@@ -791,6 +791,16 @@ def check_chat(provider, layer, authcfg, work):
     panel.undo_button.click()
     check("undo this turn", layer.subsetString() == "", layer.subsetString())
     check("undo is reported", "communes" in panel.status.text(), panel.status.text())
+    # Token diet, lot 3 (2026-11-16): after the first request, only what changed goes, or one line when nothing did.
+    provider.reset((200, {}, text_turn("D'accord.")), (200, {}, text_turn("Rien n'a bougé.")))
+    ask("j'ai retiré le filtre")
+    ask("et maintenant ?")
+    contexts = [request["body"]["messages"][-1]["content"][-1]["text"] for request in provider.requests]
+    check("a later request says what changed, not the whole project", len(contexts) == 2
+          and "Changed in QGIS since your last answer" in contexts[0] and "Project when" not in contexts[0], contexts)
+    check("a later request with nothing changed carries one line",
+          len(contexts) == 2 and contexts[1].startswith("Project unchanged since the last request.")
+          and "Project when" not in contexts[1], contexts)
 
     try:  # an algorithm of Processing through the chat, its layer undone with the turn
         sys.path.append(os.path.join(QgsApplication.pkgDataPath(), "python", "plugins"))
@@ -830,10 +840,14 @@ def check_chat(provider, layer, authcfg, work):
 
     from filter_mate.core.agent.compaction import SUMMARY_HEADER
     from filter_mate.core.agent.session import AgentLimits
-    chat._engine._session._limits = AgentLimits(max_history_chars=2000)  # the conversation is long by now
+    # Token diet, lot 3: the conversation weighs less than 2,000 characters by now and its tool results are too short
+    # to be taken out (MIN_TRIMMED, unit tests): a small budget sums its requests up.
+    chat._engine._session._limits = AgentLimits(max_history_chars=300)
     provider.reset((200, {}, text_turn("Bien.")))
     check("a long conversation is sent shorter", ask("et maintenant ?"))
     sent = provider.requests[0]["body"]["messages"]
+    check("the request after a rewritten history has the whole project",
+          "Project when" in sent[-1]["content"][-1]["text"], sent[-1]["content"][-1]["text"][:300])
     check("its oldest requests are summed up at its start", sent[0]["content"][0]["text"].startswith(SUMMARY_HEADER)
           and sent[-1]["content"][0]["text"] == "et maintenant ?", sent[0]["content"][0]["text"][:300])
     check("the thread says so", "summed up in a few lines" in panel.thread.toPlainText(), panel.thread.toPlainText()[-300:])
