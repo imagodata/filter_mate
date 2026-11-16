@@ -14,9 +14,20 @@ from qgis.PyQt.QtCore import QCoreApplication
 
 from ..base import BaseExtension, ExtensionMetadata
 
+
 DEFAULT_QFIELDCLOUD_URL = "https://app.qfield.cloud/api/v1/"
 
 logger = logging.getLogger('FilterMate.Extensions.QFieldCloud')
+
+
+def _even_action_spacing(layout) -> None:
+    """The same gap between each two buttons of the action bar, with or without this one."""
+    try:
+        from ...ui.layout.action_bar_manager import even_action_spacing
+        even_action_spacing(layout)
+    except (ImportError, RuntimeError) as exc:
+        logger.debug("QFieldCloud: action bar spacing not evened: %s", exc)
+
 
 # Lazy availability flag — set on first check_dependencies() call
 _QFIELDSYNC_AVAILABLE: Optional[bool] = None
@@ -261,6 +272,8 @@ class QFieldCloudExtension(BaseExtension):
             logger.warning("QFieldCloud: Could not find action bar layout in dockwidget")
             return []
 
+        _even_action_spacing(layout)
+
         # Store reference for teardown
         self._qfc_button = btn
         self._dockwidget = dockwidget
@@ -282,9 +295,12 @@ class QFieldCloudExtension(BaseExtension):
                 except AttributeError:
                     pass
                 self._dockwidget = None
+            bar = self._qfc_button.parentWidget()
             self._qfc_button.setParent(None)
             self._qfc_button.deleteLater()
             self._qfc_button = None
+            if bar is not None:
+                _even_action_spacing(bar.layout())
 
         # Disconnect and remove the settings action from the plugin vector menu
         if self._settings_action is not None:

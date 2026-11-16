@@ -813,6 +813,10 @@ def s_compare_check():
     if not check('compare: a checkable button beside Redo', button is not None and button.isCheckable()
                  and button.parentWidget() is redo.parentWidget()):
         return None
+    shown = sorted((b for b in d.frame_actions.findChildren(QPushButton) if b.isVisible()), key=lambda b: b.x())
+    gaps = [after.x() - (before.x() + before.width()) for before, after in zip(shown, shown[1:])]
+    check('compare: the same gap between each two buttons of the action bar', len(gaps) >= 2
+          and max(gaps) - min(gaps) <= 2, str(gaps))
     check('compare: available as Undo is', button.isEnabled() == d.pushButton_action_undo_filter.isEnabled(),
           f"compare={button.isEnabled()} undo={d.pushButton_action_undo_filter.isEnabled()}")
     canvas = iface.mapCanvas()

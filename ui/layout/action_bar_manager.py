@@ -22,6 +22,32 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def even_action_spacing(layout: Optional[QtWidgets.QLayout]) -> None:
+    """One growing gap, the same, between each two buttons of a horizontal action bar.
+
+    The bar of the .ui spreads its buttons with a spacer between each two; a button added by the code (Compare after
+    Redo, QFieldCloud after Export) came without one and stayed stuck to its neighbor while the other gaps grew with
+    the width of the dock. Called again after a button is added or removed. A button hidden takes no gap.
+    """
+    if not isinstance(layout, QtWidgets.QHBoxLayout):
+        return
+    for index in reversed(range(layout.count())):
+        item = layout.itemAt(index)
+        if item is not None and item.spacerItem() is not None:
+            layout.takeAt(index)
+    first = True
+    index = 0
+    while index < layout.count():
+        widget = layout.itemAt(index).widget()
+        if widget is not None and not widget.isHidden():
+            if not first:
+                layout.insertSpacerItem(index, QtWidgets.QSpacerItem(
+                    4, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum))
+                index += 1
+            first = False
+        index += 1
+
+
 class ActionBarManager(LayoutManagerBase):
     """
     Manages action bar positioning and layout.

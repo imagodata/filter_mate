@@ -32,6 +32,7 @@ from qgis.PyQt.QtWidgets import QMenu, QPushButton
 from ...adapters.qgis.compare_swipe import CompareSession, MapWatch, map_state
 from ...core.domain.compare_states import (BeforeMap, MapState, from_cross_operation, map_from_history_entry,
                                            map_from_operation, map_from_pin)
+from ..layout.action_bar_manager import even_action_spacing
 
 logger = logging.getLogger("FilterMate.compare")
 
@@ -195,6 +196,7 @@ class CompareController(QObject):
         button.setAccessibleName(_tr("Compare before and after the last filter"))
         index = layout.indexOf(redo)
         layout.insertWidget(index + 1, button, 0, layout.itemAt(index).alignment())
+        even_action_spacing(layout)  # the same gap on both sides of it as between the other buttons
         button.toggled.connect(self._on_toggled)
         # No room for another button in the action bar: the pin is in the menu of this one.
         menu = QMenu(button)

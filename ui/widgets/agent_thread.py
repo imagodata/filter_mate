@@ -11,11 +11,11 @@ import html
 import re
 from typing import Any, Callable, List, Optional, Sequence
 
-from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer, pyqtSignal
+from qgis.PyQt.QtCore import QCoreApplication, QSize, Qt, QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QFontMetrics
 from qgis.PyQt.QtWidgets import (
-    QButtonGroup, QCheckBox, QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton, QRadioButton, QScrollArea,
-    QSizePolicy, QVBoxLayout, QWidget,
+    QApplication, QButtonGroup, QCheckBox, QFrame, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QRadioButton,
+    QScrollArea, QSizePolicy, QStyle, QStyleOptionButton, QVBoxLayout, QWidget,
 )
 
 from ...core.agent.questions import MAX_OTHER
@@ -26,6 +26,12 @@ ANSWER_CHARS_PER_MS = 40  # and less often as it grows: drawing it costs as much
 DONE_COLOR = {"light": "#146a55", "dark": "#4fd1b0"}
 # Background, border, title of an error card (mockup: Error board).
 ERROR_COLORS = {"light": ("#fdf3f3", "#f0c2c2", "#8c1d1d"), "dark": ("#3a2224", "#6b3236", "#f2b8b8")}
+# A label wraps between words only: one word longer than the thread (a path, an address, a key) made the whole
+# thread wider than its frame, every line of it cut on the right. Such a word is given places to wrap.
+LONG_WORD = 24  # characters
+ZWSP = "\u200b"  # an invisible place to wrap; never copied (AgentThread._clean_clipboard)
+_LONG_WORD = re.compile(r"\S{%d,}" % (LONG_WORD + 1))
+_WORD_SEPARATOR = re.compile(r"([/\\_.\-?&=,;:@#|+~])")
 _HEADING = re.compile(r"^\s{0,3}#{1,6}\s+")
 _BULLET = re.compile(r"^(\s*)[-*+]\s+")
 _EMPHASIS = re.compile(r"(\*\*|__)(.+?)\1")
@@ -56,11 +62,21 @@ def strong_markup(text: str, strong: Sequence[str]) -> str:
     pattern = re.compile("|".join(rf"(?<!\w){re.escape(name)}(?!\w)" for name in names))
     out, start = [], 0
     for match in pattern.finditer(text):
-        out.append(html.escape(text[start:match.start()]))
-        out.append(f"<b>{html.escape(match.group(0))}</b>")
+        out.append(html.escape(breakable(text[start:match.start()])))
+        out.append(f"<b>{html.escape(breakable(match.group(0)))}</b>")
         start = match.end()
-    out.append(html.escape(text[start:]))
+    out.append(html.escape(breakable(text[start:])))
     return "".join(out)
+
+
+def breakable(text: str) -> str:
+    """``text`` with an invisible place to wrap in each word longer than LONG_WORD: after its separators
+    (``/``, ``\\``, ``_``, ``.``...), and every LONG_WORD characters in a piece still longer."""
+    def split(match: "re.Match") -> str:
+        pieces = _WORD_SEPARATOR.sub(lambda separator: separator.group(1) + ZWSP, match.group(0)).split(ZWSP)
+        return ZWSP.join(ZWSP.join(piece[start:start + LONG_WORD] for start in range(0, len(piece), LONG_WORD))
+                         for piece in pieces if piece)
+    return _LONG_WORD.sub(split, text) if text else text
 
 
 def plain_tooltip(text: str) -> str:
@@ -73,8 +89,41 @@ def _plain_label(text: str, parent: QWidget, wrap: bool = True) -> QLabel:
     label = QLabel(parent)
     label.setTextFormat(Qt.TextFormat.PlainText)
     label.setWordWrap(wrap)
-    label.setText(text)
+    label.setText(breakable(text) if wrap else text)
     return label
+
+
+class ElidedButton(QPushButton):
+    """A button whose text is cut with … when the thread is narrower than it; the whole text in its tooltip."""
+
+    MINIMUM = 60  # px
+
+    def __init__(self, text: str, parent: QWidget) -> None:
+        super().__init__(text, parent)
+        self._full = text
+        self.setToolTip(plain_tooltip(text))
+        self.setMinimumWidth(self.MINIMUM)  # the layouts take it rather than the width of the whole text
+
+    def sizeHint(self) -> QSize:  # noqa: N802 - Qt name
+        """The size of the whole text, whatever is shown: the shown text must not shrink what the button asks."""
+        option = QStyleOptionButton()
+        self.initStyleOption(option)
+        option.text = self._full
+        metrics = self.fontMetrics()
+        content = QSize(metrics.horizontalAdvance(self._full), metrics.height())
+        return self.style().sizeFromContents(QStyle.ContentsType.CT_PushButton, option, content, self)
+
+    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt name
+        super().resizeEvent(event)
+        metrics = self.fontMetrics()
+        hint = self.sizeHint().width()
+        if self.width() >= hint:  # the whole text (elidedText at its exact width may still cut it, by rounding)
+            shown = self._full
+        else:
+            room = self.width() - (hint - metrics.horizontalAdvance(self._full))
+            shown = metrics.elidedText(self._full, Qt.TextElideMode.ElideRight, max(room, 10))
+        if self.text() != shown:
+            self.setText(shown)
 
 
 class ElidedLabel(QLabel):
@@ -489,6 +538,10 @@ class AgentThread(QScrollArea):
         self._content = QWidget(self)
         self._content.setObjectName("widget_agent_thread")
         self._layout = QVBoxLayout(self._content)
+        # As wide as the frame, never more: a line that cannot be narrower is cut, the others still wrap. Its height
+        # is set by _fit_height. (The horizontal scroll bar is off: a wider content was cut on the right, all of it.)
+        self._layout.setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)
+        self._content.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         self._layout.setContentsMargins(10, 10, 10, 10)
         self._layout.setSpacing(10)
         self._layout.addStretch(1)
@@ -515,6 +568,9 @@ class AgentThread(QScrollArea):
         self._end_timer.setSingleShot(True)
         self._end_timer.setInterval(0)
         self._end_timer.timeout.connect(self._scroll_to_end)
+        clipboard = QApplication.clipboard()
+        if clipboard is not None:
+            clipboard.dataChanged.connect(self._clean_clipboard)
         self.refresh_look()
 
     # --- what the panel asks ---------------------------------------------------------
@@ -623,7 +679,7 @@ class AgentThread(QScrollArea):
             column.addWidget(text)
         button = None
         if action and on_action is not None:
-            button = QPushButton(action, card)
+            button = ElidedButton(action, card)
             button.setObjectName("pushButton_agent_error_action")
             button.setCursor(Qt.CursorShape.PointingHandCursor)
             button.clicked.connect(on_action)
@@ -680,7 +736,7 @@ class AgentThread(QScrollArea):
         row = QWidget(self._content)
         layout = QHBoxLayout(row)
         layout.setContentsMargins(0, 0, 0, 0)
-        button = QPushButton(label, row)
+        button = ElidedButton(label, row)
         button.setObjectName("pushButton_agent_link")
         button.setCursor(Qt.CursorShape.PointingHandCursor)
         button.clicked.connect(on_click)
@@ -721,14 +777,14 @@ class AgentThread(QScrollArea):
 
     def _show_answer(self) -> None:
         self._answer_timer.stop()
-        self._answer.widget.setText(plain_markdown(self._answer_raw).strip("\n"))
+        self._answer.widget.setText(breakable(plain_markdown(self._answer_raw).strip("\n")))
         self._fit_timer.start()
         self._follow_end()
 
     def add_step(self, text: str) -> None:
         """A step of the running request; the previous one is marked done."""
         self.finish_steps()
-        label = _plain_label(f"◌  {text}…", self._content)
+        label = _plain_label(f"◌  {text}…", self._content)  # breakable, as every wrapped label
         item = _Item(label, "", "step")
         item.step_text = text  # type: ignore[attr-defined]
         item.look = lambda palette, dark: self._look_step(item, palette, dark)
@@ -743,7 +799,7 @@ class AgentThread(QScrollArea):
         color = DONE_COLOR["dark" if dark else "light"] if succeeded else palette["fm_danger"]
         label.setTextFormat(Qt.TextFormat.RichText)  # only the mark is colored; the text is escaped
         label.setText(f'<span style="color: {color};">{"✓" if succeeded else "✗"}</span>&nbsp;&nbsp;'
-                      f'{html.escape(getattr(item, "step_text", ""))}')
+                      f'{html.escape(breakable(getattr(item, "step_text", "")))}')
         _sheet(label, f"font-size: 12px; color: {palette['fm_text_muted']};")
 
     def finish_steps(self, succeeded: bool = True) -> None:
@@ -832,6 +888,21 @@ class AgentThread(QScrollArea):
     def _scroll_to_end(self) -> None:
         bar = self.verticalScrollBar()
         bar.setValue(bar.maximum())
+
+    def _clean_clipboard(self) -> None:
+        """Text copied from the thread without the places to wrap its long words (ZWSP): a path pasted elsewhere
+        must be the path. Only a copy of a selection of this thread is changed."""
+        try:
+            clipboard = QApplication.clipboard()
+            text = clipboard.text() if clipboard is not None else ""
+            if ZWSP not in text:
+                return
+            for label in self._content.findChildren(QLabel):
+                if label.hasSelectedText() and label.selectedText() == text:
+                    clipboard.setText(text.replace(ZWSP, ""))
+                    return
+        except RuntimeError:  # the thread went away
+            pass
 
     def _fit_bubble(self, bubble: QLabel) -> None:
         bubble.setMaximumWidth(max(80, int(self.viewport().width() * BUBBLE_SHARE)))

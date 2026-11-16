@@ -4,6 +4,14 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### AGENT (experimental)
+
+- **The conversation follows the width of the dock.** One word longer than the conversation (a path, an address) made the whole conversation wider than its frame, with no scroll bar to reach the rest: every line, the cards with their Undo, were cut on the right. Such a word now wraps where it can (after a `/`, a `\`, a `_`, a `.`), and the conversation is never wider than its frame. A copy of the word is the word, without the invisible places where it wraps. A button of the agent too long for the dock ends with … and shows its whole text in its tooltip.
+
+### Dock
+
+- **The same gap between each two buttons of the action bar.** Compare and the QFieldCloud button were added beside Redo and Export without a gap of their own: stuck to their neighbor, while the other gaps grew with the width of the dock. The gaps are now the same at any width.
+
 ## [5.1.2] - 2026-11-15
 
 The agent brings in the data a request needs when the project has none: the elevation of an area (a relief map with
