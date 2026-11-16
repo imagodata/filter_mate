@@ -350,3 +350,35 @@ def test_a_section_turned_off_leaves_its_buttons_to_the_bar_for_all():
 
 def test_a_section_turned_off_carries_nothing_even_when_it_was_apart():
     assert bars.bar_plan("bottom", ["filtering"], ["filtering"]) == {bars.ONE_BAR: bars.ACTION_ORDER}
+
+
+# --- the bar for all once a section took its buttons to its own panel (2026-11-16, audit) -------------------------
+
+
+def test_the_bar_for_all_shows_only_while_one_of_its_buttons_acts():
+    """FILTERING in its own panel left a bar in the dock for an Export greyed out beside About."""
+    left = bars.bar_plan("bottom", detached=("filtering",))[bars.ONE_BAR]
+    assert left == ("pushButton_action_export", "pushButton_action_qfieldcloud", "pushButton_action_about")
+    assert not bars.one_bar_serves(left, open_key=None)
+    assert not bars.one_bar_serves(left, open_key="filtering")  # its panel has its buttons
+    assert bars.one_bar_serves(left, open_key="exporting")
+    assert bars.one_bar_serves(left, open_key="configuration")
+    assert not bars.one_bar_serves(left, open_key=None, agent=True)  # nothing of FILTERING is left in it
+
+
+def test_what_stays_of_a_section_turned_off_keeps_the_bar():
+    left = bars.bar_plan("bottom", detached=("exporting",), off=("filtering",))[bars.ONE_BAR]
+    assert "pushButton_action_undo_filter" in left
+    assert bars.one_bar_serves(left, open_key=None, off=("filtering",))
+
+
+def test_undo_redo_and_compare_keep_the_bar_while_the_agent_walks_its_steps():
+    left = bars.bar_plan("bottom", detached=("exporting",))[bars.ONE_BAR]
+    assert set(bars.AGENT_BUTTONS) <= set(left)
+    assert not bars.one_bar_serves(left, open_key=None)
+    assert bars.one_bar_serves(left, open_key=None, agent=True)
+    assert bars.one_bar_serves(left, open_key="filtering")
+
+
+def test_a_button_of_no_section_always_acts():
+    assert bars.one_bar_serves(["pushButton_action_of_an_extension"], open_key=None)

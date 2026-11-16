@@ -2585,6 +2585,25 @@ def s_section_bars():
     check('sections: nothing open below, no button and no bar', actions_shown() == [] and not d.frame_actions.isVisible()
           and not any(bars.frame(key).isVisible() for key in ('filtering', 'exporting', 'configuration')),
           str(actions_shown()))
+    if 'agent' in d._fm_sections._headers:
+        # 2026-11-16, audit: with AGENT open there was no button at all, while Undo, Redo and Compare walk its steps.
+        d._fm_sections.open_top('agent')
+        QApplication.processEvents()
+        check('sections: AGENT open, the buttons of FILTERING show for Undo, Redo and Compare',
+              d.agent_has_focus() and bars.frame('filtering').isVisible()
+              and actions_shown() == [name for name in FILTERING_ACTIONS if name in SECTION['all']]
+              and not action_button('filter').isEnabled(), str(actions_shown()))
+        d._fm_sections.open_top('exploring')
+        QApplication.processEvents()
+        check('sections: AGENT folded, no bar again', actions_shown() == [] and not bars.frame('filtering').isVisible(),
+              str(actions_shown()))
+        open_section(d.EXPORTING)
+        d._fm_sections.open_top('agent')
+        QApplication.processEvents()
+        check('sections: AGENT open over EXPORTING, the row is the one of EXPORTING alone',
+              bars.frame('exporting').isVisible() and not bars.frame('filtering').isVisible(), str(actions_shown()))
+        d._fm_sections.open_top('exploring')
+        open_section(None)
     if action_button('qfieldcloud') is None:
         # A button that comes late, as QFieldCloud does: its extension puts it in the bar for all, after the dock.
         late = QPushButton(d.frame_actions)
@@ -2683,8 +2702,9 @@ def s_section_detach():
           and all(action_button(name).isVisible() for name in filtering))
     check('panels: they act with nothing open in the dock', action_button('filter').isEnabled()
           and action_button('unfilter').isEnabled() and d.filtering_detached)
-    check('panels: the other buttons stay in the bar of the dock', d.frame_actions.isVisible()
-          and action_button('export').parentWidget() is d.frame_actions
+    # 2026-11-16, audit: the bar stayed in the dock for an Export greyed out beside About.
+    check('panels: the other buttons stay in the bar of the dock, not shown while none of them acts',
+          not d.frame_actions.isVisible() and action_button('export').parentWidget() is d.frame_actions
           and action_button('about').parentWidget() is d.frame_actions and not action_button('export').isEnabled(),
           str(actions_shown()))
     check('panels: below the dock the first time, in its dock area', window.dockWidgetArea(panel) == window.dockWidgetArea(d)
@@ -2701,8 +2721,11 @@ def s_section_detach():
     check('panels: FILTERING asked to open shows its panel, the dock stays folded',
           toolbox.currentWidget() is d._fm_sections._nothing and panel.isVisible())
     open_section(d.EXPORTING)
-    check('panels: EXPORTING open in the dock, Export and Filter both act', action_button('export').isEnabled()
-          and action_button('filter').isEnabled())
+    check('panels: EXPORTING open in the dock, Export and Filter both act, the bar of the dock shows',
+          action_button('export').isEnabled() and action_button('filter').isEnabled() and d.frame_actions.isVisible()
+          and action_button('export').isVisible())
+    open_section(d.CONFIGURATION)
+    check('panels: CONFIGURATION open in the dock, the bar shows for About', d.frame_actions.isVisible())
     open_section(None)
     grab_widget(panel, 'panel_filtering')
     grab('dock_filtering_apart')
@@ -2771,13 +2794,21 @@ def s_section_stack():
     check('stack: Export is in the panel and acts; the buttons of FILTERING are folded with it', export.isVisible()
           and export.isEnabled() and filtering.isAncestorOf(export) and not action_button('filter').isVisible()
           and action_button('filter').isEnabled() and filtering.isAncestorOf(action_button('filter')))
+    open_section(d.CONFIGURATION)
+    in_bar = [name for name in actions_shown() if action_button(name).parentWidget() is d.frame_actions]
+    shown_open = d.frame_actions.isVisible() and in_bar == ['about']
+    open_section(None)
+    check('stack: the bar of the dock keeps About alone, shown while CONFIGURATION is open', shown_open
+          and not d.frame_actions.isVisible() and action_button('about').parentWidget() is d.frame_actions,
+          f"open={shown_open} in the bar={in_bar} folded={d.frame_actions.isVisible()}")
     filtering.rail.chip('filtering').click()
     QApplication.processEvents()
     check('stack: a click on a chip of the panel opens its section, with its buttons', filtering.current() == 'filtering'
           and d.FILTERING.isVisible() and not d.EXPORTING.isVisible() and action_button('filter').isVisible()
           and not export.isVisible(), str(actions_shown()))
-    check('stack: the bar of the dock keeps About alone', d.frame_actions.isVisible()
-          and action_button('about').parentWidget() is d.frame_actions, str(actions_shown()))
+    check('stack: About stays in the bar of the dock, folded while CONFIGURATION is',
+          not d.frame_actions.isVisible() and action_button('about').parentWidget() is d.frame_actions,
+          str(actions_shown()))
     check('stack: CONFIGURATION joins them', panels.open_smart('configuration')
           and filtering.members == ['filtering', 'exporting', 'configuration']
           and filtering.isAncestorOf(action_button('about')), str(filtering.members))
@@ -2876,13 +2907,14 @@ def s_section_back_check():
           and not [panel for panel in window.findChildren(QDockWidget, 'FilterMatePanel_filtering')
                    if not panel.isHidden()],
           f"current={toolbox.currentWidget().objectName()} apart={panels.detached()}")
-    check('panels: their buttons are back in the bar of the dock', d.frame_actions.isVisible()
-          and all(action_button(name).parentWidget() is d.frame_actions for name in ACTION_NAMES
-                  if action_button(name) is not None) and not d.filtering_detached)
+    check('panels: their buttons are back in the bar of the dock',
+          all(action_button(name).parentWidget() is d.frame_actions for name in ACTION_NAMES
+              if action_button(name) is not None) and not d.filtering_detached)
     open_section(d.FILTERING)
-    check('panels: FILTERING opens in the dock again, with its widgets', toolbox.currentWidget() is d.FILTERING
-          and d.comboBox_filtering_current_layer.isVisible() and action_button('filter').isEnabled()
-          and action_button('filter').isVisible())
+    check('panels: FILTERING opens in the dock again, with its widgets and its buttons',
+          toolbox.currentWidget() is d.FILTERING and d.comboBox_filtering_current_layer.isVisible()
+          and action_button('filter').isEnabled() and action_button('filter').isVisible()
+          and d.frame_actions.isVisible())
     panels.attach_all()
     QApplication.processEvents()
     check('panels: with every section back the dock has the minimum height of its profile again',
@@ -3903,7 +3935,78 @@ def s_probe_settings_check():
 
 
 PROBE = {}
-AUDIT_STEPS = [s_section_setup, s_audit_tab_behind, s_audit_tab_behind_check, s_audit_offer_check,
+
+
+def icon_lightness(button):
+    """How light the icon of ``button`` is drawn, 0 (black) to 255 (white); -1 without a pixel."""
+    image = button.icon().pixmap(32, 32).toImage()
+    values = [image.pixelColor(x, y).lightness() for x in range(image.width()) for y in range(image.height())
+              if image.pixelColor(x, y).alpha() > 128]
+    return sum(values) / len(values) if values else -1
+
+
+def s_audit_theme():
+    """The tools the kind of the layer adds to the rail of EXPLORING draw their own icons: a theme set while the
+    panel is open reaches them too (they were drawn again only when the current layer changed)."""
+    AUDIT['theme'] = config_value('APP.DOCKWIDGET.COLORS.ACTIVE_THEME')
+    more = dock().findChild(QAbstractButton, 'pushButton_exploring_vector_more')
+    AUDIT['light_before'] = icon_lightness(more) if more is not None else None
+    apply_settings({'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': 'dark'})
+    return waits(0.8)
+
+
+def s_audit_theme_check():
+    d = dock()
+    names = ('pushButton_exploring_vector_more', 'pushButton_checkable_exploring_vector_zone')
+    drawn = {name: icon_lightness(d.findChild(QAbstractButton, name)) for name in names
+             if d.findChild(QAbstractButton, name) is not None}
+    check('audit: a dark theme set while the panel is open draws the tools of the rail light',
+          len(drawn) == 2 and all(value > 140 for value in drawn.values()),
+          f"before={AUDIT['light_before']} dark={drawn}")
+    apply_settings({'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': 'light'})
+    return waits(0.8)
+
+
+def s_audit_theme_back_check():
+    d = dock()
+    more = d.findChild(QAbstractButton, 'pushButton_exploring_vector_more')
+    check('audit: and a light one draws them dark again', more is not None and 0 <= icon_lightness(more) < 110,
+          str(icon_lightness(more) if more is not None else None))
+    apply_settings({'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': AUDIT['theme']})
+    return waits(0.5)
+
+
+def s_audit_empty_bar():
+    """The buttons under their section and EXPORTING turned off: the bar for all stayed, empty, for the buttons
+    that went with the section."""
+    AUDIT['position'] = dock()._action_bar_manager.get_position()
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': 'sections', 'APP.OPTIONS.EXPORTING.enabled': False})
+    return waits(0.6)
+
+
+def s_audit_empty_bar_check():
+    d = dock()
+    open_section(None)
+    folded = d.frame_actions.isVisible()
+    open_section(d.FILTERING)
+    check('audit: the buttons under their section and EXPORTING turned off, no empty bar for all',
+          not folded and not d.frame_actions.isVisible() and action_button('filter').isVisible(),
+          f"nothing open={folded} filtering open={d.frame_actions.isVisible()} {actions_shown()}")
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': AUDIT['position'], 'APP.OPTIONS.EXPORTING.enabled': True})
+    return waits(0.6)
+
+
+def s_audit_empty_bar_back_check():
+    d = dock()
+    open_section(d.FILTERING)
+    check('audit: back to the bar for all with EXPORTING on, every button in it', d.frame_actions.isVisible()
+          and action_button('export').isVisible() and action_button('filter').isVisible(), str(actions_shown()))
+    return waits(0.2)
+
+
+AUDIT_STEPS = [s_section_setup, s_vector_source, s_audit_empty_bar, s_audit_empty_bar_check,
+               s_audit_empty_bar_back_check, s_audit_theme, s_audit_theme_check, s_audit_theme_back_check,
+               s_audit_tab_behind, s_audit_tab_behind_check, s_audit_offer_check,
                s_audit_show_agent_check, s_audit_reopen_check, s_audit_stack_below_check, s_audit_merge_check,
                s_audit_buttons_check, s_audit_fronts_check]
 
