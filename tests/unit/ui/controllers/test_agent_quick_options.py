@@ -53,8 +53,6 @@ def test_saving_a_provider_with_consent_remembers_it(monkeypatch):
 
 # --- one way to apply a change, at once (a click) or once the request ends (the agent) ---------------------------
 
-from types import SimpleNamespace  # noqa: E402
-from unittest.mock import MagicMock  # noqa: E402
 
 from core.agent.agent_options import Change, ProviderEntry  # noqa: E402
 
@@ -69,6 +67,7 @@ def host(monkeypatch):
     made = SimpleNamespace(_reset_view=MagicMock(), _restart_engine=MagicMock(), _sync_mcp=MagicMock(),
                            _refresh_ready=MagicMock(), _say=MagicMock(), _pending_options=[], store=store)
     made.apply_agent_options = lambda change: Controller.apply_agent_options(made, change)
+    made._menu_providers = lambda values: Controller._menu_providers(made, values)
     return made
 
 
@@ -112,3 +111,25 @@ def test_a_pending_change_applies_over_the_current_settings(host):
 def test_nothing_applies_during_the_request(host):
     host._pending_options.append(Change(sources_on=("osm_tiles",)))
     assert host.store["values"].enabled_sources == ("datagouv",)  # queued only
+
+
+def test_a_click_during_a_request_waits_for_its_end(host):
+    host._engine = SimpleNamespace(busy=True)
+    Controller._click_option(host, Change(sources_on=("osm_tiles",)))
+    assert host._pending_options == [Change(sources_on=("osm_tiles",))]
+    assert host.store["values"].enabled_sources == ("datagouv",)
+    host._engine = None
+    Controller._click_option(host, Change(sources_on=("osm_tiles",)))
+    assert host.store["values"].enabled_sources == ("datagouv", "osm_tiles")
+
+
+def test_the_menu_is_filled_from_the_settings(host, monkeypatch):
+    from core.agent.sources import BUILT_IN
+    monkeypatch.setattr(chat_controller, "read_providers", lambda: (ProviderEntry("ollama", "qwen3:8b", "u"),))
+    monkeypatch.setattr(chat_controller, "qgis_databases", lambda: [])
+    host.panel = SimpleNamespace(fill_options=MagicMock())
+    Controller._fill_options(host)
+    groups, providers, mcp_on = host.panel.fill_options.call_args.args
+    ticked = [source_id for _title, rows in groups for source_id, _name, on in rows if on]
+    assert ticked == ["datagouv"] and len([row for _t, rows in groups for row in rows]) == len(BUILT_IN)
+    assert providers == [("anthropic · m", True), ("ollama · qwen3:8b", False)] and mcp_on is False

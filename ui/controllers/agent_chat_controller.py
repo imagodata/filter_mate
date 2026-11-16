@@ -89,7 +89,7 @@ from .agent_mcp_bridge import NO_UNDO_POINT, AgentMcpBridge
 from .history_tips import button_tip
 from ..widgets.agent_panel import (
     ANSWER_CONVERSATION, ANSWER_NO, ANSWER_ONCE, AgentPanel, AgentSettingsDialog, ask_code, ask_plain,
-    ask_with_conversation, level_short, preset_label,
+    ask_with_conversation, level_short, preset_label, source_group_titles,
 )
 from ..widgets.agent_widgets_strip import number_text
 
@@ -231,6 +231,13 @@ class AgentChatController(QObject):
         self.panel.compare_requested.connect(self._on_compare)
         self.panel.card_compare_requested.connect(self._on_card_compare)
         self.panel.settings_requested.connect(self.open_settings)
+        # Sources, model and MCP server from the menu "⋯" (2026-11-16)
+        self.panel.options_requested.connect(self._fill_options)
+        self.panel.source_toggled.connect(self._on_source_toggled)
+        self.panel.provider_chosen.connect(self._on_provider_chosen)
+        self.panel.provider_forgotten.connect(self._on_provider_forgotten)
+        self.panel.mcp_toggled.connect(self._on_mcp_toggled)
+        self.panel.settings_tab_requested.connect(lambda tab: self.open_settings(tab=tab))
         self.panel.setup_requested.connect(self.start_setup)
         self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
@@ -852,6 +859,55 @@ class AgentChatController(QObject):
             self._sync_mcp()
         self._refresh_ready()
         return ""
+
+    def _menu_providers(self, values: AgentSettings):
+        """The providers set up, the one in use first when the list has not kept it yet."""
+        from ...core.agent.agent_options import remember
+        current = current_provider(values)
+        providers = read_providers()
+        return remember(providers, current) if values.model and not any(entry.same(current) for entry in providers) \
+            else providers, current
+
+    def _fill_options(self) -> None:
+        """The menu "⋯" opens: the sources by group, the providers set up, the MCP server, as the settings hold them."""
+        from ...core.agent.sources import source_group
+        values = load_settings()
+        sources = list(all_sources(custom_from_json(values.custom_sources))) + list(qgis_databases())
+        groups = [(title, [(source.id, source.title, source.id in values.enabled_sources)
+                           for source in sources if source_group(source) == key])
+                  for key, title in source_group_titles()]
+        providers, current = self._menu_providers(values)
+        self.panel.fill_options(groups, [(entry.label, entry.same(current)) for entry in providers], values.mcp_enabled)
+
+    def _click_option(self, change) -> None:
+        """A click in the menu: applied at once, or when the request under way ends (its tools stay meanwhile)."""
+        engine = getattr(self, "_engine", None)
+        if engine is not None and engine.busy:
+            self._pending_options.append(change)
+            return
+        reason = self.apply_agent_options(change)
+        if reason:
+            self._say(reason, error=True, offer_settings=True)
+
+    def _on_source_toggled(self, source_id: str, on: bool) -> None:
+        from ...core.agent.agent_options import Change
+        self._click_option(Change(sources_on=(source_id,)) if on else Change(sources_off=(source_id,)))
+
+    def _on_provider_chosen(self, index: int) -> None:
+        from ...core.agent.agent_options import Change
+        providers, _current = self._menu_providers(load_settings())
+        if 0 <= index < len(providers):
+            self._click_option(Change(provider=providers[index]))
+
+    def _on_provider_forgotten(self, index: int) -> None:
+        from ...core.agent.agent_options import forget
+        providers, _current = self._menu_providers(load_settings())
+        if 0 <= index < len(providers):
+            write_providers(forget(providers, providers[index]))
+
+    def _on_mcp_toggled(self, on: bool) -> None:
+        from ...core.agent.agent_options import Change
+        self._click_option(Change(mcp_server=bool(on)))
 
     def _apply_pending_options(self) -> None:
         """The changes the agent made during the request that ended, over the settings as they are now."""

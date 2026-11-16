@@ -268,6 +268,13 @@ class AgentPanel(QFrame):
     new_conversation_requested = pyqtSignal()
     redo_requested = pyqtSignal()
     history_requested = pyqtSignal()
+    # The options of the agent from the menu "⋯" (2026-11-16): the controller fills them when the menu opens.
+    options_requested = pyqtSignal()
+    source_toggled = pyqtSignal(str, bool)
+    provider_chosen = pyqtSignal(int)
+    provider_forgotten = pyqtSignal(int)
+    mcp_toggled = pyqtSignal(bool)
+    settings_tab_requested = pyqtSignal(str)
     resend_requested = pyqtSignal(str)
     step_undo_requested = pyqtSignal(int)
     compare_requested = pyqtSignal(int, int)  # the rank of a turn applied, its step (-1: the whole turn)
@@ -373,6 +380,18 @@ class AgentPanel(QFrame):
         self.new_action.triggered.connect(self.new_conversation_requested)
         self.setup_action = menu.addAction(_tr("Set FilterMate up with the agent…"))
         self.setup_action.triggered.connect(self.setup_requested)
+        # Sources, model and the MCP server of the plugin, turned on or off without opening the settings.
+        menu.addSeparator()
+        self.sources_menu = menu.addMenu(_tr("Sources"))
+        self.sources_menu.setObjectName("menu_agent_sources")
+        self.models_menu = menu.addMenu(_tr("Model"))
+        self.models_menu.setObjectName("menu_agent_models")
+        self.mcp_action = menu.addAction(_tr("MCP server of the plugin"))
+        self.mcp_action.setCheckable(True)
+        self.mcp_action.triggered.connect(self.mcp_toggled)
+        self._option_menus = []
+        menu.aboutToShow.connect(self.options_requested)
+        menu.addSeparator()
         self.settings_action = menu.addAction(_tr("Agent settings"))
         self.settings_action.triggered.connect(self.settings_requested)
         self.more_button.setMenu(menu)
@@ -743,6 +762,48 @@ class AgentPanel(QFrame):
         self.shown.emit()
 
     # --- state ----------------------------------------------------------------
+
+    def fill_options(self, groups, providers, mcp_on: bool) -> None:
+        """The menu of the options: ``groups`` ``[(title, [(source id, name, ticked)])]``, ``providers`` ``[(label,
+        current)]``, the MCP server of the plugin on or not."""
+        for submenu in self._option_menus:  # clear() leaves the submenus alive: they would pile up
+            submenu.deleteLater()
+        self._option_menus = []
+        self.sources_menu.clear()
+        for title, rows in groups:
+            if not rows:
+                continue
+            submenu = self.sources_menu.addMenu(title.replace("&", "&&"))  # names come from the user or QGIS
+            self._option_menus.append(submenu)
+            for source_id, name, on in rows:
+                action = submenu.addAction(name.replace("&", "&&"))
+                action.setCheckable(True)
+                action.setChecked(bool(on))
+                action.triggered.connect(lambda checked, source_id=source_id: self.source_toggled.emit(source_id, checked))
+        self.sources_menu.addSeparator()
+        self.sources_menu.addAction(_tr("Source settings…")).triggered.connect(
+            lambda: self.settings_tab_requested.emit("sources"))
+        self.models_menu.clear()
+        others = []
+        for index, (label, current) in enumerate(providers):
+            action = self.models_menu.addAction(label.replace("&", "&&"))
+            action.setCheckable(True)
+            action.setChecked(bool(current))
+            if current:  # chosen again: it stays the one in use
+                action.triggered.connect(lambda checked, action=action: action.setChecked(True))
+            else:
+                action.triggered.connect(lambda checked, index=index: self.provider_chosen.emit(index))
+                others.append((index, label))
+        if others:
+            forget = self.models_menu.addMenu(_tr("Remove from the list"))
+            self._option_menus.append(forget)
+            for index, label in others:
+                forget.addAction(label.replace("&", "&&")).triggered.connect(
+                    lambda checked=False, index=index: self.provider_forgotten.emit(index))
+        self.models_menu.addSeparator()
+        self.models_menu.addAction(_tr("Other provider or model…")).triggered.connect(
+            lambda: self.settings_tab_requested.emit("provider"))
+        self.mcp_action.setChecked(bool(mcp_on))
 
     def set_recipes(self, recipes, can_save: bool) -> None:
         """The recipes of the project in the menu, each with its steps in view before it runs; save the last request."""
