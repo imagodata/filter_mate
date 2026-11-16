@@ -288,6 +288,7 @@ class DockSections(QObject):
         # the rules of the stacks. Asked to open, a section apart has ``raise_detached`` bring its panel forward.
         self.detached = set()
         self.raise_detached = None
+        self.bring_back = None  # called with the key of a section apart that is being turned off
         self.exploring_header.clicked.connect(lambda: self._on_top_header("exploring"))
         # "Nothing open" below: QToolBox always has a current page, so an empty one, its header never shown.
         self._nothing = QWidget()
@@ -418,6 +419,8 @@ class DockSections(QObject):
         index = self._toolbox.indexOf(page) if page is not None else -1
         if index < 0:
             return False
+        if not shown and key in self.detached and self.bring_back is not None:
+            self.bring_back(key)  # in its own panel (section_panels.py): a section turned off shows nowhere
         if not shown and self._toolbox.currentWidget() is page:
             self._reopen.add(key)  # open again when it comes back, if nothing else was opened meanwhile
             self._toolbox.setCurrentWidget(self._nothing)
@@ -664,7 +667,25 @@ def apply_section_options(dock: Any) -> list:
                 changed.append(key)
         except RuntimeError:  # the dock went away
             return changed
+    if changed:
+        _follow_sections(dock)
     return changed
+
+
+def _follow_sections(dock: Any) -> None:
+    """After a section was turned on or off: one that was in its own panel before it was turned off goes there
+    again, and the buttons go where the sections left can carry them (section_panels.py, section_bars.py)."""
+    try:
+        panels = getattr(dock, "_fm_panels", None)
+        if panels is not None:
+            panels.restore()
+        manager = getattr(dock, "_action_bar_manager", None)
+        if manager is not None:
+            manager.sync_sections()
+    except RuntimeError:  # the dock went away
+        pass
+    except Exception:
+        logger.exception("Panels and buttons did not follow the sections turned on or off")
 
 
 def install_dock_chrome(dock: Any) -> Optional[DockTitleBar]:

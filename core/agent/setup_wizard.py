@@ -49,7 +49,7 @@ GROUP_SWITCHES = {"gpkg": GPKG_GROUPS, "kml": KML_GROUPS}
 THEMES = ("auto", "light", "dark", "default")
 PROFILES = ("auto", "compact", "normal", "hidpi")
 LANGUAGES = ("auto", "en", "fr")
-ACTION_BARS = ("bottom", "top", "left", "right")
+ACTION_BARS = ("bottom", "top", "left", "right", "sections")  # sections: each section shows its own buttons
 RASTER_FORMATS = ("COG", "GTiff")
 POINT_CLOUD_FORMATS = ("LAZ", "LAS", "COPC")
 

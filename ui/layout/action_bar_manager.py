@@ -262,7 +262,7 @@ class ActionBarManager(LayoutManagerBase):
 
         # The buttons a section stops carrying leave its bar before the one bar is rebuilt with them
         if self._section_bars is not None:
-            self._section_bars.prepare(self._position, self._detached_sections())
+            self._section_bars.prepare(self._position, self._detached_sections(), self._off_sections())
 
         # Get the action buttons of the one bar
         action_buttons = self._get_action_buttons()
@@ -300,6 +300,17 @@ class ActionBarManager(LayoutManagerBase):
         except Exception:  # a dock half built, or going away
             return ()
 
+    def _off_sections(self) -> tuple:
+        """The sections turned off (``APP.OPTIONS.<NAME>.enabled``, ui/layout/dock_chrome.py): they carry no button."""
+        sections = getattr(self.dockwidget, '_fm_sections', None)
+        shown = getattr(sections, 'section_shown', None)
+        if not callable(shown):
+            return ()
+        try:
+            return tuple(key for key in ('filtering', 'exporting', 'configuration') if shown(key) is False)
+        except Exception:  # a dock half built, or going away
+            return ()
+
     def sync_sections(self, prepared: bool = False) -> None:
         """The buttons under their section, as the position and the sections in their own panel ask.
 
@@ -314,7 +325,7 @@ class ActionBarManager(LayoutManagerBase):
                 self._section_bars = SectionBars(self.dockwidget, self)
                 prepared = False
             if not prepared:
-                self._section_bars.prepare(self._position, detached)
+                self._section_bars.prepare(self._position, detached, self._off_sections())
             self._section_bars.settle()
         except Exception as e:
             logger.error(f"ActionBarManager: Error placing the buttons of the sections: {e}", exc_info=True)

@@ -10730,9 +10730,24 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <translation>Avaa {} omaan paneeliinsa</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="574"/>
-        <source>Bring every section back to this panel</source>
-        <translation>Palauta kaikki osiot tähän paneeliin</translation>
+        <location filename="../../ui/layout/section_panels.py" line="781"/>
+        <source>Open every section in its own panel</source>
+        <translation>Avaa jokainen osio omaan paneeliinsa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>Ryhmitä kohteen {} kanssa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>Yhdistä {} takaisin FilterMateen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>Yhdistä kaikki osiot takaisin FilterMateen</translation>
     </message>
 </context>
 <context>
@@ -11469,6 +11484,11 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <location filename="../ui/controllers/setup_wizard.py" line="90"/>
         <source>Right</source>
         <translation>Oikea</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>Kunkin osion alla</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>

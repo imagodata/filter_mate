@@ -34,11 +34,14 @@ BAR_NAME = "frame_actions"  # the bars of the sections are named as the one bar:
 GAP = "gap"  # in the signature of a row, a growing gap
 
 
-def bar_plan(position: str, detached: Iterable[str] = ()) -> Dict[str, Tuple[str, ...]]:
+def bar_plan(position: str, detached: Iterable[str] = (), off: Iterable[str] = ()) -> Dict[str, Tuple[str, ...]]:
     """Which bar holds each button: ``{section: names}`` for the sections that carry theirs, and ``ONE_BAR`` for the
-    buttons left to the bar for all. Every section carries its own with ``sections``; a detached one always does."""
-    apart = set(detached)
-    plan = {key: names for key, names in SECTION_BUTTONS.items() if position == SECTIONS_POSITION or key in apart}
+    buttons left to the bar for all. Every section carries its own with ``sections``; a detached one always does.
+    A section turned ``off`` (``APP.OPTIONS.<NAME>.enabled``) carries none: its buttons that stay in use (Undo,
+    Redo and Compare walk the steps of the agent and open the history) are in the bar for all."""
+    apart, gone = set(detached), set(off)
+    plan = {key: names for key, names in SECTION_BUTTONS.items()
+            if key not in gone and (position == SECTIONS_POSITION or key in apart)}
     lent = {name for names in plan.values() for name in names}
     plan[ONE_BAR] = tuple(name for name in ACTION_ORDER if name not in lent)
     return plan
@@ -109,10 +112,10 @@ class SectionBars:
         """The names of the buttons the sections carry: not for the one bar."""
         return {name for key, names in self._plan.items() if key != ONE_BAR for name in names}
 
-    def prepare(self, position: str, detached: Iterable[str] = ()) -> None:
+    def prepare(self, position: str, detached: Iterable[str] = (), off: Iterable[str] = ()) -> None:
         """The plan for ``position``: the buttons a section no longer carries leave its row, on their way to the one
         bar (``settle`` puts them there, unless the manager rebuilt it with them in between)."""
-        self._plan = bar_plan(position, detached)
+        self._plan = bar_plan(position, detached, off)
         one_bar = getattr(self._dock, BAR_NAME, None)
         for key, frame in self._frames.items():
             keep = self._buttons(self._plan.get(key, ()))
@@ -137,8 +140,8 @@ class SectionBars:
         except RuntimeError:  # the dock went away
             logger.debug("Section bars not settled: the dock went away", exc_info=True)
 
-    def sync(self, position: str, detached: Iterable[str] = ()) -> None:
-        self.prepare(position, detached)
+    def sync(self, position: str, detached: Iterable[str] = (), off: Iterable[str] = ()) -> None:
+        self.prepare(position, detached, off)
         self.settle()
 
     def host(self, key: str, layout: Any = None) -> None:

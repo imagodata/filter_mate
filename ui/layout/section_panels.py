@@ -77,15 +77,30 @@ def panel_height(hint: int, room: int, spare: int) -> int:
     return int(max(PANEL_MIN_HEIGHT, min(hint, room * PANEL_MAX_SHARE, spare)))
 
 
-def menu_entries(key: str, detached: Iterable[str]) -> List[str]:
-    """What the menu of the header of ``key`` offers: ``detach`` when the section can leave the dock, ``attach_all``
-    when a section is apart."""
-    apart = set(detached)
-    entries = []
-    if key in DETACHABLE and key not in apart:
-        entries.append("detach")
+DOCK = "dock"  # in a menu, the FilterMate dock as the panel to group with
+
+
+def menu_entries(key: str, detached: Iterable[str], present: Iterable[str] = DETACHABLE) -> List[Tuple[str, str]]:
+    """What the menu of the section ``key`` offers, as ``(command, section)``, to separate, group and merge:
+
+    * in the dock: ``detach`` (its own panel) when it can leave;
+    * in its own panel: ``group`` with the dock (``DOCK``) and with each other panel, as tabs, then ``attach``
+      (merged back into the dock);
+    * ``detach_all`` when it would move another section than this one, ``attach_all`` when a section is apart.
+
+    ``present``: the sections the dock has, in it or apart (a section turned off is not among them)."""
+    apart = [name for name in DETACHABLE if name in set(detached)]
+    in_dock = [name for name in DETACHABLE if name in set(present) and name not in apart]
+    entries: List[Tuple[str, str]] = []
+    if key in apart:
+        entries += [("group", other) for other in [DOCK] + [name for name in apart if name != key]]
+        entries.append(("attach", key))
+    elif key in in_dock:
+        entries.append(("detach", key))
+    if [name for name in in_dock if name != key]:
+        entries.append(("detach_all", ""))
     if apart:
-        entries.append("attach_all")
+        entries.append(("attach_all", ""))
     return entries
 
 
@@ -205,6 +220,8 @@ class SectionPanels:
         sections = self._sections()
         if sections is not None:
             sections.raise_detached = self.raise_panel  # asked to open, a section apart shows its panel
+            # Turned off, a section apart goes back to the dock first; it stays kept as apart, for when it returns.
+            sections.bring_back = lambda key: self.attach(key, remember=False)
         contents = getattr(dock, CONTENTS_NAME, None)
         if contents is not None:
             contents.installEventFilter(self._watch)  # its style sheet changes with the theme
@@ -268,7 +285,12 @@ class SectionPanels:
         """The sections that were apart the last time, apart again: those that are in the dock by now (AGENT comes
         after the others). Called when the dock is built, and again when AGENT is installed."""
         self.watch_headers()
-        restored = []
+        restored: List[str] = []
+        try:
+            if self._dock.parentWidget() is None:
+                return restored  # the dock is not in the window of QGIS yet: its panels are placed after it
+        except RuntimeError:
+            return restored
         for key in _saved():
             if key not in self._panels and self.detach(key, remember=False):
                 restored.append(key)
@@ -304,6 +326,9 @@ class SectionPanels:
         shortcuts = getattr(self._dock, "keyboard_shortcuts_for", None)
         if callable(shortcuts):  # F5, Ctrl+Z and Ctrl+Y of the dock, with the focus in the panel
             panel.shortcuts = shortcuts(panel)
+        from qgis.PyQt.QtCore import Qt as _Qt
+        panel.setContextMenuPolicy(_Qt.ContextMenuPolicy.CustomContextMenu)  # group, merge: on its title
+        panel.customContextMenuRequested.connect(lambda pos, name=key, host=panel: self._show_panel_menu(name, host, pos))
         return panel
 
     def find_children(self, *args: Any, **kwargs: Any) -> list:
@@ -453,12 +478,14 @@ class SectionPanels:
         return True
 
     def _present(self) -> List[str]:
-        """The sections this dock has, in it or apart (AGENT is not there when it is turned off)."""
+        """The sections this dock has, in it or apart: not AGENT, FILTERING or EXPORTING when they are turned off."""
         from .section_bars import SECTION_PAGES
         sections = self._sections()
         pages = getattr(sections, "_pages", {}) if sections is not None else {}
+        shown = getattr(sections, "section_shown", None)
         return [key for key in DETACHABLE
-                if key in pages or getattr(self._dock, SECTION_PAGES.get(key, ""), None) is not None]
+                if key in pages or (getattr(self._dock, SECTION_PAGES.get(key, ""), None) is not None
+                                    and not (callable(shown) and shown(key) is False))]
 
     def _remember(self) -> None:
         _save(remembered(self.detached(), _saved(), self._present()))
@@ -737,22 +764,76 @@ class SectionPanels:
                 lambda pos, name=key, button=header: self._show_menu(name, button, pos))
 
     def build_menu(self, key: str, parent: Any) -> Any:
-        """The menu of the header of ``key``, None when it would be empty."""
+        """The menu of the section ``key`` (on its header in the dock, on the title of its panel): separate, group,
+        merge. None when it would be empty."""
         from qgis.PyQt.QtWidgets import QMenu
-        entries = [entry for entry in menu_entries(key, self.detached())
-                   if entry != "detach" or self.can_detach(key)]
+        entries = []
+        for command, name in menu_entries(key, self.detached(), self._present()):
+            if command == "detach" and not self.can_detach(name):
+                continue
+            if command == "group" and not self.can_group(key, name):
+                continue
+            entries.append((command, name))
         if not entries:
             return None
+        texts = {
+            "detach": lambda name: _tr("Open {} in its own panel").format(TITLES[name]),
+            "detach_all": lambda name: _tr("Open every section in its own panel"),
+            "group": lambda name: _tr("Group with {}").format("FilterMate" if name == DOCK else TITLES[name]),
+            "attach": lambda name: _tr("Merge {} back into FilterMate").format(TITLES[name]),
+            "attach_all": lambda name: _tr("Merge every section back into FilterMate"),
+        }
+        runs = {
+            "detach": self.detach, "detach_all": lambda _name: self.detach_all(),
+            "group": lambda name: self.group(key, name), "attach": self.attach,
+            "attach_all": lambda _name: self.attach_all(),
+        }
         menu = QMenu(parent)
-        if "detach" in entries:
-            action = menu.addAction(_tr("Open {} in its own panel").format(TITLES[key]))
-            action.setObjectName("action_section_detach")
-            action.triggered.connect(lambda _checked=False: self.detach(key))
-        if "attach_all" in entries:
-            action = menu.addAction(_tr("Bring every section back to this panel"))
-            action.setObjectName("action_section_attach_all")
-            action.triggered.connect(lambda _checked=False: self.attach_all())
+        parts = {"detach": 0, "group": 0, "attach": 1, "detach_all": 2, "attach_all": 2}  # this section, then all
+        before = None
+        for command, name in entries:
+            if before is not None and parts[command] != before:
+                menu.addSeparator()
+            action = menu.addAction(texts[command](name))
+            action.setObjectName(f"action_section_{command}" + (f"_{name}" if command == "group" else ""))
+            action.triggered.connect(lambda _checked=False, run=runs[command], name=name: run(name))
+            before = parts[command]
         return menu
+
+    def can_group(self, key: str, other: str) -> bool:
+        """The panel of ``key`` can become a tab of the panel of ``other`` (``DOCK``: the dock): both are there, the
+        other one is docked, and they are not tabbed together yet."""
+        panel = self._panels.get(key)
+        target = self._dock if other == DOCK else self._panels.get(other)
+        window = self._main_window()
+        if panel is None or target is None or window is None or target is panel:
+            return False
+        try:
+            return (not target.isFloating() and not target.isHidden()
+                    and panel not in window.tabifiedDockWidgets(target))
+        except RuntimeError:
+            return False
+
+    def group(self, key: str, other: str) -> bool:
+        """The panel of ``key`` as a tab beside the panel of ``other`` (``DOCK``: beside the dock)."""
+        if not self.can_group(key, other):
+            return False
+        from qgis.PyQt.QtCore import QTimer
+        panel = self._panels[key]
+        target = self._dock if other == DOCK else self._panels[other]
+        try:
+            if panel.isFloating():
+                panel.setFloating(False)
+            self._main_window().tabifyDockWidget(target, panel)
+            panel.show()
+            QTimer.singleShot(0, lambda: self.raise_panel(key))  # a new tab comes behind the others
+            return True
+        except RuntimeError:
+            return False
+
+    def detach_all(self) -> List[str]:
+        """Every section that can leave the dock, in its own panel; those that left."""
+        return [key for key in DETACHABLE if key not in self._panels and self.detach(key)]
 
     def _show_menu(self, key: str, header: Any, pos: Any) -> None:
         try:
@@ -760,6 +841,16 @@ class SectionPanels:
             if menu is not None:
                 menu.aboutToHide.connect(menu.deleteLater)
                 menu.popup(header.mapToGlobal(pos))  # never modal: the headless checks reach this path
+        except RuntimeError:
+            pass
+
+    def _show_panel_menu(self, key: str, panel: Any, pos: Any) -> None:
+        """A right click on the title of a panel (not in its contents, which have their own menus)."""
+        try:
+            holder = panel.widget()
+            if holder is not None and holder.geometry().contains(pos):
+                return
+            self._show_menu(key, panel, pos)
         except RuntimeError:
             pass
 

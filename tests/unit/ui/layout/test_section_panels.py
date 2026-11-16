@@ -196,18 +196,53 @@ def test_a_change_of_dock_position_wins_over_the_place_kept():
     assert not panels.restore_dock_first(("filtering",), None, 2)  # never placed with panels before
 
 
-# --- the menu of a header ----------------------------------------------------------
+# --- the menu of a section: separate, group, merge -----------------------------------
 
-def test_a_section_in_the_dock_can_leave_it():
+def test_a_section_in_the_dock_can_leave_it_alone_or_with_the_others():
     for key in panels.DETACHABLE:
-        assert panels.menu_entries(key, []) == ["detach"]
+        assert panels.menu_entries(key, []) == [("detach", key), ("detach_all", "")]
 
 
 def test_exploring_never_leaves_the_dock():
-    assert panels.menu_entries("exploring", []) == []
-    assert panels.menu_entries("exploring", ["agent"]) == ["attach_all"]
+    assert panels.menu_entries("exploring", []) == [("detach_all", "")]
+    assert panels.menu_entries("exploring", panels.DETACHABLE) == [("attach_all", "")]
 
 
-def test_with_a_section_apart_the_menu_brings_all_back():
-    assert panels.menu_entries("exporting", ["filtering"]) == ["detach", "attach_all"]
-    assert panels.menu_entries("filtering", ["filtering"]) == ["attach_all"]
+def test_the_last_section_in_the_dock_is_not_offered_with_the_others():
+    apart = ["agent", "exporting", "configuration"]
+    assert panels.menu_entries("filtering", apart) == [("detach", "filtering"), ("attach_all", "")]
+
+
+def test_a_section_apart_groups_with_the_dock_and_the_other_panels_then_merges_back():
+    assert panels.menu_entries("filtering", ["filtering"]) == [
+        ("group", panels.DOCK), ("attach", "filtering"), ("detach_all", ""), ("attach_all", "")]
+    assert panels.menu_entries("exporting", ["agent", "filtering", "exporting"]) == [
+        ("group", panels.DOCK), ("group", "agent"), ("group", "filtering"), ("attach", "exporting"),
+        ("detach_all", ""), ("attach_all", "")]
+
+
+def test_every_section_apart_leaves_nothing_to_separate():
+    entries = panels.menu_entries("agent", panels.DETACHABLE)
+    assert ("detach_all", "") not in entries and entries[-1] == ("attach_all", "")
+    assert [name for command, name in entries if command == "group"] == [
+        panels.DOCK, "filtering", "exporting", "configuration"]
+
+
+def test_a_section_turned_off_is_offered_nothing_and_is_not_counted():
+    present = ("agent", "exporting", "configuration")  # FILTERING is turned off
+    assert panels.menu_entries("filtering", [], present) == [("detach_all", "")]
+    assert panels.menu_entries("exporting", ["agent", "configuration"], present) == [
+        ("detach", "exporting"), ("attach_all", "")]
+
+
+# --- a section turned off carries no button ------------------------------------------
+
+def test_a_section_turned_off_leaves_its_buttons_to_the_bar_for_all():
+    plan = bars.bar_plan(bars.SECTIONS_POSITION, (), ["filtering"])
+    assert "filtering" not in plan
+    assert plan[bars.ONE_BAR] == (FILTER, UNDO, REDO, COMPARE, UNFILTER)
+    assert plan["exporting"] == (EXPORT, QFIELDCLOUD)
+
+
+def test_a_section_turned_off_carries_nothing_even_when_it_was_apart():
+    assert bars.bar_plan("bottom", ["filtering"], ["filtering"]) == {bars.ONE_BAR: bars.ACTION_ORDER}

@@ -2886,10 +2886,130 @@ def s_section_restart():
     return settled()
 
 
+def menu_action(menu, name):
+    return next((action for action in menu.actions() if action.objectName() == name), None) if menu is not None else None
+
+
+def s_section_group():
+    """Separate, group and merge from the menus: every section apart in one go, a panel as a tab of another, one
+    section merged back, then all of them."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    has_agent = 'agent' in d._fm_sections._headers
+    every = tuple(key for key in ('agent', 'filtering', 'exporting', 'configuration') if has_agent or key != 'agent')
+    header = bottom_header(d.FILTERING)
+    menu = panels.build_menu('filtering', header)
+    names = [action.objectName() for action in menu.actions() if not action.isSeparator()] if menu is not None else []
+    check('group: in the dock, a section is offered its own panel, alone or with the others',
+          names == ['action_section_detach', 'action_section_detach_all'], str(names))
+    menu_action(menu, 'action_section_detach_all').trigger()
+    QApplication.processEvents()
+    if not check('group: every section in its own panel in one go', panels.detached() == every, str(panels.detached())):
+        panels.attach_all()
+        return None
+    filtering, exporting = panels.panel('filtering'), panels.panel('exporting')
+    menu = panels.build_menu('filtering', filtering)
+    names = [action.objectName() for action in menu.actions() if not action.isSeparator()]
+    check('group: a panel is offered the panels it is not tabbed with, and to merge',
+          'action_section_group_dock' in names and 'action_section_group_exporting' not in names
+          and 'action_section_attach' in names and 'action_section_attach_all' in names
+          and 'action_section_detach_all' not in names, str(names))
+    menu_action(menu, 'action_section_group_dock').trigger()
+    QApplication.processEvents()
+    check('group: FILTERING becomes a tab beside the FilterMate dock', filtering in window.tabifiedDockWidgets(d)
+          and filtering not in window.tabifiedDockWidgets(exporting) and filtering.isVisible(),
+          str([panel.objectName() for panel in window.tabifiedDockWidgets(d)]))
+    menu = panels.build_menu('exporting', exporting)
+    check('group: EXPORTING is offered FILTERING again, now that they are apart',
+          menu_action(menu, 'action_section_group_filtering') is not None)
+    menu_action(menu, 'action_section_group_filtering').trigger()
+    QApplication.processEvents()
+    check('group: EXPORTING joins FILTERING and the dock as a tab', exporting in window.tabifiedDockWidgets(filtering)
+          and exporting in window.tabifiedDockWidgets(d) and action_button('export').isEnabled())
+    panels._show_panel_menu('exporting', exporting, QPoint(8, 4))  # a right click on the title of the panel
+    QApplication.processEvents()
+    shown = [popup for popup in exporting.findChildren(QMenu) if popup.isVisible()]
+    check('group: a right click on the title of a panel opens its menu', len(shown) == 1)
+    for popup in shown:
+        popup.hide()
+    inside = exporting.widget().geometry().center()
+    panels._show_panel_menu('exporting', exporting, inside)
+    QApplication.processEvents()
+    check('group: not a right click in the contents of the panel',
+          not [popup for popup in exporting.findChildren(QMenu) if popup.isVisible()])
+    menu = panels.build_menu('exporting', exporting)
+    menu_action(menu, 'action_section_attach').trigger()
+    QApplication.processEvents()
+    check('group: merged back, EXPORTING is in the dock again, the others stay apart',
+          'exporting' not in panels.detached() and d.isAncestorOf(d.EXPORTING) and 'filtering' in panels.detached()
+          and bottom_header(d.EXPORTING).isVisible(), str(panels.detached()))
+    menu = panels.build_menu('exporting', bottom_header(d.EXPORTING))
+    menu_action(menu, 'action_section_attach_all').trigger()
+    QApplication.processEvents()
+    open_section(d.FILTERING)
+    check('group: every section merged back into FilterMate', panels.detached() == ()
+          and not QSettings().value(DETACHED_KEY) and actions_shown() == SECTION['all']
+          and d.toolBox_tabTools.currentWidget() is d.FILTERING, f"{panels.detached()} {actions_shown()}")
+    return settled()
+
+
+def s_section_off():
+    """A section turned off (APP.OPTIONS.FILTERING.enabled) while it is in its own panel: the panel goes with it, and
+    comes back when the section is turned on again. Undo, Redo and Compare stay within reach."""
+    d = dock()
+    panels = d._fm_panels
+    manager = d._action_bar_manager
+    options = d.CONFIG_DATA['APP']['OPTIONS']
+    before = options.get('FILTERING')
+    open_section(d.FILTERING)
+    if not check('off: FILTERING is in its own panel', panels.detach('filtering')):
+        return None
+    QApplication.processEvents()
+    options['FILTERING'] = {'enabled': {'value': False}}
+    changed = d.apply_section_options()
+    QApplication.processEvents()
+    check('off: turned off, FILTERING leaves its panel and the dock, and is kept as apart',
+          changed == ['filtering'] and panels.detached() == () and not bottom_header(d.FILTERING).isVisible()
+          and QSettings().value(DETACHED_KEY) == 'filtering' and not panels.can_detach('filtering')
+          and d.isAncestorOf(d.FILTERING), f"changed={changed} apart={panels.detached()}")
+    check('off: Filter and Unfilter go, Undo and Redo stay in the bar of the dock',
+          not action_button('filter').isVisible() and not action_button('unfilter').isVisible()
+          and action_button('undo_filter').isVisible() and action_button('undo_filter').parentWidget() is d.frame_actions,
+          str(actions_shown()))
+    manager.set_position('sections')
+    QApplication.processEvents()
+    kept = [name for name in ('undo_filter', 'redo_filter', 'compare') if name in SECTION['all']]
+    check('off: with the buttons under their section, Undo, Redo and Compare stay in a bar', d.frame_actions.isVisible()
+          and actions_shown() == kept, str(actions_shown()))
+    manager.set_position(SECTION['position'])
+    QApplication.processEvents()
+    options['FILTERING'] = {'enabled': {'value': True}}
+    changed = d.apply_section_options()
+    QApplication.processEvents()
+    panel = panels.panel('filtering')
+    check('off: turned on again, FILTERING is back in its own panel with its buttons', changed == ['filtering']
+          and panels.detached() == ('filtering',) and panel is not None
+          and panel.isAncestorOf(action_button('filter')) and not action_button('filter').isHidden()
+          and panel.isAncestorOf(d.comboBox_filtering_current_layer), f"changed={changed} apart={panels.detached()}")
+    panels.attach_all()
+    if before is None:
+        options.pop('FILTERING', None)
+    else:
+        options['FILTERING'] = before
+    d.apply_section_options()
+    QApplication.processEvents()
+    open_section(d.FILTERING)
+    check('off: left as found', panels.detached() == () and d.toolBox_tabTools.currentWidget() is d.FILTERING
+          and actions_shown() == SECTION['all'] and not QSettings().value(DETACHED_KEY)
+          and d.FILTERING.isAncestorOf(d.comboBox_filtering_current_layer), str(actions_shown()))
+    return settled()
+
+
 SECTION_STEPS = [s_section_setup, s_section_bars, s_vector_source, s_vector_select, s_section_detach, s_section_filter,
                  s_section_filter_check, s_section_undo, s_section_undo_check, s_section_stack,
                  s_section_close_dock, s_section_reopen_dock, s_section_close_panel, s_section_back_check,
-                 s_section_restart]
+                 s_section_restart, s_section_group, s_section_off]
 
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
