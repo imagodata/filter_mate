@@ -523,20 +523,21 @@ def check_families(chat, provider, settings, ask):
     check("families: on by default in the dialog",
           AgentSettingsDialog(AgentSettings(), target_of).tool_families.isChecked())
     # Token diet, lot 1: the core, the index of the others in the instructions, and use_tools adds what is named.
-    provider.reset((200, {}, tool_turn("use_tools", {"names": ["group_layers"]})), (200, {}, text_turn("ok")))
-    check("families: a request that adds a tool ends", ask("put the roads in a group"))
+    settings(tool_families=True)  # a new conversation: the skill loaded above brought tools of its own
+    provider.reset((200, {}, tool_turn("use_tools", {"names": ["sample_features"]})), (200, {}, text_turn("ok")))
+    check("families: a request that adds a tool ends", ask("show me a few roads"))
     system = provider.requests[0]["body"]["system"][0]["text"] if provider.requests else ""
     check("families: the first request carries the core, use_tools and the index",
-          len(provider.requests) == 2 and "use_tools" in names(0) and "group_layers" not in names(0)
-          and "apply_filter" in names(0) and "\n- group_layers: " in system, names(0))
+          len(provider.requests) == 2 and "use_tools" in names(0) and "sample_features" not in names(0)
+          and "apply_filter" in names(0) and "\n- sample_features: " in system, names(0))
     check("families: use_tools offers the tool from the next turn, at the end",
-          len(provider.requests) == 2 and names(1)[-1] == "group_layers" and names(1)[:len(names(0))] == names(0),
+          len(provider.requests) == 2 and names(1)[-1] == "sample_features" and names(1)[:len(names(0))] == names(0),
           names(1)[-3:])
     settings(tool_families=False)
     provider.reset((200, {}, text_turn("ok")))
     ask("hello")
     check("families off: every tool, no use_tools, no index",
-          provider.requests and "use_tools" not in names(0) and "group_layers" in names(0)
+          provider.requests and "use_tools" not in names(0) and "sample_features" in names(0)
           and "Tools you can add with use_tools" not in provider.requests[0]["body"]["system"][0]["text"])
     settings()
 
