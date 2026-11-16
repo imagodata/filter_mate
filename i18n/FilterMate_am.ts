@@ -11571,6 +11571,36 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <translation>ክፍሎቹ የሚቀመጡበት</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>ርዕሶች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>ፓነሉ ክፍሎቹን የሚዘረዝርበት መንገድ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>የቺፖች ረድፍ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>ነባሪው፦ ለእያንዳንዱ ክምር አንድ ረድፍ፣ በቺፕ ላይ ጠቅ ማድረግ ክፍሉን የሚከፍትበትና ቺፕ ወደ ሌላ ቦታ የሚጎተትበት።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>ርዕሶች፣ አንዱ ከሌላው በላይ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>የእያንዳንዱ ክፍል ስም በራሱ መስመር ላይ።</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>ርዕስ ላይ ጠቅ ማድረግ ክፍሉን ይከፍታል።</translation>

@@ -244,7 +244,8 @@ def test_the_layout_is_asked_with_the_buttons_ticked_as_it_is(world, chat):
     _answer(world, chat)  # features
     _answer(world, chat)  # look
     layout = chat.panel.questions[-1]
-    assert [question.header for question in layout] == ["Layout", "Buttons"]
+    assert [question.header for question in layout] == ["Layout", "Headers", "Buttons"]
+    assert [option.label for option in layout[1].options if option.selected] == ["A rail of chips"]
     assert [option.label for option in layout[0].options if option.selected] == ["All in the FilterMate panel"]
     assert len(layout[0].options) == 2  # nothing apart: "As they are now" is not a choice
 
@@ -449,7 +450,7 @@ def test_a_panel_without_sections_to_move_asks_the_buttons_alone(world, chat):
     chat.wizard.start()
     _answer(world, chat)
     _answer(world, chat)
-    assert [question.header for question in chat.panel.questions[-1]] == ["Buttons"]
+    assert [question.header for question in chat.panel.questions[-1]] == ["Headers", "Buttons"]
 
 
 # --- the tour ----------------------------------------------------------------------------------------------------------
@@ -491,6 +492,23 @@ def test_the_tour_names_a_section_turned_off(world, chat):
     texts = [text for kind, text in chat.panel.said if kind == "text"]
     assert not any(text.startswith("FILTERING ") for text in texts)
     assert any(text.startswith("Turned off in your settings: FILTERING.") for text in texts)
+
+
+def test_the_headers_stacked_are_a_setting_of_the_setup(world, chat):
+    card = _run(world, chat, pick=[("Headers", "Headers, one above the other")])
+    assert len(card.lines) == 1 and card.lines[0].startswith(world.wizard.SECTION_HEADERS)
+    card.apply_requested.emit()
+    assert world.applied == [{world.wizard.SECTION_HEADERS: "stacked"}]
+    assert chat.wizard.revert() is True
+    assert world.applied[-1] == {world.wizard.SECTION_HEADERS: "rail"}
+
+
+def test_with_the_headers_stacked_the_tour_speaks_of_headers(world, chat):
+    chat._parent_widget._fm_sections.stacked = True
+    world.tour.WelcomeTour(chat).show()
+    texts = [text for kind, text in chat.panel.said if kind == "text"]
+    assert not any("rail" in text for text in texts)
+    assert any("Right-click the header of AGENT" in text for text in texts)
 
 
 def test_the_tour_waits_for_the_end_of_a_request(world, chat):

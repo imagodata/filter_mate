@@ -21,7 +21,9 @@ class DockFacts:
     """What the panel shows now."""
 
     off: Tuple[str, ...] = ()  # the sections turned off, among MAY_BE_OFF
-    rail: bool = False  # each stack lists its sections in a rail of chips (ui/widgets/section_rail.py)
+    # Each stack lists its sections in a rail of chips (ui/widgets/section_rail.py); False with the headers stacked
+    # one above the other (APP.DOCKWIDGET.SECTION_HEADERS), which is told with the word "header".
+    rail: bool = False
     panels: bool = False  # a section can be shown in its own panel of QGIS (ui/layout/section_panels.py)
     apart: Tuple[str, ...] = ()  # the sections that are in their own panel
     can_move: bool = False  # one more section can leave the panel
@@ -40,7 +42,7 @@ def steps(facts: DockFacts) -> List[Tuple[str, str]]:
     if any(key in MAY_BE_OFF for key in facts.off):
         told.append((TEXT, "off"))
     if facts.panels:
-        told += [(TEXT, "panels"), (TEXT, "groups")]
+        told += [(TEXT, "panels" if facts.rail else "panels_headers"), (TEXT, "groups")]
         if facts.can_move:
             told.append((LINK, "detach_all"))
         if facts.apart:

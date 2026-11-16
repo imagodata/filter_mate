@@ -51,6 +51,11 @@ def _texts(off: str) -> Dict[str, str]:
                       "then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, "
                       "to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds "
                       "the layer the other sections work on."),
+        # With the headers stacked (APP.DOCKWIDGET.SECTION_HEADERS): the same, said of a header.
+        "panels_headers": _tr("A section can leave this panel. Right-click the header of AGENT, FILTERING, "
+                              "EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a "
+                              "panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on "
+                              "another screen. EXPLORING stays here: it holds the layer the other sections work on."),
         "groups": _tr("Right-click the title of such a panel to group it with another one, as tabs, or to merge "
                       "it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where "
                       "you left it."),
@@ -88,7 +93,7 @@ class WelcomeTour:
         sections = getattr(self._dock(), "_fm_sections", None)
         shown = getattr(sections, "section_shown", None)
         off, apart, can_move = (), (), False
-        rail = getattr(sections, "top_rail", None) is not None
+        rail = getattr(sections, "top_rail", None) is not None and not getattr(sections, "stacked", False)
         panels = self._panels()
         try:
             if callable(shown):

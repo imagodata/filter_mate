@@ -11571,6 +11571,36 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>अनुभाग कहाँ रहें</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>शीर्षक</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>पैनल अपने अनुभागों को कैसे सूचीबद्ध करता है</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>चिप की एक पट्टी</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>डिफ़ॉल्ट: हर स्टैक के लिए एक पंक्ति, जहाँ किसी चिप पर क्लिक करने से उसका अनुभाग खुलता है और चिप को दूसरी जगह खींचा जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>शीर्षक, एक के ऊपर एक</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>हर अनुभाग का नाम अपनी अलग पंक्ति में।</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>किसी शीर्षक पर क्लिक करने से उसका अनुभाग खुलता है।</translation>

@@ -135,6 +135,14 @@
         ],
         "description": "Position of the action bar: 'top' (horizontal at top), 'bottom' (horizontal at bottom), 'left' (vertical on left side), 'right' (vertical on right side), 'sections' (no bar for all: each section shows its own buttons while it is open - Filter, Undo, Redo, Compare and Unfilter for FILTERING, Export for EXPORTING, About for CONFIGURATION)"
       },
+      "SECTION_HEADERS": {
+        "value": "rail",
+        "choices": [
+          "rail",
+          "stacked"
+        ],
+        "description": "How the panel lists its sections: 'rail' (one row of chips per stack: a click on a chip opens its section, a chip is dragged to another place), 'stacked' (the name of each section on its own line, one above the other)"
+      },
       "ACTION_BAR_VERTICAL_ALIGNMENT": {
         "value": "top",
         "choices": [

@@ -37,6 +37,7 @@ LANGUAGE_NAMES = {"en": "English", "fr": "Français", "de": "Deutsch", "es": "Es
 def _headers() -> Dict[str, str]:
     return {"sections": _tr("Sections"), "data": _tr("Data"), "size": _tr("Size"), "theme": _tr("Theme"),
             "profile": _tr("Panel"), "language": _tr("Language"), "panels": _tr("Layout"),
+            "headers": _tr("Headers"),
             "action_bar": _tr("Buttons"),
             "after": _tr("Filtering"), "targets": _tr("Targets"), "groups": _tr("Groups"),
             "raster_format": _tr("Rasters"), "point_cloud_format": _tr("Clouds")}
@@ -51,6 +52,7 @@ def _questions() -> Dict[str, str]:
         "profile": _tr("Size of the panel"),
         "language": _tr("Language of the panel"),
         "panels": _tr("Where the sections go"),
+        "headers": _tr("How the panel lists its sections"),
         "action_bar": _tr("Where the action buttons go (Filter, Export...)"),
         "after": _tr("When you filter"),
         "targets": _tr("A vector layer also filters these layers (cut to its features)"),
@@ -60,8 +62,9 @@ def _questions() -> Dict[str, str]:
     }
 
 
-def _labels(facts: wizard.ProjectFacts) -> Dict[str, Dict[str, tuple]]:
-    """Per question, per choice: (label, description)."""
+def _labels(facts: wizard.ProjectFacts, stacked: bool = False) -> Dict[str, Dict[str, tuple]]:
+    """Per question, per choice: (label, description). ``stacked``: the panel lists its sections by headers, not
+    by rails, which the words of the default layout follow."""
 
     def in_project(count: int) -> str:
         return _tr("{} in this project").format(count) if count else ""
@@ -94,12 +97,18 @@ def _labels(facts: wizard.ProjectFacts) -> Dict[str, Dict[str, tuple]]:
         "language": {"auto": (_tr("As QGIS"), "")},
         "panels": {
             wizard.IN_DOCK: (_tr("All in the FilterMate panel"),
-                             _tr("The default: one panel, where a click in a rail opens a section.")),
+                             _tr("A click on a header opens its section.") if stacked
+                             else _tr("The default: one panel, where a click in a rail opens a section.")),
             wizard.IN_PANELS: (_tr("Each in its own panel of QGIS"),
                                _tr("AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or "
                                    "floating; EXPLORING stays in FilterMate. A right-click on the title of a panel "
                                    "groups it with another one or merges it back.")),
             wizard.AS_NOW: (_tr("As they are now"), _tr("Some sections are in their own panel.")),
+        },
+        "headers": {
+            "rail": (_tr("A rail of chips"), _tr("The default: one row per stack, where a click on a chip opens "
+                                                 "its section and a chip is dragged to another place.")),
+            "stacked": (_tr("Headers, one above the other"), _tr("The name of each section on its own line.")),
         },
         "action_bar": {"bottom": (_tr("Bottom"), ""), "top": (_tr("Top"), ""), "left": (_tr("Left"), ""),
                        "right": (_tr("Right"), ""),
@@ -234,7 +243,9 @@ class SetupWizard:
             self._propose()
             return
         asks = wizard.step_questions(step, self._values, self._facts, self._answers)
-        headers, texts, labels = _headers(), _questions(), _labels(self._facts)
+        sections = getattr(getattr(self._chat, "_parent_widget", None), "_fm_sections", None)
+        headers, texts = _headers(), _questions()
+        labels = _labels(self._facts, bool(getattr(sections, "stacked", False)))
         questions, keys_by_label = [], []
         for ask in asks:
             words = labels.get(ask.key, {})

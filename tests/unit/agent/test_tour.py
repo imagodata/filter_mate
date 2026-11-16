@@ -44,6 +44,14 @@ def test_a_panel_that_cannot_split_says_nothing_of_panels():
     assert _keys(facts, tour.LINK) == ["setup", "connect"]
 
 
+def test_with_the_headers_stacked_the_panels_are_told_with_headers():
+    stacked = tour.DockFacts(rail=False, panels=True, can_move=True)
+    assert "panels_headers" in _keys(stacked, tour.TEXT) and "panels" not in _keys(stacked, tour.TEXT)
+    assert "rail" not in _keys(stacked, tour.TEXT)
+    rails = tour.DockFacts(rail=True, panels=True, can_move=True)
+    assert "panels" in _keys(rails, tour.TEXT) and "panels_headers" not in _keys(rails, tour.TEXT)
+
+
 def test_a_model_connected_is_not_offered_again():
     assert "connect" not in _keys(tour.DockFacts(model_ready=True), tour.LINK)
     assert "connect" in _keys(tour.DockFacts(), tour.LINK)
