@@ -507,6 +507,12 @@ def update_section_icons(dw: Any, dark: Any = None) -> bool:
                 label.setPixmap(icon.pixmap(64, 64))
         except RuntimeError:  # the dock went away
             pass
+    for rail in getattr(dw, '_fm_rails', None) or ():  # the chips of the rails of sections (ui/widgets/section_rail.py)
+        try:
+            rail.refresh_icons(dark)
+            drawn = True
+        except RuntimeError:  # a rail that went with its panel
+            pass
     return drawn
 
 

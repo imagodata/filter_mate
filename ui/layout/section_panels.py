@@ -204,7 +204,6 @@ class SectionPanels:
         self._window = window
         self._panels: Dict[str, Any] = {}
         self._origins: Dict[str, Any] = {}  # the scroll area of the tool box a page came from
-        self._menus_on: set = set()
         self._dock_minimum: Optional[int] = None  # the minimum height of the display profile, while it is relaxed
         self._hidden_with_dock = False
         self._closing = False
@@ -222,6 +221,7 @@ class SectionPanels:
             sections.raise_detached = self.raise_panel  # asked to open, a section apart shows its panel
             # Turned off, a section apart goes back to the dock first; it stays kept as apart, for when it returns.
             sections.bring_back = lambda key: self.attach(key, remember=False)
+            sections.on_menu = self._on_chip_menu  # a right click on the chip of a section, in a rail of the dock
         contents = getattr(dock, CONTENTS_NAME, None)
         if contents is not None:
             contents.installEventFilter(self._watch)  # its style sheet changes with the theme
@@ -230,7 +230,6 @@ class SectionPanels:
         if toolbox is not None:
             toolbox.currentChanged.connect(self._on_bottom_changed)
         dock.destroyed.connect(self._on_dock_destroyed)
-        self.watch_headers()
 
     # --- what is apart ------------------------------------------------------------
 
@@ -284,7 +283,6 @@ class SectionPanels:
     def restore(self) -> List[str]:
         """The sections that were apart the last time, apart again: those that are in the dock by now (AGENT comes
         after the others). Called when the dock is built, and again when AGENT is installed."""
-        self.watch_headers()
         restored: List[str] = []
         try:
             if self._dock.parentWidget() is None:
@@ -359,9 +357,9 @@ class SectionPanels:
         toolbox = self._dock.toolBox_tabTools
         page = getattr(self._dock, SECTION_PAGES[key])
         index = toolbox.indexOf(page)
-        if toolbox.currentWidget() is page:  # before its header goes: QToolBox would open the next section
+        if toolbox.currentWidget() is page:  # before its item is turned off: QToolBox would open the next section
             toolbox.setCurrentWidget(sections._nothing)
-        self._show_bottom_header(index, False)
+        toolbox.setItemEnabled(index, False)
         self._origins[key] = area
         area.takeWidget()
         panel.scroll.setWidget(page)
@@ -372,12 +370,10 @@ class SectionPanels:
     def _take_top(self, key: str, panel: Any) -> bool:
         sections = self._sections()
         page = sections._pages.get(key)
-        header = sections._headers.get(key)
-        if page is None or header is None:
+        if page is None:
             return False
         was_open = sections.is_open(key)
         sections._top_layout.removeWidget(page)
-        header.setVisible(False)
         sections.detached.add(key)
         if was_open:
             sections.open_top("exploring")
@@ -512,19 +508,17 @@ class SectionPanels:
             return
         area.setWidget(page)
         page.show()
-        self._show_bottom_header(self._dock.toolBox_tabTools.indexOf(page), True)
+        toolbox = self._dock.toolBox_tabTools
+        toolbox.setItemEnabled(toolbox.indexOf(page), True)
 
     def _give_top(self, key: str, panel: Any) -> None:
         sections = self._sections()
         page = sections._pages.get(key)
-        header = sections._headers.get(key)
-        if page is None or header is None:
+        if page is None:
             return
         panel.body.removeWidget(page)
-        sections._top_layout.insertWidget(sections._top_layout.indexOf(header) + 1, page, 1)
+        sections._top_layout.insertWidget(sections._top_layout.indexOf(sections.top_rail) + 1, page, 1)
         page.hide()
-        header.setChecked(False)
-        header.setVisible(True)
         sections.detached.discard(key)
 
     def _rescue(self, key: str, panel: Any) -> None:
@@ -587,13 +581,9 @@ class SectionPanels:
             select()  # the buttons of a section apart act whatever is open in the dock
         self.relax_dock()
         sections = self._sections()
-        if sections is None:
-            return
-        splitter = getattr(dock, "splitter_main", None)
-        bottom = splitter.widget(1) if splitter is not None and splitter.count() > 1 else None
-        if bottom is not None:  # with no section left below, the upper stack takes the dock
-            bottom.setVisible(any(key not in self._panels and self._header_shown(key) for key in BOTTOM))
-        sections._fit()
+        if sections is not None:
+            sections.refresh_rails()  # the chip of a section apart leaves its rail; with none left below, the
+            # upper stack takes the dock
 
     def _bars(self) -> Any:
         manager = getattr(self._dock, "_action_bar_manager", None)
@@ -624,30 +614,6 @@ class SectionPanels:
         viewport = page.parentWidget()
         area = viewport.parentWidget() if viewport is not None else None
         return area if isinstance(area, QScrollArea) and area.widget() is page else None
-
-    def _bottom_header(self, index: int) -> Any:
-        from qgis.PyQt.QtWidgets import QAbstractButton
-        toolbox = self._dock.toolBox_tabTools
-        text = toolbox.itemText(index)
-        for button in toolbox.findChildren(QAbstractButton):
-            if button.objectName() == "qt_toolbox_toolboxbutton" and button.text() == text:
-                return button
-        return None
-
-    def _show_bottom_header(self, index: int, shown: bool) -> None:
-        if index < 0:
-            return
-        header = self._bottom_header(index)
-        if header is not None:
-            header.setVisible(shown)
-        self._dock.toolBox_tabTools.setItemEnabled(index, shown)
-
-    def _header_shown(self, key: str) -> bool:
-        from .section_bars import SECTION_PAGES
-        toolbox = self._dock.toolBox_tabTools
-        index = toolbox.indexOf(getattr(self._dock, SECTION_PAGES[key], None))
-        header = self._bottom_header(index) if index >= 0 else None
-        return header is not None and not header.isHidden()
 
     def raise_panel(self, key: str) -> None:
         panel = self._panels.get(key)
@@ -737,31 +703,11 @@ class SectionPanels:
         except (RuntimeError, AttributeError):
             pass
 
-    # --- the menu of the headers ----------------------------------------------------
+    # --- the menu of a section --------------------------------------------------------
 
-    def watch_headers(self) -> None:
-        """A right click on a header offers its own panel; done again when a header comes late (AGENT)."""
-        from qgis.PyQt.QtCore import Qt
-        from qgis.PyQt.QtWidgets import QAbstractButton
-        from .section_bars import SECTION_PAGES
-        sections = self._sections()
-        if sections is None:
-            return
-        headers = dict(getattr(sections, "_headers", {}))
-        toolbox = getattr(self._dock, "toolBox_tabTools", None)
-        if toolbox is not None:
-            texts = {toolbox.itemText(toolbox.indexOf(getattr(self._dock, page))): key
-                     for key, page in SECTION_PAGES.items() if getattr(self._dock, page, None) is not None}
-            for button in toolbox.findChildren(QAbstractButton):
-                if button.objectName() == "qt_toolbox_toolboxbutton" and button.text() in texts:
-                    headers[texts[button.text()]] = button
-        for key, header in headers.items():
-            if header in self._menus_on:
-                continue
-            self._menus_on.add(header)
-            header.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-            header.customContextMenuRequested.connect(
-                lambda pos, name=key, button=header: self._show_menu(name, button, pos))
+    def _on_chip_menu(self, key: str, place: Any) -> None:
+        """A right click on the chip of a section, in a rail of the dock."""
+        self._popup(key, self._dock, place)
 
     def build_menu(self, key: str, parent: Any) -> Any:
         """The menu of the section ``key`` (on its header in the dock, on the title of its panel): separate, group,
@@ -835,12 +781,13 @@ class SectionPanels:
         """Every section that can leave the dock, in its own panel; those that left."""
         return [key for key in DETACHABLE if key not in self._panels and self.detach(key)]
 
-    def _show_menu(self, key: str, header: Any, pos: Any) -> None:
+    def _popup(self, key: str, parent: Any, place: Any) -> None:
+        """The menu of ``key`` at ``place`` of the screen; never modal: the headless checks reach this path."""
         try:
-            menu = self.build_menu(key, header)
+            menu = self.build_menu(key, parent)
             if menu is not None:
                 menu.aboutToHide.connect(menu.deleteLater)
-                menu.popup(header.mapToGlobal(pos))  # never modal: the headless checks reach this path
+                menu.popup(place)
         except RuntimeError:
             pass
 
@@ -850,7 +797,7 @@ class SectionPanels:
             holder = panel.widget()
             if holder is not None and holder.geometry().contains(pos):
                 return
-            self._show_menu(key, panel, pos)
+            self._popup(key, panel, panel.mapToGlobal(pos))
         except RuntimeError:
             pass
 

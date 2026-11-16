@@ -564,6 +564,32 @@
 #dockWidgetContents QPushButton#pushButton_section_agent:hover {
     border-color: {fm_field_hover};
 }
+/* The rail of sections (ui/widgets/section_rail.py): one chip per section, with the look of the headers it replaces;
+   the open one has the red outline and shows its name. */
+#dockWidgetContents QPushButton#pushButton_rail_section {
+    background-color: {fm_section};
+    color: {fm_text};
+    border: 1px solid {fm_section_border};
+    border-radius: 6px;
+    padding: 0px 9px 0px 9px;
+    margin: 0px;
+    font-weight: 600;
+    text-align: left;
+    min-height: 32px;  /* 34 px with the borders, as the headers */
+    max-height: 32px;
+    min-width: 14px;
+}
+#dockWidgetContents QPushButton#pushButton_rail_section:checked {
+    border-color: {fm_section_on};
+    background-color: {fm_section};
+}
+#dockWidgetContents QPushButton#pushButton_rail_section:hover {
+    border-color: {fm_field_hover};
+}
+#dockWidgetContents QLabel#label_section_rail_trailer {
+    color: {fm_text_muted};
+    padding: 0px 4px 0px 0px;
+}
 /* The section headers are QToolBox buttons (not QToolButton), styled by ::tab above.
    A QToolButton rule here would hit the tool buttons inside the sections. */
 
