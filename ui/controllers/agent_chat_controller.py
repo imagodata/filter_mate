@@ -2123,7 +2123,8 @@ class AgentChatController(QObject):
         names = [args.get(key) for key in ("layer", "layer_name", "source_layer")]
         for key in ("target_layers", "layers"):
             values = args.get(key)
-            names.extend(values if isinstance(values, list) else ())
+            for value in values if isinstance(values, list) else ():
+                names.append(value.get("layer") if isinstance(value, dict) else value)  # set_layer_options
         return tuple(dict.fromkeys(str(name) for name in names if isinstance(name, str) and name.strip()))
 
     @staticmethod
@@ -2231,6 +2232,11 @@ class AgentChatController(QObject):
             "change_settings": lambda: _tr("Settings of FilterMate: {}").format(", ".join(
                 str(change.get("path", "")).rsplit(".", 1)[-1] for change in (args.get("changes") or [])
                 if isinstance(change, dict))),
+            "layer_options": lambda: _tr("Reading the panel options"),
+            "export_options": lambda: _tr("Reading the panel options"),
+            "set_layer_options": lambda: _tr("Panel options of: {}").format(", ".join(
+                str(item.get("layer", "")) for item in (args.get("layers") or []) if isinstance(item, dict))),
+            "set_export_options": lambda: _tr("Export options of the panel"),
         }.get(call.name, lambda: call.name.replace("_", " "))()
 
     @staticmethod

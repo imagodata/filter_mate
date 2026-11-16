@@ -767,6 +767,17 @@ server of the plugin serves 53 (the chat's tools without its own, plus `map_imag
 - **`set_layer_style` mode `keep`**: the opacity alone; every other mode replaces the style. An image drawn by its
   service (WMS, WMTS, tiles) takes no other mode: it has no band value to stretch.
 
+### The options of the panels (2026-11-16)
+
+`layer_options` / `set_layer_options` read and set, per vector layer, what EXPLORING shows (the three selection
+expressions, the active mode, tracking, linking) and the FILTERING options of the layer; `export_options` /
+`set_export_options` read and set the EXPORTING options of the project. The keys and values allowed are in
+`core/agent/panel_options.py`; `adapters/public_api/panel_options.py` writes them the way the panel does (the dict of
+the dock, then `settingLayerVariable` or `settingProjectVariables`, then the widgets when they show that layer), all or
+none. They need the panel open, refuse a protected layer, are of the class *project* and are undone with the turn
+(`layer_options` and `export_options` effects of `adapters/agent/turn_effects.py`, left as they are when the user
+changed them since). The skill `panels` brings them (families of tools): they do not weigh on the first request.
+
 ### Settings of FilterMate and skills (2026-11-12)
 
 `describe_settings`, `get_setting`, `change_settings` and `diagnose_performance` work on FilterMate itself, not on the

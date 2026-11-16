@@ -30,6 +30,10 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
   ``{path: value}``, one effect per step that first changed them; ``step`` is the call of the turn (0, 1...) and,
   once committed, the number of recorded steps up to that call (TurnCheckpoint.commit), so that "back to before a
   step" restores the settings changed from it. Not of the project, but undone with the turn that changed them.
+* ``("layer_options", layer_id, before, after, name)``: what a layer shows in EXPLORING and how it filters, in
+  FilterMate's panel (``adapters/public_api/panel_options.py``): the options the turn changed only, before and after
+  (``core.agent.panel_options.state_change``), as sorted JSON; the panel sets others itself;
+* ``("export_options", "", before, after)``: the export options of the project in that panel, the same way.
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
@@ -63,6 +67,18 @@ EDIT_TOOLS = ("update_features", "delete_features", "add_features", "add_field")
 LAYOUT_TOOLS = ("create_layout",)
 CRS_TOOLS = ("set_project_crs",)
 SETTINGS_TOOLS = ("change_settings", "apply_settings_profile")
+PANEL_TOOLS = ("set_layer_options",)
+EXPORT_PANEL_TOOLS = ("set_export_options",)
+
+
+def _export_options_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "export options of the panel")
+
+
+def _panel_json(value: Any) -> str:
+    import json
+    return json.dumps(value, sort_keys=True, ensure_ascii=False)
 
 
 def _settings_label() -> str:
@@ -346,6 +362,10 @@ class EffectsRecorder:
         self._crs: Optional[str] = None
         # (call of the turn, path, value before that call), in order: a setting changed twice has two records.
         self._settings_calls: List[Tuple[int, str, Any]] = []
+        # The options of FilterMate's panels before the turn first set them: by layer id (JSON, name), and the export
+        # ones (JSON).
+        self._panel_layers: Dict[str, Tuple[str, str]] = {}
+        self._export_panel: Optional[str] = None
 
     def before_call(self, call: Any, step: int = 0) -> None:
         project = QgsProject.instance()
@@ -432,6 +452,19 @@ class EffectsRecorder:
                 style = _style(layer) if layer is not None and layer.id() not in self._styles else None
                 if style is not None:
                     self._styles[layer.id()] = style
+            elif name in PANEL_TOOLS:
+                from ..public_api.panel_options import layer_state, running_dock
+                dock = running_dock()
+                for item in arguments.get("layers") or ():
+                    layer = _resolve(project, item.get("layer")) if isinstance(item, dict) else None
+                    state = layer_state(dock, layer.id()) if layer is not None else None
+                    if state is not None and layer.id() not in self._panel_layers:
+                        self._panel_layers[layer.id()] = (_panel_json(state), layer.name())
+            elif name in EXPORT_PANEL_TOOLS:
+                from ..public_api.panel_options import export_state, running_dock
+                state = export_state(running_dock())
+                if state is not None and self._export_panel is None:
+                    self._export_panel = _panel_json({"EXPORTING": state})
             elif name == "set_layers_visibility":
                 for reference in arguments.get("layers") or ():
                     layer = _resolve(project, reference)
@@ -595,12 +628,28 @@ class EffectsRecorder:
             after = _style(layer) if layer is not None else None
             if after is not None and after != before:
                 effects.append(("style", layer_id, before, after, layer.name()))
+        if self._panel_layers or self._export_panel is not None:
+            import json
+            from ..public_api.panel_options import export_state, layer_state, running_dock
+            from ...core.agent.panel_options import state_change
+            dock = running_dock()
+            for layer_id, (before, name) in self._panel_layers.items():
+                state = layer_state(dock, layer_id)
+                was, made = state_change(json.loads(before), state) if state is not None else (None, None)
+                if made and (made["values"] or made["absent"]):
+                    effects.append(("layer_options", layer_id, _panel_json(was), _panel_json(made), name))
+            state = export_state(dock) if self._export_panel is not None else None
+            if state is not None:
+                was, made = state_change(json.loads(self._export_panel), {"EXPORTING": state})
+                if made["values"] or made["absent"]:
+                    effects.append(("export_options", "", _panel_json(was), _panel_json(made)))
         self.__init__(self._record_settings)
         return tuple(effects)
 
 
 # What the user may change in QGIS after a turn: put back only when still as the turn left it.
-_CHECKED = frozenset({"visibility", "project_crs", "layer_name", "current_style", "style"})
+_CHECKED = frozenset({"visibility", "project_crs", "layer_name", "current_style", "style", "layer_options",
+                      "export_options"})
 _GONE = object()  # the layer of an effect is no longer in the project
 
 
@@ -620,6 +669,16 @@ def _now(project: QgsProject, effect: Tuple[Any, ...]) -> Any:
     if kind == "visibility":
         visible = _visible(project, layer_id)
         return _GONE if visible is None else visible
+    if kind in ("layer_options", "export_options"):
+        import json
+        from ..public_api.panel_options import export_state, layer_state, running_dock
+        from ...core.agent.panel_options import state_part
+        dock = running_dock()
+        state = layer_state(dock, layer_id) if kind == "layer_options" else export_state(dock)
+        if state is None:
+            return _GONE
+        # the keys the turn changed only, read as the effect keeps them
+        return _panel_json(state_part(state if kind == "layer_options" else {"EXPORTING": state}, json.loads(effect[2])))
     layer = project.mapLayer(layer_id)
     if layer is None:
         return _GONE
@@ -636,6 +695,8 @@ def _as_left(project: QgsProject, effect: Tuple[Any, ...]) -> str:
     """The name of what an effect touched, as a list of what is left as it is says it."""
     if effect[0] == "project_crs":
         return _crs_label()
+    if effect[0] == "export_options":
+        return _export_options_label()
     if not effect[1]:
         return effect[0]
     layer = project.mapLayer(effect[1])
@@ -660,7 +721,8 @@ def _where(project: QgsProject, effect: Tuple[Any, ...], undo: bool) -> str:
 
 
 # What changes a layer itself (protected layers are left as they are); a selection or visibility only shows it.
-_LAYER_CHANGES = frozenset({"added", "removed", "style", "join", "layer_name", "current_style", "edits"})
+_LAYER_CHANGES = frozenset({"added", "removed", "style", "join", "layer_name", "current_style", "edits",
+                            "layer_options"})
 
 
 def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSet[str] = frozenset(),
@@ -843,6 +905,14 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                     left.append(_settings_label())
                 else:
                     (done if len(kept) == len(wanted) else left).append(_settings_label())
+            elif kind in ("layer_options", "export_options"):
+                import json
+                from ..public_api.panel_options import restore_export_state, restore_layer_state, running_dock
+                state = json.loads(effect[2] if undo else effect[3])
+                if kind == "layer_options":
+                    (done if restore_layer_state(running_dock(), layer_id, state) else left).append(effect[4])
+                else:
+                    (done if restore_export_state(running_dock(), state) else left).append(_export_options_label())
             elif kind == "notes":
                 from .project_notes_store import write_notes
                 write_notes(list(effect[2] if undo else effect[3]), project)

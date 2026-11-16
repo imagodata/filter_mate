@@ -68,9 +68,24 @@
         <translation>Lectura del ajuste {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2230"/>
+        <source>Reading the panel options</source>
+        <translation>Lectura de las opciones del panel</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1262"/>
         <source>Settings of FilterMate: {}</source>
         <translation>Ajustes de FilterMate: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2231"/>
+        <source>Panel options of: {}</source>
+        <translation>Opciones de los paneles de: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
+        <source>Export options of the panel</source>
+        <translation>Opciones de exportación del panel</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
@@ -450,6 +465,11 @@ Para qué: {}
         <location filename="../../adapters/agent/turn_effects.py" line="56"/>
         <source>settings of FilterMate</source>
         <translation>ajustes de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="70"/>
+        <source>export options of the panel</source>
+        <translation>opciones de exportación del panel</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>

@@ -775,6 +775,23 @@ class FilterMateAccessor(Protocol):
         """Check or uncheck layers in the layer tree."""
         ...
 
+    def layer_options(self, layer: str) -> Dict[str, Any]:
+        """What a layer shows in EXPLORING and how it filters, as FilterMate's panel holds it; FilterRejected
+        without the panel or the layer."""
+        ...
+
+    def set_layer_options(self, layers: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Set the EXPLORING and FILTERING options of layers (``[{layer, exploring, filtering}]``), all or none."""
+        ...
+
+    def export_options(self) -> Dict[str, Any]:
+        """How the project exports from FilterMate's EXPORTING panel."""
+        ...
+
+    def set_export_options(self, changes: Dict[str, Any]) -> Dict[str, Any]:
+        """Set export options of the project in FilterMate's EXPORTING panel, all or none."""
+        ...
+
     def add_layer(self, source: str, name: str = "", kind: str = "vector") -> LayerSummary:
         """Add a layer from a file or a public https URL; raises FilterRejected on any other source."""
         ...
@@ -943,6 +960,9 @@ class InMemoryAccessor:
     _redo_stack: List[HistoryStep] = field(default_factory=list)
     # Rows of ``MapContext.drawn_objects``: the rasters that have objects drawn in the dock.
     drawn_objects: List[Dict[str, Any]] = field(default_factory=list)
+    # The options of FilterMate's panels: by layer id ({"exploring": {...}, "filtering": {...}}), and the export ones.
+    panel_layers: Dict[str, Dict[str, Dict[str, Any]]] = field(default_factory=dict)
+    export_panel: Dict[str, Any] = field(default_factory=dict)
 
     def list_layers(self) -> List[LayerSummary]:
         return [self._with_active(layer) for layer in self.layers]
@@ -1183,6 +1203,32 @@ class InMemoryAccessor:
         done = [found.name for found in (self._find(name) for name in layers) if found is not None]
         failed = {name: "layer not found" for name in layers if self._find(name) is None}
         return OperationResult(done=done, failed=failed)
+
+    def layer_options(self, layer: str) -> Dict[str, Any]:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        options = self.panel_layers.get(found.layer_id, {})
+        return {"layer_name": found.name, "layer_id": found.layer_id, "exploring": dict(options.get("exploring", {})),
+                "filtering": dict(options.get("filtering", {}))}
+
+    def set_layer_options(self, layers: List[Dict[str, Any]]) -> Dict[str, Any]:
+        targets = [self._find(str(item.get("layer", ""))) for item in layers]
+        if not layers or None in targets:
+            raise FilterRejected("layer not found")
+        for found, item in zip(targets, layers):
+            options = self.panel_layers.setdefault(found.layer_id, {})
+            for group in ("exploring", "filtering"):
+                options.setdefault(group, {}).update(item.get(group) or {})
+        return {"changed": [dict(item, layer_name=found.name) for found, item in zip(targets, layers)],
+                "shown_in_panel": False}
+
+    def export_options(self) -> Dict[str, Any]:
+        return dict(self.export_panel, saved=True)
+
+    def set_export_options(self, changes: Dict[str, Any]) -> Dict[str, Any]:
+        self.export_panel.update(changes)
+        return {"changed": dict(changes), "saved": True}
 
     def add_layer(self, source: str, name: str = "", kind: str = "vector") -> LayerSummary:
         summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or source.rsplit("/", 1)[-1],

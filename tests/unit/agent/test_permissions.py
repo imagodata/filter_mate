@@ -47,6 +47,9 @@ class TestRiskClasses:
         # Elevation is read from the network; contours and a copy are layers made of the project, undone with the turn.
         ("add_elevation", OUTSIDE), ("contour_lines", PROJECT), ("duplicate_layer", PROJECT),
         ("add_osm_features", OUTSIDE), ("add_population", OUTSIDE),
+        # The options of the panels: read, or set and undone with the turn.
+        ("layer_options", READ), ("export_options", READ), ("set_layer_options", PROJECT),
+        ("set_export_options", PROJECT),
     ])
     def test_class_of_the_tools_of_the_catalog(self, name, risk):
         assert risk_of(tools_by_name()[name]) == risk
@@ -323,6 +326,16 @@ class TestProtectedLayers:
                 ("join_layers", {"layer": "routes", "join_layer": "cadastre", "target_field": "a", "join_field": "a"})):
             call = ToolCallPart("c", name, arguments)
             assert executor.verdict(call, policy) == RUN, name
+
+    def test_one_protected_layer_refuses_the_call(self):
+        from core.agent.permissions import PROTECTED, changed_layers
+        layers = [{"layer": "routes", "exploring": {"is_tracking": True}},
+                  {"layer": "cadastre", "exploring": {"is_tracking": True}}]
+        assert changed_layers("set_layer_options", {"layers": layers}) == ["routes", "cadastre"]
+        executor = ToolExecutor(chat_tools(), {})
+        call = ToolCallPart("c", "set_layer_options", {"layers": layers, "reason": "r"})
+        assert executor.verdict(call, PermissionPolicy(AUTONOMOUS, protector=Protector("cadastre"))) == PROTECTED
+        assert changed_layers("set_export_options", {"changes": {"layers_to_export": ["cadastre"]}}) == []
 
     def test_a_clear_is_refused_on_a_protected_layer_and_on_every_layer(self):
         from core.agent.permissions import PROTECTED

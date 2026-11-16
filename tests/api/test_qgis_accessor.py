@@ -693,3 +693,31 @@ class TestCrossResult:
         result = QGISFilterMateAccessor._cross_result(report)
         assert result.filtered == ["communes"]
         assert result.warnings == {"communes": "Partial result: the remote time limit was reached."}
+
+
+class TestPanelOptions:
+    """The options of FilterMate's panels: read and set through the panel module, never without the panel."""
+
+    def test_they_need_the_panel(self, public_api):
+        from filtermate_api.accessor import FilterRejected
+        accessor = QGISFilterMateAccessor(public_api=public_api, plugin=types.SimpleNamespace(
+            app=types.SimpleNamespace(dockwidget=None)))
+        for call in (lambda: accessor.layer_options("communes"), lambda: accessor.export_options(),
+                     lambda: accessor.set_layer_options([{"layer": "communes"}]),
+                     lambda: accessor.set_export_options({"batch_zip": True})):
+            with pytest.raises(FilterRejected, match="Open the FilterMate panel first"):
+                call()
+
+    def test_they_go_to_the_panel_module_with_the_dock(self, public_api, monkeypatch):
+        dock = types.SimpleNamespace(widgets_initialized=True)
+        accessor = QGISFilterMateAccessor(public_api=public_api, plugin=types.SimpleNamespace(
+            app=types.SimpleNamespace(dockwidget=dock)))
+        seen = []
+
+        def control(name, *args, module="", changes=None, **kwargs):
+            seen.append((name, args, module, changes))
+            return {"changed": [], "shown_in_panel": False}
+        monkeypatch.setattr(accessor, "_control", control)
+        layers = [{"layer": "communes", "exploring": {"is_tracking": True}}]
+        assert accessor.set_layer_options(layers) == {"changed": [], "shown_in_panel": False}
+        assert seen == [("set_layer_options", (dock, layers), "adapters.public_api.panel_options", {"layers": layers})]

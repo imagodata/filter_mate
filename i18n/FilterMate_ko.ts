@@ -68,9 +68,24 @@
         <translation>설정 {} 읽는 중</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2230"/>
+        <source>Reading the panel options</source>
+        <translation>패널 옵션 읽는 중</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1262"/>
         <source>Settings of FilterMate: {}</source>
         <translation>FilterMate 설정: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2231"/>
+        <source>Panel options of: {}</source>
+        <translation>패널 옵션: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
+        <source>Export options of the panel</source>
+        <translation>패널 내보내기 옵션</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
@@ -450,6 +465,11 @@ Run it?</source>
         <location filename="../../adapters/agent/turn_effects.py" line="56"/>
         <source>settings of FilterMate</source>
         <translation>FilterMate 설정</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="70"/>
+        <source>export options of the panel</source>
+        <translation>패널 내보내기 옵션</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>

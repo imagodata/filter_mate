@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
@@ -80,6 +80,62 @@ class VisibilityBody(BaseModel):
 def visibility(payload: VisibilityBody, request: Request) -> OperationResult:
     """Check or uncheck layers in the layer tree."""
     return _accessor(request).set_layers_visibility(payload.layers, payload.visible)
+
+
+# --- The options of FilterMate's panels -------------------------------------------------------------------------
+
+
+class LayerOptionsItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: LayerName
+    exploring: Dict[str, Any] = Field(default_factory=dict, description="EXPLORING options of the layer")
+    filtering: Dict[str, Any] = Field(default_factory=dict, description="FILTERING options of the layer")
+
+
+class LayerOptionsBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layers: List[LayerOptionsItem] = Field(..., min_length=1, max_length=50)
+    reason: str = Field(default="", max_length=500)
+
+
+class ExportOptionsBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    changes: Dict[str, Any] = Field(..., min_length=1)
+    reason: str = Field(default="", max_length=500)
+
+
+def _panels(call):
+    try:
+        return call()
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+@router.get("/panels/layer")
+def panel_layer(request: Request, layer: str = Query(..., min_length=1, max_length=_MAX_NAME)) -> Dict[str, Any]:
+    """What a layer shows in EXPLORING and how it filters, in FilterMate's panel."""
+    return _panels(lambda: _accessor(request).layer_options(layer))
+
+
+@router.post("/panels/layer")
+def set_panel_layers(payload: LayerOptionsBody, request: Request) -> Dict[str, Any]:
+    """Set the EXPLORING and FILTERING options of layers in FilterMate's panel, all or none."""
+    return _panels(lambda: _accessor(request).set_layer_options([item.model_dump() for item in payload.layers]))
+
+
+@router.get("/panels/export")
+def panel_export(request: Request) -> Dict[str, Any]:
+    """How the project exports from FilterMate's EXPORTING panel."""
+    return _panels(lambda: _accessor(request).export_options())
+
+
+@router.post("/panels/export")
+def set_panel_export(payload: ExportOptionsBody, request: Request) -> Dict[str, Any]:
+    """Set export options of the project in FilterMate's EXPORTING panel, all or none."""
+    return _panels(lambda: _accessor(request).set_export_options(payload.changes))
 
 
 class AddLayerBody(BaseModel):

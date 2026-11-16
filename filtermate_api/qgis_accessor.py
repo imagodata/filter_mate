@@ -607,6 +607,32 @@ class QGISFilterMateAccessor:
         result = self._control("set_layers_visibility", layers, visible)
         return OperationResult(done=result["done"], failed=result["failed"])
 
+    # ------------------------------------------------------------------
+    # The options of FilterMate's panels (agent mode)
+    # ------------------------------------------------------------------
+
+    _PANELS = "adapters.public_api.panel_options"
+
+    def _panel(self):
+        """FilterMate's dock, its widgets made; FilterRejected without it."""
+        dock = self._app_attribute("dockwidget")
+        if dock is None or not getattr(dock, "widgets_initialized", False):
+            raise FilterRejected("Open the FilterMate panel first: these options are those of its panels.")
+        return dock
+
+    def layer_options(self, layer: str) -> Dict[str, Any]:
+        return self._control("layer_options", self._panel(), layer, module=self._PANELS)
+
+    def set_layer_options(self, layers: List[Dict[str, Any]]) -> Dict[str, Any]:
+        return self._control("set_layer_options", self._panel(), layers, module=self._PANELS,
+                             changes={"layers": layers})
+
+    def export_options(self) -> Dict[str, Any]:
+        return self._control("export_options", self._panel(), module=self._PANELS)
+
+    def set_export_options(self, changes: Dict[str, Any]) -> Dict[str, Any]:
+        return self._control("set_export_options", self._panel(), changes, module=self._PANELS)
+
     def add_layer(self, source: str, name: str = "", kind: str = "vector") -> LayerSummary:
         return LayerSummary(**self._control("add_layer", source, name=name, kind=kind))
 

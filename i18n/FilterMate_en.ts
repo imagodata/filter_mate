@@ -381,6 +381,11 @@ Run it?</translation>
         <translation>settings of FilterMate</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="70"/>
+        <source>export options of the panel</source>
+        <translation>export options of the panel</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
         <source>Show in the configuration: {}</source>
         <translation>Show in the configuration: {}</translation>
@@ -882,9 +887,24 @@ Its tools will see of your project only what the agent sends them, and what they
         <translation>Reading the setting {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2230"/>
+        <source>Reading the panel options</source>
+        <translation>Reading the panel options</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1262"/>
         <source>Settings of FilterMate: {}</source>
         <translation>Settings of FilterMate: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2231"/>
+        <source>Panel options of: {}</source>
+        <translation>Panel options of: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
+        <source>Export options of the panel</source>
+        <translation>Export options of the panel</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>

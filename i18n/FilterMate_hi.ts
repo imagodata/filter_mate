@@ -68,9 +68,24 @@
         <translation>सेटिंग {} पढ़ी जा रही है</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2230"/>
+        <source>Reading the panel options</source>
+        <translation>पैनल के विकल्प पढ़े जा रहे हैं</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1262"/>
         <source>Settings of FilterMate: {}</source>
         <translation>FilterMate की सेटिंग्स: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2231"/>
+        <source>Panel options of: {}</source>
+        <translation>पैनल के विकल्प: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
+        <source>Export options of the panel</source>
+        <translation>पैनल के निर्यात विकल्प</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
@@ -450,6 +465,11 @@ Run it?</source>
         <location filename="../../adapters/agent/turn_effects.py" line="56"/>
         <source>settings of FilterMate</source>
         <translation>FilterMate की सेटिंग्स</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="70"/>
+        <source>export options of the panel</source>
+        <translation>पैनल के निर्यात विकल्प</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>

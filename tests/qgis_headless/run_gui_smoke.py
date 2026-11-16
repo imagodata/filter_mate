@@ -2129,6 +2129,109 @@ def s_finish():
     os._exit(1 if failed else 0)  # QGIS exit code = test result; skips the slow GUI teardown
 
 
+# --- the agent sets the options of the panels (adapters/public_api/panel_options.py) on the real dock ---------------
+# 2026-11-16, review: on a stand-in dock everything passed while the real one emptied the predicates and the buffer
+# of the current layer, put the defaults of an unticked export group back, and reset a non-field expression.
+
+PANELS = {}
+
+
+def panels_module():
+    return importlib.import_module(f'{PACKAGE}.adapters.public_api.panel_options')
+
+
+def s_panels_setup():
+    places = QgsVectorLayer('Point?crs=EPSG:2154&field=nom:string&field=code:string', 'lieux', 'memory')
+    project.addMapLayer(places)
+    return lambda: registered('zones', 'lieux') and tasks_idle()
+
+
+def current_is(name):
+    """Condition: the panel shows ``name`` (a layer added becomes the active layer of QGIS, which the panel follows)."""
+    done = switched_to(name, False)
+    return lambda: done() and dock().current_layer is not None and dock().current_layer.name() == name
+
+
+def s_panels_zones():
+    iface.setActiveLayer(layer('zones'))
+    dock().comboBox_filtering_current_layer.setLayer(layer('zones'))
+    return current_is('zones')
+
+
+def s_panels_set():
+    turn_effects = importlib.import_module(f'{PACKAGE}.adapters.agent.turn_effects')
+    messages = importlib.import_module(f'{PACKAGE}.core.agent.messages')
+    panels, d = panels_module(), dock()
+    recorder = turn_effects.EffectsRecorder()
+    layers = [{'layer': 'zones', 'filtering': {'layers_to_filter': ['lieux'], 'geometric_predicates': ['Intersect'],
+                                               'buffer_value': 25.0}},
+              {'layer': 'lieux', 'exploring': {'single_selection_expression': '"code"'}}]
+    recorder.before_call(messages.ToolCallPart('p1', 'set_layer_options', {'layers': layers}))
+    recorder.before_call(messages.ToolCallPart('p2', 'set_export_options', {'changes': {}}))
+    PANELS['answer'] = panels.set_layer_options(d, layers)
+    PANELS['export'] = panels.set_export_options(d, {'datatype_to_export': 'GeoJSON', 'layers_to_export': ['zones']})
+    PANELS['recorder'] = recorder
+    return settled()
+
+
+def s_panels_check():
+    d = dock()
+    w = d.widgets['FILTERING']
+    kept = app().PROJECT_LAYERS[layer('zones').id()]['filtering']
+    check('panels: the filtering options show on the current layer',
+          w['GEOMETRIC_PREDICATES']['WIDGET'].checkedItems() == ['Intersect']
+          and abs(w['BUFFER_VALUE']['WIDGET'].value() - 25.0) < 1e-6
+          and layer('lieux').id() in (d.get_layers_to_filter() or [])
+          and w['HAS_GEOMETRIC_PREDICATES']['WIDGET'].isChecked(),
+          f"{w['GEOMETRIC_PREDICATES']['WIDGET'].checkedItems()} {w['BUFFER_VALUE']['WIDGET'].value()} {kept}")
+    check('panels: the panel keeps them', kept.get('geometric_predicates') == ['Intersect']
+          and kept.get('buffer_value') == 25.0 and PANELS['answer']['shown_in_panel'], str(PANELS['answer']))
+    e = d.widgets['EXPORTING']
+    d.set_exporting_properties()  # as a switch of tab does
+    exporting = d.project_props['EXPORTING']
+    check('panels: the export options stay after the panel is refreshed',
+          exporting.get('DATATYPE_TO_EXPORT') == 'GeoJSON' and e['HAS_DATATYPE_TO_EXPORT']['WIDGET'].isChecked()
+          and e['DATATYPE_TO_EXPORT']['WIDGET'].currentText() == 'GeoJSON'
+          and exporting.get('LAYERS_TO_EXPORT') == [layer('zones').id()],
+          f"{exporting} {e['DATATYPE_TO_EXPORT']['WIDGET'].currentText()} {PANELS['export']}")
+    iface.setActiveLayer(layer('lieux'))
+    d.comboBox_filtering_current_layer.setLayer(layer('lieux'))
+    return current_is('lieux')
+
+
+def s_panels_other_layer_check():
+    kept = app().PROJECT_LAYERS[layer('lieux').id()]['exploring']
+    check('panels: a field set on another layer stays when it is chosen', kept.get('single_selection_expression')
+          in ('"code"', 'code'), str(kept))
+    effects = PANELS['recorder'].finish()
+    PANELS['effects'] = effects
+    check('panels: the turn keeps the options before it', sorted(effect[0] for effect in effects)
+          == ['export_options', 'layer_options', 'layer_options'], str([effect[:2] for effect in effects]))
+    iface.setActiveLayer(layer('zones'))
+    dock().comboBox_filtering_current_layer.setLayer(layer('zones'))
+    return current_is('zones')
+
+
+def s_panels_undo():
+    turn_effects = importlib.import_module(f'{PACKAGE}.adapters.agent.turn_effects')
+    PANELS['undo'] = turn_effects.apply_effects(PANELS['effects'], undo=True)
+    return settled()
+
+
+def s_panels_undo_check():
+    d = dock()
+    kept = app().PROJECT_LAYERS[layer('zones').id()]['filtering']
+    done, left = PANELS['undo']
+    check('panels: undo puts the options and the panel back', not left and kept.get('geometric_predicates') in ([], None)
+          and d.widgets['FILTERING']['GEOMETRIC_PREDICATES']['WIDGET'].checkedItems() == []
+          and d.project_props['EXPORTING'].get('DATATYPE_TO_EXPORT') != 'GeoJSON',
+          f"done={done} left={left} {kept} {d.project_props['EXPORTING'].get('DATATYPE_TO_EXPORT')}")
+
+
+PANEL_STEPS = [s_panels_setup, s_panels_zones, s_panels_set, s_panels_check, s_panels_other_layer_check,
+               s_panels_undo, s_panels_undo_check]
+
+
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
          s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
@@ -2155,7 +2258,11 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_setup, s_partial_undo_source, s_partial_undo_select, s_partial_undo_filter,
          s_partial_undo_on_source, s_partial_undo_on_source_check, s_partial_undo_on_target,
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
-         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel, s_finish]
+         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
+         *PANEL_STEPS, s_finish]
+
+if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
 
 
 def run_step(index=0):
