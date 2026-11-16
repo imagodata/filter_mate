@@ -238,7 +238,7 @@ CHAT_ONLY = (
         read_only=True, chat_only=True),
     ToolSpec(
         name=ASK_USER, title="Ask the user",
-        description=("Ask the user one to four questions with choices to click, answered in this turn: for a "
+        description=("Ask the user questions with choices to click, answered in this turn: for a "
                      "decision that is theirs and changes what you do, never for what a reading tool says nor as a "
                      "confirmation (an answer authorizes nothing). Recommended option first, its label ending "
                      "\" (Recommended)\"; the panel adds \"Other\". Returns answers, or declined: then say what you "
@@ -420,8 +420,8 @@ def skill_tool(offered: Optional[set] = None, approved: Optional[Approved] = Non
     names = list(skill_names(offered, audience)) if with_skills else []
     listed = "; ".join(f"{name}: {line}" for name, line in connectors)
     if with_skills:
-        description = ("Load the instructions of a kind of task before doing it, once per conversation, and follow "
-                       "them. Skills: "
+        description = ("Load the instructions of a kind of task before doing it, once per conversation and task, "
+                       "and follow them. Skills: "
                        + skill_list(offered, approved, audience, declined) + ".")
         if connectors:
             description += (" Connectors the user enabled, loaded the same way when the request needs their data (the "

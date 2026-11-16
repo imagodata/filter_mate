@@ -60,7 +60,8 @@ _PREDICATES_DOC = (
     "source, Are within = it lies inside, Disjoint = outside"
 )
 _OPERATOR_DOC = (
-    "Combine with the previous filter of each target (AND NOT: remove this selection from it); omit to replace it"
+    "With each target's filter: AND narrows, OR widens, AND NOT removes this selection (from the whole layer when "
+    "unfiltered); omit to replace it"
 )
 
 
@@ -85,7 +86,7 @@ class RasterSelection(BaseModel):
     derivative: Literal["value", "slope_degrees", "slope_percent", "aspect", "hillshade", "roughness"] = Field(
         default="value", description="range: what the bounds apply to, the band read as a DTM")
     segments: List[str] = Field(default_factory=list, max_length=10000, description="WKT polygons, raster CRS")
-    dock_objects: bool = False
+    dock_objects: bool = Field(default=False, description="The objects drawn in the dock (drawn_objects); alone")
 
     @model_validator(mode="after")
     def _check_segments(self) -> "RasterSelection":
@@ -244,10 +245,10 @@ def build_server(client: FilterMateClient) -> Any:
         limit: Annotated[int, Field(ge=1, le=100, description="Groups, the largest first")] = 10,
     ) -> Dict[str, Any]:
         """Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group,
-        on what it shows now (its filter applies) or its selection: "how many", "what total", what a filter kept.
+        on what it shows now or its selection: "how many", "what total", what a filter kept.
 
-        Returns feature_count, statistics {count, nulls, minimum, maximum, sum, mean, stdev or distinct}, unit, and
-        groups, groups_total, truncated. Refused on web services and above 500000 features: filter or select first.
+        Returns feature_count, statistics, unit, groups, groups_total, truncated. Refused on web services and above
+        500000 features: filter or select first.
         """
         return await call("POST", "/layers/statistics", _body(
             layer=layer, field=field, group_by=group_by, measure=measure, selected_only=selected_only, limit=limit))
@@ -390,7 +391,7 @@ def build_server(client: FilterMateClient) -> Any:
         """Set the filter (subset string) of one vector layer by its attributes; revert with clear_filters.
 
         Returns success, expression, replaced_filter (the filter it lost) and active_filters. GeoPackage and Shapefile
-        may take an invalid expression silently and show nothing: a count of -1 or 0 says so.
+        may take an invalid expression silently and show nothing: a count of -1 or 0 says so, clear_filters recovers.
         """
         return await call("POST", "/filters/apply",
                           _body(layer_name=layer_name, expression=expression, source=source, operator=operator))
@@ -435,12 +436,10 @@ def build_server(client: FilterMateClient) -> Any:
             "Point cloud source: the points that make the area (omit: those it shows)"))] = None,
         filter_source: Annotated[bool, Field(description="Raster source: mask it outside the selection too")] = False,
     ) -> Dict[str, Any]:
-        """Filter layers of any kind (features, pixels, LiDAR points) by where they lie against an area of a source
-        layer of any kind: a vector's selection, a raster's pixels, a point cloud's points.
+        """Filter layers of any kind (features, pixels, LiDAR points) by where they lie against the area of a source
+        layer: a vector's selection, a raster's pixels, a point cloud's points. clear_filters reverts it.
 
-        Replaces each target's filter unless operator is given; not in the undo history (clear_filters reverts).
-        Returns filtered (layer names), failed, skipped and warnings ({layer: reason}; a warning: filtered, not
-        exactly).
+        Returns filtered, failed, skipped and warnings ({layer: reason}; a warning: filtered, not exactly).
         """
         return await call("POST", "/filters/cross", _body(
             source_layer=source_layer, target_layers=target_layers, predicates=predicates, buffer=buffer,
@@ -584,10 +583,10 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Label a layer", idempotent=True))
     async def set_labels(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
-        field: str = "",
+        field: Annotated[str, Field(max_length=1000)] = "",
         enabled: Annotated[bool, Field(description="false: labels off")] = True,
         size: Annotated[Optional[float], Field(ge=4, le=72, description="Points")] = None,
-        color: str = "",
+        color: Annotated[str, Field(max_length=50)] = "",
         buffer: Annotated[bool, Field(description="A halo, to read it on any background")] = True,
         expression: Annotated[str, Field(max_length=2000, description=(
             "Instead of field, QGIS (NOT SQL): \"nom\" || ' (' || \"population\" || ')'"))] = "",
@@ -657,7 +656,7 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Make a print layout", idempotent=False))
     async def create_layout(
         name: Annotated[str, Field(min_length=1, max_length=100, description="New in the project")],
-        title: str = "",
+        title: Annotated[str, Field(max_length=200)] = "",
         page: Literal["A4", "A3", "A5", "Letter"] = "A4",
         orientation: Literal["landscape", "portrait"] = "landscape",
         layers: Annotated[Optional[List[Annotated[str, Field(min_length=1, max_length=1000)]]], Field(
@@ -861,7 +860,8 @@ def build_server(client: FilterMateClient) -> Any:
         raster: Annotated[str, Field(min_length=1, max_length=1000, description="An orthophoto, as on the map")],
         guide_layer: Annotated[str, Field(min_length=1, max_length=1000, description=(
             "Points (a click on each object) or polygons (footprints)"))],
-        selected_only: Annotated[bool, Field(description="Its selection; with none, what it shows")] = True,
+        selected_only: Annotated[bool, Field(description=(
+            "Its selection; with none, what it shows (a web service needs one)"))] = True,
         limit: Annotated[int, Field(ge=1, le=200, description="A guide that gives more is refused")] = 50,
         name: Annotated[str, Field(max_length=200, description="Default: the guide's, then (SAM)")] = "",
     ) -> Dict[str, Any]:
@@ -883,10 +883,11 @@ def build_server(client: FilterMateClient) -> Any:
             "Its ONE selected feature (point or footprint) is the example"))] = "",
         use_dock_object: Annotated[bool, Field(description=(
             "The examples: the objects drawn in the dock (drawn_objects of map_context)"))] = False,
-        extent_wkt: Annotated[str, Field(max_length=100_000, description="Area searched; empty: the map")] = "",
+        extent_wkt: Annotated[str, Field(max_length=100_000, description=(
+            "Area searched (map_context's extent_wkt, its canvas_crs as extent_crs); empty: the map"))] = "",
         extent_crs: Annotated[str, Field(max_length=64, description="Empty: the raster's")] = "",
         same_shape: bool = True,
-        name: str = "",
+        name: Annotated[str, Field(max_length=200)] = "",
     ) -> Dict[str, Any]:
         """Find with SAM, on a raster, the objects that look like an example (0.5 to 2 times its area), as a new
         layer with appearance (0 to 1) and area_m2. About half is right and most are missed: no census, the user
@@ -1020,10 +1021,11 @@ def build_server(client: FilterMateClient) -> Any:
             "as_mapped: a layer per geometry; points: one point each, to count or for a heatmap"))] = "as_mapped",
         platform: Annotated[str, Field(min_length=1, max_length=200, description=(
             "A server the user allowed"))] = "overpass_fr",
-        name: str = "",
+        name: Annotated[str, Field(max_length=180)] = "",
     ) -> Dict[str, Any]:
         """Add the OpenStreetMap features that carry given tags in an area (buildings, roads, hospitals, shops,
-        parks...), anywhere, in EPSG:4326 with osm_id, name and a column per key. A town or a district, not a region.
+        parks...), anywhere, in EPSG:4326 with osm_id, name and a column per key (addr:street: addr_street). A town
+        or a district, not a region.
 
         Returns layers [{layer_id, name, geometry, feature_count, fields}] and feature_count.
         """
@@ -1135,7 +1137,7 @@ def build_server(client: FilterMateClient) -> Any:
     async def export_layers(
         layers: Annotated[LayerList, Field(description="Of any kind, one file each")],
         subfolder: Annotated[str, Field(max_length=300, description=(
-            "Below the export root: a or a/b, never absolute nor .."))] = "export",
+            "Below the export root: a or a/b, letters, digits, _ . - only"))] = "export",
         vector_format: Literal["GPKG", "GeoJSON", "ESRI Shapefile", "FlatGeobuf", "CSV"] = "GPKG",
         raster_format: Literal["COG", "GTiff"] = "COG",
         point_cloud_format: Literal["LAZ", "COPC", "LAS", "GPKG", "CSV"] = "LAZ",

@@ -27,7 +27,8 @@ PLACE_TOOL = "find_place"
 # are then not offered at all.
 MISSING_SOURCES = {
     OPEN_DATA_TOOL: "data from the web; add_layer then takes local files only. Under Open data platforms",
-    PLACE_TOOL: "a place no layer holds; one a layer holds: select_features, zoom_to. Under Place search",
+    PLACE_TOOL: "a place no layer holds, whereas select_features and zoom_to find one a layer holds. Under Place "
+                "search",
     BASEMAP_TOOL: "a basemap. Under Basemaps, or an XYZ address",
     ELEVATION_TOOL: "relief or contours with no elevation raster in the project. Copernicus DEM, under Satellite "
                     "imagery",
@@ -35,8 +36,8 @@ MISSING_SOURCES = {
     OSM_TOOL: "buildings, roads, shops... no layer holds. Under Open data platforms",
 }
 MISSING_TITLE = "\n\nSources not ticked, their tools not offered: "
-MISSING_RULE = (". When one is needed, say it can be ticked in the Sources tab of the settings of the agent and call "
-                "show_settings_link with target sources; never guess coordinates nor try another way.")
+MISSING_RULE = (". When one is needed and no tool offered gives the same, say it can be ticked in the Sources tab of "
+                "the settings of the agent and call show_settings_link with target sources; never guess coordinates.")
 
 
 def missing_sources_note(missing: Sequence[str]) -> str:

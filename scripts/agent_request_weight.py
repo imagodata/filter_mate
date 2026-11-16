@@ -255,8 +255,8 @@ CONVERSATION = (
 # 21 calls, 1,381,796 characters sent, largest 80,432, cost 291,616.
 REFERENCE: Optional[Dict[str, Any]] = {  # lot 2 of the token diet; before (867c4f24): sent 1,408,656, largest
     # 67,413, cost 340,333
-    "date": "2026-11-16", "commit": "0fd257d2", "fingerprint": "16efd34dcb03",
-    "calls": 28, "sent": 780140, "largest": 35399, "cost": 183783,
+    "date": "2026-11-16", "commit": "46f630db", "fingerprint": "16efd34dcb03",  # with the fixes of its review
+    "calls": 28, "sent": 784859, "largest": 35602, "cost": 184870,
 }
 MAX_RISE = 0.05
 

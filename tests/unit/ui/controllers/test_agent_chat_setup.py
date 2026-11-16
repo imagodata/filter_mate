@@ -43,9 +43,9 @@ GOLDEN = {  # (length, sha256 of the UTF-8 text); 2026-11-16, lot 1 of the token
     # paragraphs that described a tool one by one (12,076 characters before for the default); then the way of working
     # starts from the state of the project sent, not from list_layers and map_context (review of lot 1); lot 2: the
     # sources not ticked in one paragraph, a shorter way of working
-    "default": (3967, "ac66493f8d77b6b7ce8fb05c3aead3d844827de9c21fdbc1fc61a00f1f1476a3"),
-    "no_values_local": (4451, "47ec0e5db03870f5bcdcc5c3e7ef8a1bb79b17d93f6101adc6c2cde34e720dda"),
-    "every_source": (5515, "4aaaf0d4913f05573a9b7a5849b272134ce2ac1befd2fdc95f1478b4f738e723"),
+    "default": (3999, "158aad06babbdd071dc594e3681ef3e520fac66c1ad30562927a7abf0181d64e"),
+    "no_values_local": (4483, "082cefc65ec8070d870cbd05c9c98d645ee618537668fa1651505acffb036cdb"),
+    "every_source": (5517, "2ace6aa7e59ba840ad2983f44137de6ebfa1285a7ae9fb5e4a622dc8a0de6ca2"),
 }
 _EVERY = tuple(source.id for source in sources.BUILT_IN)
 CONFIGS = {

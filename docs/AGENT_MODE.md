@@ -784,13 +784,17 @@ server of the plugin serves 53 (the chat's tools without its own, plus `map_imag
 ### Shorter tools and instructions (token diet, lot 2, 2026-11-16)
 
 The fixed part of a request with the default settings (the instructions with the index, and the tools of the core)
-went from 30,941 to under 20,000 characters (`test_tool_weight.py` bounds it). A description says what the tool does,
+went from 32,491 (30,941 once the light form of the schemas was sent to every provider) to 19,966 characters
+(`test_tool_weight.py` bounds it under 20,000). The light form keeps a bound that guides a call (a length of 100 at
+most, a number of items of 20 at most that is not the size of an enum, the schema of the values of a map) and drops the
+guards; `test_tool_constraints.py` keeps a snapshot of what every tool accepts, so that a rewritten description never
+takes a constraint with it. A description says what the tool does,
 what it returns and the rule that avoids a frequent mistake; examples and rare cases live in the skill of the task
 (the derivatives of a DTM in `terrain`, the objects drawn in the dock and `segments` in `raster-objects`). A tool weighs
 2,000 characters at most as the model reads it, except cross_filter (3,500) and set_layer_style (3,200), whose schemas
 alone weigh 1,687 and 1,464. The summaries of the index are 60 characters at most, and the sources not ticked are one
-paragraph (`chat_setup.MISSING_SOURCES`). The conversation of the bench: cost 257,561 -> 183,783, largest request
-47,659 -> 35,399.
+paragraph (`chat_setup.MISSING_SOURCES`). The conversation of the bench: cost 257,561 -> 184,870, largest request
+47,659 -> 35,602.
 
 ### The options of the panels (2026-11-16)
 
