@@ -673,6 +673,26 @@ Pentru ce: {}
         <translation>Secțiuni: FILTERING, EXPORTING, AGENT, doar cele pe care le folosiți</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>Configurați FilterMate?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>Câteva alegeri, apoi setările înainte și după: nu este nevoie de niciun model de IA și nimic nu se schimbă până nu aplicați. Mai târziu: meniul Vector &gt; FilterMate &gt; Configurare FilterMate; Cum funcționează FilterMate se găsește tot acolo.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>Aspect: temă, dimensiunea panoului, limbă</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
+        <translation>Dispunere: secțiunile în acest panou sau fiecare în propriul panou al QGIS, locul butoanelor</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
         <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
         <translation>Datele dvs.: rastere, nori de puncte, PostgreSQL, servicii web, mărimea lor</translation>
@@ -2015,6 +2035,16 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="645"/>
         <source>Set up FilterMate, no model needed</source>
         <translation>Configurează FilterMate, fără model</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>Configurare FilterMate…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>Cum funcționează FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4369,6 +4399,36 @@ Faceți clic pe indicatorul ★ și selectați 'Adăugați filtrul curent la fav
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Configurare FilterMate cu agentul</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>Câteva alegeri, apoi fiecare setare înainte și după: nu este nevoie de niciun model de IA</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>Cum funcționează FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>Ce face fiecare secțiune, secțiunile ca panouri ale QGIS, unde sunt butoanele</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>Noutăți în FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Secțiunile FilterMate pot fi panouri ale QGIS, iar configurarea sa nu necesită niciun model de IA.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Configurare FilterMate&lt;/b&gt; pune câteva alegeri: secțiunile pe care le folosiți, datele dvs., aspectul, unde se pun secțiunile și butoanele lor. Arată fiecare setare înainte și după și nu trimite nimic nicăieri.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Secțiuni ca panouri&lt;/b&gt;: faceți clic dreapta pe antetul AGENT, FILTERING, EXPORTING sau CONFIGURATION pentru a o deschide în propriul panou al QGIS. Faceți clic dreapta pe titlul unui panou pentru a-l grupa cu altul, în file, sau pentru a-l îmbina înapoi în FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Butoane sub fiecare secțiune, iar FILTERING sau EXPORTING dezactivate atunci când nu le folosiți.&lt;/b&gt;&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtrează, aplică stiluri și aduce date dintr-o frază, cu propria cheie API sau cu un model Ollama local. &lt;b&gt;Cum funcționează FilterMate&lt;/b&gt;, din meniul său, explică din nou fiecare secțiune.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>Configurare FilterMate</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -11491,6 +11551,71 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Sub fiecare secțiune</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>Dispunere</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>Unde se pun secțiunile</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>Un clic pe un antet deschide secțiunea sa.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>Toate în panoul FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Each in its own panel of QGIS</source>
+        <translation>Fiecare în propriul panou al QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
+        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
+        <translation>AGENT, FILTERING, EXPORTING și CONFIGURATION lângă hartă, în file sau plutitoare; EXPLORING rămâne în FilterMate. Un clic dreapta pe titlul unui panou îl grupează cu altul sau îl îmbină înapoi în FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>Cum sunt acum</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>Unele secțiuni sunt în propriul panou.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>Fiecare secțiune își arată propriile butoane cât timp este deschisă.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
+        <source>Sections: each in its own panel of QGIS (applied at once)</source>
+        <translation>Secțiuni: fiecare în propriul panou al QGIS (se aplică imediat)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>Secțiuni: toate înapoi în panoul FilterMate (se aplică imediat)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>Aceste setări au fost deja readuse cum erau.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
+        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
+        <translation>Fiecare secțiune este în propriul panou al QGIS: trageți una de titlu; faceți clic dreapta pe titlu pentru a o grupa cu alta, în file, sau pentru a o îmbina înapoi în FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Zoom pe ceea ce rămâne</translation>
@@ -12063,6 +12188,74 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>Tile-uri vectoriale</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>Cum funcționează FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>Cum funcționează FilterMate, secțiune cu secțiune. Nu este nevoie de niciun model de IA pentru a citi acest lucru și nu se trimite nimic nicăieri.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>EXPLORING conține stratul curent și ce alegeți în el: entități ale unui strat vectorial, un interval de valori sau clase ale unui raster, clase sau înălțimi ale unui nor de puncte. Celelalte secțiuni lucrează pe ceea ce selectează.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>FILTERING filtrează straturile pe care le bifați după această selecție: cele care o intersectează, cele aflate la o anumită distanță de ea... Filtrează aplică filtrul, Anulează și Refă parcurg istoricul, Compară arată harta înainte și după, Elimină filtrul scoate filtrele.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>EXPORTING scrie straturile așa cum sunt filtrate: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>AGENT face același lucru dintr-o frază, și mai mult (stiluri, etichete, date de adus), cu un model pe care îl conectați: propria cheie API sau Ollama pe acest computer. Fiecare cerere poate fi anulată.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>CONFIGURATION listează toate setările. Configurare FilterMate le cere pe cele principale prin câteva alegeri și arată fiecare setare înainte și după.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>Dezactivat în setările dvs.: {}. Configurare FilterMate readuce o secțiune.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>O secțiune poate părăsi acest panou. Faceți clic dreapta pe antetul AGENT, FILTERING, EXPORTING sau CONFIGURATION, apoi alegeți să o deschideți în propriul panou: devine un panou al QGIS, pe care îl puteți trage lângă hartă, îl puteți pune în filă cu panoul Straturi sau îl puteți lăsa să plutească pe alt ecran. EXPLORING rămâne aici: conține stratul pe care lucrează celelalte secțiuni.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
+        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
+        <translation>Faceți clic dreapta pe titlul unui astfel de panou pentru a-l grupa cu altul, în file, sau pentru a-l îmbina înapoi în FilterMate. Închiderea lui îl îmbină, de asemenea, înapoi. QGIS pune fiecare panou la loc, unde l-ați lăsat.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>Butoanele acționează în propria secțiune: Filtrează, Anulează, Refă, Compară și Elimină filtrul cu FILTERING, Exportă cu EXPORTING. O secțiune din propriul panou își ia butoanele cu ea; configurarea le poate arăta și sub fiecare secțiune.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>Configurare FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>Conectați un model</translation>
     </message>
 </context>
 <context>

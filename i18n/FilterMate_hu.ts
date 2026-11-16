@@ -673,6 +673,26 @@ Futtatja?</translation>
         <translation>Szakaszok: FILTERING, EXPORTING, AGENT, csak amelyeket használ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>Beállítja a FilterMate-et?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>Néhány választás, majd a beállítások előtte és utána: nincs szükség MI-modellre, és semmi sem változik, amíg nem alkalmazza. Később: Vektor &gt; FilterMate &gt; A FilterMate beállítása menü; ott van a Hogyan működik a FilterMate is.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>Megjelenés: téma, a panel mérete, nyelv</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
+        <translation>Elrendezés: a szakaszok ebben a panelben vagy mind a saját QGIS-panelében, a gombok helye</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
         <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
         <translation>Az Ön adatai: raszterek, ponthalmazok, PostgreSQL, webszolgáltatások, méretük</translation>
@@ -2015,6 +2035,16 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="645"/>
         <source>Set up FilterMate, no model needed</source>
         <translation>A FilterMate beállítása, modell nélkül</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>A FilterMate beállítása…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>Hogyan működik a FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4369,6 +4399,36 @@ Kattintson a ★ jelzőre és válassza a 'Jelenlegi szűrő hozzáadása a kedv
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>FilterMate beállítása az ügynökkel</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>Néhány választás, majd minden beállítás előtte és utána: nincs szükség MI-modellre</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>Hogyan működik a FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>Mit csinál az egyes szakasz, a szakaszok QGIS-panelként, hol vannak a gombok</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>Újdonságok a FilterMate-ben</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A FilterMate szakaszai QGIS-panelek lehetnek, és a beállításához nincs szükség MI-modellre.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;A FilterMate beállítása&lt;/b&gt; néhány dolgot megkérdez: a használt szakaszokat, az adatait, a megjelenést, a szakaszok és gombjaik helyét. Minden beállítást előtte és utána mutat, és semmit sem küld el sehova.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Szakaszok panelként&lt;/b&gt;: kattintson jobb gombbal az AGENT, a FILTERING, az EXPORTING vagy a CONFIGURATION fejlécére, hogy saját QGIS-panelben nyissa meg. Egy panel címén jobb gombbal kattintva csoportosíthatja egy másikkal, lapokként, vagy visszaolvaszthatja a FilterMate-be.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Gombok minden szakasz alatt&lt;/b&gt;, és a FILTERING vagy az EXPORTING kikapcsolva, ha nem használja őket.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; egy mondatból szűr, stílust ad és adatokat hoz be, a saját API-kulcsával vagy egy helyi Ollama-modellel. &lt;b&gt;Hogyan működik a FilterMate&lt;/b&gt; a menüjében újra elmondja az egyes szakaszokat.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>A FilterMate beállítása</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -11491,6 +11551,71 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <translation>Minden szakasz alatt</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>Elrendezés</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>Hol legyenek a szakaszok</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>A fejlécre kattintva megnyílik a szakasza.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>Mind a FilterMate panelben</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Each in its own panel of QGIS</source>
+        <translation>Mind a saját QGIS-panelében</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
+        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
+        <translation>Az AGENT, a FILTERING, az EXPORTING és a CONFIGURATION a térkép mellett, lapokként vagy lebegve; az EXPLORING a FilterMate-ben marad. Egy panel címén jobb gombbal kattintva csoportosíthatja egy másikkal, vagy visszaolvaszthatja a FilterMate-be.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>Ahogy most vannak</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>Néhány szakasz a saját panelében van.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>Minden szakasz a saját gombjait mutatja, amíg nyitva van.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
+        <source>Sections: each in its own panel of QGIS (applied at once)</source>
+        <translation>Szakaszok: mind a saját QGIS-panelében (azonnal érvénybe lép)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>Szakaszok: mind vissza a FilterMate panelbe (azonnal érvénybe lép)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>Ezek a beállítások már vissza lettek állítva az eredeti állapotba.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
+        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
+        <translation>Minden szakasz a saját QGIS-panelében van: húzza el a címénél fogva; a címén jobb gombbal kattintva csoportosíthatja egy másik panellel, lapokként, vagy visszaolvaszthatja a FilterMate-be.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Nagyítás a megmaradt elemekre</translation>
@@ -12063,6 +12188,74 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>Vektorcsempék</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>Hogyan működik a FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>Hogyan működik a FilterMate, szakaszról szakaszra. Az elolvasásához nincs szükség MI-modellre, és semmi sem kerül elküldésre sehova.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>Az EXPLORING a jelenlegi réteget tartalmazza, és azt, amit benne kiválaszt: egy vektoros réteg elemeit, egy raszter értéktartományát vagy osztályait, egy ponthalmaz osztályait vagy magasságait. A többi szakasz azzal dolgozik, amit kiválaszt.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>A FILTERING a bejelölt rétegeket szűri ezzel a kijelöléssel: azokat, amelyek metszik, vagy a közelében vannak adott távolságon belül... A Szűrés alkalmazza a szűrőt, a Visszavonás és az Újra végigjárja az előzményeket, az Összehasonlítás a térképet előtte és utána mutatja, a Szűrés megszüntetése eltávolítja a szűrőket.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>Az EXPORTING úgy írja ki a rétegeket, ahogy szűrve vannak: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>Az AGENT ugyanezt megteszi egy mondatból, és még többet (stílusok, címkék, behozandó adatok), egy Ön által csatlakoztatott modellel: a saját API-kulcsával vagy az ezen a számítógépen futó Ollamával. Minden kérés visszavonható.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>A CONFIGURATION felsorol minden beállítást. A FilterMate beállítása a fontosabbakat kérdezi meg néhány választással, és minden beállítást előtte és utána mutat.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>A beállításaiban kikapcsolva: {}. A FilterMate beállítása visszahoz egy szakaszt.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>Egy szakasz elhagyhatja ezt a panelt. Kattintson jobb gombbal az AGENT, a FILTERING, az EXPORTING vagy a CONFIGURATION fejlécére, majd válassza a saját panelben való megnyitást: QGIS-panel lesz belőle, amelyet a térkép mellé húzhat, a Rétegek panellel lapokba rendezhet, vagy lebegtethet egy másik képernyőn. Az EXPLORING itt marad: azt a réteget tartalmazza, amelyen a többi szakasz dolgozik.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
+        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
+        <translation>Kattintson jobb gombbal egy ilyen panel címén, hogy egy másikkal csoportosítsa, lapokként, vagy visszaolvassza a FilterMate-be. A bezárása is visszaolvasztja. A QGIS minden panelt oda tesz vissza, ahol hagyta.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>A gombok a saját szakaszukban működnek: Szűrés, Visszavonás, Újra, Összehasonlítás és Szűrés megszüntetése a FILTERING-gel, Exportálás az EXPORTING-gal. A saját panelben lévő szakasz magával viszi a gombjait; A FilterMate beállítása minden szakasz alatt is megjelenítheti őket.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>A FilterMate beállítása</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>Modell csatlakoztatása</translation>
     </message>
 </context>
 <context>

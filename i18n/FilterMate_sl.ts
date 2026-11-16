@@ -673,6 +673,26 @@ Jo zaženem?</translation>
         <translation>Razdelki: FILTERING, EXPORTING, AGENT, samo tisti, ki jih uporabljate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>Nastaviti FilterMate?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>Nekaj izbir, nato nastavitve pred in po: model UI ni potreben, nič se ne spremeni, dokler tega ne uveljavite. Pozneje: meni Vektor &gt; FilterMate &gt; Nastavi FilterMate; tam je tudi Kako deluje FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>Videz: tema, velikost plošče, jezik</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
+        <translation>Postavitev: razdelki v tej plošči ali vsak v svoji plošči QGIS, mesto gumbov</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
         <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
         <translation>Vaši podatki: rastri, oblaki točk, PostgreSQL, spletne storitve, njihova velikost</translation>
@@ -2015,6 +2035,16 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="645"/>
         <source>Set up FilterMate, no model needed</source>
         <translation>Nastavi FilterMate, brez modela</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>Nastavi FilterMate…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>Kako deluje FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4369,6 +4399,36 @@ Kliknite kazalnik ★ in izberite 'Dodaj trenutni filter med priljubljene', da s
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Nastavi FilterMate z agentom</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>Nekaj izbir, nato vsaka nastavitev pred in po: model UI ni potreben</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>Kako deluje FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>Kaj počne vsak razdelek, razdelki kot plošče QGIS, kje so gumbi</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>Novosti v FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Razdelki FilterMate so lahko plošče QGIS, njegova nastavitev pa ne potrebuje nobenega modela UI.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Nastavi FilterMate&lt;/b&gt; vpraša po nekaj izbirah: razdelki, ki jih uporabljate, vaši podatki, videz, mesto razdelkov in njihovih gumbov. Prikaže vsako nastavitev pred in po ter ne pošlje nič nikamor.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Razdelki kot plošče&lt;/b&gt;: z desnim klikom na naslovno vrstico razdelka AGENT, FILTERING, EXPORTING ali CONFIGURATION ga odprite v lastni plošči QGIS. Z desnim klikom na naslov plošče jo združite v skupino z drugo, kot zavihke, ali jo združite nazaj v FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Gumbi pod vsakim razdelkom&lt;/b&gt; in izklopljena FILTERING ali EXPORTING, kadar ju ne uporabljate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtrira, oblikuje sloge in dodaja podatke iz ene povedi, z vašim lastnim ključem API ali lokalnim modelom Ollama. &lt;b&gt;Kako deluje FilterMate&lt;/b&gt; v njegovem meniju znova opiše vsak razdelek.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>Nastavi FilterMate</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -11491,6 +11551,71 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>Pod vsakim razdelkom</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>Postavitev</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>Kam postaviti razdelke</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>Klik na naslovno vrstico odpre njen razdelek.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>Vsi v plošči FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Each in its own panel of QGIS</source>
+        <translation>Vsak v svoji plošči QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
+        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
+        <translation>AGENT, FILTERING, EXPORTING in CONFIGURATION ob zemljevidu, kot zavihki ali plavajoče; EXPLORING ostane v FilterMate. Desni klik na naslov plošče jo združi v skupino z drugo ali pa jo združi nazaj v FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>Kakršni so zdaj</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>Nekateri razdelki so v lastni plošči.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>Vsak razdelek ima svoje gumbe, dokler je odprt.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
+        <source>Sections: each in its own panel of QGIS (applied at once)</source>
+        <translation>Razdelki: vsak v svoji plošči QGIS (uveljavljeno takoj)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>Razdelki: vsi nazaj v plošči FilterMate (uveljavljeno takoj)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>Te nastavitve so že povrnjene, kakršne so bile.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
+        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
+        <translation>Vsak razdelek je v svoji plošči QGIS: povlecite ga za naslov; z desnim klikom na naslov ga združite v skupino z drugo ploščo, kot zavihke, ali ga združite nazaj v FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Povečaj na ohranjeno</translation>
@@ -12063,6 +12188,74 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>Vektorske ploščice</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>Kako deluje FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>Kako deluje FilterMate, razdelek za razdelkom. Za branje ni potreben noben model UI in nič se ne pošilja nikamor.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>EXPLORING vsebuje trenutni sloj in to, kar v njem izberete: objekte vektorskega sloja, obseg vrednosti ali razrede rastra, razrede ali višine oblaka točk. Drugi razdelki delajo s tem, kar izbere.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>FILTERING filtrira sloje, ki jih označite, glede na ta izbor: tiste, ki se z njim sekajo, ležijo v določeni razdalji od njega... Filtriraj uveljavi filter, Razveljavi in Ponovi se sprehajata po zgodovini, Primerjaj prikaže zemljevid pred in po, Odstrani filter odstrani filtre.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>EXPORTING zapiše sloje, kakršni so filtrirani: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>AGENT naredi isto iz ene povedi, in več (sloge, oznake, podatke za dodajanje), z modelom, ki ga povežete: z lastnim ključem API ali z Ollamo v tem računalniku. Vsako zahtevo je mogoče razveljaviti.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>CONFIGURATION našteva vse nastavitve. Nastavi FilterMate vpraša po glavnih z nekaj izbirami in prikaže vsako nastavitev pred in po.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>Izklopljeno v vaših nastavitvah: {}. Nastavi FilterMate razdelek vrne.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>Razdelek lahko zapusti to ploščo. Z desnim klikom na naslovno vrstico razdelka AGENT, FILTERING, EXPORTING ali CONFIGURATION izberite odprtje v lastni plošči: postane plošča QGIS, ki jo lahko povlečete ob zemljevid, združite v zavihke s ploščo Sloji ali pustite plavati na drugem zaslonu. EXPLORING ostane tukaj: vsebuje sloj, s katerim delajo drugi razdelki.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
+        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
+        <translation>Z desnim klikom na naslov take plošče jo združite v skupino z drugo, kot zavihke, ali jo združite nazaj v FilterMate. Tudi z zaprtjem se združi nazaj. QGIS vrne vsako ploščo tja, kjer ste jo pustili.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>Gumbi delujejo v svojem razdelku: Filtriraj, Razveljavi, Ponovi, Primerjaj in Odstrani filter pri FILTERING, Izvozi pri EXPORTING. Razdelek v lastni plošči vzame gumbe s seboj; Nastavi FilterMate jih lahko pokaže tudi pod vsakim razdelkom.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>Nastavi FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>Poveži model</translation>
     </message>
 </context>
 <context>

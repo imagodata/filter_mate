@@ -84,6 +84,7 @@ SOURCES = \
     ../ui/controllers/history_controller.py \
     ../ui/controllers/history_tips.py \
     ../ui/controllers/setup_wizard.py \
+    ../ui/controllers/welcome_tour.py \
     ../ui/controllers/segmentation_controller.py \
     ../ui/controllers/coverage_dock_extras.py \
     ../ui/controllers/centroid_targets_sync.py \
