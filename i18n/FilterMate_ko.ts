@@ -78,6 +78,47 @@
         <translation>에이전트 옵션 읽는 중</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>에이전트가 다음을 켜려고 합니다:
+{}
+
+동의하십니까?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>다른 제공자, {}: 사용자의 요청과 그에 필요한 데이터가 {}(으)로 전송됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>플러그인의 MCP 서버: 이 컴퓨터의 다른 애플리케이션이 그 도구로 FilterMate와 QGIS를 제어할 수 있게 됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>에이전트가 요청하는 내용을 {}(으)로 보냅니다</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>진행 중인 요청이 끝나면 적용됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>대화는 {}과(와) 계속되며, 이전 내용은 전달되지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{}은(는) 이 주소에서 데이터를 받는 것에 대한 동의가 없습니다. 에이전트 설정의 제공자 탭에서 다시 동의하세요.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>{}의 키가 없습니다. 에이전트 설정의 제공자 탭에서 입력하세요.</translation>

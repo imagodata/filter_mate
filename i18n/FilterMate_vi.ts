@@ -78,6 +78,47 @@
         <translation>Đang đọc các tùy chọn của tác tử</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Tác tử muốn bật những mục sau:
+{}
+
+Quý vị có đồng ý không?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>Nhà cung cấp khác, {}: yêu cầu của quý vị và dữ liệu chúng cần sẽ được gửi đến {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>Máy chủ MCP của plugin: khi đó các ứng dụng khác trên máy tính này có thể điều khiển FilterMate và QGIS bằng các công cụ của nó.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>gửi những gì tác tử yêu cầu đến {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>Được áp dụng khi yêu cầu đang chạy kết thúc.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>Cuộc trò chuyện tiếp tục với {}; nó không biết những gì đã diễn ra trước đó.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} chưa có sự đồng ý của quý vị để nhận dữ liệu của quý vị tại địa chỉ này: hãy cấp lại trong thẻ Nhà cung cấp của cài đặt tác tử.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>Thiếu khóa của {}: hãy nhập trong thẻ Nhà cung cấp của cài đặt tác tử.</translation>

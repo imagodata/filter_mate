@@ -78,6 +78,47 @@
         <translation>Läser agentens alternativ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Agenten vill aktivera detta:
+{}
+
+Godkänner du?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>En annan leverantör, {}: dina förfrågningar och de data de behöver skickas till {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>Tilläggets MCP-server: andra program på den här datorn kan då styra FilterMate och QGIS med dess verktyg.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>skickar det agenten ber om till {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>Tillämpas när pågående förfrågan är klar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>Samtalet fortsätter med {}; den får inte veta vad som sagts tidigare.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} har inte ditt samtycke att ta emot dina data på den här adressen: ge det igen på fliken Leverantör i agentinställningarna.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>Nyckeln för {} saknas: ange den på fliken Leverantör i agentinställningarna.</translation>

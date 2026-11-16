@@ -78,6 +78,47 @@
         <translation>Optionen des Agenten werden gelesen</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Der Agent möchte Folgendes aktivieren:
+{}
+
+Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>Ein anderer Anbieter, {}: Ihre Anfragen und die dafür nötigen Daten werden an {} gesendet.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>Der MCP-Server des Plugins: Andere Anwendungen auf diesem Computer können dann FilterMate und QGIS mit seinen Werkzeugen steuern.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>sendet, was der Agent verlangt, an {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>Wird angewendet, sobald die laufende Anfrage beendet ist.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>Die Unterhaltung wird mit {} fortgesetzt; es erfährt nicht, was zuvor besprochen wurde.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} hat keine Einwilligung, Ihre Daten an dieser Adresse zu empfangen: Erteilen Sie sie erneut im Tab Anbieter der Agent-Einstellungen.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>Der Schlüssel von {} fehlt: Geben Sie ihn im Tab Anbieter der Agent-Einstellungen ein.</translation>

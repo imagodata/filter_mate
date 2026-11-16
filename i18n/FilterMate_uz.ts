@@ -78,6 +78,47 @@
         <translation>Agent parametrlari o'qilmoqda</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Agent quyidagilarni yoqmoqchi:
+{}
+
+Rozimisiz?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>Boshqa ta'minotchi, {}: so'rovlaringiz va ular uchun kerakli ma'lumotlar {} manziliga yuboriladi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>Plaginning MCP serveri: shunda bu kompyuterdagi boshqa ilovalar uning vositalari bilan FilterMate va QGIS'ni boshqara oladi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>agent so'raganini {} manziliga yuboradi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>Joriy so'rov tugaganda qo'llaniladi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>Suhbat {} bilan davom etadi; u oldin nima bo'lganini bilmaydi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} sizning ma'lumotlaringizni shu manzilda qabul qilishga roziligingiz yo'q: uni agent sozlamalarining Ta'minotchi yorlig'ida qayta bering.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>{} kaliti yo'q: uni agent sozlamalarining Ta'minotchi yorlig'ida kiriting.</translation>

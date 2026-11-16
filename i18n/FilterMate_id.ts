@@ -78,6 +78,47 @@
         <translation>Membaca opsi agen</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Agen ingin mengaktifkan ini:
+{}
+
+Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>Penyedia lain, {}: permintaan Anda dan data yang dibutuhkannya akan dikirim ke {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>Server MCP plugin: aplikasi lain di komputer ini kemudian dapat mengendalikan FilterMate dan QGIS dengan alatnya.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>mengirim apa yang diminta agen ke {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>Diterapkan saat permintaan yang sedang berjalan selesai.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>Percakapan dilanjutkan dengan {}; ia tidak mengetahui apa yang terjadi sebelumnya.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} tidak memiliki persetujuan Anda untuk menerima data Anda di alamat ini: berikan lagi di tab Penyedia pada pengaturan agen.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>Kunci {} tidak ada: masukkan di tab Penyedia pada pengaturan agen.</translation>

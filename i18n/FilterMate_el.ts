@@ -78,6 +78,47 @@
         <translation>Ανάγνωση των επιλογών του πράκτορα</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να ενεργοποιήσει τα εξής:
+{}
+
+Συμφωνείτε;</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>Άλλος πάροχος, {}: τα αιτήματά σας και τα δεδομένα που χρειάζονται θα σταλούν στο {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>Ο διακομιστής MCP του πρόσθετου: άλλες εφαρμογές σε αυτόν τον υπολογιστή μπορούν τότε να ελέγχουν το FilterMate και το QGIS με τα εργαλεία του.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>στέλνει στο {} ό,τι ζητά ο πράκτορας</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>Εφαρμόζεται όταν ολοκληρωθεί το τρέχον αίτημα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>Η συζήτηση συνεχίζεται με το {}· αυτό δεν γνωρίζει τι προηγήθηκε.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>Για το {} δεν έχετε δώσει συγκατάθεση να λαμβάνει τα δεδομένα σας σε αυτή τη διεύθυνση: δώστε την ξανά στην καρτέλα Πάροχος των ρυθμίσεων του πράκτορα.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>Το κλειδί του {} λείπει: εισαγάγετέ το στην καρτέλα Πάροχος των ρυθμίσεων του πράκτορα.</translation>
