@@ -188,7 +188,7 @@ def _network_layer(layer_id: str, geometry: str, count: int, kind_values) -> dic
         "zone_mro_id": [f"MRO_{number:02d}" for number in range(1, 11)],
         "status": ["TODO", "CONSTRUCTED", "AS_BUILT", "BLOWN"], "type": list(kind_values),
         "city": list(_CITIES), "postal_code": ["31000", "31100", "31200", "31300", "31400", "31500"],
-        "owner": ["Constructel", "Orange", "Free"], "comment": ["", "à revoir", "accès difficile"],
+        "owner": ["Acme Fiber", "Orange", "Free"], "comment": ["", "à revoir", "accès difficile"],
         "created_at": ["2025-01-12", "2025-06-30"], "updated_at": ["2026-10-01", "2026-11-12"],
         "length": [0.5, 2400.0]}}
 

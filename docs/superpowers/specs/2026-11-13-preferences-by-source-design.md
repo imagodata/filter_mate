@@ -4,7 +4,7 @@ Date : 2026-11-13. Statut : à approuver.
 
 ## Pourquoi
 
-Le bridge Constructel ouvre un nouveau projet QGIS à chaque fois, avec les mêmes tables PostgreSQL. Or FilterMate
+Le bridge d'un déploiement en entreprise ouvre un nouveau projet QGIS à chaque fois, avec les mêmes tables PostgreSQL. Or FilterMate
 range presque tout par projet et par couche :
 
 - le projet est reconnu par son nom et son chemin (`fm_projects`) ;
@@ -142,4 +142,4 @@ Décision de l'utilisateur (13/11) :
     coupée, mémoire bornée ;
   - contrôle sans écran : deux projets successifs sur le même GeoPackage, où le second retrouve les champs d'EXPLORING,
     les favoris et l'historique ;
-  - un contrôle PostGIS sur le scénario Constructel, avec les mêmes tables et un nouveau projet.
+  - un contrôle PostGIS sur le scénario du déploiement en entreprise, avec les mêmes tables et un nouveau projet.
