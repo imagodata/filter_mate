@@ -63,6 +63,26 @@
         <translation>Binabasa ang mga setting ng FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2420"/>
+        <source>Turning on: {}</source>
+        <translation>Binubuksan: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2418"/>
+        <source>Turning off: {}</source>
+        <translation>Pinapatay: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2417"/>
+        <source>Reading the options of the agent</source>
+        <translation>Binabasa ang mga opsyon ng agent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
+        <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
+        <translation>Nawawala ang key ng {}: ilagay ito sa tab na Provider ng mga setting ng agent.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>Reading the setting {}</source>
         <translation>Binabasa ang setting na {}</translation>
@@ -1294,6 +1314,26 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Mga setting ng agent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="804"/>
+        <source>Other provider or model…</source>
+        <translation>Ibang provider o model…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="798"/>
+        <source>Remove from the list</source>
+        <translation>Alisin sa listahan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="784"/>
+        <source>Source settings…</source>
+        <translation>Mga setting ng source…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="389"/>
+        <source>MCP server of the plugin</source>
+        <translation>MCP server ng plugin</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="325"/>

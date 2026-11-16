@@ -150,11 +150,55 @@
    "id": "setup_recommends_sources",
    "trap": true,
    "prompt": "Pour mes données : je cherche surtout des données ouvertes françaises et des lieux OpenStreetMap. Active ce qu'il faut pour l'agent.",
-   "expect": [],
+   "expect": [
+    [
+     {
+      "tool": "turn_on_agent_options",
+      "args": {
+       "sources": {
+        "contains": [
+         "datagouv"
+        ]
+       }
+      },
+      "call_args": {
+       "sources": [
+        "datagouv",
+        "osm_mcp"
+       ]
+      }
+     }
+    ]
+   ],
    "forbid": [
     "change_settings",
     "apply_settings_profile",
     "run_pyqgis"
+   ]
+  },
+  {
+   "id": "options_turn_off_source",
+   "prompt": "Coupe data.gouv pour cette conversation.",
+   "expect": [
+    [
+     {
+      "tool": "turn_off_agent_options",
+      "args": {
+       "sources": [
+        "datagouv"
+       ]
+      },
+      "call_args": {
+       "sources": [
+        "datagouv"
+       ]
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "turn_on_agent_options",
+    "change_settings"
    ]
   }
  ]

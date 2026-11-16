@@ -63,6 +63,26 @@
         <translation>Чтение настроек FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2420"/>
+        <source>Turning on: {}</source>
+        <translation>Включение: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2418"/>
+        <source>Turning off: {}</source>
+        <translation>Отключение: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2417"/>
+        <source>Reading the options of the agent</source>
+        <translation>Чтение параметров агента</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
+        <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
+        <translation>Ключ {} отсутствует: введите его на вкладке «Провайдер» в настройках агента.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>Reading the setting {}</source>
         <translation>Чтение настройки {}</translation>
@@ -1294,6 +1314,26 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Настройки агента</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="804"/>
+        <source>Other provider or model…</source>
+        <translation>Другой провайдер или модель…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="798"/>
+        <source>Remove from the list</source>
+        <translation>Удалить из списка</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="784"/>
+        <source>Source settings…</source>
+        <translation>Настройки источников…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="389"/>
+        <source>MCP server of the plugin</source>
+        <translation>Сервер MCP плагина</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="325"/>

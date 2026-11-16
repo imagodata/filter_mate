@@ -63,6 +63,26 @@
         <translation>Lendo as configurações do FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2420"/>
+        <source>Turning on: {}</source>
+        <translation>A ativar: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2418"/>
+        <source>Turning off: {}</source>
+        <translation>A desativar: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2417"/>
+        <source>Reading the options of the agent</source>
+        <translation>A ler as opções do agente</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
+        <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
+        <translation>Falta a chave de {}: introduza-a no separador Fornecedor das definições do agente.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>Reading the setting {}</source>
         <translation>Lendo a configuração {}</translation>
@@ -1294,6 +1314,26 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Definições do agente</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="804"/>
+        <source>Other provider or model…</source>
+        <translation>Outro fornecedor ou modelo…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="798"/>
+        <source>Remove from the list</source>
+        <translation>Remover da lista</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="784"/>
+        <source>Source settings…</source>
+        <translation>Definições das fontes…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="389"/>
+        <source>MCP server of the plugin</source>
+        <translation>Servidor MCP do plugin</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="325"/>

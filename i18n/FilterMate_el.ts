@@ -63,6 +63,26 @@
         <translation>Ανάγνωση των ρυθμίσεων του FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2420"/>
+        <source>Turning on: {}</source>
+        <translation>Ενεργοποίηση: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2418"/>
+        <source>Turning off: {}</source>
+        <translation>Απενεργοποίηση: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2417"/>
+        <source>Reading the options of the agent</source>
+        <translation>Ανάγνωση των επιλογών του πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
+        <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
+        <translation>Το κλειδί του {} λείπει: εισαγάγετέ το στην καρτέλα Πάροχος των ρυθμίσεων του πράκτορα.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>Reading the setting {}</source>
         <translation>Ανάγνωση της ρύθμισης {}</translation>
@@ -1294,6 +1314,26 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Ρυθμίσεις πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="804"/>
+        <source>Other provider or model…</source>
+        <translation>Άλλος πάροχος ή μοντέλο…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="798"/>
+        <source>Remove from the list</source>
+        <translation>Αφαίρεση από τη λίστα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="784"/>
+        <source>Source settings…</source>
+        <translation>Ρυθμίσεις πηγών…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="389"/>
+        <source>MCP server of the plugin</source>
+        <translation>Διακομιστής MCP του πρόσθετου</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="325"/>

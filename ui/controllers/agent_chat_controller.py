@@ -73,7 +73,8 @@ from ...core.agent.project_notes import added as note_added, notes_block, remove
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
     ADD_NOTE, ADD_TABLE, ASK_USER, CREATE_WIDGET, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
-    LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool,
+    LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
+    TURN_OFF_OPTIONS, TURN_ON_OPTIONS,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...core.domain.layer_kind import LayerKind
@@ -909,6 +910,49 @@ class AgentChatController(QObject):
         from ...core.agent.agent_options import Change
         self._click_option(Change(mcp_server=bool(on)))
 
+    def _options_sources(self, values: AgentSettings):
+        return list(all_sources(custom_from_json(values.custom_sources))) + list(qgis_databases())
+
+    def _agent_options_tool(self, _arguments) -> dict:
+        """agent_options: what the agent reaches, as the settings hold it."""
+        from ...core.agent.agent_options import options_view
+        values = load_settings()
+        providers, current = self._menu_providers(values)
+        return options_view(self._options_sources(values), values.enabled_sources, providers, current,
+                            values.mcp_enabled)
+
+    def _turn_off_options_tool(self, arguments) -> dict:
+        """turn_off_agent_options: queued, made when the request ends (its tools stay meanwhile)."""
+        from ...core.agent.agent_options import Change, plan_off
+        if not arguments.get("sources") and "mcp_server" not in arguments:
+            raise ToolFailure("Name the sources to untick, or give mcp_server false.")
+        values = load_settings()
+        try:
+            change, answer = plan_off(self._options_sources(values), values.enabled_sources,
+                                      arguments.get("sources") or [], arguments.get("mcp_server"))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        if change != Change():
+            self._pending_options.append(change)
+        return dict(answer, applies="after this request")
+
+    def _turn_on_options_tool(self, arguments) -> dict:
+        """turn_on_agent_options, once the user said yes: queued, made when the request ends."""
+        from ...core.agent.agent_options import Change, plan_on
+        if not arguments.get("sources") and "mcp_server" not in arguments and not arguments.get("provider"):
+            raise ToolFailure("Name the sources to tick, mcp_server true or a provider set up.")
+        values = load_settings()
+        providers, current = self._menu_providers(values)
+        try:
+            change, answer = plan_on(self._options_sources(values), values.enabled_sources,
+                                     arguments.get("sources") or [], arguments.get("mcp_server"),
+                                     str(arguments.get("provider") or ""), providers, current)
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        if change != Change():
+            self._pending_options.append(change)
+        return dict(answer, applies="in a new conversation" if change.provider is not None else "after this request")
+
     def _apply_pending_options(self) -> None:
         """The changes the agent made during the request that ended, over the settings as they are now."""
         pending, self._pending_options = self._pending_options, []
@@ -1019,6 +1063,9 @@ class AgentChatController(QObject):
         handlers[REMOVE_RECIPE] = self._remove_recipe_tool
         handlers[ASK_USER] = self._ask_user_tool
         handlers["show_settings_link"] = self._settings_link_tool
+        handlers[AGENT_OPTIONS] = self._agent_options_tool
+        handlers[TURN_OFF_OPTIONS] = self._turn_off_options_tool
+        handlers[TURN_ON_OPTIONS] = self._turn_on_options_tool
         handlers[LIST_TABLES] = lambda arguments: self._list_tables_tool(databases, arguments)
         handlers[ADD_TABLE] = lambda arguments: self._add_table_tool(databases, arguments)
         return tools, handlers, active
@@ -2367,6 +2414,12 @@ class AgentChatController(QObject):
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
+            AGENT_OPTIONS: lambda: _tr("Reading the options of the agent"),
+            TURN_OFF_OPTIONS: lambda: _tr("Turning off: {}").format(", ".join(
+                [str(name) for name in args.get("sources") or []] + (["MCP server"] if "mcp_server" in args else []))),
+            TURN_ON_OPTIONS: lambda: _tr("Turning on: {}").format(", ".join(
+                [str(name) for name in args.get("sources") or []] + (["MCP server"] if "mcp_server" in args else [])
+                + ([str(args["provider"])] if args.get("provider") else []))),
             "export_settings_profile": lambda: _tr("Profile of settings saved: {}").format(args.get("name", "")),
             "apply_settings_profile": lambda: _tr("Profile of settings applied: {}").format(args.get("name", "")),
             "get_setting": lambda: _tr("Reading the setting {}").format(args.get("path", "")),

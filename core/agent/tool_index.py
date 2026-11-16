@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Sequence
 
 MAX_SUMMARY = 90
-MAX_INDEX = 6000
+MAX_INDEX = 7000  # every tool of the chat (the worst case); the index of the default settings is about 4,300
 INDEX_TITLE = ("\n\nTools you can add with use_tools. Before saying a thing cannot be done, look here; add in one call "
                "every tool the request needs:")
 
@@ -83,6 +83,9 @@ SUMMARIES = {
     "export_settings_profile": "Save the settings the user changed as a profile file to share",
     "apply_settings_profile": "Apply a profile of settings of FilterMate by its name",
     "show_settings_link": "Put a button in the thread to a setting the user changes themselves",
+    "agent_options": "The provider, the sources and MCP connectors ticked, the MCP server of the agent",
+    "turn_off_agent_options": "Untick sources or connectors, or stop the MCP server, when the user asks",
+    "turn_on_agent_options": "Tick sources or connectors, start the MCP server, switch provider (asks the user)",
     "layer_options": "What a layer shows in FilterMate's EXPLORING panel, and its FILTERING options",
     "set_layer_options": "Set what layers show in EXPLORING and their FILTERING options",
     "export_options": "The options of FilterMate's EXPORTING panel",

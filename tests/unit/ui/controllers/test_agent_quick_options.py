@@ -68,6 +68,7 @@ def host(monkeypatch):
                            _refresh_ready=MagicMock(), _say=MagicMock(), _pending_options=[], store=store)
     made.apply_agent_options = lambda change: Controller.apply_agent_options(made, change)
     made._menu_providers = lambda values: Controller._menu_providers(made, values)
+    made._options_sources = lambda values: Controller._options_sources(made, values)
     return made
 
 
@@ -133,3 +134,42 @@ def test_the_menu_is_filled_from_the_settings(host, monkeypatch):
     ticked = [source_id for _title, rows in groups for source_id, _name, on in rows if on]
     assert ticked == ["datagouv"] and len([row for _t, rows in groups for row in rows]) == len(BUILT_IN)
     assert providers == [("anthropic · m", True), ("ollama · qwen3:8b", False)] and mcp_on is False
+
+
+# --- the tools of the chat: they queue, the end of the request applies ----------------------------------------------
+
+def _tools_host(host, monkeypatch):
+    monkeypatch.setattr(chat_controller, "read_providers", lambda: (ProviderEntry("ollama", "qwen3:8b", "u"),))
+    monkeypatch.setattr(chat_controller, "qgis_databases", lambda: [])
+    return host
+
+
+def test_turn_off_queues_without_changing(host, monkeypatch):
+    _tools_host(host, monkeypatch)
+    answer = Controller._turn_off_options_tool(host, {"sources": ["datagouv"]})
+    assert answer == {"turned_off": ["datagouv"], "already": [], "applies": "after this request"}
+    assert [change.sources_off for change in host._pending_options] == [("datagouv",)]
+    assert host.store["values"].enabled_sources == ("datagouv",)
+
+
+def test_turn_on_another_provider_says_a_new_conversation(host, monkeypatch):
+    _tools_host(host, monkeypatch)
+    answer = Controller._turn_on_options_tool(host, {"provider": "ollama · qwen3:8b"})
+    assert answer["applies"] == "in a new conversation" and host._pending_options[0].provider.model == "qwen3:8b"
+
+
+def test_a_call_with_nothing_or_an_unknown_source_fails(host, monkeypatch):
+    ToolFailure = chat_controller.ToolFailure  # the class of the package loaded here
+    _tools_host(host, monkeypatch)
+    with pytest.raises(ToolFailure):
+        Controller._turn_off_options_tool(host, {})
+    with pytest.raises(ToolFailure, match="nowhere"):
+        Controller._turn_on_options_tool(host, {"sources": ["nowhere"]})
+    assert host._pending_options == []
+
+
+def test_the_options_read(host, monkeypatch):
+    _tools_host(host, monkeypatch)
+    view = Controller._agent_options_tool(host, {})
+    assert view["provider"] == "anthropic · m" and "ollama · qwen3:8b" in view["providers"]
+    assert {"id": "datagouv", "title": "data.gouv.fr", "group": "open_data", "on": True} in view["sources"]

@@ -542,6 +542,29 @@ def check_families(chat, provider, settings, ask):
     settings()
 
 
+def check_agent_options(chat, provider, settings, ask):
+    """The agent turns its sources off without a question, once the request ends; turning one on is asked (2026-11-16)."""
+    from qgis.PyQt.QtCore import QCoreApplication
+    from filter_mate.adapters.agent.settings import load_settings
+
+    settings(enabled_sources=("datagouv",))
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or False  # declined
+    provider.reset((200, {}, tool_turn("turn_off_agent_options", {"sources": ["datagouv"]})), (200, {}, text_turn("ok")))
+    check("options: a request that turns a source off ends", ask("coupe data.gouv"))
+    for _ in range(5):
+        QCoreApplication.processEvents()
+    check("options: turning off asks nothing and applies after the request",
+          not asked and "datagouv" not in load_settings().enabled_sources, (asked, load_settings().enabled_sources))
+    provider.reset((200, {}, tool_turn("turn_on_agent_options", {"sources": ["datagouv"]})), (200, {}, text_turn("ok")))
+    ask("remets data.gouv")
+    for _ in range(5):
+        QCoreApplication.processEvents()
+    check("options: turning on is asked, and declined changes nothing",
+          asked and "datagouv" not in load_settings().enabled_sources, asked)
+    settings()
+
+
 def check_ask_user(panel, provider, ask):
     """ask_user (lot D): the card in the thread, clicked while the request waits; the answer comes back in the turn."""
     from qgis.PyQt.QtCore import QTimer
@@ -866,6 +889,7 @@ def check_chat(provider, layer, authcfg, work):
           QgsProject.instance().crs().authid())
     # Here and not after the first filter: settings() starts a new conversation, and the checks above build on one.
     check_families(chat, provider, settings, ask)
+    check_agent_options(chat, provider, settings, ask)
 
     offered = [tool.name for tool in chat.tools_and_handlers(load_settings())[0]]
     check("view_map is offered with a key of the user and shared values", "view_map" in offered, offered)

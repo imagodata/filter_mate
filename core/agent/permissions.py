@@ -86,7 +86,9 @@ AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_no
 # The settings of FilterMate itself (config.json, a file of this machine, kept beyond the project): always shown to
 # the user before and after, at every level, advisor included (2026-11-12, decided with the user); at the autonomous
 # level, how the panel looks changes without a question. The settings of the agent are refused by the tool itself.
-SETTINGS_TOOLS = frozenset({"change_settings", "apply_settings_profile"})
+# turn_on_agent_options (2026-11-16): ticking a source, a connector or the MCP server, or another provider, widens
+# what the agent reaches: the user says yes each time, as for the settings of FilterMate.
+SETTINGS_TOOLS = frozenset({"change_settings", "apply_settings_profile", "turn_on_agent_options"})
 # Tools whose question holds what the one question for several actions has no room for: the address of a source and
 # what reading it implies, the service a layer comes from, the features deleted, the file written, the settings
 # before and after (a card, applied by the user). Each is asked alone, in its own words, as code is.
