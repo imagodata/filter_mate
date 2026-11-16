@@ -253,9 +253,10 @@ CONVERSATION = (
 # Taken again on 2026-11-16 for lot 3 (14 layers, notes, widgets, 13 requests), on the code of main after lots 0 and 1
 # (867c4f24). The first one, for lot 0 (10 requests, 9 layers, main b77dea9c before lot 1): fingerprint 3a596d972f4d,
 # 21 calls, 1,381,796 characters sent, largest 80,432, cost 291,616.
-REFERENCE: Optional[Dict[str, Any]] = {
-    "date": "2026-11-16", "commit": "867c4f24", "fingerprint": "16efd34dcb03",
-    "calls": 28, "sent": 1408656, "largest": 67413, "cost": 340333,
+REFERENCE: Optional[Dict[str, Any]] = {  # lot 2 of the token diet; before (867c4f24): sent 1,408,656, largest
+    # 67,413, cost 340,333
+    "date": "2026-11-16", "commit": "46f630db", "fingerprint": "16efd34dcb03",  # with the fixes of its review
+    "calls": 28, "sent": 784859, "largest": 35602, "cost": 184870,
 }
 MAX_RISE = 0.05
 

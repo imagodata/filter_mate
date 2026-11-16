@@ -1,6 +1,6 @@
 ---
 name: filtermate-open-data
-description: "Bring data in, take layers out through the MCP server of the FilterMate QGIS plugin: bring data in - what OpenStreetMap maps in an area (buildings, roads, shops, hospitals...), datasets of the open data platforms the user allowed, a file, a URL, a WFS service, a satellite scene, a web basemap, the elevation or the population of an area - and remove layers from the project. Use when the user asks for it in QGIS with FilterMate."
+description: "Bring data in, take layers out through the MCP server of the FilterMate QGIS plugin: bring data in (OpenStreetMap, open data platforms, a file, a URL, WFS, satellite, basemap, elevation, population) or remove layers. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/open-data/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->

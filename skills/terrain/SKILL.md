@@ -1,12 +1,12 @@
 ---
 name: terrain
 title: Draw the relief
-description: a terrain, relief or elevation map - the elevation of an area brought in, colors by height, a shaded relief over it, contour lines with index contours, slopes - over a satellite or a neutral basemap
+description: a relief map: elevation brought in, colors by height, shaded relief, contour lines, slopes
 metadata:
   version: 2
   plugin_min: 5.1.1
   audience: chat, mcp
-  tools: find_place, zoom_to, map_context, list_layers, describe_layer, add_basemap, add_elevation, set_layer_style, duplicate_layer, contour_lines, set_labels, view_map, run_algorithm, describe_algorithm, export_layers
+  tools: find_place, cross_filter, zoom_to, map_context, list_layers, describe_layer, add_basemap, add_elevation, set_layer_style, duplicate_layer, contour_lines, set_labels, view_map, run_algorithm, describe_algorithm, export_layers
   risk: change
   trust: builtin
 ---
@@ -68,6 +68,10 @@ When the user gives none, choose, and say what you chose.
 - A slope or an aspect map: run_algorithm with native:slope or native:aspect on the elevation layer
   (describe_algorithm first), then set_layer_style on the result. The elevation of add_elevation is in metres on a
   grid in metres, so slopes are right as they come.
+- Data by the slope, aspect or roughness of the ground ("the buildings on slopes over 15 %"): cross_filter with the
+  elevation raster as source_layer and raster_selection {"mode": "range", "derivative": "slope_percent", "minimum":
+  15}. derivative is slope_degrees, slope_percent, aspect, hillshade or roughness; the bounds are then in degrees,
+  percent... of that quantity, read from the band as a DTM. No new layer is written.
 - A hillshade as a raster file of its own: native:hillshade. Only when the user wants the file: to show a relief,
   the hillshade mode draws it without writing anything.
 - The mean height of each polygon of a layer, the height at each point: the analysis skill (zonal statistics,

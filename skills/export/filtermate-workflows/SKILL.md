@@ -1,6 +1,6 @@
 ---
 name: filtermate-workflows
-description: "Chain the steps of a request through the MCP server of the FilterMate QGIS plugin: a request that needs several steps - what lies within a distance or inside an area, a place found then the data around it, a count by category, how many people live there, several criteria, a thematic map, data fetched then filtered - done with the fewest calls, in the right order. Use when the user asks for it in QGIS with FilterMate."
+description: "Chain the steps of a request through the MCP server of the FilterMate QGIS plugin: a request of several steps (within a distance, around a place, counts, population, criteria, fetched then filtered) in the fewest calls. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/workflows/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->

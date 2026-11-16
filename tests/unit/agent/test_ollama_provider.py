@@ -99,7 +99,7 @@ class TestRequest:
             "either": {"anyOf": [{"type": "string"}, {"type": "integer"}]}}}
         assert wire_schema(schema) == {"type": "object", "required": ["layer"], "properties": {
             "layer": {"type": "string", "description": "Layer id or name"},
-            "names": {"type": "array", "items": {"type": "string"}},
+            "names": {"type": "array", "items": {"type": "string", "maxLength": 9}, "minItems": 1, "maxItems": 5},
             "opacity": {"type": "number", "minimum": 0, "maximum": 1, "description": "0 to 1"},  # no empty default
             "mode": {"enum": ["AND", "OR"], "type": "string"},
             "either": {"anyOf": [{"type": "string"}, {"type": "integer"}]}}}
@@ -115,12 +115,14 @@ class TestRequest:
             "$defs": {"minLength": {"type": "string", "maxLength": 3}}}
         assert wire_schema(schema) == {"type": "object", "required": ["maxItems"], "properties": {
             "maxItems": {"type": "integer", "maximum": 9}, "odd": {"anyOf": [{"type": "null"}, {"type": "null"}]}},
-            "$defs": {"minLength": {"type": "string"}}}
+            "$defs": {"minLength": {"type": "string", "maxLength": 3}}}
 
     def test_every_tool_is_sent_without_its_checks(self):
         request = ollama().build_request("system", [Message(ROLE_USER, (TextPart("hi"),))], chat_tools())
         sent = json.dumps(json.loads(request.body)["tools"])
-        assert "maxLength" not in sent and "additionalProperties" not in sent and '{"type": "null"}' not in sent
+        # The guards go (a length of 1,000, false); a bound that guides stays (review of lot 2, tool_schema.py)
+        assert '"maxLength": 1000' not in sent and '"additionalProperties": false' not in sent
+        assert '{"type": "null"}' not in sent
         named = {tool.name: tool.input_schema for tool in chat_tools()}
         for tool in json.loads(request.body)["tools"]:
             assert set(tool["function"]["parameters"].get("properties", {})) == set(
