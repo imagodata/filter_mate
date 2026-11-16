@@ -355,7 +355,7 @@ def build_server(client: FilterMateClient) -> Any:
         layer_name: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
         expression: Annotated[str, Field(min_length=1, max_length=500_000, description="As for apply_filter")],
     ) -> Dict[str, Any]:
-        """Try what apply_filter would do on a private copy of the layer: nothing changes in the project.
+        """Try an expression alone on a private copy of the layer, never combined with its filter: nothing changes.
 
         Returns valid, feature_count (-1: unknown) and error. Refused on web services and memory layers.
         """
@@ -385,7 +385,7 @@ def build_server(client: FilterMateClient) -> Any:
             "BETWEEN, IS NULL, simple functions; no subquery"))],
         source: Annotated[str, Field(max_length=200, description="Tag in the FilterMate log")] = "mcp",
         operator: Annotated[Optional[Operator], Field(description=(
-            "Combine with the current filter: the new condition only, never a copy of it; omit to replace"))]
+            "With the current filter: AND narrows, OR widens, AND NOT takes the condition out; omit to replace"))]
             = None,
     ) -> Dict[str, Any]:
         """Set the filter (subset string) of one vector layer by its attributes; revert with clear_filters.
@@ -1016,7 +1016,8 @@ def build_server(client: FilterMateClient) -> Any:
             'Features with ONE of these tags: [{"key": "amenity", "value": "hospital"}], [{"key": "building"}]'))],
         extent_wkt: Annotated[str, Field(max_length=100_000, description=(
             "extent_wkt of find_place or map_context; empty: the map"))] = "",
-        crs: Annotated[str, Field(max_length=64, description="EPSG:4326 for find_place")] = "",
+        crs: Annotated[str, Field(max_length=64, description=(
+            "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty"))] = "",
         geometry: Annotated[Literal["as_mapped", "points", "lines", "polygons"], Field(description=(
             "as_mapped: a layer per geometry; points: one point each, to count or for a heatmap"))] = "as_mapped",
         platform: Annotated[str, Field(min_length=1, max_length=200, description=(
