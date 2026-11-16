@@ -974,6 +974,8 @@ class FilterMate:
                     dw.pushButton_action_qfieldcloud.setParent(None)
                     dw.pushButton_action_qfieldcloud = None
                     logger.info("QFieldCloud button hidden (extension disabled)")
+            if hasattr(dw, 'apply_section_options'):
+                dw.apply_section_options()  # a button of EXPORTING made now goes with the section turned off
         except Exception as e:
             logger.warning("FilterMate: Extension dockwidget UI error: %s", e)
 

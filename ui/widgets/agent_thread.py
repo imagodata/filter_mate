@@ -245,13 +245,17 @@ class QuestionCard(QFrame):
     """The questions of ``ask_user`` in the thread: choices to click (one, or several when the question says so),
     a free "Other" the panel always adds, and Answer once each question has one. The controller waits for
     ``answered`` (the labels ticked and the free text, per question) or ``declined`` (the card closed); the card
-    then freezes showing what was chosen. An answer changes nothing and authorizes nothing."""
+    then freezes showing what was chosen. An answer changes nothing and authorizes nothing.
+
+    ``free_other`` False (the setup, read by no model): no "Other", and a question of several choices may be left
+    with none ticked."""
 
     answered = pyqtSignal(object)  # [(selected labels, free text), ...], one per question
     declined = pyqtSignal()
 
-    def __init__(self, texts: dict, questions, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, texts: dict, questions, parent: Optional[QWidget] = None, free_other: bool = True) -> None:
         super().__init__(parent)
+        self._free_other = free_other
         self.setObjectName("frame_agent_questions")
         self._texts = texts
         self._questions = list(questions)
@@ -287,12 +291,18 @@ class QuestionCard(QFrame):
                 group.addButton(button)
                 self._choices.append(button)
                 buttons.append((button, option.label))
+                button.setChecked(bool(getattr(option, "selected", False)))
                 column.addWidget(button)
                 if option.description:
                     note = _plain_label(option.description, self)
                     note.setContentsMargins(18, 0, 0, 0)
                     self._muted.append(note)
                     column.addWidget(note)
+            if not free_other:
+                for button, _label in buttons:
+                    button.toggled.connect(lambda _checked: self._refresh())
+                self._groups.append((buttons, None, None))
+                continue
             other_row = QHBoxLayout()
             other_row.setContentsMargins(0, 0, 0, 0)
             other_row.setSpacing(6)
@@ -321,7 +331,7 @@ class QuestionCard(QFrame):
         self.answer_button = QPushButton(texts["answer"], self)
         self.answer_button.setObjectName("pushButton_agent_questions_answer")
         self.answer_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.answer_button.setEnabled(False)
+        self.answer_button.setEnabled(self._complete())
         self.answer_button.clicked.connect(self._submit)
         row.addWidget(self.answer_button)
         self.close_button = QPushButton("✕", self)
@@ -347,7 +357,7 @@ class QuestionCard(QFrame):
         chosen = []
         for buttons, other, field in self._groups:
             selected = [label for button, label in buttons if button.isChecked()]
-            chosen.append((selected, field.text().strip() if other.isChecked() else ""))
+            chosen.append((selected, field.text().strip() if other is not None and other.isChecked() else ""))
         return chosen
 
     def summary_lines(self) -> List[str]:
@@ -405,7 +415,11 @@ class QuestionCard(QFrame):
         self._refresh()
 
     def _complete(self) -> bool:
-        for buttons, other, field in self._groups:
+        for (buttons, other, field), question in zip(self._groups, self._questions):
+            if other is None:  # no free answer: one choice of a single choice, any number of several
+                if not question.multi_select and not any(button.isChecked() for button, _label in buttons):
+                    return False
+                continue
             if other.isChecked() and not field.text().strip():
                 return False
             if not other.isChecked() and not any(button.isChecked() for button, _label in buttons):
@@ -715,10 +729,10 @@ class AgentThread(QScrollArea):
         self.end_answer()
         return card
 
-    def add_question_card(self, texts: dict, questions) -> "QuestionCard":
+    def add_question_card(self, texts: dict, questions, free_other: bool = True) -> "QuestionCard":
         """The questions of ask_user in the thread (QuestionCard); the caller waits for ``answered``/``declined``,
         and the transcription keeps the questions with what was chosen."""
-        card = QuestionCard(texts, questions, self._content)
+        card = QuestionCard(texts, questions, self._content, free_other=free_other)
         plain = "\n".join(f"? {question.question}" for question in questions)
         item = _Item(card, plain, "questions", card.restyle)
         card.answered.connect(lambda _chosen: self._close_question_item(item, card))

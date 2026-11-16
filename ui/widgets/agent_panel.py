@@ -641,6 +641,10 @@ class AgentPanel(QFrame):
         self.configure_button = QPushButton(_tr("Connect a provider"), page)
         self.configure_button.setObjectName("pushButton_agent_configure")
         self.configure_button.clicked.connect(self.settings_requested)
+        # The setup needs no model: cards of choices in the thread (ui/controllers/setup_wizard.py).
+        self.setup_button = QPushButton(_tr("Set up FilterMate, no model needed"), page)
+        self.setup_button.setObjectName("pushButton_agent_setup")
+        self.setup_button.clicked.connect(self.setup_requested)
         self.try_label = QLabel(_tr("TRY"), page)
         self.try_label.setObjectName("label_agent_try")
         page.setObjectName("widget_agent_welcome")
@@ -652,6 +656,7 @@ class AgentPanel(QFrame):
         layout.addWidget(self.welcome_text)
         layout.addWidget(self.welcome_note)
         layout.addWidget(self.configure_button, 0, Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.setup_button, 0, Qt.AlignmentFlag.AlignLeft)
         layout.addSpacing(4)
         layout.addWidget(self.try_label)
         self.example_buttons = []
@@ -715,6 +720,9 @@ class AgentPanel(QFrame):
             f"QPushButton#pushButton_agent_example:hover {{ border-color: {palette['fm_active_border']}; }}"
             f"QPushButton#pushButton_agent_configure {{ padding: 8px 16px; font-weight: 500; border: none;"
             f" border-radius: 6px; background: {palette['fm_accent']}; color: {palette['fm_accent_text']}; }}"
+            f"QPushButton#pushButton_agent_setup {{ padding: 8px 16px; border: 1px solid {palette['fm_group_border']};"
+            f" border-radius: 6px; background: {palette['fm_group']}; color: {palette['fm_text']}; }}"
+            f"QPushButton#pushButton_agent_setup:hover {{ border-color: {palette['fm_active_border']}; }}"
             f"QLabel#label_agent_welcome_note {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
             f" {palette['fm_group_border']}; padding: 0 0 0 10px; }}"
             f"QFrame#frame_agent_history {{ background: {palette['fm_list']}; border: 1px solid"
@@ -872,6 +880,7 @@ class AgentPanel(QFrame):
         self.welcome_icon.setVisible(not ready)
         self.welcome_note.setVisible(not ready)
         self.configure_button.setVisible(not ready)
+        self.setup_button.setVisible(not ready)
         # Nothing can be asked before a provider is set up (mockup: Welcome board); the menu still opens the settings.
         if hasattr(self, "send_button"):
             self.input.setEnabled(ready)
@@ -992,13 +1001,13 @@ class AgentPanel(QFrame):
         self._in_answer = False
         return card
 
-    def add_question_card(self, texts: dict, questions):
+    def add_question_card(self, texts: dict, questions, free_other: bool = True):
         """The questions of ask_user in the thread, with choices to click and a free Other (agent_thread).
 
         The thread is shown even from the history page: the turn waits for the answer.
         """
         self.stack.setCurrentIndex(_THREAD_PAGE)
-        card = self.thread.add_question_card(texts, questions)
+        card = self.thread.add_question_card(texts, questions, free_other=free_other)
         self._in_answer = False
         return card
 

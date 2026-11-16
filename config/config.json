@@ -752,6 +752,22 @@
           "description": "Marks a configuration in which the AGENT section was turned on once, when it became on by default"
         }
       },
+      "FILTERING": {
+        "description": "The FILTERING section of the panel: filter layers by the features selected in EXPLORING",
+        "enabled": {
+          "value": true,
+          "choices": [true, false],
+          "description": "Show the FILTERING section and its Filter and Unfilter buttons (Undo and Redo stay, for the agent and the history). Off: the source layer chooser goes to the top of EXPLORING"
+        }
+      },
+      "EXPORTING": {
+        "description": "The EXPORTING section of the panel: export layers to files",
+        "enabled": {
+          "value": true,
+          "choices": [true, false],
+          "description": "Show the EXPORTING section and its buttons (Export, QFieldCloud)"
+        }
+      },
       "EXPLORATION": {
         "description": "Layer exploration and feature identification settings",
         "point_buffer_distance_m": {

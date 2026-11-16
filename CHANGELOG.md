@@ -11,6 +11,11 @@ All notable changes to FilterMate will be documented in this file.
 
 - **The cache of the provider serves more.** What a setting changes comes at the end of the instructions and of the tools, Anthropic keeps the tools and the instructions in its cache across a compaction and from one conversation to the next, and Ollama no longer loads the model again when a conversation gets shorter.
 - **Shorter requests.** The tools of the agent and its instructions say the same in fewer words, the rare cases moved to the skill of their task, and the sources you did not tick are named in one paragraph: a conversation of ten requests costs 29 % less on the bench, and its largest request is a quarter lighter.
+- **Set FilterMate up with no AI model.** *Set up FilterMate* (the first-run card, Vector > FilterMate, the ⋯ menu of the panel, and a new button of the welcome when no model is connected) no longer sends a request to a model: it asks with cards of choices in the AGENT thread, ticked as your settings are now. Which sections you use (FILTERING, EXPORTING, AGENT), which data you work with (rasters, point clouds, PostgreSQL, web services) and how big your layers are (timeouts and warnings follow), the look of the panel (theme, size, language, where the buttons go), then what you filter and export (zoom to what is kept, history in the project, rasters and point clouds filtered by a vector layer, groups kept in a GeoPackage or a KML, export formats). The last card shows every setting before and after; nothing changes until Apply, and a link puts them back as they were. Nothing is sent anywhere. The setup may turn the AGENT section off, since you choose it; a model still never changes the settings of the agent. With a model connected, *Refine the setup with the agent* follows.
+
+### Dock
+
+- **FILTERING and EXPORTING can be turned off.** Two new settings, `APP.OPTIONS.FILTERING.enabled` and `APP.OPTIONS.EXPORTING.enabled`, applied at once: the section and its buttons (Filter and Unfilter; Export and QFieldCloud) go, Undo and Redo staying for the agent and the history. Without FILTERING, the source layer chooser and its button that follows the current layer of QGIS move to the top of EXPLORING, and back when FILTERING returns. The agent, the Processing algorithms and the API still filter and export.
 
 ## [5.1.1] - 2026-11-16
 
