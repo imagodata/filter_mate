@@ -234,3 +234,40 @@ def check_export_changes(changes: Mapping[str, Any], *, layers: Sequence[LayerFa
         return {}, problems
     _ticked(clean, changes, _EXPORT_BOXES)
     return {EXPORT_KEYS[key]: value for key, value in clean.items()}, []
+
+
+# --- What a turn changed, for its undo (adapters/agent/turn_effects.py) ---------------------------------------------
+# A part of a state: {"values": {group: {key: value}}, "absent": [[group, key], ...]}. Only the keys a turn changed are
+# kept: the panel sets some options itself (on a change of layer, a box ticked with its value), and a whole state
+# compared would take that for a change of the user.
+
+def state_change(before: Mapping[str, Mapping[str, Any]],
+                 after: Mapping[str, Mapping[str, Any]]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """The parts of ``before`` and ``after`` (states by group) where they differ."""
+    was: Dict[str, Any] = {"values": {}, "absent": []}
+    made: Dict[str, Any] = {"values": {}, "absent": []}
+    for group in sorted(set(before) | set(after)):
+        old, new = before.get(group) or {}, after.get(group) or {}
+        for key in sorted(set(old) | set(new)):
+            if key in old and key in new and old[key] == new[key]:
+                continue
+            for part, state in ((was, old), (made, new)):
+                if key in state:
+                    part["values"].setdefault(group, {})[key] = state[key]
+                else:
+                    part["absent"].append([group, key])
+    return was, made
+
+
+def state_part(state: Mapping[str, Mapping[str, Any]], like: Mapping[str, Any]) -> Dict[str, Any]:
+    """``state`` read on the keys of the part ``like``, in its form: what to compare with it."""
+    keys = [(group, key) for group, values in (like.get("values") or {}).items() for key in values]
+    keys += [tuple(item) for item in like.get("absent") or ()]
+    part: Dict[str, Any] = {"values": {}, "absent": []}
+    for group, key in sorted(keys):
+        values = state.get(group) or {}
+        if key in values:
+            part["values"].setdefault(group, {})[key] = values[key]
+        else:
+            part["absent"].append([group, key])
+    return part

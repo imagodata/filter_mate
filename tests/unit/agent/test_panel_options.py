@@ -163,3 +163,18 @@ def test_the_bench_simulates_the_tools_of_the_panels():
         assert bench._touched({"layers": [{"layer": "communes_a1"}]}, project.by_ref) == ["communes"]
     finally:
         sys.modules.pop(spec.name, None)
+
+
+def test_a_change_keeps_only_the_keys_the_turn_changed():
+    """2026-11-16, real panel: on a change of layer the panel set has_buffer_type itself; compared whole, the state
+    looked changed by the user and the undo left the layer as it was."""
+    from core.agent.panel_options import state_change, state_part
+    before = {"filtering": {"buffer_value": 0.0, "has_buffer_type": False}, "exploring": {"is_tracking": False}}
+    after = {"filtering": {"buffer_value": 25.0, "has_buffer_type": False, "has_buffer_value": True},
+             "exploring": {"is_tracking": False}}
+    was, made = state_change(before, after)
+    assert was == {"values": {"filtering": {"buffer_value": 0.0}}, "absent": [["filtering", "has_buffer_value"]]}
+    assert made == {"values": {"filtering": {"buffer_value": 25.0, "has_buffer_value": True}}, "absent": []}
+    now = {"filtering": {"buffer_value": 25.0, "has_buffer_type": True, "has_buffer_value": True}}  # the panel's own
+    assert state_part(now, made) == made and state_part(now, was) != was
+    assert state_change(before, before) == ({"values": {}, "absent": []}, {"values": {}, "absent": []})

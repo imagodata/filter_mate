@@ -2146,9 +2146,16 @@ def s_panels_setup():
     return lambda: registered('zones', 'lieux') and tasks_idle()
 
 
+def current_is(name):
+    """Condition: the panel shows ``name`` (a layer added becomes the active layer of QGIS, which the panel follows)."""
+    done = switched_to(name, False)
+    return lambda: done() and dock().current_layer is not None and dock().current_layer.name() == name
+
+
 def s_panels_zones():
+    iface.setActiveLayer(layer('zones'))
     dock().comboBox_filtering_current_layer.setLayer(layer('zones'))
-    return switched_to('zones', False)
+    return current_is('zones')
 
 
 def s_panels_set():
@@ -2158,7 +2165,7 @@ def s_panels_set():
     recorder = turn_effects.EffectsRecorder()
     layers = [{'layer': 'zones', 'filtering': {'layers_to_filter': ['lieux'], 'geometric_predicates': ['Intersect'],
                                                'buffer_value': 25.0}},
-              {'layer': 'lieux', 'exploring': {'single_selection_expression': '"nom"'}}]
+              {'layer': 'lieux', 'exploring': {'single_selection_expression': '"code"'}}]
     recorder.before_call(messages.ToolCallPart('p1', 'set_layer_options', {'layers': layers}))
     recorder.before_call(messages.ToolCallPart('p2', 'set_export_options', {'changes': {}}))
     PANELS['answer'] = panels.set_layer_options(d, layers)
@@ -2187,20 +2194,22 @@ def s_panels_check():
           and e['DATATYPE_TO_EXPORT']['WIDGET'].currentText() == 'GeoJSON'
           and exporting.get('LAYERS_TO_EXPORT') == [layer('zones').id()],
           f"{exporting} {e['DATATYPE_TO_EXPORT']['WIDGET'].currentText()} {PANELS['export']}")
+    iface.setActiveLayer(layer('lieux'))
     d.comboBox_filtering_current_layer.setLayer(layer('lieux'))
-    return switched_to('lieux', False)
+    return current_is('lieux')
 
 
 def s_panels_other_layer_check():
     kept = app().PROJECT_LAYERS[layer('lieux').id()]['exploring']
     check('panels: a field set on another layer stays when it is chosen', kept.get('single_selection_expression')
-          in ('"nom"', 'nom'), str(kept))
+          in ('"code"', 'code'), str(kept))
     effects = PANELS['recorder'].finish()
     PANELS['effects'] = effects
     check('panels: the turn keeps the options before it', sorted(effect[0] for effect in effects)
           == ['export_options', 'layer_options', 'layer_options'], str([effect[:2] for effect in effects]))
+    iface.setActiveLayer(layer('zones'))
     dock().comboBox_filtering_current_layer.setLayer(layer('zones'))
-    return switched_to('zones', False)
+    return current_is('zones')
 
 
 def s_panels_undo():

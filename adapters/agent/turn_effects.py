@@ -31,8 +31,9 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
   once committed, the number of recorded steps up to that call (TurnCheckpoint.commit), so that "back to before a
   step" restores the settings changed from it. Not of the project, but undone with the turn that changed them.
 * ``("layer_options", layer_id, before, after, name)``: what a layer shows in EXPLORING and how it filters, in
-  FilterMate's panel (``adapters/public_api/panel_options.py``), as sorted JSON;
-* ``("export_options", "", before, after)``: the export options of the project in that panel, as sorted JSON.
+  FilterMate's panel (``adapters/public_api/panel_options.py``): the options the turn changed only, before and after
+  (``core.agent.panel_options.state_change``), as sorted JSON; the panel sets others itself;
+* ``("export_options", "", before, after)``: the export options of the project in that panel, the same way.
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
@@ -463,7 +464,7 @@ class EffectsRecorder:
                 from ..public_api.panel_options import export_state, running_dock
                 state = export_state(running_dock())
                 if state is not None and self._export_panel is None:
-                    self._export_panel = _panel_json(state)
+                    self._export_panel = _panel_json({"EXPORTING": state})
             elif name == "set_layers_visibility":
                 for reference in arguments.get("layers") or ():
                     layer = _resolve(project, reference)
@@ -628,15 +629,20 @@ class EffectsRecorder:
             if after is not None and after != before:
                 effects.append(("style", layer_id, before, after, layer.name()))
         if self._panel_layers or self._export_panel is not None:
+            import json
             from ..public_api.panel_options import export_state, layer_state, running_dock
+            from ...core.agent.panel_options import state_change
             dock = running_dock()
             for layer_id, (before, name) in self._panel_layers.items():
                 state = layer_state(dock, layer_id)
-                if state is not None and _panel_json(state) != before:
-                    effects.append(("layer_options", layer_id, before, _panel_json(state), name))
+                was, made = state_change(json.loads(before), state) if state is not None else (None, None)
+                if made and (made["values"] or made["absent"]):
+                    effects.append(("layer_options", layer_id, _panel_json(was), _panel_json(made), name))
             state = export_state(dock) if self._export_panel is not None else None
-            if state is not None and _panel_json(state) != self._export_panel:
-                effects.append(("export_options", "", self._export_panel, _panel_json(state)))
+            if state is not None:
+                was, made = state_change(json.loads(self._export_panel), {"EXPORTING": state})
+                if made["values"] or made["absent"]:
+                    effects.append(("export_options", "", _panel_json(was), _panel_json(made)))
         self.__init__(self._record_settings)
         return tuple(effects)
 
@@ -664,10 +670,15 @@ def _now(project: QgsProject, effect: Tuple[Any, ...]) -> Any:
         visible = _visible(project, layer_id)
         return _GONE if visible is None else visible
     if kind in ("layer_options", "export_options"):
+        import json
         from ..public_api.panel_options import export_state, layer_state, running_dock
+        from ...core.agent.panel_options import state_part
         dock = running_dock()
         state = layer_state(dock, layer_id) if kind == "layer_options" else export_state(dock)
-        return _GONE if state is None else _panel_json(state)
+        if state is None:
+            return _GONE
+        # the keys the turn changed only, read as the effect keeps them
+        return _panel_json(state_part(state if kind == "layer_options" else {"EXPORTING": state}, json.loads(effect[2])))
     layer = project.mapLayer(layer_id)
     if layer is None:
         return _GONE

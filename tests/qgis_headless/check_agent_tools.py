@@ -1057,8 +1057,8 @@ def check_panel_options(project, gpkg, shp, work):
                  "LAYERS_TO_EXPORT": []}
     dock = SimpleNamespace(
         widgets_initialized=True, current_layer=gpkg, PROJECT_LAYERS={gpkg.id(): props(), shp.id(): props()},
-        settingLayerVariable=MagicMock(), _synchronize_layer_widgets=MagicMock(),
-        _reset_exploring_button_states=MagicMock(), _reset_filtering_button_states=MagicMock(),
+        settingLayerVariable=MagicMock(), resettingLayerVariable=MagicMock(), current_layer_changed=MagicMock(),
+        widgets={"EXPORTING": {}}, exporting_populate_combobox=MagicMock(),
         project_props={"EXPORTING": exporting}, CONFIG_DATA={"CURRENT_PROJECT": {"EXPORTING": exporting}},
         setProjectVariablesEvent=MagicMock(), set_exporting_properties=MagicMock())
     before = utils.plugins.get(PLUGIN_PACKAGE)
@@ -1081,7 +1081,8 @@ def check_panel_options(project, gpkg, shp, work):
         check("panels: the options are set as the panel keeps them, and shown",
               stored["exploring"]["single_selection_expression"] == '"nom"'
               and stored["filtering"]["layers_to_filter"] == [shp.id()] and stored["filtering"]["has_layers_to_filter"]
-              and made["shown_in_panel"] and dock.settingLayerVariable.emit.call_args.args[0] is gpkg, made)
+              and made["shown_in_panel"] and dock.settingLayerVariable.emit.call_args.args[0] is gpkg
+              and dock.current_layer_changed.call_args.args[0] is gpkg, made)
         read = panel_options.layer_options(dock, "communes")
         check("panels: read back with the names of the layers", read["filtering"]["layers_to_filter"] == ["routes"]
               and read["exploring"]["single_selection_expression"] == '"nom"', read)

@@ -197,6 +197,11 @@ def test_layer_state_keeps_only_the_options_an_agent_sets(dock):
     assert panel_options.layer_state(dock, "gone") is None and panel_options.layer_state(None, COMMUNES.id()) is None
 
 
+def _undo_of(before, after):
+    from core.agent.panel_options import state_change
+    return state_change(before, after)[0]
+
+
 def test_layer_state_restored_as_the_panel_saves_it(dock, project):
     before = panel_options.layer_state(dock, COMMUNES.id())
     dock.current_layer = COMMUNES
@@ -204,38 +209,41 @@ def test_layer_state_restored_as_the_panel_saves_it(dock, project):
                                     project=project)
     dock.settingLayerVariable.emit.reset_mock()
     dock.current_layer_changed.reset_mock()
-    assert panel_options.restore_layer_state(dock, COMMUNES.id(), before, project=project) is True
+    undo = _undo_of(before, panel_options.layer_state(dock, COMMUNES.id()))
+    assert panel_options.restore_layer_state(dock, COMMUNES.id(), undo, project=project) is True
     assert dock.PROJECT_LAYERS[COMMUNES.id()]["exploring"]["single_selection_expression"] == '"fid"'
-    saved = dock.settingLayerVariable.emit.call_args.args
-    assert saved[0] is COMMUNES and ("exploring", "single_selection_expression") in saved[1]
+    dock.settingLayerVariable.emit.assert_called_once_with(COMMUNES, [("exploring", "single_selection_expression")])
     dock.current_layer_changed.assert_called_once_with(COMMUNES, manual_change=True)
-    assert panel_options.restore_layer_state(dock, "gone", before, project=project) is False
+    assert panel_options.restore_layer_state(dock, "gone", undo, project=project) is False
 
 
 def test_export_state_restored(dock, project):
-    before = panel_options.export_state(dock)
+    before = {"EXPORTING": panel_options.export_state(dock)}
     panel_options.set_export_options(dock, {"datatype_to_export": "GeoJSON"}, project=project)
-    dock.setProjectVariablesEvent.reset_mock()
-    assert panel_options.restore_export_state(dock, before) is True
+    dock.calls.reset_mock()
+    undo = _undo_of(before, {"EXPORTING": panel_options.export_state(dock)})
+    assert panel_options.restore_export_state(dock, undo) is True
     assert dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"]["DATATYPE_TO_EXPORT"] == "GPKG"
     assert dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"]["HAS_DATATYPE_TO_EXPORT"] is False
-    dock.setProjectVariablesEvent.assert_called_once()
-    assert panel_options.export_state(None) is None and panel_options.restore_export_state(None, before) is False
+    assert [call[0] for call in dock.calls.mock_calls][-1] == "setProjectVariablesEvent"
+    assert panel_options.export_state(None) is None and panel_options.restore_export_state(None, undo) is False
 
 
-def test_a_restored_state_is_exactly_the_one_kept(dock, project):
-    """2026-11-16, QGIS check: a box the change added (has_geometric_predicates) stayed after the undo, so the state was
-    not the one kept and the redo took it for a change of the user."""
+def test_a_restored_state_is_the_one_kept(dock, project):
     before = panel_options.layer_state(dock, COMMUNES.id())
-    assert "has_geometric_predicates" not in before["filtering"]
     panel_options.set_layer_options(dock, [{"layer": "communes", "filtering": {"geometric_predicates": ["Intersect"]}}],
                                     project=project)
-    panel_options.restore_layer_state(dock, COMMUNES.id(), before, project=project)
+    undo = _undo_of(before, panel_options.layer_state(dock, COMMUNES.id()))
+    panel_options.restore_layer_state(dock, COMMUNES.id(), undo, project=project)
     assert panel_options.layer_state(dock, COMMUNES.id()) == before
-    kept = panel_options.export_state(dock)
-    panel_options.set_export_options(dock, {"styles_to_export": "SLD"}, project=project)
-    panel_options.restore_export_state(dock, kept)
-    assert panel_options.export_state(dock) == kept
+    dock.resettingLayerVariable.emit.assert_called_once_with(
+        COMMUNES, [("filtering", "geometric_predicates"), ("filtering", "has_geometric_predicates")])
+
+
+def test_nothing_to_save_emits_nothing(dock, project):
+    """An empty list of keys tells FilterMate to save every option of the layer."""
+    panel_options.restore_layer_state(dock, COMMUNES.id(), {"values": {}, "absent": []}, project=project)
+    dock.settingLayerVariable.emit.assert_not_called()
 
 
 def test_the_answer_is_what_the_panel_keeps(dock, project):
@@ -270,19 +278,3 @@ def test_single_and_multiple_selection_take_a_field(dock, project):
         "multiple_selection_expression": "insee", "custom_selection_expression": '"nom" || \' (\' || "insee" || \')\''}}],
         project=project)
     assert dock.PROJECT_LAYERS[COMMUNES.id()]["exploring"]["multiple_selection_expression"] == "insee"
-
-
-def test_a_removed_box_is_removed_from_storage_too(dock, project):
-    before = panel_options.layer_state(dock, COMMUNES.id())
-    panel_options.set_layer_options(dock, [{"layer": "communes", "filtering": {"geometric_predicates": ["Intersect"]}}],
-                                    project=project)
-    panel_options.restore_layer_state(dock, COMMUNES.id(), before, project=project)
-    dock.resettingLayerVariable.emit.assert_called_once_with(
-        COMMUNES, [("filtering", "geometric_predicates"), ("filtering", "has_geometric_predicates")])
-
-
-def test_nothing_to_save_emits_nothing(dock, project):
-    """An empty list of keys tells FilterMate to save every option of the layer."""
-    dock.settingLayerVariable.emit.reset_mock()
-    panel_options.restore_layer_state(dock, COMMUNES.id(), {"exploring": {}, "filtering": {}}, project=project)
-    dock.settingLayerVariable.emit.assert_not_called()

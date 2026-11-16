@@ -278,24 +278,25 @@ def layer_state(dock, layer_id: str) -> Any:
             "filtering": {key: value for key, value in (props.get("filtering") or {}).items() if key in FILTERING_KEYS}}
 
 
-def restore_layer_state(dock, layer_id: str, state: Dict[str, Dict[str, Any]], project=None) -> bool:
-    """Put back the options of ``layer_state`` the way set_layer_options writes them; False without the panel or the
-    layer."""
+def restore_layer_state(dock, layer_id: str, part: Dict[str, Any], project=None) -> bool:
+    """Put back a part of the options of a layer (``core.agent.panel_options.state_change``) the way set_layer_options
+    writes them; False without the panel or the layer."""
     if dock_problem(dock):
         return False
     props = (getattr(dock, "PROJECT_LAYERS", None) or {}).get(layer_id)
     layer = _project(project).mapLayer(layer_id)
     if not isinstance(props, dict) or layer is None:
         return False
+    allowed = {"exploring": EXPLORING_KEYS, "filtering": FILTERING_KEYS}
     keys, removed = [], []
-    for group, allowed in (("exploring", EXPLORING_KEYS), ("filtering", FILTERING_KEYS)):
-        values = {key: value for key, value in (state.get(group) or {}).items() if key in allowed}
-        stored = props.setdefault(group, {})
-        stored.update(values)
-        for key in [key for key in stored if key in allowed and key not in values]:
-            del stored[key]  # a box the change added: the state is again exactly the one kept
-            removed.append((group, key))
+    for group, values in (part.get("values") or {}).items():
+        values = {key: value for key, value in values.items() if key in allowed.get(group, ())}
+        props.setdefault(group, {}).update(values)
         keys += [(group, key) for key in values]
+    for group, key in part.get("absent") or ():
+        if key in allowed.get(group, ()) and key in props.get(group, {}):
+            del props[group][key]  # an option the turn added
+            removed.append((group, key))
     if keys:  # an empty list would save every option of the layer
         dock.settingLayerVariable.emit(layer, keys)
     if removed:  # out of FilterMate's database and the variables of the layer too
@@ -313,11 +314,13 @@ def export_state(dock) -> Any:
     return {key: exporting[key] for key in EXPORT_KEYS.values() if key in exporting}
 
 
-def restore_export_state(dock, state: Dict[str, Any]) -> bool:
-    """Put back the export options of ``export_state`` the way set_export_options writes them."""
+def restore_export_state(dock, part: Dict[str, Any]) -> bool:
+    """Put back a part of the export options (``state_change`` of ``{"EXPORTING": export_state}``) the way
+    set_export_options writes them."""
     if dock_problem(dock):
         return False
-    exporting = _exporting(dock)
-    kept = {key: value for key, value in state.items() if key in EXPORT_KEYS.values()}
-    _apply_export(dock, kept, [key for key in exporting if key in EXPORT_KEYS.values() and key not in kept])
+    allowed = set(EXPORT_KEYS.values())
+    values = {key: value for key, value in ((part.get("values") or {}).get("EXPORTING") or {}).items() if key in allowed}
+    removed = [key for group, key in part.get("absent") or () if group == "EXPORTING" and key in allowed]
+    _apply_export(dock, values, removed)
     return True
