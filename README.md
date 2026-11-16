@@ -2,7 +2,7 @@
 
 **🧭 Explore, 🔍 filter and 📦 export vector 🗺️, raster 🏔️ and LiDAR point cloud ☁️ layers in QGIS, from one panel.**
 
-[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.1.2-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
+[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.1.1-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
 [![QGIS 3.22 → 4.x](https://img.shields.io/badge/QGIS-3.22%20%E2%86%92%204.x%20%C2%B7%20Qt5%20%2F%20Qt6-589632)](https://plugins.qgis.org/plugins/filter_mate)
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![QGIS headless](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml)
@@ -48,7 +48,7 @@ splitter handle, 🔍 FILTERING, 📦 EXPORTING and 🔧 CONFIGURATION below.
 
 | Section | What you do there |
 |---|---|
-| 🤖 **AGENT** (experimental) | Ask in a sentence: "buildings above 1200 m in the selected commune". The agent reads the project, filters, selects, zooms, styles and labels layers, edits features (in the edit buffer: you save them), makes print layouts, sets the CRS of the project, adds open data, runs Processing algorithms of QGIS, draws objects with SAM and exports; each step can be undone. It also organizes the layer tree, makes sliders and charts under the conversation, helps set FilterMate up, and keeps a request as a recipe you run again without any model. See [docs/AGENT_MODE.md](docs/AGENT_MODE.md). |
+| 🤖 **AGENT** (experimental) | Ask in a sentence: "buildings above 1200 m in the selected commune". The agent reads the project, filters, selects, zooms, styles and labels layers, edits features (in the edit buffer: you save them), makes print layouts, sets the CRS of the project, brings in the elevation, the OpenStreetMap features, the population or the natural risks (France) of an area, adds web basemaps and open data, runs Processing algorithms of QGIS, draws objects with SAM and exports; each step can be undone. It also organizes the layer tree, makes sliders and charts under the conversation, helps set FilterMate up, asks with choices to click when the decision is yours, and keeps a request as a recipe you run again without any model. See [docs/AGENT_MODE.md](docs/AGENT_MODE.md). |
 | 🧭 **EXPLORING** | Select on the current layer. Vector: one feature, several, or an expression. Raster: a band, a pixel value (picked on the map), a value range on a live histogram, classes of a paletted raster, a raster calculator expression. Point cloud: ASPRS / LiDAR HD classes, Z, intensity and return ranges, chained attribute conditions, height above a DTM. |
 | 🔍 **FILTERING** | Choose the layers to filter and how they relate to the selection: geometric predicates (intersects, within, disjoint…), a buffer, AND / OR with existing filters, a minimum coverage for polygons. |
 | 📦 **EXPORTING** | Write the filtered layers as they are: vector formats, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds, or a GeoPackage with an embedded QGIS project. |
@@ -70,7 +70,7 @@ the original source back, and project files are always saved with the original s
 - ⚡ **Fast on large data.** Filters run as SQL on PostgreSQL / PostGIS, SpatiaLite and GeoPackage (spatial index used,
   no reload), with an OGR path for everything else. In the [documented Saint-Gaudens run](https://imagodata.github.io/filter_mate/stories.html#s1),
   12 layers from a 2.9 GB department-wide GeoPackage were filtered in under a second. Timings depend on the data, hardware and cache.
-- 🌐 **Web services and remote files** (WFS, OGC API Features, ArcGIS, WMS / WMTS / XYZ, WCS, vector tiles, remote COPC / EPT): filtered and explored with bounded, cancellable reads, never on the main thread, and with an explicit refusal rather than a silently partial result.
+- 🌐 **Web services and remote files** (WFS, OGC API Features, ArcGIS, WMS / WMTS / XYZ, WCS, vector tiles, remote COPC / EPT): filtered and explored with bounded, cancellable reads, never on the main thread, and with an explicit refusal rather than a silently partial result. A WMS, a WMTS or a tile basemap can itself be a layer to filter: captured over the area, then cut like a local raster.
 - 🤖 **AGENT** (experimental): a chat in the panel that drives FilterMate and QGIS from a sentence, Processing algorithms included, with Claude, Mistral,
   OpenAI or any compatible server, a local Ollama model (the settings help to install it and to download a model). Filters apply at once
   and each step can be undone; exports and added or removed layers are confirmed. You choose how far it goes alone
@@ -79,8 +79,9 @@ the original source back, and project files are always saved with the original s
   it asks with choices to click; it sets FilterMate up with you (offered once per version, and from the menu
   Vector > FilterMate); a team can give it its own skills, a `SKILL.md` you read and allow first. When the
   project has no such layer, it brings in what a request needs: the elevation of an area (a relief map with its
-  contours in one sentence), OpenStreetMap features by tags, the population of an area, the natural risks of France. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: open data portals,
-  WFS, WMS and WMTS services (IGN, Géorisques), Sentinel-2 scenes, Copernicus elevation, OpenStreetMap (Overpass),
+  contours in one sentence), OpenStreetMap features by tags, the population of an area, the natural risks of France. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: web basemaps (OpenStreetMap, Carto, IGN,
+  Google Satellite), a geocoder, the tables of a PostgreSQL connection of QGIS, open data portals, WFS, WMS and WMTS
+  services (IGN, Géorisques), Sentinel-2 scenes, Copernicus elevation, OpenStreetMap (Overpass),
   a population grid, remote MCP connectors. A built-in MCP server lets Claude Code or another client on
   your computer use the same tools ([docs/AGENT_MODE.md](docs/AGENT_MODE.md)).
 - 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster, a value condition
@@ -90,8 +91,9 @@ the original source back, and project files are always saved with the original s
   polygon layer, or are drawn from a layer of points or footprints in Processing ([docs/SEGMENTATION.md](docs/SEGMENTATION.md)).
 - ✏️ **Zone on the map**: draw a rectangle, polygon, freehand shape or circle; on a vector layer it selects the features it touches, on a raster it keeps the pixels inside it, on a point cloud it cuts the targets.
 - 🎨 **Raster bands**: tick the bands that drive the pipette and the value range, and display one in grey or up to three as a colour composite (false colour included).
-- ↩️ **Undo / Redo** of every filter, per layer, and a global history. **Compare** shows the map before and after the
-  last filter, on each side of a line that follows the mouse.
+- ↩️ **Undo / Redo** of every filter, per layer, and the history of the project in one panel, where you go back to
+  before any step. **Compare** shows the map before and after the last filter, or a state you pinned, on each side
+  of a line across the map.
 - ⭐ **Favorites**: save a filter with its layers and settings, replay it in a click, share it with a team through a git
   repository ([docs/favorites_sharing/USER_GUIDE.md](docs/favorites_sharing/USER_GUIDE.md)).
 - ⚙️ **Automation**: ten Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and

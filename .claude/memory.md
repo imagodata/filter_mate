@@ -1287,3 +1287,13 @@ Result: Que veux-tu faire dans cette session ?
   Même motif non traité : `raster_materialization.py`, `exporters.py`.
 - Piège de banc : `QgsFeatureRequest(expression)` sur une couche postgres est compilé en SQL ; pour une référence
   « ce que QGIS répond », évaluer entité par entité.
+
+## [2026-11-16] Release 5.1.1 refaite : tout ce qui suit 5.1.0 dans une seule 5.1.1
+- Décision utilisateur : la version publiée après 5.1.0 est 5.1.1, datée du 16/11, avec ce que portaient les tags
+  v5.1.1 (14/11) et v5.1.2 (15/11) et #493. Une seule section `[5.1.1]` dans CHANGELOG.md et une seule entrée
+  `changelog=` dans metadata.txt ; tags et releases GitHub v5.1.2 et ancien v5.1.1 supprimés, v5.1.1 reposé sur le
+  merge de la PR de release (le tag publie via `release.yml`).
+- Anciens tags, pour les retrouver : v5.1.1 = objet e233d1b6 sur 34c16c71 ; v5.1.2 = objet 171321f1 sur 4333952e.
+- plugins.qgis.org : un second envoi de 5.1.1 y a été accepté le 14/11 (run 43647948288, « QGIS accepted upload »),
+  alors que CONTRIBUTING dit qu'un numéro déjà reçu est refusé ; la 5.1.2 envoyée le 15/11 y reste (non servie par
+  plugins.xml au 16/11) tant qu'elle n'est pas supprimée à la main par le propriétaire.
