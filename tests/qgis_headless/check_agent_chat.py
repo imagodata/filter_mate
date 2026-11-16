@@ -549,6 +549,7 @@ def check_agent_options(chat, provider, settings, ask):
 
     settings(enabled_sources=("datagouv",))
     asked = []
+    answer_before = chat._ask_user
     chat._ask_user = lambda title, text: asked.append(text) or False  # declined
     provider.reset((200, {}, tool_turn("turn_off_agent_options", {"sources": ["datagouv"]})), (200, {}, text_turn("ok")))
     check("options: a request that turns a source off ends", ask("coupe data.gouv"))
@@ -562,6 +563,7 @@ def check_agent_options(chat, provider, settings, ask):
         QCoreApplication.processEvents()
     check("options: turning on is asked, and declined changes nothing",
           asked and "datagouv" not in load_settings().enabled_sources, asked)
+    chat._ask_user = answer_before  # the checks after expect the answers they set
     settings()
 
 
