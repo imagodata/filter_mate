@@ -4,6 +4,9 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Docs: [AI and data](docs/AI_AND_DATA.md) says what the AGENT sends, to whom and when; [TRADEMARKS.md](TRADEMARKS.md)
+  covers the name and the logo; the README links both, and the Discord. Internal notes are no longer published.
+
 ### AGENT (experimental)
 
 - **Shorter requests.** The tools of the agent and its instructions say the same in fewer words, the rare cases moved to the skill of their task, and the sources you did not tick are named in one paragraph: a conversation of ten requests costs 29 % less on the bench, and its largest request is a quarter lighter.

@@ -141,6 +141,7 @@ The same operation is available as the `filtermate:cross_filter_from_raster` Pro
 | 📖 [User guide](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) | Step by step: first filter, exploring, predicates and buffers, rasters and point clouds, favorites, export, backends, configuration. |
 | 💡 [Use cases](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage](https://imagodata.github.io/filter_mate/stories.fr.html) | Sixteen business questions covering all nine combinations: twelve QGIS recordings and four illustrated recipes, in English and French. |
 | 🤖 [docs/AGENT_MODE.md](docs/AGENT_MODE.md) | The AGENT section: providers, tools, levels of autonomy, undo, recipes, widgets, sources, the built-in MCP server. |
+| 🔒 [docs/AI_AND_DATA.md](docs/AI_AND_DATA.md) | AI and data: what the AGENT sends, to whom and when; no account, no telemetry. |
 | 🧩 [docs/SEGMENTATION.md](docs/SEGMENTATION.md) | Objects drawn by SAM: set up, use, Processing, what it is good at, with measured results. |
 | ⚙️ [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API, MCP servers. |
 | ⭐ [docs/favorites_sharing/](docs/favorites_sharing/USER_GUIDE.md) | Sharing favorites through git repositories. |
@@ -158,9 +159,10 @@ The scripts of `tests/qgis_headless/` load the plugin in the official QGIS Docke
 the dock with its GUI. Start with [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a map of the source tree and
 [CONTRIBUTING.md](CONTRIBUTING.md) for the code rules (Qt5 / Qt6 guards, translations, zip build, pull requests).
 
-🐛 Bugs and 💬 ideas: [GitHub issues](https://github.com/imagodata/filter_mate/issues).
+🐛 Bugs and 💬 ideas: [GitHub issues](https://github.com/imagodata/filter_mate/issues) · 💬 Questions and news: [Discord](https://discord.gg/9DNbuVYQ).
 
 ## 📄 License
 
-GNU General Public License v3.0, see [LICENSE](LICENSE). Developed by [imagodata](https://github.com/imagodata) · simon.ducournau+filter_mate@gmail.com.
+GNU General Public License v3.0, see [LICENSE](LICENSE); the name and the logo are covered by
+[TRADEMARKS.md](TRADEMARKS.md). Developed by [imagodata](https://github.com/imagodata) · simon.ducournau+filter_mate@gmail.com.
 Map data in the screenshots: BD TOPO® and LiDAR HD © IGN, Licence Ouverte 2.0.
