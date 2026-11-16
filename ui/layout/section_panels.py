@@ -323,6 +323,8 @@ class SectionPanels:
             holder.setAttribute(styled, contents.testAttribute(styled))
         self._style(panel)
         panel.closed_by_user.connect(self._on_panel_closed)
+        # Its tab selected: Qt shows nothing again (the page behind a tab was never hidden), so the page is told.
+        panel.visibilityChanged.connect(lambda visible, name=key: self._on_panel_visible(name, visible))
         shortcuts = getattr(self._dock, "keyboard_shortcuts_for", None)
         if callable(shortcuts):  # F5, Ctrl+Z and Ctrl+Y of the dock, with the focus in the panel
             panel.shortcuts = shortcuts(panel)
@@ -491,8 +493,20 @@ class SectionPanels:
         _save(remembered(self.detached(), _saved(), self._present()))
 
     def attach_all(self, remember: bool = True) -> None:
+        """Every section back in the dock. Remembered: none is kept as apart, not even one that is turned off
+        now (it used to go back to its panel the day it was turned on again, against this last word)."""
         for key in self.detached():
             self.attach(key, remember)
+        if remember:
+            _save(())
+
+    def sections_changed(self) -> None:
+        """A section was turned on or off (dock_chrome.apply_section_options): the buttons, the stack below and
+        the room of the dock follow, as after a section left or came back."""
+        try:
+            self._after_change()
+        except RuntimeError:  # the dock went away
+            pass
 
     def shutdown(self) -> None:
         """The plugin unloads: the sections go back to the dock and their panels go, what was apart stays saved."""
@@ -724,6 +738,24 @@ class SectionPanels:
             return
         self.attach(key)
 
+    def _on_panel_visible(self, key: str, visible: bool) -> None:
+        """The panel of ``key`` comes in view (shown, or its tab selected): a page that tells when it is shown
+        (AGENT: an offer waiting in its thread is seen then) says so, once Qt has laid the tabs out."""
+        if not visible or key not in self._panels or self._closing:
+            return
+        from qgis.PyQt.QtCore import QTimer
+
+        def tell() -> None:
+            try:
+                sections = self._sections()
+                page = getattr(sections, "_pages", {}).get(key) if sections is not None else None
+                shown = getattr(page, "shown", None)
+                if key in self._panels and shown is not None and hasattr(shown, "emit") and sections.is_open(key):
+                    shown.emit()
+            except (RuntimeError, TypeError):  # the page went away
+                pass
+        QTimer.singleShot(0, tell)
+
     def _on_bottom_changed(self, index: int) -> None:
         """Something opened a section that is apart (a script, the agent): its panel comes forward instead."""
         from .section_bars import SECTION_PAGES
@@ -832,8 +864,36 @@ class SectionPanels:
             return False
 
     def detach_all(self) -> List[str]:
-        """Every section that can leave the dock, in its own panel; those that left."""
-        return [key for key in DETACHABLE if key not in self._panels and self.detach(key)]
+        """Every section that can leave the dock, in its own panel; those that left.
+
+        Each new tab comes in front of the one before: left alone, AGENT would hide the dock (EXPLORING) and
+        CONFIGURATION would hide FILTERING. What was open stays in front: AGENT or the dock above, and below the
+        section that was open, FILTERING when none was."""
+        from qgis.PyQt.QtCore import QTimer
+        from .section_bars import SECTION_PAGES
+        sections = self._sections()
+        agent_open = bool(sections is not None and sections.is_open("agent"))
+        toolbox = getattr(self._dock, "toolBox_tabTools", None)
+        current = toolbox.currentWidget() if toolbox is not None else None
+        below = next((key for key in BOTTOM if current is not None
+                      and current is getattr(self._dock, SECTION_PAGES[key], None)), "filtering")
+        left = [key for key in DETACHABLE if key not in self._panels and self.detach(key)]
+        if left:
+            QTimer.singleShot(0, lambda: self._bring_forward(below, agent_open))  # after the raise of each new tab
+        return left
+
+    def _bring_forward(self, below: str, agent_open: bool) -> None:
+        try:
+            for key in (below, "filtering"):
+                if key in self._panels:
+                    self.raise_panel(key)
+                    break
+            if agent_open and "agent" in self._panels:
+                self.raise_panel("agent")
+            elif not self._dock.isFloating():
+                self._dock.raise_()
+        except RuntimeError:  # the dock went away
+            pass
 
     def _show_menu(self, key: str, header: Any, pos: Any) -> None:
         try:

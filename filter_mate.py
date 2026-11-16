@@ -291,14 +291,23 @@ class FilterMate:
             parent=self.iface.mainWindow(),
             status_tip=self.tr(u'Open FilterMate panel'))
 
-        # The setup with the agent: also offered once per version, in the AGENT panel
+        # The setup, asked with cards in the AGENT panel (no model): also offered there once per version
         self._setup_action = self.add_action(
             icon_path,
-            text=self.tr(u'Set up FilterMate with the agent'),
+            text=self.tr(u'Set up FilterMate'),
             callback=self.setup_with_agent,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False,
-            status_tip=self.tr(u'The agent asks a few questions and proposes the settings of FilterMate'))
+            status_tip=self.tr(u'A few choices, then every setting before and after: no AI model needed'))
+
+        # What each section does, the sections as panels of QGIS, the buttons: told in the AGENT panel (no model)
+        self._tour_action = self.add_action(
+            icon_path,
+            text=self.tr(u'How FilterMate works'),
+            callback=self.show_how_it_works,
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False,
+            status_tip=self.tr(u'What each section does, the sections as panels of QGIS, where the buttons are'))
 
         # Action to reset configuration and database
         reset_icon_path = os.path.join(self.plugin_dir, 'icons', 'parameters.png')
@@ -314,13 +323,15 @@ class FilterMate:
         """Retranslate menu and toolbar action texts after a language change.
 
         Each entry is found by its own reference, never by its place in ``self.actions``: an entry added between
-        two others (the setup with the agent) took the words of the one after it.
+        two others (the setup) took the words of the one after it.
         """
         self.menu = self.tr(u'&FilterMate')
         entries = (
             ('_open_action', self.tr(u'FilterMate'), self.tr(u'Open FilterMate panel')),
-            ('_setup_action', self.tr(u'Set up FilterMate with the agent'),
-             self.tr(u'The agent asks a few questions and proposes the settings of FilterMate')),
+            ('_setup_action', self.tr(u'Set up FilterMate'),
+             self.tr(u'A few choices, then every setting before and after: no AI model needed')),
+            ('_tour_action', self.tr(u'How FilterMate works'),
+             self.tr(u'What each section does, the sections as panels of QGIS, where the buttons are')),
             ('_reset_action', self.tr(u'Reset configuration and database'),
              self.tr(u'Reset the default configuration and delete the SQLite database')),
         )
@@ -1829,17 +1840,18 @@ class FilterMate:
             settings.setValue('FilterMate/discord_welcome_dismissed', True)
 
     def _offer_agent_setup(self) -> None:
-        """The first opening of a version: the AGENT panel offers the setup with the agent, once."""
+        """The first opening of a version: the AGENT panel offers the setup (cards of choices, no model), once."""
         chat = getattr(getattr(self.app, 'dockwidget', None), '_agent_chat', None) if self.app else None
         if chat is None:
             return
         try:
             chat.offer_setup_once()
         except Exception:
-            logger.exception("FilterMate: the setup with the agent could not be offered")
+            logger.exception("FilterMate: the setup could not be offered")
 
-    def setup_with_agent(self):
-        """Vector > FilterMate > Set up FilterMate with the agent: the panel opened, then the setup started."""
+    def _chat_of_agent(self):
+        """The chat of the AGENT section, the panel opened first; None, said in the message bar, when the section
+        is turned off: the setup and the tour are told in its thread."""
         if not self.pluginIsActive or not self.app or not getattr(self.app, 'dockwidget', None):
             self.run()
         dock = getattr(self.app, 'dockwidget', None) if self.app else None
@@ -1850,13 +1862,28 @@ class FilterMate:
             self.iface.messageBar().pushInfo(
                 "FilterMate", self.tr("The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the "
                                       "configuration, then restart QGIS."))
-            return
-        chat.start_setup()
+        return chat
 
-    WHATS_NEW_VERSION = 5
+    def setup_with_agent(self):
+        """Vector > FilterMate > Set up FilterMate: the panel opened, then the setup started in the AGENT thread
+        (cards of choices, no model; the name dates from the setup a model asked)."""
+        chat = self._chat_of_agent()
+        if chat is not None:
+            chat.start_setup()
+
+    def show_how_it_works(self):
+        """Vector > FilterMate > How FilterMate works: the panel opened, then the tour told in the AGENT thread."""
+        chat = self._chat_of_agent()
+        if chat is not None:
+            chat.show_tour()
+
+    WHATS_NEW_VERSION = 6
 
     def _show_whats_new(self) -> bool:
-        """Present FilterMate 5 once (raster and point cloud layers); True when shown."""
+        """Present once what changed in how FilterMate is set up and laid out (the setup with no model, the
+        sections as panels of QGIS); True when shown. ``_setup_asked`` is set when its button *Set up FilterMate*
+        was clicked: run() starts the setup once the AGENT section is there."""
+        self._setup_asked = False
         settings = QSettings()
         try:
             seen = int(settings.value('FilterMate/whats_new_seen', 0) or 0)
@@ -1867,37 +1894,48 @@ class FilterMate:
         settings.setValue('FilterMate/whats_new_seen', self.WHATS_NEW_VERSION)
 
         page = 'guide.fr.html' if getattr(self, '_current_locale', 'en') == 'fr' else 'guide.html'
-        guide_url = f"https://imagodata.github.io/filter_mate/{page}#raster-lidar"
+        guide_url = f"https://imagodata.github.io/filter_mate/{page}#interface"
 
         dlg = QDialog(self.iface.mainWindow())
-        dlg.setWindowTitle(self.tr("What's new in FilterMate 5"))
+        dlg.setWindowTitle(self.tr("What's new in FilterMate"))
         dlg.setMinimumWidth(460)
         layout = QVBoxLayout(dlg)
         layout.setSpacing(12)
         layout.setContentsMargins(24, 20, 24, 20)
 
         text = QLabel(self.tr(
-            "<p style='font-size:13px;'><b>FilterMate now works with raster and point cloud layers.</b></p>"
+            "<p style='font-size:13px;'><b>The sections of FilterMate can be panels of QGIS, and its setup "
+            "needs no AI model.</b></p>"
             "<ul style='margin-left:10px; font-size:12px;'>"
-            "<li><b>EXPLORING</b> adapts to the current layer: value range and classes of a raster, "
-            "classes, elevation and attributes of a LiDAR point cloud.</li>"
-            "<li><b>FILTERING</b> relates that selection to layers of any kind, with the usual predicates "
-            "and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped "
-            "to a municipality.</li>"
-            "<li><b>EXPORTING</b> writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).</li>"
-            "<li>Processing algorithms and models, qgis_process, Python and REST APIs.</li>"
+            "<li><b>Set up FilterMate</b> asks a few choices: the sections you use, your data, the look, where "
+            "the sections and their buttons go. It shows every setting before and after, and sends nothing "
+            "anywhere.</li>"
+            "<li><b>Sections as panels</b>: right-click the header of AGENT, FILTERING, EXPORTING or "
+            "CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it "
+            "with another one, as tabs, or to merge it back into FilterMate.</li>"
+            "<li><b>Buttons under each section</b>, and FILTERING or EXPORTING turned off when you do not use "
+            "them.</li>"
+            "<li><b>AGENT</b> filters, styles and brings in data from a sentence, with your own API key or a "
+            "local Ollama model. <b>How FilterMate works</b>, in its menu, tells each section again.</li>"
             "</ul>"
         ))
         text.setWordWrap(True)
         layout.addWidget(text)
 
+        def ask_setup():
+            self._setup_asked = True
+            dlg.accept()
+
         bottom = QHBoxLayout()
+        setup_btn = QPushButton(self.tr("Set up FilterMate"))
+        setup_btn.setDefault(True)
+        setup_btn.clicked.connect(ask_setup)
+        bottom.addWidget(setup_btn)
         guide_btn = QPushButton(self.tr("Open the user guide"))
         guide_btn.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(guide_url)))
         bottom.addWidget(guide_btn)
         bottom.addStretch()
         close_btn = QPushButton(self.tr("Close"))
-        close_btn.setDefault(True)
         close_btn.clicked.connect(dlg.accept)
         bottom.addWidget(close_btn)
         layout.addLayout(bottom)
@@ -1951,7 +1989,11 @@ class FilterMate:
                             self._show_discord_welcome()
                         self._init_extensions_dockwidget_ui()
                         self.app.dockwidget.install_agent_panel(self)
-                        self._offer_agent_setup()
+                        if getattr(self, '_setup_asked', False):  # asked in the dialog of what is new
+                            self._setup_asked = False
+                            self.setup_with_agent()
+                        else:
+                            self._offer_agent_setup()
                 else:
                     # App already exists, call run() which will show the dockwidget
                     # and refresh layers if needed

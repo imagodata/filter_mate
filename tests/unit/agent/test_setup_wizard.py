@@ -56,7 +56,8 @@ def test_sections_turned_off_skip_their_step(values):
     answers = wizard.Answers()
     answers.record(wizard.FEATURES, {"sections": ["agent"], "data": [], "size": ["keep"]})
     assert wizard.next_step([wizard.FEATURES], values, answers) == wizard.LOOK
-    assert wizard.next_step([wizard.FEATURES, wizard.LOOK], values, answers) is None
+    assert wizard.next_step([wizard.FEATURES, wizard.LOOK], values, answers) == wizard.LAYOUT
+    assert wizard.next_step([wizard.FEATURES, wizard.LOOK, wizard.LAYOUT], values, answers) is None
     asked = {change["path"]: change["value"] for change in wizard.changes(values, answers)}
     assert asked == {wizard.FILTERING_ON: False, wizard.EXPORTING_ON: False, wizard.RASTER_ON: False,
                      wizard.POINT_CLOUD_ON: False}
@@ -125,3 +126,58 @@ def test_the_project_ticks_its_kinds_of_data(values):
 def test_same_number_and_switch():
     assert wizard._same(60, 60.0)
     assert not wizard._same(True, 1)
+
+
+# --- where the sections go: asked with the buttons, moved by the panel, never a setting ------------------------------
+
+
+def test_the_layout_step_asks_the_panels_and_the_buttons(values):
+    facts = wizard.ProjectFacts(layout=wizard.IN_DOCK)
+    look = wizard.step_questions(wizard.LOOK, values, facts, wizard.Answers())
+    assert [ask.key for ask in look] == ["theme", "profile", "language"]
+    layout = wizard.step_questions(wizard.LAYOUT, values, facts, wizard.Answers())
+    assert [ask.key for ask in layout] == ["panels", "action_bar"]
+    panels = layout[0]
+    assert [choice.key for choice in panels.choices] == list(wizard.LAYOUTS) and not panels.multi
+    assert [choice.key for choice in panels.choices if choice.selected] == [wizard.IN_DOCK]
+
+
+def test_sections_that_cannot_move_are_not_asked(values):
+    """A panel without sections to move (a dock of an older layout): the buttons alone."""
+    layout = wizard.step_questions(wizard.LAYOUT, values, wizard.ProjectFacts(), wizard.Answers())
+    assert [ask.key for ask in layout] == ["action_bar"]
+
+
+def test_some_sections_apart_is_a_choice_of_its_own_ticked(values):
+    facts = wizard.ProjectFacts(layout=wizard.AS_NOW)
+    panels = wizard.step_questions(wizard.LAYOUT, values, facts, wizard.Answers())[0]
+    assert [choice.key for choice in panels.choices] == [wizard.IN_DOCK, wizard.IN_PANELS, wizard.AS_NOW]
+    assert [choice.key for choice in panels.choices if choice.selected] == [wizard.AS_NOW]
+
+
+@pytest.mark.parametrize("now, chosen, wanted", [
+    (wizard.IN_DOCK, wizard.IN_DOCK, None),  # as it is
+    (wizard.IN_DOCK, wizard.IN_PANELS, wizard.IN_PANELS),
+    (wizard.IN_PANELS, wizard.IN_DOCK, wizard.IN_DOCK),
+    (wizard.AS_NOW, wizard.AS_NOW, None),  # left as they are
+    (wizard.AS_NOW, wizard.IN_PANELS, wizard.IN_PANELS),
+    (wizard.AS_NOW, wizard.IN_DOCK, wizard.IN_DOCK),
+])
+def test_the_sections_move_only_when_the_answer_is_another_layout(now, chosen, wanted):
+    answers = wizard.Answers()
+    answers.record(wizard.LAYOUT, {"panels": [chosen], "action_bar": ["bottom"]})
+    assert wizard.layout_wanted(wizard.ProjectFacts(layout=now), answers) == wanted
+
+
+def test_a_layout_not_asked_moves_nothing():
+    answers = wizard.Answers()
+    assert wizard.layout_wanted(wizard.ProjectFacts(layout=wizard.IN_DOCK), answers) is None
+    answers.record(wizard.LAYOUT, {"action_bar": ["sections"]})
+    assert wizard.layout_wanted(wizard.ProjectFacts(), answers) is None
+
+
+def test_the_layout_is_never_a_setting(values):
+    """QGIS keeps the place of its panels: the answer changes no setting, the buttons asked with it do."""
+    answers = wizard.Answers()
+    answers.record(wizard.LAYOUT, {"panels": [wizard.IN_PANELS], "action_bar": ["sections"]})
+    assert wizard.changes(values, answers) == [{"path": wizard.ACTION_BAR, "value": "sections"}]

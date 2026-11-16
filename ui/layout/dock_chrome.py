@@ -28,6 +28,8 @@ logger = logging.getLogger("FilterMate")
 
 AGENT_PAGE = "AGENT"
 # The sections the user may turn off (APP.OPTIONS.<NAME>.enabled), and the buttons of the action bar acting in them.
+from .section_bars import _hidden_by_code  # noqa: E402 - plain Python, no Qt at import
+
 SECTION_PAGES = {"filtering": "FILTERING", "exporting": "EXPORTING"}
 SECTION_ACTIONS = {
     # Undo and Redo stay: they walk the steps of the agent too, and open the history of the project.
@@ -328,11 +330,16 @@ class DockSections(QObject):
         return trailer
 
     def is_open(self, key: str) -> bool:
-        """In view: open in its stack, or on screen in its own panel (behind another tab, it is not)."""
+        """In view: open in its stack, or on screen in its own panel (behind another tab, it is not).
+
+        Qt calls the page of a panel behind another tab visible (``isVisible`` is true in Qt 5 and 6): only its
+        visible region, empty then, tells that nobody sees it."""
         page = self._pages.get(key)
         if page is None:
             return False
-        return page.isVisible() if key in self.detached else not page.isHidden()
+        if key in self.detached:
+            return page.isVisible() and not page.visibleRegion().isEmpty()
+        return not page.isHidden()
 
     def _open_in_stack(self, key: str) -> bool:
         """Open in the stack of the dock; a section in its own panel is not, wherever it shows."""
@@ -437,7 +444,9 @@ class DockSections(QObject):
                 continue
             if not shown:
                 if name not in hidden:
-                    hidden[name] = not widget.isHidden()  # QFieldCloud stays hidden without its plugin
+                    # QFieldCloud stays hidden without its plugin. A button just made, or one a bar rebuilt in the
+                    # same turn (another position of the bar) took and gives back, is hidden for a moment only.
+                    hidden[name] = not _hidden_by_code(widget)
                 widget.setVisible(False)
             elif name in hidden:
                 widget.setVisible(hidden.pop(name))
@@ -450,8 +459,9 @@ class DockSections(QObject):
             self._move_source_layer(to_exploring=not shown)
         if shown and key in self._reopen:
             self._reopen.discard(key)
-            # Not over AGENT: opening FILTERING opens EXPLORING, which would fold AGENT under its user.
-            if self._toolbox.currentWidget() is self._nothing and not self.is_open("agent"):
+            # Not over AGENT: opening FILTERING opens EXPLORING, which would fold AGENT under its user. AGENT in
+            # its own panel folds nothing.
+            if self._toolbox.currentWidget() is self._nothing and not self._open_in_stack("agent"):
                 self._toolbox.setCurrentWidget(page)
         self._fit()
         return True
@@ -679,9 +689,13 @@ def _follow_sections(dock: Any) -> None:
         panels = getattr(dock, "_fm_panels", None)
         if panels is not None:
             panels.restore()
-        manager = getattr(dock, "_action_bar_manager", None)
-        if manager is not None:
-            manager.sync_sections()
+            # The stack below shows when a section is left in it, and hides with the last one: a section turned
+            # on while the two others are in their panels was shown in a hidden stack, so nowhere.
+            panels.sections_changed()
+        else:
+            manager = getattr(dock, "_action_bar_manager", None)
+            if manager is not None:
+                manager.sync_sections()
     except RuntimeError:  # the dock went away
         pass
     except Exception:

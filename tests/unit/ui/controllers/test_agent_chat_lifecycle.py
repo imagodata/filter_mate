@@ -200,6 +200,7 @@ def ctrl_module(monkeypatch):
     bounded_http = _load(monkeypatch, "adapters.agent.bounded_http", "adapters/agent/bounded_http.py")
     _load(monkeypatch, "ui.controllers.history_tips", "ui/controllers/history_tips.py")
     _load(monkeypatch, "ui.controllers.setup_wizard", "ui/controllers/setup_wizard.py")
+    _load(monkeypatch, "ui.controllers.welcome_tour", "ui/controllers/welcome_tour.py")
     module = _load(monkeypatch, "ui.controllers.agent_chat_controller", "ui/controllers/agent_chat_controller.py")
     module._test_bounded_http = bounded_http
     module._test_store = store
@@ -806,7 +807,8 @@ def offer(ctrl_module, controller, dock, monkeypatch):
                                               open_top=lambda key: state.opened.append(key))
     controller._on_send = state.sent.append
     # The setup asks with cards, no request (ui/controllers/setup_wizard.py): its start counts as what was sent.
-    controller._wizard = types.SimpleNamespace(start=lambda: state.sent.append("setup"), forget=lambda: None)
+    controller._wizard = types.SimpleNamespace(start=lambda: state.sent.append("setup"), forget=lambda: None,
+                                               offer_back_again=lambda: state.sent.append("back link"))
     return state
 
 
@@ -826,6 +828,10 @@ def test_an_offer_nobody_saw_is_not_kept_as_made(controller, offer):
     assert len(offer.cards) == 1 and offer.key not in FakeSettings.values
     assert controller.offer_setup_once("9.9.9") is False and len(offer.cards) == 1  # one card, not one per call
 
+    controller._on_panel_shown()  # shown behind another tab, as QGIS restores a panel: nobody saw the card
+    assert offer.key not in FakeSettings.values
+
+    offer.agent_open = True
     controller._on_panel_shown()  # the user opens AGENT: the card is in view
     assert FakeSettings.values[offer.key] == "9.9.9"
     assert controller.offer_setup_once("9.9.9") is False
@@ -844,7 +850,9 @@ def test_an_offer_nobody_saw_comes_back_in_the_thread_of_another_project(control
     project.cleared.emit()
     project.readProject.emit()
     assert len(offer.cards) >= 2 and not offer.cards[-1].done and offer.key not in FakeSettings.values
+    assert "back link" in offer.sent  # what puts the settings of the setup back returns with the thread
 
+    offer.agent_open = True
     controller._on_panel_shown()
     shown = len(offer.cards)
     project.cleared.emit()
