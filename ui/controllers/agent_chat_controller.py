@@ -15,7 +15,7 @@ from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 from ...adapters.agent.qt_transport import QtTransport
 from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, load_settings, provider_config, read_key, save_settings, store_key,
-    target_of,
+    target_of, current_provider, read_providers, write_providers,
 )
 from ...adapters.agent import transcript_store
 from ...adapters.agent.project_notes_store import read_notes, write_notes
@@ -802,6 +802,7 @@ class AgentChatController(QObject):
                                         tool_families=dialog.tool_families.isChecked(),
                                         autonomy=dialog.chosen_autonomy(),
                                         tool_rules=json.dumps(dialog.chosen_tool_rules())))
+            self._remember_provider(load_settings())
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
             self._policy.rules = load_settings().rules
             if project_layers:
@@ -816,6 +817,13 @@ class AgentChatController(QObject):
         self._sync_mcp()
         self._refresh_ready()
         return True
+
+    @staticmethod
+    def _remember_provider(values: AgentSettings) -> None:
+        """A provider the user agreed to send data to joins the list the menu and the agent switch between."""
+        if values.consent and values.model:
+            from ...core.agent.agent_options import remember
+            write_providers(remember(read_providers(), current_provider(values)))
 
     def _sync_mcp(self) -> None:
         self._mcp.sync()

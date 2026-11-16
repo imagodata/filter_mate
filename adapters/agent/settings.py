@@ -13,6 +13,7 @@ from typing import Optional, Tuple
 from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsSettings
 from qgis.PyQt.QtCore import QCoreApplication
 
+from ...core.agent.agent_options import ProviderEntry
 from ...core.agent.mcp_server import DEFAULT_PORT
 from ...core.agent.permissions import DEFAULT_LEVEL, clean_rules, level_or_default
 from ...core.agent.providers import PRESETS
@@ -256,3 +257,27 @@ def provider_config(values: AgentSettings, key: Optional[str]) -> ProviderConfig
     kind, base_url = PRESETS[values.preset]
     return ProviderConfig(kind=kind, model=values.model, base_url=values.base_url or base_url, api_key=key or "",
                           max_tokens=MAX_TOKENS)
+
+
+# --- The providers the user set up (2026-11-16): the menu of the AGENT panel and the agent switch between them ------
+
+def current_provider(values: AgentSettings) -> ProviderEntry:
+    return ProviderEntry(values.preset, values.model, values.base_url, values.authcfg, values.consent_target,
+                         values.key_target)
+
+
+def read_providers() -> Tuple[ProviderEntry, ...]:
+    """The providers set up, the latest first; none when what is saved cannot be read."""
+    try:
+        rows = json.loads(str(QgsSettings().value(_PREFIX + "providers", "[]") or "[]"))
+        return tuple(ProviderEntry(str(row["preset"]), str(row["model"]), str(row.get("base_url", "")),
+                                   str(row.get("authcfg", "")), str(row.get("consent_target", "")),
+                                   str(row.get("key_target", ""))) for row in rows)
+    except (ValueError, TypeError, KeyError, AttributeError):
+        return ()
+
+
+def write_providers(entries) -> None:
+    QgsSettings().setValue(_PREFIX + "providers", json.dumps(
+        [{"preset": entry.preset, "model": entry.model, "base_url": entry.base_url, "authcfg": entry.authcfg,
+          "consent_target": entry.consent_target, "key_target": entry.key_target} for entry in entries]))
