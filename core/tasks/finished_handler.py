@@ -183,18 +183,19 @@ class FinishedHandler:
 
         # Apply pending subset strings on main thread
         apply_failures: List[str] = []
-        refused_layer_ids: List[str] = []
+        refusals: List[Tuple[str, str, str]] = []
         applied_count = 0
         if pending_subset_requests:
             applied_count = apply_pending_subset_requests(
                 pending_subset_requests,
                 safe_set_subset_fn,
                 failures=apply_failures,
-                refused_layer_ids=refused_layer_ids,
+                refusals=refusals,
             )
             logger.info(f"Applied {applied_count} pending subset requests")
             # 2026-11-16: run() already wrote the history of the refused layers (entry
             # added, last one or all deleted) while they keep their previous filter.
+            refused_layer_ids = [layer_id for layer_id, _name, _reason in refusals if layer_id]
             if refused_layer_ids and restore_history_fn is not None:
                 try:
                     restore_history_fn(refused_layer_ids)
@@ -221,8 +222,8 @@ class FinishedHandler:
             if cleanup_canceled_mv_fn is not None:
                 cleanup_canceled_mv_fn()
         elif task_action in ('reset', 'unfilter'):
-            if refused_layer_ids:
-                logger.info(f"Views kept: the filter of {len(refused_layer_ids)} layer(s) was refused")
+            if refusals:
+                logger.info(f"Views kept: the filter of {len(refusals)} layer(s) was refused")
             else:
                 cleanup_mv_fn()
 
@@ -254,7 +255,7 @@ class FinishedHandler:
 
         # 2026-10-17: a filter the provider refused is not a success
         if apply_failures:
-            self._display_apply_failures(apply_failures, iface)
+            self._display_apply_failures(refusals, iface)
 
         self._release_task_caches(task_parameters)
 
@@ -553,9 +554,20 @@ class FinishedHandler:
             )
 
     @staticmethod
-    def _display_apply_failures(failures: List[str], iface: Any) -> None:
-        """Message bar warning for the filters the providers refused (2026-10-17)."""
-        shown = "; ".join(failures[:3]) + (f" (+{len(failures) - 3})" if len(failures) > 3 else "")
+    def _display_apply_failures(refusals: List[Tuple[str, str, str]], iface: Any) -> None:
+        """Message bar warning for the filters the providers refused (2026-10-17).
+
+        2026-11-16: the layers are grouped by reason: a server gone repeated the same
+        long reason once per layer ("Cables: connection lost…; Conduites: connection lost…").
+        """
+        groups: Dict[str, List[str]] = {}
+        for _layer_id, name, reason in refusals:
+            groups.setdefault(reason, []).append(name)
+        parts = []
+        for reason, names in list(groups.items())[:3]:
+            listed = ", ".join(names[:3]) + (f" (+{len(names) - 3})" if len(names) > 3 else "")
+            parts.append(f"{listed}: {reason}")
+        shown = "; ".join(parts) + (f" (+{len(groups) - 3})" if len(groups) > 3 else "")
         message = QCoreApplication.translate(
             "FinishedHandler", "Filter not applied, previous filter kept: {0}"
         ).format(shown)

@@ -214,12 +214,26 @@ def test_filters_applied_everywhere_still_say_success(finished):
     finished.iface.messageBar.return_value.pushMessage.assert_called_once()
 
 
-def _refuse(finished, layer_id="cables_id"):
-    def apply(requests, fn, failures=None, refused_layer_ids=None):
-        failures.append("Cables: lost")
-        refused_layer_ids.append(layer_id)
-        return 0
+def _refuse(finished, refused=(("cables_id", "Cables", "lost"),), applied=0):
+    def apply(requests, fn, failures=None, refusals=None):
+        for layer_id, name, reason in refused:
+            failures.append(f"{name}: {reason}")
+            refusals.append((layer_id, name, reason))
+        return applied
     finished.apply.side_effect = apply
+
+
+def _warning(finished):
+    return finished.iface.messageBar.return_value.pushWarning.call_args.args[1]
+
+
+def test_the_warning_groups_the_layers_by_reason(finished):
+    """2026-11-16: 9 layers refused for the server gone repeated the same long reason."""
+    names = ["Cables", "Conduites", "Structures", "Zones MRO", "Zones POP"]
+    _refuse(finished, [(f"{n}_id", n, "connection lost") for n in names] + [("t_id", "Tranchees", "bad column")])
+    finished.run(canceled=False, task_action="unfilter")
+    assert _warning(finished) == ("Filter not applied, previous filter kept: "
+                                  "Cables, Conduites, Structures (+2): connection lost; Tranchees: bad column")
 
 
 def test_the_history_of_refused_layers_is_put_back(finished):
