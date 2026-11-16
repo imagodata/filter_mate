@@ -690,8 +690,8 @@ class _ColumnAligner(QObject if QObject is not None else object):
         try:
             if not self._page.isVisible():
                 return
-            if self._pairs:
-                _keys_follow_rows(self._pairs[0][0].parentWidget())
+            if self._pairs:  # the holder of the key column (its first button may be lent to EXPLORING)
+                _keys_follow_rows(self._keys.parentWidget() or self._pairs[0][0].parentWidget())
             rows = []
             for button, value in self._pairs:
                 if button.isHidden() or value.isHidden() or self._keys.indexOf(button) < 0:

@@ -205,6 +205,8 @@ class AgentChatController(QObject):
         self._settings_cards = []  # the cards of the thread, kept alive with it
         self._setup_offer = ""  # the version whose setup offer nobody has seen yet
         self._setup_card = None  # its card, while it waits for an answer
+        from .setup_wizard import SetupWizard
+        self._wizard = SetupWizard(self)  # the setup asked with cards, no model
         self._settings_outcomes = []  # what the user chose on a card since the last request, told to the model
         manager = getattr(parent_widget, '_config_model_manager', None)
         self._settings_applier = manager.apply_settings if manager is not None else None
@@ -370,6 +372,7 @@ class AgentChatController(QObject):
         self.panel.input.forget()
         self.panel.clear_thread()
         self._setup_card = None  # it went with the thread
+        self._wizard.forget()
         if not self._transcript:
             return
         for item in self._transcript:
@@ -635,13 +638,14 @@ class AgentChatController(QObject):
 
     def _show_setup_offer(self) -> None:
         texts = {"heading": _tr("Set FilterMate up with the agent?"),
-                 "note": _tr("A few questions, then the settings shown before and after: nothing changes until you "
-                             "apply. Later: menu Vector > FilterMate > Set up FilterMate with the agent."),
+                 "note": _tr("A few choices, then the settings shown before and after: no AI model needed, nothing "
+                             "changes until you apply. Later: menu Vector > FilterMate > Set up FilterMate with the "
+                             "agent."),
                  "apply": _tr("Start"), "cancel": _tr("Not now"),
                  "accepted": _tr("Setup started."), "declined": _tr("Not now: the menu starts it when you want.")}
-        lines = [_tr("Look: language, theme, size of the panel"),
-                 _tr("Your data: PostgreSQL, rasters, point clouds, timeouts"),
-                 _tr("The agent: what it may do alone, which layers it never changes")]
+        lines = [_tr("Sections: FILTERING, EXPORTING, AGENT, only those you use"),
+                 _tr("Your data: rasters, point clouds, PostgreSQL, web services, their size"),
+                 _tr("Look: theme, size of the panel, language, buttons")]
         card = self.panel.add_settings_card(texts, lines, "")
         card.apply_requested.connect(self.start_setup)  # closed by start_setup, once the setup really starts
         card.cancel_requested.connect(self._decline_setup)
@@ -700,9 +704,9 @@ class AgentChatController(QObject):
             self._say(_tr("Not now: the menu starts it when you want."))
 
     def start_setup(self) -> bool:
-        """Set FilterMate up with the agent: the AGENT section opened, and a request that starts the setup. The
-        settings of the agent are asked first when it has none (the usual way of a first request). True when the
-        request was handed over; an offer waiting in the thread is closed then, not before."""
+        """Set FilterMate up: the AGENT section opened, and the cards of the setup in its thread (setup_wizard.py),
+        with or without a model: no request is sent. True when it started; an offer waiting in the thread is closed
+        then, not before."""
         sections = getattr(self._parent_widget, "_fm_sections", None)
         if sections is not None and hasattr(sections, "open_top"):
             try:  # first: what is said below must be in view
@@ -719,6 +723,14 @@ class AgentChatController(QObject):
         card, self._setup_card = self._setup_card, None
         if card is not None and not card.done:
             card.finish(True)
+        self._wizard.start()  # cards of choices: no model, nothing sent
+        return True
+
+    def start_model_setup(self) -> bool:
+        """After the setup: the agent looks at the project, asks its own questions and proposes more settings."""
+        if self.chat_busy() or self._mcp.busy:
+            self._say(_tr("Wait for the end of the request, then try again."), error=True)
+            return False
         self._on_send(_tr("Help me set FilterMate up for my computer and my data: look at what this project holds, "
                           "ask me a few questions, then propose the settings."))
         return True
@@ -2166,6 +2178,7 @@ class AgentChatController(QObject):
         self.panel.clear_thread()
         self._links, self._settings_cards, self._settings_outcomes = [], [], []
         self._setup_card = None  # it went with the thread
+        self._wizard.forget()
 
     def new_conversation(self) -> None:
         """The user starts again: what this project's conversation kept is forgotten."""
@@ -2885,16 +2898,17 @@ class AgentChatController(QObject):
         self._settings_outcomes.append(("applied: " if applied else "declined: ")
                                        + ", ".join(f"{row['path']} = {json.dumps(row['after'])}" for row in changes))
 
-    def _apply_settings_card(self, card, changes, reason: str) -> None:
-        """Apply clicked: the change as shown, as a step of the history of its own (undoable), outside any request."""
+    def _apply_settings_card(self, card, changes, reason: str) -> bool:
+        """Apply clicked: the change as shown, as a step of the history of its own (undoable), outside any request.
+        True when applied. The setup (setup_wizard.py) applies its card here too."""
         if self.chat_busy() or self._mcp.busy:
             self._say(_tr("Wait for the end of the request, then click Apply again."), error=True)
-            return
+            return False
         now = plugin_settings.current_values([row["path"] for row in changes])
         if any(now.get(row["path"]) != row["before"] for row in changes):
             self._say(_tr("These settings changed since the agent proposed them: ask it again."), error=True)
             self._close_settings_card(card, changes, False)
-            return
+            return False
         import uuid
         call = ToolCallPart(uuid.uuid4().hex, "change_settings", {
             "changes": [{"path": row["path"], "value": row["after"]} for row in changes], "reason": reason})
@@ -2907,7 +2921,7 @@ class AgentChatController(QObject):
         except Exception:
             logger.exception("Agent: undo point of a card failed")
             self._say(NO_UNDO_POINT, error=True)
-            return
+            return False
         try:
             answer, failed = json.dumps(plugin_settings.apply_planned(changes), ensure_ascii=False), False
         except ToolFailure as exc:
@@ -2918,6 +2932,7 @@ class AgentChatController(QObject):
         self._close_settings_card(card, changes, not failed)
         self._save_transcript()
         self.history_changed()
+        return not failed
 
     def _settings_plan(self, call: ToolCallPart):
         """(rows, left out, problem) of a settings call, read once for what the user sees."""

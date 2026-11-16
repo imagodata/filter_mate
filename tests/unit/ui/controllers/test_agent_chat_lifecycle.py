@@ -199,6 +199,7 @@ def ctrl_module(monkeypatch):
     _module(monkeypatch, ".ui.widgets.agent_widgets_strip", number_text=str)
     bounded_http = _load(monkeypatch, "adapters.agent.bounded_http", "adapters/agent/bounded_http.py")
     _load(monkeypatch, "ui.controllers.history_tips", "ui/controllers/history_tips.py")
+    _load(monkeypatch, "ui.controllers.setup_wizard", "ui/controllers/setup_wizard.py")
     module = _load(monkeypatch, "ui.controllers.agent_chat_controller", "ui/controllers/agent_chat_controller.py")
     module._test_bounded_http = bounded_http
     module._test_store = store
@@ -804,7 +805,19 @@ def offer(ctrl_module, controller, dock, monkeypatch):
     dock._fm_sections = types.SimpleNamespace(is_open=lambda key: state.agent_open,
                                               open_top=lambda key: state.opened.append(key))
     controller._on_send = state.sent.append
+    # The setup asks with cards, no request (ui/controllers/setup_wizard.py): its start counts as what was sent.
+    controller._wizard = types.SimpleNamespace(start=lambda: state.sent.append("setup"), forget=lambda: None)
     return state
+
+
+def test_the_setup_sends_nothing_to_a_model(controller, offer):
+    assert controller.start_setup() is True
+    assert offer.sent == ["setup"]
+
+
+def test_refining_the_setup_asks_the_model(controller, offer):
+    assert controller.start_model_setup() is True
+    assert len(offer.sent) == 1 and offer.sent[0] != "setup"
 
 
 def test_an_offer_nobody_saw_is_not_kept_as_made(controller, offer):

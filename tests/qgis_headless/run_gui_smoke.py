@@ -30,7 +30,7 @@ import types
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsSettings, QgsVectorLayer
 from qgis.PyQt.QtCore import QCoreApplication, QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
-from qgis.PyQt.QtWidgets import QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QPushButton, QScrollArea, QToolButton
+from qgis.PyQt.QtWidgets import QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QPushButton, QScrollArea, QToolButton, QWidget
 try:
     from qgis.PyQt.QtGui import QShortcut
 except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
@@ -703,6 +703,75 @@ def s_agent_setup_offer_check():
           and chat.panel.setup_action is not None, f"first={first} second={second} entries={entries}")
     chat.new_conversation()  # the checks of the AGENT section that follow expect its welcome
     return waits(0.2)
+
+
+def _wizard_card():
+    """The question card of the setup waiting in the AGENT thread."""
+    return agent_chat()._wizard._card
+
+
+def _answer_card(untick=()):
+    card = _wizard_card()
+    for buttons, _other, _field in card._groups:
+        for button, label in buttons:
+            if label in untick:
+                button.setChecked(False)
+    card.answer_button.click()
+
+
+def s_setup_wizard():
+    """The setup with no model: cards of choices; FILTERING turned off on the first one."""
+    chat = agent_chat()
+    STATE['wizard_started'] = chat.start_setup()
+    card = _wizard_card()
+    STATE['wizard_no_other'] = card is not None and not any(
+        other is not None for _buttons, other, _field in card._groups)
+    STATE['wizard_steps'] = 0
+    while _wizard_card() is not None and STATE['wizard_steps'] < 6:
+        _answer_card(untick=('FILTERING',) if STATE['wizard_steps'] == 0 else ())
+        STATE['wizard_steps'] += 1
+    STATE['wizard_card'] = chat._settings_cards[-1] if chat._settings_cards else None
+    return waits(0.2)
+
+
+def s_setup_wizard_apply():
+    card = STATE['wizard_card']
+    STATE['wizard_rows'] = [row.text() for row in card.rows] if card is not None else []
+    if card is not None:
+        card.apply_button.click()
+    return waits(0.5)
+
+
+def s_setup_wizard_check():
+    d = dock()
+    config = d.CONFIG_DATA['APP']['OPTIONS'].get('FILTERING', {}).get('enabled', {})
+    value = config.get('value') if isinstance(config, dict) else config
+    combo, auto = d.comboBox_filtering_current_layer, d.pushButton_checkable_filtering_auto_current_layer
+    check('setup with no model: cards without Other, three steps (FILTERING skipped), the change shown then applied',
+          STATE['wizard_started'] is True and STATE['wizard_no_other'] and STATE['wizard_steps'] == 3
+          and len(STATE['wizard_rows']) == 1 and STATE['wizard_card'].done and value is False,
+          f"started={STATE['wizard_started']} steps={STATE['wizard_steps']} rows={STATE['wizard_rows']} value={value!r}")
+    check('FILTERING off: its header and buttons hidden, the source layer chooser at the top of EXPLORING',
+          not d._fm_sections.section_shown('filtering') and d.pushButton_action_filter.isHidden()
+          and d.pushButton_action_unfilter.isHidden() and d.frame_exploring.isAncestorOf(combo)
+          and d.frame_exploring.isAncestorOf(auto) and not combo.isHidden() and not d.FILTERING.isAncestorOf(combo),
+          f"shown={d._fm_sections.section_shown('filtering')} combo parent={combo.parentWidget().objectName()}")
+    agent_chat()._on_undo()  # the setup is a step of the history: Undo puts FILTERING back
+    return waits(0.5)
+
+
+def s_setup_wizard_back_check():
+    d = dock()
+    combo, auto = d.comboBox_filtering_current_layer, d.pushButton_checkable_filtering_auto_current_layer
+    check('Undo of the setup: FILTERING, its header, buttons and the source layer chooser back in place',
+          d._fm_sections.section_shown('filtering') and not d.pushButton_action_filter.isHidden()
+          and d.FILTERING.isAncestorOf(combo) and d.FILTERING.isAncestorOf(auto)
+          and d.findChild(QWidget, 'widget_exploring_source_layer') is None,
+          f"combo parent={combo.parentWidget().objectName()} auto parent={auto.parentWidget().objectName()}")
+    agent_chat().new_conversation()  # the checks of the AGENT section that follow expect its welcome
+    d._fm_sections.open_top('exploring')  # the setup opened AGENT, which folds EXPLORING and FILTERING
+    d.toolBox_tabTools.setCurrentWidget(d.FILTERING)  # the steps that follow filter (Undo walks FILTERING only)
+    return waits(0.3)
 
 
 def s_qt6_enums_check():
@@ -2277,7 +2346,8 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
          s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
          s_agent_skill_from_profile_check,
-         s_agent_setup_offer_check,
+         s_agent_setup_offer_check, s_setup_wizard, s_setup_wizard_apply, s_setup_wizard_check,
+         s_setup_wizard_back_check,
          s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_compare_check, s_compare_off_check, s_compare_pin,

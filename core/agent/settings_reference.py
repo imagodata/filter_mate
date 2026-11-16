@@ -240,11 +240,14 @@ LIVE = frozenset({
     "APP.OPTIONS.CROSS_FILTER.vector_source_raster_targets",
     "APP.OPTIONS.CROSS_FILTER.vector_source_point_cloud_targets",
     "APP.OPTIONS.UI_RESPONSIVENESS.expression_debounce_ms", "APP.DOCKWIDGET.LANGUAGE",
+    "APP.OPTIONS.FILTERING.enabled", "APP.OPTIONS.EXPORTING.enabled",
 })
-# Read once, when the panel is built.
-ON_RESTART = frozenset({"APP.DOCKWIDGET.DOCK_POSITION"})
+# Read once, when the panel is built (the AGENT section goes after restarting QGIS).
+ON_RESTART = frozenset({"APP.DOCKWIDGET.DOCK_POSITION", "APP.OPTIONS.AGENT.enabled"})
 EFFECT_NOW, EFFECT_NEXT_USE, EFFECT_RESTART = "now", "next use", "after restarting QGIS"
 MAX_CHANGES = 10
+# The setup asked to the user (core/agent/setup_wizard.py): every answer is the user's own, in one card.
+MAX_USER_CHANGES = 60
 MAX_TEXT = 500
 # A number without a maximum in the schema stays within what a Qt integer and a timeout can hold.
 MAX_NUMBER = 2_147_483_647
@@ -313,14 +316,19 @@ def checked_value(setting: Setting, value: Any) -> Any:
     raise ValueError(f"{setting.path} is not a setting the agent changes")
 
 
-def plan(settings: Sequence[Setting], changes: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def plan(settings: Sequence[Setting], changes: Sequence[Dict[str, Any]], *,
+         by_user: bool = False) -> List[Dict[str, Any]]:
     """The changes asked, checked: ``[{path, where, before, after, effect}]``, one per setting (the last value
     asked wins; ``before == after`` when it already holds it); ``ValueError`` listing every problem when one is
-    wrong (nothing is changed then)."""
+    wrong (nothing is changed then).
+
+    ``by_user``: the changes are the answers of the user to the setup, no model chose them: the settings of the
+    agent itself are theirs to change (never a private one), up to ``MAX_USER_CHANGES``."""
     if not changes:
         raise ValueError("no change given")
-    if len(changes) > MAX_CHANGES:
-        raise ValueError(f"{MAX_CHANGES} changes at most in one call")
+    limit = MAX_USER_CHANGES if by_user else MAX_CHANGES
+    if len(changes) > limit:
+        raise ValueError(f"{limit} changes at most in one call")
     by_path = {item.path.upper(): item for item in settings}
     problems: List[str] = []
     planned: Dict[str, Dict[str, Any]] = {}
@@ -333,7 +341,7 @@ def plan(settings: Sequence[Setting], changes: Sequence[Dict[str, Any]]) -> List
             except LookupError as exc:
                 problems.append(str(exc))
                 continue
-        why = refusal(setting)
+        why = refusal(setting) if not (by_user and not setting.private) else ""
         if why:
             problems.append(why)
             continue

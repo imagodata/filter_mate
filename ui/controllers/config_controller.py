@@ -200,6 +200,7 @@ class ConfigController(BaseController):
             self._save_configuration()
             self._apply_layer_kinds_change(layer_kinds_before, changes_summary)
             self._apply_target_options_change(target_options_before, changes_summary)
+            self._apply_sections_change(items_keys_values_path, changes_summary)
 
             if changes_summary:
                 logger.info(f"Applied live: {', '.join(changes_summary)}")
@@ -212,6 +213,17 @@ class ConfigController(BaseController):
 
         except Exception as e:
             logger.error(f"Error applying configuration change: {e}")
+
+    # === Sections (FILTERING / EXPORTING) ===
+
+    def _apply_sections_change(self, _path, changes_summary: List[str]) -> None:
+        """APP.OPTIONS.FILTERING / EXPORTING ``enabled`` switched: the section shown or hidden at once. Read from
+        the saved configuration (the tree may show translated names): nothing happens when no section changed."""
+        apply_options = getattr(self.dockwidget, 'apply_section_options', None)
+        if callable(apply_options):
+            changed = apply_options()
+            if changed:
+                changes_summary.append(f"sections ({', '.join(changed)})")
 
     # === Layer kinds (raster / point cloud) ===
 
