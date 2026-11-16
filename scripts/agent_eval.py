@@ -32,7 +32,7 @@ sys.path.insert(0, str(ROOT / "core"))
 from agent.messages import ERROR_NETWORK, ProviderError, StreamFailure  # noqa: E402
 from agent.providers import PRESETS, create_provider  # noqa: E402
 from agent.providers.base import ProviderConfig, error_from_response  # noqa: E402
-from agent.project_summary import project_state, project_summary  # noqa: E402
+from agent.project_summary import project_state, project_summary, project_update  # noqa: E402
 from agent.sql_guard import filter_problem  # noqa: E402
 
 # As filtermate_api/agent_tools.py words it (not imported: it needs QGIS).
@@ -868,6 +868,11 @@ def _project_rows(project: SimulatedProject):
 def project_context(project: SimulatedProject, before: Optional[Dict[str, Any]] = None) -> str:
     """As the chat sends it after a request: the state of the project, and what changed since ``before``."""
     return project_summary(*_project_rows(project), before=before)
+
+
+def project_update_of(project: SimulatedProject, before: Optional[Dict[str, Any]]) -> str:
+    """What changed since ``before``, or that nothing did: a request after the first (token diet, lot 3)."""
+    return project_update(*_project_rows(project), before=before)
 
 
 def project_state_of(project: SimulatedProject) -> Dict[str, Any]:

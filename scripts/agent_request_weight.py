@@ -45,9 +45,10 @@ from agent.families import bringing, split_tools, use_tools_handler  # noqa: E40
 from agent.session import STATUS_DONE, AgentLimits, AgentSession, run_exchange  # noqa: E402
 from agent.skills import SKILLS  # noqa: E402
 from agent.tool_executor import ToolExecutor  # noqa: E402
-from agent_eval import ScriptedTransport, SimulatedProject, project_context, project_state_of, skill_loader  # noqa: E402
+from agent_eval import (  # noqa: E402
+    ScriptedTransport, SimulatedProject, project_context, project_state_of, project_update_of, skill_loader)
 from agent.project_notes import notes_block  # noqa: E402
-from agent.request_context import ContextParts, compose, widgets_part  # noqa: E402
+from agent.request_context import ContextMemory, ContextParts, compose, widgets_part  # noqa: E402
 
 
 # What ui/controllers/agent_chat_controller.py adds to the instructions for the sources ticked, measured in QGIS
@@ -216,10 +217,14 @@ def bench_project() -> SimulatedProject:
     return project
 
 
-def bench_context(project: SimulatedProject, before) -> str:
-    """The context a request carries, as the chat composes it (core/agent/request_context.py)."""
-    return compose(ContextParts(summary=project_context(project, before=before), notes=notes_block(BENCH_NOTES),
-                                widgets=widgets_part(BENCH_WIDGETS)))
+def bench_context(project: SimulatedProject, before, memory: Optional[ContextMemory] = None, full: bool = True) -> str:
+    """The context a request carries, as the chat composes it (core/agent/request_context.py): the whole of it, or what
+    changed since ``before`` when ``memory`` says what was sent already (lot 3)."""
+    memory = memory if memory is not None else ContextMemory()
+    full = full or memory.empty or before is None
+    summary = project_context(project, before=before) if full else project_update_of(project, before)
+    return compose(memory.delta(ContextParts(summary=summary, notes=notes_block(BENCH_NOTES),
+                                             widgets=widgets_part(BENCH_WIDGETS)), full))
 
 
 # The requests: 13 since lot 3 (three of them read data).
@@ -316,11 +321,14 @@ def replay() -> Replay:
     executor.execute = checked
     before: Dict[str, List[Dict[str, Any]]] = {}
     seen = None
+    memory = ContextMemory()
     for rank, (text, steps) in enumerate(CONVERSATION, 1):
         scripted = ScriptedTransport([{"tool": tool, "args": args} for tool, args in steps])
         scripted.use_first({name: held[name] for name in hidden})  # a tool added before is not added again
         exchange = run_exchange(session, text, _Measured(scripted, kinds, rank, run, before), executor,
-                                confirm=lambda call: True, context=bench_context(project, seen))
+                                confirm=lambda call: True,
+                                context=lambda full, seen=seen: bench_context(project, seen, memory, full))
+        memory.sent()
         seen = project_state_of(project)
         if exchange.error is not None:
             run.errors.append(f"request {rank}: {exchange.error.message}")

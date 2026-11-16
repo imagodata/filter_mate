@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, replace
-from typing import Any, Callable, Dict, Mapping, Optional, Protocol, Sequence, Tuple
+from typing import Any, Callable, Dict, Mapping, Optional, Protocol, Sequence, Tuple, Union
 
 from .messages import (
     ERROR_BAD_REQUEST, ERROR_NETWORK, ERROR_RATE_LIMIT, ERROR_SERVER, ERROR_STREAM, ProviderError, StreamEvent,
@@ -152,7 +152,7 @@ class ChatEngine:
         """Requests of this conversation summed up so far, to keep what is sent short."""
         return self._session.summarized
 
-    def send(self, text: str, context: str = "") -> bool:
+    def send(self, text: str, context: Union[str, Callable[[bool], str]] = "") -> bool:
         """Start a request; False when one is running or there is nothing to send. ``context`` goes with it."""
         if self._busy or not text.strip():
             return False

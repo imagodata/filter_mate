@@ -66,8 +66,10 @@ from ...core.agent.messages import (
 from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
 from ...core.agent.providers.base import HttpRequest, encode_json, error_from_response, without_key
 from ...core.agent.providers.model_list import listing_url, models_from_listing
-from ...core.agent.project_summary import project_state, project_summary
-from ...core.agent.request_context import ContextParts, compose, decided_part, protected_part, widgets_part
+from ...core.agent.project_summary import project_state, project_summary, project_update
+from ...core.agent.request_context import (
+    ContextMemory, ContextParts, compose, decided_part, protected_part, widgets_part,
+)
 from ...core.agent.messages import request_usage
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
@@ -219,6 +221,8 @@ class AgentChatController(QObject):
         self._seen = None  # project_state when the last answer ended
         # Changes of the sources, the MCP server or the provider the agent made during a request: applied when it ends.
         self._pending_options = []
+        # Token diet, lot 3: what the requests of this conversation sent already (core/agent/request_context.py).
+        self._context_memory = ContextMemory()
         self._transcript_key = ""
         self._answer = []
         self._header_label = None
@@ -2146,6 +2150,7 @@ class AgentChatController(QObject):
         self._connectors = None
         self._connectors_shown = set()
         self._seen = None  # another conversation has seen nothing yet
+        self._context_memory.forget()
 
     def _reset_view(self) -> None:
         self._restart_engine()
@@ -2204,7 +2209,7 @@ class AgentChatController(QObject):
         # conversation with itself, so it is kept for the next one (_recap_sent).
         recap, self._recap = getattr(self, "_recap", ""), ""
         self._recap_sent = recap
-        self._engine.send(text, "\n\n".join(part for part in (self._project_context(), recap) if part))
+        self._engine.send(text, lambda full: "\n\n".join(part for part in (self._project_context(full), recap) if part))
         self._show_undo_state()  # Undo of the action bar and Ctrl+Z wait for the end of the turn
         if self._engine.summarized > summarized:
             note = _tr("The oldest requests of this conversation are now summed up in a few lines, to keep it short.")
@@ -2258,13 +2263,19 @@ class AgentChatController(QObject):
                 logger.debug("Agent: a layer left out of the summary", exc_info=True)
         return [row for _rank, row in sorted(rows, key=lambda item: item[0])]
 
-    def _project_context(self) -> str:
-        """The map, the layers, their filters, the selections now and what the user changed since the last answer.
+    def _project_context(self, full: bool = True) -> str:
+        """The map, the layers, their filters, the selections now and what the user changed since the last answer:
+        the whole of it at the first request and after the history was rewritten (``full``), else what changed only,
+        and the notes, widgets, recipes and protected layers when they changed (token diet, lot 3).
 
         Sent after the request; empty when the project cannot be read.
         """
+        full = full or self._context_memory.empty or self._seen is None
         read = self._read_project()
-        summary = "" if read is None else project_summary(*read, before=self._seen)
+        if read is None:
+            summary = ""
+        else:
+            summary = project_summary(*read, before=self._seen) if full else project_update(*read, before=self._seen)
         try:
             notes = notes_block(read_notes())
         except Exception:  # the request goes without them
@@ -2283,9 +2294,10 @@ class AgentChatController(QObject):
         except Exception:  # the request goes without them
             protected = []
         outcomes, self._settings_outcomes = self._settings_outcomes, []  # the cards answered since the last request
-        return compose(ContextParts(summary=summary, notes=notes, widgets=widgets_part(widgets), recipes=recipes,
-                                    protected=protected_part(protected), decided=decided_part(outcomes),
-                                    level=level_note(self._policy.level)))
+        return compose(self._context_memory.delta(ContextParts(
+            summary=summary, notes=notes, widgets=widgets_part(widgets), recipes=recipes,
+            protected=protected_part(protected), decided=decided_part(outcomes), level=level_note(self._policy.level)),
+            full))
 
     def protection_refusal(self, call: ToolCallPart) -> str:
         """What a call that would change a protected layer, or of a tool turned off, is answered, for the MCP server
@@ -2936,6 +2948,11 @@ class AgentChatController(QObject):
             listed, one_line(str(reason), 300))
 
     def on_finished(self, outcome: ChatOutcome) -> None:
+        # What the request carried is known to the model, unless it failed before reaching it (lot 3).
+        if outcome.status == OUTCOME_FAILED or self._abandoned:
+            self._context_memory.forget()
+        else:
+            self._context_memory.sent()
         if self._pending_options:  # after this request, out of the callback of the engine
             QTimer.singleShot(0, self._apply_pending_options)
         if self._abandoned:  # the end of a request left while its tool ran (_drop_engine): only let it go

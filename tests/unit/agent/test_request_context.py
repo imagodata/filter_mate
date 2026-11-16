@@ -23,3 +23,53 @@ def test_the_parts_read_as_before():
     assert decided_part(["a: yes", "b: no"]) == ("Settings changes you proposed, as the user decided them in the "
                                                  "thread: a: yes; b: no")
     assert decided_part([]) == ""
+
+
+# --- what changed only (lot 3) --------------------------------------------------------------------------------------
+
+from core.agent.project_summary import UNCHANGED, project_state, project_update  # noqa: E402
+from core.agent.request_context import ContextMemory  # noqa: E402
+
+ROWS = [{"layer_id": "c1", "name": "communes", "layer_kind": "vector", "feature_count": 10,
+         "active_filter_expression": ""}]
+
+
+def test_unchanged_project_is_one_line():
+    before = project_state(ROWS, [], {})
+    assert project_update(ROWS, [], {}, before) == UNCHANGED == "Project unchanged since the last request."
+
+
+def test_a_changed_layer_is_listed():
+    before = project_state(ROWS, [], {})
+    now = [dict(ROWS[0], active_filter_expression='"dept" = \'31\'')]
+    update = project_update(now, [], {}, before)
+    assert update.startswith("Changed in QGIS since your last answer") and "communes" in update
+
+
+def test_notes_go_once_until_they_change():
+    memory = ContextMemory()
+    parts = ContextParts(summary="S", notes="N1", widgets="W", level="")
+    assert memory.delta(parts, full=False) == parts  # nothing sent yet: everything
+    memory.sent()
+    assert memory.delta(ContextParts(summary="U", notes="N1", widgets="W"), full=False) == ContextParts(summary="U")
+    memory.sent()
+    assert memory.delta(ContextParts(summary="U", notes="N2", widgets="W"), full=False).notes == "N2"
+    memory.sent()
+    gone = memory.delta(ContextParts(summary="U", notes="", widgets="W"), full=False)
+    assert gone.notes == "The notes of this project were all removed." and gone.widgets == ""
+
+
+def test_a_failed_request_sends_its_parts_again():
+    memory = ContextMemory()
+    memory.delta(ContextParts(summary="S", notes="N"), full=True)
+    memory.sent()
+    memory.delta(ContextParts(summary="U", notes="N2"), full=False)  # the request fails: not sent()
+    assert memory.delta(ContextParts(summary="U", notes="N2"), full=False).notes == "N2"
+
+
+def test_a_new_conversation_sends_everything():
+    memory = ContextMemory()
+    memory.delta(ContextParts(summary="S", notes="N"), full=True)
+    memory.sent()
+    memory.forget()
+    assert memory.empty and memory.delta(ContextParts(summary="S", notes="N"), full=False).notes == "N"

@@ -682,3 +682,28 @@ class TestToolsLeaveAtACompaction:
         chat._limits = AgentLimits(max_history_chars=50)
         chat.add_user_text("f")
         assert chat.dropped == () and chat.tool_names == ("read", "zoom")
+
+
+class TestContextAfterACompaction:
+    """Lot 3: the session asks the whole context at the first request and after it rewrote the history."""
+
+    def test_a_rewritten_history_gets_the_whole_state(self):
+        asked = []
+        chat = session()
+
+        def context(full):
+            asked.append(full)
+            return "whole" if full else "changes"
+        chat.add_user_text("a", context)
+        chat.accept_turn(turn(STOP_END, TextPart("x" * 200)))
+        chat.add_user_text("b", context)
+        chat.accept_turn(turn(STOP_END, TextPart("y" * 200)))
+        chat._limits = AgentLimits(max_history_chars=50)
+        chat.add_user_text("c", context)
+        assert asked == [True, False, True] and chat.rewritten
+        assert chat.messages[-1].parts[-1].text == "whole"
+
+    def test_a_string_context_still_works(self):
+        chat = session()
+        chat.add_user_text("a", "state")
+        assert chat.messages[-1].parts[-1].text == "state"

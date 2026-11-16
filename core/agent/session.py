@@ -7,7 +7,7 @@ drive it from signals. :func:`run_exchange` is the blocking way, for the evaluat
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable, Collection, Dict, List, Optional, Protocol, Sequence, Tuple
+from typing import Callable, Collection, Dict, List, Optional, Protocol, Sequence, Tuple, Union
 
 from .compaction import compact
 from .mcp_client import PREFIX as CONNECTOR_TOOL_PREFIX
@@ -110,6 +110,7 @@ class AgentSession:
         self.usage = Usage()
         # Requests summed up so far, to say so in the interface.
         self.summarized = 0
+        self.rewritten = False
 
     @property
     def messages(self) -> Tuple[Message, ...]:
@@ -125,17 +126,22 @@ class AgentSession:
         """The tools ``next_request`` offers, in their order."""
         return self._tools
 
-    def add_user_text(self, text: str, context: str = "") -> None:
+    def add_user_text(self, text: str, context: Union[str, Callable[[bool], str]] = "") -> None:
         """Start a new request of the user; ``context`` (the state of the project) follows it in the same message.
 
         A conversation past ``max_history_chars`` first loses its oldest requests, summed up in their place.
         """
+        first = not self._messages
         self._messages = [_without_images(message) for message in self._messages]
         writes = [tool.name for tool in self._tools if not tool.read_only]
         self._messages, summarized = compact(self._messages, self._limits.max_history_chars, writes)
         self.summarized += summarized
+        # Lot 3: the history was rewritten; the next context carries the whole state again.
+        self.rewritten = bool(summarized)
+        if callable(context):  # the whole state at the first request and after a rewrite, what changed otherwise
+            context = context(first or self.rewritten)
         self._requests += 1
-        self.dropped = self._drop_idle() if summarized else ()
+        self.dropped = self._drop_idle() if self.rewritten else ()
         self._request_start = len(self._messages)
         parts = (TextPart(text),) + ((TextPart(context),) if context else ())
         self._messages.append(Message(ROLE_USER, parts))
