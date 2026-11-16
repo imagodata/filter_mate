@@ -4422,6 +4422,11 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
     </message>
     <message>
         <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;레일은 FilterMate의 섹션을 나열하고, 섹션을 QGIS 패널로 만들 수 있으며, 설정에는 AI 모델이 필요하지 않습니다.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;FilterMate 설정&lt;/b&gt;에서는 몇 가지를 선택합니다. 사용하는 섹션, 데이터, 모양, 섹션과 버튼의 위치입니다. 모든 설정의 변경 전과 변경 후를 보여 주며, 어디로도 아무것도 전송하지 않습니다.&lt;/li&gt;&lt;li&gt;&lt;b&gt;섹션 레일&lt;/b&gt;이 패널의 각 스택에 있습니다. 칩을 클릭하면 해당 섹션이 열리고, 칩을 끌면 섹션의 순서를 바꿀 수 있습니다.&lt;/li&gt;&lt;li&gt;&lt;b&gt;패널로 쓰는 섹션&lt;/b&gt;: 요청할 때만 가능합니다(기본적으로 모두 FilterMate 패널에 남습니다). AGENT, FILTERING, EXPORTING 또는 CONFIGURATION의 칩을 오른쪽 클릭하면 QGIS의 별도 패널에서 열립니다. 패널 제목을 오른쪽 클릭하면 다른 패널과 탭으로 그룹화하거나 FilterMate로 다시 병합할 수 있습니다.&lt;/li&gt;&lt;li&gt;&lt;b&gt;각 섹션 아래의 버튼&lt;/b&gt;. 사용하지 않는 FILTERING이나 EXPORTING은 끌 수 있습니다.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt;는 문장 하나로 필터링하고, 스타일을 지정하고, 데이터를 가져옵니다. 자신의 API 키 또는 로컬 Ollama 모델을 사용합니다. &lt;b&gt;FilterMate 사용법&lt;/b&gt;은 메뉴에서 각 섹션을 다시 설명해 줍니다.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
         <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate의 섹션을 QGIS 패널로 만들 수 있으며, 설정에는 AI 모델이 필요하지 않습니다.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;FilterMate 설정&lt;/b&gt;에서는 몇 가지를 선택합니다. 사용하는 섹션, 데이터, 모양, 섹션과 버튼의 위치입니다. 모든 설정의 변경 전과 변경 후를 보여 주며, 어디로도 아무것도 전송하지 않습니다.&lt;/li&gt;&lt;li&gt;&lt;b&gt;패널로 쓰는 섹션&lt;/b&gt;: AGENT, FILTERING, EXPORTING 또는 CONFIGURATION의 헤더를 오른쪽 클릭하면 QGIS의 별도 패널에서 열립니다. 패널 제목을 오른쪽 클릭하면 다른 패널과 탭으로 그룹화하거나 FilterMate로 다시 병합할 수 있습니다.&lt;/li&gt;&lt;li&gt;&lt;b&gt;각 섹션 아래의 버튼&lt;/b&gt;. 사용하지 않는 FILTERING이나 EXPORTING은 끌 수 있습니다.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt;는 문장 하나로 필터링하고, 스타일을 지정하고, 데이터를 가져옵니다. 자신의 API 키 또는 로컬 Ollama 모델을 사용합니다. &lt;b&gt;FilterMate 사용법&lt;/b&gt;은 메뉴에서 각 섹션을 다시 설명해 줍니다.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
@@ -11572,6 +11577,11 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>기본 상태: 패널 하나이며, 레일을 클릭하면 섹션이 열립니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
         <source>Each in its own panel of QGIS</source>
         <translation>각각 QGIS의 별도 패널에</translation>
     </message>
@@ -12201,6 +12211,16 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
         <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
         <translation>FilterMate 사용법을 섹션별로 설명합니다. 읽는 데 AI 모델은 필요하지 않으며, 어디로도 전송되지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>패널에는 스택이 두 개 있고, 각 스택의 레일에 섹션이 나열됩니다. 위에는 AGENT와 EXPLORING, 아래에는 FILTERING, EXPORTING, CONFIGURATION이 있습니다. 레일의 칩을 클릭하면 해당 섹션이 열리고, 칩을 레일을 따라 끌면 섹션의 순서를 바꿀 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>기본적으로 모든 섹션은 이 패널 안에 있으며, 요청하지 않으면 아무것도 움직이지 않습니다. 섹션은 이 패널을 떠날 수 있습니다. 레일에서 AGENT, FILTERING, EXPORTING 또는 CONFIGURATION의 칩을 오른쪽 클릭한 다음, 별도 패널에서 열기를 선택하세요. 섹션이 QGIS 패널이 되어 지도 옆으로 끌어다 놓거나, 레이어 패널과 탭으로 묶거나, 다른 화면에 띄울 수 있습니다. EXPLORING은 여기에 남습니다. 다른 섹션이 작업하는 레이어가 여기에 있기 때문입니다.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

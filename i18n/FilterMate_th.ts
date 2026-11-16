@@ -4422,6 +4422,11 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
     </message>
     <message>
         <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;แถบแสดงรายการส่วนของ FilterMate ส่วนหนึ่งเป็นแผงของ QGIS ได้ และการตั้งค่าไม่ต้องใช้โมเดล AI&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;ตั้งค่า FilterMate&lt;/b&gt; จะถามตัวเลือกไม่กี่ข้อ ได้แก่ ส่วนที่คุณใช้ ข้อมูลของคุณ รูปลักษณ์ และตำแหน่งของส่วนต่าง ๆ กับปุ่มของแต่ละส่วน โดยแสดงทุกการตั้งค่าก่อนและหลัง และไม่ส่งสิ่งใดไปที่ใด&lt;/li&gt;&lt;li&gt;&lt;b&gt;แถบของส่วน&lt;/b&gt; ในแต่ละสแต็กของแผง คลิกชิปเพื่อเปิดส่วนของชิปนั้น ลากชิปเพื่อเรียงลำดับส่วนใหม่&lt;/li&gt;&lt;li&gt;&lt;b&gt;ส่วนในรูปแบบแผง&lt;/b&gt; เมื่อคุณสั่ง (โดยค่าเริ่มต้นทุกส่วนอยู่ในแผง FilterMate) คลิกขวาที่ชิปของ AGENT, FILTERING, EXPORTING หรือ CONFIGURATION เพื่อเปิดในแผงของ QGIS ของตัวเอง คลิกขวาที่ชื่อแผงเพื่อจัดกลุ่มกับแผงอื่นเป็นแท็บ หรือรวมกลับเข้า FilterMate&lt;/li&gt;&lt;li&gt;&lt;b&gt;ปุ่มใต้แต่ละส่วน&lt;/b&gt; และปิด FILTERING หรือ EXPORTING ได้เมื่อคุณไม่ได้ใช้&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; กรอง จัดสไตล์ และนำข้อมูลเข้ามาจากประโยคเดียว ด้วยคีย์ API ของคุณเอง หรือโมเดล Ollama ในเครื่อง &lt;b&gt;FilterMate ทำงานอย่างไร&lt;/b&gt; ในเมนูของมัน จะบอกแต่ละส่วนอีกครั้ง&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
         <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;ส่วนต่าง ๆ ของ FilterMate เป็นแผงของ QGIS ได้ และการตั้งค่าไม่ต้องใช้โมเดล AI&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;ตั้งค่า FilterMate&lt;/b&gt; จะถามตัวเลือกไม่กี่ข้อ ได้แก่ ส่วนที่คุณใช้ ข้อมูลของคุณ รูปลักษณ์ และตำแหน่งของส่วนต่าง ๆ กับปุ่มของแต่ละส่วน โดยแสดงทุกการตั้งค่าก่อนและหลัง และไม่ส่งสิ่งใดไปที่ใด&lt;/li&gt;&lt;li&gt;&lt;b&gt;ส่วนในรูปแบบแผง&lt;/b&gt; คลิกขวาที่ส่วนหัวของ AGENT, FILTERING, EXPORTING หรือ CONFIGURATION เพื่อเปิดในแผงของ QGIS ของตัวเอง คลิกขวาที่ชื่อแผงเพื่อจัดกลุ่มกับแผงอื่นเป็นแท็บ หรือรวมกลับเข้า FilterMate&lt;/li&gt;&lt;li&gt;&lt;b&gt;ปุ่มใต้แต่ละส่วน&lt;/b&gt; และปิด FILTERING หรือ EXPORTING ได้เมื่อคุณไม่ได้ใช้&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; กรอง จัดสไตล์ และนำข้อมูลเข้ามาจากประโยคเดียว ด้วยคีย์ API ของคุณเอง หรือโมเดล Ollama ในเครื่อง &lt;b&gt;FilterMate ทำงานอย่างไร&lt;/b&gt; ในเมนูของมัน จะบอกแต่ละส่วนอีกครั้ง&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
@@ -11572,6 +11577,11 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>ค่าเริ่มต้น: มีแผงเดียว และการคลิกบนแถบจะเปิดส่วนหนึ่ง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
         <source>Each in its own panel of QGIS</source>
         <translation>แยกเป็นแผงของ QGIS ส่วนละแผง</translation>
     </message>
@@ -12201,6 +12211,16 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
         <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
         <translation>FilterMate ทำงานอย่างไร ทีละส่วน ไม่ต้องใช้โมเดล AI ในการอ่านส่วนนี้ และจะไม่มีการส่งข้อมูลไปที่ใด</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>แผงมีสองสแต็ก แต่ละสแต็กมีแถบที่แสดงรายการส่วนของตน ได้แก่ AGENT และ EXPLORING ด้านบน และ FILTERING, EXPORTING และ CONFIGURATION ด้านล่าง คลิกชิปบนแถบเพื่อเปิดส่วนของชิปนั้น และลากชิปไปตามแถบเพื่อเรียงลำดับส่วนใหม่</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>โดยค่าเริ่มต้น ทุกส่วนอยู่ในแผงนี้ และไม่มีอะไรเคลื่อนที่หากคุณไม่สั่ง ส่วนหนึ่งสามารถแยกออกจากแผงนี้ได้ คลิกขวาที่ชิปของ AGENT, FILTERING, EXPORTING หรือ CONFIGURATION บนแถบของมัน แล้วเลือกเปิดในแผงของตัวเอง ส่วนนั้นจะกลายเป็นแผงของ QGIS ที่ลากไปไว้ข้างแผนที่ ซ้อนเป็นแท็บกับแผงเลเยอร์ หรือลอยบนหน้าจออื่นได้ EXPLORING จะอยู่ที่นี่ เพราะเก็บเลเยอร์ที่ส่วนอื่นใช้ทำงาน</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

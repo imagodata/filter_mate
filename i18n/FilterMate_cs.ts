@@ -4421,6 +4421,11 @@ Klikněte na indikátor ★ a vyberte „Přidat aktuální filtr do oblíbenýc
     </message>
     <message>
         <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Lišta vypisuje sekce FilterMate, sekce může být panelem QGIS a nastavení nepotřebuje žádný model AI.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Nastavit FilterMate&lt;/b&gt; se zeptá na pár voleb: sekce, které používáte, vaše data, vzhled, umístění sekcí a jejich tlačítek. Ukáže každé nastavení před a po a nic nikam neodesílá.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Lišta sekcí&lt;/b&gt; v každém bloku panelu: kliknutím na čip otevřete jeho sekci, přetažením změníte pořadí sekcí.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sekce jako panely&lt;/b&gt;, když o to požádáte (ve výchozím stavu zůstávají všechny v panelu FilterMate): klikněte pravým tlačítkem na čip sekce AGENT, FILTERING, EXPORTING nebo CONFIGURATION a otevřete ji ve vlastním panelu QGIS. Kliknutím pravým tlačítkem na název panelu ho seskupíte s jiným, jako karty, nebo sloučíte zpět do FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Tlačítka pod každou sekcí&lt;/b&gt; a vypnuté FILTERING nebo EXPORTING, když je nepoužíváte.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtruje, upravuje styly a přidává data z jedné věty, s vaším vlastním klíčem API nebo místním modelem Ollama. &lt;b&gt;Jak FilterMate funguje&lt;/b&gt; v jeho nabídce znovu popíše každou sekci.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
         <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Sekce FilterMate mohou být panely QGIS a jeho nastavení nepotřebuje žádný model AI.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Nastavit FilterMate&lt;/b&gt; se zeptá na pár voleb: sekce, které používáte, vaše data, vzhled, umístění sekcí a jejich tlačítek. Ukáže každé nastavení před a po a nic nikam neodesílá.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sekce jako panely&lt;/b&gt;: klikněte pravým tlačítkem na záhlaví AGENT, FILTERING, EXPORTING nebo CONFIGURATION a otevřete ho ve vlastním panelu QGIS. Kliknutím pravým tlačítkem na název panelu ho seskupíte s jiným, jako karty, nebo sloučíte zpět do FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Tlačítka pod každou sekcí&lt;/b&gt; a vypnuté FILTERING nebo EXPORTING, když je nepoužíváte.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtruje, upravuje styly a přidává data z jedné věty, s vaším vlastním klíčem API nebo místním modelem Ollama. &lt;b&gt;Jak FilterMate funguje&lt;/b&gt; v jeho nabídce znovu popíše každou sekci.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
@@ -11554,6 +11559,11 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>Výchozí stav: jeden panel, kde kliknutí na liště otevře sekci.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
         <source>Each in its own panel of QGIS</source>
         <translation>Každá ve vlastním panelu QGIS</translation>
     </message>
@@ -12183,6 +12193,16 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
         <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
         <translation>Jak FilterMate funguje, sekci po sekci. K přečtení není potřeba žádný model AI a nic se nikam neodesílá.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>Panel má dva bloky, každý s lištou, která vypisuje jeho sekce: AGENT a EXPLORING nahoře, FILTERING, EXPORTING a CONFIGURATION dole. Kliknutím na čip na liště otevřete jeho sekci, přetažením čipu podél lišty změníte pořadí sekcí.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>Ve výchozím stavu je každá sekce v tomto panelu a nic se nepřesouvá, dokud o to nepožádáte. Sekce ho může opustit: klikněte pravým tlačítkem na čip sekce AGENT, FILTERING, EXPORTING nebo CONFIGURATION na její liště a zvolte otevření ve vlastním panelu. Stane se panelem QGIS, který můžete přetáhnout vedle mapy, spojit do karet s panelem Vrstvy nebo nechat plovoucí na jiné obrazovce. EXPLORING zůstává tady: obsahuje vrstvu, se kterou ostatní sekce pracují.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

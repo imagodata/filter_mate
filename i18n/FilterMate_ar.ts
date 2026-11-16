@@ -4422,6 +4422,11 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
     </message>
     <message>
         <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;يسرد الشريط أقسام FilterMate، ويمكن أن يصبح القسم لوحة في QGIS، ولا يحتاج إعداده إلى نموذج ذكاء اصطناعي.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;إعداد FilterMate&lt;/b&gt; يطرح بضعة خيارات: الأقسام التي تستخدمها، وبياناتك، والمظهر، وموضع الأقسام وأزرارها. يعرض كل إعداد قبل التغيير وبعده، ولا يرسل أي شيء إلى أي مكان.&lt;/li&gt;&lt;li&gt;&lt;b&gt;شريط للأقسام&lt;/b&gt; في كل كومة من اللوحة: انقر على شريحة لفتح قسمها، واسحبها لوضع الأقسام بترتيب آخر.&lt;/li&gt;&lt;li&gt;&lt;b&gt;الأقسام كلوحات&lt;/b&gt;، عندما تطلب ذلك (افتراضيًا تبقى كلها في لوحة FilterMate): انقر بزر الفأرة الأيمن على شريحة AGENT أو FILTERING أو EXPORTING أو CONFIGURATION لفتح قسمها في لوحة QGIS خاصة به. انقر بزر الفأرة الأيمن على عنوان لوحة لتجميعها مع لوحة أخرى في تبويبات، أو لدمجها من جديد في FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;أزرار تحت كل قسم&lt;/b&gt;، وتعطيل FILTERING أو EXPORTING عندما لا تستخدمهما.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; يصفّي ويضبط الأنماط ويجلب البيانات انطلاقًا من جملة، بمفتاح API الخاص بك أو بنموذج Ollama محلي. &lt;b&gt;كيف يعمل FilterMate&lt;/b&gt;، في قائمته، يشرح كل قسم من جديد.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
         <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;يمكن أن تصبح أقسام FilterMate لوحات في QGIS، ولا يحتاج إعداده إلى نموذج ذكاء اصطناعي.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;إعداد FilterMate&lt;/b&gt; يطرح بضعة خيارات: الأقسام التي تستخدمها، وبياناتك، والمظهر، وموضع الأقسام وأزرارها. يعرض كل إعداد قبل التغيير وبعده، ولا يرسل أي شيء إلى أي مكان.&lt;/li&gt;&lt;li&gt;&lt;b&gt;الأقسام كلوحات&lt;/b&gt;: انقر بزر الفأرة الأيمن على عنوان AGENT أو FILTERING أو EXPORTING أو CONFIGURATION لفتحه في لوحة QGIS خاصة به. انقر بزر الفأرة الأيمن على عنوان لوحة لتجميعها مع لوحة أخرى في تبويبات، أو لدمجها من جديد في FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;أزرار تحت كل قسم&lt;/b&gt;، وتعطيل FILTERING أو EXPORTING عندما لا تستخدمهما.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; يصفّي ويضبط الأنماط ويجلب البيانات انطلاقًا من جملة، بمفتاح API الخاص بك أو بنموذج Ollama محلي. &lt;b&gt;كيف يعمل FilterMate&lt;/b&gt;، في قائمته، يشرح كل قسم من جديد.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
@@ -11572,6 +11577,11 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>الافتراضي: لوحة واحدة، حيث يفتح النقر في شريط ما قسمًا.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
         <source>Each in its own panel of QGIS</source>
         <translation>كل قسم في لوحة QGIS خاصة به</translation>
     </message>
@@ -12201,6 +12211,16 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
         <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
         <translation>كيف يعمل FilterMate، قسمًا بعد قسم. لا حاجة إلى نموذج ذكاء اصطناعي لقراءة هذا، ولا يُرسل أي شيء إلى أي مكان.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>للوحة كومتان، لكلٍّ منهما شريط يسرد أقسامها: AGENT وEXPLORING في الأعلى، وFILTERING وEXPORTING وCONFIGURATION في الأسفل. انقر على شريحة في شريط لفتح قسمها، واسحبها على طول الشريط لوضع الأقسام بترتيب آخر.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>افتراضيًا يكون كل قسم في هذه اللوحة، ولا يتحرك شيء ما لم تطلب ذلك. يمكن لقسم أن يغادرها: انقر بزر الفأرة الأيمن على شريحة AGENT أو FILTERING أو EXPORTING أو CONFIGURATION في شريطه، ثم اختر فتحه في لوحة خاصة به. يصبح لوحة في QGIS، يمكن سحبها بجانب الخريطة أو دمجها في تبويب مع لوحة الطبقات أو جعلها عائمة على شاشة أخرى. يبقى EXPLORING هنا: فهو يحتوي على الطبقة التي تعمل عليها الأقسام الأخرى.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

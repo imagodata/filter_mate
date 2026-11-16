@@ -4422,6 +4422,11 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
     </message>
     <message>
         <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;导轨列出 FilterMate 的各个部分，某个部分可以成为 QGIS 的面板，其设置无需 AI 模型。&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;设置 FilterMate&lt;/b&gt; 会让你做几个选择：你使用的部分、你的数据、外观，以及各部分及其按钮的位置。它会显示每项设置的前后对比，并且不会向任何地方发送任何内容。&lt;/li&gt;&lt;li&gt;&lt;b&gt;各部分的导轨&lt;/b&gt;位于面板的每个堆栈中：单击胶囊即可打开对应的部分，拖动胶囊可调整各部分的顺序。&lt;/li&gt;&lt;li&gt;&lt;b&gt;以面板形式使用部分&lt;/b&gt;，需要时再启用（默认情况下它们都留在 FilterMate 面板中）：右键单击 AGENT、FILTERING、EXPORTING 或 CONFIGURATION 的胶囊，即可在 QGIS 的单独面板中打开它。右键单击面板标题，可将它与另一个面板以选项卡形式组合，或合并回 FilterMate。&lt;/li&gt;&lt;li&gt;&lt;b&gt;每个部分下方的按钮&lt;/b&gt;；不使用 FILTERING 或 EXPORTING 时，可以将它们关闭。&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; 可以根据一句话进行过滤、设置样式并导入数据，使用你自己的 API 密钥或本地的 Ollama 模型。&lt;b&gt;FilterMate 的工作方式&lt;/b&gt;（在它的菜单中）会再次介绍每个部分。&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
         <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate 的各个部分可以成为 QGIS 的面板，其设置无需 AI 模型。&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;设置 FilterMate&lt;/b&gt; 会让你做几个选择：你使用的部分、你的数据、外观，以及各部分及其按钮的位置。它会显示每项设置的前后对比，并且不会向任何地方发送任何内容。&lt;/li&gt;&lt;li&gt;&lt;b&gt;以面板形式使用部分&lt;/b&gt;：右键单击 AGENT、FILTERING、EXPORTING 或 CONFIGURATION 的标题，即可在 QGIS 的单独面板中打开它。右键单击面板标题，可将它与另一个面板以选项卡形式组合，或合并回 FilterMate。&lt;/li&gt;&lt;li&gt;&lt;b&gt;每个部分下方的按钮&lt;/b&gt;；不使用 FILTERING 或 EXPORTING 时，可以将它们关闭。&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; 可以根据一句话进行过滤、设置样式并导入数据，使用你自己的 API 密钥或本地的 Ollama 模型。&lt;b&gt;FilterMate 的工作方式&lt;/b&gt;（在它的菜单中）会再次介绍每个部分。&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
@@ -11572,6 +11577,11 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>默认情况：只有一个面板，在导轨中单击即可打开一个部分。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
         <source>Each in its own panel of QGIS</source>
         <translation>各自放在 QGIS 的单独面板中</translation>
     </message>
@@ -12201,6 +12211,16 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
         <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
         <translation>FilterMate 的工作方式，按部分逐一介绍。阅读这些内容无需 AI 模型，也不会向任何地方发送任何内容。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>面板有两个堆栈，每个堆栈都有一条列出其各部分的导轨：AGENT 和 EXPLORING 在上方，FILTERING、EXPORTING 和 CONFIGURATION 在下方。单击导轨上的胶囊即可打开对应的部分，沿导轨拖动胶囊可调整各部分的顺序。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>默认情况下，每个部分都在这个面板中，除非你要求，否则什么都不会移动。某个部分可以离开这个面板：在导轨上右键单击 AGENT、FILTERING、EXPORTING 或 CONFIGURATION 的胶囊，然后选择在单独的面板中打开。它会成为 QGIS 的一个面板，可以拖到地图旁边、与图层面板合并为选项卡，或浮动到另一块屏幕上。EXPLORING 留在这里：其他部分处理的图层就保存在它里面。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
