@@ -539,6 +539,18 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         answer["outputs"] = {name: os.path.relpath(path, str(folder)) for name, path in answer["outputs"].items()}
         return answer
 
+    def layer_options(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.layer_options(args["layer"])
+
+    def set_layer_options(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.set_layer_options(args["layers"])
+
+    def export_options(_: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.export_options()
+
+    def set_export_options(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.set_export_options(args["changes"])
+
     handlers = {
         "list_layers": list_layers, "filter_state": filter_state, "list_favorites": list_favorites,
         "describe_layer": describe_layer, "field_values": field_values, "preview_filter": preview_filter,
@@ -559,5 +571,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "add_population": add_population,
         "add_osm_features": add_osm_features,
         "segment_objects": segment_objects, "similar_objects": similar_objects,
+        "layer_options": layer_options, "set_layer_options": set_layer_options, "export_options": export_options,
+        "set_export_options": set_export_options,
     }
     return {name: _guarded(_one_layer_per_name(accessor, handler)) for name, handler in handlers.items()}

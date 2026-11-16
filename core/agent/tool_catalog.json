@@ -2189,6 +2189,103 @@
    }
   },
   {
+   "name": "layer_options",
+   "title": "Options of a layer in the panels",
+   "description": "What a layer shows in FilterMate's EXPLORING panel and its FILTERING options, with the values each takes. Needs FilterMate's panel open.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "set_layer_options",
+   "title": "Set the options of layers in the panels",
+   "description": "Set, all or none, what layers show in FilterMate's EXPLORING panel and their FILTERING options, as the user would in the panel. exploring: single_selection_expression, multiple_selection_expression, custom_selection_expression (QGIS expressions of the layer), current_exploring_groupbox (single_selection, multiple_selection, custom_selection), is_tracking, is_linking. filtering: layers_to_filter, geometric_predicates, source_layer_combine_operator and other_layers_combine_operator (AND, AND NOT, OR), buffer_value (metres), buffer_type (Round, Flat, Square), buffer_segments, and the has_... box of each. Returns changed and shown_in_panel.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "description": "[{layer, exploring, filtering}], each a vector layer id or name with the options to set",
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "reason": {
+      "default": "",
+      "description": "Why, in the language of the user",
+      "maxLength": 500,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layers"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "export_options",
+   "title": "Export options of the panel",
+   "description": "How the project exports from FilterMate's EXPORTING panel, with the formats it takes. Needs the panel.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {},
+    "type": "object"
+   }
+  },
+  {
+   "name": "set_export_options",
+   "title": "Set the export options of the panel",
+   "description": "Prepare FilterMate's EXPORTING panel, all or none, for the user to export from it; this exports nothing (export_layers does). Returns changed and saved.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "changes": {
+      "additionalProperties": true,
+      "description": "layers_to_export, datatype_to_export (format), projection_to_export (EPSG:...), styles_to_export (QML, SLD), output_folder_to_export, zip_to_export (.zip path), batch_output_folder, batch_zip, and the has_... box of each",
+      "type": "object"
+     },
+     "reason": {
+      "default": "",
+      "description": "Why, in the language of the user",
+      "maxLength": 500,
+      "type": "string"
+     }
+    },
+    "required": [
+     "changes"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "segment_objects",
    "title": "Draw objects with SAM",
    "description": "Draw with SAM, on a raster, the object each feature of a guide layer points at; adds them as a layer. The new polygon layer is a temporary GeoPackage, in the CRS of the raster, one object per guide feature, with the attributes of the feature, sam_score (the confidence of SAM, 0 to 1) and, for a polygon guide, sam_iou (overlap of the footprint with the drawn object, 0 to 1: a low value flags a footprint to look at, such as a building that changed, it does not prove a change). Then select_features on that layer (e.g. \"sam_iou\" < 0.5) or cross_filter with it as the source. No other layer is changed. Returns layer (layer_id, name, feature_count...), guide_features, drawn, without_object (features with no object: off the raster, nothing found by SAM, or never tried when stopped_early), sam_score {median, minimum}, sam_iou {median, minimum, below_half}, seconds and stopped_early (true when the 20 s allowed ran out before every window was drawn: call again with fewer features). QGIS is held while SAM draws, about 2 s for each window of 1024 pixels; other changes are refused meanwhile. A guide whose features cannot be counted (a web service) needs a selection. SAM (the model and its runtime) is installed by the user from the FilterMate dock; without it the call fails and says so. Good on buildings and other well delimited objects; parcels and trees are not reliable.",

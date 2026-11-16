@@ -60,6 +60,8 @@ CHANGED_LAYERS = {
     # A copy is a second layer on the same source, and no protected one: what is edited in it is written in the
     # file of the layer copied (2026-11-15: a protected layer was edited through its copy).
     "duplicate_layer": ("layer",),
+    # The options of the layers in FilterMate's panels: [{"layer": ..., "exploring": ..., "filtering": ...}].
+    "set_layer_options": ("layers",),
 }
 # Without any layer named, these act on every layer.
 ALL_WHEN_NONE = frozenset({"clear_filters"})
@@ -168,6 +170,8 @@ def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
             references.append(value)
         elif isinstance(value, list):
             references.extend(item for item in value if isinstance(item, str))
+            references.extend(item["layer"] for item in value
+                              if isinstance(item, dict) and isinstance(item.get("layer"), str))
     source = arguments.get("source_layer")
     if name == "cross_filter" and isinstance(source, str) and (
             arguments.get("filter_source") or _keeps_points(arguments.get("point_cloud_criteria"))):

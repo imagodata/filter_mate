@@ -116,3 +116,12 @@ def test_two_layers_of_one_name_are_named_as_such():
     clean, problems = check_layer_changes({}, {"layers_to_filter": ["communes"]}, layer=ROUTES, layers=twins + [ROUTES],
                                           predicates=PREDICATES, expression_problem=no_problem)
     assert clean == {} and problems == ["layers_to_filter: two layers are named communes, give its id"]
+
+
+def test_the_chat_offers_the_tools_of_the_panels():
+    from core.agent.tool_catalog import chat_tools
+    from filtermate_api.accessor import InMemoryAccessor
+    from filtermate_api.agent_tools import build_handlers
+    names = {"layer_options", "set_layer_options", "export_options", "set_export_options"}
+    assert names <= {tool.name for tool in chat_tools()}
+    assert names <= set(build_handlers(InMemoryAccessor(), export_root=None))

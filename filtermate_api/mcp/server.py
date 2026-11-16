@@ -899,6 +899,48 @@ def build_server(client: FilterMateClient) -> Any:
         """Check or uncheck layers in the layer tree (shown or hidden on the map). Returns done and failed."""
         return await call("POST", "/layers/visibility", _body(layers=layers, visible=visible))
 
+    @mcp.tool(annotations=ToolAnnotations(title="Options of a layer in the panels", readOnlyHint=True,
+                                          openWorldHint=False))
+    async def layer_options(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+    ) -> Dict[str, Any]:
+        """What a layer shows in FilterMate's EXPLORING panel and its FILTERING options, with the values each takes.
+        Needs FilterMate's panel open."""
+        return await call("GET", "/panels/layer?" + urlencode({"layer": layer}))
+
+    @mcp.tool(annotations=_write("Set the options of layers in the panels", idempotent=True))
+    async def set_layer_options(
+        layers: Annotated[List[Dict[str, Any]], Field(min_length=1, max_length=50, description=(
+            "[{layer, exploring, filtering}], each a vector layer id or name with the options to set"))],
+        reason: Annotated[str, Field(max_length=500, description="Why, in the language of the user")] = "",
+    ) -> Dict[str, Any]:
+        """Set, all or none, what layers show in FilterMate's EXPLORING panel and their FILTERING options, as the user
+        would in the panel. exploring: single_selection_expression, multiple_selection_expression,
+        custom_selection_expression (QGIS expressions of the layer), current_exploring_groupbox (single_selection,
+        multiple_selection, custom_selection), is_tracking, is_linking. filtering: layers_to_filter,
+        geometric_predicates, source_layer_combine_operator and other_layers_combine_operator (AND, AND NOT, OR),
+        buffer_value (metres), buffer_type (Round, Flat, Square), buffer_segments, and the has_... box of each.
+        Returns changed and shown_in_panel."""
+        return await call("POST", "/panels/layer", _body(layers=layers, reason=reason))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Export options of the panel", readOnlyHint=True,
+                                          openWorldHint=False))
+    async def export_options() -> Dict[str, Any]:
+        """How the project exports from FilterMate's EXPORTING panel, with the formats it takes. Needs the panel."""
+        return await call("GET", "/panels/export")
+
+    @mcp.tool(annotations=_write("Set the export options of the panel", idempotent=True))
+    async def set_export_options(
+        changes: Annotated[Dict[str, Any], Field(description=(
+            "layers_to_export, datatype_to_export (format), projection_to_export (EPSG:...), styles_to_export (QML, "
+            "SLD), output_folder_to_export, zip_to_export (.zip path), batch_output_folder, batch_zip, and the has_... "
+            "box of each"))],
+        reason: Annotated[str, Field(max_length=500, description="Why, in the language of the user")] = "",
+    ) -> Dict[str, Any]:
+        """Prepare FilterMate's EXPORTING panel, all or none, for the user to export from it; this exports nothing
+        (export_layers does). Returns changed and saved."""
+        return await call("POST", "/panels/export", _body(changes=changes, reason=reason))
+
     @mcp.tool(annotations=_write("Draw objects with SAM", idempotent=False))
     async def segment_objects(
         raster: Annotated[str, Field(min_length=1, max_length=1000, description=(
