@@ -264,6 +264,7 @@ class AgentPanel(QFrame):
     undo_requested = pyqtSignal()
     settings_requested = pyqtSignal()
     setup_requested = pyqtSignal()
+    tour_requested = pyqtSignal()  # how FilterMate works, told in the thread (ui/controllers/welcome_tour.py)
     shown = pyqtSignal()  # the panel comes in view: its section opens, or the dock shows it
     new_conversation_requested = pyqtSignal()
     redo_requested = pyqtSignal()
@@ -378,8 +379,10 @@ class AgentPanel(QFrame):
         self.set_recipes([], False)
         self.new_action = menu.addAction(_tr("New conversation"))
         self.new_action.triggered.connect(self.new_conversation_requested)
-        self.setup_action = menu.addAction(_tr("Set FilterMate up with the agent…"))
+        self.setup_action = menu.addAction(_tr("Set up FilterMate…"))
         self.setup_action.triggered.connect(self.setup_requested)
+        self.tour_action = menu.addAction(_tr("How FilterMate works"))
+        self.tour_action.triggered.connect(self.tour_requested)
         # Sources, model and the MCP server of the plugin, turned on or off without opening the settings.
         menu.addSeparator()
         self.sources_menu = menu.addMenu(_tr("Sources"))
@@ -645,6 +648,11 @@ class AgentPanel(QFrame):
         self.setup_button = QPushButton(_tr("Set up FilterMate, no model needed"), page)
         self.setup_button.setObjectName("pushButton_agent_setup")
         self.setup_button.clicked.connect(self.setup_requested)
+        # What each section does, the panels, the buttons: told in the thread, with or without a model.
+        self.tour_button = QPushButton(_tr("How FilterMate works"), page)
+        self.tour_button.setObjectName("pushButton_agent_tour")
+        self.tour_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.tour_button.clicked.connect(self.tour_requested)
         self.try_label = QLabel(_tr("TRY"), page)
         self.try_label.setObjectName("label_agent_try")
         page.setObjectName("widget_agent_welcome")
@@ -666,6 +674,7 @@ class AgentPanel(QFrame):
             button.clicked.connect(lambda _checked=False, value=text: self.use_example(value))
             layout.addWidget(button)
             self.example_buttons.append(button)
+        layout.addWidget(self.tour_button, 0, Qt.AlignmentFlag.AlignLeft)  # under what the welcome offers, either way
         layout.addStretch(1)
         self.set_ready(False)
         return page
@@ -723,6 +732,9 @@ class AgentPanel(QFrame):
             f"QPushButton#pushButton_agent_setup {{ padding: 8px 16px; border: 1px solid {palette['fm_group_border']};"
             f" border-radius: 6px; background: {palette['fm_group']}; color: {palette['fm_text']}; }}"
             f"QPushButton#pushButton_agent_setup:hover {{ border-color: {palette['fm_active_border']}; }}"
+            f"QPushButton#pushButton_agent_tour {{ padding: 4px 0; font-size: 12px; font-weight: 500; border: none;"
+            f" background: transparent; color: {palette['fm_accent']}; text-align: left; }}"
+            f"QPushButton#pushButton_agent_tour:hover {{ text-decoration: underline; }}"
             f"QLabel#label_agent_welcome_note {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
             f" {palette['fm_group_border']}; padding: 0 0 0 10px; }}"
             f"QFrame#frame_agent_history {{ background: {palette['fm_list']}; border: 1px solid"

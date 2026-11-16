@@ -673,6 +673,26 @@ Run it?</source>
         <translation>セクション：FILTERING、EXPORTING、AGENT のうち、使うものだけ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>FilterMate を設定しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>いくつか選択すると、設定の変更前と変更後が表示されます。AI モデルは不要で、適用するまで何も変わりません。あとで設定する場合は、メニューの ベクタ &gt; FilterMate &gt; FilterMate を設定 を使います。FilterMate の使い方もそこにあります。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>外観：テーマ、パネルのサイズ、言語</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
+        <translation>レイアウト：セクションをこのパネルに置くか、それぞれを QGIS の専用パネルに置くか、ボタンの位置</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
         <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
         <translation>データ：ラスタ、ポイントクラウド、PostgreSQL、Web サービス、そのサイズ</translation>
@@ -2015,6 +2035,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="645"/>
         <source>Set up FilterMate, no model needed</source>
         <translation>FilterMate を設定（モデル不要）</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>FilterMate を設定…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>FilterMate の使い方</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4369,6 +4399,41 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>エージェントで FilterMate を設定</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>いくつか選択すると、すべての設定の変更前と変更後が表示されます。AI モデルは不要です</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>FilterMate の使い方</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>各セクションの役割、QGIS のパネルとしてのセクション、ボタンの位置</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>FilterMate の新機能</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;レールは FilterMate のセクションを並べ、セクションは QGIS のパネルにでき、設定に AI モデルは不要です。&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;FilterMate を設定&lt;/b&gt;では、使用するセクション、データ、外観、セクションとそのボタンの配置を、いくつかの選択で決めます。すべての設定の変更前と変更後を表示し、何も送信しません。&lt;/li&gt;&lt;li&gt;&lt;b&gt;セクションのレール&lt;/b&gt;がパネルの各スタックにあります。チップをクリックするとそのセクションが開き、ドラッグするとセクションの順序を変えられます。&lt;/li&gt;&lt;li&gt;&lt;b&gt;パネルになるセクション&lt;/b&gt;：頼んだときだけです（既定ではすべて FilterMate のパネルに残ります）。AGENT、FILTERING、EXPORTING、CONFIGURATION のチップを右クリックすると、QGIS の専用パネルで開きます。パネルのタイトルを右クリックすると、別のパネルとタブでグループ化したり、FilterMate に戻して統合したりできます。&lt;/li&gt;&lt;li&gt;&lt;b&gt;各セクションの下のボタン&lt;/b&gt;。使わない場合は、FILTERING や EXPORTING をオフにできます。&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; は、自分の API キーまたはローカルの Ollama モデルを使い、一文でフィルタ、スタイル設定、データの取り込みを行います。&lt;b&gt;FilterMate の使い方&lt;/b&gt;は、メニューから開くと各セクションをもう一度説明します。&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate のセクションを QGIS のパネルにでき、設定に AI モデルは不要です。&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;FilterMate を設定&lt;/b&gt;では、使用するセクション、データ、外観、セクションとそのボタンの配置を、いくつかの選択で決めます。すべての設定の変更前と変更後を表示し、何も送信しません。&lt;/li&gt;&lt;li&gt;&lt;b&gt;パネルになるセクション&lt;/b&gt;：AGENT、FILTERING、EXPORTING、CONFIGURATION のヘッダーを右クリックすると、QGIS の専用パネルで開きます。パネルのタイトルを右クリックすると、別のパネルとタブでグループ化したり、FilterMate に戻して統合したりできます。&lt;/li&gt;&lt;li&gt;&lt;b&gt;各セクションの下のボタン&lt;/b&gt;。使わない場合は、FILTERING や EXPORTING をオフにできます。&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; は、自分の API キーまたはローカルの Ollama モデルを使い、一文でフィルタ、スタイル設定、データの取り込みを行います。&lt;b&gt;FilterMate の使い方&lt;/b&gt;は、メニューから開くと各セクションをもう一度説明します。&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>FilterMate を設定</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -11491,6 +11556,76 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>各セクションの下</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>レイアウト</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>セクションの配置</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>ヘッダーをクリックすると、そのセクションが開きます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>すべて FilterMate パネル内</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>既定の状態：パネルは 1 つで、レールをクリックするとセクションが開きます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Each in its own panel of QGIS</source>
+        <translation>それぞれ QGIS の専用パネル</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
+        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
+        <translation>AGENT、FILTERING、EXPORTING、CONFIGURATION を地図の横に、タブまたはフローティングで配置します。EXPLORING は FilterMate に残ります。パネルのタイトルを右クリックすると、別のパネルとグループ化したり、元に戻して統合したりできます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>現在のまま</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>一部のセクションは専用のパネルにあります。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>各セクションは、開いている間、そのセクション専用のボタンを表示します。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
+        <source>Sections: each in its own panel of QGIS (applied at once)</source>
+        <translation>セクション：それぞれ QGIS の専用パネル（すぐに適用されます）</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>セクション：すべて FilterMate パネルに戻す（すぐに適用されます）</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>これらの設定はすでに元に戻されています。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
+        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
+        <translation>各セクションは QGIS の専用パネルにあります。タイトルをドラッグして移動できます。タイトルを右クリックすると、別のパネルとタブでグループ化したり、FilterMate に戻して統合したりできます。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>残ったものにズーム</translation>
@@ -12063,6 +12198,84 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>ベクタタイル</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>FilterMate の使い方</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>FilterMate の使い方をセクションごとに説明します。読むのに AI モデルは不要で、何も送信されません。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>パネルには 2 つのスタックがあり、それぞれのレールにセクションが並びます。上に AGENT と EXPLORING、下に FILTERING、EXPORTING、CONFIGURATION があります。レールのチップをクリックするとそのセクションが開き、チップをレールに沿ってドラッグするとセクションの順序を変えられます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>既定では、すべてのセクションがこのパネルの中にあり、頼まない限り何も動きません。セクションはここから出せます。レール上の AGENT、FILTERING、EXPORTING、CONFIGURATION のチップを右クリックし、専用のパネルで開く操作を選びます。そのセクションは QGIS のパネルになり、地図の横にドラッグしたり、レイヤパネルとタブにしたり、別の画面にフローティングで表示したりできます。EXPLORING はここに残ります。ほかのセクションが使うレイヤを保持しているためです。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>EXPLORING は、現在のレイヤと、そこで選んだものを保持します。ベクタレイヤの地物、ラスタの値の範囲やクラス、ポイントクラウドのクラスや高さです。ほかのセクションは、ここで選んだものに対して動作します。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>FILTERING は、チェックを入れたレイヤを、その選択でフィルタします。選択と交差するもの、選択から一定の距離内にあるものなど... 「フィルタ」は適用し、「元に戻す」と「やり直す」は履歴をたどり、「比較」は前後の地図を表示し、「フィルタ解除」はフィルタを取り除きます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>EXPORTING は、フィルタされた状態のままレイヤをエクスポートします：GeoPackage、Shapefile、KML、GeoTIFF、LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>AGENT は、一文で同じことを行い、さらに多くのこと（スタイル、ラベル、取り込むデータ）も行います。接続したモデルを使います。自分の API キー、またはこのコンピューター上の Ollama です。各リクエストは元に戻せます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>CONFIGURATION には、すべての設定が一覧表示されます。「FilterMate を設定」では、主な設定をいくつかの選択で尋ね、各設定の変更前と変更後を表示します。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>設定で無効になっています：{}。「FilterMate を設定」を使うと、セクションを戻せます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>セクションは、このパネルから出せます。AGENT、FILTERING、EXPORTING、CONFIGURATION のヘッダーを右クリックし、専用のパネルで開く操作を選びます。そのセクションは QGIS のパネルになり、地図の横にドラッグしたり、レイヤパネルとタブにしたり、別の画面にフローティングで表示したりできます。EXPLORING はここに残ります。ほかのセクションが使うレイヤを保持しているためです。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
+        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
+        <translation>このようなパネルのタイトルを右クリックすると、別のパネルとタブでグループ化したり、FilterMate に戻して統合したりできます。閉じても統合されます。QGIS は、各パネルを最後に置いた場所に戻します。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>ボタンは、それぞれのセクション内で動作します。「フィルタ」「元に戻す」「やり直す」「比較」「フィルタ解除」は FILTERING、「エクスポート」は EXPORTING です。専用パネルにあるセクションは、そのボタンも一緒に持っていきます。設定で、各セクションの下にボタンを表示することもできます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>FilterMate を設定</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>モデルを接続</translation>
     </message>
 </context>
 <context>

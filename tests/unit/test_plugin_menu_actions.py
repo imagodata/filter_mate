@@ -6,6 +6,9 @@ with ast: the module cannot be imported outside QGIS).
 2026-11-13: retranslate_actions renamed the entries by their place in the list. "Set up FilterMate with the
 agent" had been added between the panel and the reset: it took the name "Reset configuration and database",
 still started the setup (a request to the provider), and the real reset kept the words of the old language.
+
+2026-11-16: the setup asks with cards and needs no model: its entry is "Set up FilterMate", and "How FilterMate
+works" follows it.
 """
 import ast
 import os
@@ -44,7 +47,7 @@ def _plugin():
     exec(compile(ast.Module(body=methods, type_ignores=[]), str(_PLUGIN), "exec"), namespace)
     plugin = types.SimpleNamespace(iface=MagicMock(), toolbar=MagicMock(), actions=[], menu="&FilterMate",
                                    plugin_dir="/plugin", tr=lambda message: message)
-    for name in ("run", "setup_with_agent", "reset_configuration"):
+    for name in ("run", "setup_with_agent", "show_how_it_works", "reset_configuration"):
         setattr(plugin, name, MagicMock(name=name))
     for name in _NAMES:
         setattr(plugin, name, types.MethodType(namespace[name], plugin))
@@ -56,7 +59,9 @@ def test_each_entry_keeps_its_own_words_after_a_language_change():
     plugin = _plugin()
     plugin._add_menu_actions()
     english = {action.text: action for action in plugin.actions}
-    assert set(english) == {"FilterMate", "Set up FilterMate with the agent", "Reset configuration and database"}
+    assert set(english) == {"FilterMate", "Set up FilterMate", "How FilterMate works",
+                            "Reset configuration and database"}
+    assert not any("agent" in action.text.lower() or "agent" in action.tip.lower() for action in plugin.actions)
 
     plugin.tr = lambda message: "FR:" + message  # the language changed while QGIS runs
     plugin.retranslate_actions()
@@ -64,7 +69,7 @@ def test_each_entry_keeps_its_own_words_after_a_language_change():
     for text, action in english.items():
         assert action.text == "FR:" + text
         assert action.tip.startswith("FR:")
-    assert len({action.text for action in plugin.actions}) == 3  # no two entries under one name
+    assert len({action.text for action in plugin.actions}) == 4  # no two entries under one name
 
 
 @pytest.mark.unit
@@ -78,4 +83,5 @@ def test_the_entries_of_an_extension_are_left_alone():
     plugin.retranslate_actions()
     assert extension.text == "QFieldCloud"
     assert sorted(action.text for action in plugin.actions if action is not extension) == [
-        "FR:FilterMate", "FR:Reset configuration and database", "FR:Set up FilterMate with the agent"]
+        "FR:FilterMate", "FR:How FilterMate works", "FR:Reset configuration and database",
+        "FR:Set up FilterMate"]

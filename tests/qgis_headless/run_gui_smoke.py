@@ -698,7 +698,7 @@ def s_agent_skill_from_profile_check():
 
 
 def s_agent_setup_offer_check():
-    """The setup with the agent: offered once per version (a card of the thread), an entry of both menus."""
+    """The setup: offered once per version (a card of the thread), an entry of both menus; no model in its name."""
     import qgis.utils
     chat = agent_chat()
     before = len(chat._settings_cards)
@@ -706,12 +706,13 @@ def s_agent_setup_offer_check():
     second = chat.offer_setup_once('smoke-9.9.9')
     cards = len(chat._settings_cards)
     controller = importlib.import_module(f'{PACKAGE}.ui.controllers.agent_chat_controller')
-    shown = cards >= 1 and controller._tr('Set FilterMate up with the agent?') in chat.panel.thread.toPlainText()
+    shown = cards >= 1 and controller._tr('Set up FilterMate?') in chat.panel.thread.toPlainText()
     plugin = qgis.utils.plugins[PACKAGE]
     entries = [action.text() for action in plugin.actions]
-    check('setup with the agent: offered once per version, in the QGIS menu and the panel menu',
-          first is True and second is False and bool(shown) and len(chat._settings_cards) == before + 1 and plugin.tr('Set up FilterMate with the agent') in entries
-          and chat.panel.setup_action is not None, f"first={first} second={second} entries={entries}")
+    check('setup: offered once per version, in the QGIS menu and the panel menu',
+          first is True and second is False and bool(shown) and len(chat._settings_cards) == before + 1 and plugin.tr('Set up FilterMate') in entries
+          and chat.panel.setup_action is not None and 'agent' not in chat.panel.setup_action.text().lower(),
+          f"first={first} second={second} entries={entries}")
     chat.new_conversation()  # the checks of the AGENT section that follow expect its welcome
     return waits(0.2)
 
@@ -721,12 +722,14 @@ def _wizard_card():
     return agent_chat()._wizard._card
 
 
-def _answer_card(untick=()):
+def _answer_card(untick=(), tick=()):
     card = _wizard_card()
     for buttons, _other, _field in card._groups:
         for button, label in buttons:
             if label in untick:
                 button.setChecked(False)
+            if label in tick:
+                button.setChecked(True)
     card.answer_button.click()
 
 
@@ -758,8 +761,8 @@ def s_setup_wizard_check():
     config = d.CONFIG_DATA['APP']['OPTIONS'].get('FILTERING', {}).get('enabled', {})
     value = config.get('value') if isinstance(config, dict) else config
     combo, auto = d.comboBox_filtering_current_layer, d.pushButton_checkable_filtering_auto_current_layer
-    check('setup with no model: cards without Other, three steps (FILTERING skipped), the change shown then applied',
-          STATE['wizard_started'] is True and STATE['wizard_no_other'] and STATE['wizard_steps'] == 3
+    check('setup with no model: cards without Other, four steps (FILTERING skipped), the change shown then applied',
+          STATE['wizard_started'] is True and STATE['wizard_no_other'] and STATE['wizard_steps'] == 4
           and len(STATE['wizard_rows']) == 1 and STATE['wizard_card'].done and value is False,
           f"started={STATE['wizard_started']} steps={STATE['wizard_steps']} rows={STATE['wizard_rows']} value={value!r}")
     check('FILTERING off: its header and buttons hidden, the source layer chooser at the top of EXPLORING',
@@ -3073,6 +3076,667 @@ SECTION_STEPS = [s_section_setup, s_section_rail, s_section_bars, s_vector_sourc
                  s_section_close_dock, s_section_reopen_dock, s_section_close_panel, s_section_back_check,
                  s_section_restart, s_section_group, s_section_off]
 
+# --- the welcome: how FilterMate works told in the AGENT thread, the layout asked by the setup (2026-11-16) --------
+
+WELCOME = {}
+EVERY_SECTION = ('agent', 'filtering', 'exporting', 'configuration')
+
+
+def grab_window(name):
+    """FM_GRAB_DIR set: the whole window of QGIS as <name>.png (where the panels are, beside the dock)."""
+    folder = os.environ.get('FM_GRAB_DIR')
+    if folder:
+        QApplication.processEvents()
+        iface.mainWindow().grab().save(os.path.join(folder, f"{name}.png"))
+
+
+def thread_links():
+    """The link buttons of the AGENT thread by their whole text, in the order they were said."""
+    return {button._full: button for button in agent_chat().panel.thread.findChildren(QPushButton)
+            if button.objectName() == 'pushButton_agent_link'}
+
+
+def present_sections():
+    return tuple(key for key in EVERY_SECTION if key != 'agent' or 'agent' in dock()._fm_sections._headers)
+
+
+def leave_welcome():
+    """As the other steps expect the dock: an empty thread, EXPLORING and FILTERING open, nothing apart."""
+    d = dock()
+    agent_chat().new_conversation()
+    d._fm_panels.attach_all()
+    QSettings().remove(DETACHED_KEY)
+    d._fm_sections.open_top('exploring')
+    d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
+    QApplication.processEvents()
+
+
+def s_tour():
+    """How FilterMate works: a button of the welcome and an entry of both menus; told in the thread, no model."""
+    import qgis.utils
+    d, chat = dock(), agent_chat()
+    panel, plugin = chat.panel, qgis.utils.plugins[PACKAGE]
+    tour = importlib.import_module(f'{PACKAGE}.ui.controllers.welcome_tour')
+    chat.new_conversation()
+    d._fm_sections.open_top('agent')
+    QApplication.processEvents()
+    entries = [action.text() for action in plugin.actions]
+    check('tour: a button of the welcome, an entry of the panel menu and of the QGIS menu',
+          panel.tour_button.isVisible() and panel.tour_action.text() == tour.title() and tour.title() in entries
+          and plugin.tr('Set up FilterMate') in entries and not any('agent' in entry.lower() for entry in entries),
+          str(entries))
+    check('tour: the button fits the welcome, under what it offers', panel.tour_button.width() <= panel.stack.width()
+          and panel.tour_button.geometry().top() > panel.welcome_text.geometry().bottom(),
+          f"{panel.tour_button.geometry()} in {panel.stack.width()}")
+    grab('welcome')
+    d._fm_sections.open_top('exploring')  # told from a folded AGENT: the section opens
+    QApplication.processEvents()
+    panel.tour_action.trigger()
+    QApplication.processEvents()
+    text = panel.thread.toPlainText()
+    told = [words for words in ('a rail that lists its sections', 'EXPLORING holds', 'FILTERING filters',
+                                'EXPORTING writes', 'AGENT does', 'CONFIGURATION lists',
+                                'By default every section is in this panel', 'group it with another one',
+                                'The buttons act') if words in text]
+    links = list(thread_links())
+    check('tour: told in the AGENT thread, which opens: each section, the panels, the buttons, then the links',
+          d._fm_sections.is_open('agent') and len(told) == 9 and links[:1] == ['Open every section in its own panel']
+          and 'Set up FilterMate' in links, f"told={len(told)} links={links}")
+    check('tour: nothing is kept in the conversation, no model is asked', not chat._transcript
+          and chat._engine is None)
+    labels = [label for label in panel.thread.findChildren(QLabel) if label.isVisible()]
+    check('tour: no paragraph wider than the thread', all(label.width() <= panel.thread.width() for label in labels),
+          str(max((label.width() for label in labels), default=0)))
+    grab('tour')
+    thread_links()['Open every section in its own panel'].click()
+    return waits(0.6)
+
+
+def s_tour_links_check():
+    """The links of the tour do what was just said: every section in its own panel, then all of them back."""
+    d, chat = dock(), agent_chat()
+    panels = d._fm_panels
+    check('tour: its link opens every section in its own panel, AGENT and its thread still in view',
+          panels.detached() == present_sections() and d._fm_sections.is_open('agent') and on_screen(chat.panel),
+          f"apart={panels.detached()} agent in view={d._fm_sections.is_open('agent')}")
+    grab_window('tour_every_section_apart')
+    chat.show_tour()  # told again: what can be done now is to bring them back
+    QApplication.processEvents()
+    links = list(thread_links())
+    back = 'Merge every section back into FilterMate'
+    WELCOME['links'] = links
+    if back in links:
+        thread_links()[back].click()
+    return waits(0.6)  # AGENT comes back folded: its section opens once Qt has laid the dock out
+
+
+def s_tour_merged_check():
+    d = dock()
+    check('tour: told again with the sections apart, its link merges them back, AGENT open in the dock',
+          'Merge every section back into FilterMate' in WELCOME['links'] and d._fm_panels.detached() == ()
+          and d._fm_sections.is_open('agent') and on_screen(agent_chat().panel),
+          f"links={WELCOME['links']} apart={d._fm_panels.detached()} agent open={d._fm_sections.is_open('agent')}")
+    leave_welcome()
+    return settled()
+
+
+def s_setup_layout():
+    """The setup asks where the sections go, with the buttons: each in its own panel, the buttons under it."""
+    d, chat = dock(), agent_chat()
+    chat.new_conversation()
+    WELCOME['position'] = d._action_bar_manager.get_position()
+    WELCOME['started'] = chat.start_setup()
+    asked = []
+    while _wizard_card() is not None and len(asked) < 8:
+        card = _wizard_card()
+        asked.append([chip.text() for chip in card._chips])
+        if asked[-1] == ['Layout', 'Buttons']:
+            QApplication.processEvents()
+            agent_chat().panel.thread.ensureWidgetVisible(card)
+            QApplication.processEvents()
+            grab('setup_layout_step')
+        _answer_card(tick=('Each in its own panel of QGIS', 'Under each section'))
+    WELCOME['asked'] = asked
+    card = chat._settings_cards[-1] if chat._settings_cards else None
+    WELCOME['card'] = card
+    WELCOME['rows'] = [row.text() for row in card.rows] if card is not None else []
+    WELCOME['apart_before_apply'] = d._fm_panels.detached()
+    QApplication.processEvents()
+    grab('setup_layout_card')
+    if card is not None:
+        card.apply_button.click()
+    return waits(0.8)
+
+
+def s_setup_layout_check():
+    d = dock()
+    panels, manager = d._fm_panels, d._action_bar_manager
+    check('setup: the layout is a step of its own, the sections asked with the buttons',
+          WELCOME['started'] is True and ['Layout', 'Buttons'] in WELCOME['asked'] and len(WELCOME['asked']) == 5,
+          str(WELCOME['asked']))
+    check('setup: the sections and the buttons on the card of the changes, nothing moved before Apply',
+          len(WELCOME['rows']) == 2 and any('own panel' in row for row in WELCOME['rows'])
+          and WELCOME['apart_before_apply'] == (), f"rows={WELCOME['rows']} apart={WELCOME['apart_before_apply']}")
+    check('setup: Apply moves every section to its own panel and the buttons under their section',
+          WELCOME['card'] is not None and WELCOME['card'].done and panels.detached() == present_sections()
+          and manager.get_position() == 'sections', f"apart={panels.detached()} position={manager.get_position()}")
+    check('setup: AGENT moved with the others, its thread is still in view', d._fm_sections.is_open('agent')
+          and on_screen(agent_chat().panel))
+    text = agent_chat().panel.thread.toPlainText()
+    check('setup: it says how to group and merge, and offers how FilterMate works',
+          'group it with another one' in text and 'How FilterMate works' in thread_links(), text[-300:])
+    grab_window('setup_layout_applied')
+    WELCOME['reverted'] = agent_chat()._wizard.revert()  # the link after Apply
+    return waits(0.8)
+
+
+def s_setup_layout_back():
+    d = dock()
+    check('setup put back: every section in FilterMate again, the buttons where they were',
+          WELCOME['reverted'] is True and d._fm_panels.detached() == ()
+          and d._action_bar_manager.get_position() == WELCOME['position'],
+          f"apart={d._fm_panels.detached()} position={d._action_bar_manager.get_position()}")
+    leave_welcome()
+    check('setup put back: the dock as it was, FILTERING open with its buttons',
+          d.toolBox_tabTools.currentWidget() is d.FILTERING and d.frame_actions.isVisible()
+          and action_button('filter').isVisible(), str(actions_shown()))
+    return settled()
+
+
+WELCOME_STEPS = [s_tour, s_tour_links_check, s_tour_merged_check, s_setup_layout, s_setup_layout_check, s_setup_layout_back]
+
+
+# --- what a section in its own panel still shares with the others (FM_ONLY=sync) -------------------------------------
+
+SYNC = {}
+
+
+def apply_settings(values):
+    """As the setup and the agent set a setting: through the panel, applied at once."""
+    return importlib.import_module(f'{PACKAGE}.adapters.agent.plugin_settings').apply_values(values)
+
+
+def s_sync_apart():
+    d = dock()
+    SYNC['theme'] = config_value('APP.DOCKWIDGET.COLORS.ACTIVE_THEME')
+    SYNC['position'] = d._action_bar_manager.get_position()
+    SYNC['docked'] = bool(os.environ.get('FM_SYNC_DOCKED'))  # the control: the same probes with nothing apart
+    if not SYNC['docked']:
+        d._fm_panels.detach_all()
+    return waits(0.6)
+
+
+def sync_sections():
+    return () if SYNC.get('docked') else present_sections()
+
+
+def s_sync_layer():
+    """The current layer is chosen in FILTERING, now in its own panel: EXPLORING, left in the dock, follows."""
+    d = dock()
+    check('sync: every section is apart, EXPLORING alone in the dock', d._fm_panels.detached() == sync_sections()
+          and d._fm_sections.is_open('exploring'), str(d._fm_panels.detached()))
+    d.comboBox_filtering_current_layer.setLayer(layer('dem'))
+    return switched_to('dem', coverage_page=True)
+
+
+def s_sync_layer_check():
+    d, ctrl = dock(), coverage()
+    panel = d._fm_panels.panel('filtering') or d
+    check('sync: a raster chosen in the panel of FILTERING shows its page in EXPLORING, in the dock',
+          ctrl.active_layer is not None and ctrl.active_layer.name() == 'dem' and ctrl._raster_panel.isVisible()
+          and d.isAncestorOf(ctrl._raster_panel) and panel.isAncestorOf(d.comboBox_filtering_current_layer))
+    grab_window('sync_raster_current')
+    auto = d.pushButton_checkable_filtering_auto_current_layer
+    SYNC['auto'] = auto.isChecked()
+    if not auto.isChecked():
+        auto.click()
+    iface.setActiveLayer(layer('zones'))  # the layer panel of QGIS: the chooser follows it, then EXPLORING
+    return switched_to('zones', coverage_page=False)
+
+
+def s_sync_active_layer_check():
+    d = dock()
+    current = d.comboBox_filtering_current_layer.currentLayer()
+    check('sync: the layer made current in QGIS reaches the chooser in the panel, then EXPLORING in the dock',
+          current is not None and current.name() == 'zones' and d.mGroupBox_exploring_single_selection.isVisible(),
+          f"chooser={current.name() if current else None}")
+    auto = d.pushButton_checkable_filtering_auto_current_layer
+    if auto.isChecked():  # off: the layer added below would become the source, which is never among its targets
+        auto.click()
+    extra = QgsVectorLayer('Point?crs=EPSG:2154&field=nom:string', 'sync_extra', 'memory')
+    project.addMapLayer(extra)
+    return waits(3.0, lambda: registered('sync_extra') and tasks_idle())  # the lists follow in a batch, a moment later
+
+
+def exporting_items():
+    combo = dock().checkableComboBoxLayer_exporting_layers
+    return [combo.model().item(row).text() for row in range(combo.model().rowCount())]
+
+
+def s_sync_layers_check():
+    """A layer added to the project reaches the lists of the panels; removed, it leaves them."""
+    SYNC['added'] = (any(text.startswith('sync_extra') for text in combo_items()),
+                     any(text.startswith('sync_extra') for text in exporting_items()))
+    project.removeMapLayer(layer('sync_extra').id())
+    return waits(2.0, tasks_idle)
+
+
+def s_sync_layers_removed_check():
+    gone = (not any(text.startswith('sync_extra') for text in combo_items()),
+            not any(text.startswith('sync_extra') for text in exporting_items()))
+    check('sync: a layer added to the project is listed in the panels of FILTERING and EXPORTING',
+          SYNC['added'] == (True, True), f"filtering, exporting = {SYNC['added']}")
+    check('sync: removed from the project, it leaves both lists', gone == (True, True), f"filtering, exporting = {gone}")
+    apply_settings({'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': 'dark' if SYNC['theme'] != 'dark' else 'light'})
+    return waits(1.0)
+
+
+def s_sync_theme_check():
+    d = dock()
+    panels = d._fm_panels
+    sheet = d.dockWidgetContents.styleSheet()
+    same = {key: panels.panel(key).widget().styleSheet() == sheet for key in panels.detached()}
+    print(f"   lists after the theme: filtering={combo_items()} exporting={exporting_items()}", flush=True)
+    agent = agent_chat().panel
+    theme = getattr(getattr(d, '_theme_manager', None), 'current_theme', None)
+    theme = theme() if callable(theme) else theme
+    check('sync: a change of theme reaches every panel, the AGENT thread with it', all(same.values()) and len(same) == len(sync_sections())
+          and agent._dark() == (theme == 'dark'), f"theme={theme} same sheet={same} agent dark={agent._dark()}")
+    grab_window('sync_other_theme')
+    apply_settings({'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': SYNC['theme']})
+    QApplication.processEvents()
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': 'top' if SYNC['position'] != 'top' else 'bottom'})
+    return waits(1.0)
+
+
+def s_sync_position_check():
+    """Another place for the bar for all: the buttons of a section apart stay in its panel."""
+    d = dock()
+    panels = d._fm_panels
+    filtering, exporting = panels.panel('filtering') or d, panels.panel('exporting') or d
+    check('sync: the bar moved, the buttons of FILTERING and EXPORTING stay in their panels, shown and enabled',
+          filtering.isAncestorOf(action_button('filter')) and exporting.isAncestorOf(action_button('export'))
+          and action_button('filter').isVisible() and action_button('export').isVisible()
+          and (SYNC['docked'] or (action_button('filter').isEnabled() and action_button('export').isEnabled())),
+          str(actions_shown()))
+    grab_window('sync_bar_moved')
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': SYNC['position']})
+    QApplication.processEvents()
+    d.raise_()  # AGENT is a tab of the dock: the dock in front hides its thread
+    QApplication.processEvents()
+    SYNC['agent_behind'] = SYNC['docked'] or (on_screen(agent_chat().panel) is False
+                                              and not d._fm_sections.is_open('agent'))
+    agent_chat()._show_agent()  # what a question of the agent, the setup and the tour do
+    return waits(0.6)
+
+
+def on_screen(widget):
+    """Qt calls a panel behind a tab visible: only its visible region tells it is not in view."""
+    return widget.isVisible() and not widget.visibleRegion().isEmpty()
+
+
+def s_sync_agent_check():
+    d = dock()
+    check('sync: AGENT behind the tab of the dock is not counted as in view, and comes forward when its thread '
+          'has something to say', SYNC['agent_behind'] and d._fm_sections.is_open('agent')
+          and on_screen(agent_chat().panel),
+          f"behind before={SYNC['agent_behind']} in view now={d._fm_sections.is_open('agent')} "
+          f"on screen={on_screen(agent_chat().panel)}")
+    d.comboBox_filtering_current_layer.setLayer(layer('zones'))
+    return switched_to('zones', coverage_page=False)
+
+
+def s_sync_undo():
+    """A filter from the panel: Undo of the panel and the count of EXPLORING in the dock follow."""
+    d = dock()
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+    east_a = next(feature for feature in layer('zones').getFeatures() if feature['name'] == 'east_a')
+    d.mFeaturePickerWidget_exploring_single_selection.setFeature(east_a.id())
+    set_targets(['dem'])
+    set_predicates(['Intersect'])
+    ready = targets_ready(['dem'])
+    return lambda: bool(dock().get_current_features()[0]) and ready()
+
+
+def s_sync_filter():
+    SYNC['undo_before'] = action_button('undo_filter').isEnabled()
+    action_button('filter').click()
+    return lambda: layer('dem').source().endswith('.vrt') and tasks_idle()
+
+
+def s_sync_filter_check():
+    check('sync: a filter from the panel enables Undo there, and Export stays enabled in the panel of EXPORTING',
+          action_button('undo_filter').isEnabled() and action_button('export').isEnabled(),
+          f"undo before={SYNC['undo_before']} after={action_button('undo_filter').isEnabled()}")
+    grab_window('sync_filtered')
+    action_button('undo_filter').click()
+    return lambda: not layer('dem').source().endswith('.vrt') and tasks_idle()
+
+
+def s_sync_new_project():
+    """Another project with the sections apart: the panels stay, their lists empty, nothing raises."""
+    check('sync: Undo of the panel takes the filter back', not layer('dem').source().endswith('.vrt'))
+    SYNC['errors'] = len(STATE['python_errors'])
+    project.setDirty(False)
+    iface.newProject(False)  # File > New, without the question about unsaved changes
+    return waits(3.0, tasks_idle)
+
+
+def s_sync_new_project_check():
+    d = dock()
+    panels = d._fm_panels
+    # 2026-11-16: the lists keep the layers of the project that was closed (with every section in the dock too);
+    # they are greyed out with the rest of the dock, and filled again by the next layers. Known, not a defect of
+    # the panels: what is checked here is that nothing can be done with them meanwhile.
+    stale = [text for text in combo_items() + exporting_items()]
+    usable = d.checkableComboBoxLayer_exporting_layers.isEnabled() or d.checkableComboBoxLayer_filtering_layers_to_filter.isEnabled()
+    check('sync: a project emptied leaves the panels in place, without an error, their lists out of reach',
+          panels.detached() == sync_sections() and len(STATE['python_errors']) == SYNC['errors']
+          and (not stale or not usable),
+          f"apart={panels.detached()} stale={stale} usable={usable} errors={STATE['python_errors'][SYNC['errors']:]}")
+    grab_window('sync_empty_project')
+    zones = QgsVectorLayer(M['zones'] + '|layername=zones', 'zones', 'ogr')
+    project.addMapLayers([zones, QgsRasterLayer(M['dem'], 'dem', 'gdal')])
+    return lambda: registered('zones', 'dem') and tasks_idle()
+
+
+def s_sync_layers_back_check():
+    check('sync: layers loaded again are listed in the panels', any(text.startswith('dem') for text in combo_items())
+          and any(text.startswith('zones') for text in exporting_items()),
+          f"filtering={combo_items()} exporting={exporting_items()}")
+    auto = dock().pushButton_checkable_filtering_auto_current_layer
+    if auto.isChecked() != SYNC['auto']:
+        auto.click()
+    leave_welcome()
+    return settled()
+
+
+SYNC_STEPS = [s_section_setup, s_sync_apart, s_sync_layer, s_sync_layer_check, s_sync_active_layer_check,
+              s_sync_layers_check, s_sync_layers_removed_check, s_sync_theme_check, s_sync_position_check,
+              s_sync_agent_check, s_sync_undo, s_sync_filter, s_sync_filter_check, s_sync_new_project,
+              s_sync_new_project_check, s_sync_layers_back_check]
+
+
+# --- what the audit of 16 November found in the panels and the sections turned off (FM_ONLY=audit) ---------------
+
+AUDIT = {}
+FILTERING_ON = 'APP.OPTIONS.FILTERING.enabled'
+
+
+def s_audit_tab_behind():
+    """AGENT in its own panel, behind the tab of the dock: Qt calls its page visible, nobody sees it."""
+    leave_welcome()
+    dock()._fm_panels.detach('agent')
+    return waits(0.6)
+
+
+def s_audit_tab_behind_check():
+    d, chat = dock(), agent_chat()
+    d.raise_()
+    QApplication.processEvents()
+    page = chat.panel
+    check('audit: AGENT behind the tab of the dock is not counted as open, though Qt calls its page visible',
+          page.isVisible() and not on_screen(page) and not d._fm_sections.is_open('agent'),
+          f"visible={page.isVisible()} on screen={on_screen(page)} open={d._fm_sections.is_open('agent')}")
+    QSettings().remove(chat.SETUP_OFFERED_KEY)
+    AUDIT['offered'] = chat.offer_setup_once('audit-1.0')
+    AUDIT['kept_behind'] = QSettings().value(chat.SETUP_OFFERED_KEY)
+    d._fm_panels.raise_panel('agent')  # the user clicks its tab
+    return waits(0.6)
+
+
+def s_audit_offer_check():
+    d, chat = dock(), agent_chat()
+    kept = QSettings().value(chat.SETUP_OFFERED_KEY)
+    check('audit: an offer of the setup behind a tab is kept as made only once its tab comes forward',
+          AUDIT['offered'] is True and not AUDIT['kept_behind'] and kept == 'audit-1.0',
+          f"offered={AUDIT['offered']} kept behind={AUDIT['kept_behind']!r} kept in front={kept!r}")
+    d.raise_()
+    QApplication.processEvents()
+    chat._show_agent()  # what a question of the agent does
+    return waits(0.6)
+
+
+def s_audit_show_agent_check():
+    check('audit: a question of the agent brings its panel forward from behind a tab', on_screen(agent_chat().panel))
+    leave_welcome()
+    d = dock()
+    d._fm_panels.detach('agent')
+    QApplication.processEvents()
+    open_section(d.FILTERING)
+    apply_settings({FILTERING_ON: False})
+    QApplication.processEvents()
+    apply_settings({FILTERING_ON: True})
+    return waits(0.5)
+
+
+def s_audit_reopen_check():
+    d = dock()
+    check('audit: turned on again with AGENT in its own panel, FILTERING opens as it was',
+          d.toolBox_tabTools.currentWidget() is d.FILTERING, d.toolBox_tabTools.currentWidget().objectName())
+    leave_welcome()
+    panels = d._fm_panels
+    apply_settings({FILTERING_ON: False})
+    QApplication.processEvents()
+    panels.detach('exporting')
+    panels.detach('configuration')
+    QApplication.processEvents()
+    AUDIT['stack_hidden'] = not d.splitter_main.widget(1).isVisible()
+    apply_settings({FILTERING_ON: True})
+    return waits(0.5)
+
+
+def s_audit_stack_below_check():
+    d = dock()
+    header = bottom_header(d.FILTERING)
+    d.raise_()  # a panel with no room below the dock is one of its tabs, in front of it
+    QApplication.processEvents()
+    check('audit: turned on while the two other sections are in their panels, FILTERING shows in the dock',
+          AUDIT['stack_hidden'] and d.splitter_main.widget(1).isVisible() and header is not None
+          and on_screen(header), f"stack hidden before={AUDIT['stack_hidden']} "
+          f"stack={d.splitter_main.widget(1).isVisible()} header on screen={header is not None and on_screen(header)} "
+          f"sizes={d.splitter_main.sizes()} stack={d.splitter_main.widget(1).geometry()} "
+          f"header={header.geometry() if header is not None else None} visible={header is not None and header.isVisible()} "
+          f"toolbox={d.toolBox_tabTools.geometry()} dock={d.height()}")
+    grab_window('audit_filtering_on_among_panels')
+    apply_settings({FILTERING_ON: False})
+    QApplication.processEvents()
+    check('audit: turned off again, the stack left empty goes', not d.splitter_main.widget(1).isVisible())
+    apply_settings({FILTERING_ON: True})
+    QApplication.processEvents()
+    leave_welcome()
+    d._fm_panels.detach('filtering')
+    QApplication.processEvents()
+    apply_settings({FILTERING_ON: False})  # back in the dock, kept as apart for the day it returns
+    QApplication.processEvents()
+    AUDIT['kept_apart'] = QSettings().value(DETACHED_KEY)
+    d._fm_panels.attach_all()  # "Merge every section back into FilterMate"
+    apply_settings({FILTERING_ON: True})
+    return waits(0.5)
+
+
+def s_audit_merge_check():
+    d = dock()
+    check('audit: every section merged back stays merged, one that was turned off included',
+          AUDIT['kept_apart'] == 'filtering' and d._fm_panels.detached() == () and not QSettings().value(DETACHED_KEY),
+          f"kept apart={AUDIT['kept_apart']!r} apart now={d._fm_panels.detached()} saved={QSettings().value(DETACHED_KEY)!r}")
+    leave_welcome()
+    AUDIT['position'] = d._action_bar_manager.get_position()
+    other = 'top' if AUDIT['position'] != 'top' else 'bottom'
+    # One change of settings: the bar is rebuilt (its buttons hidden for a moment), then FILTERING is turned off.
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': other, FILTERING_ON: False})
+    QApplication.processEvents()
+    apply_settings({FILTERING_ON: True})
+    return waits(0.5)
+
+
+def s_audit_buttons_check():
+    d = dock()
+    open_section(d.FILTERING)
+    check('audit: the bar moved and FILTERING turned off in one change, then on: Filter and Unfilter are back',
+          action_button('filter').isVisible() and action_button('unfilter').isVisible(), str(actions_shown()))
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': AUDIT['position']})
+    QApplication.processEvents()
+    leave_welcome()
+    d._fm_panels.detach_all()
+    return waits(0.6)
+
+
+def s_audit_fronts_check():
+    d = dock()
+    window, panels = iface.mainWindow(), d._fm_panels
+    together = panels.panel('filtering') in window.tabifiedDockWidgets(d)  # one group of tabs: the dock is in front
+    behind = panels.panel('configuration') in window.tabifiedDockWidgets(panels.panel('filtering'))
+    check('audit: every section apart, the dock and FILTERING stay in front, as the dock opens',
+          on_screen(d.frame_exploring) and (on_screen(d.FILTERING) or together)
+          and not (behind and on_screen(d.CONFIGURATION)) and not on_screen(agent_chat().panel),
+          f"exploring={on_screen(d.frame_exploring)} filtering={on_screen(d.FILTERING)} "
+          f"configuration={on_screen(d.CONFIGURATION)} agent={on_screen(agent_chat().panel)}")
+    grab_window('audit_every_section_apart')
+    leave_welcome()
+    return settled()
+
+
+def s_probe_settings():
+    """A setting applied as the setup and the agent apply it reaches the dock (FM_STEPS, to find what stops it)."""
+    d = dock()
+    PROBE['position'] = d._action_bar_manager.get_position()
+    other = 'top' if PROBE['position'] != 'top' else 'bottom'
+    PROBE['other'] = other
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': other, FILTERING_ON: False})
+    return waits(1.0)
+
+
+def s_probe_settings_check():
+    d = dock()
+    check('probe: a setting applied through the configuration reaches the dock',
+          d._action_bar_manager.get_position() == PROBE['other'] and not d._fm_sections.section_shown('filtering'),
+          f"position={d._action_bar_manager.get_position()} wanted={PROBE['other']} "
+          f"filtering shown={d._fm_sections.section_shown('filtering')} "
+          f"config={config_value('APP.DOCKWIDGET.ACTION_BAR_POSITION')!r}")
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': PROBE['position'], FILTERING_ON: True})
+    return waits(0.5)
+
+
+PROBE = {}
+AUDIT_STEPS = [s_section_setup, s_audit_tab_behind, s_audit_tab_behind_check, s_audit_offer_check,
+               s_audit_show_agent_check, s_audit_reopen_check, s_audit_stack_below_check, s_audit_merge_check,
+               s_audit_buttons_check, s_audit_fronts_check]
+
+
+# --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------
+
+
+def _shot(name, act):
+    """Two steps: ``act``, then the window as <name>.png once Qt has laid it out."""
+    def step():
+        act()
+        return waits(0.6)
+
+    def after():
+        grab_window(name)
+        return None
+    step.__name__, after.__name__ = f's_shot_{name}', f's_shot_{name}_grab'
+    return [step, after]
+
+
+def _menu_shot(name, key, on_panel):
+    """The menu of a section, on its header in the dock or on the title of its panel, as a picture of its own."""
+    def step():
+        d = dock()
+        panels = d._fm_panels
+        sections = d._fm_sections
+        anchor = panels.panel(key) if on_panel else (sections.top_rail if key == 'agent'
+                                                     else sections.bottom_rail).chip(key)
+        menu = panels.build_menu(key, anchor)
+        if menu is not None:
+            menu.popup(anchor.mapToGlobal(QPoint(30, 12)))
+            QApplication.processEvents()
+            grab_widget(menu, name)
+            menu.hide()
+            menu.deleteLater()
+        return None
+    step.__name__ = f's_shot_{name}'
+    return [step]
+
+
+def _shots():
+    def d():
+        return dock()
+
+    def panels():
+        return dock()._fm_panels
+
+    def bars(position):
+        return lambda: (d()._action_bar_manager.set_position(position), QApplication.processEvents())
+
+    def off(key, on):
+        def act():
+            d().CONFIG_DATA['APP']['OPTIONS'][key.upper()] = {'enabled': {'value': on}}
+            d().apply_section_options()
+        return act
+
+    def floating():
+        panel = panels().panel('filtering')
+        panel.setFloating(True)
+        panel.resize(380, 520)
+        panel.move(700, 200)
+
+    def float_grab():
+        grab_widget(panels().panel('filtering'), '15_filtering_floating')
+        panels().panel('filtering').setFloating(False)
+
+    def raster():
+        d().comboBox_filtering_current_layer.setLayer(layer('dem'))
+
+    steps = [s_section_setup, s_vector_source, s_vector_select]
+    steps += _shot('01_dock', lambda: open_section(d().FILTERING))
+    steps += _menu_shot('02_menu_chip_filtering', 'filtering', on_panel=False)
+    steps += _menu_shot('02_menu_chip_agent', 'agent', on_panel=False)
+    steps += _shot('03_filtering_apart', lambda: panels().detach('filtering'))
+    steps += _menu_shot('04_menu_panel_filtering', 'filtering', on_panel=True)
+    steps += _shot('05_every_section_apart', lambda: panels().detach_all())
+    steps += _menu_shot('06_menu_panel_exporting', 'exporting', on_panel=True)
+    steps += _shot('07_agent_in_front', lambda: panels().raise_panel('agent'))
+    steps += _shot('08_dock_in_front', lambda: d().raise_())
+    steps += _shot('09_exporting_in_front', lambda: panels().raise_panel('exporting'))
+    steps += _shot('10_configuration_in_front', lambda: panels().raise_panel('configuration'))
+    steps += _shot('11_filtering_grouped_with_dock', lambda: panels().group('filtering', 'dock'))
+    steps += _shot('12_exporting_grouped_with_agent', lambda: panels().group('exporting', 'agent'))
+    steps += _shot('13_raster_current', raster)
+    steps += [s_vector_source]
+    steps += _shot('14_filtering_floating_window', floating)
+    steps += [lambda: float_grab()]
+    steps += _shot('16_filtering_merged_back', lambda: panels().attach('filtering'))
+    steps += _shot('17_all_merged_back', lambda: (panels().attach_all(), open_section(d().FILTERING)))
+    steps += _shot('18_bars_filtering', bars('sections'))
+    steps += _shot('19_bars_exporting', lambda: open_section(d().EXPORTING))
+    steps += _shot('20_bars_configuration', lambda: open_section(d().CONFIGURATION))
+    steps += _shot('21_bars_nothing_open', lambda: open_section(None))
+    steps += _shot('22_bars_agent', lambda: d()._fm_sections.open_top('agent'))
+    steps += _shot('23_bars_filtering_apart', lambda: (d()._fm_sections.open_top('exploring'),
+                                                        panels().detach('filtering')))
+    steps += _shot('24_bars_every_section_apart', lambda: panels().detach_all())
+    steps += _shot('25_bottom_bar_again', lambda: (panels().attach_all(), bars('bottom')(),
+                                                    open_section(d().FILTERING)))
+    steps += _shot('26_filtering_off', off('filtering', False))
+    steps += _shot('27_filtering_off_others_apart', lambda: panels().detach_all())
+    steps += _shot('28_filtering_on_again', lambda: (panels().attach_all(), off('filtering', True)(),
+                                                     open_section(d().FILTERING)))
+    steps += _shot('29_dark_dock', lambda: apply_settings({'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': 'dark'}))
+    steps += _shot('30_dark_every_section_apart', lambda: panels().detach_all())
+    steps += _shot('31_dark_agent_in_front', lambda: panels().raise_panel('agent'))
+    steps += _shot('32_light_again', lambda: (panels().attach_all(),
+                                              apply_settings({'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': 'light'}),
+                                              open_section(d().FILTERING)))
+    for step in steps:
+        if step.__name__ == '<lambda>':
+            step.__name__ = 's_shot_floating_grab'
+    return steps
+
+
+SHOT_STEPS = _shots() + WELCOME_STEPS
+
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
          s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
@@ -3101,7 +3765,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_source, s_partial_undo_on_source_check, s_partial_undo_on_target,
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
-         *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, s_finish]
+         *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
@@ -3109,6 +3773,20 @@ if os.environ.get('FM_ONLY') == 'sections':  # the buttons under their section, 
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SECTION_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'sections_startup':  # the same, as the dock finds them when it opens
     STEPS = [s_setup, s_open_plugin, s_dock_ready, s_section_startup_check, s_finish]
+if os.environ.get('FM_ONLY') == 'welcome':  # the tour and the layout step of the setup alone
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *WELCOME_STEPS, s_finish]
+if os.environ.get('FM_STEPS'):  # steps by name, in this order: to find which one leaves the dock in another state
+    STEPS = [s_setup, s_open_plugin, s_dock_ready,
+             *[step for name in os.environ['FM_STEPS'].split(',') for step in
+               (globals()[name] if isinstance(globals()[name], list) else [globals()[name]])], s_finish]
+if os.environ.get('FM_ONLY') == 'layout':  # everything about the sections, their panels and the welcome, in a row
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'audit':  # the defects of the panels found on 16 November, each one alone
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *AUDIT_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'sync':  # what a section in its own panel still shares with the others
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *SYNC_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'layout_shots':  # the window in each layout, as pictures in FM_GRAB_DIR
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *SHOT_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 
