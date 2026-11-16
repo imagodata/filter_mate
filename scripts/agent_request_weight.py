@@ -46,6 +46,8 @@ from agent.session import STATUS_DONE, AgentLimits, AgentSession, run_exchange  
 from agent.skills import SKILLS  # noqa: E402
 from agent.tool_executor import ToolExecutor  # noqa: E402
 from agent_eval import ScriptedTransport, SimulatedProject, project_context, project_state_of, skill_loader  # noqa: E402
+from agent.project_notes import notes_block  # noqa: E402
+from agent.request_context import ContextParts, compose, widgets_part  # noqa: E402
 
 
 # What ui/controllers/agent_chat_controller.py adds to the instructions for the sources ticked, measured in QGIS
@@ -167,15 +169,68 @@ def default_setup() -> Tuple[str, Tuple[ToolSpec, ...], Dict[str, List[str]]]:
     return instructions, tuple(start), held
 
 
-# A conversation of ten requests on the simulated project of agent_eval.py, the calls taken from cases of its bench:
+# A conversation on the simulated project of agent_eval.py, the calls taken from cases of its bench:
 # filters on attributes, a filter across layers, a statistic, a style, the view, an export.
 CONVERSATION_SETUP = {"selected": ["communes"]}
+# Lot 3 (2026-11-16): five layers like those of the network project of the user (12 fields each, a zone id that links
+# them), two notes and two widgets, so that the bench sees what sending less of the state and of the data saves.
+_CITIES = ["Toulouse", "Muret", "Blagnac", "Colomiers", "Tournefeuille", "Balma", "L'Union", "Cugnaux", "Ramonville",
+           "Castanet", "Portet", "Plaisance", "Saint-Orens", "Launaguet", "Aucamville", "Fenouillet", "Seilh",
+           "Pibrac", "Cornebarrieu", "Beauzelle", "Villeneuve", "Escalquens", "Labège", "Auzeville", "Quint",
+           "Fonsorbes", "Frouzins", "Roques", "Seysses", "Villate"]
+
+
+def _network_layer(layer_id: str, geometry: str, count: int, kind_values) -> dict:
+    return {"id": layer_id, "kind": "vector", "geometry": geometry, "count": count, "fields": {
+        "identifier": [f"{layer_id.upper()}-{number:05d}" for number in range(1, 6)],
+        "zone_pop_id": [f"POP_{number:03d}" for number in range(1, 41)],
+        "zone_mro_id": [f"MRO_{number:02d}" for number in range(1, 11)],
+        "status": ["TODO", "CONSTRUCTED", "AS_BUILT", "BLOWN"], "type": list(kind_values),
+        "city": list(_CITIES), "postal_code": ["31000", "31100", "31200", "31300", "31400", "31500"],
+        "owner": ["Constructel", "Orange", "Free"], "comment": ["", "à revoir", "accès difficile"],
+        "created_at": ["2025-01-12", "2025-06-30"], "updated_at": ["2026-10-01", "2026-11-12"],
+        "length": [0.5, 2400.0]}}
+
+
+EXTRA_LAYERS = {
+    "zones_pop": _network_layer("zones_pop_j1", "MultiPolygon", 106, ["POP"]),
+    "points_demande": _network_layer("points_demande_k2", "Point", 22166, ["HP", "N-HP"]),
+    "cables": _network_layer("cables_l3", "MultiLineString", 3103, ["FO-12", "FO-24", "FO-48", "FO-144"]),
+    "conduites": _network_layer("conduites_m4", "MultiLineString", 33883, ["PVC-42", "PEHD-45", "Aérien"]),
+    "structures": _network_layer("structures_n5", "Point", 22185, ["PBO", "PM", "BPE", "Chambre", "Poteau"]),
+}
+BENCH_NOTES = ["Les couches du réseau se rattachent aux zones POP par le champ zone_pop_id.",
+               "Le statut TODO veut dire à construire ; CONSTRUCTED, posé ; AS_BUILT, récolé."]
+BENCH_WIDGETS = [{"id": "w1", "kind": "range", "layer": "cables", "field": "length", "low": 0, "high": 1200},
+                 {"id": "w2", "kind": "values", "layer": "points_demande", "field": "status", "ticked": ["HP"]}]
+
+
+def bench_project() -> SimulatedProject:
+    """The simulated project of agent_eval.py and the five layers of a network: 14 layers."""
+    import copy
+    project = SimulatedProject(CONVERSATION_SETUP)
+    for name, layer in EXTRA_LAYERS.items():
+        project.layers[name] = copy.deepcopy(layer)
+        project.by_ref[name] = name
+        project.by_ref[layer["id"]] = name
+    return project
+
+
+def bench_context(project: SimulatedProject, before) -> str:
+    """The context a request carries, as the chat composes it (core/agent/request_context.py)."""
+    return compose(ContextParts(summary=project_context(project, before=before), notes=notes_block(BENCH_NOTES),
+                                widgets=widgets_part(BENCH_WIDGETS)))
+
+
+# The requests: 13 since lot 3 (three of them read data).
 CONVERSATION = (
     ("Ne garde que les communes de Haute-Garonne (département 31).",
      (("apply_filter", {"layer_name": "communes", "expression": "\"dept\" = '31'"}),)),
+    ("Quels champs a la couche des câbles ?", (("describe_layer", {"layer": "cables"}),)),
     ("Quels champs a la couche des routes ?", (("describe_layer", {"layer": "routes"}),)),
     ("Filtre les bâtiments qui sont dans la commune sélectionnée.",
      (("cross_filter", {"source_layer": "communes", "target_layers": ["batiments"], "predicates": ["Are within"]}),)),
+    ("Quels statuts prennent les câbles ?", (("field_values", {"layer": "cables", "field": "status"}),)),
     ("Combien y a-t-il de communes par département ?",
      (("layer_statistics", {"layer": "communes", "group_by": "dept"}),)),
     ("Colore les communes selon leur population, en 5 classes.",
@@ -184,14 +239,18 @@ CONVERSATION = (
      (("apply_filter", {"layer_name": "communes", "expression": "\"population\" > 10000", "operator": "AND"}),)),
     ("Zoome sur la commune sélectionnée.", (("zoom_to", {"layer": "communes", "selected_only": True}),)),
     ("Hide the parcels layer.", (("set_layers_visibility", {"layers": ["parcelles"], "visible": False}),)),
+    ("Montre-moi quelques points de demande.", (("sample_features", {"layer": "points_demande"}),)),
     ("Exporte les bâtiments en GeoJSON.", (("export_layers", {"layers": ["batiments"], "vector_format": "GeoJSON"}),)),
     ("Retire le filtre sur les communes.", (("clear_filters", {"layers": ["communes"]}),)),
 )
 # The conversation of the main branch before lot 1 (2026-11-16), set by lot 0: each lot must lower the cost and the
 # largest request, neither rising more than 5 % above (docs/superpowers/specs/2026-11-16-agent-token-diet-design.md).
+# Taken again on 2026-11-16 for lot 3 (14 layers, notes, widgets, 13 requests), on the code of main after lots 0 and 1
+# (867c4f24). The first one, for lot 0 (10 requests, 9 layers, main b77dea9c before lot 1): fingerprint 3a596d972f4d,
+# 21 calls, 1,381,796 characters sent, largest 80,432, cost 291,616.
 REFERENCE: Optional[Dict[str, Any]] = {
-    "date": "2026-11-16", "commit": "b77dea9c", "fingerprint": "3a596d972f4d",
-    "calls": 21, "sent": 1381796, "largest": 80432, "cost": 291616,
+    "date": "2026-11-16", "commit": "867c4f24", "fingerprint": "16efd34dcb03",
+    "calls": 28, "sent": 1408656, "largest": 67413, "cost": 340333,
 }
 MAX_RISE = 0.05
 
@@ -235,7 +294,7 @@ def replay() -> Replay:
     instructions, tools, held = default_setup()
     kinds = providers()
     run = Replay()
-    project = SimulatedProject(CONVERSATION_SETUP)
+    project = bench_project()
     project.offered = {tool.name for tool in tools} | set(held)
     hidden = {tool.name: tool for tool in chat_tools() if tool.name in held}
     known = {tool.name for tool in tools} | set(hidden)
@@ -261,7 +320,7 @@ def replay() -> Replay:
         scripted = ScriptedTransport([{"tool": tool, "args": args} for tool, args in steps])
         scripted.use_first({name: held[name] for name in hidden})  # a tool added before is not added again
         exchange = run_exchange(session, text, _Measured(scripted, kinds, rank, run, before), executor,
-                                confirm=lambda call: True, context=project_context(project, before=seen))
+                                confirm=lambda call: True, context=bench_context(project, seen))
         seen = project_state_of(project)
         if exchange.error is not None:
             run.errors.append(f"request {rank}: {exchange.error.message}")

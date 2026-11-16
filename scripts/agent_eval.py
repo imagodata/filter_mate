@@ -179,7 +179,8 @@ class SimulatedProject:
             values = layer["fields"][args["field"]]
             if args.get("search"):
                 values = [value for value in values if args["search"].lower() in str(value).lower()]
-            return {"layer_name": name, "field": args["field"], "values": values, "truncated": False}
+            limit = args.get("limit", 50)
+            return {"layer_name": name, "field": args["field"], "values": values[:limit], "truncated": len(values) > limit}
 
         def layer_statistics(args):
             name, layer = self._layer(args["layer"])
@@ -202,9 +203,10 @@ class SimulatedProject:
                 answer["statistics"] = {"count": count, "nulls": 0, "minimum": min(values), "maximum": max(values),
                                         "distinct": len(values)}
             if args.get("group_by"):
-                groups = known[args["group_by"]]
-                answer.update({"group_by": args["group_by"], "groups_total": len(groups), "truncated": False,
-                               "groups": [{"value": value, "feature_count": count // len(groups)} for value in groups]})
+                groups, limit = known[args["group_by"]], args.get("limit", 20)
+                answer.update({"group_by": args["group_by"], "groups_total": len(groups), "truncated": len(groups) > limit,
+                               "groups": [{"value": value, "feature_count": count // len(groups)}
+                                          for value in groups[:limit]]})
             return answer
 
         def sample_features(args):
@@ -213,8 +215,9 @@ class SimulatedProject:
                 raise ToolFailure(f"'{name}' is not a vector layer")
             rows = [{"fid": index + 1, "attributes": {field: values[index % len(values)]
                                                       for field, values in layer["fields"].items()}}
-                    for index in range(min(args.get("limit", 5), 2))]
-            return {"layer_name": name, "crs_authid": "EPSG:2154", "features": rows, "truncated": True}
+                    for index in range(min(args.get("limit", 5), layer.get("count", 0)))]
+            return {"layer_name": name, "crs_authid": "EPSG:2154", "features": rows,
+                    "truncated": layer.get("count", 0) > len(rows)}
 
         def identify_at(args):
             return {"x": args["x"], "y": args["y"], "crs": args.get("crs") or "EPSG:2154", "tolerance": 12.5,
