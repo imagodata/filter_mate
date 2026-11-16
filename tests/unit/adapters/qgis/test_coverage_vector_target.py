@@ -387,28 +387,65 @@ def _web_fields(layer):
     return layer
 
 
-class TestWebServiceTargets:
-    """2026-10-17: a web service is filtered by a real key, at most key_list_limit (500) of them."""
+EAST_HALF_BY_EXTENT = "intersects_bbox($geometry, geom_from_wkt('POLYGON((500 0, 1000 0, 1000 1000, 500 1000, 500 0))'))"
 
-    def test_no_key_is_refused_instead_of_writing_dollar_id(self, engine, remote):
+
+class TestWebServiceTargets:
+    """2026-10-17: a web service is filtered by a real key, at most key_list_limit (500) of them.
+
+    2026-11-15: where its features cannot be listed (no stable key, more than 500 keys, or a list too long for the
+    address of a request), a WFS is cut by the extent of the source instead of being refused (``_cut_by_extent``).
+    """
+
+    def _cut_by_extent(self, job):
+        assert job.outcome.success and job.outcome.details.get('by_extent')
+        assert job.outcome.message == "dock refusal: by_extent"  # the dock's own message
+        assert job._expression == EAST_HALF_BY_EXTENT  # never $id
+
+    def test_no_key_is_cut_by_extent_instead_of_writing_dollar_id(self, engine, remote):
         layer = _web_fields(_WebLayer(['nom', 'population'], {fid: _box(*box) for fid, (_, box) in ZONES.items()}))
         job = engine.VectorTargetJob(layer, None)
         job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(), lambda: False)
+        self._cut_by_extent(job)
+        assert remote.reads == []  # nothing to list, nothing read
+
+    def test_no_key_with_and_not_is_refused(self, engine, remote):
+        """AND NOT keeps what lies outside the rectangle: no cut by extent, the missing key is said."""
+        layer = _web_fields(_WebLayer(['nom', 'population'], {fid: _box(*box) for fid, (_, box) in ZONES.items()}))
+        job = engine.VectorTargetJob(layer, 'AND NOT')
+        job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(operator='AND NOT'), lambda: False)
         assert not job.outcome.success and "no unique key field" in job.outcome.message
         assert job._expression == ''
 
-    @pytest.mark.parametrize("count, applied", [(500, True), (501, False)])
-    def test_key_list_is_bounded(self, engine, remote, count, applied):
+    @staticmethod
+    def _keyed_job(engine, count):
         features = {fid: _box(600, 100, 650, 150) for fid in range(1, count + 1)}
-        layer = _web_fields(_WebLayer(['cleabs', 'population'], features))
-        job = engine.VectorTargetJob(layer, None)
+        job = engine.VectorTargetJob(_web_fields(_WebLayer(['cleabs', 'population'], features)), None)
         assert (job._pk, job._raw_pk) == ('cleabs', False)
         job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(), lambda: False)
-        assert job.outcome.success is applied
-        if applied:
-            assert job._expression.startswith('"cleabs" IN (1, 2')
+        return job
+
+    def test_a_short_key_list_is_sent(self, engine, remote):
+        """About 190 bytes of address a key: 20 of them fit in the 8,000 most servers read."""
+        job = self._keyed_job(engine, 20)
+        assert job.outcome.success and not job.outcome.details.get('by_extent')
+        assert job._expression.startswith('"cleabs" IN (1, 2') and job.outcome.kept_count == 20
+
+    @pytest.mark.parametrize("count", [50, 500])
+    def test_a_list_too_long_for_the_address_is_cut_by_extent(self, engine, remote, count):
+        """Under the 500 keys, but past the 8,000 bytes of address most servers read."""
+        self._cut_by_extent(self._keyed_job(engine, count))
+
+    @pytest.mark.parametrize("count, listed", [(500, True), (501, False)])
+    def test_key_list_is_bounded(self, engine, remote, monkeypatch, count, listed):
+        """With room in the address (a server that reads 1 MB), the list still stops at 500 keys."""
+        monkeypatch.setattr(sys.modules[f'{fk.PACKAGE}.adapters.qgis.remote_materializer'], 'request_bytes_limit',
+                            lambda params=None: 1000000)
+        job = self._keyed_job(engine, count)
+        if listed:
+            assert job.outcome.success and job._expression.startswith('"cleabs" IN (1, 2')
         else:
-            assert job.outcome.message == "dock refusal: key_limit"  # the dock's own message
+            self._cut_by_extent(job)
 
 
 class _Remote:
@@ -417,6 +454,7 @@ class _Remote:
     def __init__(self, outcome_class):
         self.Outcome = outcome_class
         self.reads, self.marked, self.forced = [], [], None
+        self.extents = []  # mark_extent_result: the filter by extent set, '' for a list of keys
         self.limit_params = []
 
     def _snapshot(self, layer):
@@ -460,6 +498,10 @@ def remote(monkeypatch):
     module = types.ModuleType(f'{fk.PACKAGE}.adapters.qgis.remote_materializer')
     for name in ('_snapshot', 'unfiltered_snapshot', 'materialization_limits', 'materialize', 'mark_partial_result'):
         setattr(module, name, getattr(stand_in, name))
+    # 2026-11-15: the longest address sent to a service (its default) and a QGIS that checks what a service answers
+    module.request_bytes_limit = lambda params=None: fk.load('core.domain.source_capability').REMOTE_REQUEST_BYTES
+    module.supports_reply_validation = lambda: True
+    module.mark_extent_result = lambda layer, extent: stand_in.extents.append(extent)
     monkeypatch.setitem(sys.modules, module.__name__, module)
     for name in ('adapters.backends', 'adapters.backends.ogr'):
         package = types.ModuleType(f'{fk.PACKAGE}.{name}')
