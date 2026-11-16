@@ -215,6 +215,8 @@ class AgentChatController(QObject):
         self._building = False
         self._transcript = []
         self._seen = None  # project_state when the last answer ended
+        # Changes of the sources, the MCP server or the provider the agent made during a request: applied when it ends.
+        self._pending_options = []
         self._transcript_key = ""
         self._answer = []
         self._header_label = None
@@ -817,6 +819,47 @@ class AgentChatController(QObject):
         self._sync_mcp()
         self._refresh_ready()
         return True
+
+    def apply_agent_options(self, change) -> str:
+        """Make ``change`` (core/agent/agent_options.Change) to the settings as the settings dialog would: other sources
+        start another conversation with the model under the same thread, another provider a new thread. "" when done,
+        else why not (nothing changed then)."""
+        from ...core.agent.agent_options import apply_change
+        values = load_settings()
+        provider = change.provider
+        changes = {"enabled_sources": apply_change(values.enabled_sources, change)}
+        if change.mcp_server is not None:
+            changes["mcp_enabled"] = change.mcp_server
+        if provider is not None:
+            changes.update(preset=provider.preset, model=provider.model, base_url=provider.base_url,
+                           authcfg=provider.authcfg, consent_target=provider.consent_target,
+                           key_target=provider.key_target, consent=True)
+        wanted = replace(values, **changes)
+        if provider is not None and wanted.needs_key:
+            try:
+                key = read_key(provider.authcfg) if provider.authcfg else ""
+            except KeyStoreError:
+                key = ""
+            if not key:
+                return _tr("The key of {} is missing: enter it in the Provider tab of the agent settings.").format(
+                    provider.label)
+        save_settings(wanted)
+        if provider is not None:
+            self._reset_view()  # another provider cannot continue this conversation
+        elif wanted.enabled_sources != values.enabled_sources:
+            self._restart_engine()  # other tools: another conversation with the model, under the same thread
+        if wanted.mcp_enabled != values.mcp_enabled:
+            self._sync_mcp()
+        self._refresh_ready()
+        return ""
+
+    def _apply_pending_options(self) -> None:
+        """The changes the agent made during the request that ended, over the settings as they are now."""
+        pending, self._pending_options = self._pending_options, []
+        for change in pending:
+            reason = self.apply_agent_options(change)
+            if reason:
+                self._say(reason, error=True, offer_settings=True)
 
     @staticmethod
     def _remember_provider(values: AgentSettings) -> None:
@@ -2713,6 +2756,8 @@ class AgentChatController(QObject):
             listed, one_line(str(reason), 300))
 
     def on_finished(self, outcome: ChatOutcome) -> None:
+        if self._pending_options:  # after this request, out of the callback of the engine
+            QTimer.singleShot(0, self._apply_pending_options)
         if self._abandoned:  # the end of a request left while its tool ran (_drop_engine): only let it go
             self._abandoned, self._engine = False, None
             self._request_calls, self._answer = [], []
