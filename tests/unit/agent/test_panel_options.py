@@ -125,3 +125,36 @@ def test_the_chat_offers_the_tools_of_the_panels():
     names = {"layer_options", "set_layer_options", "export_options", "set_export_options"}
     assert names <= {tool.name for tool in chat_tools()}
     assert names <= set(build_handlers(InMemoryAccessor(), export_root=None))
+
+
+PANEL_TOOLS = {"layer_options", "set_layer_options", "export_options", "set_export_options"}
+
+
+def test_the_tools_of_the_panels_come_with_their_skill():
+    """The token diet (2026-11-16): a new tool must not weigh on the first request; the skill panels brings them."""
+    from core.agent.families import bringing
+    from core.agent.skills import SKILLS
+    from core.agent.tool_catalog import chat_tools
+    held = bringing(chat_tools(), SKILLS.values())
+    assert all(held.get(name) == ["panels"] for name in PANEL_TOOLS), {name: held.get(name) for name in PANEL_TOOLS}
+
+
+def test_the_bench_simulates_the_tools_of_the_panels():
+    import importlib.util
+    import sys
+    from pathlib import Path
+    path = Path(__file__).resolve().parents[3] / "scripts" / "agent_eval.py"
+    spec = importlib.util.spec_from_file_location("agent_eval_panels", path)
+    bench = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = bench
+    try:
+        spec.loader.exec_module(bench)
+        project = bench.SimulatedProject()
+        handlers = project.handlers()
+        assert PANEL_TOOLS <= set(handlers)
+        changed = handlers["set_layer_options"]({"layers": [{"layer": "communes", "exploring": {"is_tracking": True}}]})
+        assert changed["changed"][0]["layer_name"] == "communes"
+        assert handlers["layer_options"]({"layer": "communes"})["exploring"]["is_tracking"] is True
+        assert bench._touched({"layers": [{"layer": "communes_a1"}]}, project.by_ref) == ["communes"]
+    finally:
+        sys.modules.pop(spec.name, None)

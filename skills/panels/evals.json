@@ -1,0 +1,100 @@
+{
+ "cases": [
+  {
+   "id": "panels_readable_label",
+   "prompt": "Règle l'exploration des communes pour qu'on voie leur nom au lieu de l'identifiant.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_options",
+      "args": {
+       "layers": {
+        "contains": [
+         "communes",
+         "single_selection_expression",
+         "nom"
+        ]
+       }
+      },
+      "call_args": {
+       "layers": [
+        {
+         "layer": "communes",
+         "exploring": {
+          "single_selection_expression": "\"nom\" || ' (' || \"insee\" || ')'"
+         }
+        }
+       ],
+       "reason": "Le nom se lit mieux que l'identifiant."
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "select_features"
+   ],
+   "touches": [
+    "communes"
+   ]
+  },
+  {
+   "id": "panels_prepare_export",
+   "prompt": "Prépare l'export des bâtiments en GeoPackage, je le lancerai moi-même depuis le panneau.",
+   "expect": [
+    [
+     {
+      "tool": "set_export_options",
+      "args": {
+       "changes": {
+        "contains": [
+         "batiments",
+         "GPKG"
+        ]
+       }
+      },
+      "call_args": {
+       "changes": {
+        "layers_to_export": [
+         "batiments"
+        ],
+        "datatype_to_export": "GPKG"
+       },
+       "reason": "Export préparé dans le panneau."
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "export_layers"
+   ]
+  },
+  {
+   "id": "panels_export_now_is_an_export",
+   "prompt": "Exporte maintenant les bâtiments en GeoPackage.",
+   "trap": true,
+   "expect": [
+    [
+     {
+      "tool": "export_layers",
+      "args": {
+       "layers": [
+        "batiments"
+       ],
+       "vector_format": "GPKG"
+      },
+      "call_args": {
+       "layers": [
+        "batiments"
+       ],
+       "vector_format": "GPKG"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "set_export_options"
+   ]
+  }
+ ]
+}

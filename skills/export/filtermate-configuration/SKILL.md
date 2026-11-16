@@ -56,6 +56,8 @@ When the user asks to set FilterMate up (the setup the panel offers once per ver
    A connector ticked costs almost nothing until it is used, and its first use is asked in each conversation.
 6. Say how to share this setup with a team (export_settings_profile) and that the setup can be started again from
    the menu.
+7. Offer to set up what the panels show for the layers of the project (readable labels in EXPLORING): the skill
+   panels does it.
 
 Never change a setting before the user answered.
 

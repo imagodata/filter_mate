@@ -108,6 +108,9 @@ class SimulatedProject:
         self.empty: List[str] = list(setup.get("empty", []))  # layers a relation filter leaves with no feature
         self.settings: Dict[str, Any] = {}  # the configuration of FilterMate: its defaults, then what was changed
         self.offered: set = set()  # the tools of the case (load_skill offers the skills they allow)
+        # The options of FilterMate's panels: by layer name ({"exploring": {...}, "filtering": {...}}), and the export.
+        self.panels: Dict[str, Dict[str, Dict[str, Any]]] = {}
+        self.export_panel: Dict[str, Any] = {"datatype_to_export": "GPKG", "layers_to_export": []}
 
     def _get_setting(self, args):
         try:
@@ -558,8 +561,36 @@ class SimulatedProject:
                 raise ToolFailure(str(exc)) from None
             return answers_payload(questions, [([question.options[0].label], "") for question in questions])
 
+        def layer_options(args):
+            name, _ = self._layer(args["layer"])
+            options = self.panels.setdefault(name, {"exploring": {"single_selection_expression": '"fid"'},
+                                                    "filtering": {}})
+            return {"layer_name": name, "exploring": dict(options["exploring"]), "filtering": dict(options["filtering"])}
+
+        def set_layer_options(args):
+            items = args.get("layers") or []
+            names = [self._layer(str(item.get("layer", "")))[0] for item in items]
+            for name, item in zip(names, items):
+                options = self.panels.setdefault(name, {"exploring": {}, "filtering": {}})
+                for group in ("exploring", "filtering"):
+                    options[group].update(item.get(group) or {})
+            return {"changed": [dict(item, layer_name=name) for name, item in zip(names, items)],
+                    "shown_in_panel": False}
+
+        def export_options(_):
+            return dict(self.export_panel, saved=True)
+
+        def set_export_options(args):
+            changes = dict(args.get("changes") or {})
+            if "layers_to_export" in changes:
+                changes["layers_to_export"] = self._targets(changes["layers_to_export"])
+            self.export_panel.update(changes)
+            return {"changed": changes, "saved": True}
+
         return {
             "ask_user": ask_user,
+            "layer_options": layer_options, "set_layer_options": set_layer_options,
+            "export_options": export_options, "set_export_options": set_export_options,
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
             "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
             "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
@@ -675,7 +706,8 @@ def _touched(arguments: Dict[str, Any], by_ref: Dict[str, str], tool: str = "") 
     if tool in SHOWS_LAYERS:
         return []
     names: List[Any] = [arguments.get("layer_name"), arguments.get("layer"), *(arguments.get("target_layers") or ()),
-                        *(arguments.get("layers") or ())]
+                        *(item.get("layer") if isinstance(item, dict) else item  # set_layer_options
+                          for item in arguments.get("layers") or ())]
     return [_normalize(name, by_ref) for name in names if isinstance(name, str)]
 
 
