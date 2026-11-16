@@ -10730,9 +10730,9 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <translation>Відкрити {} в окремій панелі</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Відкрити кожен розділ в окремій панелі</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Винести всі розділи з FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

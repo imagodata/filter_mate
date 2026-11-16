@@ -10712,9 +10712,9 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <translation>Otevřít {} ve vlastním panelu</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Otevřít každou sekci ve vlastním panelu</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Vyjmout všechny sekce z FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

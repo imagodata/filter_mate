@@ -10730,9 +10730,9 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>{}을(를) 별도 패널에서 열기</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>각 섹션을 별도 패널에서 열기</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>모든 섹션을 FilterMate에서 분리</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

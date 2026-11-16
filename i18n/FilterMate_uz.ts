@@ -10730,9 +10730,9 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <translation>{} ni alohida panelda ochish</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Har bir bo'limni alohida panelda ochish</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Barcha bo'limlarni FilterMate'dan chiqarish</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

@@ -10730,9 +10730,9 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <translation>{} megnyitása saját panelen</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Minden szakasz megnyitása saját panelen</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Minden szakasz kiemelése a FilterMate-ből</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

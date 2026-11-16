@@ -10730,9 +10730,9 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <translation>{}ን በራሱ ፓነል ውስጥ ክፈት</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>እያንዳንዱን ክፍል በራሱ ፓነል ውስጥ ክፈት</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>ሁሉንም ክፍሎች ከFilterMate አውጣ</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

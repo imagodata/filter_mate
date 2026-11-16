@@ -10730,9 +10730,9 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <translation>{} bölümünü kendi panelinde aç</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Her bölümü kendi panelinde aç</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Tüm bölümleri FilterMate'ten çıkar</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

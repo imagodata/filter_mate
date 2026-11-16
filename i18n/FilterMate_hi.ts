@@ -10730,9 +10730,9 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>{} को उसके अपने पैनल में खोलें</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>हर अनुभाग को उसके अपने पैनल में खोलें</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>सभी अनुभागों को FilterMate से बाहर निकालें</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

@@ -67,13 +67,14 @@ def format_order(order: Iterable[str]) -> str:
 def _rail_class():
     """The widget, made when Qt is there (the rules above are read without it)."""
     from qgis.PyQt.QtCore import QEvent, QMimeData, QObject, QPoint, QSize, Qt, pyqtSignal
-    from qgis.PyQt.QtGui import QDrag
+    from qgis.PyQt.QtGui import QCursor, QDrag
     from qgis.PyQt.QtWidgets import QApplication, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QWidget
 
     class SectionRail(QWidget):
         chosen = pyqtSignal(str)  # a click on the chip of this section
         reordered = pyqtSignal(list)  # its chips were dragged into this order
         dropped_in = pyqtSignal(str, int)  # the chip of this section, of another rail, was dropped here at this place
+        dropped_out = pyqtSignal(str, QPoint)  # its chip was dropped where nothing took it, at this place of the screen
         menu_requested = pyqtSignal(str, QPoint)  # a right click on the chip of this section, at this place of the screen
 
         def __init__(self, parent: Any = None, accepts: Optional[Callable[[str], bool]] = None,
@@ -255,8 +256,10 @@ def _rail_class():
             drag.setHotSpot(QPoint(chip.width() // 2, chip.height() // 2))
             chip.setDown(False)
             run = getattr(drag, "exec", None) or drag.exec_  # PyQt5 before 5.15 only has exec_
-            run(Qt.DropAction.MoveAction)
+            taken = run(Qt.DropAction.MoveAction)
             self.set_current(self._current)
+            if taken == Qt.DropAction.IgnoreAction:  # no rail, no panel took it: its owner may give it a panel
+                self.dropped_out.emit(str(key), QCursor.pos())
 
         @staticmethod
         def dragged_key(mime: Any) -> Optional[str]:

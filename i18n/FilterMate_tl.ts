@@ -10730,9 +10730,9 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <translation>Buksan ang {} sa sarili nitong panel</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Buksan ang bawat seksyon sa sarili nitong panel</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Ilabas ang lahat ng seksyon mula sa FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

@@ -10730,9 +10730,9 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>Odpri {} v lastni plošči</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Odpri vsak razdelek v lastni plošči</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Izloči vse razdelke iz FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

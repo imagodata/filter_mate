@@ -10730,9 +10730,9 @@ onnxruntime ve de PyPI amb pip, el model de huggingface.co/{1}, cada fitxer veri
         <translation>Obre {} en un tauler propi</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Obre cada secció en un tauler propi</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Treu totes les seccions de FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

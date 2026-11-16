@@ -10730,9 +10730,9 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <translation>Buka {} dalam panelnya sendiri</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Buka setiap bahagian dalam panelnya sendiri</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Keluarkan semua bahagian daripada FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

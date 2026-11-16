@@ -10730,9 +10730,9 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <translation>{} in einem eigenen Bedienfeld öffnen</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Jeden Bereich in einem eigenen Bedienfeld öffnen</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Alle Bereiche aus FilterMate herauslösen</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

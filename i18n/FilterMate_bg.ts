@@ -10730,9 +10730,9 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>Отваряне на {} в собствен панел</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Отваряне на всяка секция в собствен панел</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Изваждане на всички секции от FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

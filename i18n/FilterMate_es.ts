@@ -10730,9 +10730,9 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <translation>Abrir {} en su propio panel</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Abrir cada sección en su propio panel</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Sacar todas las secciones de FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

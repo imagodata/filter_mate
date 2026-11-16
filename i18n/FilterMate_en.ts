@@ -10735,9 +10735,9 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>Open {} in its own panel</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Open every section in its own panel</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Take every section out of FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

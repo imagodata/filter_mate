@@ -10730,9 +10730,9 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>{} を専用のパネルで開く</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>各セクションを専用のパネルで開く</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>すべてのセクションを FilterMate から取り出す</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>

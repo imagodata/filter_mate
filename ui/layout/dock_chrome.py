@@ -28,6 +28,8 @@ logger = logging.getLogger("FilterMate")
 
 AGENT_PAGE = "AGENT"
 # The sections the user may turn off (APP.OPTIONS.<NAME>.enabled), and the buttons of the action bar acting in them.
+from .section_bars import _hidden_by_code  # noqa: E402 - plain Python, no Qt at import
+
 SECTION_PAGES = {"filtering": "FILTERING", "exporting": "EXPORTING"}
 SECTION_ACTIONS = {
     # Undo and Redo stay: they walk the steps of the agent too, and open the history of the project.
@@ -303,6 +305,7 @@ class DockSections(QObject):
         self.bring_back = None  # called with the key of a section apart that is being turned off
         self.on_menu = None  # called with (key, place on the screen) on a right click on the chip of a section
         self.on_dropped = None  # called with (key, index) when the chip of a section apart is dropped on a rail
+        self.on_dropped_out = None  # called with (key, place on the screen) when a chip is dropped out of every rail
         from ..widgets.section_rail import make_rail
         self.top_rail = make_rail(self.top, accepts=lambda key: key in TOP_KEYS and key in self.detached,
                                   dark=self._dark)
@@ -314,6 +317,7 @@ class DockSections(QObject):
         self.top_rail.chosen.connect(self._on_top_chip)
         self.top_rail.reordered.connect(lambda _order: self._save_orders())
         self.top_rail.dropped_in.connect(self._on_dropped_in)
+        self.top_rail.dropped_out.connect(self._on_dropped_out)
         self.top_rail.menu_requested.connect(self._on_chip_menu)
         self.top_rail.set_sections(["exploring"])
         # "Nothing open" below: QToolBox always has a current page, so an empty one, its header never shown.
@@ -340,6 +344,7 @@ class DockSections(QObject):
         self.bottom_rail.chosen.connect(self._on_bottom_chip)
         self.bottom_rail.reordered.connect(lambda _order: self._save_orders())
         self.bottom_rail.dropped_in.connect(self._on_dropped_in)
+        self.bottom_rail.dropped_out.connect(self._on_dropped_out)
         self.bottom_rail.menu_requested.connect(self._on_chip_menu)
         from ..widgets.section_rail import parse_order
         present = [key for key in BOTTOM_KEYS if getattr(dock, key.upper(), None) is not None]
@@ -402,6 +407,11 @@ class DockSections(QObject):
         rail = self.top_rail if key in TOP_KEYS else self.bottom_rail
         rail.move(key, index)
 
+    def _on_dropped_out(self, key: str, place: Any) -> None:
+        """A chip of the dock was dropped where no rail and no panel took it: the panels decide (a new one)."""
+        if self.on_dropped_out is not None:
+            self.on_dropped_out(key, place)
+
     # --- the top stack ---------------------------------------------------------------
 
     def add_agent(self, page: QWidget) -> QLabel:
@@ -419,11 +429,16 @@ class DockSections(QObject):
         return trailer
 
     def is_open(self, key: str) -> bool:
-        """In view: open in its stack, or on screen in its own panel (behind another tab, it is not)."""
+        """In view: open in its stack, or on screen in its own panel (behind another tab, it is not).
+
+        Qt calls the page of a panel behind another tab visible (``isVisible`` is true in Qt 5 and 6): only its
+        visible region, empty then, tells that nobody sees it."""
         page = self._pages.get(key)
         if page is None:
             return False
-        return page.isVisible() if key in self.detached else not page.isHidden()
+        if key in self.detached:
+            return page.isVisible() and not page.visibleRegion().isEmpty()
+        return not page.isHidden()
 
     def _open_in_stack(self, key: str) -> bool:
         """Open in the stack of the dock; a section in its own panel is not, wherever it shows."""
@@ -512,7 +527,9 @@ class DockSections(QObject):
                 continue
             if not shown:
                 if name not in hidden:
-                    hidden[name] = not widget.isHidden()  # QFieldCloud stays hidden without its plugin
+                    # QFieldCloud stays hidden without its plugin. A button just made, or one a bar rebuilt in the
+                    # same turn (another position of the bar) took and gives back, is hidden for a moment only.
+                    hidden[name] = not _hidden_by_code(widget)
                 widget.setVisible(False)
             elif name in hidden:
                 widget.setVisible(hidden.pop(name))
@@ -525,8 +542,9 @@ class DockSections(QObject):
             self._move_source_layer(to_exploring=not shown)
         if shown and key in self._reopen:
             self._reopen.discard(key)
-            # Not over AGENT: opening FILTERING opens EXPLORING, which would fold AGENT under its user.
-            if self._toolbox.currentWidget() is self._nothing and not self.is_open("agent"):
+            # Not over AGENT: opening FILTERING opens EXPLORING, which would fold AGENT under its user. AGENT in
+            # its own panel folds nothing.
+            if self._toolbox.currentWidget() is self._nothing and not self._open_in_stack("agent"):
                 self._toolbox.setCurrentWidget(page)
         self._fit()
         return True
