@@ -282,7 +282,8 @@ class TestHandlers:
     def test_field_values_defaults(self, api):
         accessor, root = api
         assert run(accessor, root, "field_values", layer="communes", field="nom")[1]["values"] == ["x"]
-        assert accessor.calls[-1] == ("values", {"layer": "communes", "search": "", "limit": 50})
+        # 20 since lot 3 of the token diet (2026-11-16): the reading tools return less by default
+        assert accessor.calls[-1] == ("values", {"layer": "communes", "search": "", "limit": 20})
 
     def test_apply_filter_is_tagged_and_applied(self, api):
         accessor, root = api
