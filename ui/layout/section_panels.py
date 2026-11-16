@@ -43,11 +43,12 @@ Groups = Tuple[Tuple[str, ...], ...]
 
 def parse_groups(value: Any) -> Groups:
     """The panels kept in the settings, each with its sections in their order: ``agent,filtering+exporting``. Known
-    sections only, once each; a list of names is one panel per name."""
+    sections only, once each. A list holds one panel per item: its sections, or its text (``filtering+exporting``;
+    a name alone is a panel of its own)."""
     if isinstance(value, str):
         names = [part.split("+") for part in value.split(",")]
     elif isinstance(value, (list, tuple, set, frozenset)):
-        names = [list(part) if isinstance(part, (list, tuple)) else [part] for part in value]
+        names = [list(part) if isinstance(part, (list, tuple)) else str(part).split("+") for part in value]
     else:
         return ()
     seen: set = set()
@@ -64,8 +65,8 @@ def parse_groups(value: Any) -> Groups:
     return tuple(groups)
 
 
-def format_groups(groups: Iterable[Sequence[str]]) -> str:
-    return ",".join("+".join(group) for group in parse_groups([list(group) for group in groups]))
+def format_groups(groups: Iterable[Any]) -> str:
+    return ",".join("+".join(group) for group in parse_groups(list(groups)))
 
 
 def parse_detached(value: Any) -> Tuple[str, ...]:
@@ -76,14 +77,26 @@ def parse_detached(value: Any) -> Tuple[str, ...]:
 
 def remembered(groups: Iterable[Sequence[str]], saved: Iterable[Sequence[str]], present: Iterable[str]) -> Groups:
     """What is kept: the panels as they are now, and each section ``saved`` as apart that the dock does not hold
-    this time (AGENT turned off is not among those ``present``), in a panel of its own: it is apart again the day
-    it comes back."""
-    now = parse_groups([list(group) for group in groups])
+    this time (AGENT turned off, or not installed yet, is not among those ``present``): it is apart again the day
+    it comes back. It is kept with the sections it shared a panel with, at its place among them, when one of them
+    is still in a panel; in a panel of its own otherwise."""
+    now = [list(group) for group in parse_groups(list(groups))]
     apart = {key for group in now for key in group}
     here = set(present)
-    absent = [key for group in parse_groups([list(group) for group in saved]) for key in group
-              if key not in apart and key not in here]
-    return now + tuple((key,) for key in absent)
+    alone: List[Tuple[str, ...]] = []
+    for group in parse_groups(list(saved)):
+        for position, key in enumerate(group):
+            if key in apart or key in here:
+                continue  # in a panel, or in the dock where the user put it back
+            mates = [mate for mate in group if mate != key and mate in apart]
+            host = next((panel for panel in now if mates and mates[0] in panel), None)
+            if host is None:
+                alone.append((key,))
+                continue
+            after = [mate for mate in group[position + 1:] if mate in host]
+            host.insert(host.index(after[0]) if after else len(host), key)
+            apart.add(key)
+    return tuple(tuple(group) for group in now) + tuple(alone)
 
 
 def smart_group(key: str, groups: Iterable[Sequence[str]]) -> Optional[str]:
@@ -253,7 +266,7 @@ def _panel_class():
     it or drops the chip of a section on it."""
     from qgis.PyQt.QtCore import pyqtSignal
     from qgis.PyQt.QtWidgets import QFrame, QScrollArea, QVBoxLayout, QWidget
-    from ..widgets.section_rail import SECTION_MIME, make_rail
+    from ..widgets.section_rail import SECTION_MIME, TAKES_SECTIONS, make_rail
     try:
         from qgis.gui import QgsDockWidget as Base
     except ImportError:
@@ -270,6 +283,10 @@ def _panel_class():
             self._boxes: Dict[str, Any] = {}
             self._pages: Dict[str, Any] = {}
             self._current: Optional[str] = None
+            # The section QGIS keeps the place of the panel under, while it is not here yet (AGENT comes after the
+            # others when the dock opens): named after the sections it has, the panel would get another place.
+            self.kept_name: Optional[str] = None
+            self.setProperty(TAKES_SECTIONS, True)  # it decides itself what a dragged chip does on it
             holder = QWidget(self)
             holder.setObjectName(CONTENTS_NAME)
             self.body = QVBoxLayout(holder)
@@ -319,9 +336,9 @@ def _panel_class():
                 return None
             viewport = page.parentWidget()
             area = viewport.parentWidget() if viewport is not None else None
-            if isinstance(area, QScrollArea) and area.widget() is page:
+            if isinstance(area, QScrollArea) and area.widget() is page and box.isAncestorOf(area):
                 area.takeWidget()
-            else:
+            elif box.isAncestorOf(page):  # not a page that was already put elsewhere (a move that failed half way)
                 box.layout().removeWidget(page)
                 page.setParent(None)
             self.body.removeWidget(box)
@@ -363,12 +380,15 @@ def _panel_class():
                 key for key in self.members if key not in order]
 
         def retitle(self) -> None:
-            """Named after its sections; QGIS keeps its place under the name of the first one."""
+            """Named after its sections; QGIS keeps its place under the name of the first one (``kept_name`` until
+            that section is here)."""
             if not self.members:
                 return
+            if self.kept_name in self.members:
+                self.kept_name = None
             title = panel_title(self.members)
             self.setWindowTitle(title)
-            self.setObjectName(PANEL_NAME.format(self.members[0]))
+            self.setObjectName(PANEL_NAME.format(self.kept_name or self.members[0]))
             # In the menu of the panels of QGIS, the name of a section alone would say little.
             self.toggleViewAction().setText(f"FilterMate: {title}")
 
@@ -426,6 +446,8 @@ class SectionPanels:
 
         self._watch = _Watch(dock)
         dock.setAcceptDrops(True)  # the chip of a section apart dropped anywhere on the dock: it comes back
+        from ..widgets.section_rail import TAKES_SECTIONS
+        dock.setProperty(TAKES_SECTIONS, True)  # so the drop is the dock's to take, not the rail's it comes from
         sections = self._sections()
         if sections is not None:
             sections.raise_detached = self.raise_panel  # asked to open, a section apart shows its panel
@@ -454,6 +476,16 @@ class SectionPanels:
         """The panels, each with its sections in the order of its rail."""
         return tuple(tuple(panel.members) for panel in self._panels)
 
+    def kept_apart(self) -> Groups:
+        """The panels kept for the next time, each with its sections: those of now, and each section that was
+        apart and is turned off, in a panel of its own."""
+        return _saved()
+
+    def keep_apart(self, groups: Iterable[Any]) -> None:
+        """Keep exactly ``groups`` for the next time (the setup puts back what it found, a section turned off
+        included). A name alone is a panel of its own."""
+        _save(parse_groups(list(groups)))
+
     def panel(self, key: str) -> Any:
         """The panel that holds the section ``key``, None when it is in the dock."""
         return self._home.get(key)
@@ -478,9 +510,10 @@ class SectionPanels:
 
     # --- out of the dock, between panels, back --------------------------------------
 
-    def detach(self, key: str, remember: bool = True, place: Any = None) -> bool:
+    def detach(self, key: str, remember: bool = True, place: Any = None, named: Optional[str] = None) -> bool:
         """``key`` in a panel of its own: out of the dock, or out of a panel it shares. ``place`` (of the screen):
-        the panel floats there. False when the section cannot move."""
+        the panel floats there. ``named``: the section QGIS keeps the place of the panel under, when it is another
+        one (the first of a group, which is not there yet). False when the section cannot move."""
         if key in self._home:
             return self._split(key, remember, place)
         if not self.can_detach(key):
@@ -488,7 +521,6 @@ class SectionPanels:
         window = self._main_window()
         if window is None:
             return False
-        panel = None
         try:
             panel = self._new_panel(window)
             page = self._out_of_dock(key)
@@ -497,7 +529,9 @@ class SectionPanels:
                 return False
             panel.add(key, page, key in BOTTOM)
             self._home[key] = panel
+            panel.kept_name = named if named != key else None
             panel.retitle()
+            self._unpin(key, panel)
             self._after_change()  # first: the dock folds what left, and says how much room it can spare
             self._place(panel, window, place)
             if remember:
@@ -508,15 +542,13 @@ class SectionPanels:
             return False
         except Exception:
             logger.exception("Section %s could not be shown in its own panel", key)
-            if key in self._home:  # half way there: back in the dock, rather than in a panel nobody placed
-                self.attach(key, remember=False)
-            elif panel is not None:
-                self._forget(panel)
+            self._bring_home(key)
             return False
 
-    def move(self, key: str, panel: Any, index: Optional[int] = None, remember: bool = True) -> bool:
+    def move(self, key: str, panel: Any, index: Optional[int] = None, remember: bool = True,
+             front: bool = True) -> bool:
         """``key`` into ``panel``, at ``index`` of its rail: from the dock, or from another panel (which goes when
-        it gave its last section)."""
+        it gave its last section). ``front``: the panel comes in front of the tabs it shares, with ``key`` open."""
         if not self.can_take(key, panel):
             return False
         source = self._home.get(key)
@@ -531,10 +563,12 @@ class SectionPanels:
             panel.add(key, page, key in BOTTOM, index)
             self._home[key] = panel
             panel.retitle()
+            self._unpin(key, panel)
             if source is not None:
                 self._settle_panel(source)
             self._after_change()
-            self.raise_panel(key)
+            if front:
+                self.raise_panel(key)
             if remember:
                 self._remember()
             return True
@@ -543,7 +577,55 @@ class SectionPanels:
             return False
         except Exception:
             logger.exception("Section %s could not be moved to another panel", key)
+            self._bring_home(key)
             return False
+
+    def _unpin(self, key: str, holder: Any) -> None:
+        """``key`` is in ``holder`` now: no other panel waits for it under its name."""
+        for panel in self._panels:
+            if panel is not holder and panel.kept_name == key:
+                panel.kept_name = None
+                panel.retitle()
+
+    def _page(self, key: str) -> Any:
+        from .section_bars import SECTION_PAGES
+        if key in SECTION_PAGES:
+            return getattr(self._dock, SECTION_PAGES[key], None)
+        sections = self._sections()
+        return getattr(sections, "_pages", {}).get(key) if sections is not None else None
+
+    def _bring_home(self, key: str) -> None:
+        """A move failed half way: the section goes back to the dock, rather than stay nowhere, or in a panel
+        nobody placed."""
+        from qgis.PyQt.QtWidgets import QScrollArea
+        try:
+            try:
+                self._unhost(key)
+            except RuntimeError:
+                raise
+            except Exception:
+                logger.debug("The buttons of %s were not taken out of its panel", key, exc_info=True)
+            self._home.pop(key, None)
+            page = self._page(key)
+            for panel in list(self._panels):
+                if key in panel.members:
+                    panel.take(key)
+            sections = self._sections()
+            left = key in self._origins if key in BOTTOM else (sections is not None and key in sections.detached)
+            if page is not None and left:
+                viewport = page.parentWidget()
+                area = viewport.parentWidget() if viewport is not None else None
+                if isinstance(area, QScrollArea) and area.widget() is page and area is not self._origins.get(key):
+                    area.takeWidget()  # of a panel that goes: the page would be deleted with it
+                self._into_dock(key, page)
+            for panel in list(self._panels):
+                self._rescue(key, panel)
+                self._settle_panel(panel)
+            self._after_change()
+        except RuntimeError:  # the dock went away
+            pass
+        except Exception:
+            logger.exception("Section %s could not be brought back to the dock", key)
 
     def group(self, key: str, anchor: str) -> bool:
         """``key`` into the panel that holds the section ``anchor``."""
@@ -554,6 +636,41 @@ class SectionPanels:
         a new one (``smart_group``)."""
         anchor = smart_group(key, self.groups())
         return self.group(key, anchor) if anchor is not None else self.detach(key)
+
+    def arrange(self, groups: Iterable[Sequence[str]], remember: bool = True) -> bool:
+        """The panels as ``groups`` says: each group in one panel, its sections in that order, every other section
+        back in the dock (the setup puts the sections back where it found them). A section that cannot move (it
+        is turned off) stays where it is. True when a section moved."""
+        wanted = parse_groups([list(group) for group in groups])
+        before = self.groups()
+        placed = {key for group in wanted for key in group}
+        for key in self.detached():
+            if key not in placed:
+                self.attach(key, remember=False)
+        for group in wanted:
+            panel = None
+            for key in group:
+                home = self._home.get(key)
+                if panel is None:  # the first one that can be apart gives the group its panel
+                    if (home is None or any(member not in group for member in home.members)) \
+                            and not self.detach(key, remember=False):
+                        continue
+                    panel = self._home.get(key)
+                elif home is not panel:
+                    self.move(key, panel, remember=False)
+            try:
+                order = [key for key in group if panel is not None and key in panel.members]
+                if panel is not None and order != list(panel.members):
+                    shown = panel.current()
+                    panel.set_order(order)
+                    panel.rail.set_sections(panel.members)
+                    panel.open(shown)
+                    panel.retitle()
+            except RuntimeError:  # the panel went away
+                pass
+        if remember:
+            self._remember()
+        return self.groups() != before
 
     def detach_all(self) -> List[str]:
         """Every section that can leave the dock, taken out: FILTERING, EXPORTING and CONFIGURATION together, as in
@@ -566,6 +683,10 @@ class SectionPanels:
         from .section_bars import SECTION_PAGES
         sections = self._sections()
         agent_open = bool(sections is not None and sections.is_open("agent"))
+        try:  # behind the tab of another panel of QGIS (Layers), the dock stays there
+            dock_front = self._dock.isVisible() and not self._dock.visibleRegion().isEmpty()
+        except RuntimeError:
+            dock_front = False
         toolbox = getattr(self._dock, "toolBox_tabTools", None)
         current = toolbox.currentWidget() if toolbox is not None else None
         below = next((key for key in BOTTOM if current is not None
@@ -573,7 +694,8 @@ class SectionPanels:
         left = [key for key in DETACHABLE if key not in self._home and self.open_smart(key)]
         if left:
             self._open_first(below)
-            QTimer.singleShot(0, lambda: self._bring_forward(below, agent_open))  # after QGIS laid the tabs out
+            # after QGIS laid the tabs out
+            QTimer.singleShot(0, lambda: self._bring_forward(below, agent_open, dock_front))
         return left
 
     def _open_first(self, below: str) -> Optional[str]:
@@ -586,14 +708,16 @@ class SectionPanels:
                 return key
         return None
 
-    def _bring_forward(self, below: str, agent_open: bool) -> None:
+    def _bring_forward(self, below: str, agent_open: bool, dock_front: bool) -> None:
+        if self._closing:
+            return
         try:
             key = self._open_first(below)
             if key is not None:
                 self.raise_panel(key)
             if agent_open and "agent" in self._home:
                 self.raise_panel("agent")
-            elif not self._dock.isFloating():
+            elif dock_front and not self._dock.isFloating():
                 self._dock.raise_()
         except RuntimeError:  # the dock went away
             pass
@@ -611,6 +735,7 @@ class SectionPanels:
             panel.add(key, page, key in BOTTOM)
             self._home[key] = panel
             panel.retitle()
+            self._unpin(key, panel)
             self._settle_panel(source)
             self._after_change()
             self._place(panel, window, place)
@@ -621,6 +746,7 @@ class SectionPanels:
             return False
         except Exception:
             logger.exception("Section %s could not be given its own panel", key)
+            self._bring_home(key)
             return False
 
     def attach(self, key: str, remember: bool = True) -> bool:
@@ -629,7 +755,12 @@ class SectionPanels:
         if panel is None:
             return False
         try:
-            self._unhost(key)
+            try:
+                self._unhost(key)
+            except RuntimeError:
+                raise
+            except Exception:  # its page still has to leave: left there, it would go with the panel
+                logger.exception("The buttons of %s could not leave its panel", key)
             page = panel.take(key)
             if page is not None:
                 self._into_dock(key, page)
@@ -639,6 +770,11 @@ class SectionPanels:
             logger.exception("Section %s could not be brought back to the dock", key)
         self._home.pop(key, None)
         self._rescue(key, panel)
+        try:
+            if key in panel.members:  # its page did not leave the usual way: the panel does not list it any more
+                panel.take(key)
+        except RuntimeError:
+            pass
         self._settle_panel(panel)
         try:
             self._after_change()
@@ -674,13 +810,25 @@ class SectionPanels:
             return restored
         for group in _saved():
             panel = next((self._home[key] for key in group if key in self._home), None)
-            for key in group:
+            came = False
+            for position, key in enumerate(group):
                 if key in self._home:
                     continue
-                done = self.move(key, panel, remember=False) if panel is not None else self.detach(key, remember=False)
+                if panel is None:
+                    # Under the name of the first section of the group, there or not yet: where QGIS kept it.
+                    done = self.detach(key, remember=False, named=group[0])
+                else:  # at its place among those that are there, behind the tab the panel may share
+                    index = sum(1 for mate in group[:position] if mate in panel.members)
+                    done = self.move(key, panel, index=index, remember=False, front=False)
                 if done:
                     restored.append(key)
                     panel = self._home[key]
+                    came = True
+            try:
+                if came and panel is not None and panel.members:
+                    panel.open(panel.members[0])  # not the last one that came
+            except RuntimeError:
+                pass
         self._fuse_tabbed()  # panels QGIS put back as tabs of each other (an older arrangement) merge
         return restored
 
@@ -842,18 +990,29 @@ class SectionPanels:
         dock = self._dock
         area = window.dockWidgetArea(dock)
         docked = area != Qt.DockWidgetArea.NoDockWidgetArea and not dock.isFloating()
+        target = area if docked else Qt.DockWidgetArea.RightDockWidgetArea
         if place is not None:
-            window.addDockWidget(area if docked else Qt.DockWidgetArea.RightDockWidgetArea, panel)
-            panel.setFloating(True)
-            panel.resize(max(FLOATING_SIZE[0], dock.width()), FLOATING_SIZE[1])
-            panel.move(self._on_screen(place - QPoint(panel.width() // 2, 12), panel.width(), panel.height(), place))
+            window.addDockWidget(target, panel)
+            self._float(panel, place - QPoint(max(FLOATING_SIZE[0], dock.width()) // 2, 12), place)
             panel.show()
-            return
-        if window.restoreDockWidget(panel):
+        elif window.restoreDockWidget(panel):
             panel.show()
-            return
-        window.addDockWidget(area if docked else Qt.DockWidgetArea.RightDockWidgetArea, panel)
-        if docked:
+            if self._tabbed_with_ours(panel, window):
+                # The place QGIS kept is a tab of the dock or of another panel (it merged there once): a new one.
+                self._place_new(panel, window, target, docked)
+        else:
+            self._place_new(panel, window, target, docked)
+        if self._hidden_with_dock:
+            panel.hide()  # the dock is closed: its panels come back with it
+
+    def _place_new(self, panel: Any, window: Any, target: Any, docked: bool) -> None:
+        """A first place for ``panel``: below the dock or beside it; where that makes it a tab of the dock (the
+        dock shares its tabs with other panels of QGIS, and a panel split from a tab is one more tab), at the end
+        of the area, then across it, then floating beside the dock."""
+        from qgis.PyQt.QtCore import QPoint, Qt
+        dock = self._dock
+        window.addDockWidget(target, panel)
+        if docked and not window.tabifiedDockWidgets(dock):
             wanted = self._height_below(panel)
             if wanted:  # the room of the dock shared: the section at its own height, the dock keeps the larger part
                 room = dock.height()
@@ -862,6 +1021,34 @@ class SectionPanels:
             else:
                 window.splitDockWidget(dock, panel, Qt.Orientation.Horizontal)
         panel.show()
+        if not self._tabbed_with_ours(panel, window):
+            return
+        window.addDockWidget(target, panel)
+        if not self._tabbed_with_ours(panel, window):
+            return
+        upright = target in (Qt.DockWidgetArea.LeftDockWidgetArea, Qt.DockWidgetArea.RightDockWidgetArea)
+        window.addDockWidget(target, panel, Qt.Orientation.Horizontal if upright else Qt.Orientation.Vertical)
+        if not self._tabbed_with_ours(panel, window):
+            return
+        corner = dock.mapToGlobal(QPoint(0, 0))
+        self._float(panel, corner - QPoint(max(FLOATING_SIZE[0], dock.width()) + 12, 0), corner)
+
+    def _float(self, panel: Any, corner: Any, place: Any) -> None:
+        """``panel`` floating with its corner at ``corner``, whole on the screen that holds ``place``."""
+        panel.setFloating(True)
+        panel.resize(max(FLOATING_SIZE[0], self._dock.width()), FLOATING_SIZE[1])
+        panel.move(self._on_screen(corner, panel.width(), panel.height(), place))
+
+    def _tabbed_with_ours(self, panel: Any, window: Any) -> bool:
+        """``panel`` is a tab of the dock or of another panel of FilterMate: they would merge at once."""
+        try:
+            layout = window.layout()
+            if layout is not None:
+                layout.activate()  # the tabs are read from the layout once it is applied, not from what was asked
+            mates = window.tabifiedDockWidgets(panel)
+        except (RuntimeError, AttributeError):
+            return False
+        return any(mate is self._dock or mate in self._panels for mate in mates)
 
     @staticmethod
     def _on_screen(corner: Any, width: int, height: int, place: Any) -> Any:
@@ -1045,6 +1232,8 @@ class SectionPanels:
             return
         try:
             panel.open(key)
+            if self._hidden_with_dock:
+                return  # the dock is closed: its panels come back with it, this one with ``key`` open
             panel.show()
             panel.raise_()
         except RuntimeError:
@@ -1101,9 +1290,8 @@ class SectionPanels:
 
     def _on_dock_closed(self) -> None:
         """The dock is closed: the panels of its sections go with it, and come back when it is shown again. They
-        are hidden, not closed: a panel the user closes brings its sections back."""
-        if not self._panels:
-            return
+        are hidden, not closed: a panel the user closes brings its sections back. A panel made while the dock is
+        closed (a section turned on again) waits for it too."""
         self._hidden_with_dock = True
         for panel in self._panels:
             try:
@@ -1183,17 +1371,31 @@ class SectionPanels:
         the dock or the panel it was dragged from: a drop that missed the rail changes nothing."""
         try:
             dock = self._dock
-            source = self._home.get(key) or dock
-            if source.rect().contains(source.mapFromGlobal(place)):
+            home = self._home.get(key)
+            if self._holds(home or dock, place):
                 return
-            if key in self._home and dock.isVisible() and dock.rect().contains(dock.mapFromGlobal(place)):
-                self.attach(key)  # dropped on the dock, where nothing took the drop: it comes back all the same
+            target = next((panel for panel in self._panels if panel is not home and self._holds(panel, place)), None)
+            if target is not None:
+                self.move(key, target)  # on another panel, where nothing took the drop: it joins it all the same
                 return
-            if key in self._home and len(self._home[key].members) < 2:
+            if home is not None and self._holds(dock, place):
+                self.attach(key)  # on the dock: it comes back
+                return
+            if home is not None and len(home.members) < 2:
                 return  # alone in its panel already
         except RuntimeError:
             return
         self.detach(key, place=place)
+
+    @staticmethod
+    def _holds(widget: Any, place: Any) -> bool:
+        """``place`` of the screen is on ``widget``, where it shows: behind the tab of another panel it shows
+        nowhere, though Qt calls it visible. (Not its visible region: Qt takes its opaque children out of it.)"""
+        from qgis.PyQt.QtWidgets import QApplication
+        if not widget.isVisible():
+            return False
+        at = QApplication.widgetAt(place)
+        return at is not None and (at is widget or widget.isAncestorOf(at))
 
     # --- the menu of a section --------------------------------------------------------
 
@@ -1206,7 +1408,7 @@ class SectionPanels:
         when it would be empty."""
         from qgis.PyQt.QtWidgets import QMenu
         entries = [(command, name) for command, name in menu_entries(key, self.groups(), self._present())
-                   if command != "detach" or key in self._home or self.can_detach(key)]
+                   if command not in ("detach", "group") or key in self._home or self.can_detach(key)]
         if not entries:
             return None
         texts = {

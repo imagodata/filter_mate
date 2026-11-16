@@ -130,6 +130,14 @@ def test_a_list_of_names_is_one_panel_each():
     assert panels.parse_groups(["agent", ("filtering", "exporting")]) == (("agent",), ("filtering", "exporting"))
 
 
+def test_a_list_holds_one_panel_per_item_as_its_sections_or_as_its_text():
+    # 2026-11-16, review: "filtering+exporting" in a list was read as one unknown name, and names alone were cut
+    # into letters when saved: the setup, which keeps what it found as a list, wiped what was kept.
+    assert panels.parse_groups(["agent", "filtering+exporting"]) == (("agent",), ("filtering", "exporting"))
+    assert panels.format_groups(["agent", "filtering"]) == "agent,filtering"
+    assert panels.format_groups(["agent", "filtering+exporting"]) == "agent,filtering+exporting"
+
+
 def test_unknown_names_noise_and_repeats_are_left_out():
     assert panels.parse_groups("exporting+nothing, FILTERING +exporting, ,exploring") == (("exporting",), ("filtering",))
     assert panels.parse_groups("exploring") == ()  # EXPLORING stays in the dock
@@ -161,8 +169,23 @@ def test_the_panels_as_they_are_now_are_what_is_kept():
 def test_a_section_the_dock_does_not_hold_this_time_stays_kept():
     # AGENT was apart, then turned off: FILTERING leaves and comes back, AGENT is apart again the day it returns.
     present = ("filtering", "exporting", "configuration")
-    assert panels.remembered((("filtering",),), (("agent", "filtering"),), present) == (("filtering",), ("agent",))
+    assert panels.remembered((("filtering",),), (("agent",), ("filtering",)), present) == (("filtering",), ("agent",))
     assert panels.remembered((), (("agent",), ("filtering",)), present) == (("agent",),)
+
+
+def test_a_section_that_is_not_there_keeps_its_place_in_the_panel_it_shared():
+    # 2026-11-16, review: AGENT is installed after the others when the dock opens. Kept alone as soon as anything
+    # was remembered meanwhile, it lost the panel it shared, and the order of its sections.
+    present = ("filtering", "exporting", "configuration")
+    assert panels.remembered((("filtering",),), (("agent", "filtering"),), present) == (("agent", "filtering"),)
+    assert panels.remembered((("filtering", "configuration"),), (("filtering", "agent", "configuration"),),
+                             present) == (("filtering", "agent", "configuration"),)
+    assert panels.remembered((("exporting",),), (("exporting", "agent"),), present) == (("exporting", "agent"),)
+    # FILTERING turned off, EXPORTING put back in the dock: nothing of its panel is left to share.
+    assert panels.remembered((), (("filtering", "exporting"),), ("exporting", "configuration")) == (("filtering",),)
+    # The section it shared a panel with is in another panel now: it follows it there.
+    assert panels.remembered((("configuration", "filtering"),), (("agent", "filtering"),), present) == (
+        ("configuration", "agent", "filtering"),)
 
 
 # --- where a section goes when nothing says where -------------------------------------

@@ -440,6 +440,25 @@ class DockSections(QObject):
             return page.isVisible() and not page.visibleRegion().isEmpty()
         return not page.isHidden()
 
+    def in_view(self, key: str) -> bool:
+        """Open, and on screen. The dock itself can be behind the tab of another panel of QGIS (Layers), with its
+        section open in it: open then, and seen by nobody."""
+        page = self._pages.get(key)
+        return bool(page is not None and self.is_open(key) and page.isVisible()
+                    and not page.visibleRegion().isEmpty())
+
+    def bring_in_view(self, key: str) -> None:
+        """``key`` open (``open_top``: its panel comes forward when it has one), and the dock in front of the tabs
+        it shares with other panels when the section is in it."""
+        self.open_top(key)
+        if key in self.detached:
+            return
+        try:
+            if self._dock.isVisible() and not self._dock.isFloating():
+                self._dock.raise_()
+        except RuntimeError:  # the dock went away
+            pass
+
     def _open_in_stack(self, key: str) -> bool:
         """Open in the stack of the dock; a section in its own panel is not, wherever it shows."""
         page = self._pages.get(key)

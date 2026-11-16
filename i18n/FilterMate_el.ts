@@ -673,6 +673,26 @@ Run it?</source>
         <translation>Ενότητες: FILTERING, EXPORTING, AGENT, μόνο όσες χρησιμοποιείτε</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>Να ρυθμιστεί το FilterMate;</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>Μερικές επιλογές, και μετά οι ρυθμίσεις πριν και μετά: δεν χρειάζεται μοντέλο ΤΝ, τίποτα δεν αλλάζει μέχρι να εφαρμόσετε. Αργότερα: μενού Διανυσματικό &gt; FilterMate &gt; Ρύθμιση του FilterMate· εκεί βρίσκεται και το Πώς λειτουργεί το FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>Εμφάνιση: θέμα, μέγεθος του πίνακα, γλώσσα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Διάταξη: οι ενότητες σε αυτόν τον πίνακα ή σε πίνακες του QGIS, πού μπαίνουν τα κουμπιά</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
         <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
         <translation>Τα δεδομένα σας: ράστερ, νέφη σημείων, PostgreSQL, υπηρεσίες ιστού, το μέγεθός τους</translation>
@@ -2015,6 +2035,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="645"/>
         <source>Set up FilterMate, no model needed</source>
         <translation>Ρύθμιση του FilterMate, χωρίς μοντέλο</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>Ρύθμιση του FilterMate…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>Πώς λειτουργεί το FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4369,6 +4399,41 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Ρύθμιση του FilterMate με τον πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>Μερικές επιλογές, και μετά κάθε ρύθμιση πριν και μετά: δεν χρειάζεται μοντέλο ΤΝ</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>Πώς λειτουργεί το FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>Τι κάνει κάθε ενότητα, οι ενότητες ως πίνακες του QGIS, πού βρίσκονται τα κουμπιά</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>Τι νέο υπάρχει στο FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Μια ράγα απαριθμεί τις ενότητες του FilterMate, μια ενότητα μπορεί να γίνει πίνακας του QGIS και η ρύθμισή του δεν χρειάζεται μοντέλο ΤΝ.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Ρύθμιση του FilterMate&lt;/b&gt; ρωτά μερικές επιλογές: τις ενότητες που χρησιμοποιείτε, τα δεδομένα σας, την εμφάνιση, πού μπαίνουν οι ενότητες και τα κουμπιά τους. Δείχνει κάθε ρύθμιση πριν και μετά και δεν στέλνει τίποτα πουθενά.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Μια ράγα ενοτήτων&lt;/b&gt; σε κάθε στοίβα του πίνακα: κάντε κλικ σε ένα τσιπ για να ανοίξει η ενότητά του, σύρετέ το για να βάλετε τις ενότητες σε άλλη σειρά.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Ενότητες ως πίνακες&lt;/b&gt;, όταν το ζητήσετε (από προεπιλογή μένουν όλες στον πίνακα του FilterMate): κάντε δεξί κλικ στο τσιπ του AGENT, του FILTERING, του EXPORTING ή του CONFIGURATION για να το ανοίξετε σε δικό του πίνακα του QGIS. Κάντε δεξί κλικ στον τίτλο ενός πίνακα για να τον ομαδοποιήσετε με άλλον, ως καρτέλες, ή να τον συγχωνεύσετε πίσω στο FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Κουμπιά κάτω από κάθε ενότητα&lt;/b&gt; και απενεργοποιημένα το FILTERING ή το EXPORTING όταν δεν τα χρησιμοποιείτε.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; φιλτράρει, ορίζει στυλ και φέρνει δεδομένα από μια πρόταση, με το δικό σας κλειδί API ή ένα τοπικό μοντέλο Ollama. &lt;b&gt;Πώς λειτουργεί το FilterMate&lt;/b&gt;, στο μενού του, ξαναλέει κάθε ενότητα.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Οι ενότητες του FilterMate μπορούν να γίνουν πίνακες του QGIS και η ρύθμισή του δεν χρειάζεται μοντέλο ΤΝ.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Ρύθμιση του FilterMate&lt;/b&gt; ρωτά μερικές επιλογές: τις ενότητες που χρησιμοποιείτε, τα δεδομένα σας, την εμφάνιση, πού μπαίνουν οι ενότητες και τα κουμπιά τους. Δείχνει κάθε ρύθμιση πριν και μετά και δεν στέλνει τίποτα πουθενά.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Ενότητες ως πίνακες&lt;/b&gt;: κάντε δεξί κλικ στην κεφαλίδα του AGENT, του FILTERING, του EXPORTING ή του CONFIGURATION για να το ανοίξετε σε δικό του πίνακα του QGIS. Κάντε δεξί κλικ στον τίτλο ενός πίνακα για να τον ομαδοποιήσετε με άλλον, ως καρτέλες, ή να τον συγχωνεύσετε πίσω στο FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Κουμπιά κάτω από κάθε ενότητα&lt;/b&gt; και απενεργοποιημένα το FILTERING ή το EXPORTING όταν δεν τα χρησιμοποιείτε.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; φιλτράρει, ορίζει στυλ και φέρνει δεδομένα από μια πρόταση, με το δικό σας κλειδί API ή ένα τοπικό μοντέλο Ollama. &lt;b&gt;Πώς λειτουργεί το FilterMate&lt;/b&gt;, στο μενού του, ξαναλέει κάθε ενότητα.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>Ρύθμιση του FilterMate</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -11491,6 +11556,76 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>Κάτω από κάθε ενότητα</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>Διάταξη</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>Πού μπαίνουν οι ενότητες</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>Ένα κλικ στην κεφαλίδα ανοίγει την ενότητά της.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>Όλες στον πίνακα FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>Η προεπιλογή: ένας πίνακας, όπου ένα κλικ σε μια ράγα ανοίγει μια ενότητα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>Σε πίνακες του QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>Το AGENT στον δικό του πίνακα, τα FILTERING, EXPORTING και CONFIGURATION μαζί σε έναν άλλο, δίπλα στον χάρτη ή αιωρούμενα· το EXPLORING μένει στο FilterMate. Σύρετε το τσιπ μιας ενότητας σε άλλον πίνακα για να τους ομαδοποιήσετε, κάντε δεξί κλικ σε αυτό για να τη συγχωνεύσετε πίσω στο FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>Όπως είναι τώρα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>Κάποιες ενότητες βρίσκονται σε δικό τους πίνακα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>Κάθε ενότητα δείχνει τα δικά της κουμπιά όσο είναι ανοιχτή.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>Ενότητες: όλες πίσω στον πίνακα FilterMate (εφαρμόζεται αμέσως)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Ενότητες: σε πίνακες του QGIS (εφαρμόζεται αμέσως)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Οι ενότητες βρίσκονται σε πίνακες του QGIS: σύρετε έναν πίνακα από τον τίτλο του· σύρετε το τσιπ μιας ενότητας σε άλλον πίνακα για να τους ομαδοποιήσετε, κάντε δεξί κλικ σε αυτό για να τη συγχωνεύσετε πίσω στο FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>Αυτές οι ρυθμίσεις έχουν ήδη επανέλθει όπως ήταν.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Εστίαση σε ό,τι διατηρείται</translation>
@@ -12063,6 +12198,84 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>Διανυσματικά πλακίδια</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>Πώς λειτουργεί το FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>Πώς λειτουργεί το FilterMate, ενότητα προς ενότητα. Δεν χρειάζεται μοντέλο ΤΝ για να το διαβάσετε και τίποτα δεν στέλνεται πουθενά.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>Ο πίνακας έχει δύο στοίβες, καθεμία με μια ράγα που απαριθμεί τις ενότητές της: το AGENT και το EXPLORING στο πάνω μέρος, το FILTERING, το EXPORTING και το CONFIGURATION από κάτω. Κάντε κλικ σε ένα τσιπ μιας ράγας για να ανοίξει η ενότητά του και σύρετέ το κατά μήκος της ράγας για να βάλετε τις ενότητες σε άλλη σειρά.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>Από προεπιλογή κάθε ενότητα βρίσκεται σε αυτόν τον πίνακα και τίποτα δεν μετακινείται αν δεν το ζητήσετε. Μια ενότητα μπορεί να τον αφήσει: κάντε δεξί κλικ στο τσιπ του AGENT, του FILTERING, του EXPORTING ή του CONFIGURATION στη ράγα του και επιλέξτε να ανοίξει σε δικό της πίνακα. Γίνεται πίνακας του QGIS, που μπορείτε να σύρετε δίπλα στον χάρτη, να βάλετε σε καρτέλα με τον πίνακα Επίπεδα ή να αφήσετε να αιωρείται σε άλλη οθόνη. Το EXPLORING μένει εδώ: περιέχει το επίπεδο στο οποίο δουλεύουν οι άλλες ενότητες.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Ένας πίνακας χωράει μία ενότητα ή περισσότερες, που απαριθμούνται σε μια ράγα όπως εδώ. Σύρετε το τσιπ μιας ενότητας σε άλλον πίνακα για να τους ομαδοποιήσετε, στο FilterMate για να τη συγχωνεύσετε πίσω, ή έξω από κάθε πίνακα για να της δώσετε έναν νέο· δύο πίνακες του FilterMate που τοποθετούνται ως καρτέλες ο ένας με τον άλλον γίνονται ένας. Δεξί κλικ σε ένα τσιπ ή στον τίτλο ενός πίνακα προσφέρει τις ίδιες μετακινήσεις. Το κλείσιμο ενός πίνακα συγχωνεύει πίσω τις ενότητές του στο FilterMate. Το QGIS επαναφέρει κάθε πίνακα εκεί που τον αφήσατε.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>Το EXPLORING περιέχει το τρέχον επίπεδο και ό,τι επιλέγετε σε αυτό: οντότητες ενός διανυσματικού επιπέδου, ένα εύρος τιμών ή κλάσεις ενός ράστερ, κλάσεις ή ύψη ενός νέφους σημείων. Οι άλλες ενότητες δουλεύουν πάνω σε ό,τι επιλέγει.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>Το FILTERING φιλτράρει τα επίπεδα που τσεκάρετε με βάση αυτή την επιλογή: όσα την τέμνουν, βρίσκονται σε κάποια απόσταση από αυτήν... Το Φίλτρο εφαρμόζει, η Αναίρεση και η Επανάληψη διατρέχουν το ιστορικό, η Σύγκριση δείχνει τον χάρτη πριν και μετά, η Αφαίρεση φίλτρου αφαιρεί τα φίλτρα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>Το EXPORTING γράφει τα επίπεδα όπως είναι φιλτραρισμένα: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>Ο AGENT κάνει το ίδιο από μια πρόταση, και περισσότερα (στυλ, ετικέτες, δεδομένα προς προσθήκη), με ένα μοντέλο που συνδέετε: το δικό σας κλειδί API ή το Ollama σε αυτόν τον υπολογιστή. Κάθε αίτημα μπορεί να αναιρεθεί.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>Το CONFIGURATION απαριθμεί όλες τις ρυθμίσεις. Η Ρύθμιση του FilterMate ρωτά τις βασικές με μερικές επιλογές και δείχνει κάθε ρύθμιση πριν και μετά.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>Απενεργοποιημένο στις ρυθμίσεις σας: {}. Η Ρύθμιση του FilterMate επαναφέρει μια ενότητα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>Μια ενότητα μπορεί να φύγει από αυτόν τον πίνακα. Κάντε δεξί κλικ στην κεφαλίδα του AGENT, του FILTERING, του EXPORTING ή του CONFIGURATION και επιλέξτε να ανοίξει σε δικό της πίνακα: γίνεται πίνακας του QGIS, που μπορείτε να σύρετε δίπλα στον χάρτη, να βάλετε σε καρτέλα με τον πίνακα Επίπεδα ή να αφήσετε να αιωρείται σε άλλη οθόνη. Το EXPLORING μένει εδώ: περιέχει το επίπεδο στο οποίο δουλεύουν οι άλλες ενότητες.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>Τα κουμπιά ενεργούν στη δική τους ενότητα: Φίλτρο, Αναίρεση, Επανάληψη, Σύγκριση και Αφαίρεση φίλτρου με το FILTERING, Εξαγωγή με το EXPORTING. Μια ενότητα σε δικό της πίνακα παίρνει μαζί της τα κουμπιά της· η Ρύθμιση του FilterMate μπορεί επίσης να τα δείξει κάτω από κάθε ενότητα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>Ρύθμιση του FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>Σύνδεση μοντέλου</translation>
     </message>
 </context>
 <context>
