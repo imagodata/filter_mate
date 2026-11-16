@@ -499,6 +499,70 @@ def check_checkpoint(layer):
     restored, left = checkpoint.undo()
     check("once it can be restored", layer.subsetString() == '"pop" = 100' and restored == ["communes"],
           (layer.subsetString(), restored, left))
+    # 2026-11-13: a turn that also added a layer. Refused, the undo removed that layer first, then loaded it again
+    # from its definition: a layer in memory did not come back, a file layer came back without its style nor its edits.
+    from filter_mate.core.agent.messages import ToolCallPart
+    project = QgsProject.instance()
+    layer.setSubsetString('"pop" = 100')
+    checkpoint.begin(ToolCallPart("made", "run_algorithm", {"algorithm": "native:buffer"}))
+    made = QgsVectorLayer("Point?crs=EPSG:4326&field=name:string", "made by the turn", "memory")
+    feature = QgsFeature(made.fields())
+    feature.setAttributes(["kept"])
+    feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(1, 1)))
+    made.dataProvider().addFeatures([feature])
+    project.addMapLayer(made)
+    checkpoint.end()
+    made_id = made.id()
+    checkpoint.begin(ToolCallPart("filter", "apply_filter", {"layer": "communes"}))
+    layer.setSubsetString('"pop" > 1000')
+    checkpoint.end()
+    names = list(checkpoint.commit())
+    check("the turn filtered a layer and added one", sorted(names) == ["communes", "made by the turn"], names)
+    layer.startEditing()
+    restored, left = checkpoint.undo()
+    still = project.mapLayer(made_id)
+    check("an undo a layer refuses leaves the layer the turn added, with its features",
+          still is made and still.featureCount() == 1 and left == ["communes"] and checkpoint.can_undo()
+          and layer.subsetString() == '"pop" > 1000',
+          (still.featureCount() if still is not None else None, restored, left, layer.subsetString()))
+    layer.rollBack()
+    restored, left = checkpoint.undo()
+    check("once it can be restored, the filter goes back and the layer the turn added leaves",
+          project.mapLayer(made_id) is None and layer.subsetString() == '"pop" = 100' and not left
+          and sorted(restored) == ["communes", "made by the turn"], (restored, left, layer.subsetString()))
+    checkpoint.redo()  # a layer in memory does not come back (#302): its turn's filter does
+    checkpoint.undo()
+    # A file layer comes back on redo, before its turn's filter; a redo or an undo refused leaves the layers as they were.
+    layer.setSubsetString('"pop" = 100')
+    checkpoint.begin(ToolCallPart("made", "run_algorithm", {"algorithm": "native:buffer"}))
+    saved = make_layer(os.path.join(tempfile.mkdtemp(), "made.gpkg"))
+    saved.setName("saved by the turn")
+    project.addMapLayer(saved)
+    checkpoint.end()
+    saved_id = saved.id()
+    checkpoint.begin(ToolCallPart("filter", "apply_filter", {"layer": "communes"}))
+    layer.setSubsetString('"pop" > 1000')
+    checkpoint.end()
+    checkpoint.commit()
+    checkpoint.undo()
+    check("an undo removes the file layer the turn added", project.mapLayer(saved_id) is None
+          and layer.subsetString() == '"pop" = 100', layer.subsetString())
+    layer.startEditing()
+    restored, left = checkpoint.redo()
+    check("a redo a layer refuses takes back the layer it brought back",
+          project.mapLayer(saved_id) is None and left == ["communes"] and checkpoint.can_redo()
+          and layer.subsetString() == '"pop" = 100', (restored, left, layer.subsetString()))
+    layer.rollBack()
+    restored, left = checkpoint.redo()
+    again = project.mapLayer(saved_id)
+    check("redo brings the layer back before its turn's filter", again is not None and again.featureCount() == 60
+          and layer.subsetString() == '"pop" > 1000', (restored, left, layer.subsetString()))
+    layer.startEditing()
+    restored, left = checkpoint.undo()
+    check("refused again, the layer redo brought back stays", project.mapLayer(saved_id) is again and left == ["communes"],
+          (restored, left))
+    layer.rollBack()
+    checkpoint.undo()
     layer.setSubsetString("")
 
 
