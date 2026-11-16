@@ -3164,12 +3164,18 @@ def s_tour_links_check():
     QApplication.processEvents()
     links = list(thread_links())
     back = 'Merge every section back into FilterMate'
-    offered = back in links and links.count('Open every section in its own panel') == 1  # the first telling's
+    WELCOME['links'] = links
     if back in links:
         thread_links()[back].click()
-        QApplication.processEvents()
-    check('tour: told again with the sections apart, its link merges them back', offered and panels.detached() == ()
-          and d._fm_sections.is_open('agent'), f"links={links} apart={panels.detached()}")
+    return waits(0.6)  # AGENT comes back folded: its section opens once Qt has laid the dock out
+
+
+def s_tour_merged_check():
+    d = dock()
+    check('tour: told again with the sections apart, its link merges them back, AGENT open in the dock',
+          'Merge every section back into FilterMate' in WELCOME['links'] and d._fm_panels.detached() == ()
+          and d._fm_sections.is_open('agent') and on_screen(agent_chat().panel),
+          f"links={WELCOME['links']} apart={d._fm_panels.detached()} agent open={d._fm_sections.is_open('agent')}")
     leave_welcome()
     return settled()
 
@@ -3237,7 +3243,7 @@ def s_setup_layout_back():
     return settled()
 
 
-WELCOME_STEPS = [s_tour, s_tour_links_check, s_setup_layout, s_setup_layout_check, s_setup_layout_back]
+WELCOME_STEPS = [s_tour, s_tour_links_check, s_tour_merged_check, s_setup_layout, s_setup_layout_check, s_setup_layout_back]
 
 
 # --- what a section in its own panel still shares with the others (FM_ONLY=sync) -------------------------------------
