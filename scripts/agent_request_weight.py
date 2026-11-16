@@ -42,7 +42,7 @@ from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
 from agent.tool_catalog import LOAD_SKILL, RUN_PYTHON, USE_TOOLS, ToolSpec, chat_tools, with_skill_tool  # noqa: E402
 from agent.chat_setup import SOURCE_TOOLS, chat_instructions  # noqa: E402
 from agent.families import bringing, split_tools, use_tools_handler  # noqa: E402
-from agent.session import STATUS_DONE, AgentLimits, AgentSession, run_exchange  # noqa: E402
+from agent.session import STATUS_DONE, AgentLimits, AgentSession, history_budget, run_exchange  # noqa: E402
 from agent.skills import SKILLS  # noqa: E402
 from agent.tool_executor import ToolExecutor  # noqa: E402
 from agent_eval import (  # noqa: E402
@@ -303,7 +303,8 @@ def replay() -> Replay:
     project.offered = {tool.name for tool in tools} | set(held)
     hidden = {tool.name: tool for tool in chat_tools() if tool.name in held}
     known = {tool.name for tool in tools} | set(hidden)
-    session = AgentSession(kinds["anthropic"], tools, instructions, AgentLimits())
+    session = AgentSession(kinds["anthropic"], tools, instructions, AgentLimits(
+        max_history_chars=history_budget("anthropic", 0)))  # as the chat gives a remote provider (lot 3)
     handlers = project.handlers()
     handlers[USE_TOOLS] = use_tools_handler(hidden, lambda now: (session.offer(now), executor.offer(now)), known=known,
                                             skills=held)

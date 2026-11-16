@@ -48,6 +48,21 @@ class AgentLimits:
 # Token diet, lot 1: a tool added and not called during this many requests leaves the request at a compaction.
 MAX_IDLE_REQUESTS = 3
 
+# Lot 3 of the token diet: the history a provider gets before the compaction steps in. Remote providers: half of the
+# 120,000 characters of before. Ollama: what the 32k step leaves once the instructions and the tools are in (a larger
+# step loads the model again), 20,000 at least.
+REMOTE_HISTORY = 60_000
+MIN_LOCAL_HISTORY = 20_000
+
+
+def history_budget(provider_kind: str, fixed_chars: int) -> int:
+    """Characters of history for ``provider_kind``, the instructions and tools taking ``fixed_chars``."""
+    if provider_kind != "ollama":
+        return REMOTE_HISTORY
+    from .providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS
+    return max(MIN_LOCAL_HISTORY, int((CONTEXT_STEPS[1] - ANSWER_ROOM) * CHARS_PER_TOKEN) - fixed_chars)
+
+
 TURNS_LEFT_NOTE = ("{} model turns left for this request: finish what is under way and answer now. If something "
                    "cannot be done in time, say what is left.")
 

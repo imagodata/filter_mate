@@ -71,7 +71,9 @@ from ...core.agent.request_context import (
     ContextMemory, ContextParts, compose, decided_part, protected_part, widgets_part,
 )
 from ...core.agent.messages import request_usage
-from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
+from ...core.agent.session import (
+    REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget,
+)
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
@@ -1925,9 +1927,13 @@ class AgentChatController(QObject):
         tools, handlers, held = self._families(values, tools, handlers, active)
         configured = parse_extra_domains(self._accessor().configured_domains())
         index = getattr(self, "_index_tools", [])
-        session = AgentSession(provider, tools, self._prompt(
-            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered, index),
-            core=CORE if index else ())
+        prompt = self._prompt(
+            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered, index)
+        # Lot 3: the history a provider gets before the compaction, after what the instructions and tools take.
+        fixed = len(prompt) + len(json.dumps([[tool.name, tool.description, tool.input_schema] for tool in tools],
+                                             ensure_ascii=False))
+        limits = AgentLimits(max_history_chars=history_budget(PRESETS[values.preset][0], fixed))
+        session = AgentSession(provider, tools, prompt, limits, core=CORE if index else ())
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
         return ChatEngine(session, executor, QtTransport(self), self,

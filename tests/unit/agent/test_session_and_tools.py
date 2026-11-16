@@ -707,3 +707,21 @@ class TestContextAfterACompaction:
         chat = session()
         chat.add_user_text("a", "state")
         assert chat.messages[-1].parts[-1].text == "state"
+
+
+class TestHistoryBudget:
+    """Lot 3: the history a provider gets before the compaction steps in."""
+
+    def test_a_remote_budget(self):
+        from core.agent.session import history_budget
+        assert history_budget("anthropic", 40_000) == history_budget("openai", 10) == 60_000
+
+    def test_an_ollama_budget_leaves_room_in_the_32k_step(self):
+        from core.agent.providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS
+        from core.agent.session import history_budget
+        step = int((CONTEXT_STEPS[1] - ANSWER_ROOM) * CHARS_PER_TOKEN)
+        assert history_budget("ollama", 30_000) == step - 30_000
+        assert history_budget("ollama", step) == 20_000  # at least
+
+    def test_the_result_cap_is_8000(self):
+        assert MAX_RESULT_CHARS == 8000
