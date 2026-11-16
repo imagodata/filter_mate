@@ -3795,6 +3795,14 @@ def s_headers_stacked_check():
           and min(order) >= 0 and len(heights) == 1
           and all(sections._headers[key].width() <= d.width() for key in expected_top()),
           f"order={order} heights={heights}")
+    if 'agent' in sections._headers:
+        # 2026-11-17, review: the label that says where the requests go stayed in the rail, hidden with it.
+        label = sections._agent_trailer
+        label.setText('Ollama · qwen3 · MCP')
+        QApplication.processEvents()
+        check('headers: where the requests of AGENT go is said at the right of its header',
+              label.parentWidget() is sections._headers['agent'] and label.isVisible()
+              and label.geometry().right() <= sections._headers['agent'].width(), str(label.geometry()))
     grab('headers_stacked')
     grab_window('headers_stacked_window')
     if 'agent' in sections._headers:
@@ -3882,6 +3890,11 @@ def s_headers_rail_check():
           and sections.bottom_rail.shown_sections() == ['filtering', 'exporting', 'configuration']
           and d.toolBox_tabTools.currentWidget() is d.FILTERING,
           f"top={top_headers()} bottom={toolbox_headers()} rail={sections.bottom_rail.shown_sections()}")
+    if 'agent' in sections._headers:
+        label = sections._agent_trailer
+        check('headers: with the rails, where the requests go is said at the right of the top rail again',
+              label.parentWidget() is sections.top_rail and label.isVisible())
+        label.setText('')
     open_section(None)
     stack = d.splitter_main.widget(1)
     check('headers: with the rails and nothing open below, the lower stack is its rail again',

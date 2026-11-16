@@ -410,27 +410,58 @@ class DockSections(QObject):
         self._stacked = stacked
         try:
             self._lay_top()
+            self._place_trailer()
             self.bottom_rail.setVisible(not stacked)
             self.refresh_rails()
         except RuntimeError:  # the dock went away
             pass
         return True
 
+    def _place_trailer(self) -> None:
+        """The label that says where the requests of AGENT go: at the right of the rail, or of the header of AGENT
+        when the headers are stacked (hidden with the rail, it showed nowhere)."""
+        label, header = getattr(self, "_agent_trailer", None), self._headers.get("agent")
+        if label is None or header is None:
+            return
+        if self._stacked:
+            row = header.layout()
+            if row is None:
+                row = QHBoxLayout(header)
+                row.setContentsMargins(0, 0, getattr(header, "_right", 12), 0)
+                row.addStretch(1)
+            row.addWidget(label)
+        else:
+            self.top_rail.layout().addWidget(label)
+        # In the header it must not take the clicks that open the section.
+        label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, self._stacked)
+        label.show()
+
     def _lay_top(self) -> None:
         """The upper stack in order: the rail then the pages, or each header above its page. A page in its own
         panel is not in the stack."""
         layout = self._top_layout
-        for widget in (self.top_rail, *self._headers.values(), *self._pages.values()):
-            if layout.indexOf(widget) >= 0:
-                layout.removeWidget(widget)
-        layout.addWidget(self.top_rail)
-        self.top_rail.setVisible(not self._stacked)
+        wanted = [(self.top_rail, 0)]
         for key in TOP_KEYS:
             header, page = self._headers.get(key), self._pages.get(key)
             if header is not None and self._stacked:
-                layout.addWidget(header)
+                wanted.append((header, 0))
             if page is not None and key not in self.detached:
-                layout.addWidget(page, 1)
+                wanted.append((page, 1))
+        for widget, stretch in wanted:  # each one out then back at the end: a widget that went away is left out,
+            try:                        # the others still get their place
+                if layout.indexOf(widget) >= 0:
+                    layout.removeWidget(widget)
+                layout.addWidget(widget, stretch)
+            except RuntimeError:
+                continue
+        if not self._stacked:
+            for header in self._headers.values():
+                try:
+                    if layout.indexOf(header) >= 0:
+                        layout.removeWidget(header)
+                except RuntimeError:
+                    continue
+        self.top_rail.setVisible(not self._stacked)
 
     def place_top(self, key: str) -> None:
         """The page of ``key`` is back from its own panel: at its place in the upper stack, folded."""
@@ -467,7 +498,8 @@ class DockSections(QObject):
         exploring = self._headers.get("exploring")
         if exploring is not None:
             exploring.setToolTip("" if self._open_in_stack("exploring") else _tr("Show EXPLORING"))
-        shown = set(self.bottom_rail.shown_sections()) if self._stacked else set()
+        shown = ({key for key in BOTTOM_KEYS if key not in self.detached and self._shown.get(key, True)}
+                 if self._stacked else set())
         titles = {self._toolbox.itemText(self._toolbox.indexOf(page)): key for key in BOTTOM_KEYS
                   for page in [getattr(self._dock, key.upper(), None)]
                   if page is not None and self._toolbox.indexOf(page) >= 0}
@@ -486,7 +518,8 @@ class DockSections(QObject):
                 lambda pos, name=key, item=button: self._on_chip_menu(name, item.mapToGlobal(pos)))
 
     def _on_bottom_header(self, button: QAbstractButton) -> None:
-        """A click on the open header folds the stack (QToolBox opened it at the press already otherwise)."""
+        """A click on the open header folds the stack. QToolBox has already made the page of the header current
+        (its own slot comes first): what was open is the page kept at the press."""
         for index in range(self._toolbox.count()):
             if self._toolbox.itemText(index) == button.text():
                 if index == self._current_before_press:
@@ -537,7 +570,8 @@ class DockSections(QObject):
         page.hide()
         from ..widgets.section_rail import parse_order
         self.top_rail.set_sections(parse_order(_saved_order(TOP_ORDER_KEY), TOP_KEYS))
-        trailer = self.top_rail.trailer()
+        trailer = self._agent_trailer = self.top_rail.trailer()
+        self._place_trailer()
         self.refresh_rails()
         return trailer
 
@@ -911,13 +945,16 @@ def apply_section_options(dock: Any) -> list:
                 changed.append(key)
         except RuntimeError:  # the dock went away
             return changed
-    try:
-        if sections.set_stacked(headers_stacked(config_data)):
-            changed.append("headers")
-    except RuntimeError:  # the dock went away
-        return changed
     if changed:
         _follow_sections(dock)
+    try:
+        if sections.set_stacked(headers_stacked(config_data)):
+            changed.append("headers")  # listed another way: nothing left the dock nor came back
+            manager = getattr(dock, "_action_bar_manager", None)
+            if manager is not None:
+                manager.sync_sections()
+    except RuntimeError:  # the dock went away
+        pass
     return changed
 
 
