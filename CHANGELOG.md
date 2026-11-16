@@ -4,6 +4,9 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Docs: [AI and data](docs/AI_AND_DATA.md) says what the AGENT sends, to whom and when; [TRADEMARKS.md](TRADEMARKS.md)
+  covers the name and the logo; the README links both, and the Discord. Internal notes are no longer published.
+
 ## [5.1.1] - 2026-11-16
 
 The fixes of a review of 5.1.0, and what was merged since. The free quota of the agent is removed: AGENT works with
