@@ -2,7 +2,10 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] - 5.2.0
+
+The next version is 5.2.0: a 5.1.2 was sent to plugins.qgis.org on 15 November before 5.1.1 was made again, so the
+number that follows must be above it.
 
 - Docs: [AI and data](docs/AI_AND_DATA.md) says what the AGENT sends, to whom and when; [TRADEMARKS.md](TRADEMARKS.md)
   covers the name and the logo; the README links both, and the Discord. Internal notes are no longer published.

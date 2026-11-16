@@ -8,7 +8,7 @@ name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 description=🧭 Explore, 🔍 filter and 📦 export vector 🗺️, raster 🏔️ and LiDAR point cloud ☁️ layers from one panel, on any data source (PostgreSQL, Spatialite, GeoPackage, OGR). QGIS 3.22 to 4.x.
-version=5.1.1
+version=5.2.0
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
