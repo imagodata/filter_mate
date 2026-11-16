@@ -195,9 +195,15 @@ class FilterResultHandler:
         if self._update_undo_redo_buttons:
             self._update_undo_redo_buttons()
 
-        # Show success message with actual backend used
-        self._show_task_completion_message(task_name, source_layer, display_backend, layer_count, is_fallback,
-                                           feature_count=feature_count)
+        # Show success message with actual backend used. 2026-11-16: not when a provider
+        # refused filters (FinishedHandler noted them and showed the warning that lists
+        # them): "Successfully removed filters" then contradicted it.
+        if task_parameters.get('_apply_failures'):
+            logger.info(f"Task '{task_name}': {len(task_parameters['_apply_failures'])} filter(s) refused, "
+                        "no success message")
+        else:
+            self._show_task_completion_message(task_name, source_layer, display_backend, layer_count, is_fallback,
+                                               feature_count=feature_count)
 
         # Update backend indicator with actual backend used
         self._update_backend_indicator(task_parameters, provider_type, display_backend, is_fallback)

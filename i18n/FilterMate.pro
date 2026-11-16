@@ -31,6 +31,7 @@ SOURCES = \
     ../adapters/qgis/remote_materializer.py \
     ../adapters/qgis/server_filter_translation.py \
     ../adapters/qgis/server_subset_job.py \
+    ../adapters/qgis/subset_failure_reason.py \
     ../core/services/app_initializer.py \
     ../core/services/datasource_manager.py \
     ../core/services/filter_application_service.py \

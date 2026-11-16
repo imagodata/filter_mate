@@ -191,3 +191,22 @@ def test_a_target_removed_during_the_filter_is_left_out_with_a_warning(finished,
     assert applied == [(kept, '"id" > 3')]
     warning = finished.iface.messageBar.return_value.pushWarning.call_args.args[1]
     assert "rivers" in warning and "roads" not in warning
+
+
+def test_a_refused_filter_shows_no_success(finished):
+    """2026-11-16: the server gone, every unfilter refused, yet "Filter task : Layer(s) filtered
+    to precedent state" came next to "Filter not applied, previous filter kept"."""
+    finished.apply.side_effect = lambda requests, fn, failures=None: failures.append("Cables: lost") or 0
+    params = {"task": {}}
+    finished.run(canceled=False, task_action="unfilter", task_parameters=params)
+    assert params["_apply_failures"] == ["Cables: lost"]
+    bar = finished.iface.messageBar.return_value
+    bar.pushMessage.assert_not_called()
+    bar.pushWarning.assert_called_once()
+
+
+def test_filters_applied_everywhere_still_say_success(finished):
+    params = {"task": {}}
+    finished.run(canceled=False, task_action="unfilter", task_parameters=params)
+    assert params["_apply_failures"] == []
+    finished.iface.messageBar.return_value.pushMessage.assert_called_once()

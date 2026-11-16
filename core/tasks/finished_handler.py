@@ -211,6 +211,11 @@ class FinishedHandler:
         if ogr_source_geom is not None:
             cleanup_memory_layer(ogr_source_geom)
 
+        # 2026-11-16: the refused filters, for the completion message of the app
+        # (FilterResultHandler): no "Successfully removed filters" after them.
+        if isinstance(task_parameters, dict):
+            task_parameters['_apply_failures'] = list(apply_failures)
+
         # Handle result messages
         self._handle_result_messages(
             result=result,
@@ -224,6 +229,7 @@ class FinishedHandler:
             layers_count=layers_count,
             restore_selection_fn=restore_selection_fn,
             iface=iface,
+            apply_failed=bool(apply_failures),
         )
 
         # 2026-10-17: a filter the provider refused is not a success
@@ -254,6 +260,7 @@ class FinishedHandler:
         layers_count: Optional[int],
         restore_selection_fn: Callable[[], None],
         iface: Any,
+        apply_failed: bool = False,
     ) -> None:
         """Handle success/failure/exception result messages.
 
@@ -272,6 +279,7 @@ class FinishedHandler:
             layers_count: Number of layers processed.
             restore_selection_fn: Function to restore source layer selection.
             iface: QGIS iface instance.
+            apply_failed: A provider refused one of the filters (no success message).
         """
         if is_canceled_fn():
             # 2026-10-17: no message for a canceled task, whatever its run()
@@ -291,6 +299,7 @@ class FinishedHandler:
                 layers_count=layers_count,
                 restore_selection_fn=restore_selection_fn,
                 iface=iface,
+                apply_failed=apply_failed,
             )
         else:
             self._handle_exception_result(
@@ -312,6 +321,7 @@ class FinishedHandler:
         layers_count: Optional[int],
         restore_selection_fn: Callable[[], None],
         iface: Any,
+        apply_failed: bool = False,
     ) -> None:
         """Handle task result when no exception occurred.
 
@@ -326,6 +336,7 @@ class FinishedHandler:
             layers_count: Number of layers processed.
             restore_selection_fn: Function to restore source layer selection.
             iface: QGIS iface instance.
+            apply_failed: A provider refused one of the filters (no success message).
         """
         task_was_canceled = is_canceled_fn()
 
@@ -355,6 +366,7 @@ class FinishedHandler:
                 task_message=task_message,
                 restore_selection_fn=restore_selection_fn,
                 iface=iface,
+                apply_failed=apply_failed,
             )
 
     def _display_failure_message(
@@ -422,6 +434,7 @@ class FinishedHandler:
         task_message: Optional[str],
         restore_selection_fn: Callable[[], None],
         iface: Any,
+        apply_failed: bool = False,
     ) -> None:
         """Display success message in QGIS message bar.
 
@@ -431,6 +444,8 @@ class FinishedHandler:
             task_message: Task result/error message string.
             restore_selection_fn: Function to restore source layer selection.
             iface: QGIS iface instance.
+            apply_failed: A provider refused one of the filters: the warning that
+                lists them is the message, no success next to it (2026-11-16).
         """
         result_action: Optional[str] = None
 
@@ -448,12 +463,13 @@ class FinishedHandler:
                     "FinishedHandler", "Layer(s) unfiltered"
                 )
 
-            iface.messageBar().pushMessage(
-                message_category,
-                QCoreApplication.translate(
-                    "FinishedHandler", "Filter task : {0}"
-                ).format(result_action),
-                Qgis.MessageLevel.Success)
+            if not apply_failed:
+                iface.messageBar().pushMessage(
+                    message_category,
+                    QCoreApplication.translate(
+                        "FinishedHandler", "Filter task : {0}"
+                    ).format(result_action),
+                    Qgis.MessageLevel.Success)
 
             # Restore source layer selection after filter/unfilter
             try:
