@@ -10,13 +10,18 @@ every tool.
 """
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Sequence, Set
+from typing import Any, Callable, Collection, Dict, Iterable, List, Sequence, Set, Tuple
 
+from .mcp_client import PREFIX as CONNECTOR_TOOL_PREFIX
 from .skills import Skill
-from .tool_catalog import FILTERING_TOOLS, LOAD_SKILL, ToolSpec
+from .tool_catalog import ASK_USER, LOAD_SKILL, MAX_USE_TOOLS, USE_TOOLS, USE_TOOLS_TOOL, ToolSpec
 
-# find_place: a place is found before anything else ("zoom to Albi"), so no skill that names it holds it back.
-ALWAYS = frozenset(FILTERING_TOOLS) | {LOAD_SKILL, "find_place"}
+# Token diet, lot 1 (docs/superpowers/specs/2026-11-16-agent-token-diet-design.md): offered at once, what the most
+# common request (filter a layer on a field) needs in one turn, and the ways to the others. preview_filter: the
+# instructions test an expression before apply_filter.
+CORE = frozenset({USE_TOOLS, LOAD_SKILL, ASK_USER, "describe_layer", "field_values", "preview_filter", "apply_filter",
+                  "clear_filters", "undo_agent_step"})
+ALWAYS = CORE  # deprecated name
 
 
 def bringing(tools: Sequence[ToolSpec], skills: Iterable[Skill]) -> Dict[str, List[str]]:
@@ -28,7 +33,7 @@ def bringing(tools: Sequence[ToolSpec], skills: Iterable[Skill]) -> Dict[str, Li
     found: Dict[str, List[str]] = {}
     for skill in skills:
         if skill.trust == "builtin" and "chat" in skill.audience and set(skill.requires) <= names:
-            for name in sorted((set(skill.tools) | set(skill.requires)) & (names - ALWAYS)):
+            for name in sorted((set(skill.tools) | set(skill.requires)) & (names - CORE)):
                 found.setdefault(name, []).append(skill.name)
     return found
 
@@ -44,3 +49,33 @@ def unlocked(skill: Skill, hidden: Set[str]) -> Set[str]:
     if skill.trust != "builtin":
         return set()
     return (set(skill.tools) | set(skill.requires)) & hidden
+
+
+def split_tools(tools: Sequence[ToolSpec]) -> Tuple[List[ToolSpec], List[ToolSpec]]:
+    """``(offered at once, available)``: the core of ``tools`` and use_tools, then the others, in their order. A tool
+    of a connector (mcp_...) is in neither: it comes with its entry of load_skill."""
+    start = [tool for tool in tools if tool.name in CORE and tool.name != USE_TOOLS]
+    available = [tool for tool in tools if tool.name not in CORE and not tool.name.startswith(CONNECTOR_TOOL_PREFIX)]
+    return start + [USE_TOOLS_TOOL], available
+
+
+def use_tools_handler(available: Dict[str, ToolSpec], offer: Callable[[List[ToolSpec]], Any], known: Collection[str],
+                      refused: Callable[[str], str] = lambda name: "") -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+    """The handler of use_tools: the tools named leave ``available`` and are ``offer``-ed, in the order asked, all or
+    none. ``known``: every tool of the conversation (a name offered already is said so); ``refused``: why a tool may
+    not be added (a rule of the user), "" when it may."""
+    from .tool_executor import ToolFailure
+
+    def run(arguments: Dict[str, Any]) -> Dict[str, Any]:
+        names = list(dict.fromkeys(str(name) for name in arguments.get("names") or ()))[:MAX_USE_TOOLS]
+        unknown = [name for name in names if name not in available and name not in known]
+        if unknown:
+            raise ToolFailure(f"No tool {', '.join(unknown)}: use the names of the index at the end of the instructions.")
+        problems = [f"{name}: {refused(name)}" for name in names if name in available and refused(name)]
+        if problems:
+            raise ToolFailure("Not added: " + "; ".join(problems))
+        added = [name for name in names if name in available]
+        if added:
+            offer([available.pop(name) for name in added])
+        return {"added": added, "already": [name for name in names if name not in added]}
+    return run

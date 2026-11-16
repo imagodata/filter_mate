@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
-"""Families of tools (core/agent/families.py): the tools of a task offered once its skill is loaded."""
+"""Families of tools (core/agent/families.py): the core offered at once, the others added by use_tools or a skill."""
+import pytest
+
 from core.agent import skills
-from core.agent.families import ALWAYS, bringing, hidden_tools, unlocked
+from core.agent.families import CORE, bringing, hidden_tools, split_tools, unlocked, use_tools_handler
 from core.agent.messages import ToolCallPart
 from core.agent.session import AgentSession
-from core.agent.tool_catalog import FILTERING_TOOLS, LOAD_SKILL, ToolSpec, chat_tools
-from core.agent.tool_executor import ToolExecutor
+from core.agent.tool_catalog import LOAD_SKILL, USE_TOOLS, USE_TOOLS_TOOL, ToolSpec, chat_tools
+from core.agent.tool_executor import ToolExecutor, ToolFailure
 
 TOOLS = [tool for tool in chat_tools() if tool.name not in ("run_pyqgis", "view_map")]
 
 
-def test_the_tools_that_filter_and_load_skill_are_always_offered():
+def test_the_core_is_never_held():
     hidden = hidden_tools(TOOLS, skills.SKILLS.values())
-    names = {tool.name for tool in TOOLS}
-    assert not hidden & ALWAYS and LOAD_SKILL in names - hidden
-    assert (FILTERING_TOOLS & names) <= names - hidden
+    assert not hidden & CORE and {LOAD_SKILL, USE_TOOLS, "apply_filter", "preview_filter"} <= CORE
     assert {"set_layer_style", "run_algorithm", "create_layout", "delete_features"} <= hidden
-    # a tool no skill names stays offered
-    assert all(any(name in skill.tools or name in skill.requires for skill in skills.SKILLS.values())
-               for name in hidden)
 
 
 def test_a_skill_brings_its_own_tools_only():
@@ -48,7 +45,7 @@ def test_the_session_and_the_executor_take_more_tools_after_the_others():
     assert executor.execute(ToolCallPart("1", "b", {})).is_error  # not offered yet
     executor.hold({"b"})
     held = executor.execute(ToolCallPart("2", "b", {}))
-    assert held.is_error and "load_skill" in held.content
+    assert held.is_error and 'call use_tools with "b" first' in held.content
     executor.offer([later])
     assert executor.execute(ToolCallPart("3", "b", {})).content == '"B"'
 
@@ -83,13 +80,59 @@ def test_a_tool_held_names_the_skills_that_bring_it():
     executor = ToolExecutor([tool for tool in TOOLS if tool.name not in held], {})
     executor.hold(held)
     answer = executor.execute(ToolCallPart("1", "create_layout", {})).content
-    assert '"cartography"' in answer and "its list says which" not in answer
+    assert 'use_tools with "create_layout"' in answer and 'load_skill with "cartography"' in answer
     assert all(f'"{name}"' in answer for name in held["create_layout"])
 
 
-def test_finding_a_place_is_never_held_back_by_a_skill_that_names_it():
-    """The skill of the workflows names find_place: held back, "zoom to Albi" would first load instructions."""
-    assert "find_place" in ALWAYS
-    named = [skill.name for skill in skills.SKILLS.values() if "find_place" in skill.tools]
-    assert named, "no skill names find_place any more: this test and the exception can go"
-    assert "find_place" not in hidden_tools(chat_tools(), skills.SKILLS.values())
+# --- token diet, lot 1: only the tools a request needs ------------------------------------------------------------
+
+def _tool(name):
+    return ToolSpec(name, f"{name} tool.", summary=f"Do {name}")
+
+
+def test_split_keeps_the_core_and_the_order():
+    tools = [_tool("list_layers"), _tool("apply_filter"), _tool("zoom_to"), _tool("describe_layer"), _tool("mcp_x")]
+    start, available = split_tools(tools)
+    assert [tool.name for tool in start] == ["apply_filter", "describe_layer", USE_TOOLS]
+    assert [tool.name for tool in available] == ["list_layers", "zoom_to"]
+    assert start[-1] is USE_TOOLS_TOOL and USE_TOOLS_TOOL.read_only
+
+
+def _handler(refused=lambda name: ""):
+    offered = []
+    available = {name: _tool(name) for name in ("a", "b", "c")}
+    run = use_tools_handler(available, offered.extend, known={"a", "b", "c", "apply_filter"}, refused=refused)
+    return run, offered, available
+
+
+def test_use_tools_adds_in_the_order_asked():
+    run, offered, available = _handler()
+    assert run({"names": ["b", "a"]}) == {"added": ["b", "a"], "already": []}
+    assert [tool.name for tool in offered] == ["b", "a"] and set(available) == {"c"}
+
+
+def test_use_tools_ignores_what_is_already_offered():
+    run, offered, _ = _handler()
+    run({"names": ["a"]})
+    assert run({"names": ["a", "apply_filter", "c"]}) == {"added": ["c"], "already": ["a", "apply_filter"]}
+
+
+def test_use_tools_refuses_an_unknown_name():
+    run, offered, _ = _handler()
+    with pytest.raises(ToolFailure, match="nope"):
+        run({"names": ["a", "nope"]})
+    assert offered == []
+
+
+def test_use_tools_refuses_a_tool_turned_off():
+    run, offered, _ = _handler(refused=lambda name: "turned off by the user" if name == "b" else "")
+    with pytest.raises(ToolFailure, match="b: turned off by the user"):
+        run({"names": ["a", "b"]})
+    assert offered == []
+
+
+def test_a_held_tool_says_use_tools():
+    executor = ToolExecutor([], {})
+    executor.hold({"zoom_to": []})
+    answer = executor.execute(ToolCallPart("1", "zoom_to", {})).content
+    assert answer.startswith('zoom_to is not offered yet: call use_tools with "zoom_to" first')

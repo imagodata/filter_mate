@@ -21,6 +21,8 @@ Handler = Callable[[Dict[str, Any]], Any]
 MAX_RESULT_CHARS = 20_000
 DECLINED = "The user declined this action. Nothing was done; do not try again unless they ask."
 # A tool of a connector the conversation has not loaded (the model remembers it from an earlier one, or guesses).
+# A tool of the index not added yet (core/agent/families.py, token diet lot 1).
+HELD = '{} is not offered yet: call use_tools with "{}" first'
 NOT_LOADED = ("{} is a tool of an external connector that is not loaded in this conversation: call load_skill with "
               "its connector-… entry first (its list says which), then call it again.")
 
@@ -168,9 +170,9 @@ class ToolExecutor:
         handler = self._handlers.get(call.name)
         if tool is None and call.name in self._held:
             # The skills by name: the list of load_skill does not say which tool comes with which (2026-11-13).
-            skills = " or ".join(f'"{name}"' for name in self._held[call.name]) or "the skill of that task"
-            return failure(f"{call.name} comes with the instructions of its task: call load_skill with {skills} "
-                           f"first, then call {call.name} again.")
+            skills = " or ".join(f'"{name}"' for name in self._held[call.name])
+            return failure(HELD.format(call.name, call.name) + (f", or load_skill with {skills}" if skills else "")
+                           + f", then call {call.name} again.")
         if tool is None and call.name.startswith(CONNECTOR_TOOL_PREFIX):
             return failure(NOT_LOADED.format(call.name))
         if tool is None or handler is None:
