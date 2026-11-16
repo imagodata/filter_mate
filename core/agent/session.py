@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, Collection, Dict, List, Optional, Protocol, Sequence, Tuple, Union
 
-from .compaction import compact
+from .compaction import _size, compact, trim_results
 from .mcp_client import PREFIX as CONNECTOR_TOOL_PREFIX
 from .messages import (
     ROLE_ASSISTANT, ROLE_USER, STOP_MAX_TOKENS, STOP_REFUSAL, STOP_TOOL_USE, Message, ProviderError, StreamFailure,
@@ -134,10 +134,14 @@ class AgentSession:
         first = not self._messages
         self._messages = [_without_images(message) for message in self._messages]
         writes = [tool.name for tool in self._tools if not tool.read_only]
+        trimmed = 0
+        if sum(_size(message) for message in self._messages) > self._limits.max_history_chars:
+            # Lot 3: the results of old requests go first; requests are summed up only if that is not enough.
+            self._messages, trimmed = trim_results(self._messages)
         self._messages, summarized = compact(self._messages, self._limits.max_history_chars, writes)
         self.summarized += summarized
         # Lot 3: the history was rewritten; the next context carries the whole state again.
-        self.rewritten = bool(summarized)
+        self.rewritten = bool(summarized or trimmed)
         if callable(context):  # the whole state at the first request and after a rewrite, what changed otherwise
             context = context(first or self.rewritten)
         self._requests += 1

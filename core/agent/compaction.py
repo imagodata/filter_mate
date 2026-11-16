@@ -116,3 +116,38 @@ def compact(messages: Sequence[Message], budget: int, writes: Sequence[str] = ()
     summary = TextPart("\n".join([SUMMARY_HEADER] + lines))
     # Only the first request can hold a summary, and it is among the dropped ones: the request kept has none.
     return [Message(ROLE_USER, (summary,) + messages[keep_from].parts)] + messages[keep_from + 1:], len(dropped)
+
+
+# --- Token diet, lot 3: the first stage, before any request is summed up ---------------------------------------------
+TRIMMED = "(Result of {} characters taken out to save room: call {} again if needed.)"
+_TRIMMED_START = "(Result of "
+MIN_TRIMMED = 300  # a shorter result costs about what its line would
+
+
+def trim_results(messages: Sequence[Message], keep: int = 2) -> Tuple[List[Message], int]:
+    """The results of the tools of the requests before the last ``keep`` replaced by a line that says how long they
+    were and which tool to call again; the calls stay. Also the number of results taken out."""
+    messages = list(messages)
+    starts = [index for index, message in enumerate(messages) if is_request(message)]
+    if len(starts) <= keep:
+        return messages, 0
+    limit = starts[-keep]
+    names = {part.call_id: part.name for message in messages for part in message.parts
+             if isinstance(part, ToolCallPart)}
+    count = 0
+    for index in range(limit):
+        message = messages[index]
+        if message.role != ROLE_USER or not any(isinstance(part, ToolResultPart) for part in message.parts):
+            continue
+        parts = []
+        for part in message.parts:
+            if (isinstance(part, ToolResultPart) and len(part.content) > MIN_TRIMMED
+                    and not part.content.startswith(_TRIMMED_START)):
+                parts.append(ToolResultPart(part.call_id, TRIMMED.format(len(part.content),
+                                                                         names.get(part.call_id, "the tool")),
+                                            part.is_error))
+                count += 1
+            else:
+                parts.append(part)
+        messages[index] = Message(message.role, tuple(parts))
+    return messages, count
