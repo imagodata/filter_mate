@@ -91,10 +91,10 @@ def _tool(name):
 
 
 def test_split_keeps_the_core_and_the_order():
-    tools = [_tool("list_layers"), _tool("apply_filter"), _tool("zoom_to"), _tool("describe_layer"), _tool("mcp_x")]
+    tools = [_tool("list_layers"), _tool("apply_filter"), _tool("group_layers"), _tool("describe_layer"), _tool("mcp_x")]
     start, available = split_tools(tools)
     assert [tool.name for tool in start] == ["apply_filter", "describe_layer", USE_TOOLS]
-    assert [tool.name for tool in available] == ["list_layers", "zoom_to"]
+    assert [tool.name for tool in available] == ["list_layers", "group_layers"]
     assert start[-1] is USE_TOOLS_TOOL and USE_TOOLS_TOOL.read_only
 
 
@@ -136,3 +136,10 @@ def test_a_held_tool_says_use_tools():
     executor.hold({"zoom_to": []})
     answer = executor.execute(ToolCallPart("1", "zoom_to", {})).content
     assert answer.startswith('zoom_to is not offered yet: call use_tools with "zoom_to" first')
+
+
+def test_a_tool_turned_off_is_said_so_even_out_of_the_index():
+    """A tool turned off in the Tools tab is not in the conversation at all: use_tools says why, not "No tool"."""
+    run, offered, _ = _handler(refused=lambda name: "turned off by the user" if name == "zoom_to" else "")
+    with pytest.raises(ToolFailure, match="zoom_to: turned off by the user"):
+        run({"names": ["zoom_to"]})

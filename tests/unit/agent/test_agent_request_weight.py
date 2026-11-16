@@ -88,7 +88,7 @@ def test_conversation_runs_offline_and_cleanly(weight, monkeypatch):
     run = weight.replay()
     assert run.errors == []
     assert sorted({call.request for call in run.calls}) == list(range(1, 11))
-    assert run.skills_loaded == ["cartography"]
+    assert run.skills_loaded == []  # lot 1: set_layer_style comes by use_tools, no skill loaded for it
     assert all(value == 0 for value in run.calls[0].prefix.values())
 
 

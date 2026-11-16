@@ -43,10 +43,11 @@ from agent.settings_reference import (  # noqa: E402
     describe as describe_settings, get as get_setting, plan as plan_settings, read_settings, set_leaf)
 from agent.performance import summary as performance_summary  # noqa: E402
 from agent.questions import answers_payload, parse_questions  # noqa: E402
-from agent.families import bringing, unlocked  # noqa: E402
+from agent.families import bringing, split_tools, unlocked, use_tools_handler  # noqa: E402
+from agent.tool_index import index_block  # noqa: E402
 from agent.skills import SKILLS, load as load_skill  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, chat_tools, load_catalog, with_skill_tool  # noqa: E402
+from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, USE_TOOLS, chat_tools, load_catalog, with_skill_tool  # noqa: E402
 from agent.tool_executor import ToolExecutor, ToolFailure  # noqa: E402
 
 CASES_PATH = Path(__file__).with_name("agent_eval_cases.json")
@@ -759,19 +760,20 @@ class ScriptedTransport:
     def __init__(self, steps: Sequence[Dict[str, Any]]) -> None:
         self._steps = list(steps)
 
-    def load_first(self, held: Dict[str, Sequence[str]], skill: str = "") -> None:
-        """Load, before the calls, the skill each tool held back comes with (``held``: tool -> its skills; the
-        skill of the case first): what a model does when the tools of a task are offered once its skill is loaded.
-        A call made before would be answered "call load_skill first", and a chain that styles the layers it makes
-        would style layers that are not there."""
-        asked = {(step.get("call_args") or step.get("args") or {}).get("name") for step in self._steps
-                 if step["tool"] == "load_skill"}
-        loaded: List[str] = []
-        for step in self._steps:
-            skills = held.get(step["tool"]) or ()
-            if skills and not set(skills) & (set(loaded) | asked):  # one the case loads itself is not loaded twice
-                loaded.append(skill if skill in skills else skills[0])
-        self._steps = [{"tool": "load_skill", "call_args": {"name": name}} for name in loaded] + self._steps
+    def use_first(self, held: Dict[str, Sequence[str]]) -> None:
+        """One use_tools call before the calls, with the tools of the index they call (``held``: tool -> the skills
+        that bring it), in their order: what a model does when a request carries the core of the tools and the index
+        of the others (token diet, lot 1). A tool that a load_skill of the case brings is left to it."""
+        asked = [(step.get("call_args") or step.get("args") or {}).get("name") for step in self._steps
+                 if step["tool"] == "load_skill"]
+        brought = set()
+        for name in asked:
+            if name in SKILLS:
+                brought |= unlocked(SKILLS[name], set(held))
+        names = list(dict.fromkeys(step["tool"] for step in self._steps
+                                   if step["tool"] in held and step["tool"] not in brought))
+        if names:
+            self._steps = [{"tool": USE_TOOLS, "call_args": {"names": names}}] + self._steps
 
     def send(self, request, session):
         json.loads(request.body)
@@ -870,19 +872,24 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
     tools = tuple(with_skill_tool(tools, offered))
     hidden: Dict[str, Any] = {}
     held: Dict[str, Any] = {}
-    if families:  # the tools of a task offered once its skill is loaded (core/agent/families.py)
-        held = bringing(tools, SKILLS.values())
-        hidden = {tool.name: tool for tool in tools if tool.name in held}
-        tools = tuple(tool for tool in tools if tool.name not in held)
+    index = ""
+    if families and not filtering:  # as the chat offers them by default (core/agent/families.py, token diet lot 1)
+        brought = bringing(tools, SKILLS.values())
+        start, available = split_tools(tools)
+        held = {tool.name: brought.get(tool.name, []) for tool in available}
+        hidden = {tool.name: tool for tool in available}
+        tools, index = tuple(start), index_block(available)
         if isinstance(transport, ScriptedTransport):
-            transport.load_first(held, case.get("skill", ""))
-    session = AgentSession(provider, tools, (prompt or SYSTEM_PROMPT) + (FILTERING_NOTE if filtering else ""),
+            transport.use_first(held)
+    session = AgentSession(provider, tools, (prompt or SYSTEM_PROMPT) + (FILTERING_NOTE if filtering else "") + index,
                            AgentLimits())
     project.offered = offered
     handlers_of_case = project.handlers()
     if hidden:
         handlers_of_case["load_skill"] = skill_loader(
             handlers_of_case["load_skill"], hidden, lambda now: (session.offer(now), executor.offer(now)))
+        handlers_of_case[USE_TOOLS] = use_tools_handler(
+            hidden, lambda now: (session.offer(now), executor.offer(now)), known=offered | {USE_TOOLS})
     executor = ToolExecutor(tools, handlers_of_case)
     executor.hold(held)
     exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True,

@@ -17,10 +17,15 @@ from .skills import Skill
 from .tool_catalog import ASK_USER, LOAD_SKILL, MAX_USE_TOOLS, USE_TOOLS, USE_TOOLS_TOOL, ToolSpec
 
 # Token diet, lot 1 (docs/superpowers/specs/2026-11-16-agent-token-diet-design.md): offered at once, what the most
-# common request (filter a layer on a field) needs in one turn, and the ways to the others. preview_filter: the
-# instructions test an expression before apply_filter.
+# common requests need in one turn, and the ways to the others. Measured on 2026-11-16 with
+# scripts/agent_request_weight.py --conversation (reference: cost 291,616, largest request 80,432): the 9 tools of a
+# filter on a field alone cost 484,919 (each request added a tool, and a tool added rewrites the whole cache of
+# Anthropic); with the filter across layers, the statistics, the zoom, the visibility and the export, 211,986 and
+# 54,761; the 25 tools offered before, 260,642. preview_filter and field_values stay: the instructions test an
+# expression before apply_filter and read the exact spelling of a value.
 CORE = frozenset({USE_TOOLS, LOAD_SKILL, ASK_USER, "describe_layer", "field_values", "preview_filter", "apply_filter",
-                  "clear_filters", "undo_agent_step"})
+                  "cross_filter", "clear_filters", "layer_statistics", "zoom_to", "set_layers_visibility",
+                  "export_layers", "undo_agent_step"})
 ALWAYS = CORE  # deprecated name
 
 
@@ -68,12 +73,12 @@ def use_tools_handler(available: Dict[str, ToolSpec], offer: Callable[[List[Tool
 
     def run(arguments: Dict[str, Any]) -> Dict[str, Any]:
         names = list(dict.fromkeys(str(name) for name in arguments.get("names") or ()))[:MAX_USE_TOOLS]
+        problems = [f"{name}: {refused(name)}" for name in names if refused(name)]
+        if problems:
+            raise ToolFailure("Not added: " + "; ".join(problems))
         unknown = [name for name in names if name not in available and name not in known]
         if unknown:
             raise ToolFailure(f"No tool {', '.join(unknown)}: use the names of the index at the end of the instructions.")
-        problems = [f"{name}: {refused(name)}" for name in names if name in available and refused(name)]
-        if problems:
-            raise ToolFailure("Not added: " + "; ".join(problems))
         added = [name for name in names if name in available]
         if added:
             offer([available.pop(name) for name in added])

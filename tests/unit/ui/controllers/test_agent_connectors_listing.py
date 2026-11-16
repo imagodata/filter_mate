@@ -112,9 +112,8 @@ def test_the_starting_request_stays_under_50_kb(plugin_tools):
     request = providers.create_provider(providers.ProviderConfig("anthropic", "m")).build_request(
         chat_controller.AgentChatController._prompt(every, active),
         [messages.Message(messages.ROLE_USER, (messages.TextPart("Bonjour"),))], tools)
-    # 2026-11-16: 50,103 with the skill panels in load_skill (every source ticked, the worst case; +0.3 % on the
-    # default conversation of scripts/agent_request_weight.py). Lot 1 of the token diet brings it far lower.
-    assert len(request.body) < 50_500, len(request.body)
+    # Lot 1 of the token diet (2026-11-16): the core of the tools and the index of the others.
+    assert len(request.body) < 50_000, len(request.body)
 
 
 def test_the_prompt_says_the_connectors_load_with_load_skill():
@@ -195,3 +194,14 @@ def test_the_prompt_says_to_look_at_the_skills_before_answering_that_a_tool_is_m
     active = [source for source in sources.BUILT_IN if source.id == "datagouv_mcp"]
     prompt = chat_controller.AgentChatController._prompt(values(), active)
     assert "add_layer to bring in a file it finds" in prompt and "look at what load_skill lists" in prompt
+
+
+def test_connector_tools_stay_out_of_the_index(plugin_tools):
+    """The tools of a connector come with its entry of load_skill, never through the index of use_tools."""
+    host = _Host()
+    chosen = values()
+    tools, handlers, active = run(host, chosen)
+    families(host, chosen, tools, handlers, active)
+    index = [tool.name for tool in host._index_tools]
+    assert index and not [name for name in index if name.startswith("mcp_")]
+    assert "load_skill" not in index and "use_tools" not in index
