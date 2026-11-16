@@ -11214,6 +11214,19 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
     </message>
 </context>
 <context>
+    <name>SubsetFailureReason</name>
+    <message>
+        <location filename="../adapters/qgis/subset_failure_reason.py" line="96"/>
+        <source>connection to the database server lost: check the network or the VPN, then reload the layers</source>
+        <translation>verbinding met de databaseserver verbroken: controleer het netwerk of de VPN en laad de lagen daarna opnieuw</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/subset_failure_reason.py" line="98"/>
+        <source>the data provider refused the filter without giving a reason</source>
+        <translation>de gegevensprovider heeft het filter geweigerd zonder een reden te geven</translation>
+    </message>
+</context>
+<context>
     <name>TabbedConfigDialog</name>
     <message>
         <location filename="../ui/dialogs/config_editor_widget.py" line="570"/>

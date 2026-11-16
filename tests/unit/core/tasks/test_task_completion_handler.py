@@ -385,3 +385,56 @@ class TestApplyPendingRefusedKeys:
     def test_a_filter_with_no_fallback_is_reported_as_before(self, monkeypatch):
         applied, asked, said, failures, _fallback = self._run(monkeypatch, refused={self.KEYS}, remembered=False)
         assert applied == 0 and asked == [self.KEYS] and said == [] and len(failures) == 1
+
+
+# ---------------------------------------------------------------------------
+# apply_pending_subset_requests: the reason of a refused filter
+# ---------------------------------------------------------------------------
+
+class TestRefusedFilterReason:
+    """2026-11-16: the PostgreSQL server gone, layer.error() empty: the failure line ended with
+    "- " and the message bar listed the layers with no reason."""
+
+    @pytest.fixture(autouse=True)
+    def _real_watch(self, monkeypatch):
+        import importlib.util
+        import pathlib
+        path = pathlib.Path(__file__).resolve().parents[4] / "adapters" / "qgis" / "subset_failure_reason.py"
+        name = _tch.__package__.split('.')[0] + '.adapters.qgis.subset_failure_reason'
+        spec = importlib.util.spec_from_file_location(name, path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        monkeypatch.setitem(sys.modules, name, module)
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        self.reasons = module
+
+    def _refused(self, provider_errors_after):
+        layer = _make_layer("Cables", "dbname='wyre' table=\"wyre\".\"cable\"", provider="postgres")
+        layer.subsetString.return_value = '"id" > 3'
+        provider = layer.dataProvider.return_value
+        provider.errors.return_value = []
+
+        def refuse(lyr, expr):
+            provider.errors.return_value = provider_errors_after
+            return False
+        return layer, refuse
+
+    def test_a_lost_connection_is_the_reason(self):
+        # What QgsPostgresProvider adds when QgsPostgresConn gets no result (server gone, reset failed)
+        layer, refuse = self._refused(['no result buffer'])
+        failures = []
+        applied = apply_pending_subset_requests([(layer, '')], refuse, failures=failures)
+        assert applied == 0
+        assert failures == [f"Cables: {self.reasons.CONNECTION_LOST}"]
+
+    def test_the_refused_layers_are_named_by_id(self):
+        layer, refuse = self._refused(['no result buffer'])
+        refused = []
+        apply_pending_subset_requests([(layer, '')], refuse, failures=[], refusals=refused)
+        assert refused == [("Cables_id", "Cables", self.reasons.CONNECTION_LOST)]
+
+    def test_never_an_empty_reason(self):
+        layer, refuse = self._refused([])
+        failures = []
+        apply_pending_subset_requests([(layer, '')], refuse, failures=failures)
+        assert failures == [f"Cables: {self.reasons.NO_REASON}"]

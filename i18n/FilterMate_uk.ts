@@ -11214,6 +11214,19 @@ onnxruntime завантажується з PyPI за допомогою pip, м
     </message>
 </context>
 <context>
+    <name>SubsetFailureReason</name>
+    <message>
+        <location filename="../adapters/qgis/subset_failure_reason.py" line="96"/>
+        <source>connection to the database server lost: check the network or the VPN, then reload the layers</source>
+        <translation>з'єднання з сервером бази даних втрачено: перевірте мережу або VPN, а потім перезавантажте шари</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/subset_failure_reason.py" line="98"/>
+        <source>the data provider refused the filter without giving a reason</source>
+        <translation>постачальник даних відхилив фільтр, не вказавши причину</translation>
+    </message>
+</context>
+<context>
     <name>TabbedConfigDialog</name>
     <message>
         <location filename="../ui/dialogs/config_editor_widget.py" line="570"/>

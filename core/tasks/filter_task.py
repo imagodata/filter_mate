@@ -114,6 +114,7 @@ from .source_geometry_preparer import SourceGeometryPreparer
 from .subset_management_handler import SubsetManagementHandler
 from .filtering_orchestrator import FilteringOrchestrator
 from .finished_handler import FinishedHandler
+from .history_snapshot import restore_history, take_history_snapshot
 from .materialized_view_handler import MaterializedViewHandler
 from .expression_facade_handler import ExpressionFacadeHandler
 from .spatial_query_handler import SpatialQueryHandler
@@ -1207,6 +1208,12 @@ class FilterEngineTask(QgsTask):
         if task_params.get("session_id"):
             self.session_id = task_params["session_id"]
             logger.debug(f"   session_id extracted: {self.session_id}")
+
+        # 2026-11-16: the filter history of the task's layers before run() writes it, put back
+        # by finished() for the layers whose subset the provider refuses (see history_snapshot).
+        if self.task_action in ('filter', 'unfilter', 'reset'):
+            self._history_snapshot = take_history_snapshot(
+                self.db_file_path, self.project_uuid, self._history_layer_ids(task_params))
 
         try:
             # PHASE 14.7: Delegate to TaskRunOrchestrator service
@@ -3065,6 +3072,30 @@ class FilterEngineTask(QgsTask):
         self.active_connections.clear()
         self._task_postgresql_connection = None
 
+    def _history_layer_ids(self, task_params: Dict[str, Any]) -> List[str]:
+        """Ids of the source layer and of the targets of the task (for the history snapshot)."""
+        ids = []
+        source = getattr(self, 'source_layer', None)
+        try:
+            if source is not None:
+                ids.append(source.id())
+        except (RuntimeError, AttributeError):
+            pass
+        for props in task_params.get('layers') or []:
+            if isinstance(props, dict) and props.get('layer_id'):
+                ids.append(props['layer_id'])
+        infos = self.task_parameters.get('infos') if isinstance(self.task_parameters, dict) else None
+        if isinstance(infos, dict) and infos.get('layer_id'):
+            ids.append(infos['layer_id'])
+        return ids
+
+    def _restore_refused_history(self, layer_ids: List[str]) -> None:
+        """finished(): the filter history of the refused layers, as it was before run()."""
+        restored = restore_history(self.db_file_path, self.project_uuid,
+                                   getattr(self, '_history_snapshot', None), layer_ids)
+        if restored:
+            logger.info(f"Filter history put back for {len(restored)} refused layer(s)")
+
     def _cleanup_canceled_task_views(self) -> None:
         """finished() of a canceled task: its views are queued for dropping (see _drop_deferred_views).
 
@@ -3197,6 +3228,7 @@ class FilterEngineTask(QgsTask):
             task_bridge=getattr(self, '_task_bridge', None),
             cleanup_safe_intersect_fn=self._cleanup_safe_intersect_layers,
             cleanup_canceled_mv_fn=self._cleanup_canceled_task_views,
+            restore_history_fn=self._restore_refused_history,
         )
         # 2026-10-17: the views of canceled tasks nothing reads, then the connection a view
         # cleanup opened on the main thread: closed now

@@ -11214,6 +11214,19 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
     </message>
 </context>
 <context>
+    <name>SubsetFailureReason</name>
+    <message>
+        <location filename="../adapters/qgis/subset_failure_reason.py" line="96"/>
+        <source>connection to the database server lost: check the network or the VPN, then reload the layers</source>
+        <translation>डेटाबेस सर्वर से कनेक्शन टूट गया: नेटवर्क या VPN जाँचें, फिर परतों को दोबारा लोड करें</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/subset_failure_reason.py" line="98"/>
+        <source>the data provider refused the filter without giving a reason</source>
+        <translation>डेटा प्रदाता ने बिना कोई कारण बताए फ़िल्टर अस्वीकार कर दिया</translation>
+    </message>
+</context>
+<context>
     <name>TabbedConfigDialog</name>
     <message>
         <location filename="../ui/dialogs/config_editor_widget.py" line="570"/>

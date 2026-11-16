@@ -161,6 +161,18 @@ aujourd'hui (`NOTES_OF_SOURCES`). Un test vérifie que le mode tourne sans rése
   demande n'est résumée (voulu). Seulement à une compaction.
 - **Plafond d'un résultat** : de 20 000 à 8 000 caractères, avec la marque `truncated` existante qui dit comment
   demander la suite quand l'outil le permet.
+- **Ne pas tout envoyer : carte, couches, données** (ajout du 16/11, demande de l'utilisateur : « optimiser via
+  outil mais aussi contexte de map et couches et données, pas besoin de tout envoyer ») :
+  - la ligne de la carte (CRS, échelle, étendue, couche active) part avec la première demande, puis seulement quand
+    la vue a changé ; notes, widgets, recettes et couches protégées de même (voir l'état en différence ci-dessus) ;
+  - les outils de lecture rendent moins par défaut, et le disent : `field_values` (50 valeurs aujourd'hui),
+    `sample_features` (5 entités, tous leurs champs), `layer_statistics` (20 groupes), `describe_layer` (chaque champ
+    avec ses exemples) ; chacun dit combien il a laissé de côté et comment demander la suite. Les valeurs par défaut
+    exactes se décident au banc ;
+  - le banc du lot 0 gagne, dans ce lot, un projet simulé réaliste (14 couches comme le projet réseau de l'utilisateur,
+    des notes, des widgets) et des demandes qui lisent des données (`describe_layer`, `field_values`,
+    `sample_features`) : sans elles, ces gains ne se voient pas. La conversation changée, la référence est reprise sur
+    `main` avant tout changement de ce lot, et l'ancienne reste notée pour mémoire.
 - **Budget de compaction selon le fournisseur** : Ollama le dérive du palier de 32k moins la partie fixe ; les
   fournisseurs distants passent de 120 000 à 60 000 caractères. Chiffres à confirmer au banc.
 
