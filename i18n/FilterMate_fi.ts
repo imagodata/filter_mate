@@ -10805,6 +10805,11 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <translation>Ryhmitä kohteen {} kanssa</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>Ryhmitä kohteen {} kanssa välilehtinä</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>Yhdistä {} takaisin FilterMateen</translation>

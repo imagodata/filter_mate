@@ -10805,6 +10805,11 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Grupează cu {}</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>Grupează cu {}, în file</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>Îmbină {} înapoi în FilterMate</translation>

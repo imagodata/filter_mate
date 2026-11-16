@@ -474,6 +474,28 @@ class CoverageDockExtras(QObject):
                     self._on_pc_object_context_menu if name == PC_OBJECT_BUTTON
                     else lambda position, n=name: self._on_pc_zone_context_menu(position, n))
 
+    def refresh_icons(self) -> None:
+        """The theme changed (IconManager.refresh_all_icons): the tool icons are drawn again, once Qt has given
+        the buttons the text colour of the new style sheet. They were drawn when the current layer changed only:
+        a theme set while FilterMate was open left them dark on a dark panel."""
+        try:
+            from qgis.PyQt.QtCore import QTimer
+        except ImportError:
+            return
+        if getattr(self, '_icons_pending', False):
+            return  # a theme that follows QGIS refreshes the icons several times in a row: drawn once
+        self._icons_pending = True
+        QTimer.singleShot(0, self._refresh_icons_safely)
+
+    def _refresh_icons_safely(self) -> None:
+        self._icons_pending = False
+        try:
+            self._refresh_icons()
+            # The buttons the kinds of layer share: the icon manager just gave them their vector icon back.
+            self._set_kind_icons(self._strip_kind)
+        except RuntimeError:  # the dock went away meanwhile
+            pass
+
     def _refresh_icons(self) -> None:
         """Draw the tool icons in the text color of the current theme."""
         try:
@@ -501,6 +523,7 @@ class CoverageDockExtras(QObject):
             'pushButton_exploring_point_cloud_3d': ICON_3D,
         }
         for name, button in self._tools.items():
+            button.ensurePolished()  # the palette of a style sheet set since the button was last painted
             color = button.palette().color(QPalette.ColorRole.ButtonText).name()
             renderer = QSvgRenderer(QByteArray(_svg_document(bodies[name], color).encode('utf-8')))
             pixmap = QPixmap(48, 48)

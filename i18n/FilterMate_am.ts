@@ -10805,6 +10805,11 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <translation>ከ{} ጋር አቧድን</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>ከ{} ጋር እንደ ትሮች አቧድን</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>{}ን ወደ FilterMate መልሰህ አዋህድ</translation>

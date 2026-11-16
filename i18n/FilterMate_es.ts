@@ -10805,6 +10805,11 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <translation>Agrupar con {}</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>Agrupar con {}, en pestañas</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>Volver a fusionar {} en FilterMate</translation>

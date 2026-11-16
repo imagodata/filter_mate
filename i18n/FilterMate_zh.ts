@@ -10805,6 +10805,11 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <translation>与 {} 组合</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>与 {} 以选项卡形式组合</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>将 {} 合并回 FilterMate</translation>

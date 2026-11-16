@@ -10805,6 +10805,11 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
         <translation>Gruppera med {}</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>Gruppera med {}, som flikar</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>Slå ihop {} med FilterMate igen</translation>

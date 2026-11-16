@@ -475,6 +475,12 @@ class DockSections(QObject):
                 continue
             page.setVisible(name == key)
         self.top_rail.set_current(key)
+        manager = getattr(self._dock, "_action_bar_manager", None)
+        if manager is not None:  # with AGENT open, Undo, Redo and Compare are shown: they walk its steps
+            try:
+                manager.sync_sections()
+            except RuntimeError:  # the dock went away
+                pass
         self._fit()
         request = getattr(self._dock, "undoRedoStateRequested", None)
         if request is not None:  # Undo and Redo follow AGENT when it opens or folds

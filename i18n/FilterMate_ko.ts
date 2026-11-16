@@ -10805,6 +10805,11 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>{}과(와) 그룹화</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>{}과(와) 탭으로 그룹화</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>{}을(를) FilterMate로 다시 병합</translation>

@@ -10805,6 +10805,11 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>{} के साथ समूहित करें</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>{} के साथ टैब में समूहित करें</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>{} को वापस FilterMate में मिलाएँ</translation>

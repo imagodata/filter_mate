@@ -10929,6 +10929,11 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <translation>Regrouper avec {}</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>Regrouper avec {}, en onglets</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>Fusionner {} dans FilterMate</translation>

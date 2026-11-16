@@ -10805,6 +10805,11 @@ onnxruntime pochodzi z PyPI przez pip, model z huggingface.co/{1}, każdy plik j
         <translation>Zgrupuj z {}</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>Zgrupuj z {}, jako karty</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>Scal {} z powrotem z FilterMate</translation>

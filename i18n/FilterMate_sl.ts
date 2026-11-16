@@ -10805,6 +10805,11 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>Združi v skupino z {}</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>Združi v skupino z {}, kot zavihke</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>Združi {} nazaj v FilterMate</translation>
