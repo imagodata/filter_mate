@@ -67,6 +67,7 @@ from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
 from ...core.agent.providers.base import HttpRequest, encode_json, error_from_response, without_key
 from ...core.agent.providers.model_list import listing_url, models_from_listing
 from ...core.agent.project_summary import project_state, project_summary
+from ...core.agent.request_context import ContextParts, compose, decided_part, protected_part, widgets_part
 from ...core.agent.messages import request_usage
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
@@ -2273,8 +2274,6 @@ class AgentChatController(QObject):
             widgets = widget_summary(agent_widgets.read_widgets())
         except Exception:  # the request goes without them
             widgets = []
-        listed = ("Widgets of the panel (data, made with create_widget): " + json.dumps(widgets, ensure_ascii=False)
-                  if widgets else "")
         try:
             recipes = recipes_block(read_recipes())
         except Exception:  # the request goes without them
@@ -2283,15 +2282,10 @@ class AgentChatController(QObject):
             protected = self._protection.names()
         except Exception:  # the request goes without them
             protected = []
-        guarded = ("Layers the user protected from the agent (read them, use them as a source, never change them): "
-                   + json.dumps(protected, ensure_ascii=False) if protected else "")
-        decided = ""
-        if self._settings_outcomes:  # the cards of change_settings answered since the last request
-            decided = ("Settings changes you proposed, as the user decided them in the thread: "
-                       + "; ".join(self._settings_outcomes))
-            self._settings_outcomes = []
-        return "\n\n".join(part for part in (summary, notes, listed, recipes, guarded, decided,
-                                              level_note(self._policy.level)) if part)
+        outcomes, self._settings_outcomes = self._settings_outcomes, []  # the cards answered since the last request
+        return compose(ContextParts(summary=summary, notes=notes, widgets=widgets_part(widgets), recipes=recipes,
+                                    protected=protected_part(protected), decided=decided_part(outcomes),
+                                    level=level_note(self._policy.level)))
 
     def protection_refusal(self, call: ToolCallPart) -> str:
         """What a call that would change a protected layer, or of a tool turned off, is answered, for the MCP server
