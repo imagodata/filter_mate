@@ -143,3 +143,34 @@ def test_a_tool_turned_off_is_said_so_even_out_of_the_index():
     run, offered, _ = _handler(refused=lambda name: "turned off by the user" if name == "zoom_to" else "")
     with pytest.raises(ToolFailure, match="zoom_to: turned off by the user"):
         run({"names": ["zoom_to"]})
+
+
+# --- 2026-11-16, review of lot 1 ------------------------------------------------------------------------------------
+
+def test_use_tools_names_the_skill_that_says_how_to_use_a_tool():
+    """A tool added from the index skips its skill; the answer names it, so its rules (never remove a layer to hide
+    it...) stay within reach."""
+    available = {name: _tool(name) for name in ("remove_layers", "zoom")}
+    run = use_tools_handler(available, lambda tools: None, known=set(available), skills={"remove_layers": ["open-data"]})
+    answer = run({"names": ["remove_layers", "zoom"]})
+    assert answer["skills"] == {"remove_layers": ["open-data"]} and "load_skill" in answer["note"]
+    assert "skills" not in run({"names": ["zoom"]})
+
+
+def test_a_tool_out_of_this_conversation_says_why():
+    run = use_tools_handler({}, lambda tools: None, known=set(), everything={"view_map"})
+    with pytest.raises(ToolFailure, match="view_map: not available in this conversation"):
+        run({"names": ["view_map"]})
+    with pytest.raises(ToolFailure, match="mcp_search: a tool of a connector: load its entry with load_skill"):
+        run({"names": ["mcp_search"]})
+
+
+def test_nothing_is_marked_added_when_the_offer_fails():
+    available = {"a": _tool("a")}
+
+    def offer(tools):
+        raise ToolFailure("The conversation is over.")
+    run = use_tools_handler(available, offer, known={"a"})
+    with pytest.raises(ToolFailure, match="over"):
+        run({"names": ["a"]})
+    assert "a" in available

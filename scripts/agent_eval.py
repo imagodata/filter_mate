@@ -889,7 +889,7 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
         handlers_of_case["load_skill"] = skill_loader(
             handlers_of_case["load_skill"], hidden, lambda now: (session.offer(now), executor.offer(now)))
         handlers_of_case[USE_TOOLS] = use_tools_handler(
-            hidden, lambda now: (session.offer(now), executor.offer(now)), known=offered | {USE_TOOLS})
+            hidden, lambda now: (session.offer(now), executor.offer(now)), known=offered | {USE_TOOLS}, skills=held)
     executor = ToolExecutor(tools, handlers_of_case)
     executor.hold(held)
     exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True,

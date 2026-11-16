@@ -241,7 +241,8 @@ def replay() -> Replay:
     known = {tool.name for tool in tools} | set(hidden)
     session = AgentSession(kinds["anthropic"], tools, instructions, AgentLimits())
     handlers = project.handlers()
-    handlers[USE_TOOLS] = use_tools_handler(hidden, lambda now: (session.offer(now), executor.offer(now)), known=known)
+    handlers[USE_TOOLS] = use_tools_handler(hidden, lambda now: (session.offer(now), executor.offer(now)), known=known,
+                                            skills=held)
     handlers[LOAD_SKILL] = skill_loader(handlers[LOAD_SKILL], hidden,
                                         lambda now: (session.offer(now), executor.offer(now)))
     executor = ToolExecutor(tools, handlers)
