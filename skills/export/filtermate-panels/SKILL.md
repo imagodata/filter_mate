@@ -1,6 +1,6 @@
 ---
 name: filtermate-panels
-description: "Set up the panels of FilterMate through the MCP server of the FilterMate QGIS plugin: set up FilterMate's panels for the user, who then works in them by hand - the fields EXPLORING shows for each layer, the filtering options of a layer, the export options of the project. Use when the user asks for it in QGIS with FilterMate."
+description: "Set up the panels of FilterMate through the MCP server of the FilterMate QGIS plugin: prepare FilterMate's panels for the user - the fields EXPLORING shows per layer, its filtering options, the export options. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/panels/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->

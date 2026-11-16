@@ -1036,6 +1036,81 @@ def check_processing(project, gpkg):
         project.removeMapLayer(layer_id)
 
 
+def check_panel_options(project, gpkg, shp, work):
+    """The options of FilterMate's panels on real layers: an expression checked by QGIS, the change written as the panel
+    writes it, and undone with the turn. The panel is a stand-in, put where the running plugin is looked for; its
+    signal that saves into FilterMate's database is recorded, not run (that is the panel's own path)."""
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+    from qgis import utils
+    from filter_mate.adapters.public_api import panel_options
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
+    from filter_mate.core.agent.messages import ToolCallPart
+    from filter_mate.core.domain.plugin_package import PLUGIN_PACKAGE
+
+    def props():
+        return {"exploring": {"single_selection_expression": '"fid"', "multiple_selection_expression": '"fid"',
+                              "custom_selection_expression": '"fid"', "current_exploring_groupbox": "single_selection",
+                              "is_tracking": False, "is_linking": False},
+                "filtering": {"has_layers_to_filter": False, "layers_to_filter": [], "geometric_predicates": []}}
+    exporting = {"HAS_DATATYPE_TO_EXPORT": False, "DATATYPE_TO_EXPORT": "GPKG", "HAS_LAYERS_TO_EXPORT": False,
+                 "LAYERS_TO_EXPORT": []}
+    dock = SimpleNamespace(
+        widgets_initialized=True, current_layer=gpkg, PROJECT_LAYERS={gpkg.id(): props(), shp.id(): props()},
+        settingLayerVariable=MagicMock(), _synchronize_layer_widgets=MagicMock(),
+        _reset_exploring_button_states=MagicMock(), _reset_filtering_button_states=MagicMock(),
+        project_props={"EXPORTING": exporting}, CONFIG_DATA={"CURRENT_PROJECT": {"EXPORTING": exporting}},
+        setProjectVariablesEvent=MagicMock(), set_exporting_properties=MagicMock())
+    before = utils.plugins.get(PLUGIN_PACKAGE)
+    utils.plugins[PLUGIN_PACKAGE] = SimpleNamespace(app=SimpleNamespace(dockwidget=dock))
+    try:
+        check("panels: the running panel is found", panel_options.running_dock() is dock)
+        wrong = refused(panel_options.set_layer_options, dock,
+                        [{"layer": "communes", "exploring": {"single_selection_expression": '"nmo"'}}])
+        bad = refused(panel_options.set_layer_options, dock,
+                      [{"layer": "communes", "exploring": {"single_selection_expression": '"nom" ||'}}])
+        check("panels: a field the layer lacks and a broken expression are refused",
+              "unknown field nmo" in wrong and bad != "" and not dock.settingLayerVariable.emit.called, (wrong, bad))
+        recorder = EffectsRecorder()
+        layers = [{"layer": "communes", "exploring": {"single_selection_expression": '"nom"'},
+                   "filtering": {"layers_to_filter": ["routes"], "geometric_predicates": ["Intersect"]}}]
+        recorder.before_call(ToolCallPart("p1", "set_layer_options", {"layers": layers}))
+        recorder.before_call(ToolCallPart("p2", "set_export_options", {"changes": {}}))
+        made = panel_options.set_layer_options(dock, layers)
+        stored = dock.PROJECT_LAYERS[gpkg.id()]
+        check("panels: the options are set as the panel keeps them, and shown",
+              stored["exploring"]["single_selection_expression"] == '"nom"'
+              and stored["filtering"]["layers_to_filter"] == [shp.id()] and stored["filtering"]["has_layers_to_filter"]
+              and made["shown_in_panel"] and dock.settingLayerVariable.emit.call_args.args[0] is gpkg, made)
+        read = panel_options.layer_options(dock, "communes")
+        check("panels: read back with the names of the layers", read["filtering"]["layers_to_filter"] == ["routes"]
+              and read["exploring"]["single_selection_expression"] == '"nom"', read)
+        export = panel_options.set_export_options(dock, {"datatype_to_export": "GeoJSON", "layers_to_export": ["routes"],
+                                                         "output_folder_to_export": work})
+        check("panels: export options set and read back", exporting["DATATYPE_TO_EXPORT"] == "GeoJSON"
+              and exporting["LAYERS_TO_EXPORT"] == [shp.id()]
+              and panel_options.export_options(dock)["layers_to_export"] == ["routes"], export)
+        effects = recorder.finish()
+        check("panels: the turn keeps the options before it", sorted(effect[0] for effect in effects) ==
+              ["export_options", "layer_options"], effects)
+        done, left = apply_effects(effects, undo=True)
+        check("panels: undo puts the options back", stored["exploring"]["single_selection_expression"] == '"fid"'
+              and stored["filtering"]["layers_to_filter"] == [] and exporting["DATATYPE_TO_EXPORT"] == "GPKG"
+              and not left and "communes" in done, (done, left))
+        apply_effects(effects, undo=False)
+        check("panels: redo sets them again", stored["exploring"]["single_selection_expression"] == '"nom"'
+              and exporting["DATATYPE_TO_EXPORT"] == "GeoJSON")
+        stored["exploring"]["single_selection_expression"] = '"pop"'  # the user changed it since
+        done, left = apply_effects(effects, undo=True)
+        check("panels: undo leaves what the user changed since", stored["exploring"]["single_selection_expression"]
+              == '"pop"' and "communes" in left, (done, left))
+    finally:
+        if before is None:
+            utils.plugins.pop(PLUGIN_PACKAGE, None)
+        else:
+            utils.plugins[PLUGIN_PACKAGE] = before
+
+
 def main(introspection):
     work = tempfile.mkdtemp()
     project = QgsProject.instance()
@@ -1070,6 +1145,7 @@ def main(introspection):
     check_fields_joins(project, work)
     check_tree_more(project)
     check_favorite_layers(project)
+    check_panel_options(project, gpkg, shp, work)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

@@ -1,7 +1,7 @@
 ---
 name: panels
 title: Set up the panels of FilterMate
-description: set up FilterMate's panels for the user, who then works in them by hand - the fields EXPLORING shows for each layer, the filtering options of a layer, the export options of the project
+description: prepare FilterMate's panels for the user - the fields EXPLORING shows per layer, its filtering options, the export options
 metadata:
   version: 1
   plugin_min: 5.1.0

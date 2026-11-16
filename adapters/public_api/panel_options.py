@@ -245,10 +245,12 @@ def restore_layer_state(dock, layer_id: str, state: Dict[str, Dict[str, Any]], p
     if not isinstance(props, dict) or layer is None:
         return False
     keys = []
-    for group, values in state.items():
-        allowed = EXPLORING_KEYS if group == "exploring" else FILTERING_KEYS
-        values = {key: value for key, value in values.items() if key in allowed}
-        props.setdefault(group, {}).update(values)
+    for group, allowed in (("exploring", EXPLORING_KEYS), ("filtering", FILTERING_KEYS)):
+        values = {key: value for key, value in (state.get(group) or {}).items() if key in allowed}
+        stored = props.setdefault(group, {})
+        stored.update(values)
+        for key in [key for key in stored if key in allowed and key not in values]:
+            del stored[key]  # a box the change added: the state is again exactly the one kept
         keys += [(group, key) for key in values]
     dock.settingLayerVariable.emit(layer, keys)
     current = getattr(dock, "current_layer", None)
@@ -272,7 +274,10 @@ def restore_export_state(dock, state: Dict[str, Any]) -> bool:
     if dock_problem(dock):
         return False
     exporting = _exporting(dock)
-    exporting.update({key: value for key, value in state.items() if key in EXPORT_KEYS.values()})
+    kept = {key: value for key, value in state.items() if key in EXPORT_KEYS.values()}
+    exporting.update(kept)
+    for key in [key for key in exporting if key in EXPORT_KEYS.values() and key not in kept]:
+        del exporting[key]
     dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"] = exporting
     dock.setProjectVariablesEvent()
     dock.set_exporting_properties()

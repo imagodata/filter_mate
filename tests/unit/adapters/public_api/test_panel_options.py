@@ -209,3 +209,18 @@ def test_export_state_restored(dock, project):
     assert dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"]["HAS_DATATYPE_TO_EXPORT"] is False
     dock.setProjectVariablesEvent.assert_called_once()
     assert panel_options.export_state(None) is None and panel_options.restore_export_state(None, before) is False
+
+
+def test_a_restored_state_is_exactly_the_one_kept(dock, project):
+    """2026-11-16, QGIS check: a box the change added (has_geometric_predicates) stayed after the undo, so the state was
+    not the one kept and the redo took it for a change of the user."""
+    before = panel_options.layer_state(dock, COMMUNES.id())
+    assert "has_geometric_predicates" not in before["filtering"]
+    panel_options.set_layer_options(dock, [{"layer": "communes", "filtering": {"geometric_predicates": ["Intersect"]}}],
+                                    project=project)
+    panel_options.restore_layer_state(dock, COMMUNES.id(), before, project=project)
+    assert panel_options.layer_state(dock, COMMUNES.id()) == before
+    kept = panel_options.export_state(dock)
+    panel_options.set_export_options(dock, {"styles_to_export": "SLD"}, project=project)
+    panel_options.restore_export_state(dock, kept)
+    assert panel_options.export_state(dock) == kept
