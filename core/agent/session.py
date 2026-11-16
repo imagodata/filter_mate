@@ -103,6 +103,16 @@ class AgentSession:
     def messages(self) -> Tuple[Message, ...]:
         return tuple(self._messages)
 
+    @property
+    def system(self) -> str:
+        """The instructions ``next_request`` sends."""
+        return self._system
+
+    @property
+    def tools(self) -> Tuple[ToolSpec, ...]:
+        """The tools ``next_request`` offers, in their order."""
+        return self._tools
+
     def add_user_text(self, text: str, context: str = "") -> None:
         """Start a new request of the user; ``context`` (the state of the project) follows it in the same message.
 

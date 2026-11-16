@@ -23,7 +23,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Callable, Dict, List, Optional, Sequence
 
 ROOT = Path(__file__).resolve().parent.parent
 # core/__init__.py imports QGIS; core/agent itself does not, it is loaded on its own.
@@ -32,7 +32,7 @@ sys.path.insert(0, str(ROOT / "core"))
 from agent.messages import ERROR_NETWORK, ProviderError, StreamFailure  # noqa: E402
 from agent.providers import PRESETS, create_provider  # noqa: E402
 from agent.providers.base import ProviderConfig, error_from_response  # noqa: E402
-from agent.project_summary import project_summary  # noqa: E402
+from agent.project_summary import project_state, project_summary  # noqa: E402
 from agent.sql_guard import filter_problem  # noqa: E402
 
 # As filtermate_api/agent_tools.py words it (not imported: it needs QGIS).
@@ -765,7 +765,10 @@ class ScriptedTransport:
 
 
 class UrllibTransport:
-    """The real thing, for ``--live``."""
+    """The real thing, for ``--live``; ``timeout``: how long a request may wait for the model, in seconds."""
+
+    def __init__(self, timeout: float = TIMEOUT_SECONDS) -> None:
+        self._timeout = timeout
 
     def send(self, request, session):
         parser = session.new_parser()
@@ -773,7 +776,7 @@ class UrllibTransport:
                                               method="POST")
         events = []
         try:
-            with urllib.request.urlopen(http_request, timeout=TIMEOUT_SECONDS) as response:  # nosec B310
+            with urllib.request.urlopen(http_request, timeout=self._timeout) as response:  # nosec B310
                 while True:
                     chunk = response.read1(65536)
                     if not chunk:
@@ -789,6 +792,37 @@ class UrllibTransport:
 def fits(case: Dict[str, Any], names) -> bool:
     """Can ``case`` pass with only the tools ``names``: one of its expected answers uses none other."""
     return any(all(step["tool"] in names for step in steps) for steps in (case.get("expect") or [[]]))
+
+
+def skill_loader(load: Callable[[Dict[str, Any]], Any], hidden: Dict[str, Any],
+                 offer: Callable[[List[Any]], Any]) -> Callable[[Dict[str, Any]], Any]:
+    """load_skill as the chat wraps it with the families on: the tools the skill brings leave ``hidden`` and are
+    ``offer``-ed, and the answer names them (core/agent/families.py)."""
+    def load_and_offer(arguments):
+        answer = load(arguments)
+        skill = SKILLS.get(arguments.get("name", ""))
+        names = sorted(unlocked(skill, set(hidden))) if skill is not None else []
+        if names:
+            offer([hidden.pop(name) for name in names])
+            answer = dict(answer, tools_now_offered=names)
+        return answer
+    return load_and_offer
+
+
+def _project_rows(project: SimulatedProject):
+    handlers = project.handlers()
+    return (handlers["list_layers"]({})["layers"], [{"name": name, "selected_count": 1} for name in project.selected],
+            handlers["map_context"]({}))
+
+
+def project_context(project: SimulatedProject, before: Optional[Dict[str, Any]] = None) -> str:
+    """As the chat sends it after a request: the state of the project, and what changed since ``before``."""
+    return project_summary(*_project_rows(project), before=before)
+
+
+def project_state_of(project: SimulatedProject) -> Dict[str, Any]:
+    """What the chat keeps when an answer ends, to say what changed at the next request."""
+    return project_state(*_project_rows(project))
 
 
 def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
@@ -815,27 +849,12 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
     project.offered = offered
     handlers_of_case = project.handlers()
     if hidden:
-        load = handlers_of_case["load_skill"]
-
-        def load_and_offer(arguments):
-            answer = load(arguments)
-            skill = SKILLS.get(arguments.get("name", ""))
-            names = sorted(unlocked(skill, set(hidden))) if skill is not None else []
-            if names:
-                offered_now = [hidden.pop(name) for name in names]
-                session.offer(offered_now)
-                executor.offer(offered_now)
-                answer = dict(answer, tools_now_offered=names)
-            return answer
-        handlers_of_case["load_skill"] = load_and_offer
+        handlers_of_case["load_skill"] = skill_loader(
+            handlers_of_case["load_skill"], hidden, lambda now: (session.offer(now), executor.offer(now)))
     executor = ToolExecutor(tools, handlers_of_case)
     executor.hold(held)
-    # As the chat sends it: the state of the project after the request.
-    handlers = project.handlers()
-    context = project_summary(handlers["list_layers"]({})["layers"],
-                              [{"name": name, "selected_count": 1} for name in project.selected],
-                              handlers["map_context"]({}))
-    exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True, context=context)
+    exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True,
+                            context=project_context(project))
     write_tools = [tool.name for tool in load_catalog() + SETTINGS_TOOLS + CHAT_ONLY if not tool.read_only]
     reason = exchange.error.message if exchange.error else score_case(case, exchange.calls, project.by_ref, write_tools)
     if not reason and exchange.decision is not None and exchange.decision.status not in ("done", STATUS_RUN_TOOLS):
@@ -867,6 +886,34 @@ def expected_script(case: Dict[str, Any]) -> List[Dict[str, Any]]:
     return [{"tool": step["tool"], "args": step.get("call_args", {})} for step in (case.get("expect") or [[]])[0]]
 
 
+def passes_by_case(results: Sequence[Dict[str, Any]]) -> Dict[str, List[bool]]:
+    """Each case with whether each of its runs passed, in the order played."""
+    found: Dict[str, List[bool]] = {}
+    for result in results:
+        found.setdefault(result["id"], []).append(bool(result["passed"]))
+    return found
+
+
+def lost_cases(reference: Dict[str, List[bool]], now: Dict[str, List[bool]]) -> List[str]:
+    """The cases that passed at least twice in the reference and at most once now (3 runs each: the gate of the
+    token diet, docs/superpowers/specs/2026-11-16-agent-token-diet-design.md); a case run on one side only is not
+    lost."""
+    return sorted(case for case in reference if len(now.get(case, ())) == len(reference[case])
+                  and sum(reference[case]) >= 2 and sum(now[case]) <= 1)
+
+
+def uneven_cases(reference: Dict[str, List[bool]], now: Dict[str, List[bool]]) -> List[str]:
+    """The cases run on both sides, not as many times: not compared (a run with another --repeat, or cut short)."""
+    return sorted(case for case in reference if case in now and len(now[case]) != len(reference[case]))
+
+
+def _positive(text: str) -> int:
+    value = int(text)
+    if value < 1:
+        raise argparse.ArgumentTypeError("at least 1")
+    return value
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--live", action="store_true", help="call the provider (costs money)")
@@ -878,12 +925,31 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--model", help="model name; required with --live")
     parser.add_argument("--base-url", help="instead of the provider's usual address")
     parser.add_argument("--case", action="append", help="only this case (repeatable)")
-    parser.add_argument("--json", type=Path, help="write the results here")
+    parser.add_argument("--json", type=Path, help="write the results here, again after each case")
+    parser.add_argument("--repeat", type=_positive, default=1, help="play each case this many times")
+    parser.add_argument("--timeout", type=float, default=TIMEOUT_SECONDS,
+                        help="seconds a live request may wait for the model (a local model on a small GPU is slow)")
+    parser.add_argument("--baseline", type=Path,
+                        help="the --json of a reference run: name the cases lost against it, and fail only on those")
     parser.add_argument("--tools", choices=("all", "filtering"), default="all",
                         help="filtering: the tools a local model gets by default; the cases that need others are left out")
     args = parser.parse_args(argv)
     if args.live and not args.model:
         parser.error("--live needs --model")
+    options = {"live": args.live, "provider": args.provider, "model": args.model or "scripted", "families": args.families,
+               "tools": args.tools, "prompt": args.prompt, "repeat": args.repeat}
+    reference = None
+    if args.baseline:  # checked before hours of a live run, not after
+        if args.json and args.json.resolve() == args.baseline.resolve():
+            parser.error("--json would write over --baseline")
+        try:
+            baseline = json.loads(args.baseline.read_text(encoding="utf-8"))
+            reference = passes_by_case(baseline["results"])
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            parser.error(f"--baseline {args.baseline}: not a run of this bench ({exc})")
+        differ = {key: value for key, value in (baseline.get("options") or {}).items() if options.get(key) != value}
+        if differ:
+            parser.error(f"--baseline was run with other options: {differ}")
 
     kind, base_url = PRESETS[args.provider if args.live else "anthropic"]
     provider = create_provider(ProviderConfig(
@@ -899,22 +965,41 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     for case in load_cases(args.case):
         if filtering and not fits(case, FILTERING_TOOLS):
             continue
-        transport = UrllibTransport() if args.live else ScriptedTransport(expected_script(case))
-        started = time.monotonic()
-        result = run_case(case, provider, transport, filtering, prompt=legacy_prompt, families=args.families)
-        result["seconds"] = round(time.monotonic() - started, 1)
-        results.append(result)
-        status = "PASS" if result["passed"] else "FAIL"
-        print(f"{status} {result['id']:<28} {result['seconds']:>6}s {','.join(result['tools'])}" + (
-            f"\n     {result['reason']}" if result["reason"] else ""))
+        for attempt in range(1, args.repeat + 1):
+            transport = UrllibTransport(args.timeout) if args.live else ScriptedTransport(expected_script(case))
+            started = time.monotonic()
+            result = run_case(case, provider, transport, filtering, prompt=legacy_prompt, families=args.families)
+            result["seconds"] = round(time.monotonic() - started, 1)
+            result["attempt"] = attempt
+            results.append(result)
+            status = "PASS" if result["passed"] else "FAIL"
+            print(f"{status} {result['id']:<28} {result['seconds']:>6}s {','.join(result['tools'])}" + (
+                f"\n     {result['reason']}" if result["reason"] else ""), flush=True)
+            if args.json:  # a live run stopped halfway keeps what it did
+                _write_results(args.json, results, options)
     passed = sum(1 for result in results if result["passed"])
-    totals = {key: sum(result[key] for result in results)
-              for key in ("input_tokens", "output_tokens", "cache_read_tokens", "cache_write_tokens")}
+    totals = _write_results(args.json, results, options) if args.json else _totals(results)
     print(f"\n{passed}/{len(results)} passed; tokens: {totals}")
-    if args.json:
-        args.json.write_text(json.dumps({"results": results, "totals": totals}, indent=1, ensure_ascii=False),
-                             encoding="utf-8")
+    if reference is not None:
+        now = passes_by_case(results)
+        lost, uneven = lost_cases(reference, now), uneven_cases(reference, now)
+        print(f"lost against {args.baseline.name}: {', '.join(lost) if lost else 'none'}")
+        if uneven:
+            print(f"not compared, run a different number of times: {', '.join(uneven)}")
+        return 1 if lost or uneven else 0
     return 0 if passed == len(results) else 1
+
+
+def _totals(results: Sequence[Dict[str, Any]]) -> Dict[str, int]:
+    return {key: sum(result[key] for result in results)
+            for key in ("input_tokens", "output_tokens", "cache_read_tokens", "cache_write_tokens")}
+
+
+def _write_results(path: Path, results: Sequence[Dict[str, Any]], options: Dict[str, Any]) -> Dict[str, int]:
+    totals = _totals(results)
+    path.write_text(json.dumps({"options": options, "results": list(results), "totals": totals}, indent=1,
+                               ensure_ascii=False), encoding="utf-8")
+    return totals
 
 
 if __name__ == "__main__":
