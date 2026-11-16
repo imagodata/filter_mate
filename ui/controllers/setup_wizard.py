@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import replace
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from qgis.PyQt.QtCore import QCoreApplication
 
@@ -139,6 +139,19 @@ def project_facts() -> wizard.ProjectFacts:
         return wizard.ProjectFacts()
 
 
+def wait_for_chat(chat: Any) -> bool:
+    """A request runs, or another application is changing the project: said, and nothing is to be done now."""
+    if chat.chat_busy():
+        chat._say(QCoreApplication.translate("AgentChat", "Wait for the end of the request, then try again."),
+                  error=True)
+        return True
+    if getattr(getattr(chat, "_mcp", None), "busy", False):
+        chat._say(QCoreApplication.translate("AgentChat", "Another application is changing the project: try "
+                                             "again in a moment."))
+        return True
+    return False
+
+
 class SetupWizard:
     """One setup at a time in the thread of ``chat`` (the AgentChatController): a card per step, then the change."""
 
@@ -150,8 +163,8 @@ class SetupWizard:
         self._done: List[str] = []
         self._facts = wizard.ProjectFacts()
         self._apply_card = None  # the card of the change, until Apply or Cancel
-        # What each Apply changed, the last one last: {"rows": the settings set, "moved": the sections that were
-        # apart before it moved them (None: it moved none), "done": put back}. Each has its own link in the thread.
+        # What each Apply changed, the last one last: {"rows": the settings set, "moved": where the sections were
+        # before it moved them ({"apart", "kept"}; None: it moved none), "done": put back}. Each has its own link.
         self._changes: List[dict] = []
 
     @property
@@ -164,26 +177,17 @@ class SetupWizard:
 
     def offer_back_again(self) -> None:
         """The thread was emptied for another project: the settings are those of every project, so the link that
-        puts back what the setup changed comes back in it."""
-        for change in self._changes:
-            if not change["done"]:
-                self._add_back_link(change)
+        puts back what the last setup changed comes back in it. One link: those of earlier setups would all read
+        the same, and what they set was set again since."""
+        change = next((item for item in reversed(self._changes) if not item["done"]), None)
+        if change is not None:
+            self._add_back_link(change)
 
     def _add_back_link(self, change: dict) -> None:
         self._chat.panel.add_link(_tr("Put my settings back as they were"), lambda: self.revert(change))
 
     def _wait(self) -> bool:
-        """A request runs, or another application is changing the project: said, and nothing is done now."""
-        chat = self._chat
-        if chat.chat_busy():
-            chat._say(QCoreApplication.translate("AgentChat", "Wait for the end of the request, then try again."),
-                      error=True)
-            return True
-        if getattr(getattr(chat, "_mcp", None), "busy", False):
-            chat._say(QCoreApplication.translate("AgentChat", "Another application is changing the project: try "
-                                                 "again in a moment."))
-            return True
-        return False
+        return wait_for_chat(self._chat)
 
     def start(self) -> None:
         from ...adapters.agent import plugin_settings
@@ -307,19 +311,21 @@ class SetupWizard:
         a model never undoes it, and the settings of the agent itself go back with the link that follows."""
         if self._wait():
             return
+        # Where the sections are, read first: a setting that turns a section off brings it back from its panel.
+        before = self._sections_now() if layout is not None else None
         applied = self._set(rows, "before", "after") if rows else []
-        if applied is None and layout is None:
+        if applied is None:  # the settings could not be applied (said): nothing else is done
             self._apply_card = None
             card.finish(False)
             return
         # The settings first: a section they turn off shows nowhere, a section they turn on can leave the panel.
-        moved = self._move_sections(layout) if layout is not None else None
+        moved = self._move_sections(layout, before) if before is not None else None
         self._apply_card = None
         if not applied and moved is None:
             card.finish(False)
             return
         card.finish(True)
-        change = {"rows": [dict(row) for row in applied or ()], "moved": moved, "done": False}
+        change = {"rows": [dict(row) for row in applied], "moved": moved, "done": False}
         self._changes.append(change)
         self._add_back_link(change)
         self._follow_up(apart=layout == wizard.IN_PANELS and moved is not None)
@@ -337,56 +343,72 @@ class SetupWizard:
             return False
         if self._wait():
             return False
-        change["done"] = True
         rows, moved = change["rows"], change["moved"]
         # The settings first, as Apply did: a section they turn on again can go back to its panel.
-        done = bool(rows) and self._set(rows, "after", "before") is not None
+        done = bool(rows) and bool(self._set(rows, "after", "before"))
         if moved is not None:
             done = self._restore_sections(moved) or done
+        change["done"] = True  # once it was tried to its end: a link that failed half way can be clicked again
         if done:
             self._chat.panel.add_note(_tr("Settings put back as they were."))
         return done
 
-    def _move_sections(self, layout: str) -> Optional[Tuple[str, ...]]:
-        """Every section in its own panel, or all back in FilterMate. The sections that were apart before, to put
-        them back; None when nothing moved."""
+    def _sections_now(self) -> Optional[dict]:
+        """Where the sections are: those in their own panel, and those kept as apart for the next time (one that
+        is turned off goes back to its panel the day it is turned on). None when they cannot move."""
         panels = self._panels()
         if panels is None:
             return None
         try:
-            before = tuple(panels.detached())
+            kept = getattr(panels, "kept_apart", None)
+            apart = tuple(panels.detached())
+            return {"apart": apart, "kept": tuple(kept()) if callable(kept) else apart}
+        except Exception:
+            logger.debug("Setup: the panels of the sections were not read", exc_info=True)
+            return None
+
+    def _move_sections(self, layout: str, before: dict) -> Optional[dict]:
+        """Every section in its own panel, or all back in FilterMate. ``before`` (where they were when Apply was
+        clicked) to put them back; None when nothing moved and nothing kept as apart changed."""
+        panels = self._panels()
+        if panels is None:
+            return None
+        try:
             if layout == wizard.IN_PANELS:
                 panels.detach_all()
             else:
                 panels.attach_all()
-            moved = tuple(panels.detached()) != before
         except Exception:
             logger.exception("Setup: the sections could not be moved")
             return None
         self._keep_thread_in_view()
-        return before if moved else None
+        return before if self._sections_now() != before else None
 
-    def _restore_sections(self, before: Tuple[str, ...]) -> bool:
-        """The sections apart as they were before Apply; True when one moved."""
+    def _restore_sections(self, before: dict) -> bool:
+        """The sections apart as they were before Apply, and what was kept as apart then; True when it changed."""
         panels = self._panels()
         if panels is None:
             return False
-        moved = False
+        now = self._sections_now()
         try:
             for key in panels.detached():
-                if key not in before:
-                    moved = panels.attach(key) or moved
-            for key in before:
+                if key not in before["apart"]:
+                    panels.attach(key)
+            for key in before["apart"]:
                 if key not in panels.detached():
-                    moved = panels.detach(key) or moved
+                    panels.detach(key)
+            keep = getattr(panels, "keep_apart", None)
+            if callable(keep):  # a section turned off meanwhile is not kept as apart unless it was
+                keep(before["kept"])
         except Exception:
             logger.exception("Setup: the sections could not be put back")
         self._keep_thread_in_view()
-        return moved
+        return self._sections_now() != now
 
     def _keep_thread_in_view(self) -> None:
-        """AGENT moved with the others: its thread, where the setup goes on, comes forward."""
-        show = getattr(self._chat, "_show_agent", None)
+        """AGENT moved with the others: its thread, where the setup goes on, comes forward, once Qt has laid
+        the panels out (a panel that just moved still reads as where it was)."""
+        show = getattr(self._chat, "_show_agent_soon", None) or getattr(self._chat, "_show_agent", None)
         if callable(show):
             try:
                 show()
@@ -395,14 +417,14 @@ class SetupWizard:
 
     def _set(self, rows, was: str, to: str) -> Optional[List[dict]]:
         """Set each row from its ``was`` value to its ``to`` value; the rows changed since are left out (said).
-        The rows set, None when none was."""
+        The rows set (none when they all changed since); None when they could not be applied (said too)."""
         from ...adapters.agent import plugin_settings
         now = plugin_settings.current_values([row["path"] for row in rows])
         kept = [row for row in rows if now.get(row["path"]) == row[was]]
         if len(kept) < len(rows):
             self._chat.panel.add_note(_tr("Some of these settings changed since: they are left as they are."))
         if not kept:
-            return None
+            return []
         try:
             plugin_settings.apply_values({row["path"]: row[to] for row in kept})
         except RuntimeError as exc:  # the configuration was put back as it was

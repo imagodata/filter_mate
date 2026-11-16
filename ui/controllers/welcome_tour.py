@@ -107,11 +107,10 @@ class WelcomeTour:
 
     def show(self) -> bool:
         """Tell it in the thread. False while a request runs: its answer is being written there."""
+        from .setup_wizard import wait_for_chat
         chat = self._chat
-        if chat.chat_busy():
-            chat._say(QCoreApplication.translate("AgentChat", "Wait for the end of the request, then try again."),
-                      error=True)
-            return False
+        if chat.chat_busy():  # another application at work does not keep the tour from being told
+            return not wait_for_chat(chat)
         facts = self.facts()
         texts = _texts(", ".join(key.upper() for key in facts.off))
         labels = _links()
@@ -130,8 +129,9 @@ class WelcomeTour:
 
     def _move(self, apart: bool) -> bool:
         """Every section in its own panel, or all back in FilterMate; AGENT, where this is read, stays in view."""
+        from .setup_wizard import wait_for_chat
         panels = self._panels()
-        if panels is None:
+        if panels is None or wait_for_chat(self._chat):  # AGENT moves too: not under a request being answered
             return False
         try:
             if apart:
@@ -142,7 +142,7 @@ class WelcomeTour:
             logger.exception("Tour: the sections could not be moved")
             return False
         chat = self._chat
-        show = getattr(chat, "_show_agent", None)
+        show = getattr(chat, "_show_agent_soon", None) or getattr(chat, "_show_agent", None)
         if callable(show):
             show()
         return True

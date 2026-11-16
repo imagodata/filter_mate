@@ -843,6 +843,32 @@ def test_an_offer_made_in_the_open_section_is_kept_at_once(controller, offer):
     assert FakeSettings.values[offer.key] == "9.9.9"
 
 
+def test_an_offer_in_a_panel_just_put_back_waits_for_the_tabs_to_be_laid_out(controller, offer, dock):
+    """2026-11-16, review: AGENT in its own panel, put back behind the tab of the dock when QGIS starts. Qt had
+    not laid the tabs out yet: the panel read as in view and the offer was kept as seen."""
+    dock._fm_sections.detached = {"agent"}
+    offer.agent_open = True  # what Qt says before the layout
+    assert controller.offer_setup_once("9.9.9") is True
+    assert offer.key not in FakeSettings.values  # asked again a moment later (QTimer), and when its tab comes
+
+    offer.agent_open = False  # laid out: behind the tab of the dock
+    controller._on_panel_shown()
+    assert offer.key not in FakeSettings.values
+    offer.agent_open = True  # the user clicks its tab
+    controller._on_panel_shown()
+    assert FakeSettings.values[offer.key] == "9.9.9"
+
+
+def test_in_view_is_asked_of_a_dock_that_knows_it(controller, offer, dock):
+    """Open in the dock is not in view when the dock is behind the tab of another panel of QGIS."""
+    offer.agent_open = True
+    dock._fm_sections.in_view = lambda key: False
+    dock._fm_sections.bring_in_view = lambda key: offer.opened.append(("in view", key))
+    assert controller._agent_shown() is False
+    controller._show_agent()
+    assert offer.opened == [("in view", "agent")]
+
+
 def test_an_offer_nobody_saw_comes_back_in_the_thread_of_another_project(controller, offer):
     """Opening a project empties the thread: the card went with it, for good."""
     controller.offer_setup_once("9.9.9")

@@ -1853,7 +1853,11 @@ class FilterMate:
         """The chat of the AGENT section, the panel opened first; None, said in the message bar, when the section
         is turned off: the setup and the tour are told in its thread."""
         if not self.pluginIsActive or not self.app or not getattr(self.app, 'dockwidget', None):
-            self.run()
+            self._from_menu = True  # run() leaves what its dialog asked to the entry that opened the panel
+            try:
+                self.run()
+            finally:
+                self._from_menu = False
         dock = getattr(self.app, 'dockwidget', None) if self.app else None
         if dock is not None and not dock.isVisible():
             dock.show()
@@ -1868,14 +1872,30 @@ class FilterMate:
         """Vector > FilterMate > Set up FilterMate: the panel opened, then the setup started in the AGENT thread
         (cards of choices, no model; the name dates from the setup a model asked)."""
         chat = self._chat_of_agent()
+        self._setup_asked = False  # asked in the dialog of what is new too: started once, here
         if chat is not None:
             chat.start_setup()
 
     def show_how_it_works(self):
-        """Vector > FilterMate > How FilterMate works: the panel opened, then the tour told in the AGENT thread."""
+        """Vector > FilterMate > How FilterMate works: the panel opened, then the tour told in the AGENT thread.
+        The setup instead, when the dialog of what is new, shown on the way, was answered *Set up FilterMate*:
+        the last word, and both would be written in the same thread."""
         chat = self._chat_of_agent()
-        if chat is not None:
+        asked, self._setup_asked = getattr(self, '_setup_asked', False), False
+        if chat is None:
+            return
+        if asked:
+            chat.start_setup()
+        else:
             chat.show_tour()
+
+    def _agent_section_on(self) -> bool:
+        """``APP.OPTIONS.AGENT.enabled``, as the panel reads it; on when it cannot be read."""
+        try:
+            from .ui.controllers.agent_chat_controller import agent_enabled
+            return bool(agent_enabled(self.app.dockwidget.CONFIG_DATA))
+        except Exception:
+            return True
 
     WHATS_NEW_VERSION = 6
 
@@ -1930,10 +1950,11 @@ class FilterMate:
             dlg.accept()
 
         bottom = QHBoxLayout()
-        setup_btn = QPushButton(self.tr("Set up FilterMate"))
-        setup_btn.setDefault(True)
-        setup_btn.clicked.connect(ask_setup)
-        bottom.addWidget(setup_btn)
+        if self._agent_section_on():  # the setup is asked in the thread of AGENT: no button without the section
+            setup_btn = QPushButton(self.tr("Set up FilterMate"))
+            setup_btn.setDefault(True)
+            setup_btn.clicked.connect(ask_setup)
+            bottom.addWidget(setup_btn)
         guide_btn = QPushButton(self.tr("Open the user guide"))
         guide_btn.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(guide_url)))
         bottom.addWidget(guide_btn)
@@ -1992,11 +2013,11 @@ class FilterMate:
                             self._show_discord_welcome()
                         self._init_extensions_dockwidget_ui()
                         self.app.dockwidget.install_agent_panel(self)
-                        if getattr(self, '_setup_asked', False):  # asked in the dialog of what is new
-                            self._setup_asked = False
-                            self.setup_with_agent()
-                        else:
+                        if not getattr(self, '_setup_asked', False):
                             self._offer_agent_setup()
+                        elif not getattr(self, '_from_menu', False):  # asked in the dialog of what is new
+                            self.setup_with_agent()
+                        # from an entry of the menu: that entry starts it, once (setup_with_agent)
                 else:
                     # App already exists, call run() which will show the dockwidget
                     # and refresh layers if needed

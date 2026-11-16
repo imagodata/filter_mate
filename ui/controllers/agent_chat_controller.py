@@ -588,6 +588,7 @@ class AgentChatController(QObject):
         self.panel.input.forget()
         self._reset_view()
         self._offer_setup_again()
+        self._wizard.offer_back_again()  # a new project has no thread to read: the link stays within reach
         self._refresh_history()
 
     # --- settings ---------------------------------------------------------------
@@ -636,7 +637,11 @@ class AgentChatController(QObject):
             return False  # its card already waits in the thread, or it was offered before
         self._setup_offer = version
         self._show_setup_offer()
-        if self._agent_shown():
+        if self._agent_apart():
+            # Its panel was just put back where QGIS kept it: until Qt has laid the tabs out, a panel behind
+            # another one still reads as in view. Asked again a moment later, and when its tab comes forward.
+            QTimer.singleShot(250, self._on_panel_shown)
+        elif self._agent_shown():
             self._keep_setup_offered()
         return True
 
@@ -663,25 +668,48 @@ class AgentChatController(QObject):
             self._show_setup_offer()
 
     def _agent_shown(self) -> bool:
-        """Whether the AGENT section is open. A dock without sections to fold hides nothing."""
+        """Whether the AGENT section is open and on screen: not folded, not in a panel (its own, or the dock)
+        behind the tab of another one. A dock without sections to fold hides nothing."""
         sections = getattr(self._parent_widget, "_fm_sections", None)
         if sections is None or not hasattr(sections, "is_open"):
             return True
         try:
-            return bool(sections.is_open("agent"))
+            in_view = getattr(sections, "in_view", None)
+            return bool(in_view("agent") if callable(in_view) else sections.is_open("agent"))
         except Exception:
             logger.debug("Agent: the state of the section could not be read", exc_info=True)
             return True
 
-    def _show_agent(self) -> None:
-        """Open the AGENT section when it is folded: the agent waits there for an answer of the user."""
-        if self._agent_shown():
-            return
+    def _agent_apart(self) -> bool:
+        """Whether AGENT is in its own panel of QGIS (ui/layout/section_panels.py)."""
         sections = getattr(self._parent_widget, "_fm_sections", None)
         try:
-            sections.open_top("agent")
+            return "agent" in (getattr(sections, "detached", None) or ())
+        except TypeError:
+            return False
+
+    def _open_agent(self) -> None:
+        """The AGENT section open and in front: what is said in its thread must be in view."""
+        sections = getattr(self._parent_widget, "_fm_sections", None)
+        if sections is None:
+            return
+        try:
+            bring = getattr(sections, "bring_in_view", None)
+            if callable(bring):
+                bring("agent")
+            elif hasattr(sections, "open_top"):
+                sections.open_top("agent")
         except Exception:
             logger.debug("Agent: the section could not be opened", exc_info=True)
+
+    def _show_agent(self) -> None:
+        """Open the AGENT section when it is folded or behind a tab: the agent waits there for an answer."""
+        if not self._agent_shown():
+            self._open_agent()
+
+    def _show_agent_soon(self) -> None:
+        """The same once Qt has laid the panels out: a section that just moved still reads as where it was."""
+        QTimer.singleShot(150, self._show_agent)
 
     def _on_panel_shown(self) -> None:
         """The AGENT section opens, or its panel comes forward: an offer that waited in it is in view. Not when
@@ -713,12 +741,7 @@ class AgentChatController(QObject):
         """Set FilterMate up: the AGENT section opened, and the cards of the setup in its thread (setup_wizard.py),
         with or without a model: no request is sent. True when it started; an offer waiting in the thread is closed
         then, not before."""
-        sections = getattr(self._parent_widget, "_fm_sections", None)
-        if sections is not None and hasattr(sections, "open_top"):
-            try:  # first: what is said below must be in view
-                sections.open_top("agent")
-            except Exception:
-                logger.debug("Agent: section not opened for the setup", exc_info=True)
+        self._open_agent()  # first: what is said below must be in view
         if self.chat_busy():
             self._say(_tr("Wait for the end of the request, then start the setup again."), error=True)
             return False
@@ -736,12 +759,7 @@ class AgentChatController(QObject):
         """How FilterMate works: the AGENT section opened, and the tour told in its thread (welcome_tour.py), with
         or without a model: nothing is sent. An offer of the setup waiting in the thread stays: the tour ends on
         the same setup. True when it was told."""
-        sections = getattr(self._parent_widget, "_fm_sections", None)
-        if sections is not None and hasattr(sections, "open_top"):
-            try:  # first: what is said below must be in view
-                sections.open_top("agent")
-            except Exception:
-                logger.debug("Agent: section not opened for the tour", exc_info=True)
+        self._open_agent()  # first: what is said below must be in view
         return self._tour.show()
 
     def start_model_setup(self) -> bool:

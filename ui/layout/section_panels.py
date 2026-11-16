@@ -236,6 +236,14 @@ class SectionPanels:
     def detached(self) -> Tuple[str, ...]:
         return tuple(key for key in DETACHABLE if key in self._panels)
 
+    def kept_apart(self) -> Tuple[str, ...]:
+        """The sections kept as apart for the next time: those apart now, and those that are turned off."""
+        return _saved()
+
+    def keep_apart(self, keys: Iterable[str]) -> None:
+        """Keep exactly ``keys`` as apart (the setup puts back what it found, a section turned off included)."""
+        _save(parse_detached(list(keys)))
+
     def panel(self, key: str) -> Any:
         return self._panels.get(key)
 
@@ -811,16 +819,22 @@ class SectionPanels:
         from .section_bars import SECTION_PAGES
         sections = self._sections()
         agent_open = bool(sections is not None and sections.is_open("agent"))
+        try:  # behind the tab of another panel of QGIS (Layers), the dock stays there
+            dock_front = self._dock.isVisible() and not self._dock.visibleRegion().isEmpty()
+        except RuntimeError:
+            dock_front = False
         toolbox = getattr(self._dock, "toolBox_tabTools", None)
         current = toolbox.currentWidget() if toolbox is not None else None
         below = next((key for key in BOTTOM if current is not None
                       and current is getattr(self._dock, SECTION_PAGES[key], None)), "filtering")
         left = [key for key in DETACHABLE if key not in self._panels and self.detach(key)]
-        if left:
-            QTimer.singleShot(0, lambda: self._bring_forward(below, agent_open))  # after the raise of each new tab
+        if left:  # after the raise of each new tab
+            QTimer.singleShot(0, lambda: self._bring_forward(below, agent_open, dock_front))
         return left
 
-    def _bring_forward(self, below: str, agent_open: bool) -> None:
+    def _bring_forward(self, below: str, agent_open: bool, dock_front: bool) -> None:
+        if self._closing:
+            return
         try:
             for key in (below, "filtering"):
                 if key in self._panels:
@@ -828,7 +842,7 @@ class SectionPanels:
                     break
             if agent_open and "agent" in self._panels:
                 self.raise_panel("agent")
-            elif not self._dock.isFloating():
+            elif dock_front and not self._dock.isFloating():
                 self._dock.raise_()
         except RuntimeError:  # the dock went away
             pass

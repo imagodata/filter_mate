@@ -73,13 +73,23 @@ class FakePanel:
 
 
 class FakePanels:
-    """The sections that can go to their own panels (ui/layout/section_panels.SectionPanels)."""
+    """The sections that can go to their own panels (ui/layout/section_panels.SectionPanels), with what they keep
+    as apart for the next time: the sections apart, and those that are turned off (not ``present``)."""
 
     def __init__(self, apart=(), present=DETACHABLE):
-        self.apart, self.present = list(apart), tuple(present)
+        self.apart, self.present, self.kept = list(apart), list(present), list(apart)
 
     def detached(self):
         return tuple(key for key in DETACHABLE if key in self.apart)
+
+    def kept_apart(self):
+        return tuple(key for key in DETACHABLE if key in self.kept)
+
+    def keep_apart(self, keys):
+        self.kept = list(keys)
+
+    def _remember(self):
+        self.kept = [key for key in DETACHABLE if key in self.apart or (key in self.kept and key not in self.present)]
 
     def can_detach(self, key):
         return key in self.present and key not in self.apart
@@ -88,12 +98,16 @@ class FakePanels:
         if not self.can_detach(key):
             return False
         self.apart.append(key)
+        if remember:
+            self._remember()
         return True
 
     def attach(self, key, remember=True):
         if key not in self.apart:
             return False
         self.apart.remove(key)
+        if remember:
+            self._remember()
         return True
 
     def detach_all(self):
@@ -101,7 +115,19 @@ class FakePanels:
 
     def attach_all(self, remember=True):
         for key in self.detached():
-            self.attach(key)
+            self.attach(key, remember)
+        if remember:
+            self.kept = []
+
+    def section_turned(self, key, on):
+        """What the dock does when a setting turns a section off or on (dock_chrome.apply_section_options)."""
+        if on and key not in self.present:
+            self.present.append(key)
+            if key in self.kept:
+                self.detach(key, remember=False)
+        elif not on and key in self.present:
+            self.attach(key, remember=False)  # back in the dock, kept as apart for the day it returns
+            self.present.remove(key)
 
 
 def _module(monkeypatch, name, **attrs):
@@ -135,13 +161,16 @@ def world(monkeypatch):
         _module(monkeypatch, name)
     _module(monkeypatch, ".ui.layout.section_panels", DETACHABLE=DETACHABLE)
     reference = importlib.import_module(f"{_PKG}.core.agent.settings_reference")
-    state = types.SimpleNamespace(config={}, ready=False, applied=[])
+    state = types.SimpleNamespace(config={}, ready=False, applied=[], fail=False, on_apply=lambda values: None)
 
     def rows():
         return reference.read_settings(state.config)
 
     def apply_values(values):
+        if state.fail:
+            raise RuntimeError("the configuration was put back as it was")
         state.applied.append(dict(values))
+        state.on_apply(values)
         for path, value in values.items():
             node = state.config
             *parents, leaf = path.split(".")
@@ -172,6 +201,7 @@ def chat(world):
     chat._say = lambda text, error=False: chat.status.append(text)
     chat._lines_of = lambda rows, left_out=(): [f"{row['path']}: {row['before']} → {row['after']}" for row in rows]
     chat._show_agent = lambda: chat.shown.append("agent")
+    chat._show_agent_soon = chat._show_agent  # the controller waits for Qt to lay the panels out
     chat.start_setup = lambda: chat.started.append("setup") or True
     chat.start_model_setup = lambda: True
     chat.open_settings = lambda tab="": chat.opened.append(tab) or True
@@ -179,13 +209,15 @@ def chat(world):
     return chat
 
 
-def _answer(world, chat, untick=(), pick=()):
-    """Answer the card that waits as it is ticked, but for ``untick`` (labels) and ``pick`` ((header, label))."""
+def _answer(world, chat, untick=(), pick=(), tick=()):
+    """Answer the card that waits as it is ticked, but for ``untick`` and ``tick`` (labels) and ``pick`` ((header,
+    label))."""
     setup = chat.wizard
     questions = chat.panel.questions[-1]
     chosen = []
     for question in questions:
-        labels = [option.label for option in question.options if option.selected and option.label not in untick]
+        labels = [option.label for option in question.options
+                  if (option.selected or option.label in tick) and option.label not in untick]
         for header, label in pick:
             if question.header == header:
                 labels = [label]
@@ -193,12 +225,12 @@ def _answer(world, chat, untick=(), pick=()):
     setup._card.answered.emit(chosen)
 
 
-def _run(world, chat, untick=(), pick=()):
+def _run(world, chat, untick=(), pick=(), tick=()):
     """The setup from its first card to the card of the changes; that card, None when nothing is to change."""
     chat.wizard = world.setup.SetupWizard(chat)
     chat.wizard.start()
     while chat.wizard.running:
-        _answer(world, chat, untick, pick)
+        _answer(world, chat, untick, pick, tick)
     cards = [card for card in chat.panel.cards if card.lines]  # the cards of questions have no line
     return cards[-1] if cards else None
 
@@ -341,6 +373,74 @@ def test_apply_and_put_back_wait_for_another_application(world, chat):
     assert chat.wizard.revert() is False and len(world.applied) == 1
     chat._mcp.busy = False
     assert chat.wizard.revert() is True
+
+
+def _follow_filtering(world, chat):
+    """The panels follow FILTERING turned on or off by a setting, as the dock does."""
+    panels = chat._parent_widget._fm_panels
+    world.on_apply = lambda values: (panels.section_turned("filtering", values[world.wizard.FILTERING_ON])
+                                     if world.wizard.FILTERING_ON in values else None)
+    return panels
+
+
+def test_the_link_puts_back_a_section_that_apply_turned_off_and_merged(world, chat):
+    """2026-11-16, review: FILTERING alone in its panel, turned off and merged by one Apply. Where the sections
+    were was read after the setting had brought FILTERING back: the link then left it in the dock."""
+    chat._parent_widget._fm_panels = FakePanels(apart=("filtering",))
+    panels = _follow_filtering(world, chat)
+    card = _run(world, chat, untick=("FILTERING",), pick=[("Layout", "All in the FilterMate panel")])
+    card.apply_requested.emit()
+    assert card.accepted is True and panels.detached() == () and panels.kept_apart() == ()
+
+    assert chat.wizard.revert() is True
+    assert world.config["APP"]["OPTIONS"]["FILTERING"]["enabled"] is True
+    assert panels.detached() == ("filtering",) and panels.kept_apart() == ("filtering",)
+
+
+def test_the_link_does_not_leave_a_section_kept_as_apart(world, chat):
+    """2026-11-16, review: FILTERING off and nothing apart; the setup turns it on with every section in its own
+    panel; the link turns it off again. It stayed kept as apart: alone in a panel the day it was turned on."""
+    world.config = {"APP": {"OPTIONS": {"FILTERING": {"enabled": False}}}}
+    chat._parent_widget._fm_panels = FakePanels(present=[key for key in DETACHABLE if key != "filtering"])
+    panels = _follow_filtering(world, chat)
+    card = _run(world, chat, tick=("FILTERING",), pick=[("Layout", "Each in its own panel of QGIS")])
+    card.apply_requested.emit()
+    assert panels.detached() == DETACHABLE and panels.kept_apart() == DETACHABLE
+
+    assert chat.wizard.revert() is True
+    assert panels.detached() == () and panels.kept_apart() == ()
+    panels.section_turned("filtering", True)  # turned on another day: in the dock, as before the setup
+    assert panels.detached() == ()
+
+
+def test_settings_that_cannot_be_applied_move_nothing(world, chat):
+    """The card read "Applied." under "Nothing changed: the settings could not be applied."."""
+    panels = chat._parent_widget._fm_panels
+    card = _run(world, chat, pick=[("Layout", "Each in its own panel of QGIS"), ("Buttons", "Top")])
+    world.fail = True
+    card.apply_requested.emit()
+    assert card.accepted is False and panels.detached() == ()
+    assert ("note", "Nothing changed: the settings could not be applied.") in chat.panel.said
+    assert ("link", "Put my settings back as they were") not in chat.panel.said
+
+
+def test_one_link_comes_back_after_several_setups(world, chat):
+    for place in ("Top", "Left"):
+        _run(world, chat, pick=[("Buttons", place)]).apply_requested.emit()
+    chat.panel.said.clear()
+    chat.wizard.forget()
+    chat.wizard.offer_back_again()
+    assert chat.panel.said == [("link", "Put my settings back as they were")]  # the last setup's
+    chat.panel.links["Put my settings back as they were"]()
+    assert world.applied[-1] == {world.wizard.ACTION_BAR: "top"}
+
+
+def test_the_links_of_the_tour_wait_for_the_end_of_a_request(world, chat):
+    panels = chat._parent_widget._fm_panels
+    world.tour.WelcomeTour(chat).show()
+    chat.busy = True
+    chat.panel.links["Open every section in its own panel"]()
+    assert panels.detached() == () and "Wait" in chat.status[-1]
 
 
 def test_a_panel_without_sections_to_move_asks_the_buttons_alone(world, chat):
