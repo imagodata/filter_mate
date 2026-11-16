@@ -682,3 +682,46 @@ class TestToolsLeaveAtACompaction:
         chat._limits = AgentLimits(max_history_chars=50)
         chat.add_user_text("f")
         assert chat.dropped == () and chat.tool_names == ("read", "zoom")
+
+
+class TestContextAfterACompaction:
+    """Lot 3: the session asks the whole context at the first request and after it rewrote the history."""
+
+    def test_a_rewritten_history_gets_the_whole_state(self):
+        asked = []
+        chat = session()
+
+        def context(full):
+            asked.append(full)
+            return "whole" if full else "changes"
+        chat.add_user_text("a", context)
+        chat.accept_turn(turn(STOP_END, TextPart("x" * 200)))
+        chat.add_user_text("b", context)
+        chat.accept_turn(turn(STOP_END, TextPart("y" * 200)))
+        chat._limits = AgentLimits(max_history_chars=50)
+        chat.add_user_text("c", context)
+        assert asked == [True, False, True] and chat.rewritten
+        assert chat.messages[-1].parts[-1].text == "whole"
+
+    def test_a_string_context_still_works(self):
+        chat = session()
+        chat.add_user_text("a", "state")
+        assert chat.messages[-1].parts[-1].text == "state"
+
+
+class TestHistoryBudget:
+    """Lot 3: the history a provider gets before the compaction steps in."""
+
+    def test_a_remote_budget(self):
+        from core.agent.session import history_budget
+        assert history_budget("anthropic", 40_000) == history_budget("openai", 10) == 60_000
+
+    def test_an_ollama_budget_leaves_room_in_the_32k_step(self):
+        from core.agent.providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS
+        from core.agent.session import history_budget
+        step = int((CONTEXT_STEPS[1] - ANSWER_ROOM) * CHARS_PER_TOKEN)
+        assert history_budget("ollama", 30_000) == step - 30_000
+        assert history_budget("ollama", step) == 20_000  # at least
+
+    def test_the_result_cap_is_8000(self):
+        assert MAX_RESULT_CHARS == 8000

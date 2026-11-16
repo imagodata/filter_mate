@@ -7,9 +7,9 @@ drive it from signals. :func:`run_exchange` is the blocking way, for the evaluat
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable, Collection, Dict, List, Optional, Protocol, Sequence, Tuple
+from typing import Callable, Collection, Dict, List, Optional, Protocol, Sequence, Tuple, Union
 
-from .compaction import compact
+from .compaction import _size, compact, trim_results
 from .mcp_client import PREFIX as CONNECTOR_TOOL_PREFIX
 from .messages import (
     ROLE_ASSISTANT, ROLE_USER, STOP_MAX_TOKENS, STOP_REFUSAL, STOP_TOOL_USE, Message, ProviderError, StreamFailure,
@@ -47,6 +47,21 @@ class AgentLimits:
 
 # Token diet, lot 1: a tool added and not called during this many requests leaves the request at a compaction.
 MAX_IDLE_REQUESTS = 3
+
+# Lot 3 of the token diet: the history a provider gets before the compaction steps in. Remote providers: half of the
+# 120,000 characters of before. Ollama: what the 32k step leaves once the instructions and the tools are in (a larger
+# step loads the model again), 20,000 at least.
+REMOTE_HISTORY = 60_000
+MIN_LOCAL_HISTORY = 20_000
+
+
+def history_budget(provider_kind: str, fixed_chars: int) -> int:
+    """Characters of history for ``provider_kind``, the instructions and tools taking ``fixed_chars``."""
+    if provider_kind != "ollama":
+        return REMOTE_HISTORY
+    from .providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS
+    return max(MIN_LOCAL_HISTORY, int((CONTEXT_STEPS[1] - ANSWER_ROOM) * CHARS_PER_TOKEN) - fixed_chars)
+
 
 TURNS_LEFT_NOTE = ("{} model turns left for this request: finish what is under way and answer now. If something "
                    "cannot be done in time, say what is left.")
@@ -110,6 +125,7 @@ class AgentSession:
         self.usage = Usage()
         # Requests summed up so far, to say so in the interface.
         self.summarized = 0
+        self.rewritten = False
 
     @property
     def messages(self) -> Tuple[Message, ...]:
@@ -125,17 +141,26 @@ class AgentSession:
         """The tools ``next_request`` offers, in their order."""
         return self._tools
 
-    def add_user_text(self, text: str, context: str = "") -> None:
+    def add_user_text(self, text: str, context: Union[str, Callable[[bool], str]] = "") -> None:
         """Start a new request of the user; ``context`` (the state of the project) follows it in the same message.
 
         A conversation past ``max_history_chars`` first loses its oldest requests, summed up in their place.
         """
+        first = not self._messages
         self._messages = [_without_images(message) for message in self._messages]
         writes = [tool.name for tool in self._tools if not tool.read_only]
+        trimmed = 0
+        if sum(_size(message) for message in self._messages) > self._limits.max_history_chars:
+            # Lot 3: the results of old requests go first; requests are summed up only if that is not enough.
+            self._messages, trimmed = trim_results(self._messages)
         self._messages, summarized = compact(self._messages, self._limits.max_history_chars, writes)
         self.summarized += summarized
+        # Lot 3: the history was rewritten; the next context carries the whole state again.
+        self.rewritten = bool(summarized or trimmed)
+        if callable(context):  # the whole state at the first request and after a rewrite, what changed otherwise
+            context = context(first or self.rewritten)
         self._requests += 1
-        self.dropped = self._drop_idle() if summarized else ()
+        self.dropped = self._drop_idle() if self.rewritten else ()
         self._request_start = len(self._messages)
         parts = (TextPart(text),) + ((TextPart(context),) if context else ())
         self._messages.append(Message(ROLE_USER, parts))

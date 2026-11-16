@@ -10,6 +10,7 @@ import logging
 import math
 from typing import Any, Dict, List, Optional, Set
 
+from ...core.agent.field_rows import field_row
 from ...core.agent.sql_guard import expression_problem, filter_problem, quoted_identifiers
 from ...core.domain.layer_kind import LayerKind
 from ..qgis.feature_count import exact_feature_count, features_to_read, note_trial
@@ -254,8 +255,7 @@ def sql_dialect(layer) -> str:
 def _vector_details(layer) -> Dict[str, Any]:
     from qgis.core import QgsWkbTypes
     stored = _provider_field_names(layer)
-    fields = [{'name': item.name(), 'type': item.typeName(), 'alias': item.alias() or '',
-               'filterable': item.name().lower() in stored}
+    fields = [field_row(item.name(), item.typeName(), item.alias() or '', item.name().lower() in stored)
               for item in list(layer.fields())[:MAX_FIELDS]]
     count = _safe(lambda: exact_feature_count(layer))  # featureCount() of a filtered GeoPackage can ignore the filter
     return {'fields': fields, 'feature_count': -1 if count is None else count,

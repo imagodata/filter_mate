@@ -18,7 +18,7 @@ logger = logging.getLogger("FilterMate.agent")
 
 Handler = Callable[[Dict[str, Any]], Any]
 
-MAX_RESULT_CHARS = 20_000
+MAX_RESULT_CHARS = 8_000  # lot 3 of the token diet (20,000 before): the truncated mark says how to ask the rest
 DECLINED = "The user declined this action. Nothing was done; do not try again unless they ask."
 # A tool of a connector the conversation has not loaded (the model remembers it from an earlier one, or guesses).
 # A tool of the index not added yet (core/agent/families.py, token diet lot 1).

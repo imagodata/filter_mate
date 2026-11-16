@@ -1235,7 +1235,7 @@ def main(introspection):
 
     # Virtual fields exist for QGIS only: the SQL of the source cannot test them.
     virtual_index = gpkg.addExpressionField('"pop" * 2', QgsField("double_pop", QVariant.Int))
-    fields = {item["name"]: item["filterable"] for item in introspection.describe_layer("communes")["fields"]}
+    fields = {item["name"]: item.get("filterable", True) for item in introspection.describe_layer("communes")["fields"]}
     check("virtual field is not filterable", fields["double_pop"] is False and fields["pop"] is True, fields)
     virtual = introspection.preview_filter("communes", '"double_pop" > 15')
     check("virtual field is refused by preview", virtual["valid"] is False and "double_pop" in virtual["error"], virtual)

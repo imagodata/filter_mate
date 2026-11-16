@@ -19,6 +19,8 @@ MAX_NAMES = 5
 HEADER = ("Project when this request was sent (for reference; list_layers, describe_layer and filter_state give "
           "the details):")
 CHANGES_HEADER = "Changed in QGIS since your last answer (by the user, or another application):"
+# Token diet, lot 3: a request after the first sends what changed only, or this line.
+UNCHANGED = "Project unchanged since the last request."
 # Two extents closer than this share of their size are the same view.
 _SAME_VIEW = 1e-6
 
@@ -178,3 +180,13 @@ def project_summary(layers: Iterable[Mapping[str, Any]], selections: Iterable[Ma
         if changes:
             lines.extend([CHANGES_HEADER] + changes)
     return "\n".join(lines)
+
+
+def project_update(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapping[str, Any]] = (),
+                   view: Optional[Mapping[str, Any]] = None, before: Optional[Mapping[str, Any]] = None) -> str:
+    """What changed in the project since ``before`` (``project_state`` when the last answer ended), or ``UNCHANGED``:
+    the request after the first, whose history holds the whole state already (token diet, lot 3)."""
+    rows = list(layers)
+    chosen = [item for item in selections if isinstance(item, Mapping)]
+    changes = project_changes(before or {}, project_state(rows, chosen, view or {}))
+    return "\n".join([CHANGES_HEADER] + changes) if changes else UNCHANGED

@@ -236,8 +236,8 @@ def build_server(client: FilterMateClient) -> Any:
         many), labels (the field labelled), opacity, min_scale and max_scale (it only shows between these scale
         denominators)), and by kind: joins [{layer, field, target_field, prefix}] and relations [{name, role (parent
         or child), layer, fields}] for a vector layer, with sql_dialect (postgresql, sqlite, ogr_sql or qgis_expression: the language of
-        its filter) and fields [{name, type, alias, filterable}] for a vector layer (filterable is
-        false for virtual and joined fields, which a filter expression cannot test); bands [{band, name, classes}]
+        its filter) and fields [{name, type, alias?, filterable?}] for a vector layer (alias only when the field has
+        one; filterable: false only on a virtual or joined field, which a filter expression cannot test); bands [{band, name, classes}]
         and pixel_size for a raster, classes [{value, label}] only on a paletted band; attributes [name] for a point
         cloud.
         """
@@ -249,7 +249,7 @@ def build_server(client: FilterMateClient) -> Any:
         field: Annotated[str, Field(min_length=1, max_length=1000, description="Field name, from describe_layer")],
         search: Annotated[str, Field(max_length=200, description=(
             "Text fields: only values containing this text, ignoring case"))] = "",
-        limit: Annotated[int, Field(ge=1, le=200, description="Maximum number of values returned")] = 50,
+        limit: Annotated[int, Field(ge=1, le=200, description="Maximum number of values returned")] = 20,
     ) -> Dict[str, Any]:
         """Distinct values a field really takes, among the features the layer shows now (its filter applies).
 
@@ -271,7 +271,7 @@ def build_server(client: FilterMateClient) -> Any:
             "Measure the geometries instead of a field: length of lines (perimeter of polygons) in metres, or "
             "area of polygons in square metres"))] = "",
         selected_only: Annotated[bool, Field(description="Only the selected features")] = False,
-        limit: Annotated[int, Field(ge=1, le=100, description="At most this many groups, the largest first")] = 20,
+        limit: Annotated[int, Field(ge=1, le=100, description="At most this many groups, the largest first")] = 10,
     ) -> Dict[str, Any]:
         """Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group.
 
@@ -288,7 +288,7 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=ToolAnnotations(title="Sample of features", readOnlyHint=True, openWorldHint=False))
     async def sample_features(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
-        limit: Annotated[int, Field(ge=1, le=20, description="At most this many features")] = 5,
+        limit: Annotated[int, Field(ge=1, le=20, description="At most this many features")] = 3,
         fields: Annotated[Optional[List[Annotated[str, Field(min_length=1, max_length=1000)]]], Field(
             max_length=50, description="Only these fields; the first 50 fields by default")] = None,
         expression: Annotated[str, Field(max_length=100_000, description=(

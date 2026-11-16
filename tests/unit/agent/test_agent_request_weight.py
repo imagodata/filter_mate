@@ -87,7 +87,7 @@ def test_conversation_runs_offline_and_cleanly(weight, monkeypatch):
     monkeypatch.setattr(socket.socket, "connect", refuse)
     run = weight.replay()
     assert run.errors == []
-    assert sorted({call.request for call in run.calls}) == list(range(1, 11))
+    assert sorted({call.request for call in run.calls}) == list(range(1, 14))
     assert run.skills_loaded == []  # lot 1: set_layer_style comes by use_tools, no skill loaded for it
     assert all(value == 0 for value in run.calls[0].prefix.values())
 
@@ -129,3 +129,15 @@ def test_a_rise_past_five_percent_fails(weight, monkeypatch):
     assert weight.main(["--conversation"]) == 1
     monkeypatch.setattr(weight, "REFERENCE", dict(reference, cost=cost / 1.04))
     assert weight.main(["--conversation"]) == 0
+
+
+def test_the_bench_project_is_like_a_real_one(weight):
+    """Lot 3 (2026-11-16): 14 layers like the network project of the user, notes and widgets, and requests that read
+    data: without them, sending less of the state and of the data would not show."""
+    project = weight.bench_project()
+    assert len(project.layers) == 14 and all(len(project.layers[name]["fields"]) == 12 for name in weight.EXTRA_LAYERS)
+    reads = [steps[0][0] for _text, steps in weight.CONVERSATION]
+    assert len(weight.CONVERSATION) == 13
+    assert {"describe_layer", "field_values", "sample_features"} <= set(reads)
+    context = weight.bench_context(project, None)
+    assert "Notes kept for this project" in context and "Widgets of the panel" in context
