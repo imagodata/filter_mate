@@ -11571,6 +11571,36 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>섹션 배치</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>헤더</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>패널이 섹션을 나열하는 방식</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>칩 레일</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>기본 상태: 스택마다 한 줄이며, 칩을 클릭하면 해당 섹션이 열리고 칩을 다른 위치로 끌 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>헤더를 위아래로 배치</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>각 섹션의 이름이 별도의 줄에 표시됩니다.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>헤더를 클릭하면 해당 섹션이 열립니다.</translation>

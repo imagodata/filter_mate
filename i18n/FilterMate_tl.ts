@@ -11571,6 +11571,36 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <translation>Saan ilalagay ang mga seksyon</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Mga header</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Paano inililista ng panel ang mga seksyon nito</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Isang bar ng mga chip</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Ang default: isang hanay bawat stack, kung saan nagbubukas ng seksyon ang pag-click sa isang chip at iniidrag ang chip sa ibang lugar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Mga header, isa sa ibabaw ng isa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Ang pangalan ng bawat seksyon sa sarili nitong linya.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Ang pag-click sa header ay magbubukas ng seksyon nito.</translation>

@@ -11571,6 +11571,36 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>Къде да са секциите</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Заглавия</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Как панелът изброява своите секции</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Лента от чипове</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>По подразбиране: един ред на стек, където щракване върху чип отваря неговата секция, а чипът се плъзга на друго място.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Заглавия, едно над друго</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Името на всяка секция на отделен ред.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Щракване върху заглавието отваря неговата секция.</translation>

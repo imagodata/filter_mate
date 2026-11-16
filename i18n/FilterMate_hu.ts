@@ -11571,6 +11571,36 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <translation>Hol legyenek a szakaszok</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Fejlécek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Hogyan sorolja fel a panel a szakaszait</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Chipek sávja</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Alapértelmezés: egy sor kötegenként, ahol egy chipre kattintva megnyílik a szakasza, a chipet pedig másik helyre lehet húzni.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Fejlécek egymás fölött</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Minden szakasz neve a saját sorában.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>A fejlécre kattintva megnyílik a szakasza.</translation>

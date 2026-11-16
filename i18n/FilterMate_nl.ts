@@ -11571,6 +11571,36 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <translation>Waar de secties komen</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Koppen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Hoe het paneel zijn secties toont</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Een balk met chips</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>De standaard: één rij per stapel, waar een klik op een chip de bijbehorende sectie opent en een chip naar een andere plek wordt gesleept.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Koppen, de ene boven de andere</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>De naam van elke sectie op een eigen regel.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Een klik op een kop opent de bijbehorende sectie.</translation>

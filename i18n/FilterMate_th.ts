@@ -11571,6 +11571,36 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <translation>ตำแหน่งของแต่ละส่วน</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>ส่วนหัว</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>วิธีที่แผงแสดงรายการส่วนของตน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>แถบชิป</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>ค่าเริ่มต้น: หนึ่งแถวต่อสแต็ก คลิกชิปเพื่อเปิดส่วนของชิปนั้น และลากชิปไปไว้ที่อื่นได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>ส่วนหัวซ้อนกันในแนวตั้ง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>ชื่อของแต่ละส่วนอยู่บนบรรทัดของตัวเอง</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>คลิกที่ส่วนหัวเพื่อเปิดส่วนนั้น</translation>
