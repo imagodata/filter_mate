@@ -734,6 +734,8 @@ Each entry was checked to answer without an account; `tests/qgis_headless/check_
     pip install -r requirements-mcp.txt
     python scripts/export_agent_tools.py
     python scripts/agent_request_weight.py     # what every tool weighs in a request of a local model
+    python scripts/agent_request_weight.py --conversation   # what a conversation of ten requests costs, call by
+                                                            # call, against the reference before the token diet
 
 A description is read at every request. With every tool offered to a local model (the families off), the
 instructions and the tools must hold in the 32k context Ollama is asked for: beyond, it asks for 64k, which
