@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import html
 import time
-from typing import Sequence, Tuple
+from typing import List, Sequence, Tuple
 
 from qgis.PyQt.QtCore import QByteArray, QCoreApplication, QEvent, QSize, Qt, QTimer, QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QFont, QTextOption
@@ -25,7 +25,7 @@ from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import (
-    KIND_CKAN, KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_POPULATION, KIND_WFS, KIND_WMS,
+    KIND_CKAN, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_WFS, KIND_WMS,
     KIND_WMTS, KIND_XYZ,
 )
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
@@ -37,7 +37,8 @@ from ...core.agent.providers.ollama_chat import (
     tags_url,
 )
 from ...core.agent.sources import (
-    KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
+    KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, SOURCE_GROUPS, all_sources,
+    custom_from_json, source_group,
     custom_to_json, make_source,
 )
 from ..styles.mockup_design import FONT_FAMILY, plugin_is_dark, render_icon, tokens
@@ -244,6 +245,15 @@ def level_detail(level: str) -> str:
         AUTONOMOUS: _tr("Exports into the export folder, layer removals and deletions run without a question too, and "
                         "not all of them can be undone. The network, connectors and code are still asked first."),
     }[level_or_default(level)]
+
+
+def source_group_titles() -> List[Tuple[str, str]]:
+    """The groups of the sources (core/agent/sources.py, source_group) with their titles, in their order: the Sources
+    tab of the settings and the menu of the panel."""
+    titles = {"open_data": _tr("Open data platforms"), "imagery": _tr("Satellite imagery"),
+              "basemaps": _tr("Basemaps"), "places": _tr("Place search"), "databases": _tr("Databases of QGIS"),
+              "connectors": _tr("MCP connectors")}
+    return [(key, titles[key]) for key in SOURCE_GROUPS]
 
 
 class AgentPanel(QFrame):
@@ -1476,14 +1486,7 @@ class AgentSettingsDialog(QDialog):
 
     def _fill_sources(self, enabled_ids) -> None:
         self.sources_tree.clear()
-        other = (KIND_MCP, KIND_STAC, KIND_ELEVATION, KIND_POPULATION, KIND_XYZ, KIND_GEOCODER, KIND_DATABASE)
-        groups = ((_tr("Open data platforms"), lambda source: source.kind not in other),
-                  # An elevation model and a population grid are read from satellites too: listed with the imagery.
-                  (_tr("Satellite imagery"), lambda source: source.kind in (KIND_STAC, KIND_ELEVATION, KIND_POPULATION)),
-                  (_tr("Basemaps"), lambda source: source.kind == KIND_XYZ),
-                  (_tr("Place search"), lambda source: source.kind == KIND_GEOCODER),
-                  (_tr("Databases of QGIS"), lambda source: source.kind == KIND_DATABASE),
-                  (_tr("MCP connectors"), lambda source: source.kind == KIND_MCP))
+        groups = [(title, lambda source, key=key: source_group(source) == key) for key, title in source_group_titles()]
         for title, belongs in groups:
             group = QTreeWidgetItem(self.sources_tree, [title.upper()])
             group.setFlags(Qt.ItemFlag.ItemIsEnabled)
