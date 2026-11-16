@@ -179,15 +179,19 @@ class FilterResultHandler:
         # This ensures the message reflects what backend was really used (e.g., OGR fallback)
         display_backend, is_fallback = self._determine_backend(task_parameters, provider_type)
 
-        # Handle filter history based on task type
+        # Handle filter history based on task type. 2026-11-16: a filter refused on every
+        # layer changed nothing, its entry would only repeat the previous state; a reset
+        # refused on some layer leaves it filtered, its history is kept.
+        refused = task_parameters.get('_apply_failures') or []
+        nothing_applied = bool(refused) and not task_parameters.get('_apply_applied')
         perf_mark_start("post_filter_history")
         if task_name == 'filter':
-            if self._push_filter_to_history:
+            if self._push_filter_to_history and not nothing_applied:
                 self._push_filter_to_history(source_layer, task_parameters,
                                              feature_count if feature_count is not None else -1,
                                              provider_type, layer_count)
         elif task_name == 'reset':
-            if self._clear_filter_history:
+            if self._clear_filter_history and not refused:
                 self._clear_filter_history(source_layer, task_parameters)
         perf_mark_end("post_filter_history")
 
@@ -198,9 +202,8 @@ class FilterResultHandler:
         # Show success message with actual backend used. 2026-11-16: not when a provider
         # refused filters (FinishedHandler noted them and showed the warning that lists
         # them): "Successfully removed filters" then contradicted it.
-        if task_parameters.get('_apply_failures'):
-            logger.info(f"Task '{task_name}': {len(task_parameters['_apply_failures'])} filter(s) refused, "
-                        "no success message")
+        if refused:
+            logger.info(f"Task '{task_name}': {len(refused)} filter(s) refused, no success message")
         else:
             self._show_task_completion_message(task_name, source_layer, display_backend, layer_count, is_fallback,
                                                feature_count=feature_count)

@@ -112,6 +112,7 @@ class FinishedHandler:
         task_bridge: Optional[Any],
         cleanup_safe_intersect_fn: Callable[[], None],
         cleanup_canceled_mv_fn: Optional[Callable[[], None]] = None,
+        restore_history_fn: Optional[Callable[[List[str]], None]] = None,
     ) -> Tuple[List[str], List, Optional[Any]]:
         """Handle task completion with cleanup and user notifications.
 
@@ -148,6 +149,8 @@ class FinishedHandler:
             cleanup_safe_intersect_fn: Function to cleanup safe_intersect layers.
             cleanup_canceled_mv_fn: For a canceled task: drops the materialized views it
                 created that nothing uses (instead of cleanup_mv_fn).
+            restore_history_fn: Puts back the filter history of the layers whose
+                filter the provider refused, as it was before the task (2026-11-16).
 
         Returns:
             Tuple of (cleared_warnings, cleared_pending_requests, cleared_ogr_source_geom)
@@ -180,13 +183,24 @@ class FinishedHandler:
 
         # Apply pending subset strings on main thread
         apply_failures: List[str] = []
+        refusals: List[Tuple[str, str, str]] = []
+        applied_count = 0
         if pending_subset_requests:
             applied_count = apply_pending_subset_requests(
                 pending_subset_requests,
                 safe_set_subset_fn,
                 failures=apply_failures,
+                refusals=refusals,
             )
             logger.info(f"Applied {applied_count} pending subset requests")
+            # 2026-11-16: run() already wrote the history of the refused layers (entry
+            # added, last one or all deleted) while they keep their previous filter.
+            refused_layer_ids = [layer_id for layer_id, _name, _reason in refusals if layer_id]
+            if refused_layer_ids and restore_history_fn is not None:
+                try:
+                    restore_history_fn(refused_layer_ids)
+                except Exception as e:  # catch-all safety net: the history must not break finished()
+                    logger.warning(f"Filter history of the refused layers not put back: {e}")
 
             # E6: Delegated canvas refresh to task_completion_handler
             schedule_canvas_refresh(
@@ -201,11 +215,17 @@ class FinishedHandler:
         # filters in place (it dropped the MVs the filtered layers used).
         # 2026-10-17: not after a canceled reset / unfilter either: its subsets were not
         # applied, the layers still read those views.
+        # 2026-11-16: nor when a provider refused some of them: the cleanup forgets the views
+        # of every layer of the task, the refused ones still read theirs (their references
+        # stay; the next unfilter / reset that goes through drops them).
         if is_canceled_fn():
             if cleanup_canceled_mv_fn is not None:
                 cleanup_canceled_mv_fn()
         elif task_action in ('reset', 'unfilter'):
-            cleanup_mv_fn()
+            if refusals:
+                logger.info(f"Views kept: the filter of {len(refusals)} layer(s) was refused")
+            else:
+                cleanup_mv_fn()
 
         # E6: Delegate memory layer cleanup to task_completion_handler
         if ogr_source_geom is not None:
@@ -215,6 +235,7 @@ class FinishedHandler:
         # (FilterResultHandler): no "Successfully removed filters" after them.
         if isinstance(task_parameters, dict):
             task_parameters['_apply_failures'] = list(apply_failures)
+            task_parameters['_apply_applied'] = applied_count
 
         # Handle result messages
         self._handle_result_messages(
@@ -234,7 +255,7 @@ class FinishedHandler:
 
         # 2026-10-17: a filter the provider refused is not a success
         if apply_failures:
-            self._display_apply_failures(apply_failures, iface)
+            self._display_apply_failures(refusals, iface)
 
         self._release_task_caches(task_parameters)
 
@@ -533,9 +554,20 @@ class FinishedHandler:
             )
 
     @staticmethod
-    def _display_apply_failures(failures: List[str], iface: Any) -> None:
-        """Message bar warning for the filters the providers refused (2026-10-17)."""
-        shown = "; ".join(failures[:3]) + (f" (+{len(failures) - 3})" if len(failures) > 3 else "")
+    def _display_apply_failures(refusals: List[Tuple[str, str, str]], iface: Any) -> None:
+        """Message bar warning for the filters the providers refused (2026-10-17).
+
+        2026-11-16: the layers are grouped by reason: a server gone repeated the same
+        long reason once per layer ("Cables: connection lost…; Conduites: connection lost…").
+        """
+        groups: Dict[str, List[str]] = {}
+        for _layer_id, name, reason in refusals:
+            groups.setdefault(reason, []).append(name)
+        parts = []
+        for reason, names in list(groups.items())[:3]:
+            listed = ", ".join(names[:3]) + (f" (+{len(names) - 3})" if len(names) > 3 else "")
+            parts.append(f"{listed}: {reason}")
+        shown = "; ".join(parts) + (f" (+{len(groups) - 3})" if len(groups) > 3 else "")
         message = QCoreApplication.translate(
             "FinishedHandler", "Filter not applied, previous filter kept: {0}"
         ).format(shown)

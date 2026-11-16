@@ -58,6 +58,11 @@ def _masked(text: str) -> str:
     return mask_sensitive_text(text)
 
 
+def _says_connection_lost(lines: List[str], no_result) -> bool:
+    return any(line.lower() in no_result or any(marker in line.lower() for marker in _CONNECTION_LOST_MARKERS)
+               for line in lines)
+
+
 def failure_reason(layer_error: str, server_error: str, provider_errors: List[str], postgres: bool,
                    translate: Callable[[str], str], no_result_texts=(_NO_RESULT,)) -> str:
     """One line saying why the filter was refused.
@@ -77,11 +82,8 @@ def failure_reason(layer_error: str, server_error: str, provider_errors: List[st
     no_result = {text.strip().lower() for text in no_result_texts if text}
     lines = [_first_line(error) for error in provider_errors]
     lines = [line for line in lines if line]
-    if postgres:
-        if any(line.lower() in no_result for line in lines):
-            return translate(CONNECTION_LOST)
-        if any(marker in line.lower() for line in lines for marker in _CONNECTION_LOST_MARKERS):
-            return translate(CONNECTION_LOST)
+    if postgres and _says_connection_lost(lines, no_result):
+        return translate(CONNECTION_LOST)
     for line in lines:
         if line.lower() not in no_result:
             return _masked(line)
@@ -121,6 +123,28 @@ def _provider_errors(layer) -> List[str]:
         return [error for error in list(provider.errors()) if isinstance(error, str)]
     except Exception:  # catch-all safety net: a deleted layer or provider says nothing
         return []
+
+
+def provider_error_count(layer) -> int:
+    """How many errors the provider of the layer holds (the start of a watch)."""
+    return len(_provider_errors(layer))
+
+
+def postgres_connection_lost(layer, errors_before: int) -> bool:
+    """The errors a postgres provider added since ``errors_before`` say its connection is gone.
+
+    2026-11-16: the diagnostics of a refused subset then skip what opens a connection again
+    (retry after reloadData, feature count, psycopg2 probe): about 30 s per layer when the
+    host no longer answers.
+    """
+    try:
+        if layer.providerType() != 'postgres':
+            return False
+    except Exception:  # catch-all safety net: a deleted layer
+        return False
+    lines = [line for line in (_first_line(error) for error in _provider_errors(layer)[errors_before:]) if line]
+    no_result = {text.strip().lower() for text in _no_result_texts() if text}
+    return _says_connection_lost(lines, no_result)
 
 
 class SubsetFailureWatch:

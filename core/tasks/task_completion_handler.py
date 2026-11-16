@@ -241,6 +241,17 @@ class _NoWatch:
         return message if isinstance(message, str) and message.strip() else 'Unknown error'
 
 
+def _note_refused(refusals: Optional[List[Tuple[str, str, str]]], layer: Any, reason: str) -> None:
+    """Add (id, name, reason) of a layer whose filter was refused (a deleted layer: no id)."""
+    if refusals is None:
+        return
+    try:
+        layer_id, name = (layer.id(), layer.name()) if layer is not None else ('', 'Unknown')
+    except (RuntimeError, AttributeError):
+        layer_id, name = '', 'Unknown'
+    refusals.append((layer_id, name, reason))
+
+
 def _subset_failure_watch(layer: Any):
     """A SubsetFailureWatch for the layer (see adapters/qgis/subset_failure_reason.py)."""
     try:
@@ -255,6 +266,7 @@ def apply_pending_subset_requests(
     pending_requests: List[Tuple[Any, str]],  # List[Tuple[QgsVectorLayer, str]]
     safe_set_subset_fn: Callable[[Any, str], bool],  # Callable[[QgsVectorLayer, str], bool]
     failures: Optional[List[str]] = None,
+    refusals: Optional[List[Tuple[str, str, str]]] = None,
 ) -> int:
     """
     Apply pending subset string requests on main thread.
@@ -268,6 +280,9 @@ def apply_pending_subset_requests(
         failures: When given, receives one "<layer>: <error>" line per filter
             the provider refused (2026-10-17: shown in the message bar
             instead of a silent success)
+        refusals: When given, receives (layer id, layer name, reason) per refused
+            filter (2026-11-16: its filter history is put back, the warning groups
+            the layers by reason)
 
     Returns:
         int: Number of successfully applied filters
@@ -525,6 +540,7 @@ def apply_pending_subset_requests(
                     )
                     if failures is not None:
                         failures.append(f"{layer.name()}: {error_msg}")
+                    _note_refused(refusals, layer, error_msg)
 
         except Exception as e:  # catch-all safety net: subset application must not crash finished()
             import traceback
@@ -536,6 +552,7 @@ def apply_pending_subset_requests(
             )
             if failures is not None:
                 failures.append(f"{layer.name() if layer else 'Unknown'}: {e}")
+            _note_refused(refusals, layer, str(e))
 
         # Track last-touched DB path so the next iteration knows whether the
         # lock-error retry applies (same shared SQLite file).

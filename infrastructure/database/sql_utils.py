@@ -87,6 +87,22 @@ except ImportError:  # imported from the repository root (tests)
     from filtermate_core.sql.identifiers import sanitize_sql_identifier  # noqa: F401
 
 
+def _provider_error_count(layer) -> int:
+    try:
+        from ...adapters.qgis.subset_failure_reason import provider_error_count
+    except ImportError:
+        return 0
+    return provider_error_count(layer)
+
+
+def _postgres_connection_lost(layer, errors_before: int) -> bool:
+    try:
+        from ...adapters.qgis.subset_failure_reason import postgres_connection_lost
+    except ImportError:
+        return False
+    return postgres_connection_lost(layer, errors_before)
+
+
 def _layer_count_label(layer) -> str:
     """Return a count label for diagnostics: features (vector) or points (point cloud).
 
@@ -286,15 +302,19 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
 
             # FIX 2026-02-11: Detach FeaturePickerWidget before subset change to prevent crash
             _t_phase = _perf.perf_counter()
+            errors_before = _provider_error_count(layer)
             with feature_picker_guard(layer):
                 result = layer.setSubsetString(subset_expression)
+            # 2026-11-16: the server gone, every step below that opens a connection again
+            # waits for it (retry, count, probe): skipped, the refusal says why on its own.
+            connection_lost = not result and _postgres_connection_lost(layer, errors_before)
 
             # FIX v4.9.0: Retry for PostgreSQL layers after connection reset.
             # When a prior complex PostGIS EXISTS query fails, the QGIS PostgreSQL provider
             # may leave its internal connection in an aborted-transaction state, causing
             # all subsequent setSubsetString() calls to fail even with valid expressions.
             # reloadData() forces a fresh connection so the retry has a clean state.
-            if not result and layer.providerType() == 'postgres':
+            if not result and layer.providerType() == 'postgres' and not connection_lost:
                 logger.info(
                     f"[SQL] 🔄 setSubsetString failed for PostgreSQL layer '{layer.name()}' "
                     "- retrying once after reloadData()..."
@@ -317,7 +337,10 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                     f"cast {_cast_ms:.0f} ms, setSubsetString {_set_ms:.0f} ms)"
                 )
 
-            if not result:
+            if not result and connection_lost:
+                logger.warning(f"setSubsetString returned False for layer {layer.name()}: connection to the "
+                               "PostgreSQL server lost (no retry, count or probe)")
+            elif not result:
                 logger.warning(f"setSubsetString returned False for layer {layer.name()}")
                 # Additional diagnostics for failure
                 logger.warning("[SQL] ❌ FAILED - Diagnostics:")

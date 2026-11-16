@@ -43,8 +43,9 @@ def handler(monkeypatch):
     return handler
 
 
-def _params(failures):
-    return {"infos": {"layer_provider_type": "postgresql"}, "task": {"layers": []}, "_apply_failures": failures}
+def _params(failures, applied=0):
+    return {"infos": {"layer_provider_type": "postgresql"}, "task": {"layers": []}, "_apply_failures": failures,
+            "_apply_applied": applied}
 
 
 def test_refused_filters_give_no_success_message(handler):
@@ -55,3 +56,34 @@ def test_refused_filters_give_no_success_message(handler):
 def test_applied_filters_give_the_success_message(handler):
     handler.handle_task_completion("unfilter", MagicMock(), _params([]))
     handler._show_task_completion_message.assert_called_once()
+
+
+@pytest.fixture
+def history():
+    return types.SimpleNamespace(push=MagicMock(), clear=MagicMock())
+
+
+def _with_history(handler, history):
+    handler._push_filter_to_history = history.push
+    handler._clear_filter_history = history.clear
+    return handler
+
+
+def test_a_filter_refused_everywhere_pushes_no_entry(handler, history):
+    _with_history(handler, history).handle_task_completion("filter", MagicMock(), _params(["Cables: lost"], applied=0))
+    history.push.assert_not_called()
+
+
+def test_a_filter_refused_on_some_layers_pushes_the_real_state(handler, history):
+    _with_history(handler, history).handle_task_completion("filter", MagicMock(), _params(["Cables: lost"], applied=3))
+    history.push.assert_called_once()
+
+
+def test_a_refused_reset_keeps_the_history(handler, history):
+    _with_history(handler, history).handle_task_completion("reset", MagicMock(), _params(["Cables: lost"], applied=2))
+    history.clear.assert_not_called()
+
+
+def test_a_reset_that_went_through_clears_the_history(handler, history):
+    _with_history(handler, history).handle_task_completion("reset", MagicMock(), _params([], applied=3))
+    history.clear.assert_called_once()

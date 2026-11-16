@@ -286,6 +286,56 @@ class TestSafeSetSubsetStringDiagnostics:
         assert fake_probe.closed_calls == 1
 
 
+class _LostPgLayer(_FailingPgLayer):
+    """The server gone: the provider adds "no result buffer" at each refused setSubsetString."""
+
+    def __init__(self):
+        self.errors, self.reloads, self.counts = [], 0, 0
+        self.provider = types.SimpleNamespace(error=lambda: None, errors=lambda: list(self.errors),
+                                              reloadData=self._reload)
+
+    def _reload(self):
+        self.reloads += 1
+
+    def dataProvider(self):
+        return self.provider
+
+    def featureCount(self):
+        self.counts += 1
+        return 0
+
+    def setSubsetString(self, expression):
+        self.errors.append("no result buffer")
+        return False
+
+
+class TestLostConnectionDiagnostics:
+    """2026-11-16: the server gone, the retry, the count and the probe each waited for it (~30 s a layer)."""
+
+    def test_nothing_reconnects(self, monkeypatch):
+        import importlib.util
+        import pathlib
+        connection = _FakeConnection()
+        for name in ("filter_mate", "filter_mate.infrastructure", "filter_mate.adapters", "filter_mate.adapters.qgis"):
+            monkeypatch.setitem(sys.modules, name, types.ModuleType(name))
+        utils = types.ModuleType("filter_mate.infrastructure.utils")
+        utils.get_datasource_connexion_from_layer = lambda layer: (connection, None)
+        monkeypatch.setitem(sys.modules, "filter_mate.infrastructure.utils", utils)
+        path = pathlib.Path(__file__).resolve().parents[3] / "adapters" / "qgis" / "subset_failure_reason.py"
+        spec = importlib.util.spec_from_file_location("filter_mate.adapters.qgis.subset_failure_reason", path)
+        reasons = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(reasons)
+        monkeypatch.setitem(sys.modules, "filter_mate.adapters.qgis.subset_failure_reason", reasons)
+        from tests.unit.extensions.plugin_alias import alias_package
+        alias_package(monkeypatch, "infrastructure.database.sql_utils")
+        from infrastructure.database import sql_utils
+
+        layer = _LostPgLayer()
+        assert sql_utils.safe_set_subset_string(layer, "") is False
+        assert (layer.reloads, layer.counts, connection.closed_calls) == (0, 0, 0)
+        assert layer.errors == ["no result buffer"]  # one attempt only
+
+
 class TestMaskUriSecrets:
     """The narrow variant for saved data: connection-string passwords only."""
 

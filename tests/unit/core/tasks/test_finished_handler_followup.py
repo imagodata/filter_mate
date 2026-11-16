@@ -62,7 +62,7 @@ FinishedHandler = _load().FinishedHandler
 
 def test_refused_filters_reach_the_message_bar():
     iface = MagicMock()
-    FinishedHandler._display_apply_failures(["troncon_de_route: no such table: json_each"], iface)
+    FinishedHandler._display_apply_failures([("t_id", "troncon_de_route", "no such table: json_each")], iface)
     iface.messageBar.return_value.pushWarning.assert_called_once()
 
 

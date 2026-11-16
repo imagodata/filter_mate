@@ -427,6 +427,12 @@ class TestRefusedFilterReason:
         assert applied == 0
         assert failures == [f"Cables: {self.reasons.CONNECTION_LOST}"]
 
+    def test_the_refused_layers_are_named_by_id(self):
+        layer, refuse = self._refused(['no result buffer'])
+        refused = []
+        apply_pending_subset_requests([(layer, '')], refuse, failures=[], refusals=refused)
+        assert refused == [("Cables_id", "Cables", self.reasons.CONNECTION_LOST)]
+
     def test_never_an_empty_reason(self):
         layer, refuse = self._refused([])
         failures = []

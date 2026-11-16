@@ -70,13 +70,18 @@ else:
     raise SystemExit('FAIL   the server was not stopped')
 
 failures = []
+started = time.perf_counter()
 applied = apply_pending_subset_requests([(layer, '') for layer in layers], safe_set_subset_string, failures=failures)
-print(f'applied={applied} failures={failures}', flush=True)
+per_layer = (time.perf_counter() - started) / len(layers)
+print(f'applied={applied} failures={failures} per_layer={per_layer:.1f} s', flush=True)
 results = {
     'the unfilters are refused': applied == 0,
     'the previous filters are kept': all(layer.subsetString() == '"id" > 10' for layer in layers),
     'each refusal names the lost connection': failures == [f'Cables: {CONNECTION_LOST}',
                                                            f'Conduites: {CONNECTION_LOST}'],
+    # 2026-11-16: no retry, count or probe after a lost connection (about 30 s a layer before,
+    # QGIS's own reset of its connection is what remains)
+    'a refusal takes under 15 s a layer': per_layer < 15,
 }
 for name, ok in results.items():
     print(f"{'PASS' if ok else 'FAIL'}   {name}", flush=True)
