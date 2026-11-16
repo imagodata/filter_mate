@@ -41,10 +41,11 @@ Controller = chat_controller.AgentChatController
 
 GOLDEN = {  # (length, sha256 of the UTF-8 text); 2026-11-16, lot 1 of the token diet: the instructions without the
     # paragraphs that described a tool one by one (12,076 characters before for the default); then the way of working
-    # starts from the state of the project sent, not from list_layers and map_context (review of lot 1)
-    "default": (6366, "e557fe3f8022b29122680ebf7fb1beecef7b7e83c1493fb012455e15c3b4f735"),
-    "no_values_local": (6850, "e6d1c5d92221d6c2500b1947530a9512e09e2d179fac6eda4bb9b783cbab5bfc"),
-    "every_source": (6942, "855ff10544b9b01388d99d5f28dbca4a1576f95e19b335e75f2ff3fb033e97e2"),
+    # starts from the state of the project sent, not from list_layers and map_context (review of lot 1); lot 2: the
+    # sources not ticked in one paragraph, a shorter way of working
+    "default": (3967, "ac66493f8d77b6b7ce8fb05c3aead3d844827de9c21fdbc1fc61a00f1f1476a3"),
+    "no_values_local": (4451, "47ec0e5db03870f5bcdcc5c3e7ef8a1bb79b17d93f6101adc6c2cde34e720dda"),
+    "every_source": (5515, "4aaaf0d4913f05573a9b7a5849b272134ce2ac1befd2fdc95f1478b4f738e723"),
 }
 _EVERY = tuple(source.id for source in sources.BUILT_IN)
 CONFIGS = {

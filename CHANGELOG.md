@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### AGENT (experimental)
+
+- **Shorter requests.** The tools of the agent and its instructions say the same in fewer words, the rare cases moved to the skill of their task, and the sources you did not tick are named in one paragraph: a conversation of ten requests costs 29 % less on the bench, and its largest request is a quarter lighter.
+
 ## [5.1.1] - 2026-11-16
 
 The fixes of a review of 5.1.0, and what was merged since. The free quota of the agent is removed: AGENT works with
