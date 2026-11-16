@@ -53,8 +53,8 @@ def check(label, condition, detail=""):
 
 
 def wait(condition, seconds=10.0):
-    deadline = time.time() + seconds
-    while time.time() < deadline:
+    deadline = time.monotonic() + seconds
+    while time.monotonic() < deadline:
         QCoreApplication.processEvents()
         if condition():
             return True
@@ -369,46 +369,48 @@ def check_hostile_connector():
 
     dripping = connection("/drip")
     dripping.timeout_ms = 800
-    started = time.time()
+    started = time.monotonic()
     try:
         dripping.list_tools()
         check("hostile: a dripping stream is cut", False)
     except McpError:
-        check("hostile: a dripping stream is cut", time.time() - started < 3, time.time() - started)
+        check("hostile: a dripping stream is cut", time.monotonic() - started < 3, time.monotonic() - started)
 
-    started = time.time()
+    started = time.monotonic()
     try:
         connection("/huge").list_tools()
         check("hostile: an endless answer is cut", False)
     except McpError as exc:
-        check("hostile: an endless answer is cut", "too much" in str(exc) and time.time() - started < 15, (str(exc), time.time() - started))
+        check("hostile: an endless answer is cut", "too much" in str(exc) and time.monotonic() - started < 15, (str(exc), time.monotonic() - started))
 
-    started = time.time()
+    started = time.monotonic()
     connection("/open").list_tools()
-    check("hostile: an answered stream that stays open does not hold QGIS", time.time() - started < 2, time.time() - started)
+    check("hostile: an answered stream that stays open does not hold QGIS", time.monotonic() - started < 2, time.monotonic() - started)
 
     # 2026-11-14: one connector after the other, each that stalled or was down was waited for in turn.
+    # Durations are read on time.monotonic(): under load the wall clock of a container is set again, and a wait of two
+    # seconds read -0.01 s on time.time() (2026-11-16, latest, with other benches and a local model running).
     from filter_mate.adapters.agent.bounded_http import BoundedReply, fetch_together
     from filter_mate.adapters.agent.mcp_connection import list_tools_together
     from filter_mate.core.agent.mcp_client import McpTimeout
     down = McpConnection(make_source("http://127.0.0.1:9/mcp", "mcp", "Down"))
-    started = time.time()
+    started = time.monotonic()
     found = list_tools_together([connection("/slow"), down, connection("/slow"), connection("/ok")])
-    took = time.time() - started
+    took = time.monotonic() - started
     check("together: slow connectors are waited for at once, one that is down beside them",
           [isinstance(item, McpError) for item in found] == [False, True, False, False] and 1.7 < took < 3.2
           and all(len(item) == 2 for item in found if not isinstance(item, McpError)), (found, took))
     plan.pop("stalled", None)
     seen.clear()
-    started = time.time()
+    started = time.monotonic()
     found = list_tools_together([connection("/stall")], timeouts_ms=(500, 5000))
-    took = time.time() - started
+    took = time.monotonic() - started
     check("together: a connector that stalled once is tried again and answers",
           not isinstance(found[0], McpError) and sum(item[1] == "initialize" for item in seen) == 2 and took < 3,
           (found, seen, took))
     found = list_tools_together([connection("/drip")], timeouts_ms=(300, 600))
     check("together: one that never answers ends as too long, after two tries", isinstance(found[0], McpTimeout), found)
-    started = time.time()
+    started = time.monotonic()
     body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "initialize"}).encode()
     replies = fetch_together([{"url": base + "/slow", "body": body}, {"url": "http://127.0.0.1:9/x"},
                               {"url": base + "/drip", "body": json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}).encode(), "timeout_ms": 400},
@@ -416,17 +418,17 @@ def check_hostile_connector():
     check("together: each request keeps its own outcome and its own bounds",
           isinstance(replies[0], BoundedReply) and replies[0].status == 200 and isinstance(replies[1], HttpFailure)
           and str(replies[2]) == bounded_http_too_long() and isinstance(replies[3], BoundedReply)
-          and replies[3].content == b"ok" and time.time() - started < 1.5, (replies, time.time() - started))
+          and replies[3].content == b"ok" and time.monotonic() - started < 1.5, (replies, time.monotonic() - started))
 
     from filter_mate.adapters.agent import bounded_http
     timer_hits = []
     QTimer.singleShot(100, lambda: timer_hits.append(1) or bounded_http.abort_active())
-    started = time.time()
+    started = time.monotonic()
     try:
         fetch(base + "/drip", body=json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}).encode(), timeout_ms=5000)
         check("stop: it interrupts a wait", False)
     except HttpFailure:
-        check("stop: it interrupts a wait", time.time() - started < 2 and timer_hits, time.time() - started)
+        check("stop: it interrupts a wait", time.monotonic() - started < 2 and timer_hits, time.monotonic() - started)
     server.shutdown()
     server.server_close()
 
