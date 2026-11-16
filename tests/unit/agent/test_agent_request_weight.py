@@ -3,6 +3,7 @@
 and the start of it the cache of each provider can serve. No network."""
 import importlib.util
 import json
+import socket
 import sys
 from pathlib import Path
 
@@ -57,3 +58,47 @@ def test_estimated_cost(weight):
     second = weight.CallWeight(1, 400, 500, 100, 3, {"anthropic": 900, "openai": 900, "ollama": 900}, 16384)
     assert first.sent == 1000
     assert weight.estimated_cost([first, second]) == pytest.approx(1250 + 90 + 125)
+
+
+def test_conversation_runs_offline_and_cleanly(weight, monkeypatch):
+    def refuse(*args, **kwargs):
+        raise AssertionError("network")
+    monkeypatch.setattr(socket.socket, "connect", refuse)
+    run = weight.replay()
+    assert run.errors == []
+    assert sorted({call.request for call in run.calls}) == list(range(1, 11))
+    assert run.skills_loaded == ["cartography"]
+    assert all(value == 0 for value in run.calls[0].prefix.values())
+
+
+def test_within_a_request_the_whole_start_is_shared(weight):
+    calls = weight.replay().calls
+    compared = 0
+    for before, after in zip(calls, calls[1:]):
+        if after.request == before.request and after.tool_count == before.tool_count:
+            assert after.prefix["anthropic"] == before.sent - 1  # all of the call before but the "]" of its messages
+            compared += 1
+    assert compared
+
+
+def test_main_conversation_without_reference(weight, monkeypatch, capsys):
+    monkeypatch.setattr(weight, "REFERENCE", None)
+    assert weight.main(["--conversation"]) == 0
+    assert "estimated cost" in capsys.readouterr().out
+
+
+def test_a_reference_of_another_conversation_is_refused(weight, monkeypatch, capsys):
+    monkeypatch.setattr(weight, "REFERENCE", {"fingerprint": "000000000000", "cost": 1e12, "largest": 10 ** 9})
+    assert weight.main(["--conversation"]) == 1
+    assert "another conversation" in capsys.readouterr().out
+
+
+def test_a_rise_past_five_percent_fails(weight, monkeypatch):
+    run = weight.replay()
+    cost = weight.estimated_cost(run.calls)
+    largest = max(call.sent for call in run.calls)
+    reference = {"fingerprint": weight.fingerprint(), "cost": cost / 1.06, "largest": largest}
+    monkeypatch.setattr(weight, "REFERENCE", reference)
+    assert weight.main(["--conversation"]) == 1
+    monkeypatch.setattr(weight, "REFERENCE", dict(reference, cost=cost / 1.04))
+    assert weight.main(["--conversation"]) == 0
