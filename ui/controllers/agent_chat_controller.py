@@ -28,7 +28,7 @@ from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.domain.history_timeline import KIND_AGENT, card_target, changes_map
 from ...core.agent.chat_setup import (
     BASEMAP_TOOL, ELEVATION_TOOL, IMAGERY_TOOL, OPEN_DATA_TOOL, OSM_TOOL, PLACE_TOOL, POPULATION_TOOL, SERVICE_TOOL,
-    chat_instructions,
+    VALUES_TOOLS, chat_instructions, stable_order,
 )
 from ...core.agent.families import CORE
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
@@ -106,7 +106,6 @@ LIVE_DELAY_MS = 800  # a burst of saves (several layers, or the edits of a scrip
 LIVE_MAX_TRIES = 375  # while FilterMate or the chat works, or a target is edited: about five minutes, then the user is told
 
 # What reads attribute values: not offered when the user chose not to share them.
-VALUES_TOOLS = ("field_values", "layer_statistics", "sample_features", "identify_at")
 # The skill whose tools bring into the project what a connector finds (add_layer, add_service_layer...).
 DATA_SKILL = "open-data"
 ADD_FOUND_NOTE = ("add_layer adds a file this connector finds, by its https URL (geojson or gpkg first; a raster with "
@@ -1096,7 +1095,8 @@ class AgentChatController(QObject):
             left_out.add(PLACE_TOOL)
         if not databases or not for_chat:
             left_out.update((LIST_TABLES, ADD_TABLE))
-        tools = [tool for tool in chat_tools() if tool.name not in left_out]
+        # the tools a setting brings after the others (lot 4 of the token diet: the start stays alike for the cache)
+        tools = stable_order([tool for tool in chat_tools() if tool.name not in left_out])
         offered = {tool.name for tool in tools}
         skill_approved = skill_declined = None
         try:  # the skills of the profile and of the project folder, read again (the project may have changed)

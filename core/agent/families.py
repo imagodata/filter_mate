@@ -92,7 +92,7 @@ def use_tools_handler(available: Dict[str, ToolSpec], offer: Callable[[List[Tool
             raise ToolFailure("Not added: " + "; ".join(problems))
         unknown = [missing(name) for name in names if name not in available and name not in known]
         if unknown:
-            raise ToolFailure("Not added: " + "; ".join(unknown) + ". Use the names of the index at the end of the "
+            raise ToolFailure("Not added: " + "; ".join(unknown) + ". Use the names of the index of the "
                               "instructions.")
         added = [name for name in names if name in available]
         if added:

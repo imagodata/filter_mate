@@ -77,7 +77,8 @@ class TestAnthropicRequest:
         assert request.headers["x-api-key"] == SECRET
         assert request.headers["anthropic-version"] == "2026-10-21"
         assert body["stream"] is True and body["cache_control"] == {"type": "ephemeral"}
-        assert body["system"] == [{"type": "text", "text": "SYS"}]
+        # a breakpoint at the end of the instructions too (lot 4 of the token diet), of the same TTL
+        assert body["system"] == [{"type": "text", "text": "SYS", "cache_control": {"type": "ephemeral"}}]
         assert body["tools"][0]["input_schema"] == TOOL.input_schema
         assert not {"temperature", "top_p", "top_k", "tool_choice"} & set(body)
 

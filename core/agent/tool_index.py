@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """One line per tool, and the index of the tools a conversation may add with use_tools (token diet, lot 1).
 
-Plain Python. A request carries the core of the tools only (core/agent/families.py); the instructions end with this
+Plain Python. A request carries the core of the tools only (core/agent/families.py); the instructions hold this
 index, one line per tool the conversation may add: the model adds what a request needs in one use_tools call.
 """
 from __future__ import annotations
