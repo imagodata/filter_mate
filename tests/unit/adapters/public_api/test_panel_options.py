@@ -1,0 +1,176 @@
+# -*- coding: utf-8 -*-
+"""The options of FilterMate's panels read and set as the panel does (adapters/public_api/panel_options.py).
+
+The module is loaded for real under a synthetic package; the dock is a stand-in with what the module touches, the
+layers plain objects, and the few reads of QGIS (vector or not, an expression, a CRS, the formats, the project file)
+are replaced per test.
+"""
+import importlib
+import pathlib
+import sys
+import types
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+import pytest
+
+pytestmark = pytest.mark.unit
+
+_ROOT = pathlib.Path(__file__).resolve().parents[4]
+_PKG = "fm_panel_options_test"
+
+
+def _load():
+    for name, path in (("", _ROOT), (".core", _ROOT / "core"), (".core.agent", _ROOT / "core" / "agent"),
+                       (".core.domain", _ROOT / "core" / "domain"), (".adapters", _ROOT / "adapters"),
+                       (".adapters.public_api", _ROOT / "adapters" / "public_api")):
+        package = types.ModuleType(_PKG + name)
+        package.__path__ = [str(path)]
+        sys.modules[_PKG + name] = package
+    return importlib.import_module(f"{_PKG}.adapters.public_api.panel_options")
+
+
+panel_options = _load()
+
+
+class _Layer:
+    def __init__(self, layer_id, name, vector=True):
+        self._id, self._name, self.vector = layer_id, name, vector
+
+    def id(self):
+        return self._id
+
+    def name(self):
+        return self._name
+
+
+COMMUNES, ROUTES, MNT = _Layer("communes_a1", "communes"), _Layer("routes_c3", "routes"), _Layer("mnt_f6", "mnt", False)
+
+
+def _props():
+    return {"exploring": {"single_selection_expression": '"fid"', "multiple_selection_expression": '"fid"',
+                          "custom_selection_expression": '"fid"', "current_exploring_groupbox": "single_selection",
+                          "is_tracking": False, "is_linking": False, "is_selecting": False},
+            "filtering": {"has_layers_to_filter": False, "layers_to_filter": [], "has_buffer_value": False,
+                          "buffer_value": 0.0}}
+
+
+@pytest.fixture
+def project():
+    layers = {layer.id(): layer for layer in (COMMUNES, ROUTES, MNT)}
+    return SimpleNamespace(mapLayers=lambda: dict(layers), mapLayer=layers.get)
+
+
+@pytest.fixture
+def dock():
+    exporting = {"HAS_LAYERS_TO_EXPORT": False, "LAYERS_TO_EXPORT": [], "HAS_DATATYPE_TO_EXPORT": False,
+                 "DATATYPE_TO_EXPORT": "GPKG", "BATCH_ZIP": False}
+    return SimpleNamespace(
+        widgets_initialized=True, current_layer=None,
+        PROJECT_LAYERS={COMMUNES.id(): _props(), ROUTES.id(): _props()},
+        settingLayerVariable=MagicMock(), _synchronize_layer_widgets=MagicMock(),
+        _reset_exploring_button_states=MagicMock(), _reset_filtering_button_states=MagicMock(),
+        project_props={"EXPORTING": exporting}, CONFIG_DATA={"CURRENT_PROJECT": {"EXPORTING": exporting}},
+        setProjectVariablesEvent=MagicMock(), set_exporting_properties=MagicMock())
+
+
+@pytest.fixture(autouse=True)
+def qgis_reads(monkeypatch):
+    monkeypatch.setattr(panel_options, "_is_vector", lambda layer: layer.vector)
+    monkeypatch.setattr(panel_options, "_expression_problem",
+                        lambda layer, text: "unknown field nmo" if "nmo" in text else "")
+    monkeypatch.setattr(panel_options, "_crs_problem", lambda value: "")
+    monkeypatch.setattr(panel_options, "_formats", lambda: {"GPKG", "GeoJSON"})
+    monkeypatch.setattr(panel_options, "_project_saved", lambda: True)
+
+
+def test_current_layer_is_saved_and_shown(dock, project):
+    dock.current_layer = COMMUNES
+    answer = panel_options.set_layer_options(
+        dock, [{"layer": "communes", "exploring": {"single_selection_expression": '"nom"'}}], project=project)
+    assert dock.PROJECT_LAYERS[COMMUNES.id()]["exploring"]["single_selection_expression"] == '"nom"'
+    dock.settingLayerVariable.emit.assert_called_once_with(COMMUNES, [("exploring", "single_selection_expression")])
+    dock._synchronize_layer_widgets.assert_called_once_with(COMMUNES, dock.PROJECT_LAYERS[COMMUNES.id()])
+    dock._reset_exploring_button_states.assert_called_once()
+    assert answer == {"changed": [{"layer_name": "communes", "exploring": {"single_selection_expression": '"nom"'}}],
+                      "shown_in_panel": True}
+
+
+def test_other_layer_is_saved_not_shown(dock, project):
+    dock.current_layer = ROUTES
+    answer = panel_options.set_layer_options(dock, [{"layer": "communes", "exploring": {"is_tracking": True}}],
+                                             project=project)
+    dock.settingLayerVariable.emit.assert_called_once_with(COMMUNES, [("exploring", "is_tracking")])
+    dock._synchronize_layer_widgets.assert_not_called()
+    assert answer["shown_in_panel"] is False
+
+
+def test_nothing_written_when_one_layer_is_wrong(dock, project):
+    with pytest.raises(ValueError, match="communes: single_selection_expression: unknown field nmo"):
+        panel_options.set_layer_options(
+            dock, [{"layer": "routes", "exploring": {"is_tracking": True}},
+                   {"layer": "communes", "exploring": {"single_selection_expression": '"nmo"'}}], project=project)
+    dock.settingLayerVariable.emit.assert_not_called()
+    assert dock.PROJECT_LAYERS[ROUTES.id()]["exploring"]["is_tracking"] is False
+
+
+@pytest.mark.parametrize("layers, message", [
+    ([], "one layer at least"),
+    ([{"layer": "communes"}] * 51, "at most 50 layers"),
+    ([{"layer": "nowhere", "exploring": {"is_tracking": True}}], "No layer nowhere"),
+    ([{"layer": "mnt", "exploring": {"is_tracking": True}}], "mnt: only a vector layer has these options"),
+])
+def test_refused_calls(dock, project, layers, message):
+    with pytest.raises(ValueError, match=message):
+        panel_options.set_layer_options(dock, layers, project=project)
+
+
+def test_a_layer_the_panel_has_not_read(dock, project):
+    del dock.PROJECT_LAYERS[ROUTES.id()]
+    with pytest.raises(ValueError, match="FilterMate has not read routes yet"):
+        panel_options.layer_options(dock, "routes", project=project)
+
+
+def test_layer_options_name_the_layers_to_filter(dock, project):
+    dock.PROJECT_LAYERS[COMMUNES.id()]["filtering"]["layers_to_filter"] = [ROUTES.id()]
+    answer = panel_options.layer_options(dock, "communes", project=project)
+    assert answer["filtering"]["layers_to_filter"] == ["routes"]
+    assert "is_selecting" not in answer["exploring"] and answer["layer_id"] == COMMUNES.id()
+    assert answer["choices"]["combine_operators"] == ["AND", "AND NOT", "OR"]
+
+
+def test_export_options_are_saved_and_shown(dock, project, tmp_path):
+    answer = panel_options.set_export_options(
+        dock, {"layers_to_export": ["communes"], "output_folder_to_export": str(tmp_path)}, project=project)
+    exporting = dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"]
+    assert exporting["LAYERS_TO_EXPORT"] == [COMMUNES.id()] and exporting["HAS_OUTPUT_FOLDER_TO_EXPORT"] is True
+    assert exporting is dock.project_props["EXPORTING"]
+    dock.setProjectVariablesEvent.assert_called_once()
+    dock.set_exporting_properties.assert_called_once()
+    assert answer["changed"]["output_folder_to_export"] == str(tmp_path) and answer["saved"] is True
+
+
+def test_export_folder_must_exist(dock, project, tmp_path):
+    with pytest.raises(ValueError, match="output_folder_to_export: no such folder"):
+        panel_options.set_export_options(dock, {"output_folder_to_export": str(tmp_path / "nope")}, project=project)
+    dock.setProjectVariablesEvent.assert_not_called()
+
+
+def test_export_options_say_when_not_saved(dock, project, monkeypatch):
+    monkeypatch.setattr(panel_options, "_project_saved", lambda: False)
+    answer = panel_options.set_export_options(dock, {"batch_zip": True}, project=project)
+    assert answer["saved"] is False and "once the project is saved" in answer["note"]
+
+
+def test_export_options_read_with_names(dock, project):
+    dock.project_props["EXPORTING"]["LAYERS_TO_EXPORT"] = [ROUTES.id()]
+    answer = panel_options.export_options(dock, project=project)
+    assert answer["layers_to_export"] == ["routes"] and answer["datatype_to_export"] == "GPKG"
+    assert answer["formats"] == ["GPKG", "GeoJSON"] and answer["saved"] is True
+
+
+def test_no_panel():
+    assert "Open the FilterMate panel first" in panel_options.dock_problem(None)
+    assert "Open the FilterMate panel first" in panel_options.dock_problem(SimpleNamespace(widgets_initialized=False))
+    with pytest.raises(ValueError, match="Open the FilterMate panel first"):
+        panel_options.export_options(None)
