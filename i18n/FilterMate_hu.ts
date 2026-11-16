@@ -78,6 +78,47 @@
         <translation>Az ügynök beállítási lehetőségeinek olvasása</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Az ügynök be akarja kapcsolni ezeket:
+{}
+
+Egyetért?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>Másik szolgáltató, {}: a kéréseit és a hozzájuk szükséges adatokat a(z) {} címre küldi el a rendszer.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>A bővítmény MCP-kiszolgálója: a számítógép más alkalmazásai ekkor az eszközeivel irányíthatják a FilterMate-et és a QGIS-t.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>elküldi a(z) {} címre, amit az ügynök kér</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>A folyamatban lévő kérés végén lép életbe.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>A beszélgetés a(z) {} szolgáltatóval folytatódik; nem tudja, mi előzte meg.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>A(z) {} nem rendelkezik az Ön hozzájárulásával ahhoz, hogy ezen a címen megkapja az adatait: adja meg újra az ügynök beállításainak Szolgáltató lapján.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>A(z) {} kulcsa hiányzik: adja meg az ügynök beállításainak Szolgáltató lapján.</translation>

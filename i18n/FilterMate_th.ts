@@ -78,6 +78,47 @@
         <translation>กำลังอ่านตัวเลือกของเอเจนต์</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>เอเจนต์ต้องการเปิดใช้สิ่งเหล่านี้:
+{}
+
+คุณเห็นด้วยหรือไม่</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>ผู้ให้บริการรายอื่น {}: คำขอของคุณและข้อมูลที่จำเป็นจะถูกส่งไปยัง {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>เซิร์ฟเวอร์ MCP ของปลั๊กอิน: แอปพลิเคชันอื่นบนคอมพิวเตอร์เครื่องนี้จะสามารถควบคุม FilterMate และ QGIS ด้วยเครื่องมือของเซิร์ฟเวอร์ได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>ส่งสิ่งที่เอเจนต์ร้องขอไปยัง {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>จะมีผลเมื่อคำขอที่กำลังดำเนินอยู่สิ้นสุดลง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>การสนทนาดำเนินต่อกับ {} โดยจะไม่ได้รับแจ้งสิ่งที่ผ่านมา</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} ไม่ได้รับความยินยอมจากคุณให้รับข้อมูลของคุณที่ที่อยู่นี้: โปรดให้ความยินยอมอีกครั้งในแท็บผู้ให้บริการของการตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>ไม่พบคีย์ของ {}: โปรดป้อนในแท็บผู้ให้บริการของการตั้งค่าเอเจนต์</translation>

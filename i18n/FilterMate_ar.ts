@@ -78,6 +78,47 @@
         <translation>قراءة خيارات الوكيل</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>يريد الوكيل تفعيل ما يلي:
+{}
+
+هل توافق؟</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>مزوّد آخر، {}: سيتم إرسال طلباتك والبيانات التي تحتاجها إلى {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>خادم MCP للإضافة: يمكن حينئذٍ لتطبيقات أخرى على هذا الحاسوب التحكم في FilterMate وQGIS بأدواته.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>يرسل ما يطلبه الوكيل إلى {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>يُطبَّق عند انتهاء الطلب الجاري.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>تستمر المحادثة مع {}؛ فهو لا يعرف ما سبق.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} ليس لديه موافقتك على تلقي بياناتك على هذا العنوان: امنحها له مجددًا في تبويب المزوّد ضمن إعدادات الوكيل.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>مفتاح {} مفقود: أدخله في تبويب المزوّد ضمن إعدادات الوكيل.</translation>

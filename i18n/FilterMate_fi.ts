@@ -78,6 +78,47 @@
         <translation>Luetaan agentin valintoja</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Agentti haluaa ottaa nämä käyttöön:
+{}
+
+Oletteko samaa mieltä?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>Toinen palveluntarjoaja, {}: pyyntösi ja niiden tarvitsemat tiedot lähetetään osoitteeseen {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>Laajennuksen MCP-palvelin: muut tämän tietokoneen sovellukset voivat sen jälkeen ohjata FilterMatea ja QGISiä sen työkaluilla.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>lähettää sen, mitä agentti pyytää, osoitteeseen {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>Otetaan käyttöön, kun käynnissä oleva pyyntö päättyy.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>Keskustelu jatkuu palveluntarjoajan {} kanssa; se ei tiedä, mitä aiemmin on sanottu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>Palvelulla {} ei ole suostumustasi vastaanottaa tietojasi tähän osoitteeseen: anna se uudelleen agentin asetusten Palveluntarjoaja-välilehdellä.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>Palvelun {} avain puuttuu: anna se agentin asetusten Palveluntarjoaja-välilehdellä.</translation>

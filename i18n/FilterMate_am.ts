@@ -78,6 +78,47 @@
         <translation>የወኪሉን አማራጮች በማንበብ ላይ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>ወኪሉ እነዚህን ማብራት ይፈልጋል፦
+{}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>ሌላ አቅራቢ፣ {}፦ ጥያቄዎችዎ እና የሚፈልጓቸው ውሂቦች ወደ {} ይላካሉ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>የፕለጊኑ MCP አገልጋይ፦ በዚህ ኮምፒውተር ላይ ያሉ ሌሎች መተግበሪያዎች በመሣሪያዎቹ FilterMate እና QGIS ን መቆጣጠር ይችላሉ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>ወኪሉ የሚጠይቀውን ወደ {} ይልካል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>አሁን ያለው ጥያቄ ሲያልቅ ይተገበራል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>ውይይቱ ከ{} ጋር ይቀጥላል፤ ከዚህ በፊት የነበረውን አያውቅም።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} መረጃዎን በዚህ አድራሻ ለመቀበል ፈቃድ የለውም፦ በወኪል ቅንብሮች የአቅራቢ ትር ውስጥ እንደገና ይስጡት።</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>የ{} ቁልፍ የለም፦ በወኪል ቅንብሮች የአቅራቢ ትር ውስጥ ያስገቡት።</translation>

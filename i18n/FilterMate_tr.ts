@@ -78,6 +78,47 @@
         <translation>Aracı seçenekleri okunuyor</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Ajan şunları açmak istiyor:
+{}
+
+Onaylıyor musunuz?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>Başka bir sağlayıcı, {}: istekleriniz ve gereken veriler {} adresine gönderilecek.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>Eklentinin MCP sunucusu: bu bilgisayardaki diğer uygulamalar o zaman araçlarıyla FilterMate ve QGIS'i yönetebilir.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>ajanın istediğini {} adresine gönderir</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>Devam eden istek bittiğinde uygulanır.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>Konuşma {} ile devam ediyor; o, öncesinde ne olduğunu bilmiyor.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} için, verilerinizin bu adreste alınmasına verdiğiniz onay yok: bunu aracı ayarlarının Sağlayıcı sekmesinde yeniden verin.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>{} anahtarı eksik: aracı ayarlarının Sağlayıcı sekmesine girin.</translation>
