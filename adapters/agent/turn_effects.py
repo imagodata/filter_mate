@@ -725,9 +725,14 @@ _LAYER_CHANGES = frozenset({"added", "removed", "style", "join", "layer_name", "
                             "layer_options"})
 
 
+def takes_away(effect: Tuple[Any, ...], undo: bool) -> bool:
+    """Whether undoing (or applying again) ``effect`` removes a layer from the project."""
+    return effect[0] in ("added", "removed") and (effect[0] == "removed") != undo
+
+
 def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSet[str] = frozenset(),
                   presence: Optional[bool] = None, edits: Optional[bool] = None,
-                  close: FrozenSet[str] = frozenset()) -> Tuple[List[str], List[str]]:
+                  close: FrozenSet[str] = frozenset(), coming: Optional[bool] = None) -> Tuple[List[str], List[str]]:
     """Undo (or apply again) what a turn did beside the filters: names of what changed, and of what could not.
 
     What would change a layer whose id is in ``keep`` (protected from the agent) is left as it is. ``presence``: only
@@ -736,7 +741,9 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
     or all (None): undone, they go before the filters (a layer being edited refuses a filter). ``close``: the ids of
     the layers whose filter is restored next: undone, such a layer leaves the editing mode the turn put it in
     (``_closable``), and its edits can no longer be applied again; any other layer stays in editing mode, where
-    applying the turn again finds its commands.
+    applying the turn again finds its commands. ``coming``, among the layers added or removed: only those that come
+    back (True) or only those that go away (False): a layer goes away once the filters are restored, never before (a
+    filter that refuses must leave it in the project, as it is).
     """
     project = QgsProject.instance()
     done: List[str] = []
@@ -746,6 +753,8 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
         if presence is not None and (kind in ("added", "removed")) != presence:
             continue
         if edits is not None and (kind == "edits") != edits:
+            continue
+        if coming is not None and kind in ("added", "removed") and takes_away(effect, undo) == coming:
             continue
         if kind in _LAYER_CHANGES and layer_id in keep:
             layer = project.mapLayer(layer_id)
