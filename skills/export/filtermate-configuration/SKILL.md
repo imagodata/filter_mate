@@ -61,6 +61,17 @@ When the user asks to set FilterMate up (the setup the panel offers once per ver
 
 Never change a setting before the user answered.
 
+## Sources, model and MCP server of the agent
+
+In the chat, agent_options says the provider in use, the providers the user set up, each source and MCP connector
+with whether it is ticked, and the MCP server of the plugin. In the chat, when the user asks to stop using a source, a
+connector or the MCP server, turn_off_agent_options does it without a question. In the chat, to tick one, start the
+MCP server or switch to another provider the user set up, propose it and say why, then call turn_on_agent_options:
+the user says yes first. Both apply after the request; another provider starts a new conversation. A provider not set
+up, a key and the consent to send data are the user's: in the chat, show_settings_link with provider puts a button to
+that tab. The user can do all of it from the menu ⋯ of the AGENT panel too (Sources, Model, MCP server of the
+plugin).
+
 ## What you never change
 
 - The settings of the agent itself: the section APP.OPTIONS.AGENT (the open data platforms it may search, the AGENT

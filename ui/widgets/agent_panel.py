@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import html
 import time
-from typing import Sequence, Tuple
+from typing import List, Sequence, Tuple
 
 from qgis.PyQt.QtCore import QByteArray, QCoreApplication, QEvent, QSize, Qt, QTimer, QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QFont, QTextOption
@@ -25,7 +25,7 @@ from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import (
-    KIND_CKAN, KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_POPULATION, KIND_WFS, KIND_WMS,
+    KIND_CKAN, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_WFS, KIND_WMS,
     KIND_WMTS, KIND_XYZ,
 )
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
@@ -37,7 +37,8 @@ from ...core.agent.providers.ollama_chat import (
     tags_url,
 )
 from ...core.agent.sources import (
-    KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
+    KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, SOURCE_GROUPS, all_sources,
+    custom_from_json, source_group,
     custom_to_json, make_source,
 )
 from ..styles.mockup_design import FONT_FAMILY, plugin_is_dark, render_icon, tokens
@@ -246,6 +247,15 @@ def level_detail(level: str) -> str:
     }[level_or_default(level)]
 
 
+def source_group_titles() -> List[Tuple[str, str]]:
+    """The groups of the sources (core/agent/sources.py, source_group) with their titles, in their order: the Sources
+    tab of the settings and the menu of the panel."""
+    titles = {"open_data": _tr("Open data platforms"), "imagery": _tr("Satellite imagery"),
+              "basemaps": _tr("Basemaps"), "places": _tr("Place search"), "databases": _tr("Databases of QGIS"),
+              "connectors": _tr("MCP connectors")}
+    return [(key, titles[key]) for key in SOURCE_GROUPS]
+
+
 class AgentPanel(QFrame):
     """Widgets only: the controller decides what happens."""
 
@@ -258,6 +268,13 @@ class AgentPanel(QFrame):
     new_conversation_requested = pyqtSignal()
     redo_requested = pyqtSignal()
     history_requested = pyqtSignal()
+    # The options of the agent from the menu "⋯" (2026-11-16): the controller fills them when the menu opens.
+    options_requested = pyqtSignal()
+    source_toggled = pyqtSignal(str, bool)
+    provider_chosen = pyqtSignal(int)
+    provider_forgotten = pyqtSignal(int)
+    mcp_toggled = pyqtSignal(bool)
+    settings_tab_requested = pyqtSignal(str)
     resend_requested = pyqtSignal(str)
     step_undo_requested = pyqtSignal(int)
     compare_requested = pyqtSignal(int, int)  # the rank of a turn applied, its step (-1: the whole turn)
@@ -363,6 +380,18 @@ class AgentPanel(QFrame):
         self.new_action.triggered.connect(self.new_conversation_requested)
         self.setup_action = menu.addAction(_tr("Set FilterMate up with the agent…"))
         self.setup_action.triggered.connect(self.setup_requested)
+        # Sources, model and the MCP server of the plugin, turned on or off without opening the settings.
+        menu.addSeparator()
+        self.sources_menu = menu.addMenu(_tr("Sources"))
+        self.sources_menu.setObjectName("menu_agent_sources")
+        self.models_menu = menu.addMenu(_tr("Model"))
+        self.models_menu.setObjectName("menu_agent_models")
+        self.mcp_action = menu.addAction(_tr("MCP server of the plugin"))
+        self.mcp_action.setCheckable(True)
+        self.mcp_action.triggered.connect(self.mcp_toggled)
+        self._option_menus = []
+        menu.aboutToShow.connect(self.options_requested)
+        menu.addSeparator()
         self.settings_action = menu.addAction(_tr("Agent settings"))
         self.settings_action.triggered.connect(self.settings_requested)
         self.more_button.setMenu(menu)
@@ -733,6 +762,48 @@ class AgentPanel(QFrame):
         self.shown.emit()
 
     # --- state ----------------------------------------------------------------
+
+    def fill_options(self, groups, providers, mcp_on: bool) -> None:
+        """The menu of the options: ``groups`` ``[(title, [(source id, name, ticked)])]``, ``providers`` ``[(label,
+        current)]``, the MCP server of the plugin on or not."""
+        for submenu in self._option_menus:  # clear() leaves the submenus alive: they would pile up
+            submenu.deleteLater()
+        self._option_menus = []
+        self.sources_menu.clear()
+        for title, rows in groups:
+            if not rows:
+                continue
+            submenu = self.sources_menu.addMenu(title.replace("&", "&&"))  # names come from the user or QGIS
+            self._option_menus.append(submenu)
+            for source_id, name, on in rows:
+                action = submenu.addAction(name.replace("&", "&&"))
+                action.setCheckable(True)
+                action.setChecked(bool(on))
+                action.triggered.connect(lambda checked, source_id=source_id: self.source_toggled.emit(source_id, checked))
+        self.sources_menu.addSeparator()
+        self.sources_menu.addAction(_tr("Source settings…")).triggered.connect(
+            lambda: self.settings_tab_requested.emit("sources"))
+        self.models_menu.clear()
+        others = []
+        for index, (label, current) in enumerate(providers):
+            action = self.models_menu.addAction(label.replace("&", "&&"))
+            action.setCheckable(True)
+            action.setChecked(bool(current))
+            if current:  # chosen again: it stays the one in use
+                action.triggered.connect(lambda checked, action=action: action.setChecked(True))
+            else:
+                action.triggered.connect(lambda checked, index=index: self.provider_chosen.emit(index))
+                others.append((index, label))
+        if others:
+            forget = self.models_menu.addMenu(_tr("Remove from the list"))
+            self._option_menus.append(forget)
+            for index, label in others:
+                forget.addAction(label.replace("&", "&&")).triggered.connect(
+                    lambda checked=False, index=index: self.provider_forgotten.emit(index))
+        self.models_menu.addSeparator()
+        self.models_menu.addAction(_tr("Other provider or model…")).triggered.connect(
+            lambda: self.settings_tab_requested.emit("provider"))
+        self.mcp_action.setChecked(bool(mcp_on))
 
     def set_recipes(self, recipes, can_save: bool) -> None:
         """The recipes of the project in the menu, each with its steps in view before it runs; save the last request."""
@@ -1476,14 +1547,7 @@ class AgentSettingsDialog(QDialog):
 
     def _fill_sources(self, enabled_ids) -> None:
         self.sources_tree.clear()
-        other = (KIND_MCP, KIND_STAC, KIND_ELEVATION, KIND_POPULATION, KIND_XYZ, KIND_GEOCODER, KIND_DATABASE)
-        groups = ((_tr("Open data platforms"), lambda source: source.kind not in other),
-                  # An elevation model and a population grid are read from satellites too: listed with the imagery.
-                  (_tr("Satellite imagery"), lambda source: source.kind in (KIND_STAC, KIND_ELEVATION, KIND_POPULATION)),
-                  (_tr("Basemaps"), lambda source: source.kind == KIND_XYZ),
-                  (_tr("Place search"), lambda source: source.kind == KIND_GEOCODER),
-                  (_tr("Databases of QGIS"), lambda source: source.kind == KIND_DATABASE),
-                  (_tr("MCP connectors"), lambda source: source.kind == KIND_MCP))
+        groups = [(title, lambda source, key=key: source_group(source) == key) for key, title in source_group_titles()]
         for title, belongs in groups:
             group = QTreeWidgetItem(self.sources_tree, [title.upper()])
             group.setFlags(Qt.ItemFlag.ItemIsEnabled)

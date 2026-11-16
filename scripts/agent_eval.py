@@ -588,8 +588,21 @@ class SimulatedProject:
             self.export_panel.update(changes)
             return {"changed": changes, "saved": True}
 
+        def agent_options(_):
+            return {"provider": "anthropic · scripted", "providers": ["anthropic · scripted"], "mcp_server": False,
+                    "sources": [{"id": "datagouv", "title": "data.gouv.fr", "group": "open_data", "on": True},
+                                {"id": "osm_mcp", "title": "OpenStreetMap (MCP)", "group": "connectors", "on": False}]}
+
+        def turn_off_agent_options(args):
+            return {"turned_off": list(args.get("sources") or []), "already": [], "applies": "after this request"}
+
+        def turn_on_agent_options(args):
+            return {"turned_on": list(args.get("sources") or []), "already": [], "applies": "after this request"}
+
         return {
             "ask_user": ask_user,
+            "agent_options": agent_options, "turn_off_agent_options": turn_off_agent_options,
+            "turn_on_agent_options": turn_on_agent_options,
             "layer_options": layer_options, "set_layer_options": set_layer_options,
             "export_options": export_options, "set_export_options": set_export_options,
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,

@@ -2232,6 +2232,47 @@ PANEL_STEPS = [s_panels_setup, s_panels_zones, s_panels_set, s_panels_check, s_p
                s_panels_undo, s_panels_undo_check]
 
 
+# --- sources, model and MCP server from the menu "⋯" of the AGENT panel (2026-11-16), on the real panel ----------
+
+OPTIONS = {}
+
+
+def agent_settings_module():
+    return importlib.import_module(f'{PACKAGE}.adapters.agent.settings')
+
+
+def s_options_menu():
+    chat, settings = agent_chat(), agent_settings_module()
+    OPTIONS['before'] = settings.load_settings()
+    OPTIONS['thread'] = len(chat._transcript)
+    chat._fill_options()  # as when the menu opens
+    panel = chat.panel
+    groups = [action.menu() for action in panel.sources_menu.actions() if action.menu() is not None]
+    OPTIONS['groups'] = [menu.title() for menu in groups]
+    entry = next(action for menu in groups for action in menu.actions()
+                 if action.isCheckable() and not action.isChecked())
+    OPTIONS['ticked_name'] = entry.text()
+    entry.trigger()  # the user ticks a source in the menu
+    return settled()
+
+
+def s_options_menu_check():
+    chat, settings = agent_chat(), agent_settings_module()
+    after = settings.load_settings()
+    added = [source_id for source_id in after.enabled_sources if source_id not in OPTIONS['before'].enabled_sources]
+    check('options: the menu lists the groups of the sources', len(OPTIONS['groups']) >= 3, str(OPTIONS['groups']))
+    check('options: a tick in the menu saves the source and keeps the thread',
+          len(added) == 1 and len(chat._transcript) == OPTIONS['thread'], f"{added} {OPTIONS['ticked_name']}")
+    chat._on_source_toggled(added[0] if added else '', False)  # and untick it again
+    check('options: an untick puts it back', settings.load_settings().enabled_sources ==
+          OPTIONS['before'].enabled_sources, str(settings.load_settings().enabled_sources))
+    has_mcp = chat.panel.mcp_action.isCheckable()
+    check('options: the MCP server and the model are in the menu', has_mcp and chat.panel.models_menu.actions(),
+          str([action.text() for action in chat.panel.models_menu.actions()]))
+
+
+OPTION_STEPS = [s_options_menu, s_options_menu_check]
+
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
          s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
@@ -2259,10 +2300,12 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_source, s_partial_undo_on_source_check, s_partial_undo_on_target,
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
-         *PANEL_STEPS, s_finish]
+         *PANEL_STEPS, *OPTION_STEPS, s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 
 
 def run_step(index=0):

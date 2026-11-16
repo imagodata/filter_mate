@@ -72,6 +72,9 @@ REMOVE_WIDGET = "remove_widget"
 SAVE_RECIPE = "save_recipe"
 REMOVE_RECIPE = "remove_recipe"
 SHOW_SETTINGS_LINK = "show_settings_link"
+AGENT_OPTIONS = "agent_options"
+TURN_OFF_OPTIONS = "turn_off_agent_options"
+TURN_ON_OPTIONS = "turn_on_agent_options"
 ASK_USER = "ask_user"
 LIST_TABLES = "list_database_tables"
 ADD_TABLE = "add_database_table"
@@ -272,6 +275,38 @@ CHAT_ONLY = (
                 "required": ["question", "header", "options"], "additionalProperties": False}}},
             "required": ["questions"], "additionalProperties": False},
         read_only=True, chat_only=True),
+    # The options of the agent itself (2026-11-16, core/agent/agent_options.py): what it reaches, read; turned off
+    # without a question (that only narrows it); turned on once the user says yes, at every level.
+    ToolSpec(
+        AGENT_OPTIONS,
+        "The options of the agent: the provider and model in use and those the user set up, each source and MCP "
+        "connector with its group and whether it is ticked, the MCP server of the plugin. Returns provider, providers, "
+        "sources [{id, title, group, on}] and mcp_server.",
+        {"type": "object", "properties": {}, "additionalProperties": False},
+        title="Read the options of the agent", read_only=True, chat_only=True),
+    ToolSpec(
+        TURN_OFF_OPTIONS,
+        "Untick sources or MCP connectors (their ids from agent_options) or stop the MCP server of the plugin, when "
+        "the user asks. Applies after this request: the next one runs without their tools. Returns turned_off and "
+        "already.",
+        {"type": "object", "properties": {
+            "sources": {"type": "array", "items": {"type": "string", "maxLength": 200}, "maxItems": 100},
+            "mcp_server": {"type": "boolean", "enum": [False], "description": "false stops the MCP server"}},
+         "additionalProperties": False},
+        title="Turn options of the agent off", chat_only=True),
+    ToolSpec(
+        TURN_ON_OPTIONS,
+        "Tick sources or MCP connectors (their ids from agent_options), start the MCP server of the plugin, or switch "
+        "to another provider the user set up (its label from agent_options). The user is asked first, and it applies "
+        "after this request (another provider: in a new conversation). Never a key nor the consent to send data: "
+        "those are the user's, in the agent settings. Returns turned_on, already, provider and mcp_server.",
+        {"type": "object", "properties": {
+            "sources": {"type": "array", "items": {"type": "string", "maxLength": 200}, "maxItems": 100},
+            "mcp_server": {"type": "boolean", "enum": [True], "description": "true starts the MCP server"},
+            "provider": {"type": "string", "maxLength": 300, "description": "A label of providers, from agent_options"}},
+         "additionalProperties": False},
+        # destructive: confirmed by the user like a change of this machine (a setting kept beyond the project)
+        title="Turn options of the agent on", destructive=True, chat_only=True),
 )
 
 

@@ -15,7 +15,7 @@ from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 from ...adapters.agent.qt_transport import QtTransport
 from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, load_settings, provider_config, read_key, save_settings, store_key,
-    target_of,
+    target_of, current_provider, read_providers, write_providers,
 )
 from ...adapters.agent import transcript_store
 from ...adapters.agent.project_notes_store import read_notes, write_notes
@@ -73,7 +73,8 @@ from ...core.agent.project_notes import added as note_added, notes_block, remove
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
     ADD_NOTE, ADD_TABLE, ASK_USER, CREATE_WIDGET, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
-    LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool,
+    LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
+    TURN_OFF_OPTIONS, TURN_ON_OPTIONS,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...core.domain.layer_kind import LayerKind
@@ -89,7 +90,7 @@ from .agent_mcp_bridge import NO_UNDO_POINT, AgentMcpBridge
 from .history_tips import button_tip
 from ..widgets.agent_panel import (
     ANSWER_CONVERSATION, ANSWER_NO, ANSWER_ONCE, AgentPanel, AgentSettingsDialog, ask_code, ask_plain,
-    ask_with_conversation, level_short, preset_label,
+    ask_with_conversation, level_short, preset_label, source_group_titles,
 )
 from ..widgets.agent_widgets_strip import number_text
 
@@ -215,6 +216,8 @@ class AgentChatController(QObject):
         self._building = False
         self._transcript = []
         self._seen = None  # project_state when the last answer ended
+        # Changes of the sources, the MCP server or the provider the agent made during a request: applied when it ends.
+        self._pending_options = []
         self._transcript_key = ""
         self._answer = []
         self._header_label = None
@@ -229,6 +232,13 @@ class AgentChatController(QObject):
         self.panel.compare_requested.connect(self._on_compare)
         self.panel.card_compare_requested.connect(self._on_card_compare)
         self.panel.settings_requested.connect(self.open_settings)
+        # Sources, model and MCP server from the menu "⋯" (2026-11-16)
+        self.panel.options_requested.connect(self._fill_options)
+        self.panel.source_toggled.connect(self._on_source_toggled)
+        self.panel.provider_chosen.connect(self._on_provider_chosen)
+        self.panel.provider_forgotten.connect(self._on_provider_forgotten)
+        self.panel.mcp_toggled.connect(self._on_mcp_toggled)
+        self.panel.settings_tab_requested.connect(lambda tab: self.open_settings(tab=tab))
         self.panel.setup_requested.connect(self.start_setup)
         self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
@@ -802,6 +812,7 @@ class AgentChatController(QObject):
                                         tool_families=dialog.tool_families.isChecked(),
                                         autonomy=dialog.chosen_autonomy(),
                                         tool_rules=json.dumps(dialog.chosen_tool_rules())))
+            self._remember_provider(load_settings())
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
             self._policy.rules = load_settings().rules
             if project_layers:
@@ -816,6 +827,146 @@ class AgentChatController(QObject):
         self._sync_mcp()
         self._refresh_ready()
         return True
+
+    def apply_agent_options(self, change) -> str:
+        """Make ``change`` (core/agent/agent_options.Change) to the settings as the settings dialog would: other sources
+        start another conversation with the model under the same thread, another provider a new thread. "" when done,
+        else why not (nothing changed then)."""
+        from ...core.agent.agent_options import apply_change
+        values = load_settings()
+        provider = change.provider
+        changes = {"enabled_sources": apply_change(values.enabled_sources, change)}
+        if change.mcp_server is not None:
+            changes["mcp_enabled"] = change.mcp_server
+        if provider is not None:
+            changes.update(preset=provider.preset, model=provider.model, base_url=provider.base_url,
+                           authcfg=provider.authcfg, consent_target=provider.consent_target,
+                           key_target=provider.key_target, consent=True)
+        wanted = replace(values, **changes)
+        if provider is not None and wanted.needs_key:
+            try:
+                key = read_key(provider.authcfg) if provider.authcfg else ""
+            except KeyStoreError:
+                key = ""
+            if not key:
+                return _tr("The key of {} is missing: enter it in the Provider tab of the agent settings.").format(
+                    provider.label)
+        save_settings(wanted)
+        if provider is not None:
+            self._reset_view()  # another provider cannot continue this conversation
+        elif wanted.enabled_sources != values.enabled_sources:
+            self._restart_engine()  # other tools: another conversation with the model, under the same thread
+        if wanted.mcp_enabled != values.mcp_enabled:
+            self._sync_mcp()
+        self._refresh_ready()
+        return ""
+
+    def _menu_providers(self, values: AgentSettings):
+        """The providers set up, the one in use first when the list has not kept it yet."""
+        from ...core.agent.agent_options import remember
+        current = current_provider(values)
+        providers = read_providers()
+        return remember(providers, current) if values.model and not any(entry.same(current) for entry in providers) \
+            else providers, current
+
+    def _fill_options(self) -> None:
+        """The menu "⋯" opens: the sources by group, the providers set up, the MCP server, as the settings hold them."""
+        from ...core.agent.sources import source_group
+        values = load_settings()
+        sources = list(all_sources(custom_from_json(values.custom_sources))) + list(qgis_databases())
+        groups = [(title, [(source.id, source.title, source.id in values.enabled_sources)
+                           for source in sources if source_group(source) == key])
+                  for key, title in source_group_titles()]
+        providers, current = self._menu_providers(values)
+        self.panel.fill_options(groups, [(entry.label, entry.same(current)) for entry in providers], values.mcp_enabled)
+
+    def _click_option(self, change) -> None:
+        """A click in the menu: applied at once, or when the request under way ends (its tools stay meanwhile)."""
+        engine = getattr(self, "_engine", None)
+        if engine is not None and engine.busy:
+            self._pending_options.append(change)
+            return
+        reason = self.apply_agent_options(change)
+        if reason:
+            self._say(reason, error=True, offer_settings=True)
+
+    def _on_source_toggled(self, source_id: str, on: bool) -> None:
+        from ...core.agent.agent_options import Change
+        self._click_option(Change(sources_on=(source_id,)) if on else Change(sources_off=(source_id,)))
+
+    def _on_provider_chosen(self, index: int) -> None:
+        from ...core.agent.agent_options import Change
+        providers, _current = self._menu_providers(load_settings())
+        if 0 <= index < len(providers):
+            self._click_option(Change(provider=providers[index]))
+
+    def _on_provider_forgotten(self, index: int) -> None:
+        from ...core.agent.agent_options import forget
+        providers, _current = self._menu_providers(load_settings())
+        if 0 <= index < len(providers):
+            write_providers(forget(providers, providers[index]))
+
+    def _on_mcp_toggled(self, on: bool) -> None:
+        from ...core.agent.agent_options import Change
+        self._click_option(Change(mcp_server=bool(on)))
+
+    def _options_sources(self, values: AgentSettings):
+        return list(all_sources(custom_from_json(values.custom_sources))) + list(qgis_databases())
+
+    def _agent_options_tool(self, _arguments) -> dict:
+        """agent_options: what the agent reaches, as the settings hold it."""
+        from ...core.agent.agent_options import options_view
+        values = load_settings()
+        providers, current = self._menu_providers(values)
+        return options_view(self._options_sources(values), values.enabled_sources, providers, current,
+                            values.mcp_enabled)
+
+    def _turn_off_options_tool(self, arguments) -> dict:
+        """turn_off_agent_options: queued, made when the request ends (its tools stay meanwhile)."""
+        from ...core.agent.agent_options import Change, plan_off
+        if not arguments.get("sources") and "mcp_server" not in arguments:
+            raise ToolFailure("Name the sources to untick, or give mcp_server false.")
+        values = load_settings()
+        try:
+            change, answer = plan_off(self._options_sources(values), values.enabled_sources,
+                                      arguments.get("sources") or [], arguments.get("mcp_server"))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        if change != Change():
+            self._pending_options.append(change)
+        return dict(answer, applies="after this request")
+
+    def _turn_on_options_tool(self, arguments) -> dict:
+        """turn_on_agent_options, once the user said yes: queued, made when the request ends."""
+        from ...core.agent.agent_options import Change, plan_on
+        if not arguments.get("sources") and "mcp_server" not in arguments and not arguments.get("provider"):
+            raise ToolFailure("Name the sources to tick, mcp_server true or a provider set up.")
+        values = load_settings()
+        providers, current = self._menu_providers(values)
+        try:
+            change, answer = plan_on(self._options_sources(values), values.enabled_sources,
+                                     arguments.get("sources") or [], arguments.get("mcp_server"),
+                                     str(arguments.get("provider") or ""), providers, current)
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        if change != Change():
+            self._pending_options.append(change)
+        return dict(answer, applies="in a new conversation" if change.provider is not None else "after this request")
+
+    def _apply_pending_options(self) -> None:
+        """The changes the agent made during the request that ended, over the settings as they are now."""
+        pending, self._pending_options = self._pending_options, []
+        for change in pending:
+            reason = self.apply_agent_options(change)
+            if reason:
+                self._say(reason, error=True, offer_settings=True)
+
+    @staticmethod
+    def _remember_provider(values: AgentSettings) -> None:
+        """A provider the user agreed to send data to joins the list the menu and the agent switch between."""
+        if values.consent and values.model:
+            from ...core.agent.agent_options import remember
+            write_providers(remember(read_providers(), current_provider(values)))
 
     def _sync_mcp(self) -> None:
         self._mcp.sync()
@@ -912,6 +1063,9 @@ class AgentChatController(QObject):
         handlers[REMOVE_RECIPE] = self._remove_recipe_tool
         handlers[ASK_USER] = self._ask_user_tool
         handlers["show_settings_link"] = self._settings_link_tool
+        handlers[AGENT_OPTIONS] = self._agent_options_tool
+        handlers[TURN_OFF_OPTIONS] = self._turn_off_options_tool
+        handlers[TURN_ON_OPTIONS] = self._turn_on_options_tool
         handlers[LIST_TABLES] = lambda arguments: self._list_tables_tool(databases, arguments)
         handlers[ADD_TABLE] = lambda arguments: self._add_table_tool(databases, arguments)
         return tools, handlers, active
@@ -2260,6 +2414,12 @@ class AgentChatController(QObject):
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
+            AGENT_OPTIONS: lambda: _tr("Reading the options of the agent"),
+            TURN_OFF_OPTIONS: lambda: _tr("Turning off: {}").format(", ".join(
+                [str(name) for name in args.get("sources") or []] + (["MCP server"] if "mcp_server" in args else []))),
+            TURN_ON_OPTIONS: lambda: _tr("Turning on: {}").format(", ".join(
+                [str(name) for name in args.get("sources") or []] + (["MCP server"] if "mcp_server" in args else [])
+                + ([str(args["provider"])] if args.get("provider") else []))),
             "export_settings_profile": lambda: _tr("Profile of settings saved: {}").format(args.get("name", "")),
             "apply_settings_profile": lambda: _tr("Profile of settings applied: {}").format(args.get("name", "")),
             "get_setting": lambda: _tr("Reading the setting {}").format(args.get("path", "")),
@@ -2705,6 +2865,8 @@ class AgentChatController(QObject):
             listed, one_line(str(reason), 300))
 
     def on_finished(self, outcome: ChatOutcome) -> None:
+        if self._pending_options:  # after this request, out of the callback of the engine
+            QTimer.singleShot(0, self._apply_pending_options)
         if self._abandoned:  # the end of a request left while its tool ran (_drop_engine): only let it go
             self._abandoned, self._engine = False, None
             self._request_calls, self._answer = [], []

@@ -233,3 +233,15 @@ def describe_enabled(sources: Sequence[Source]) -> Dict[str, Any]:
             "population": [named(source) for source in sources if source.kind == KIND_POPULATION],
             "databases": [f"{source.id} ({source.title})" for source in sources if source.kind == KIND_DATABASE],
             "connectors": [source.title for source in sources if source.is_connector]}
+
+
+# The groups of the Sources tab of the agent settings, and of the menu of the panel (ui/widgets/agent_panel.py).
+SOURCE_GROUPS = ("open_data", "imagery", "basemaps", "places", "databases", "connectors")
+
+
+def source_group(source: Source) -> str:
+    """Where ``source`` is listed: an elevation model and a population grid are read from satellites too, so with
+    the imagery; every other platform of data is open data."""
+    from .open_data import KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_POPULATION, KIND_STAC, KIND_XYZ
+    return {KIND_MCP: "connectors", KIND_STAC: "imagery", KIND_ELEVATION: "imagery", KIND_POPULATION: "imagery",
+            KIND_XYZ: "basemaps", KIND_GEOCODER: "places", KIND_DATABASE: "databases"}.get(source.kind, "open_data")
