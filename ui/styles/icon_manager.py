@@ -271,8 +271,21 @@ class IconManager(StylerBase):
             if checkbox is not None:
                 self.set_button_icon(checkbox, 'centroid.png')
 
+        self._refresh_rail_tools()
         logger.info(f"Refreshed {updated} button icons for theme '{self._current_theme}'")
         return updated
+
+    def _refresh_rail_tools(self) -> None:
+        """The tools the kind of the current layer adds to the rail of EXPLORING draw their own icons, in the text
+        colour of the theme (ui/controllers/coverage_dock_extras.py): they carry no ``icon_name`` to refresh."""
+        try:
+            integration = getattr(self.dockwidget, '_controller_integration', None)
+            extras = getattr(getattr(integration, 'coverage_controller', None), '_extras', None)
+            refresh = getattr(extras, 'refresh_icons', None)
+            if callable(refresh):
+                refresh()
+        except Exception:
+            logger.debug("Rail tool icons not refreshed", exc_info=True)
 
     def on_theme_changed(self, theme: str) -> None:
         """

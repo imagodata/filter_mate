@@ -757,7 +757,9 @@ class SectionPanels:
         texts = {
             "detach": lambda name: _tr("Open {} in its own panel").format(TITLES[name]),
             "detach_all": lambda name: _tr("Open every section in its own panel"),
-            "group": lambda name: _tr("Group with {}").format("FilterMate" if name == DOCK else TITLES[name]),
+            # "as tabs": beside "Merge ... back into FilterMate", a plain "Group with FilterMate" read as the same
+            "group": lambda name: _tr("Group with {}, as tabs").format("FilterMate" if name == DOCK
+                                                                       else TITLES[name]),
             "attach": lambda name: _tr("Merge {} back into FilterMate").format(TITLES[name]),
             "attach_all": lambda name: _tr("Merge every section back into FilterMate"),
         }

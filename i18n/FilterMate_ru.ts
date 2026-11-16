@@ -10805,6 +10805,11 @@ onnxruntime загружается из PyPI с помощью pip, модель
         <translation>Сгруппировать с {}</translation>
     </message>
     <message>
+        <location filename="../../ui/layout/section_panels.py" line="761"/>
+        <source>Group with {}, as tabs</source>
+        <translation>Сгруппировать с {}, вкладками</translation>
+    </message>
+    <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
         <source>Merge {} back into FilterMate</source>
         <translation>Объединить {} обратно с FilterMate</translation>
