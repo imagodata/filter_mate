@@ -15,6 +15,7 @@ from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import Qt
 
 from .base_manager import LayoutManagerBase
+from .section_bars import SECTIONS_POSITION, SectionBars
 
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
@@ -53,7 +54,8 @@ class ActionBarManager(LayoutManagerBase):
     Manages action bar positioning and layout.
 
     The action bar contains the main filter/export action buttons.
-    It can be positioned at: top, bottom, left, or right of the toolset.
+    It can be positioned at: top, bottom, left, or right of the toolset, or split between the
+    sections ('sections': each section shows its own buttons, see section_bars.py).
 
     Extracted methods from dockwidget (14 methods, lines 4039-4604):
     - _setup_action_bar_layout()
@@ -84,7 +86,7 @@ class ActionBarManager(LayoutManagerBase):
     """
 
     # Valid positions
-    VALID_POSITIONS = ('top', 'bottom', 'left', 'right')
+    VALID_POSITIONS = ('top', 'bottom', 'left', 'right', SECTIONS_POSITION)
 
     def __init__(self, dockwidget: 'FilterMateDockWidget') -> None:
         """
@@ -105,6 +107,12 @@ class ActionBarManager(LayoutManagerBase):
         self._vertical_action_spacer: Optional[QtWidgets.QSpacerItem] = None
         self._header_wrapper: Optional[QtWidgets.QWidget] = None
         self._header_spacer: Optional[QtWidgets.QWidget] = None
+        # The bars of the sections that carry their own buttons; None while the one bar holds them all.
+        self._section_bars: Optional[SectionBars] = None
+
+    def _bar_position(self) -> str:
+        """Where the one bar goes. With 'sections' it stays at the bottom, for the buttons no section takes."""
+        return 'bottom' if self._position == SECTIONS_POSITION else self._position
 
     def _get_ui_config(self):
         """Lazy load UIConfig to avoid circular imports."""
@@ -171,6 +179,7 @@ class ActionBarManager(LayoutManagerBase):
                 self.dockwidget.frame_actions.show()
                 self.dockwidget._current_action_bar_position = self._position
                 logger.info(f"ActionBarManager: Using '{self._position}' position")
+                self.sync_sections()
             return True
         except Exception as e:
             logger.error(f"ActionBarManager: Error applying configuration: {e}", exc_info=True)
@@ -251,14 +260,18 @@ class ActionBarManager(LayoutManagerBase):
         if self._side_action_bar_active:
             self.restore_side_action_bar_layout()
 
-        # Get all action buttons
+        # The buttons a section stops carrying leave its bar before the one bar is rebuilt with them
+        if self._section_bars is not None:
+            self._section_bars.prepare(self._position, self._detached_sections())
+
+        # Get the action buttons of the one bar
         action_buttons = self._get_action_buttons()
 
         # Step 1: Clear old layout
         self.clear_layout()
 
         # Step 2: Create new layout based on position
-        is_horizontal = self._position in ('top', 'bottom')
+        is_horizontal = self._bar_position() in ('top', 'bottom')
         if is_horizontal:
             self.create_horizontal_layout(action_buttons)
         else:
@@ -276,8 +289,58 @@ class ActionBarManager(LayoutManagerBase):
         # Store current position
         self.dockwidget._current_action_bar_position = self._position
 
-    def _get_action_buttons(self) -> List[QtWidgets.QPushButton]:
-        """Get list of action buttons from dockwidget."""
+        # Step 6: The sections that carry their own buttons take them
+        self.sync_sections(prepared=True)
+
+    def _detached_sections(self) -> tuple:
+        """The sections shown in their own panel (ui/layout/section_panels.py): they carry their buttons."""
+        panels = getattr(self.dockwidget, '_fm_panels', None)
+        try:
+            return tuple(panels.detached()) if panels is not None else ()
+        except Exception:  # a dock half built, or going away
+            return ()
+
+    def sync_sections(self, prepared: bool = False) -> None:
+        """The buttons under their section, as the position and the sections in their own panel ask.
+
+        Nothing is built while the one bar holds every button. Called again when the open section changes, when a
+        button comes late (QFieldCloud, Compare) and when a section leaves the dock or comes back.
+        """
+        try:
+            detached = self._detached_sections()
+            if self._section_bars is None:
+                if self._position != SECTIONS_POSITION and not detached:
+                    return
+                self._section_bars = SectionBars(self.dockwidget, self)
+                prepared = False
+            if not prepared:
+                self._section_bars.prepare(self._position, detached)
+            self._section_bars.settle()
+        except Exception as e:
+            logger.error(f"ActionBarManager: Error placing the buttons of the sections: {e}", exc_info=True)
+
+    def section_bars(self) -> Optional[SectionBars]:
+        """The bars of the sections, None while the one bar holds every button."""
+        return self._section_bars
+
+    def horizontal_bar_margins(self) -> tuple:
+        """``(left, top, right, bottom)`` of a horizontal bar, from the display profile."""
+        UIConfig = self._get_ui_config()
+        margins = (UIConfig.get_config('layout', 'margins_actions') if UIConfig else None) or {}
+        if isinstance(margins, dict):
+            return (margins.get('left', 8), margins.get('top', 8), margins.get('right', 8), margins.get('bottom', 16))
+        return (8, 8, 8, 16)
+
+    def horizontal_bar_height(self) -> int:
+        """The height of a horizontal bar: it hugs its buttons."""
+        UIConfig = self._get_ui_config()
+        margins = (UIConfig.get_config('layout', 'margins_actions') if UIConfig else None) or {}
+        v_margins = (margins.get('top', 2) + margins.get('bottom', 2)) if isinstance(margins, dict) else 4
+        return self._get_button_height() + v_margins + 1  # + the 1 px top border of the stylesheets
+
+    def _get_action_buttons(self, every: bool = False) -> List[QtWidgets.QPushButton]:
+        """The action buttons of the one bar; ``every`` adds those a section carries (section_bars.py)."""
+        lent = self._section_bars.lent() if self._section_bars is not None and not every else ()
         buttons = []
         button_names = [
             'pushButton_action_filter',
@@ -290,7 +353,7 @@ class ActionBarManager(LayoutManagerBase):
             'pushButton_action_about'
         ]
         for name in button_names:
-            if hasattr(self.dockwidget, name):
+            if name not in lent and getattr(self.dockwidget, name, None) is not None:
                 buttons.append(getattr(self.dockwidget, name))
         return buttons
 
@@ -316,7 +379,7 @@ class ActionBarManager(LayoutManagerBase):
         btn_size = QSize(button_height, button_height)
         ico_size = QSize(icon_size, icon_size)
 
-        for btn in self._get_action_buttons():
+        for btn in self._get_action_buttons(every=True):
             btn.setFixedSize(btn_size)
             btn.setIconSize(ico_size)
 
@@ -349,14 +412,7 @@ class ActionBarManager(LayoutManagerBase):
             action_buttons: List of QPushButton widgets to add
         """
         new_layout = QtWidgets.QHBoxLayout(self.dockwidget.frame_actions)
-        UIConfig = self._get_ui_config()
-        margins = (UIConfig.get_config('layout', 'margins_actions') if UIConfig else None) or {}
-        if isinstance(margins, dict):
-            new_layout.setContentsMargins(
-                margins.get('left', 8), margins.get('top', 8),
-                margins.get('right', 8), margins.get('bottom', 16))
-        else:
-            new_layout.setContentsMargins(8, 8, 8, 16)
+        new_layout.setContentsMargins(*self.horizontal_bar_margins())
 
         # Uniform fixed spacing between buttons
         button_spacing = 8
@@ -414,17 +470,13 @@ class ActionBarManager(LayoutManagerBase):
         """
         frame = self.dockwidget.frame_actions
         button_height = self._get_button_height()
-        UIConfig = self._get_ui_config()
 
         # Enforce uniform button dimensions
         self._apply_uniform_button_sizes(button_height)
 
-        if self._position in ('top', 'bottom'):
-            # Horizontal mode - use UIConfig action_frame dimensions
-            # Frame hugs the buttons: button height + vertical layout margins
-            margins = (UIConfig.get_config('layout', 'margins_actions') if UIConfig else None) or {}
-            v_margins = (margins.get('top', 2) + margins.get('bottom', 2)) if isinstance(margins, dict) else 4
-            frame_height = button_height + v_margins + 1  # + the 1 px top border of the stylesheets
+        if self._bar_position() in ('top', 'bottom'):
+            # Horizontal mode: the frame hugs the buttons (button height + vertical layout margins)
+            frame_height = self.horizontal_bar_height()
             frame_max = frame_height
             frame.setMinimumHeight(frame_height)
             frame.setMaximumHeight(frame_max)
@@ -461,13 +513,14 @@ class ActionBarManager(LayoutManagerBase):
 
         frame.setParent(self.dockwidget.dockWidgetContents)
 
-        if self._position == 'top':
+        position = self._bar_position()
+        if position == 'top':
             self.dockwidget.verticalLayout_main.insertWidget(0, frame)
             logger.info("ActionBarManager: Positioned at TOP")
-        elif self._position == 'bottom':
+        elif position == 'bottom':
             container.addWidget(frame)
             logger.info("ActionBarManager: Positioned at BOTTOM")
-        elif self._position in ('left', 'right'):
+        elif position in ('left', 'right'):
             self._create_side_wrapper()
             logger.info(f"ActionBarManager: Positioned at {self._position.upper()}")
 

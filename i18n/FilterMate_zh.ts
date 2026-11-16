@@ -10723,6 +10723,19 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>在单独的面板中打开 {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="574"/>
+        <source>Bring every section back to this panel</source>
+        <translation>将所有部分移回此面板</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>

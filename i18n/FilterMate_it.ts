@@ -10723,6 +10723,19 @@ onnxruntime proviene da PyPI con pip, il modello da huggingface.co/{1}, ogni fil
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>Apri {} in un pannello proprio</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="574"/>
+        <source>Bring every section back to this panel</source>
+        <translation>Riporta tutte le sezioni in questo pannello</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>

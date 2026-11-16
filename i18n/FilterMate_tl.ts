@@ -10723,6 +10723,19 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>Buksan ang {} sa sarili nitong panel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="574"/>
+        <source>Bring every section back to this panel</source>
+        <translation>Ibalik ang lahat ng seksyon sa panel na ito</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>

@@ -10723,6 +10723,19 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>Öppna {} i en egen panel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="574"/>
+        <source>Bring every section back to this panel</source>
+        <translation>Flytta tillbaka alla sektioner till den här panelen</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>

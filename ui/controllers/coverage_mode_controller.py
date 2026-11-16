@@ -3724,7 +3724,8 @@ class CoverageModeController(BaseController):
             self._call(self._app(), 'update_undo_redo_buttons')
             return
         # Same rule as FilterMateApp.update_undo_redo_buttons: Undo / Redo only on the FILTERING tab.
-        on_filtering = getattr(dw, 'tabTools_current_index', 0) == 0
+        on_filtering = (getattr(dw, 'tabTools_current_index', 0) == 0
+                        or getattr(dw, 'filtering_detached', False) is True)  # FILTERING in its own panel
         undo, redo = getattr(dw, 'pushButton_action_undo_filter', None), getattr(dw, 'pushButton_action_redo_filter', None)
         self._call(undo, 'setEnabled', on_filtering and self.can_undo())
         self._call(redo, 'setEnabled', on_filtering and self.can_redo())

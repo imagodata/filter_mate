@@ -829,6 +829,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._setup_backend_indicator()
         from .ui.layout.dock_chrome import install_dock_chrome
         install_dock_chrome(self)  # favorites in the title bar, two stacks of sections
+        from .ui.layout.section_panels import install_section_panels
+        install_section_panels(self)  # a section can go to its own QGIS panel
         self._setup_action_bar_layout()
         self._setup_exploring_tab_widgets()
         self._setup_filtering_tab_widgets()
@@ -1038,6 +1040,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     logger.warning("DimensionsManager.apply() returned False - UI may be misconfigured")
                     iface.messageBar().pushWarning("FilterMate", self.tr("UI configuration incomplete - check logs"))
                 self._harmonize_mockup_spacing()
+                panels = getattr(self, '_fm_panels', None)
+                if panels is not None:  # with a section in its own panel, the dock needs less than its profile asks
+                    panels.relax_dock()
                 return
             except Exception as e:
                 logger.error(f"DimensionsManager.apply() FAILED: {e}", exc_info=True)
@@ -3541,21 +3546,49 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.debug("select_tabTools_index: SKIPPED (widgets not initialized)")
             return
         self.tabTools_current_index = self._section_index(self.widgets["DOCK"]["TOOLS"]["WIDGET"])
-        #                           FILTER  UNDO   REDO   UNFILT EXPORT QFCLOUD
-        states = {
-            0: (True,  True,  True,  True,  False, False),  # FILTERING
-            1: (False, False, False, False, True,  True),    # EXPORTING
-            2: (False, False, False, False, False, False),   # EXPLORING
-        }
-        s = states.get(self.tabTools_current_index, (False,) * 6)
+        # The buttons of a section act while it is the one open below, or while it is in its own panel.
+        filtering, exporting = self.section_active('filtering'), self.section_active('exporting')
+        #    FILTER     UNDO       REDO       UNFILT     EXPORT     QFCLOUD
+        s = (filtering, filtering, filtering, filtering, exporting, exporting)
         logger.info(f"select_tabTools_index: index={self.tabTools_current_index}, EXPORT enabled={s[4]}")
         for i, name in enumerate(['FILTER', 'UNDO_FILTER', 'REDO_FILTER', 'UNFILTER', 'EXPORT', 'QFIELDCLOUD']):
             widget_info = self.widgets["ACTION"].get(name)
             if widget_info and widget_info.get("WIDGET"):
                 widget_info["WIDGET"].setEnabled(s[i])
         self.widgets["ACTION"]["ABOUT"]["WIDGET"].setEnabled(True)
+        if self._action_bar_manager:  # the bar of the open section; a button that came late goes to its section
+            self._action_bar_manager.sync_sections()
         self.set_exporting_properties()
         self.undoRedoStateRequested.emit()
+
+    def detached_sections(self) -> tuple:
+        """The sections shown in their own QGIS panel (ui/layout/section_panels.py)."""
+        panels = getattr(self, '_fm_panels', None)
+        try:
+            return tuple(panels.detached()) if panels is not None else ()
+        except Exception:  # the dock is being built, or goes away
+            return ()
+
+    def section_active(self, key: str) -> bool:
+        """The buttons of the section ``key`` act: it is the one open below, or it is in its own panel."""
+        from .ui.layout.section_bars import section_active
+        open_key = {0: 'filtering', 1: 'exporting', 2: 'configuration'}.get(self.tabTools_current_index)
+        return section_active(key, open_key, self.detached_sections())
+
+    @property
+    def filtering_detached(self) -> bool:
+        """FILTERING is in its own panel: Undo and Redo walk its history whatever is open in the dock."""
+        return 'filtering' in self.detached_sections()
+
+    def restore_section_panels(self) -> None:
+        """The sections that were in their own panel the last time, there again. Never blocks the dock."""
+        panels = getattr(self, '_fm_panels', None)
+        if panels is None:
+            return
+        try:
+            panels.restore()
+        except Exception:
+            logger.exception("The panels of the sections could not be restored")
 
     def _connect_groupbox_signals_directly(self):
         """v4.0 S18: Connect groupbox signals for exclusive behavior.
@@ -7165,6 +7198,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 self._agent_chat = AgentChatController(lambda page: add_agent_section(self, page), plugin, self)
         except Exception:
             logger.exception("Agent panel could not be installed")
+        self.restore_section_panels()  # every section is in the dock by now, AGENT the last
 
     def shutdown_agent_panel(self, unloading=False):
         """Stop a running request; when the plugin unloads, also let go of the project."""
@@ -7311,10 +7345,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         task.when_settled(settled)
 
     def agent_has_focus(self) -> bool:
-        """AGENT is open: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the agent."""
+        """AGENT is open in the dock: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the
+        agent. In its own panel (ui/layout/section_panels.py) it shows beside FILTERING, whose history they keep
+        walking; the steps of the agent are undone from its own history."""
         sections = getattr(self, '_fm_sections', None)
         # Read with getattr: tests call the methods of the dock on plain objects.
         return (getattr(self, '_agent_chat', None) is not None and sections is not None
+                and 'agent' not in getattr(sections, 'detached', ())
                 and bool(getattr(sections, 'is_open', lambda _key: False)('agent')))
 
     def _history_controller(self):
@@ -7373,7 +7410,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             - Export task syncs HAS_LAYERS_TO_EXPORT flag before execution
         """
         chat, sections = getattr(self, '_agent_chat', None), getattr(self, '_fm_sections', None)
-        if task_name in ('undo', 'redo') and chat is not None and sections is not None and sections.is_open('agent'):
+        if (task_name in ('undo', 'redo') and chat is not None and sections is not None
+                and 'agent' not in getattr(sections, 'detached', ()) and sections.is_open('agent')):
             # AGENT open: a step of the agent, not a dock or coverage filter (the buttons show its history).
             (chat._on_undo if task_name == 'undo' else chat._on_redo)()
             return

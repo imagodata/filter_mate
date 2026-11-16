@@ -130,9 +130,10 @@
           "top",
           "bottom",
           "left",
-          "right"
+          "right",
+          "sections"
         ],
-        "description": "Position of the action bar: 'top' (horizontal at top), 'bottom' (horizontal at bottom), 'left' (vertical on left side), 'right' (vertical on right side)"
+        "description": "Position of the action bar: 'top' (horizontal at top), 'bottom' (horizontal at bottom), 'left' (vertical on left side), 'right' (vertical on right side), 'sections' (no bar for all: each section shows its own buttons while it is open - Filter, Undo, Redo, Compare and Unfilter for FILTERING, Export for EXPORTING, About for CONFIGURATION)"
       },
       "ACTION_BAR_VERTICAL_ALIGNMENT": {
         "value": "top",

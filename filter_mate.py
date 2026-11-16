@@ -1550,6 +1550,13 @@ class FilterMate:
         # cleared and crashed QGIS (access violation in
         # QgsFeaturePickerModelBase::endUpdate).
         if self.app and self.app.dockwidget:
+            # The sections shown in their own QGIS panel go back to the dock, and their panels go with it.
+            try:
+                panels = getattr(self.app.dockwidget, '_fm_panels', None)
+                if panels is not None:
+                    panels.shutdown()
+            except Exception as e:
+                logger.debug(f"FilterMate: section panels not removed: {e}")
             try:
                 self.iface.removeDockWidget(self.app.dockwidget)
             except Exception as e:

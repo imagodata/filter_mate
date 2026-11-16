@@ -30,7 +30,8 @@ import types
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsSettings, QgsVectorLayer
 from qgis.PyQt.QtCore import QCoreApplication, QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
-from qgis.PyQt.QtWidgets import QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QPushButton, QScrollArea, QToolButton, QWidget
+from qgis.PyQt.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDockWidget, QLabel, QLineEdit, QPushButton,
+                                 QScrollArea, QToolButton, QWidget)
 try:
     from qgis.PyQt.QtGui import QShortcut
 except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
@@ -2351,6 +2352,452 @@ def s_options_menu_check():
 
 OPTION_STEPS = [s_options_menu, s_options_menu_check]
 
+
+# --- The buttons under their section; a section in its own QGIS panel (ui/layout/section_bars.py, section_panels.py)
+
+SECTION = {}
+ACTION_NAMES = ('filter', 'undo_filter', 'redo_filter', 'compare', 'unfilter', 'export', 'qfieldcloud', 'about')
+FILTERING_ACTIONS = ACTION_NAMES[:5]
+DETACHED_KEY = 'FilterMate/panels/detached'
+
+
+def action_button(name):
+    return getattr(dock(), 'pushButton_action_' + name, None)
+
+
+def actions_shown():
+    """The action buttons on screen, in the order of the bar."""
+    return [name for name in ACTION_NAMES if action_button(name) is not None and action_button(name).isVisible()]
+
+
+def open_section(page):
+    """``page`` open in the lower stack; None folds it."""
+    d = dock()
+    d.toolBox_tabTools.setCurrentWidget(page if page is not None else d._fm_sections._nothing)
+    QApplication.processEvents()
+
+
+def spread(bar):
+    """The gaps left of, between and right of the buttons shown in ``bar``."""
+    shown = sorted((b for b in bar.findChildren(QPushButton) if b.isVisible()), key=lambda b: b.x())
+    if not shown:
+        return []
+    return ([shown[0].x()] + [after.x() - (before.x() + before.width()) for before, after in zip(shown, shown[1:])]
+            + [bar.width() - shown[-1].x() - shown[-1].width()])
+
+
+def grab_widget(widget, name):
+    folder = os.environ.get('FM_GRAB_DIR')
+    if folder:
+        widget.grab().save(os.path.join(folder, f"{name}.png"))
+
+
+def bottom_header(page):
+    toolbox = dock().toolBox_tabTools
+    text = toolbox.itemText(toolbox.indexOf(page))
+    return next((button for button in toolbox.findChildren(QAbstractButton)
+                 if button.objectName() == 'qt_toolbox_toolboxbutton' and button.text() == text), None)
+
+
+def panel_place(panel):
+    """Where ``panel`` is, seen from the dock: ``tab`` with it, ``below`` it, ``above`` it; None without a panel."""
+    if panel is None:
+        return None
+    d = dock()
+    window = iface.mainWindow()
+    if panel in window.tabifiedDockWidgets(d):
+        return 'tab'
+    return 'below' if panel.mapTo(window, QPoint(0, 0)).y() > d.mapTo(window, QPoint(0, 0)).y() else 'above'
+
+
+def s_section_setup():
+    """The layers the steps below filter: the raster target an earlier step removed comes back."""
+    if layer('dem') is None:
+        project.addMapLayer(QgsRasterLayer(M['dem'], 'dem', 'gdal'))
+    return lambda: registered('zones', 'dem') and tasks_idle()
+
+
+def s_section_bars():
+    """ACTION_BAR_POSITION = sections: each section shows its own buttons while it is open, no bar for all."""
+    d = dock()
+    manager = d._action_bar_manager
+    QSettings().remove(DETACHED_KEY)
+    open_section(d.FILTERING)
+    SECTION['all'] = actions_shown()
+    SECTION['position'] = manager.get_position()
+    grab('sections_before')
+    manager.set_position('sections')  # what the configuration does when the setting changes
+    QApplication.processEvents()
+    grab('sections_filtering')
+    bars = manager.section_bars()
+    if not check('sections: the position is taken', bars is not None and manager.get_position() == 'sections'):
+        return None
+    expected = [name for name in FILTERING_ACTIONS if name in SECTION['all']]
+    check('sections: FILTERING shows Filter, Undo, Redo, Compare and Unfilter', actions_shown() == expected,
+          str(actions_shown()))
+    check('sections: no bar for all', not d.frame_actions.isVisible())
+    bar = bars.frame('filtering')
+    gaps = spread(bar)
+    check('sections: the buttons of FILTERING are spread evenly', len(gaps) == len(expected) + 1
+          and max(gaps[1:-1]) - min(gaps[1:-1]) <= 3 and abs(gaps[0] - gaps[-1]) <= 3, str(gaps))
+    below = d.height() - (bar.mapTo(d, QPoint(0, 0)).y() + bar.height())
+    check('sections: the bar is at the bottom of the dock, where the bar for all was', 0 <= below <= 12, str(below))
+    check('sections: the buttons of FILTERING act', all(action_button(name).isEnabled() for name in ('filter', 'unfilter')))
+    open_section(d.EXPORTING)
+    grab('sections_exporting')
+    expected = [name for name in ('export', 'qfieldcloud') if name in SECTION['all']]
+    check('sections: EXPORTING shows Export (and QFieldCloud with its extension)', actions_shown() == expected,
+          str(actions_shown()))
+    gaps = spread(bars.frame('exporting'))
+    check('sections: Export is centred in its bar', len(gaps) >= 2 and abs(gaps[0] - gaps[-1]) <= 3, str(gaps))
+    check('sections: Export acts', action_button('export').isEnabled())
+    open_section(d.CONFIGURATION)
+    check('sections: CONFIGURATION shows About', actions_shown() == ['about'], str(actions_shown()))
+    open_section(None)
+    grab('sections_nothing_open')
+    check('sections: nothing open below, no button and no bar', actions_shown() == [] and not d.frame_actions.isVisible()
+          and not any(bars.frame(key).isVisible() for key in ('filtering', 'exporting', 'configuration')),
+          str(actions_shown()))
+    if action_button('qfieldcloud') is None:
+        # A button that comes late, as QFieldCloud does: its extension puts it in the bar for all, after the dock.
+        late = QPushButton(d.frame_actions)
+        late.setObjectName('pushButton_action_qfieldcloud')
+        late.setFixedSize(action_button('export').size())
+        d.frame_actions.layout().addWidget(late)
+        d.pushButton_action_qfieldcloud = late
+        open_section(d.EXPORTING)  # select_tabTools_index, which the extension calls too
+        row = bars.frame('exporting')
+        check('sections: a button that comes late joins its section, after Export', late.parentWidget() is row
+              and late.isVisible() and late.x() > action_button('export').x(), str(actions_shown()))
+        late.hide()  # the extension turned off
+        d.select_tabTools_index()
+        QApplication.processEvents()
+        gaps = spread(row)
+        check('sections: hidden, it stays hidden and Export is centred again', not late.isVisible()
+              and actions_shown() == ['export'] and len(gaps) == 2 and abs(gaps[0] - gaps[-1]) <= 3, str(gaps))
+        late.show()
+        manager.set_position('bottom')
+        QApplication.processEvents()
+        check('sections: back in the bar for all, it is after Export and before About',
+              late.parentWidget() is d.frame_actions and action_button('export').x() < late.x() < action_button('about').x(),
+              f"{action_button('export').x()} {late.x()} {action_button('about').x()}")
+        d.frame_actions.layout().removeWidget(late)
+        d.pushButton_action_qfieldcloud = None
+        late.setParent(None)
+        late.deleteLater()
+        manager.set_position('sections')
+        QApplication.processEvents()
+    open_section(d.FILTERING)
+    manager.set_position(SECTION['position'])
+    QApplication.processEvents()
+    held = [name for name in ACTION_NAMES if action_button(name) is not None
+            and action_button(name).parentWidget() is d.frame_actions]
+    order = sorted(actions_shown(), key=lambda name: action_button(name).x())
+    check('sections: back to the bar for all, every button in it and in order', d.frame_actions.isVisible()
+          and actions_shown() == SECTION['all'] and order == SECTION['all']
+          and held == [name for name in ACTION_NAMES if action_button(name) is not None],
+          f"shown={actions_shown()} order={order} held={held}")
+    check('sections: Export is off again while FILTERING is open', not action_button('export').isEnabled()
+          and action_button('filter').isEnabled())
+    grab('sections_after')
+    return None
+
+
+def s_section_detach():
+    """FILTERING in its own QGIS panel: its widgets and its buttons go there, and act whatever the dock shows."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    toolbox = d.toolBox_tabTools
+    open_section(d.FILTERING)
+    index = toolbox.indexOf(d.FILTERING)
+    check('panels: FILTERING can leave the dock, EXPLORING cannot', panels.can_detach('filtering')
+          and not panels.can_detach('exploring'))
+    detached = panels.detach('filtering')
+    QApplication.processEvents()
+    panel = panels.panel('filtering')
+    if not check('panels: FILTERING is in a panel of QGIS', detached and panel is not None and panel.parent() is window
+                 and panel.objectName() == 'FilterMatePanel_filtering' and panel.isVisible(),
+                 f"detached={detached} panel={panel}"):
+        return None
+    check('panels: its widgets are those of the dock, moved', panel.isAncestorOf(d.FILTERING)
+          and not d.isAncestorOf(d.FILTERING) and d.FILTERING.isVisible()
+          and d.comboBox_filtering_current_layer.isVisible())
+    header = bottom_header(d.FILTERING)
+    check('panels: its place in the tool box is kept, its header hidden', toolbox.indexOf(d.FILTERING) == index
+          and toolbox.currentWidget() is d._fm_sections._nothing and header is not None and not header.isVisible(),
+          f"index={toolbox.indexOf(d.FILTERING)} current={toolbox.currentWidget().objectName()}")
+    filtering = [name for name in FILTERING_ACTIONS if action_button(name) is not None]
+    check('panels: its buttons went with it', all(panel.isAncestorOf(action_button(name)) for name in filtering)
+          and all(action_button(name).isVisible() for name in filtering))
+    check('panels: they act with nothing open in the dock', action_button('filter').isEnabled()
+          and action_button('unfilter').isEnabled() and d.filtering_detached)
+    check('panels: the other buttons stay in the bar of the dock', d.frame_actions.isVisible()
+          and action_button('export').parentWidget() is d.frame_actions
+          and action_button('about').parentWidget() is d.frame_actions and not action_button('export').isEnabled(),
+          str(actions_shown()))
+    check('panels: below the dock the first time, in its dock area', window.dockWidgetArea(panel) == window.dockWidgetArea(d)
+          and panel_place(panel) == 'below' and not panel.isFloating(),
+          f"place={panel_place(panel)} dock={d.height()} minimum={d.minimumSizeHint().height()}/{d.minimumHeight()} "
+          f"docks={[(w.objectName(), w.height()) for w in window.findChildren(QDockWidget) if w.isVisible()]}")
+    sheet = panel.widget().styleSheet()
+    check('panels: the panel has the style sheet of the dock', len(sheet) > 100 and sheet == d.dockWidgetContents.styleSheet()
+          and panel.widget().objectName() == 'dockWidgetContents', str(len(sheet)))
+    check('panels: what is apart is remembered', QSettings().value(DETACHED_KEY) == 'filtering',
+          str(QSettings().value(DETACHED_KEY)))
+    toolbox.setCurrentWidget(d.FILTERING)  # a script, or the agent, opens FILTERING
+    QApplication.processEvents()
+    check('panels: FILTERING asked to open shows its panel, the dock stays folded',
+          toolbox.currentWidget() is d._fm_sections._nothing and panel.isVisible())
+    open_section(d.EXPORTING)
+    check('panels: EXPORTING open in the dock, Export and Filter both act', action_button('export').isEnabled()
+          and action_button('filter').isEnabled())
+    open_section(None)
+    grab_widget(panel, 'panel_filtering')
+    grab('dock_filtering_apart')
+    headers = sorted((bottom_header(page) for page in (d.EXPORTING, d.CONFIGURATION)), key=lambda button: button.y())
+    stack = d.splitter_main.widget(1)
+    last = headers[-1].mapTo(stack, QPoint(0, headers[-1].height())).y()
+    gap = headers[1].y() - (headers[0].y() + headers[0].height())
+    check('panels: the headers left in the dock keep their gap, the last one is whole',
+          gap == toolbox.layout().spacing() and last <= stack.height(), f"gap={gap} last={last} stack={stack.height()}")
+    check('panels: the panel has room for its section', panel.height() >= 180,
+          f"panel={panel.height()} dock={d.height()} dock minimum={d.minimumSizeHint().height()} "
+          f"window={window.height()} floating={d.isFloating()}")
+    return None
+
+
+def s_section_filter():
+    """The Filter button of the panel filters (the selection of s_vector_select)."""
+    action_button('filter').click()
+    return lambda: layer('dem').source().endswith('.vrt') and tasks_idle()
+
+
+def s_section_filter_check():
+    dem = layer('dem')
+    check('panels: Filter in the panel of FILTERING clips the raster target', dem.source().endswith('.vrt')
+          and dem.isValid(), f"source=...{dem.source()[-40:]}")
+    return settled()
+
+
+def s_section_undo():
+    undo = action_button('undo_filter')
+    check('panels: Undo acts in the panel, with nothing open in the dock', undo.isEnabled()
+          and dock().tabTools_current_index != 0, f"enabled={undo.isEnabled()} index={dock().tabTools_current_index}")
+    undo.click()
+    return lambda: not layer('dem').source().endswith('.vrt') and tasks_idle()
+
+
+def s_section_undo_check():
+    check('panels: Undo in the panel puts the raster target back',
+          os.path.normpath(layer('dem').source()) == os.path.normpath(M['dem']), layer('dem').source())
+    return settled()
+
+
+def s_section_stack():
+    """EXPORTING and CONFIGURATION join FILTERING as tabs, AGENT leaves too: the dock keeps EXPLORING."""
+    d = dock()
+    panels = d._fm_panels
+    sections = d._fm_sections
+    window = iface.mainWindow()
+    filtering = panels.panel('filtering')
+    if not check('panels: FILTERING is still apart', filtering is not None):
+        return None
+    check('panels: EXPORTING leaves the dock', panels.detach('exporting'))
+    QApplication.processEvents()
+    exporting = panels.panel('exporting')
+    check('panels: EXPORTING is tabbed with FILTERING', exporting is not None
+          and exporting in window.tabifiedDockWidgets(filtering),
+          str([p.objectName() for p in window.tabifiedDockWidgets(filtering)]))
+    export = action_button('export')
+    in_panel = [name for name in ACTION_NAMES if action_button(name) is not None
+                and exporting is not None and exporting.isAncestorOf(action_button(name))]
+    check('panels: the panel of EXPORTING has Export (and QFieldCloud with its extension), and it acts',
+          in_panel == [name for name in ('export', 'qfieldcloud') if action_button(name) is not None]
+          and export.isEnabled(), str(in_panel))
+    check('panels: the bar of the dock keeps About alone', d.frame_actions.isVisible()
+          and action_button('about').parentWidget() is d.frame_actions, str(actions_shown()))
+    check('panels: CONFIGURATION leaves the dock', panels.detach('configuration'))
+    QApplication.processEvents()
+    configuration = panels.panel('configuration')
+    check('panels: CONFIGURATION is tabbed with them, About in it', configuration is not None
+          and configuration in window.tabifiedDockWidgets(filtering)
+          and configuration.isAncestorOf(action_button('about')))
+    check('panels: no bar and no lower stack left in the dock', not d.frame_actions.isVisible()
+          and not d.splitter_main.widget(1).isVisible() and sections.is_open('exploring'))
+    has_agent = 'agent' in sections._headers
+    if has_agent:
+        check('panels: AGENT leaves the dock', panels.detach('agent'))
+        QApplication.processEvents()
+        agent = panels.panel('agent')
+        page = sections._pages['agent']
+        check('panels: AGENT is in its panel, EXPLORING open in the dock', agent is not None
+              and agent.isAncestorOf(page) and not sections._headers['agent'].isVisible()
+              and sections.is_open('exploring') and 'agent' in sections.detached)
+        sections.open_top('agent')  # the agent asks for an answer of the user
+        QApplication.processEvents()
+        check('panels: AGENT asked to open shows its panel, EXPLORING stays open',
+              sections.is_open('exploring') and agent is not None and agent.isVisible() and page.isVisible()
+              and sections.is_open('agent'))
+        check('panels: Undo and Redo stay with FILTERING while AGENT is apart', not d.agent_has_focus())
+    else:
+        report('SKIP', 'panels: AGENT leaves the dock', 'no AGENT section in this dock')
+    check('panels: what is apart is remembered, in the order of the dock', QSettings().value(DETACHED_KEY)
+          == ','.join((['agent'] if has_agent else []) + ['filtering', 'exporting', 'configuration']),
+          str(QSettings().value(DETACHED_KEY)))
+    sheet = d.dockWidgetContents.styleSheet()
+    d.dockWidgetContents.setStyleSheet(sheet + '\n/* another theme */')
+    QApplication.processEvents()
+    check('panels: a change of theme reaches the panels',
+          all(panels.panel(key).widget().styleSheet().endswith('/* another theme */') for key in panels.detached()))
+    d.dockWidgetContents.setStyleSheet(sheet)
+    QApplication.processEvents()
+    for key in panels.detached():
+        panels.raise_panel(key)
+        QApplication.processEvents()
+        grab_widget(panels.panel(key), f'panel_{key}')
+    grab('dock_exploring_alone')
+    return None
+
+
+def s_section_close_dock():
+    dock().close()  # the X of the dock: its panels go with it
+    since = time.time()
+    return lambda: not dock().isVisible() and time.time() - since > 1
+
+
+def s_section_reopen_dock():
+    panels = dock()._fm_panels
+    check('panels: the dock closed, its panels are hidden and stay apart',
+          not any(panels.panel(key).isVisible() for key in panels.detached()) and len(panels.detached()) >= 3,
+          str(panels.detached()))
+    qgis.utils.plugins[PACKAGE].run()  # the toolbar button
+    return settled()
+
+
+def s_section_close_panel():
+    d = dock()
+    panels = d._fm_panels
+    check('panels: the dock shown again, its panels too',
+          d.isVisible() and all(not panels.panel(key).isHidden() for key in panels.detached()),
+          str([key for key in panels.detached() if panels.panel(key).isHidden()]))
+    panels.panel('filtering').close()  # the X of the panel
+    return lambda: 'filtering' not in panels.detached()
+
+
+def s_section_back_check():
+    """A panel closed: its section is back in the dock, folded; then every section back, and restored."""
+    d = dock()
+    panels = d._fm_panels
+    sections = d._fm_sections
+    toolbox = d.toolBox_tabTools
+    window = iface.mainWindow()
+    header = bottom_header(d.FILTERING)
+    check('panels: closing the panel brings FILTERING back to the dock, folded', d.isAncestorOf(d.FILTERING)
+          and header is not None and header.isVisible() and toolbox.isItemEnabled(toolbox.indexOf(d.FILTERING))
+          and toolbox.currentWidget() is sections._nothing and d.splitter_main.widget(1).isVisible()
+          and not [panel for panel in window.findChildren(QDockWidget, 'FilterMatePanel_filtering')
+                   if not panel.isHidden()],
+          f"current={toolbox.currentWidget().objectName()}")
+    check('panels: its buttons are back in the bar of the dock', d.frame_actions.isVisible()
+          and all(action_button(name).parentWidget() is d.frame_actions for name in FILTERING_ACTIONS
+                  if action_button(name) is not None) and not d.filtering_detached)
+    open_section(d.FILTERING)
+    check('panels: FILTERING opens in the dock again, with its widgets', toolbox.currentWidget() is d.FILTERING
+          and d.comboBox_filtering_current_layer.isVisible() and action_button('filter').isEnabled()
+          and action_button('filter').isVisible())
+    panels.attach_all()
+    QApplication.processEvents()
+    pages = [toolbox.indexOf(page) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION)]
+    held = [name for name in ACTION_NAMES if action_button(name) is not None
+            and action_button(name).parentWidget() is d.frame_actions]
+    order = sorted(actions_shown(), key=lambda name: action_button(name).x())
+    check('panels: every section back, the dock as it was', panels.detached() == () and pages == [0, 1, 2]
+          and all(d.isAncestorOf(page) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION))
+          and ('agent' not in sections._headers or (sections._headers['agent'].isVisible()
+                                                    and d.isAncestorOf(sections._pages['agent'])))
+          and held == [name for name in ACTION_NAMES if action_button(name) is not None]
+          and order == SECTION['all'] and not QSettings().value(DETACHED_KEY),
+          f"pages={pages} held={held} order={order} saved={QSettings().value(DETACHED_KEY)!r}")
+    leftovers = [panel.objectName() for panel in window.findChildren(QDockWidget)
+                 if panel.objectName().startswith('FilterMatePanel_') and not panel.isHidden()]
+    check('panels: no panel left in QGIS', not leftovers, str(leftovers))
+    QSettings().setValue(DETACHED_KEY, 'exporting, nothing, FILTERING')  # as saved by another session, and noise
+    restored = panels.restore()
+    QApplication.processEvents()
+    check('panels: the sections that were apart are apart again when the dock is built',
+          restored == ['filtering', 'exporting'] and panels.detached() == ('filtering', 'exporting')
+          and panels.panel('exporting') in window.tabifiedDockWidgets(panels.panel('filtering')), str(restored))
+    panels.attach_all()
+    QApplication.processEvents()
+    open_section(d.FILTERING)
+    check('panels: left as found', panels.detached() == () and toolbox.currentWidget() is d.FILTERING
+          and actions_shown() == SECTION['all'] and not QSettings().value(DETACHED_KEY), str(actions_shown()))
+    grab('sections_end')
+    return settled()
+
+
+def s_section_restart():
+    """As after a restart of QGIS: the dock and its panel come back where they were, the panel still below it."""
+    from qgis.PyQt.QtWidgets import QMenu
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    module = importlib.import_module(f'{PACKAGE}.ui.layout.section_panels')
+    area = window.dockWidgetArea(d)
+    open_section(d.FILTERING)
+    panels.detach('filtering')
+    QApplication.processEvents()
+    panel = panels.panel('filtering')
+    place = panel_place(panel)
+    if not check('restart: FILTERING is apart, below the dock or tabbed with it', place in ('below', 'tab'),
+                 f"place={place} dock={d.height()} floating={d.isFloating()}/{panel.isFloating() if panel else None} "
+                 f"visible={d.isVisible()}/{panel.isVisible() if panel else None} "
+                 f"tops={d.mapTo(window, QPoint(0, 0)).y()}/{panel.mapTo(window, QPoint(0, 0)).y() if panel else None} "
+                 f"docks={[(w.objectName(), w.height()) for w in window.findChildren(QDockWidget) if w.isVisible()]}"):
+        return None
+    menu = window.findChild(QMenu, module.PANEL_MENU_NAME)
+    check('restart: the panel is listed in the menu of the panels of QGIS', menu is not None
+          and panel.toggleViewAction() in menu.actions(), f"menu={menu}")
+    state = window.saveState()  # QGIS saves its window when it closes
+    panels.attach_all(remember=False)  # the plugin unloads: its panels go, what was apart stays saved
+    iface.removeDockWidget(d)
+    QApplication.processEvents()
+    window.restoreState(state)  # QGIS starts: it knows neither the dock nor its panel yet
+    QSettings().setValue(module.DOCK_AREA_KEY, module._area_number(area))
+    restored = module.place_dock(d, iface, area)  # the plugin opens its dock
+    d.show()
+    again = panels.restore()  # and the sections that were apart
+    QApplication.processEvents()
+    panel = panels.panel('filtering')
+    check('restart: the dock is back where QGIS kept it', restored and window.dockWidgetArea(d) == area
+          and d.isVisible() and (menu is None or d.toggleViewAction() in menu.actions()), f"restored={restored}")
+    check('restart: FILTERING is apart again, where it was (below the dock, or tabbed with it)',
+          again == ['filtering'] and panel is not None and not panel.isHidden() and panel_place(panel) == place,
+          f"again={again} place before={place} after={panel_place(panel)}")
+    panels.raise_panel('filtering')
+    QApplication.processEvents()
+    check('restart: its buttons act', action_button('filter').isEnabled()
+          and panel is not None and panel.isAncestorOf(action_button('filter')))
+    QSettings().setValue(module.DOCK_AREA_KEY, -1)
+    check('restart: a change of DOCK_POSITION since wins over the place QGIS kept',
+          not module.restore_dock_first(panels.detached(), QSettings().value(module.DOCK_AREA_KEY),
+                                        module._area_number(area)))
+    QSettings().setValue(module.DOCK_AREA_KEY, module._area_number(area))
+    panels.attach_all()
+    QApplication.processEvents()
+    open_section(d.FILTERING)
+    check('restart: left as found', panels.detached() == () and not QSettings().value(DETACHED_KEY) and d.isVisible()
+          and d.toolBox_tabTools.currentWidget() is d.FILTERING and actions_shown() == SECTION['all'],
+          str(actions_shown()))
+    return settled()
+
+
+SECTION_STEPS = [s_section_setup, s_section_bars, s_vector_source, s_vector_select, s_section_detach, s_section_filter,
+                 s_section_filter_check, s_section_undo, s_section_undo_check, s_section_stack,
+                 s_section_close_dock, s_section_reopen_dock, s_section_close_panel, s_section_back_check,
+                 s_section_restart]
+
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
          s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
@@ -2379,10 +2826,12 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_source, s_partial_undo_on_source_check, s_partial_undo_on_target,
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
-         *PANEL_STEPS, *OPTION_STEPS, s_finish]
+         *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'sections':  # the buttons under their section, a section in its own QGIS panel
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *SECTION_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 

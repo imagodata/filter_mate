@@ -434,7 +434,8 @@ class HistoryController(QObject):
         agent_focus = getattr(dock, "agent_has_focus", None)
         if callable(agent_focus) and agent_focus():
             return self._agent_focus()
-        if getattr(dock, "tabTools_current_index", 0) != 0:
+        if (getattr(dock, "tabTools_current_index", 0) != 0
+                and getattr(dock, "filtering_detached", False) is not True):  # FILTERING in its own panel acts
             return UndoFocus()
         coverage = self._coverage()
         layer = getattr(coverage, "active_layer", None) if coverage is not None else None

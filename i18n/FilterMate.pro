@@ -69,6 +69,7 @@ SOURCES = \
     ../adapters/agent/agent_widgets.py \
     ../ui/controllers/property_controller.py \
     ../ui/layout/dock_chrome.py \
+    ../ui/layout/section_panels.py \
     ../ui/styles/mockup_design.py \
     ../ui/widgets/agent_panel.py \
     ../ui/widgets/agent_thread.py \
