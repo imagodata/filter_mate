@@ -765,7 +765,10 @@ class ScriptedTransport:
 
 
 class UrllibTransport:
-    """The real thing, for ``--live``."""
+    """The real thing, for ``--live``; ``timeout``: how long a request may wait for the model, in seconds."""
+
+    def __init__(self, timeout: float = TIMEOUT_SECONDS) -> None:
+        self._timeout = timeout
 
     def send(self, request, session):
         parser = session.new_parser()
@@ -773,7 +776,7 @@ class UrllibTransport:
                                               method="POST")
         events = []
         try:
-            with urllib.request.urlopen(http_request, timeout=TIMEOUT_SECONDS) as response:  # nosec B310
+            with urllib.request.urlopen(http_request, timeout=self._timeout) as response:  # nosec B310
                 while True:
                     chunk = response.read1(65536)
                     if not chunk:
@@ -895,7 +898,20 @@ def lost_cases(reference: Dict[str, List[bool]], now: Dict[str, List[bool]]) -> 
     """The cases that passed at least twice in the reference and at most once now (3 runs each: the gate of the
     token diet, docs/superpowers/specs/2026-11-16-agent-token-diet-design.md); a case run on one side only is not
     lost."""
-    return sorted(case for case in reference if case in now and sum(reference[case]) >= 2 and sum(now[case]) <= 1)
+    return sorted(case for case in reference if len(now.get(case, ())) == len(reference[case])
+                  and sum(reference[case]) >= 2 and sum(now[case]) <= 1)
+
+
+def uneven_cases(reference: Dict[str, List[bool]], now: Dict[str, List[bool]]) -> List[str]:
+    """The cases run on both sides, not as many times: not compared (a run with another --repeat, or cut short)."""
+    return sorted(case for case in reference if case in now and len(now[case]) != len(reference[case]))
+
+
+def _positive(text: str) -> int:
+    value = int(text)
+    if value < 1:
+        raise argparse.ArgumentTypeError("at least 1")
+    return value
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -910,7 +926,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--base-url", help="instead of the provider's usual address")
     parser.add_argument("--case", action="append", help="only this case (repeatable)")
     parser.add_argument("--json", type=Path, help="write the results here, again after each case")
-    parser.add_argument("--repeat", type=int, default=1, help="play each case this many times")
+    parser.add_argument("--repeat", type=_positive, default=1, help="play each case this many times")
+    parser.add_argument("--timeout", type=float, default=TIMEOUT_SECONDS,
+                        help="seconds a live request may wait for the model (a local model on a small GPU is slow)")
     parser.add_argument("--baseline", type=Path,
                         help="the --json of a reference run: name the cases lost against it, and fail only on those")
     parser.add_argument("--tools", choices=("all", "filtering"), default="all",
@@ -918,6 +936,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parser.parse_args(argv)
     if args.live and not args.model:
         parser.error("--live needs --model")
+    options = {"live": args.live, "provider": args.provider, "model": args.model or "scripted", "families": args.families,
+               "tools": args.tools, "prompt": args.prompt, "repeat": args.repeat}
+    reference = None
+    if args.baseline:  # checked before hours of a live run, not after
+        if args.json and args.json.resolve() == args.baseline.resolve():
+            parser.error("--json would write over --baseline")
+        try:
+            baseline = json.loads(args.baseline.read_text(encoding="utf-8"))
+            reference = passes_by_case(baseline["results"])
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            parser.error(f"--baseline {args.baseline}: not a run of this bench ({exc})")
+        differ = {key: value for key, value in (baseline.get("options") or {}).items() if options.get(key) != value}
+        if differ:
+            parser.error(f"--baseline was run with other options: {differ}")
 
     kind, base_url = PRESETS[args.provider if args.live else "anthropic"]
     provider = create_provider(ProviderConfig(
@@ -934,7 +966,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if filtering and not fits(case, FILTERING_TOOLS):
             continue
         for attempt in range(1, args.repeat + 1):
-            transport = UrllibTransport() if args.live else ScriptedTransport(expected_script(case))
+            transport = UrllibTransport(args.timeout) if args.live else ScriptedTransport(expected_script(case))
             started = time.monotonic()
             result = run_case(case, provider, transport, filtering, prompt=legacy_prompt, families=args.families)
             result["seconds"] = round(time.monotonic() - started, 1)
@@ -944,15 +976,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(f"{status} {result['id']:<28} {result['seconds']:>6}s {','.join(result['tools'])}" + (
                 f"\n     {result['reason']}" if result["reason"] else ""), flush=True)
             if args.json:  # a live run stopped halfway keeps what it did
-                _write_results(args.json, results)
+                _write_results(args.json, results, options)
     passed = sum(1 for result in results if result["passed"])
-    totals = _write_results(args.json, results) if args.json else _totals(results)
+    totals = _write_results(args.json, results, options) if args.json else _totals(results)
     print(f"\n{passed}/{len(results)} passed; tokens: {totals}")
-    if args.baseline:
-        reference = json.loads(args.baseline.read_text(encoding="utf-8"))["results"]
-        lost = lost_cases(passes_by_case(reference), passes_by_case(results))
+    if reference is not None:
+        now = passes_by_case(results)
+        lost, uneven = lost_cases(reference, now), uneven_cases(reference, now)
         print(f"lost against {args.baseline.name}: {', '.join(lost) if lost else 'none'}")
-        return 1 if lost else 0
+        if uneven:
+            print(f"not compared, run a different number of times: {', '.join(uneven)}")
+        return 1 if lost or uneven else 0
     return 0 if passed == len(results) else 1
 
 
@@ -961,10 +995,10 @@ def _totals(results: Sequence[Dict[str, Any]]) -> Dict[str, int]:
             for key in ("input_tokens", "output_tokens", "cache_read_tokens", "cache_write_tokens")}
 
 
-def _write_results(path: Path, results: Sequence[Dict[str, Any]]) -> Dict[str, int]:
+def _write_results(path: Path, results: Sequence[Dict[str, Any]], options: Dict[str, Any]) -> Dict[str, int]:
     totals = _totals(results)
-    path.write_text(json.dumps({"results": list(results), "totals": totals}, indent=1, ensure_ascii=False),
-                    encoding="utf-8")
+    path.write_text(json.dumps({"options": options, "results": list(results), "totals": totals}, indent=1,
+                               ensure_ascii=False), encoding="utf-8")
     return totals
 
 

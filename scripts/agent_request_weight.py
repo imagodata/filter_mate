@@ -42,7 +42,7 @@ from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
 from agent.tool_catalog import LOAD_SKILL, RUN_PYTHON, ToolSpec, chat_tools, with_skill_tool  # noqa: E402
 from agent.chat_setup import SOURCE_TOOLS, chat_instructions  # noqa: E402
 from agent.families import bringing  # noqa: E402
-from agent.session import AgentLimits, AgentSession, run_exchange  # noqa: E402
+from agent.session import STATUS_DONE, AgentLimits, AgentSession, run_exchange  # noqa: E402
 from agent.skills import SKILLS  # noqa: E402
 from agent.tool_executor import ToolExecutor  # noqa: E402
 from agent_eval import ScriptedTransport, SimulatedProject, project_context, project_state_of, skill_loader  # noqa: E402
@@ -88,11 +88,17 @@ def _compact(value: Any) -> str:
 
 
 def cache_order(kind: str, body: Dict[str, Any]) -> str:
-    """The parts of a request in the order its server reads them for its cache: the tools first at all three, then
-    the instructions and the messages (in OpenAI's and Ollama's JSON the tools come after the messages, but their
-    servers put them at the head of the prompt; the literal order would count tools left unchanged as not cached)."""
-    parts = ("tools", "system", "messages") if kind == "anthropic" else ("tools", "messages")
-    return "".join(_compact(body.get(part, [])) for part in parts)
+    """The parts of a request in the order its server reads them for its cache.
+
+    Anthropic documents tools, system, messages. Ollama renders the instructions (the first message), then the tools
+    (the templates of qwen3 and its kin put them in the system block), then the other messages. OpenAI documents no
+    order: taken as tools first, as its JSON's order would count tools left unchanged as not cached (an assumption)."""
+    if kind == "anthropic":
+        return "".join(_compact(body.get(part, [])) for part in ("tools", "system", "messages"))
+    messages = body.get("messages", [])
+    if kind == "ollama" and messages and messages[0].get("role") == "system":
+        return _compact(messages[:1]) + _compact(body.get("tools", [])) + _compact(messages[1:])
+    return _compact(body.get("tools", [])) + _compact(messages)
 
 
 def common_prefix(a: str, b: str) -> int:
@@ -105,14 +111,24 @@ def common_prefix(a: str, b: str) -> int:
     return size
 
 
-def cached_prefix(kind: str, before: Optional[Dict[str, Any]], body: Dict[str, Any]) -> int:
-    """The characters of ``body`` the cache can serve after ``before``, the previous request of the conversation to
-    the same provider: none for the first, none at Ollama when num_ctx changed (it loads the model again)."""
-    if before is None:
+def cached_prefix(kind: str, earlier: Sequence[Dict[str, Any]], body: Dict[str, Any]) -> int:
+    """The characters of ``body`` the cache of the provider ``kind`` can serve after ``earlier``, the requests of the
+    conversation sent to it before, in order.
+
+    Anthropic (cache_control on the whole request) writes each request up to its last block and serves only such an
+    entry whole: the longest earlier request ``body`` starts with, without the "]" that closed its messages; a tool
+    added, or the history rewritten, and nothing is read. OpenAI serves the start in common with the request before.
+    Ollama too, unless num_ctx changed: it loads the model again."""
+    if not earlier:
         return 0
+    order = cache_order(kind, body)
+    if kind == "anthropic":
+        written = (cache_order(kind, before)[:-1] for before in earlier)
+        return max((len(entry) for entry in written if order.startswith(entry)), default=0)
+    before = earlier[-1]
     if kind == "ollama" and before.get("options", {}).get("num_ctx") != body.get("options", {}).get("num_ctx"):
         return 0
-    return common_prefix(cache_order(kind, before), cache_order(kind, body))
+    return common_prefix(cache_order(kind, before), order)
 
 
 @dataclass(frozen=True)
@@ -173,7 +189,7 @@ CONVERSATION = (
 # largest request, neither rising more than 5 % above (docs/superpowers/specs/2026-11-16-agent-token-diet-design.md).
 REFERENCE: Optional[Dict[str, Any]] = {
     "date": "2026-11-16", "commit": "b77dea9c", "fingerprint": "3a596d972f4d",
-    "calls": 21, "sent": 1381796, "largest": 80432, "cost": 251284,
+    "calls": 21, "sent": 1381796, "largest": 80432, "cost": 291616,
 }
 MAX_RISE = 0.05
 
@@ -194,7 +210,8 @@ class Replay:
 class _Measured:
     """The scripted model, after weighing the request it is sent as each provider would build it."""
 
-    def __init__(self, inner, kinds: Dict[str, Provider], rank: int, run: Replay, before: Dict[str, Any]) -> None:
+    def __init__(self, inner, kinds: Dict[str, Provider], rank: int, run: Replay,
+                 before: Dict[str, List[Dict[str, Any]]]) -> None:
         self._inner, self._kinds, self._rank, self._run, self._before = inner, kinds, rank, run, before
 
     def send(self, request, session):
@@ -204,9 +221,10 @@ class _Measured:
         self._run.calls.append(CallWeight(
             self._rank, len(_compact(anthropic["system"])), len(_compact(anthropic.get("tools", []))),
             len(_compact(anthropic["messages"])), len(session.tools),
-            {kind: cached_prefix(kind, self._before.get(kind), body) for kind, body in bodies.items()},
+            {kind: cached_prefix(kind, self._before.setdefault(kind, []), body) for kind, body in bodies.items()},
             bodies["ollama"]["options"]["num_ctx"]))
-        self._before.update(bodies)
+        for kind, body in bodies.items():
+            self._before[kind].append(body)
         return self._inner.send(request, session)
 
 
@@ -232,7 +250,7 @@ def replay() -> Replay:
             run.errors.append(f"{call.name}: {result.content[:160]}")
         return result
     executor.execute = checked
-    before: Dict[str, Any] = {}
+    before: Dict[str, List[Dict[str, Any]]] = {}
     seen = None
     for rank, (text, steps) in enumerate(CONVERSATION, 1):
         scripted = ScriptedTransport([{"tool": tool, "args": args} for tool, args in steps])
@@ -242,6 +260,9 @@ def replay() -> Replay:
         seen = project_state_of(project)
         if exchange.error is not None:
             run.errors.append(f"request {rank}: {exchange.error.message}")
+        elif exchange.decision is None or exchange.decision.status != STATUS_DONE:  # its steps left would weigh too
+            reason = exchange.decision.reason if exchange.decision is not None else "no answer"
+            run.errors.append(f"request {rank}: stopped ({reason})")
         run.skills_loaded += [str(call.arguments.get("name", "")) for call in exchange.calls if call.name == LOAD_SKILL]
     run.summarized = session.summarized
     return run

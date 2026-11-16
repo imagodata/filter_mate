@@ -556,6 +556,58 @@ class TestBench:
                                                      for attempt in (1, 2, 3)]}), encoding="utf-8")
         assert bench.main(["--case", "attr_dept", "--repeat", "3", "--baseline", str(reference)]) == 0
 
+    def _reference(self, tmp_path, attempts=3, **options):
+        reference = tmp_path / "ref.json"
+        reference.write_text(json.dumps({"options": options, "results": [
+            {"id": "attr_dept", "passed": True, "attempt": attempt} for attempt in range(1, attempts + 1)]}),
+            encoding="utf-8")
+        return reference
+
+    def test_baseline_with_other_attempts_is_not_compared(self, bench, tmp_path, capsys):
+        reference = self._reference(tmp_path)
+        assert bench.main(["--case", "attr_dept", "--baseline", str(reference)]) == 1
+        assert "not compared" in capsys.readouterr().out
+
+    def test_baseline_refused_before_running(self, bench, tmp_path, capsys):
+        with pytest.raises(SystemExit):
+            bench.main(["--case", "attr_dept", "--baseline", str(tmp_path / "missing.json")])
+        reference = self._reference(tmp_path)
+        with pytest.raises(SystemExit):
+            bench.main(["--case", "attr_dept", "--repeat", "3", "--baseline", str(reference), "--json", str(reference)])
+        other = self._reference(tmp_path, families=True)
+        with pytest.raises(SystemExit):
+            bench.main(["--case", "attr_dept", "--repeat", "3", "--baseline", str(other)])
+        assert "attr_dept" not in capsys.readouterr().out  # nothing was played
+
+    def test_json_records_the_options(self, bench, tmp_path):
+        out = tmp_path / "r.json"
+        bench.main(["--case", "attr_dept", "--families", "--json", str(out)])
+        options = json.loads(out.read_text(encoding="utf-8"))["options"]
+        assert options["families"] is True and options["repeat"] == 1 and options["provider"] == "anthropic"
+
+    def test_repeat_must_be_positive(self, bench):
+        with pytest.raises(SystemExit):
+            bench.main(["--case", "attr_dept", "--repeat", "0"])
+
+    def test_live_waits_as_long_as_asked(self, bench, monkeypatch):
+        waited = []
+
+        def urlopen(request, timeout):
+            waited.append(timeout)
+            raise OSError("no server")
+        monkeypatch.setattr(bench.urllib.request, "urlopen", urlopen)
+        bench.UrllibTransport(timeout=900).send(SimpleRequest(), FakeSession())
+        assert waited == [900]
+
+
+class SimpleRequest:
+    url, headers, body = "http://localhost:1/x", {}, b"{}"
+
+
+class FakeSession:
+    def new_parser(self):
+        return None
+
 
 class TestRequestUsage:
     """What one request weighed, for the line under the thread."""

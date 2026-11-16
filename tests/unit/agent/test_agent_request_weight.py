@@ -38,19 +38,40 @@ def test_common_prefix_counts_characters(weight):
     assert weight.common_prefix("département 31", "département 32") == 13
 
 
-@pytest.mark.parametrize("kind", ["anthropic", "openai", "ollama"])
+def _compact(value):
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+
+@pytest.mark.parametrize("kind", ["anthropic", "openai"])
 def test_cache_order_puts_the_tools_first(weight, kind):
     body = json.loads(weight.providers()[kind].build_request("sys", [user("é")], TOOLS).body)
-    tools = json.dumps(body["tools"], ensure_ascii=False, separators=(",", ":"))
-    assert weight.cache_order(kind, body).startswith(tools)
+    assert weight.cache_order(kind, body).startswith(_compact(body["tools"]))
+
+
+def test_ollama_reads_the_instructions_then_the_tools(weight):
+    body = json.loads(weight.providers()["ollama"].build_request("sys", [user("é")], TOOLS).body)
+    system, rest = body["messages"][0], body["messages"][1:]
+    assert system["role"] == "system"
+    assert weight.cache_order("ollama", body) == _compact([system]) + _compact(body["tools"]) + _compact(rest)
+
+
+def test_anthropic_reads_only_what_an_earlier_request_wrote(weight):
+    """Its cache holds each earlier request whole (up to its last block): a request that adds a tool reads none."""
+    first = {"tools": [{"name": "a"}], "system": [{"text": "s"}], "messages": [{"content": "m1"}]}
+    more_tools = dict(first, tools=[{"name": "a"}, {"name": "b"}])
+    longer = dict(first, messages=[{"content": "m1"}, {"content": "m2"}])
+    assert weight.cached_prefix("anthropic", [first], more_tools) == 0
+    assert weight.cached_prefix("openai", [first], more_tools) > 0
+    assert weight.cached_prefix("anthropic", [first], longer) == len(weight.cache_order("anthropic", first)) - 1
+    assert weight.cached_prefix("anthropic", [first, more_tools], longer) == len(weight.cache_order("anthropic", first)) - 1
 
 
 def test_ollama_prefix_is_lost_when_the_context_step_changes(weight):
     before = {"tools": [], "messages": [{"role": "user", "content": "a"}], "options": {"num_ctx": 16384}}
     after = dict(before, options={"num_ctx": 32768})
-    assert weight.cached_prefix("ollama", before, after) == 0
-    assert weight.cached_prefix("openai", before, after) > 0
-    assert weight.cached_prefix("ollama", None, before) == 0
+    assert weight.cached_prefix("ollama", [before], after) == 0
+    assert weight.cached_prefix("openai", [before], after) > 0
+    assert weight.cached_prefix("ollama", [], before) == 0
 
 
 def test_estimated_cost(weight):
@@ -69,6 +90,12 @@ def test_conversation_runs_offline_and_cleanly(weight, monkeypatch):
     assert sorted({call.request for call in run.calls}) == list(range(1, 11))
     assert run.skills_loaded == ["cartography"]
     assert all(value == 0 for value in run.calls[0].prefix.values())
+
+
+def test_a_request_cut_short_is_reported(weight, monkeypatch):
+    steps = tuple(("describe_layer", {"layer": "routes"}) for _ in range(20))  # past the 16 turns of a request
+    monkeypatch.setattr(weight, "CONVERSATION", (("Décris les routes vingt fois.", steps),))
+    assert any("request 1" in error for error in weight.replay().errors)
 
 
 def test_within_a_request_the_whole_start_is_shared(weight):
