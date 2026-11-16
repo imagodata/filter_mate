@@ -99,6 +99,9 @@ class SectionBars:
         self._parked: Dict[Any, bool] = {}  # buttons out of a section, on their way to the one bar: shown or not
         self._plan = bar_plan("bottom")
         self._managed_one_bar = False
+        self._watch: Any = None
+        self._pending = False
+        self._watch_bar(getattr(dock, BAR_NAME, None))
 
     # --- what the action bar manager asks -----------------------------------------
 
@@ -151,6 +154,37 @@ class SectionBars:
     def frame(self, key: str) -> Any:
         return self._frames.get(key)
 
+    # --- a button that comes by another hand ---------------------------------------
+
+    def _watch_bar(self, bar: Any) -> None:
+        """Compare is made beside Redo and QFieldCloud after Export, both after the dock, each in the bar it finds
+        its neighbour in (and it evens the gaps of that bar its own way): the rows are put right once it is done."""
+        if bar is None:
+            return
+        if self._watch is None:
+            from qgis.PyQt.QtCore import QEvent, QObject
+            owner = self
+
+            class _Watch(QObject):
+                def eventFilter(self, _watched: Any, event: Any) -> bool:  # noqa: N802 - Qt name
+                    if event.type() == QEvent.Type.ChildAdded:
+                        owner._settle_later()
+                    return False
+
+            self._watch = _Watch(self._dock)
+        bar.installEventFilter(self._watch)
+
+    def _settle_later(self) -> None:
+        if self._pending:
+            return
+        self._pending = True
+        from qgis.PyQt.QtCore import QTimer
+        QTimer.singleShot(0, self._settle_pending)
+
+    def _settle_pending(self) -> None:
+        self._pending = False
+        self.settle()
+
     # --- the rows -----------------------------------------------------------------
 
     def _buttons(self, names: Iterable[str]) -> list:
@@ -170,6 +204,7 @@ class SectionBars:
         row.setSpacing(0)
         self._frames[key] = frame
         self._place(key, frame)
+        self._watch_bar(frame)
         return frame
 
     def _place(self, key: str, frame: Any) -> None:

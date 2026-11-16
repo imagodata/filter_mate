@@ -30,8 +30,8 @@ import types
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsSettings, QgsVectorLayer
 from qgis.PyQt.QtCore import QCoreApplication, QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
-from qgis.PyQt.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDockWidget, QLabel, QLineEdit, QPushButton,
-                                 QScrollArea, QToolButton, QWidget)
+from qgis.PyQt.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDockWidget, QLabel, QLineEdit, QMenu,
+                                 QPushButton, QScrollArea, QToolButton, QWidget)
 try:
     from qgis.PyQt.QtGui import QShortcut
 except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
@@ -300,6 +300,16 @@ def s_open_plugin():
     settings.setValue('qgis/digitizing/validate_geometries', 0)  # FilterMate asks about it otherwise
     plugins = os.path.join(tempfile.mkdtemp(prefix='fm_gui_'), 'plugins')
     shutil.copytree(REPO, os.path.join(plugins, PACKAGE), ignore=shutil.ignore_patterns(*EXCLUDED))
+    if os.environ.get('FM_ACTION_BAR'):  # the dock opens with this position of the action bar, as saved before
+        for name in ('config.default.json', 'config.json'):
+            path = os.path.join(plugins, PACKAGE, 'config', name)
+            with open(path, encoding='utf-8') as stream:
+                config = json.load(stream)
+            config['APP']['DOCKWIDGET']['ACTION_BAR_POSITION']['value'] = os.environ['FM_ACTION_BAR']
+            with open(path, 'w', encoding='utf-8') as stream:
+                json.dump(config, stream, indent=2)
+    if os.environ.get('FM_DETACHED'):  # and with these sections in their own panel, as left the last time
+        settings.setValue('FilterMate/panels/detached', os.environ['FM_DETACHED'])
     sys.path.insert(0, plugins)
     qgis.utils.plugin_paths.insert(0, plugins)
     qgis.utils.updateAvailablePlugins()
@@ -2410,6 +2420,55 @@ def panel_place(panel):
     return 'below' if panel.mapTo(window, QPoint(0, 0)).y() > d.mapTo(window, QPoint(0, 0)).y() else 'above'
 
 
+def s_section_startup_check():
+    """The dock opened with ``sections`` saved and sections left apart (FM_ACTION_BAR, FM_DETACHED): everything is in
+    place without a click. Compare is made beside Redo after the bars: it must be in the row of FILTERING."""
+    d = dock()
+    panels = d._fm_panels
+    manager = d._action_bar_manager
+    window = iface.mainWindow()
+    position, wanted = os.environ.get('FM_ACTION_BAR'), os.environ.get('FM_DETACHED', '')
+    QApplication.processEvents()
+    grab('startup')
+    if position == 'sections':
+        bars = manager.section_bars()
+        if not check('startup: the buttons are under their section', bars is not None
+                     and manager.get_position() == 'sections' and not d.frame_actions.isVisible()):
+            return None
+        row = bars.frame('filtering')
+        held = [name for name in FILTERING_ACTIONS if action_button(name) is not None
+                and action_button(name).parentWidget() is row]
+        check('startup: FILTERING holds Filter, Undo, Redo, Compare and Unfilter', held == list(FILTERING_ACTIONS),
+              str(held))
+        if 'filtering' not in wanted:
+            open_section(d.FILTERING)
+            gaps = spread(row)
+            check('startup: they are spread evenly, Compare among them', len(gaps) == 6
+                  and max(gaps[1:-1]) - min(gaps[1:-1]) <= 3 and abs(gaps[0] - gaps[-1]) <= 3, str(gaps))
+    if wanted:
+        expected = tuple(key for key in ('agent', 'filtering', 'exporting', 'configuration') if key in wanted
+                         and (key != 'agent' or 'agent' in d._fm_sections._headers))
+        check('startup: the sections left apart are in their panels', panels.detached() == expected
+              and all(panels.panel(key).isVisible() or panel_place(panels.panel(key)) == 'tab' for key in expected),
+              f"{panels.detached()} expected {expected}")
+        if 'filtering' in expected:
+            panel = panels.panel('filtering')
+            panels.raise_panel('filtering')
+            QApplication.processEvents()
+            gaps = spread(manager.section_bars().frame('filtering'))
+            check('startup: the panel of FILTERING has its buttons, evenly spread, and they act',
+                  all(panel.isAncestorOf(action_button(name)) for name in FILTERING_ACTIONS)
+                  and len(gaps) == 6 and max(gaps[1:-1]) - min(gaps[1:-1]) <= 3 and action_button('filter').isEnabled(),
+                  str(gaps))
+            grab_widget(panel, 'startup_panel_filtering')
+        check('startup: what is apart stays saved', QSettings().value(DETACHED_KEY) == wanted,
+              str(QSettings().value(DETACHED_KEY)))
+        menu = window.findChild(QMenu, 'mPanelMenu')
+        check('startup: the panels are listed in the menu of the panels of QGIS', menu is not None
+              and all(panels.panel(key).toggleViewAction() in menu.actions() for key in expected), f"menu={menu}")
+    return None
+
+
 def s_section_setup():
     """The layers the steps below filter: the raster target an earlier step removed comes back."""
     if layer('dem') is None:
@@ -2513,8 +2572,32 @@ def s_section_detach():
     index = toolbox.indexOf(d.FILTERING)
     check('panels: FILTERING can leave the dock, EXPLORING cannot', panels.can_detach('filtering')
           and not panels.can_detach('exploring'))
+    icons = d._icon_manager.refresh_all_icons() if getattr(d, '_icon_manager', None) is not None else -1
+    set_ui_profile('normal')  # the profile that asks the dock for the most height
+    QApplication.processEvents()
+    minimum = d.minimumHeight()
     detached = panels.detach('filtering')
     QApplication.processEvents()
+    in_panel = panels.panel('filtering')
+    if in_panel is not None:
+        again = d._icon_manager.refresh_all_icons() if icons >= 0 else -1
+        check('panels: a change of theme still redraws the icons of the section apart', again == icons
+              and action_button('filter') in d.findChildren(QPushButton), f"{icons} icons before, {again} after")
+        check('panels: F5, Ctrl+Z and Ctrl+Y work with the focus in the panel',
+              len(getattr(in_panel, 'shortcuts', None) or []) == 3)
+        check('panels: the dock gives up the minimum height of its profile, for what its contents need',
+              minimum > 0 and d.minimumHeight() < minimum and panels._dock_minimum == minimum,
+              f"normal profile {minimum} -> {d.minimumHeight()}, kept={panels._dock_minimum}")
+        set_ui_profile('auto')
+        QApplication.processEvents()
+        sections = d._fm_sections
+        if 'agent' in sections._headers:
+            sections.open_top('agent')
+            QApplication.processEvents()
+            check('panels: with AGENT open in the dock, Undo and Redo of the panel stay with FILTERING',
+                  sections.is_open('agent') and not d.agent_has_focus())
+            sections.open_top('exploring')
+            QApplication.processEvents()
     panel = panels.panel('filtering')
     if not check('panels: FILTERING is in a panel of QGIS', detached and panel is not None and panel.parent() is window
                  and panel.objectName() == 'FilterMatePanel_filtering' and panel.isVisible(),
@@ -2708,6 +2791,16 @@ def s_section_back_check():
           and action_button('filter').isVisible())
     panels.attach_all()
     QApplication.processEvents()
+    check('panels: with every section back the dock has the minimum height of its profile again',
+          d.minimumHeight() > 0, str(d.minimumHeight()))
+    if 'agent' in sections._headers:
+        minimum = d.minimumHeight()
+        panels.detach('agent')
+        QApplication.processEvents()
+        check('panels: AGENT alone apart, the dock keeps its minimum height', d.minimumHeight() == minimum,
+              f"{minimum} -> {d.minimumHeight()}")
+        panels.attach('agent')
+        QApplication.processEvents()
     pages = [toolbox.indexOf(page) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION)]
     held = [name for name in ACTION_NAMES if action_button(name) is not None
             and action_button(name).parentWidget() is d.frame_actions]
@@ -2832,6 +2925,8 @@ if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, afte
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'sections':  # the buttons under their section, a section in its own QGIS panel
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SECTION_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'sections_startup':  # the same, as the dock finds them when it opens
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, s_section_startup_check, s_finish]
 if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 

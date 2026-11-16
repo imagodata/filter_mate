@@ -284,8 +284,8 @@ class DockSections(QObject):
         self.top.show()  # QSplitter.replaceWidget leaves the new widget hidden
         self._pages = {"exploring": exploring}
         self._headers = {"exploring": self.exploring_header}
-        # Sections shown in their own panel (ui/layout/section_panels.py): out of the rules of the stacks. Asked to
-        # open, a section apart has ``raise_detached`` bring its panel forward.
+        # The keys of the sections shown in their own panel (ui/layout/section_panels.py), of either stack: out of
+        # the rules of the stacks. Asked to open, a section apart has ``raise_detached`` bring its panel forward.
         self.detached = set()
         self.raise_detached = None
         self.exploring_header.clicked.connect(lambda: self._on_top_header("exploring"))
@@ -401,6 +401,9 @@ class DockSections(QObject):
         return -1
 
     def _on_bottom_changed(self, _index: int) -> None:
+        current = self._toolbox.currentWidget()
+        if any(current is getattr(self._dock, key.upper(), None) for key in self.detached):
+            return  # a section in its own panel: that panel comes forward (section_panels.py), the stacks stay
         if self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None) and not self.is_open("exploring"):
             self._open_top("exploring")  # FILTERING works on what EXPLORING selects
         self._fit()

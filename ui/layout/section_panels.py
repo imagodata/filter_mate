@@ -45,6 +45,13 @@ def format_detached(keys: Iterable[str]) -> str:
     return ",".join(parse_detached(list(keys)))
 
 
+def remembered(detached: Iterable[str], saved: Iterable[str], present: Iterable[str]) -> Tuple[str, ...]:
+    """What is kept as apart: the sections apart now, and those ``saved`` that the dock does not hold this time
+    (AGENT turned off is not among those ``present``): they are apart again the day they come back."""
+    now, before, here = set(detached), set(saved), set(present)
+    return tuple(key for key in DETACHABLE if key in now or (key in before and key not in here))
+
+
 def tab_partners(key: str, detached: Iterable[str]) -> List[str]:
     """The sections apart whose panel the new panel of ``key`` is tabbed with, the nearest first: FILTERING,
     EXPORTING and CONFIGURATION go together, AGENT with none of them."""
@@ -201,13 +208,10 @@ class SectionPanels:
         contents = getattr(dock, CONTENTS_NAME, None)
         if contents is not None:
             contents.installEventFilter(self._watch)  # its style sheet changes with the theme
-        dock.installEventFilter(self._watch)  # shown again after it was closed
+        dock.installEventFilter(self._watch)  # closed, then shown again: its panels follow
         toolbox = getattr(dock, "toolBox_tabTools", None)
         if toolbox is not None:
             toolbox.currentChanged.connect(self._on_bottom_changed)
-        closing = getattr(dock, "closingPlugin", None)
-        if closing is not None:
-            closing.connect(self._on_dock_closed)
         dock.destroyed.connect(self._on_dock_destroyed)
         self.watch_headers()
 
@@ -249,7 +253,7 @@ class SectionPanels:
             self._after_change()  # first: the dock folds what left, and says how much room it can spare
             self._place(key, panel, window)
             if remember:
-                _save(self.detached())
+                self._remember()
             return True
         except RuntimeError:  # the dock went away
             logger.debug("Section %s not detached: the dock went away", key, exc_info=True)
@@ -297,7 +301,29 @@ class SectionPanels:
             holder.setAttribute(styled, contents.testAttribute(styled))
         self._style(panel)
         panel.closed_by_user.connect(self._on_panel_closed)
+        shortcuts = getattr(self._dock, "keyboard_shortcuts_for", None)
+        if callable(shortcuts):  # F5, Ctrl+Z and Ctrl+Y of the dock, with the focus in the panel
+            panel.shortcuts = shortcuts(panel)
         return panel
+
+    def find_children(self, *args: Any, **kwargs: Any) -> list:
+        """What the panels hold, looked for as ``QObject.findChildren`` does: the widgets of a section apart are no
+        longer children of the dock, whose passes of style, size and icons look for them through it."""
+        from qgis.PyQt.QtCore import Qt
+        direct = Qt.FindChildOption.FindDirectChildrenOnly
+        for value in list(args) + list(kwargs.values()):
+            try:
+                if value == direct:
+                    return []  # the direct children of the dock only: none of them is in a panel
+            except Exception:  # nosec B112 - a value that cannot be compared is not the option
+                continue
+        found: list = []
+        for panel in self._panels.values():
+            try:
+                found.extend(panel.findChildren(*args, **kwargs))
+            except RuntimeError:  # a panel that is going away
+                pass
+        return found
 
     def _take_bottom(self, key: str, panel: Any) -> bool:
         from .section_bars import SECTION_PAGES
@@ -315,6 +341,7 @@ class SectionPanels:
         area.takeWidget()
         panel.scroll.setWidget(page)
         page.show()
+        sections.detached.add(key)
         return True
 
     def _take_top(self, key: str, panel: Any) -> bool:
@@ -375,15 +402,17 @@ class SectionPanels:
         spare = room - max(dock.minimumHeight(), dock.minimumSizeHint().height())
         return panel_height(panel.widget().sizeHint().height() + TITLE_ROOM, room, spare)
 
-    def relax_dock(self) -> None:
-        """With a section in its own panel, the dock needs less height than its display profile asks for all of
-        them (600 px in the normal one): its contents say how much. The profile's minimum comes back with the last
-        section. Called again after the dimensions of a profile are applied."""
+    def relax_dock(self, profile_applied: bool = False) -> None:
+        """With FILTERING, EXPORTING or CONFIGURATION in its own panel, the dock needs less height than its display
+        profile asks for all of them (600 px in the normal one): no minimum of its own, Qt then holds it to what
+        its contents need. The profile's minimum comes back with the last of them. ``profile_applied``: the
+        dimensions of a profile were just applied, the minimum of the dock is the one to give back."""
         try:
             dock = self._dock
-            if self._panels:
+            if any(key in BOTTOM for key in self._panels):  # AGENT alone apart leaves the dock as tall as ever
+                if self._dock_minimum is None or profile_applied:
+                    self._dock_minimum = dock.minimumHeight()  # once: afterwards Qt writes what the contents need
                 if dock.minimumHeight() > 0:
-                    self._dock_minimum = dock.minimumHeight()
                     dock.setMinimumHeight(0)
             elif self._dock_minimum is not None:
                 dock.setMinimumHeight(self._dock_minimum)
@@ -417,9 +446,22 @@ class SectionPanels:
             self._after_change()
         except RuntimeError:
             pass
+        except Exception:  # the plugin unloads, its controllers are gone: the other panels still have to go
+            logger.debug("The dock was not refreshed after %s came back", key, exc_info=True)
         if remember:
-            _save(self.detached())
+            self._remember()
         return True
+
+    def _present(self) -> List[str]:
+        """The sections this dock has, in it or apart (AGENT is not there when it is turned off)."""
+        from .section_bars import SECTION_PAGES
+        sections = self._sections()
+        pages = getattr(sections, "_pages", {}) if sections is not None else {}
+        return [key for key in DETACHABLE
+                if key in pages or getattr(self._dock, SECTION_PAGES.get(key, ""), None) is not None]
+
+    def _remember(self) -> None:
+        _save(remembered(self.detached(), _saved(), self._present()))
 
     def attach_all(self, remember: bool = True) -> None:
         for key in self.detached():
@@ -434,6 +476,9 @@ class SectionPanels:
         from .section_bars import SECTION_PAGES
         page = getattr(self._dock, SECTION_PAGES[key])
         area = self._origins.pop(key, None)
+        sections = self._sections()
+        if sections is not None:
+            sections.detached.discard(key)
         if panel.scroll is not None and panel.scroll.widget() is page:
             panel.scroll.takeWidget()
         if area is None:
@@ -511,7 +556,7 @@ class SectionPanels:
                     bars.host(key, panel.body)
                 bars.settle()
         select = getattr(dock, "select_tabTools_index", None)
-        if callable(select):
+        if callable(select) and not self._closing:  # not while the plugin unloads: its controllers are gone
             select()  # the buttons of a section apart act whatever is open in the dock
         self.relax_dock()
         sections = self._sections()
@@ -607,6 +652,8 @@ class SectionPanels:
                 if kind == QEvent.Type.StyleChange:
                     for panel in self._panels.values():
                         self._style(panel)
+            elif watched is self._dock and kind == QEvent.Type.Close:
+                self._on_dock_closed()  # the close event itself: the dock may not say that it closes
             elif watched is self._dock and kind == QEvent.Type.Show and self._hidden_with_dock:
                 self._hidden_with_dock = False
                 for panel in self._panels.values():
@@ -615,7 +662,8 @@ class SectionPanels:
             pass
 
     def _on_dock_closed(self) -> None:
-        """The dock is closed: the panels of its sections go with it, and come back when it is shown again."""
+        """The dock is closed: the panels of its sections go with it, and come back when it is shown again. They
+        are hidden, not closed: a panel the user closes brings its section back."""
         if not self._panels:
             return
         self._hidden_with_dock = True
@@ -633,10 +681,21 @@ class SectionPanels:
             self._drop(panel)
 
     def _on_panel_closed(self, key: str) -> None:
-        if self._closing or self._hidden_with_dock or key not in self._panels:
+        if self._closing or key not in self._panels:
             return
         from qgis.PyQt.QtCore import QTimer
-        QTimer.singleShot(0, lambda: self.attach(key))  # after the close event of the panel is over
+        QTimer.singleShot(0, lambda: self._attach_closed(key))  # after the close event of the panel is over
+
+    def _attach_closed(self, key: str) -> None:
+        """The user closed the panel of ``key``: its section comes back. Not when QGIS itself is closing (a floating
+        panel is closed with its windows): the section stays apart for the next time."""
+        try:
+            window = self._main_window()
+            if self._closing or window is None or not window.isVisible():
+                return
+        except RuntimeError:
+            return
+        self.attach(key)
 
     def _on_bottom_changed(self, index: int) -> None:
         """Something opened a section that is apart (a script, the agent): its panel comes forward instead."""

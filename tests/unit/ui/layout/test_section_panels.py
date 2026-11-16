@@ -139,6 +139,19 @@ def test_what_is_saved_reads_back():
         assert panels.parse_detached(panels.format_detached(keys)) == keys
 
 
+def test_what_is_apart_now_is_what_is_kept():
+    present = ("agent", "filtering", "exporting", "configuration")
+    assert panels.remembered(("filtering",), ("filtering", "exporting"), present) == ("filtering",)
+    assert panels.remembered((), ("agent",), present) == ()
+
+
+def test_a_section_the_dock_does_not_hold_this_time_stays_kept():
+    # AGENT was apart, then turned off: FILTERING leaves and comes back, AGENT is apart again the day it returns.
+    present = ("filtering", "exporting", "configuration")
+    assert panels.remembered(("filtering",), ("agent", "filtering"), present) == ("agent", "filtering")
+    assert panels.remembered((), ("agent", "filtering"), present) == ("agent",)
+
+
 # --- where a panel goes the first time ---------------------------------------------
 
 def test_the_lower_sections_are_tabbed_together_the_nearest_first():
