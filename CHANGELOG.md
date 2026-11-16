@@ -6,9 +6,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [5.1.1] - 2026-11-16
 
-The fixes of a review of 5.1.0, and what was merged since; it replaces the builds 5.1.1 of 14 November and 5.1.2 of 15
-November, whose tags are withdrawn. The free quota of the agent is removed: AGENT works with your own API key or a
-local Ollama model. New: the agent sets FilterMate up with you, asks its questions with choices to click and follows
+The fixes of a review of 5.1.0, and what was merged since. The free quota of the agent is removed: AGENT works with
+your own API key or a local Ollama model. New: the agent sets FilterMate up with you, asks its questions with choices to click and follows
 your own skills; it brings in the data a request needs when the project has none: the elevation of an area (a relief
 map with its contours in one sentence), what OpenStreetMap maps there, how many people live there, and the natural
 risks of France; it adds web basemaps, WMS and WMTS layers and the tables of a PostgreSQL connection among the sources
