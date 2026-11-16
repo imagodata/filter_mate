@@ -146,6 +146,10 @@ class TestQuotedIdentifiers:
 
 
 class TestSession:
+    def test_session_shows_what_it_sends(self):
+        chat = session()
+        assert chat.system == "S" and chat.tools == (READ,)
+
     def test_tools_then_done_and_usage(self):
         chat = session()
         chat.add_user_text("hi")
@@ -530,6 +534,27 @@ class TestBench:
         finally:
             server.shutdown()
             server.server_close()
+
+    def test_lost_cases(self, bench):
+        reference = {"a": [True, True, False], "b": [True, False, False], "c": [True, True, True], "d": [True] * 3}
+        now = {"a": [True, False, False], "b": [False] * 3, "c": [True, True, False]}
+        assert bench.lost_cases(reference, now) == ["a"]
+
+    def test_passes_by_case_keeps_the_attempts(self, bench):
+        results = [{"id": "x", "passed": True, "attempt": 1}, {"id": "x", "passed": False, "attempt": 2}]
+        assert bench.passes_by_case(results) == {"x": [True, False]}
+
+    def test_repeat_and_json(self, bench, tmp_path):
+        out = tmp_path / "r.json"
+        assert bench.main(["--case", "attr_dept", "--repeat", "2", "--json", str(out)]) == 0
+        results = json.loads(out.read_text(encoding="utf-8"))["results"]
+        assert [(result["id"], result["attempt"]) for result in results] == [("attr_dept", 1), ("attr_dept", 2)]
+
+    def test_baseline_reports_no_lost_case(self, bench, tmp_path):
+        reference = tmp_path / "ref.json"
+        reference.write_text(json.dumps({"results": [{"id": "attr_dept", "passed": True, "attempt": attempt}
+                                                     for attempt in (1, 2, 3)]}), encoding="utf-8")
+        assert bench.main(["--case", "attr_dept", "--repeat", "3", "--baseline", str(reference)]) == 0
 
 
 class TestRequestUsage:
