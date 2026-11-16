@@ -40,10 +40,11 @@ chat_controller, agent_settings, sources = _load()
 Controller = chat_controller.AgentChatController
 
 GOLDEN = {  # (length, sha256 of the UTF-8 text); 2026-11-16, lot 1 of the token diet: the instructions without the
-    # paragraphs that described a tool one by one (12,076 characters before for the default)
-    "default": (6357, "111ca6bcc8b38352582a4fe4b97660c21833a3e4e1ef563c6b875526309ac554"),
-    "no_values_local": (6841, "0f72b1b59a0e6aff60b4d9dfae646ad9b54b9ced2471276f524a982cb1e52499"),
-    "every_source": (6933, "07a04f553220042019f86ca8966c7cd4afcf2a92d4ec5924febb6ad08d8fb0c6"),
+    # paragraphs that described a tool one by one (12,076 characters before for the default); then the way of working
+    # starts from the state of the project sent, not from list_layers and map_context (review of lot 1)
+    "default": (6366, "e557fe3f8022b29122680ebf7fb1beecef7b7e83c1493fb012455e15c3b4f735"),
+    "no_values_local": (6850, "e6d1c5d92221d6c2500b1947530a9512e09e2d179fac6eda4bb9b783cbab5bfc"),
+    "every_source": (6942, "855ff10544b9b01388d99d5f28dbca4a1576f95e19b335e75f2ff3fb033e97e2"),
 }
 _EVERY = tuple(source.id for source in sources.BUILT_IN)
 CONFIGS = {

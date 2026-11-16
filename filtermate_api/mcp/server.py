@@ -1208,7 +1208,8 @@ def build_server(client: FilterMateClient) -> Any:
     async def remove_layers(
         layers: Annotated[LayerList, Field(description="Layer ids or names to remove from the project")],
     ) -> Dict[str, Any]:
-        """Remove layers from the project. Their files are not deleted. The chat of FilterMate asks the user first,
+        """Remove layers from the project, only when the user asks to remove them: never to hide or to filter a
+        layer (set_layers_visibility, apply_filter). Their files are not deleted. The chat of FilterMate asks the user first,
         and undoing the turn there brings the layers back with their styles and filters, except a layer held in
         memory, whose features are lost. From another client it cannot be undone. Returns done and failed."""
         return await call("POST", "/layers/remove", _body(layers=layers))

@@ -1632,14 +1632,17 @@ class AgentChatController(QObject):
         load = handlers.get(LOAD_SKILL)
         if hidden:
             def offer(found):
-                if self._engine is not None:
-                    self._engine.offer_tools(found)
+                if self._engine is None:
+                    raise ToolFailure("This conversation is over: nothing added.")
+                self._engine.offer_tools(found)
 
             def turned_off(name: str) -> str:
+                # the rules as they are now: the user may change them while the conversation goes on
                 return "turned off by the user in the Tools tab of the agent settings" \
-                    if values.rules.get(name) == RULE_NEVER else ""
+                    if self._policy.turned_off(name) else ""
             handlers = dict(handlers, **{USE_TOOLS: use_tools_handler(
-                later, offer, known={tool.name for tool in tools} | {USE_TOOLS}, refused=turned_off)})
+                later, offer, known={tool.name for tool in tools} | {USE_TOOLS}, refused=turned_off, skills=hidden,
+                everything={tool.name for tool in chat_tools()})})
 
         def offer_family(skill_name: str):
             """The tools the skill ``skill_name`` brings, offered now; their names, none when already there."""

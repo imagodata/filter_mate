@@ -10,7 +10,7 @@ every tool.
 """
 from __future__ import annotations
 
-from typing import Any, Callable, Collection, Dict, Iterable, List, Sequence, Set, Tuple
+from typing import Any, Callable, Collection, Dict, Iterable, List, Mapping, Sequence, Set, Tuple
 
 from .mcp_client import PREFIX as CONNECTOR_TOOL_PREFIX
 from .skills import Skill
@@ -64,23 +64,44 @@ def split_tools(tools: Sequence[ToolSpec]) -> Tuple[List[ToolSpec], List[ToolSpe
     return start + [USE_TOOLS_TOOL], available
 
 
+SKILL_NOTE = ("A tool of a new kind of task comes with instructions: load_skill with the skill named for it says how to "
+              "use it and what never to do with it.")
+NOT_HERE = ("not available in this conversation (its source is not ticked, or a setting or the expert mode is off): "
+            "say so to the user, who changes it in the agent settings")
+
+
 def use_tools_handler(available: Dict[str, ToolSpec], offer: Callable[[List[ToolSpec]], Any], known: Collection[str],
-                      refused: Callable[[str], str] = lambda name: "") -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+                      refused: Callable[[str], str] = lambda name: "", skills: Mapping[str, Sequence[str]] = {},
+                      everything: Collection[str] = ()) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
     """The handler of use_tools: the tools named leave ``available`` and are ``offer``-ed, in the order asked, all or
     none. ``known``: every tool of the conversation (a name offered already is said so); ``refused``: why a tool may
-    not be added (a rule of the user), "" when it may."""
+    not be added now (a rule of the user, read at each call), "" when it may; ``skills``: the skills that bring each
+    tool, named in the answer (their rules are not in the index); ``everything``: every tool of the chat, to say why
+    one is not in this conversation."""
     from .tool_executor import ToolFailure
+
+    def missing(name: str) -> str:
+        if name.startswith(CONNECTOR_TOOL_PREFIX):
+            return f"{name}: a tool of a connector: load its entry with load_skill"
+        return f"{name}: {NOT_HERE}" if name in everything else f"{name}: no such tool"
 
     def run(arguments: Dict[str, Any]) -> Dict[str, Any]:
         names = list(dict.fromkeys(str(name) for name in arguments.get("names") or ()))[:MAX_USE_TOOLS]
         problems = [f"{name}: {refused(name)}" for name in names if refused(name)]
         if problems:
             raise ToolFailure("Not added: " + "; ".join(problems))
-        unknown = [name for name in names if name not in available and name not in known]
+        unknown = [missing(name) for name in names if name not in available and name not in known]
         if unknown:
-            raise ToolFailure(f"No tool {', '.join(unknown)}: use the names of the index at the end of the instructions.")
+            raise ToolFailure("Not added: " + "; ".join(unknown) + ". Use the names of the index at the end of the "
+                              "instructions.")
         added = [name for name in names if name in available]
         if added:
-            offer([available.pop(name) for name in added])
-        return {"added": added, "already": [name for name in names if name not in added]}
+            offer([available[name] for name in added])  # raises when it cannot: nothing is marked added then
+            for name in added:
+                available.pop(name)
+        answer: Dict[str, Any] = {"added": added, "already": [name for name in names if name not in added]}
+        brought = {name: list(skills[name]) for name in added if skills.get(name)}
+        if brought:
+            answer.update(skills=brought, note=SKILL_NOTE)
+        return answer
     return run

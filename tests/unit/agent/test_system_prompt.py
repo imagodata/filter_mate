@@ -30,3 +30,16 @@ def test_the_rules_across_tools_stay():
 
 def test_the_instructions_are_shorter():
     assert len(SYSTEM_PROMPT) < 7000, len(SYSTEM_PROMPT)
+
+
+def test_the_way_of_working_starts_from_the_state_sent_and_the_core():
+    """2026-11-16, review of lot 1: list_layers and map_context, out of the core, cost a use_tools round trip each
+    time the instructions sent the model to them; the state of the project sent with each request answers."""
+    assert "list_layers" not in SYSTEM_PROMPT and "map_context" not in SYSTEM_PROMPT
+    assert "state of the project sent with each request" in SYSTEM_PROMPT
+
+
+def test_remove_layers_says_never_to_hide():
+    from core.agent.tool_catalog import chat_tools
+    remove = next(tool for tool in chat_tools() if tool.name == "remove_layers")
+    assert "never to hide or to filter" in remove.description
