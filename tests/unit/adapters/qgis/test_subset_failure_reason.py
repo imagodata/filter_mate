@@ -123,3 +123,28 @@ class TestWatch:
         sfr._translate(sfr.CONNECTION_LOST)
         sfr._translate(sfr.NO_REASON)
         assert seen == [('SubsetFailureReason', sfr.CONNECTION_LOST), ('SubsetFailureReason', sfr.NO_REASON)]
+
+
+class TestPostgresConnectionLost:
+    """2026-11-16: the diagnostics of a refused subset skip what reconnects when the server is gone."""
+
+    def _layer(self, sfr, provider, errors):
+        layer = MagicMock()
+        layer.providerType.return_value = provider
+        layer.dataProvider.return_value.errors.return_value = errors
+        return layer
+
+    def test_no_result_since_the_start(self, sfr):
+        layer = self._layer(sfr, 'postgres', ['old', 'no result buffer'])
+        assert sfr.postgres_connection_lost(layer, 1)
+
+    def test_an_old_no_result_does_not_count(self, sfr):
+        layer = self._layer(sfr, 'postgres', ['no result buffer', 'ERROR:  syntax error'])
+        assert not sfr.postgres_connection_lost(layer, 1)
+
+    def test_only_postgres(self, sfr):
+        layer = self._layer(sfr, 'ogr', ['no result buffer'])
+        assert not sfr.postgres_connection_lost(layer, 0)
+
+    def test_the_count_of_errors(self, sfr):
+        assert sfr.provider_error_count(self._layer(sfr, 'postgres', ['a', 'b'])) == 2
