@@ -791,6 +791,31 @@ L'exécuter ?</translation>
         <translation>Configuration lancée.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="641"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Quelques choix, puis les réglages avant et après : aucun modèle d'IA n'est nécessaire, rien ne change tant que vous n'appliquez pas. Plus tard : menu Vecteur &gt; FilterMate &gt; Configurer FilterMate avec l'agent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="646"/>
+        <source>Sections: FILTERING, EXPORTING, AGENT, only those you use</source>
+        <translation>Sections : FILTERING, EXPORTING, AGENT, seulement celles que vous utilisez</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
+        <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
+        <translation>Vos données : rasters, nuages de points, PostgreSQL, services web, leur taille</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="648"/>
+        <source>Look: theme, size of the panel, language, buttons</source>
+        <translation>Apparence : thème, taille du panneau, langue, boutons</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>Wait for the end of the request, then try again.</source>
+        <translation>Attendez la fin de la requête, puis réessayez.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
         <source>Not now: the menu starts it when you want.</source>
         <translation>Plus tard : le menu la lance quand vous voulez.</translation>
@@ -1995,6 +2020,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="429"/>
         <source>Connect a provider</source>
         <translation>Connecter un fournisseur</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="645"/>
+        <source>Set up FilterMate, no model needed</source>
+        <translation>Configurer FilterMate, sans modèle</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -11217,6 +11247,444 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0} : le fournisseur a rejeté le filtre et la restauration a échoué.</translation>
+    </message>
+</context>
+<context>
+    <name>SetupWizard</name>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Sections</source>
+        <translation>Sections</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Data</source>
+        <translation>Données</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Size</source>
+        <translation>Taille</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Theme</source>
+        <translation>Thème</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Panel</source>
+        <translation>Panneau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Language</source>
+        <translation>Langue</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Buttons</source>
+        <translation>Boutons</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Filtering</source>
+        <translation>Filtrage</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Targets</source>
+        <translation>Cibles</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Groups</source>
+        <translation>Groupes</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Rasters</source>
+        <translation>Rasters</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Clouds</source>
+        <translation>Nuages</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="42"/>
+        <source>Which sections of the panel do you use? EXPLORING is always there.</source>
+        <translation>Quelles sections du panneau utilisez-vous ? EXPLORING est toujours présent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Which data do you work with, besides vector layers?</source>
+        <translation>Avec quelles données travaillez-vous, en plus des couches vectorielles ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>How big are your layers, most of the time?</source>
+        <translation>Quelle est la taille de vos couches, la plupart du temps ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="45"/>
+        <source>Colours of the panel</source>
+        <translation>Couleurs du panneau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="46"/>
+        <source>Size of the panel</source>
+        <translation>Taille du panneau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="47"/>
+        <source>Language of the panel</source>
+        <translation>Langue du panneau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="48"/>
+        <source>Where the action buttons go (Filter, Export...)</source>
+        <translation>Où placer les boutons d'action (Filtrer, Exporter...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="49"/>
+        <source>When you filter</source>
+        <translation>Quand vous filtrez</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="50"/>
+        <source>A vector layer also filters these layers (cut to its features)</source>
+        <translation>Une couche vectorielle filtre aussi ces couches (découpées à ses entités)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="51"/>
+        <source>When you export to a file, keep the groups of the layer tree</source>
+        <translation>Lors d'un export vers un fichier, conserver les groupes de l'arbre des couches</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="52"/>
+        <source>Format of the rasters exported</source>
+        <translation>Format des rasters exportés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Format of the point clouds exported</source>
+        <translation>Format des nuages de points exportés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="150"/>
+        <source>Set up FilterMate: a few choices, ticked as your settings are now. Nothing is sent anywhere, and nothing changes until you apply.</source>
+        <translation>Configurer FilterMate : quelques choix, cochés selon vos réglages actuels. Rien n'est envoyé nulle part, et rien ne change tant que vous n'appliquez pas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Stop the setup</source>
+        <translation>Arrêter la configuration</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Setup stopped.</source>
+        <translation>Configuration arrêtée.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="202"/>
+        <source>Setup stopped: nothing changed. Menu Vector &gt; FilterMate starts it again.</source>
+        <translation>Configuration arrêtée : rien n'a changé. Le menu Vecteur &gt; FilterMate la relance.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="220"/>
+        <source>Your settings of FilterMate</source>
+        <translation>Vos réglages de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="221"/>
+        <source>They stay for every project; Undo puts them back.</source>
+        <translation>Ils restent pour tous les projets ; Annuler les remet comme avant.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Apply</source>
+        <translation>Appliquer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Cancel</source>
+        <translation>Annuler</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Applied.</source>
+        <translation>Appliqué.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Rien n'a changé : les réglages n'ont pas pu être appliqués.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>Certains de ces réglages ont changé depuis : ils sont laissés tels quels.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Réglages remis comme avant.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Remettre mes réglages comme avant</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Ils restent pour tous les projets ; le lien qui suit les remet comme avant.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Not applied: nothing changed.</source>
+        <translation>Non appliqué : rien n'a changé.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="230"/>
+        <source>Setup of FilterMate</source>
+        <translation>Configuration de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="65"/>
+        <source>Filter layers by the features selected in EXPLORING. Off: the source layer is chosen at the top of EXPLORING.</source>
+        <translation>Filtrer les couches selon les entités sélectionnées dans EXPLORING. Désactivé : la couche source se choisit en haut d'EXPLORING.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="67"/>
+        <source>Export layers to files (GeoPackage, Shapefile, KML...), QFieldCloud.</source>
+        <translation>Exporter des couches vers des fichiers (GeoPackage, Shapefile, KML...) et QFieldCloud.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="69"/>
+        <source>Filter from a sentence, with a model you connect. Without a model it keeps this setup.</source>
+        <translation>Filtrer à partir d'une phrase, avec un modèle que vous connectez. Sans modèle, elle propose toujours cette configuration.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="73"/>
+        <source>Rasters (images, DEMs)</source>
+        <translation>Rasters (images, MNT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="74"/>
+        <source>Point clouds (LiDAR)</source>
+        <translation>Nuages de points (LiDAR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="75"/>
+        <source>PostgreSQL / PostGIS</source>
+        <translation>PostgreSQL / PostGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="76"/>
+        <source>Web services (WFS, WMS)</source>
+        <translation>Services web (WFS, WMS)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>Small: under 10,000 features</source>
+        <translation>Petites : moins de 10 000 entités</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>A shorter wait while you type an expression.</source>
+        <translation>Une attente plus courte pendant la saisie d'une expression.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>Medium: up to 100,000</source>
+        <translation>Moyennes : jusqu'à 100 000</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>The usual settings.</source>
+        <translation>Les réglages habituels.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Large: 100,000 features or more</source>
+        <translation>Grandes : 100 000 entités ou plus</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Longer timeouts, fewer warnings.</source>
+        <translation>Délais plus longs, moins d'avertissements.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="82"/>
+        <source>Keep my settings</source>
+        <translation>Garder mes réglages</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>As QGIS</source>
+        <translation>Comme QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Light</source>
+        <translation>Clair</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Dark</source>
+        <translation>Sombre</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="85"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Fit to the screen</source>
+        <translation>Adapter à l'écran</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Compact (small screen)</source>
+        <translation>Compact (petit écran)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Large (4K, Retina)</source>
+        <translation>Grand (4K, Retina)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Bottom</source>
+        <translation>En bas</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Top</source>
+        <translation>En haut</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Left</source>
+        <translation>À gauche</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Right</source>
+        <translation>À droite</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="91"/>
+        <source>Zoom to what is kept</source>
+        <translation>Zoomer sur ce qui est conservé</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="92"/>
+        <source>Keep the history of filters in the project</source>
+        <translation>Conserver l'historique des filtres dans le projet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="93"/>
+        <source>Show optimization tips</source>
+        <translation>Afficher les conseils d'optimisation</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="94"/>
+        <source>Let FilterMate choose the fastest way</source>
+        <translation>Laisser FilterMate choisir la méthode la plus rapide</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="95"/>
+        <source>Point clouds</source>
+        <translation>Nuages de points</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a GeoPackage</source>
+        <translation>Dans un GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a KML</source>
+        <translation>Dans un KML</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Cloud Optimized GeoTIFF</source>
+        <translation>Cloud Optimized GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>GeoTIFF</source>
+        <translation>GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAZ (compressed)</source>
+        <translation>LAZ (compressé)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAS</source>
+        <translation>LAS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="99"/>
+        <source>COPC (cloud optimized)</source>
+        <translation>COPC (optimisé pour le cloud)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>Next</source>
+        <translation>Suivant</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>See the changes</source>
+        <translation>Voir les changements</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="209"/>
+        <source>Nothing to change: FilterMate already works this way.</source>
+        <translation>Rien à changer : FilterMate fonctionne déjà ainsi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="256"/>
+        <source>Refine the setup with the agent</source>
+        <translation>Affiner la configuration avec l'agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="258"/>
+        <source>Connect a model to filter from a sentence</source>
+        <translation>Connecter un modèle pour filtrer à partir d'une phrase</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>{} in this project</source>
+        <translation>{} dans ce projet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="216"/>
+        <source>These settings could not be prepared: change them in the configuration of the panel.</source>
+        <translation>Ces réglages n'ont pas pu être préparés : modifiez-les dans la configuration du panneau.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="248"/>
+        <source>FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show it again: this setup, or {}.</source>
+        <translation>FILTERING est masqué : la couche source se choisit en haut d'EXPLORING. Pour le réafficher : cette configuration, ou {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>The AGENT section goes after restarting QGIS. To bring it back: {}.</source>
+        <translation>La section AGENT disparaît au redémarrage de QGIS. Pour la retrouver : {}.</translation>
     </message>
 </context>
 <context>

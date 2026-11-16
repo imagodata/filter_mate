@@ -663,6 +663,31 @@ Chạy không?</translation>
         <translation>Đã bắt đầu thiết lập.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="641"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Vài lựa chọn, rồi các cài đặt trước và sau: không cần mô hình AI, không có gì thay đổi cho đến khi bạn áp dụng. Sau này: menu Vector &gt; FilterMate &gt; Thiết lập FilterMate với tác tử.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="646"/>
+        <source>Sections: FILTERING, EXPORTING, AGENT, only those you use</source>
+        <translation>Mục: FILTERING, EXPORTING, AGENT, chỉ những mục bạn dùng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
+        <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
+        <translation>Dữ liệu của bạn: raster, đám mây điểm, PostgreSQL, dịch vụ web, kích cỡ của chúng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="648"/>
+        <source>Look: theme, size of the panel, language, buttons</source>
+        <translation>Giao diện: chủ đề, kích cỡ của bảng, ngôn ngữ, nút</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>Wait for the end of the request, then try again.</source>
+        <translation>Hãy chờ yêu cầu kết thúc rồi thử lại.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
         <source>Not now: the menu starts it when you want.</source>
         <translation>Để sau: menu sẽ khởi động thiết lập khi bạn muốn.</translation>
@@ -1985,6 +2010,11 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <location filename="../ui/widgets/agent_panel.py" line="429"/>
         <source>Connect a provider</source>
         <translation>Kết nối nhà cung cấp</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="645"/>
+        <source>Set up FilterMate, no model needed</source>
+        <translation>Thiết lập FilterMate, không cần mô hình</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -11093,6 +11123,444 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: nhà cung cấp đã từ chối bộ lọc và việc khôi phục thất bại.</translation>
+    </message>
+</context>
+<context>
+    <name>SetupWizard</name>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Sections</source>
+        <translation>Mục</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Data</source>
+        <translation>Dữ liệu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Size</source>
+        <translation>Kích cỡ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Theme</source>
+        <translation>Chủ đề</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Panel</source>
+        <translation>Bảng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Language</source>
+        <translation>Ngôn ngữ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Buttons</source>
+        <translation>Nút</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Filtering</source>
+        <translation>Lọc</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Targets</source>
+        <translation>Đích</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Groups</source>
+        <translation>Nhóm</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Rasters</source>
+        <translation>Raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Clouds</source>
+        <translation>Đám mây</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="42"/>
+        <source>Which sections of the panel do you use? EXPLORING is always there.</source>
+        <translation>Bạn dùng những mục nào của bảng? EXPLORING luôn có sẵn.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Which data do you work with, besides vector layers?</source>
+        <translation>Ngoài lớp vector, bạn làm việc với dữ liệu nào?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>How big are your layers, most of the time?</source>
+        <translation>Phần lớn thời gian, các lớp của bạn lớn cỡ nào?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="45"/>
+        <source>Colours of the panel</source>
+        <translation>Màu sắc của bảng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="46"/>
+        <source>Size of the panel</source>
+        <translation>Kích cỡ của bảng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="47"/>
+        <source>Language of the panel</source>
+        <translation>Ngôn ngữ của bảng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="48"/>
+        <source>Where the action buttons go (Filter, Export...)</source>
+        <translation>Vị trí các nút thao tác (Lọc, Xuất...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="49"/>
+        <source>When you filter</source>
+        <translation>Khi lọc</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="50"/>
+        <source>A vector layer also filters these layers (cut to its features)</source>
+        <translation>Một lớp vector cũng lọc các lớp này (được cắt theo các đối tượng của nó)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="51"/>
+        <source>When you export to a file, keep the groups of the layer tree</source>
+        <translation>Khi xuất ra tệp, giữ các nhóm của cây lớp</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="52"/>
+        <source>Format of the rasters exported</source>
+        <translation>Định dạng raster được xuất</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Format of the point clouds exported</source>
+        <translation>Định dạng đám mây điểm được xuất</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="150"/>
+        <source>Set up FilterMate: a few choices, ticked as your settings are now. Nothing is sent anywhere, and nothing changes until you apply.</source>
+        <translation>Thiết lập FilterMate: vài lựa chọn, được đánh dấu theo cài đặt hiện tại của bạn. Không có gì được gửi đi đâu cả, và không có gì thay đổi cho đến khi bạn áp dụng.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Stop the setup</source>
+        <translation>Dừng thiết lập</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Setup stopped.</source>
+        <translation>Đã dừng thiết lập.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="202"/>
+        <source>Setup stopped: nothing changed. Menu Vector &gt; FilterMate starts it again.</source>
+        <translation>Đã dừng thiết lập: không có gì thay đổi. Menu Vector &gt; FilterMate sẽ bắt đầu lại.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="220"/>
+        <source>Your settings of FilterMate</source>
+        <translation>Cài đặt FilterMate của bạn</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="221"/>
+        <source>They stay for every project; Undo puts them back.</source>
+        <translation>Chúng được giữ cho mọi dự án; Hoàn tác sẽ khôi phục lại.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Apply</source>
+        <translation>Áp dụng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Cancel</source>
+        <translation>Hủy</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Applied.</source>
+        <translation>Đã áp dụng.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Không có gì thay đổi: không thể áp dụng các cài đặt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>Một số cài đặt này đã thay đổi kể từ đó: chúng được giữ nguyên.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Đã khôi phục các cài đặt như trước.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Khôi phục cài đặt của tôi như trước</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Chúng được giữ cho mọi dự án; liên kết bên dưới sẽ khôi phục chúng như trước.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Not applied: nothing changed.</source>
+        <translation>Chưa áp dụng: không có gì thay đổi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="230"/>
+        <source>Setup of FilterMate</source>
+        <translation>Thiết lập FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="65"/>
+        <source>Filter layers by the features selected in EXPLORING. Off: the source layer is chosen at the top of EXPLORING.</source>
+        <translation>Lọc các lớp theo đối tượng được chọn trong EXPLORING. Tắt: lớp nguồn được chọn ở phía trên EXPLORING.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="67"/>
+        <source>Export layers to files (GeoPackage, Shapefile, KML...), QFieldCloud.</source>
+        <translation>Xuất các lớp ra tệp (GeoPackage, Shapefile, KML...) và QFieldCloud.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="69"/>
+        <source>Filter from a sentence, with a model you connect. Without a model it keeps this setup.</source>
+        <translation>Lọc từ một câu, bằng mô hình bạn kết nối. Không có mô hình thì giữ nguyên thiết lập này.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="73"/>
+        <source>Rasters (images, DEMs)</source>
+        <translation>Raster (ảnh, DEM)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="74"/>
+        <source>Point clouds (LiDAR)</source>
+        <translation>Đám mây điểm (LiDAR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="75"/>
+        <source>PostgreSQL / PostGIS</source>
+        <translation>PostgreSQL / PostGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="76"/>
+        <source>Web services (WFS, WMS)</source>
+        <translation>Dịch vụ web (WFS, WMS)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>Small: under 10,000 features</source>
+        <translation>Nhỏ: dưới 10.000 đối tượng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>A shorter wait while you type an expression.</source>
+        <translation>Thời gian chờ ngắn hơn khi bạn nhập biểu thức.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>Medium: up to 100,000</source>
+        <translation>Vừa: tối đa 100.000</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>The usual settings.</source>
+        <translation>Các cài đặt thông thường.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Large: 100,000 features or more</source>
+        <translation>Lớn: từ 100.000 đối tượng trở lên</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Longer timeouts, fewer warnings.</source>
+        <translation>Thời gian chờ dài hơn, ít cảnh báo hơn.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="82"/>
+        <source>Keep my settings</source>
+        <translation>Giữ cài đặt của tôi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>As QGIS</source>
+        <translation>Như QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Light</source>
+        <translation>Sáng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Dark</source>
+        <translation>Tối</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="85"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Fit to the screen</source>
+        <translation>Vừa với màn hình</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Compact (small screen)</source>
+        <translation>Gọn (màn hình nhỏ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Normal</source>
+        <translation>Bình thường</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Large (4K, Retina)</source>
+        <translation>Lớn (4K, Retina)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Bottom</source>
+        <translation>Dưới</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Top</source>
+        <translation>Trên</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Left</source>
+        <translation>Trái</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Right</source>
+        <translation>Phải</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="91"/>
+        <source>Zoom to what is kept</source>
+        <translation>Thu phóng tới phần còn lại</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="92"/>
+        <source>Keep the history of filters in the project</source>
+        <translation>Giữ lịch sử bộ lọc trong dự án</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="93"/>
+        <source>Show optimization tips</source>
+        <translation>Hiện mẹo tối ưu hóa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="94"/>
+        <source>Let FilterMate choose the fastest way</source>
+        <translation>Để FilterMate chọn cách nhanh nhất</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="95"/>
+        <source>Point clouds</source>
+        <translation>Đám mây điểm</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a GeoPackage</source>
+        <translation>Trong một GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a KML</source>
+        <translation>Trong một KML</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Cloud Optimized GeoTIFF</source>
+        <translation>Cloud Optimized GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>GeoTIFF</source>
+        <translation>GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAZ (compressed)</source>
+        <translation>LAZ (nén)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAS</source>
+        <translation>LAS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="99"/>
+        <source>COPC (cloud optimized)</source>
+        <translation>COPC (tối ưu cho đám mây)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>Next</source>
+        <translation>Tiếp</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>See the changes</source>
+        <translation>Xem các thay đổi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="209"/>
+        <source>Nothing to change: FilterMate already works this way.</source>
+        <translation>Không có gì để thay đổi: FilterMate đã hoạt động theo cách này.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="256"/>
+        <source>Refine the setup with the agent</source>
+        <translation>Tinh chỉnh thiết lập với tác tử</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="258"/>
+        <source>Connect a model to filter from a sentence</source>
+        <translation>Kết nối mô hình để lọc từ một câu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>{} in this project</source>
+        <translation>{} trong dự án này</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="216"/>
+        <source>These settings could not be prepared: change them in the configuration of the panel.</source>
+        <translation>Không thể chuẩn bị các cài đặt này: hãy đổi chúng trong cấu hình của bảng.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="248"/>
+        <source>FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show it again: this setup, or {}.</source>
+        <translation>FILTERING đang bị ẩn: lớp nguồn được chọn ở phía trên EXPLORING. Để hiện lại: thiết lập này, hoặc {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>The AGENT section goes after restarting QGIS. To bring it back: {}.</source>
+        <translation>Mục AGENT biến mất sau khi khởi động lại QGIS. Để đưa nó trở lại: {}.</translation>
     </message>
 </context>
 <context>

@@ -663,6 +663,31 @@ Pentru ce: {}
         <translation>Configurarea a pornit.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="641"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Câteva alegeri, apoi setările înainte și după: nu este nevoie de niciun model AI și nimic nu se schimbă până nu aplicați. Mai târziu: meniul Vector &gt; FilterMate &gt; Configurare FilterMate cu agentul.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="646"/>
+        <source>Sections: FILTERING, EXPORTING, AGENT, only those you use</source>
+        <translation>Secțiuni: FILTERING, EXPORTING, AGENT, doar cele pe care le folosiți</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
+        <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
+        <translation>Datele dvs.: rastere, nori de puncte, PostgreSQL, servicii web, mărimea lor</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="648"/>
+        <source>Look: theme, size of the panel, language, buttons</source>
+        <translation>Aspect: temă, mărimea panoului, limbă, butoane</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>Wait for the end of the request, then try again.</source>
+        <translation>Așteptați sfârșitul cererii, apoi încercați din nou.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
         <source>Not now: the menu starts it when you want.</source>
         <translation>Nu acum: meniul o pornește când doriți.</translation>
@@ -1985,6 +2010,11 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="429"/>
         <source>Connect a provider</source>
         <translation>Conectați un furnizor</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="645"/>
+        <source>Set up FilterMate, no model needed</source>
+        <translation>Configurează FilterMate, fără model</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -11093,6 +11123,444 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: furnizorul a respins filtrul, iar restaurarea a eșuat.</translation>
+    </message>
+</context>
+<context>
+    <name>SetupWizard</name>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Sections</source>
+        <translation>Secțiuni</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Data</source>
+        <translation>Date</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Size</source>
+        <translation>Mărime</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Theme</source>
+        <translation>Temă</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Panel</source>
+        <translation>Panou</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Language</source>
+        <translation>Limbă</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Buttons</source>
+        <translation>Butoane</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Filtering</source>
+        <translation>Filtrare</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Targets</source>
+        <translation>Ținte</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Groups</source>
+        <translation>Grupuri</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Rasters</source>
+        <translation>Rastere</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Clouds</source>
+        <translation>Nori</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="42"/>
+        <source>Which sections of the panel do you use? EXPLORING is always there.</source>
+        <translation>Ce secțiuni ale panoului folosiți? EXPLORING este mereu prezentă.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Which data do you work with, besides vector layers?</source>
+        <translation>Cu ce date lucrați, pe lângă straturile vectoriale?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>How big are your layers, most of the time?</source>
+        <translation>Cât de mari sunt, de obicei, straturile dvs.?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="45"/>
+        <source>Colours of the panel</source>
+        <translation>Culorile panoului</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="46"/>
+        <source>Size of the panel</source>
+        <translation>Mărimea panoului</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="47"/>
+        <source>Language of the panel</source>
+        <translation>Limba panoului</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="48"/>
+        <source>Where the action buttons go (Filter, Export...)</source>
+        <translation>Unde se află butoanele de acțiune (Filtrează, Exportă...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="49"/>
+        <source>When you filter</source>
+        <translation>Când filtrați</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="50"/>
+        <source>A vector layer also filters these layers (cut to its features)</source>
+        <translation>Un strat vectorial filtrează și aceste straturi (decupate după entitățile sale)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="51"/>
+        <source>When you export to a file, keep the groups of the layer tree</source>
+        <translation>La exportul într-un fișier, păstrează grupurile arborelui de straturi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="52"/>
+        <source>Format of the rasters exported</source>
+        <translation>Formatul rasterelor exportate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Format of the point clouds exported</source>
+        <translation>Formatul norilor de puncte exportați</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="150"/>
+        <source>Set up FilterMate: a few choices, ticked as your settings are now. Nothing is sent anywhere, and nothing changes until you apply.</source>
+        <translation>Configurați FilterMate: câteva alegeri, bifate conform setărilor dvs. actuale. Nimic nu este trimis nicăieri și nimic nu se schimbă până nu aplicați.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Stop the setup</source>
+        <translation>Oprește configurarea</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Setup stopped.</source>
+        <translation>Configurare oprită.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="202"/>
+        <source>Setup stopped: nothing changed. Menu Vector &gt; FilterMate starts it again.</source>
+        <translation>Configurare oprită: nimic nu s-a schimbat. Meniul Vector &gt; FilterMate o pornește din nou.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="220"/>
+        <source>Your settings of FilterMate</source>
+        <translation>Setările dvs. pentru FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="221"/>
+        <source>They stay for every project; Undo puts them back.</source>
+        <translation>Rămân pentru toate proiectele; Anulează le readuce.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Apply</source>
+        <translation>Aplică</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Cancel</source>
+        <translation>Anulează</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Applied.</source>
+        <translation>Aplicat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Nimic nu s-a schimbat: setările nu au putut fi aplicate.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>Unele dintre aceste setări s-au schimbat între timp: sunt lăsate așa cum sunt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Setările au fost readuse așa cum erau.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Readu setările mele așa cum erau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Rămân pentru toate proiectele; linkul care urmează le readuce așa cum erau.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Not applied: nothing changed.</source>
+        <translation>Neaplicat: nimic nu s-a schimbat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="230"/>
+        <source>Setup of FilterMate</source>
+        <translation>Configurarea FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="65"/>
+        <source>Filter layers by the features selected in EXPLORING. Off: the source layer is chosen at the top of EXPLORING.</source>
+        <translation>Filtrează straturile după entitățile selectate în EXPLORING. Dezactivat: stratul sursă se alege în partea de sus a EXPLORING.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="67"/>
+        <source>Export layers to files (GeoPackage, Shapefile, KML...), QFieldCloud.</source>
+        <translation>Exportă straturi în fișiere (GeoPackage, Shapefile, KML...) și în QFieldCloud.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="69"/>
+        <source>Filter from a sentence, with a model you connect. Without a model it keeps this setup.</source>
+        <translation>Filtrează dintr-o propoziție, cu un model pe care îl conectați. Fără model, această configurare rămâne.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="73"/>
+        <source>Rasters (images, DEMs)</source>
+        <translation>Rastere (imagini, MNT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="74"/>
+        <source>Point clouds (LiDAR)</source>
+        <translation>Nori de puncte (LiDAR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="75"/>
+        <source>PostgreSQL / PostGIS</source>
+        <translation>PostgreSQL / PostGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="76"/>
+        <source>Web services (WFS, WMS)</source>
+        <translation>Servicii web (WFS, WMS)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>Small: under 10,000 features</source>
+        <translation>Mici: sub 10.000 de entități</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>A shorter wait while you type an expression.</source>
+        <translation>Un timp de așteptare mai scurt cât timp scrieți o expresie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>Medium: up to 100,000</source>
+        <translation>Medii: până la 100.000</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>The usual settings.</source>
+        <translation>Setările obișnuite.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Large: 100,000 features or more</source>
+        <translation>Mari: 100.000 de entități sau mai multe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Longer timeouts, fewer warnings.</source>
+        <translation>Timpi de expirare mai lungi, mai puține avertismente.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="82"/>
+        <source>Keep my settings</source>
+        <translation>Păstrează setările mele</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>As QGIS</source>
+        <translation>Ca QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Light</source>
+        <translation>Deschis</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Dark</source>
+        <translation>Întunecat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="85"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Fit to the screen</source>
+        <translation>Potrivește ecranului</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Compact (small screen)</source>
+        <translation>Compact (ecran mic)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Large (4K, Retina)</source>
+        <translation>Mare (4K, Retina)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Bottom</source>
+        <translation>Jos</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Top</source>
+        <translation>Sus</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Left</source>
+        <translation>Stânga</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Right</source>
+        <translation>Dreapta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="91"/>
+        <source>Zoom to what is kept</source>
+        <translation>Zoom pe ceea ce rămâne</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="92"/>
+        <source>Keep the history of filters in the project</source>
+        <translation>Păstrează istoricul filtrelor în proiect</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="93"/>
+        <source>Show optimization tips</source>
+        <translation>Afișează sfaturi de optimizare</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="94"/>
+        <source>Let FilterMate choose the fastest way</source>
+        <translation>Lasă FilterMate să aleagă cea mai rapidă metodă</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="95"/>
+        <source>Point clouds</source>
+        <translation>Nori de puncte</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a GeoPackage</source>
+        <translation>Într-un GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a KML</source>
+        <translation>Într-un KML</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Cloud Optimized GeoTIFF</source>
+        <translation>Cloud Optimized GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>GeoTIFF</source>
+        <translation>GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAZ (compressed)</source>
+        <translation>LAZ (comprimat)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAS</source>
+        <translation>LAS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="99"/>
+        <source>COPC (cloud optimized)</source>
+        <translation>COPC (optimizat pentru cloud)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>Next</source>
+        <translation>Următorul</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>See the changes</source>
+        <translation>Vezi modificările</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="209"/>
+        <source>Nothing to change: FilterMate already works this way.</source>
+        <translation>Nimic de schimbat: FilterMate funcționează deja așa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="256"/>
+        <source>Refine the setup with the agent</source>
+        <translation>Rafinează configurarea cu agentul</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="258"/>
+        <source>Connect a model to filter from a sentence</source>
+        <translation>Conectați un model pentru a filtra dintr-o propoziție</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>{} in this project</source>
+        <translation>{} în acest proiect</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="216"/>
+        <source>These settings could not be prepared: change them in the configuration of the panel.</source>
+        <translation>Aceste setări nu au putut fi pregătite: modificați-le în configurația panoului.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="248"/>
+        <source>FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show it again: this setup, or {}.</source>
+        <translation>FILTERING este ascuns: stratul sursă se alege în partea de sus a EXPLORING. Pentru a-l afișa din nou: această configurare sau {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>The AGENT section goes after restarting QGIS. To bring it back: {}.</source>
+        <translation>Secțiunea AGENT dispare după repornirea QGIS. Pentru a o recupera: {}.</translation>
     </message>
 </context>
 <context>

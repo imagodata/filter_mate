@@ -663,6 +663,31 @@ Jalankan?</translation>
         <translation>Penyiapan dimulai.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="641"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Beberapa pilihan, lalu pengaturan sebelum dan sesudah: tidak perlu model AI, tidak ada yang berubah sampai Anda menerapkannya. Nanti: menu Vektor &gt; FilterMate &gt; Siapkan FilterMate dengan agen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="646"/>
+        <source>Sections: FILTERING, EXPORTING, AGENT, only those you use</source>
+        <translation>Bagian: FILTERING, EXPORTING, AGENT, hanya yang Anda gunakan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
+        <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
+        <translation>Data Anda: raster, awan titik, PostgreSQL, layanan web, ukurannya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="648"/>
+        <source>Look: theme, size of the panel, language, buttons</source>
+        <translation>Tampilan: tema, ukuran panel, bahasa, tombol</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>Wait for the end of the request, then try again.</source>
+        <translation>Tunggu permintaan selesai, lalu coba lagi.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
         <source>Not now: the menu starts it when you want.</source>
         <translation>Nanti saja: menu akan memulainya kapan pun Anda mau.</translation>
@@ -1985,6 +2010,11 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <location filename="../ui/widgets/agent_panel.py" line="429"/>
         <source>Connect a provider</source>
         <translation>Hubungkan penyedia</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="645"/>
+        <source>Set up FilterMate, no model needed</source>
+        <translation>Atur FilterMate, tanpa model</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -11093,6 +11123,444 @@ onnxruntime berasal dari PyPI dengan pip, model dari huggingface.co/{1}, dan set
         <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: penyedia menolak filter dan pemulihan gagal.</translation>
+    </message>
+</context>
+<context>
+    <name>SetupWizard</name>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Sections</source>
+        <translation>Bagian</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Data</source>
+        <translation>Data</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Size</source>
+        <translation>Ukuran</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Theme</source>
+        <translation>Tema</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Panel</source>
+        <translation>Panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Language</source>
+        <translation>Bahasa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Buttons</source>
+        <translation>Tombol</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Filtering</source>
+        <translation>Pemfilteran</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Targets</source>
+        <translation>Target</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Groups</source>
+        <translation>Grup</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Rasters</source>
+        <translation>Raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Clouds</source>
+        <translation>Awan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="42"/>
+        <source>Which sections of the panel do you use? EXPLORING is always there.</source>
+        <translation>Bagian panel mana yang Anda gunakan? EXPLORING selalu ada.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Which data do you work with, besides vector layers?</source>
+        <translation>Data apa yang Anda gunakan selain layer vektor?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>How big are your layers, most of the time?</source>
+        <translation>Biasanya, seberapa besar layer Anda?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="45"/>
+        <source>Colours of the panel</source>
+        <translation>Warna panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="46"/>
+        <source>Size of the panel</source>
+        <translation>Ukuran panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="47"/>
+        <source>Language of the panel</source>
+        <translation>Bahasa panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="48"/>
+        <source>Where the action buttons go (Filter, Export...)</source>
+        <translation>Posisi tombol aksi (Filter, Ekspor...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="49"/>
+        <source>When you filter</source>
+        <translation>Saat memfilter</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="50"/>
+        <source>A vector layer also filters these layers (cut to its features)</source>
+        <translation>Layer vektor juga memfilter layer ini (dipotong sesuai fiturnya)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="51"/>
+        <source>When you export to a file, keep the groups of the layer tree</source>
+        <translation>Saat mengekspor ke file, pertahankan grup pada pohon layer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="52"/>
+        <source>Format of the rasters exported</source>
+        <translation>Format raster yang diekspor</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Format of the point clouds exported</source>
+        <translation>Format awan titik yang diekspor</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="150"/>
+        <source>Set up FilterMate: a few choices, ticked as your settings are now. Nothing is sent anywhere, and nothing changes until you apply.</source>
+        <translation>Atur FilterMate: beberapa pilihan, dicentang sesuai pengaturan Anda saat ini. Tidak ada yang dikirim ke mana pun, dan tidak ada yang berubah sampai Anda menerapkannya.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Stop the setup</source>
+        <translation>Hentikan pengaturan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Setup stopped.</source>
+        <translation>Pengaturan dihentikan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="202"/>
+        <source>Setup stopped: nothing changed. Menu Vector &gt; FilterMate starts it again.</source>
+        <translation>Pengaturan dihentikan: tidak ada yang berubah. Menu Vektor &gt; FilterMate memulainya lagi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="220"/>
+        <source>Your settings of FilterMate</source>
+        <translation>Pengaturan FilterMate Anda</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="221"/>
+        <source>They stay for every project; Undo puts them back.</source>
+        <translation>Tetap berlaku untuk setiap proyek; Urungkan mengembalikannya.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Apply</source>
+        <translation>Terapkan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Cancel</source>
+        <translation>Batal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Applied.</source>
+        <translation>Diterapkan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Tidak ada yang berubah: pengaturan tidak dapat diterapkan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>Beberapa pengaturan ini telah berubah sejak itu: dibiarkan apa adanya.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Pengaturan dikembalikan seperti semula.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Kembalikan pengaturan saya seperti semula</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Tetap berlaku untuk setiap proyek; tautan berikut mengembalikannya seperti semula.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Not applied: nothing changed.</source>
+        <translation>Tidak diterapkan: tidak ada yang berubah.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="230"/>
+        <source>Setup of FilterMate</source>
+        <translation>Pengaturan FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="65"/>
+        <source>Filter layers by the features selected in EXPLORING. Off: the source layer is chosen at the top of EXPLORING.</source>
+        <translation>Filter layer berdasarkan fitur yang dipilih di EXPLORING. Nonaktif: layer sumber dipilih di bagian atas EXPLORING.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="67"/>
+        <source>Export layers to files (GeoPackage, Shapefile, KML...), QFieldCloud.</source>
+        <translation>Ekspor layer ke file (GeoPackage, Shapefile, KML...) dan ke QFieldCloud.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="69"/>
+        <source>Filter from a sentence, with a model you connect. Without a model it keeps this setup.</source>
+        <translation>Filter dari sebuah kalimat, dengan model yang Anda sambungkan. Tanpa model, pengaturan ini tetap dipakai.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="73"/>
+        <source>Rasters (images, DEMs)</source>
+        <translation>Raster (citra, DEM)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="74"/>
+        <source>Point clouds (LiDAR)</source>
+        <translation>Awan titik (LiDAR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="75"/>
+        <source>PostgreSQL / PostGIS</source>
+        <translation>PostgreSQL / PostGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="76"/>
+        <source>Web services (WFS, WMS)</source>
+        <translation>Layanan web (WFS, WMS)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>Small: under 10,000 features</source>
+        <translation>Kecil: kurang dari 10.000 fitur</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>A shorter wait while you type an expression.</source>
+        <translation>Jeda lebih singkat saat Anda mengetik ekspresi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>Medium: up to 100,000</source>
+        <translation>Sedang: hingga 100.000</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>The usual settings.</source>
+        <translation>Pengaturan yang biasa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Large: 100,000 features or more</source>
+        <translation>Besar: 100.000 fitur atau lebih</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Longer timeouts, fewer warnings.</source>
+        <translation>Batas waktu lebih panjang, peringatan lebih sedikit.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="82"/>
+        <source>Keep my settings</source>
+        <translation>Pertahankan pengaturan saya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>As QGIS</source>
+        <translation>Seperti QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Light</source>
+        <translation>Terang</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Dark</source>
+        <translation>Gelap</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="85"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Fit to the screen</source>
+        <translation>Sesuaikan dengan layar</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Compact (small screen)</source>
+        <translation>Ringkas (layar kecil)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Large (4K, Retina)</source>
+        <translation>Besar (4K, Retina)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Bottom</source>
+        <translation>Bawah</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Top</source>
+        <translation>Atas</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Left</source>
+        <translation>Kiri</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Right</source>
+        <translation>Kanan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="91"/>
+        <source>Zoom to what is kept</source>
+        <translation>Zoom ke yang dipertahankan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="92"/>
+        <source>Keep the history of filters in the project</source>
+        <translation>Simpan riwayat filter di dalam proyek</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="93"/>
+        <source>Show optimization tips</source>
+        <translation>Tampilkan tips optimasi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="94"/>
+        <source>Let FilterMate choose the fastest way</source>
+        <translation>Biarkan FilterMate memilih cara tercepat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="95"/>
+        <source>Point clouds</source>
+        <translation>Awan titik</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a GeoPackage</source>
+        <translation>Dalam GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a KML</source>
+        <translation>Dalam KML</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Cloud Optimized GeoTIFF</source>
+        <translation>Cloud Optimized GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>GeoTIFF</source>
+        <translation>GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAZ (compressed)</source>
+        <translation>LAZ (terkompresi)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAS</source>
+        <translation>LAS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="99"/>
+        <source>COPC (cloud optimized)</source>
+        <translation>COPC (dioptimalkan untuk cloud)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>Next</source>
+        <translation>Berikutnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>See the changes</source>
+        <translation>Lihat perubahan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="209"/>
+        <source>Nothing to change: FilterMate already works this way.</source>
+        <translation>Tidak ada yang perlu diubah: FilterMate sudah bekerja seperti ini.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="256"/>
+        <source>Refine the setup with the agent</source>
+        <translation>Sempurnakan pengaturan dengan agen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="258"/>
+        <source>Connect a model to filter from a sentence</source>
+        <translation>Sambungkan model untuk memfilter dari kalimat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>{} in this project</source>
+        <translation>{} dalam proyek ini</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="216"/>
+        <source>These settings could not be prepared: change them in the configuration of the panel.</source>
+        <translation>Pengaturan ini tidak dapat disiapkan: ubah di konfigurasi panel.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="248"/>
+        <source>FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show it again: this setup, or {}.</source>
+        <translation>FILTERING disembunyikan: layer sumber dipilih di bagian atas EXPLORING. Untuk menampilkannya lagi: pengaturan ini, atau {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>The AGENT section goes after restarting QGIS. To bring it back: {}.</source>
+        <translation>Bagian AGENT hilang setelah QGIS dimulai ulang. Untuk memunculkannya kembali: {}.</translation>
     </message>
 </context>
 <context>

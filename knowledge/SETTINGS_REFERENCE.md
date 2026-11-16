@@ -259,6 +259,26 @@ Chat section that filters your layers from a sentence. Sends your request, the n
 | `open_data_domains` | (empty) |  | Open data platforms allowed besides data.gouv.fr and the Opendatasoft hub, comma separated: a host (Opendatasoft portal) or host:kind with kind opendatasoft or ckan, e.g. data.toulouse-metropole.fr, data.example.org:ckan |
 | `enabled` | true | true, false | Show the AGENT section before FILTERING (on: when the panel is next opened; off: after restarting QGIS) |
 
+## Settings > Performance > FILTERING
+
+`APP.OPTIONS.FILTERING`
+
+The FILTERING section of the panel: filter layers by the features selected in EXPLORING
+
+| Setting | Default | Allowed | Description |
+|---|---|---|---|
+| `enabled` | true | true, false | Show the FILTERING section and its Filter and Unfilter buttons (Undo and Redo stay, for the agent and the history). Off: the source layer chooser goes to the top of EXPLORING |
+
+## Settings > Performance > EXPORTING
+
+`APP.OPTIONS.EXPORTING`
+
+The EXPORTING section of the panel: export layers to files
+
+| Setting | Default | Allowed | Description |
+|---|---|---|---|
+| `enabled` | true | true, false | Show the EXPORTING section and its buttons (Export, QFieldCloud) |
+
 ## Settings > Performance > EXPLORATION
 
 `APP.OPTIONS.EXPLORATION`

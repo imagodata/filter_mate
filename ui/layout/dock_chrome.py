@@ -21,12 +21,21 @@ from typing import Any, Optional
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt
 from qgis.PyQt.QtGui import QColor, QPainter, QPen, QPolygonF
 from qgis.PyQt.QtWidgets import (
-    QAbstractButton, QDockWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
+    QAbstractButton, QComboBox, QDockWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
 )
 
 logger = logging.getLogger("FilterMate")
 
 AGENT_PAGE = "AGENT"
+# The sections the user may turn off (APP.OPTIONS.<NAME>.enabled), and the buttons of the action bar acting in them.
+SECTION_PAGES = {"filtering": "FILTERING", "exporting": "EXPORTING"}
+SECTION_ACTIONS = {
+    # Undo and Redo stay: they walk the steps of the agent too, and open the history of the project.
+    "filtering": ("pushButton_action_filter", "pushButton_action_unfilter"),
+    "exporting": ("pushButton_action_export", "pushButton_action_qfieldcloud"),
+}
+# The source layer chooser of FILTERING, which EXPLORING follows: at the top of EXPLORING without FILTERING.
+SOURCE_LAYER_WIDGETS = ("pushButton_checkable_filtering_auto_current_layer", "comboBox_filtering_current_layer")
 EXPLORING_TITLE = "EXPLORING"  # a section name, never translated, as FILTERING
 TITLE_BUTTON = 22  # height of everything in the title bar: favorites, float, close
 TITLE_GLYPH = 8  # side of the float and close glyphs
@@ -285,6 +294,10 @@ class DockSections(QObject):
             holder.setMaximumHeight(0)
             holder = holder.parentWidget()
         self._watched = set()
+        self._hidden_actions = {}
+        self._reopen = set()
+        self._shown = {}
+        self._source_row, self._source_origins = None, []
         self._bottom_limits = None
         self._current_before_press = -1
         self._share = _saved_share()
@@ -373,6 +386,95 @@ class DockSections(QObject):
         if self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None) and not self.is_open("exploring"):
             self._open_top("exploring")  # FILTERING works on what EXPLORING selects
         self._fit()
+
+    # --- sections turned off (APP.OPTIONS.FILTERING / EXPORTING .enabled) -----------
+
+    def set_section_shown(self, key: str, shown: bool) -> bool:
+        """Show or hide FILTERING or EXPORTING: its header, and the buttons of the action bar that act in it only.
+        Without FILTERING the source layer chooser goes to the top of EXPLORING, which still follows it. Hiding again
+        hides a button made since (QFieldCloud comes after the dock). True when the section was there."""
+        page = getattr(self._dock, SECTION_PAGES.get(key, ""), None)
+        index = self._toolbox.indexOf(page) if page is not None else -1
+        if index < 0:
+            return False
+        if not shown and self._toolbox.currentWidget() is page:
+            self._reopen.add(key)  # open again when it comes back, if nothing else was opened meanwhile
+            self._toolbox.setCurrentWidget(self._nothing)
+        for button in self._toolbox.findChildren(QAbstractButton):
+            if button.objectName() == "qt_toolbox_toolboxbutton" and button.text() == self._toolbox.itemText(index):
+                button.setVisible(shown)
+        self._toolbox.setItemEnabled(index, shown)
+        self._shown[key] = shown
+        hidden = self._hidden_actions.setdefault(key, {})
+        bars = []
+        for name in SECTION_ACTIONS.get(key, ()):
+            widget = getattr(self._dock, name, None)
+            if widget is None:
+                continue
+            if not shown:
+                if name not in hidden:
+                    hidden[name] = not widget.isHidden()  # QFieldCloud stays hidden without its plugin
+                widget.setVisible(False)
+            elif name in hidden:
+                widget.setVisible(hidden.pop(name))
+            bar = widget.parentWidget().layout() if widget.parentWidget() is not None else None
+            if bar is not None and bar not in bars:
+                bars.append(bar)
+        for bar in bars:
+            _even_spacing(bar)
+        if key == "filtering":
+            self._move_source_layer(to_exploring=not shown)
+        if shown and key in self._reopen:
+            self._reopen.discard(key)
+            # Not over AGENT: opening FILTERING opens EXPLORING, which would fold AGENT under its user.
+            if self._toolbox.currentWidget() is self._nothing and not self.is_open("agent"):
+                self._toolbox.setCurrentWidget(page)
+        self._fit()
+        return True
+
+    def section_shown(self, key: str) -> bool:
+        """As last set here (a disabled parent would make ``QToolBox.isItemEnabled`` say hidden)."""
+        return self._shown.get(key, True)
+
+    def _move_source_layer(self, to_exploring: bool) -> None:
+        """The same widgets, moved: everything wired to them keeps working, nothing to keep in step."""
+        widgets = [getattr(self._dock, name, None) for name in SOURCE_LAYER_WIDGETS]
+        if any(widget is None for widget in widgets):
+            return
+        if to_exploring:
+            holder = self._dock.frame_exploring.layout()
+            if self._source_row is not None or holder is None:
+                return
+            origins = []
+            for widget in widgets:
+                layout = _layout_holding(widget.parentWidget(), widget) if widget.parentWidget() else None
+                if layout is None:
+                    return  # not where the .ui puts it: left alone
+                at = layout.indexOf(widget)
+                stretch = layout.stretch(at) if hasattr(layout, "stretch") else 0
+                origins.append((widget, layout, at, stretch, layout.itemAt(at).alignment(), widget.isHidden()))
+            row = QWidget(self._dock.frame_exploring)
+            row.setObjectName("widget_exploring_source_layer")
+            line = QHBoxLayout(row)
+            line.setContentsMargins(0, 0, 0, 0)
+            line.setSpacing(4)
+            for widget, layout, *_rest in origins:
+                layout.removeWidget(widget)
+                line.addWidget(widget, 1 if isinstance(widget, QComboBox) else 0)
+                widget.setVisible(not _rest[-1])
+            holder.insertWidget(0, row)
+            row.show()
+            self._source_row, self._source_origins = row, origins
+            return
+        if self._source_row is None:
+            return
+        for widget, layout, at, stretch, alignment, was_hidden in self._source_origins:  # back, as they were
+            self._source_row.layout().removeWidget(widget)
+            layout.insertWidget(min(at, layout.count()), widget, stretch, alignment)
+            widget.setVisible(not was_hidden)
+        self._source_row.hide()
+        self._source_row.deleteLater()
+        self._source_row, self._source_origins = None, []
 
     # --- room ------------------------------------------------------------------------
 
@@ -465,6 +567,60 @@ class DockSections(QObject):
     def _headers_height(self) -> int:
         headers = [header for header in self._headers.values() if not header.isHidden()]
         return sum(header.height() for header in headers) + STACK_GAP * max(0, len(headers) - 1)
+
+
+def _layout_holding(widget: QWidget, child: QWidget):
+    """The layout, nested at any depth under ``widget``, that holds ``child``; None when none does."""
+    pending = [widget.layout()] if widget.layout() is not None else []
+    while pending:
+        layout = pending.pop()
+        if layout.indexOf(child) >= 0:
+            return layout
+        for position in range(layout.count()):
+            inner = layout.itemAt(position).layout()
+            if inner is not None:
+                pending.append(inner)
+    return None
+
+
+def _even_spacing(layout) -> None:
+    try:
+        from .action_bar_manager import even_action_spacing
+        even_action_spacing(layout)
+    except Exception:
+        logger.debug("Action bar not spaced again", exc_info=True)
+
+
+def section_enabled(config_data: Any, key: str) -> bool:
+    """``APP.OPTIONS.<FILTERING|EXPORTING>.enabled``; on when absent, as in the default configuration."""
+    try:
+        node = config_data["APP"]["OPTIONS"][SECTION_PAGES[key]]["enabled"]
+    except (KeyError, TypeError):
+        return True
+    value = node.get("value") if isinstance(node, dict) else node
+    if isinstance(value, str):
+        return value.strip().lower() not in ("false", "0", "no", "off")
+    return value is not False and value != 0
+
+
+def apply_section_options(dock: Any) -> list:
+    """Show or hide FILTERING and EXPORTING as the configuration says; the keys of the sections whose state
+    changed."""
+    sections = getattr(dock, "_fm_sections", None)
+    if sections is None:
+        return []
+    changed = []
+    config_data = getattr(dock, "CONFIG_DATA", None) or {}
+    for key in SECTION_PAGES:
+        wanted = section_enabled(config_data, key)
+        try:
+            before = sections.section_shown(key)
+            # Hidden again even when it was: a button of the section made since is hidden with it.
+            if (before != wanted or not wanted) and sections.set_section_shown(key, wanted) and before != wanted:
+                changed.append(key)
+        except RuntimeError:  # the dock went away
+            return changed
+    return changed
 
 
 def install_dock_chrome(dock: Any) -> Optional[DockTitleBar]:

@@ -2197,9 +2197,19 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self.current_layer and not self.current_layer_selection_connection:
             self._ensure_layer_signals_connected(self.current_layer)
         self.widgetsInitialized.emit(); self._setup_keyboard_shortcuts()
+        self.apply_section_options()
         if self._pending_layers_update:
             self._pending_layers_update = False; pl, pr, weak_self = self.PROJECT_LAYERS, self.PROJECT, weakref.ref(self)
             QTimer.singleShot(100, lambda: weak_self() and weak_self().get_project_layers_from_app(pl, pr))
+
+    def apply_section_options(self):
+        """FILTERING / EXPORTING shown or hidden as APP.OPTIONS.<NAME>.enabled says (ui/layout/dock_chrome.py)."""
+        try:
+            from .ui.layout.dock_chrome import apply_section_options
+            return apply_section_options(self)
+        except Exception as e:
+            logger.warning(f"Sections not applied: {e}")
+            return []
 
     def _connect_initial_widget_signals(self):
         """
