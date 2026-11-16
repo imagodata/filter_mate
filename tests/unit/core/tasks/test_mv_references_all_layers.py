@@ -127,7 +127,7 @@ def _load_finished_handler():
         )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        return module.FinishedHandler
+        return module
     finally:
         for key, value in saved.items():
             if value is None:
@@ -140,7 +140,11 @@ def _load_finished_handler():
     ("export", False), ("filter", False), ("unfilter", True), ("reset", True),
 ])
 def test_mv_cleanup_only_when_filters_are_removed(task_action, cleans, monkeypatch):
-    handler = _load_finished_handler()()
+    module = _load_finished_handler()
+    # The QgsProject of tests/conftest.py is the MagicMock class (no instance()): run alone, this test failed in
+    # FinishedHandler._removed_target_names; in the whole suite another test had replaced qgis.core first.
+    monkeypatch.setattr(module, "QgsProject", MagicMock(instance=MagicMock(return_value=MagicMock())))
+    handler = module.FinishedHandler()
     for name in ("_handle_result_messages", "_release_task_caches",
                  "_log_task_bridge_metrics"):
         monkeypatch.setattr(handler, name, MagicMock())
