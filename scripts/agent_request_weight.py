@@ -171,7 +171,10 @@ CONVERSATION = (
 )
 # The conversation of the main branch before lot 1 (2026-11-16), set by lot 0: each lot must lower the cost and the
 # largest request, neither rising more than 5 % above (docs/superpowers/specs/2026-11-16-agent-token-diet-design.md).
-REFERENCE: Optional[Dict[str, Any]] = None
+REFERENCE: Optional[Dict[str, Any]] = {
+    "date": "2026-11-16", "commit": "b77dea9c", "fingerprint": "3a596d972f4d",
+    "calls": 21, "sent": 1381796, "largest": 80432, "cost": 251284,
+}
 MAX_RISE = 0.05
 
 
