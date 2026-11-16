@@ -215,6 +215,42 @@ def _say_cut_by_extent(layer: Any, subset: str) -> None:
         logger.warning(f"Cut by extent not reported: {exc}")
 
 
+class _NoWatch:
+    """Stand-in when the watch cannot be loaded: the reason is whatever the layer says."""
+
+    def __init__(self, layer: Any):
+        self._layer = layer
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc_info):
+        return False
+
+    def reason(self) -> str:
+        try:
+            error = self._layer.error()
+            message = error.message() if error is not None else ''
+        except (RuntimeError, AttributeError):
+            message = ''
+        try:
+            from ...adapters.qgis.server_filter_translation import last_server_filter_error
+            message = last_server_filter_error(self._layer) or message
+        except Exception as exc:  # catch-all safety net: the reason must not break the apply loop
+            logger.debug(f"Web service error not read: {exc}")
+        return message if isinstance(message, str) and message.strip() else 'Unknown error'
+
+
+def _subset_failure_watch(layer: Any):
+    """A SubsetFailureWatch for the layer (see adapters/qgis/subset_failure_reason.py)."""
+    try:
+        from ...adapters.qgis.subset_failure_reason import SubsetFailureWatch
+        return SubsetFailureWatch(layer)
+    except Exception as exc:  # catch-all safety net: the filter is applied whatever happens to the watch
+        logger.debug(f"Subset failure watch unavailable: {exc}")
+        return _NoWatch(layer)
+
+
 def apply_pending_subset_requests(
     pending_requests: List[Tuple[Any, str]],  # List[Tuple[QgsVectorLayer, str]]
     safe_set_subset_fn: Callable[[Any, str], bool],  # Callable[[QgsVectorLayer, str], bool]
@@ -385,27 +421,31 @@ def apply_pending_subset_requests(
                 applied_count += 1
             else:
                 set_started = _perf_time.perf_counter()
-                # Apply new filter
-                success = safe_set_subset_fn(layer, expression_str)
-                if not success and shares_file and _is_sqlite_lock_error(layer):
-                    # The previous layer's provider still holds the file: give it
-                    # a moment and retry once (replaces the blind pause of old).
-                    import time as _time
-                    _time.sleep(0.3)
+                # 2026-11-16: keeps what the provider says during the attempts, for the
+                # reason of a refusal (layer.error() is empty when the server is gone).
+                watch = _subset_failure_watch(layer)
+                with watch:
+                    # Apply new filter
                     success = safe_set_subset_fn(layer, expression_str)
+                    if not success and shares_file and _is_sqlite_lock_error(layer):
+                        # The previous layer's provider still holds the file: give it
+                        # a moment and retry once (replaces the blind pause of old).
+                        import time as _time
+                        _time.sleep(0.3)
+                        success = safe_set_subset_fn(layer, expression_str)
 
-                extent_fallback = _extent_fallback()
-                if success and extent_fallback is not None:
-                    extent_fallback.forget(layer.id())
-                elif extent_fallback is not None:
-                    # 2026-11-15: a web service refused the keys of an exact filter (their address is too long for
-                    # it, far under 500 keys on a real WFS). The cut by the extent of the source left for that
-                    # case is set instead, and said: the layer is filtered, not left whole with an error.
-                    by_extent = extent_fallback.take(layer.id(), expression_str)
-                    if by_extent and safe_set_subset_fn(layer, by_extent):
-                        success = True
-                        expression_str = by_extent
-                        _say_cut_by_extent(layer, by_extent)
+                    extent_fallback = _extent_fallback()
+                    if success and extent_fallback is not None:
+                        extent_fallback.forget(layer.id())
+                    elif extent_fallback is not None:
+                        # 2026-11-15: a web service refused the keys of an exact filter (their address is too long
+                        # for it, far under 500 keys on a real WFS). The cut by the extent of the source left for
+                        # that case is set instead, and said: the layer is filtered, not left whole with an error.
+                        by_extent = extent_fallback.take(layer.id(), expression_str)
+                        if by_extent and safe_set_subset_fn(layer, by_extent):
+                            success = True
+                            expression_str = by_extent
+                            _say_cut_by_extent(layer, by_extent)
 
                 set_ms = (_perf_time.perf_counter() - set_started) * 1000.0
                 phase_details = f", set {set_ms:.0f} ms"
@@ -474,11 +514,7 @@ def apply_pending_subset_requests(
                     applied_count += 1
                 else:
                     # Enhanced diagnostic for failed filters
-                    error_msg = 'Unknown error'
-                    if layer.error():
-                        error_msg = layer.error().message()
-                    from ...adapters.qgis.server_filter_translation import last_server_filter_error
-                    error_msg = last_server_filter_error(layer) or error_msg
+                    error_msg = watch.reason()
                     logger.warning(f"  ✗ Failed to apply filter to {layer.name()}")
                     logger.warning(f"    → Error: {error_msg}")
                     logger.warning(f"    → Expression ({len(expression_str)} chars): {expression_str[:200]}...")
