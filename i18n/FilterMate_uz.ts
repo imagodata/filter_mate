@@ -10723,6 +10723,34 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>{} ni alohida panelda ochish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="781"/>
+        <source>Open every section in its own panel</source>
+        <translation>Har bir bo'limni alohida panelda ochish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>{} bilan guruhlash</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>{} ni FilterMate bilan qayta birlashtirish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>Barcha bo'limlarni FilterMate bilan qayta birlashtirish</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11456,6 +11484,11 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <location filename="../ui/controllers/setup_wizard.py" line="90"/>
         <source>Right</source>
         <translation>O'ng</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>Har bir bo'lim ostida</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>

@@ -2616,8 +2616,9 @@ class FilterMateApp:
 
         # FIX 2026-02-18: Only update undo/redo on filtering tab (index 0)
         # On other tabs, these buttons must stay disabled per select_tabTools_index()
+        # FILTERING in its own panel keeps its buttons whatever is open in the dock (ui/layout/section_panels.py)
         tab_index = getattr(self.dockwidget, 'tabTools_current_index', 0)
-        if tab_index != 0:
+        if tab_index != 0 and getattr(self.dockwidget, 'filtering_detached', False) is not True:
             undo_btn.setEnabled(False)
             redo_btn.setEnabled(False)
             return

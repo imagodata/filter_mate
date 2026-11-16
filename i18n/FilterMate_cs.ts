@@ -10705,6 +10705,34 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>Otevřít {} ve vlastním panelu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="781"/>
+        <source>Open every section in its own panel</source>
+        <translation>Otevřít každou sekci ve vlastním panelu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>Seskupit s {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>Sloučit {} zpět do FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>Sloučit všechny sekce zpět do FilterMate</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11438,6 +11466,11 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <location filename="../ui/controllers/setup_wizard.py" line="90"/>
         <source>Right</source>
         <translation>Vpravo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>Pod každou sekcí</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>

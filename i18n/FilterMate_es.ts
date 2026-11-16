@@ -10723,6 +10723,34 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>Abrir {} en su propio panel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="781"/>
+        <source>Open every section in its own panel</source>
+        <translation>Abrir cada sección en su propio panel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>Agrupar con {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>Volver a fusionar {} en FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>Volver a fusionar todas las secciones en FilterMate</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11456,6 +11484,11 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <location filename="../ui/controllers/setup_wizard.py" line="90"/>
         <source>Right</source>
         <translation>Derecha</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>Debajo de cada sección</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>

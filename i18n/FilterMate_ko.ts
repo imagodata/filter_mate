@@ -10723,6 +10723,34 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>{}을(를) 별도 패널에서 열기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="781"/>
+        <source>Open every section in its own panel</source>
+        <translation>각 섹션을 별도 패널에서 열기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>{}과(와) 그룹화</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>{}을(를) FilterMate로 다시 병합</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>모든 섹션을 FilterMate로 다시 병합</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11456,6 +11484,11 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <location filename="../ui/controllers/setup_wizard.py" line="90"/>
         <source>Right</source>
         <translation>오른쪽</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>각 섹션 아래</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>

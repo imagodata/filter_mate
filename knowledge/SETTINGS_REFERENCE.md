@@ -21,7 +21,7 @@
 | `LANGUAGE` | auto | auto, en, fr, de, es, it, nl, pt, pl, zh, ru, id, vi, tr, hi, fi, da, sv, nb, sl, tl, am, uz | Interface language: 'auto' (use QGIS locale), or force specific language |
 | `UI_PROFILE` | auto | auto, compact, normal, hidpi | UI display profile: 'auto' (detect from screen/DPI), 'compact' for small screens, 'normal' for standard displays, 'hidpi' for high resolution displays (4K, Retina) |
 | `DOCK_POSITION` | right | left, right, top, bottom | Position of the FilterMate dockwidget in QGIS: 'left' (left side), 'right' (right side), 'top' (top area), 'bottom' (bottom area) |
-| `ACTION_BAR_POSITION` | bottom | top, bottom, left, right | Position of the action bar: 'top' (horizontal at top), 'bottom' (horizontal at bottom), 'left' (vertical on left side), 'right' (vertical on right side) |
+| `ACTION_BAR_POSITION` | bottom | top, bottom, left, right, sections | Position of the action bar: 'top' (horizontal at top), 'bottom' (horizontal at bottom), 'left' (vertical on left side), 'right' (vertical on right side), 'sections' (no bar for all: each section shows its own buttons while it is open - Filter, Undo, Redo, Compare and Unfilter for FILTERING, Export for EXPORTING, About for CONFIGURATION) |
 | `ACTION_BAR_VERTICAL_ALIGNMENT` | top | top, bottom | Vertical alignment of action buttons when action bar is in vertical mode (left/right): 'top' (buttons at top), 'bottom' (buttons at bottom). Use the splitter handle to adjust position. |
 
 ## Settings > Interface > Appearance

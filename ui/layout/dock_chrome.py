@@ -284,6 +284,11 @@ class DockSections(QObject):
         self.top.show()  # QSplitter.replaceWidget leaves the new widget hidden
         self._pages = {"exploring": exploring}
         self._headers = {"exploring": self.exploring_header}
+        # The keys of the sections shown in their own panel (ui/layout/section_panels.py), of either stack: out of
+        # the rules of the stacks. Asked to open, a section apart has ``raise_detached`` bring its panel forward.
+        self.detached = set()
+        self.raise_detached = None
+        self.bring_back = None  # called with the key of a section apart that is being turned off
         self.exploring_header.clicked.connect(lambda: self._on_top_header("exploring"))
         # "Nothing open" below: QToolBox always has a current page, so an empty one, its header never shown.
         self._nothing = QWidget()
@@ -323,20 +328,34 @@ class DockSections(QObject):
         return trailer
 
     def is_open(self, key: str) -> bool:
+        """In view: open in its stack, or on screen in its own panel (behind another tab, it is not)."""
         page = self._pages.get(key)
-        return page is not None and not page.isHidden()
+        if page is None:
+            return False
+        return page.isVisible() if key in self.detached else not page.isHidden()
+
+    def _open_in_stack(self, key: str) -> bool:
+        """Open in the stack of the dock; a section in its own panel is not, wherever it shows."""
+        page = self._pages.get(key)
+        return page is not None and key not in self.detached and not page.isHidden()
 
     def open_top(self, key: Optional[str]) -> None:
         """Open ``key`` in the top stack and apply the rules. One section of it stays open: None, or a section
-        that is not there, opens EXPLORING."""
+        that is not there, opens EXPLORING. A section in its own panel has that panel come forward instead."""
+        if key in self.detached:
+            if self.raise_detached is not None:
+                self.raise_detached(key)
+            return
         if key == "agent" and self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None):
             self._toolbox.setCurrentWidget(self._nothing)  # FILTERING works on EXPLORING, which AGENT folds
         self._open_top(key)
 
     def _open_top(self, key: Optional[str]) -> None:
-        if key not in self._pages:  # never nothing open above
+        if key not in self._pages or key in self.detached:  # never nothing open above
             key = "exploring"
         for name, page in self._pages.items():
+            if name in self.detached:
+                continue
             page.setVisible(name == key)
             self._headers[name].setChecked(name == key)
         header = self._headers["exploring"]
@@ -352,7 +371,7 @@ class DockSections(QObject):
     def _on_top_header(self, key: str) -> None:
         """A click on a folded header opens it; on the open one, it leaves it open (and checked: the click
         unchecked it)."""
-        if self.is_open(key):
+        if self._open_in_stack(key):
             self._headers[key].setChecked(True)
             return
         self.open_top(key)
@@ -383,6 +402,9 @@ class DockSections(QObject):
         return -1
 
     def _on_bottom_changed(self, _index: int) -> None:
+        current = self._toolbox.currentWidget()
+        if any(current is getattr(self._dock, key.upper(), None) for key in self.detached):
+            return  # a section in its own panel: that panel comes forward (section_panels.py), the stacks stay
         if self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None) and not self.is_open("exploring"):
             self._open_top("exploring")  # FILTERING works on what EXPLORING selects
         self._fit()
@@ -397,6 +419,8 @@ class DockSections(QObject):
         index = self._toolbox.indexOf(page) if page is not None else -1
         if index < 0:
             return False
+        if not shown and key in self.detached and self.bring_back is not None:
+            self.bring_back(key)  # in its own panel (section_panels.py): a section turned off shows nowhere
         if not shown and self._toolbox.currentWidget() is page:
             self._reopen.add(key)  # open again when it comes back, if nothing else was opened meanwhile
             self._toolbox.setCurrentWidget(self._nothing)
@@ -481,7 +505,7 @@ class DockSections(QObject):
     def _fit(self) -> None:
         """A stack with nothing open keeps its headers only, and the other one takes the room."""
         try:
-            top_open = any(self.is_open(key) for key in self._pages)
+            top_open = any(self._open_in_stack(key) for key in self._pages)
             self.top.setMaximumHeight(QWIDGETSIZE_MAX if top_open else self._headers_height())
             bottom = self._splitter.widget(1) if self._splitter.count() > 1 else None
             if bottom is not None:
@@ -497,6 +521,7 @@ class DockSections(QObject):
                     bottom.setMaximumHeight(self._bottom_limits[1])
                     bottom.setMinimumHeight(self._bottom_limits[0])
                     self._bottom_limits = None
+                self._hold_toolbox(nothing)
                 sizes = self._splitter.sizes()
                 total = sum(sizes)
                 if len(sizes) == 2 and total > 0:
@@ -510,8 +535,30 @@ class DockSections(QObject):
         except RuntimeError:  # the dock went away
             pass
 
+    def _hold_toolbox(self, nothing: bool) -> None:
+        """With nothing open and a header hidden (its section is in its own panel), the tool box is held to the
+        headers left: its minimum is sized for all of them, it spread those left apart and cut the last one."""
+        headers = [button for button in self._toolbox.findChildren(QAbstractButton)
+                   if button.objectName() == "qt_toolbox_toolboxbutton" and button.text() != ""]
+        shown = [button for button in headers if not button.isHidden()]
+        saved = getattr(self, "_toolbox_minimum", None)
+        if nothing and len(shown) < len(headers):
+            if saved is None:
+                saved = self._toolbox_minimum = self._toolbox.minimumHeight()
+            layout = self._toolbox.layout()
+            spacing = max(0, layout.spacing()) if layout is not None else 0
+            margins = layout.contentsMargins() if layout is not None else None
+            height = sum(header.maximumHeight() for header in shown) + spacing * len(shown)
+            if margins is not None:
+                height += margins.top() + margins.bottom()
+            self._toolbox.setMinimumHeight(min(saved, height))
+        elif saved is not None:
+            self._toolbox.setMinimumHeight(saved)
+            self._toolbox_minimum = None
+
     def _both_open(self) -> bool:
-        return any(self.is_open(key) for key in self._pages) and self._toolbox.currentWidget() is not self._nothing
+        return (any(self._open_in_stack(key) for key in self._pages)
+                and self._toolbox.currentWidget() is not self._nothing)
 
     def _share_room(self) -> None:
         """Both stacks open: the top one gets ``self._share`` of the room (Qt keeps each one above its minimum)."""
@@ -620,7 +667,25 @@ def apply_section_options(dock: Any) -> list:
                 changed.append(key)
         except RuntimeError:  # the dock went away
             return changed
+    if changed:
+        _follow_sections(dock)
     return changed
+
+
+def _follow_sections(dock: Any) -> None:
+    """After a section was turned on or off: one that was in its own panel before it was turned off goes there
+    again, and the buttons go where the sections left can carry them (section_panels.py, section_bars.py)."""
+    try:
+        panels = getattr(dock, "_fm_panels", None)
+        if panels is not None:
+            panels.restore()
+        manager = getattr(dock, "_action_bar_manager", None)
+        if manager is not None:
+            manager.sync_sections()
+    except RuntimeError:  # the dock went away
+        pass
+    except Exception:
+        logger.exception("Panels and buttons did not follow the sections turned on or off")
 
 
 def install_dock_chrome(dock: Any) -> Optional[DockTitleBar]:

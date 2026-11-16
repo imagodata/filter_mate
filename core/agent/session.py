@@ -179,7 +179,10 @@ class AgentSession:
 
     def _drop_idle(self) -> Tuple[str, ...]:
         """Take out of the request the tools added and not called in the last ``MAX_IDLE_REQUESTS`` requests: at a
-        compaction only, when the cache is lost anyway (the start of the request changes then)."""
+        compaction only, which rewrites the history. Since lot 4 the tools and the instructions are read again from
+        the cache after a compaction, unless a tool is taken out here: the tools come first, so the cache of the
+        request then starts over from that tool (Anthropic: from the start). Kept, to keep a long conversation
+        light (lot 1), at the price of one write of the cache."""
         idle = sorted(name for name, added in self._added_at.items()
                       if max(added, self._used_at.get(name, 0)) < self._requests - MAX_IDLE_REQUESTS)
         for name in idle:
