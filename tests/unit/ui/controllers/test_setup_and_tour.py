@@ -165,7 +165,7 @@ def chat(world):
     """The AgentChatController, as much of it as the setup and the tour use."""
     panel = FakePanel()
     dock = types.SimpleNamespace(_fm_panels=FakePanels(), _fm_sections=types.SimpleNamespace(
-        section_shown=lambda key: True))
+        section_shown=lambda key: True, top_rail=object()))
     chat = types.SimpleNamespace(panel=panel, _parent_widget=dock, _settings_cards=[], busy=False, status=[],
                                  shown=[], started=[], opened=[])
     chat.chat_busy = lambda: chat.busy
@@ -359,8 +359,10 @@ def test_the_tour_tells_each_section_then_offers_what_it_said(world, chat):
     assert world.tour.WelcomeTour(chat).show() is True
     said = chat.panel.said
     texts = [text for kind, text in said if kind == "text"]
-    assert [text.split()[0] for text in texts[1:6]] == ["EXPLORING", "FILTERING", "EXPORTING", "AGENT",
+    assert texts[1].startswith("The panel has two stacks, each with a rail")
+    assert [text.split()[0] for text in texts[2:7]] == ["EXPLORING", "FILTERING", "EXPORTING", "AGENT",
                                                         "CONFIGURATION"]
+    assert any(text.startswith("By default every section is in this panel") for text in texts)
     assert said.count(("end", "")) == len(texts)  # each paragraph on its own
     assert [text for kind, text in said if kind == "link"] == [
         "Open every section in its own panel", "Set up FilterMate", "Connect a model"]

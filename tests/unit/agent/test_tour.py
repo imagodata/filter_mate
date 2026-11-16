@@ -10,9 +10,10 @@ def _keys(facts, kind):
 
 
 def test_every_section_then_the_panels_then_the_buttons():
-    facts = tour.DockFacts(panels=True, can_move=True)
-    assert _keys(facts, tour.TEXT) == ["intro", "exploring", "filtering", "exporting", "agent", "configuration",
-                                       "panels", "groups", "buttons"]
+    facts = tour.DockFacts(rail=True, panels=True, can_move=True)
+    assert _keys(facts, tour.TEXT) == ["intro", "rail", "exploring", "filtering", "exporting", "agent",
+                                       "configuration", "panels", "groups", "buttons"]
+    assert "rail" not in _keys(tour.DockFacts(panels=True), tour.TEXT)  # a panel without rails says nothing of them
     assert _keys(facts, tour.LINK) == ["detach_all", "setup", "connect"]
 
 

@@ -192,6 +192,18 @@ class SourceTag(QObject):
 QWIDGETSIZE_MAX = 16777215
 STACK_GAP = 8
 SHARE_KEY = "FilterMate/splitter_top_share"  # share of the splitter the upper stack gets when both are open
+TOP_KEYS = ("agent", "exploring")  # the sections of the upper stack, in their usual order
+BOTTOM_KEYS = ("filtering", "exporting", "configuration")  # those of the lower stack (the pages of the tool box)
+TOP_ORDER_KEY = "FilterMate/sections/top_order"  # the order the chips of each rail were dragged into
+BOTTOM_ORDER_KEY = "FilterMate/sections/bottom_order"
+
+
+def _saved_order(key: str) -> Any:
+    try:
+        from qgis.PyQt.QtCore import QSettings
+        return QSettings().value(key, "")
+    except Exception:
+        return ""
 
 
 def _default_share() -> float:
@@ -279,11 +291,11 @@ class DockSections(QObject):
         self._splitter.replaceWidget(index, self.top)
         if len(sizes) == self._splitter.count() and sum(sizes) > 0:
             self._splitter.setSizes(sizes)  # the manager sized the splitter for EXPLORING: the stack takes its place
+        # The headers stacked one above the other gave way to a rail per stack (ui/widgets/section_rail.py): one
+        # row of chips, dragged to put the sections in another order. The header objects stay, hidden: other code
+        # reads their icon labels.
         self.exploring_header = SectionHeader("exploring", EXPLORING_TITLE, self.top)
-        self._top_layout.addWidget(self.exploring_header)
-        self._top_layout.addWidget(exploring, 1)
-        exploring.show()
-        self.top.show()  # QSplitter.replaceWidget leaves the new widget hidden
+        self.exploring_header.hide()
         self._pages = {"exploring": exploring}
         self._headers = {"exploring": self.exploring_header}
         # The keys of the sections shown in their own panel (ui/layout/section_panels.py), of either stack: out of
@@ -291,7 +303,21 @@ class DockSections(QObject):
         self.detached = set()
         self.raise_detached = None
         self.bring_back = None  # called with the key of a section apart that is being turned off
-        self.exploring_header.clicked.connect(lambda: self._on_top_header("exploring"))
+        self.on_menu = None  # called with (key, place on the screen) on a right click on the chip of a section
+        self.on_dropped = None  # called with (key, index) when the chip of a section apart is dropped on a rail
+        from ..widgets.section_rail import make_rail
+        self.top_rail = make_rail(self.top, accepts=lambda key: key in TOP_KEYS and key in self.detached,
+                                  dark=self._dark)
+        self.top_rail.setObjectName("widget_section_rail_top")
+        self._top_layout.addWidget(self.top_rail)
+        self._top_layout.addWidget(exploring, 1)
+        exploring.show()
+        self.top.show()  # QSplitter.replaceWidget leaves the new widget hidden
+        self.top_rail.chosen.connect(self._on_top_chip)
+        self.top_rail.reordered.connect(lambda _order: self._save_orders())
+        self.top_rail.dropped_in.connect(self._on_dropped_in)
+        self.top_rail.menu_requested.connect(self._on_chip_menu)
+        self.top_rail.set_sections(["exploring"])
         # "Nothing open" below: QToolBox always has a current page, so an empty one, its header never shown.
         self._nothing = QWidget()
         self._nothing.setObjectName("page_no_section")
@@ -300,33 +326,98 @@ class DockSections(QObject):
         while holder is not None and holder is not self._toolbox:  # QToolBox wraps each page in a scroll area
             holder.setMaximumHeight(0)
             holder = holder.parentWidget()
-        self._watched = set()
         self._hidden_actions = {}
         self._reopen = set()
         self._shown = {}
         self._source_row, self._source_origins = None, []
         self._bottom_limits = None
-        self._current_before_press = -1
         self._share = _saved_share()
-        self._watch_bottom_headers()
+        self.bottom_rail = make_rail(self._toolbox.parentWidget(),
+                                     accepts=lambda key: key in BOTTOM_KEYS and key in self.detached, dark=self._dark)
+        self.bottom_rail.setObjectName("widget_section_rail_bottom")
+        holder = _layout_holding(self._toolbox.parentWidget(), self._toolbox) if self._toolbox.parentWidget() else None
+        if holder is not None:
+            holder.insertWidget(holder.indexOf(self._toolbox), self.bottom_rail)
+            holder.setSpacing(STACK_GAP)
+        self.bottom_rail.chosen.connect(self._on_bottom_chip)
+        self.bottom_rail.reordered.connect(lambda _order: self._save_orders())
+        self.bottom_rail.dropped_in.connect(self._on_dropped_in)
+        self.bottom_rail.menu_requested.connect(self._on_chip_menu)
+        from ..widgets.section_rail import parse_order
+        present = [key for key in BOTTOM_KEYS if getattr(dock, key.upper(), None) is not None]
+        self.bottom_rail.set_sections(parse_order(_saved_order(BOTTOM_ORDER_KEY), present))
+        dock._fm_rails = [self.top_rail, self.bottom_rail]  # their icons follow the theme (update_section_icons)
+        self._hide_bottom_headers()
         self._toolbox.currentChanged.connect(self._on_bottom_changed)
         self._splitter.splitterMoved.connect(self._on_handle_moved)
         self._splitter.installEventFilter(self)
         self._open_top("exploring")
+        self.refresh_rails()
+
+    def _dark(self) -> bool:
+        return bool(getattr(getattr(self._dock, "_icon_manager", None), "is_dark_mode", False))
+
+    # --- the rails -------------------------------------------------------------------
+
+    def refresh_rails(self) -> None:
+        """Each rail shows the chips of the sections of its stack that are in the dock: not one turned off, nor one
+        shown in its own panel; the open one is checked. The lower stack goes with its last chip."""
+        try:
+            for key in self.top_rail.sections():
+                self.top_rail.set_shown(key, key not in self.detached)
+            for key in self.bottom_rail.sections():
+                self.bottom_rail.set_shown(key, key not in self.detached and self._shown.get(key, True))
+            self.top_rail.set_current(next((key for key in self._pages if self._open_in_stack(key)), None))
+            self.bottom_rail.set_current(self.bottom_key())
+            self._fit()
+        except RuntimeError:  # the dock went away
+            pass
+
+    def bottom_key(self) -> Optional[str]:
+        """The section open in the lower stack, None with none open."""
+        current = self._toolbox.currentWidget()
+        for key in BOTTOM_KEYS:
+            if current is not None and current is getattr(self._dock, key.upper(), None):
+                return key
+        return None
+
+    def _save_orders(self) -> None:
+        """The order the user dragged the chips into, for this session and the next ones."""
+        try:
+            from qgis.PyQt.QtCore import QSettings
+            from ..widgets.section_rail import format_order
+            settings = QSettings()
+            settings.setValue(TOP_ORDER_KEY, format_order(self.top_rail.sections()))
+            settings.setValue(BOTTOM_ORDER_KEY, format_order(self.bottom_rail.sections()))
+        except Exception:  # nosec B110 - a convenience: the usual order next time
+            pass
+
+    def _on_chip_menu(self, key: str, place: Any) -> None:
+        if self.on_menu is not None:
+            self.on_menu(key, place)
+
+    def _on_dropped_in(self, key: str, index: int) -> None:
+        """The chip of a section apart was dropped on the rail of its stack: the section comes back, there."""
+        if self.on_dropped is None:
+            return
+        self.on_dropped(key, index)
+        rail = self.top_rail if key in TOP_KEYS else self.bottom_rail
+        rail.move(key, index)
 
     # --- the top stack ---------------------------------------------------------------
 
     def add_agent(self, page: QWidget) -> QLabel:
-        """AGENT before EXPLORING, folded: the label at the right of its header."""
+        """AGENT in the top stack, folded: its chip in the rail, and the label at the right of the rail."""
         header = SectionHeader("agent", AGENT_PAGE, self.top)
-        trailer = header.add_trailer()
-        self._top_layout.insertWidget(0, header)
+        header.hide()  # as the header of EXPLORING: the rail lists the sections
         self._top_layout.insertWidget(1, page, 1)
         page.hide()
         self._pages["agent"] = page
         self._headers["agent"] = header
-        header.clicked.connect(lambda: self._on_top_header("agent"))
-        self._fit()
+        from ..widgets.section_rail import parse_order
+        self.top_rail.set_sections(parse_order(_saved_order(TOP_ORDER_KEY), TOP_KEYS))
+        trailer = self.top_rail.trailer()
+        self.refresh_rails()
         return trailer
 
     def is_open(self, key: str) -> bool:
@@ -364,9 +455,7 @@ class DockSections(QObject):
             if name in self.detached:
                 continue
             page.setVisible(name == key)
-            self._headers[name].setChecked(name == key)
-        header = self._headers["exploring"]
-        header.setToolTip("" if key == "exploring" else _tr("Show EXPLORING"))
+        self.top_rail.set_current(key)
         self._fit()
         request = getattr(self._dock, "undoRedoStateRequested", None)
         if request is not None:  # Undo and Redo follow AGENT when it opens or folds
@@ -375,38 +464,25 @@ class DockSections(QObject):
             except (RuntimeError, TypeError):
                 pass
 
-    def _on_top_header(self, key: str) -> None:
-        """A click on a folded header opens it; on the open one, it leaves it open (and checked: the click
-        unchecked it)."""
-        if self._open_in_stack(key):
-            self._headers[key].setChecked(True)
-            return
-        self.open_top(key)
+    def _on_top_chip(self, key: str) -> None:
+        """A click on the chip of a folded section opens it; on the open one, it leaves it open."""
+        if not self._open_in_stack(key):
+            self.open_top(key)
 
     # --- the bottom stack ------------------------------------------------------------
 
-    def _watch_bottom_headers(self) -> None:
+    def _hide_bottom_headers(self) -> None:
+        """The headers of the tool box give way to the rail above it; the tool box only shows the open section."""
         for button in self._toolbox.findChildren(QAbstractButton):
-            if button.objectName() != "qt_toolbox_toolboxbutton" or button in self._watched:
-                continue
-            self._watched.add(button)
-            if button.text() == "":
-                button.hide()  # the header of "nothing open"
-                continue
-            button.pressed.connect(lambda: setattr(self, "_current_before_press", self._toolbox.currentIndex()))
-            button.clicked.connect(lambda _checked=False, item=button: self._on_bottom_header(item))
+            if button.objectName() == "qt_toolbox_toolboxbutton":
+                button.hide()
 
-    def _on_bottom_header(self, button: QAbstractButton) -> None:
-        """A click on the open header folds the stack."""
-        index = self._index_of(button)
-        if index >= 0 and index == self._current_before_press:
-            self._toolbox.setCurrentWidget(self._nothing)
-
-    def _index_of(self, button: QAbstractButton) -> int:
-        for index in range(self._toolbox.count()):
-            if self._toolbox.itemText(index) == button.text():
-                return index
-        return -1
+    def _on_bottom_chip(self, key: str) -> None:
+        """A click on a chip opens its section; on the chip of the open one, it folds the stack."""
+        page = getattr(self._dock, key.upper(), None)
+        if page is None:
+            return
+        self._toolbox.setCurrentWidget(self._nothing if self._toolbox.currentWidget() is page else page)
 
     def _on_bottom_changed(self, _index: int) -> None:
         current = self._toolbox.currentWidget()
@@ -414,6 +490,7 @@ class DockSections(QObject):
             return  # a section in its own panel: that panel comes forward (section_panels.py), the stacks stay
         if self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None) and not self.is_open("exploring"):
             self._open_top("exploring")  # FILTERING works on what EXPLORING selects
+        self.bottom_rail.set_current(self.bottom_key())
         self._fit()
 
     # --- sections turned off (APP.OPTIONS.FILTERING / EXPORTING .enabled) -----------
@@ -431,11 +508,9 @@ class DockSections(QObject):
         if not shown and self._toolbox.currentWidget() is page:
             self._reopen.add(key)  # open again when it comes back, if nothing else was opened meanwhile
             self._toolbox.setCurrentWidget(self._nothing)
-        for button in self._toolbox.findChildren(QAbstractButton):
-            if button.objectName() == "qt_toolbox_toolboxbutton" and button.text() == self._toolbox.itemText(index):
-                button.setVisible(shown)
         self._toolbox.setItemEnabled(index, shown)
         self._shown[key] = shown
+        self.refresh_rails()  # its chip goes from the rail, or comes back
         hidden = self._hidden_actions.setdefault(key, {})
         bars = []
         for name in SECTION_ACTIONS.get(key, ()):
@@ -513,18 +588,20 @@ class DockSections(QObject):
     # --- room ------------------------------------------------------------------------
 
     def _fit(self) -> None:
-        """A stack with nothing open keeps its headers only, and the other one takes the room."""
+        """A stack with nothing open keeps its rail only, and the other one takes the room. The lower stack with no
+        chip left (its sections are turned off, or in their own panels) goes altogether."""
         try:
             top_open = any(self._open_in_stack(key) for key in self._pages)
             self.top.setMaximumHeight(QWIDGETSIZE_MAX if top_open else self._headers_height())
             bottom = self._splitter.widget(1) if self._splitter.count() > 1 else None
             if bottom is not None:
+                bottom.setVisible(bool(self.bottom_rail.shown_sections()))
                 nothing = self._toolbox.currentWidget() is self._nothing
                 if nothing:
                     if self._bottom_limits is None:  # what the dimension managers set: given back when a section opens
                         self._bottom_limits = (bottom.minimumHeight(), bottom.maximumHeight())
                     height = self._bottom_headers_height(bottom)
-                    # The minimum first: Qt keeps the larger of the two, and the headers would spread over it.
+                    # The minimum first: Qt keeps the larger of the two, and the rail would be spread over it.
                     bottom.setMinimumHeight(min(self._bottom_limits[0], height))
                     bottom.setMaximumHeight(height)
                 elif self._bottom_limits is not None:
@@ -546,25 +623,9 @@ class DockSections(QObject):
             pass
 
     def _hold_toolbox(self, nothing: bool) -> None:
-        """With nothing open and a header hidden (its section is in its own panel), the tool box is held to the
-        headers left: its minimum is sized for all of them, it spread those left apart and cut the last one."""
-        headers = [button for button in self._toolbox.findChildren(QAbstractButton)
-                   if button.objectName() == "qt_toolbox_toolboxbutton" and button.text() != ""]
-        shown = [button for button in headers if not button.isHidden()]
-        saved = getattr(self, "_toolbox_minimum", None)
-        if nothing and len(shown) < len(headers):
-            if saved is None:
-                saved = self._toolbox_minimum = self._toolbox.minimumHeight()
-            layout = self._toolbox.layout()
-            spacing = max(0, layout.spacing()) if layout is not None else 0
-            margins = layout.contentsMargins() if layout is not None else None
-            height = sum(header.maximumHeight() for header in shown) + spacing * len(shown)
-            if margins is not None:
-                height += margins.top() + margins.bottom()
-            self._toolbox.setMinimumHeight(min(saved, height))
-        elif saved is not None:
-            self._toolbox.setMinimumHeight(saved)
-            self._toolbox_minimum = None
+        """With nothing open the tool box takes no room: its headers are gone (the rail above it lists the
+        sections), and its minimum, sized for them, would keep an empty band under the rail."""
+        self._toolbox.setVisible(not nothing)
 
     def _both_open(self) -> bool:
         return (any(self._open_in_stack(key) for key in self._pages)
@@ -601,18 +662,9 @@ class DockSections(QObject):
         return False
 
     def _bottom_headers_height(self, bottom: QWidget) -> int:
-        """The lower stack with nothing open: its headers, the gaps between them and the margins around."""
-        buttons = [button for button in self._toolbox.findChildren(QAbstractButton)
-                   if button.objectName() == "qt_toolbox_toolboxbutton" and not button.isHidden()]
-        try:
-            from .mockup_layout import SECTION_TAB_HEIGHT
-        except Exception:
-            SECTION_TAB_HEIGHT = 34
-        for button in buttons:
-            button.setMaximumHeight(SECTION_TAB_HEIGHT)  # QToolBox would stretch them over the room left
-        spacing = self._toolbox.layout().spacing() if self._toolbox.layout() is not None else 0
-        height = len(buttons) * SECTION_TAB_HEIGHT + max(0, spacing) * len(buttons)
-        widget = self._toolbox
+        """The lower stack with nothing open: its rail and the margins around."""
+        height = self.bottom_rail.height()
+        widget = self.bottom_rail.parentWidget()
         while widget is not None and widget is not bottom.parentWidget():
             layout = widget.layout()
             if layout is not None:
@@ -622,8 +674,7 @@ class DockSections(QObject):
         return height
 
     def _headers_height(self) -> int:
-        headers = [header for header in self._headers.values() if not header.isHidden()]
-        return sum(header.height() for header in headers) + STACK_GAP * max(0, len(headers) - 1)
+        return self.top_rail.height()
 
 
 def _layout_holding(widget: QWidget, child: QWidget):

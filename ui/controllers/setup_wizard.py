@@ -93,7 +93,8 @@ def _labels(facts: wizard.ProjectFacts) -> Dict[str, Dict[str, tuple]]:
                     "normal": (_tr("Normal"), ""), "hidpi": (_tr("Large (4K, Retina)"), "")},
         "language": {"auto": (_tr("As QGIS"), "")},
         "panels": {
-            wizard.IN_DOCK: (_tr("All in the FilterMate panel"), _tr("A click on a header opens its section.")),
+            wizard.IN_DOCK: (_tr("All in the FilterMate panel"),
+                             _tr("The default: one panel, where a click in a rail opens a section.")),
             wizard.IN_PANELS: (_tr("Each in its own panel of QGIS"),
                                _tr("AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or "
                                    "floating; EXPLORING stays in FilterMate. A right-click on the title of a panel "

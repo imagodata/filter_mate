@@ -1999,16 +1999,24 @@ def s_agent_panel():
         return
     first = chat
     d.install_agent_panel(plugin)
-    agent_header = sections._headers['agent']
-    exploring_header = sections.exploring_header
+    # A rail per stack lists its sections (ui/widgets/section_rail.py): the headers stacked above each other are gone.
+    top_rail, bottom_rail = sections.top_rail, sections.bottom_rail
+    agent_header = top_rail.chip('agent')
+    exploring_header = top_rail.chip('exploring')
     check('agent: installed once', d._agent_chat is first and
-          len([h for h in sections.top.findChildren(QPushButton) if h.objectName() == 'pushButton_section_agent']) == 1)
+          len([c for c in top_rail.findChildren(QPushButton) if c.property('fm_section') == 'agent']) == 1)
     check('stacks: AGENT shares the top stack with EXPLORING', chat.panel.parentWidget() is sections.top and
           d.frame_exploring.parentWidget() is sections.top)
     top_layout = sections.top.layout()
-    check('stacks: AGENT first, EXPLORING second', top_layout.indexOf(agent_header) < top_layout.indexOf(chat.panel)
-          < top_layout.indexOf(exploring_header) < top_layout.indexOf(d.frame_exploring),
-          str([top_layout.indexOf(w) for w in (agent_header, chat.panel, exploring_header, d.frame_exploring)]))
+    check('stacks: the rail first, AGENT and EXPLORING listed in it in this order',
+          top_layout.indexOf(top_rail) == 0 and top_rail.sections() == ['agent', 'exploring']
+          and agent_header.x() < exploring_header.x()
+          and top_layout.indexOf(top_rail) < min(top_layout.indexOf(chat.panel), top_layout.indexOf(d.frame_exploring)),
+          f"{top_rail.sections()} {[top_layout.indexOf(w) for w in (top_rail, chat.panel, d.frame_exploring)]}")
+    old_headers = [b for b in toolbox.findChildren(QAbstractButton)
+                   if b.objectName() == 'qt_toolbox_toolboxbutton' and b.isVisibleTo(toolbox)]
+    old_headers += [h for h in sections._headers.values() if h.isVisibleTo(sections.top)]
+    check('stacks: no header stacked above another is left', not old_headers, str(len(old_headers)))
     # The handle reaches from one stack at its minimum to the other: no size hint floor above (the Minimum policy
     # of EXPLORING held it at 396 px of 905), no cap below (the tool box stopped at 650 px).
     splitter = d.splitter_main
@@ -2037,12 +2045,19 @@ def s_agent_panel():
           and -1 not in [toolbox.indexOf(page) for page in lower_titles]
           and all(toolbox.itemText(toolbox.indexOf(page)) == title for page, title in lower_titles.items()),
           str([toolbox.itemText(i) for i in range(toolbox.count())]))
-    bottom_headers = [b for b in toolbox.findChildren(QAbstractButton)
-                      if b.objectName() == 'qt_toolbox_toolboxbutton' and b.isVisibleTo(toolbox)]
+    bottom_headers = [bottom_rail.chip(key) for key in bottom_rail.shown_sections()]
+    check('stacks: the lower rail lists FILTERING, EXPORTING and CONFIGURATION',
+          bottom_rail.shown_sections() == ['filtering', 'exporting', 'configuration']
+          and all(chip.isVisible() for chip in bottom_headers), str(bottom_rail.shown_sections()))
     heights = {b.height() for b in bottom_headers} | {exploring_header.height(), agent_header.height()}
-    check('stacks: one header height everywhere', len(heights) == 1, str(heights))
+    check('stacks: one chip height everywhere, that of the headers before', heights == {34}, str(heights))
     check('stacks: FILTERING open, EXPLORING open, AGENT folded', toolbox.currentWidget() is d.FILTERING and
-          sections.is_open('exploring') and not sections.is_open('agent') and exploring_header.isChecked())
+          sections.is_open('exploring') and not sections.is_open('agent') and exploring_header.isChecked()
+          and bottom_rail.chip('filtering').isChecked() and not agent_header.isChecked())
+    check('stacks: the open sections show their name on their chip, the others their icon only',
+          exploring_header.text() == 'EXPLORING' and bottom_rail.chip('filtering').text() == 'FILTERING'
+          and agent_header.text() == '' and bottom_rail.chip('exporting').text() == ''
+          and not agent_header.icon().isNull() and agent_header.toolTip() == 'AGENT')
     check('agent: FILTERING is still section 0', d.tabTools_current_index == 0, str(d.tabTools_current_index))
     filter_button = d.widgets['ACTION']['FILTER']['WIDGET']
     check('agent: filter button on FILTERING', filter_button.isEnabled())
@@ -2078,22 +2093,20 @@ def s_agent_panel():
     QApplication.processEvents()
     check('stacks: a click on the open AGENT leaves it open', sections.is_open('agent') and agent_header.isChecked()
           and not sections.is_open('exploring') and not exploring_header.isChecked())
-    check('stacks: the lower headers stay', all(b.isVisible() for b in bottom_headers))
+    check('stacks: the lower rail stays', all(b.isVisible() for b in bottom_headers)
+          and not any(b.isChecked() for b in bottom_headers))
     QApplication.processEvents()
-    span = max(b.geometry().bottom() for b in bottom_headers) - min(b.geometry().top() for b in bottom_headers)
-    check('stacks: the open AGENT takes the room, the folded stack keeps its headers only',
-          lower.height() <= len(bottom_headers) * 34 + 60 and span <= len(bottom_headers) * 34 + 30,
-          f"lower={lower.height()} span={span} min={lower.minimumHeight()}")
+    check('stacks: the open AGENT takes the room, the folded stack keeps its rail only',
+          lower.height() <= 34 + 30 and not toolbox.isVisible(),
+          f"lower={lower.height()} min={lower.minimumHeight()} tool box shown={toolbox.isVisible()}")
     panel = chat.panel
     panel = chat.panel
     check('agent: the welcome is shown', panel.welcome_title.isVisible())
     check('agent: the input is below it', panel.input.geometry().top() > panel.stack.geometry().bottom())
     check('agent: the input takes the width', panel.input.width() > panel.width() * 0.7,
           f"{panel.input.width()} of {panel.width()}")
-    headers = [b for b in toolbox.findChildren(QAbstractButton)
-               if b.objectName() == 'qt_toolbox_toolboxbutton' and not b.isHidden()]
-    headers += [sections.exploring_header, agent_header]
-    check('agent: same header height, the lower stack folded too', len({b.height() for b in headers}) == 1,
+    headers = bottom_headers + [exploring_header, agent_header]
+    check('agent: same chip height, the lower stack folded too', {b.height() for b in headers} == {34},
           str([b.height() for b in headers]))
     if shots:
         d.grab().save(os.path.join(shots, 'agent_welcome.png'))
@@ -2116,14 +2129,14 @@ def s_agent_panel():
     check('agent: undo is on the change card', panel.undo_offered() and len(card_undo) == 1, str(card_undo))
     if shots:
         d.grab().save(os.path.join(shots, 'agent_open.png'))
-    check('agent: the thread is on the edges of the headers (mockup)', abs(panel.thread.mapTo(d, QPoint(0, 0)).x()
-          - agent_header.mapTo(d, QPoint(0, 0)).x()) <= 1 and abs(panel.thread.width() - agent_header.width()) <= 2,
-          f"thread x={panel.thread.mapTo(d, QPoint(0, 0)).x()} w={panel.thread.width()} header w={agent_header.width()}")
+    check('agent: the thread is on the edges of the rail (mockup)', abs(panel.thread.mapTo(d, QPoint(0, 0)).x()
+          - top_rail.mapTo(d, QPoint(0, 0)).x()) <= 1 and abs(panel.thread.width() - top_rail.width()) <= 2,
+          f"thread x={panel.thread.mapTo(d, QPoint(0, 0)).x()} w={panel.thread.width()} rail w={top_rail.width()}")
     if os.environ.get('FM_GEOMETRY'):
         def where(widget):
             top_left = widget.mapTo(d, QPoint(0, 0))
             return f"x={top_left.x()} y={top_left.y()} w={widget.width()} h={widget.height()}"
-        for label, widget in (('agent header', agent_header), ('panel', panel), ('stack', panel.stack),
+        for label, widget in (('top rail', top_rail), ('panel', panel), ('stack', panel.stack),
                               ('thread', panel.thread), ('input', panel.input), ('status', panel.status)):
             print(f"GEOMETRY {label}: {where(widget)} margins={widget.contentsMargins().left()},"
                   f"{widget.contentsMargins().top()},{widget.contentsMargins().right()}", flush=True)
@@ -2138,12 +2151,14 @@ def s_agent_panel():
           and d.tabTools_current_index == 1, str(d.tabTools_current_index))
     check('stacks: an open section gets its minimum back', lower.minimumHeight() == 420, str(lower.minimumHeight()))
     lower.setMinimumHeight(lower_min)
-    export_header = next(b for b in bottom_headers if b.text() == lower_titles[d.EXPORTING])
+    export_header = bottom_rail.chip('exporting')
+    check('stacks: the chip of EXPORTING is the open one', export_header.isChecked()
+          and export_header.text() == 'EXPORTING' and bottom_rail.current() == 'exporting')
     export_header.click()
     QApplication.processEvents()
-    check('stacks: a click on the open header folds it', toolbox.currentWidget() not in (d.EXPORTING, d.FILTERING)
-          and sections.is_open('agent'))
-    filtering_header = next(b for b in bottom_headers if b.text() == lower_titles[d.FILTERING])
+    check('stacks: a click on the chip of the open section folds it', toolbox.currentWidget() not in (d.EXPORTING, d.FILTERING)
+          and sections.is_open('agent') and not export_header.isChecked() and bottom_rail.current() is None)
+    filtering_header = bottom_rail.chip('filtering')
     filtering_header.click()
     QApplication.processEvents()
     check('stacks: FILTERING brings EXPLORING back and folds AGENT', toolbox.currentWidget() is d.FILTERING and
@@ -2406,10 +2421,56 @@ def grab_widget(widget, name):
 
 
 def bottom_header(page):
-    toolbox = dock().toolBox_tabTools
-    text = toolbox.itemText(toolbox.indexOf(page))
-    return next((button for button in toolbox.findChildren(QAbstractButton)
-                 if button.objectName() == 'qt_toolbox_toolboxbutton' and button.text() == text), None)
+    """The chip of the section of ``page`` in the lower rail of the dock (the headers of the tool box gave way to it)."""
+    d = dock()
+    key = next(name for name in ('filtering', 'exporting', 'configuration') if getattr(d, name.upper()) is page)
+    return d._fm_sections.bottom_rail.chip(key)
+
+
+def s_section_rail():
+    """A chip dragged along its rail puts the sections in another order, kept for the next time; the pages of the
+    tool box keep their indexes. (QDrag.exec is modal: ``drop`` is what the drop event of the rail calls.)"""
+    d = dock()
+    sections = d._fm_sections
+    toolbox = d.toolBox_tabTools
+    top, bottom = sections.top_rail, sections.bottom_rail
+    for key in ('FilterMate/sections/top_order', 'FilterMate/sections/bottom_order'):
+        QSettings().remove(key)
+    if not check('rail: the usual order', bottom.sections() == ['filtering', 'exporting', 'configuration'],
+                 str(bottom.sections())):
+        return None
+    open_section(d.FILTERING)
+    took = bottom.drop('configuration', bottom.chip('filtering').geometry().left() + 2, bottom)
+    QApplication.processEvents()
+    places = sorted(bottom.shown_sections(), key=lambda key: bottom.chip(key).x())
+    check('rail: a chip dropped before another one takes its place', took
+          and bottom.sections() == ['configuration', 'filtering', 'exporting'] and places == bottom.sections(),
+          f"{bottom.sections()} on screen {places}")
+    check('rail: the open section stays open, the pages keep their indexes', toolbox.currentWidget() is d.FILTERING
+          and bottom.current() == 'filtering' and bottom.chip('filtering').isChecked()
+          and [toolbox.indexOf(page) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION)] == [0, 1, 2]
+          and d.tabTools_current_index == 0, str(d.tabTools_current_index))
+    check('rail: the order is kept for the next time',
+          QSettings().value('FilterMate/sections/bottom_order') == 'configuration,filtering,exporting',
+          str(QSettings().value('FilterMate/sections/bottom_order')))
+    check('rail: a chip of the other stack is refused', not bottom.takes('agent', top) and not top.takes('filtering', bottom)
+          and not bottom.drop('exploring', 5, top) and bottom.sections() == ['configuration', 'filtering', 'exporting'])
+    bottom.drop('configuration', bottom.width() - 2, bottom)
+    QApplication.processEvents()
+    check('rail: dropped after the last one, it goes last', bottom.sections() == ['filtering', 'exporting', 'configuration'],
+          str(bottom.sections()))
+    if 'agent' in top.sections():
+        top.drop('exploring', 1, top)
+        QApplication.processEvents()
+        check('rail: EXPLORING dragged before AGENT, in the top rail', top.sections() == ['exploring', 'agent']
+              and top.chip('exploring').x() < top.chip('agent').x() and sections.is_open('exploring'), str(top.sections()))
+        top.drop('agent', 1, top)
+        QApplication.processEvents()
+        check('rail: and AGENT dragged back first', top.sections() == ['agent', 'exploring'], str(top.sections()))
+    for key in ('FilterMate/sections/top_order', 'FilterMate/sections/bottom_order'):
+        QSettings().remove(key)
+    grab('rails')
+    return None
 
 
 def panel_place(panel):
@@ -2641,12 +2702,12 @@ def s_section_detach():
     open_section(None)
     grab_widget(panel, 'panel_filtering')
     grab('dock_filtering_apart')
-    headers = sorted((bottom_header(page) for page in (d.EXPORTING, d.CONFIGURATION)), key=lambda button: button.y())
+    rail = d._fm_sections.bottom_rail
     stack = d.splitter_main.widget(1)
-    last = headers[-1].mapTo(stack, QPoint(0, headers[-1].height())).y()
-    gap = headers[1].y() - (headers[0].y() + headers[0].height())
-    check('panels: the headers left in the dock keep their gap, the last one is whole',
-          gap == toolbox.layout().spacing() and last <= stack.height(), f"gap={gap} last={last} stack={stack.height()}")
+    last = rail.mapTo(stack, QPoint(0, rail.height())).y()
+    check('panels: the rail of the dock keeps the chips of the sections left, whole',
+          rail.shown_sections() == ['exporting', 'configuration'] and last <= stack.height()
+          and stack.height() <= 34 + 30, f"{rail.shown_sections()} last={last} stack={stack.height()}")
     check('panels: the panel has room for its section', panel.height() >= 180,
           f"panel={panel.height()} dock={d.height()} dock minimum={d.minimumSizeHint().height()} "
           f"window={window.height()} floating={d.isFloating()}")
@@ -2718,7 +2779,7 @@ def s_section_stack():
         agent = panels.panel('agent')
         page = sections._pages['agent']
         check('panels: AGENT is in its panel, EXPLORING open in the dock', agent is not None
-              and agent.isAncestorOf(page) and not sections._headers['agent'].isVisible()
+              and agent.isAncestorOf(page) and not sections.top_rail.chip('agent').isVisible()
               and sections.is_open('exploring') and 'agent' in sections.detached)
         sections.open_top('agent')  # the agent asks for an answer of the user
         QApplication.processEvents()
@@ -2810,7 +2871,7 @@ def s_section_back_check():
     order = sorted(actions_shown(), key=lambda name: action_button(name).x())
     check('panels: every section back, the dock as it was', panels.detached() == () and pages == [0, 1, 2]
           and all(d.isAncestorOf(page) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION))
-          and ('agent' not in sections._headers or (sections._headers['agent'].isVisible()
+          and ('agent' not in sections._headers or (sections.top_rail.chip('agent').isVisible()
                                                     and d.isAncestorOf(sections._pages['agent'])))
           and held == [name for name in ACTION_NAMES if action_button(name) is not None]
           and order == SECTION['all'] and not QSettings().value(DETACHED_KEY),
@@ -3009,7 +3070,8 @@ def s_section_off():
     return settled()
 
 
-SECTION_STEPS = [s_section_setup, s_section_bars, s_vector_source, s_vector_select, s_section_detach, s_section_filter,
+SECTION_STEPS = [s_section_setup, s_section_rail, s_section_bars, s_vector_source, s_vector_select, s_section_detach,
+                 s_section_filter,
                  s_section_filter_check, s_section_undo, s_section_undo_check, s_section_stack,
                  s_section_close_dock, s_section_reopen_dock, s_section_close_panel, s_section_back_check,
                  s_section_restart, s_section_group, s_section_off]
@@ -3072,12 +3134,13 @@ def s_tour():
     panel.tour_action.trigger()
     QApplication.processEvents()
     text = panel.thread.toPlainText()
-    told = [words for words in ('EXPLORING holds', 'FILTERING filters', 'EXPORTING writes', 'AGENT does',
-                                'CONFIGURATION lists', 'A section can leave', 'group it with another one',
+    told = [words for words in ('a rail that lists its sections', 'EXPLORING holds', 'FILTERING filters',
+                                'EXPORTING writes', 'AGENT does', 'CONFIGURATION lists',
+                                'By default every section is in this panel', 'group it with another one',
                                 'The buttons act') if words in text]
     links = list(thread_links())
     check('tour: told in the AGENT thread, which opens: each section, the panels, the buttons, then the links',
-          d._fm_sections.is_open('agent') and len(told) == 8 and links[:1] == ['Open every section in its own panel']
+          d._fm_sections.is_open('agent') and len(told) == 9 and links[:1] == ['Open every section in its own panel']
           and 'Set up FilterMate' in links, f"told={len(told)} links={links}")
     check('tour: nothing is kept in the conversation, no model is asked', not chat._transcript
           and chat._engine is None)
@@ -3572,8 +3635,9 @@ def _menu_shot(name, key, on_panel):
     def step():
         d = dock()
         panels = d._fm_panels
-        anchor = panels.panel(key) if on_panel else (bottom_header(getattr(d, key.upper())) if key != 'agent'
-                                                     else d._fm_sections._headers['agent'])
+        sections = d._fm_sections
+        anchor = panels.panel(key) if on_panel else (sections.top_rail if key == 'agent'
+                                                     else sections.bottom_rail).chip(key)
         menu = panels.build_menu(key, anchor)
         if menu is not None:
             menu.popup(anchor.mapToGlobal(QPoint(30, 12)))
@@ -3617,8 +3681,8 @@ def _shots():
 
     steps = [s_section_setup, s_vector_source, s_vector_select]
     steps += _shot('01_dock', lambda: open_section(d().FILTERING))
-    steps += _menu_shot('02_menu_header_filtering', 'filtering', on_panel=False)
-    steps += _menu_shot('02_menu_header_agent', 'agent', on_panel=False)
+    steps += _menu_shot('02_menu_chip_filtering', 'filtering', on_panel=False)
+    steps += _menu_shot('02_menu_chip_agent', 'agent', on_panel=False)
     steps += _shot('03_filtering_apart', lambda: panels().detach('filtering'))
     steps += _menu_shot('04_menu_panel_filtering', 'filtering', on_panel=True)
     steps += _shot('05_every_section_apart', lambda: panels().detach_all())

@@ -30,6 +30,9 @@ def _texts(off: str) -> Dict[str, str]:
     return {
         "intro": _tr("How FilterMate works, section by section. No AI model is needed to read this, and nothing "
                      "is sent anywhere."),
+        "rail": _tr("The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the "
+                    "top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, "
+                    "drag it along the rail to put the sections in another order."),
         "exploring": _tr("EXPLORING holds the current layer and what you pick in it: features of a vector layer, a "
                          "range of values or classes of a raster, classes or heights of a point cloud. The other "
                          "sections work on what it selects."),
@@ -43,10 +46,11 @@ def _texts(off: str) -> Dict[str, str]:
         "configuration": _tr("CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few "
                              "choices, and shows each setting before and after."),
         "off": _tr("Turned off in your settings: {}. Set up FilterMate brings a section back.").format(off),
-        "panels": _tr("A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or "
-                      "CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag "
-                      "beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays "
-                      "here: it holds the layer the other sections work on."),
+        "panels": _tr("By default every section is in this panel, and nothing moves unless you ask. A section can "
+                      "leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, "
+                      "then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, "
+                      "to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds "
+                      "the layer the other sections work on."),
         "groups": _tr("Right-click the title of such a panel to group it with another one, as tabs, or to merge "
                       "it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where "
                       "you left it."),
@@ -84,6 +88,7 @@ class WelcomeTour:
         sections = getattr(self._dock(), "_fm_sections", None)
         shown = getattr(sections, "section_shown", None)
         off, apart, can_move = (), (), False
+        rail = getattr(sections, "top_rail", None) is not None
         panels = self._panels()
         try:
             if callable(shown):
@@ -97,7 +102,8 @@ class WelcomeTour:
             ready = bool(load_settings().ready)
         except Exception:
             ready = False
-        return tour.DockFacts(off=off, panels=panels is not None, apart=apart, can_move=can_move, model_ready=ready)
+        return tour.DockFacts(off=off, rail=rail, panels=panels is not None, apart=apart, can_move=can_move,
+                              model_ready=ready)
 
     def show(self) -> bool:
         """Tell it in the thread. False while a request runs: its answer is being written there."""

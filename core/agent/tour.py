@@ -21,6 +21,7 @@ class DockFacts:
     """What the panel shows now."""
 
     off: Tuple[str, ...] = ()  # the sections turned off, among MAY_BE_OFF
+    rail: bool = False  # each stack lists its sections in a rail of chips (ui/widgets/section_rail.py)
     panels: bool = False  # a section can be shown in its own panel of QGIS (ui/layout/section_panels.py)
     apart: Tuple[str, ...] = ()  # the sections that are in their own panel
     can_move: bool = False  # one more section can leave the panel
@@ -33,6 +34,8 @@ def steps(facts: DockFacts) -> List[Tuple[str, str]]:
     A section turned off is not described: one line names those that are, and the setup that brings them back.
     The links move the sections only when there is something to move."""
     told: List[Tuple[str, str]] = [(TEXT, "intro")]
+    if facts.rail:
+        told.append((TEXT, "rail"))
     told += [(TEXT, key) for key in SECTIONS if key not in facts.off]
     if any(key in MAY_BE_OFF for key in facts.off):
         told.append((TEXT, "off"))

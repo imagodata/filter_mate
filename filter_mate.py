@@ -1904,15 +1904,18 @@ class FilterMate:
         layout.setContentsMargins(24, 20, 24, 20)
 
         text = QLabel(self.tr(
-            "<p style='font-size:13px;'><b>The sections of FilterMate can be panels of QGIS, and its setup "
-            "needs no AI model.</b></p>"
+            "<p style='font-size:13px;'><b>A rail lists the sections of FilterMate, a section can be a panel of "
+            "QGIS, and the setup needs no AI model.</b></p>"
             "<ul style='margin-left:10px; font-size:12px;'>"
             "<li><b>Set up FilterMate</b> asks a few choices: the sections you use, your data, the look, where "
             "the sections and their buttons go. It shows every setting before and after, and sends nothing "
             "anywhere.</li>"
-            "<li><b>Sections as panels</b>: right-click the header of AGENT, FILTERING, EXPORTING or "
-            "CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it "
-            "with another one, as tabs, or to merge it back into FilterMate.</li>"
+            "<li><b>A rail of sections</b> in each stack of the panel: click a chip to open its section, drag "
+            "it to put the sections in another order.</li>"
+            "<li><b>Sections as panels</b>, when you ask for it (by default they all stay in the FilterMate "
+            "panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its "
+            "own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to "
+            "merge it back into FilterMate.</li>"
             "<li><b>Buttons under each section</b>, and FILTERING or EXPORTING turned off when you do not use "
             "them.</li>"
             "<li><b>AGENT</b> filters, styles and brings in data from a sentence, with your own API key or a "
