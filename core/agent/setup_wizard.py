@@ -9,7 +9,7 @@ own, which is why the setup may turn the AGENT section off (settings_reference.p
 A step is a list of questions; a question has a key, one or several choices, and the choices ticked when it opens:
 the settings as they are, so answering without touching anything changes nothing.
 
-One answer is not a setting: where the sections go (all in the FilterMate panel, or each in its own panel of QGIS,
+One answer is not a setting: where the sections go (all in the FilterMate panel, or in panels of QGIS,
 ui/layout/section_panels.py). QGIS keeps the place of its panels itself; ``layout_wanted`` says what to move, and
 the panel moves it when the settings are applied.
 """
@@ -56,7 +56,7 @@ PROFILES = ("auto", "compact", "normal", "hidpi")
 LANGUAGES = ("auto", "en", "fr")
 ACTION_BARS = ("bottom", "top", "left", "right", "sections")  # sections: each section shows its own buttons
 HEADERS = ("rail", "stacked")  # a rail of chips per stack (the default), or the headers one above the other
-# Where the sections are: in the FilterMate panel, each in its own panel, or some of them apart (as they are now).
+# Where the sections are: in the FilterMate panel, in panels of QGIS, or some of them apart (as they are now).
 IN_DOCK, IN_PANELS, AS_NOW = "dock", "panels", "as_now"
 LAYOUTS = (IN_DOCK, IN_PANELS)
 RASTER_FORMATS = ("COG", "GTiff")

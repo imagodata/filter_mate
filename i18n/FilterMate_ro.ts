@@ -688,9 +688,9 @@ Pentru ce: {}
         <translation>Aspect: temă, dimensiunea panoului, limbă</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Dispunere: secțiunile în acest panou sau fiecare în propriul panou al QGIS, locul butoanelor</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Dispunere: secțiunile în acest panou sau în panouri ale QGIS, locul butoanelor</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Deschide {} în propriul panou</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Deschide fiecare secțiune în propriul panou</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Scoate toate secțiunile din FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Grupează cu {}</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Grupează cu {}, în file</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Implicit: un singur panou, în care un clic într-o bară deschide o secțiune.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Fiecare în propriul panou al QGIS</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>În panouri ale QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING și CONFIGURATION lângă hartă, în file sau plutitoare; EXPLORING rămâne în FilterMate. Un clic dreapta pe titlul unui panou îl grupează cu altul sau îl îmbină înapoi în FilterMate.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT în propriul panou, FILTERING, EXPORTING și CONFIGURATION împreună într-altul, lângă hartă sau plutitoare; EXPLORING rămâne în FilterMate. Trageți chipul unei secțiuni pe alt panou ca să le grupați, faceți clic dreapta pe el ca să o îmbinați înapoi în FilterMate.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Fiecare secțiune își arată propriile butoane cât timp este deschisă.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Secțiuni: fiecare în propriul panou al QGIS (se aplică imediat)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Secțiuni: toate înapoi în panoul FilterMate (se aplică imediat)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Secțiuni: în panouri ale QGIS (se aplică imediat)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Secțiunile sunt în panouri ale QGIS: trageți un panou de titlu; trageți chipul unei secțiuni pe alt panou ca să le grupați, faceți clic dreapta pe el ca să o îmbinați înapoi în FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Aceste setări au fost deja readuse cum erau.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Fiecare secțiune este în propriul panou al QGIS: trageți una de titlu; faceți clic dreapta pe titlu pentru a o grupa cu alta, în file, sau pentru a o îmbina înapoi în FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Implicit, fiecare secțiune este în acest panou și nimic nu se mută dacă nu cereți. O secțiune îl poate părăsi: faceți clic dreapta pe chip-ul secțiunii AGENT, FILTERING, EXPORTING sau CONFIGURATION din bara sa, apoi alegeți să o deschideți în propriul panou. Devine un panou al QGIS, pe care îl puteți trage lângă hartă, îl puteți pune în filă cu panoul Straturi sau îl puteți lăsa să plutească pe alt ecran. EXPLORING rămâne aici: conține stratul pe care lucrează celelalte secțiuni.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panou conține o secțiune sau mai multe, listate într-o bară ca aici. Trageți chipul unei secțiuni pe alt panou ca să le grupați, pe FilterMate ca să o îmbinați înapoi, sau în afara oricărui panou ca să-i dați unul nou; două panouri ale FilterMate puse în file devin unul singur. Un clic dreapta pe un chip, sau pe titlul unui panou, oferă aceleași mutări. Închiderea unui panou îi îmbină secțiunile înapoi în FilterMate. QGIS pune fiecare panou la loc, unde l-ați lăsat.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panou conține o secțiune sau mai multe. Faceți clic dreapta pe antetul unei secțiuni, sau pe titlul unui panou, ca să o grupați cu alt panou sau să o îmbinați înapoi în FilterMate; două panouri ale FilterMate puse în file devin unul singur. Închiderea unui panou îi îmbină secțiunile înapoi în FilterMate. QGIS pune fiecare panou la loc, unde l-ați lăsat.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING conține stratul curent și ce alegeți în el: entități ale unui strat vectorial, un interval de valori sau clase ale unui raster, clase sau înălțimi ale unui nor de puncte. Celelalte secțiuni lucrează pe ceea ce selectează.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>O secțiune poate părăsi acest panou. Faceți clic dreapta pe antetul AGENT, FILTERING, EXPORTING sau CONFIGURATION, apoi alegeți să o deschideți în propriul panou: devine un panou al QGIS, pe care îl puteți trage lângă hartă, îl puteți pune în filă cu panoul Straturi sau îl puteți lăsa să plutească pe alt ecran. EXPLORING rămâne aici: conține stratul pe care lucrează celelalte secțiuni.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>Faceți clic dreapta pe titlul unui astfel de panou pentru a-l grupa cu altul, în file, sau pentru a-l îmbina înapoi în FilterMate. Închiderea lui îl îmbină, de asemenea, înapoi. QGIS pune fiecare panou la loc, unde l-ați lăsat.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

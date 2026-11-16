@@ -816,9 +816,9 @@ L'exécuter ?</translation>
         <translation>Apparence : thème, taille du panneau, langue</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Disposition : les sections dans ce panneau ou chacune dans son propre panneau de QGIS, la place des boutons</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Disposition : les sections dans ce panneau ou dans des panneaux de QGIS, la place des boutons</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10919,19 +10919,14 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <translation>Ouvrir {} dans son propre panneau</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Ouvrir chaque section dans son propre panneau</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Sortir toutes les sections de FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Regrouper avec {}</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Regrouper avec {}, en onglets</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11740,14 +11735,14 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <translation>Par défaut : un seul panneau, où un clic dans un rail ouvre une section.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Chacune dans son propre panneau de QGIS</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>Dans des panneaux de QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING et CONFIGURATION à côté de la carte, en onglets ou flottants ; EXPLORING reste dans FilterMate. Un clic droit sur le titre d'un panneau le regroupe avec un autre ou le fusionne dans FilterMate.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT dans son propre panneau, FILTERING, EXPORTING et CONFIGURATION ensemble dans un autre, à côté de la carte ou flottants ; EXPLORING reste dans FilterMate. Faites glisser la pastille d'une section sur un autre panneau pour les regrouper, faites un clic droit dessus pour la fusionner dans FilterMate.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11765,24 +11760,24 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <translation>Chaque section montre ses propres boutons tant qu'elle est ouverte.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Sections : chacune dans son propre panneau de QGIS (appliqué tout de suite)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Sections : toutes de retour dans le panneau FilterMate (appliqué tout de suite)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Sections : dans des panneaux de QGIS (appliqué tout de suite)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Les sections sont dans des panneaux de QGIS : déplacez un panneau par son titre, faites glisser la pastille d'une section sur un autre panneau pour les regrouper, faites un clic droit dessus pour la fusionner dans FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Ces réglages ont déjà été remis comme avant.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Chaque section est dans son propre panneau de QGIS : déplacez-en un par son titre, faites un clic droit sur le titre pour le regrouper avec un autre, en onglets, ou pour le fusionner dans FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12382,6 +12377,16 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <translation>Par défaut, toutes les sections sont dans ce panneau, et rien ne bouge sans que vous le demandiez. Une section peut le quitter : faites un clic droit sur la pastille d'AGENT, FILTERING, EXPORTING ou CONFIGURATION dans son rail, puis choisissez de l'ouvrir dans son propre panneau. Elle devient un panneau de QGIS, à déplacer à côté de la carte, à mettre en onglet avec le panneau Couches ou à faire flotter sur un autre écran. EXPLORING reste ici : il contient la couche sur laquelle les autres sections travaillent.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panneau tient une section ou plusieurs, listées dans un rail comme ici. Faites glisser la pastille d'une section sur un autre panneau pour les regrouper, sur FilterMate pour la fusionner, ou hors de tout panneau pour lui en donner un nouveau ; deux panneaux de FilterMate mis en onglets l'un de l'autre n'en font plus qu'un. Un clic droit sur une pastille, ou sur le titre d'un panneau, propose les mêmes déplacements. Fermer un panneau fusionne ses sections dans FilterMate. QGIS remet chaque panneau là où vous l'avez laissé.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panneau tient une section ou plusieurs. Faites un clic droit sur l'en-tête d'une section, ou sur le titre d'un panneau, pour la regrouper avec un autre panneau ou pour la fusionner dans FilterMate ; deux panneaux de FilterMate mis en onglets l'un de l'autre n'en font plus qu'un. Fermer un panneau fusionne ses sections dans FilterMate. QGIS remet chaque panneau là où vous l'avez laissé.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING contient la couche courante et ce que vous y choisissez : des entités d'une couche vecteur, une plage de valeurs ou des classes d'un raster, des classes ou des hauteurs d'un nuage de points. Les autres sections travaillent sur ce qu'il sélectionne.</translation>
@@ -12415,11 +12420,6 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>Une section peut quitter ce panneau. Faites un clic droit sur l'en-tête d'AGENT, FILTERING, EXPORTING ou CONFIGURATION, puis choisissez de l'ouvrir dans son propre panneau : elle devient un panneau de QGIS, à déplacer à côté de la carte, à mettre en onglet avec le panneau Couches ou à faire flotter sur un autre écran. EXPLORING reste ici : il contient la couche sur laquelle les autres sections travaillent.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>Faites un clic droit sur le titre d'un tel panneau pour le regrouper avec un autre, en onglets, ou pour le fusionner dans FilterMate. Le fermer le fusionne aussi. QGIS remet chaque panneau là où vous l'avez laissé.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

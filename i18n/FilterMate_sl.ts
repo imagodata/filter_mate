@@ -688,9 +688,9 @@ Jo zaženem?</translation>
         <translation>Videz: tema, velikost plošče, jezik</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Postavitev: razdelki v tej plošči ali vsak v svoji plošči QGIS, mesto gumbov</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Postavitev: razdelki v tej plošči ali v ploščah QGIS, mesto gumbov</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>Odpri {} v lastni plošči</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Odpri vsak razdelek v lastni plošči</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Izloči vse razdelke iz FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Združi v skupino z {}</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Združi v skupino z {}, kot zavihke</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>Privzeto: ena plošča, v kateri klik na traku odpre razdelek.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Vsak v svoji plošči QGIS</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>V ploščah QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING in CONFIGURATION ob zemljevidu, kot zavihki ali plavajoče; EXPLORING ostane v FilterMate. Desni klik na naslov plošče jo združi v skupino z drugo ali pa jo združi nazaj v FilterMate.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT v svoji plošči, FILTERING, EXPORTING in CONFIGURATION skupaj v drugi, ob zemljevidu ali plavajoče; EXPLORING ostane v FilterMate. Povlecite čip razdelka na drugo ploščo, da ju združite v skupino, z desnim klikom nanj razdelek združite nazaj v FilterMate.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>Vsak razdelek ima svoje gumbe, dokler je odprt.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Razdelki: vsak v svoji plošči QGIS (uveljavljeno takoj)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Razdelki: vsi nazaj v plošči FilterMate (uveljavljeno takoj)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Razdelki: v ploščah QGIS (uveljavljeno takoj)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Razdelki so v ploščah QGIS: povlecite ploščo za naslov; povlecite čip razdelka na drugo ploščo, da ju združite v skupino, z desnim klikom nanj razdelek združite nazaj v FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Te nastavitve so že povrnjene, kakršne so bile.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Vsak razdelek je v svoji plošči QGIS: povlecite ga za naslov; z desnim klikom na naslov ga združite v skupino z drugo ploščo, kot zavihke, ali ga združite nazaj v FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>Privzeto je vsak razdelek v tej plošči in se nič ne premakne, dokler tega ne zahtevate. Razdelek jo lahko zapusti: z desnim klikom na čip razdelka AGENT, FILTERING, EXPORTING ali CONFIGURATION na njegovem traku izberite odprtje v lastni plošči. Postane plošča QGIS, ki jo lahko povlečete ob zemljevid, združite v zavihke s ploščo Sloji ali pustite plavati na drugem zaslonu. EXPLORING ostane tukaj: vsebuje sloj, s katerim delajo drugi razdelki.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Plošča vsebuje en razdelek ali več, naštetih na traku kot tukaj. Povlecite čip razdelka na drugo ploščo, da ju združite v skupino, na FilterMate, da ga združite nazaj, ali ven iz vseh plošč, da dobi novo; dve plošči FilterMate, združeni kot zavihka, postaneta ena. Desni klik na čip ali na naslov plošče ponuja iste premike. Z zaprtjem plošče se njeni razdelki združijo nazaj v FilterMate. QGIS vrne vsako ploščo tja, kjer ste jo pustili.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Plošča vsebuje en razdelek ali več. Z desnim klikom na naslovno vrstico razdelka ali na naslov plošče ga združite v skupino z drugo ploščo ali združite nazaj v FilterMate; dve plošči FilterMate, združeni kot zavihka, postaneta ena. Z zaprtjem plošče se njeni razdelki združijo nazaj v FilterMate. QGIS vrne vsako ploščo tja, kjer ste jo pustili.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING vsebuje trenutni sloj in to, kar v njem izberete: objekte vektorskega sloja, obseg vrednosti ali razrede rastra, razrede ali višine oblaka točk. Drugi razdelki delajo s tem, kar izbere.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>Razdelek lahko zapusti to ploščo. Z desnim klikom na naslovno vrstico razdelka AGENT, FILTERING, EXPORTING ali CONFIGURATION izberite odprtje v lastni plošči: postane plošča QGIS, ki jo lahko povlečete ob zemljevid, združite v zavihke s ploščo Sloji ali pustite plavati na drugem zaslonu. EXPLORING ostane tukaj: vsebuje sloj, s katerim delajo drugi razdelki.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>Z desnim klikom na naslov take plošče jo združite v skupino z drugo, kot zavihke, ali jo združite nazaj v FilterMate. Tudi z zaprtjem se združi nazaj. QGIS vrne vsako ploščo tja, kjer ste jo pustili.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

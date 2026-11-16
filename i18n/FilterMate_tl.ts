@@ -688,9 +688,9 @@ Patakbuhin?</translation>
         <translation>Hitsura: tema, laki ng panel, wika</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Layout: ang mga seksyon sa panel na ito o bawat isa sa sarili nitong panel ng QGIS, kung saan ilalagay ang mga button</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Layout: ang mga seksyon sa panel na ito o sa mga panel ng QGIS, kung saan ilalagay ang mga button</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <translation>Buksan ang {} sa sarili nitong panel</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Buksan ang bawat seksyon sa sarili nitong panel</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Ilabas ang lahat ng seksyon mula sa FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Igrupo kasama ang {}</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Igrupo kasama ang {} bilang mga tab</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <translation>Ang default: isang panel, kung saan nagbubukas ng seksyon ang pag-click sa isang bar.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Bawat isa sa sarili nitong panel ng QGIS</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>Sa mga panel ng QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>Ang AGENT, FILTERING, EXPORTING at CONFIGURATION ay nasa tabi ng mapa, bilang mga tab o lumulutang; nananatili ang EXPLORING sa FilterMate. I-right-click ang pamagat ng isang panel para igrupo ito sa iba pa o isanib muli.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>Ang AGENT ay nasa sarili nitong panel, ang FILTERING, EXPORTING at CONFIGURATION ay magkakasama sa isa pa, sa tabi ng mapa o lumulutang; nananatili ang EXPLORING sa FilterMate. I-drag ang chip ng isang seksyon sa ibang panel para igrupo ang mga ito, i-right-click ito para isanib muli sa FilterMate.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <translation>Ipinapakita ng bawat seksyon ang sarili nitong mga button habang bukas ito.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Mga seksyon: bawat isa sa sarili nitong panel ng QGIS (agad na inilalapat)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Mga seksyon: lahat ay nakabalik sa panel ng FilterMate (agad na inilalapat)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Mga seksyon: sa mga panel ng QGIS (agad na inilalapat)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Nasa mga panel ng QGIS ang mga seksyon: i-drag ang isang panel sa pamagat nito, i-drag ang chip ng isang seksyon sa ibang panel para igrupo ang mga ito, i-right-click ito para isanib muli sa FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Naibalik na ang mga setting na ito.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Nasa sarili nitong panel ng QGIS ang bawat seksyon: i-drag ang isa sa pamagat nito, i-right-click ang pamagat para igrupo ito sa iba pa bilang mga tab, o isanib muli sa FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <translation>Bilang default, nasa panel na ito ang bawat seksyon, at walang gumagalaw maliban kung hihilingin mo. Maaaring umalis ang isang seksyon dito: i-right-click ang chip ng AGENT, FILTERING, EXPORTING o CONFIGURATION sa bar nito, at piliing buksan ito sa sarili nitong panel. Magiging panel ito ng QGIS na maaari mong i-drag sa tabi ng mapa, gawing tab kasama ng Layers panel, o ilutang sa ibang screen. Nananatili rito ang EXPLORING: hawak nito ang layer na pinagtatrabahuhan ng iba pang seksyon.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Maaaring maglaman ang isang panel ng isang seksyon o ilan, na nakalista sa isang bar tulad ng dito. I-drag ang chip ng isang seksyon sa ibang panel para igrupo ang mga ito, sa FilterMate para isanib muli, o palabas sa lahat ng panel para bigyan ito ng bago; nagiging iisa ang dalawang panel ng FilterMate na pinagsama-sama bilang mga tab. Nag-aalok ng parehong paglilipat ang right-click sa isang chip, o sa pamagat ng isang panel. Naisasanib muli sa FilterMate ang mga seksyon ng isang panel kapag isinara ito. Ibinabalik ng QGIS ang bawat panel kung saan mo ito iniwan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Maaaring maglaman ang isang panel ng isang seksyon o ilan. I-right-click ang header ng isang seksyon, o ang pamagat ng isang panel, para igrupo ito sa ibang panel o isanib muli sa FilterMate; nagiging iisa ang dalawang panel ng FilterMate na pinagsama-sama bilang mga tab. Naisasanib muli sa FilterMate ang mga seksyon ng isang panel kapag isinara ito. Ibinabalik ng QGIS ang bawat panel kung saan mo ito iniwan.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>Hawak ng EXPLORING ang kasalukuyang layer at ang pinipili mo roon: mga feature ng vector layer, saklaw ng mga halaga o mga klase ng raster, mga klase o taas ng point cloud. Gumagana ang iba pang seksyon sa kung ano ang pinipili nito.</translation>
@@ -12291,11 +12296,6 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>Maaaring umalis ang isang seksyon sa panel na ito. I-right-click ang header ng AGENT, FILTERING, EXPORTING o CONFIGURATION, at piliing buksan ito sa sarili nitong panel: magiging panel ito ng QGIS na maaari mong i-drag sa tabi ng mapa, gawing tab kasama ng Layers panel, o ilutang sa ibang screen. Nananatili rito ang EXPLORING: hawak nito ang layer na pinagtatrabahuhan ng iba pang seksyon.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>I-right-click ang pamagat ng ganoong panel para igrupo ito sa iba pa bilang mga tab, o isanib muli sa FilterMate. Naisasanib din ito kapag isinara. Ibinabalik ng QGIS ang bawat panel kung saan mo ito iniwan.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

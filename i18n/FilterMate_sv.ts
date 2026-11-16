@@ -688,9 +688,9 @@ Köra den?</translation>
         <translation>Utseende: tema, panelens storlek, språk</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Layout: sektionerna i den här panelen eller var och en i sin egen panel i QGIS, var knapparna placeras</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Layout: sektionerna i den här panelen eller i paneler i QGIS, var knapparna placeras</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
         <translation>Öppna {} i en egen panel</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Öppna varje sektion i en egen panel</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Ta ut alla sektioner ur FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Gruppera med {}</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Gruppera med {}, som flikar</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
         <translation>Standard: en panel, där ett klick i en list öppnar en sektion.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Var och en i sin egen panel i QGIS</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>I paneler i QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING och CONFIGURATION bredvid kartan, som flikar eller flytande; EXPLORING stannar i FilterMate. Ett högerklick på en panels titel grupperar den med en annan eller slår ihop den med FilterMate igen.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT i en egen panel, FILTERING, EXPORTING och CONFIGURATION tillsammans i en annan, bredvid kartan eller flytande; EXPLORING stannar i FilterMate. Dra chipet för en sektion till en annan panel för att gruppera dem, högerklicka på det för att slå ihop sektionen med FilterMate igen.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
         <translation>Varje sektion visar sina egna knappar medan den är öppen.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Sektioner: var och en i sin egen panel i QGIS (tillämpas direkt)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Sektioner: alla tillbaka i FilterMate-panelen (tillämpas direkt)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Sektioner: i paneler i QGIS (tillämpas direkt)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Sektionerna ligger i paneler i QGIS: dra en panel i dess titel, dra chipet för en sektion till en annan panel för att gruppera dem, högerklicka på det för att slå ihop sektionen med FilterMate igen.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Dessa inställningar har redan återställts.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Varje sektion ligger i en egen panel i QGIS: dra en i dess titel, högerklicka på titeln för att gruppera den med en annan, som flikar, eller för att slå ihop den med FilterMate igen.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
         <translation>Som standard ligger varje sektion i den här panelen, och inget flyttas om du inte ber om det. En sektion kan lämna den: högerklicka på chipet för AGENT, FILTERING, EXPORTING eller CONFIGURATION i dess list och välj att öppna den i en egen panel. Den blir en panel i QGIS som du kan dra bredvid kartan, lägga som flik med panelen Lager eller låta flyta på en annan skärm. EXPLORING stannar här: den innehåller lagret som de andra sektionerna arbetar med.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>En panel rymmer en sektion eller flera, listade i en list som här. Dra chipet för en sektion till en annan panel för att gruppera dem, till FilterMate för att slå ihop den igen, eller utanför alla paneler för att ge den en ny; två paneler i FilterMate som sätts ihop som flikar blir en. Ett högerklick på ett chip, eller på titeln på en panel, erbjuder samma förflyttningar. Om du stänger en panel slås dess sektioner ihop med FilterMate igen. QGIS sätter tillbaka varje panel där du lämnade den.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>En panel rymmer en sektion eller flera. Högerklicka på rubriken för en sektion, eller på titeln på en panel, för att gruppera den med en annan panel eller för att slå ihop den med FilterMate igen; två paneler i FilterMate som sätts ihop som flikar blir en. Om du stänger en panel slås dess sektioner ihop med FilterMate igen. QGIS sätter tillbaka varje panel där du lämnade den.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING innehåller det aktuella lagret och det du väljer i det: objekt i ett vektorlager, ett värdeintervall eller klasser i ett raster, klasser eller höjder i ett punktmoln. De andra sektionerna arbetar med det den väljer.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>En sektion kan lämna den här panelen. Högerklicka på rubriken för AGENT, FILTERING, EXPORTING eller CONFIGURATION och välj att öppna den i en egen panel: den blir en panel i QGIS som du kan dra bredvid kartan, lägga som flik med panelen Lager eller låta flyta på en annan skärm. EXPLORING stannar här: den innehåller lagret som de andra sektionerna arbetar med.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>Högerklicka på titeln på en sådan panel för att gruppera den med en annan, som flikar, eller för att slå ihop den med FilterMate igen. Om du stänger den slås den också ihop igen. QGIS sätter tillbaka varje panel där du lämnade den.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

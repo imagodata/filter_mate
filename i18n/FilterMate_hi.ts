@@ -688,9 +688,9 @@ Run it?</source>
         <translation>रूप-रंग: थीम, पैनल का आकार, भाषा</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>लेआउट: अनुभाग इसी पैनल में या हर एक QGIS के अपने पैनल में, बटन कहाँ रहें</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>लेआउट: अनुभाग इसी पैनल में या QGIS के पैनलों में, बटन कहाँ रहें</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>{} को उसके अपने पैनल में खोलें</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>हर अनुभाग को उसके अपने पैनल में खोलें</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>सभी अनुभागों को FilterMate से बाहर निकालें</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>{} के साथ समूहित करें</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>{} के साथ टैब में समूहित करें</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>डिफ़ॉल्ट: एक पैनल, जहाँ पट्टी में क्लिक करने से एक अनुभाग खुलता है।</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>हर एक QGIS के अपने पैनल में</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>QGIS के पैनलों में</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING और CONFIGURATION नक्शे के बगल में, टैब के रूप में या तैरते हुए; EXPLORING FilterMate में ही रहता है। किसी पैनल के शीर्षक पर राइट-क्लिक करने से वह किसी दूसरे पैनल के साथ समूहित होता है या वापस FilterMate में मिल जाता है।</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT अपने अलग पैनल में, FILTERING, EXPORTING और CONFIGURATION एक साथ दूसरे पैनल में, नक्शे के बगल में या तैरते हुए; EXPLORING FilterMate में ही रहता है। किसी अनुभाग के चिप को दूसरे पैनल पर खींचें ताकि वे समूहित हों, उस पर राइट-क्लिक करके उसे वापस FilterMate में मिलाएँ।</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>हर अनुभाग खुला होने पर अपने बटन दिखाता है।</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>अनुभाग: हर एक QGIS के अपने पैनल में (तुरंत लागू)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>अनुभाग: सभी वापस FilterMate पैनल में (तुरंत लागू)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>अनुभाग: QGIS के पैनलों में (तुरंत लागू)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>अनुभाग QGIS के पैनलों में हैं: किसी पैनल को उसके शीर्षक से खींचें, किसी अनुभाग के चिप को दूसरे पैनल पर खींचें ताकि वे समूहित हों, उस पर राइट-क्लिक करके उसे वापस FilterMate में मिलाएँ।</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>ये सेटिंग पहले ही पहले जैसी कर दी गई हैं।</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>हर अनुभाग QGIS के अपने पैनल में है: किसी को उसके शीर्षक से खींचें, शीर्षक पर राइट-क्लिक करके उसे किसी दूसरे के साथ टैब में समूहित करें, या वापस FilterMate में मिलाएँ।</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>डिफ़ॉल्ट रूप से हर अनुभाग इसी पैनल में रहता है, और आपके कहे बिना कुछ नहीं हिलता। कोई अनुभाग इससे बाहर जा सकता है: उसकी पट्टी में AGENT, FILTERING, EXPORTING या CONFIGURATION के चिप पर राइट-क्लिक करें, फिर उसे अपने पैनल में खोलना चुनें। वह QGIS का पैनल बन जाता है, जिसे नक्शे के बगल में खींचा जा सकता है, परत पैनल के साथ टैब में रखा जा सकता है या दूसरी स्क्रीन पर तैराया जा सकता है। EXPLORING यहीं रहता है: उसमें वह परत है जिस पर बाकी अनुभाग काम करते हैं।</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>एक पैनल में एक अनुभाग या कई अनुभाग हो सकते हैं, जो यहाँ की तरह पट्टी में सूचीबद्ध होते हैं। किसी अनुभाग के चिप को समूहित करने के लिए दूसरे पैनल पर, वापस मिलाने के लिए FilterMate पर, या उसे नया पैनल देने के लिए हर पैनल से बाहर खींचें; FilterMate के दो पैनल टैब के रूप में साथ रखे जाने पर एक हो जाते हैं। किसी चिप पर, या किसी पैनल के शीर्षक पर, राइट-क्लिक करने से यही सब चालें मिलती हैं। पैनल बंद करने पर उसके अनुभाग वापस FilterMate में मिल जाते हैं। QGIS हर पैनल को वहीं रखता है जहाँ आपने उसे छोड़ा था।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>एक पैनल में एक अनुभाग या कई अनुभाग हो सकते हैं। किसी अनुभाग के शीर्षक पर, या किसी पैनल के शीर्षक पर, राइट-क्लिक करके उसे दूसरे पैनल के साथ समूहित करें या वापस FilterMate में मिलाएँ; FilterMate के दो पैनल टैब के रूप में साथ रखे जाने पर एक हो जाते हैं। पैनल बंद करने पर उसके अनुभाग वापस FilterMate में मिल जाते हैं। QGIS हर पैनल को वहीं रखता है जहाँ आपने उसे छोड़ा था।</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING में मौजूदा परत और उसमें आपका चुना हुआ रहता है: वेक्टर परत के फ़ीचर, रास्टर के मानों की सीमा या वर्ग, पॉइंट क्लाउड के वर्ग या ऊँचाइयाँ। बाकी अनुभाग उसी चयन पर काम करते हैं।</translation>
@@ -12291,11 +12296,6 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>कोई अनुभाग इस पैनल से बाहर जा सकता है। AGENT, FILTERING, EXPORTING या CONFIGURATION के शीर्षक पर राइट-क्लिक करें, फिर उसे अपने पैनल में खोलना चुनें: वह QGIS का पैनल बन जाता है, जिसे नक्शे के बगल में खींचा जा सकता है, परत पैनल के साथ टैब में रखा जा सकता है या दूसरी स्क्रीन पर तैराया जा सकता है। EXPLORING यहीं रहता है: उसमें वह परत है जिस पर बाकी अनुभाग काम करते हैं।</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>ऐसे पैनल के शीर्षक पर राइट-क्लिक करके उसे किसी दूसरे के साथ टैब में समूहित करें, या वापस FilterMate में मिलाएँ। उसे बंद करने पर भी वह वापस मिल जाता है। QGIS हर पैनल को वहीं रखता है जहाँ आपने उसे छोड़ा था।</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

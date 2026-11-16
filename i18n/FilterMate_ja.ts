@@ -688,9 +688,9 @@ Run it?</source>
         <translation>外観：テーマ、パネルのサイズ、言語</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>レイアウト：セクションをこのパネルに置くか、それぞれを QGIS の専用パネルに置くか、ボタンの位置</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>レイアウト：セクションをこのパネルに置くか、QGIS のパネルに置くか、ボタンの位置</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>{} を専用のパネルで開く</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>各セクションを専用のパネルで開く</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>すべてのセクションを FilterMate から取り出す</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>{} とグループ化</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>{} とタブでグループ化</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>既定の状態：パネルは 1 つで、レールをクリックするとセクションが開きます。</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>それぞれ QGIS の専用パネル</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>QGIS のパネルに</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT、FILTERING、EXPORTING、CONFIGURATION を地図の横に、タブまたはフローティングで配置します。EXPLORING は FilterMate に残ります。パネルのタイトルを右クリックすると、別のパネルとグループ化したり、元に戻して統合したりできます。</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT は専用のパネルに、FILTERING、EXPORTING、CONFIGURATION はまとめて別のパネルに、地図の横にタブまたはフローティングで配置します。EXPLORING は FilterMate に残ります。セクションのチップを別のパネルにドラッグするとグループ化され、右クリックすると FilterMate に戻して統合できます。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>各セクションは、開いている間、そのセクション専用のボタンを表示します。</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>セクション：それぞれ QGIS の専用パネル（すぐに適用されます）</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>セクション：すべて FilterMate パネルに戻す（すぐに適用されます）</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>セクション：QGIS のパネルに（すぐに適用されます）</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>セクションは QGIS のパネルにあります。パネルはタイトルをドラッグして移動できます。セクションのチップを別のパネルにドラッグするとグループ化され、右クリックすると FilterMate に戻して統合できます。</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>これらの設定はすでに元に戻されています。</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>各セクションは QGIS の専用パネルにあります。タイトルをドラッグして移動できます。タイトルを右クリックすると、別のパネルとタブでグループ化したり、FilterMate に戻して統合したりできます。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>既定では、すべてのセクションがこのパネルの中にあり、頼まない限り何も動きません。セクションはここから出せます。レール上の AGENT、FILTERING、EXPORTING、CONFIGURATION のチップを右クリックし、専用のパネルで開く操作を選びます。そのセクションは QGIS のパネルになり、地図の横にドラッグしたり、レイヤパネルとタブにしたり、別の画面にフローティングで表示したりできます。EXPLORING はここに残ります。ほかのセクションが使うレイヤを保持しているためです。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>パネルには 1 つまたは複数のセクションを置け、ここと同じようにレールに一覧表示されます。セクションのチップを別のパネルにドラッグするとグループ化され、FilterMate にドラッグすると戻して統合され、どのパネルの外にもドラッグすると新しいパネルになります。FilterMate の 2 つのパネルをタブとして組み合わせると 1 つになります。チップやパネルのタイトルを右クリックしても、同じ移動ができます。パネルを閉じると、そのセクションは FilterMate に戻って統合されます。QGIS は、各パネルを最後に置いた場所に戻します。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>パネルには 1 つまたは複数のセクションを置けます。セクションのヘッダー、またはパネルのタイトルを右クリックすると、別のパネルとグループ化したり、FilterMate に戻して統合したりできます。FilterMate の 2 つのパネルをタブとして組み合わせると 1 つになります。パネルを閉じると、そのセクションは FilterMate に戻って統合されます。QGIS は、各パネルを最後に置いた場所に戻します。</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING は、現在のレイヤと、そこで選んだものを保持します。ベクタレイヤの地物、ラスタの値の範囲やクラス、ポイントクラウドのクラスや高さです。ほかのセクションは、ここで選んだものに対して動作します。</translation>
@@ -12291,11 +12296,6 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>セクションは、このパネルから出せます。AGENT、FILTERING、EXPORTING、CONFIGURATION のヘッダーを右クリックし、専用のパネルで開く操作を選びます。そのセクションは QGIS のパネルになり、地図の横にドラッグしたり、レイヤパネルとタブにしたり、別の画面にフローティングで表示したりできます。EXPLORING はここに残ります。ほかのセクションが使うレイヤを保持しているためです。</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>このようなパネルのタイトルを右クリックすると、別のパネルとタブでグループ化したり、FilterMate に戻して統合したりできます。閉じても統合されます。QGIS は、各パネルを最後に置いた場所に戻します。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

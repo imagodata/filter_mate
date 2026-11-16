@@ -323,6 +323,7 @@ class DockSections(QObject):
         self.bring_back = None  # called with the key of a section apart that is being turned off
         self.on_menu = None  # called with (key, place on the screen) on a right click on the chip of a section
         self.on_dropped = None  # called with (key, index) when the chip of a section apart is dropped on a rail
+        self.on_dropped_out = None  # called with (key, place on the screen) when a chip is dropped out of every rail
         from ..widgets.section_rail import make_rail
         self.top_rail = make_rail(self.top, accepts=lambda key: key in TOP_KEYS and key in self.detached,
                                   dark=self._dark)
@@ -334,6 +335,7 @@ class DockSections(QObject):
         self.top_rail.chosen.connect(self._on_top_chip)
         self.top_rail.reordered.connect(lambda _order: self._save_orders())
         self.top_rail.dropped_in.connect(self._on_dropped_in)
+        self.top_rail.dropped_out.connect(self._on_dropped_out)
         self.top_rail.menu_requested.connect(self._on_chip_menu)
         self.top_rail.set_sections(["exploring"])
         # "Nothing open" below: QToolBox always has a current page, so an empty one, its header never shown.
@@ -360,6 +362,7 @@ class DockSections(QObject):
         self.bottom_rail.chosen.connect(self._on_bottom_chip)
         self.bottom_rail.reordered.connect(lambda _order: self._save_orders())
         self.bottom_rail.dropped_in.connect(self._on_dropped_in)
+        self.bottom_rail.dropped_out.connect(self._on_dropped_out)
         self.bottom_rail.menu_requested.connect(self._on_chip_menu)
         from ..widgets.section_rail import parse_order
         present = [key for key in BOTTOM_KEYS if getattr(dock, key.upper(), None) is not None]
@@ -556,6 +559,11 @@ class DockSections(QObject):
         self.on_dropped(key, index)
         rail = self.top_rail if key in TOP_KEYS else self.bottom_rail
         rail.move(key, index)
+
+    def _on_dropped_out(self, key: str, place: Any) -> None:
+        """A chip of the dock was dropped where no rail and no panel took it: the panels decide (a new one)."""
+        if self.on_dropped_out is not None:
+            self.on_dropped_out(key, place)
 
     # --- the top stack ---------------------------------------------------------------
 

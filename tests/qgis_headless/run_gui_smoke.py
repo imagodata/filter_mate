@@ -28,8 +28,8 @@ import traceback
 import types
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsSettings, QgsVectorLayer
-from qgis.PyQt.QtCore import QCoreApplication, QPoint, QPointF, QSettings, Qt, QTimer
-from qgis.PyQt.QtGui import QWheelEvent
+from qgis.PyQt.QtCore import QCoreApplication, QMimeData, QPoint, QPointF, QSettings, Qt, QTimer
+from qgis.PyQt.QtGui import QDragEnterEvent, QDropEvent, QWheelEvent
 from qgis.PyQt.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDockWidget, QLabel, QLineEdit, QMenu,
                                  QPushButton, QScrollArea, QToolButton, QWidget)
 try:
@@ -2482,14 +2482,18 @@ def s_section_rail():
 
 
 def panel_place(panel):
-    """Where ``panel`` is, seen from the dock: ``tab`` with it, ``below`` it, ``above`` it; None without a panel."""
+    """Where ``panel`` is, seen from the dock: a ``tab`` of it, ``below`` it, ``beside`` it, ``above`` it, or
+    ``floating``; None without a panel."""
     if panel is None:
         return None
     d = dock()
     window = iface.mainWindow()
+    if panel.isFloating():
+        return 'floating'
     if panel in window.tabifiedDockWidgets(d):
         return 'tab'
-    return 'below' if panel.mapTo(window, QPoint(0, 0)).y() > d.mapTo(window, QPoint(0, 0)).y() else 'above'
+    lower = panel.mapToGlobal(QPoint(0, 0)).y() - d.mapToGlobal(QPoint(0, 0)).y()
+    return 'beside' if abs(lower) <= 4 else ('below' if lower > 0 else 'above')
 
 
 def s_section_startup_check():
@@ -2521,7 +2525,7 @@ def s_section_startup_check():
         expected = tuple(key for key in ('agent', 'filtering', 'exporting', 'configuration') if key in wanted
                          and (key != 'agent' or 'agent' in d._fm_sections._headers))
         check('startup: the sections left apart are in their panels', panels.detached() == expected
-              and all(panels.panel(key).isVisible() or panel_place(panels.panel(key)) == 'tab' for key in expected),
+              and all(not panels.panel(key).isHidden() and panel_place(panels.panel(key)) != 'tab' for key in expected),
               f"{panels.detached()} expected {expected}")
         if 'filtering' in expected:
             panel = panels.panel('filtering')
@@ -2773,72 +2777,99 @@ def s_section_undo_check():
 
 
 def s_section_stack():
-    """EXPORTING and CONFIGURATION join FILTERING as tabs, AGENT leaves too: the dock keeps EXPLORING."""
+    """EXPORTING and CONFIGURATION join the panel of FILTERING, listed in its rail; AGENT gets its own panel: the dock
+    keeps EXPLORING."""
     d = dock()
     panels = d._fm_panels
     sections = d._fm_sections
     window = iface.mainWindow()
     filtering = panels.panel('filtering')
-    if not check('panels: FILTERING is still apart', filtering is not None):
+    if not check('stack: FILTERING is still apart, alone in its panel without a rail', filtering is not None
+                 and filtering.members == ['filtering'] and not filtering.rail.isVisible()):
         return None
-    check('panels: EXPORTING leaves the dock', panels.detach('exporting'))
+    check('stack: EXPORTING taken out joins the panel of FILTERING', panels.open_smart('exporting'))
     QApplication.processEvents()
-    exporting = panels.panel('exporting')
-    check('panels: EXPORTING is tabbed with FILTERING', exporting is not None
-          and exporting in window.tabifiedDockWidgets(filtering),
-          str([p.objectName() for p in window.tabifiedDockWidgets(filtering)]))
     export = action_button('export')
-    in_panel = [name for name in ACTION_NAMES if action_button(name) is not None
-                and exporting is not None and exporting.isAncestorOf(action_button(name))]
-    check('panels: the panel of EXPORTING has Export (and QFieldCloud with its extension), and it acts',
-          in_panel == [name for name in ('export', 'qfieldcloud') if action_button(name) is not None]
-          and export.isEnabled(), str(in_panel))
+    check('stack: one panel for both, listed in its rail, the one that came is open',
+          panels.panel('exporting') is filtering and filtering.members == ['filtering', 'exporting']
+          and filtering.rail.isVisible() and filtering.rail.shown_sections() == ['filtering', 'exporting']
+          and filtering.current() == 'exporting' and filtering.rail.chip('exporting').isChecked()
+          and d.EXPORTING.isVisible() and not d.FILTERING.isVisible(),
+          f"{filtering.members} current={filtering.current()}")
+    check('stack: the panel is named after its sections, QGIS knows it by the first one',
+          filtering.windowTitle() == 'FILTERING · EXPORTING' and filtering.objectName() == 'FilterMatePanel_filtering',
+          f"{filtering.windowTitle()} {filtering.objectName()}")
+    check('stack: Export is in the panel and acts; the buttons of FILTERING are folded with it', export.isVisible()
+          and export.isEnabled() and filtering.isAncestorOf(export) and not action_button('filter').isVisible()
+          and action_button('filter').isEnabled() and filtering.isAncestorOf(action_button('filter')))
     open_section(d.CONFIGURATION)
     in_bar = [name for name in actions_shown() if action_button(name).parentWidget() is d.frame_actions]
     shown_open = d.frame_actions.isVisible() and in_bar == ['about']
     open_section(None)
-    check('panels: the bar of the dock keeps About alone, shown while CONFIGURATION is open', shown_open
+    check('stack: the bar of the dock keeps About alone, shown while CONFIGURATION is open', shown_open
           and not d.frame_actions.isVisible() and action_button('about').parentWidget() is d.frame_actions,
           f"open={shown_open} in the bar={in_bar} folded={d.frame_actions.isVisible()}")
-    check('panels: CONFIGURATION leaves the dock', panels.detach('configuration'))
+    filtering.rail.chip('filtering').click()
     QApplication.processEvents()
-    configuration = panels.panel('configuration')
-    check('panels: CONFIGURATION is tabbed with them, About in it', configuration is not None
-          and configuration in window.tabifiedDockWidgets(filtering)
-          and configuration.isAncestorOf(action_button('about')))
-    check('panels: no bar and no lower stack left in the dock', not d.frame_actions.isVisible()
+    check('stack: a click on a chip of the panel opens its section, with its buttons', filtering.current() == 'filtering'
+          and d.FILTERING.isVisible() and not d.EXPORTING.isVisible() and action_button('filter').isVisible()
+          and not export.isVisible(), str(actions_shown()))
+    check('stack: About stays in the bar of the dock, folded while CONFIGURATION is',
+          not d.frame_actions.isVisible() and action_button('about').parentWidget() is d.frame_actions,
+          str(actions_shown()))
+    check('stack: CONFIGURATION joins them', panels.open_smart('configuration')
+          and filtering.members == ['filtering', 'exporting', 'configuration']
+          and filtering.isAncestorOf(action_button('about')), str(filtering.members))
+    QApplication.processEvents()
+    check('stack: no bar and no lower stack left in the dock', not d.frame_actions.isVisible()
           and not d.splitter_main.widget(1).isVisible() and sections.is_open('exploring'))
+    took = filtering.rail.drop('configuration', 1, filtering.rail)  # dragged before the first chip
+    QApplication.processEvents()
+    check('stack: a chip of the panel dragged first, the panel follows', took
+          and filtering.members == ['configuration', 'filtering', 'exporting']
+          and filtering.objectName() == 'FilterMatePanel_configuration'
+          and filtering.windowTitle() == 'CONFIGURATION · FILTERING · EXPORTING'
+          and QSettings().value(DETACHED_KEY) == 'configuration+filtering+exporting',
+          f"{filtering.members} {filtering.objectName()} saved={QSettings().value(DETACHED_KEY)}")
+    filtering.rail.drop('configuration', filtering.rail.width() - 1, filtering.rail)
+    QApplication.processEvents()
+    check('stack: and dragged back last', filtering.members == ['filtering', 'exporting', 'configuration']
+          and filtering.objectName() == 'FilterMatePanel_filtering', str(filtering.members))
     has_agent = 'agent' in sections._headers
     if has_agent:
-        check('panels: AGENT leaves the dock', panels.detach('agent'))
+        check('stack: AGENT leaves the dock', panels.detach('agent'))
         QApplication.processEvents()
         agent = panels.panel('agent')
         page = sections._pages['agent']
-        check('panels: AGENT is in its panel, EXPLORING open in the dock', agent is not None
-              and agent.isAncestorOf(page) and not sections.top_rail.chip('agent').isVisible()
-              and sections.is_open('exploring') and 'agent' in sections.detached)
+        check('stack: AGENT is in a panel of its own, not a tab of the dock or of the other panel',
+              agent is not None and agent is not filtering and agent.isAncestorOf(page)
+              and agent not in window.tabifiedDockWidgets(d) and agent not in window.tabifiedDockWidgets(filtering)
+              and not sections.top_rail.chip('agent').isVisible() and sections.is_open('exploring')
+              and 'agent' in sections.detached, panel_place(agent))
         sections.open_top('agent')  # the agent asks for an answer of the user
         QApplication.processEvents()
-        check('panels: AGENT asked to open shows its panel, EXPLORING stays open',
+        check('stack: AGENT asked to open shows its panel, EXPLORING stays open',
               sections.is_open('exploring') and agent is not None and agent.isVisible() and page.isVisible()
               and sections.is_open('agent'))
-        check('panels: Undo and Redo stay with FILTERING while AGENT is apart', not d.agent_has_focus())
+        check('stack: Undo and Redo stay with FILTERING while AGENT is apart', not d.agent_has_focus())
     else:
-        report('SKIP', 'panels: AGENT leaves the dock', 'no AGENT section in this dock')
-    check('panels: what is apart is remembered, in the order of the dock', QSettings().value(DETACHED_KEY)
-          == ','.join((['agent'] if has_agent else []) + ['filtering', 'exporting', 'configuration']),
+        report('SKIP', 'stack: AGENT leaves the dock', 'no AGENT section in this dock')
+    check('stack: the panels are kept with their sections', QSettings().value(DETACHED_KEY)
+          == ('filtering+exporting+configuration' + (',agent' if has_agent else '')),
           str(QSettings().value(DETACHED_KEY)))
+    everyone = {id(panels.panel(key)): panels.panel(key) for key in panels.detached()}.values()
     sheet = d.dockWidgetContents.styleSheet()
     d.dockWidgetContents.setStyleSheet(sheet + '\n/* another theme */')
     QApplication.processEvents()
-    check('panels: a change of theme reaches the panels',
-          all(panels.panel(key).widget().styleSheet().endswith('/* another theme */') for key in panels.detached()))
+    check('stack: a change of theme reaches the panels',
+          all(panel.widget().styleSheet().endswith('/* another theme */') for panel in everyone))
     d.dockWidgetContents.setStyleSheet(sheet)
     QApplication.processEvents()
-    for key in panels.detached():
-        panels.raise_panel(key)
-        QApplication.processEvents()
-        grab_widget(panels.panel(key), f'panel_{key}')
+    filtering.open('filtering')
+    QApplication.processEvents()
+    grab_widget(filtering, 'panel_stack')
+    if has_agent:
+        grab_widget(panels.panel('agent'), 'panel_agent')
     grab('dock_exploring_alone')
     return None
 
@@ -2864,26 +2895,28 @@ def s_section_close_panel():
     check('panels: the dock shown again, its panels too',
           d.isVisible() and all(not panels.panel(key).isHidden() for key in panels.detached()),
           str([key for key in panels.detached() if panels.panel(key).isHidden()]))
-    panels.panel('filtering').close()  # the X of the panel
+    panels.panel('filtering').close()  # the X of the panel that holds FILTERING, EXPORTING and CONFIGURATION
     return lambda: 'filtering' not in panels.detached()
 
 
 def s_section_back_check():
-    """A panel closed: its section is back in the dock, folded; then every section back, and restored."""
+    """A panel closed: its sections are back in the dock, folded; then every section back, and restored."""
     d = dock()
     panels = d._fm_panels
     sections = d._fm_sections
     toolbox = d.toolBox_tabTools
     window = iface.mainWindow()
-    header = bottom_header(d.FILTERING)
-    check('panels: closing the panel brings FILTERING back to the dock, folded', d.isAncestorOf(d.FILTERING)
-          and header is not None and header.isVisible() and toolbox.isItemEnabled(toolbox.indexOf(d.FILTERING))
+    rail = sections.bottom_rail
+    check('panels: closing the panel brings its three sections back to the dock, folded',
+          all(d.isAncestorOf(page) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION))
+          and rail.shown_sections() == ['filtering', 'exporting', 'configuration']
+          and all(toolbox.isItemEnabled(toolbox.indexOf(page)) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION))
           and toolbox.currentWidget() is sections._nothing and d.splitter_main.widget(1).isVisible()
           and not [panel for panel in window.findChildren(QDockWidget, 'FilterMatePanel_filtering')
                    if not panel.isHidden()],
-          f"current={toolbox.currentWidget().objectName()}")
-    check('panels: its buttons are back in the bar of the dock',
-          all(action_button(name).parentWidget() is d.frame_actions for name in FILTERING_ACTIONS
+          f"current={toolbox.currentWidget().objectName()} apart={panels.detached()}")
+    check('panels: their buttons are back in the bar of the dock',
+          all(action_button(name).parentWidget() is d.frame_actions for name in ACTION_NAMES
               if action_button(name) is not None) and not d.filtering_detached)
     open_section(d.FILTERING)
     check('panels: FILTERING opens in the dock again, with its widgets and its buttons',
@@ -2916,12 +2949,15 @@ def s_section_back_check():
     leftovers = [panel.objectName() for panel in window.findChildren(QDockWidget)
                  if panel.objectName().startswith('FilterMatePanel_') and not panel.isHidden()]
     check('panels: no panel left in QGIS', not leftovers, str(leftovers))
-    QSettings().setValue(DETACHED_KEY, 'exporting, nothing, FILTERING')  # as saved by another session, and noise
+    QSettings().setValue(DETACHED_KEY, 'exporting+nothing+FILTERING, configuration')  # as saved before, and noise
     restored = panels.restore()
     QApplication.processEvents()
-    check('panels: the sections that were apart are apart again when the dock is built',
-          restored == ['filtering', 'exporting'] and panels.detached() == ('filtering', 'exporting')
-          and panels.panel('exporting') in window.tabifiedDockWidgets(panels.panel('filtering')), str(restored))
+    shared = panels.panel('exporting')
+    check('panels: the panels of the last time come back with their sections in their order',
+          restored == ['exporting', 'filtering', 'configuration']
+          and panels.groups() == (('exporting', 'filtering'), ('configuration',))
+          and shared is panels.panel('filtering') and shared.objectName() == 'FilterMatePanel_exporting'
+          and panels.panel('configuration') is not shared, f"{restored} {panels.groups()}")
     panels.attach_all()
     QApplication.processEvents()
     open_section(d.FILTERING)
@@ -2932,8 +2968,7 @@ def s_section_back_check():
 
 
 def s_section_restart():
-    """As after a restart of QGIS: the dock and its panel come back where they were, the panel still below it."""
-    from qgis.PyQt.QtWidgets import QMenu
+    """As after a restart of QGIS: the dock and its panel come back where they were."""
     d = dock()
     panels = d._fm_panels
     window = iface.mainWindow()
@@ -2941,13 +2976,13 @@ def s_section_restart():
     area = window.dockWidgetArea(d)
     open_section(d.FILTERING)
     panels.detach('filtering')
+    panels.open_smart('exporting')
     QApplication.processEvents()
     panel = panels.panel('filtering')
     place = panel_place(panel)
-    if not check('restart: FILTERING is apart, below the dock or tabbed with it', place in ('below', 'tab'),
+    if not check('restart: FILTERING and EXPORTING share a panel, below the dock or beside it',
+                 place in ('below', 'beside') and panels.groups() == (('filtering', 'exporting'),),
                  f"place={place} dock={d.height()} floating={d.isFloating()}/{panel.isFloating() if panel else None} "
-                 f"visible={d.isVisible()}/{panel.isVisible() if panel else None} "
-                 f"tops={d.mapTo(window, QPoint(0, 0)).y()}/{panel.mapTo(window, QPoint(0, 0)).y() if panel else None} "
                  f"docks={[(w.objectName(), w.height()) for w in window.findChildren(QDockWidget) if w.isVisible()]}"):
         return None
     menu = window.findChild(QMenu, module.PANEL_MENU_NAME)
@@ -2961,13 +2996,14 @@ def s_section_restart():
     QSettings().setValue(module.DOCK_AREA_KEY, module._area_number(area))
     restored = module.place_dock(d, iface, area)  # the plugin opens its dock
     d.show()
-    again = panels.restore()  # and the sections that were apart
+    again = panels.restore()  # and the panels of the last time
     QApplication.processEvents()
     panel = panels.panel('filtering')
     check('restart: the dock is back where QGIS kept it', restored and window.dockWidgetArea(d) == area
           and d.isVisible() and (menu is None or d.toggleViewAction() in menu.actions()), f"restored={restored}")
-    check('restart: FILTERING is apart again, where it was (below the dock, or tabbed with it)',
-          again == ['filtering'] and panel is not None and not panel.isHidden() and panel_place(panel) == place,
+    check('restart: the panel is back with its two sections, where it was',
+          again == ['filtering', 'exporting'] and panel is not None and panel is panels.panel('exporting')
+          and not panel.isHidden() and panel_place(panel) == place,
           f"again={again} place before={place} after={panel_place(panel)}")
     panels.raise_panel('filtering')
     QApplication.processEvents()
@@ -2991,73 +3027,303 @@ def menu_action(menu, name):
     return next((action for action in menu.actions() if action.objectName() == name), None) if menu is not None else None
 
 
-def s_section_group():
-    """Separate, group and merge from the menus: every section apart in one go, a panel as a tab of another, one
-    section merged back, then all of them."""
+def menu_names(menu):
+    return [action.objectName() for action in menu.actions() if not action.isSeparator()] if menu is not None else []
+
+
+def drop_as_tab(first, second):
+    """``second`` put as a tab of ``first``, as a drop with the mouse does.
+
+    It leaves the layout of the window first. Tabbed while it is still laid out, Qt 6.10 makes two tab bars for the
+    one group (QMainWindowLayout::getTabBar lays the window out again, which makes the bar a second time); the spare
+    one is deleted while it is being shown when another move ends its animation in between, and QGIS dies in
+    QMainWindowLayout::showTabBars. A drop with the mouse goes another way in Qt (plug), and the plugin never tabs
+    a dock itself."""
+    window = iface.mainWindow()
+    window.removeDockWidget(second)
+    QApplication.processEvents()
+    window.tabifyDockWidget(first, second)
+    second.show()
+    QApplication.processEvents()
+
+
+def s_section_tabbed_dock():
+    """2026-11-16, review: the dock shares its tabs with a panel of QGIS (Layers). A panel split from a tab is one
+    more tab (Qt): the section taken out was a tab of the dock, and merged back at once."""
     d = dock()
     panels = d._fm_panels
     window = iface.mainWindow()
-    has_agent = 'agent' in d._fm_sections._headers
-    every = tuple(key for key in ('agent', 'filtering', 'exporting', 'configuration') if has_agent or key != 'agent')
-    header = bottom_header(d.FILTERING)
-    menu = panels.build_menu('filtering', header)
-    names = [action.objectName() for action in menu.actions() if not action.isSeparator()] if menu is not None else []
-    check('group: in the dock, a section is offered its own panel, alone or with the others',
-          names == ['action_section_detach', 'action_section_detach_all'], str(names))
-    menu_action(menu, 'action_section_detach_all').trigger()
-    QApplication.processEvents()
-    if not check('group: every section in its own panel in one go', panels.detached() == every, str(panels.detached())):
-        panels.attach_all()
+    layers = window.findChild(QDockWidget, 'Layers')
+    if not check('tabbed dock: QGIS has its Layers panel', layers is not None and layers.isVisible()):
         return None
-    filtering, exporting = panels.panel('filtering'), panels.panel('exporting')
-    menu = panels.build_menu('filtering', filtering)
-    names = [action.objectName() for action in menu.actions() if not action.isSeparator()]
-    check('group: a panel is offered the panels it is not tabbed with, and to merge',
-          'action_section_group_dock' in names and 'action_section_group_exporting' not in names
-          and 'action_section_attach' in names and 'action_section_attach_all' in names
-          and 'action_section_detach_all' not in names, str(names))
-    menu_action(menu, 'action_section_group_dock').trigger()
+    state = window.saveState()  # put back at the end: the places of this step are not those of the next ones
+    drop_as_tab(layers, d)
+    d.raise_()
     QApplication.processEvents()
-    check('group: FILTERING becomes a tab beside the FilterMate dock', filtering in window.tabifiedDockWidgets(d)
-          and filtering not in window.tabifiedDockWidgets(exporting) and filtering.isVisible(),
-          str([panel.objectName() for panel in window.tabifiedDockWidgets(d)]))
-    menu = panels.build_menu('exporting', exporting)
-    check('group: EXPORTING is offered FILTERING again, now that they are apart',
-          menu_action(menu, 'action_section_group_filtering') is not None)
-    menu_action(menu, 'action_section_group_filtering').trigger()
+    tabbed = layers in window.tabifiedDockWidgets(d)
+    took = panels.detach('filtering')
     QApplication.processEvents()
-    check('group: EXPORTING joins FILTERING and the dock as a tab', exporting in window.tabifiedDockWidgets(filtering)
-          and exporting in window.tabifiedDockWidgets(d) and action_button('export').isEnabled())
-    panels._show_panel_menu('exporting', exporting, QPoint(8, 4))  # a right click on the title of the panel
     QApplication.processEvents()
-    shown = [popup for popup in exporting.findChildren(QMenu) if popup.isVisible()]
-    check('group: a right click on the title of a panel opens its menu', len(shown) == 1)
-    for popup in shown:
-        popup.hide()
-    inside = exporting.widget().geometry().center()
-    panels._show_panel_menu('exporting', exporting, inside)
+    panel = panels.panel('filtering')
+    check('tabbed dock: FILTERING taken out of a dock that shares its tabs stays out, in a place of its own',
+          tabbed and took and panel is not None and panel.isVisible() and panels.detached() == ('filtering',)
+          and d not in window.tabifiedDockWidgets(panel) and on_screen(d.FILTERING) and on_screen(d.frame_exploring),
+          f"tabbed={tabbed} took={took} apart={panels.detached()} "
+          f"mates={[w.objectName() for w in window.tabifiedDockWidgets(panel)] if panel else None} "
+          f"floating={panel.isFloating() if panel else None}")
+    panels.detach_all()
     QApplication.processEvents()
-    check('group: not a right click in the contents of the panel',
-          not [popup for popup in exporting.findChildren(QMenu) if popup.isVisible()])
-    menu = panels.build_menu('exporting', exporting)
-    menu_action(menu, 'action_section_attach').trigger()
     QApplication.processEvents()
-    check('group: merged back, EXPORTING is in the dock again, the others stay apart',
-          'exporting' not in panels.detached() and d.isAncestorOf(d.EXPORTING) and 'filtering' in panels.detached()
-          and bottom_header(d.EXPORTING).isVisible(), str(panels.detached()))
-    menu = panels.build_menu('exporting', bottom_header(d.EXPORTING))
-    menu_action(menu, 'action_section_attach_all').trigger()
+    has_agent = 'agent' in d._fm_sections._headers
+    lower = ('filtering', 'exporting', 'configuration')
+    ours = [d] + [panels.panel(key) for key in panels.detached()]
+    check('tabbed dock: the other sections follow, none as a tab of the dock or of a panel of FilterMate',
+          set(panels.groups()) == {lower} | ({('agent',)} if has_agent else set())
+          and not any(mate in ours for one in ours for mate in window.tabifiedDockWidgets(one)),
+          f"{panels.groups()} "
+          f"{[(one.objectName(), [w.objectName() for w in window.tabifiedDockWidgets(one)]) for one in ours]}")
+    panels.attach_all()
+    QApplication.processEvents()
+    window.restoreState(state)
+    QApplication.processEvents()
+    d.show()
+    d.raise_()
+    open_section(d.FILTERING)
+    QApplication.processEvents()
+    check('tabbed dock: left as found', panels.detached() == () and not QSettings().value(DETACHED_KEY)
+          and d.isVisible() and layers not in window.tabifiedDockWidgets(d) and layers.isVisible()
+          and d.toolBox_tabTools.currentWidget() is d.FILTERING and actions_shown() == SECTION['all'],
+          f"apart={panels.detached()} mates={[w.objectName() for w in window.tabifiedDockWidgets(d)]} {actions_shown()}")
+    return settled()
+
+
+def s_section_restore_order():
+    """2026-11-16, review: AGENT is installed after the other sections when the dock opens. A panel it shares came
+    back named after the section that was there, at another place than QGIS kept, and AGENT joined it last."""
+    d = dock()
+    panels, sections = d._fm_panels, d._fm_sections
+    if 'agent' not in sections._headers:
+        check('restore: skipped without AGENT', True)
+        return settled()
+    module = importlib.import_module(f'{PACKAGE}.ui.layout.section_panels')
+    QSettings().setValue(DETACHED_KEY, 'agent+filtering')
+    page = sections._pages.pop('agent')  # as when the dock is built: AGENT is not there yet
+    try:
+        first = panels.restore()
+        QApplication.processEvents()
+        panel = panels.panel('filtering')
+        early = (first, panel.objectName() if panel else None, QSettings().value(DETACHED_KEY))
+    finally:
+        sections._pages['agent'] = page
+    second = panels.restore()  # AGENT is installed
+    QApplication.processEvents()
+    panel = panels.panel('filtering')
+    name = module.PANEL_NAME.format('agent')
+    check('restore: a panel AGENT shares waits for it under its name, and AGENT takes its place in it',
+          early == (['filtering'], name, 'agent+filtering') and second == ['agent'] and panel is not None
+          and panel is panels.panel('agent') and panel.members == ['agent', 'filtering'] and panel.objectName() == name
+          and panel.current() == 'agent' and panel.kept_name is None,
+          f"early={early} second={second} members={panel.members if panel else None} "
+          f"name={panel.objectName() if panel else None} current={panel.current() if panel else None}")
+    panels.attach_all()
     QApplication.processEvents()
     open_section(d.FILTERING)
-    check('group: every section merged back into FilterMate', panels.detached() == ()
+    check('restore: left as found', panels.detached() == () and not QSettings().value(DETACHED_KEY)
+          and d.toolBox_tabTools.currentWidget() is d.FILTERING and actions_shown() == SECTION['all'],
+          str(actions_shown()))
+    return settled()
+
+
+def put_behind_layers(key):
+    """The panel of the section ``key`` as a tab of the Layers panel of QGIS, behind it: Qt calls its page
+    visible, nobody sees it. (A panel of FilterMate is never a tab of the dock: they merge.)"""
+    window = iface.mainWindow()
+    layers, panel = window.findChild(QDockWidget, 'Layers'), dock()._fm_panels.panel(key)
+    if layers is None or panel is None:
+        return False
+    if panel not in window.tabifiedDockWidgets(layers):
+        drop_as_tab(layers, panel)
+    layers.raise_()
+    QApplication.processEvents()
+    return True
+
+
+def s_section_group():
+    """Separate, group and merge: from the menus, by putting two panels together, and by dragging a chip onto a
+    panel, back onto the dock, or out of every panel."""
+    d = dock()
+    panels = d._fm_panels
+    sections = d._fm_sections
+    window = iface.mainWindow()
+    bottom = sections.bottom_rail
+    has_agent = 'agent' in sections._headers
+    menu = panels.build_menu('filtering', d)
+    check('group: in the dock, a section is offered its own panel, alone or with the others',
+          menu_names(menu) == ['action_section_detach', 'action_section_detach_all'], str(menu_names(menu)))
+    menu_action(menu, 'action_section_detach_all').trigger()
+    QApplication.processEvents()
+    lower = ('filtering', 'exporting', 'configuration')
+    if not check('group: taken out, FILTERING, EXPORTING and CONFIGURATION share a panel, AGENT has its own',
+                 panels.groups() == ((('agent',),) if has_agent else ()) + (lower,), str(panels.groups())):
+        panels.attach_all()
+        return None
+    stack = panels.panel('filtering')
+    check('group: the panel shows the section that was open in the dock, not the last one that came',
+          stack.current() == 'filtering' and d.FILTERING.isVisible() and action_button('filter').isVisible()
+          and not d.CONFIGURATION.isVisible(), f"current={stack.current()}")
+    menu = panels.build_menu('exporting', stack)
+    check('group: a section that shares a panel is offered its own, the other panels, and to merge back',
+          menu_names(menu) == ['action_section_detach'] + (['action_section_group_agent'] if has_agent else [])
+          + ['action_section_attach', 'action_section_attach_all'], str(menu_names(menu)))
+    menu_action(menu, 'action_section_detach').trigger()
+    QApplication.processEvents()
+    exporting = panels.panel('exporting')
+    check('group: EXPORTING gets a panel of its own, not a tab of the one it left', exporting is not stack
+          and exporting.members == ['exporting'] and stack.members == ['filtering', 'configuration']
+          and exporting not in window.tabifiedDockWidgets(stack) and action_button('export').isEnabled(),
+          f"{panels.groups()} {panel_place(exporting)}")
+    # Two panels of FilterMate put together merge: EXPORTING dropped as a tab of the other panel.
+    drop_as_tab(stack, exporting)
+    alone = panels.panel('exporting') is stack  # the signals of the drop already merged them
+    panels._fuse_tabbed(exporting)
+    QApplication.processEvents()
+    check('group: a panel dropped as a tab of another one gives it its sections',
+          panels.panel('exporting') is stack and stack.members == ['filtering', 'configuration', 'exporting']
+          and stack.current() == 'exporting' and len(panels.groups()) == (2 if has_agent else 1),
+          f"{panels.groups()} merged by the signals alone={alone}")
+    if has_agent:
+        agent = panels.panel('agent')
+        drop_as_tab(d, agent)
+        panels._fuse_tabbed(agent)
+        QApplication.processEvents()
+        check('group: a panel dropped as a tab of the dock gives its sections back to the dock',
+              'agent' not in panels.detached() and sections.top_rail.chip('agent').isVisible()
+              and d.isAncestorOf(sections._pages['agent']), str(panels.groups()))
+        # 2026-11-16, review: the place QGIS keeps for that panel is now a tab of the dock. Taken out again, AGENT
+        # went back there, and merged at once.
+        panels.detach('agent')
+        QApplication.processEvents()
+        QApplication.processEvents()
+        again = panels.panel('agent')
+        check('group: taken out again after it merged as a tab of the dock, AGENT stays out, in another place',
+              again is not None and again.isVisible() and d not in window.tabifiedDockWidgets(again)
+              and stack not in window.tabifiedDockWidgets(again),
+              f"{panels.groups()} mates={[w.objectName() for w in window.tabifiedDockWidgets(again)] if again else None}")
+        panels.attach('agent')
+        QApplication.processEvents()
+    # A chip dragged from a rail to another (``drop`` is what the drop event of a rail calls).
+    check('group: the dock takes back a chip of a panel on the rail of its stack only',
+          bottom.takes('configuration', stack.rail) and not sections.top_rail.takes('configuration', stack.rail)
+          and not bottom.takes('exploring', sections.top_rail))
+    bottom.drop('configuration', 0, stack.rail)
+    QApplication.processEvents()
+    check('group: a chip of a panel dropped on the rail of the dock: its section comes back',
+          'configuration' not in panels.detached() and d.isAncestorOf(d.CONFIGURATION)
+          and bottom.shown_sections() == ['configuration'] and stack.members == ['filtering', 'exporting'],
+          f"{panels.groups()} {bottom.shown_sections()}")
+    check('group: a panel takes the chip of a section of the dock, not one it holds',
+          stack.rail.takes('configuration', bottom) and not stack.rail.takes('exploring', sections.top_rail)
+          and panels.can_take('configuration', stack) and not panels.can_take('filtering', stack))
+    stack.rail.drop('configuration', 0, bottom)
+    QApplication.processEvents()
+    check('group: a chip of the dock dropped on the rail of a panel: its section joins it, there',
+          panels.panel('configuration') is stack and stack.members == ['configuration', 'filtering', 'exporting']
+          and stack.current() == 'configuration' and not bottom.shown_sections(), str(panels.groups()))
+    far = window.mapToGlobal(QPoint(60, 300))  # over the map, out of the dock and of every panel
+    panels._on_dropped_out('filtering', stack.mapToGlobal(QPoint(40, 60)))
+    QApplication.processEvents()
+    check('group: a chip dropped within its own panel changes nothing', panels.panel('filtering') is stack)
+    panels._on_dropped_out('filtering', far)
+    QApplication.processEvents()
+    torn = panels.panel('filtering')
+    check('group: a chip dropped out of every panel gets a new one, floating where it was dropped',
+          torn is not stack and torn.members == ['filtering'] and torn.isFloating() and torn.isVisible()
+          and stack.members == ['configuration', 'exporting'] and action_button('filter').isEnabled()
+          and abs(torn.frameGeometry().center().x() - far.x()) < torn.width() and torn.frameGeometry().left() >= 0,
+          f"{panels.groups()} floating={torn.isFloating()} at {torn.frameGeometry().topLeft()} for {far}")
+    panels._on_dropped_out('filtering', d.mapToGlobal(QPoint(40, 200)))
+    QApplication.processEvents()
+    check('group: a chip of a panel dropped on the dock, out of its rails, comes back all the same',
+          'filtering' not in panels.detached() and d.isAncestorOf(d.FILTERING), str(panels.groups()))
+    # 2026-11-16, review: QDrag.exec says the same of a drop nobody took and of a drag given up with Escape, which
+    # made a panel. The rail takes the drop itself where nothing of FilterMate does (``catcher``, an event filter
+    # of the application while the chip is dragged: called here as Qt calls it).
+    rail_module = importlib.import_module(f'{PACKAGE}.ui.widgets.section_rail')
+    canvas = iface.mapCanvas()
+    mime = QMimeData()
+    mime.setData(rail_module.SECTION_MIME, b'filtering')
+    buttons, keys = Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier
+    catcher = bottom.catcher('filtering')
+    on_map = QDragEnterEvent(QPoint(80, 90), Qt.DropAction.MoveAction, mime, buttons, keys)
+    on_map.ignore()
+    took_map = catcher.eventFilter(canvas, on_map)
+    on_dock = QDragEnterEvent(QPoint(5, 5), Qt.DropAction.MoveAction, mime, buttons, keys)
+    on_dock.ignore()
+    took_dock = catcher.eventFilter(d.frame_exploring, on_dock)
+    on_panel = QDragEnterEvent(QPoint(5, 5), Qt.DropAction.MoveAction, mime, buttons, keys)
+    on_panel.ignore()
+    took_panel = catcher.eventFilter(stack.widget(), on_panel)
+    other = QMimeData()
+    other.setData(rail_module.SECTION_MIME, b'exporting')
+    not_its_chip = QDragEnterEvent(QPoint(80, 90), Qt.DropAction.MoveAction, other, buttons, keys)
+    not_its_chip.ignore()
+    took_other = catcher.eventFilter(canvas, not_its_chip)
+    dropped = QDropEvent(QPointF(80, 90), Qt.DropAction.MoveAction, mime, buttons, keys)
+    catcher.eventFilter(canvas, dropped)
+    check('drag: over the map the rail takes the drop of its chip; over the dock or a panel, they decide',
+          took_map and on_map.isAccepted() and not took_dock and not on_dock.isAccepted() and not took_panel
+          and not took_other and catcher.place == canvas.mapToGlobal(QPoint(80, 90)),
+          f"map={took_map}/{on_map.isAccepted()} dock={took_dock} panel={took_panel} other={took_other} "
+          f"place={catcher.place}")
+    bottom.finish_drag('filtering', False, None, True)  # given up with Escape: nothing took it, the button is down
+    QApplication.processEvents()
+    check('drag: a drag given up with Escape changes nothing', 'filtering' not in panels.detached()
+          and len(panels.groups()) == 1, str(panels.groups()))
+    bottom.finish_drag('filtering', True, catcher.place, False)  # dropped on the map
+    QApplication.processEvents()
+    dropped_panel = panels.panel('filtering')
+    check('drag: a chip of the dock dropped on the map gets a panel, floating there',
+          dropped_panel is not None and dropped_panel.isFloating() and dropped_panel.members == ['filtering'],
+          str(panels.groups()))
+    panels._on_dropped_out('filtering', stack.mapToGlobal(QPoint(40, 120)))  # on a panel, out of its rail
+    QApplication.processEvents()
+    check('drag: a chip dropped on another panel, out of its rail, joins it all the same',
+          panels.panel('filtering') is stack and 'filtering' in stack.members, str(panels.groups()))
+    panels.attach('filtering')
+    QApplication.processEvents()
+    panels._show_panel_menu(stack, QPoint(8, 4))  # a right click on the title of the panel
+    QApplication.processEvents()
+    shown = [popup for popup in stack.findChildren(QMenu) if popup.isVisible()]
+    check('group: a right click on the title of a panel opens the menu of its open section', len(shown) == 1
+          and 'action_section_attach' in menu_names(shown[0]) if shown else False)
+    for popup in shown:
+        popup.hide()
+    panels._show_panel_menu(stack, stack.widget().geometry().center())
+    QApplication.processEvents()
+    check('group: not a right click in the contents of the panel',
+          not [popup for popup in stack.findChildren(QMenu) if popup.isVisible()])
+    menu = panels.build_menu('filtering', d)
+    check('group: a section of the dock is offered the panel of its stack first, then its own',
+          menu_names(menu)[:2] == ['action_section_group_configuration', 'action_section_detach'], str(menu_names(menu)))
+    menu_action(menu, 'action_section_attach_all').trigger()
+    QApplication.processEvents()
+    for key in ('FilterMate/sections/top_order', 'FilterMate/sections/bottom_order'):
+        QSettings().remove(key)
+    bottom.drop('configuration', bottom.width() - 1, bottom)  # the usual order of the lower rail again
+    QApplication.processEvents()
+    for key in ('FilterMate/sections/top_order', 'FilterMate/sections/bottom_order'):
+        QSettings().remove(key)
+    open_section(d.FILTERING)
+    check('group: every section merged back into FilterMate', panels.detached() == () and panels.groups() == ()
           and not QSettings().value(DETACHED_KEY) and actions_shown() == SECTION['all']
-          and d.toolBox_tabTools.currentWidget() is d.FILTERING, f"{panels.detached()} {actions_shown()}")
+          and bottom.sections() == ['filtering', 'exporting', 'configuration']
+          and d.toolBox_tabTools.currentWidget() is d.FILTERING, f"{panels.groups()} {actions_shown()} {bottom.sections()}")
     return settled()
 
 
 def s_section_off():
-    """A section turned off (APP.OPTIONS.FILTERING.enabled) while it is in its own panel: the panel goes with it, and
-    comes back when the section is turned on again. Undo, Redo and Compare stay within reach."""
+    """A section turned off (APP.OPTIONS.FILTERING.enabled) while it is in a panel: it leaves the panel, and is in it
+    again when it is turned on. Undo, Redo and Compare stay within reach."""
     d = dock()
     panels = d._fm_panels
     manager = d._action_bar_manager
@@ -3093,6 +3359,19 @@ def s_section_off():
           and panels.detached() == ('filtering',) and panel is not None
           and panel.isAncestorOf(action_button('filter')) and not action_button('filter').isHidden()
           and panel.isAncestorOf(d.comboBox_filtering_current_layer), f"changed={changed} apart={panels.detached()}")
+    # Turned off again, then every section merged back: that last word holds the day it is turned on.
+    options['FILTERING'] = {'enabled': {'value': False}}
+    d.apply_section_options()
+    QApplication.processEvents()
+    kept_apart = QSettings().value(DETACHED_KEY)
+    panels.attach_all()
+    options['FILTERING'] = {'enabled': {'value': True}}
+    d.apply_section_options()
+    QApplication.processEvents()
+    check('off: merged back while it was off, FILTERING is in the dock when it is turned on again',
+          kept_apart == 'filtering' and not QSettings().value(DETACHED_KEY) and panels.detached() == ()
+          and d.isAncestorOf(d.FILTERING) and bottom_header(d.FILTERING).isVisible(),
+          f"kept={kept_apart} saved={QSettings().value(DETACHED_KEY)} apart={panels.detached()}")
     panels.attach_all()
     if before is None:
         options.pop('FILTERING', None)
@@ -3107,11 +3386,12 @@ def s_section_off():
     return settled()
 
 
-SECTION_STEPS = [s_section_setup, s_section_rail, s_section_bars, s_vector_source, s_vector_select, s_section_detach,
+SECTION_STEPS = [s_section_setup, s_section_rail, s_section_bars, s_section_tabbed_dock, s_vector_source,
+                 s_vector_select, s_section_detach,
                  s_section_filter,
                  s_section_filter_check, s_section_undo, s_section_undo_check, s_section_stack,
                  s_section_close_dock, s_section_reopen_dock, s_section_close_panel, s_section_back_check,
-                 s_section_restart, s_section_group, s_section_off]
+                 s_section_restart, s_section_restore_order, s_section_group, s_section_off]
 
 # --- the welcome: how FilterMate works told in the AGENT thread, the layout asked by the setup (2026-11-16) --------
 
@@ -3173,11 +3453,11 @@ def s_tour():
     text = panel.thread.toPlainText()
     told = [words for words in ('a rail that lists its sections', 'EXPLORING holds', 'FILTERING filters',
                                 'EXPORTING writes', 'AGENT does', 'CONFIGURATION lists',
-                                'By default every section is in this panel', 'group it with another one',
+                                'By default every section is in this panel', 'A panel holds one section or several',
                                 'The buttons act') if words in text]
     links = list(thread_links())
     check('tour: told in the AGENT thread, which opens: each section, the panels, the buttons, then the links',
-          d._fm_sections.is_open('agent') and len(told) == 9 and links[:1] == ['Open every section in its own panel']
+          d._fm_sections.is_open('agent') and len(told) == 9 and links[:1] == ['Take every section out of FilterMate']
           and 'Set up FilterMate' in links, f"told={len(told)} links={links}")
     check('tour: nothing is kept in the conversation, no model is asked', not chat._transcript
           and chat._engine is None)
@@ -3185,17 +3465,19 @@ def s_tour():
     check('tour: no paragraph wider than the thread', all(label.width() <= panel.thread.width() for label in labels),
           str(max((label.width() for label in labels), default=0)))
     grab('tour')
-    thread_links()['Open every section in its own panel'].click()
+    thread_links()['Take every section out of FilterMate'].click()
     return waits(0.6)
 
 
 def s_tour_links_check():
-    """The links of the tour do what was just said: every section in its own panel, then all of them back."""
+    """The links of the tour do what was just said: every section out of FilterMate, then all of them back."""
     d, chat = dock(), agent_chat()
     panels = d._fm_panels
-    check('tour: its link opens every section in its own panel, AGENT and its thread still in view',
-          panels.detached() == present_sections() and d._fm_sections.is_open('agent') and on_screen(chat.panel),
-          f"apart={panels.detached()} agent in view={d._fm_sections.is_open('agent')}")
+    lower = tuple(key for key in present_sections() if key != 'agent')
+    check('tour: its link takes every section out, AGENT in its own panel and the others together, its thread '
+          'still in view', panels.detached() == present_sections() and d._fm_sections.is_open('agent')
+          and on_screen(chat.panel) and lower in panels.groups() and len(panels.groups()) == len(present_sections()) - 2,
+          f"groups={panels.groups()} agent in view={d._fm_sections.is_open('agent')}")
     grab_window('tour_every_section_apart')
     chat.show_tour()  # told again: what can be done now is to bring them back
     QApplication.processEvents()
@@ -3218,7 +3500,7 @@ def s_tour_merged_check():
 
 
 def s_setup_layout():
-    """The setup asks where the sections go, with the buttons: each in its own panel, the buttons under it."""
+    """The setup asks where the sections go, with the buttons: in panels of QGIS, the buttons under them."""
     d, chat = dock(), agent_chat()
     chat.new_conversation()
     WELCOME['position'] = d._action_bar_manager.get_position()
@@ -3232,7 +3514,7 @@ def s_setup_layout():
             agent_chat().panel.thread.ensureWidgetVisible(card)
             QApplication.processEvents()
             grab('setup_layout_step')
-        _answer_card(tick=('Each in its own panel of QGIS', 'Under each section'))
+        _answer_card(tick=('In panels of QGIS', 'Under each section'))
     WELCOME['asked'] = asked
     card = chat._settings_cards[-1] if chat._settings_cards else None
     WELCOME['card'] = card
@@ -3253,16 +3535,16 @@ def s_setup_layout_check():
           and len(WELCOME['asked']) == 5,
           str(WELCOME['asked']))
     check('setup: the sections and the buttons on the card of the changes, nothing moved before Apply',
-          len(WELCOME['rows']) == 2 and any('own panel' in row for row in WELCOME['rows'])
+          len(WELCOME['rows']) == 2 and any('in panels of QGIS' in row for row in WELCOME['rows'])
           and WELCOME['apart_before_apply'] == (), f"rows={WELCOME['rows']} apart={WELCOME['apart_before_apply']}")
-    check('setup: Apply moves every section to its own panel and the buttons under their section',
+    check('setup: Apply takes every section out of FilterMate and puts the buttons under their section',
           WELCOME['card'] is not None and WELCOME['card'].done and panels.detached() == present_sections()
           and manager.get_position() == 'sections', f"apart={panels.detached()} position={manager.get_position()}")
     check('setup: AGENT moved with the others, its thread is still in view', d._fm_sections.is_open('agent')
           and on_screen(agent_chat().panel))
     text = agent_chat().panel.thread.toPlainText()
     check('setup: it says how to group and merge, and offers how FilterMate works',
-          'group it with another one' in text and 'How FilterMate works' in thread_links(), text[-300:])
+          'to group them' in text and 'How FilterMate works' in thread_links(), text[-300:])
     grab_window('setup_layout_applied')
     WELCOME['reverted'] = agent_chat()._wizard.revert()  # the link after Apply
     return waits(0.8)
@@ -3392,16 +3674,21 @@ def s_sync_position_check():
     d = dock()
     panels = d._fm_panels
     filtering, exporting = panels.panel('filtering') or d, panels.panel('exporting') or d
-    check('sync: the bar moved, the buttons of FILTERING and EXPORTING stay in their panels, shown and enabled',
+
+    def acts(key, name):
+        """The button ``name`` shows, enabled, once its section ``key`` is the open one of its panel."""
+        if not SYNC['docked']:
+            panels.raise_panel(key)
+            QApplication.processEvents()
+        return action_button(name).isVisible() and (SYNC['docked'] or action_button(name).isEnabled())
+
+    check('sync: the bar moved, the buttons of FILTERING and EXPORTING stay in their panel, shown and enabled',
           filtering.isAncestorOf(action_button('filter')) and exporting.isAncestorOf(action_button('export'))
-          and action_button('filter').isVisible() and action_button('export').isVisible()
-          and (SYNC['docked'] or (action_button('filter').isEnabled() and action_button('export').isEnabled())),
-          str(actions_shown()))
+          and acts('exporting', 'export') and acts('filtering', 'filter'), str(actions_shown()))
     grab_window('sync_bar_moved')
     apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': SYNC['position']})
     QApplication.processEvents()
-    d.raise_()  # AGENT is a tab of the dock: the dock in front hides its thread
-    QApplication.processEvents()
+    put_behind_layers('agent')  # AGENT as a tab of Layers, behind it: the tab in front hides its thread
     SYNC['agent_behind'] = SYNC['docked'] or (on_screen(agent_chat().panel) is False
                                               and not d._fm_sections.is_open('agent'))
     agent_chat()._show_agent()  # what a question of the agent, the setup and the tour do
@@ -3415,7 +3702,7 @@ def on_screen(widget):
 
 def s_sync_agent_check():
     d = dock()
-    check('sync: AGENT behind the tab of the dock is not counted as in view, and comes forward when its thread '
+    check('sync: AGENT behind the tab of another panel is not counted as in view, and comes forward when its thread '
           'has something to say', SYNC['agent_behind'] and d._fm_sections.is_open('agent')
           and on_screen(agent_chat().panel),
           f"behind before={SYNC['agent_behind']} in view now={d._fm_sections.is_open('agent')} "
@@ -3502,19 +3789,20 @@ FILTERING_ON = 'APP.OPTIONS.FILTERING.enabled'
 
 
 def s_audit_tab_behind():
-    """AGENT in its own panel, behind the tab of the dock: Qt calls its page visible, nobody sees it."""
+    """AGENT in its own panel, behind the tab of another panel: Qt calls its page visible, nobody sees it."""
     leave_welcome()
     dock()._fm_panels.detach('agent')
+    QApplication.processEvents()
+    AUDIT['behind'] = put_behind_layers('agent')
     return waits(0.6)
 
 
 def s_audit_tab_behind_check():
     d, chat = dock(), agent_chat()
-    d.raise_()
-    QApplication.processEvents()
+    put_behind_layers('agent')
     page = chat.panel
-    check('audit: AGENT behind the tab of the dock is not counted as open, though Qt calls its page visible',
-          page.isVisible() and not on_screen(page) and not d._fm_sections.is_open('agent'),
+    check('audit: AGENT behind the tab of another panel is not counted as open, though Qt calls its page visible',
+          AUDIT['behind'] and page.isVisible() and not on_screen(page) and not d._fm_sections.is_open('agent'),
           f"visible={page.isVisible()} on screen={on_screen(page)} open={d._fm_sections.is_open('agent')}")
     QSettings().remove(chat.SETUP_OFFERED_KEY)
     AUDIT['offered'] = chat.offer_setup_once('audit-1.0')
@@ -3524,13 +3812,12 @@ def s_audit_tab_behind_check():
 
 
 def s_audit_offer_check():
-    d, chat = dock(), agent_chat()
+    chat = agent_chat()
     kept = QSettings().value(chat.SETUP_OFFERED_KEY)
     check('audit: an offer of the setup behind a tab is kept as made only once its tab comes forward',
           AUDIT['offered'] is True and not AUDIT['kept_behind'] and kept == 'audit-1.0',
           f"offered={AUDIT['offered']} kept behind={AUDIT['kept_behind']!r} kept in front={kept!r}")
-    d.raise_()
-    QApplication.processEvents()
+    put_behind_layers('agent')
     chat._show_agent()  # what a question of the agent does
     return waits(0.6)
 
@@ -3623,13 +3910,13 @@ def s_audit_buttons_check():
 def s_audit_fronts_check():
     d = dock()
     window, panels = iface.mainWindow(), d._fm_panels
-    together = panels.panel('filtering') in window.tabifiedDockWidgets(d)  # one group of tabs: the dock is in front
-    behind = panels.panel('configuration') in window.tabifiedDockWidgets(panels.panel('filtering'))
-    check('audit: every section apart, the dock and FILTERING stay in front, as the dock opens',
-          on_screen(d.frame_exploring) and (on_screen(d.FILTERING) or together)
-          and not (behind and on_screen(d.CONFIGURATION)) and not on_screen(agent_chat().panel),
+    lower = panels.panel('filtering')
+    check('audit: every section taken out, what was open stays in view: EXPLORING in the dock, FILTERING in the '
+          'panel of the lower sections', on_screen(d.frame_exploring) and on_screen(d.FILTERING)
+          and lower is not None and lower.current() == 'filtering' and lower is panels.panel('configuration')
+          and not on_screen(d.CONFIGURATION) and lower not in window.tabifiedDockWidgets(d),
           f"exploring={on_screen(d.frame_exploring)} filtering={on_screen(d.FILTERING)} "
-          f"configuration={on_screen(d.CONFIGURATION)} agent={on_screen(agent_chat().panel)}")
+          f"configuration={on_screen(d.CONFIGURATION)} groups={panels.groups()}")
     grab_window('audit_every_section_apart')
     leave_welcome()
     return settled()

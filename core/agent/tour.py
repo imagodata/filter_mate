@@ -42,7 +42,8 @@ def steps(facts: DockFacts) -> List[Tuple[str, str]]:
     if any(key in MAY_BE_OFF for key in facts.off):
         told.append((TEXT, "off"))
     if facts.panels:
-        told += [(TEXT, "panels" if facts.rail else "panels_headers"), (TEXT, "groups")]
+        told += [(TEXT, "panels" if facts.rail else "panels_headers"),
+                 (TEXT, "groups" if facts.rail else "groups_headers")]
         if facts.can_move:
             told.append((LINK, "detach_all"))
         if facts.apart:

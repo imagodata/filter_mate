@@ -688,9 +688,9 @@ Run it?</source>
         <translation>Εμφάνιση: θέμα, μέγεθος του πίνακα, γλώσσα</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Διάταξη: οι ενότητες σε αυτόν τον πίνακα ή η καθεμία σε δικό της πίνακα του QGIS, πού μπαίνουν τα κουμπιά</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Διάταξη: οι ενότητες σε αυτόν τον πίνακα ή σε πίνακες του QGIS, πού μπαίνουν τα κουμπιά</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>Άνοιγμα του {} σε δικό του πίνακα</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Άνοιγμα κάθε ενότητας σε δικό της πίνακα</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Αφαίρεση όλων των ενοτήτων από το FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Ομαδοποίηση με {}</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Ομαδοποίηση με {}, ως καρτέλες</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>Η προεπιλογή: ένας πίνακας, όπου ένα κλικ σε μια ράγα ανοίγει μια ενότητα.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Η καθεμία σε δικό της πίνακα του QGIS</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>Σε πίνακες του QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>Οι AGENT, FILTERING, EXPORTING και CONFIGURATION δίπλα στον χάρτη, ως καρτέλες ή αιωρούμενες· το EXPLORING μένει στο FilterMate. Δεξί κλικ στον τίτλο ενός πίνακα τον ομαδοποιεί με άλλον ή τον συγχωνεύει πίσω στο FilterMate.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>Το AGENT στον δικό του πίνακα, τα FILTERING, EXPORTING και CONFIGURATION μαζί σε έναν άλλο, δίπλα στον χάρτη ή αιωρούμενα· το EXPLORING μένει στο FilterMate. Σύρετε το τσιπ μιας ενότητας σε άλλον πίνακα για να τους ομαδοποιήσετε, κάντε δεξί κλικ σε αυτό για να τη συγχωνεύσετε πίσω στο FilterMate.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>Κάθε ενότητα δείχνει τα δικά της κουμπιά όσο είναι ανοιχτή.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Ενότητες: η καθεμία σε δικό της πίνακα του QGIS (εφαρμόζεται αμέσως)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Ενότητες: όλες πίσω στον πίνακα FilterMate (εφαρμόζεται αμέσως)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Ενότητες: σε πίνακες του QGIS (εφαρμόζεται αμέσως)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Οι ενότητες βρίσκονται σε πίνακες του QGIS: σύρετε έναν πίνακα από τον τίτλο του· σύρετε το τσιπ μιας ενότητας σε άλλον πίνακα για να τους ομαδοποιήσετε, κάντε δεξί κλικ σε αυτό για να τη συγχωνεύσετε πίσω στο FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Αυτές οι ρυθμίσεις έχουν ήδη επανέλθει όπως ήταν.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Κάθε ενότητα βρίσκεται σε δικό της πίνακα του QGIS: σύρετέ την από τον τίτλο της· με δεξί κλικ στον τίτλο την ομαδοποιείτε με άλλον πίνακα, ως καρτέλες, ή τη συγχωνεύετε πίσω στο FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>Από προεπιλογή κάθε ενότητα βρίσκεται σε αυτόν τον πίνακα και τίποτα δεν μετακινείται αν δεν το ζητήσετε. Μια ενότητα μπορεί να τον αφήσει: κάντε δεξί κλικ στο τσιπ του AGENT, του FILTERING, του EXPORTING ή του CONFIGURATION στη ράγα του και επιλέξτε να ανοίξει σε δικό της πίνακα. Γίνεται πίνακας του QGIS, που μπορείτε να σύρετε δίπλα στον χάρτη, να βάλετε σε καρτέλα με τον πίνακα Επίπεδα ή να αφήσετε να αιωρείται σε άλλη οθόνη. Το EXPLORING μένει εδώ: περιέχει το επίπεδο στο οποίο δουλεύουν οι άλλες ενότητες.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Ένας πίνακας χωράει μία ενότητα ή περισσότερες, που απαριθμούνται σε μια ράγα όπως εδώ. Σύρετε το τσιπ μιας ενότητας σε άλλον πίνακα για να τους ομαδοποιήσετε, στο FilterMate για να τη συγχωνεύσετε πίσω, ή έξω από κάθε πίνακα για να της δώσετε έναν νέο· δύο πίνακες του FilterMate που τοποθετούνται ως καρτέλες ο ένας με τον άλλον γίνονται ένας. Δεξί κλικ σε ένα τσιπ ή στον τίτλο ενός πίνακα προσφέρει τις ίδιες μετακινήσεις. Το κλείσιμο ενός πίνακα συγχωνεύει πίσω τις ενότητές του στο FilterMate. Το QGIS επαναφέρει κάθε πίνακα εκεί που τον αφήσατε.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Ένας πίνακας χωράει μία ενότητα ή περισσότερες. Κάντε δεξί κλικ στην κεφαλίδα μιας ενότητας, ή στον τίτλο ενός πίνακα, για να την ομαδοποιήσετε με άλλον πίνακα ή να τη συγχωνεύσετε πίσω στο FilterMate· δύο πίνακες του FilterMate που τοποθετούνται ως καρτέλες ο ένας με τον άλλον γίνονται ένας. Το κλείσιμο ενός πίνακα συγχωνεύει πίσω τις ενότητές του στο FilterMate. Το QGIS επαναφέρει κάθε πίνακα εκεί που τον αφήσατε.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>Το EXPLORING περιέχει το τρέχον επίπεδο και ό,τι επιλέγετε σε αυτό: οντότητες ενός διανυσματικού επιπέδου, ένα εύρος τιμών ή κλάσεις ενός ράστερ, κλάσεις ή ύψη ενός νέφους σημείων. Οι άλλες ενότητες δουλεύουν πάνω σε ό,τι επιλέγει.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>Μια ενότητα μπορεί να φύγει από αυτόν τον πίνακα. Κάντε δεξί κλικ στην κεφαλίδα του AGENT, του FILTERING, του EXPORTING ή του CONFIGURATION και επιλέξτε να ανοίξει σε δικό της πίνακα: γίνεται πίνακας του QGIS, που μπορείτε να σύρετε δίπλα στον χάρτη, να βάλετε σε καρτέλα με τον πίνακα Επίπεδα ή να αφήσετε να αιωρείται σε άλλη οθόνη. Το EXPLORING μένει εδώ: περιέχει το επίπεδο στο οποίο δουλεύουν οι άλλες ενότητες.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>Κάντε δεξί κλικ στον τίτλο ενός τέτοιου πίνακα για να τον ομαδοποιήσετε με άλλον, ως καρτέλες, ή να τον συγχωνεύσετε πίσω στο FilterMate. Το κλείσιμο τον συγχωνεύει επίσης πίσω. Το QGIS επαναφέρει κάθε πίνακα εκεί που τον αφήσατε.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

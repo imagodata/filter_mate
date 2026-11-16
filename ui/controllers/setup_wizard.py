@@ -5,8 +5,9 @@ The steps and what each answer sets are plain Python (core/agent/setup_wizard.py
 of the thread, and what follows Apply. The setup applies its settings itself, outside any request and outside the
 history of the agent (a model never undoes them): a link puts them back. Nothing is sent to any provider.
 
-One answer is not a setting: where the sections go, all in the FilterMate panel or each in its own panel of QGIS
-(ui/layout/section_panels.py). It shows on the same card, moves with Apply, and comes back with the same link.
+One answer is not a setting: where the sections go, all in the FilterMate panel or in panels of QGIS (AGENT in
+its own, FILTERING, EXPORTING and CONFIGURATION together: ui/layout/section_panels.py). It shows on the same
+card, moves with Apply, and comes back with the same link.
 """
 from __future__ import annotations
 
@@ -99,10 +100,11 @@ def _labels(facts: wizard.ProjectFacts, stacked: bool = False) -> Dict[str, Dict
             wizard.IN_DOCK: (_tr("All in the FilterMate panel"),
                              _tr("A click on a header opens its section.") if stacked
                              else _tr("The default: one panel, where a click in a rail opens a section.")),
-            wizard.IN_PANELS: (_tr("Each in its own panel of QGIS"),
-                               _tr("AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or "
-                                   "floating; EXPLORING stays in FilterMate. A right-click on the title of a panel "
-                                   "groups it with another one or merges it back.")),
+            wizard.IN_PANELS: (_tr("In panels of QGIS"),
+                               _tr("AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in "
+                                   "another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the "
+                                   "chip of a section onto another panel to group them, right-click it to merge it "
+                                   "back.")),
             wizard.AS_NOW: (_tr("As they are now"), _tr("Some sections are in their own panel.")),
         },
         "headers": {
@@ -304,7 +306,7 @@ class SetupWizard:
                  "accepted": _tr("Applied."), "declined": _tr("Not applied: nothing changed.")}
         lines = self._chat._lines_of(rows)
         if layout == wizard.IN_PANELS:
-            lines.append(_tr("Sections: each in its own panel of QGIS (applied at once)"))
+            lines.append(_tr("Sections: in panels of QGIS (applied at once)"))
         elif layout == wizard.IN_DOCK:
             lines.append(_tr("Sections: all back in the FilterMate panel (applied at once)"))
         card = self._chat.panel.add_settings_card(texts, lines, "")
@@ -365,22 +367,21 @@ class SetupWizard:
         return done
 
     def _sections_now(self) -> Optional[dict]:
-        """Where the sections are: those in their own panel, and those kept as apart for the next time (one that
-        is turned off goes back to its panel the day it is turned on). None when they cannot move."""
+        """Where the sections are: the panels with their sections, and those kept for the next time (a section
+        that is turned off goes back to its panel the day it is turned on). None when they cannot move."""
         panels = self._panels()
         if panels is None:
             return None
         try:
-            kept = getattr(panels, "kept_apart", None)
-            apart = tuple(panels.detached())
-            return {"apart": apart, "kept": tuple(kept()) if callable(kept) else apart}
+            return {"apart": tuple(tuple(group) for group in panels.groups()),
+                    "kept": tuple(tuple(group) for group in panels.kept_apart())}
         except Exception:
             logger.debug("Setup: the panels of the sections were not read", exc_info=True)
             return None
 
     def _move_sections(self, layout: str, before: dict) -> Optional[dict]:
-        """Every section in its own panel, or all back in FilterMate. ``before`` (where they were when Apply was
-        clicked) to put them back; None when nothing moved and nothing kept as apart changed."""
+        """Every section out of FilterMate, in panels of QGIS, or all back in it. ``before`` (where they were when
+        Apply was clicked) to put them back; None when nothing moved and nothing kept as apart changed."""
         panels = self._panels()
         if panels is None:
             return None
@@ -396,21 +397,15 @@ class SetupWizard:
         return before if self._sections_now() != before else None
 
     def _restore_sections(self, before: dict) -> bool:
-        """The sections apart as they were before Apply, and what was kept as apart then; True when it changed."""
+        """The panels with the sections they had before Apply, and what was kept for the next time then; True
+        when it changed."""
         panels = self._panels()
         if panels is None:
             return False
         now = self._sections_now()
         try:
-            for key in panels.detached():
-                if key not in before["apart"]:
-                    panels.attach(key)
-            for key in before["apart"]:
-                if key not in panels.detached():
-                    panels.detach(key)
-            keep = getattr(panels, "keep_apart", None)
-            if callable(keep):  # a section turned off meanwhile is not kept as apart unless it was
-                keep(before["kept"])
+            panels.arrange(before["apart"])
+            panels.keep_apart(before["kept"])  # a section turned off meanwhile is not kept apart unless it was
         except Exception:
             logger.exception("Setup: the sections could not be put back")
         self._keep_thread_in_view()
@@ -461,8 +456,9 @@ class SetupWizard:
         sections = wizard.kept_sections(self._values, self._answers)
         panel = self._chat.panel
         if apart:
-            panel.add_note(_tr("Each section is in its own panel of QGIS: drag one by its title, right-click the "
-                               "title to group it with another one, as tabs, or to merge it back into FilterMate."))
+            panel.add_note(_tr("The sections are in panels of QGIS: drag a panel by its title, drag the chip of a "
+                               "section onto another panel to group them, right-click it to merge it back into "
+                               "FilterMate."))
         if self._values.get(wizard.FILTERING_ON) is not False and "filtering" not in sections:
             panel.add_note(_tr("FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show "
                                "it again: this setup, or {}.").format(self._where(wizard.FILTERING_ON)))

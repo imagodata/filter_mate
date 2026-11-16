@@ -72,46 +72,70 @@ class FakePanel:
         return self.cards[-1]
 
 
-class FakePanels:
-    """The sections that can go to their own panels (ui/layout/section_panels.SectionPanels), with what they keep
-    as apart for the next time: the sections apart, and those that are turned off (not ``present``)."""
+# What "In panels of QGIS" gives: AGENT in its own panel, the sections of the lower stack together.
+TAKEN_OUT = (("agent",), ("filtering", "exporting", "configuration"))
 
-    def __init__(self, apart=(), present=DETACHABLE):
-        self.apart, self.present, self.kept = list(apart), list(present), list(apart)
+
+class FakePanels:
+    """The sections that can go to panels of QGIS (ui/layout/section_panels.SectionPanels): the panels with their
+    sections, and what is kept for the next time: the panels of now, and each section that was apart and is turned
+    off (not ``present``)."""
+
+    def __init__(self, apart=(), present=DETACHABLE, groups=None):
+        self.panels = [list(group) for group in groups] if groups is not None else [[key] for key in apart]
+        self.present = list(present)
+        self.kept = [tuple(group) for group in self.panels]
 
     def detached(self):
-        return tuple(key for key in DETACHABLE if key in self.apart)
+        return tuple(key for key in DETACHABLE if any(key in group for group in self.panels))
+
+    def groups(self):
+        return tuple(tuple(group) for group in self.panels)
 
     def kept_apart(self):
-        return tuple(key for key in DETACHABLE if key in self.kept)
+        return tuple(self.kept)
 
-    def keep_apart(self, keys):
-        self.kept = list(keys)
+    def keep_apart(self, groups):
+        self.kept = [(group,) if isinstance(group, str) else tuple(group) for group in groups]
 
     def _remember(self):
-        self.kept = [key for key in DETACHABLE if key in self.apart or (key in self.kept and key not in self.present)]
+        apart = set(self.detached())
+        absent = [key for group in self.kept for key in group if key not in apart and key not in self.present]
+        self.kept = [tuple(group) for group in self.panels] + [(key,) for key in absent]
 
     def can_detach(self, key):
-        return key in self.present and key not in self.apart
+        return key in self.present and key not in self.detached()
 
     def detach(self, key, remember=True):
         if not self.can_detach(key):
             return False
-        self.apart.append(key)
+        self.panels.append([key])
         if remember:
             self._remember()
         return True
 
     def attach(self, key, remember=True):
-        if key not in self.apart:
+        if key not in self.detached():
             return False
-        self.apart.remove(key)
+        self.panels = [group for group in ([name for name in group if name != key] for group in self.panels) if group]
         if remember:
             self._remember()
         return True
 
     def detach_all(self):
-        return [key for key in DETACHABLE if self.detach(key)]
+        """AGENT in its own panel, the lower sections together (open_smart)."""
+        left = []
+        for key in DETACHABLE:
+            if not self.can_detach(key):
+                continue
+            lower = next((group for group in self.panels if key != "agent" and group != ["agent"]), None)
+            if lower is not None:
+                lower.append(key)
+            else:
+                self.panels.append([key])
+            left.append(key)
+        self._remember()
+        return left
 
     def attach_all(self, remember=True):
         for key in self.detached():
@@ -119,11 +143,18 @@ class FakePanels:
         if remember:
             self.kept = []
 
+    def arrange(self, groups, remember=True):
+        before = self.groups()
+        self.panels = [group for group in ([key for key in group if key in self.present] for group in groups) if group]
+        if remember:
+            self._remember()
+        return self.groups() != before
+
     def section_turned(self, key, on):
         """What the dock does when a setting turns a section off or on (dock_chrome.apply_section_options)."""
         if on and key not in self.present:
             self.present.append(key)
-            if key in self.kept:
+            if any(key in group for group in self.kept):
                 self.detach(key, remember=False)
         elif not on and key in self.present:
             self.attach(key, remember=False)  # back in the dock, kept as apart for the day it returns
@@ -259,15 +290,15 @@ def test_answering_as_ticked_changes_nothing_and_moves_nothing(world, chat):
 
 def test_apply_moves_the_sections_and_the_link_puts_them_back(world, chat):
     panels = chat._parent_widget._fm_panels
-    card = _run(world, chat, pick=[("Layout", "Each in its own panel of QGIS")])
-    assert card.lines == ["Sections: each in its own panel of QGIS (applied at once)"]
+    card = _run(world, chat, pick=[("Layout", "In panels of QGIS")])
+    assert card.lines == ["Sections: in panels of QGIS (applied at once)"]
     assert panels.detached() == ()  # nothing moves until Apply
 
     card.apply_requested.emit()
     assert card.done and card.accepted is True
     assert panels.detached() == DETACHABLE and world.applied == []  # no setting was changed
     assert chat.shown == ["agent"]  # AGENT moved too: its thread comes forward
-    assert any(kind == "note" and "group it with another one" in text for kind, text in chat.panel.said)
+    assert any(kind == "note" and "to group them" in text for kind, text in chat.panel.said)
 
     assert chat.wizard.revert() is True
     assert panels.detached() == ()
@@ -292,9 +323,31 @@ def test_the_link_puts_back_the_sections_that_were_apart_only(world, chat):
     assert panels.detached() == ("filtering",)
 
 
+def test_the_link_puts_the_panels_back_with_the_sections_they_shared(world, chat):
+    """A panel holds several sections: the link gives each one its panel again, not a panel of its own."""
+    together = (("agent",), ("exporting", "filtering"))
+    panels = chat._parent_widget._fm_panels = FakePanels(groups=together)
+    chat.wizard = world.setup.SetupWizard(chat)
+    chat.wizard.start()
+    while chat.wizard.running:
+        _answer(world, chat, pick=[("Layout", "All in the FilterMate panel")])
+    card = [card for card in chat.panel.cards if card.lines][-1]
+    card.apply_requested.emit()
+    assert panels.groups() == () and panels.kept_apart() == ()
+    assert chat.wizard.revert() is True
+    assert panels.groups() == together and panels.kept_apart() == together
+
+
+def test_every_section_taken_out_shares_two_panels(world, chat):
+    panels = chat._parent_widget._fm_panels
+    card = _run(world, chat, pick=[("Layout", "In panels of QGIS")])
+    card.apply_requested.emit()
+    assert panels.groups() == TAKEN_OUT  # AGENT in its own panel, the lower sections together
+
+
 def test_settings_and_sections_go_on_one_card_and_come_back_together(world, chat):
     panels = chat._parent_widget._fm_panels
-    card = _run(world, chat, pick=[("Layout", "Each in its own panel of QGIS"), ("Buttons", "Under each section")])
+    card = _run(world, chat, pick=[("Layout", "In panels of QGIS"), ("Buttons", "Under each section")])
     assert len(card.lines) == 2 and card.lines[0].startswith(world.wizard.ACTION_BAR)
     card.apply_requested.emit()
     assert world.applied == [{world.wizard.ACTION_BAR: "sections"}] and panels.detached() == DETACHABLE
@@ -305,7 +358,7 @@ def test_settings_and_sections_go_on_one_card_and_come_back_together(world, chat
 def test_a_setting_changed_since_does_not_keep_the_sections_from_moving(world, chat):
     """The row is left as it is (and said); the sections still go where Apply was asked to put them."""
     panels = chat._parent_widget._fm_panels
-    card = _run(world, chat, pick=[("Layout", "Each in its own panel of QGIS"), ("Buttons", "Top")])
+    card = _run(world, chat, pick=[("Layout", "In panels of QGIS"), ("Buttons", "Top")])
     world.config.setdefault("APP", {}).setdefault("DOCKWIDGET", {})["ACTION_BAR_POSITION"] = "left"  # meanwhile
     card.apply_requested.emit()
     assert card.accepted is True and panels.detached() == DETACHABLE and world.applied == []
@@ -322,7 +375,7 @@ def test_nothing_applied_and_nothing_moved_closes_the_card_as_not_applied(world,
 
 def test_apply_waits_for_the_end_of_a_request(world, chat):
     panels = chat._parent_widget._fm_panels
-    card = _run(world, chat, pick=[("Layout", "Each in its own panel of QGIS")])
+    card = _run(world, chat, pick=[("Layout", "In panels of QGIS")])
     chat.busy = True
     card.apply_requested.emit()
     assert not card.done and panels.detached() == () and "Wait" in chat.status[-1]
@@ -395,18 +448,18 @@ def test_the_link_puts_back_a_section_that_apply_turned_off_and_merged(world, ch
 
     assert chat.wizard.revert() is True
     assert world.config["APP"]["OPTIONS"]["FILTERING"]["enabled"] is True
-    assert panels.detached() == ("filtering",) and panels.kept_apart() == ("filtering",)
+    assert panels.detached() == ("filtering",) and panels.kept_apart() == (("filtering",),)
 
 
 def test_the_link_does_not_leave_a_section_kept_as_apart(world, chat):
-    """2026-11-16, review: FILTERING off and nothing apart; the setup turns it on with every section in its own
-    panel; the link turns it off again. It stayed kept as apart: alone in a panel the day it was turned on."""
+    """2026-11-16, review: FILTERING off and nothing apart; the setup turns it on with every section out of
+    FilterMate; the link turns it off again. It stayed kept as apart: alone in a panel the day it was turned on."""
     world.config = {"APP": {"OPTIONS": {"FILTERING": {"enabled": False}}}}
     chat._parent_widget._fm_panels = FakePanels(present=[key for key in DETACHABLE if key != "filtering"])
     panels = _follow_filtering(world, chat)
-    card = _run(world, chat, tick=("FILTERING",), pick=[("Layout", "Each in its own panel of QGIS")])
+    card = _run(world, chat, tick=("FILTERING",), pick=[("Layout", "In panels of QGIS")])
     card.apply_requested.emit()
-    assert panels.detached() == DETACHABLE and panels.kept_apart() == DETACHABLE
+    assert panels.detached() == DETACHABLE and panels.kept_apart() == TAKEN_OUT
 
     assert chat.wizard.revert() is True
     assert panels.detached() == () and panels.kept_apart() == ()
@@ -417,7 +470,7 @@ def test_the_link_does_not_leave_a_section_kept_as_apart(world, chat):
 def test_settings_that_cannot_be_applied_move_nothing(world, chat):
     """The card read "Applied." under "Nothing changed: the settings could not be applied."."""
     panels = chat._parent_widget._fm_panels
-    card = _run(world, chat, pick=[("Layout", "Each in its own panel of QGIS"), ("Buttons", "Top")])
+    card = _run(world, chat, pick=[("Layout", "In panels of QGIS"), ("Buttons", "Top")])
     world.fail = True
     card.apply_requested.emit()
     assert card.accepted is False and panels.detached() == ()
@@ -440,7 +493,7 @@ def test_the_links_of_the_tour_wait_for_the_end_of_a_request(world, chat):
     panels = chat._parent_widget._fm_panels
     world.tour.WelcomeTour(chat).show()
     chat.busy = True
-    chat.panel.links["Open every section in its own panel"]()
+    chat.panel.links["Take every section out of FilterMate"]()
     assert panels.detached() == () and "Wait" in chat.status[-1]
 
 
@@ -466,13 +519,13 @@ def test_the_tour_tells_each_section_then_offers_what_it_said(world, chat):
     assert any(text.startswith("By default every section is in this panel") for text in texts)
     assert said.count(("end", "")) == len(texts)  # each paragraph on its own
     assert [text for kind, text in said if kind == "link"] == [
-        "Open every section in its own panel", "Set up FilterMate", "Connect a model"]
+        "Take every section out of FilterMate", "Set up FilterMate", "Connect a model"]
 
 
 def test_the_links_of_the_tour_do_what_they_say(world, chat):
     panels = chat._parent_widget._fm_panels
     world.tour.WelcomeTour(chat).show()
-    chat.panel.links["Open every section in its own panel"]()
+    chat.panel.links["Take every section out of FilterMate"]()
     assert panels.detached() == DETACHABLE and chat.shown == ["agent"]
     chat.panel.links["Set up FilterMate"]()
     chat.panel.links["Connect a model"]()
@@ -509,6 +562,7 @@ def test_with_the_headers_stacked_the_tour_speaks_of_headers(world, chat):
     texts = [text for kind, text in chat.panel.said if kind == "text"]
     assert not any("rail" in text for text in texts)
     assert any("Right-click the header of AGENT" in text for text in texts)
+    assert any("Right-click the header of a section, or the title of a panel" in text for text in texts)
 
 
 def test_the_tour_waits_for_the_end_of_a_request(world, chat):

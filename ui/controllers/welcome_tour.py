@@ -56,9 +56,16 @@ def _texts(off: str) -> Dict[str, str]:
                               "EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a "
                               "panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on "
                               "another screen. EXPLORING stays here: it holds the layer the other sections work on."),
-        "groups": _tr("Right-click the title of such a panel to group it with another one, as tabs, or to merge "
-                      "it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where "
-                      "you left it."),
+        "groups": _tr("A panel holds one section or several, listed in a rail as here. Drag the chip of a section "
+                      "onto another panel to group them, onto FilterMate to merge it back, or out of every panel to "
+                      "give it a new one; two panels of FilterMate put together as tabs become one. A right-click on "
+                      "a chip, or on the title of a panel, offers the same moves. Closing a panel merges its "
+                      "sections back. QGIS puts every panel back where you left it."),
+        # With the headers stacked: the dock has no chip to drag, the menu of a header does the same.
+        "groups_headers": _tr("A panel holds one section or several. Right-click the header of a section, or "
+                              "the title of a panel, to group it with another panel or to merge it back into "
+                              "FilterMate; two panels of FilterMate put together as tabs become one. Closing a "
+                              "panel merges its sections back. QGIS puts every panel back where you left it."),
         "buttons": _tr("The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with "
                        "FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the "
                        "setup can also show them under each section."),
@@ -68,7 +75,7 @@ def _texts(off: str) -> Dict[str, str]:
 def _links() -> Dict[str, str]:
     return {
         # The words of the menu of a section header (ui/layout/section_panels.py): one translation for both.
-        "detach_all": QCoreApplication.translate("SectionPanels", "Open every section in its own panel"),
+        "detach_all": QCoreApplication.translate("SectionPanels", "Take every section out of FilterMate"),
         "attach_all": QCoreApplication.translate("SectionPanels", "Merge every section back into FilterMate"),
         "setup": _tr("Set up FilterMate"),
         "connect": _tr("Connect a model"),
@@ -133,7 +140,8 @@ class WelcomeTour:
         return True
 
     def _move(self, apart: bool) -> bool:
-        """Every section in its own panel, or all back in FilterMate; AGENT, where this is read, stays in view."""
+        """Every section out of FilterMate, in panels of QGIS, or all back in it; AGENT, where this is read, stays
+        in view."""
         from .setup_wizard import wait_for_chat
         panels = self._panels()
         if panels is None or wait_for_chat(self._chat):  # AGENT moves too: not under a request being answered

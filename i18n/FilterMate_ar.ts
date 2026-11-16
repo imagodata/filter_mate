@@ -688,9 +688,9 @@ Run it?</source>
         <translation>المظهر: السمة وحجم اللوحة واللغة</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>التخطيط: الأقسام في هذه اللوحة أو كل قسم في لوحة QGIS خاصة به، وموضع الأزرار</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>التخطيط: الأقسام في هذه اللوحة أو في لوحات QGIS، وموضع الأزرار</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>فتح {} في لوحة خاصة به</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>فتح كل قسم في لوحة خاصة به</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>إخراج كل الأقسام من FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>تجميع مع {}</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>تجميع مع {} في تبويبات</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>الافتراضي: لوحة واحدة، حيث يفتح النقر في شريط ما قسمًا.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>كل قسم في لوحة QGIS خاصة به</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>في لوحات QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT وFILTERING وEXPORTING وCONFIGURATION بجانب الخريطة، في تبويبات أو عائمة؛ ويبقى EXPLORING في FilterMate. النقر بزر الفأرة الأيمن على عنوان لوحة يجمعها مع لوحة أخرى أو يدمجها من جديد في FilterMate.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT في لوحة خاصة به، وFILTERING وEXPORTING وCONFIGURATION معًا في لوحة أخرى، بجانب الخريطة أو عائمة؛ ويبقى EXPLORING في FilterMate. اسحب شريحة قسم على لوحة أخرى لتجميعهما، وانقر عليها بزر الفأرة الأيمن لدمجها من جديد في FilterMate.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>يعرض كل قسم أزراره الخاصة ما دام مفتوحًا.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>الأقسام: كل قسم في لوحة QGIS خاصة به (يُطبَّق فورًا)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>الأقسام: كلها في لوحة FilterMate من جديد (يُطبَّق فورًا)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>الأقسام: في لوحات QGIS (يُطبَّق فورًا)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>الأقسام في لوحات QGIS: اسحب لوحة من عنوانها، واسحب شريحة قسم على لوحة أخرى لتجميعهما، وانقر عليها بزر الفأرة الأيمن لدمجها من جديد في FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>أُعيدت هذه الإعدادات بالفعل كما كانت.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>كل قسم في لوحة QGIS خاصة به: اسحب أي لوحة من عنوانها، وانقر بزر الفأرة الأيمن على العنوان لتجميعها مع لوحة أخرى في تبويبات، أو لدمجها من جديد في FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>افتراضيًا يكون كل قسم في هذه اللوحة، ولا يتحرك شيء ما لم تطلب ذلك. يمكن لقسم أن يغادرها: انقر بزر الفأرة الأيمن على شريحة AGENT أو FILTERING أو EXPORTING أو CONFIGURATION في شريطه، ثم اختر فتحه في لوحة خاصة به. يصبح لوحة في QGIS، يمكن سحبها بجانب الخريطة أو دمجها في تبويب مع لوحة الطبقات أو جعلها عائمة على شاشة أخرى. يبقى EXPLORING هنا: فهو يحتوي على الطبقة التي تعمل عليها الأقسام الأخرى.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>تحتوي اللوحة على قسم واحد أو عدة أقسام، مدرجة في شريط كما هنا. اسحب شريحة قسم على لوحة أخرى لتجميعهما، أو على FilterMate لدمجه من جديد، أو خارج كل اللوحات لمنحه لوحة جديدة؛ وكل لوحتين من FilterMate جُمعتا في تبويبات تصبحان لوحة واحدة. النقر بزر الفأرة الأيمن على شريحة أو على عنوان لوحة يتيح الحركات نفسها. إغلاق لوحة يدمج أقسامها من جديد. يعيد QGIS كل لوحة إلى حيث تركتها.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>تحتوي اللوحة على قسم واحد أو عدة أقسام. انقر بزر الفأرة الأيمن على عنوان قسم، أو على عنوان لوحة، لتجميعه مع لوحة أخرى أو لدمجه من جديد في FilterMate؛ وكل لوحتين من FilterMate جُمعتا في تبويبات تصبحان لوحة واحدة. إغلاق لوحة يدمج أقسامها من جديد. يعيد QGIS كل لوحة إلى حيث تركتها.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>يحتوي EXPLORING على الطبقة الحالية وما تختاره فيها: معالم طبقة متجهة، أو نطاق قيم أو فئات في راستر، أو فئات أو ارتفاعات في سحابة نقاط. تعمل الأقسام الأخرى على ما يحدده.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>يمكن لقسم أن يغادر هذه اللوحة. انقر بزر الفأرة الأيمن على عنوان AGENT أو FILTERING أو EXPORTING أو CONFIGURATION، ثم اختر فتحه في لوحة خاصة به: يصبح لوحة في QGIS، يمكن سحبها بجانب الخريطة أو دمجها في تبويب مع لوحة الطبقات أو جعلها عائمة على شاشة أخرى. يبقى EXPLORING هنا: فهو يحتوي على الطبقة التي تعمل عليها الأقسام الأخرى.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>انقر بزر الفأرة الأيمن على عنوان مثل هذه اللوحة لتجميعها مع لوحة أخرى في تبويبات، أو لدمجها من جديد في FilterMate. وإغلاقها يدمجها من جديد أيضًا. يعيد QGIS كل لوحة إلى حيث تركتها.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

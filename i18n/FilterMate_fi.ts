@@ -688,9 +688,9 @@ Ajetaanko?</translation>
         <translation>Ulkoasu: teema, paneelin koko, kieli</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Asettelu: osiot tässä paneelissa tai kukin omassa QGIS-paneelissaan, painikkeiden paikka</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Asettelu: osiot tässä paneelissa tai QGIS-paneeleissa, painikkeiden paikka</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <translation>Avaa {} omaan paneeliinsa</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Avaa jokainen osio omaan paneeliinsa</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Irrota kaikki osiot FilterMatesta</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Ryhmitä kohteen {} kanssa</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Ryhmitä kohteen {} kanssa välilehtinä</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <translation>Oletus: yksi paneeli, jossa palkin napsautus avaa osion.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Kukin omassa QGIS-paneelissaan</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>QGIS-paneeleissa</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING ja CONFIGURATION kartan vieressä, välilehtinä tai irrallaan; EXPLORING pysyy FilterMatessa. Paneelin otsikon napsautus hiiren kakkospainikkeella ryhmittelee sen toisen kanssa tai yhdistää sen takaisin FilterMateen.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT omassa paneelissaan, FILTERING, EXPORTING ja CONFIGURATION yhdessä toisessa, kartan vieressä tai irrallaan; EXPLORING pysyy FilterMatessa. Vedä osion kapseli toiseen paneeliin ryhmitelläksesi ne, napsauta sitä hiiren kakkospainikkeella yhdistääksesi osion takaisin FilterMateen.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <translation>Kukin osio näyttää omat painikkeensa, kun se on auki.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Osiot: kukin omassa QGIS-paneelissaan (otetaan käyttöön heti)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Osiot: kaikki takaisin FilterMate-paneeliin (otetaan käyttöön heti)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Osiot: QGIS-paneeleissa (otetaan käyttöön heti)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Osiot ovat QGIS-paneeleissa: vedä paneelia otsikosta, vedä osion kapseli toiseen paneeliin ryhmitelläksesi ne, napsauta sitä hiiren kakkospainikkeella yhdistääksesi osion takaisin FilterMateen.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Nämä asetukset on jo palautettu ennalleen.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Kukin osio on omassa QGIS-paneelissaan: vedä sitä otsikosta; napsauta otsikkoa hiiren kakkospainikkeella ryhmitelläksesi sen toisen paneelin kanssa välilehtinä tai yhdistääksesi sen takaisin FilterMateen.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <translation>Oletuksena jokainen osio on tässä paneelissa, eikä mikään liiku, ellet pyydä. Osio voi poistua siitä: napsauta AGENT-, FILTERING-, EXPORTING- tai CONFIGURATION-osion kapselia sen palkissa hiiren kakkospainikkeella ja valitse avaus omaan paneeliin. Siitä tulee QGIS-paneeli, jonka voit vetää kartan viereen, yhdistää välilehdeksi Tasot-paneelin kanssa tai jättää irralleen toiselle näytölle. EXPLORING pysyy täällä: se sisältää tason, jolla muut osiot työskentelevät.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Paneelissa on yksi osio tai useampi, lueteltuna palkissa kuten tässä. Vedä osion kapseli toiseen paneeliin ryhmitelläksesi ne, FilterMateen yhdistääksesi osion takaisin tai pois kaikista paneeleista antaaksesi sille uuden paneelin; kaksi FilterMaten paneelia, jotka on yhdistetty välilehdiksi, muuttuvat yhdeksi. Kapselin tai paneelin otsikon napsautus hiiren kakkospainikkeella tarjoaa samat siirrot. Paneelin sulkeminen yhdistää sen osiot takaisin FilterMateen. QGIS palauttaa jokaisen paneelin sinne, mihin sen jätit.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Paneelissa on yksi osio tai useampi. Napsauta osion otsikkoa tai paneelin otsikkoa hiiren kakkospainikkeella ryhmitelläksesi sen toisen paneelin kanssa tai yhdistääksesi sen takaisin FilterMateen; kaksi FilterMaten paneelia, jotka on yhdistetty välilehdiksi, muuttuvat yhdeksi. Paneelin sulkeminen yhdistää sen osiot takaisin FilterMateen. QGIS palauttaa jokaisen paneelin sinne, mihin sen jätit.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING sisältää nykyisen tason ja sen, minkä valitset siitä: vektoritason kohteet, rasterin arvoalueen tai luokat, pistepilven luokat tai korkeudet. Muut osiot toimivat sen valinnan pohjalta.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>Osio voi poistua tästä paneelista. Napsauta AGENT-, FILTERING-, EXPORTING- tai CONFIGURATION-osion otsikkoa hiiren kakkospainikkeella ja valitse avaus omaan paneeliin: siitä tulee QGIS-paneeli, jonka voit vetää kartan viereen, yhdistää välilehdeksi Tasot-paneelin kanssa tai jättää irralleen toiselle näytölle. EXPLORING pysyy täällä: se sisältää tason, jolla muut osiot työskentelevät.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>Napsauta tällaisen paneelin otsikkoa hiiren kakkospainikkeella ryhmitelläksesi sen toisen kanssa välilehtinä tai yhdistääksesi sen takaisin FilterMateen. Sulkeminenkin yhdistää sen takaisin. QGIS palauttaa jokaisen paneelin sinne, mihin sen jätit.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

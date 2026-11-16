@@ -688,9 +688,9 @@ Ausführen?</translation>
         <translation>Aussehen: Design, Größe des Bedienfelds, Sprache</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Anordnung: die Bereiche in diesem Bedienfeld oder jeder in einem eigenen Bedienfeld von QGIS, wohin die Schaltflächen kommen</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Anordnung: die Bereiche in diesem Bedienfeld oder in Bedienfeldern von QGIS, wohin die Schaltflächen kommen</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <translation>{} in einem eigenen Bedienfeld öffnen</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Jeden Bereich in einem eigenen Bedienfeld öffnen</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Alle Bereiche aus FilterMate herauslösen</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Mit {} gruppieren</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Mit {} gruppieren, als Tabs</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <translation>Standard: ein Bedienfeld, in dem ein Klick in eine Leiste einen Bereich öffnet.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Jeder in einem eigenen Bedienfeld von QGIS</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>In Bedienfeldern von QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING und CONFIGURATION neben der Karte, als Tabs oder schwebend; EXPLORING bleibt in FilterMate. Ein Rechtsklick auf den Titel eines Bedienfelds gruppiert es mit einem anderen oder führt es wieder in FilterMate zusammen.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT in einem eigenen Bedienfeld, FILTERING, EXPORTING und CONFIGURATION zusammen in einem anderen, neben der Karte oder schwebend; EXPLORING bleibt in FilterMate. Ziehen Sie den Chip eines Bereichs auf ein anderes Bedienfeld, um sie zu gruppieren, klicken Sie mit der rechten Maustaste darauf, um ihn wieder in FilterMate zusammenzuführen.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <translation>Jeder Bereich zeigt seine eigenen Schaltflächen, solange er geöffnet ist.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Bereiche: jeder in einem eigenen Bedienfeld von QGIS (wird sofort angewendet)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Bereiche: alle wieder im FilterMate-Bedienfeld (wird sofort angewendet)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Bereiche: in Bedienfeldern von QGIS (wird sofort angewendet)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Die Bereiche befinden sich in Bedienfeldern von QGIS: Ziehen Sie ein Bedienfeld an seinem Titel; ziehen Sie den Chip eines Bereichs auf ein anderes Bedienfeld, um sie zu gruppieren, klicken Sie mit der rechten Maustaste darauf, um ihn wieder in FilterMate zusammenzuführen.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Diese Einstellungen wurden bereits wiederhergestellt.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Jeder Bereich befindet sich in einem eigenen Bedienfeld von QGIS: Ziehen Sie eines an seinem Titel; klicken Sie mit der rechten Maustaste auf den Titel, um es mit einem anderen als Tabs zu gruppieren oder wieder in FilterMate zusammenzuführen.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <translation>Standardmäßig befindet sich jeder Bereich in diesem Bedienfeld, und nichts bewegt sich, wenn Sie es nicht verlangen. Ein Bereich kann es verlassen: Klicken Sie in seiner Leiste mit der rechten Maustaste auf den Chip von AGENT, FILTERING, EXPORTING oder CONFIGURATION und wählen Sie, ihn in einem eigenen Bedienfeld zu öffnen. Er wird zu einem Bedienfeld von QGIS, das Sie neben die Karte ziehen, als Tab mit dem Layer-Bedienfeld zusammenlegen oder auf einem anderen Bildschirm schweben lassen können. EXPLORING bleibt hier: Es enthält den Layer, mit dem die anderen Bereiche arbeiten.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Ein Bedienfeld enthält einen Bereich oder mehrere, in einer Leiste aufgelistet wie hier. Ziehen Sie den Chip eines Bereichs auf ein anderes Bedienfeld, um sie zu gruppieren, auf FilterMate, um ihn wieder zusammenzuführen, oder aus allen Bedienfeldern heraus, um ihm ein neues zu geben; zwei Bedienfelder von FilterMate, die als Tabs zusammengelegt werden, werden zu einem. Ein Rechtsklick auf einen Chip oder auf den Titel eines Bedienfelds bietet dieselben Verschiebungen. Beim Schließen eines Bedienfelds werden seine Bereiche wieder in FilterMate zusammengeführt. QGIS stellt jedes Bedienfeld dort wieder her, wo Sie es gelassen haben.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Ein Bedienfeld enthält einen Bereich oder mehrere. Klicken Sie mit der rechten Maustaste auf die Kopfzeile eines Bereichs oder auf den Titel eines Bedienfelds, um ihn mit einem anderen Bedienfeld zu gruppieren oder wieder in FilterMate zusammenzuführen; zwei Bedienfelder von FilterMate, die als Tabs zusammengelegt werden, werden zu einem. Beim Schließen eines Bedienfelds werden seine Bereiche wieder in FilterMate zusammengeführt. QGIS stellt jedes Bedienfeld dort wieder her, wo Sie es gelassen haben.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING enthält den aktuellen Layer und das, was Sie darin auswählen: Objekte eines Vektor-Layers, einen Wertebereich oder Klassen eines Rasters, Klassen oder Höhen einer Punktwolke. Die anderen Bereiche arbeiten mit dem, was er auswählt.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>Ein Bereich kann dieses Bedienfeld verlassen. Klicken Sie mit der rechten Maustaste auf die Kopfzeile von AGENT, FILTERING, EXPORTING oder CONFIGURATION und wählen Sie, ihn in einem eigenen Bedienfeld zu öffnen: Er wird zu einem Bedienfeld von QGIS, das Sie neben die Karte ziehen, als Tab mit dem Layer-Bedienfeld zusammenlegen oder auf einem anderen Bildschirm schweben lassen können. EXPLORING bleibt hier: Es enthält den Layer, mit dem die anderen Bereiche arbeiten.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>Klicken Sie mit der rechten Maustaste auf den Titel eines solchen Bedienfelds, um es mit einem anderen als Tabs zu gruppieren oder wieder in FilterMate zusammenzuführen. Auch beim Schließen wird es wieder zusammengeführt. QGIS stellt jedes Bedienfeld dort wieder her, wo Sie es gelassen haben.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

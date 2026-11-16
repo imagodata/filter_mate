@@ -688,9 +688,9 @@ Run it?</source>
         <translation>外观：主题、面板大小、语言</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>布局：各部分放在这个面板中，还是各自放在 QGIS 的单独面板中；按钮的位置</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>布局：各部分放在这个面板中，还是放在 QGIS 的面板中；按钮的位置</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <translation>在单独的面板中打开 {}</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>在单独的面板中打开每个部分</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>将所有部分移出 FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>与 {} 组合</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>与 {} 以选项卡形式组合</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <translation>默认情况：只有一个面板，在导轨中单击即可打开一个部分。</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>各自放在 QGIS 的单独面板中</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>放在 QGIS 的面板中</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT、FILTERING、EXPORTING 和 CONFIGURATION 放在地图旁边，以选项卡形式或浮动；EXPLORING 仍留在 FilterMate 中。右键单击面板标题，可将它与另一个面板组合，或合并回去。</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT 放在自己的面板中，FILTERING、EXPORTING 和 CONFIGURATION 一起放在另一个面板中，位于地图旁边，可浮动；EXPLORING 仍留在 FilterMate 中。将某个部分的胶囊拖到另一个面板上可将它们组合，右键单击胶囊可将该部分合并回 FilterMate。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <translation>每个部分在打开时显示它自己的按钮。</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>部分：各自放在 QGIS 的单独面板中（立即生效）</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>部分：全部放回 FilterMate 面板（立即生效）</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>部分：放在 QGIS 的面板中（立即生效）</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>各部分都在 QGIS 的面板中：拖动标题即可移动面板；将某个部分的胶囊拖到另一个面板上可将它们组合，右键单击胶囊可将该部分合并回 FilterMate。</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>这些设置已经恢复原状。</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>每个部分都在 QGIS 的单独面板中：拖动标题即可移动面板；右键单击标题，可将它与另一个面板以选项卡形式组合，或合并回 FilterMate。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <translation>默认情况下，每个部分都在这个面板中，除非你要求，否则什么都不会移动。某个部分可以离开这个面板：在导轨上右键单击 AGENT、FILTERING、EXPORTING 或 CONFIGURATION 的胶囊，然后选择在单独的面板中打开。它会成为 QGIS 的一个面板，可以拖到地图旁边、与图层面板合并为选项卡，或浮动到另一块屏幕上。EXPLORING 留在这里：其他部分处理的图层就保存在它里面。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>一个面板可以容纳一个或多个部分，像这里一样列在导轨上。将某个部分的胶囊拖到另一个面板上可将它们组合，拖到 FilterMate 上可合并回去，拖出所有面板之外则会为它新建一个面板；FilterMate 的两个面板以选项卡形式组合后会合为一个。右键单击胶囊或面板标题，也可以进行同样的移动。关闭面板会将它的各部分合并回 FilterMate。QGIS 会把每个面板放回你上次放置的位置。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>一个面板可以容纳一个或多个部分。右键单击某个部分的标题或面板的标题，可将它与另一个面板组合，或合并回 FilterMate；FilterMate 的两个面板以选项卡形式组合后会合为一个。关闭面板会将它的各部分合并回 FilterMate。QGIS 会把每个面板放回你上次放置的位置。</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING 包含当前图层以及你在其中的选择：矢量图层的要素，栅格的值范围或类别，点云的类别或高度。其他部分处理的就是它所选中的内容。</translation>
@@ -12291,11 +12296,6 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>某个部分可以离开这个面板。右键单击 AGENT、FILTERING、EXPORTING 或 CONFIGURATION 的标题，然后选择在单独的面板中打开：它会成为 QGIS 的一个面板，可以拖到地图旁边、与图层面板合并为选项卡，或浮动到另一块屏幕上。EXPLORING 留在这里：其他部分处理的图层就保存在它里面。</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>右键单击这类面板的标题，可将它与另一个面板以选项卡形式组合，或合并回 FilterMate。关闭面板也会将它合并回去。QGIS 会把每个面板放回你上次放置的位置。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

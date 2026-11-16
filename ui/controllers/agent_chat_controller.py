@@ -655,7 +655,7 @@ class AgentChatController(QObject):
         lines = [_tr("Sections: FILTERING, EXPORTING, AGENT, only those you use"),
                  _tr("Your data: rasters, point clouds, PostgreSQL, web services, their size"),
                  _tr("Look: theme, size of the panel, language"),
-                 _tr("Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go")]
+                 _tr("Layout: the sections in this panel or in panels of QGIS, where the buttons go")]
         card = self.panel.add_settings_card(texts, lines, "")
         card.apply_requested.connect(self.start_setup)  # closed by start_setup, once the setup really starts
         card.cancel_requested.connect(self._decline_setup)

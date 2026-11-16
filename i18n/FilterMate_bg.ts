@@ -688,9 +688,9 @@ Run it?</source>
         <translation>Външен вид: тема, размер на панела, език</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Разположение: секциите в този панел или всяка в собствен панел на QGIS, къде са бутоните</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Разположение: секциите в този панел или в панели на QGIS, къде са бутоните</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>Отваряне на {} в собствен панел</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Отваряне на всяка секция в собствен панел</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Изваждане на всички секции от FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Групиране с {}</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Групиране с {}, като раздели</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>По подразбиране: един панел, в който щракване върху лентата отваря секция.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Всяка в собствен панел на QGIS</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>В панели на QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING и CONFIGURATION до картата, като раздели или плаващи; EXPLORING остава във FilterMate. Щракване с десния бутон върху заглавието на панел го групира с друг или го обединява обратно във FilterMate.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT в собствен панел, FILTERING, EXPORTING и CONFIGURATION заедно в друг, до картата или плаващи; EXPLORING остава във FilterMate. Плъзнете чипа на секция върху друг панел, за да ги групирате, щракнете с десния бутон върху него, за да я обедините обратно във FilterMate.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>Всяка секция показва свои бутони, докато е отворена.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Секции: всяка в собствен панел на QGIS (прилага се веднага)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Секции: всички обратно в панела FilterMate (прилага се веднага)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Секции: в панели на QGIS (прилага се веднага)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Секциите са в панели на QGIS: плъзнете панел за заглавието му; плъзнете чипа на секция върху друг панел, за да ги групирате, щракнете с десния бутон върху него, за да я обедините обратно във FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Тези настройки вече са върнати, както бяха.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Всяка секция е в собствен панел на QGIS: плъзнете я за заглавието; щракнете с десния бутон върху заглавието, за да я групирате с друг панел, като раздели, или да я обедините обратно във FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>По подразбиране всяка секция е в този панел и нищо не се мести, докато не го поискате. Секцията може да го напусне: щракнете с десния бутон върху чипа на AGENT, FILTERING, EXPORTING или CONFIGURATION в лентата ѝ, после изберете да се отвори в собствен панел. Тя става панел на QGIS, който можете да плъзнете до картата, да обедините в раздели с панела Слоеве или да оставите да плава на друг екран. EXPLORING остава тук: съдържа слоя, с който работят останалите секции.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Панелът съдържа една секция или няколко, изброени в лента като тук. Плъзнете чипа на секция върху друг панел, за да ги групирате, върху FilterMate, за да я обедините обратно, или извън всеки панел, за да ѝ дадете нов; два панела на FilterMate, събрани като раздели, стават един. Щракване с десния бутон върху чип или върху заглавието на панел предлага същите премествания. Затварянето на панел обединява секциите му обратно във FilterMate. QGIS връща всеки панел там, където сте го оставили.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Панелът съдържа една секция или няколко. Щракнете с десния бутон върху заглавието на секция или върху заглавието на панел, за да групирате с друг панел или да обедините обратно във FilterMate; два панела на FilterMate, събрани като раздели, стават един. Затварянето на панел обединява секциите му обратно във FilterMate. QGIS връща всеки панел там, където сте го оставили.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING съдържа текущия слой и това, което избирате в него: обекти на векторен слой, диапазон от стойности или класове на растер, класове или височини на облак от точки. Останалите секции работят с това, което избере.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>Секцията може да напусне този панел. Щракнете с десния бутон върху заглавието на AGENT, FILTERING, EXPORTING или CONFIGURATION, после изберете да се отвори в собствен панел: тя става панел на QGIS, който можете да плъзнете до картата, да обедините в раздели с панела Слоеве или да оставите да плава на друг екран. EXPLORING остава тук: съдържа слоя, с който работят останалите секции.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>Щракнете с десния бутон върху заглавието на такъв панел, за да го групирате с друг, като раздели, или да го обедините обратно във FilterMate. Затварянето също го обединява обратно. QGIS връща всеки панел там, където сте го оставили.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

@@ -688,9 +688,9 @@ Chạy không?</translation>
         <translation>Giao diện: chủ đề, kích cỡ của bảng điều khiển, ngôn ngữ</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>Bố cục: các phần nằm trong bảng điều khiển này hoặc mỗi phần trong một bảng điều khiển riêng của QGIS, vị trí các nút</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Bố cục: các phần nằm trong bảng điều khiển này hoặc trong các bảng điều khiển của QGIS, vị trí các nút</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>Mở {} trong bảng điều khiển riêng</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Mở từng phần trong bảng điều khiển riêng</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Đưa tất cả các phần ra khỏi FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>Nhóm với {}</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>Nhóm với {}, dạng tab</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>Mặc định: một bảng điều khiển duy nhất, nơi một cú nhấp trên thanh mở một phần.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>Mỗi phần trong một bảng điều khiển riêng của QGIS</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>Trong các bảng điều khiển của QGIS</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING và CONFIGURATION nằm cạnh bản đồ, dạng tab hoặc nổi; EXPLORING vẫn ở trong FilterMate. Nhấp chuột phải vào tiêu đề của một bảng điều khiển để nhóm nó với bảng khác hoặc gộp trở lại.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT trong một bảng điều khiển riêng, FILTERING, EXPORTING và CONFIGURATION cùng nhau trong một bảng khác, cạnh bản đồ hoặc nổi; EXPLORING vẫn ở trong FilterMate. Kéo chip của một phần vào bảng điều khiển khác để nhóm chúng, nhấp chuột phải vào chip để gộp phần đó trở lại FilterMate.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>Mỗi phần hiển thị các nút của riêng nó khi đang mở.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>Phần: mỗi phần trong một bảng điều khiển riêng của QGIS (được áp dụng ngay)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>Phần: tất cả trở lại bảng điều khiển FilterMate (được áp dụng ngay)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Phần: trong các bảng điều khiển của QGIS (được áp dụng ngay)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Các phần nằm trong các bảng điều khiển của QGIS: kéo tiêu đề để di chuyển một bảng điều khiển; kéo chip của một phần vào bảng điều khiển khác để nhóm chúng, nhấp chuột phải vào chip để gộp phần đó trở lại FilterMate.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>Các cài đặt này đã được khôi phục rồi.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>Mỗi phần nằm trong một bảng điều khiển riêng của QGIS: kéo tiêu đề để di chuyển; nhấp chuột phải vào tiêu đề để nhóm với bảng khác dạng tab, hoặc gộp trở lại FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>Theo mặc định, mọi phần đều nằm trong bảng điều khiển này, và không có gì di chuyển trừ khi bạn yêu cầu. Một phần có thể rời khỏi đó: nhấp chuột phải vào chip của AGENT, FILTERING, EXPORTING hoặc CONFIGURATION trên thanh của nó, rồi chọn mở nó trong bảng điều khiển riêng. Nó trở thành một bảng điều khiển của QGIS, có thể kéo cạnh bản đồ, ghép tab với bảng điều khiển Lớp hoặc thả nổi trên màn hình khác. EXPLORING ở lại đây: nó giữ lớp mà các phần khác làm việc trên đó.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Một bảng điều khiển chứa một phần hoặc nhiều phần, được liệt kê trên một thanh như ở đây. Kéo chip của một phần vào bảng điều khiển khác để nhóm chúng, vào FilterMate để gộp trở lại, hoặc ra ngoài mọi bảng điều khiển để cấp cho nó một bảng mới; hai bảng điều khiển của FilterMate được ghép thành tab sẽ thành một. Nhấp chuột phải vào một chip, hoặc vào tiêu đề của một bảng điều khiển, sẽ có các thao tác di chuyển tương tự. Đóng một bảng điều khiển sẽ gộp các phần của nó trở lại FilterMate. QGIS đặt mỗi bảng điều khiển về đúng chỗ bạn đã để.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Một bảng điều khiển chứa một phần hoặc nhiều phần. Nhấp chuột phải vào tiêu đề của một phần, hoặc vào tiêu đề của một bảng điều khiển, để nhóm nó với bảng khác hoặc gộp trở lại FilterMate; hai bảng điều khiển của FilterMate được ghép thành tab sẽ thành một. Đóng một bảng điều khiển sẽ gộp các phần của nó trở lại FilterMate. QGIS đặt mỗi bảng điều khiển về đúng chỗ bạn đã để.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING chứa lớp hiện tại và những gì bạn chọn trong đó: đối tượng của lớp vector, khoảng giá trị hoặc các lớp phân loại của raster, các lớp phân loại hoặc độ cao của đám mây điểm. Các phần khác làm việc trên những gì nó chọn.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>Một phần có thể rời khỏi bảng điều khiển này. Nhấp chuột phải vào tiêu đề của AGENT, FILTERING, EXPORTING hoặc CONFIGURATION, rồi chọn mở nó trong bảng điều khiển riêng: nó trở thành một bảng điều khiển của QGIS, có thể kéo cạnh bản đồ, ghép tab với bảng điều khiển Lớp hoặc thả nổi trên màn hình khác. EXPLORING ở lại đây: nó giữ lớp mà các phần khác làm việc trên đó.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>Nhấp chuột phải vào tiêu đề của một bảng điều khiển như vậy để nhóm nó với bảng khác dạng tab, hoặc gộp trở lại FilterMate. Đóng nó cũng gộp trở lại. QGIS đặt mỗi bảng điều khiển về đúng chỗ bạn đã để.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

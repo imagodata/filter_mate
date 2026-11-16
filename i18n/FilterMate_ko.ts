@@ -688,9 +688,9 @@ Run it?</source>
         <translation>모양: 테마, 패널 크기, 언어</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/agent_chat_controller.py" line="653"/>
-        <source>Layout: the sections in this panel or each in its own panel of QGIS, where the buttons go</source>
-        <translation>레이아웃: 섹션을 이 패널에 둘지 각각 QGIS의 별도 패널에 둘지, 버튼의 위치</translation>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>레이아웃: 섹션을 이 패널에 둘지 QGIS의 패널에 둘지, 버튼의 위치</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
@@ -10795,19 +10795,14 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>{}을(를) 별도 패널에서 열기</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>각 섹션을 별도 패널에서 열기</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>모든 섹션을 FilterMate에서 분리</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
         <source>Group with {}</source>
         <translation>{}과(와) 그룹화</translation>
-    </message>
-    <message>
-        <location filename="../../ui/layout/section_panels.py" line="761"/>
-        <source>Group with {}, as tabs</source>
-        <translation>{}과(와) 탭으로 그룹화</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="783"/>
@@ -11616,14 +11611,14 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>기본 상태: 패널 하나이며, 레일을 클릭하면 섹션이 열립니다.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
-        <source>Each in its own panel of QGIS</source>
-        <translation>각각 QGIS의 별도 패널에</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>QGIS의 패널에</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="98"/>
-        <source>AGENT, FILTERING, EXPORTING and CONFIGURATION beside the map, as tabs or floating; EXPLORING stays in FilterMate. A right-click on the title of a panel groups it with another one or merges it back.</source>
-        <translation>AGENT, FILTERING, EXPORTING, CONFIGURATION을 지도 옆에 탭으로 또는 플로팅으로 둡니다. EXPLORING은 FilterMate에 남습니다. 패널 제목을 오른쪽 클릭하면 다른 패널과 그룹화하거나 다시 병합할 수 있습니다.</translation>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT는 자체 패널에, FILTERING, EXPORTING, CONFIGURATION은 다른 패널 하나에 함께, 지도 옆에 두거나 플로팅으로 둡니다. EXPLORING은 FilterMate에 남습니다. 섹션의 칩을 다른 패널로 끌면 그룹화되고, 오른쪽 클릭하면 FilterMate로 다시 병합할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
@@ -11641,24 +11636,24 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>각 섹션은 열려 있는 동안 자신의 버튼을 표시합니다.</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="291"/>
-        <source>Sections: each in its own panel of QGIS (applied at once)</source>
-        <translation>섹션: 각각 QGIS의 별도 패널에 (즉시 적용됨)</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
         <source>Sections: all back in the FilterMate panel (applied at once)</source>
         <translation>섹션: 모두 FilterMate 패널로 되돌림 (즉시 적용됨)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>섹션: QGIS의 패널에 (즉시 적용됨)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>섹션은 QGIS의 패널에 있습니다. 패널은 제목을 끌어서 옮기고, 섹션의 칩을 다른 패널로 끌면 그룹화되며, 오른쪽 클릭하면 FilterMate로 다시 병합할 수 있습니다.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
         <source>These settings were already put back.</source>
         <translation>이 설정은 이미 되돌려졌습니다.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/setup_wizard.py" line="430"/>
-        <source>Each section is in its own panel of QGIS: drag one by its title, right-click the title to group it with another one, as tabs, or to merge it back into FilterMate.</source>
-        <translation>각 섹션이 QGIS의 별도 패널에 있습니다. 제목을 끌어서 옮기고, 제목을 오른쪽 클릭하면 다른 패널과 탭으로 그룹화하거나 FilterMate로 다시 병합할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
@@ -12258,6 +12253,16 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>기본적으로 모든 섹션은 이 패널 안에 있으며, 요청하지 않으면 아무것도 움직이지 않습니다. 섹션은 이 패널을 떠날 수 있습니다. 레일에서 AGENT, FILTERING, EXPORTING 또는 CONFIGURATION의 칩을 오른쪽 클릭한 다음, 별도 패널에서 열기를 선택하세요. 섹션이 QGIS 패널이 되어 지도 옆으로 끌어다 놓거나, 레이어 패널과 탭으로 묶거나, 다른 화면에 띄울 수 있습니다. EXPLORING은 여기에 남습니다. 다른 섹션이 작업하는 레이어가 여기에 있기 때문입니다.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>패널에는 섹션을 하나 또는 여러 개 둘 수 있고, 여기처럼 레일에 나열됩니다. 섹션의 칩을 다른 패널로 끌면 그룹화되고, FilterMate로 끌면 다시 병합되며, 모든 패널 밖으로 끌면 새 패널이 만들어집니다. FilterMate의 패널 두 개를 탭으로 합치면 하나가 됩니다. 칩이나 패널의 제목을 오른쪽 클릭해도 같은 이동을 할 수 있습니다. 패널을 닫으면 그 섹션이 FilterMate로 다시 병합됩니다. QGIS는 각 패널을 마지막에 둔 위치로 되돌립니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>패널에는 섹션을 하나 또는 여러 개 둘 수 있습니다. 섹션의 헤더나 패널의 제목을 오른쪽 클릭하면 다른 패널과 그룹화하거나 FilterMate로 다시 병합할 수 있습니다. FilterMate의 패널 두 개를 탭으로 합치면 하나가 됩니다. 패널을 닫으면 그 섹션이 FilterMate로 다시 병합됩니다. QGIS는 각 패널을 마지막에 둔 위치로 되돌립니다.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
         <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
         <translation>EXPLORING은 현재 레이어와 그 안에서 선택한 항목을 담고 있습니다. 벡터 레이어의 객체, 래스터의 값 범위나 클래스, 포인트 클라우드의 클래스나 높이입니다. 다른 섹션은 여기서 선택한 것에 대해 작업합니다.</translation>
@@ -12291,11 +12296,6 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
         <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
         <translation>섹션은 이 패널을 떠날 수 있습니다. AGENT, FILTERING, EXPORTING 또는 CONFIGURATION의 헤더를 오른쪽 클릭한 다음, 별도 패널에서 열기를 선택하세요. 섹션이 QGIS 패널이 되어 지도 옆으로 끌어다 놓거나, 레이어 패널과 탭으로 묶거나, 다른 화면에 띄울 수 있습니다. EXPLORING은 여기에 남습니다. 다른 섹션이 작업하는 레이어가 여기에 있기 때문입니다.</translation>
-    </message>
-    <message>
-        <location filename="../../ui/controllers/welcome_tour.py" line="50"/>
-        <source>Right-click the title of such a panel to group it with another one, as tabs, or to merge it back into FilterMate. Closing it merges it back too. QGIS puts every panel back where you left it.</source>
-        <translation>이런 패널의 제목을 오른쪽 클릭하면 다른 패널과 탭으로 그룹화하거나 FilterMate로 다시 병합할 수 있습니다. 패널을 닫아도 병합됩니다. QGIS는 각 패널을 마지막에 둔 위치로 되돌립니다.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
