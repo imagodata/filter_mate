@@ -66,6 +66,35 @@ def test_anthropic_reads_only_what_an_earlier_request_wrote(weight):
     assert weight.cached_prefix("anthropic", [first, more_tools], longer) == len(weight.cache_order("anthropic", first)) - 1
 
 
+def test_anthropic_reads_the_tools_and_the_instructions_after_a_rewrite(weight):
+    """Lot 4: the instructions carry a breakpoint of their own; a history rewritten (a compaction) still reads them."""
+    first = {"tools": [{"name": "a"}], "system": [{"text": "s", "cache_control": {"type": "ephemeral"}}],
+             "messages": [{"content": "m1"}]}
+    rewritten = dict(first, messages=[{"content": "summary"}])
+    assert weight.cached_prefix("anthropic", [first], rewritten) == len(_compact(first["tools"]) + _compact(first["system"]))
+    unmarked = dict(first, system=[{"text": "s"}])
+    assert weight.cached_prefix("anthropic", [unmarked], dict(unmarked, messages=[{"content": "summary"}])) == 0
+
+
+def test_a_new_conversation_reads_the_tools_and_the_instructions(weight):
+    run = weight.replay()
+    fresh = weight.next_conversation(run)
+    instructions, tools, _ = weight.default_setup()
+    body = json.loads(weight.providers()["anthropic"].build_request(instructions, [user("x")], tools).body)
+    assert fresh["anthropic"] == len(_compact(body["tools"]) + _compact(body["system"]))
+
+
+def test_a_start_that_changed_within_a_request_is_named(weight):
+    def call(request, read, tools=3, num_ctx=16384):
+        return weight.CallWeight(request, 10, 10, 10, tools, {"anthropic": read, "openai": read, "ollama": read},
+                                 num_ctx, {"anthropic": 100, "openai": 100, "ollama": 100})
+    assert weight.broken_starts([call(1, 0), call(1, 99)]) == []
+    assert weight.broken_starts([call(1, 0), call(2, 5)]) == []  # another request: the context changed
+    assert weight.broken_starts([call(1, 0), call(1, 0, tools=4)]) == []  # a tool added: its price is accepted
+    assert len(weight.broken_starts([call(1, 0), call(1, 50)])) == 3
+    assert weight.broken_starts(weight.replay().calls) == []
+
+
 def test_ollama_prefix_is_lost_when_the_context_step_changes(weight):
     before = {"tools": [], "messages": [{"role": "user", "content": "a"}], "options": {"num_ctx": 16384}}
     after = dict(before, options={"num_ctx": 32768})

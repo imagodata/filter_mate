@@ -28,7 +28,7 @@ from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.domain.history_timeline import KIND_AGENT, card_target, changes_map
 from ...core.agent.chat_setup import (
     BASEMAP_TOOL, ELEVATION_TOOL, IMAGERY_TOOL, OPEN_DATA_TOOL, OSM_TOOL, PLACE_TOOL, POPULATION_TOOL, SERVICE_TOOL,
-    chat_instructions,
+    chat_instructions, stable_order,
 )
 from ...core.agent.families import CORE
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
@@ -1084,7 +1084,8 @@ class AgentChatController(QObject):
             left_out.add(PLACE_TOOL)
         if not databases or not for_chat:
             left_out.update((LIST_TABLES, ADD_TABLE))
-        tools = [tool for tool in chat_tools() if tool.name not in left_out]
+        # the tools a setting brings after the others (lot 4 of the token diet: the start stays alike for the cache)
+        tools = stable_order([tool for tool in chat_tools() if tool.name not in left_out])
         offered = {tool.name for tool in tools}
         skill_approved = skill_declined = None
         try:  # the skills of the profile and of the project folder, read again (the project may have changed)

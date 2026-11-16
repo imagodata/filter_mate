@@ -9,6 +9,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ### AGENT (experimental)
 
+- **The cache of the provider serves more.** What a setting changes comes at the end of the instructions and of the tools, Anthropic keeps the tools and the instructions in its cache across a compaction and from one conversation to the next, and Ollama no longer loads the model again when a conversation gets shorter.
 - **Shorter requests.** The tools of the agent and its instructions say the same in fewer words, the rare cases moved to the skill of their task, and the sources you did not tick are named in one paragraph: a conversation of ten requests costs 29 % less on the bench, and its largest request is a quarter lighter.
 
 ## [5.1.1] - 2026-11-16

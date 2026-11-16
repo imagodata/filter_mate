@@ -796,6 +796,20 @@ alone weigh 1,687 and 1,464. The summaries of the index are 60 characters at mos
 paragraph (`chat_setup.MISSING_SOURCES`). The conversation of the bench: cost 257,561 -> 184,870, largest request
 47,659 -> 35,602.
 
+### The start of a request stays the same (token diet, lot 4, 2026-11-16)
+
+Each provider's cache serves the start a request shares with an earlier one. The instructions are the way of working,
+then the index, then what a setting says (values not shared, sources ticked or not, connectors): nothing that depends
+on a setting comes before what does not. The tools a setting brings (`chat_setup.SETTING_TOOLS`: the sources, the
+expert mode) come after the others, and a tool added by use_tools or load_skill goes at the end. Anthropic gets a
+second breakpoint at the end of the instructions (the tools come before them), next to the automatic one at the end of
+the request: the tools and the instructions are read again after a compaction rewrites the history, and by the next
+conversation of the same settings within the five minutes of the cache (19,550 characters of its first request on the
+bench). Ollama keeps the largest `num_ctx` of a conversation: a smaller one after a compaction would load the model
+again. `agent_request_weight.py --conversation` fails when, between two calls of one request with the same tools and
+the same `num_ctx`, a provider's cache does not serve the whole call before. A tool added still costs Anthropic its
+cache: the tools come first in its request.
+
 ### The options of the panels (2026-11-16)
 
 `layer_options` / `set_layer_options` read and set, per vector layer, what EXPLORING shows (the three selection

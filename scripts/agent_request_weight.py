@@ -40,7 +40,7 @@ from agent.providers.base import Provider, ProviderConfig  # noqa: E402
 from agent.providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
 from agent.tool_catalog import LOAD_SKILL, RUN_PYTHON, USE_TOOLS, ToolSpec, chat_tools, with_skill_tool  # noqa: E402
-from agent.chat_setup import SOURCE_TOOLS, chat_instructions  # noqa: E402
+from agent.chat_setup import SOURCE_TOOLS, chat_instructions, stable_order  # noqa: E402
 from agent.families import bringing, split_tools, use_tools_handler  # noqa: E402
 from agent.session import STATUS_DONE, AgentLimits, AgentSession, history_budget, run_exchange  # noqa: E402
 from agent.skills import SKILLS  # noqa: E402
@@ -114,19 +114,32 @@ def common_prefix(a: str, b: str) -> int:
     return size
 
 
+def anthropic_entries(body: Dict[str, Any]) -> List[str]:
+    """What an Anthropic request writes to the cache, in its order: up to the instructions when their block carries
+    cache_control (since lot 4), and up to its last block (the top-level cache_control)."""
+    entries = []
+    system = body.get("system", [])
+    if system and isinstance(system[-1], dict) and system[-1].get("cache_control"):
+        entries.append(_compact(body.get("tools", [])) + _compact(system))
+    entries.append(cache_order("anthropic", body)[:-1])  # the provider always sends the top-level cache_control
+    return entries
+
+
 def cached_prefix(kind: str, earlier: Sequence[Dict[str, Any]], body: Dict[str, Any]) -> int:
     """The characters of ``body`` the cache of the provider ``kind`` can serve after ``earlier``, the requests of the
     conversation sent to it before, in order.
 
     Anthropic (cache_control on the whole request) writes each request up to its last block and serves only such an
     entry whole: the longest earlier request ``body`` starts with, without the "]" that closed its messages; a tool
-    added, or the history rewritten, and nothing is read. OpenAI serves the start in common with the request before.
-    Ollama too, unless num_ctx changed: it loads the model again."""
+    added, or the history rewritten, and nothing is read. Since lot 4 a second breakpoint ends the instructions: the
+    tools and the instructions of an earlier request are an entry too, read after a rewrite of the history and by the
+    next conversation of the same settings. OpenAI serves the start in common with the request before. Ollama too,
+    unless num_ctx changed: it loads the model again."""
     if not earlier:
         return 0
     order = cache_order(kind, body)
     if kind == "anthropic":
-        written = (cache_order(kind, before)[:-1] for before in earlier)
+        written = (entry for before in earlier for entry in anthropic_entries(before))
         return max((len(entry) for entry in written if order.startswith(entry)), default=0)
     before = earlier[-1]
     if kind == "ollama" and before.get("options", {}).get("num_ctx") != body.get("options", {}).get("num_ctx"):
@@ -145,6 +158,7 @@ class CallWeight:
     tool_count: int
     prefix: Dict[str, int]
     num_ctx: int
+    ordered: Dict[str, int] = field(default_factory=dict)  # the characters of the request in each cache's order
 
     @property
     def sent(self) -> int:
@@ -161,7 +175,7 @@ def default_setup() -> Tuple[str, Tuple[ToolSpec, ...], Dict[str, List[str]]]:
     """``(instructions, tools offered at the start, tools held back with the skills that bring them)`` as the chat
     builds them with the default settings: the families on, no source ticked, the values shared, neither the expert
     mode nor the filtering tools alone (tests/unit/ui/controllers/test_agent_request_weight_default.py checks it)."""
-    tools = [tool for tool in chat_tools() if tool.name not in SOURCE_TOOLS and tool.name != RUN_PYTHON]
+    tools = stable_order([tool for tool in chat_tools() if tool.name not in SOURCE_TOOLS and tool.name != RUN_PYTHON])
     tools = with_skill_tool(tools, {tool.name for tool in tools})
     brought = bringing(tools, SKILLS.values())
     start, available = split_tools(tools)
@@ -253,10 +267,11 @@ CONVERSATION = (
 # Taken again on 2026-11-16 for lot 3 (14 layers, notes, widgets, 13 requests), on the code of main after lots 0 and 1
 # (867c4f24). The first one, for lot 0 (10 requests, 9 layers, main b77dea9c before lot 1): fingerprint 3a596d972f4d,
 # 21 calls, 1,381,796 characters sent, largest 80,432, cost 291,616.
-REFERENCE: Optional[Dict[str, Any]] = {  # lot 2 of the token diet; before (867c4f24): sent 1,408,656, largest
-    # 67,413, cost 340,333
-    "date": "2026-11-16", "commit": "46f630db", "fingerprint": "16efd34dcb03",  # with the fixes of its review
-    "calls": 28, "sent": 784859, "largest": 35602, "cost": 184870,
+REFERENCE: Optional[Dict[str, Any]] = {  # lot 4 of the token diet (the cache): the breakpoint of the instructions
+    # weighs 35 characters a call, read back by a new conversation and after a compaction, neither replayed here;
+    # lot 2 with its review: sent 784,859, largest 35,602, cost 184,870; before (867c4f24): 1,408,656, 67,413, 340,333
+    "date": "2026-11-16", "commit": "dc7db692", "fingerprint": "16efd34dcb03",  # with the changes of lot 4
+    "calls": 28, "sent": 785895, "largest": 35639, "cost": 185101,
 }
 MAX_RISE = 0.05
 
@@ -272,6 +287,20 @@ class Replay:
     errors: List[str] = field(default_factory=list)  # tool answers in error: the conversation would weigh less
     skills_loaded: List[str] = field(default_factory=list)
     summarized: int = 0  # requests the compaction summed up
+    bodies: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)  # every request, by provider
+
+
+def broken_starts(calls: Sequence[CallWeight]) -> List[str]:
+    """Lot 4: between two calls of one request with the same tools and the same num_ctx, each provider's cache must
+    serve the whole call before (without the "]" that closed it); a call that does not is a start that changed."""
+    broken = []
+    for before, call in zip(calls, calls[1:]):
+        if call.request != before.request or call.tool_count != before.tool_count or call.num_ctx != before.num_ctx:
+            continue
+        for kind, read in call.prefix.items():
+            if read < before.ordered[kind] - 1:
+                broken.append(f"request {call.request}: {kind} reads {read} of the {before.ordered[kind]} sent before")
+    return broken
 
 
 class _Measured:
@@ -289,7 +318,7 @@ class _Measured:
             self._rank, len(_compact(anthropic["system"])), len(_compact(anthropic.get("tools", []))),
             len(_compact(anthropic["messages"])), len(session.tools),
             {kind: cached_prefix(kind, self._before.setdefault(kind, []), body) for kind, body in bodies.items()},
-            bodies["ollama"]["options"]["num_ctx"]))
+            bodies["ollama"]["options"]["num_ctx"], {kind: len(cache_order(kind, body)) for kind, body in bodies.items()}))
         for kind, body in bodies.items():
             self._before[kind].append(body)
         return self._inner.send(request, session)
@@ -339,7 +368,18 @@ def replay() -> Replay:
             run.errors.append(f"request {rank}: stopped ({reason})")
         run.skills_loaded += [str(call.arguments.get("name", "")) for call in exchange.calls if call.name == LOAD_SKILL]
     run.summarized = session.summarized
+    run.bodies = before
     return run
+
+
+def next_conversation(run: Replay) -> Dict[str, int]:
+    """What the cache of each provider serves of the first request of a new conversation of the same settings, sent
+    after ``run``: the tools and the instructions are the same, the request is another one."""
+    instructions, tools, _held = default_setup()
+    first = [Message(ROLE_USER, (TextPart("Bonjour, que contient ce projet ?"),))]
+    return {kind: cached_prefix(kind, run.bodies.get(kind, []),
+                                json.loads(provider.build_request(instructions, first, tools).body))
+            for kind, provider in providers().items()}
 
 
 def _rise(now: float, then: float) -> float:
@@ -359,17 +399,21 @@ def report_conversation() -> int:
     print(f"\n{totals['calls']} calls, {totals['sent']} characters sent, largest request {totals['largest']}, "
           f"estimated cost {totals['cost']} (characters at the price of an input not cached), "
           f"requests summed up {run.summarized}; fingerprint {fingerprint()}")
-    for error in run.errors:
+    fresh = next_conversation(run)
+    print("a new conversation of the same settings, first request: cached " + ", ".join(
+        f"{kind} {read}" for kind, read in fresh.items()))
+    broken = broken_starts(run.calls)
+    for error in run.errors + broken:
         print(f"  error: {error}")
     if REFERENCE is None:
-        return 1 if run.errors else 0
+        return 1 if run.errors or broken else 0
     if REFERENCE.get("fingerprint") != fingerprint():
         print(f"reference taken on another conversation ({REFERENCE.get('fingerprint')}): take it again")
         return 1
     rises = {key: _rise(totals[key], REFERENCE[key]) for key in ("cost", "largest")}
     print("against the reference of " + str(REFERENCE.get("date", "?")) + ": "
           + ", ".join(f"{key} {rise:+.1%}" for key, rise in rises.items()))
-    return 1 if run.errors or any(rise > MAX_RISE for rise in rises.values()) else 0
+    return 1 if run.errors or broken or any(rise > MAX_RISE for rise in rises.values()) else 0
 
 
 def main(argv=None) -> int:

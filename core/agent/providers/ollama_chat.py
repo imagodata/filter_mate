@@ -97,6 +97,10 @@ class OllamaChatProvider:
         self._config = config
         self._base_url = native_base(config.base_url)
         check_base_url(self._base_url, config.api_key or config.extra_headers)
+        # The largest context asked so far: a provider serves one conversation, and a smaller num_ctx after a
+        # compaction would make Ollama load the model again, its cache lost, then again when the history grows back
+        # (lot 4 of the token diet).
+        self._num_ctx = 0
 
     def build_request(self, system: str, messages: Sequence[Message], tools: Sequence[ToolSpec]) -> HttpRequest:
         config = self._config
@@ -110,7 +114,8 @@ class OllamaChatProvider:
                 "name": tool.name, "description": tool.description, "parameters": wire_schema(tool.input_schema)}}
                 for tool in tools]
         size = len(encode_json(body))
-        body["options"] = {"num_ctx": context_for(size)}
+        self._num_ctx = max(self._num_ctx, context_for(size))
+        body["options"] = {"num_ctx": self._num_ctx}
         headers = {"content-type": "application/json", "accept": "application/x-ndjson"}
         if config.api_key:  # a server behind a proxy that asks for one
             headers["authorization"] = f"Bearer {config.api_key}"
