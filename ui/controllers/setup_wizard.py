@@ -37,6 +37,7 @@ LANGUAGE_NAMES = {"en": "English", "fr": "Français", "de": "Deutsch", "es": "Es
 def _headers() -> Dict[str, str]:
     return {"sections": _tr("Sections"), "data": _tr("Data"), "size": _tr("Size"), "theme": _tr("Theme"),
             "profile": _tr("Panel"), "language": _tr("Language"), "panels": _tr("Layout"),
+            "headers": _tr("Headers"),
             "action_bar": _tr("Buttons"),
             "after": _tr("Filtering"), "targets": _tr("Targets"), "groups": _tr("Groups"),
             "raster_format": _tr("Rasters"), "point_cloud_format": _tr("Clouds")}
@@ -51,6 +52,7 @@ def _questions() -> Dict[str, str]:
         "profile": _tr("Size of the panel"),
         "language": _tr("Language of the panel"),
         "panels": _tr("Where the sections go"),
+        "headers": _tr("How the panel lists its sections"),
         "action_bar": _tr("Where the action buttons go (Filter, Export...)"),
         "after": _tr("When you filter"),
         "targets": _tr("A vector layer also filters these layers (cut to its features)"),
@@ -100,6 +102,11 @@ def _labels(facts: wizard.ProjectFacts) -> Dict[str, Dict[str, tuple]]:
                                    "floating; EXPLORING stays in FilterMate. A right-click on the title of a panel "
                                    "groups it with another one or merges it back.")),
             wizard.AS_NOW: (_tr("As they are now"), _tr("Some sections are in their own panel.")),
+        },
+        "headers": {
+            "rail": (_tr("A rail of chips"), _tr("The default: one row per stack, where a click on a chip opens "
+                                                 "its section and a chip is dragged to another place.")),
+            "stacked": (_tr("Headers, one above the other"), _tr("The name of each section on its own line.")),
         },
         "action_bar": {"bottom": (_tr("Bottom"), ""), "top": (_tr("Top"), ""), "left": (_tr("Left"), ""),
                        "right": (_tr("Right"), ""),

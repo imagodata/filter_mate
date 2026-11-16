@@ -531,9 +531,8 @@ class SectionPanels:
         if page is None:
             return
         panel.body.removeWidget(page)
-        sections._top_layout.insertWidget(sections._top_layout.indexOf(sections.top_rail) + 1, page, 1)
-        page.hide()
         sections.detached.discard(key)
+        sections.place_top(key)  # under the rail, or under its header when the headers are stacked
 
     def _rescue(self, key: str, panel: Any) -> None:
         """Nothing of the dock stays in a panel that goes away: left there, it would be deleted with it. What the
