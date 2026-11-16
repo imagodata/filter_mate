@@ -8,7 +8,7 @@ JSON because that server needs pydantic and the MCP SDK, which QGIS does not hav
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -39,6 +39,8 @@ class ToolSpec:
     manages_history: bool = False
     # Belongs to the conversation of the chat (its notes): not served to another application.
     chat_only: bool = False
+    # One line for the index of the tools a conversation may add (core/agent/tool_index.py).
+    summary: str = ""
 
     @property
     def requires_confirmation(self) -> bool:
@@ -418,8 +420,10 @@ SKILL_TOOLS = (skill_tool(),)
 
 def chat_tools(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
     """The tools the chat offers."""
-    return (tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + SETTINGS_TOOLS + SKILL_TOOLS
-            + CHAT_ONLY)
+    from .tool_index import SUMMARIES
+    tools = (tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + SETTINGS_TOOLS + SKILL_TOOLS
+             + CHAT_ONLY)
+    return tuple(replace(tool, summary=SUMMARIES.get(tool.name, tool.summary)) for tool in tools)
 
 
 # What a local model gets when the user asks for the filtering tools only (a slow computer): reading the project and
