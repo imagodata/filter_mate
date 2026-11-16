@@ -1,7 +1,7 @@
 ---
 name: open-data
 title: Bring data in, take layers out
-description: bring data in - what OpenStreetMap maps in an area (buildings, roads, shops, hospitals...), datasets of the open data platforms the user allowed, a file, a URL, a WFS service, a satellite scene, a web basemap, the elevation or the population of an area - and remove layers from the project
+description: bring data in (OpenStreetMap, open data platforms, a file, a URL, WFS, satellite, basemap, elevation, population) or remove layers
 metadata:
   version: 5
   plugin_min: 5.1.1

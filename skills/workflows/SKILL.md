@@ -1,7 +1,7 @@
 ---
 name: workflows
 title: Chain the steps of a request
-description: a request that needs several steps - what lies within a distance or inside an area, a place found then the data around it, a count by category, how many people live there, several criteria, a thematic map, data fetched then filtered - done with the fewest calls, in the right order
+description: a request of several steps (within a distance, around a place, counts, population, criteria, fetched then filtered) in the fewest calls
 metadata:
   version: 4
   plugin_min: 5.1.1

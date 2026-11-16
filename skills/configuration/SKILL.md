@@ -1,7 +1,7 @@
 ---
 name: configuration
 title: Configure FilterMate
-description: set FilterMate up for the user (look, language, messages, raster and point cloud options, timeouts, caches, profiles) and find why filters are slow
+description: set FilterMate up (look, language, options, timeouts, caches, profiles); why filters are slow
 metadata:
   version: 5
   plugin_min: 5.1.0

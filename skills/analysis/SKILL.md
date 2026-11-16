@@ -1,7 +1,7 @@
 ---
 name: analysis
 title: Analyse with Processing, fields and joins
-description: make new layers with the Processing algorithms of QGIS (buffer, centroids, dissolve, clip, intersection, join by location, heatmap, slope...), add computed fields, join tables
+description: new layers with the Processing algorithms (buffer, dissolve, clip, join by location, heatmap...), computed fields, joined tables
 metadata:
   version: 2
   plugin_min: 5.1.0
