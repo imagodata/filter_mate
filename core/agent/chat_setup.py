@@ -11,7 +11,7 @@ from typing import Optional, Sequence
 from .open_data import NO_DATA_KINDS
 from .sources import Source, describe_enabled
 from .system_prompt import SYSTEM_PROMPT, platforms_note
-from .tool_catalog import ADD_TABLE, FILTERING_NOTE, LIST_TABLES, RUN_PYTHON
+from .tool_catalog import ADD_TABLE, FILTERING_NOTE, LIST_TABLES, LOAD_SKILL, RUN_PYTHON, VIEW_MAP
 from .tool_index import index_block
 
 OPEN_DATA_TOOL = "search_open_data"
@@ -57,10 +57,12 @@ SOURCE_TOOLS = frozenset({OPEN_DATA_TOOL, SERVICE_TOOL, IMAGERY_TOOL, BASEMAP_TO
                           POPULATION_TOOL, PLACE_TOOL, LIST_TABLES, ADD_TABLE})
 
 
-# Lot 4 of the token diet (the cache): the tools whose presence depends on a setting come after the others, so that
-# two conversations of other settings start alike as long as possible (a ticked source no longer moves the tools that
-# follow its own in the catalog).
-SETTING_TOOLS = SOURCE_TOOLS | {RUN_PYTHON}
+# The tools left out when the user does not share attribute values (with view_map: an image of the map shows them).
+VALUES_TOOLS = ("field_values", "layer_statistics", "sample_features", "identify_at")
+# Lot 4 of the token diet (the cache): the tools whose presence or description depends on a setting come after the
+# others, so that two conversations of other settings start alike as long as possible (a ticked source, the values
+# not shared, the expert mode no longer move the tools that follow). load_skill lists the skills the settings allow.
+SETTING_TOOLS = SOURCE_TOOLS | {RUN_PYTHON, VIEW_MAP, LOAD_SKILL} | set(VALUES_TOOLS)
 
 
 def stable_order(tools: Sequence) -> list:
@@ -77,7 +79,8 @@ def chat_instructions(active: Sequence[Source], *, send_values: bool = True, fil
     (core/agent/tool_index.py).
 
     Lot 4 of the token diet (the cache): the way of working, then the index, then what a setting says (values not
-    shared, sources ticked or not, connectors): nothing that depends on a setting comes before what does not.
+    shared, sources ticked or not, connectors). The index itself depends on the settings (the tools they offer), and
+    comes after the way of working, which does not.
 
     ``offered``: the tools of the conversation, those a skill brings later among them; None when not known.
     A note that says a tool is missing must be true: a geocoder of the configuration file offers find_place with

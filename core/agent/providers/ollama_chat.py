@@ -97,10 +97,12 @@ class OllamaChatProvider:
         self._config = config
         self._base_url = native_base(config.base_url)
         check_base_url(self._base_url, config.api_key or config.extra_headers)
-        # The largest context asked so far: a provider serves one conversation, and a smaller num_ctx after a
+        # The context a request never goes under: a provider serves one conversation, and a smaller num_ctx after a
         # compaction would make Ollama load the model again, its cache lost, then again when the history grows back
-        # (lot 4 of the token diet).
-        self._num_ctx = 0
+        # (lot 4 of the token diet). Raised by what the text of a request needs, images left out (the session drops
+        # an image after the request that carries it), and never past the step the compaction keeps a conversation
+        # in: a request that needs more still gets it, the next ones come back down (review of lot 4).
+        self._floor = 0
 
     def build_request(self, system: str, messages: Sequence[Message], tools: Sequence[ToolSpec]) -> HttpRequest:
         config = self._config
@@ -114,8 +116,9 @@ class OllamaChatProvider:
                 "name": tool.name, "description": tool.description, "parameters": wire_schema(tool.input_schema)}}
                 for tool in tools]
         size = len(encode_json(body))
-        self._num_ctx = max(self._num_ctx, context_for(size))
-        body["options"] = {"num_ctx": self._num_ctx}
+        images = sum(len(image) for message in body["messages"] for image in message.get("images", ()))
+        self._floor = max(self._floor, min(context_for(size - images), CONTEXT_STEPS[1]))
+        body["options"] = {"num_ctx": max(context_for(size), self._floor)}
         headers = {"content-type": "application/json", "accept": "application/x-ndjson"}
         if config.api_key:  # a server behind a proxy that asks for one
             headers["authorization"] = f"Bearer {config.api_key}"

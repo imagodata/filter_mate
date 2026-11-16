@@ -95,6 +95,32 @@ def test_a_start_that_changed_within_a_request_is_named(weight):
     assert weight.broken_starts(weight.replay().calls) == []
 
 
+def test_a_tool_added_first_is_caught(weight, monkeypatch):
+    """Review of lot 4: a tool put before the others breaks the start of OpenAI and Ollama, which read the tools
+    before it; the bench must say so, not only Anthropic's cost."""
+    from agent.session import AgentSession
+
+    def offer_first(self, tools):
+        known = {tool.name for tool in self._tools}
+        self._tools = tuple(tool for tool in tools if tool.name not in known) + self._tools
+    monkeypatch.setattr(AgentSession, "offer", offer_first)
+    broken = weight.broken_starts(weight.replay().calls)
+    assert any("openai" in line for line in broken) and any("ollama" in line for line in broken)
+
+
+def test_the_instructions_of_a_conversation_never_change(weight):
+    calls = weight.replay().calls
+    assert len({call.system for call in calls}) == 1
+    changed = [calls[0], weight.CallWeight(**dict(calls[1].__dict__, system="other"))]
+    assert weight.broken_starts(changed) == [f"request {calls[1].request}: the instructions changed"]
+
+
+def test_a_new_conversation_reads_what_it_should(weight):
+    fresh = weight.next_conversation(weight.replay())
+    for kind in ("anthropic", "openai", "ollama"):
+        assert fresh[kind] >= fresh[kind + "_expected"] > 0
+
+
 def test_ollama_prefix_is_lost_when_the_context_step_changes(weight):
     before = {"tools": [], "messages": [{"role": "user", "content": "a"}], "options": {"num_ctx": 16384}}
     after = dict(before, options={"num_ctx": 32768})

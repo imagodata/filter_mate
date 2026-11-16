@@ -87,7 +87,7 @@ class AnthropicProvider:
             # so that both are read again after a compaction rewrites the history, and by the next conversation of
             # the same settings within the 5 minutes of the cache. Anthropic documents this pair for an agent loop;
             # 2 of the 4 breakpoints a request may hold, of the same TTL.
-            "system": [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+            "system": [{"type": "text", "text": system, **({"cache_control": {"type": "ephemeral"}} if system else {})}],
             **({"tools": [{"name": tool.name, "description": tool.description, "input_schema": for_model(tool.input_schema)}
                           for tool in tools]} if tools else {}),  # an empty list is refused by some servers
             "messages": _wire_messages(messages),

@@ -42,11 +42,26 @@ def test_the_tools_a_setting_brings_come_last():
     assert names[:len(kept)] == kept  # the others keep their order
 
 
-def test_ticking_a_source_does_not_move_the_tools_before_it():
+def test_a_setting_moves_only_what_comes_after_the_constant_tools():
+    """The values not shared, the expert mode, a source ticked: the tools of the other settings keep their place."""
     tools = chat_tools()
-    without = stable_order([tool for tool in tools if tool.name not in SETTING_TOOLS])
-    with_place = stable_order([tool for tool in tools if tool.name not in SETTING_TOOLS or tool.name == "find_place"])
-    assert [tool.name for tool in with_place][:len(without)] == [tool.name for tool in without]
+    constant = [tool.name for tool in stable_order(tools) if tool.name not in SETTING_TOOLS]
+    for left_out in ({"field_values", "layer_statistics"}, {"run_pyqgis"}, {"find_place"}, {"load_skill"}):
+        names = [tool.name for tool in stable_order([tool for tool in tools if tool.name not in left_out])]
+        assert names[:len(constant)] == constant, left_out
+
+
+def test_ollama_comes_back_down_after_an_image():
+    """Review of lot 4: an image weighs on its request only; the floor never passes the step of the compaction."""
+    provider = OllamaChatProvider(ProviderConfig(kind="ollama", model="m", base_url="http://localhost:11434",
+                                                 api_key=""))
+    from core.agent.messages import ToolResultPart
+    image = [Message(ROLE_USER, (ToolResultPart("c1", "the map", images=(("image/jpeg", "A" * 300_000),)),))]
+    assert json.loads(provider.build_request("S", image, []).body)["options"]["num_ctx"] == CONTEXT_STEPS[2]
+    assert json.loads(provider.build_request("S", hello(), []).body)["options"]["num_ctx"] == CONTEXT_STEPS[0]
+    huge = hello("x" * 300_000)
+    assert json.loads(provider.build_request("S", huge, []).body)["options"]["num_ctx"] == CONTEXT_STEPS[2]
+    assert json.loads(provider.build_request("S", hello(), []).body)["options"]["num_ctx"] == CONTEXT_STEPS[1]
 
 
 def test_a_tool_added_goes_at_the_end():

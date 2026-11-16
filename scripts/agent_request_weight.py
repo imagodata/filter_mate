@@ -159,6 +159,10 @@ class CallWeight:
     prefix: Dict[str, int]
     num_ctx: int
     ordered: Dict[str, int] = field(default_factory=dict)  # the characters of the request in each cache's order
+    # The start a tool added at the end leaves alike: the tools before it (and for Ollama the instructions first);
+    # nothing for Anthropic, which reads only an entry written whole. And the instructions, which never change.
+    kept: Dict[str, int] = field(default_factory=dict)
+    system: str = ""
 
     @property
     def sent(self) -> int:
@@ -268,10 +272,10 @@ CONVERSATION = (
 # (867c4f24). The first one, for lot 0 (10 requests, 9 layers, main b77dea9c before lot 1): fingerprint 3a596d972f4d,
 # 21 calls, 1,381,796 characters sent, largest 80,432, cost 291,616.
 REFERENCE: Optional[Dict[str, Any]] = {  # lot 4 of the token diet (the cache): the breakpoint of the instructions
-    # weighs 35 characters a call, read back by a new conversation and after a compaction, neither replayed here;
+    # weighs 37 characters a call, read back by a new conversation and after a compaction, neither replayed here;
     # lot 2 with its review: sent 784,859, largest 35,602, cost 184,870; before (867c4f24): 1,408,656, 67,413, 340,333
-    "date": "2026-11-16", "commit": "dc7db692", "fingerprint": "16efd34dcb03",  # with the changes of lot 4
-    "calls": 28, "sent": 785895, "largest": 35639, "cost": 185101,
+    "date": "2026-11-16", "commit": "40d4e3ef", "fingerprint": "16efd34dcb03",  # with lot 4 and its review
+    "calls": 28, "sent": 785587, "largest": 35628, "cost": 185033,
 }
 MAX_RISE = 0.05
 
@@ -290,16 +294,40 @@ class Replay:
     bodies: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)  # every request, by provider
 
 
+def tools_start(kind: str, body: Dict[str, Any]) -> int:
+    """The characters of ``body``, in the order of the cache of ``kind``, that a tool added at the end of its list
+    leaves alike: the tools but the "]" that closes them, after the instructions for Ollama; 0 for Anthropic."""
+    if kind == "anthropic" or not body.get("tools"):
+        return 0
+    tools = len(_compact(body["tools"])) - 1
+    messages = body.get("messages", [])
+    if kind == "ollama" and messages and messages[0].get("role") == "system":
+        return len(_compact(messages[:1])) + tools
+    return tools
+
+
 def broken_starts(calls: Sequence[CallWeight]) -> List[str]:
-    """Lot 4: between two calls of one request with the same tools and the same num_ctx, each provider's cache must
-    serve the whole call before (without the "]" that closed it); a call that does not is a start that changed."""
+    """Lot 4: the starts that changed. Between two calls of one request, each provider's cache must serve the whole
+    call before (without the "]" that closed it) when the tools are the same, and the tools before when one was
+    added at the end; Ollama only at the same num_ctx (another loads the model again). The instructions of a
+    conversation never change."""
     broken = []
     for before, call in zip(calls, calls[1:]):
-        if call.request != before.request or call.tool_count != before.tool_count or call.num_ctx != before.num_ctx:
+        if call.system != before.system:
+            broken.append(f"request {call.request}: the instructions changed")
+        if call.request != before.request:
             continue
         for kind, read in call.prefix.items():
-            if read < before.ordered[kind] - 1:
-                broken.append(f"request {call.request}: {kind} reads {read} of the {before.ordered[kind]} sent before")
+            if kind == "ollama" and call.num_ctx != before.num_ctx:
+                continue
+            if call.tool_count == before.tool_count:
+                needed = before.ordered[kind] - 1
+            elif call.tool_count > before.tool_count:
+                needed = before.kept.get(kind, 0)
+            else:
+                continue  # tools taken out: only at a compaction, which rewrites the history anyway
+            if read < needed:
+                broken.append(f"request {call.request}: {kind} reads {read} of the {needed} it should")
     return broken
 
 
@@ -318,7 +346,8 @@ class _Measured:
             self._rank, len(_compact(anthropic["system"])), len(_compact(anthropic.get("tools", []))),
             len(_compact(anthropic["messages"])), len(session.tools),
             {kind: cached_prefix(kind, self._before.setdefault(kind, []), body) for kind, body in bodies.items()},
-            bodies["ollama"]["options"]["num_ctx"], {kind: len(cache_order(kind, body)) for kind, body in bodies.items()}))
+            bodies["ollama"]["options"]["num_ctx"], {kind: len(cache_order(kind, body)) for kind, body in bodies.items()},
+            {kind: tools_start(kind, body) for kind, body in bodies.items()}, _compact(anthropic["system"])))
         for kind, body in bodies.items():
             self._before[kind].append(body)
         return self._inner.send(request, session)
@@ -377,9 +406,17 @@ def next_conversation(run: Replay) -> Dict[str, int]:
     after ``run``: the tools and the instructions are the same, the request is another one."""
     instructions, tools, _held = default_setup()
     first = [Message(ROLE_USER, (TextPart("Bonjour, que contient ce projet ?"),))]
-    return {kind: cached_prefix(kind, run.bodies.get(kind, []),
-                                json.loads(provider.build_request(instructions, first, tools).body))
-            for kind, provider in providers().items()}
+    read = {}
+    for kind, provider in providers().items():
+        body = json.loads(provider.build_request(instructions, first, tools).body)
+        earlier = run.bodies.get(kind, [])
+        if kind == "openai":  # its cache holds more than the request before: the best start of any
+            read[kind] = max((cached_prefix(kind, [before], body) for before in earlier), default=0)
+        else:
+            read[kind] = cached_prefix(kind, earlier, body)
+        read[kind + "_expected"] = len(_compact(body["tools"]) + _compact(body["system"])) if kind == "anthropic" \
+            else tools_start(kind, body)
+    return read
 
 
 def _rise(now: float, then: float) -> float:
@@ -401,8 +438,10 @@ def report_conversation() -> int:
           f"requests summed up {run.summarized}; fingerprint {fingerprint()}")
     fresh = next_conversation(run)
     print("a new conversation of the same settings, first request: cached " + ", ".join(
-        f"{kind} {read}" for kind, read in fresh.items()))
-    broken = broken_starts(run.calls)
+        f"{kind} {fresh[kind]}" for kind in KINDS))
+    broken = broken_starts(run.calls) + [
+        f"a new conversation: {kind} reads {fresh[kind]} of the {fresh[kind + '_expected']} it should"
+        for kind in KINDS if fresh[kind] < fresh[kind + "_expected"]]
     for error in run.errors + broken:
         print(f"  error: {error}")
     if REFERENCE is None:

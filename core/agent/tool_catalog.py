@@ -398,7 +398,7 @@ USE_TOOLS = "use_tools"
 MAX_USE_TOOLS = 20
 USE_TOOLS_TOOL = ToolSpec(
     USE_TOOLS,
-    "Add tools from the index at the end of the instructions to this conversation, from the next turn on. Add in one "
+    "Add tools from the index of the instructions to this conversation, from the next turn on. Add in one "
     "call every tool the request needs. Returns added and already (offered before).",
     {"type": "object", "properties": {"names": {"type": "array", "items": {"type": "string", "maxLength": 100},
                                                 "minItems": 1, "maxItems": MAX_USE_TOOLS}},
