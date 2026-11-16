@@ -879,8 +879,7 @@ class SectionPanels:
             return
         if sections is None:
             return
-        sections._top_layout.insertWidget(sections._top_layout.indexOf(sections.top_rail) + 1, page, 1)
-        page.hide()
+        sections.place_top(key)  # under the rail, or under its header when the headers are stacked
 
     def _unhost(self, key: str) -> None:
         """The bar of the buttons of ``key`` leaves its panel before its page does (it would go with its column)."""

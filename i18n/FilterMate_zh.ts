@@ -11566,6 +11566,36 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <translation>各部分放在哪里</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>标题</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>面板列出各部分的方式</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>胶囊导轨</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>默认情况：每个堆栈一行，单击某个胶囊会打开对应的部分，胶囊可以拖到其他位置。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>标题，上下排列</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>每个部分的名称各占一行。</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>点击标题即可打开对应的部分。</translation>
@@ -12226,6 +12256,11 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>一个面板可以容纳一个或多个部分，像这里一样列在导轨上。将某个部分的胶囊拖到另一个面板上可将它们组合，拖到 FilterMate 上可合并回去，拖出所有面板之外则会为它新建一个面板；FilterMate 的两个面板以选项卡形式组合后会合为一个。右键单击胶囊或面板标题，也可以进行同样的移动。关闭面板会将它的各部分合并回 FilterMate。QGIS 会把每个面板放回你上次放置的位置。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>一个面板可以容纳一个或多个部分。右键单击某个部分的标题或面板的标题，可将它与另一个面板组合，或合并回 FilterMate；FilterMate 的两个面板以选项卡形式组合后会合为一个。关闭面板会将它的各部分合并回 FilterMate。QGIS 会把每个面板放回你上次放置的位置。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

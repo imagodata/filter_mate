@@ -11566,6 +11566,36 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
         <translation>Hvor seksjonene skal stå</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Overskrifter</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Hvordan panelet viser seksjonene sine</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>En bjelke med chips</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Standarden: én rad per stabel, der et klikk på en chip åpner seksjonen og en chip dras til et annet sted.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Overskrifter, én over den andre</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Navnet på hver seksjon på sin egen linje.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Et klikk på en overskrift åpner seksjonen.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Et panel rommer én seksjon eller flere, listet i en bjelke som her. Dra chipen til en seksjon på et annet panel for å gruppere dem, på FilterMate for å flette den tilbake, eller ut av alle paneler for å gi den et nytt; to paneler i FilterMate som settes sammen som faner, blir til ett. Et høyreklikk på en chip, eller på tittelen til et panel, tilbyr de samme flyttene. Lukker du et panel, flettes seksjonene tilbake i FilterMate. QGIS setter hvert panel tilbake der du lot det stå.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Et panel rommer én seksjon eller flere. Høyreklikk på overskriften til en seksjon, eller på tittelen til et panel, for å gruppere den med et annet panel eller for å flette den tilbake i FilterMate; to paneler i FilterMate som settes sammen som faner, blir til ett. Lukker du et panel, flettes seksjonene tilbake i FilterMate. QGIS setter hvert panel tilbake der du lot det stå.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

@@ -11566,6 +11566,36 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <translation>Waar de secties komen</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Koppen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Hoe het paneel zijn secties toont</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Een balk met chips</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>De standaard: één rij per stapel, waar een klik op een chip de bijbehorende sectie opent en een chip naar een andere plek wordt gesleept.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Koppen, de ene boven de andere</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>De naam van elke sectie op een eigen regel.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Een klik op een kop opent de bijbehorende sectie.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Een paneel bevat één sectie of meerdere, opgesomd in een balk zoals hier. Sleep de chip van een sectie naar een ander paneel om ze te groeperen, naar FilterMate om de sectie weer samen te voegen, of buiten alle panelen om er een nieuw paneel voor te maken; twee panelen van FilterMate die als tabbladen samen zijn gezet, worden er één. Een rechtermuisklik op een chip, of op de titel van een paneel, biedt dezelfde verplaatsingen. Een paneel sluiten voegt de secties ervan weer samen met FilterMate. QGIS zet elk paneel terug waar u het had gelaten.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Een paneel bevat één sectie of meerdere. Klik met de rechtermuisknop op de kop van een sectie, of op de titel van een paneel, om die met een ander paneel te groeperen of weer samen te voegen met FilterMate; twee panelen van FilterMate die als tabbladen samen zijn gezet, worden er één. Een paneel sluiten voegt de secties ervan weer samen met FilterMate. QGIS zet elk paneel terug waar u het had gelaten.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

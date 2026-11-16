@@ -11690,6 +11690,36 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <translation>Où placer les sections</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>En-têtes</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Comment le panneau liste ses sections</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Un rail de pastilles</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Par défaut : une rangée par pile, où un clic sur une pastille ouvre sa section et où une pastille se fait glisser à une autre place.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Des en-têtes, les uns au-dessus des autres</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Le nom de chaque section sur sa propre ligne.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Un clic sur un en-tête ouvre sa section.</translation>
@@ -12350,6 +12380,11 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Un panneau tient une section ou plusieurs, listées dans un rail comme ici. Faites glisser la pastille d'une section sur un autre panneau pour les regrouper, sur FilterMate pour la fusionner, ou hors de tout panneau pour lui en donner un nouveau ; deux panneaux de FilterMate mis en onglets l'un de l'autre n'en font plus qu'un. Un clic droit sur une pastille, ou sur le titre d'un panneau, propose les mêmes déplacements. Fermer un panneau fusionne ses sections dans FilterMate. QGIS remet chaque panneau là où vous l'avez laissé.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panneau tient une section ou plusieurs. Faites un clic droit sur l'en-tête d'une section, ou sur le titre d'un panneau, pour la regrouper avec un autre panneau ou pour la fusionner dans FilterMate ; deux panneaux de FilterMate mis en onglets l'un de l'autre n'en font plus qu'un. Fermer un panneau fusionne ses sections dans FilterMate. QGIS remet chaque panneau là où vous l'avez laissé.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

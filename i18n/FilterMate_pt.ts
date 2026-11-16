@@ -11566,6 +11566,36 @@ O onnxruntime vem do PyPI com o pip, o modelo de huggingface.co/{1}, cada arquiv
         <translation>Onde ficam as secções</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Cabeçalhos</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Como o painel lista as suas secções</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Uma barra de chips</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Por predefinição: uma linha por pilha, onde um clique num chip abre a respetiva secção e um chip pode ser arrastado para outro sítio.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Cabeçalhos, um por cima do outro</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>O nome de cada secção na sua própria linha.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Um clique num cabeçalho abre a respetiva secção.</translation>
@@ -12226,6 +12256,11 @@ O onnxruntime vem do PyPI com o pip, o modelo de huggingface.co/{1}, cada arquiv
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Um painel contém uma secção ou várias, listadas numa barra como aqui. Arraste o chip de uma secção para outro painel para os agrupar, para o FilterMate para a voltar a fundir, ou para fora de todos os painéis para lhe dar um novo; dois painéis do FilterMate reunidos em separadores tornam-se um só. Um clique com o botão direito num chip, ou no título de um painel, oferece as mesmas mudanças. Fechar um painel volta a fundir as suas secções no FilterMate. O QGIS repõe cada painel onde o deixou.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Um painel contém uma secção ou várias. Clique com o botão direito no cabeçalho de uma secção, ou no título de um painel, para a agrupar com outro painel ou para a voltar a fundir no FilterMate; dois painéis do FilterMate reunidos em separadores tornam-se um só. Fechar um painel volta a fundir as suas secções no FilterMate. O QGIS repõe cada painel onde o deixou.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

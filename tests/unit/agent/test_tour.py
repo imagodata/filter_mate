@@ -18,8 +18,10 @@ def test_every_section_then_the_panels_then_the_buttons():
 
 
 def test_the_links_follow_what_was_just_said():
-    told = tour.steps(tour.DockFacts(panels=True, can_move=True))
+    told = tour.steps(tour.DockFacts(rail=True, panels=True, can_move=True))
     assert told[told.index((tour.TEXT, "groups")) + 1] == (tour.LINK, "detach_all")
+    stacked = tour.steps(tour.DockFacts(panels=True, can_move=True))  # the same link after the other words
+    assert stacked[stacked.index((tour.TEXT, "groups_headers")) + 1] == (tour.LINK, "detach_all")
     assert told[told.index((tour.TEXT, "buttons")) + 1] == (tour.LINK, "setup")
 
 
@@ -42,6 +44,16 @@ def test_a_panel_that_cannot_split_says_nothing_of_panels():
     facts = tour.DockFacts(can_move=True, apart=("agent",))
     assert "panels" not in _keys(facts, tour.TEXT) and "groups" not in _keys(facts, tour.TEXT)
     assert _keys(facts, tour.LINK) == ["setup", "connect"]
+
+
+def test_with_the_headers_stacked_the_panels_are_told_with_headers():
+    stacked = tour.DockFacts(rail=False, panels=True, can_move=True)
+    assert "panels_headers" in _keys(stacked, tour.TEXT) and "panels" not in _keys(stacked, tour.TEXT)
+    assert "groups_headers" in _keys(stacked, tour.TEXT) and "groups" not in _keys(stacked, tour.TEXT)
+    assert "rail" not in _keys(stacked, tour.TEXT)
+    rails = tour.DockFacts(rail=True, panels=True, can_move=True)
+    assert "panels" in _keys(rails, tour.TEXT) and "panels_headers" not in _keys(rails, tour.TEXT)
+    assert "groups" in _keys(rails, tour.TEXT) and "groups_headers" not in _keys(rails, tour.TEXT)
 
 
 def test_a_model_connected_is_not_offered_again():

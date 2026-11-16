@@ -11566,6 +11566,36 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>Πού μπαίνουν οι ενότητες</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Κεφαλίδες</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Πώς ο πίνακας απαριθμεί τις ενότητές του</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Μια ράγα από τσιπ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Η προεπιλογή: μία σειρά ανά στοίβα, όπου ένα κλικ σε ένα τσιπ ανοίγει την ενότητά του και ένα τσιπ σύρεται σε άλλη θέση.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Κεφαλίδες, η μία πάνω από την άλλη</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Το όνομα κάθε ενότητας σε ξεχωριστή γραμμή.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Ένα κλικ στην κεφαλίδα ανοίγει την ενότητά της.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Ένας πίνακας χωράει μία ενότητα ή περισσότερες, που απαριθμούνται σε μια ράγα όπως εδώ. Σύρετε το τσιπ μιας ενότητας σε άλλον πίνακα για να τους ομαδοποιήσετε, στο FilterMate για να τη συγχωνεύσετε πίσω, ή έξω από κάθε πίνακα για να της δώσετε έναν νέο· δύο πίνακες του FilterMate που τοποθετούνται ως καρτέλες ο ένας με τον άλλον γίνονται ένας. Δεξί κλικ σε ένα τσιπ ή στον τίτλο ενός πίνακα προσφέρει τις ίδιες μετακινήσεις. Το κλείσιμο ενός πίνακα συγχωνεύει πίσω τις ενότητές του στο FilterMate. Το QGIS επαναφέρει κάθε πίνακα εκεί που τον αφήσατε.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Ένας πίνακας χωράει μία ενότητα ή περισσότερες. Κάντε δεξί κλικ στην κεφαλίδα μιας ενότητας, ή στον τίτλο ενός πίνακα, για να την ομαδοποιήσετε με άλλον πίνακα ή να τη συγχωνεύσετε πίσω στο FilterMate· δύο πίνακες του FilterMate που τοποθετούνται ως καρτέλες ο ένας με τον άλλον γίνονται ένας. Το κλείσιμο ενός πίνακα συγχωνεύει πίσω τις ενότητές του στο FilterMate. Το QGIS επαναφέρει κάθε πίνακα εκεί που τον αφήσατε.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

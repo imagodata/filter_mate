@@ -11566,6 +11566,36 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>Vị trí các phần</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Tiêu đề</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Cách bảng điều khiển liệt kê các phần của nó</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Một thanh chip</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Mặc định: mỗi chồng một hàng, nơi nhấp vào một chip sẽ mở phần của nó và chip được kéo sang chỗ khác.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Tiêu đề, cái này trên cái kia</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Tên của mỗi phần trên một dòng riêng.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Nhấp vào tiêu đề sẽ mở phần đó.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Một bảng điều khiển chứa một phần hoặc nhiều phần, được liệt kê trên một thanh như ở đây. Kéo chip của một phần vào bảng điều khiển khác để nhóm chúng, vào FilterMate để gộp trở lại, hoặc ra ngoài mọi bảng điều khiển để cấp cho nó một bảng mới; hai bảng điều khiển của FilterMate được ghép thành tab sẽ thành một. Nhấp chuột phải vào một chip, hoặc vào tiêu đề của một bảng điều khiển, sẽ có các thao tác di chuyển tương tự. Đóng một bảng điều khiển sẽ gộp các phần của nó trở lại FilterMate. QGIS đặt mỗi bảng điều khiển về đúng chỗ bạn đã để.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Một bảng điều khiển chứa một phần hoặc nhiều phần. Nhấp chuột phải vào tiêu đề của một phần, hoặc vào tiêu đề của một bảng điều khiển, để nhóm nó với bảng khác hoặc gộp trở lại FilterMate; hai bảng điều khiển của FilterMate được ghép thành tab sẽ thành một. Đóng một bảng điều khiển sẽ gộp các phần của nó trở lại FilterMate. QGIS đặt mỗi bảng điều khiển về đúng chỗ bạn đã để.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

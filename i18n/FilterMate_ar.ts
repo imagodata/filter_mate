@@ -11566,6 +11566,36 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>موضع الأقسام</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>العناوين</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>كيف تسرد اللوحة أقسامها</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>شريط من الشرائح</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>الافتراضي: صف واحد لكل كومة، حيث يفتح النقر على شريحة قسمها وتُسحب الشريحة إلى مكان آخر.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>عناوين، واحد فوق الآخر</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>اسم كل قسم في سطر خاص به.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>النقر على العنوان يفتح قسمه.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>تحتوي اللوحة على قسم واحد أو عدة أقسام، مدرجة في شريط كما هنا. اسحب شريحة قسم على لوحة أخرى لتجميعهما، أو على FilterMate لدمجه من جديد، أو خارج كل اللوحات لمنحه لوحة جديدة؛ وكل لوحتين من FilterMate جُمعتا في تبويبات تصبحان لوحة واحدة. النقر بزر الفأرة الأيمن على شريحة أو على عنوان لوحة يتيح الحركات نفسها. إغلاق لوحة يدمج أقسامها من جديد. يعيد QGIS كل لوحة إلى حيث تركتها.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>تحتوي اللوحة على قسم واحد أو عدة أقسام. انقر بزر الفأرة الأيمن على عنوان قسم، أو على عنوان لوحة، لتجميعه مع لوحة أخرى أو لدمجه من جديد في FilterMate؛ وكل لوحتين من FilterMate جُمعتا في تبويبات تصبحان لوحة واحدة. إغلاق لوحة يدمج أقسامها من جديد. يعيد QGIS كل لوحة إلى حيث تركتها.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

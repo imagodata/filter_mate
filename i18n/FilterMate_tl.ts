@@ -11566,6 +11566,36 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <translation>Saan ilalagay ang mga seksyon</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Mga header</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Paano inililista ng panel ang mga seksyon nito</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Isang bar ng mga chip</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Ang default: isang hanay bawat stack, kung saan nagbubukas ng seksyon ang pag-click sa isang chip at iniidrag ang chip sa ibang lugar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Mga header, isa sa ibabaw ng isa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Ang pangalan ng bawat seksyon sa sarili nitong linya.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Ang pag-click sa header ay magbubukas ng seksyon nito.</translation>
@@ -12226,6 +12256,11 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Maaaring maglaman ang isang panel ng isang seksyon o ilan, na nakalista sa isang bar tulad ng dito. I-drag ang chip ng isang seksyon sa ibang panel para igrupo ang mga ito, sa FilterMate para isanib muli, o palabas sa lahat ng panel para bigyan ito ng bago; nagiging iisa ang dalawang panel ng FilterMate na pinagsama-sama bilang mga tab. Nag-aalok ng parehong paglilipat ang right-click sa isang chip, o sa pamagat ng isang panel. Naisasanib muli sa FilterMate ang mga seksyon ng isang panel kapag isinara ito. Ibinabalik ng QGIS ang bawat panel kung saan mo ito iniwan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Maaaring maglaman ang isang panel ng isang seksyon o ilan. I-right-click ang header ng isang seksyon, o ang pamagat ng isang panel, para igrupo ito sa ibang panel o isanib muli sa FilterMate; nagiging iisa ang dalawang panel ng FilterMate na pinagsama-sama bilang mga tab. Naisasanib muli sa FilterMate ang mga seksyon ng isang panel kapag isinara ito. Ibinabalik ng QGIS ang bawat panel kung saan mo ito iniwan.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

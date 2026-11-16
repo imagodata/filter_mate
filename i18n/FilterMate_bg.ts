@@ -11566,6 +11566,36 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>Къде да са секциите</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Заглавия</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Как панелът изброява своите секции</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Лента от чипове</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>По подразбиране: един ред на стек, където щракване върху чип отваря неговата секция, а чипът се плъзга на друго място.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Заглавия, едно над друго</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Името на всяка секция на отделен ред.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Щракване върху заглавието отваря неговата секция.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Панелът съдържа една секция или няколко, изброени в лента като тук. Плъзнете чипа на секция върху друг панел, за да ги групирате, върху FilterMate, за да я обедините обратно, или извън всеки панел, за да ѝ дадете нов; два панела на FilterMate, събрани като раздели, стават един. Щракване с десния бутон върху чип или върху заглавието на панел предлага същите премествания. Затварянето на панел обединява секциите му обратно във FilterMate. QGIS връща всеки панел там, където сте го оставили.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Панелът съдържа една секция или няколко. Щракнете с десния бутон върху заглавието на секция или върху заглавието на панел, за да групирате с друг панел или да обедините обратно във FilterMate; два панела на FilterMate, събрани като раздели, стават един. Затварянето на панел обединява секциите му обратно във FilterMate. QGIS връща всеки панел там, където сте го оставили.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

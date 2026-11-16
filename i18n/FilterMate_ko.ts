@@ -11566,6 +11566,36 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>섹션 배치</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>헤더</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>패널이 섹션을 나열하는 방식</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>칩 레일</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>기본 상태: 스택마다 한 줄이며, 칩을 클릭하면 해당 섹션이 열리고 칩을 다른 위치로 끌 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>헤더를 위아래로 배치</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>각 섹션의 이름이 별도의 줄에 표시됩니다.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>헤더를 클릭하면 해당 섹션이 열립니다.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>패널에는 섹션을 하나 또는 여러 개 둘 수 있고, 여기처럼 레일에 나열됩니다. 섹션의 칩을 다른 패널로 끌면 그룹화되고, FilterMate로 끌면 다시 병합되며, 모든 패널 밖으로 끌면 새 패널이 만들어집니다. FilterMate의 패널 두 개를 탭으로 합치면 하나가 됩니다. 칩이나 패널의 제목을 오른쪽 클릭해도 같은 이동을 할 수 있습니다. 패널을 닫으면 그 섹션이 FilterMate로 다시 병합됩니다. QGIS는 각 패널을 마지막에 둔 위치로 되돌립니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>패널에는 섹션을 하나 또는 여러 개 둘 수 있습니다. 섹션의 헤더나 패널의 제목을 오른쪽 클릭하면 다른 패널과 그룹화하거나 FilterMate로 다시 병합할 수 있습니다. FilterMate의 패널 두 개를 탭으로 합치면 하나가 됩니다. 패널을 닫으면 그 섹션이 FilterMate로 다시 병합됩니다. QGIS는 각 패널을 마지막에 둔 위치로 되돌립니다.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

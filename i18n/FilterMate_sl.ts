@@ -11566,6 +11566,36 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>Kam postaviti razdelke</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Naslovi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Kako plošča našteva svoje razdelke</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Trak s čipi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Privzeto: ena vrstica na sklad, v kateri klik na čip odpre njegov razdelek in se čip povleče na drugo mesto.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Naslovne vrstice, ena nad drugo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Ime vsakega razdelka v svoji vrstici.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Klik na naslovno vrstico odpre njen razdelek.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Plošča vsebuje en razdelek ali več, naštetih na traku kot tukaj. Povlecite čip razdelka na drugo ploščo, da ju združite v skupino, na FilterMate, da ga združite nazaj, ali ven iz vseh plošč, da dobi novo; dve plošči FilterMate, združeni kot zavihka, postaneta ena. Desni klik na čip ali na naslov plošče ponuja iste premike. Z zaprtjem plošče se njeni razdelki združijo nazaj v FilterMate. QGIS vrne vsako ploščo tja, kjer ste jo pustili.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Plošča vsebuje en razdelek ali več. Z desnim klikom na naslovno vrstico razdelka ali na naslov plošče ga združite v skupino z drugo ploščo ali združite nazaj v FilterMate; dve plošči FilterMate, združeni kot zavihka, postaneta ena. Z zaprtjem plošče se njeni razdelki združijo nazaj v FilterMate. QGIS vrne vsako ploščo tja, kjer ste jo pustili.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

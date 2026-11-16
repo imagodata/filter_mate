@@ -11566,6 +11566,36 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <translation>ክፍሎቹ የሚቀመጡበት</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>ርዕሶች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>ፓነሉ ክፍሎቹን የሚዘረዝርበት መንገድ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>የቺፖች ረድፍ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>ነባሪው፦ ለእያንዳንዱ ክምር አንድ ረድፍ፣ በቺፕ ላይ ጠቅ ማድረግ ክፍሉን የሚከፍትበትና ቺፕ ወደ ሌላ ቦታ የሚጎተትበት።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>ርዕሶች፣ አንዱ ከሌላው በላይ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>የእያንዳንዱ ክፍል ስም በራሱ መስመር ላይ።</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>ርዕስ ላይ ጠቅ ማድረግ ክፍሉን ይከፍታል።</translation>
@@ -12226,6 +12256,11 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>አንድ ፓነል አንድ ክፍል ወይም ብዙ ክፍሎችን ይይዛል፣ እዚህ እንዳለው በረድፍ ውስጥ ተዘርዝረው። ለማቧደን የአንድን ክፍል ቺፕ ወደ ሌላ ፓነል፣ መልሶ ለማዋሃድ ወደ FilterMate፣ ወይም አዲስ ፓነል ለመስጠት ከሁሉም ፓነሎች ውጭ ይጎትቱት፤ እንደ ትሮች አንድ ላይ የተቀመጡ ሁለት የFilterMate ፓነሎች አንድ ይሆናሉ። በቺፕ ላይ ወይም በፓነል ርዕስ ላይ በቀኝ ጠቅ ማድረግ ተመሳሳይ እንቅስቃሴዎችን ያቀርባል። ፓነልን መዝጋት ክፍሎቹን መልሶ ያዋህዳል። QGIS እያንዳንዱን ፓነል ትተውት በነበረበት ቦታ ይመልሰዋል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>አንድ ፓነል አንድ ክፍል ወይም ብዙ ክፍሎችን ይይዛል። የአንድ ክፍል ርዕስ ላይ ወይም የፓነል ርዕስ ላይ በቀኝ ጠቅ ያድርጉ፣ ከሌላ ፓነል ጋር ለማቧደን ወይም መልሶ ወደ FilterMate ለማዋሃድ፤ እንደ ትሮች አንድ ላይ የተቀመጡ ሁለት የFilterMate ፓነሎች አንድ ይሆናሉ። ፓነልን መዝጋት ክፍሎቹን መልሶ ያዋህዳል። QGIS እያንዳንዱን ፓነል ትተውት በነበረበት ቦታ ይመልሰዋል።</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

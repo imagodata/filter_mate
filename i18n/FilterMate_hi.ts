@@ -11566,6 +11566,36 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>अनुभाग कहाँ रहें</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>शीर्षक</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>पैनल अपने अनुभागों को कैसे सूचीबद्ध करता है</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>चिप की एक पट्टी</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>डिफ़ॉल्ट: हर स्टैक के लिए एक पंक्ति, जहाँ किसी चिप पर क्लिक करने से उसका अनुभाग खुलता है और चिप को दूसरी जगह खींचा जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>शीर्षक, एक के ऊपर एक</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>हर अनुभाग का नाम अपनी अलग पंक्ति में।</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>किसी शीर्षक पर क्लिक करने से उसका अनुभाग खुलता है।</translation>
@@ -12226,6 +12256,11 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>एक पैनल में एक अनुभाग या कई अनुभाग हो सकते हैं, जो यहाँ की तरह पट्टी में सूचीबद्ध होते हैं। किसी अनुभाग के चिप को समूहित करने के लिए दूसरे पैनल पर, वापस मिलाने के लिए FilterMate पर, या उसे नया पैनल देने के लिए हर पैनल से बाहर खींचें; FilterMate के दो पैनल टैब के रूप में साथ रखे जाने पर एक हो जाते हैं। किसी चिप पर, या किसी पैनल के शीर्षक पर, राइट-क्लिक करने से यही सब चालें मिलती हैं। पैनल बंद करने पर उसके अनुभाग वापस FilterMate में मिल जाते हैं। QGIS हर पैनल को वहीं रखता है जहाँ आपने उसे छोड़ा था।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>एक पैनल में एक अनुभाग या कई अनुभाग हो सकते हैं। किसी अनुभाग के शीर्षक पर, या किसी पैनल के शीर्षक पर, राइट-क्लिक करके उसे दूसरे पैनल के साथ समूहित करें या वापस FilterMate में मिलाएँ; FilterMate के दो पैनल टैब के रूप में साथ रखे जाने पर एक हो जाते हैं। पैनल बंद करने पर उसके अनुभाग वापस FilterMate में मिल जाते हैं। QGIS हर पैनल को वहीं रखता है जहाँ आपने उसे छोड़ा था।</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

@@ -11566,6 +11566,36 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Unde se pun secțiunile</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Anteturi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Cum listează panoul secțiunile sale</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>O bară de chipuri</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Implicit: un rând pe stivă, în care un clic pe un chip deschide secțiunea lui, iar un chip se trage în alt loc.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Anteturi, unul deasupra altuia</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Numele fiecărei secțiuni pe propriul rând.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Un clic pe un antet deschide secțiunea sa.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Un panou conține o secțiune sau mai multe, listate într-o bară ca aici. Trageți chipul unei secțiuni pe alt panou ca să le grupați, pe FilterMate ca să o îmbinați înapoi, sau în afara oricărui panou ca să-i dați unul nou; două panouri ale FilterMate puse în file devin unul singur. Un clic dreapta pe un chip, sau pe titlul unui panou, oferă aceleași mutări. Închiderea unui panou îi îmbină secțiunile înapoi în FilterMate. QGIS pune fiecare panou la loc, unde l-ați lăsat.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panou conține o secțiune sau mai multe. Faceți clic dreapta pe antetul unei secțiuni, sau pe titlul unui panou, ca să o grupați cu alt panou sau să o îmbinați înapoi în FilterMate; două panouri ale FilterMate puse în file devin unul singur. Închiderea unui panou îi îmbină secțiunile înapoi în FilterMate. QGIS pune fiecare panou la loc, unde l-ați lăsat.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

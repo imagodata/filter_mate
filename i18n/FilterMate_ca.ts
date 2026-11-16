@@ -11566,6 +11566,36 @@ onnxruntime ve de PyPI amb pip, el model de huggingface.co/{1}, cada fitxer veri
         <translation>On van les seccions</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Capçaleres</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Com el panell llista les seves seccions</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Un carril de pastilles</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Per defecte: una fila per pila, on un clic en una pastilla obre la seva secció i una pastilla s'arrossega a un altre lloc.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Capçaleres, una damunt l'altra</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>El nom de cada secció en la seva pròpia línia.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Un clic en una capçalera n'obre la secció.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime ve de PyPI amb pip, el model de huggingface.co/{1}, cada fitxer veri
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Un panell conté una secció o diverses, llistades en un carril com aquí. Arrossegueu la pastilla d'una secció cap a un altre panell per agrupar-los, cap a FilterMate per tornar-la a fusionar, o fora de tots els panells per donar-li un panell nou; dos panells de FilterMate posats en pestanyes en formen un de sol. Un clic dret en una pastilla, o al títol d'un panell, ofereix els mateixos moviments. Tancar un panell en torna a fusionar les seccions. QGIS torna cada panell on l'havíeu deixat.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panell conté una secció o diverses. Feu clic dret a la capçalera d'una secció, o al títol d'un panell, per agrupar-la amb un altre panell o per tornar-la a fusionar amb FilterMate; dos panells de FilterMate posats en pestanyes en formen un de sol. Tancar un panell en torna a fusionar les seccions. QGIS torna cada panell on l'havíeu deixat.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

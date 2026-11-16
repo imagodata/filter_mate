@@ -11566,6 +11566,36 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <translation>Hol legyenek a szakaszok</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Fejlécek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Hogyan sorolja fel a panel a szakaszait</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Chipek sávja</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Alapértelmezés: egy sor kötegenként, ahol egy chipre kattintva megnyílik a szakasza, a chipet pedig másik helyre lehet húzni.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Fejlécek egymás fölött</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Minden szakasz neve a saját sorában.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>A fejlécre kattintva megnyílik a szakasza.</translation>
@@ -12226,6 +12256,11 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Egy panel egy szakaszt vagy többet tart, egy sávban felsorolva, mint itt. Húzza egy szakasz chipjét egy másik panelre, hogy csoportosítsa őket, a FilterMate-re, hogy visszaolvassza, vagy minden panelből kifelé, hogy új panelt kapjon; a FilterMate két panelje, ha lapokként összeteszik őket, eggyé válik. Egy chipre vagy egy panel címére jobb gombbal kattintva ugyanezek a mozdítások kínálkoznak. Egy panel bezárása visszaolvasztja a szakaszait a FilterMate-be. A QGIS minden panelt oda tesz vissza, ahol hagyta.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Egy panel egy szakaszt vagy többet tart. Kattintson jobb gombbal egy szakasz fejlécén, vagy egy panel címén, hogy egy másik panellel csoportosítsa, vagy visszaolvassza a FilterMate-be; a FilterMate két panelje, ha lapokként összeteszik őket, eggyé válik. Egy panel bezárása visszaolvasztja a szakaszait a FilterMate-be. A QGIS minden panelt oda tesz vissza, ahol hagyta.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

@@ -11566,6 +11566,36 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <translation>Bölümlerin yeri</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Başlıklar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Panel bölümlerini nasıl listeler</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Çip şeridi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Varsayılan: yığın başına bir sıra; bir çipe tıklamak bölümünü açar ve çip başka bir yere sürüklenir.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Başlıklar, üst üste</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Her bölümün adı kendi satırında.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Bir başlığa tıklamak ilgili bölümü açar.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Bir panel bir ya da birkaç bölüm tutar; bölümler burada olduğu gibi bir şeritte listelenir. Bir bölümün çipini gruplamak için başka bir panelin, geri birleştirmek için FilterMate'in üzerine ya da yeni bir panel vermek için tüm panellerin dışına sürükleyin; FilterMate'in sekmeler halinde bir araya getirilen iki paneli tek bir panel olur. Bir çipe ya da bir panelin başlığına sağ tıklamak aynı taşımaları sunar. Bir paneli kapatmak bölümlerini FilterMate'e geri birleştirir. QGIS her paneli bıraktığınız yere koyar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Bir panel bir ya da birkaç bölüm tutar. Bir bölümün başlığına ya da bir panelin başlığına sağ tıklayarak onu başka bir panelle gruplayın ya da FilterMate'e geri birleştirin; FilterMate'in sekmeler halinde bir araya getirilen iki paneli tek bir panel olur. Bir paneli kapatmak bölümlerini FilterMate'e geri birleştirir. QGIS her paneli bıraktığınız yere koyar.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

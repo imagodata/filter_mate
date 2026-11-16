@@ -11566,6 +11566,36 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <translation>ตำแหน่งของแต่ละส่วน</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>ส่วนหัว</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>วิธีที่แผงแสดงรายการส่วนของตน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>แถบชิป</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>ค่าเริ่มต้น: หนึ่งแถวต่อสแต็ก คลิกชิปเพื่อเปิดส่วนของชิปนั้น และลากชิปไปไว้ที่อื่นได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>ส่วนหัวซ้อนกันในแนวตั้ง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>ชื่อของแต่ละส่วนอยู่บนบรรทัดของตัวเอง</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>คลิกที่ส่วนหัวเพื่อเปิดส่วนนั้น</translation>
@@ -12226,6 +12256,11 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>แผงหนึ่งมีได้หนึ่งส่วนหรือหลายส่วน โดยแสดงรายการไว้ในแถบเหมือนที่นี่ ลากชิปของส่วนหนึ่งไปวางบนอีกแผงเพื่อจัดกลุ่ม ไปวางบน FilterMate เพื่อรวมกลับเข้าไป หรือลากออกนอกทุกแผงเพื่อให้ได้แผงใหม่ แผงของ FilterMate สองแผงที่นำมาจัดเป็นแท็บด้วยกันจะกลายเป็นแผงเดียว การคลิกขวาที่ชิปหรือที่ชื่อแผงจะมีการย้ายแบบเดียวกันให้เลือก การปิดแผงจะรวมส่วนต่าง ๆ ของแผงนั้นกลับเข้า FilterMate QGIS จะวางแต่ละแผงกลับที่เดิมที่คุณวางไว้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>แผงหนึ่งมีได้หนึ่งส่วนหรือหลายส่วน คลิกขวาที่ส่วนหัวของส่วนใดส่วนหนึ่ง หรือที่ชื่อแผง เพื่อจัดกลุ่มกับอีกแผงหนึ่งหรือรวมกลับเข้า FilterMate แผงของ FilterMate สองแผงที่นำมาจัดเป็นแท็บด้วยกันจะกลายเป็นแผงเดียว การปิดแผงจะรวมส่วนต่าง ๆ ของแผงนั้นกลับเข้า FilterMate QGIS จะวางแต่ละแผงกลับที่เดิมที่คุณวางไว้</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

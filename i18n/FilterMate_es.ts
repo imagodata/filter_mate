@@ -11566,6 +11566,36 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <translation>Dónde van las secciones</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Encabezados</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Cómo lista el panel sus secciones</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Un carril de chips</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Lo predeterminado: una fila por pila, donde un clic en un chip abre su sección y un chip se arrastra a otro lugar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Encabezados, uno encima de otro</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>El nombre de cada sección en su propia línea.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Un clic en un encabezado abre su sección.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Un panel contiene una sección o varias, listadas en un carril como aquí. Arrastre el chip de una sección a otro panel para agruparlos, a FilterMate para volver a fusionarla, o fuera de todo panel para darle uno nuevo; dos paneles de FilterMate reunidos en pestañas pasan a ser uno solo. Un clic derecho en un chip, o en el título de un panel, ofrece los mismos movimientos. Cerrar un panel vuelve a fusionar sus secciones en FilterMate. QGIS devuelve cada panel a donde lo dejó.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panel contiene una sección o varias. Haga clic derecho en el encabezado de una sección, o en el título de un panel, para agruparla con otro panel o para volver a fusionarla en FilterMate; dos paneles de FilterMate reunidos en pestañas pasan a ser uno solo. Cerrar un panel vuelve a fusionar sus secciones en FilterMate. QGIS devuelve cada panel a donde lo dejó.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

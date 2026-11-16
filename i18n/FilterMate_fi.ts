@@ -11566,6 +11566,36 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <translation>Minne osiot sijoitetaan</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Otsikot</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Miten paneeli luettelee osionsa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Kapseleiden palkki</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Oletus: yksi rivi pinoa kohti, jossa kapselin napsautus avaa sen osion ja kapseli vedetään toiseen paikkaan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Otsikot päällekkäin</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Jokaisen osion nimi omalla rivillään.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Otsikon napsautus avaa sen osion.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Paneelissa on yksi osio tai useampi, lueteltuna palkissa kuten tässä. Vedä osion kapseli toiseen paneeliin ryhmitelläksesi ne, FilterMateen yhdistääksesi osion takaisin tai pois kaikista paneeleista antaaksesi sille uuden paneelin; kaksi FilterMaten paneelia, jotka on yhdistetty välilehdiksi, muuttuvat yhdeksi. Kapselin tai paneelin otsikon napsautus hiiren kakkospainikkeella tarjoaa samat siirrot. Paneelin sulkeminen yhdistää sen osiot takaisin FilterMateen. QGIS palauttaa jokaisen paneelin sinne, mihin sen jätit.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Paneelissa on yksi osio tai useampi. Napsauta osion otsikkoa tai paneelin otsikkoa hiiren kakkospainikkeella ryhmitelläksesi sen toisen paneelin kanssa tai yhdistääksesi sen takaisin FilterMateen; kaksi FilterMaten paneelia, jotka on yhdistetty välilehdiksi, muuttuvat yhdeksi. Paneelin sulkeminen yhdistää sen osiot takaisin FilterMateen. QGIS palauttaa jokaisen paneelin sinne, mihin sen jätit.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

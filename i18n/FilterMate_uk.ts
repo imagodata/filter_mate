@@ -11566,6 +11566,36 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <translation>Де розмістити розділи</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Заголовки</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Як панель перелічує свої розділи</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Смуга чипів</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Типово: один рядок на стос, де клацання по чипу відкриває його розділ, а чип перетягується на інше місце.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Заголовки один над одним</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Назва кожного розділу в окремому рядку.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Клацання по заголовку відкриває його розділ.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Панель містить один розділ або кілька, перелічених на смузі, як тут. Перетягніть чип розділу на іншу панель, щоб згрупувати їх, на FilterMate, щоб повернути його назад, або за межі всіх панелей, щоб дати йому нову; дві панелі FilterMate, об'єднані вкладками, стають однією. Клацання правою кнопкою по чипу або по заголовку панелі пропонує ті самі переміщення. Закриття панелі повертає її розділи назад у FilterMate. QGIS повертає кожну панель туди, де ви її залишили.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Панель містить один розділ або кілька. Клацніть правою кнопкою по заголовку розділу або по заголовку панелі, щоб згрупувати з іншою панеллю або повернути назад у FilterMate; дві панелі FilterMate, об'єднані вкладками, стають однією. Закриття панелі повертає її розділи назад у FilterMate. QGIS повертає кожну панель туди, де ви її залишили.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

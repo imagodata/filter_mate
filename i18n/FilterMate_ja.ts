@@ -11566,6 +11566,36 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>セクションの配置</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>ヘッダー</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>パネルがセクションを一覧にする方法</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>チップのレール</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>既定の状態：スタックごとに 1 行で、チップをクリックするとそのセクションが開き、チップを別の位置にドラッグできます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>ヘッダーを上下に並べる</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>各セクションの名前が専用の行に表示されます。</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>ヘッダーをクリックすると、そのセクションが開きます。</translation>
@@ -12226,6 +12256,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>パネルには 1 つまたは複数のセクションを置け、ここと同じようにレールに一覧表示されます。セクションのチップを別のパネルにドラッグするとグループ化され、FilterMate にドラッグすると戻して統合され、どのパネルの外にもドラッグすると新しいパネルになります。FilterMate の 2 つのパネルをタブとして組み合わせると 1 つになります。チップやパネルのタイトルを右クリックしても、同じ移動ができます。パネルを閉じると、そのセクションは FilterMate に戻って統合されます。QGIS は、各パネルを最後に置いた場所に戻します。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>パネルには 1 つまたは複数のセクションを置けます。セクションのヘッダー、またはパネルのタイトルを右クリックすると、別のパネルとグループ化したり、FilterMate に戻して統合したりできます。FilterMate の 2 つのパネルをタブとして組み合わせると 1 つになります。パネルを閉じると、そのセクションは FilterMate に戻って統合されます。QGIS は、各パネルを最後に置いた場所に戻します。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>

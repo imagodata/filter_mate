@@ -308,6 +308,14 @@ def s_open_plugin():
             config['APP']['DOCKWIDGET']['ACTION_BAR_POSITION']['value'] = os.environ['FM_ACTION_BAR']
             with open(path, 'w', encoding='utf-8') as stream:
                 json.dump(config, stream, indent=2)
+    if os.environ.get('FM_HEADERS'):  # the dock opens with the sections listed this way, as saved before
+        for name in ('config.default.json', 'config.json'):
+            path = os.path.join(plugins, PACKAGE, 'config', name)
+            with open(path, encoding='utf-8') as stream:
+                config = json.load(stream)
+            config['APP']['DOCKWIDGET']['SECTION_HEADERS']['value'] = os.environ['FM_HEADERS']
+            with open(path, 'w', encoding='utf-8') as stream:
+                json.dump(config, stream, indent=2)
     if os.environ.get('FM_DETACHED'):  # and with these sections in their own panel, as left the last time
         settings.setValue('FilterMate/panels/detached', os.environ['FM_DETACHED'])
     sys.path.insert(0, plugins)
@@ -3501,7 +3509,7 @@ def s_setup_layout():
     while _wizard_card() is not None and len(asked) < 8:
         card = _wizard_card()
         asked.append([chip.text() for chip in card._chips])
-        if asked[-1] == ['Layout', 'Buttons']:
+        if asked[-1] == ['Layout', 'Headers', 'Buttons']:
             QApplication.processEvents()
             agent_chat().panel.thread.ensureWidgetVisible(card)
             QApplication.processEvents()
@@ -3523,7 +3531,8 @@ def s_setup_layout_check():
     d = dock()
     panels, manager = d._fm_panels, d._action_bar_manager
     check('setup: the layout is a step of its own, the sections asked with the buttons',
-          WELCOME['started'] is True and ['Layout', 'Buttons'] in WELCOME['asked'] and len(WELCOME['asked']) == 5,
+          WELCOME['started'] is True and ['Layout', 'Headers', 'Buttons'] in WELCOME['asked']
+          and len(WELCOME['asked']) == 5,
           str(WELCOME['asked']))
     check('setup: the sections and the buttons on the card of the changes, nothing moved before Apply',
           len(WELCOME['rows']) == 2 and any('in panels of QGIS' in row for row in WELCOME['rows'])
@@ -4011,6 +4020,194 @@ AUDIT_STEPS = [s_section_setup, s_vector_source, s_audit_empty_bar, s_audit_empt
                s_audit_buttons_check, s_audit_fronts_check]
 
 
+# --- the headers stacked, a choice beside the rails (APP.DOCKWIDGET.SECTION_HEADERS, FM_ONLY=headers) -------------
+
+HEADERS = {}
+
+
+def top_headers():
+    """The sections of the upper stack whose header shows, from the top."""
+    sections = dock()._fm_sections
+    shown = [(header.y(), key) for key, header in sections._headers.items() if header.isVisible()]
+    return [key for _y, key in sorted(shown)]
+
+
+def toolbox_header(page):
+    toolbox = dock().toolBox_tabTools
+    text = toolbox.itemText(toolbox.indexOf(page))
+    return next((button for button in toolbox.findChildren(QAbstractButton)
+                 if button.objectName() == 'qt_toolbox_toolboxbutton' and button.text() == text), None)
+
+
+def toolbox_headers():
+    """The sections of the lower stack whose header shows, from the top."""
+    d = dock()
+    shown = [(toolbox_header(getattr(d, name)).y(), name.lower()) for name in ('FILTERING', 'EXPORTING', 'CONFIGURATION')
+             if toolbox_header(getattr(d, name)) is not None and toolbox_header(getattr(d, name)).isVisible()]
+    return [key for _y, key in sorted(shown)]
+
+
+def expected_top():
+    return ['agent', 'exploring'] if 'agent' in dock()._fm_sections._headers else ['exploring']
+
+
+def s_headers_stacked():
+    """APP.DOCKWIDGET.SECTION_HEADERS = stacked: the headers one above the other list the sections, no rail."""
+    leave_welcome()
+    sections = dock()._fm_sections
+    HEADERS['rails'] = (not sections.stacked and sections.top_rail.isVisible() and sections.bottom_rail.isVisible()
+                        and top_headers() == [] and toolbox_headers() == [])
+    HEADERS['value'] = config_value('APP.DOCKWIDGET.SECTION_HEADERS')
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEADERS': 'stacked'})
+    return waits(0.6)
+
+
+def s_headers_stacked_check():
+    d = dock()
+    sections, toolbox = d._fm_sections, d.toolBox_tabTools
+    check('headers: the rails are the default, with no header', HEADERS['rails'] and HEADERS['value'] == 'rail',
+          f"rails={HEADERS['rails']} value={HEADERS['value']!r}")
+    check('headers: stacked, a header per section and no rail', sections.stacked
+          and not sections.top_rail.isVisible() and not sections.bottom_rail.isVisible()
+          and top_headers() == expected_top() and toolbox_headers() == ['filtering', 'exporting', 'configuration'],
+          f"top={top_headers()} bottom={toolbox_headers()}")
+    check('headers: what was open stays open, its header checked', sections.is_open('exploring')
+          and sections._headers['exploring'].isChecked() and toolbox.currentWidget() is d.FILTERING
+          and d.comboBox_filtering_current_layer.isVisible())
+    layout = sections._top_layout
+    order = [layout.indexOf(sections._headers[key]) for key in expected_top()] + [layout.indexOf(d.frame_exploring)]
+    heights = {sections._headers[key].height() for key in expected_top()} | {
+        toolbox_header(page).height() for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION)}
+    check('headers: each header above its page, all of one height, within the dock', order == sorted(order)
+          and min(order) >= 0 and len(heights) == 1
+          and all(sections._headers[key].width() <= d.width() for key in expected_top()),
+          f"order={order} heights={heights}")
+    if 'agent' in sections._headers:
+        # 2026-11-17, review: the label that says where the requests go stayed in the rail, hidden with it.
+        label = sections._agent_trailer
+        label.setText('Ollama · qwen3 · MCP')
+        QApplication.processEvents()
+        check('headers: where the requests of AGENT go is said at the right of its header',
+              label.parentWidget() is sections._headers['agent'] and label.isVisible()
+              and label.geometry().right() <= sections._headers['agent'].width(), str(label.geometry()))
+    grab('headers_stacked')
+    grab_window('headers_stacked_window')
+    if 'agent' in sections._headers:
+        sections._headers['agent'].click()
+        QApplication.processEvents()
+        check('headers: a click on the header of AGENT opens it, EXPLORING and FILTERING fold',
+              sections.is_open('agent') and not sections.is_open('exploring') and sections._headers['agent'].isChecked()
+              and not sections._headers['exploring'].isChecked() and toolbox.currentWidget() is not d.FILTERING
+              and top_headers() == expected_top(), f"top={top_headers()}")
+        grab('headers_agent_open')
+        sections._headers['agent'].click()
+        QApplication.processEvents()
+        check('headers: a click on the open one leaves it open', sections.is_open('agent')
+              and sections._headers['agent'].isChecked())
+        sections._headers['exploring'].click()
+        QApplication.processEvents()
+        check('headers: a click on the header of EXPLORING brings it back', sections.is_open('exploring')
+              and not sections.is_open('agent') and sections._headers['exploring'].isChecked())
+    toolbox_header(d.EXPORTING).click()
+    QApplication.processEvents()
+    opened = toolbox.currentWidget() is d.EXPORTING
+    toolbox_header(d.EXPORTING).click()
+    QApplication.processEvents()
+    check('headers: a click on a header below opens its section, a second one folds the stack', opened
+          and toolbox.currentWidget() is sections._nothing and toolbox_headers() == ['filtering', 'exporting', 'configuration'],
+          f"opened={opened} current={toolbox.currentWidget().objectName()}")
+    stack = d.splitter_main.widget(1)
+    headers = sorted((toolbox_header(page) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION)), key=lambda b: b.y())
+    last = headers[-1].mapTo(stack, QPoint(0, headers[-1].height())).y()
+    gaps = {after.y() - (before.y() + before.height()) for before, after in zip(headers, headers[1:])}
+    check('headers: with nothing open below, the three headers are whole, evenly apart, and the stack is held to them',
+          last <= stack.height() and len(gaps) == 1 and stack.height() <= last + 24,
+          f"last={last} stack={stack.height()} gaps={gaps}")
+    grab('headers_nothing_open')
+    header = toolbox_header(d.FILTERING)
+    header.customContextMenuRequested.emit(QPoint(8, 8))
+    QApplication.processEvents()
+    menus = [menu for menu in d.findChildren(QMenu) if menu.isVisible()]
+    names = [action.objectName() for menu in menus for action in menu.actions() if not action.isSeparator()]
+    check('headers: a right click on a header opens the menu of its section',
+          names == ['action_section_detach', 'action_section_detach_all'], str(names))
+    for menu in menus:
+        menu.hide()
+    toolbox.setCurrentWidget(d.FILTERING)
+    QApplication.processEvents()
+    apply_settings({'APP.OPTIONS.FILTERING.enabled': False})
+    return waits(0.5)
+
+
+def s_headers_off_check():
+    d = dock()
+    sections, panels = d._fm_sections, d._fm_panels
+    check('headers: a section turned off loses its header', toolbox_headers() == ['exporting', 'configuration']
+          and d.frame_exploring.isAncestorOf(d.comboBox_filtering_current_layer), str(toolbox_headers()))
+    apply_settings({'APP.OPTIONS.FILTERING.enabled': True})
+    QApplication.processEvents()
+    check('headers: turned on again, its header is back and it opens as it was',
+          toolbox_headers() == ['filtering', 'exporting', 'configuration']
+          and d.toolBox_tabTools.currentWidget() is d.FILTERING, str(toolbox_headers()))
+    apart = panels.detach('exporting') and (panels.detach('agent') if 'agent' in sections._headers else True)
+    QApplication.processEvents()
+    check('headers: a section in its own panel loses its header in the dock', apart
+          and toolbox_headers() == ['filtering', 'configuration'] and top_headers() == ['exploring'],
+          f"top={top_headers()} bottom={toolbox_headers()}")
+    grab_window('headers_sections_apart')
+    panels.attach_all()
+    QApplication.processEvents()
+    layout = sections._top_layout
+    order = [layout.indexOf(widget) for key in expected_top()
+             for widget in (sections._headers[key], sections._pages[key])]
+    check('headers: merged back, each header is there again above its page, AGENT folded',
+          toolbox_headers() == ['filtering', 'exporting', 'configuration'] and top_headers() == expected_top()
+          and order == sorted(order) and min(order) >= 0 and sections.is_open('exploring'),
+          f"top={top_headers()} order={order}")
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEADERS': 'rail'})
+    return waits(0.6)
+
+
+def s_headers_rail_check():
+    d = dock()
+    sections = d._fm_sections
+    check('headers: back to the rails, no header left and the sections as they were', not sections.stacked
+          and sections.top_rail.isVisible() and sections.bottom_rail.isVisible() and top_headers() == []
+          and toolbox_headers() == [] and sections.is_open('exploring')
+          and sections.bottom_rail.shown_sections() == ['filtering', 'exporting', 'configuration']
+          and d.toolBox_tabTools.currentWidget() is d.FILTERING,
+          f"top={top_headers()} bottom={toolbox_headers()} rail={sections.bottom_rail.shown_sections()}")
+    if 'agent' in sections._headers:
+        label = sections._agent_trailer
+        check('headers: with the rails, where the requests go is said at the right of the top rail again',
+              label.parentWidget() is sections.top_rail and label.isVisible())
+        label.setText('')
+    open_section(None)
+    stack = d.splitter_main.widget(1)
+    check('headers: with the rails and nothing open below, the lower stack is its rail again',
+          not d.toolBox_tabTools.isVisible() and stack.height() <= sections.bottom_rail.height() + 24,
+          f"stack={stack.height()} rail={sections.bottom_rail.height()}")
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEADERS': HEADERS['value']})
+    leave_welcome()
+    return settled()
+
+
+def s_headers_startup_check():
+    """The dock opened with the headers stacked saved (FM_HEADERS=stacked): they are there without a click, the one
+    of AGENT too, which joins the dock after the others."""
+    d = dock()
+    sections = d._fm_sections
+    check('headers at startup: the dock opens with its headers stacked, AGENT above EXPLORING', sections.stacked
+          and not sections.top_rail.isVisible() and not sections.bottom_rail.isVisible()
+          and top_headers() == expected_top() and toolbox_headers() == ['filtering', 'exporting', 'configuration']
+          and sections.is_open('exploring'), f"top={top_headers()} bottom={toolbox_headers()}")
+    grab('headers_startup')
+    return None
+
+
+HEADER_STEPS = [s_section_setup, s_headers_stacked, s_headers_stacked_check, s_headers_off_check, s_headers_rail_check]
+
+
 # --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------
 
 
@@ -4152,7 +4349,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_source, s_partial_undo_on_source_check, s_partial_undo_on_target,
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
-         *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, s_finish]
+         *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
@@ -4167,7 +4364,12 @@ if os.environ.get('FM_STEPS'):  # steps by name, in this order: to find which on
              *[step for name in os.environ['FM_STEPS'].split(',') for step in
                (globals()[name] if isinstance(globals()[name], list) else [globals()[name]])], s_finish]
 if os.environ.get('FM_ONLY') == 'layout':  # everything about the sections, their panels and the welcome, in a row
-    STEPS = [s_setup, s_open_plugin, s_dock_ready, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, s_finish]
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS,
+             s_finish]
+if os.environ.get('FM_ONLY') == 'headers':  # the headers stacked instead of the rails, and back
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *HEADER_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'headers_startup':  # the same as the dock finds them when it opens (FM_HEADERS)
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, s_headers_startup_check, s_finish]
 if os.environ.get('FM_ONLY') == 'audit':  # the defects of the panels found on 16 November, each one alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *AUDIT_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'sync':  # what a section in its own panel still shares with the others

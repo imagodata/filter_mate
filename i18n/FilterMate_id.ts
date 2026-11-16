@@ -11566,6 +11566,36 @@ onnxruntime berasal dari PyPI dengan pip, model dari huggingface.co/{1}, dan set
         <translation>Posisi bagian</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Judul</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Cara panel mendaftar bagiannya</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Sebuah bilah chip</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Bawaan: satu baris per tumpukan, tempat klik pada chip membuka bagiannya dan chip diseret ke tempat lain.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Judul, satu di atas yang lain</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Nama setiap bagian pada barisnya sendiri.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
         <source>A click on a header opens its section.</source>
         <translation>Klik pada judul membuka bagiannya.</translation>
@@ -12226,6 +12256,11 @@ onnxruntime berasal dari PyPI dengan pip, model dari huggingface.co/{1}, dan set
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
         <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
         <translation>Sebuah panel memuat satu bagian atau beberapa, didaftar dalam sebuah bilah seperti di sini. Seret chip sebuah bagian ke panel lain untuk mengelompokkannya, ke FilterMate untuk menggabungkannya kembali, atau keluar dari semua panel untuk memberinya panel baru; dua panel FilterMate yang disatukan sebagai tab menjadi satu. Klik kanan pada sebuah chip, atau pada judul sebuah panel, menawarkan perpindahan yang sama. Menutup sebuah panel menggabungkan kembali bagian-bagiannya ke FilterMate. QGIS mengembalikan setiap panel ke tempat Anda meninggalkannya.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Sebuah panel memuat satu bagian atau beberapa. Klik kanan pada judul sebuah bagian, atau pada judul sebuah panel, untuk mengelompokkannya dengan panel lain atau untuk menggabungkannya kembali ke FilterMate; dua panel FilterMate yang disatukan sebagai tab menjadi satu. Menutup sebuah panel menggabungkan kembali bagian-bagiannya ke FilterMate. QGIS mengembalikan setiap panel ke tempat Anda meninggalkannya.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
