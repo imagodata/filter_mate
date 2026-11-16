@@ -86,7 +86,8 @@ def finished(monkeypatch):
     monkeypatch.setattr(module, "QCoreApplication",
                         types.SimpleNamespace(translate=lambda context, text: text), raising=False)
 
-    def run(canceled, result=True, exception=None, task_action="filter", pending=None, task_parameters=None):
+    def run(canceled, result=True, exception=None, task_action="filter", pending=None, task_parameters=None,
+            restore_history_fn=None):
         handler.handle_finished(
             result=result, task_action=task_action, message_category="FilterLayers",
             is_canceled_fn=lambda: canceled, warning_messages=[],
@@ -96,6 +97,7 @@ def finished(monkeypatch):
             source_layer=MagicMock(), task_parameters=task_parameters or {}, failed_layer_names=[], layers_count=1,
             task_description="Filtering data", restore_selection_fn=MagicMock(), task_bridge=None,
             cleanup_safe_intersect_fn=MagicMock(), cleanup_canceled_mv_fn=cleanup_canceled,
+            restore_history_fn=restore_history_fn,
         )
 
     return types.SimpleNamespace(run=run, apply=apply, iface=iface, handler=handler, cleanup_mv=cleanup_mv,
@@ -196,7 +198,7 @@ def test_a_target_removed_during_the_filter_is_left_out_with_a_warning(finished,
 def test_a_refused_filter_shows_no_success(finished):
     """2026-11-16: the server gone, every unfilter refused, yet "Filter task : Layer(s) filtered
     to precedent state" came next to "Filter not applied, previous filter kept"."""
-    finished.apply.side_effect = lambda requests, fn, failures=None: failures.append("Cables: lost") or 0
+    _refuse(finished)
     params = {"task": {}}
     finished.run(canceled=False, task_action="unfilter", task_parameters=params)
     assert params["_apply_failures"] == ["Cables: lost"]
@@ -210,3 +212,47 @@ def test_filters_applied_everywhere_still_say_success(finished):
     finished.run(canceled=False, task_action="unfilter", task_parameters=params)
     assert params["_apply_failures"] == []
     finished.iface.messageBar.return_value.pushMessage.assert_called_once()
+
+
+def _refuse(finished, layer_id="cables_id"):
+    def apply(requests, fn, failures=None, refused_layer_ids=None):
+        failures.append("Cables: lost")
+        refused_layer_ids.append(layer_id)
+        return 0
+    finished.apply.side_effect = apply
+
+
+def test_the_history_of_refused_layers_is_put_back(finished):
+    """2026-11-16: run() deleted the last history entry of the unfilter, the layer kept its filter."""
+    _refuse(finished)
+    restore = MagicMock()
+    params = {"task": {}}
+    finished.run(canceled=False, task_action="unfilter", task_parameters=params, restore_history_fn=restore)
+    restore.assert_called_once_with(["cables_id"])
+    assert params["_apply_applied"] == 0
+
+
+def test_no_history_put_back_when_everything_applied(finished):
+    restore = MagicMock()
+    finished.run(canceled=False, task_action="unfilter", restore_history_fn=restore)
+    restore.assert_not_called()
+
+
+def test_a_failing_restore_does_not_break_finished(finished):
+    _refuse(finished)
+    finished.run(canceled=False, task_action="unfilter", restore_history_fn=MagicMock(side_effect=OSError("locked")))
+    finished.iface.messageBar.return_value.pushWarning.assert_called_once()
+
+
+@pytest.mark.parametrize("action", ["unfilter", "reset"])
+def test_views_kept_when_a_filter_is_refused(finished, action):
+    """The refused layers keep their filter, which may read the session views."""
+    _refuse(finished)
+    finished.run(canceled=False, task_action=action)
+    finished.cleanup_mv.assert_not_called()
+
+
+@pytest.mark.parametrize("action", ["unfilter", "reset"])
+def test_views_dropped_when_every_filter_is_removed(finished, action):
+    finished.run(canceled=False, task_action=action)
+    finished.cleanup_mv.assert_called_once()
