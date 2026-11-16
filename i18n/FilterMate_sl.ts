@@ -78,6 +78,47 @@
         <translation>Branje možnosti agenta</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1005"/>
+        <source>The agent wants to turn these on:
+{}
+
+Do you agree?</source>
+        <translation>Agent želi vklopiti naslednje:
+{}
+
+Se strinjate?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1003"/>
+        <source>Another provider, {}: your requests and the data they need will be sent to {}.</source>
+        <translation>Drug ponudnik, {}: vaše zahteve in podatki, ki jih potrebujejo, bodo poslani na {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1000"/>
+        <source>The MCP server of the plugin: other applications on this computer can then drive FilterMate and QGIS with its tools.</source>
+        <translation>Strežnik MCP vtičnika: druge aplikacije v tem računalniku lahko potem upravljajo FilterMate in QGIS z njegovimi orodji.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="996"/>
+        <source>sends what the agent asks to {}</source>
+        <translation>pošlje to, kar agent zahteva, na {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="912"/>
+        <source>Applied when the request under way ends.</source>
+        <translation>Uporabi se, ko se trenutna zahteva konča.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="874"/>
+        <source>The conversation goes on with {}; it is not told what came before.</source>
+        <translation>Pogovor se nadaljuje z {}; ta ne ve, kaj je bilo prej.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="854"/>
+        <source>{} has no consent to receive your data at this address: give it again in the Provider tab of the agent settings.</source>
+        <translation>{} nima vašega soglasja za prejemanje vaših podatkov na tem naslovu: znova ga podajte v zavihku Ponudnik v nastavitvah agenta.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="852"/>
         <source>The key of {} is missing: enter it in the Provider tab of the agent settings.</source>
         <translation>Ključ za {} manjka: vnesite ga v zavihek Ponudnik v nastavitvah agenta.</translation>

@@ -380,7 +380,7 @@ class PermissionPolicy:
         always (tab Tools) above advisor. Never allowed for the conversation: each change is shown."""
         if rule == RULE_ASK or self.level == ADVISOR:
             return ASK
-        if rule == RULE_ALLOW:
+        if rule == RULE_ALLOW and spec.name != "turn_on_agent_options":  # widening what the agent reaches: asked
             return RUN
         if self.level == AUTONOMOUS and spec.name == "change_settings" and _display_only(arguments):
             return RUN

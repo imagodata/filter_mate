@@ -557,6 +557,7 @@ class AgentChatController(QObject):
         # application is making (its layers compared with the next project's, an Undo would remove them all).
         self._checkpoint.discard()
         self._turn_cards, self._auto_pin = [], None  # the map read for the pin was the closed project's
+        self._pending_options = []  # asked about the project that went away
         self._mcp.forget_change()
         self._replay_stop = True  # a recipe stops before its next step
         if self._replaying:
@@ -781,7 +782,9 @@ class AgentChatController(QObject):
             target = dialog.chosen_target()
             try:
                 if key:
-                    authcfg, key_target = store_key(key, authcfg), target
+                    # 2026-11-16: another server gets a key place of its own, so that a provider remembered keeps
+                    # its key (one place overwritten sent a key to another provider).
+                    authcfg, key_target = store_key(key, self._key_place(values, target)), target
                 elif dialog.forget_key:
                     delete_key(authcfg)
                     authcfg, key_target = "", ""
@@ -843,6 +846,16 @@ class AgentChatController(QObject):
                            authcfg=provider.authcfg, consent_target=provider.consent_target,
                            key_target=provider.key_target, consent=True)
         wanted = replace(values, **changes)
+        if provider is not None:
+            from ...core.agent.agent_options import switch_problem
+            problem = switch_problem(provider, read_providers(), target_of(provider.preset, provider.base_url),
+                                     wanted.needs_key)
+            if problem == "consent":
+                return _tr("{} has no consent to receive your data at this address: give it again in the Provider tab "
+                           "of the agent settings.").format(provider.label)
+            if problem:
+                return _tr("The key of {} is missing: enter it in the Provider tab of the agent settings.").format(
+                    provider.label)
         if provider is not None and wanted.needs_key:
             try:
                 key = read_key(provider.authcfg) if provider.authcfg else ""
@@ -853,11 +866,19 @@ class AgentChatController(QObject):
                     provider.label)
         save_settings(wanted)
         if provider is not None:
-            self._reset_view()  # another provider cannot continue this conversation
+            # Another conversation with another provider, under the same thread (2026-11-16, review: clearing it
+            # wiped the answer that said so): it is not told what came before, and what was allowed is asked again.
+            self._restart_engine()
+            self._policy.forget()
+            self._recap_from = len(self._transcript)
+            self._say(_tr("The conversation goes on with {}; it is not told what came before.").format(provider.label))
         elif wanted.enabled_sources != values.enabled_sources:
             self._restart_engine()  # other tools: another conversation with the model, under the same thread
         if wanted.mcp_enabled != values.mcp_enabled:
             self._sync_mcp()
+            mcp = getattr(self, "_mcp", None)
+            if wanted.mcp_enabled and mcp is not None and getattr(mcp, "error", ""):
+                save_settings(replace(wanted, mcp_enabled=False))  # it did not start: the box says so
         self._refresh_ready()
         return ""
 
@@ -878,13 +899,17 @@ class AgentChatController(QObject):
                            for source in sources if source_group(source) == key])
                   for key, title in source_group_titles()]
         providers, current = self._menu_providers(values)
-        self.panel.fill_options(groups, [(entry.label, entry.same(current)) for entry in providers], values.mcp_enabled)
+        mcp = getattr(self, "_mcp", None)
+        listening = bool(getattr(mcp, "listening", values.mcp_enabled)) if mcp is not None else values.mcp_enabled
+        self.panel.fill_options(groups, [(entry.label, entry.same(current)) for entry in providers], listening)
 
     def _click_option(self, change) -> None:
-        """A click in the menu: applied at once, or when the request under way ends (its tools stay meanwhile)."""
-        engine = getattr(self, "_engine", None)
-        if engine is not None and engine.busy:
+        """A click in the menu: applied at once, or when the request or the recipe under way ends (its tools stay
+        meanwhile); the MCP server of the plugin has nothing to do with them, and follows at once."""
+        mcp_only = change.mcp_server is not None and not (change.sources_on or change.sources_off or change.provider)
+        if not mcp_only and self.chat_busy():
             self._pending_options.append(change)
+            self.panel.set_status(_tr("Applied when the request under way ends."))
             return
         reason = self.apply_agent_options(change)
         if reason:
@@ -953,6 +978,32 @@ class AgentChatController(QObject):
             self._pending_options.append(change)
         return dict(answer, applies="in a new conversation" if change.provider is not None else "after this request")
 
+    def _turn_on_question(self, change) -> str:
+        """What turning on means, for the user to decide: each source with its group, where a connector sends what
+        the agent asks, what the MCP server lets other applications do, where another provider receives the data."""
+        from urllib.parse import urlsplit
+        from ...core.agent.sources import source_group
+        values = load_settings()
+        sources = {source.id: source for source in self._options_sources(values)}
+        titles = dict(source_group_titles())
+        lines = []
+        for source_id in change.sources_on:
+            source = sources.get(source_id)
+            if source is None:
+                continue
+            line = f"• {one_line(source.title, 100)} ({titles.get(source_group(source), '')})"
+            if source.is_connector:
+                line += " — " + _tr("sends what the agent asks to {}").format(
+                    one_line(urlsplit(source.address).netloc or source.address, 100))
+            lines.append(line)
+        if change.mcp_server:
+            lines.append("• " + _tr("The MCP server of the plugin: other applications on this computer can then drive "
+                                    "FilterMate and QGIS with its tools."))
+        if change.provider is not None:
+            lines.append("• " + _tr("Another provider, {}: your requests and the data they need will be sent to {}.")
+                         .format(change.provider.label, target_of(change.provider.preset, change.provider.base_url)))
+        return _tr("The agent wants to turn these on:\n{}\n\nDo you agree?").format("\n".join(lines))
+
     def _apply_pending_options(self) -> None:
         """The changes the agent made during the request that ended, over the settings as they are now."""
         pending, self._pending_options = self._pending_options, []
@@ -962,11 +1013,21 @@ class AgentChatController(QObject):
                 self._say(reason, error=True, offer_settings=True)
 
     @staticmethod
+    def _key_place(values: AgentSettings, target: str) -> str:
+        """Where a key typed for ``target`` is stored: the place of the key of the provider in use when it is for the
+        same server, else a new one ("")."""
+        return values.authcfg if values.authcfg and values.key_target == target else ""
+
+    @staticmethod
     def _remember_provider(values: AgentSettings) -> None:
-        """A provider the user agreed to send data to joins the list the menu and the agent switch between."""
+        """A provider the user agreed to send data to joins the list the menu and the agent switch between; one whose
+        consent was withdrawn leaves it."""
+        from ...core.agent.agent_options import forget, remember
+        entry = current_provider(values)
         if values.consent and values.model:
-            from ...core.agent.agent_options import remember
-            write_providers(remember(read_providers(), current_provider(values)))
+            write_providers(remember(read_providers(), entry))
+        else:
+            write_providers(forget(read_providers(), entry))
 
     def _sync_mcp(self) -> None:
         self._mcp.sync()
@@ -1643,6 +1704,8 @@ class AgentChatController(QObject):
         finally:
             abandoned, self._abandoned = self._abandoned, False
             self._replaying, self._replay_stop = False, False
+            if self._pending_options:  # a click in the menu during the recipe
+                QTimer.singleShot(0, self._apply_pending_options)
             try:
                 self._checkpoint.commit()
             except Exception:
@@ -2630,6 +2693,20 @@ class AgentChatController(QObject):
         """A call of the chat the level of autonomy does not let run alone; the user may allow the tool for the
         rest of the conversation."""
         title = _tr("FilterMate agent")
+        if call.name == TURN_ON_OPTIONS:
+            # What it would turn on, in words: nothing already on is asked; a call the tool refuses runs to say why.
+            from ...core.agent.agent_options import plan_on
+            values = load_settings()
+            providers, current = self._menu_providers(values)
+            try:
+                change, _answer = plan_on(self._options_sources(values), values.enabled_sources,
+                                          call.arguments.get("sources") or [], call.arguments.get("mcp_server"),
+                                          str(call.arguments.get("provider") or ""), providers, current)
+            except ValueError:
+                return True
+            if not (change.sources_on or change.mcp_server or change.provider):
+                return True
+            return bool(self._ask_user(title, self._turn_on_question(change)))
         gate = connector_gate(call)
         if gate is not None:
             loader = self._connectors
