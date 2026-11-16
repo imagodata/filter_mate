@@ -10,7 +10,8 @@ from typing import Sequence
 
 MAX_SUMMARY = 90
 MAX_INDEX = 6000
-INDEX_TITLE = "\n\nTools you can add with use_tools (one call with every tool the request needs):"
+INDEX_TITLE = ("\n\nTools you can add with use_tools. Before saying a thing cannot be done, look here; add in one call "
+               "every tool the request needs:")
 
 SUMMARIES = {
     # reading the project

@@ -212,7 +212,8 @@ CHAT_ONLY = (
                      "when the user asks to keep, save or reuse what was done (a recipe, a routine, a chain to run "
                      "again). It keeps the changes made so far in this request, or, when this request changed nothing "
                      "yet, those of the last request that did; reads, notes, widgets, code and connectors are not "
-                     "kept. The same name replaces the recipe. Returns recipe (its name and steps) and recipes."),
+                     "kept. The same name replaces the recipe; never run its steps yourself. Returns recipe (its name "
+                     "and steps) and recipes."),
         input_schema={"type": "object", "properties": {
             "name": {"type": "string", "minLength": 1, "maxLength": 60,
                      "description": "Short name in the words of the user"}},
