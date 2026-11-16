@@ -21,6 +21,7 @@ from ..messages import (
     ProviderError, StreamEvent, StreamFailure, TextDelta, TextPart, ToolCallPart, ToolResultPart, TurnComplete, Usage,
 )
 from ..tool_catalog import ToolSpec
+from ..tool_schema import for_model
 from .base import HttpRequest, ProviderConfig, check_base_url, encode_json
 
 # Context sizes asked of Ollama, the smallest that holds the request and an answer: 16k for the filtering tools of a
@@ -33,7 +34,6 @@ _STOP_REASONS = {"stop": STOP_END, "length": STOP_MAX_TOKENS}
 # What only checks an argument: the plugin checks every call against the whole schema of the catalog
 # (core/agent/tool_executor.py), so a local model is not sent these. 2026-11-15: 6,600 characters of 100,000 with
 # every tool, the room the next tools needed under the 32k step.
-_CHECKS_ONLY = frozenset({"maxLength", "minLength", "maxItems", "minItems", "additionalProperties"})
 _MAX_LINE = 4_000_000  # a line longer than this is not a chunk of a chat answer
 
 
@@ -46,27 +46,7 @@ def context_for(body_chars: int) -> int:
     return CONTEXT_STEPS[-1]
 
 
-def wire_schema(node: Any, names: bool = False) -> Any:
-    """The schema of a tool as a local model reads it: without what only checks an argument, and an optional value
-    (``anyOf`` a type or null) written as its type. A null still passes the check of the plugin.
-
-    ``names``: ``node`` maps the names of properties to their schemas: a property is kept whatever its name (a
-    connector may name one maxItems).
-    """
-    if isinstance(node, list):
-        return [wire_schema(item) for item in node]
-    if not isinstance(node, dict):
-        return node
-    if names:
-        return {key: wire_schema(value) for key, value in node.items()}
-    node = {key: wire_schema(value, names=key in ("properties", "patternProperties", "$defs", "definitions"))
-            for key, value in node.items() if key not in _CHECKS_ONLY}
-    options = node.get("anyOf")
-    if isinstance(options, list) and len(options) == 2 and {"type": "null"} in options:
-        other = next((option for option in options if option != {"type": "null"}), None)
-        if isinstance(other, dict):
-            return {**other, **{key: value for key, value in node.items() if key != "anyOf"}}
-    return node
+wire_schema = for_model  # the name tests and docs used before lot 2 of the token diet
 
 
 def native_base(url: str) -> str:

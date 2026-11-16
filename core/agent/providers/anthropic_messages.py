@@ -15,6 +15,7 @@ from ..messages import (
     ToolResultPart, TurnComplete, Usage,
 )
 from ..tool_catalog import ToolSpec
+from ..tool_schema import for_model
 from .base import HttpRequest, ProviderConfig, SseDecoder, check_base_url, encode_json, parse_tool_arguments
 
 PROVIDER = "anthropic"
@@ -83,7 +84,7 @@ class AnthropicProvider:
             # Caches everything up to the last block, and follows the conversation as it grows.
             "cache_control": {"type": "ephemeral"},
             "system": [{"type": "text", "text": system}],
-            **({"tools": [{"name": tool.name, "description": tool.description, "input_schema": tool.input_schema}
+            **({"tools": [{"name": tool.name, "description": tool.description, "input_schema": for_model(tool.input_schema)}
                           for tool in tools]} if tools else {}),  # an empty list is refused by some servers
             "messages": _wire_messages(messages),
         }

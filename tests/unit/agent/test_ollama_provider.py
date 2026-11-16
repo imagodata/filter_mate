@@ -100,8 +100,8 @@ class TestRequest:
         assert wire_schema(schema) == {"type": "object", "required": ["layer"], "properties": {
             "layer": {"type": "string", "description": "Layer id or name"},
             "names": {"type": "array", "items": {"type": "string"}},
-            "opacity": {"type": "number", "minimum": 0, "maximum": 1, "default": None, "description": "0 to 1"},
-            "mode": {"enum": ["AND", "OR"], "type": "string", "default": None},
+            "opacity": {"type": "number", "minimum": 0, "maximum": 1, "description": "0 to 1"},  # no empty default
+            "mode": {"enum": ["AND", "OR"], "type": "string"},
             "either": {"anyOf": [{"type": "string"}, {"type": "integer"}]}}}
         assert schema["properties"]["layer"]["maxLength"] == 1000  # the catalog keeps them: the plugin checks with it
         # What a model sends is still checked against the whole schema: a null passes, a name too long does not.
