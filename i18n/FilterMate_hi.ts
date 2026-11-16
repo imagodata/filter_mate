@@ -11293,6 +11293,31 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>लागू किया गया।</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>कुछ नहीं बदला: सेटिंग लागू नहीं की जा सकीं।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>इनमें से कुछ सेटिंग तब से बदल चुकी हैं: उन्हें जैसा है वैसा ही छोड़ दिया गया है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>सेटिंग पहले जैसी कर दी गईं।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>मेरी सेटिंग पहले जैसी करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>ये हर प्रोजेक्ट के लिए बने रहते हैं; नीचे दिया गया लिंक इन्हें पहले जैसा कर देता है।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="223"/>
         <source>Not applied: nothing changed.</source>
         <translation>लागू नहीं किया गया: कुछ नहीं बदला।</translation>

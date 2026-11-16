@@ -11293,6 +11293,31 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <translation>นำไปใช้แล้ว</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>ไม่มีอะไรเปลี่ยนแปลง: ไม่สามารถนำการตั้งค่าไปใช้ได้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>การตั้งค่าบางรายการเหล่านี้เปลี่ยนไปแล้ว: จะปล่อยไว้ตามเดิม</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>คืนค่าการตั้งค่าให้เหมือนเดิมแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>คืนค่าการตั้งค่าของฉันให้เหมือนเดิม</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>การตั้งค่าเหล่านี้ใช้กับทุกโปรเจกต์ และลิงก์ที่ตามมาจะคืนค่าให้เป็นเหมือนเดิม</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="223"/>
         <source>Not applied: nothing changed.</source>
         <translation>ไม่ได้นำไปใช้: ไม่มีอะไรเปลี่ยนแปลง</translation>

@@ -11275,6 +11275,31 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <translation>Použito.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Nic se nezměnilo: nastavení se nepodařilo použít.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>Některá z těchto nastavení se mezitím změnila: zůstávají, jak jsou.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Nastavení bylo vráceno, jak bylo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Vrátit mé nastavení, jak bylo</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Platí pro všechny projekty; odkaz níže je vrátí tak, jak byly.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="223"/>
         <source>Not applied: nothing changed.</source>
         <translation>Nepoužito: nic se nezměnilo.</translation>

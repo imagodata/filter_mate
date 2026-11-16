@@ -328,6 +328,7 @@ class ConfigModelManager:
                 self._write_config(ENV_VARS)
                 self._realign_layer_kinds(kinds_before)
                 self._realign_target_options(targets_before)
+                self._realign_sections()
             except Exception:
                 logger.exception("Configuration not put back after a failed change")
             raise RuntimeError(f"the settings could not be applied ({exc})") from exc
@@ -593,6 +594,12 @@ class ConfigModelManager:
             logger.debug(f"Target options unreadable: {e}")
             return None
 
+    def _realign_sections(self):
+        """FILTERING / EXPORTING shown as the configuration put back says (APP.OPTIONS.<NAME>.enabled)."""
+        apply_options = getattr(self.dockwidget, 'apply_section_options', None)
+        if callable(apply_options):
+            apply_options()
+
     def _realign_target_options(self, before):
         """The configuration read from disk changed which rasters / point clouds a vector source
         lists as targets: fill the FILTERING targets list again (PropertyController)."""
@@ -683,6 +690,7 @@ class ConfigModelManager:
                 logger.warning(f"Could not reload config from disk: {e}")
             self._realign_layer_kinds(kinds_before)
             self._realign_target_options(targets_before)
+            self._realign_sections()
 
             from ...ui.widgets.json_view.model import JsonModel
             dw.config_model = JsonModel(

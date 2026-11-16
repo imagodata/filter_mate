@@ -11293,6 +11293,31 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>Đã áp dụng.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Không có gì thay đổi: không thể áp dụng các cài đặt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>Một số cài đặt này đã thay đổi kể từ đó: chúng được giữ nguyên.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Đã khôi phục các cài đặt như trước.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Khôi phục cài đặt của tôi như trước</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Chúng được giữ cho mọi dự án; liên kết bên dưới sẽ khôi phục chúng như trước.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="223"/>
         <source>Not applied: nothing changed.</source>
         <translation>Chưa áp dụng: không có gì thay đổi.</translation>

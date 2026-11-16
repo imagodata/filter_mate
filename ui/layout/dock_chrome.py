@@ -30,8 +30,8 @@ AGENT_PAGE = "AGENT"
 # The sections the user may turn off (APP.OPTIONS.<NAME>.enabled), and the buttons of the action bar acting in them.
 SECTION_PAGES = {"filtering": "FILTERING", "exporting": "EXPORTING"}
 SECTION_ACTIONS = {
-    "filtering": ("pushButton_action_filter", "pushButton_action_undo_filter", "pushButton_action_redo_filter",
-                  "pushButton_action_unfilter"),
+    # Undo and Redo stay: they walk the steps of the agent too, and open the history of the project.
+    "filtering": ("pushButton_action_filter", "pushButton_action_unfilter"),
     "exporting": ("pushButton_action_export", "pushButton_action_qfieldcloud"),
 }
 # The source layer chooser of FILTERING, which EXPLORING follows: at the top of EXPLORING without FILTERING.
@@ -296,6 +296,7 @@ class DockSections(QObject):
         self._watched = set()
         self._hidden_actions = {}
         self._reopen = set()
+        self._shown = {}
         self._source_row, self._source_origins = None, []
         self._bottom_limits = None
         self._current_before_press = -1
@@ -390,8 +391,8 @@ class DockSections(QObject):
 
     def set_section_shown(self, key: str, shown: bool) -> bool:
         """Show or hide FILTERING or EXPORTING: its header, and the buttons of the action bar that act in it only.
-        Without FILTERING the source layer chooser goes to the top of EXPLORING, which still follows it. True when
-        the section was there."""
+        Without FILTERING the source layer chooser goes to the top of EXPLORING, which still follows it. Hiding again
+        hides a button made since (QFieldCloud comes after the dock). True when the section was there."""
         page = getattr(self._dock, SECTION_PAGES.get(key, ""), None)
         index = self._toolbox.indexOf(page) if page is not None else -1
         if index < 0:
@@ -403,7 +404,9 @@ class DockSections(QObject):
             if button.objectName() == "qt_toolbox_toolboxbutton" and button.text() == self._toolbox.itemText(index):
                 button.setVisible(shown)
         self._toolbox.setItemEnabled(index, shown)
+        self._shown[key] = shown
         hidden = self._hidden_actions.setdefault(key, {})
+        bars = []
         for name in SECTION_ACTIONS.get(key, ()):
             widget = getattr(self._dock, name, None)
             if widget is None:
@@ -414,19 +417,24 @@ class DockSections(QObject):
                 widget.setVisible(False)
             elif name in hidden:
                 widget.setVisible(hidden.pop(name))
+            bar = widget.parentWidget().layout() if widget.parentWidget() is not None else None
+            if bar is not None and bar not in bars:
+                bars.append(bar)
+        for bar in bars:
+            _even_spacing(bar)
         if key == "filtering":
             self._move_source_layer(to_exploring=not shown)
         if shown and key in self._reopen:
             self._reopen.discard(key)
-            if self._toolbox.currentWidget() is self._nothing:
+            # Not over AGENT: opening FILTERING opens EXPLORING, which would fold AGENT under its user.
+            if self._toolbox.currentWidget() is self._nothing and not self.is_open("agent"):
                 self._toolbox.setCurrentWidget(page)
         self._fit()
         return True
 
     def section_shown(self, key: str) -> bool:
-        page = getattr(self._dock, SECTION_PAGES.get(key, ""), None)
-        index = self._toolbox.indexOf(page) if page is not None else -1
-        return index >= 0 and self._toolbox.isItemEnabled(index)
+        """As last set here (a disabled parent would make ``QToolBox.isItemEnabled`` say hidden)."""
+        return self._shown.get(key, True)
 
     def _move_source_layer(self, to_exploring: bool) -> None:
         """The same widgets, moved: everything wired to them keeps working, nothing to keep in step."""
@@ -434,35 +442,36 @@ class DockSections(QObject):
         if any(widget is None for widget in widgets):
             return
         if to_exploring:
-            if self._source_row is not None:
+            holder = self._dock.frame_exploring.layout()
+            if self._source_row is not None or holder is None:
                 return
             origins = []
             for widget in widgets:
                 layout = _layout_holding(widget.parentWidget(), widget) if widget.parentWidget() else None
                 if layout is None:
                     return  # not where the .ui puts it: left alone
-                origins.append((widget, layout, layout.indexOf(widget)))
+                at = layout.indexOf(widget)
+                stretch = layout.stretch(at) if hasattr(layout, "stretch") else 0
+                origins.append((widget, layout, at, stretch, layout.itemAt(at).alignment(), widget.isHidden()))
             row = QWidget(self._dock.frame_exploring)
             row.setObjectName("widget_exploring_source_layer")
             line = QHBoxLayout(row)
             line.setContentsMargins(0, 0, 0, 0)
             line.setSpacing(4)
-            for widget, layout, _index in origins:
+            for widget, layout, *_rest in origins:
                 layout.removeWidget(widget)
                 line.addWidget(widget, 1 if isinstance(widget, QComboBox) else 0)
-                widget.show()
-            holder = self._dock.frame_exploring.layout()
-            if holder is not None:
-                holder.insertWidget(0, row)
+                widget.setVisible(not _rest[-1])
+            holder.insertWidget(0, row)
             row.show()
             self._source_row, self._source_origins = row, origins
             return
         if self._source_row is None:
             return
-        for widget, layout, index in self._source_origins:  # back where they were, in the same order
+        for widget, layout, at, stretch, alignment, was_hidden in self._source_origins:  # back, as they were
             self._source_row.layout().removeWidget(widget)
-            layout.insertWidget(min(index, layout.count()), widget)
-            widget.show()
+            layout.insertWidget(min(at, layout.count()), widget, stretch, alignment)
+            widget.setVisible(not was_hidden)
         self._source_row.hide()
         self._source_row.deleteLater()
         self._source_row, self._source_origins = None, []
@@ -574,6 +583,14 @@ def _layout_holding(widget: QWidget, child: QWidget):
     return None
 
 
+def _even_spacing(layout) -> None:
+    try:
+        from .action_bar_manager import even_action_spacing
+        even_action_spacing(layout)
+    except Exception:
+        logger.debug("Action bar not spaced again", exc_info=True)
+
+
 def section_enabled(config_data: Any, key: str) -> bool:
     """``APP.OPTIONS.<FILTERING|EXPORTING>.enabled``; on when absent, as in the default configuration."""
     try:
@@ -581,7 +598,9 @@ def section_enabled(config_data: Any, key: str) -> bool:
     except (KeyError, TypeError):
         return True
     value = node.get("value") if isinstance(node, dict) else node
-    return value is not False
+    if isinstance(value, str):
+        return value.strip().lower() not in ("false", "0", "no", "off")
+    return value is not False and value != 0
 
 
 def apply_section_options(dock: Any) -> list:
@@ -595,7 +614,9 @@ def apply_section_options(dock: Any) -> list:
     for key in SECTION_PAGES:
         wanted = section_enabled(config_data, key)
         try:
-            if sections.section_shown(key) != wanted and sections.set_section_shown(key, wanted):
+            before = sections.section_shown(key)
+            # Hidden again even when it was: a button of the section made since is hidden with it.
+            if (before != wanted or not wanted) and sections.set_section_shown(key, wanted) and before != wanted:
                 changed.append(key)
         except RuntimeError:  # the dock went away
             return changed

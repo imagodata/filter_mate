@@ -11293,6 +11293,31 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>Приложено.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Нищо не е променено: настройките не можаха да бъдат приложени.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>Някои от тези настройки са променени междувременно: оставят се такива, каквито са.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Настройките са върнати, както бяха.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Върни моите настройки, както бяха</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Остават за всички проекти; връзката по-долу ги връща такива, каквито са били.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="223"/>
         <source>Not applied: nothing changed.</source>
         <translation>Не е приложено: нищо не е променено.</translation>

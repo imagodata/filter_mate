@@ -267,7 +267,7 @@ The FILTERING section of the panel: filter layers by the features selected in EX
 
 | Setting | Default | Allowed | Description |
 |---|---|---|---|
-| `enabled` | true | true, false | Show the FILTERING section and its buttons (Filter, Undo, Redo, Unfilter). Off: the source layer chooser goes to the top of EXPLORING |
+| `enabled` | true | true, false | Show the FILTERING section and its Filter and Unfilter buttons (Undo and Redo stay, for the agent and the history). Off: the source layer chooser goes to the top of EXPLORING |
 
 ## Settings > Performance > EXPORTING
 

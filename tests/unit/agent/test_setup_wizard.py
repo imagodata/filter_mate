@@ -35,8 +35,8 @@ def test_the_size_values_fit_the_bounds(settings):
     rows = plan(settings, [{"path": path, "value": value} for size in wizard.SIZE_VALUES.values()
                            for path, value in size.items()], by_user=True)
     assert rows
-    plan(settings, [{"path": path, "value": value} for web in wizard.WEB_VALUES.values()
-                    for path, value in web.items()], by_user=True)
+    plan(settings, [{"path": path, "value": value} for kind in (wizard.WEB_VALUES, wizard.POSTGRES_VALUES)
+                    for values in kind.values() for path, value in values.items()], by_user=True)
 
 
 def test_answering_as_ticked_changes_nothing(values):
@@ -85,8 +85,13 @@ def test_large_layers_with_web_services(values):
     answers.record(wizard.FEATURES, {"sections": ["filtering", "exporting", "agent"],
                                      "data": ["rasters", "point_clouds", "web"], "size": ["large"]})
     asked = {change["path"]: change["value"] for change in wizard.changes(values, answers)}
-    assert asked[wizard.PG_TIMEOUT] == 180.0 and asked[wizard.WFS_TIMEOUT] == 120
+    assert asked[wizard.WFS_TIMEOUT] == 120
+    assert wizard.PG_TIMEOUT not in asked  # PostgreSQL not ticked: its timeout is left as it is
     assert wizard.FILTERING_ON not in asked  # already on
+    answers.record(wizard.FEATURES, {"sections": ["filtering", "exporting", "agent"],
+                                     "data": ["postgres"], "size": ["large"]})
+    asked = {change["path"]: change["value"] for change in wizard.changes(values, answers)}
+    assert asked[wizard.PG_TIMEOUT] == 180.0 and wizard.WFS_TIMEOUT not in asked
 
 
 def test_a_question_not_asked_changes_nothing(values):

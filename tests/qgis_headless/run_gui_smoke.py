@@ -756,15 +756,15 @@ def s_setup_wizard_check():
           and d.pushButton_action_unfilter.isHidden() and d.frame_exploring.isAncestorOf(combo)
           and d.frame_exploring.isAncestorOf(auto) and not combo.isHidden() and not d.FILTERING.isAncestorOf(combo),
           f"shown={d._fm_sections.section_shown('filtering')} combo parent={combo.parentWidget().objectName()}")
-    agent_chat()._on_undo()  # the setup is a step of the history: Undo puts FILTERING back
+    STATE['wizard_reverted'] = agent_chat()._wizard.revert()  # the link after Apply puts FILTERING back
     return waits(0.5)
 
 
 def s_setup_wizard_back_check():
     d = dock()
     combo, auto = d.comboBox_filtering_current_layer, d.pushButton_checkable_filtering_auto_current_layer
-    check('Undo of the setup: FILTERING, its header, buttons and the source layer chooser back in place',
-          d._fm_sections.section_shown('filtering') and not d.pushButton_action_filter.isHidden()
+    check('setup put back: FILTERING, its header, buttons and the source layer chooser back in place',
+          STATE['wizard_reverted'] is True and d._fm_sections.section_shown('filtering') and not d.pushButton_action_filter.isHidden()
           and d.FILTERING.isAncestorOf(combo) and d.FILTERING.isAncestorOf(auto)
           and d.findChild(QWidget, 'widget_exploring_source_layer') is None,
           f"combo parent={combo.parentWidget().objectName()} auto parent={auto.parentWidget().objectName()}")

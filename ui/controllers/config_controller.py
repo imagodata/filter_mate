@@ -854,6 +854,7 @@ class ConfigController(BaseController):
                 self.dockwidget.config_view.setModel(self.dockwidget.config_model)
                 self.dockwidget.config_view.model = self.dockwidget.config_model
 
+            self._apply_sections_change(None, [])  # FILTERING / EXPORTING as the configuration put back says
             return True
 
         except Exception as e:

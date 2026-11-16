@@ -64,22 +64,24 @@ PROGRESSIVE = OPTIONS + "PROGRESSIVE_FILTERING.enabled"
 STREAMING = OPTIONS + "STREAMING_EXPORT.enabled"
 WFS_TIMEOUT = OPTIONS + "SERVER_FILTER.wfs_timeout_seconds"
 REMOTE_TIMEOUT = OPTIONS + "REMOTE_MATERIALIZATION.timeout_seconds"
-_MEDIUM = {DEBOUNCE: 450, PG_TIMEOUT: 60.0, LOCAL_TIMEOUT: 30.0, SPATIALITE_TIMEOUT: 120, LARGE_WARNING: 50000,
+_MEDIUM = {DEBOUNCE: 450, LOCAL_TIMEOUT: 30.0, SPATIALITE_TIMEOUT: 120, LARGE_WARNING: 50000,
            PROGRESSIVE: True, STREAMING: True}
 SIZE_VALUES: Dict[str, Dict[str, Any]] = {
     "small": {**_MEDIUM, DEBOUNCE: 300},
     "medium": dict(_MEDIUM),
     # Large layers: longer waits before a query gives up, no warning at every filter, the typing waited for.
-    "large": {**_MEDIUM, DEBOUNCE: 700, PG_TIMEOUT: 180.0, LOCAL_TIMEOUT: 120.0, SPATIALITE_TIMEOUT: 300,
-              LARGE_WARNING: 500000},
+    "large": {**_MEDIUM, DEBOUNCE: 700, LOCAL_TIMEOUT: 120.0, SPATIALITE_TIMEOUT: 300, LARGE_WARNING: 500000},
 }
-# Web services (WFS) with large layers: the server is given longer too. Defaults otherwise.
+# PostgreSQL and web services (WFS) with large layers: the server is given longer too. Defaults otherwise. Set only
+# when that kind of data is ticked.
+POSTGRES_VALUES = {"large": {PG_TIMEOUT: 180.0}, "other": {PG_TIMEOUT: 60.0}}
 WEB_VALUES = {"large": {WFS_TIMEOUT: 120, REMOTE_TIMEOUT: 180}, "other": {WFS_TIMEOUT: 60, REMOTE_TIMEOUT: 90}}
 
 # Every setting the setup may change: the values it reads first.
 PATHS = tuple(sorted({*SECTION_SWITCHES.values(), *DATA_SWITCHES.values(), *AFTER_FILTER_SWITCHES.values(),
                       *TARGET_SWITCHES.values(), *GROUP_SWITCHES.values(), THEME, UI_PROFILE, LANGUAGE, ACTION_BAR,
-                      RASTER_FORMAT, POINT_CLOUD_FORMAT, *_MEDIUM, *WEB_VALUES["large"]}))
+                      RASTER_FORMAT, POINT_CLOUD_FORMAT, *_MEDIUM, *WEB_VALUES["large"],
+                      *POSTGRES_VALUES["large"]}))
 
 
 @dataclass(frozen=True)
@@ -213,8 +215,10 @@ def changes(values: Mapping[str, Any], answers: Answers) -> List[Dict[str, Any]]
     size = sorted(answers.get(FEATURES, "size") or ["keep"])[0]
     if size in SIZE_VALUES:
         wanted.update(SIZE_VALUES[size])
-        if "web" in (answers.get(FEATURES, "data") or ()):
-            wanted.update(WEB_VALUES["large" if size == "large" else "other"])
+        data = answers.get(FEATURES, "data") or ()
+        for kind, values_of in (("postgres", POSTGRES_VALUES), ("web", WEB_VALUES)):
+            if kind in data:
+                wanted.update(values_of["large" if size == "large" else "other"])
     one(LOOK, "theme", THEME)
     one(LOOK, "profile", UI_PROFILE)
     one(LOOK, "language", LANGUAGE)

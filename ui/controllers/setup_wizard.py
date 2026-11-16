@@ -103,18 +103,18 @@ def _labels(facts: wizard.ProjectFacts) -> Dict[str, Dict[str, tuple]]:
 def project_facts() -> wizard.ProjectFacts:
     """How many layers of each kind the open project holds; none when it cannot be read."""
     try:
-        from qgis.core import QgsMapLayerType, QgsProject
+        import qgis.core as core
+        point_cloud_class = getattr(core, "QgsPointCloudLayer", None)  # QGIS 3.18 and later
         rasters = point_clouds = postgres = web = 0
-        point_cloud_type = getattr(QgsMapLayerType, "PointCloudLayer", None)
-        for layer in QgsProject.instance().mapLayers().values():
+        for layer in core.QgsProject.instance().mapLayers().values():
             provider = (layer.providerType() or "").lower()
             if provider in ("wms", "wfs", "oapif", "arcgismapserver", "arcgisfeatureserver", "wcs", "xyz"):
                 web += 1
-            elif provider == "postgres" or provider == "postgresraster":
+            elif provider in ("postgres", "postgresraster"):
                 postgres += 1
-            elif point_cloud_type is not None and layer.type() == point_cloud_type:
+            elif point_cloud_class is not None and isinstance(layer, point_cloud_class):
                 point_clouds += 1
-            elif layer.type() == QgsMapLayerType.RasterLayer:
+            elif isinstance(layer, core.QgsRasterLayer):
                 rasters += 1
         return wizard.ProjectFacts(rasters=rasters, point_clouds=point_clouds, postgres=postgres, web=web)
     except Exception:
@@ -132,6 +132,8 @@ class SetupWizard:
         self._answers = wizard.Answers()
         self._done: List[str] = []
         self._facts = wizard.ProjectFacts()
+        self._apply_card = None  # the card of the change, until Apply or Cancel
+        self._applied: List[dict] = []  # the rows the last Apply set: what "put back" restores
 
     @property
     def running(self) -> bool:
@@ -139,7 +141,7 @@ class SetupWizard:
 
     def forget(self) -> None:
         """The thread was emptied: its cards went with it."""
-        self._card = None
+        self._card = self._apply_card = None
 
     def start(self) -> None:
         from ...adapters.agent import plugin_settings
@@ -152,12 +154,13 @@ class SetupWizard:
         self._next()
 
     def _close_card(self) -> None:
-        card, self._card = self._card, None
-        if card is not None:
-            try:
-                card.finish(False)
-            except RuntimeError:  # it went with the thread
-                pass
+        for card in (self._card, self._apply_card):
+            if card is not None:
+                try:
+                    card.finish(False)
+                except RuntimeError:  # it went with the thread
+                    pass
+        self._card = self._apply_card = None
 
     def _next(self) -> None:
         step = wizard.next_step(self._done, self._values, self._answers)
@@ -205,30 +208,80 @@ class SetupWizard:
         from ...adapters.agent import plugin_settings
         from ...core.agent.settings_reference import plan
         changes = wizard.changes(self._values, self._answers)
-        if not changes:
-            self._chat.panel.add_note(_tr("Nothing to change: FilterMate already works this way."))
-            self._follow_up()
-            return
         try:
-            rows = plan(plugin_settings.settings_rows(), changes, by_user=True)
+            rows = plan(plugin_settings.settings_rows(), changes, by_user=True) if changes else []
         except ValueError as exc:  # a setting of the setup missing from this configuration
             logger.warning(f"Setup: settings not planned: {exc}")
             self._chat.panel.add_note(_tr("These settings could not be prepared: change them in the configuration "
                                           "of the panel."))
             return
         rows = [row for row in rows if row["before"] != row["after"]]
+        if not rows:
+            self._chat.panel.add_note(_tr("Nothing to change: FilterMate already works this way."))
+            self._follow_up()
+            return
         texts = {"heading": _tr("Your settings of FilterMate"),
-                 "note": _tr("They stay for every project; Undo puts them back."),
+                 "note": _tr("They stay for every project; the link that follows puts them back as they were."),
                  "apply": _tr("Apply"), "cancel": _tr("Cancel"),
                  "accepted": _tr("Applied."), "declined": _tr("Not applied: nothing changed.")}
         card = self._chat.panel.add_settings_card(texts, self._chat._lines_of(rows), "")
         card.apply_requested.connect(lambda: self._apply(card, rows))
-        card.cancel_requested.connect(lambda: card.finish(False))
+        card.cancel_requested.connect(lambda: self._cancel(card))
+        self._apply_card = card
         self._chat._settings_cards.append(card)
 
+    def _cancel(self, card) -> None:
+        self._apply_card = None
+        card.finish(False)
+
     def _apply(self, card, rows) -> None:
-        if self._chat._apply_settings_card(card, rows, _tr("Setup of FilterMate")):
-            self._follow_up()
+        """Apply clicked: the settings set as shown, by the user. Not a step of the agent: a model never undoes it,
+        and the settings of the agent itself go back with the link that follows."""
+        if self._chat.chat_busy():
+            self._chat._say(QCoreApplication.translate("AgentChat", "Wait for the end of the request, then try "
+                                                       "again."), error=True)
+            return
+        if not self._set(rows, "before", "after"):
+            self._apply_card = None
+            card.finish(False)
+            return
+        self._apply_card = None
+        card.finish(True)
+        self._applied = [dict(row) for row in rows]
+        self._chat.panel.add_link(_tr("Put my settings back as they were"), self.revert)
+        self._follow_up()
+
+    def revert(self) -> bool:
+        """The link after Apply: the settings the setup set put back, those changed since left as they are."""
+        rows, self._applied = self._applied, []
+        if not rows:
+            return False
+        if self._chat.chat_busy():
+            self._applied = rows
+            self._chat._say(QCoreApplication.translate("AgentChat", "Wait for the end of the request, then try "
+                                                       "again."), error=True)
+            return False
+        if self._set(rows, "after", "before"):
+            self._chat.panel.add_note(_tr("Settings put back as they were."))
+            return True
+        return False
+
+    def _set(self, rows, was: str, to: str) -> bool:
+        """Set each row from its ``was`` value to its ``to`` value; the rows changed since are left out (said)."""
+        from ...adapters.agent import plugin_settings
+        now = plugin_settings.current_values([row["path"] for row in rows])
+        kept = [row for row in rows if now.get(row["path"]) == row[was]]
+        if len(kept) < len(rows):
+            self._chat.panel.add_note(_tr("Some of these settings changed since: they are left as they are."))
+        if not kept:
+            return False
+        try:
+            plugin_settings.apply_values({row["path"]: row[to] for row in kept})
+        except RuntimeError as exc:  # the configuration was put back as it was
+            logger.warning(f"Setup: settings not applied: {exc}")
+            self._chat.panel.add_note(_tr("Nothing changed: the settings could not be applied."))
+            return False
+        return True
 
     @staticmethod
     def _where(path: str) -> str:

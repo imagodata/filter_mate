@@ -11293,6 +11293,31 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <translation>ተተግብሯል።</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>ምንም አልተቀየረም፡ ቅንብሮቹ ሊተገበሩ አልቻሉም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>ከዚያ በኋላ ከእነዚህ ቅንብሮች አንዳንዶቹ ተቀይረዋል፡ እንዳሉ ይቀራሉ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>ቅንብሮቹ ወደ ቀድሞው ተመልሰዋል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>ቅንብሮቼን ወደ ቀድሞው መልስ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>ለሁሉም ፕሮጀክቶች ይቆያሉ፤ የሚከተለው አገናኝ ወደ ቀድሞው ይመልሳቸዋል።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="223"/>
         <source>Not applied: nothing changed.</source>
         <translation>አልተተገበረም፡ ምንም አልተቀየረም።</translation>

@@ -2898,17 +2898,16 @@ class AgentChatController(QObject):
         self._settings_outcomes.append(("applied: " if applied else "declined: ")
                                        + ", ".join(f"{row['path']} = {json.dumps(row['after'])}" for row in changes))
 
-    def _apply_settings_card(self, card, changes, reason: str) -> bool:
-        """Apply clicked: the change as shown, as a step of the history of its own (undoable), outside any request.
-        True when applied. The setup (setup_wizard.py) applies its card here too."""
+    def _apply_settings_card(self, card, changes, reason: str) -> None:
+        """Apply clicked: the change as shown, as a step of the history of its own (undoable), outside any request."""
         if self.chat_busy() or self._mcp.busy:
             self._say(_tr("Wait for the end of the request, then click Apply again."), error=True)
-            return False
+            return
         now = plugin_settings.current_values([row["path"] for row in changes])
         if any(now.get(row["path"]) != row["before"] for row in changes):
             self._say(_tr("These settings changed since the agent proposed them: ask it again."), error=True)
             self._close_settings_card(card, changes, False)
-            return False
+            return
         import uuid
         call = ToolCallPart(uuid.uuid4().hex, "change_settings", {
             "changes": [{"path": row["path"], "value": row["after"]} for row in changes], "reason": reason})
@@ -2921,7 +2920,7 @@ class AgentChatController(QObject):
         except Exception:
             logger.exception("Agent: undo point of a card failed")
             self._say(NO_UNDO_POINT, error=True)
-            return False
+            return
         try:
             answer, failed = json.dumps(plugin_settings.apply_planned(changes), ensure_ascii=False), False
         except ToolFailure as exc:
@@ -2932,7 +2931,6 @@ class AgentChatController(QObject):
         self._close_settings_card(card, changes, not failed)
         self._save_transcript()
         self.history_changed()
-        return not failed
 
     def _settings_plan(self, call: ToolCallPart):
         """(rows, left out, problem) of a settings call, read once for what the user sees."""
