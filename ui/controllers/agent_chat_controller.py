@@ -30,6 +30,7 @@ from ...core.agent.chat_setup import (
     BASEMAP_TOOL, ELEVATION_TOOL, IMAGERY_TOOL, OPEN_DATA_TOOL, OSM_TOOL, PLACE_TOOL, POPULATION_TOOL, SERVICE_TOOL,
     chat_instructions,
 )
+from ...core.agent.families import CORE
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
 from ...core.agent.connectors import PREFIX as CONNECTOR_PREFIX, ConnectorLoader, connector_entries, shown_title
 from ...core.agent.mcp_client import McpError
@@ -72,7 +73,7 @@ from ...core.agent.project_notes import added as note_added, notes_block, remove
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
     ADD_NOTE, ADD_TABLE, ASK_USER, CREATE_WIDGET, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
-    LOAD_SKILL, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool,
+    LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...core.domain.layer_kind import LayerKind
@@ -1603,23 +1604,42 @@ class AgentChatController(QObject):
         return {"undone": request, "restored": restored, "left": left}
 
     def _families(self, values: AgentSettings, tools, handlers, active=()):
-        """What load_skill brings later, in this conversation: with the families of tools on, the tools of a task
-        left out until its skill is loaded (core/agent/families.py); and the tools of a connector the user ticked,
-        once the model loads its entry (core/agent/connectors.py), families on or off."""
+        """What the conversation adds later. With the option on (token diet, lot 1): the core of the tools at once,
+        the others listed in the index of the instructions (``self._index_tools``), added by use_tools or by the
+        skill that brings them (core/agent/families.py); and the tools of a connector the user ticked, once the model
+        loads its entry (core/agent/connectors.py), option on or off. The filtering tools of a local model stay as
+        they are: that small set is the user's choice."""
         from ...core.agent import skills as skill_registry
-        from ...core.agent.families import bringing, unlocked
+        from ...core.agent.families import bringing, split_tools, unlocked, use_tools_handler
         self._connectors = None
+        self._index_tools = []
         if LOAD_SKILL not in {tool.name for tool in tools}:
             return tools, handlers, set()
         entries = connector_entries(active)
         hidden = {}
-        if values.tool_families and values.rules.get(LOAD_SKILL) != RULE_NEVER:  # a skill nobody can load brings nothing
-            hidden = bringing(tools, skill_registry.SKILLS.values())  # each with the skills that bring it, for the executor
+        if (values.tool_families and values.rules.get(LOAD_SKILL) != RULE_NEVER  # a skill nobody can load brings nothing
+                and not AgentChatController.local_filtering(values)):
+            brought = bringing(tools, skill_registry.SKILLS.values())
+            start, self._index_tools = split_tools(tools)
+            # every tool of the index, each with the skills that bring it, for the answer of the executor
+            hidden = {tool.name: brought.get(tool.name, []) for tool in self._index_tools}
         if not hidden and not entries:
             return tools, handlers, set()
         loader = self._connectors = ConnectorLoader(entries, self._connect, self._offer_connector) if entries else None
         later = {tool.name: tool for tool in tools if tool.name in hidden}
+        # What use_tools and load_skill take from; a tool a compaction takes out of the request comes back to it.
+        self._later, self._by_name = later, {tool.name: tool for tool in tools}
         load = handlers.get(LOAD_SKILL)
+        if hidden:
+            def offer(found):
+                if self._engine is not None:
+                    self._engine.offer_tools(found)
+
+            def turned_off(name: str) -> str:
+                return "turned off by the user in the Tools tab of the agent settings" \
+                    if values.rules.get(name) == RULE_NEVER else ""
+            handlers = dict(handlers, **{USE_TOOLS: use_tools_handler(
+                later, offer, known={tool.name for tool in tools} | {USE_TOOLS}, refused=turned_off)})
 
         def offer_family(skill_name: str):
             """The tools the skill ``skill_name`` brings, offered now; their names, none when already there."""
@@ -1650,8 +1670,8 @@ class AgentChatController(QObject):
             answer = load(arguments)
             names = offer_family(name)
             return dict(answer, tools_now_offered=names) if names else answer
-        return ([tool for tool in tools if tool.name not in hidden], dict(handlers, **{LOAD_SKILL: load_and_offer}),
-                hidden or set())
+        kept = start if hidden else tools
+        return list(kept), dict(handlers, **{LOAD_SKILL: load_and_offer}), hidden or set()
 
     def _build_engine(self) -> Optional[ChatEngine]:
         """A conversation from the settings; None, after saying why, when they are not complete."""
@@ -1679,13 +1699,24 @@ class AgentChatController(QObject):
         # loads it (2026-11-14: each conversation waited for every connector, one that stalled among them).
         tools, handlers, held = self._families(values, tools, handlers, active)
         configured = parse_extra_domains(self._accessor().configured_domains())
+        index = getattr(self, "_index_tools", [])
         session = AgentSession(provider, tools, self._prompt(
-            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered))
+            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered, index),
+            core=CORE if index else ())
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
         return ChatEngine(session, executor, QtTransport(self), self,
                           self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy,
-                          delay=lambda seconds, step: QTimer.singleShot(int(seconds * 1000), self._again(step)))
+                          delay=lambda seconds, step: QTimer.singleShot(int(seconds * 1000), self._again(step)),
+                          released=self._release_tools)
+
+    def _release_tools(self, names) -> None:
+        """Tools a compaction took out of the request: use_tools may add them again (token diet, lot 1)."""
+        later, by_name = getattr(self, "_later", None), getattr(self, "_by_name", {})
+        if later is not None:
+            for name in names:
+                if name in by_name:
+                    later[name] = by_name[name]
 
     @staticmethod
     def _chat_owned(handlers) -> dict:
@@ -1733,13 +1764,13 @@ class AgentChatController(QObject):
 
     @staticmethod
     def _prompt(values: AgentSettings, active, configured_basemaps: Sequence[str] = (),
-                offered: Optional[Sequence[str]] = None) -> str:
+                offered: Optional[Sequence[str]] = None, available: Sequence = ()) -> str:
         """``offered``: the tools of the conversation, those a skill brings later among them; None when not known.
         A note that says a tool is missing must be true: a geocoder of the configuration file offers find_place with
         nothing ticked, and a tool turned off in the Tools tab is missing with its source ticked."""
         return chat_instructions(active, send_values=values.send_values,
                                  filtering=AgentChatController.local_filtering(values),
-                                 configured_basemaps=configured_basemaps, offered=offered)
+                                 configured_basemaps=configured_basemaps, offered=offered, available=available)
 
     @staticmethod
     def local_filtering(values: AgentSettings) -> bool:

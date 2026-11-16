@@ -1451,6 +1451,16 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>Oferecer as ferramentas de uma tarefa quando o agente carregar as respetivas instruções</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Oferecer só as ferramentas de que um pedido precisa (o agente acrescenta as outras)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Pedidos mais leves: as ferramentas que filtram, leem e mostram são sempre oferecidas; o agente vê as outras numa linha cada e acrescenta as de que um pedido precisa. As outras aplicações recebem sempre todas as ferramentas.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Pedidos mais leves: as ferramentas que filtram e leem são sempre oferecidas; as de Processing, estilos, composições, edição, SAM e dados abertos chegam quando o agente carrega a competência dessa tarefa. As outras aplicações recebem sempre todas as ferramentas.</translation>

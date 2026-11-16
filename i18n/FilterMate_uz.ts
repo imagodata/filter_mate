@@ -1451,6 +1451,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Vazifa vositalarini agent uning ko'rsatmalarini yuklagandan keyin taklif qilish</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Faqat so'rovga kerak vositalarni taklif qilish (qolganlarini agent qo'shadi)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Yengilroq so'rovlar: filtrlovchi, o'qiydigan va ko'rsatadigan vositalar doim taklif qilinadi; agent qolganlarini har birini bir qatorda ko'radi va so'rovga kerak bo'lganlarini qo'shadi. Boshqa ilovalar doim barcha vositalarni oladi.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Yengilroq so'rovlar: filtrlovchi va o'qiydigan vositalar doim taklif qilinadi; Processing, uslublar, maketlar, tahrirlash, SAM va ochiq ma'lumotlar vositalari esa agent o'sha vazifaning ko'nikmasini yuklaganda keladi. Boshqa ilovalar doim barcha vositalarni oladi.</translation>

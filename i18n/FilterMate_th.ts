@@ -1451,6 +1451,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>เสนอเครื่องมือของงานเมื่อเอเจนต์โหลดคำแนะนำของงานนั้นแล้ว</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>เสนอเฉพาะเครื่องมือที่คำขอต้องใช้ (เอเจนต์จะเพิ่มส่วนที่เหลือเอง)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>คำขอที่เบาลง: เครื่องมือกรอง อ่าน และแสดงจะถูกเสนอเสมอ ส่วนเครื่องมืออื่นเอเจนต์จะเห็นเป็นรายการบรรทัดเดียวต่อรายการ และเพิ่มเฉพาะที่คำขอต้องใช้ แอปพลิเคชันอื่นจะได้รับเครื่องมือทั้งหมดเสมอ</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>คำขอที่เบาลง: เครื่องมือกรองและอ่านจะถูกเสนอเสมอ ส่วนเครื่องมือของ Processing, สไตล์, เลย์เอาต์, การแก้ไข, SAM และข้อมูลเปิดจะมาเมื่อเอเจนต์โหลดทักษะของงานนั้น แอปพลิเคชันอื่นจะได้รับเครื่องมือทั้งหมดเสมอ</translation>

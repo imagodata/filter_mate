@@ -8,7 +8,7 @@ JSON because that server needs pydantic and the MCP SDK, which QGIS does not hav
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -39,6 +39,8 @@ class ToolSpec:
     manages_history: bool = False
     # Belongs to the conversation of the chat (its notes): not served to another application.
     chat_only: bool = False
+    # One line for the index of the tools a conversation may add (core/agent/tool_index.py).
+    summary: str = ""
 
     @property
     def requires_confirmation(self) -> bool:
@@ -210,7 +212,8 @@ CHAT_ONLY = (
                      "when the user asks to keep, save or reuse what was done (a recipe, a routine, a chain to run "
                      "again). It keeps the changes made so far in this request, or, when this request changed nothing "
                      "yet, those of the last request that did; reads, notes, widgets, code and connectors are not "
-                     "kept. The same name replaces the recipe. Returns recipe (its name and steps) and recipes."),
+                     "kept. The same name replaces the recipe; never run its steps yourself. Returns recipe (its name "
+                     "and steps) and recipes."),
         input_schema={"type": "object", "properties": {
             "name": {"type": "string", "minLength": 1, "maxLength": 60,
                      "description": "Short name in the words of the user"}},
@@ -370,6 +373,18 @@ SETTINGS_TOOLS = (
 )
 
 LOAD_SKILL = "load_skill"
+# Token diet, lot 1: a request carries the core of the tools (core/agent/families.py); use_tools adds the others the
+# instructions list in their index (core/agent/tool_index.py). Offered by the chat when that option is on.
+USE_TOOLS = "use_tools"
+MAX_USE_TOOLS = 20
+USE_TOOLS_TOOL = ToolSpec(
+    USE_TOOLS,
+    "Add tools from the index at the end of the instructions to this conversation, from the next turn on. Add in one "
+    "call every tool the request needs. Returns added and already (offered before).",
+    {"type": "object", "properties": {"names": {"type": "array", "items": {"type": "string", "maxLength": 100},
+                                                "minItems": 1, "maxItems": MAX_USE_TOOLS}},
+     "required": ["names"], "additionalProperties": False},
+    title="Add tools", read_only=True, chat_only=True, summary="Add tools of this index to the request")
 
 
 # Instructions for one kind of task, sent when the task comes rather than with every request (skills/<name>/, read by
@@ -418,8 +433,10 @@ SKILL_TOOLS = (skill_tool(),)
 
 def chat_tools(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
     """The tools the chat offers."""
-    return (tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + SETTINGS_TOOLS + SKILL_TOOLS
-            + CHAT_ONLY)
+    from .tool_index import SUMMARIES
+    tools = (tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + SETTINGS_TOOLS + SKILL_TOOLS
+             + CHAT_ONLY)
+    return tuple(replace(tool, summary=SUMMARIES.get(tool.name, tool.summary)) for tool in tools)
 
 
 # What a local model gets when the user asks for the filtering tools only (a slow computer): reading the project and

@@ -39,9 +39,9 @@ from agent.providers import PRESETS, create_provider  # noqa: E402
 from agent.providers.base import Provider, ProviderConfig  # noqa: E402
 from agent.providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import LOAD_SKILL, RUN_PYTHON, ToolSpec, chat_tools, with_skill_tool  # noqa: E402
+from agent.tool_catalog import LOAD_SKILL, RUN_PYTHON, USE_TOOLS, ToolSpec, chat_tools, with_skill_tool  # noqa: E402
 from agent.chat_setup import SOURCE_TOOLS, chat_instructions  # noqa: E402
-from agent.families import bringing  # noqa: E402
+from agent.families import bringing, split_tools, use_tools_handler  # noqa: E402
 from agent.session import STATUS_DONE, AgentLimits, AgentSession, run_exchange  # noqa: E402
 from agent.skills import SKILLS  # noqa: E402
 from agent.tool_executor import ToolExecutor  # noqa: E402
@@ -160,9 +160,11 @@ def default_setup() -> Tuple[str, Tuple[ToolSpec, ...], Dict[str, List[str]]]:
     mode nor the filtering tools alone (tests/unit/ui/controllers/test_agent_request_weight_default.py checks it)."""
     tools = [tool for tool in chat_tools() if tool.name not in SOURCE_TOOLS and tool.name != RUN_PYTHON]
     tools = with_skill_tool(tools, {tool.name for tool in tools})
-    held = bringing(tools, SKILLS.values())
-    instructions = chat_instructions([], offered=[tool.name for tool in tools])
-    return instructions, tuple(tool for tool in tools if tool.name not in held), held
+    brought = bringing(tools, SKILLS.values())
+    start, available = split_tools(tools)
+    held = {tool.name: brought.get(tool.name, []) for tool in available}
+    instructions = chat_instructions([], offered=[tool.name for tool in tools], available=available)
+    return instructions, tuple(start), held
 
 
 # A conversation of ten requests on the simulated project of agent_eval.py, the calls taken from cases of its bench:
@@ -236,8 +238,10 @@ def replay() -> Replay:
     project = SimulatedProject(CONVERSATION_SETUP)
     project.offered = {tool.name for tool in tools} | set(held)
     hidden = {tool.name: tool for tool in chat_tools() if tool.name in held}
+    known = {tool.name for tool in tools} | set(hidden)
     session = AgentSession(kinds["anthropic"], tools, instructions, AgentLimits())
     handlers = project.handlers()
+    handlers[USE_TOOLS] = use_tools_handler(hidden, lambda now: (session.offer(now), executor.offer(now)), known=known)
     handlers[LOAD_SKILL] = skill_loader(handlers[LOAD_SKILL], hidden,
                                         lambda now: (session.offer(now), executor.offer(now)))
     executor = ToolExecutor(tools, handlers)
@@ -254,7 +258,7 @@ def replay() -> Replay:
     seen = None
     for rank, (text, steps) in enumerate(CONVERSATION, 1):
         scripted = ScriptedTransport([{"tool": tool, "args": args} for tool, args in steps])
-        scripted.load_first({name: held[name] for name in hidden})  # a skill loaded before is not loaded again
+        scripted.use_first({name: held[name] for name in hidden})  # a tool added before is not added again
         exchange = run_exchange(session, text, _Measured(scripted, kinds, rank, run, before), executor,
                                 confirm=lambda call: True, context=project_context(project, before=seen))
         seen = project_state_of(project)

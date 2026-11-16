@@ -1763,6 +1763,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Proposer les outils d'une tâche une fois ses consignes chargées par l'agent</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Ne proposer que les outils utiles à la demande (l'agent ajoute les autres)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Requêtes plus légères : les outils qui filtrent, lisent et affichent sont toujours proposés ; l'agent voit les autres en une ligne chacun et ajoute ceux dont une demande a besoin. Les autres applications reçoivent toujours tous les outils.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Requêtes plus légères : les outils qui filtrent et lisent sont toujours proposés ; ceux de Processing, des styles, des mises en page, de l'édition, de SAM et des données ouvertes arrivent quand l'agent charge le skill de cette tâche. Les autres applications reçoivent toujours tous les outils.</translation>

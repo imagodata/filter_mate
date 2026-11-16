@@ -1451,6 +1451,16 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <translation>Bir görevin araçlarını, Aracı o görevin talimatlarını yükleyince sun</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Yalnızca bir isteğin gerek duyduğu araçları sun (aracı diğerlerini ekler)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Daha hafif istekler: süzme, okuma ve gösterme araçları her zaman sunulur; aracı diğerlerini her biri tek satırlık bir liste olarak görür ve bir isteğin gerek duyduklarını ekler. Diğer uygulamalar her zaman tüm araçları alır.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Daha hafif istekler: süzme ve okuma araçları her zaman sunulur; Processing, stiller, yerleşimler, düzenleme, SAM ve açık veri araçları ise Aracı o görevin becerisini yüklediğinde gelir. Diğer uygulamalar her zaman tüm araçları alır.</translation>

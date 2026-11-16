@@ -67,11 +67,24 @@ def weight():
 
 
 def test_the_bench_starts_as_the_chat_does(plugin_tools, weight):
+    host = _Host()
     values = agent_settings.AgentSettings(preset="anthropic", model="m")
-    tools, handlers, active = Controller.tools_and_handlers(_Host(), values)
+    tools, handlers, active = Controller.tools_and_handlers(host, values)
     offered = [tool.name for tool in tools]
-    kept, _handlers, held = Controller._families(_Host(), values, tools, handlers, active)
+    kept, _handlers, held = Controller._families(host, values, tools, handlers, active)
     prompt, start, bench_held = weight.default_setup()
     assert [tool.name for tool in start] == [tool.name for tool in kept]
-    assert bench_held == held  # each tool with the skills that bring it
-    assert prompt == Controller._prompt(values, active, [], offered)
+    assert "use_tools" in [tool.name for tool in kept] and "list_layers" not in [tool.name for tool in kept]
+    assert bench_held == held  # every tool of the index, each with the skills that bring it
+    assert prompt == Controller._prompt(values, active, [], offered, host._index_tools)
+    assert "Tools you can add with use_tools" in prompt and "\n- list_layers: " in prompt
+
+
+def test_families_off_offers_every_tool_without_index(plugin_tools):
+    host = _Host()
+    values = agent_settings.AgentSettings(preset="anthropic", model="m", tool_families=False)
+    tools, handlers, active = Controller.tools_and_handlers(host, values)
+    kept, _handlers, held = Controller._families(host, values, tools, handlers, active)
+    assert [tool.name for tool in kept] == [tool.name for tool in tools] and not held and not host._index_tools
+    assert "use_tools" not in [tool.name for tool in kept]
+    assert "use_tools" not in Controller._prompt(values, active, [], [tool.name for tool in tools], host._index_tools)

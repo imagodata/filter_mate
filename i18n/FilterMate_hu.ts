@@ -1451,6 +1451,16 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <translation>Egy feladat eszközeinek felkínálása, miután az ügynök betöltötte annak utasításait</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Csak a kérés által igényelt eszközök felkínálása (az ügynök hozzáadja a többit)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Könnyebb kérések: a szűrő, olvasó és megjelenítő eszközök mindig elérhetők; a többit az ügynök egy-egy soros listában látja, és hozzáadja azokat, amelyekre egy kérésnek szüksége van. A többi alkalmazás mindig minden eszközt megkap.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Könnyebb kérések: a szűrő és olvasó eszközök mindig elérhetők; a Processing, a stílusok, a nyomtatási elrendezések, a szerkesztés, a SAM és a nyílt adatok eszközei akkor jönnek, amikor az ügynök betölti az adott feladat készségét. A többi alkalmazás mindig minden eszközt megkap.</translation>

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """The instructions of the chat, built in core (core/agent/chat_setup.py) for the measuring scripts.
 
-Lot 0 of the token diet (2026-11-16) moved them out of the controller without changing a character: the digests below
-were taken from ``AgentChatController._prompt`` before the move. QGIS stays mocked by the root conftest.
+Lot 0 of the token diet (2026-11-16) moved them out of the controller without changing a character; lot 1 changed the
+text on purpose and took the digests again. Any other change of the text must show here. QGIS stays mocked by the root
+conftest.
 """
 import hashlib
 import importlib
@@ -38,10 +39,11 @@ def _load():
 chat_controller, agent_settings, sources = _load()
 Controller = chat_controller.AgentChatController
 
-GOLDEN = {  # (length, sha256 of the UTF-8 text), from _prompt on ad0b143e
-    "default": (12076, "f283741fa187bdb7f978b871441be95d6d7984d1b62f43cb223f480b2852f016"),
-    "no_values_local": (12560, "fd94b8db1b5497782b6921ed30b204e181618899945248020affd0ce3b785833"),
-    "every_source": (12652, "33ec4921967f247beff014c82a3899afd67c4fcda45f076e6bcaaceb7acff2d0"),
+GOLDEN = {  # (length, sha256 of the UTF-8 text); 2026-11-16, lot 1 of the token diet: the instructions without the
+    # paragraphs that described a tool one by one (12,076 characters before for the default)
+    "default": (6357, "111ca6bcc8b38352582a4fe4b97660c21833a3e4e1ef563c6b875526309ac554"),
+    "no_values_local": (6841, "0f72b1b59a0e6aff60b4d9dfae646ad9b54b9ced2471276f524a982cb1e52499"),
+    "every_source": (6933, "07a04f553220042019f86ca8966c7cd4afcf2a92d4ec5924febb6ad08d8fb0c6"),
 }
 _EVERY = tuple(source.id for source in sources.BUILT_IN)
 CONFIGS = {

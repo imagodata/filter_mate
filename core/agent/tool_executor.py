@@ -21,6 +21,8 @@ Handler = Callable[[Dict[str, Any]], Any]
 MAX_RESULT_CHARS = 20_000
 DECLINED = "The user declined this action. Nothing was done; do not try again unless they ask."
 # A tool of a connector the conversation has not loaded (the model remembers it from an earlier one, or guesses).
+# A tool of the index not added yet (core/agent/families.py, token diet lot 1).
+HELD = '{} is not offered yet: call use_tools with "{}" first'
 NOT_LOADED = ("{} is a tool of an external connector that is not loaded in this conversation: call load_skill with "
               "its connector-… entry first (its list says which), then call it again.")
 
@@ -100,6 +102,7 @@ class ToolExecutor:
         self._tools = {tool.name: tool for tool in tools}
         self._handlers = dict(handlers)
         self._held: Dict[str, Tuple[str, ...]] = {}
+        self._skills: Dict[str, Tuple[str, ...]] = {}  # the skills of every tool held once, for a tool held again
 
     def offer(self, tools: Sequence[ToolSpec], handlers: Optional[Mapping[str, Handler]] = None) -> None:
         """Tools run from now on: a family of tools once its skill is loaded (its handlers were given already), or
@@ -114,6 +117,13 @@ class ToolExecutor:
         """Tools offered later, with the skill of their task: a call of one says so instead of "unknown". ``names``
         maps each tool to the skills that bring it (``families.bringing``), which that answer names."""
         self._held = {name: tuple(names[name]) if isinstance(names, dict) else () for name in names}
+        self._skills.update(self._held)
+
+    def withdraw(self, names: Sequence[str]) -> None:
+        """Tools no longer offered (taken out of the request at a compaction): held again, with their skills."""
+        for name in names:
+            self._tools.pop(name, None)
+            self._held[name] = self._skills.get(name, ())
 
     def spec(self, name: str) -> Optional[ToolSpec]:
         return self._tools.get(name)
@@ -168,9 +178,9 @@ class ToolExecutor:
         handler = self._handlers.get(call.name)
         if tool is None and call.name in self._held:
             # The skills by name: the list of load_skill does not say which tool comes with which (2026-11-13).
-            skills = " or ".join(f'"{name}"' for name in self._held[call.name]) or "the skill of that task"
-            return failure(f"{call.name} comes with the instructions of its task: call load_skill with {skills} "
-                           f"first, then call {call.name} again.")
+            skills = " or ".join(f'"{name}"' for name in self._held[call.name])
+            return failure(HELD.format(call.name, call.name) + (f", or load_skill with {skills}" if skills else "")
+                           + f", then call {call.name} again.")
         if tool is None and call.name.startswith(CONNECTOR_TOOL_PREFIX):
             return failure(NOT_LOADED.format(call.name))
         if tool is None or handler is None:

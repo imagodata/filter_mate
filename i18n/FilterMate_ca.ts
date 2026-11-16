@@ -1451,6 +1451,16 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Oferir les eines d'una tasca un cop l'agent n'ha carregat les instruccions</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Oferir només les eines que necessita una sol·licitud (l'agent afegeix les altres)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Sol·licituds més lleugeres: les eines que filtren, llegeixen i mostren s'ofereixen sempre; l'agent veu les altres en una línia cadascuna i afegeix les que necessita una sol·licitud. Les altres aplicacions reben sempre totes les eines.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Sol·licituds més lleugeres: les eines que filtren i llegeixen s'ofereixen sempre; les de Processing, estils, dissenys, edició, SAM i dades obertes arriben quan l'agent carrega l'habilitat d'aquesta tasca. Les altres aplicacions reben sempre totes les eines.</translation>

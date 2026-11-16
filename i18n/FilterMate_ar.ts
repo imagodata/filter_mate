@@ -1451,6 +1451,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>عرض أدوات المهمة بعد أن يحمّل الوكيل تعليماتها</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>عرض الأدوات التي يحتاجها الطلب فقط (يضيف الوكيل الأخرى)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>طلبات أخف: تُعرض أدوات التصفية والقراءة والعرض دائمًا؛ ويرى الوكيل الأدوات الأخرى في سطر واحد لكل منها ويضيف ما يحتاجه الطلب. تحصل التطبيقات الأخرى دائمًا على جميع الأدوات.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>طلبات أخف: تُعرض أدوات التصفية والقراءة دائمًا؛ أما أدوات Processing والأنماط والتخطيطات والتحرير وSAM والبيانات المفتوحة فتأتي عندما يحمّل الوكيل مهارة تلك المهمة. تحصل التطبيقات الأخرى دائمًا على جميع الأدوات.</translation>

@@ -1451,6 +1451,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Предлагане на инструментите на дадена задача, след като агентът зареди нейните инструкции</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Предлагане само на нужните за заявката инструменти (агентът добавя останалите)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>По-леки заявки: инструментите за филтриране, четене и показване се предлагат винаги; агентът вижда останалите по един ред за всеки и добавя тези, от които заявката се нуждае. Другите приложения винаги получават всички инструменти.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>По-леки заявки: инструментите за филтриране и четене се предлагат винаги; тези за Processing, стиловете, оформленията, редактирането, SAM и отворените данни идват, когато агентът зареди умението за съответната задача. Другите приложения винаги получават всички инструменти.</translation>

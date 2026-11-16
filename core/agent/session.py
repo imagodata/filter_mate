@@ -7,9 +7,10 @@ drive it from signals. :func:`run_exchange` is the blocking way, for the evaluat
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable, List, Optional, Protocol, Sequence, Tuple
+from typing import Callable, Collection, Dict, List, Optional, Protocol, Sequence, Tuple
 
 from .compaction import compact
+from .mcp_client import PREFIX as CONNECTOR_TOOL_PREFIX
 from .messages import (
     ROLE_ASSISTANT, ROLE_USER, STOP_MAX_TOKENS, STOP_REFUSAL, STOP_TOOL_USE, Message, ProviderError, StreamFailure,
     TextPart, ToolCallPart, ToolResultPart, TurnComplete, Usage,
@@ -43,6 +44,9 @@ class AgentLimits:
     # (core/agent/compaction.py) before a new one is sent.
     max_history_chars: int = 120_000
 
+
+# Token diet, lot 1: a tool added and not called during this many requests leaves the request at a compaction.
+MAX_IDLE_REQUESTS = 3
 
 TURNS_LEFT_NOTE = ("{} model turns left for this request: finish what is under way and answer now. If something "
                    "cannot be done in time, say what is left.")
@@ -87,9 +91,17 @@ class AgentSession:
     """The conversation and its rules, without any transport."""
 
     def __init__(self, provider: Provider, tools: Sequence[ToolSpec], system: str,
-                 limits: AgentLimits = AgentLimits()) -> None:
+                 limits: AgentLimits = AgentLimits(), core: Collection[str] = ()) -> None:
         self._provider = provider
         self._tools = tuple(tools)
+        # Token diet, lot 1: the tools offered at once (never taken out), and for each tool added since, the request
+        # it was added in and the last one that called it. None of this without a core (the option off).
+        self._core = frozenset(core)
+        self._requests = 0
+        self._added_at: Dict[str, int] = {}
+        self._used_at: Dict[str, int] = {}
+        # The tools the last compaction took out of the request, for the executor and use_tools to hold again.
+        self.dropped: Tuple[str, ...] = ()
         self._system = system
         self._limits = limits
         self._messages: List[Message] = []
@@ -122,6 +134,8 @@ class AgentSession:
         writes = [tool.name for tool in self._tools if not tool.read_only]
         self._messages, summarized = compact(self._messages, self._limits.max_history_chars, writes)
         self.summarized += summarized
+        self._requests += 1
+        self.dropped = self._drop_idle() if summarized else ()
         self._request_start = len(self._messages)
         parts = (TextPart(text),) + ((TextPart(context),) if context else ())
         self._messages.append(Message(ROLE_USER, parts))
@@ -131,7 +145,23 @@ class AgentSession:
         """More tools from the next request on (a family of tools, once its skill is loaded), after those offered:
         the start of the list stays the same for the prompt cache."""
         known = {tool.name for tool in self._tools}
-        self._tools = self._tools + tuple(tool for tool in tools if tool.name not in known)
+        added = tuple(tool for tool in tools if tool.name not in known)
+        self._tools = self._tools + added
+        if self._core:
+            for tool in added:
+                if tool.name not in self._core and not tool.name.startswith(CONNECTOR_TOOL_PREFIX):
+                    self._added_at[tool.name] = self._requests
+
+    def _drop_idle(self) -> Tuple[str, ...]:
+        """Take out of the request the tools added and not called in the last ``MAX_IDLE_REQUESTS`` requests: at a
+        compaction only, when the cache is lost anyway (the start of the request changes then)."""
+        idle = sorted(name for name, added in self._added_at.items()
+                      if max(added, self._used_at.get(name, 0)) < self._requests - MAX_IDLE_REQUESTS)
+        for name in idle:
+            self._added_at.pop(name, None)
+            self._used_at.pop(name, None)
+        self._tools = tuple(tool for tool in self._tools if tool.name not in idle)
+        return tuple(idle)
 
     @property
     def tool_names(self) -> Tuple[str, ...]:
@@ -215,6 +245,9 @@ class AgentSession:
         if calls and turn.stop_reason != STOP_TOOL_USE:
             return TurnDecision(STATUS_STOPPED, text=turn.message.text, reason=REASON_TRUNCATED)
         if calls:
+            for call in calls:
+                if call.name in self._added_at:
+                    self._used_at[call.name] = self._requests
             if self._turns >= self._limits.max_model_turns:
                 return TurnDecision(STATUS_STOPPED, text=turn.message.text, reason=REASON_TURN_LIMIT)
             self._messages.append(turn.message)

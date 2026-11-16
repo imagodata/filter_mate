@@ -1451,6 +1451,16 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Orodja opravila ponudi šele, ko agent naloži njegova navodila</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Ponudi le orodja, ki jih potrebuje zahteva (agent doda ostala)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Lažje zahteve: orodja, ki filtrirajo, berejo in prikazujejo, so vedno na voljo; agent vidi ostala v eni vrstici na orodje in doda tista, ki jih potrebuje zahteva. Druge aplikacije vedno dobijo vsa orodja.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Lažje zahteve: orodja, ki filtrirajo in berejo, so vedno na voljo; orodja za Processing, sloge, postavitve, urejanje, SAM in odprte podatke pridejo, ko agent naloži veščino tega opravila. Druge aplikacije vedno dobijo vsa orodja.</translation>

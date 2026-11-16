@@ -159,7 +159,11 @@ class TestTools:
         assert {SAVE_RECIPE, REMOVE_RECIPE} <= {tool.name for tool in CHAT_ONLY}
 
     def test_the_prompt_says_when_to_keep_one(self):
-        assert "save_recipe" in SYSTEM_PROMPT and "without you" in SYSTEM_PROMPT
+        """Token diet, lot 1: the instructions keep the rule, the tool says how (its description)."""
+        from core.agent.tool_catalog import chat_tools
+        recipe = next(tool for tool in chat_tools() if tool.name == "save_recipe")
+        assert "recipe only when the user asks" in SYSTEM_PROMPT
+        assert "without you" in recipe.description and "Only when the user asks" in recipe.description
 
 
 def _cross(source="zones", target="communes"):

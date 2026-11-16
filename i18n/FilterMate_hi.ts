@@ -1451,6 +1451,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>किसी कार्य के टूल तभी दें जब एजेंट उसके निर्देश लोड कर ले</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>केवल वे टूल दें जो अनुरोध को चाहिए (एजेंट बाकी जोड़ लेता है)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>हल्के अनुरोध: फ़िल्टर करने, पढ़ने और दिखाने वाले टूल हमेशा दिए जाते हैं; एजेंट बाकी टूल एक-एक पंक्ति में देखता है और अनुरोध को जिनकी ज़रूरत हो उन्हें जोड़ लेता है। अन्य एप्लिकेशन को हमेशा सभी टूल मिलते हैं।</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>हल्के अनुरोध: फ़िल्टर करने और पढ़ने वाले टूल हमेशा दिए जाते हैं; Processing, शैलियों, लेआउट, संपादन, SAM और ओपन डेटा के टूल तब आते हैं जब एजेंट उस कार्य का कौशल लोड करता है। अन्य एप्लिकेशन को हमेशा सभी टूल मिलते हैं।</translation>

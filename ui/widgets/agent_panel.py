@@ -1152,13 +1152,12 @@ class AgentSettingsDialog(QDialog):
         general_layout.addLayout(form)
         general_layout.addWidget(self.key_note)
         general_layout.addWidget(self.local_filtering_only)
-        self.tool_families = QCheckBox(_tr("Offer the tools of a task once the agent loads its instructions"), self)
+        self.tool_families = QCheckBox(_tr("Offer only the tools a request needs (the agent adds the others)"), self)
         self.tool_families.setObjectName("checkBox_agent_tool_families")
         self.tool_families.setChecked(values.tool_families)
         self.tool_families.setToolTip(_tr(
-            "Lighter requests: the tools that filter and read are always offered; those of Processing, styles, "
-            "layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications "
-            "always get every tool."))
+            "Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line "
+            "list of the others and adds those a request needs. Other applications always get every tool."))
         general_layout.addWidget(self.tool_families)
         general_layout.addWidget(line)
         general_layout.addWidget(leaving)

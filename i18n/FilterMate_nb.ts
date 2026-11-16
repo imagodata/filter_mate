@@ -1451,6 +1451,16 @@ Godtar du alle? Nei utfører ingen av dem.</translation>
         <translation>Tilby verktøyene for en oppgave når agenten har lastet instruksjonene for den</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Tilby bare verktøyene en forespørsel trenger (agenten legger til de andre)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Lettere forespørsler: verktøyene som filtrerer, leser og viser, tilbys alltid; agenten ser de andre på én linje hver og legger til de en forespørsel trenger. Andre programmer får alltid alle verktøyene.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Lettere forespørsler: verktøyene som filtrerer og leser, tilbys alltid; de for Processing, stiler, utforminger, redigering, SAM og åpne data kommer når agenten laster ferdigheten for den oppgaven. Andre programmer får alltid alle verktøyene.</translation>
