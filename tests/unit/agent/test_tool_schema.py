@@ -27,7 +27,10 @@ SCHEMA = {"type": "object", "title": "Args", "additionalProperties": False, "req
     "selected_only": {"type": "boolean", "default": True},
     "predicates": {"type": "array", "items": {"enum": ["Intersect", "Touch"], "type": "string"},
                    "default": ["Intersect"], "maxItems": 8},
-    "title": {"type": "string", "description": "a property named title stays"}}}
+    "title": {"type": "string", "description": "a property named title stays"},
+    "header": {"type": "string", "minLength": 1, "maxLength": 12},
+    "options": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 4},
+    "names": {"type": "object", "additionalProperties": {"type": "string", "maxLength": 5000}}}}
 
 
 def test_bounds_and_titles_go():
@@ -37,6 +40,21 @@ def test_bounds_and_titles_go():
     assert light["properties"]["buffer"] == {"type": "number", "default": 0.0}
     assert light["properties"]["coverage"] == {"type": "number", "minimum": 0, "maximum": 100}
     assert light["properties"]["title"] == {"type": "string", "description": "a property named title stays"}
+    assert "maxItems" not in light["properties"]["predicates"]  # as many as its choices: says nothing more
+
+
+def test_a_bound_that_guides_stays():
+    """Review of lot 2: Anthropic and OpenAI saw these bounds before, the only place a model learns them."""
+    properties = for_model(SCHEMA)["properties"]
+    assert properties["header"] == {"type": "string", "maxLength": 12}  # 100 at most (GUIDING_LENGTH)
+    assert properties["options"] == {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 4}
+    assert properties["names"] == {"type": "object", "additionalProperties": {"type": "string"}}
+
+
+def test_a_map_of_names_keeps_every_name():
+    schema = {"type": "object", "dependentRequired": {"title": ["layer"]},
+              "dependentSchemas": {"maxLength": {"required": ["x"]}}}
+    assert for_model(schema) == schema
 
 
 def test_a_null_option_shows_as_its_type():
@@ -74,7 +92,7 @@ def test_an_external_schema_goes_through():
         "$defs": {"minLength": {"type": "string", "maxLength": 3}}}
     assert for_model(schema) == {"type": "object", "required": ["maxItems"], "properties": {
         "maxItems": {"type": "integer", "maximum": 9}, "odd": {"anyOf": [{"type": "null"}, {"type": "null"}]}},
-        "$defs": {"minLength": {"type": "string"}}}
+        "$defs": {"minLength": {"type": "string", "maxLength": 3}}}
 
 
 @pytest.mark.parametrize("provider, kind", [(AnthropicProvider, "anthropic"), (OpenAIProvider, "openai"),

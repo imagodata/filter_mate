@@ -56,16 +56,12 @@ Operator = Literal["AND", "OR", "AND NOT"]
 LayerList = Annotated[List[str], Field(min_length=1, max_length=1000)]
 
 _PREDICATES_DOC = (
-    "Spatial predicates, each tested as `target <predicate> source`: Intersect (share any space), "
-    "Contain (the target contains the source), Disjoint (share nothing; rasters and point clouds then keep the "
-    "outside of the source), Equal (same geometry), Touch (borders meet, interiors do not), "
-    "Overlap (partial overlap of same-dimension geometries), Are within (the target lies inside the source), "
-    "Cross (lines crossing). A target is kept when ANY listed predicate holds."
+    "Each tested as `target <predicate> source`, a target kept when any holds: Contain = the target contains the "
+    "source, Are within = it lies inside, Disjoint = outside"
 )
 _OPERATOR_DOC = (
-    "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what "
-    "either keeps), AND NOT (remove the new selection from the previous filter, or from the whole layer when it "
-    "has none). Omit to replace the previous filter."
+    "With each target's filter: AND narrows, OR widens, AND NOT removes this selection (from the whole layer when "
+    "unfiltered); omit to replace it"
 )
 
 
@@ -79,28 +75,18 @@ class RasterSelection(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    band: int = Field(default=1, ge=1, description="1-based band number")
+    band: int = Field(default=1, ge=1)
     mode: Literal["range", "classes", "expression"] = Field(
-        default="range",
-        description="range: pixels between minimum and maximum; classes: pixels whose value is in `classes`; "
-                    "expression: raster calculator expression")
-    minimum: Optional[float] = Field(default=None, description="range: lower bound, inclusive (in band units)")
-    maximum: Optional[float] = Field(default=None, description="range: upper bound, inclusive (in band units)")
-    classes: List[int] = Field(default_factory=list, description="classes: pixel values kept (paletted rasters)")
-    expression: str = Field(default="", max_length=2000,
-                            description='expression: raster calculator expression, e.g. "mnt@1" > 1200')
+        default="range", description="range: minimum to maximum, inclusive; classes: pixel values in classes")
+    minimum: Optional[float] = None
+    maximum: Optional[float] = None
+    classes: List[int] = Field(default_factory=list)
+    expression: str = Field(default="", max_length=2000, description='raster calculator: "mnt@1" > 1200')
+    # derivative, segments, dock_objects: told by the skills terrain and raster-objects (token diet, lot 2)
     derivative: Literal["value", "slope_degrees", "slope_percent", "aspect", "hillshade", "roughness"] = Field(
-        default="value",
-        description="range only: quantity the bounds apply to. With anything but `value` the band is read as a "
-                    "DTM (elevation model) and the bounds are in degrees / percent / etc.")
-    segments: List[str] = Field(
-        default_factory=list, max_length=10000,
-        description="objects drawn on the raster (the SAM targets of the dock): WKT polygons in the CRS of the "
-                    "raster. When given, they are the selection: leave the range, classes and expression unset.")
-    dock_objects: bool = Field(
-        default=False,
-        description="true: the objects the user drew on this raster in the FilterMate dock are the selection "
-                    "(map_context lists them as drawn_objects). Leave everything else unset, segments included.")
+        default="value", description="range: what the bounds apply to, the band read as a DTM")
+    segments: List[str] = Field(default_factory=list, max_length=10000, description="WKT polygons, raster CRS")
+    dock_objects: bool = Field(default=False, description="The objects drawn in the dock (drawn_objects); alone")
 
     @model_validator(mode="after")
     def _check_segments(self) -> "RasterSelection":
@@ -117,10 +103,10 @@ class StyleRule(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     expression: str = Field(default="", max_length=2000, description=(
-        'QGIS condition (NOT SQL), as for select_features: "population" > 10000. Empty: every other feature'))
-    color: str = Field(..., min_length=1, max_length=50, description="#rrggbb or a color name")
-    label: str = Field(default="", max_length=100, description="Its name in the legend")
-    width: Optional[float] = Field(default=None, gt=0, le=20, description="Line or outline width, point size, in mm")
+        'QGIS condition (NOT SQL): "population" > 10000; empty: every other feature'))
+    color: str = Field(..., min_length=1, max_length=50)
+    label: str = Field(default="", max_length=100, description="In the legend")
+    width: Optional[float] = Field(default=None, gt=0, le=20, description="mm")
 
 
 class OsmTag(BaseModel):
@@ -139,16 +125,13 @@ class PointCloudCriteria(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     classes: List[int] = Field(
-        default_factory=list,
-        description="ASPRS classification codes kept (0-255), e.g. 2 ground, 3-5 vegetation, 6 building, 9 water")
-    z_min: Optional[float] = Field(default=None, description="Minimum Z (elevation), in the layer CRS units")
-    z_max: Optional[float] = Field(default=None, description="Maximum Z (elevation), in the layer CRS units")
-    intensity_min: Optional[float] = Field(default=None, description="Minimum intensity")
-    intensity_max: Optional[float] = Field(default=None, description="Maximum intensity")
-    return_number: Optional[int] = Field(default=None, ge=1, le=15, description="Return number kept (1 = first return)")
-    expression: str = Field(default="", max_length=2000,
-                            description="Point cloud expression (e.g. Classification = 6 AND Z > 1000), ANDed with "
-                                        "the other criteria")
+        default_factory=list, description="ASPRS codes: 2 ground, 3-5 vegetation, 6 building, 9 water")
+    z_min: Optional[float] = None
+    z_max: Optional[float] = None
+    intensity_min: Optional[float] = None
+    intensity_max: Optional[float] = None
+    return_number: Optional[int] = Field(default=None, ge=1, le=15)
+    expression: str = Field(default="", max_length=2000, description="Classification = 6 AND Z > 1000; ANDed")
 
 
 def _body(**fields: Any) -> Dict[str, Any]:
@@ -230,32 +213,23 @@ def build_server(client: FilterMateClient) -> Any:
     ) -> Dict[str, Any]:
         """What a layer is and what a filter can test on it: its fields, bands or point attributes.
 
-        Returns layer_id, name, layer_kind, provider_type, crs_authid, geometry_type, feature_count, subset (its
-        current filter), visible and group (its place in the layer tree), extent ([xmin, ymin, xmax, ymax] in its
-        own CRS, empty for a web service), style (how it is drawn: renderer, and when they apply field, classes (how
-        many), labels (the field labelled), opacity, min_scale and max_scale (it only shows between these scale
-        denominators)), and by kind: joins [{layer, field, target_field, prefix}] and relations [{name, role (parent
-        or child), layer, fields}] for a vector layer, with sql_dialect (postgresql, sqlite, ogr_sql or qgis_expression: the language of
-        its filter) and fields [{name, type, alias?, filterable?}] for a vector layer (alias only when the field has
-        one; filterable: false only on a virtual or joined field, which a filter expression cannot test); bands [{band, name, classes}]
-        and pixel_size for a raster, classes [{value, label}] only on a paletted band; attributes [name] for a point
-        cloud.
+        Returns its kind, provider, CRS, geometry, feature_count, subset (current filter), place in the tree, extent
+        (own CRS), style; for a vector, sql_dialect (the language of its filter), fields [{name, type, alias?,
+        filterable?}] (filterable false: virtual or joined, a filter cannot test it), joins and relations; for a
+        raster, bands [{band, name, classes}] and pixel_size; for a point cloud, attributes.
         """
         return await call("GET", "/layers/details?" + urlencode({"layer": layer}))
 
     @mcp.tool(annotations=ToolAnnotations(title="Values of a field", readOnlyHint=True, openWorldHint=False))
     async def field_values(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
-        field: Annotated[str, Field(min_length=1, max_length=1000, description="Field name, from describe_layer")],
-        search: Annotated[str, Field(max_length=200, description=(
-            "Text fields: only values containing this text, ignoring case"))] = "",
-        limit: Annotated[int, Field(ge=1, le=200, description="Maximum number of values returned")] = 20,
+        field: Annotated[str, Field(min_length=1, max_length=1000)],
+        search: Annotated[str, Field(max_length=200, description="Values containing it, any case")] = "",
+        limit: Annotated[int, Field(ge=1, le=200)] = 20,
     ) -> Dict[str, Any]:
-        """Distinct values a field really takes, among the features the layer shows now (its filter applies).
+        """Distinct values a field takes in what the layer shows now, to write a filter with their exact spelling.
 
-        Use it to write a filter with the exact spelling of a value. Returns values, truncated (more values exist),
-        and minimum and maximum for a numeric or date field. NULL is left out. Refused on web services (WFS...),
-        which would have to be read whole.
+        Returns values, truncated, and minimum and maximum of a number or date; no NULL. Refused on web services.
         """
         return await call("GET", "/layers/field-values?" + urlencode(
             {"layer": layer, "field": field, "search": search, "limit": limit}))
@@ -263,24 +237,18 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=ToolAnnotations(title="Statistics of a layer", readOnlyHint=True, openWorldHint=False))
     async def layer_statistics(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
-        field: Annotated[str, Field(max_length=1000, description=(
-            "Field to sum up, from describe_layer. Leave empty to count features, or to use measure"))] = "",
-        group_by: Annotated[str, Field(max_length=1000, description=(
-            "Field whose values make the groups: one row of statistics per value"))] = "",
+        field: Annotated[str, Field(max_length=1000, description="Empty: count the features, or use measure")] = "",
+        group_by: Annotated[str, Field(max_length=1000, description="One row of statistics per value")] = "",
         measure: Annotated[Literal["", "length", "area"], Field(description=(
-            "Measure the geometries instead of a field: length of lines (perimeter of polygons) in metres, or "
-            "area of polygons in square metres"))] = "",
-        selected_only: Annotated[bool, Field(description="Only the selected features")] = False,
-        limit: Annotated[int, Field(ge=1, le=100, description="At most this many groups, the largest first")] = 10,
+            "Of the geometries instead of a field: m (perimeter of polygons) or m2"))] = "",
+        selected_only: bool = False,
+        limit: Annotated[int, Field(ge=1, le=100, description="Groups, the largest first")] = 10,
     ) -> Dict[str, Any]:
-        """Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group.
+        """Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group,
+        on what it shows now or its selection: "how many", "what total", what a filter kept.
 
-        Computed on the features the layer shows now (its filter applies), or on its selection: use it to answer
-        "how many", "what total", "which is the largest", and to check what a filter kept. With neither field nor
-        measure it counts features, by group when group_by is given. Returns feature_count (features read),
-        statistics {count, nulls, minimum, maximum, and sum, mean, stdev for numbers or distinct for text}, unit (m or
-        m2 for a measure), and with group_by: groups [{value, feature_count, and the same statistics}], groups_total
-        and truncated. Refused on web services and above 500000 features: filter or select first.
+        Returns feature_count, statistics, unit, groups, groups_total, truncated. Refused on web services and above
+        500000 features: filter or select first.
         """
         return await call("POST", "/layers/statistics", _body(
             layer=layer, field=field, group_by=group_by, measure=measure, selected_only=selected_only, limit=limit))
@@ -385,14 +353,11 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=ToolAnnotations(title="Try a filter", readOnlyHint=True, openWorldHint=False))
     async def preview_filter(
         layer_name: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
-        expression: Annotated[str, Field(min_length=1, max_length=500_000, description=(
-            "Subset string, as for apply_filter"))],
+        expression: Annotated[str, Field(min_length=1, max_length=500_000, description="As for apply_filter")],
     ) -> Dict[str, Any]:
-        """Try a filter expression on a private copy of the layer: nothing changes in the project.
+        """Try what apply_filter would do on a private copy of the layer: nothing changes in the project.
 
-        It is what apply_filter would do, and it replaces the layer's current filter in the same way. Returns valid,
-        feature_count (features kept, -1 when unknown) and error (the reason when valid is false). Refused on web
-        services and memory layers, and for anything but a plain condition (subqueries, most functions).
+        Returns valid, feature_count (-1: unknown) and error. Refused on web services and memory layers.
         """
         return await call("POST", "/filters/preview", _body(layer_name=layer_name, expression=expression))
 
@@ -414,30 +379,19 @@ def build_server(client: FilterMateClient) -> Any:
 
     @mcp.tool(annotations=_write("Apply a filter expression", idempotent=True))
     async def apply_filter(
-        layer_name: Annotated[str, Field(min_length=1, max_length=1000, description=(
-            "A VECTOR layer: its id, or its name (an id first; by name, the first vector layer of that name)"))],
+        layer_name: Annotated[str, Field(min_length=1, max_length=1000, description="A VECTOR layer id or name")],
         expression: Annotated[str, Field(min_length=1, max_length=500_000, description=(
-            "Subset string: the provider's SQL WHERE clause, without the WHERE keyword. For a PostgreSQL, "
-            "GeoPackage, Shapefile or Spatialite layer: \"population\" > 10000 AND \"dep\" = '31'. "
-            "Quote field names with double quotes and text values with single quotes. Plain conditions only: "
-            "comparisons, IN, LIKE, BETWEEN, IS NULL and simple text or number functions; a subquery or another "
-            "function is refused."))],
-        source: Annotated[str, Field(max_length=200, description=(
-            "Free-text tag shown in the FilterMate log to tell where the filter came from"))] = "mcp",
+            "SQL WHERE clause without WHERE: \"population\" > 10000 AND \"dep\" = '31'. Comparisons, IN, LIKE, "
+            "BETWEEN, IS NULL, simple functions; no subquery"))],
+        source: Annotated[str, Field(max_length=200, description="Tag in the FilterMate log")] = "mcp",
         operator: Annotated[Optional[Operator], Field(description=(
-            "Combine with the layer's current filter instead of replacing it: AND narrows it (the new condition "
-            "only, never a copy of the current filter), OR widens it, AND NOT removes the new condition from it"))]
+            "Combine with the current filter: the new condition only, never a copy of it; omit to replace"))]
             = None,
     ) -> Dict[str, Any]:
-        """Set the filter (subset string) of one vector layer; without operator it replaces the previous filter.
+        """Set the filter (subset string) of one vector layer by its attributes; revert with clear_filters.
 
-        Returns success, expression (as applied), replaced_filter (the filter the layer had and lost, when no
-        operator was given) and active_filters ({layer name: subset string} after the call). For spatial filtering
-        between layers use cross_filter or geometry_filter. Revert with clear_filters.
-
-        Caution: some providers (GeoPackage, Shapefile through OGR) accept an invalid SQL expression without any
-        error and the layer then shows no feature. Check list_layers afterwards (feature_count -1, or 0 when you
-        expected matches) and use clear_filters to recover.
+        Returns success, expression, replaced_filter (the filter it lost) and active_filters. GeoPackage and Shapefile
+        may take an invalid expression silently and show nothing: a count of -1 or 0 says so, clear_filters recovers.
         """
         return await call("POST", "/filters/apply",
                           _body(layer_name=layer_name, expression=expression, source=source, operator=operator))
@@ -465,41 +419,27 @@ def build_server(client: FilterMateClient) -> Any:
 
     @mcp.tool(annotations=_write("Cross filter", idempotent=True))
     async def cross_filter(
-        source_layer: Annotated[str, Field(min_length=1, max_length=1000, description=(
-            "Source layer, vector, raster or point cloud: layer id or name"))],
-        target_layers: Annotated[LayerList, Field(description=(
-            "Layers to filter, of any kind: layer ids or names. The source itself is not filtered "
-            "(except with filter_source)."))],
+        source_layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name")],
+        target_layers: Annotated[LayerList, Field(description="Layers of any kind, not the source")],
         predicates: Annotated[List[Predicate], Field(max_length=8, description=_PREDICATES_DOC)] = ["Intersect"],  # noqa: B006
         buffer: Annotated[float, Field(ge=-1e7, le=1e7, description=(
-            "Buffer applied to the source geometry before testing, in the source CRS units "
-            "(metres for a projected CRS; for a geographic CRS the API treats them as metres). "
-            "Negative shrinks. 0 = none."))] = 0.0,
+            "Around the source, in metres (CRS units if projected); negative shrinks"))] = 0.0,
         coverage_min: Annotated[float, Field(ge=0, le=100, description=(
-            "Polygon targets only: minimum share (%) of the target that must lie inside the source"))] = 0.0,
+            "Polygon targets: minimum % of the target inside the source"))] = 0.0,
         operator: Annotated[Optional[Operator], Field(description=_OPERATOR_DOC)] = None,
         selected_only: Annotated[bool, Field(description=(
-            "Vector source: use the features currently selected in QGIS; with none selected, the features its "
-            "filter keeps. A web service source such as WFS must be selected or already filtered, it is never read "
-            "whole. select_features changes the selection; false uses all the features the source shows."))] = True,
+            "Vector source: its selected features, else what its filter keeps (a WFS is never read whole); "
+            "false: all it shows"))] = True,
         raster_selection: Annotated[Optional[RasterSelection], Field(description=(
-            "REQUIRED when the source is a raster: which pixels are the source area"))] = None,
+            "REQUIRED for a raster source: the pixels that make the area"))] = None,
         point_cloud_criteria: Annotated[Optional[PointCloudCriteria], Field(description=(
-            "Point cloud source: which points make the source area (omit = the points it shows now)"))] = None,
-        filter_source: Annotated[bool, Field(description=(
-            "Raster source: also mask the source raster outside the selection"))] = False,
+            "Point cloud source: the points that make the area (omit: those it shows)"))] = None,
+        filter_source: Annotated[bool, Field(description="Raster source: mask it outside the selection too")] = False,
     ) -> Dict[str, Any]:
-        """Filter layers by their spatial relation to a selection made on a source layer, any kind to any kind.
+        """Filter layers of any kind (features, pixels, LiDAR points) by where they lie against the area of a source
+        layer: a vector's selection, a raster's pixels, a point cloud's points. clear_filters reverts it.
 
-        Source kinds: a vector layer (its selected features), a raster (pixels kept by raster_selection, e.g.
-        elevation between 1200 and 1300) or a point cloud (points kept by point_cloud_criteria, e.g. class 6).
-        Targets keep what satisfies the predicates: vector features, raster pixels or LiDAR points inside the source
-        area (outside with Disjoint). Filters apply in place to the project layers and replace the previous filter
-        of each target unless operator is given. Not recorded in the undo history: revert with clear_filters.
-
-        Returns filtered (names of the layers filtered), failed ({layer: reason}), skipped ({layer: reason}) and
-        warnings ({layer: reason}: filtered, but not exactly: the reason says how).
-        A layer that is not found is reported in failed; a source that is not found is an error.
+        Returns filtered, failed, skipped and warnings ({layer: reason}; a warning: filtered, not exactly).
         """
         return await call("POST", "/filters/cross", _body(
             source_layer=source_layer, target_layers=target_layers, predicates=predicates, buffer=buffer,
@@ -510,25 +450,18 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Filter by a WKT geometry", idempotent=True))
     async def geometry_filter(
         wkt: Annotated[str, Field(min_length=1, max_length=1_000_000, description=(
-            "Geometry in WKT, e.g. POLYGON((650000 6860000, 651000 6860000, 651000 6861000, 650000 6861000, "
-            "650000 6860000)); an extent as a rectangle polygon"))],
-        crs: Annotated[str, Field(min_length=1, max_length=64, description=(
-            "CRS of the geometry, authority code such as EPSG:2154 or EPSG:4326 (the coordinate order is "
-            "x/longitude first)"))],
-        target_layers: Annotated[LayerList, Field(description="Layers to filter, of any kind: layer ids or names")],
+            "WKT; an extent as a rectangle POLYGON"))],
+        crs: Annotated[str, Field(min_length=1, max_length=64, description="EPSG:2154; x/longitude first")],
+        target_layers: Annotated[LayerList, Field(description="Layers of any kind")],
         predicates: Annotated[List[Predicate], Field(max_length=8, description=_PREDICATES_DOC)] = ["Intersect"],  # noqa: B006
-        buffer: Annotated[float, Field(ge=-1e7, le=1e7, description=(
-            "Buffer applied to the geometry, in the units of the CRS of the first target"))] = 0.0,
+        buffer: Annotated[float, Field(ge=-1e7, le=1e7, description="In the CRS units of the first target")] = 0.0,
         coverage_min: Annotated[float, Field(ge=0, le=100, description=(
-            "Polygon targets only: minimum share (%) of the target inside the geometry"))] = 0.0,
+            "Polygon targets: minimum % inside"))] = 0.0,
         operator: Annotated[Optional[Operator], Field(description=_OPERATOR_DOC)] = None,
     ) -> Dict[str, Any]:
-        """Filter layers of any kind by a WKT geometry (a drawn area, an extent, a commune outline).
+        """cross_filter with a WKT geometry (an extent, a drawn area) instead of a source layer.
 
-        Same effect and answer as cross_filter, with a geometry given inline instead of a source layer: the way to
-        filter by an area when no source feature can be selected in QGIS. Replaces the previous filter of each
-        target unless operator is given. Not in the undo history: revert with clear_filters.
-        Returns filtered, failed, skipped and warnings.
+        Same effect and answer; not in the undo history (clear_filters reverts).
         """
         return await call("POST", "/filters/geometry", _body(
             wkt=wkt, crs=crs, target_layers=target_layers, predicates=predicates, buffer=buffer,
@@ -536,30 +469,25 @@ def build_server(client: FilterMateClient) -> Any:
 
     @mcp.tool(annotations=_write("Filter point clouds", idempotent=True))
     async def point_cloud_filter(
-        layers: Annotated[LayerList, Field(description=(
-            "Point cloud layers (LiDAR tiles...): layer ids or names"))],
-        criteria: Annotated[PointCloudCriteria, Field(description=(
-            "Points to keep; at least one criterion is required"))],
+        layers: Annotated[LayerList, Field(description="Point cloud layers (LiDAR tiles...)")],
+        criteria: Annotated[PointCloudCriteria, Field(description="At least one")],
         operator: Annotated[Optional[Operator], Field(description=(
             _OPERATOR_DOC))] = None,
     ) -> Dict[str, Any]:
-        """Keep only some points (by class, elevation, intensity, return number or expression) on point cloud layers.
+        """Keep only some points (class, elevation, intensity, return, expression) on point cloud layers, the same
+        criteria on each (all the tiles of a LiDAR set). undo_filter does not undo it: clear_filters does.
 
-        The same criteria apply to every listed layer, e.g. all the tiles of a LiDAR HD dataset. Sets the layer
-        filter (e.g. 'Classification = 6 AND Z >= 1000'). It is one step of the dock's history of those point clouds
-        (the dock's Undo on the layer reverts it) but undo_filter does not undo it: revert with clear_filters.
-        Returns done (layers filtered), failed and skipped.
+        Returns done, failed and skipped.
         """
         return await call("POST", "/filters/point-cloud", _body(layers=layers, criteria=criteria, operator=operator))
 
     @mcp.tool(annotations=_write("Clear filters", idempotent=True))
     async def clear_filters(
-        layers: Annotated[LayerList, Field(description="Layers of any kind to unfilter: layer ids or names")],
+        layers: Annotated[LayerList, Field(description="Of any kind")],
     ) -> Dict[str, Any]:
-        """Put layers back on their original source with no filter (the dock's Unfilter).
+        """Put layers back on their source with no filter (the dock's Unfilter): reverts cross_filter,
+        geometry_filter, point_cloud_filter and apply_favorite.
 
-        Removes subset strings and restores the original source of raster and point cloud layers that were clipped.
-        This is the way to revert cross_filter, geometry_filter, point_cloud_filter and apply_favorite.
         Returns done, failed and skipped.
         """
         return await call("POST", "/filters/clear", _body(layers=layers))
@@ -580,17 +508,14 @@ def build_server(client: FilterMateClient) -> Any:
 
     @mcp.tool(annotations=_write("Zoom the map", idempotent=True))
     async def zoom_to(
-        layer: Annotated[Optional[str], Field(max_length=1000, description=(
-            "Layer id or name to zoom to (its whole extent, or its selection with selected_only)"))] = None,
-        extent_wkt: Annotated[Optional[str], Field(max_length=100_000, description=(
-            "Instead of a layer: an extent or geometry as WKT"))] = None,
-        crs: Annotated[Optional[str], Field(max_length=64, description="CRS of the WKT, e.g. EPSG:2154")] = None,
-        selected_only: Annotated[bool, Field(description="With layer: zoom to its selected features")] = False,
+        layer: Annotated[Optional[str], Field(max_length=1000)] = None,
+        extent_wkt: Annotated[Optional[str], Field(max_length=100_000, description="Instead of a layer")] = None,
+        crs: Annotated[Optional[str], Field(max_length=64, description="Of the WKT: EPSG:2154")] = None,
+        selected_only: Annotated[bool, Field(description="The layer's selection")] = False,
     ) -> Dict[str, Any]:
-        """Zoom the QGIS map to a layer, to its selected features, to a WKT extent, or to everything (no argument).
+        """Zoom the map to a layer, its selection, a WKT extent, or everything (no argument); only the view changes.
 
-        Changes only the view, never the data or the filters. Returns extent_wkt and scale after the zoom. Fails
-        without a map window (headless QGIS).
+        Returns extent_wkt and scale. Fails without a map window.
         """
         return await call("POST", "/map/zoom", _body(layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))
 
@@ -616,45 +541,38 @@ def build_server(client: FilterMateClient) -> Any:
     async def set_layer_style(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name")],
         mode: Annotated[Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray", "hillshade", "keep"], Field(description=(
-            "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of "
-            "a numeric field), rules (a color per condition, see rules). Raster: pseudocolor (a color ramp over band "
-            "values), gray (a gray stretch), hillshade (a shaded relief from elevations). Each replaces the style. "
-            "keep: only opacity and blend change (the only mode for a WMS, WMTS or basemap image)"))],
+            "Vector: single, categorized, graduated, rules. Raster: pseudocolor, gray, hillshade. keep: only opacity "
+            "and blend (the only mode for a WMS, WMTS or basemap)"))],
         rules: Annotated[Optional[List[StyleRule]], Field(max_length=20, description=(
-            'rules: one symbol per condition; a feature is drawn by the first rule it matches: [{"expression": '
-            '"\\"population\\" > 10000", "color": "#d7191c", "label": "Towns"}, {"expression": "", "color": '
-            '"#cccccc", "label": "Others"}]. An empty expression is every other feature; without one, the features '
-            "no rule matches are not drawn"))] = None,
-        field: Annotated[str, Field(max_length=1000, description="Field for categorized and graduated")] = "",
-        color: Annotated[str, Field(max_length=50, description="single: #rrggbb or a color name")] = "",
+            "rules: a feature takes the first rule it matches; end with an empty expression, or the rest is not "
+            "drawn"))] = None,
+        field: Annotated[str, Field(max_length=1000, description="categorized, graduated")] = "",
+        color: Annotated[str, Field(max_length=50, description="single: #rrggbb or a name")] = "",
         ramp: Annotated[str, Field(max_length=100, description=(
-            "Color ramp of QGIS: Viridis, Spectral, Blues, Reds, Greens, RdYlGn, Magma, Turbo... or Terrain (relief)"))] = "",
-        classes: Annotated[int, Field(ge=2, le=12, description=(
-            "Number of classes: graduated, or pseudocolor with discrete"))] = 5,
+            "QGIS ramp: Viridis, Spectral, Blues, RdYlGn, Magma, Turbo... Terrain for relief"))] = "",
+        classes: Annotated[int, Field(ge=2, le=12, description="graduated, or pseudocolor with discrete")] = 5,
         method: Annotated[Literal["quantile", "equal_interval", "jenks", "pretty", "stddev"], Field(
-            description="graduated: how the class breaks are found")] = "quantile",
-        invert: Annotated[bool, Field(description="Reverse the color ramp")] = False,
-        opacity: Annotated[Optional[float], Field(ge=0, le=1, description="Opacity of the layer, 0 to 1")] = None,
-        band: Annotated[int, Field(ge=1, le=1000, description="Raster: the band drawn")] = 1,
-        minimum: Annotated[Optional[float], Field(description="Raster: lowest value of the ramp (statistics by default)")] = None,
-        maximum: Annotated[Optional[float], Field(description="Raster: highest value of the ramp")] = None,
+            description="graduated")] = "quantile",
+        invert: bool = False,
+        opacity: Annotated[Optional[float], Field(ge=0, le=1)] = None,
+        band: Annotated[int, Field(ge=1, le=1000, description="Raster")] = 1,
+        minimum: Annotated[Optional[float], Field(description="Raster: ramp bounds (statistics by default)")] = None,
+        maximum: Optional[float] = None,
         cut: Annotated[Optional[float], Field(gt=0, le=49, description=(
-            "Raster: percent of the values left out at each end of the ramp (2: 2nd to 98th percentile)"))] = None,
-        discrete: Annotated[bool, Field(description="pseudocolor: flat steps, not a continuous ramp")] = False,
-        width: Annotated[Optional[float], Field(gt=0, le=20, description="single: line or outline width, in mm")] = None,
+            "Raster: % left out at each end of the ramp"))] = None,
+        discrete: Annotated[bool, Field(description="pseudocolor: flat steps")] = False,
+        width: Annotated[Optional[float], Field(gt=0, le=20, description="single: line width, mm")] = None,
         blend: Annotated[Literal["", "normal", "multiply", "screen", "overlay", "soft_light"], Field(description=(
-            "How the layer mixes with what is under it: multiply darkens (a hillshade over colors). Empty: unchanged"))] = "",
+            "multiply darkens (a hillshade over colors); empty: unchanged"))] = "",
         z_factor: Annotated[Optional[float], Field(gt=0, le=1000, description=(
-            "hillshade: stretch of the heights (2 or 3 for a flat relief)"))] = None,
-        multidirectional: Annotated[bool, Field(description="hillshade: lit from several directions")] = False,
+            "hillshade: 2 or 3 for a flat relief"))] = None,
+        multidirectional: Annotated[bool, Field(description="hillshade")] = False,
     ) -> Dict[str, Any]:
-        """Change how a layer is drawn on the map: one symbol, categories, graduated classes, rules, a raster ramp or
-        a shaded relief, its opacity and its blending.
+        """Change how a layer is drawn: one symbol, categories, classes, rules, a raster ramp or a shaded relief,
+        its opacity and blending. Replaces the style; a field of more than 100 values cannot be categorized.
 
-        Returns mode, field, classes (how many were made), ramp, method, and for a raster band, minimum and
-        maximum. The values of the classes are not returned: describe_layer and layer_statistics read the data. A
-        field with more than 100 values cannot be categorized. In the chat of FilterMate, undoing the turn brings
-        the previous style back.
+        Returns mode, field, classes (how many), ramp, method; for a raster, band, minimum and maximum. Undoing the
+        turn of the chat brings the previous style back.
         """
         return await call("POST", "/layers/style", _body(
             layer=layer, mode=mode, field=field, color=color, ramp=ramp, classes=classes, method=method,
@@ -665,25 +583,22 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Label a layer", idempotent=True))
     async def set_labels(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
-        field: Annotated[str, Field(max_length=1000, description="Field whose values are written on the map")] = "",
-        enabled: Annotated[bool, Field(description="false turns the labels off")] = True,
-        size: Annotated[Optional[float], Field(ge=4, le=72, description="Text size in points")] = None,
-        color: Annotated[str, Field(max_length=50, description="Text color, #rrggbb or a name")] = "",
-        buffer: Annotated[bool, Field(description="A light halo around the text, to read it on any background")] = True,
+        field: Annotated[str, Field(max_length=1000)] = "",
+        enabled: Annotated[bool, Field(description="false: labels off")] = True,
+        size: Annotated[Optional[float], Field(ge=4, le=72, description="Points")] = None,
+        color: Annotated[str, Field(max_length=50)] = "",
+        buffer: Annotated[bool, Field(description="A halo, to read it on any background")] = True,
         expression: Annotated[str, Field(max_length=2000, description=(
-            "Instead of field: a QGIS expression (NOT SQL) written on the map, to join or format values: "
-            "\"nom\" || ' (' || \"population\" || ')', upper(\"nom\"), round(\"area\" / 10000, 1) || ' ha'"))] = "",
+            "Instead of field, QGIS (NOT SQL): \"nom\" || ' (' || \"population\" || ')'"))] = "",
         visible_from_scale: Annotated[Optional[float], Field(ge=1, le=1e9, description=(
-            "Show the labels only when the map is at least this close: 50000 for 1:50 000 and closer. At every "
-            "scale by default"))] = None,
+            "50000: from 1:50 000 and closer"))] = None,
         placement: Annotated[Literal["auto", "curved", "horizontal"], Field(description=(
-            "Lines: curved writes each label along its line (contours, rivers), horizontal flat"))] = "auto",
+            "curved: along lines (contours, rivers)"))] = "auto",
     ) -> Dict[str, Any]:
-        """Write the values of a field, or of an expression, next to the features of a vector layer on the map, or
-        turn the labels off.
+        """Write the values of a field or an expression next to the features of a vector layer, or turn the labels
+        off. Undoing the turn of the chat brings the previous labels back.
 
-        Returns labels (on or off), field or expression, visible_from_scale and placement. In the chat of FilterMate,
-        undoing the turn brings the previous labels back.
+        Returns labels, field or expression, visible_from_scale and placement.
         """
         return await call("POST", "/layers/labels", _body(
             layer=layer, field=field, enabled=enabled, size=size, color=color, buffer=buffer, expression=expression,
@@ -740,24 +655,23 @@ def build_server(client: FilterMateClient) -> Any:
 
     @mcp.tool(annotations=_write("Make a print layout", idempotent=False))
     async def create_layout(
-        name: Annotated[str, Field(min_length=1, max_length=100, description="Name of the layout, new in the project")],
-        title: Annotated[str, Field(max_length=200, description="Title written above the map")] = "",
-        page: Annotated[Literal["A4", "A3", "A5", "Letter"], Field(description="Paper size")] = "A4",
-        orientation: Annotated[Literal["landscape", "portrait"], Field(description="Page orientation")] = "landscape",
+        name: Annotated[str, Field(min_length=1, max_length=100, description="New in the project")],
+        title: Annotated[str, Field(max_length=200)] = "",
+        page: Literal["A4", "A3", "A5", "Letter"] = "A4",
+        orientation: Literal["landscape", "portrait"] = "landscape",
         layers: Annotated[Optional[List[Annotated[str, Field(min_length=1, max_length=1000)]]], Field(
-            max_length=100, description="Layers of the map; by default those checked in the layer tree")] = None,
+            max_length=100, description="Default: those checked in the tree")] = None,
         extent: Annotated[Optional[List[float]], Field(min_length=4, max_length=4, description=(
-            "[xmin, ymin, xmax, ymax] in the project CRS; by default extent_layer, then the map view"))] = None,
+            "xmin, ymin, xmax, ymax, project CRS; default: extent_layer, then the view"))] = None,
         extent_layer: Annotated[str, Field(max_length=1000, description="Show the whole of this layer")] = "",
-        legend: Annotated[bool, Field(description="A legend of the layers shown")] = True,
-        scale_bar: Annotated[bool, Field(description="A scale bar")] = True,
-        north_arrow: Annotated[bool, Field(description="A north arrow")] = True,
+        legend: bool = True,
+        scale_bar: bool = True,
+        north_arrow: bool = True,
     ) -> Dict[str, Any]:
-        """Make a print layout of the map: the map, a title, a legend, a scale bar and a north arrow on a page.
+        """Make a print layout of the map (title, legend, scale bar, north arrow), added to the project for the
+        user to finish; export_layout writes it to a file. Undoing the turn of the chat removes it.
 
-        It is added to the project, where the user opens it in the layout designer to finish it. Returns name, items,
-        extent_from (given, layer, view or layers) and the scale of its map. export_layout writes it to a file. In the
-        chat of FilterMate, undoing the turn removes it.
+        Returns name, items, extent_from and the scale of its map.
         """
         return await call("POST", "/layouts", _body(
             name=name, title=title, page=page, orientation=orientation, layers=layers, extent=extent,
@@ -943,72 +857,44 @@ def build_server(client: FilterMateClient) -> Any:
 
     @mcp.tool(annotations=_write("Draw objects with SAM", idempotent=False))
     async def segment_objects(
-        raster: Annotated[str, Field(min_length=1, max_length=1000, description=(
-            "Raster to draw on, as it shows on the map (an orthophoto): layer id or name"))],
+        raster: Annotated[str, Field(min_length=1, max_length=1000, description="An orthophoto, as on the map")],
         guide_layer: Annotated[str, Field(min_length=1, max_length=1000, description=(
-            "Vector layer whose features point at the objects: points (each a click on an object) or polygons "
-            "(each a footprint: its bounding box and a point inside it). Layer id or name."))],
+            "Points (a click on each object) or polygons (footprints)"))],
         selected_only: Annotated[bool, Field(description=(
-            "Use the selected features of the guide; with none selected, the features it shows"))] = True,
-        limit: Annotated[int, Field(ge=1, le=200, description=(
-            "The most guide features taken in one call; a guide that gives more is refused, select fewer"))] = 50,
-        name: Annotated[str, Field(max_length=200, description=(
-            "Name of the layer added (default: the name of the guide followed by (SAM))"))] = "",
+            "Its selection; with none, what it shows (a web service needs one)"))] = True,
+        limit: Annotated[int, Field(ge=1, le=200, description="A guide that gives more is refused")] = 50,
+        name: Annotated[str, Field(max_length=200, description="Default: the guide's, then (SAM)")] = "",
     ) -> Dict[str, Any]:
-        """Draw with SAM, on a raster, the object each feature of a guide layer points at; adds them as a layer.
+        """Draw with SAM, on a raster, the object each feature of a guide layer points at, as a new polygon layer
+        with the guide's attributes, sam_score and, for footprints, sam_iou (low: a footprint to look at, no proof
+        of a change). Good on buildings, not on parcels or trees.
 
-        The new polygon layer is a temporary GeoPackage, in the CRS of the raster, one object per guide feature, with the
-        attributes of the feature, sam_score (the confidence of SAM, 0 to 1) and, for a polygon guide, sam_iou (overlap
-        of the footprint with the drawn object, 0 to 1: a low value flags a footprint to look at, such as a building
-        that changed, it does not prove a change). Then select_features on that layer (e.g. "sam_iou" < 0.5) or
-        cross_filter with it as the source. No other layer is changed.
-
-        Returns layer (layer_id, name, feature_count...), guide_features, drawn, without_object (features with no
-        object: off the raster, nothing found by SAM, or never tried when stopped_early), sam_score {median, minimum},
-        sam_iou {median, minimum, below_half}, seconds and stopped_early (true when the 20 s allowed ran out before
-        every window was drawn: call again with fewer features). QGIS is held while SAM draws, about 2 s for each
-        window of 1024 pixels; other changes are refused meanwhile. A guide whose features cannot be counted (a web
-        service) needs a selection. SAM (the model and its runtime) is installed by the user from the FilterMate
-        dock; without it the call fails and says so. Good on buildings and other well delimited objects; parcels and
-        trees are not reliable.
+        Returns layer, guide_features, drawn, without_object, sam_score, sam_iou, seconds and stopped_early (the
+        20 s ran out: call again with fewer). QGIS is held about 2 s per 1024-pixel window. SAM is installed from
+        the dock.
         """
         return await call("POST", "/objects/segment", _body(
             raster=raster, guide_layer=guide_layer, selected_only=selected_only, limit=limit, name=name))
 
     @mcp.tool(annotations=_write("Find objects like an example with SAM", idempotent=False))
     async def similar_objects(
-        raster: Annotated[str, Field(min_length=1, max_length=1000, description=(
-            "Raster to search, as it shows on the map (an orthophoto): layer id or name"))],
+        raster: Annotated[str, Field(min_length=1, max_length=1000, description="An orthophoto, as on the map")],
         example_layer: Annotated[str, Field(max_length=1000, description=(
-            "Vector layer whose ONE selected feature (a point on the object, or its footprint) is the example; "
-            "select it with select_features first. Leave empty with use_dock_object."))] = "",
+            "Its ONE selected feature (point or footprint) is the example"))] = "",
         use_dock_object: Annotated[bool, Field(description=(
-            "The examples are the objects the user drew on this raster in the FilterMate dock (map_context lists "
-            "them as drawn_objects): an object counts when it looks like any of them"))] = False,
+            "The examples: the objects drawn in the dock (drawn_objects of map_context)"))] = False,
         extent_wkt: Annotated[str, Field(max_length=100_000, description=(
-            "Area searched as WKT, e.g. map_context's extent_wkt with its canvas_crs as extent_crs; empty: the visible map"))] = "",
-        extent_crs: Annotated[str, Field(max_length=64, description=(
-            "CRS of extent_wkt, e.g. EPSG:2154 (empty: the raster's)"))] = "",
-        same_shape: Annotated[bool, Field(description=(
-            "Keep only the objects shaped like the example (compactness within 0.5 to 2 times)"))] = True,
-        name: Annotated[str, Field(max_length=200, description=(
-            "Name of the layer added (default: the raster name followed by (similar objects))"))] = "",
+            "Area searched (map_context's extent_wkt, its canvas_crs as extent_crs); empty: the map"))] = "",
+        extent_crs: Annotated[str, Field(max_length=64, description="Empty: the raster's")] = "",
+        same_shape: bool = True,
+        name: Annotated[str, Field(max_length=200)] = "",
     ) -> Dict[str, Any]:
-        """Find with SAM, on a raster, the objects that look like an example; adds them as a layer.
+        """Find with SAM, on a raster, the objects that look like an example (0.5 to 2 times its area), as a new
+        layer with appearance (0 to 1) and area_m2. About half is right and most are missed: no census, the user
+        checks. Give only the place meant: past 20 s it stops, above 64 windows of 1024 pixels it is refused.
 
-        SAM draws the examples (with use_dock_object, the objects drawn on the raster in the dock, the last 8 at
-        most), then looks, window by window over the area searched, for the places whose encoder features look like one of them,
-        draws them, and keeps those of 0.5 to 2 times their area (and shape) that look like one of them. The new
-        polygon layer is a temporary GeoPackage with appearance (0 to 1, how much an object looks like the
-        nearest example) and area_m2. Measured on buildings of a 25 cm orthophoto: about half of what it finds is
-        right and it finds about a fifth of what is there, so say so to the user and let them check the layer; it
-        is no census. Give the extent of the place meant, not more: past 20 s it stops (stopped_early) and an
-        area of more than 64 windows of 1024 pixels is refused.
-
-        Returns layer (null when nothing was found: no layer added), objects, examined, windows, windows_planned,
-        stopped_early, seconds, examples {count, sam_score {median, minimum}, area_m2 {minimum, maximum}} and
-        appearance {median, minimum}. QGIS is held while it searches; other changes are refused meanwhile. SAM is
-        installed by the user from the FilterMate dock.
+        Returns layer (null: nothing found), objects, windows, stopped_early, seconds, examples and appearance.
+        SAM is installed from the dock.
         """
         return await call("POST", "/objects/similar", _body(
             raster=raster, example_layer=example_layer, use_dock_object=use_dock_object, extent_wkt=extent_wkt,
@@ -1129,22 +1015,19 @@ def build_server(client: FilterMateClient) -> Any:
         tags: Annotated[List[OsmTag], Field(min_length=1, max_length=10, description=(
             'Features with ONE of these tags: [{"key": "amenity", "value": "hospital"}], [{"key": "building"}]'))],
         extent_wkt: Annotated[str, Field(max_length=100_000, description=(
-            "The area as WKT: the extent_wkt of find_place or of map_context. Empty: the visible map"))] = "",
-        crs: Annotated[str, Field(max_length=64, description=(
-            "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty"))] = "",
+            "extent_wkt of find_place or map_context; empty: the map"))] = "",
+        crs: Annotated[str, Field(max_length=64, description="EPSG:4326 for find_place")] = "",
         geometry: Annotated[Literal["as_mapped", "points", "lines", "polygons"], Field(description=(
-            "as_mapped: a layer per kind of geometry. points: one layer of points (a point inside each area), to "
-            "count, measure distances or for a heatmap. lines or polygons: that kind alone"))] = "as_mapped",
+            "as_mapped: a layer per geometry; points: one point each, to count or for a heatmap"))] = "as_mapped",
         platform: Annotated[str, Field(min_length=1, max_length=200, description=(
-            "An OpenStreetMap server the user allowed: overpass_fr, overpass_de, or one they added"))] = "overpass_fr",
-        name: Annotated[str, Field(max_length=180, description="Name of the layer(s) in the project")] = "",
+            "A server the user allowed"))] = "overpass_fr",
+        name: Annotated[str, Field(max_length=180)] = "",
     ) -> Dict[str, Any]:
-        """Add to the project the OpenStreetMap features that carry given tags in an area: buildings, roads,
-        hospitals, schools, shops, restaurants, parks, rivers, land use..., anywhere in the world.
+        """Add the OpenStreetMap features that carry given tags in an area (buildings, roads, hospitals, shops,
+        parks...), anywhere, in EPSG:4326 with osm_id, name and a column per key (addr:street: addr_street). A town
+        or a district, not a region.
 
-        Added on top of the project, in EPSG:4326, each with osm_id, name and a column per key asked (addr:street
-        is addr_street). Returns layers [{layer_id, name, geometry, feature_count, fields}] and feature_count. Ask
-        for a town or a district, not a region. The chat of FilterMate asks the user first.
+        Returns layers [{layer_id, name, geometry, feature_count, fields}] and feature_count.
         """
         return await call("POST", "/layers/add-osm", _body(
             tags=[tag.model_dump() for tag in tags], platform=platform, extent_wkt=extent_wkt, crs=crs,
@@ -1252,24 +1135,18 @@ def build_server(client: FilterMateClient) -> Any:
 
     @mcp.tool(annotations=_write("Export filtered layers", idempotent=True, destructive=True))
     async def export_layers(
-        layers: Annotated[LayerList, Field(description=(
-            "Layers of any kind to export as they are filtered now, one file per layer: ids or names"))],
+        layers: Annotated[LayerList, Field(description="Of any kind, one file each")],
         subfolder: Annotated[str, Field(max_length=300, description=(
-            "Sub-folder of the export root configured on the QGIS machine (a or a/b, letters, digits, _ . - only, "
-            "no .. and never an absolute path)"))] = "export",
-        vector_format: Annotated[Literal["GPKG", "GeoJSON", "ESRI Shapefile", "FlatGeobuf", "CSV"], Field(
-            description="Format of vector layers")] = "GPKG",
-        raster_format: Annotated[Literal["COG", "GTiff"], Field(description="Format of raster layers")] = "COG",
-        point_cloud_format: Annotated[Literal["LAZ", "COPC", "LAS", "GPKG", "CSV"], Field(
-            description="Format of point cloud layers")] = "LAZ",
-        crs: Annotated[Optional[str], Field(max_length=64, description=(
-            "Output CRS such as EPSG:2154 (omit = each layer's CRS)"))] = None,
+            "Below the export root: a or a/b, letters, digits, _ . - only"))] = "export",
+        vector_format: Literal["GPKG", "GeoJSON", "ESRI Shapefile", "FlatGeobuf", "CSV"] = "GPKG",
+        raster_format: Literal["COG", "GTiff"] = "COG",
+        point_cloud_format: Literal["LAZ", "COPC", "LAS", "GPKG", "CSV"] = "LAZ",
+        crs: Annotated[Optional[str], Field(max_length=64, description="Omit: each layer's")] = None,
     ) -> Dict[str, Any]:
-        """Write layers, as filtered now, to files on the QGIS machine, below the server's export root.
+        """Write layers, as filtered now, to files on the QGIS machine below its export root; a file of the same
+        name is overwritten.
 
-        Writes files: a file with the same name already in the sub-folder is overwritten. The files stay on the
-        machine running QGIS; the answer gives their paths there. Returns done (layers written),
-        outputs ({layer name: file path}), failed and skipped.
+        Returns done, outputs ({layer name: file path}), failed and skipped.
         """
         return await call("POST", "/export", _body(
             layers=layers, subfolder=subfolder, vector_format=vector_format, raster_format=raster_format,

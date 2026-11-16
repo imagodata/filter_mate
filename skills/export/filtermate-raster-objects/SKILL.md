@@ -1,6 +1,6 @@
 ---
 name: filtermate-raster-objects
-description: "Objects on a raster and SAM through the MCP server of the FilterMate QGIS plugin: filter with the objects the user drew on a raster in the dock, draw objects with SAM from guide features, find objects that look like an example. Use when the user asks for it in QGIS with FilterMate."
+description: "Objects on a raster and SAM through the MCP server of the FilterMate QGIS plugin: objects drawn on a raster in the dock, SAM from guide features, objects like an example. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/raster-objects/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->
@@ -13,7 +13,9 @@ Needs the MCP server of FilterMate: in QGIS, Agent settings (menu ⋯ of the AGE
 
 map_context lists drawn_objects: the rasters on which the user drew objects in the dock. To filter with them ("the
 buildings under what I drew"), call cross_filter with that raster as source_layer and raster_selection
-{"dock_objects": true}. When no raster has drawn objects, say so: the user draws them in the dock first.
+{"dock_objects": true}. When no raster has drawn objects, say so: the user draws them in the dock first. Leave the
+other keys of raster_selection unset. Polygons of your own (WKT, in the CRS of the raster) go in raster_selection
+{"segments": [...]} instead, also alone.
 
 ## SAM
 

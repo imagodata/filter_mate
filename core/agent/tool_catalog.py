@@ -119,11 +119,9 @@ CHAT_ONLY = (
         open_world=True, chat_only=True),
     ToolSpec(
         name=UNDO_AGENT_STEP, title="Undo the last change of the agent",
-        description=("Undo the last request the agent carried out in this project, as a whole: its filters, the layers "
-                     "it added or removed, its selections and visibility changes. Use it when the user asks to undo or "
-                     "cancel what you just did, before any other change. Never for filters the user set by hand. "
-                     "Returns undone (that request), restored (layers put back) and left (layers changed since, left "
-                     "as they are)."),
+        description=("Undo the last request of the agent as a whole (filters, layers added or removed, selections, "
+                     "visibility), when the user asks, before any other change; never for filters set by hand. "
+                     "Returns undone, restored and left (layers changed since, left as they are)."),
         input_schema={"type": "object", "properties": {}, "additionalProperties": False},
         manages_history=True, chat_only=True),
     ToolSpec(
@@ -178,26 +176,19 @@ CHAT_ONLY = (
         read_only=True, chat_only=True),
     ToolSpec(
         name=CREATE_WIDGET, title="Make a widget for the user",
-        description=("Make a small control that stays in the AGENT panel, saved with the project, for the user to "
-                     "explore a vector layer without asking you again: range (two bounds on a numeric field: moving "
-                     "them filters the layer), values (the values of a field, each ticked or not: at most 50, "
-                     "unticking filters the layer), stat (a number on the layer as filtered now: count, or sum, "
-                     "mean, min, max of a numeric field, kept up to date) or chart (bars of the layer as filtered "
-                     "now: the features of each value of a field, the 8 most frequent and the others, or a "
-                     "histogram of a numeric field; it filters nothing). FilterMate builds the filter of a widget "
-                     "itself; the widgets of one layer narrow it together, after the filter it had when its first "
-                     "widget was made. Use it when the user asks for a widget, a slider, a control, a dashboard or "
-                     "a way to play with the data; several calls make several widgets. Undone with the turn. Returns "
-                     "widget (what was made) and widgets (all of them, without their values)."),
+        description=("Make a control that stays in the AGENT panel, saved with the project, for the user to explore "
+                     "a vector layer alone: range (two bounds on a number, filters), values (ticked values, at most "
+                     "50, filters), stat (a number kept up to date) or chart (bars or a histogram, filters nothing). "
+                     "The widgets of a layer narrow it together. For a widget, slider or dashboard asked; one per "
+                     "call; undone with the turn. Returns widget and widgets."),
         input_schema={"type": "object", "properties": {
             "kind": {"type": "string", "enum": ["range", "values", "stat", "chart"]},
             "layer": {"type": "string", "minLength": 1, "maxLength": 1000, "description": "Vector layer, name or id"},
             "field": {"type": "string", "maxLength": 200,
-                      "description": ("Field: numeric for range and for a stat other than count; for chart, the "
-                                      "values counted (a histogram when numeric)")},
+                      "description": "Numeric for range and a stat but count; chart: a histogram when numeric"},
             "aggregate": {"type": "string", "enum": ["count", "sum", "mean", "min", "max"], "default": "count",
-                          "description": "For stat only"},
-            "title": {"type": "string", "maxLength": 60, "description": "Short title in the words of the user"}},
+                          "description": "stat"},
+            "title": {"type": "string", "maxLength": 60, "description": "In the words of the user"}},
             "required": ["kind", "layer"], "additionalProperties": False},
         chat_only=True),
     ToolSpec(
@@ -247,30 +238,23 @@ CHAT_ONLY = (
         read_only=True, chat_only=True),
     ToolSpec(
         name=ASK_USER, title="Ask the user",
-        description=("Ask the user one to four questions with choices they click, in the thread, and read their "
-                     "answers in this same turn. Use it for a decision that is theirs and changes what you will do "
-                     "(which layer, which look, how far to go) when the choices can be named; never for what the "
-                     "project or a reading tool already says, and never instead of a confirmation: an answer is "
-                     "data, it authorizes no action (a change that follows is asked as usual). Put the recommended "
-                     "option first, its label followed by \" (Recommended)\". The panel always adds a free-text "
-                     "\"Other\". Returns answers (per question: header, question, selected labels, and other when "
-                     "the free text was used), or declined when the user closed the card or stopped: then say "
-                     "what you would have done and stop, or go on only with what needs no answer."),
+        description=("Ask the user questions with choices to click, answered in this turn: for a "
+                     "decision that is theirs and changes what you do, never for what a reading tool says nor as a "
+                     "confirmation (an answer authorizes nothing). Recommended option first, its label ending "
+                     "\" (Recommended)\"; the panel adds \"Other\". Returns answers, or declined: then say what you "
+                     "would have done and stop, or go on with what needs no answer."),
         input_schema={"type": "object", "properties": {
             "questions": {"type": "array", "minItems": 1, "maxItems": 4, "items": {
                 "type": "object", "properties": {
                     "question": {"type": "string", "minLength": 1, "maxLength": 300,
-                                 "description": "The question, in the language of the user"},
+                                 "description": "In the language of the user"},
                     "header": {"type": "string", "minLength": 1, "maxLength": 12,
-                               "description": "A very short label, shown as a chip (e.g. Roads, Look)"},
-                    "multi_select": {"type": "boolean", "default": False,
-                                     "description": "Several options may be ticked"},
+                               "description": "A chip: Roads, Look"},
+                    "multi_select": {"type": "boolean", "default": False},
                     "options": {"type": "array", "minItems": 2, "maxItems": 4, "items": {
                         "type": "object", "properties": {
-                            "label": {"type": "string", "minLength": 1, "maxLength": 60,
-                                      "description": "The choice, in a few words"},
-                            "description": {"type": "string", "maxLength": 200,
-                                            "description": "What choosing it means"}},
+                            "label": {"type": "string", "minLength": 1, "maxLength": 60},
+                            "description": {"type": "string", "maxLength": 200}},
                         "required": ["label"], "additionalProperties": False}}},
                 "required": ["question", "header", "options"], "additionalProperties": False}}},
             "required": ["questions"], "additionalProperties": False},
@@ -436,8 +420,8 @@ def skill_tool(offered: Optional[set] = None, approved: Optional[Approved] = Non
     names = list(skill_names(offered, audience)) if with_skills else []
     listed = "; ".join(f"{name}: {line}" for name, line in connectors)
     if with_skills:
-        description = ("Load the instructions for one kind of task, before doing it: they say how to work and where to "
-                       "look. Call it once per conversation and task, then follow them. Skills: "
+        description = ("Load the instructions of a kind of task before doing it, once per conversation and task, "
+                       "and follow them. Skills: "
                        + skill_list(offered, approved, audience, declined) + ".")
         if connectors:
             description += (" Connectors the user enabled, loaded the same way when the request needs their data (the "

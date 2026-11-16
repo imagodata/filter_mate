@@ -1,7 +1,7 @@
 ---
 name: cartography
 title: Make the map look right
-description: styles and labels, print layouts and their export, the CRS of the map, the layer tree, map themes and spatial bookmarks
+description: styles, labels, print layouts, the map CRS, the layer tree, map themes, bookmarks
 metadata:
   version: 3
   plugin_min: 5.1.0

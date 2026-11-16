@@ -1,7 +1,7 @@
 ---
 name: raster-objects
 title: Objects on a raster and SAM
-description: filter with the objects the user drew on a raster in the dock, draw objects with SAM from guide features, find objects that look like an example
+description: objects drawn on a raster in the dock, SAM from guide features, objects like an example
 metadata:
   version: 1
   plugin_min: 5.1.0
@@ -17,7 +17,9 @@ metadata:
 
 map_context lists drawn_objects: the rasters on which the user drew objects in the dock. To filter with them ("the
 buildings under what I drew"), call cross_filter with that raster as source_layer and raster_selection
-{"dock_objects": true}. When no raster has drawn objects, say so: the user draws them in the dock first.
+{"dock_objects": true}. When no raster has drawn objects, say so: the user draws them in the dock first. Leave the
+other keys of raster_selection unset. Polygons of your own (WKT, in the CRS of the raster) go in raster_selection
+{"segments": [...]} instead, also alone.
 
 ## SAM
 

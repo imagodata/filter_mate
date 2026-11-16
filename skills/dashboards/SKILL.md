@@ -1,7 +1,7 @@
 ---
 name: dashboards
 title: Build a dashboard of widgets
-description: build a small dashboard in the AGENT panel to explore a vector layer without asking again (sliders, ticked values, numbers, charts), saved with the project
+description: a dashboard in the AGENT panel to explore a layer (sliders, ticked values, numbers, charts)
 metadata:
   version: 1
   plugin_min: 5.1.0
