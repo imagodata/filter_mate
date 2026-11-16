@@ -1451,6 +1451,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Προσφορά των εργαλείων μιας εργασίας μόλις ο πράκτορας φορτώσει τις οδηγίες της</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Προσφορά μόνο των εργαλείων που χρειάζεται ένα αίτημα (ο πράκτορας προσθέτει τα υπόλοιπα)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Ελαφρύτερα αιτήματα: τα εργαλεία φιλτραρίσματος, ανάγνωσης και εμφάνισης προσφέρονται πάντα· ο πράκτορας βλέπει τα υπόλοιπα σε μία γραμμή το καθένα και προσθέτει όσα χρειάζεται ένα αίτημα. Οι άλλες εφαρμογές λαμβάνουν πάντα όλα τα εργαλεία.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Ελαφρύτερα αιτήματα: τα εργαλεία φιλτραρίσματος και ανάγνωσης προσφέρονται πάντα· εκείνα του Processing, των στυλ, των διατάξεων, της επεξεργασίας, του SAM και των ανοικτών δεδομένων έρχονται όταν ο πράκτορας φορτώσει τη δεξιότητα της αντίστοιχης εργασίας. Οι άλλες εφαρμογές λαμβάνουν πάντα όλα τα εργαλεία.</translation>

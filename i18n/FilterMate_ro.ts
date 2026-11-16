@@ -1451,6 +1451,16 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Oferirea instrumentelor unei sarcini după ce agentul îi încarcă instrucțiunile</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Oferirea doar a instrumentelor de care are nevoie o cerere (agentul le adaugă pe celelalte)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Cereri mai ușoare: instrumentele care filtrează, citesc și afișează sunt oferite mereu; agentul le vede pe celelalte câte pe un rând și le adaugă pe cele de care are nevoie o cerere. Celelalte aplicații primesc mereu toate instrumentele.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Cereri mai ușoare: instrumentele care filtrează și citesc sunt oferite mereu; cele pentru Processing, stiluri, machete, editare, SAM și date deschise vin atunci când agentul încarcă abilitatea sarcinii respective. Celelalte aplicații primesc mereu toate instrumentele.</translation>

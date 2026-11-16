@@ -752,6 +752,19 @@ geocoder, an elevation source, an OpenStreetMap server and a population grid, 2,
 ticked: still under the step with the families off. With the families on (the default), a request is far under
 it. The conversation itself is not weighed either.
 
+### Only the tools a request needs (token diet, lot 1, 2026-11-16)
+
+With the option on (the default, key `offer_tools_by_task`), a request carries the core of the tools
+(`core/agent/families.py`, `CORE`: describe_layer, field_values, layer_statistics, preview_filter, apply_filter,
+cross_filter, clear_filters, zoom_to, set_layers_visibility, export_layers, undo_agent_step, ask_user, load_skill,
+use_tools). The instructions end with an index, one line per other tool of the conversation (`ToolSpec.summary`,
+`core/agent/tool_index.py`); `use_tools` adds the tools named, at the end of the list, and a skill loaded still brings
+its own. A tool added and not called for 3 requests leaves the request at a compaction only (the cache is lost then
+anyway), and use_tools may add it again. The option off offers every tool, without index nor use_tools; the filtering
+tools of a local model stay as they are. The core was chosen on the conversation of
+`scripts/agent_request_weight.py --conversation`: 9 tools only cost more (each added tool rewrites the cache of
+Anthropic), these 14 cost 36 % less than the 25 offered before, with a largest request 39 % smaller.
+
 The catalog is JSON because that server needs pydantic and the MCP SDK, which QGIS does not have. A test fails when the
 two disagree. The chat leaves out `undo_filter`, `redo_filter` and `filter_status`: the first two only walk the dock's
 history, which is not what the agent did.
@@ -828,8 +841,8 @@ project; `load_skill` loads the instructions of a task. They are declared in `co
   `cartography` says how to choose a style from the data (the mode from what the field holds, the method from
   `layer_statistics`, the ramp from what the values mean); `analysis` lists the Processing algorithms whose id is
   the same from QGIS 3.22 to 4.3 and that the rules let run (read in each of them with `describe_algorithm`), so the
-  model skips `find_algorithms` for them. `find_place` is always offered (`families.ALWAYS`) though `workflows`
-  names it. Not measured with a real model: the cases of the three skills pass offline only.
+  model skips `find_algorithms` for them. `find_place` is in the index (lot 1 of the token diet; it was always
+  offered before). Not measured with a real model: the cases of the three skills pass offline only.
 - Processing in QGIS 4: the size of a pixel of a heatmap (`heatmappixelsize`, 4.2) and of an interpolation
   (`interpolationpixelsize`, 4.3), and the rows of an interpolation (`interpolationdata`, 4.3), have types of their
   own there; unknown to `processing_policy`, a heatmap was refused in 4.2 and the interpolations in 4.3. The rows

@@ -1451,6 +1451,16 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Tarjoa tehtävän työkalut vasta, kun agentti lataa sen ohjeet</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Tarjoa vain pyynnön tarvitsemat työkalut (agentti lisää muut)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Kevyemmät pyynnöt: suodattavat, lukevat ja näyttävät työkalut tarjotaan aina; agentti näkee muut yhden rivin luettelona ja lisää ne, joita pyyntö tarvitsee. Muut sovellukset saavat aina kaikki työkalut.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Kevyemmät pyynnöt: suodattavat ja lukevat työkalut tarjotaan aina; Processingin, tyylien, taittojen, muokkauksen, SAMin ja avoimen datan työkalut tulevat, kun agentti lataa kyseisen tehtävän taidon. Muut sovellukset saavat aina kaikki työkalut.</translation>

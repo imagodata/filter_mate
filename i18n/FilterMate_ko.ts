@@ -1451,6 +1451,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>에이전트가 작업 지침을 불러온 뒤에 해당 작업의 도구 제공</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>요청에 필요한 도구만 제공 (나머지는 에이전트가 추가)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>더 가벼운 요청: 필터링, 읽기, 표시 도구는 항상 제공되며, 에이전트는 나머지 도구를 한 줄씩 담긴 목록으로 보고 요청에 필요한 것을 추가합니다. 다른 애플리케이션은 항상 모든 도구를 받습니다.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>더 가벼운 요청: 필터링과 읽기 도구는 항상 제공되며, Processing, 스타일, 레이아웃, 편집, SAM, 공개 데이터 도구는 에이전트가 해당 작업의 스킬을 불러올 때 제공됩니다. 다른 애플리케이션은 항상 모든 도구를 받습니다.</translation>

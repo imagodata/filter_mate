@@ -1451,6 +1451,16 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <translation>Erbjud en uppgifts verktyg när agenten har läst in dess instruktioner</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Erbjud bara de verktyg en förfrågan behöver (agenten lägger till de andra)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Lättare förfrågningar: verktygen som filtrerar, läser och visar erbjuds alltid; agenten ser de andra på en rad vardera och lägger till de som en förfrågan behöver. Andra program får alltid alla verktyg.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Lättare förfrågningar: verktygen som filtrerar och läser erbjuds alltid; de för Processing, stilar, layouter, redigering, SAM och öppna data kommer när agenten läser in färdigheten för den uppgiften. Andra program får alltid alla verktyg.</translation>

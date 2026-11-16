@@ -1451,6 +1451,16 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <translation>Tawarkan alat suatu tugas setelah agen memuat instruksinya</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Tawarkan hanya alat yang dibutuhkan permintaan (agen menambahkan sisanya)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Permintaan lebih ringan: alat yang memfilter, membaca, dan menampilkan selalu ditawarkan; agen melihat sisanya dalam satu baris untuk tiap alat dan menambahkan yang dibutuhkan suatu permintaan. Aplikasi lain selalu mendapatkan semua alat.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Permintaan lebih ringan: alat yang memfilter dan membaca selalu ditawarkan; alat Processing, gaya, tata letak, penyuntingan, SAM, dan data terbuka datang saat agen memuat keterampilan tugas tersebut. Aplikasi lain selalu mendapatkan semua alat.</translation>

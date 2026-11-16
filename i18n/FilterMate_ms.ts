@@ -1451,6 +1451,16 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
         <translation>Tawarkan alat sesuatu tugas setelah ejen memuatkan arahannya</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Tawarkan hanya alat yang diperlukan sesuatu permintaan (ejen menambah yang lain)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Permintaan lebih ringan: alat yang menapis, membaca dan memaparkan sentiasa ditawarkan; ejen melihat yang lain dalam satu baris setiap satu dan menambah yang diperlukan oleh sesuatu permintaan. Aplikasi lain sentiasa mendapat semua alat.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Permintaan lebih ringan: alat yang menapis dan membaca sentiasa ditawarkan; alat Processing, gaya, susun atur, penyuntingan, SAM dan data terbuka datang apabila ejen memuatkan kemahiran tugas itu. Aplikasi lain sentiasa mendapat semua alat.</translation>

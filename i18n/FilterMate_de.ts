@@ -1451,6 +1451,16 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <translation>Werkzeuge einer Aufgabe erst anbieten, wenn der Agent ihre Anweisungen lädt</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Nur die Werkzeuge anbieten, die eine Anfrage braucht (der Agent ergänzt die übrigen)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Schlankere Anfragen: Die Werkzeuge zum Filtern, Lesen und Anzeigen werden immer angeboten; die übrigen sieht der Agent als Liste mit je einer Zeile und ergänzt die, die eine Anfrage braucht. Andere Anwendungen erhalten immer alle Werkzeuge.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Schlankere Anfragen: Die Werkzeuge zum Filtern und Lesen werden immer angeboten; die für Processing, Stile, Layouts, Bearbeitung, SAM und offene Daten kommen hinzu, wenn der Agent den Skill dieser Aufgabe lädt. Andere Anwendungen erhalten immer alle Werkzeuge.</translation>

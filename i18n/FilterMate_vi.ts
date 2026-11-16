@@ -1451,6 +1451,16 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Cung cấp công cụ của một tác vụ khi tác tử tải hướng dẫn của tác vụ đó</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1155"/>
+        <source>Offer only the tools a request needs (the agent adds the others)</source>
+        <translation>Chỉ cung cấp các công cụ mà yêu cầu cần (tác tử bổ sung phần còn lại)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1158"/>
+        <source>Lighter requests: the tools that filter, read and show are always offered; the agent sees a one-line list of the others and adds those a request needs. Other applications always get every tool.</source>
+        <translation>Yêu cầu nhẹ hơn: các công cụ lọc, đọc và hiển thị luôn được cung cấp; tác tử thấy các công cụ còn lại trong một dòng cho mỗi công cụ và bổ sung những công cụ mà yêu cầu cần. Các ứng dụng khác luôn nhận được mọi công cụ.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1093"/>
         <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
         <translation>Yêu cầu nhẹ hơn: các công cụ lọc và đọc luôn được cung cấp; các công cụ Processing, kiểu, bố cục, chỉnh sửa, SAM và dữ liệu mở sẽ có khi tác tử tải kỹ năng của tác vụ đó. Các ứng dụng khác luôn nhận được mọi công cụ.</translation>

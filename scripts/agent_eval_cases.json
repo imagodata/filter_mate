@@ -128,5 +128,9 @@
     "call_args": {"text": "La couche des parcelles s'appelle parcelles, clé : champ section."}}]],
   "forbid": ["export_layers", "apply_filter"]},
  {"id": "note_not_kept_unasked", "prompt": "Quelles valeurs prend le champ nom des communes ?", "expect": [],
-  "forbid": ["add_project_note", "export_layers"]}
+  "forbid": ["add_project_note", "export_layers"]},
+ {"id": "index_tool_not_refused", "prompt": "Regroupe les routes et les cours d'eau dans un groupe Réseau.",
+  "expect": [[{"tool": "group_layers", "args": {"layers": ["routes", "cours_eau"], "group": {"contains": ["Réseau"]}},
+    "call_args": {"layers": ["routes", "cours_eau"], "group": "Réseau"}}]],
+  "forbid": ["remove_layers"]}
 ]}
