@@ -1066,9 +1066,9 @@ def check_panel_options(project, gpkg, shp, work):
     try:
         check("panels: the running panel is found", panel_options.running_dock() is dock)
         wrong = refused(panel_options.set_layer_options, dock,
-                        [{"layer": "communes", "exploring": {"single_selection_expression": '"nmo"'}}])
+                        [{"layer": "communes", "exploring": {"custom_selection_expression": '"nmo"'}}])
         bad = refused(panel_options.set_layer_options, dock,
-                      [{"layer": "communes", "exploring": {"single_selection_expression": '"nom" ||'}}])
+                      [{"layer": "communes", "exploring": {"custom_selection_expression": '"nom" ||'}}])
         check("panels: a field the layer lacks and a broken expression are refused",
               "unknown field nmo" in wrong and bad != "" and not dock.settingLayerVariable.emit.called, (wrong, bad))
         recorder = EffectsRecorder()

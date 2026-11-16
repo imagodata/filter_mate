@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Any, Callable, Collection, Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Collection, Dict, List, Mapping, Optional, Sequence, Tuple, Union
 
 EXPRESSIONS = ("single_selection_expression", "multiple_selection_expression", "custom_selection_expression")
 GROUPBOXES = ("single_selection", "multiple_selection", "custom_selection")
@@ -41,8 +41,12 @@ _EXPORT_BOXES = {name: "has_" + name for name in (
     "layers_to_export", "projection_to_export", "styles_to_export", "datatype_to_export", "output_folder_to_export",
     "zip_to_export")}
 _EXPORT_FLAGS = tuple(_EXPORT_BOXES.values()) + ("batch_output_folder", "batch_zip")
-_FLAGS = ("is_tracking", "is_linking", "has_layers_to_filter", "has_geometric_predicates", "has_combine_operator",
-          "has_buffer_value", "has_buffer_type")
+_EXPLORING_FLAGS = ("is_tracking", "is_linking")
+_FILTERING_FLAGS = ("has_layers_to_filter", "has_geometric_predicates", "has_combine_operator", "has_buffer_value",
+                    "has_buffer_type")
+# The panel keeps a field of the layer for these two, and puts its key field back otherwise when the layer is chosen
+# (ui/controllers/exploring_controller.py, _reset_layer_expressions); an expression goes in the custom selection.
+FIELD_ONLY = ("single_selection_expression", "multiple_selection_expression")
 
 
 @dataclass(frozen=True)
@@ -114,9 +118,11 @@ def _ticked(values: Dict[str, Any], given: Mapping[str, Any], boxes: Mapping[str
 
 def check_layer_changes(exploring: Mapping[str, Any], filtering: Mapping[str, Any], *, layer: LayerFacts,
                         layers: Sequence[LayerFacts], predicates: Sequence[str],
-                        expression_problem: Callable[[str], str]) -> Tuple[Dict[str, Dict[str, Any]], List[str]]:
+                        expression_problem: Callable[[str], str],
+                        fields: Collection[str]) -> Tuple[Dict[str, Dict[str, Any]], List[str]]:
     """``({"exploring": {key: value}, "filtering": {...}}, problems)`` for the options of ``layer``; nothing when one
-    is wrong. ``expression_problem``: why an expression does not hold for the layer, "" when it does."""
+    is wrong. ``expression_problem``: why an expression does not hold for the layer, "" when it does; ``fields``: the
+    names of its fields."""
     if not layer.vector:
         return {}, [f"{layer.name}: only a vector layer has these options"]
     problems: List[str] = []
@@ -127,16 +133,20 @@ def check_layer_changes(exploring: Mapping[str, Any], filtering: Mapping[str, An
                 problems.append(f"{key}: an expression")
             elif len(value) > MAX_EXPRESSION:
                 problems.append(f"{key}: at most {MAX_EXPRESSION} characters")
+            elif key in FIELD_ONLY and value.strip().strip('"') not in fields:
+                problems.append(f"{key}: a field of the layer (the panel keeps a field here; an expression goes in "
+                                "custom_selection_expression)")
             else:
                 problem = expression_problem(value)
                 if problem:
                     problems.append(f"{key}: {problem}")
         elif key == "current_exploring_groupbox":
             _one_of(key, value, GROUPBOXES, problems)
-        elif key in _FLAGS:
+        elif key in _EXPLORING_FLAGS:
             _flag(key, value, problems)
         else:
-            problems.append(f"{key}: not an option of a layer")
+            problems.append(f"{key}: not an option of EXPLORING" if key in FILTERING_KEYS
+                            else f"{key}: not an option of a layer")
             continue
         clean["exploring"][key] = value
     for key, value in filtering.items():
@@ -158,10 +168,11 @@ def check_layer_changes(exploring: Mapping[str, Any], filtering: Mapping[str, An
         elif key == "buffer_segments":
             if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= MAX_SEGMENTS:
                 problems.append(f"{key}: a whole number from 1 to {MAX_SEGMENTS}")
-        elif key in _FLAGS:
+        elif key in _FILTERING_FLAGS:
             _flag(key, value, problems)
         else:
-            problems.append(f"{key}: not an option of a layer")
+            problems.append(f"{key}: not an option of FILTERING" if key in EXPLORING_KEYS
+                            else f"{key}: not an option of a layer")
             continue
         clean["filtering"][key] = value
     if problems:
@@ -170,11 +181,22 @@ def check_layer_changes(exploring: Mapping[str, Any], filtering: Mapping[str, An
     return {group: values for group, values in clean.items() if values}, []
 
 
-def check_export_changes(changes: Mapping[str, Any], *, layers: Sequence[LayerFacts], formats: Collection[str],
+def _format(value: Any, formats: Union[Mapping[str, str], Collection[str]]) -> str:
+    """The name the panel shows for ``value``, "" when FilterMate exports no such format."""
+    if not isinstance(value, str):
+        return ""
+    names = formats if isinstance(formats, Mapping) else {name: name for name in formats}
+    by_case = {alias.upper(): name for alias, name in names.items()}
+    return names.get(value) or by_case.get(value.upper(), "")
+
+
+def check_export_changes(changes: Mapping[str, Any], *, layers: Sequence[LayerFacts],
+                         formats: Union[Mapping[str, str], Collection[str]],
                          crs_problem: Callable[[str], str],
                          folder_problem: Callable[[str], str]) -> Tuple[Dict[str, Any], List[str]]:
     """The export options of the project, under the keys the project keeps; nothing when one is wrong.
-    ``formats``: those FilterMate exports; ``crs_problem`` / ``folder_problem``: why a CRS or a folder does not do,
+    ``formats``: those FilterMate exports, or its names and aliases -> the name its panel shows (kept under that name,
+    whatever the case); ``crs_problem`` / ``folder_problem``: why a CRS or a folder does not do,
     "" when it does."""
     problems: List[str] = []
     clean: Dict[str, Any] = {}
@@ -191,8 +213,9 @@ def check_export_changes(changes: Mapping[str, Any], *, layers: Sequence[LayerFa
         elif key == "styles_to_export":
             _one_of(key, value, STYLE_FORMATS, problems)
         elif key == "datatype_to_export":
-            if value not in formats:
-                problems.append(f"{key}: {value} is not a format FilterMate exports")
+            value = _format(value, formats)
+            if not value:
+                problems.append(f"{key}: {changes[key]} is not a format FilterMate exports")
         elif key == "output_folder_to_export":
             problem = folder_problem(value) if isinstance(value, str) else "a folder"
             if problem:

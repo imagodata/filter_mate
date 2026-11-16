@@ -915,8 +915,8 @@ def build_server(client: FilterMateClient) -> Any:
         reason: Annotated[str, Field(max_length=500, description="Why, in the language of the user")] = "",
     ) -> Dict[str, Any]:
         """Set, all or none, what layers show in FilterMate's EXPLORING panel and their FILTERING options, as the user
-        would in the panel. exploring: single_selection_expression, multiple_selection_expression,
-        custom_selection_expression (QGIS expressions of the layer), current_exploring_groupbox (single_selection,
+        would in the panel. exploring: single_selection_expression and multiple_selection_expression (a field of the
+        layer), custom_selection_expression (a QGIS expression), current_exploring_groupbox (single_selection,
         multiple_selection, custom_selection), is_tracking, is_linking. filtering: layers_to_filter,
         geometric_predicates, source_layer_combine_operator and other_layers_combine_operator (AND, AND NOT, OR),
         buffer_value (metres), buffer_type (Round, Flat, Square), buffer_segments, and the has_... box of each.

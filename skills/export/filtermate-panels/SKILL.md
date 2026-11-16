@@ -18,10 +18,11 @@ them, all or none, as the user would in the panel, undone with the turn. They ne
 
 1. Read the layer with describe_layer, and its values with field_values when the user shares them; without values,
    start from the names of the fields and the display expression of QGIS.
-2. Single selection: a readable label, unique when possible: a name, or a name with its code, as
-   `"nom" || ' (' || "code_insee" || ')'`. Never a technical id (fid, uuid, a numeric key) when a name exists.
-3. Multiple selection: a short field that sorts and has few values (a status, a type, a zone), so that ticking
-   several makes sense. Custom selection: an expression the user will refine, often the same label.
+2. Single selection: the most readable field, unique when possible (a name, a label). Never a technical id (fid,
+   uuid, a numeric key) when a name exists. The panel keeps a field here, not an expression.
+3. Multiple selection: a field too, short, that sorts and has few values (a status, a type, a zone), so that ticking
+   several makes sense. Custom selection: any expression, such as a label made of two fields,
+   `"nom" || ' (' || "code_insee" || ')'`.
 4. The fields that link the layers (a zone id present in most layers) come first: they filter the whole network on
    one zone.
 5. A real choice between two labels: in the chat, ask with ask_user. For the whole project: one set_layer_options

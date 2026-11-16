@@ -2214,7 +2214,7 @@
   {
    "name": "set_layer_options",
    "title": "Set the options of layers in the panels",
-   "description": "Set, all or none, what layers show in FilterMate's EXPLORING panel and their FILTERING options, as the user would in the panel. exploring: single_selection_expression, multiple_selection_expression, custom_selection_expression (QGIS expressions of the layer), current_exploring_groupbox (single_selection, multiple_selection, custom_selection), is_tracking, is_linking. filtering: layers_to_filter, geometric_predicates, source_layer_combine_operator and other_layers_combine_operator (AND, AND NOT, OR), buffer_value (metres), buffer_type (Round, Flat, Square), buffer_segments, and the has_... box of each. Returns changed and shown_in_panel.",
+   "description": "Set, all or none, what layers show in FilterMate's EXPLORING panel and their FILTERING options, as the user would in the panel. exploring: single_selection_expression and multiple_selection_expression (a field of the layer), custom_selection_expression (a QGIS expression), current_exploring_groupbox (single_selection, multiple_selection, custom_selection), is_tracking, is_linking. filtering: layers_to_filter, geometric_predicates, source_layer_combine_operator and other_layers_combine_operator (AND, AND NOT, OR), buffer_value (metres), buffer_type (Round, Flat, Square), buffer_segments, and the has_... box of each. Returns changed and shown_in_panel.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,

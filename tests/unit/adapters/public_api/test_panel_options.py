@@ -65,13 +65,21 @@ def project():
 def dock():
     exporting = {"HAS_LAYERS_TO_EXPORT": False, "LAYERS_TO_EXPORT": [], "HAS_DATATYPE_TO_EXPORT": False,
                  "DATATYPE_TO_EXPORT": "GPKG", "BATCH_ZIP": False}
-    return SimpleNamespace(
+    calls = MagicMock()
+    has = {key: {"WIDGET": MagicMock()} for key in ("HAS_LAYERS_TO_EXPORT", "HAS_PROJECTION_TO_EXPORT",
+                                                     "HAS_STYLES_TO_EXPORT", "HAS_DATATYPE_TO_EXPORT",
+                                                     "HAS_OUTPUT_FOLDER_TO_EXPORT", "HAS_ZIP_TO_EXPORT")}
+    dock = SimpleNamespace(
+        calls=calls, widgets={"EXPORTING": has},
+        current_layer_changed=calls.current_layer_changed, resettingLayerVariable=MagicMock(),
+        exporting_populate_combobox=calls.exporting_populate_combobox,
         widgets_initialized=True, current_layer=None,
         PROJECT_LAYERS={COMMUNES.id(): _props(), ROUTES.id(): _props()},
         settingLayerVariable=MagicMock(), _synchronize_layer_widgets=MagicMock(),
         _reset_exploring_button_states=MagicMock(), _reset_filtering_button_states=MagicMock(),
         project_props={"EXPORTING": exporting}, CONFIG_DATA={"CURRENT_PROJECT": {"EXPORTING": exporting}},
-        setProjectVariablesEvent=MagicMock(), set_exporting_properties=MagicMock())
+        setProjectVariablesEvent=calls.setProjectVariablesEvent, set_exporting_properties=calls.set_exporting_properties)
+    return dock
 
 
 @pytest.fixture(autouse=True)
@@ -80,7 +88,9 @@ def qgis_reads(monkeypatch):
     monkeypatch.setattr(panel_options, "_expression_problem",
                         lambda layer, text: "unknown field nmo" if "nmo" in text else "")
     monkeypatch.setattr(panel_options, "_crs_problem", lambda value: "")
-    monkeypatch.setattr(panel_options, "_formats", lambda: {"GPKG", "GeoJSON"})
+    monkeypatch.setattr(panel_options, "_driver_map", lambda: {"GPKG": "GPKG", "GEOJSON": "GeoJSON", "JSON": "GeoJSON",
+                                                               "SHP": "ESRI Shapefile"})
+    monkeypatch.setattr(panel_options, "_field_names", lambda layer: ["fid", "nom", "insee"])
     monkeypatch.setattr(panel_options, "_project_saved", lambda: True)
 
 
@@ -90,8 +100,8 @@ def test_current_layer_is_saved_and_shown(dock, project):
         dock, [{"layer": "communes", "exploring": {"single_selection_expression": '"nom"'}}], project=project)
     assert dock.PROJECT_LAYERS[COMMUNES.id()]["exploring"]["single_selection_expression"] == '"nom"'
     dock.settingLayerVariable.emit.assert_called_once_with(COMMUNES, [("exploring", "single_selection_expression")])
-    dock._synchronize_layer_widgets.assert_called_once_with(COMMUNES, dock.PROJECT_LAYERS[COMMUNES.id()])
-    dock._reset_exploring_button_states.assert_called_once()
+    dock.current_layer_changed.assert_called_once_with(COMMUNES, manual_change=True)
+    dock._reset_filtering_button_states.assert_not_called()  # it empties the predicates and the buffer
     assert answer == {"changed": [{"layer_name": "communes", "exploring": {"single_selection_expression": '"nom"'}}],
                       "shown_in_panel": True}
 
@@ -101,15 +111,15 @@ def test_other_layer_is_saved_not_shown(dock, project):
     answer = panel_options.set_layer_options(dock, [{"layer": "communes", "exploring": {"is_tracking": True}}],
                                              project=project)
     dock.settingLayerVariable.emit.assert_called_once_with(COMMUNES, [("exploring", "is_tracking")])
-    dock._synchronize_layer_widgets.assert_not_called()
+    dock.current_layer_changed.assert_not_called()
     assert answer["shown_in_panel"] is False
 
 
 def test_nothing_written_when_one_layer_is_wrong(dock, project):
-    with pytest.raises(ValueError, match="communes: single_selection_expression: unknown field nmo"):
+    with pytest.raises(ValueError, match="communes: custom_selection_expression: unknown field nmo"):
         panel_options.set_layer_options(
             dock, [{"layer": "routes", "exploring": {"is_tracking": True}},
-                   {"layer": "communes", "exploring": {"single_selection_expression": '"nmo"'}}], project=project)
+                   {"layer": "communes", "exploring": {"custom_selection_expression": '"nmo"'}}], project=project)
     dock.settingLayerVariable.emit.assert_not_called()
     assert dock.PROJECT_LAYERS[ROUTES.id()]["exploring"]["is_tracking"] is False
 
@@ -145,8 +155,10 @@ def test_export_options_are_saved_and_shown(dock, project, tmp_path):
     exporting = dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"]
     assert exporting["LAYERS_TO_EXPORT"] == [COMMUNES.id()] and exporting["HAS_OUTPUT_FOLDER_TO_EXPORT"] is True
     assert exporting is dock.project_props["EXPORTING"]
-    dock.setProjectVariablesEvent.assert_called_once()
-    dock.set_exporting_properties.assert_called_once()
+    names = [call[0] for call in dock.calls.mock_calls]
+    assert names == ["exporting_populate_combobox", "set_exporting_properties", "setProjectVariablesEvent"]
+    dock.widgets["EXPORTING"]["HAS_LAYERS_TO_EXPORT"]["WIDGET"].setChecked.assert_called_with(True)
+    dock.widgets["EXPORTING"]["HAS_OUTPUT_FOLDER_TO_EXPORT"]["WIDGET"].setChecked.assert_called_with(True)
     assert answer["changed"]["output_folder_to_export"] == str(tmp_path) and answer["saved"] is True
 
 
@@ -166,7 +178,7 @@ def test_export_options_read_with_names(dock, project):
     dock.project_props["EXPORTING"]["LAYERS_TO_EXPORT"] = [ROUTES.id()]
     answer = panel_options.export_options(dock, project=project)
     assert answer["layers_to_export"] == ["routes"] and answer["datatype_to_export"] == "GPKG"
-    assert answer["formats"] == ["GPKG", "GeoJSON"] and answer["saved"] is True
+    assert answer["formats"] == ["ESRI Shapefile", "GPKG", "GeoJSON"] and answer["saved"] is True
 
 
 def test_no_panel():
@@ -191,12 +203,12 @@ def test_layer_state_restored_as_the_panel_saves_it(dock, project):
     panel_options.set_layer_options(dock, [{"layer": "communes", "exploring": {"single_selection_expression": '"nom"'}}],
                                     project=project)
     dock.settingLayerVariable.emit.reset_mock()
-    dock._synchronize_layer_widgets.reset_mock()
+    dock.current_layer_changed.reset_mock()
     assert panel_options.restore_layer_state(dock, COMMUNES.id(), before, project=project) is True
     assert dock.PROJECT_LAYERS[COMMUNES.id()]["exploring"]["single_selection_expression"] == '"fid"'
     saved = dock.settingLayerVariable.emit.call_args.args
     assert saved[0] is COMMUNES and ("exploring", "single_selection_expression") in saved[1]
-    dock._synchronize_layer_widgets.assert_called_once()
+    dock.current_layer_changed.assert_called_once_with(COMMUNES, manual_change=True)
     assert panel_options.restore_layer_state(dock, "gone", before, project=project) is False
 
 
@@ -224,3 +236,53 @@ def test_a_restored_state_is_exactly_the_one_kept(dock, project):
     panel_options.set_export_options(dock, {"styles_to_export": "SLD"}, project=project)
     panel_options.restore_export_state(dock, kept)
     assert panel_options.export_state(dock) == kept
+
+
+def test_the_answer_is_what_the_panel_keeps(dock, project):
+    """The panel resets a group whose box is unticked: the answer says what it holds, not what was asked."""
+    def panel_resets_datatype():
+        dock.project_props["EXPORTING"]["DATATYPE_TO_EXPORT"] = "GPKG"
+    dock.set_exporting_properties = panel_resets_datatype
+    answer = panel_options.set_export_options(dock, {"datatype_to_export": "GeoJSON", "has_datatype_to_export": False},
+                                              project=project)
+    assert answer["changed"]["datatype_to_export"] == "GPKG"
+
+
+@pytest.mark.parametrize("value, stored", [("SHP", "ESRI Shapefile"), ("geojson", "GeoJSON"), ("GPKG", "GPKG")])
+def test_formats_are_stored_as_the_panel_names_them(dock, project, value, stored):
+    panel_options.set_export_options(dock, {"datatype_to_export": value}, project=project)
+    assert dock.project_props["EXPORTING"]["DATATYPE_TO_EXPORT"] == stored
+
+
+@pytest.mark.parametrize("value", ["DXF", ["GPKG"], {"a": 1}, 3])
+def test_a_wrong_format_is_refused_not_crashed(dock, project, value):
+    with pytest.raises(ValueError, match="datatype_to_export"):
+        panel_options.set_export_options(dock, {"datatype_to_export": value}, project=project)
+
+
+def test_single_and_multiple_selection_take_a_field(dock, project):
+    """2026-11-16, review: the panel puts back its key field when either is not a field of the layer."""
+    with pytest.raises(ValueError, match="single_selection_expression: a field of the layer"):
+        panel_options.set_layer_options(
+            dock, [{"layer": "communes", "exploring": {"single_selection_expression": '"nom" || "insee"'}}],
+            project=project)
+    panel_options.set_layer_options(dock, [{"layer": "communes", "exploring": {
+        "multiple_selection_expression": "insee", "custom_selection_expression": '"nom" || \' (\' || "insee" || \')\''}}],
+        project=project)
+    assert dock.PROJECT_LAYERS[COMMUNES.id()]["exploring"]["multiple_selection_expression"] == "insee"
+
+
+def test_a_removed_box_is_removed_from_storage_too(dock, project):
+    before = panel_options.layer_state(dock, COMMUNES.id())
+    panel_options.set_layer_options(dock, [{"layer": "communes", "filtering": {"geometric_predicates": ["Intersect"]}}],
+                                    project=project)
+    panel_options.restore_layer_state(dock, COMMUNES.id(), before, project=project)
+    dock.resettingLayerVariable.emit.assert_called_once_with(
+        COMMUNES, [("filtering", "geometric_predicates"), ("filtering", "has_geometric_predicates")])
+
+
+def test_nothing_to_save_emits_nothing(dock, project):
+    """An empty list of keys tells FilterMate to save every option of the layer."""
+    dock.settingLayerVariable.emit.reset_mock()
+    panel_options.restore_layer_state(dock, COMMUNES.id(), {"exploring": {}, "filtering": {}}, project=project)
+    dock.settingLayerVariable.emit.assert_not_called()

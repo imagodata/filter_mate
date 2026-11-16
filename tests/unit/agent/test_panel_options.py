@@ -11,6 +11,7 @@ COMMUNES = LayerFacts("communes_a1", "communes", True)
 ROUTES = LayerFacts("routes_c3", "routes", True)
 MNT = LayerFacts("mnt_f6", "mnt", False)
 LAYERS = [COMMUNES, ROUTES, MNT]
+FIELDS = ["fid", "nom", "nmo_like", "insee"]
 
 
 def no_problem(_):
@@ -20,7 +21,7 @@ def no_problem(_):
 def test_exploring_values_are_kept_as_stored():
     clean, problems = check_layer_changes(
         {"single_selection_expression": '"nom"', "current_exploring_groupbox": "multiple_selection", "is_tracking": True},
-        {}, layer=COMMUNES, layers=LAYERS, predicates=PREDICATES, expression_problem=no_problem)
+        {}, layer=COMMUNES, layers=LAYERS, predicates=PREDICATES, expression_problem=no_problem, fields=FIELDS)
     assert problems == [] and clean["exploring"] == {"single_selection_expression": '"nom"',
                                                      "current_exploring_groupbox": "multiple_selection",
                                                      "is_tracking": True}
@@ -28,15 +29,16 @@ def test_exploring_values_are_kept_as_stored():
 
 def test_bad_expression_refuses_the_whole_call():
     clean, problems = check_layer_changes(
-        {"single_selection_expression": '"nmo"', "is_tracking": True}, {}, layer=COMMUNES, layers=LAYERS,
-        predicates=PREDICATES, expression_problem=lambda text: "unknown field nmo" if "nmo" in text else "")
-    assert clean == {} and problems == ["single_selection_expression: unknown field nmo"]
+        {"custom_selection_expression": '"nmo"', "is_tracking": True}, {}, layer=COMMUNES, layers=LAYERS,
+        predicates=PREDICATES, expression_problem=lambda text: "unknown field nmo" if "nmo" in text else "",
+        fields=FIELDS)
+    assert clean == {} and problems == ["custom_selection_expression: unknown field nmo"]
 
 
 def test_filtering_values_tick_their_box_and_store_ids():
     clean, problems = check_layer_changes(
         {}, {"layers_to_filter": ["routes"], "geometric_predicates": ["Intersect"], "buffer_value": 50},
-        layer=COMMUNES, layers=LAYERS, predicates=PREDICATES, expression_problem=no_problem)
+        layer=COMMUNES, layers=LAYERS, predicates=PREDICATES, expression_problem=no_problem, fields=FIELDS)
     assert problems == []
     assert clean["filtering"] == {"layers_to_filter": ["routes_c3"], "has_layers_to_filter": True,
                                   "geometric_predicates": ["Intersect"], "has_geometric_predicates": True,
@@ -45,7 +47,7 @@ def test_filtering_values_tick_their_box_and_store_ids():
 
 def test_a_box_given_with_its_value_is_kept():
     clean, problems = check_layer_changes({}, {"buffer_type": "Flat", "has_buffer_type": False}, layer=COMMUNES,
-                                          layers=LAYERS, predicates=PREDICATES, expression_problem=no_problem)
+                                          layers=LAYERS, predicates=PREDICATES, expression_problem=no_problem, fields=FIELDS)
     assert problems == [] and clean["filtering"] == {"buffer_type": "Flat", "has_buffer_type": False}
 
 
@@ -60,10 +62,11 @@ def test_a_box_given_with_its_value_is_kept():
     ({"other_layers_combine_operator": "XOR"}, "other_layers_combine_operator: one of AND, AND NOT, OR"),
     ({"has_buffer_value": "yes"}, "has_buffer_value: true or false"),
     ({"bogus": 1}, "bogus: not an option of a layer"),
+    ({"is_tracking": True}, "is_tracking: not an option of FILTERING"),
 ])
 def test_filtering_refusals(filtering, problem):
     clean, problems = check_layer_changes({}, filtering, layer=COMMUNES, layers=LAYERS, predicates=PREDICATES,
-                                          expression_problem=no_problem)
+                                          expression_problem=no_problem, fields=FIELDS)
     assert clean == {} and problems and problems[0].startswith(problem), problems
 
 
@@ -71,16 +74,18 @@ def test_filtering_refusals(filtering, problem):
     ({"current_exploring_groupbox": "everything"}, "current_exploring_groupbox: one of single_selection"),
     ({"single_selection_expression": "x" * 1001}, "single_selection_expression: at most 1000 characters"),
     ({"is_selecting": True}, "is_selecting: not an option of a layer"),
+    ({"has_layers_to_filter": True}, "has_layers_to_filter: not an option of EXPLORING"),
+    ({"single_selection_expression": '"nom" || "insee"'}, "single_selection_expression: a field of the layer"),
 ])
 def test_exploring_refusals(exploring, problem):
     clean, problems = check_layer_changes(exploring, {}, layer=COMMUNES, layers=LAYERS, predicates=PREDICATES,
-                                          expression_problem=no_problem)
+                                          expression_problem=no_problem, fields=FIELDS)
     assert clean == {} and problems[0].startswith(problem), problems
 
 
 def test_a_raster_layer_is_refused():
     clean, problems = check_layer_changes({"is_tracking": True}, {}, layer=MNT, layers=LAYERS, predicates=PREDICATES,
-                                          expression_problem=no_problem)
+                                          expression_problem=no_problem, fields=FIELDS)
     assert clean == {} and problems == ["mnt: only a vector layer has these options"]
 
 
@@ -114,7 +119,7 @@ def test_two_layers_of_one_name_are_named_as_such():
     twins = [COMMUNES, LayerFacts("communes_b2", "communes", True)]
     assert resolve_layer("communes", twins) is None and resolve_layer("communes_b2", twins).layer_id == "communes_b2"
     clean, problems = check_layer_changes({}, {"layers_to_filter": ["communes"]}, layer=ROUTES, layers=twins + [ROUTES],
-                                          predicates=PREDICATES, expression_problem=no_problem)
+                                          predicates=PREDICATES, expression_problem=no_problem, fields=FIELDS)
     assert clean == {} and problems == ["layers_to_filter: two layers are named communes, give its id"]
 
 

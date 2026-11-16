@@ -65,10 +65,34 @@ def _folder_problem(path: str) -> str:
     return "" if os.access(path, os.W_OK) else "a folder FilterMate cannot write in"
 
 
-def _formats() -> set:
-    """The export formats FilterMate takes: the names and aliases of its drivers."""
+def _driver_map() -> Dict[str, str]:
     from ...core.export.layer_exporter import LayerExporter
-    return set(LayerExporter.DRIVER_MAP) | set(LayerExporter.DRIVER_MAP.values())
+    return dict(LayerExporter.DRIVER_MAP)
+
+
+def _formats() -> Dict[str, str]:
+    """The export formats FilterMate takes, each name and alias -> the driver name its panel shows."""
+    drivers = _driver_map()
+    return dict({name: name for name in drivers.values()}, **drivers)
+
+
+def _field_names(layer) -> List[str]:
+    return list(layer.fields().names())
+
+
+def _show(dock, layer) -> None:
+    """The panel shows ``layer`` again from what it keeps, by its own change of layer: the FILTERING widgets synced
+    from the options, EXPLORING reloaded, its active selection mode, the buttons (2026-11-16, review: a reset of the
+    filtering buttons emptied the predicates and the buffer, and the next Filter read the empty widgets)."""
+    dock.current_layer_changed(layer, manual_change=True)
+
+
+def _is_current(dock, layer_id: str) -> bool:
+    current = getattr(dock, "current_layer", None)
+    try:
+        return current is not None and current.id() == layer_id
+    except RuntimeError:  # the layer of the panel was deleted meanwhile
+        return False
 
 
 def _project_saved() -> bool:
@@ -145,7 +169,8 @@ def set_layer_options(dock, layers: List[Dict[str, Any]], project=None) -> Dict[
         qgis_layer = project.mapLayer(target.layer_id)
         clean, found = check_layer_changes(
             item.get("exploring") or {}, item.get("filtering") or {}, layer=target, layers=facts, predicates=PREDICATES,
-            expression_problem=lambda text, qgis_layer=qgis_layer: _expression_problem(qgis_layer, text))
+            expression_problem=lambda text, qgis_layer=qgis_layer: _expression_problem(qgis_layer, text),
+            fields=_field_names(qgis_layer) if target.vector else ())
         problems += [problem if problem.startswith(f"{target.name}:") else f"{target.name}: {problem}"
                      for problem in found]
         if not found:
@@ -153,19 +178,18 @@ def set_layer_options(dock, layers: List[Dict[str, Any]], project=None) -> Dict[
     if problems:
         raise ValueError("; ".join(problems))
     changed, shown = [], False
-    current = getattr(dock, "current_layer", None)
     for target, qgis_layer, props, clean in planned:
         keys = []
         for group, values in clean.items():
             props.setdefault(group, {}).update(values)
             keys += [(group, key) for key in values]
-        dock.settingLayerVariable.emit(qgis_layer, keys)
-        if current is not None and current.id() == target.layer_id:
-            dock._synchronize_layer_widgets(qgis_layer, props)
-            dock._reset_exploring_button_states(props)
-            dock._reset_filtering_button_states(props)
+        if keys:  # an empty list would save every option of the layer
+            dock.settingLayerVariable.emit(qgis_layer, keys)
+        if _is_current(dock, target.layer_id):
+            _show(dock, qgis_layer)
             shown = True
-        said = {group: dict(values) for group, values in clean.items()}
+        # What the panel keeps now (it may have put a value back), for the keys asked.
+        said = {group: {key: props.get(group, {}).get(key) for key in values} for group, values in clean.items()}
         if "layers_to_filter" in said.get("filtering", {}):
             said["filtering"]["layers_to_filter"] = _names(said["filtering"]["layers_to_filter"], project)
         changed.append({"layer_name": target.name, **said})
@@ -177,6 +201,29 @@ def _exporting(dock) -> Dict[str, Any]:
     return exporting
 
 
+def _apply_export(dock, values: Dict[str, Any], removed: Sequence[str] = ()) -> Dict[str, Any]:
+    """Write export options the way the EXPORTING panel holds them, then save. The panel reads the state of a group
+    from its box, not from the options (2026-11-16, review: a group left unticked put its defaults back over the
+    values set): the boxes are ticked from the options first, the list of layers filled, then the widgets set."""
+    exporting = _exporting(dock)
+    exporting.update(values)
+    for key in removed:
+        exporting.pop(key, None)
+    for key in EXPORT_KEYS.values():
+        widget = ((getattr(dock, "widgets", None) or {}).get("EXPORTING", {}).get(key) or {}).get("WIDGET")
+        if key.startswith("HAS_") and widget is not None:
+            widget.blockSignals(True)
+            try:
+                widget.setChecked(bool(exporting.get(key)))
+            finally:
+                widget.blockSignals(False)
+    dock.exporting_populate_combobox()
+    dock.set_exporting_properties()
+    dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"] = exporting
+    dock.setProjectVariablesEvent()  # saved last: what the panel holds once its widgets are set
+    return exporting
+
+
 def export_options(dock, project=None) -> Dict[str, Any]:
     """How the project exports from the EXPORTING panel, with the formats FilterMate takes."""
     _checked(dock)
@@ -185,7 +232,7 @@ def export_options(dock, project=None) -> Dict[str, Any]:
     answer = {name: exporting[key] for name, key in EXPORT_KEYS.items() if key in exporting}
     if "layers_to_export" in answer:
         answer["layers_to_export"] = _names(answer["layers_to_export"], project)
-    return dict(answer, formats=sorted(_formats()), styles=list(STYLE_FORMATS), saved=_project_saved())
+    return dict(answer, formats=sorted(set(_formats().values())), styles=list(STYLE_FORMATS), saved=_project_saved())
 
 
 def set_export_options(dock, changes: Dict[str, Any], project=None) -> Dict[str, Any]:
@@ -198,13 +245,9 @@ def set_export_options(dock, changes: Dict[str, Any], project=None) -> Dict[str,
                                            crs_problem=_crs_problem, folder_problem=_folder_problem)
     if problems:
         raise ValueError("; ".join(problems))
-    exporting = _exporting(dock)
-    exporting.update(clean)
-    dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"] = exporting
-    dock.setProjectVariablesEvent()
-    dock.set_exporting_properties()
+    exporting = _apply_export(dock, clean)
     by_key = {key: name for name, key in EXPORT_KEYS.items()}
-    said = {by_key[key]: value for key, value in clean.items()}
+    said = {by_key[key]: exporting.get(key) for key in clean}  # what the panel keeps now
     if "layers_to_export" in said:
         said["layers_to_export"] = _names(said["layers_to_export"], project)
     saved = _project_saved()
@@ -244,20 +287,21 @@ def restore_layer_state(dock, layer_id: str, state: Dict[str, Dict[str, Any]], p
     layer = _project(project).mapLayer(layer_id)
     if not isinstance(props, dict) or layer is None:
         return False
-    keys = []
+    keys, removed = [], []
     for group, allowed in (("exploring", EXPLORING_KEYS), ("filtering", FILTERING_KEYS)):
         values = {key: value for key, value in (state.get(group) or {}).items() if key in allowed}
         stored = props.setdefault(group, {})
         stored.update(values)
         for key in [key for key in stored if key in allowed and key not in values]:
             del stored[key]  # a box the change added: the state is again exactly the one kept
+            removed.append((group, key))
         keys += [(group, key) for key in values]
-    dock.settingLayerVariable.emit(layer, keys)
-    current = getattr(dock, "current_layer", None)
-    if current is not None and current.id() == layer_id:
-        dock._synchronize_layer_widgets(layer, props)
-        dock._reset_exploring_button_states(props)
-        dock._reset_filtering_button_states(props)
+    if keys:  # an empty list would save every option of the layer
+        dock.settingLayerVariable.emit(layer, keys)
+    if removed:  # out of FilterMate's database and the variables of the layer too
+        dock.resettingLayerVariable.emit(layer, removed)
+    if _is_current(dock, layer_id):
+        _show(dock, layer)
     return True
 
 
@@ -275,10 +319,5 @@ def restore_export_state(dock, state: Dict[str, Any]) -> bool:
         return False
     exporting = _exporting(dock)
     kept = {key: value for key, value in state.items() if key in EXPORT_KEYS.values()}
-    exporting.update(kept)
-    for key in [key for key in exporting if key in EXPORT_KEYS.values() and key not in kept]:
-        del exporting[key]
-    dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"] = exporting
-    dock.setProjectVariablesEvent()
-    dock.set_exporting_properties()
+    _apply_export(dock, kept, [key for key in exporting if key in EXPORT_KEYS.values() and key not in kept])
     return True

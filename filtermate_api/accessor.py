@@ -470,9 +470,6 @@ class MapContext:
     # {"layer_id", "name", "crs_authid", "count", "area_m2", "extent_wkt"} of the rasters with objects drawn
     # in the dock (the SAM targets of the PIPETTE group): what ``dock_objects`` of a raster selection uses.
     drawn_objects: List[Dict[str, Any]] = field(default_factory=list)
-    # The options of FilterMate's panels: by layer id ({"exploring": {...}, "filtering": {...}}), and the export ones.
-    panel_layers: Dict[str, Dict[str, Dict[str, Any]]] = field(default_factory=dict)
-    export_panel: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -963,6 +960,9 @@ class InMemoryAccessor:
     _redo_stack: List[HistoryStep] = field(default_factory=list)
     # Rows of ``MapContext.drawn_objects``: the rasters that have objects drawn in the dock.
     drawn_objects: List[Dict[str, Any]] = field(default_factory=list)
+    # The options of FilterMate's panels: by layer id ({"exploring": {...}, "filtering": {...}}), and the export ones.
+    panel_layers: Dict[str, Dict[str, Dict[str, Any]]] = field(default_factory=dict)
+    export_panel: Dict[str, Any] = field(default_factory=dict)
 
     def list_layers(self) -> List[LayerSummary]:
         return [self._with_active(layer) for layer in self.layers]
