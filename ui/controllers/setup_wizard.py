@@ -87,7 +87,7 @@ def _labels(facts: wizard.ProjectFacts) -> Dict[str, Dict[str, tuple]]:
                     "normal": (_tr("Normal"), ""), "hidpi": (_tr("Large (4K, Retina)"), "")},
         "language": {"auto": (_tr("As QGIS"), "")},
         "action_bar": {"bottom": (_tr("Bottom"), ""), "top": (_tr("Top"), ""), "left": (_tr("Left"), ""),
-                       "right": (_tr("Right"), "")},
+                       "right": (_tr("Right"), ""), "sections": (_tr("Under each section"), "")},
         "after": {"zoom": (_tr("Zoom to what is kept"), ""),
                   "history": (_tr("Keep the history of filters in the project"), ""),
                   "hints": (_tr("Show optimization tips"), ""),

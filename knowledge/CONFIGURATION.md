@@ -87,8 +87,11 @@ config.json
 ### Action Bar Position
 - **Key:** `APP.DOCKWIDGET.ACTION_BAR_POSITION`
 - **Default:** `bottom`
-- **Choices:** `top`, `bottom`, `left`, `right`
+- **Choices:** `top`, `bottom`, `left`, `right`, `sections`
 - When `left` or `right`: buttons stack vertically
+- When `sections`: no bar for all; each section shows its own buttons at the bottom of the dock while it is open
+  (FILTERING: Filter, Undo, Redo, Compare, Unfilter; EXPORTING: Export; CONFIGURATION: About)
+- A section opened in its own QGIS panel (right-click its header) takes its buttons with it, whatever the position
 
 ### Action Bar Vertical Alignment
 - **Key:** `APP.DOCKWIDGET.ACTION_BAR_VERTICAL_ALIGNMENT`

@@ -10847,6 +10847,34 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>Ouvrir {} dans son propre panneau</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="781"/>
+        <source>Open every section in its own panel</source>
+        <translation>Ouvrir chaque section dans son propre panneau</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>Regrouper avec {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>Fusionner {} dans FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>Tout fusionner dans FilterMate</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11580,6 +11608,11 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <location filename="../ui/controllers/setup_wizard.py" line="90"/>
         <source>Right</source>
         <translation>À droite</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>Sous chaque section</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
