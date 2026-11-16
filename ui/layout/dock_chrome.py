@@ -740,13 +740,9 @@ def _follow_sections(dock: Any) -> None:
         panels = getattr(dock, "_fm_panels", None)
         if panels is not None:
             panels.restore()
-            # The stack below shows when a section is left in it, and hides with the last one: a section turned
-            # on while the two others are in their panels was shown in a hidden stack, so nowhere.
-            panels.sections_changed()
-        else:
-            manager = getattr(dock, "_action_bar_manager", None)
-            if manager is not None:
-                manager.sync_sections()
+        manager = getattr(dock, "_action_bar_manager", None)
+        if manager is not None:
+            manager.sync_sections()
     except RuntimeError:  # the dock went away
         pass
     except Exception:

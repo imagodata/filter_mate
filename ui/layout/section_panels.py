@@ -496,14 +496,6 @@ class SectionPanels:
         if remember:
             _save(())
 
-    def sections_changed(self) -> None:
-        """A section was turned on or off (dock_chrome.apply_section_options): the buttons, the stack below and
-        the room of the dock follow, as after a section left or came back."""
-        try:
-            self._after_change()
-        except RuntimeError:  # the dock went away
-            pass
-
     def shutdown(self) -> None:
         """The plugin unloads: the sections go back to the dock and their panels go, what was apart stays saved."""
         self._closing = True
