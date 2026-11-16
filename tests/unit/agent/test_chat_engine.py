@@ -656,3 +656,25 @@ def test_a_listener_without_on_retry_is_fine():
     transport.emit(StreamFailure(ProviderError("server", "Overloaded")))
     transport.emit(turn(STOP_END, TextPart("ok")))
     assert listener.outcomes[0].status == "done" and len(transport.starts) == 2
+
+
+def test_a_tool_dropped_at_a_compaction_is_held_again():
+    """Token diet, lot 1: the executor answers "call use_tools first" for it, and use_tools may add it again."""
+    from core.agent.tool_catalog import ToolSpec
+    zoom = ToolSpec("zoom", "Zoom.", {"type": "object"})
+    session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), [READ], "S", core={READ.name})
+    executor = ToolExecutor([READ], {READ.name: lambda a: {}, "zoom": lambda a: {}})
+    executor.hold({"zoom": ["cartography"]})
+    released = []
+    engine = ChatEngine(session, executor, Transport(), Listener(), Checkpoint(), released=released.extend)
+    engine.offer_tools([zoom])
+    start = session.add_user_text
+
+    def compacted(text, context=""):
+        start(text, context)
+        session.dropped = ("zoom",)
+    session.add_user_text = compacted
+    engine.send("hello")
+    assert released == ["zoom"]
+    answer = executor.execute(call("zoom")).content
+    assert 'call use_tools with "zoom" first' in answer and '"cartography"' in answer

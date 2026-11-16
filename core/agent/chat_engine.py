@@ -111,8 +111,11 @@ class ChatEngine:
                  listener: ChatListener, checkpoint: Checkpoint,
                  defer: Callable[[Callable[[], None]], None] = lambda step: step(),
                  policy: Optional[PermissionPolicy] = None,
-                 delay: Callable[[float, Callable[[], None]], None] = lambda seconds, step: step()) -> None:
+                 delay: Callable[[float, Callable[[], None]], None] = lambda seconds, step: step(),
+                 released: Callable[[Sequence[str]], None] = lambda names: None) -> None:
         self._session = session
+        # Told the tools a compaction took out of the request (token diet, lot 1): use_tools may add them again.
+        self._released = released
         # Read at each call: the user may change the level, or allow a tool, while the conversation goes on.
         self._policy = policy if policy is not None else PermissionPolicy()
         self._executor = executor
@@ -157,6 +160,10 @@ class ChatEngine:
         self._tries = 0
         self._generation += 1
         self._session.add_user_text(text, context)
+        dropped = tuple(getattr(self._session, "dropped", ()) or ())
+        if dropped:
+            self._executor.withdraw(dropped)
+            self._released(dropped)
         self._request_model(self._generation)
         return True
 

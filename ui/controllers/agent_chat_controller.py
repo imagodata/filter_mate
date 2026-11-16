@@ -30,6 +30,7 @@ from ...core.agent.chat_setup import (
     BASEMAP_TOOL, ELEVATION_TOOL, IMAGERY_TOOL, OPEN_DATA_TOOL, OSM_TOOL, PLACE_TOOL, POPULATION_TOOL, SERVICE_TOOL,
     chat_instructions,
 )
+from ...core.agent.families import CORE
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
 from ...core.agent.connectors import PREFIX as CONNECTOR_PREFIX, ConnectorLoader, connector_entries, shown_title
 from ...core.agent.mcp_client import McpError
@@ -1626,6 +1627,8 @@ class AgentChatController(QObject):
             return tools, handlers, set()
         loader = self._connectors = ConnectorLoader(entries, self._connect, self._offer_connector) if entries else None
         later = {tool.name: tool for tool in tools if tool.name in hidden}
+        # What use_tools and load_skill take from; a tool a compaction takes out of the request comes back to it.
+        self._later, self._by_name = later, {tool.name: tool for tool in tools}
         load = handlers.get(LOAD_SKILL)
         if hidden:
             def offer(found):
@@ -1696,14 +1699,24 @@ class AgentChatController(QObject):
         # loads it (2026-11-14: each conversation waited for every connector, one that stalled among them).
         tools, handlers, held = self._families(values, tools, handlers, active)
         configured = parse_extra_domains(self._accessor().configured_domains())
+        index = getattr(self, "_index_tools", [])
         session = AgentSession(provider, tools, self._prompt(
-            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered,
-            getattr(self, "_index_tools", [])))
+            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered, index),
+            core=CORE if index else ())
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
         return ChatEngine(session, executor, QtTransport(self), self,
                           self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy,
-                          delay=lambda seconds, step: QTimer.singleShot(int(seconds * 1000), self._again(step)))
+                          delay=lambda seconds, step: QTimer.singleShot(int(seconds * 1000), self._again(step)),
+                          released=self._release_tools)
+
+    def _release_tools(self, names) -> None:
+        """Tools a compaction took out of the request: use_tools may add them again (token diet, lot 1)."""
+        later, by_name = getattr(self, "_later", None), getattr(self, "_by_name", {})
+        if later is not None:
+            for name in names:
+                if name in by_name:
+                    later[name] = by_name[name]
 
     @staticmethod
     def _chat_owned(handlers) -> dict:

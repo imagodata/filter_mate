@@ -623,3 +623,62 @@ class TestRequestUsage:
         from core.agent.messages import Usage, request_usage
         assert request_usage(Usage(5, 5), Usage(5, 5)) is None
         assert request_usage(None, Usage()) is None
+
+
+class TestToolsLeaveAtACompaction:
+    """Token diet, lot 1: a tool added and left unused for 3 requests leaves the request, at a compaction only (the
+    cache is lost then anyway); the core never leaves."""
+
+    TOOLS = {name: ToolSpec(name, f"{name} tool.", SCHEMA if name == "read" else {"type": "object"})
+             for name in ("read", "zoom", "style")}
+
+    def chat(self, budget=10**6):
+        return AgentSession(create_provider(ProviderConfig("anthropic", "m")), [self.TOOLS["read"]], "S",
+                            AgentLimits(max_history_chars=budget), core={"read"})
+
+    @staticmethod
+    def request(chat, text, *tools):
+        chat.add_user_text(text * 40)
+        for index, name in enumerate(tools):
+            chat.accept_turn(turn(STOP_TOOL_USE, call(name, f"c{index}")))
+            chat.add_tool_results([ToolResultPart(f"c{index}", "ok")])
+        chat.accept_turn(turn(STOP_END, TextPart("done")))
+
+    def test_an_unused_tool_leaves_at_a_compaction(self):
+        chat = self.chat()
+        self.request(chat, "a")
+        chat.offer([self.TOOLS["zoom"], self.TOOLS["style"]])
+        self.request(chat, "b", "zoom")
+        for text in "cde":
+            self.request(chat, text)
+        chat._limits = AgentLimits(max_history_chars=50)  # the next request compacts
+        chat.add_user_text("f")
+        assert chat.dropped == ("style", "zoom") and chat.tool_names == ("read",)
+
+    def test_a_tool_used_in_the_last_three_requests_stays(self):
+        chat = self.chat()
+        self.request(chat, "a")
+        chat.offer([self.TOOLS["zoom"], self.TOOLS["style"]])
+        self.request(chat, "b")
+        self.request(chat, "c", "zoom")
+        self.request(chat, "d")
+        chat._limits = AgentLimits(max_history_chars=50)
+        chat.add_user_text("e")
+        assert chat.dropped == ("style",) and chat.tool_names == ("read", "zoom")
+
+    def test_nothing_leaves_without_a_compaction(self):
+        chat = self.chat()
+        chat.offer([self.TOOLS["zoom"]])
+        for text in "abcdef":
+            self.request(chat, text)
+        assert chat.dropped == () and chat.tool_names == ("read", "zoom")
+
+    def test_the_core_never_leaves_and_without_core_nothing_does(self):
+        chat = AgentSession(create_provider(ProviderConfig("anthropic", "m")), [self.TOOLS["read"]], "S",
+                            AgentLimits(max_history_chars=10**6))  # the option off: no core
+        chat.offer([self.TOOLS["zoom"]])
+        for text in "abcde":
+            self.request(chat, text)
+        chat._limits = AgentLimits(max_history_chars=50)
+        chat.add_user_text("f")
+        assert chat.dropped == () and chat.tool_names == ("read", "zoom")
