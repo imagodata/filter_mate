@@ -2593,6 +2593,13 @@ def s_section_bars():
         QApplication.processEvents()
         check('sections: AGENT folded, no bar again', actions_shown() == [] and not bars.frame('filtering').isVisible(),
               str(actions_shown()))
+        open_section(d.EXPORTING)
+        d._fm_sections.open_top('agent')
+        QApplication.processEvents()
+        check('sections: AGENT open over EXPORTING, the row is the one of EXPORTING alone',
+              bars.frame('exporting').isVisible() and not bars.frame('filtering').isVisible(), str(actions_shown()))
+        d._fm_sections.open_top('exploring')
+        open_section(None)
     if action_button('qfieldcloud') is None:
         # A button that comes late, as QFieldCloud does: its extension puts it in the bar for all, after the dock.
         late = QPushButton(d.frame_actions)
@@ -3682,7 +3689,36 @@ def s_audit_theme_back_check():
     return waits(0.5)
 
 
-AUDIT_STEPS = [s_section_setup, s_vector_source, s_audit_theme, s_audit_theme_check, s_audit_theme_back_check,
+def s_audit_empty_bar():
+    """The buttons under their section and EXPORTING turned off: the bar for all stayed, empty, for the buttons
+    that went with the section."""
+    AUDIT['position'] = dock()._action_bar_manager.get_position()
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': 'sections', 'APP.OPTIONS.EXPORTING.enabled': False})
+    return waits(0.6)
+
+
+def s_audit_empty_bar_check():
+    d = dock()
+    open_section(None)
+    folded = d.frame_actions.isVisible()
+    open_section(d.FILTERING)
+    check('audit: the buttons under their section and EXPORTING turned off, no empty bar for all',
+          not folded and not d.frame_actions.isVisible() and action_button('filter').isVisible(),
+          f"nothing open={folded} filtering open={d.frame_actions.isVisible()} {actions_shown()}")
+    apply_settings({'APP.DOCKWIDGET.ACTION_BAR_POSITION': AUDIT['position'], 'APP.OPTIONS.EXPORTING.enabled': True})
+    return waits(0.6)
+
+
+def s_audit_empty_bar_back_check():
+    d = dock()
+    open_section(d.FILTERING)
+    check('audit: back to the bar for all with EXPORTING on, every button in it', d.frame_actions.isVisible()
+          and action_button('export').isVisible() and action_button('filter').isVisible(), str(actions_shown()))
+    return waits(0.2)
+
+
+AUDIT_STEPS = [s_section_setup, s_vector_source, s_audit_empty_bar, s_audit_empty_bar_check,
+               s_audit_empty_bar_back_check, s_audit_theme, s_audit_theme_check, s_audit_theme_back_check,
                s_audit_tab_behind, s_audit_tab_behind_check, s_audit_offer_check,
                s_audit_show_agent_check, s_audit_reopen_check, s_audit_stack_below_check, s_audit_merge_check,
                s_audit_buttons_check, s_audit_fronts_check]

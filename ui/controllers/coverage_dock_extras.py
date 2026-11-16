@@ -482,11 +482,17 @@ class CoverageDockExtras(QObject):
             from qgis.PyQt.QtCore import QTimer
         except ImportError:
             return
+        if getattr(self, '_icons_pending', False):
+            return  # a theme that follows QGIS refreshes the icons several times in a row: drawn once
+        self._icons_pending = True
         QTimer.singleShot(0, self._refresh_icons_safely)
 
     def _refresh_icons_safely(self) -> None:
+        self._icons_pending = False
         try:
             self._refresh_icons()
+            # The buttons the kinds of layer share: the icon manager just gave them their vector icon back.
+            self._set_kind_icons(self._strip_kind)
         except RuntimeError:  # the dock went away meanwhile
             pass
 

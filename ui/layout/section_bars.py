@@ -7,8 +7,9 @@
   dock while it is open; with none open below (EXPLORING alone) there is no bar, and it gets its room. With AGENT
   open, the buttons of FILTERING show: Undo, Redo and Compare walk the steps of the agent then.
 * A section in its own panel (ui/layout/section_panels.py) takes its buttons with it, whatever the position. The
-  bar for all, left with the buttons of the other sections, shows only while one of them acts: not for an Export
-  greyed out beside About.
+  bar for all at the bottom, left with the buttons of the other sections, shows only while the section of one of
+  them is open: not for an Export greyed out beside About. At the top or on a side it stays: coming and going
+  there would move what is under or beside it at each section opened.
 
 The buttons are those of the form, moved from a bar to another: what is wired to them keeps working.
 """
@@ -55,8 +56,9 @@ def bar_plan(position: str, detached: Iterable[str] = (), off: Iterable[str] = (
 def one_bar_serves(names: Iterable[str], open_key: Optional[str], off: Iterable[str] = (),
                    agent: bool = False) -> bool:
     """The bar for all is worth its room, once a section took its buttons to its own panel: one of the buttons
-    left in it acts. A button acts while its section is the one open below, when its section is turned off (what
-    stays of FILTERING: Undo, Redo and Compare) and, for these three, while ``agent`` walks its steps."""
+    left in it (``names``: those it shows, not the ones hidden with a section turned off) serves. A button serves
+    while its section is the one open below, when its section is turned off (what stays of FILTERING: Undo, Redo
+    and Compare) and, for these three, while ``agent`` walks its steps."""
     owners = {name: key for key, group in SECTION_BUTTONS.items() for name in group}
     gone = set(off)
     for name in names:
@@ -351,16 +353,21 @@ class SectionBars:
         for key, frame in self._frames.items():
             carries = bool(self._plan.get(key)) and any(not button.isHidden() for button in
                                                          self._buttons(self._plan[key]))
-            frame.setVisible(carries and (key in self._hosted or key == open_key
-                                          or (agent and key == "filtering")))
+            # With AGENT open and another section open below, that section keeps the row: two bars side by side
+            # would not fit, and the steps of the agent are undone from its thread too.
+            for_agent = agent and key == "filtering" and open_key in (None, "filtering")
+            frame.setVisible(carries and (key in self._hosted or key == open_key or for_agent))
         one_bar = getattr(self._dock, BAR_NAME, None)
         if one_bar is None:
             return
         if self.lent():
             self._managed_one_bar = True
-            names = [name for name in self._plan[ONE_BAR] if getattr(self._dock, name, None) is not None]
-            apart = self._position != SECTIONS_POSITION  # a section in its own panel, the others in the one bar
-            one_bar.setVisible(bool(names) and (not apart or one_bar_serves(names, open_key, self._off, agent)))
+            # What the bar shows: not the buttons hidden with a section turned off (an empty bar stayed for them).
+            names = [name for name in self._plan[ONE_BAR] if getattr(self._dock, name, None) is not None
+                     and not _hidden_by_code(getattr(self._dock, name))]
+            comes_and_goes = self._position == "bottom"  # elsewhere it would move what is under or beside it
+            one_bar.setVisible(bool(names) and (not comes_and_goes
+                                                or one_bar_serves(names, open_key, self._off, agent)))
         elif self._managed_one_bar:  # every button is back: the bar as it was
             self._managed_one_bar = False
             one_bar.setVisible(True)
