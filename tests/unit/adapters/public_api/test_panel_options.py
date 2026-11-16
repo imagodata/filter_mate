@@ -174,3 +174,38 @@ def test_no_panel():
     assert "Open the FilterMate panel first" in panel_options.dock_problem(SimpleNamespace(widgets_initialized=False))
     with pytest.raises(ValueError, match="Open the FilterMate panel first"):
         panel_options.export_options(None)
+
+
+# --- what the turn keeps to undo them (adapters/agent/turn_effects.py) ------------------------------------------------
+
+def test_layer_state_keeps_only_the_options_an_agent_sets(dock):
+    dock.PROJECT_LAYERS[COMMUNES.id()]["filtering"]["layers_to_filter"] = [ROUTES.id()]
+    state = panel_options.layer_state(dock, COMMUNES.id())
+    assert "is_selecting" not in state["exploring"] and state["filtering"]["layers_to_filter"] == [ROUTES.id()]
+    assert panel_options.layer_state(dock, "gone") is None and panel_options.layer_state(None, COMMUNES.id()) is None
+
+
+def test_layer_state_restored_as_the_panel_saves_it(dock, project):
+    before = panel_options.layer_state(dock, COMMUNES.id())
+    dock.current_layer = COMMUNES
+    panel_options.set_layer_options(dock, [{"layer": "communes", "exploring": {"single_selection_expression": '"nom"'}}],
+                                    project=project)
+    dock.settingLayerVariable.emit.reset_mock()
+    dock._synchronize_layer_widgets.reset_mock()
+    assert panel_options.restore_layer_state(dock, COMMUNES.id(), before, project=project) is True
+    assert dock.PROJECT_LAYERS[COMMUNES.id()]["exploring"]["single_selection_expression"] == '"fid"'
+    saved = dock.settingLayerVariable.emit.call_args.args
+    assert saved[0] is COMMUNES and ("exploring", "single_selection_expression") in saved[1]
+    dock._synchronize_layer_widgets.assert_called_once()
+    assert panel_options.restore_layer_state(dock, "gone", before, project=project) is False
+
+
+def test_export_state_restored(dock, project):
+    before = panel_options.export_state(dock)
+    panel_options.set_export_options(dock, {"datatype_to_export": "GeoJSON"}, project=project)
+    dock.setProjectVariablesEvent.reset_mock()
+    assert panel_options.restore_export_state(dock, before) is True
+    assert dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"]["DATATYPE_TO_EXPORT"] == "GPKG"
+    assert dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"]["HAS_DATATYPE_TO_EXPORT"] is False
+    dock.setProjectVariablesEvent.assert_called_once()
+    assert panel_options.export_state(None) is None and panel_options.restore_export_state(None, before) is False

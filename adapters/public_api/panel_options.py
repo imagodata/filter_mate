@@ -209,3 +209,71 @@ def set_export_options(dock, changes: Dict[str, Any], project=None) -> Dict[str,
         said["layers_to_export"] = _names(said["layers_to_export"], project)
     saved = _project_saved()
     return dict({"changed": said, "saved": saved}, **({} if saved else {"note": NOT_SAVED}))
+
+
+# --- What the turn of the agent keeps to undo these options (adapters/agent/turn_effects.py) --------------------------
+
+def running_dock():
+    """The dock of the running FilterMate, or None (headless, plugin not loaded, panel not made)."""
+    try:
+        from qgis.utils import plugins
+        from ...core.domain.plugin_package import PLUGIN_PACKAGE
+        dock = getattr(getattr(plugins.get(PLUGIN_PACKAGE), "app", None), "dockwidget", None)
+    except Exception:
+        return None
+    return None if dock_problem(dock) else dock
+
+
+def layer_state(dock, layer_id: str) -> Any:
+    """The options of a layer an agent may set, as stored (layers by id); None without the panel or the layer."""
+    if dock_problem(dock):
+        return None
+    props = (getattr(dock, "PROJECT_LAYERS", None) or {}).get(layer_id)
+    if not isinstance(props, dict):
+        return None
+    return {"exploring": {key: value for key, value in (props.get("exploring") or {}).items() if key in EXPLORING_KEYS},
+            "filtering": {key: value for key, value in (props.get("filtering") or {}).items() if key in FILTERING_KEYS}}
+
+
+def restore_layer_state(dock, layer_id: str, state: Dict[str, Dict[str, Any]], project=None) -> bool:
+    """Put back the options of ``layer_state`` the way set_layer_options writes them; False without the panel or the
+    layer."""
+    if dock_problem(dock):
+        return False
+    props = (getattr(dock, "PROJECT_LAYERS", None) or {}).get(layer_id)
+    layer = _project(project).mapLayer(layer_id)
+    if not isinstance(props, dict) or layer is None:
+        return False
+    keys = []
+    for group, values in state.items():
+        allowed = EXPLORING_KEYS if group == "exploring" else FILTERING_KEYS
+        values = {key: value for key, value in values.items() if key in allowed}
+        props.setdefault(group, {}).update(values)
+        keys += [(group, key) for key in values]
+    dock.settingLayerVariable.emit(layer, keys)
+    current = getattr(dock, "current_layer", None)
+    if current is not None and current.id() == layer_id:
+        dock._synchronize_layer_widgets(layer, props)
+        dock._reset_exploring_button_states(props)
+        dock._reset_filtering_button_states(props)
+    return True
+
+
+def export_state(dock) -> Any:
+    """The export options of the project an agent may set, under their stored keys; None without the panel."""
+    if dock_problem(dock):
+        return None
+    exporting = _exporting(dock)
+    return {key: exporting[key] for key in EXPORT_KEYS.values() if key in exporting}
+
+
+def restore_export_state(dock, state: Dict[str, Any]) -> bool:
+    """Put back the export options of ``export_state`` the way set_export_options writes them."""
+    if dock_problem(dock):
+        return False
+    exporting = _exporting(dock)
+    exporting.update({key: value for key, value in state.items() if key in EXPORT_KEYS.values()})
+    dock.CONFIG_DATA["CURRENT_PROJECT"]["EXPORTING"] = exporting
+    dock.setProjectVariablesEvent()
+    dock.set_exporting_properties()
+    return True
