@@ -331,12 +331,19 @@ class TurnCheckpoint:
                          if takes_away(effect, undo) and effect[1] not in keep)
 
     @staticmethod
-    def _take_back(present: set) -> None:
-        """Remove the layers that were not in the project (``present``: the ids there before): the ones a move that
-        a layer then refused had just brought back. They were not there: nothing of the user's goes with them."""
+    def _brought(before: set) -> set:
+        """The ids of the layers in the project now that were not in ``before``: what the pass that brings layers
+        back just added, read right after it (a layer added later, by the user or a task, is not counted)."""
+        return set(QgsProject.instance().mapLayers()) - before
+
+    @staticmethod
+    def _take_back(brought: set) -> None:
+        """Remove ``brought``: the layers a move that a layer then refused had just brought back (``_brought``). Only
+        those: a layer that came in meanwhile (a Processing output finished while QGIS waited) stays."""
         project = QgsProject.instance()
-        for layer_id in set(project.mapLayers()) - present:
-            project.removeMapLayer(layer_id)
+        for layer_id in brought:
+            if project.mapLayer(layer_id) is not None:
+                project.removeMapLayer(layer_id)
 
     def _move(self, operation: CrossOperation, back: bool, keep: FrozenSet[str] = frozenset()):
         """``operation`` to its state before (``back``) or after: ``(changed, left as they are, a layer refused)``.
@@ -356,6 +363,7 @@ class TurnCheckpoint:
         going = self._going(operation, back, keep)
         present = set(QgsProject.instance().mapLayers())
         done, not_done = self._effects_of(operation, back, keep, presence=True, coming=True)
+        brought = self._brought(present)
         if undoing:
             edited, not_edited = self._effects_of(operation, back, keep, presence=False, edits=True, going=going)
             done, not_done = done + edited, not_done + not_edited
@@ -363,7 +371,7 @@ class TurnCheckpoint:
         if refused:
             if undoing:
                 self._effects_of(operation, not back, keep, presence=False, edits=True)
-            self._take_back(present)
+            self._take_back(brought)
             return names, left, True
         gone, not_gone = self._effects_of(operation, back, keep, presence=True, coming=False)
         more, not_more = self._effects_of(operation, back, keep, presence=False, edits=False if undoing else None)
@@ -422,6 +430,7 @@ class TurnCheckpoint:
             return [], []
         present = set(project.mapLayers())
         done, not_done = apply_effects(effects, undo=True, presence=True, coming=True)
+        brought = self._brought(present)
         pairs += pairs_of({now.layer_id for now, _target in pairs})
         # Its effects are those of the steps, undone: undoing this operation applies them again.
         operation = CrossOperation(HISTORY_KEY, tuple(pairs), description=description[:MAX_LABEL],
@@ -436,7 +445,7 @@ class TurnCheckpoint:
         names, left, refused = self._apply(operation, use_before=False, going=going) if pairs else ([], [], False)
         if refused:  # a layer refused (being edited by the user): what moved goes back, it can be tried again
             apply_effects(effects, undo=False, presence=False, edits=True)
-            self._take_back(present)
+            self._take_back(brought)
             return names, left
         gone, not_gone = apply_effects(effects, undo=True, presence=True, coming=False)
         more, not_more = apply_effects(effects, undo=True, presence=False, edits=False)

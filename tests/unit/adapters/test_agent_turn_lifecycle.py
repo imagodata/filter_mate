@@ -352,6 +352,25 @@ def test_an_undo_a_layer_refuses_never_removes_the_layers_the_turn_added(monkeyp
     assert checkpoint_module._test_service.history.can_undo(checkpoint_module.HISTORY_KEY)  # it can be tried again
 
 
+def test_a_refusal_never_takes_back_a_layer_that_came_in_meanwhile(monkeypatch, checkpoint_module):
+    """Review of 5b63e895: the refusal removed every layer not there before the move. A layer added while the filters
+    were put back (a Processing output finished while QGIS waited on a provider) went with the turn's."""
+    edited, made = Layer("edited", subset="after"), Layer("made")
+    project, _calls, _asked, apply_effects = _turn(
+        checkpoint_module, [edited, made], [("edited", "before", "after")], (ADDED, REMOVED), refuse={"edited"})
+    monkeypatch.setattr(checkpoint_module, "apply_effects", apply_effects)
+    service = checkpoint_module._test_service
+    restore = service._restore
+
+    def restore_while_a_task_ends(pairs, use_before, project=None):
+        project.layers["users_output"] = Layer("users_output")
+        return restore(pairs, use_before, project=project)
+    service._restore = restore_while_a_task_ends
+    _names, left = checkpoint_module.TurnCheckpoint().undo()
+    assert left == ["edited"]
+    assert set(project.layers) == {"edited", "made", "users_output"}  # what came back is gone, the user's output stays
+
+
 def test_an_undo_removes_the_layers_the_turn_added_once_the_filters_are_back(monkeypatch, checkpoint_module):
     """And the filter of a layer that leaves is not touched: being edited, it would have refused for nothing."""
     target, made = Layer("target", subset="after"), Layer("made", subset="its filter")

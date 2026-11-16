@@ -298,6 +298,16 @@ class FilterMateApp:
         )
         self._layers_added_timer.start(500)
 
+    @staticmethod
+    def _still_in_project(layer) -> bool:
+        """Whether ``layer`` is alive and still in the project (by its id: a wrapper is not always the same object)."""
+        if layer is None or is_sip_deleted(layer):
+            return False
+        try:
+            return QgsProject.instance().mapLayer(layer.id()) is not None
+        except RuntimeError:
+            return False
+
     def _process_pending_added_layers(self):
         """Process all accumulated layers as a single batch."""
         if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
@@ -307,6 +317,11 @@ class FilterMateApp:
 
         layers = self._pending_added_layers
         self._pending_added_layers = []
+        # A layer added then removed within the 500 ms (the undo of an agent turn that a layer refused takes back the
+        # layers it had just brought back): deleted, or no longer this object in the project. Reading it would raise.
+        layers = [layer_item for layer_item in layers if self._still_in_project(layer_item)]
+        if not layers:
+            return
 
         import time
         self._last_layer_change_timestamp = time.time() * 1000
