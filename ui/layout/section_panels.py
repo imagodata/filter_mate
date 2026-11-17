@@ -41,6 +41,7 @@ PANEL_NAME = "FilterMatePanel_{}"  # the object name of a panel: QGIS saves and 
 PANEL_MENU_NAME = "mPanelMenu"  # the menu View > Panels of QGIS
 CONTENTS_NAME = "dockWidgetContents"  # the rules of the style sheets of the dock all start from this name
 PANEL_MARGIN = 2  # as the contents of the dock
+FUSION_SETTLE_MS = 400  # a dock dropped with the mouse is plugged at the end of an animation (about 200 ms)
 PANEL_GAP = 8  # between the rail of a panel and its open section, as in the dock
 Groups = Tuple[Tuple[str, ...], ...]
 
@@ -489,7 +490,9 @@ class SectionPanels:
         toolbox = getattr(dock, "toolBox_tabTools", None)
         if toolbox is not None:
             toolbox.currentChanged.connect(self._on_bottom_changed)
-        for signal in ("topLevelChanged", "dockLocationChanged"):  # the dock dropped as a tab of one of its panels
+        # The dock dropped as a tab of one of its panels. Dragged with the mouse within its area, a docked dock
+        # says neither signal: only the one that goes behind the new tab says it is hidden (visibilityChanged).
+        for signal in ("topLevelChanged", "dockLocationChanged", "visibilityChanged"):
             getattr(dock, signal).connect(lambda *_args: self._moved(dock))
         dock.destroyed.connect(self._on_dock_destroyed)
 
@@ -977,7 +980,8 @@ class SectionPanels:
         panel.rail.dropped_in.connect(lambda key, index, target=panel: self.move(key, target, index))
         panel.rail.dropped_out.connect(self._on_dropped_out)
         panel.rail.menu_requested.connect(lambda key, place, target=panel: self._popup(key, target, place))
-        for signal in ("topLevelChanged", "dockLocationChanged"):  # dropped as a tab of another FilterMate panel
+        # Dropped as a tab of another FilterMate panel, or of the dock (visibilityChanged: see the dock above).
+        for signal in ("topLevelChanged", "dockLocationChanged", "visibilityChanged"):
             getattr(panel, signal).connect(lambda *_args, mover=panel: self._moved(mover))
         # Its tab selected: Qt shows nothing again (the page behind a tab was never hidden), so the page is told.
         panel.visibilityChanged.connect(lambda visible, host=panel: self._on_panel_visible(host, visible))
@@ -1166,17 +1170,20 @@ class SectionPanels:
 
     def _moved(self, mover: Any) -> None:
         """A panel, or the dock, was dropped somewhere: as a tab of another one of FilterMate, they merge. Looked
-        at once the drop is over."""
+        at once the drop is over, and again once Qt has plugged it: dropped with the mouse, a dock is a tab only
+        when the animation of its drop ends (QGIS LTR, 17 November 2026), after the signal."""
         if self._closing or self._fusion_pending:
             return
         self._fusion_pending = True
         from qgis.PyQt.QtCore import QTimer
         QTimer.singleShot(0, lambda: self._fuse_tabbed(mover))
+        QTimer.singleShot(FUSION_SETTLE_MS, lambda: self._fuse_tabbed(mover, late=True))
 
-    def _fuse_tabbed(self, mover: Any = None) -> bool:
+    def _fuse_tabbed(self, mover: Any = None, late: bool = False) -> bool:
         """Merge the panels of FilterMate that are tabs of each other, or of the dock (``fusion``). True when some
-        were."""
-        self._fusion_pending = False
+        were. ``late``: the second look, once the drop is plugged (the first one let other moves be looked at)."""
+        if not late:
+            self._fusion_pending = False
         if self._closing or self._fusing:
             return False
         window = self._main_window()

@@ -3255,40 +3255,42 @@ def s_section_group():
     check('group: a chip of a panel dropped on the dock, out of its rails, comes back all the same',
           'filtering' not in panels.detached() and d.isAncestorOf(d.FILTERING), str(panels.groups()))
     # 2026-11-16, review: QDrag.exec says the same of a drop nobody took and of a drag given up with Escape, which
-    # made a panel. The rail takes the drop itself where nothing of FilterMate does (``catcher``, an event filter
-    # of the application while the chip is dragged: called here as Qt calls it).
+    # made a panel. The rail takes the drop itself where nothing of FilterMate does: ``catcher`` watches the windows
+    # of the application while the chip is dragged (a drag a widget ignores goes up to its window). Called here as
+    # Qt calls it; FM_ONLY=mouse drags with a real pointer.
     rail_module = importlib.import_module(f'{PACKAGE}.ui.widgets.section_rail')
-    canvas = iface.mapCanvas()
+    window = iface.mainWindow()
+    accepted_before = window.acceptDrops()
     mime = QMimeData()
     mime.setData(rail_module.SECTION_MIME, b'filtering')
     buttons, keys = Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier
     catcher = bottom.catcher('filtering')
+    catcher.watch()
+    watched = [shown for shown, _accepted in catcher._windows]
+    ours = [panel for panel in panels._panels if panel.isFloating()] + ([d] if d.isFloating() else [])
     on_map = QDragEnterEvent(QPoint(80, 90), Qt.DropAction.MoveAction, mime, buttons, keys)
     on_map.ignore()
-    took_map = catcher.eventFilter(canvas, on_map)
-    on_dock = QDragEnterEvent(QPoint(5, 5), Qt.DropAction.MoveAction, mime, buttons, keys)
-    on_dock.ignore()
-    took_dock = catcher.eventFilter(d.frame_exploring, on_dock)
-    on_panel = QDragEnterEvent(QPoint(5, 5), Qt.DropAction.MoveAction, mime, buttons, keys)
-    on_panel.ignore()
-    took_panel = catcher.eventFilter(stack.widget(), on_panel)
+    took_map = catcher.eventFilter(window, on_map)
     other = QMimeData()
     other.setData(rail_module.SECTION_MIME, b'exporting')
     not_its_chip = QDragEnterEvent(QPoint(80, 90), Qt.DropAction.MoveAction, other, buttons, keys)
     not_its_chip.ignore()
-    took_other = catcher.eventFilter(canvas, not_its_chip)
+    took_other = catcher.eventFilter(window, not_its_chip)
     dropped = QDropEvent(QPointF(80, 90), Qt.DropAction.MoveAction, mime, buttons, keys)
-    catcher.eventFilter(canvas, dropped)
-    check('drag: over the map the rail takes the drop of its chip; over the dock or a panel, they decide',
-          took_map and on_map.isAccepted() and not took_dock and not on_dock.isAccepted() and not took_panel
-          and not took_other and catcher.place == canvas.mapToGlobal(QPoint(80, 90)),
-          f"map={took_map}/{on_map.isAccepted()} dock={took_dock} panel={took_panel} other={took_other} "
+    catcher.eventFilter(window, dropped)
+    accepting = window.acceptDrops()
+    catcher.unwatch()
+    check('drag: the windows of QGIS take the drop of the chip dragged, not those of FilterMate, and only while '
+          'it is dragged', window in watched and not any(one in watched for one in ours) and accepting
+          and took_map and on_map.isAccepted() and not took_other
+          and catcher.place == window.mapToGlobal(QPoint(80, 90)) and window.acceptDrops() == accepted_before,
+          f"watched={[one.objectName() for one in watched]} map={took_map}/{on_map.isAccepted()} other={took_other} "
           f"place={catcher.place}")
-    bottom.finish_drag('filtering', False, None, True)  # given up with Escape: nothing took it, the button is down
+    bottom.finish_drag('filtering', None)  # given up with Escape, or dropped out of QGIS: nothing took it
     QApplication.processEvents()
     check('drag: a drag given up with Escape changes nothing', 'filtering' not in panels.detached()
           and len(panels.groups()) == 1, str(panels.groups()))
-    bottom.finish_drag('filtering', True, catcher.place, False)  # dropped on the map
+    bottom.finish_drag('filtering', catcher.place)  # dropped on the map
     QApplication.processEvents()
     dropped_panel = panels.panel('filtering')
     check('drag: a chip of the dock dropped on the map gets a panel, floating there',
@@ -4452,6 +4454,229 @@ EXPLO_STEPS = [s_section_setup, s_vector_source, s_explo_detach, s_explo_check, 
                s_explo_filter, s_explo_filter_check, s_explo_all, s_explo_restart, s_explo_off]
 
 
+# --- the drags with a real pointer (FM_ONLY=mouse) ---------------------------------------------------------------
+#
+# The steps above call what Qt calls (the drop of a rail, the filter of a drag): a drag started by the mouse blocks
+# the handler that started it, so no step can start one and go on. Here a pointer is moved from another process
+# (tests/qgis_headless/x_mouse.py, the XTest extension of the X server): QGIS gets what a real mouse sends, and
+# QDrag.exec and the drag of a dock by its title run for real. X11 only: not what Windows does with a drag.
+
+MOUSE = {}
+
+
+def mouse(*actions):
+    """The pointer does ``actions`` (x_mouse.py) beside QGIS; ``mouse_over`` tells when it is done."""
+    script = os.path.join(REPO, 'tests', 'qgis_headless', 'x_mouse.py')
+    MOUSE['process'] = subprocess.Popen(['python3', script, *[str(action) for action in actions]])
+    return mouse_over
+
+
+def mouse_over():
+    """The pointer is done, and no drag is left running: the next step must not start inside one."""
+    process = MOUSE.get('process')
+    rails = getattr(dock(), '_fm_rails', None) or []
+    return ((process is None or process.poll() is not None)
+            and not any(getattr(rail, '_dragging', False) for rail in rails))
+
+
+def at(widget, x=None, y=None):
+    """The place of the screen of a point of ``widget`` (its centre by default)."""
+    centre = widget.rect().center()
+    point = widget.mapToGlobal(QPoint(centre.x() if x is None else x, centre.y() if y is None else y))
+    return point.x(), point.y()
+
+
+def drag(start, end, hold=0.3, before_release=()):
+    """Press at ``start``, go to ``end`` step by step, wait, release."""
+    return ['move', start[0], start[1], 'sleep', 0.2, 'down', 1, 'sleep', 0.15, 'drag', start[0] + 16, start[1],
+            'drag', end[0], end[1], 'sleep', hold, *before_release, 'up', 1, 'sleep', 0.3, 'move', 5, 5, 'sleep', 0.2]
+
+
+def mouse_works():
+    if not MOUSE.get('works'):
+        report('SKIP', f"mouse: {sys._getframe(1).f_code.co_name}", 'no pointer could be moved on this display')
+    return bool(MOUSE.get('works'))
+
+
+def s_mouse_setup():
+    d = dock()
+    leave_welcome()
+    for key in ('FilterMate/sections/top_order', 'FilterMate/sections/bottom_order'):
+        QSettings().remove(key)
+    MOUSE['works'] = False
+    MOUSE['order'] = d._fm_sections.bottom_rail.sections()
+    MOUSE['ends'] = []  # how each drag of a chip of the dock ended: (section, dropped on a widget of QGIS)
+    for rail in (d._fm_sections.top_rail, d._fm_sections.bottom_rail):
+        def finish(key, place, end=type(rail).finish_drag, rail=rail):
+            MOUSE['ends'].append((key, place is not None))
+            end(rail, key, place)
+        rail.finish_drag = finish
+    return mouse('move', 640, 480, 'sleep', 0.2)
+
+
+def s_mouse_reorder():
+    """A chip dragged along its rail with the mouse: the sections are in another order."""
+    from qgis.PyQt.QtGui import QCursor
+    d = dock()
+    bottom = d._fm_sections.bottom_rail
+    MOUSE['works'] = QCursor.pos() == QPoint(640, 480) and not d._fm_sections.stacked
+    if not mouse_works():
+        return None
+    first, last = bottom.chip(MOUSE['order'][0]), bottom.chip(MOUSE['order'][-1])
+    return mouse(*drag(at(last), at(first, x=2)))
+
+
+def s_mouse_reorder_check():
+    if not mouse_works():
+        return None
+    d = dock()
+    bottom = d._fm_sections.bottom_rail
+    order = MOUSE['order']
+    check('mouse: a chip dragged along its rail goes where it is dropped, and the order is kept',
+          bottom.sections() == [order[-1]] + order[:-1]
+          and QSettings().value('FilterMate/sections/bottom_order') == ','.join(bottom.sections())
+          and d._fm_panels.detached() == (), f"{bottom.sections()} kept={QSettings().value('FilterMate/sections/bottom_order')!r}")
+    bottom.drop(order[-1], bottom.width() - 1, bottom)  # the usual order again
+    QApplication.processEvents()
+    QSettings().remove('FilterMate/sections/bottom_order')
+    canvas = iface.mapCanvas()
+    MOUSE['on_map'] = at(canvas, x=canvas.width() // 2, y=canvas.height() // 2)
+    return mouse(*drag(at(bottom.chip('filtering')), MOUSE['on_map']))
+
+
+def s_mouse_out_check():
+    """Dropped on the map, where nothing knows of sections: a panel of its own, floating there."""
+    if not mouse_works():
+        return None
+    d = dock()
+    panels = d._fm_panels
+    panel = panels.panel('filtering')
+    place = MOUSE['on_map']
+    check('mouse: a chip of the dock dropped on the map gets a panel, floating where it was dropped',
+          panel is not None and panel.isFloating() and panel.isVisible() and panel.members == ['filtering']
+          and panel.frameGeometry().contains(QPoint(*place)) and action_button('filter').isVisible(),
+          f"{panels.groups()} at {panel.frameGeometry() if panel else None} for {place}")
+    chip = d._fm_sections.bottom_rail.chip('exporting')
+    canvas = iface.mapCanvas()
+    away = at(canvas, x=canvas.width() // 4, y=canvas.height() // 4)
+    return mouse(*drag(at(chip), away, before_release=('key', 'Escape', 'sleep', 0.4)))
+
+
+def s_mouse_escape_check():
+    """Escape while a chip is dragged: nothing moves (it made a floating panel under the pointer)."""
+    if not mouse_works():
+        return None
+    d = dock()
+    panels = d._fm_panels
+    check('mouse: a drag given up with Escape changes nothing', panels.groups() == (('filtering',),)
+          and d.isAncestorOf(d.EXPORTING), f"{panels.groups()} ends={MOUSE['ends']}")
+    return mouse(*drag(at(d._fm_sections.bottom_rail.chip('exporting')), at(panels.panel('filtering'), y=200)))
+
+
+def s_mouse_join_check():
+    """Dropped on a panel, out of its rail: the section joins it."""
+    if not mouse_works():
+        return None
+    d = dock()
+    panels = d._fm_panels
+    panel = panels.panel('filtering')
+    check('mouse: a chip of the dock dropped on a panel joins it; the panel lists both in its rail',
+          panel is not None and panels.panel('exporting') is panel and panel.members == ['filtering', 'exporting']
+          and panel.rail.isVisible() and panel.current() == 'exporting' and action_button('export').isVisible(),
+          f"{panels.groups()} current={panel.current() if panel else None}")
+    if panel is None or panel.rail.chip('exporting') is None:
+        return None
+    return mouse(*drag(at(panel.rail.chip('exporting')), at(panel.rail.chip('filtering'), x=2)))
+
+
+def s_mouse_panel_rail_check():
+    if not mouse_works():
+        return None
+    d = dock()
+    panels = d._fm_panels
+    panel = panels.panel('filtering')
+    check('mouse: a chip dragged along the rail of a panel reorders its sections, and renames the panel',
+          panel is not None and panel.members == ['exporting', 'filtering']
+          and panel.windowTitle() == 'EXPORTING · FILTERING' and QSettings().value(DETACHED_KEY) == 'exporting+filtering',
+          f"{panel.members if panel else None} {panel.windowTitle() if panel else None} "
+          f"kept={QSettings().value(DETACHED_KEY)!r}")
+    if panel is None or panel.rail.chip('filtering') is None:
+        return None
+    return mouse(*drag(at(panel.rail.chip('filtering')), at(d.frame_exploring)))
+
+
+def s_mouse_back_check():
+    """Dropped on the dock, out of its rails: the section comes back."""
+    if not mouse_works():
+        return None
+    d = dock()
+    panels = d._fm_panels
+    check('mouse: a chip of a panel dropped on the dock comes back to it', panels.groups() == (('exporting',),)
+          and d.isAncestorOf(d.FILTERING) and d._fm_sections.bottom_rail.chip('filtering').isVisible(),
+          str(panels.groups()))
+    MOUSE['target'] = 'configuration'
+    panels.detach('configuration')  # a second panel, docked: the floating one is dropped on it as a tab
+    QApplication.processEvents()
+    QApplication.processEvents()
+    floating, docked = panels.panel('exporting'), panels.panel('configuration')
+    if floating is None or docked is None:
+        return None
+    MOUSE['docked_floating'] = (docked.isFloating(), floating.isFloating())
+    # By its title, as a hand takes a panel; held over the middle of the other one, where Qt offers a tab.
+    return mouse(*drag(at(floating, y=11), at(docked), hold=1.0))
+
+
+def s_mouse_tab_check():
+    """A panel dragged by its title onto another one, as a tab: Qt plugs it there (its own way, not
+    tabifyDockWidget), and the two merge."""
+    if not mouse_works():
+        return None
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    docked = panels.panel('configuration')
+    together = docked is not None and panels.panel('exporting') is docked
+    check('mouse: a panel dropped as a tab of another one with the mouse gives it its sections',
+          together and docked.members == ['configuration', 'exporting'] and len(panels.groups()) == 1
+          and not docked.isFloating() and docked.rail.isVisible(),
+          f"{panels.groups()} floating before={MOUSE.get('docked_floating')} "
+          f"tabs={[w.objectName() for w in window.tabifiedDockWidgets(docked)] if docked else None}")
+    if docked is None:
+        return None
+    MOUSE['aim'] = (at(docked, y=11), at(d.frame_exploring))
+    return mouse(*drag(at(docked, y=11), at(d.frame_exploring), hold=1.0))
+
+
+def s_mouse_dock_tab_check():
+    """The panel dragged by its title onto the dock, as a tab: its sections come back."""
+    if not mouse_works():
+        return None
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    left = panels.panel('configuration')
+    check('mouse: a panel dropped as a tab of the dock with the mouse gives its sections back',
+          panels.detached() == () and d.isAncestorOf(d.EXPORTING) and d.isAncestorOf(d.CONFIGURATION)
+          and d.isVisible(),
+          f"{panels.groups()} floating={left.isFloating() if left else None} "
+          f"at={left.frameGeometry() if left else None} dock={d.frameGeometry()} "
+          f"tabs of the dock={[w.objectName() for w in window.tabifiedDockWidgets(d)]} "
+          f"aimed={MOUSE.get('aim')}")
+    leave_welcome()
+    QSettings().remove('FilterMate/sections/bottom_order')
+    open_section(d.FILTERING)
+    check('mouse: left as found', panels.detached() == () and not QSettings().value(DETACHED_KEY)
+          and d._fm_sections.bottom_rail.sections() == MOUSE['order']
+          and d.toolBox_tabTools.currentWidget() is d.FILTERING and d.isVisible() and not d.isFloating(),
+          f"{panels.groups()} {d._fm_sections.bottom_rail.sections()}")
+    return settled()
+
+
+MOUSE_STEPS = [s_section_setup, s_mouse_setup, s_mouse_reorder, s_mouse_reorder_check, s_mouse_out_check,
+               s_mouse_escape_check, s_mouse_join_check, s_mouse_panel_rail_check, s_mouse_back_check,
+               s_mouse_tab_check, s_mouse_dock_tab_check]
+
+
 # --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------
 
 
@@ -4613,6 +4838,8 @@ if os.environ.get('FM_ONLY') == 'layout':  # everything about the sections, thei
              *EXPLO_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'exploring':  # EXPLORING in its own panel, with its chooser of the current layer
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *EXPLO_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'mouse':  # the drags of the sections with a real pointer (XTest)
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *MOUSE_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'headers':  # the headers stacked instead of the rails, and back
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *HEADER_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'headers_startup':  # the same as the dock finds them when it opens (FM_HEADERS)
