@@ -900,8 +900,8 @@ class SectionPanels:
         was_open = sections.is_open(key)
         sections._top_layout.removeWidget(page)
         sections.detached.add(key)
-        if was_open:
-            sections.open_top("exploring")
+        if was_open and "exploring" not in sections.detached:
+            sections.open_top("exploring")  # in its own panel, EXPLORING stays where the user put it
         return page
 
     def _into_dock(self, key: str, page: Any) -> None:
