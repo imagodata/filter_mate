@@ -14,6 +14,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 MAX_LAYERS = 30
 MAX_FILTER_CHARS = 80
 MAX_SELECTIONS = 10
+MAX_FIELDS = 40  # of the active layer, in the state sent with a request
 MAX_CHANGES = 12
 MAX_NAMES = 5
 HEADER = ("Project when this request was sent (for reference; list_layers, describe_layer and filter_state give "
@@ -99,7 +100,21 @@ def project_state(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapp
                                                                      int(item.get("selected_count") or 0))
                 for item in selections if isinstance(item, Mapping)}
     return {"layers": rows, "selections": selected, "active": str(view.get("active_layer_name") or ""),
+            "active_fields": _fields_text(view),
             "extent": _extent(view.get("extent")) if view.get("available") else None}
+
+
+def _fields_text(view: Mapping[str, Any]) -> str:
+    """The names of the fields of the active layer (``active_fields`` of the view), "" without any.
+
+    The quality gate of the token diet (qwen3:8b, 2026-11-17): with the state of the project and no field in it, a
+    small model wrote "dep", "department" or "code_dep" for the field "dept" in 11 runs of 12 instead of reading the
+    fields first; with this line, it used the right field in 3 runs of 3. The values are never sent here."""
+    names = [str(name) for name in (view.get("active_fields") or ()) if str(name)]
+    if not names:
+        return ""
+    shown = ", ".join(_cut(name, 60) for name in names[:MAX_FIELDS])
+    return shown if len(names) <= MAX_FIELDS else f"{shown} and {len(names) - MAX_FIELDS} more"
 
 
 def _names(names: Sequence[str]) -> str:
@@ -136,7 +151,8 @@ def project_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List
                               if key in new and was_selected.get(key, ("", 0))[1] != count])
     say("selection cleared", [name for key, (name, _) in was_selected.items() if key in new and key not in selected])
     if after.get("active") and after.get("active") != before.get("active"):
-        lines.append(f"- active layer is now: {_cut(after['active'], 100)}")
+        fields = after.get("active_fields") or ""
+        lines.append(f"- active layer is now: {_cut(after['active'], 100)}" + (f" (fields: {fields})" if fields else ""))
     if _moved(before.get("extent"), after.get("extent")):
         lines.append("- the map view moved")
     return lines[:MAX_CHANGES]
@@ -162,6 +178,9 @@ def project_summary(layers: Iterable[Mapping[str, Any]], selections: Iterable[Ma
     map_line = _map_line(view)
     if map_line:
         lines.append(map_line)
+    fields = _fields_text(view)
+    if fields:
+        lines.append(f"Fields of the active layer: {fields}")
     project_crs = str(view.get("project_crs") or "")
     lines.extend(_layer_line(row, project_crs) for row in rows[:MAX_LAYERS])
     if len(rows) > MAX_LAYERS:

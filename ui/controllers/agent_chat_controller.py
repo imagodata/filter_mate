@@ -2281,7 +2281,21 @@ class AgentChatController(QObject):
         except Exception:  # the request goes without it: the model reads the project with its tools
             logger.debug("Agent: project summary not read", exc_info=True)
             return None
+        view["active_fields"] = self._active_fields(view.get("active_layer_id"))
         return layers, view.get("selections") or [], view
+
+    @staticmethod
+    def _active_fields(layer_id) -> list:
+        """The names of the fields of the active layer when it is a vector layer, for the state sent with a request
+        (core/agent/project_summary.py): a small model guessed the name of a field it had not read. Names only, no
+        value; [] for another kind of layer or when they cannot be read."""
+        try:
+            layer = QgsProject.instance().mapLayer(str(layer_id)) if layer_id else None
+            fields = layer.fields() if layer is not None and hasattr(layer, "fields") else None
+            return [field.name() for field in fields] if fields is not None else []
+        except Exception:
+            logger.debug("Agent: fields of the active layer not read", exc_info=True)
+            return []
 
     @staticmethod
     def _layer_rows() -> list:

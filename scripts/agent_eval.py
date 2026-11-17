@@ -862,8 +862,15 @@ def skill_loader(load: Callable[[Dict[str, Any]], Any], hidden: Dict[str, Any],
 
 def _project_rows(project: SimulatedProject):
     handlers = project.handlers()
+    view = dict(handlers["map_context"]({}))
+    active = view.get("active_layer_name")
+    if active:  # the fields of the active layer, as the chat reads them (core/agent/project_summary.py)
+        try:
+            view["active_fields"] = [field["name"] for field in handlers["describe_layer"]({"layer": active}).get("fields", [])]
+        except Exception:
+            pass
     return (handlers["list_layers"]({})["layers"], [{"name": name, "selected_count": 1} for name in project.selected],
-            handlers["map_context"]({}))
+            view)
 
 
 def project_context(project: SimulatedProject, before: Optional[Dict[str, Any]] = None) -> str:

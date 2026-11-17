@@ -796,6 +796,13 @@ alone weigh 1,687 and 1,464. The summaries of the index are 60 characters at mos
 paragraph (`chat_setup.MISSING_SOURCES`). The conversation of the bench: cost 257,561 -> 184,870, largest request
 47,659 -> 35,602.
 
+### The fields of the active layer (2026-11-17)
+
+The state of the project sent with a request names the fields of the active layer (40 at most, names only, never a
+value), and a later request says them again when the active layer changes (`core/agent/project_summary.py`). The
+quality gate of the token diet found that qwen3:8b, given the state without them, wrote a field it had guessed in 11
+runs of 12 of `narrow_with_and` (`dep`, `department`, `code_dep` for `dept`); with them, the right field in 3 of 3.
+
 ### The start of a request stays the same (token diet, lot 4, 2026-11-16)
 
 Each provider's cache serves the start a request shares with an earlier one. The instructions are the way of working,

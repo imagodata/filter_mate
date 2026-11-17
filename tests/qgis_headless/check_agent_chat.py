@@ -812,6 +812,11 @@ def check_chat(provider, layer, authcfg, work):
     check("the state of the project goes after the request", first[0]["text"].startswith("garde les communes")
           and len(first) == 2 and "communes" in first[1]["text"] and "Project when" in first[1]["text"], first)
     check("no change is said on a first request", "Changed in QGIS" not in first[1]["text"], first[1]["text"])
+    # 2026-11-17: the fields of the active layer go with the state (a small model guessed "dep" for "dept")
+    names = AgentChatController._active_fields(layer.id())
+    check("state: the fields of the active layer are read", names == [field.name() for field in layer.fields()]
+          and "pop" in names and AgentChatController._active_fields("no such layer") == []
+          and AgentChatController._active_fields(None) == [], names)
     check("the project is remembered as the answer leaves it", chat._seen is not None and
           [row["filter"] for row in chat._seen["layers"].values() if row["name"] == "communes"] == ['"pop" > 1000'],
           chat._seen)
