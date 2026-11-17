@@ -2665,8 +2665,8 @@ def s_section_detach():
     toolbox = d.toolBox_tabTools
     open_section(d.FILTERING)
     index = toolbox.indexOf(d.FILTERING)
-    check('panels: FILTERING can leave the dock, EXPLORING cannot', panels.can_detach('filtering')
-          and not panels.can_detach('exploring'))
+    check('panels: FILTERING and EXPLORING can leave the dock', panels.can_detach('filtering')
+          and panels.can_detach('exploring'))
     icons = d._icon_manager.refresh_all_icons() if getattr(d, '_icon_manager', None) is not None else -1
     set_ui_profile('normal')  # the profile that asks the dock for the most height
     QApplication.processEvents()
@@ -4208,6 +4208,234 @@ def s_headers_startup_check():
 HEADER_STEPS = [s_section_setup, s_headers_stacked, s_headers_stacked_check, s_headers_off_check, s_headers_rail_check]
 
 
+# --- EXPLORING in its own panel, with a chooser of the current layer of its own (FM_ONLY=exploring) ----------------
+
+EXPLO = {}
+
+
+def explo_mirror():
+    return dock().frame_exploring.findChild(QComboBox, 'comboBox_exploring_current_layer')
+
+
+def s_explo_detach():
+    """EXPLORING leaves the dock by its own menu entry: a panel of QGIS above the dock."""
+    d = dock()
+    leave_welcome()
+    panels = d._fm_panels
+    EXPLO['errors'] = len(STATE['python_errors'])
+    EXPLO['minimum'] = d.minimumHeight()
+    mirror = explo_mirror()
+    check('explo: in the dock EXPLORING has no chooser of the current layer of its own',
+          mirror is None or mirror.isHidden())
+    names = menu_names(panels.build_menu('exploring', d))
+    check('explo: the menu of EXPLORING offers its own panel, and every section out',
+          names == ['action_section_detach', 'action_section_detach_all'], str(names))
+    grab_window('explo_0_dock')
+    EXPLO['detached'] = panels.detach('exploring')
+    return waits(0.8)
+
+
+def s_explo_check():
+    d = dock()
+    panels, sections = d._fm_panels, d._fm_sections
+    panel = panels.panel('exploring')
+    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
+    if not check('explo: EXPLORING is in its own panel, its widgets with it, and kept as apart',
+                 EXPLO['detached'] and panel is not None and panel.isAncestorOf(d.frame_exploring)
+                 and d.frame_exploring.isVisible() and panels.groups() == (('exploring',),)
+                 and QSettings().value(DETACHED_KEY) == 'exploring',
+                 f"detached={EXPLO['detached']} groups={panels.groups()} saved={QSettings().value(DETACHED_KEY)}"):
+        return None
+    check('explo: its panel is above the dock, in its column', panel_place(panel) == 'above'
+          and abs(panel.mapToGlobal(QPoint(0, 0)).x() - d.mapToGlobal(QPoint(0, 0)).x()) <= 4
+          and panel.height() >= 180 and d.height() >= 180,
+          f"place={panel_place(panel)} panel={panel.height()} dock={d.height()}")
+    check('explo: away from FILTERING, EXPLORING shows a chooser of the current layer that says the same',
+          mirror is not None and mirror.isVisible() and panel.isAncestorOf(mirror) and d.FILTERING.isAncestorOf(combo)
+          and mirror.currentIndex() == combo.currentIndex() and mirror.currentText().startswith(combo.currentText())
+          and mirror.count() == combo.count() and combo.currentLayer().id() == layer('zones').id(),
+          f"mirror={mirror.currentText() if mirror is not None else None} combo={combo.currentText()}")
+    check('explo: the dock keeps FILTERING open with its buttons, and asks less height than with EXPLORING in it',
+          d.toolBox_tabTools.currentWidget() is d.FILTERING and action_button('filter').isVisible()
+          and action_button('filter').isEnabled() and d.minimumHeight() < EXPLO['minimum'],
+          f"{actions_shown()} minimum={d.minimumHeight()} (was {EXPLO['minimum']})")
+    has_agent = 'agent' in sections._headers
+    check('explo: the rail above lists what is left there, folded',
+          sections.top_rail.shown_sections() == (['agent'] if has_agent else [])
+          and sections.top.isVisible() == has_agent and not sections._open_in_stack('agent'),
+          f"rail={sections.top_rail.shown_sections()} top={sections.top.isVisible()}")
+    grab_window('explo_1_apart')
+    index = next(row for row in range(combo.count()) if combo.layer(row).id() == layer('dem').id())
+    mirror.setCurrentIndex(index)  # as a choice in its list
+    mirror.activated.emit(index)
+    return switched_to('dem', coverage_page=True)
+
+
+def s_explo_layer_check():
+    """A layer chosen in the chooser of EXPLORING is the current layer everywhere; one chosen in FILTERING shows
+    in it."""
+    d = dock()
+    panel = d._fm_panels.panel('exploring')
+    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
+    check('explo: a layer chosen in EXPLORING is the current layer of FILTERING, and its page shows in the panel',
+          combo.currentLayer() is not None and combo.currentLayer().id() == layer('dem').id()
+          and mirror.currentIndex() == combo.currentIndex() and coverage()._raster_panel.isVisible()
+          and panel.isAncestorOf(coverage()._raster_panel), f"combo={combo.currentText()} mirror={mirror.currentText()}")
+    grab_window('explo_2_raster')
+    combo.setLayer(layer('zones'))
+    return switched_to('zones', coverage_page=False)
+
+
+def s_explo_select():
+    d = dock()
+    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
+    QApplication.processEvents()
+    check('explo: a layer chosen in FILTERING shows in the chooser of EXPLORING',
+          mirror.currentIndex() == combo.currentIndex() and mirror.currentText().startswith('zones')
+          and combo.currentLayer().id() == layer('zones').id(), f"mirror={mirror.currentText()} combo={combo.currentText()}")
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+    east_a = next(feature for feature in layer('zones').getFeatures() if feature['name'] == 'east_a')
+    d.mFeaturePickerWidget_exploring_single_selection.setFeature(east_a.id())
+    set_targets(['dem'])
+    set_predicates(['Intersect'])
+    ready = targets_ready(['dem'])
+    return lambda: bool(dock().get_current_features()[0]) and ready()
+
+
+def s_explo_filter():
+    action_button('filter').click()
+    return lambda: layer('dem').source().endswith('.vrt') and tasks_idle()
+
+
+def s_explo_filter_check():
+    d = dock()
+    panels, sections = d._fm_panels, d._fm_sections
+    toolbox = d.toolBox_tabTools
+    check('explo: a feature picked in the panel of EXPLORING filters from the dock',
+          layer('dem').source().endswith('.vrt'), layer('dem').source())
+    grab_window('explo_3_filtered')
+    if 'agent' in sections._headers:
+        chip = sections.top_rail.chip('agent')
+        chip.click()
+        QApplication.processEvents()
+        check('explo: AGENT opens in the dock beside FILTERING, EXPLORING stays in view, Undo walks the filters',
+              sections.is_open('agent') and sections.is_open('exploring') and toolbox.currentWidget() is d.FILTERING
+              and not d.agent_has_focus() and action_button('undo_filter').isVisible(),
+              f"agent={sections.is_open('agent')} below={toolbox.currentWidget().objectName()} {actions_shown()}")
+        grab_window('explo_4_agent_open')
+        open_section(d.EXPORTING)
+        open_section(d.FILTERING)
+        check('explo: FILTERING opened again below leaves AGENT open and the panel of EXPLORING where it is',
+              sections.is_open('agent') and toolbox.currentWidget() is d.FILTERING
+              and panel_place(panels.panel('exploring')) == 'above', panel_place(panels.panel('exploring')))
+        chip.click()
+        QApplication.processEvents()
+        check('explo: a click on the chip of the open AGENT folds it: nothing has to stay open above',
+              not sections.is_open('agent') and chip.isVisible() and sections.top_rail.current() is None
+              and sections.top.height() <= sections.top_rail.height() + 4,
+              f"agent={sections.is_open('agent')} top={sections.top.height()} rail={sections.top_rail.height()}")
+    action_button('undo_filter').click()
+    return lambda: not layer('dem').source().endswith('.vrt') and tasks_idle()
+
+
+def s_explo_all():
+    """With EXPLORING apart, "every section out" leaves the last section in the dock."""
+    d = dock()
+    panels = d._fm_panels
+    check('explo: Undo from the dock puts the raster target back',
+          os.path.normpath(layer('dem').source()) == os.path.normpath(M['dem']), layer('dem').source())
+    left = panels.detach_all()
+    QApplication.processEvents()
+    names = menu_names(panels.build_menu('configuration', d))
+    check('explo: with EXPLORING apart, every section out leaves the last one in the dock',
+          panels.in_dock() == ('configuration',) and 'configuration' not in left
+          and not panels.can_detach('configuration') and not panels.detach('configuration') and d.isVisible()
+          and d.isAncestorOf(d.CONFIGURATION) and names == ['action_section_attach_all'],
+          f"left={left} in dock={panels.in_dock()} menu={names}")
+    grab_window('explo_5_every_section_out')
+    return settled()  # the 2 s after Undo, when the dock puts the source layer back
+
+
+def s_explo_restart():
+    """As after a restart of QGIS: EXPLORING is in its panel again, above the dock, with its chooser."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    module = importlib.import_module(f'{PACKAGE}.ui.layout.section_panels')
+    area = window.dockWidgetArea(d)
+    panels.attach_all()
+    QApplication.processEvents()
+    panels.detach('exploring')
+    QApplication.processEvents()
+    place = panel_place(panels.panel('exploring'))
+    state = window.saveState()  # QGIS saves its window when it closes
+    panels.attach_all(remember=False)  # the plugin unloads: its panels go, what was apart stays saved
+    mirror = explo_mirror()
+    merged = d.isAncestorOf(d.frame_exploring) and mirror.isHidden()
+    iface.removeDockWidget(d)
+    QApplication.processEvents()
+    window.restoreState(state)  # QGIS starts: it knows neither the dock nor its panel yet
+    QSettings().setValue(module.DOCK_AREA_KEY, module._area_number(area))
+    restored = module.place_dock(d, iface, area)  # the plugin opens its dock
+    d.show()
+    again = panels.restore()  # and the panels of the last time
+    QApplication.processEvents()
+    panel = panels.panel('exploring')
+    check('explo: after a restart EXPLORING is in its panel again, above the dock, with its chooser',
+          merged and restored and again == ['exploring'] and panel is not None and place == 'above'
+          and panel_place(panel) == place and panel.isAncestorOf(mirror) and mirror.isVisible(),
+          f"merged={merged} restored={restored} again={again} place before={place} after={panel_place(panel)}")
+    grab_window('explo_6_restarted')
+    return waits(0.4)
+
+
+def s_explo_off():
+    """The last section of the dock cannot leave it; turned off, it gives the dock to EXPLORING, which comes back."""
+    d = dock()
+    panels, sections = d._fm_panels, d._fm_sections
+    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
+    options = d.CONFIG_DATA['APP']['OPTIONS']
+    before = options.get('FILTERING')
+    for key in ('agent', 'exporting', 'configuration'):
+        panels.detach(key)  # AGENT may not be installed
+    QApplication.processEvents()
+    check('explo: FILTERING, the last section of the dock, cannot leave it',
+          panels.in_dock() == ('filtering',) and not panels.can_detach('filtering') and not panels.detach('filtering')
+          and not sections.top.isVisible() and d.isVisible(), f"in dock={panels.in_dock()} top={sections.top.isVisible()}")
+    grab_window('explo_7_filtering_alone')
+    options['FILTERING'] = {'enabled': {'value': False}}
+    changed = d.apply_section_options()
+    QApplication.processEvents()
+    check('explo: the last section of the dock turned off, EXPLORING comes back to it with the chooser of FILTERING',
+          changed == ['filtering'] and panels.in_dock() == ('exploring',) and d.isAncestorOf(d.frame_exploring)
+          and sections.is_open('exploring') and d.isVisible() and mirror.isHidden()
+          and d.frame_exploring.isAncestorOf(combo) and combo.isVisible(),
+          f"changed={changed} in dock={panels.in_dock()} mirror hidden={mirror.isHidden()}")
+    if before is None:
+        options.pop('FILTERING', None)
+    else:
+        options['FILTERING'] = before
+    d.apply_section_options()
+    QApplication.processEvents()
+    panels.attach_all()
+    QApplication.processEvents()
+    sections.open_top('exploring')
+    open_section(d.FILTERING)
+    check('explo: merged back, EXPLORING is in the dock without its chooser, FILTERING holds its own',
+          panels.detached() == () and not QSettings().value(DETACHED_KEY) and d.isAncestorOf(d.frame_exploring)
+          and sections.is_open('exploring') and d.FILTERING.isAncestorOf(combo) and mirror.isHidden()
+          and d.minimumHeight() == EXPLO['minimum'] and d.toolBox_tabTools.currentWidget() is d.FILTERING
+          and len(STATE['python_errors']) == EXPLO['errors'],
+          f"apart={panels.detached()} saved={QSettings().value(DETACHED_KEY)!r} minimum={d.minimumHeight()} "
+          f"(was {EXPLO['minimum']}) errors={STATE['python_errors'][EXPLO['errors']:]}")
+    grab_window('explo_8_merged_back')
+    return waits(0.3)
+
+
+EXPLO_STEPS = [s_section_setup, s_vector_source, s_explo_detach, s_explo_check, s_explo_layer_check, s_explo_select,
+               s_explo_filter, s_explo_filter_check, s_explo_all, s_explo_restart, s_explo_off]
+
+
 # --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------
 
 
@@ -4349,7 +4577,8 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_source, s_partial_undo_on_source_check, s_partial_undo_on_target,
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
-         *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, s_finish]
+         *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, *EXPLO_STEPS,
+         s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
@@ -4365,7 +4594,9 @@ if os.environ.get('FM_STEPS'):  # steps by name, in this order: to find which on
                (globals()[name] if isinstance(globals()[name], list) else [globals()[name]])], s_finish]
 if os.environ.get('FM_ONLY') == 'layout':  # everything about the sections, their panels and the welcome, in a row
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS,
-             s_finish]
+             *EXPLO_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'exploring':  # EXPLORING in its own panel, with its chooser of the current layer
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *EXPLO_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'headers':  # the headers stacked instead of the rails, and back
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *HEADER_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'headers_startup':  # the same as the dock finds them when it opens (FM_HEADERS)

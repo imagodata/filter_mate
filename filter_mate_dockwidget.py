@@ -7362,7 +7362,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         sections = getattr(self, '_fm_sections', None)
         # Read with getattr: tests call the methods of the dock on plain objects.
         return (getattr(self, '_agent_chat', None) is not None and sections is not None
-                and not _apart(sections, 'agent', 'filtering')
+                and not _apart(sections, 'agent', 'filtering', 'exploring')
                 and bool(getattr(sections, 'is_open', lambda _key: False)('agent')))
 
     def _history_controller(self):

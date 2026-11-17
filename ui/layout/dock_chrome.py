@@ -392,9 +392,37 @@ class DockSections(QObject):
             self.top_rail.set_current(next((key for key in self._pages if self._open_in_stack(key)), None))
             self.bottom_rail.set_current(self.bottom_key())
             self._refresh_headers()
+            self._place_layer_mirror()
             self._fit()
         except RuntimeError:  # the dock went away
             pass
+
+    # --- EXPLORING away from FILTERING ------------------------------------------------------------------------------
+
+    def together(self) -> bool:
+        """EXPLORING and FILTERING are in the same panel: both in the dock. Apart (one of them in its own panel
+        of QGIS), EXPLORING needs a chooser of the current layer of its own: the one of FILTERING is elsewhere."""
+        return "exploring" not in self.detached and "filtering" not in self.detached
+
+    def _place_layer_mirror(self) -> None:
+        """A second chooser of the current layer at the top of EXPLORING while it is away from FILTERING
+        (ui/widgets/layer_chooser_mirror.py). Not with FILTERING turned off: its own chooser is moved to EXPLORING
+        then (``_move_source_layer``). Nothing in the classic dock."""
+        wanted = not self.together() and self._shown.get("filtering", True)
+        mirror = getattr(self, "_layer_mirror", None)
+        if not wanted:
+            if mirror is not None:
+                mirror.hide()
+            return
+        if mirror is None:
+            source = getattr(self._dock, "comboBox_filtering_current_layer", None)
+            holder = self._dock.frame_exploring.layout()
+            if source is None or holder is None:
+                return
+            from ..widgets.layer_chooser_mirror import make_mirror
+            mirror = self._layer_mirror = make_mirror(source, self._dock.frame_exploring)
+            holder.insertWidget(0, mirror)
+        mirror.show()
 
     # --- the headers stacked, for who prefers them to the rails -----------------------------------------------------
 
@@ -472,6 +500,8 @@ class DockSections(QObject):
         page = self._pages.get(key)
         if page is not None:
             page.hide()
+        if not any(self._open_in_stack(name) for name in self._pages):
+            self._open_top("exploring")  # EXPLORING is back, or nothing was open while it was away
 
     def _wire_top_header(self, key: str, header: SectionHeader) -> None:
         header.clicked.connect(lambda _checked=False, name=key: self._on_top_header(name))
@@ -481,9 +511,12 @@ class DockSections(QObject):
 
     def _on_top_header(self, key: str) -> None:
         """A click on a folded header opens it; on the open one, it leaves it open (and checked: the click
-        unchecked it)."""
+        unchecked it), or folds it when nothing has to stay open above (``_on_top_chip``)."""
         if self._open_in_stack(key):
-            self._headers[key].setChecked(True)
+            if "exploring" in self.detached:
+                self._open_top(None)
+            else:
+                self._headers[key].setChecked(True)
             return
         self.open_top(key)
 
@@ -626,13 +659,17 @@ class DockSections(QObject):
             if self.raise_detached is not None:
                 self.raise_detached(key)
             return
-        if key == "agent" and self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None):
-            self._toolbox.setCurrentWidget(self._nothing)  # FILTERING works on EXPLORING, which AGENT folds
+        if (key == "agent" and "exploring" not in self.detached
+                and self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None)):
+            # FILTERING works on EXPLORING, which AGENT folds. Not with EXPLORING in its own panel: it stays in view.
+            self._toolbox.setCurrentWidget(self._nothing)
         self._open_top(key)
 
     def _open_top(self, key: Optional[str]) -> None:
         if key not in self._pages or key in self.detached:  # never nothing open above
             key = "exploring"
+        if key in self.detached:
+            key = None  # but with EXPLORING in its own panel: what is left above (AGENT) may be folded
         for name, page in self._pages.items():
             if name in self.detached:
                 continue
@@ -654,9 +691,13 @@ class DockSections(QObject):
                 pass
 
     def _on_top_chip(self, key: str) -> None:
-        """A click on the chip of a folded section opens it; on the open one, it leaves it open."""
+        """A click on the chip of a folded section opens it; on the open one, it leaves it open: one section
+        stays open above. With EXPLORING in its own panel the open one (AGENT) folds, as a section below does:
+        nothing has to stay open there, and the lower stack takes the room."""
         if not self._open_in_stack(key):
             self.open_top(key)
+        elif "exploring" in self.detached:
+            self._open_top(None)
 
     # --- the bottom stack ------------------------------------------------------------
 
@@ -671,8 +712,11 @@ class DockSections(QObject):
         current = self._toolbox.currentWidget()
         if any(current is getattr(self._dock, key.upper(), None) for key in self.detached):
             return  # a section in its own panel: that panel comes forward (section_panels.py), the stacks stay
-        if self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None) and not self.is_open("exploring"):
-            self._open_top("exploring")  # FILTERING works on what EXPLORING selects
+        if (self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None)
+                and "exploring" not in self.detached and not self.is_open("exploring")):
+            # FILTERING works on what EXPLORING selects. In its own panel EXPLORING stays where the user put it
+            # (it may be behind a tab on purpose), and AGENT stays open beside FILTERING.
+            self._open_top("exploring")
         self.bottom_rail.set_current(self.bottom_key())
         self._fit()
 
@@ -775,6 +819,7 @@ class DockSections(QObject):
         chip left (its sections are turned off, or in their own panels) goes altogether."""
         try:
             top_open = any(self._open_in_stack(key) for key in self._pages)
+            self.top.setVisible(any(key not in self.detached for key in self._pages))  # AGENT and EXPLORING apart
             self.top.setMaximumHeight(QWIDGETSIZE_MAX if top_open else self._headers_height())
             bottom = self._splitter.widget(1) if self._splitter.count() > 1 else None
             if bottom is not None:
@@ -973,6 +1018,7 @@ def _follow_sections(dock: Any) -> None:
         panels = getattr(dock, "_fm_panels", None)
         if panels is not None:
             panels.restore()
+            panels.keep_one_in_dock()  # the section turned off was the last one of the dock: one comes back
         manager = getattr(dock, "_action_bar_manager", None)
         if manager is not None:
             manager.sync_sections()

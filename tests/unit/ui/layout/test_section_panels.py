@@ -139,8 +139,8 @@ def test_a_list_holds_one_panel_per_item_as_its_sections_or_as_its_text():
 
 
 def test_unknown_names_noise_and_repeats_are_left_out():
-    assert panels.parse_groups("exporting+nothing, FILTERING +exporting, ,exploring") == (("exporting",), ("filtering",))
-    assert panels.parse_groups("exploring") == ()  # EXPLORING stays in the dock
+    assert panels.parse_groups("exporting+nothing, FILTERING +exporting, ,nowhere") == (("exporting",), ("filtering",))
+    assert panels.parse_groups("exploring, nothing") == (("exploring",),)  # EXPLORING can be apart too
 
 
 def test_no_setting_is_no_panel():
@@ -294,9 +294,43 @@ def test_a_section_in_the_dock_can_leave_it_alone_or_with_the_others():
         assert panels.menu_entries(key, ()) == [("detach", key), ("detach_all", "")]
 
 
-def test_exploring_never_leaves_the_dock():
-    assert panels.menu_entries("exploring", ()) == [("detach_all", "")]
-    assert panels.menu_entries("exploring", (panels.DETACHABLE,)) == [("attach_all", "")]
+def test_exploring_leaves_the_dock_by_its_own_entry_and_stays_when_it_is_alone():
+    """2026-11-17: EXPLORING can be in a panel of its own; the dock is never left empty."""
+    assert panels.menu_entries("exploring", ()) == [("detach", "exploring"), ("detach_all", "")]
+    others = tuple(key for key in panels.DETACHABLE if key != "exploring")
+    assert panels.menu_entries("exploring", (others,)) == [("attach_all", "")]  # alone in the dock: it stays
+    # In its own panel it joins another one, or comes back, as any section.
+    assert panels.menu_entries("exploring", (("exploring",), ("agent",))) == [
+        ("group", "agent"), ("attach", "exploring"), ("detach_all", ""), ("attach_all", "")]
+
+
+def test_exploring_gets_a_panel_of_its_own_when_nothing_says_where():
+    assert panels.smart_group("exploring", (("agent",), ("filtering", "exporting"))) is None
+
+
+def test_the_last_section_of_the_dock_stays_in_it():
+    assert panels.can_leave("filtering", ["exploring", "filtering"])
+    assert not panels.can_leave("filtering", ["filtering"])
+    assert not panels.can_leave("filtering", ["exploring"])  # not in the dock
+    apart = (("agent",), ("exploring",), ("exporting", "configuration"))
+    assert panels.menu_entries("filtering", apart) == [("attach_all", "")]
+
+
+def test_every_section_out_leaves_exploring_in_the_dock():
+    assert panels.would_leave(panels.DETACHABLE) == ["agent", "filtering", "exporting", "configuration"]
+    assert panels.would_leave(["exploring"]) == []
+    # With EXPLORING already apart, the last section stays instead.
+    assert panels.would_leave(["agent", "filtering", "exporting", "configuration"]) == [
+        "agent", "filtering", "exporting"]
+    assert panels.would_leave(["configuration"]) == []
+    entries = panels.menu_entries("filtering", (("exploring",), ("agent",), ("configuration",)))
+    assert ("detach", "filtering") in entries and ("detach_all", "") not in entries  # it would move this one only
+
+
+def test_a_dock_left_empty_gets_exploring_back_first():
+    assert panels.comes_back(["filtering", "exploring", "agent"]) == "exploring"
+    assert panels.comes_back(["filtering", "configuration"]) == "filtering"
+    assert panels.comes_back([]) is None
 
 
 def test_the_last_section_in_the_dock_is_not_offered_with_the_others():
@@ -333,7 +367,7 @@ def test_every_section_apart_leaves_nothing_to_take_out():
 
 
 def test_a_section_turned_off_is_offered_nothing_and_is_not_counted():
-    present = ("agent", "exporting", "configuration")  # FILTERING is turned off
+    present = ("agent", "exploring", "exporting", "configuration")  # FILTERING is turned off
     assert panels.menu_entries("filtering", (), present) == [("detach_all", "")]
     assert panels.menu_entries("exporting", (("agent",), ("configuration",)), present) == [
         ("group", "configuration"), ("detach", "exporting"), ("group", "agent"), ("attach_all", "")]
