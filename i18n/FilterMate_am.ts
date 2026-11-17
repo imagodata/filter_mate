@@ -12249,8 +12249,8 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>በነባሪ እያንዳንዱ ክፍል በዚህ ፓነል ውስጥ ነው፣ እርስዎ ካልጠየቁ ምንም አይንቀሳቀስም። አንድ ክፍል ከዚህ መውጣት ይችላል፦ በረድፉ ላይ የAGENT፣ FILTERING፣ EXPORTING ወይም CONFIGURATION ቺፕ ላይ በቀኝ ጠቅ ያድርጉ፣ ከዚያ በራሱ ፓነል ውስጥ መክፈትን ይምረጡ። የQGIS ፓነል ይሆናል፤ ከካርታው አጠገብ ሊጎትቱት፣ ከንብርብሮች ፓነል ጋር በትር ሊያደርጉት ወይም በሌላ ማያ ገጽ ላይ ሊያንሳፍፉት ይችላሉ። EXPLORING እዚህ ይቀራል፦ ሌሎቹ ክፍሎች የሚሰሩበትን ንብርብር ይይዛል።</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>በነባሪ እያንዳንዱ ክፍል በዚህ ፓነል ውስጥ ነው፣ እርስዎ ካልጠየቁ ምንም አይንቀሳቀስም። አንድ ክፍል ከዚህ መውጣት ይችላል፦ በረድፉ ላይ ባለው ቺፑ ላይ በቀኝ ጠቅ ያድርጉ፣ ከዚያ በራሱ ፓነል ውስጥ መክፈትን ይምረጡ። የQGIS ፓነል ይሆናል፤ ከካርታው አጠገብ ሊጎትቱት፣ ከንብርብሮች ፓነል ጋር በትር ሊያደርጉት ወይም በሌላ ማያ ገጽ ላይ ሊያንሳፍፉት ይችላሉ። እዚህ የቀረው የመጨረሻ ክፍል እዚሁ ይቆያል። EXPLORING ሌሎቹ ክፍሎች የሚሰሩበትን ንብርብር ይይዛል፦ ከFILTERING ከተለየ በኋላ ያንን ንብርብር ለመምረጥ የራሱን ዝርዝር ያሳያል።</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>አንድ ክፍል ከዚህ ፓነል መውጣት ይችላል። የAGENT፣ FILTERING፣ EXPORTING ወይም CONFIGURATION ርዕስ ላይ በቀኝ ጠቅ ያድርጉ፣ ከዚያ በራሱ ፓነል ውስጥ መክፈትን ይምረጡ፦ የQGIS ፓነል ይሆናል፤ ከካርታው አጠገብ ሊጎትቱት፣ ከንብርብሮች ፓነል ጋር በትር ሊያደርጉት ወይም በሌላ ማያ ገጽ ላይ ሊያንሳፍፉት ይችላሉ። EXPLORING እዚህ ይቀራል፦ ሌሎቹ ክፍሎች የሚሰሩበትን ንብርብር ይይዛል።</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>አንድ ክፍል ከዚህ ፓነል መውጣት ይችላል። በርዕሱ ላይ በቀኝ ጠቅ ያድርጉ፣ ከዚያ በራሱ ፓነል ውስጥ መክፈትን ይምረጡ፦ የQGIS ፓነል ይሆናል፤ ከካርታው አጠገብ ሊጎትቱት፣ ከንብርብሮች ፓነል ጋር በትር ሊያደርጉት ወይም በሌላ ማያ ገጽ ላይ ሊያንሳፍፉት ይችላሉ። እዚህ የቀረው የመጨረሻ ክፍል እዚሁ ይቆያል። EXPLORING ሌሎቹ ክፍሎች የሚሰሩበትን ንብርብር ይይዛል፦ ከFILTERING ከተለየ በኋላ ያንን ንብርብር ለመምረጥ የራሱን ዝርዝር ያሳያል።</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

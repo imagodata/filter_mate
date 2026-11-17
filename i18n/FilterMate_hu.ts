@@ -12249,8 +12249,8 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Alapértelmezés szerint minden szakasz ebben a panelben van, és semmi sem mozdul, amíg nem kéri. Egy szakasz elhagyhatja: kattintson jobb gombbal az AGENT, a FILTERING, az EXPORTING vagy a CONFIGURATION chipjére a sávjában, majd válassza a saját panelben való megnyitást. QGIS-panel lesz belőle, amelyet a térkép mellé húzhat, a Rétegek panellel lapokba rendezhet, vagy lebegtethet egy másik képernyőn. Az EXPLORING itt marad: azt a réteget tartalmazza, amelyen a többi szakasz dolgozik.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Alapértelmezés szerint minden szakasz ebben a panelben van, és semmi sem mozdul, amíg nem kéri. Egy szakasz elhagyhatja: kattintson jobb gombbal a chipjére a sávjában, majd válassza a saját panelben való megnyitást. QGIS-panel lesz belőle, amelyet a térkép mellé húzhat, a Rétegek panellel lapokba rendezhet, vagy lebegtethet egy másik képernyőn. Az utolsó itt maradt szakasz nem mehet el. Az EXPLORING azt a réteget tartalmazza, amelyen a többi szakasz dolgozik: ha elválik a FILTERING-től, saját listát mutat e réteg kiválasztásához.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Egy szakasz elhagyhatja ezt a panelt. Kattintson jobb gombbal az AGENT, a FILTERING, az EXPORTING vagy a CONFIGURATION fejlécére, majd válassza a saját panelben való megnyitást: QGIS-panel lesz belőle, amelyet a térkép mellé húzhat, a Rétegek panellel lapokba rendezhet, vagy lebegtethet egy másik képernyőn. Az EXPLORING itt marad: azt a réteget tartalmazza, amelyen a többi szakasz dolgozik.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Egy szakasz elhagyhatja ezt a panelt. Kattintson jobb gombbal a fejlécére, majd válassza a saját panelben való megnyitást: QGIS-panel lesz belőle, amelyet a térkép mellé húzhat, a Rétegek panellel lapokba rendezhet, vagy lebegtethet egy másik képernyőn. Az utolsó itt maradt szakasz nem mehet el. Az EXPLORING azt a réteget tartalmazza, amelyen a többi szakasz dolgozik: ha elválik a FILTERING-től, saját listát mutat e réteg kiválasztásához.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

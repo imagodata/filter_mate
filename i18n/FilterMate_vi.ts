@@ -12249,8 +12249,8 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Theo mặc định, mọi phần đều nằm trong bảng điều khiển này, và không có gì di chuyển trừ khi bạn yêu cầu. Một phần có thể rời khỏi đó: nhấp chuột phải vào chip của AGENT, FILTERING, EXPORTING hoặc CONFIGURATION trên thanh của nó, rồi chọn mở nó trong bảng điều khiển riêng. Nó trở thành một bảng điều khiển của QGIS, có thể kéo cạnh bản đồ, ghép tab với bảng điều khiển Lớp hoặc thả nổi trên màn hình khác. EXPLORING ở lại đây: nó giữ lớp mà các phần khác làm việc trên đó.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Theo mặc định, mọi phần đều nằm trong bảng điều khiển này, và không có gì di chuyển trừ khi bạn yêu cầu. Một phần có thể rời khỏi đó: nhấp chuột phải vào chip của nó trên thanh, rồi chọn mở nó trong bảng điều khiển riêng. Nó trở thành một bảng điều khiển của QGIS, có thể kéo cạnh bản đồ, ghép tab với bảng điều khiển Lớp hoặc thả nổi trên màn hình khác. Phần cuối cùng còn lại ở đây thì không rời đi. EXPLORING giữ lớp mà các phần khác làm việc trên đó: khi đã tách khỏi FILTERING, nó hiển thị danh sách riêng để chọn lớp đó.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Một phần có thể rời khỏi bảng điều khiển này. Nhấp chuột phải vào tiêu đề của AGENT, FILTERING, EXPORTING hoặc CONFIGURATION, rồi chọn mở nó trong bảng điều khiển riêng: nó trở thành một bảng điều khiển của QGIS, có thể kéo cạnh bản đồ, ghép tab với bảng điều khiển Lớp hoặc thả nổi trên màn hình khác. EXPLORING ở lại đây: nó giữ lớp mà các phần khác làm việc trên đó.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Một phần có thể rời khỏi bảng điều khiển này. Nhấp chuột phải vào tiêu đề của nó, rồi chọn mở nó trong bảng điều khiển riêng: nó trở thành một bảng điều khiển của QGIS, có thể kéo cạnh bản đồ, ghép tab với bảng điều khiển Lớp hoặc thả nổi trên màn hình khác. Phần cuối cùng còn lại ở đây thì không rời đi. EXPLORING giữ lớp mà các phần khác làm việc trên đó: khi đã tách khỏi FILTERING, nó hiển thị danh sách riêng để chọn lớp đó.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

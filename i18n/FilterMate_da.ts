@@ -12249,8 +12249,8 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Som standard ligger hver sektion i dette panel, og intet flytter sig, medmindre du beder om det. En sektion kan forlade det: højreklik på chippen for AGENT, FILTERING, EXPORTING eller CONFIGURATION i dens bjælke, og vælg at åbne den i sit eget panel. Den bliver et panel i QGIS, som kan trækkes ved siden af kortet, lægges som fane sammen med panelet Lag eller gøres flydende på en anden skærm. EXPLORING bliver her: den rummer det lag, de andre sektioner arbejder på.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Som standard ligger hver sektion i dette panel, og intet flytter sig, medmindre du beder om det. En sektion kan forlade det: højreklik på dens chip i dens bjælke, og vælg at åbne den i sit eget panel. Den bliver et panel i QGIS, som kan trækkes ved siden af kortet, lægges som fane sammen med panelet Lag eller gøres flydende på en anden skærm. Den sidste sektion, der er tilbage her, bliver her. EXPLORING rummer det lag, de andre sektioner arbejder på: når den er adskilt fra FILTERING, viser den sin egen liste til at vælge det lag.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>En sektion kan forlade dette panel. Højreklik på overskriften for AGENT, FILTERING, EXPORTING eller CONFIGURATION, og vælg at åbne den i sit eget panel: den bliver et panel i QGIS, som kan trækkes ved siden af kortet, lægges som fane sammen med panelet Lag eller gøres flydende på en anden skærm. EXPLORING bliver her: den rummer det lag, de andre sektioner arbejder på.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>En sektion kan forlade dette panel. Højreklik på dens overskrift, og vælg at åbne den i sit eget panel: den bliver et panel i QGIS, som kan trækkes ved siden af kortet, lægges som fane sammen med panelet Lag eller gøres flydende på en anden skærm. Den sidste sektion, der er tilbage her, bliver her. EXPLORING rummer det lag, de andre sektioner arbejder på: når den er adskilt fra FILTERING, viser den sin egen liste til at vælge det lag.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

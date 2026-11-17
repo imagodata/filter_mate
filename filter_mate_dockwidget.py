@@ -7358,12 +7358,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """AGENT is open in the dock: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the
         agent. Not while AGENT or FILTERING is in its own panel (ui/layout/section_panels.py): they show side by
         side then, Undo and Redo sit with FILTERING and keep walking its history; the steps of the agent are undone
-        from its own history."""
+        from its own history. Nor while FILTERING is open under AGENT, which EXPLORING in its own panel allows
+        (in the dock, AGENT open folds FILTERING): the buttons are those of the section they sit with."""
         sections = getattr(self, '_fm_sections', None)
         # Read with getattr: tests call the methods of the dock on plain objects.
-        return (getattr(self, '_agent_chat', None) is not None and sections is not None
-                and not _apart(sections, 'agent', 'filtering')
-                and bool(getattr(sections, 'is_open', lambda _key: False)('agent')))
+        if (getattr(self, '_agent_chat', None) is None or sections is None
+                or _apart(sections, 'agent', 'filtering')
+                or not bool(getattr(sections, 'is_open', lambda _key: False)('agent'))):
+            return False
+        beside = _apart(sections, 'exploring') and getattr(sections, 'bottom_key', lambda: None)() == 'filtering'
+        return not beside
 
     def _history_controller(self):
         integration = getattr(self, '_controller_integration', None)
@@ -7420,9 +7424,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             - Attempts to recover current_layer from saved ID or combobox if None
             - Export task syncs HAS_LAYERS_TO_EXPORT flag before execution
         """
-        chat, sections = getattr(self, '_agent_chat', None), getattr(self, '_fm_sections', None)
-        if (task_name in ('undo', 'redo') and chat is not None and sections is not None
-                and not _apart(sections, 'agent', 'filtering') and sections.is_open('agent')):
+        chat = getattr(self, '_agent_chat', None)
+        # The same rule as the buttons, which show the history they walk (2026-11-17, review: with EXPLORING in its
+        # own panel they showed the filters, and a click undid a step of the agent).
+        if task_name in ('undo', 'redo') and chat is not None and self.agent_has_focus():
             # AGENT open: a step of the agent, not a dock or coverage filter (the buttons show its history).
             (chat._on_undo if task_name == 'undo' else chat._on_redo)()
             return

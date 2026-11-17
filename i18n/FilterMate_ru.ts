@@ -12249,8 +12249,8 @@ onnxruntime загружается из PyPI с помощью pip, модель
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>По умолчанию все разделы находятся в этой панели, и ничего не перемещается, пока вы этого не попросите. Раздел может её покинуть: щёлкните правой кнопкой по чипу AGENT, FILTERING, EXPORTING или CONFIGURATION на его полосе и выберите открытие в собственной панели. Он станет панелью QGIS, которую можно перетащить к карте, объединить во вкладки с панелью Слои или оставить плавающей на другом экране. EXPLORING остаётся здесь: он содержит слой, с которым работают остальные разделы.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>По умолчанию все разделы находятся в этой панели, и ничего не перемещается, пока вы этого не попросите. Раздел может её покинуть: щёлкните правой кнопкой по его чипу на полосе и выберите открытие в собственной панели. Он станет панелью QGIS, которую можно перетащить к карте, объединить во вкладки с панелью Слои или оставить плавающей на другом экране. Последний оставшийся здесь раздел не уходит. EXPLORING содержит слой, с которым работают остальные разделы: после отделения от FILTERING он показывает собственный список для выбора этого слоя.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime загружается из PyPI с помощью pip, модель
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Раздел может покинуть эту панель. Щёлкните правой кнопкой по заголовку AGENT, FILTERING, EXPORTING или CONFIGURATION и выберите открытие в собственной панели: она станет панелью QGIS, которую можно перетащить к карте, объединить во вкладки с панелью Слои или оставить плавающей на другом экране. EXPLORING остаётся здесь: он содержит слой, с которым работают остальные разделы.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Раздел может покинуть эту панель. Щёлкните правой кнопкой по его заголовку и выберите открытие в собственной панели: она станет панелью QGIS, которую можно перетащить к карте, объединить во вкладки с панелью Слои или оставить плавающей на другом экране. Последний оставшийся здесь раздел не уходит. EXPLORING содержит слой, с которым работают остальные разделы: после отделения от FILTERING он показывает собственный список для выбора этого слоя.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
