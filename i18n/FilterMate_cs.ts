@@ -12231,8 +12231,8 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Ve výchozím stavu je každá sekce v tomto panelu a nic se nepřesouvá, dokud o to nepožádáte. Sekce ho může opustit: klikněte pravým tlačítkem na čip sekce AGENT, FILTERING, EXPORTING nebo CONFIGURATION na její liště a zvolte otevření ve vlastním panelu. Stane se panelem QGIS, který můžete přetáhnout vedle mapy, spojit do karet s panelem Vrstvy nebo nechat plovoucí na jiné obrazovce. EXPLORING zůstává tady: obsahuje vrstvu, se kterou ostatní sekce pracují.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Ve výchozím stavu je každá sekce v tomto panelu a nic se nepřesouvá, dokud o to nepožádáte. Sekce ho může opustit: klikněte pravým tlačítkem na čip sekce na její liště a zvolte otevření ve vlastním panelu. Stane se panelem QGIS, který můžete přetáhnout vedle mapy, spojit do karet s panelem Vrstvy nebo nechat plovoucí na jiné obrazovce. Poslední sekce, která tady zbývá, zůstává. EXPLORING obsahuje vrstvu, se kterou ostatní sekce pracují: po oddělení od FILTERING zobrazuje vlastní seznam pro výběr této vrstvy.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12276,8 +12276,8 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Sekce může opustit tento panel. Klikněte pravým tlačítkem na záhlaví AGENT, FILTERING, EXPORTING nebo CONFIGURATION a zvolte otevření ve vlastním panelu: stane se panelem QGIS, který můžete přetáhnout vedle mapy, spojit do karet s panelem Vrstvy nebo nechat plovoucí na jiné obrazovce. EXPLORING zůstává tady: obsahuje vrstvu, se kterou ostatní sekce pracují.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Sekce může opustit tento panel. Klikněte pravým tlačítkem na záhlaví sekce a zvolte otevření ve vlastním panelu: stane se panelem QGIS, který můžete přetáhnout vedle mapy, spojit do karet s panelem Vrstvy nebo nechat plovoucí na jiné obrazovce. Poslední sekce, která tady zbývá, zůstává. EXPLORING obsahuje vrstvu, se kterou ostatní sekce pracují: po oddělení od FILTERING zobrazuje vlastní seznam pro výběr této vrstvy.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

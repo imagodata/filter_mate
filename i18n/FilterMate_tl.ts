@@ -12249,8 +12249,8 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Bilang default, nasa panel na ito ang bawat seksyon, at walang gumagalaw maliban kung hihilingin mo. Maaaring umalis ang isang seksyon dito: i-right-click ang chip ng AGENT, FILTERING, EXPORTING o CONFIGURATION sa bar nito, at piliing buksan ito sa sarili nitong panel. Magiging panel ito ng QGIS na maaari mong i-drag sa tabi ng mapa, gawing tab kasama ng Layers panel, o ilutang sa ibang screen. Nananatili rito ang EXPLORING: hawak nito ang layer na pinagtatrabahuhan ng iba pang seksyon.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Bilang default, nasa panel na ito ang bawat seksyon, at walang gumagalaw maliban kung hihilingin mo. Maaaring umalis ang isang seksyon dito: i-right-click ang chip nito sa bar, at piliing buksan ito sa sarili nitong panel. Magiging panel ito ng QGIS na maaari mong i-drag sa tabi ng mapa, gawing tab kasama ng Layers panel, o ilutang sa ibang screen. Hindi aalis ang huling seksyong natitira rito. Hawak ng EXPLORING ang layer na pinagtatrabahuhan ng iba pang seksyon: kapag nahiwalay na ito sa FILTERING, magpapakita ito ng sarili nitong listahan para piliin ang layer na iyon.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Maaaring umalis ang isang seksyon sa panel na ito. I-right-click ang header ng AGENT, FILTERING, EXPORTING o CONFIGURATION, at piliing buksan ito sa sarili nitong panel: magiging panel ito ng QGIS na maaari mong i-drag sa tabi ng mapa, gawing tab kasama ng Layers panel, o ilutang sa ibang screen. Nananatili rito ang EXPLORING: hawak nito ang layer na pinagtatrabahuhan ng iba pang seksyon.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Maaaring umalis ang isang seksyon sa panel na ito. I-right-click ang header nito, at piliing buksan ito sa sarili nitong panel: magiging panel ito ng QGIS na maaari mong i-drag sa tabi ng mapa, gawing tab kasama ng Layers panel, o ilutang sa ibang screen. Hindi aalis ang huling seksyong natitira rito. Hawak ng EXPLORING ang layer na pinagtatrabahuhan ng iba pang seksyon: kapag nahiwalay na ito sa FILTERING, magpapakita ito ng sarili nitong listahan para piliin ang layer na iyon.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

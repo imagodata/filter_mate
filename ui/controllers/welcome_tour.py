@@ -47,15 +47,17 @@ def _texts(off: str) -> Dict[str, str]:
                              "choices, and shows each setting before and after."),
         "off": _tr("Turned off in your settings: {}. Set up FilterMate brings a section back.").format(off),
         "panels": _tr("By default every section is in this panel, and nothing moves unless you ask. A section can "
-                      "leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, "
-                      "then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, "
-                      "to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds "
-                      "the layer the other sections work on."),
+                      "leave it: right-click its chip in its rail, then choose to open it in its own panel. It "
+                      "becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on "
+                      "another screen. The last section left here stays. EXPLORING holds the layer the other "
+                      "sections work on: once separated from FILTERING, it shows its own list to choose that "
+                      "layer."),
         # With the headers stacked (APP.DOCKWIDGET.SECTION_HEADERS): the same, said of a header.
-        "panels_headers": _tr("A section can leave this panel. Right-click the header of AGENT, FILTERING, "
-                              "EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a "
-                              "panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on "
-                              "another screen. EXPLORING stays here: it holds the layer the other sections work on."),
+        "panels_headers": _tr("A section can leave this panel. Right-click its header, then choose to open it in "
+                              "its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the "
+                              "Layers panel or to float on another screen. The last section left here stays. "
+                              "EXPLORING holds the layer the other sections work on: once separated from "
+                              "FILTERING, it shows its own list to choose that layer."),
         "groups": _tr("A panel holds one section or several, listed in a rail as here. Drag the chip of a section "
                       "onto another panel to group them, onto FilterMate to merge it back, or out of every panel to "
                       "give it a new one; two panels of FilterMate put together as tabs become one. A right-click on "

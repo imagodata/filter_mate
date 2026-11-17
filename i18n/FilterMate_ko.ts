@@ -12249,8 +12249,8 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>기본적으로 모든 섹션은 이 패널 안에 있으며, 요청하지 않으면 아무것도 움직이지 않습니다. 섹션은 이 패널을 떠날 수 있습니다. 레일에서 AGENT, FILTERING, EXPORTING 또는 CONFIGURATION의 칩을 오른쪽 클릭한 다음, 별도 패널에서 열기를 선택하세요. 섹션이 QGIS 패널이 되어 지도 옆으로 끌어다 놓거나, 레이어 패널과 탭으로 묶거나, 다른 화면에 띄울 수 있습니다. EXPLORING은 여기에 남습니다. 다른 섹션이 작업하는 레이어가 여기에 있기 때문입니다.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>기본적으로 모든 섹션은 이 패널 안에 있으며, 요청하지 않으면 아무것도 움직이지 않습니다. 섹션은 이 패널을 떠날 수 있습니다. 레일에서 해당 섹션의 칩을 오른쪽 클릭한 다음, 별도 패널에서 열기를 선택하세요. 섹션이 QGIS 패널이 되어 지도 옆으로 끌어다 놓거나, 레이어 패널과 탭으로 묶거나, 다른 화면에 띄울 수 있습니다. 여기에 마지막으로 남은 섹션은 떠나지 않습니다. EXPLORING은 다른 섹션이 작업하는 레이어를 담고 있습니다. FILTERING에서 분리되면 그 레이어를 고르는 자체 목록을 보여 줍니다.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>섹션은 이 패널을 떠날 수 있습니다. AGENT, FILTERING, EXPORTING 또는 CONFIGURATION의 헤더를 오른쪽 클릭한 다음, 별도 패널에서 열기를 선택하세요. 섹션이 QGIS 패널이 되어 지도 옆으로 끌어다 놓거나, 레이어 패널과 탭으로 묶거나, 다른 화면에 띄울 수 있습니다. EXPLORING은 여기에 남습니다. 다른 섹션이 작업하는 레이어가 여기에 있기 때문입니다.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>섹션은 이 패널을 떠날 수 있습니다. 해당 섹션의 헤더를 오른쪽 클릭한 다음, 별도 패널에서 열기를 선택하세요. 섹션이 QGIS 패널이 되어 지도 옆으로 끌어다 놓거나, 레이어 패널과 탭으로 묶거나, 다른 화면에 띄울 수 있습니다. 여기에 마지막으로 남은 섹션은 떠나지 않습니다. EXPLORING은 다른 섹션이 작업하는 레이어를 담고 있습니다. FILTERING에서 분리되면 그 레이어를 고르는 자체 목록을 보여 줍니다.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

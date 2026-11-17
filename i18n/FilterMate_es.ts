@@ -12249,8 +12249,8 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>De forma predeterminada, todas las secciones están en este panel y nada se mueve si usted no lo pide. Una sección puede salir de él: haga clic derecho en el chip de AGENT, FILTERING, EXPORTING o CONFIGURATION en su carril y elija abrirla en su propio panel. Pasa a ser un panel de QGIS, que puede arrastrar junto al mapa, agrupar en pestañas con el panel Capas o hacer flotar en otra pantalla. EXPLORING se queda aquí: contiene la capa sobre la que trabajan las demás secciones.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>De forma predeterminada, todas las secciones están en este panel y nada se mueve si usted no lo pide. Una sección puede salir de él: haga clic derecho en su chip en su carril y elija abrirla en su propio panel. Pasa a ser un panel de QGIS, que puede arrastrar junto al mapa, agrupar en pestañas con el panel Capas o hacer flotar en otra pantalla. La última sección que queda aquí se queda. EXPLORING contiene la capa sobre la que trabajan las demás secciones: una vez separado de FILTERING, muestra su propia lista para elegir esa capa.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Una sección puede salir de este panel. Haga clic derecho en el encabezado de AGENT, FILTERING, EXPORTING o CONFIGURATION y elija abrirla en su propio panel: pasa a ser un panel de QGIS, que puede arrastrar junto al mapa, agrupar en pestañas con el panel Capas o hacer flotar en otra pantalla. EXPLORING se queda aquí: contiene la capa sobre la que trabajan las demás secciones.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Una sección puede salir de este panel. Haga clic derecho en su encabezado y elija abrirla en su propio panel: pasa a ser un panel de QGIS, que puede arrastrar junto al mapa, agrupar en pestañas con el panel Capas o hacer flotar en otra pantalla. La última sección que queda aquí se queda. EXPLORING contiene la capa sobre la que trabajan las demás secciones: una vez separado de FILTERING, muestra su propia lista para elegir esa capa.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

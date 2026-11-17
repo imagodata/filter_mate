@@ -12249,8 +12249,8 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Odatiy holatda har bir bo'lim shu panelda turadi va siz so'ramaguningizcha hech narsa siljimaydi. Bo'lim paneldan chiqishi mumkin: lentadagi AGENT, FILTERING, EXPORTING yoki CONFIGURATION bo'limining chipini o'ng tugma bilan bosing va uni alohida panelda ochishni tanlang. U QGIS paneliga aylanadi, uni xarita yoniga sudrab qo'yish, Qatlamlar paneli bilan yorliqqa birlashtirish yoki boshqa ekranda suzdirish mumkin. EXPLORING shu yerda qoladi: unda boshqa bo'limlar ishlaydigan qatlam bor.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Odatiy holatda har bir bo'lim shu panelda turadi va siz so'ramaguningizcha hech narsa siljimaydi. Bo'lim paneldan chiqishi mumkin: lentadagi uning chipini o'ng tugma bilan bosing va uni alohida panelda ochishni tanlang. U QGIS paneliga aylanadi, uni xarita yoniga sudrab qo'yish, Qatlamlar paneli bilan yorliqqa birlashtirish yoki boshqa ekranda suzdirish mumkin. Bu yerda qolgan oxirgi bo'lim chiqmaydi. EXPLORING bo'limida boshqa bo'limlar ishlaydigan qatlam bor: FILTERING bo'limidan ajratilgach, u shu qatlamni tanlash uchun o'z ro'yxatini ko'rsatadi.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Bo'lim bu paneldan chiqishi mumkin. AGENT, FILTERING, EXPORTING yoki CONFIGURATION sarlavhasini o'ng tugma bilan bosing va uni alohida panelda ochishni tanlang: u QGIS paneliga aylanadi, uni xarita yoniga sudrab qo'yish, Qatlamlar paneli bilan yorliqqa birlashtirish yoki boshqa ekranda suzdirish mumkin. EXPLORING shu yerda qoladi: unda boshqa bo'limlar ishlaydigan qatlam bor.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Bo'lim bu paneldan chiqishi mumkin. Uning sarlavhasini o'ng tugma bilan bosing va uni alohida panelda ochishni tanlang: u QGIS paneliga aylanadi, uni xarita yoniga sudrab qo'yish, Qatlamlar paneli bilan yorliqqa birlashtirish yoki boshqa ekranda suzdirish mumkin. Bu yerda qolgan oxirgi bo'lim chiqmaydi. EXPLORING bo'limida boshqa bo'limlar ishlaydigan qatlam bor: FILTERING bo'limidan ajratilgach, u shu qatlamni tanlash uchun o'z ro'yxatini ko'rsatadi.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

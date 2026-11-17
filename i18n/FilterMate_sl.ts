@@ -12249,8 +12249,8 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Privzeto je vsak razdelek v tej plošči in se nič ne premakne, dokler tega ne zahtevate. Razdelek jo lahko zapusti: z desnim klikom na čip razdelka AGENT, FILTERING, EXPORTING ali CONFIGURATION na njegovem traku izberite odprtje v lastni plošči. Postane plošča QGIS, ki jo lahko povlečete ob zemljevid, združite v zavihke s ploščo Sloji ali pustite plavati na drugem zaslonu. EXPLORING ostane tukaj: vsebuje sloj, s katerim delajo drugi razdelki.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Privzeto je vsak razdelek v tej plošči in se nič ne premakne, dokler tega ne zahtevate. Razdelek jo lahko zapusti: z desnim klikom na njegov čip na traku izberite odprtje v lastni plošči. Postane plošča QGIS, ki jo lahko povlečete ob zemljevid, združite v zavihke s ploščo Sloji ali pustite plavati na drugem zaslonu. Zadnji razdelek, ki ostane tukaj, ne odide. EXPLORING vsebuje sloj, s katerim delajo drugi razdelki: ko je ločen od FILTERING, prikaže svoj lasten seznam za izbiro tega sloja.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Razdelek lahko zapusti to ploščo. Z desnim klikom na naslovno vrstico razdelka AGENT, FILTERING, EXPORTING ali CONFIGURATION izberite odprtje v lastni plošči: postane plošča QGIS, ki jo lahko povlečete ob zemljevid, združite v zavihke s ploščo Sloji ali pustite plavati na drugem zaslonu. EXPLORING ostane tukaj: vsebuje sloj, s katerim delajo drugi razdelki.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Razdelek lahko zapusti to ploščo. Z desnim klikom na njegovo naslovno vrstico izberite odprtje v lastni plošči: postane plošča QGIS, ki jo lahko povlečete ob zemljevid, združite v zavihke s ploščo Sloji ali pustite plavati na drugem zaslonu. Zadnji razdelek, ki ostane tukaj, ne odide. EXPLORING vsebuje sloj, s katerim delajo drugi razdelki: ko je ločen od FILTERING, prikaže svoj lasten seznam za izbiro tega sloja.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

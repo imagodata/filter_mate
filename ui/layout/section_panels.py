@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """The sections of the dock in panels of QGIS: separated, grouped, merged.
 
-* AGENT, FILTERING, EXPORTING and CONFIGURATION can leave the dock for a panel of QGIS, which is dragged, tabbed
-  with the panels of QGIS or floated as the user likes. EXPLORING stays: the dock is its panel, it holds the
-  current layer the others work on.
+* Every section can leave the dock for a panel of QGIS, which is dragged, tabbed with the panels of QGIS or
+  floated as the user likes. The last section of the dock stays in it: the dock is never left empty.
+* EXPLORING leaves by its own menu entry, or dragged: "every section out" keeps it in the dock, which is then its
+  panel. Its panel goes above the dock the first time: what it selects stays over FILTERING, which works on it.
+  Away from FILTERING it shows a chooser of the current layer of its own (ui/widgets/layer_chooser_mirror.py).
 * A panel holds one section or several. With several, it lists them in a rail as the dock does
   (ui/widgets/section_rail.py): one is open, its chips are dragged to put them in another order.
 * Two panels of FilterMate put together merge: a panel dropped as a tab of another one gives it its sections, and
@@ -28,15 +30,18 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 logger = logging.getLogger("FilterMate")
 
-DETACHABLE = ("agent", "filtering", "exporting", "configuration")
+DETACHABLE = ("agent", "exploring", "filtering", "exporting", "configuration")
 BOTTOM = ("filtering", "exporting", "configuration")  # the sections of the lower stack: they go together
-TITLES = {"agent": "AGENT", "filtering": "FILTERING", "exporting": "EXPORTING", "configuration": "CONFIGURATION"}
+STAYS = "exploring"  # the section "every section out" leaves in the dock, and the first to come back to an empty one
+TITLES = {"agent": "AGENT", "exploring": "EXPLORING", "filtering": "FILTERING", "exporting": "EXPORTING",
+          "configuration": "CONFIGURATION"}
 SETTINGS_KEY = "FilterMate/panels/detached"
 DOCK_AREA_KEY = "FilterMate/panels/dock_area"  # the area the dock was given the last time (DOCK_POSITION)
 PANEL_NAME = "FilterMatePanel_{}"  # the object name of a panel: QGIS saves and restores its place under it
 PANEL_MENU_NAME = "mPanelMenu"  # the menu View > Panels of QGIS
 CONTENTS_NAME = "dockWidgetContents"  # the rules of the style sheets of the dock all start from this name
 PANEL_MARGIN = 2  # as the contents of the dock
+FUSION_SETTLE_MS = 400  # a dock dropped with the mouse is plugged at the end of an animation (about 200 ms)
 PANEL_GAP = 8  # between the rail of a panel and its open section, as in the dock
 Groups = Tuple[Tuple[str, ...], ...]
 
@@ -99,10 +104,31 @@ def remembered(groups: Iterable[Sequence[str]], saved: Iterable[Sequence[str]], 
     return tuple(tuple(group) for group in now) + tuple(alone)
 
 
+def can_leave(key: str, in_dock: Iterable[str]) -> bool:
+    """``key`` may leave the dock: it is in it, and not alone there (the last section of the dock stays)."""
+    here = list(in_dock)
+    return key in here and len(here) > 1
+
+
+def would_leave(in_dock: Iterable[str]) -> List[str]:
+    """What "every section out" moves, among the sections ``in_dock``: all of them but EXPLORING, whose panel the
+    dock then is; with EXPLORING already apart, all but the last one, which stays in the dock."""
+    here = [key for key in DETACHABLE if key in set(in_dock)]
+    return [key for key in here if key != STAYS] if STAYS in here else here[:-1]
+
+
+def comes_back(detached: Iterable[str]) -> Optional[str]:
+    """The section that comes back to a dock left with none: EXPLORING when it is apart, else the first one."""
+    apart = [key for key in DETACHABLE if key in set(detached)]
+    if STAYS in apart:
+        return STAYS
+    return apart[0] if apart else None
+
+
 def smart_group(key: str, groups: Iterable[Sequence[str]]) -> Optional[str]:
     """The panel a section joins when it is taken out without saying where: the one that already holds a section
     of its stack (FILTERING, EXPORTING and CONFIGURATION go together, as in the dock), named by its first section.
-    None: a new panel (AGENT, or the first section of the lower stack to leave)."""
+    None: a new panel (AGENT, EXPLORING, or the first section of the lower stack to leave)."""
     if key not in BOTTOM:
         return None
     for group in groups:
@@ -116,6 +142,7 @@ def panel_title(members: Sequence[str]) -> str:
 
 
 PANEL_MIN_HEIGHT = 180
+EXPLORING_SHARE = 0.45  # of the room the dock had, for EXPLORING placed above it the first time
 PANEL_MAX_SHARE = 0.55  # of the room the dock had: it keeps EXPLORING, which needs the larger part
 TITLE_ROOM = 30  # the title bar of the panel, above its contents
 FLOATING_SIZE = (360, 460)  # a panel made by a chip dropped out of every panel
@@ -143,12 +170,12 @@ def menu_entries(key: str, groups: Iterable[Sequence[str]],
                  present: Iterable[str] = DETACHABLE) -> List[Tuple[str, str]]:
     """What the menu of the section ``key`` offers, as ``(command, name)``, to separate, group and merge:
 
-    * ``detach``: its own panel (from the dock, or out of a panel it shares);
+    * ``detach``: its own panel (from the dock, where the last section stays, or out of a panel it shares);
     * ``group``: into another panel, named by its first section; the one ``smart_group`` gives comes first, before
       ``detach`` for a section of the dock: it is where the section goes when nothing says where;
     * ``attach``: merged back into the dock;
-    * ``detach_all`` when it would take another section than this one out of the dock, ``attach_all`` when a
-      section is apart.
+    * ``detach_all`` when it would take another section than this one out of the dock (EXPLORING is not one of
+      them: the dock is then its panel), ``attach_all`` when a section is apart.
 
     ``present``: the sections the dock has, in it or apart (a section turned off is not among them)."""
     panels = parse_groups([list(group) for group in groups])
@@ -160,7 +187,7 @@ def menu_entries(key: str, groups: Iterable[Sequence[str]],
     join = [("group", anchor) for anchor in ([smart] if smart in others else []) + [a for a in others if a != smart]]
     entries: List[Tuple[str, str]] = []
     if home is None:
-        if key in in_dock:
+        if can_leave(key, in_dock):
             first = join[:1] if smart in others else []
             entries += first + [("detach", key)] + join[len(first):]
     else:
@@ -168,7 +195,7 @@ def menu_entries(key: str, groups: Iterable[Sequence[str]],
             entries.append(("detach", key))
         entries += join
         entries.append(("attach", key))
-    if [name for name in in_dock if name != key]:
+    if [name for name in would_leave(in_dock) if name != key]:
         entries.append(("detach_all", ""))
     if apart:
         entries.append(("attach_all", ""))
@@ -432,7 +459,8 @@ class SectionPanels:
         self._panels: List[Any] = []  # the oldest first
         self._home: Dict[str, Any] = {}  # the panel each section apart is in
         self._origins: Dict[str, Any] = {}  # the scroll area of the tool box a page came from
-        self._dock_minimum: Optional[int] = None  # the minimum height of the display profile, while it is relaxed
+        self._dock_minimum: Optional[int] = None  # the minimum height the display profile gave the dock
+        self._dock_relaxed = False  # the dock has no minimum of its own for now
         self._hidden_with_dock = False
         self._closing = False
         self._fusing = False
@@ -463,7 +491,9 @@ class SectionPanels:
         toolbox = getattr(dock, "toolBox_tabTools", None)
         if toolbox is not None:
             toolbox.currentChanged.connect(self._on_bottom_changed)
-        for signal in ("topLevelChanged", "dockLocationChanged"):  # the dock dropped as a tab of one of its panels
+        # The dock dropped as a tab of one of its panels. Dragged with the mouse within its area, a docked dock
+        # says neither signal: only the one that goes behind the new tab says it is hidden (visibilityChanged).
+        for signal in ("topLevelChanged", "dockLocationChanged", "visibilityChanged"):
             getattr(dock, signal).connect(lambda *_args: self._moved(dock))
         dock.destroyed.connect(self._on_dock_destroyed)
 
@@ -491,15 +521,31 @@ class SectionPanels:
         return self._home.get(key)
 
     def can_detach(self, key: str) -> bool:
-        """The section is in the dock and can leave it."""
+        """The section is in the dock and can leave it: not the last one, the dock is never left empty."""
         if key not in DETACHABLE or key in self._home:
             return False
         sections = self._sections()
         if sections is None:
             return False
+        if not can_leave(key, self.in_dock()):
+            return False
         if key in BOTTOM:
             return self._page_area(key) is not None
         return key in getattr(sections, "_pages", {})
+
+    def in_dock(self) -> Tuple[str, ...]:
+        """The sections the dock shows itself: those it has that are neither turned off nor in a panel."""
+        return tuple(key for key in self._present() if key not in self._home)
+
+    def keep_one_in_dock(self) -> Optional[str]:
+        """A section was turned off and the dock is left with none: one comes back from its panel, EXPLORING
+        first. The section brought back, None when the dock needed none."""
+        if self._closing or not self._home or self.in_dock():
+            return None
+        key = comes_back(self.detached())
+        if key is not None and self.attach(key):
+            return key
+        return None
 
     def can_take(self, key: str, panel: Any) -> bool:
         """``panel`` takes the section ``key``: one that can leave the dock, or one of another panel."""
@@ -674,7 +720,8 @@ class SectionPanels:
 
     def detach_all(self) -> List[str]:
         """Every section that can leave the dock, taken out: FILTERING, EXPORTING and CONFIGURATION together, as in
-        the dock, AGENT in its own panel. Those that left.
+        the dock, AGENT in its own panel. EXPLORING stays: the dock is then its panel (it leaves by its own menu
+        entry, on purpose); with EXPLORING already apart, the last section stays. Those that left.
 
         A section that joins a panel is the one it shows, and a place QGIS kept may be behind another tab. What
         was open stays in view: below the section that was open, FILTERING when none was; above AGENT when it
@@ -691,7 +738,7 @@ class SectionPanels:
         current = toolbox.currentWidget() if toolbox is not None else None
         below = next((key for key in BOTTOM if current is not None
                       and current is getattr(self._dock, SECTION_PAGES[key], None)), "filtering")
-        left = [key for key in DETACHABLE if key not in self._home and self.open_smart(key)]
+        left = [key for key in would_leave(self.in_dock()) if self.open_smart(key)]
         if left:
             self._open_first(below)
             # after QGIS laid the tabs out
@@ -857,8 +904,8 @@ class SectionPanels:
         was_open = sections.is_open(key)
         sections._top_layout.removeWidget(page)
         sections.detached.add(key)
-        if was_open:
-            sections.open_top("exploring")
+        if was_open and "exploring" not in sections.detached:
+            sections.open_top("exploring")  # in its own panel, EXPLORING stays where the user put it
         return page
 
     def _into_dock(self, key: str, page: Any) -> None:
@@ -934,7 +981,8 @@ class SectionPanels:
         panel.rail.dropped_in.connect(lambda key, index, target=panel: self.move(key, target, index))
         panel.rail.dropped_out.connect(self._on_dropped_out)
         panel.rail.menu_requested.connect(lambda key, place, target=panel: self._popup(key, target, place))
-        for signal in ("topLevelChanged", "dockLocationChanged"):  # dropped as a tab of another FilterMate panel
+        # Dropped as a tab of another FilterMate panel, or of the dock (visibilityChanged: see the dock above).
+        for signal in ("topLevelChanged", "dockLocationChanged", "visibilityChanged"):
             getattr(panel, signal).connect(lambda *_args, mover=panel: self._moved(mover))
         # Its tab selected: Qt shows nothing again (the page behind a tab was never hidden), so the page is told.
         panel.visibilityChanged.connect(lambda visible, host=panel: self._on_panel_visible(host, visible))
@@ -1005,16 +1053,27 @@ class SectionPanels:
             panel.hide()  # the dock is closed: its panels come back with it
 
     def _place_new(self, panel: Any, window: Any, target: Any, docked: bool) -> None:
-        """A first place for ``panel``: below the dock or beside it; where that makes it a tab of the dock (the
-        dock shares its tabs with other panels of QGIS, and a panel split from a tab is one more tab), at the end
-        of the area, then across it, then floating beside the dock."""
+        """A first place for ``panel``: below the dock or beside it, above it with EXPLORING (what it selects
+        stays over FILTERING, which works on it); where that makes it a tab of the dock (the dock shares its tabs
+        with other panels of QGIS, and a panel split from a tab is one more tab), at the end of the area, then
+        across it, then floating beside the dock."""
         from qgis.PyQt.QtCore import QPoint, Qt
         dock = self._dock
         window.addDockWidget(target, panel)
         if docked and not window.tabifiedDockWidgets(dock):
-            wanted = self._height_below(panel)
-            if wanted:  # the room of the dock shared: the section at its own height, the dock keeps the larger part
-                room = dock.height()
+            room = dock.height()
+            wanted = 0 if STAYS in panel.members else self._height_below(panel)
+            if STAYS in panel.members:
+                # Qt splits the room of the first of the two and moves the second one into it. The panel first
+                # takes its place in the room of the dock, under it; then the dock comes under the panel. (The
+                # panel left at the end of the area, the dock went down there with it, below the panels of QGIS
+                # that were under it.)
+                share = max(PANEL_MIN_HEIGHT, int(room * EXPLORING_SHARE))
+                window.splitDockWidget(dock, panel, Qt.Orientation.Vertical)
+                window.splitDockWidget(panel, dock, Qt.Orientation.Vertical)
+                if room - share >= PANEL_MIN_HEIGHT:
+                    window.resizeDocks([panel, dock], [share, room - share], Qt.Orientation.Vertical)
+            elif wanted:  # the room of the dock shared: the section at its own height, the dock keeps the larger part
                 window.splitDockWidget(dock, panel, Qt.Orientation.Vertical)
                 window.resizeDocks([dock, panel], [room - wanted, wanted], Qt.Orientation.Vertical)
             else:
@@ -1075,20 +1134,25 @@ class SectionPanels:
         return panel_height(panel.widget().sizeHint().height() + TITLE_ROOM, room, spare)
 
     def relax_dock(self, profile_applied: bool = False) -> None:
-        """With FILTERING, EXPORTING or CONFIGURATION in a panel, the dock needs less height than its display
-        profile asks for all of them (600 px in the normal one): no minimum of its own, Qt then holds it to what
-        its contents need. The profile's minimum comes back with the last of them. ``profile_applied``: the
-        dimensions of a profile were just applied, the minimum of the dock is the one to give back."""
+        """With EXPLORING, FILTERING, EXPORTING or CONFIGURATION in a panel, the dock needs less height than its
+        display profile asks for all of them (600 px in the normal one): no minimum of its own, Qt then holds it
+        to what its contents need. The profile's minimum comes back with the last of them. ``profile_applied``:
+        the dimensions of a profile were just applied, the minimum of the dock is the one to give back."""
         try:
             dock = self._dock
-            if any(key in BOTTOM for key in self._home):  # AGENT alone apart leaves the dock as tall as ever
-                if self._dock_minimum is None or profile_applied:
-                    self._dock_minimum = dock.minimumHeight()  # once: afterwards Qt writes what the contents need
+            apart = any(key != "agent" for key in self._home)  # AGENT alone apart leaves the dock as tall as ever
+            if profile_applied or (apart and self._dock_minimum is None):
+                # Read once per profile: afterwards Qt writes what the contents need, and a minimum read again
+                # after sections went, came back and went again was no longer the one of the profile.
+                self._dock_minimum = dock.minimumHeight()
+            if apart:
                 if dock.minimumHeight() > 0:
                     dock.setMinimumHeight(0)
-            elif self._dock_minimum is not None:
-                dock.setMinimumHeight(self._dock_minimum)
-                self._dock_minimum = None
+                self._dock_relaxed = True
+            elif self._dock_relaxed:
+                self._dock_relaxed = False
+                if self._dock_minimum is not None:
+                    dock.setMinimumHeight(self._dock_minimum)
         except RuntimeError:  # the dock went away
             pass
 
@@ -1115,17 +1179,20 @@ class SectionPanels:
 
     def _moved(self, mover: Any) -> None:
         """A panel, or the dock, was dropped somewhere: as a tab of another one of FilterMate, they merge. Looked
-        at once the drop is over."""
+        at once the drop is over, and again once Qt has plugged it: dropped with the mouse, a dock is a tab only
+        when the animation of its drop ends (QGIS LTR, 17 November 2026), after the signal."""
         if self._closing or self._fusion_pending:
             return
         self._fusion_pending = True
         from qgis.PyQt.QtCore import QTimer
         QTimer.singleShot(0, lambda: self._fuse_tabbed(mover))
+        QTimer.singleShot(FUSION_SETTLE_MS, lambda: self._fuse_tabbed(mover, late=True))
 
-    def _fuse_tabbed(self, mover: Any = None) -> bool:
+    def _fuse_tabbed(self, mover: Any = None, late: bool = False) -> bool:
         """Merge the panels of FilterMate that are tabs of each other, or of the dock (``fusion``). True when some
-        were."""
-        self._fusion_pending = False
+        were. ``late``: the second look, once the drop is plugged (the first one let other moves be looked at)."""
+        if not late:
+            self._fusion_pending = False
         if self._closing or self._fusing:
             return False
         window = self._main_window()

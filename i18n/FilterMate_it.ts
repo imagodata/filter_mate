@@ -12249,8 +12249,8 @@ onnxruntime proviene da PyPI con pip, il modello da huggingface.co/{1}, ogni fil
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Per impostazione predefinita ogni sezione è in questo pannello e nulla si sposta se non lo chiedi. Una sezione può lasciarlo: fai clic destro sul chip di AGENT, FILTERING, EXPORTING o CONFIGURATION nella sua barra, poi scegli di aprirla nel proprio pannello. Diventa un pannello di QGIS, da trascinare accanto alla mappa, da affiancare in scheda al pannello Layer o da far fluttuare su un altro schermo. EXPLORING resta qui: contiene il layer su cui lavorano le altre sezioni.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Per impostazione predefinita ogni sezione è in questo pannello e nulla si sposta se non lo chiedi. Una sezione può lasciarlo: fai clic destro sul suo chip nella sua barra, poi scegli di aprirla nel proprio pannello. Diventa un pannello di QGIS, da trascinare accanto alla mappa, da affiancare in scheda al pannello Layer o da far fluttuare su un altro schermo. L'ultima sezione rimasta qui non se ne va. EXPLORING contiene il layer su cui lavorano le altre sezioni: una volta separato da FILTERING, mostra un proprio elenco per scegliere quel layer.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime proviene da PyPI con pip, il modello da huggingface.co/{1}, ogni fil
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Una sezione può lasciare questo pannello. Fai clic destro sull'intestazione di AGENT, FILTERING, EXPORTING o CONFIGURATION, poi scegli di aprirla nel proprio pannello: diventa un pannello di QGIS, da trascinare accanto alla mappa, da affiancare in scheda al pannello Layer o da far fluttuare su un altro schermo. EXPLORING resta qui: contiene il layer su cui lavorano le altre sezioni.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Una sezione può lasciare questo pannello. Fai clic destro sulla sua intestazione, poi scegli di aprirla nel proprio pannello: diventa un pannello di QGIS, da trascinare accanto alla mappa, da affiancare in scheda al pannello Layer o da far fluttuare su un altro schermo. L'ultima sezione rimasta qui non se ne va. EXPLORING contiene il layer su cui lavorano le altre sezioni: una volta separato da FILTERING, mostra un proprio elenco per scegliere quel layer.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

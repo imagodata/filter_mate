@@ -12249,8 +12249,8 @@ onnxruntime завантажується з PyPI за допомогою pip, м
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Типово всі розділи розташовані в цій панелі, і нічого не переміщується, доки ви цього не попросите. Розділ може її залишити: клацніть правою кнопкою по чипу AGENT, FILTERING, EXPORTING або CONFIGURATION на його смузі й виберіть відкриття в окремій панелі. Він стане панеллю QGIS, яку можна перетягнути до карти, об'єднати у вкладки з панеллю Шари або залишити плаваючою на іншому екрані. EXPLORING залишається тут: він містить шар, з яким працюють інші розділи.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Типово всі розділи розташовані в цій панелі, і нічого не переміщується, доки ви цього не попросите. Розділ може її залишити: клацніть правою кнопкою по його чипу на смузі й виберіть відкриття в окремій панелі. Він стане панеллю QGIS, яку можна перетягнути до карти, об'єднати у вкладки з панеллю Шари або залишити плаваючою на іншому екрані. Останній розділ, що залишився тут, не йде. EXPLORING містить шар, з яким працюють інші розділи: після відокремлення від FILTERING він показує власний список для вибору цього шару.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime завантажується з PyPI за допомогою pip, м
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Розділ може залишити цю панель. Клацніть правою кнопкою по заголовку AGENT, FILTERING, EXPORTING або CONFIGURATION і виберіть відкриття в окремій панелі: вона стане панеллю QGIS, яку можна перетягнути до карти, об'єднати у вкладки з панеллю Шари або залишити плаваючою на іншому екрані. EXPLORING залишається тут: він містить шар, з яким працюють інші розділи.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Розділ може залишити цю панель. Клацніть правою кнопкою по його заголовку і виберіть відкриття в окремій панелі: вона стане панеллю QGIS, яку можна перетягнути до карти, об'єднати у вкладки з панеллю Шари або залишити плаваючою на іншому екрані. Останній розділ, що залишився тут, не йде. EXPLORING містить шар, з яким працюють інші розділи: після відокремлення від FILTERING він показує власний список для вибору цього шару.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

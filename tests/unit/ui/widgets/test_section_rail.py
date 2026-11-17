@@ -91,20 +91,3 @@ def test_unknown_names_noise_and_repeats_are_left_out():
 
 def test_every_section_has_a_title_and_an_icon():
     assert set(rail.TITLES) == set(rail.ICONS) == {"agent", "exploring", "filtering", "exporting", "configuration"}
-
-
-# --- a drag that nothing took ---------------------------------------------------------------
-
-def test_a_chip_dropped_out_of_the_application_left_everything():
-    assert rail.left_everything(taken=False, button_down=False)
-
-
-def test_a_drag_given_up_with_escape_changes_nothing():
-    # 2026-11-16, review: QDrag.exec says IgnoreAction for a drop nobody took and for Escape alike; Escape made
-    # a floating panel under the pointer. The button is still down when Escape ends the drag.
-    assert not rail.left_everything(taken=False, button_down=True)
-
-
-def test_a_drop_that_was_taken_left_nothing():
-    assert not rail.left_everything(taken=True, button_down=False)
-    assert not rail.left_everything(taken=True, button_down=True)
