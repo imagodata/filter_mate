@@ -76,8 +76,9 @@ the original source back, and project files are always saved with the original s
   and each step can be undone; exports and added or removed layers are confirmed. You choose how far it goes alone
   (four levels of autonomy, a rule per tool, layers it must never change). Recipes keep a request in the project and run
   it again without any model, or by themselves each time the edits of their source are saved. When a choice is yours
-  it asks with choices to click; it sets FilterMate up with you (offered once per version, and from the menu
-  Vector > FilterMate); a team can give it its own skills, a `SKILL.md` you read and allow first. When the
+  it asks with choices to click; *Set up FilterMate* asks the main settings with a few choices, with no model at all
+  (offered once per version, and from the menu Vector > FilterMate), and *How FilterMate works* tells the panel
+  section by section; a team can give it its own skills, a `SKILL.md` you read and allow first. When the
   project has no such layer, it brings in what a request needs: the elevation of an area (a relief map with its
   contours in one sentence), OpenStreetMap features by tags, the population of an area, the natural risks of France. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: web basemaps (OpenStreetMap, Carto, IGN,
   Google Satellite), a geocoder, the tables of a PostgreSQL connection of QGIS, open data portals, WFS, WMS and WMTS
@@ -99,6 +100,11 @@ the original source back, and project files are always saved with the original s
 - ⚙️ **Automation**: ten Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
   other plugins, an optional REST API, and two MCP servers for AI assistants: one built into the plugin, one over stdio
   ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
+- 🪟 **Sections as panels of QGIS**: a rail lists the sections of the panel (or headers, one above the other, if you
+  prefer). Any section leaves the panel for a panel of QGIS, alone or grouped with others, by a right-click on its chip
+  or by dragging it, and comes back the same way; QGIS puts each panel back where you left it. EXPLORING in its own
+  panel shows its own list to choose the current layer. The buttons can sit under each section, and FILTERING or
+  EXPORTING can be turned off. Nothing moves unless you ask.
 - 🔧 **Configuration**: search a setting by name; display profile automatic from the screen or chosen (compact, normal, hidpi).
 - 🧩 **QGIS 3.22 to 4.x**, Qt5 and Qt6, 🌗 light and dark themes, 🌍 34 languages.
 
