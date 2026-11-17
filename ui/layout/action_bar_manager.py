@@ -211,6 +211,20 @@ class ActionBarManager(LayoutManagerBase):
         self.apply_position()
         logger.debug(f"ActionBarManager: Position set to {position}")
 
+    def set_vertical_alignment(self, alignment: str) -> None:
+        """Where a bar on a side (left / right) stands: beside the stacks, from their top (``top``), or in the row
+        at the bottom of the dock (``bottom``). Applied at once when the bar is on a side; kept for the next time
+        it goes there otherwise. (The CONFIGURATION tree called this method before it existed: the setting raised
+        an error and waited for a restart.)"""
+        if alignment not in ('top', 'bottom'):
+            raise ValueError(f"Invalid alignment: {alignment}. Must be 'top' or 'bottom'")
+        if alignment == self._alignment:
+            return
+        self._alignment = alignment
+        if self._position in ('left', 'right'):
+            self.apply_position()
+        logger.debug(f"ActionBarManager: Alignment set to {alignment}")
+
     def _read_position_from_config(self) -> str:
         """
         Get action bar position from configuration.
@@ -523,6 +537,13 @@ class ActionBarManager(LayoutManagerBase):
         # Remove from container if present
         if container.indexOf(frame) >= 0:
             container.removeWidget(frame)
+        # And from the main column, where 'top' put it. Left there, a side position counted it when it looked for
+        # the place of the stacks: the bar then moved to the wrapper, and the wrapper went in one row too low,
+        # under the row of the bottom. From then on 'bottom' and 'sections' showed the buttons above the stacks,
+        # until a restart (2026-11-17, found by the bench that tries every position from every other one).
+        main = self.dockwidget.verticalLayout_main
+        if main.indexOf(frame) >= 0:
+            main.removeWidget(frame)
 
         frame.setParent(self.dockwidget.dockWidgetContents)
 

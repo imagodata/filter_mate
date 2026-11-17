@@ -878,7 +878,7 @@ class DockSections(QObject):
                     self._bottom_limits = None
                 self._hold_toolbox(nothing)
                 sizes = self._splitter.sizes()
-                total = sum(sizes)
+                total = self._room()
                 if len(sizes) == 2 and total > 0:
                     # A stack held to its headers gives the rest to the other one at once.
                     if not top_open:
@@ -920,6 +920,15 @@ class DockSections(QObject):
             self._toolbox.setMinimumHeight(saved)
             self._toolbox_minimum = None
 
+    def _room(self) -> int:
+        """The room the two stacks share. What the splitter gives them now, or its own length when that is more:
+        a stack that comes back from hidden (AGENT merged back after AGENT and EXPLORING were both in panels) has
+        no size yet, and with the other one held to its rail the sizes add up to that rail alone. AGENT then
+        opened 0 px high (2026-11-17, found by the walk of the bench through the layouts)."""
+        sizes = self._splitter.sizes()
+        length = self._splitter.height() - self._splitter.handleWidth() * max(0, len(sizes) - 1)
+        return max(sum(sizes), length)
+
     def _both_open(self) -> bool:
         return (any(self._open_in_stack(key) for key in self._pages)
                 and self._toolbox.currentWidget() is not self._nothing)
@@ -927,7 +936,7 @@ class DockSections(QObject):
     def _share_room(self) -> None:
         """Both stacks open: the top one gets ``self._share`` of the room (Qt keeps each one above its minimum)."""
         sizes = self._splitter.sizes()
-        total = sum(sizes)
+        total = self._room()
         if len(sizes) == 2 and total > 0:
             top = int(round(total * self._share))
             self._splitter.setSizes([top, total - top])

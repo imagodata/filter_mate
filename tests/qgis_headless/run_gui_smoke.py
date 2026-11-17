@@ -4717,6 +4717,453 @@ MOUSE_STEPS = [s_section_setup, s_mouse_setup, s_mouse_reorder, s_mouse_reorder_
                s_mouse_tab_check, s_mouse_dock_tab_check]
 
 
+# --- the freedom to switch: any layout from any other one, in any order (FM_ONLY=switch) ----------------------------
+#
+# A walk at random (FM_SEED, the same walk for the same seed) through what changes the layout of the dock: where each
+# section is (dock, panel of its own, panel shared), how the stacks list their sections, where the buttons are,
+# sections turned off, display profile, theme, the dock closed, QGIS restarted. After each move the dock must still
+# be usable (``switch_problems``); every few moves, and at the end, everything is put back as the dock is by
+# default and compared with what it was before the walk (``switch_print``).
+
+SWITCH = {}
+SWITCH_SETTINGS = {
+    'APP.DOCKWIDGET.SECTION_HEADERS': ('rail', 'stacked'),
+    'APP.DOCKWIDGET.ACTION_BAR_POSITION': ('bottom', 'top', 'left', 'right', 'sections'),
+    'APP.DOCKWIDGET.ACTION_BAR_VERTICAL_ALIGNMENT': ('top', 'bottom'),
+    'APP.OPTIONS.FILTERING.enabled': (True, False),
+    'APP.OPTIONS.EXPORTING.enabled': (True, False),
+    'APP.DOCKWIDGET.UI_PROFILE': ('auto', 'compact', 'normal'),
+    'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': ('light', 'dark'),
+}
+SWITCH_OWNERS = {'filter': 'filtering', 'undo_filter': 'filtering', 'redo_filter': 'filtering', 'compare': 'filtering',
+                 'unfilter': 'filtering', 'export': 'exporting', 'about': 'configuration'}
+
+
+def pump(milliseconds=80):
+    """Let Qt run its events, its timers and what was put off to a later turn of its loop."""
+    end = time.time() + milliseconds / 1000.0
+    while time.time() < end:
+        QApplication.processEvents()
+        time.sleep(0.004)
+
+
+def settles(condition, seconds=2.0):
+    """``condition`` holds, at once or within ``seconds``: a layout is applied a few turns of the loop of Qt after
+    what asked for it (a change of profile or of theme, a bar that changed parent)."""
+    end = time.time() + seconds
+    while not condition():
+        if time.time() > end:
+            return False
+        pump(50)
+    return True
+
+
+def switch_pages():
+    d = dock()
+    return {'agent': d._fm_sections._pages.get('agent'), 'exploring': d.frame_exploring, 'filtering': d.FILTERING,
+            'exporting': d.EXPORTING, 'configuration': d.CONFIGURATION}
+
+
+def switch_way_in(key):
+    """What the user clicks to open the section ``key`` where it is: its chip, or its header."""
+    d = dock()
+    panels, sections = d._fm_panels, d._fm_sections
+    panel = panels.panel(key)
+    if panel is not None:
+        return panel.rail.chip(key) if len(panel.members) > 1 else panel
+    if sections.stacked:
+        if key in sections._headers:
+            return sections._headers[key]
+        title = d.toolBox_tabTools.itemText(d.toolBox_tabTools.indexOf(switch_pages()[key]))
+        return next((button for button in sections._bottom_headers() if button.text() == title), None)
+    return (sections.top_rail if key in sections._headers else sections.bottom_rail).chip(key)
+
+
+def switch_problems():
+    """What is wrong with the layout as it is now: an empty list when the dock is usable."""
+    d = dock()
+    panels, sections = d._fm_panels, d._fm_sections
+    module = importlib.import_module(f'{PACKAGE}.ui.layout.section_panels')
+    found = []
+    errors = STATE['python_errors'][SWITCH['errors']:]
+    if errors:  # told once: the walk moves SWITCH['errors'] on after it reported them
+        found.append(f"python errors: {errors[:2]}")
+    present, in_dock, apart = list(panels._present()), list(panels.in_dock()), list(panels.detached())
+    pages = switch_pages()
+    # Where each section is, and what the two sides say of it.
+    if not in_dock:
+        found.append('the dock holds no section')
+    if set(sections.detached) != set(apart):
+        found.append(f"the stacks say {sorted(sections.detached)} are apart, the panels {apart}")
+    for panel in panels._panels:
+        if not panel.members:
+            found.append('a panel with no section is kept')
+        found += [f"{key} is listed by a panel that is not its own" for key in panel.members
+                  if panels.panel(key) is not panel]
+        if panel.isHidden() != bool(panels._hidden_with_dock):
+            found.append(f"the panel of {panel.members} is {'hidden' if panel.isHidden() else 'shown'} "
+                         f"while the dock is {'closed' if panels._hidden_with_dock else 'open'}")
+    for key in present:
+        panel = panels.panel(key)
+        if panel is None and not d.isAncestorOf(pages[key]):
+            found.append(f"{key} is neither in the dock nor in a panel")
+        elif panel is not None and not panel.isAncestorOf(pages[key]):
+            found.append(f"{key} is not in the panel that holds it")
+    saved = tuple(group for group in (tuple(key for key in group if key in present)
+                                      for group in module.parse_groups(QSettings().value(DETACHED_KEY, ''))) if group)
+    if saved != panels.groups():
+        found.append(f"kept for the next time {saved}, shown {panels.groups()}")
+    # A way to open each section.
+    host_of = {key: (panels.panel(key) or d) for key in present}
+    for key in present:
+        way = switch_way_in(key)
+        if way is None or (way is not host_of[key] and not way.isVisibleTo(host_of[key])):
+            found.append(f"no chip nor header to open {key} ({'stacked' if sections.stacked else 'rail'})")
+    # What is open.
+    above = [key for key in ('agent', 'exploring') if key in in_dock]
+    open_above = [key for key in above if sections._open_in_stack(key)]
+    if len(open_above) > 1 or ('exploring' in in_dock and len(open_above) != 1):
+        found.append(f"{open_above} open above, of {above}")
+    below = sections.bottom_key()
+    if below is not None and (below not in in_dock or not sections.section_shown(below)):
+        found.append(f"the lower stack shows {below}, which is not in the dock")
+    if ('exploring' in in_dock and below == 'filtering' and sections._open_in_stack('agent')):
+        found.append('AGENT and FILTERING open together in the dock, EXPLORING folded')
+    alone = sections._alone()
+    if alone is not None and not (sections._open_in_stack(alone) if alone in sections._pages else below == alone):
+        found.append(f"{alone}, the only section of the dock, is folded")
+    # The buttons where their section is.
+    for name, owner in SWITCH_OWNERS.items():
+        button = action_button(name)
+        if button is None:
+            continue
+        panel = panels.panel(owner)
+        if not (panel or d).isAncestorOf(button):
+            found.append(f"the button {name} is not where {owner} is")
+    for name, owner in (('filter', 'filtering'), ('export', 'exporting')):
+        if owner not in present or action_button(name) is None:
+            continue
+        panel = panels.panel(owner)
+        is_open = panel.current() == owner if panel is not None else below == owner
+        if is_open and not action_button(name).isVisibleTo(panel or d):
+            found.append(f"{owner} is open and shows no {name} button (bar {d._action_bar_manager.get_position()})")
+    # The chooser of the current layer.
+    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
+    mirror_shown = mirror is not None and not mirror.isHidden()
+    if not sections.section_shown('filtering'):
+        if mirror_shown or not d.frame_exploring.isAncestorOf(combo) or combo.isHidden():
+            found.append('FILTERING is off and its chooser of the current layer is not at the top of EXPLORING')
+    elif mirror_shown == sections.together() or not d.FILTERING.isAncestorOf(combo):
+        found.append(f"the second chooser is {'shown' if mirror_shown else 'hidden'} with EXPLORING and FILTERING "
+                     f"{'both in the dock' if sections.together() else 'separated'}")
+    # Room: an open section is not squeezed to nothing, the dock has its minimum when its sections are in it.
+    relaxed = any(key != 'agent' for key in apart)
+    if panels._dock_relaxed != relaxed:
+        found.append(f"the minimum height of the dock is {'given up' if panels._dock_relaxed else 'kept'} with {apart} apart")
+    if d.isVisible() and not d.visibleRegion().isEmpty():
+        for key in open_above + ([below] if below else []):
+            if pages[key].height() < 30:
+                splitter = d.splitter_main
+                found.append(f"{key} is open in the dock, {pages[key].height()} px high (dock {d.height()}, upper stack "
+                             f"{sections.top.height()} max {sections.top.maximumHeight()}, splitter {splitter.sizes()} "
+                             f"of {splitter.height()}, share {sections._share:.2f}, lower shown "
+                             f"{splitter.widget(1).isVisibleTo(d)} min {splitter.widget(1).minimumHeight()} "
+                             f"max {splitter.widget(1).maximumHeight()}, bar {d._action_bar_manager.get_position()})")
+    return found
+
+
+def switch_print():
+    """The dock as it is by default, in what a user would notice: what shows, where, in which order."""
+    d = dock()
+    sections, toolbox = d._fm_sections, d.toolBox_tabTools
+    bar = d.frame_actions
+    buttons = sorted((b for b in bar.findChildren(QPushButton) if b.isVisible()), key=lambda b: (b.y(), b.x()))
+    return {
+        'apart': d._fm_panels.detached(), 'saved': QSettings().value(DETACHED_KEY) or '',
+        'stacked': sections.stacked, 'position': d._action_bar_manager.get_position(),
+        'top chips': [key for key in sections.top_rail.shown_sections() if sections.top_rail.chip(key).isVisibleTo(d)],
+        'bottom chips': [key for key in sections.bottom_rail.shown_sections()
+                         if sections.bottom_rail.chip(key).isVisibleTo(d)],
+        'open': (next((key for key in sections._pages if sections._open_in_stack(key)), None), sections.bottom_key()),
+        'buttons': [b.objectName().replace('pushButton_action_', '') for b in buttons],
+        'bar shown': bar.isVisibleTo(d), 'bar parent': bar.parentWidget().objectName(),
+        'bar under': (bar.mapTo(d, QPoint(0, 0)).y() > toolbox.mapTo(d, QPoint(0, 0)).y()) if bar.isVisibleTo(d) else None,
+        'mirror': bool(explo_mirror() is not None and not explo_mirror().isHidden()),
+        'chooser in FILTERING': d.FILTERING.isAncestorOf(d.comboBox_filtering_current_layer),
+        'relaxed': d._fm_panels._dock_relaxed, 'top shown': sections.top.isVisibleTo(d),
+        'toolbox shown': toolbox.isVisibleTo(d), 'dock shown': d.isVisible(),
+    }
+
+
+def switch_to_default():
+    """Everything as the dock is by default, by the means a user has: every section merged back, the settings of the
+    layout at their values of before the walk, EXPLORING and FILTERING open."""
+    d = dock()
+    if not d.isVisible():
+        qgis.utils.plugins[PACKAGE].run()
+        pump(300)
+    d._fm_panels.attach_all()
+    pump()
+    values = {path: value for path, value in SWITCH['settings'].items() if config_value(path) != value}
+    if values:
+        apply_settings(values)
+        pump(250)
+    d._fm_sections.open_top('exploring')
+    open_section(d.FILTERING)
+    pump(120)
+
+
+def switch_moves():
+    """The moves of the walk, each ``(weight, name, run)``; ``run(rng)`` does one and says what, None when there is
+    nothing of the kind to do in the layout as it is."""
+    d = dock()
+    panels, sections = d._fm_panels, d._fm_sections
+    module = importlib.import_module(f'{PACKAGE}.ui.layout.section_panels')
+    window = iface.mainWindow()
+
+    def setting(path):
+        def run(rng):
+            value = rng.choice([choice for choice in SWITCH_SETTINGS[path] if choice != config_value(path)])
+            apply_settings({path: value})
+            pump(250 if 'PROFILE' in path or 'THEME' in path else 60)
+            return f"{'.'.join(path.split('.')[2:])} = {value}"
+        return run
+
+    def detach(rng):
+        keys = [key for key in panels._present() if panels.can_detach(key)
+                or (panels.panel(key) is not None and len(panels.panel(key).members) > 1)]
+        if not keys:
+            return None
+        key = rng.choice(keys)
+        return f"{key} in a panel of its own: {panels.detach(key)}"
+
+    def smart(rng):
+        keys = [key for key in panels._present() if panels.can_detach(key)]
+        if not keys:
+            return None
+        key = rng.choice(keys)
+        return f"{key} out of the dock, wherever it goes: {panels.open_smart(key)}"
+
+    def group(rng):
+        pairs = [(key, panel) for panel in panels._panels for key in panels._present() if panels.can_take(key, panel)]
+        if not pairs:
+            return None
+        key, panel = rng.choice(pairs)
+        return f"{key} into the panel of {list(panel.members)}: {panels.move(key, panel)}"
+
+    def attach(rng):
+        keys = list(panels.detached())
+        if not keys:
+            return None
+        key = rng.choice(keys)
+        return f"{key} merged back: {panels.attach(key)}"
+
+    def close_panel(rng):
+        if not panels._panels or panels._hidden_with_dock:
+            return None
+        panel = rng.choice(panels._panels)
+        members = list(panel.members)
+        panel.close()
+        pump(150)
+        return f"the panel of {members} closed"
+
+    def float_panel(rng):
+        if not panels._panels or panels._hidden_with_dock:
+            return None
+        panel = rng.choice(panels._panels)
+        panel.setFloating(not panel.isFloating())
+        pump(450)  # a panel that lands as a tab of another one of FilterMate merges a moment later
+        return f"the panel of {list(panel.members)} {'floating' if panel.isFloating() else 'docked'}"
+
+    def open_above(rng):
+        keys = [key for key in sections._pages if key not in sections.detached]
+        if not keys:
+            return None
+        key = rng.choice(keys)
+        switch_way_in(key).click()
+        return f"click on {key} above"
+
+    def open_below(rng):
+        keys = [key for key in ('filtering', 'exporting', 'configuration')
+                if key in panels.in_dock() and sections.section_shown(key)]
+        if not keys:
+            return None
+        key = rng.choice(keys)
+        way = switch_way_in(key)
+        if sections.stacked:  # QToolBox opens the page of a header itself; the dock then folds the open one
+            way.pressed.emit()
+        way.click()
+        return f"click on {key} below"
+
+    def open_in_panel(rng):
+        shared = [panel for panel in panels._panels if len(panel.members) > 1]
+        if not shared:
+            return None
+        panel = rng.choice(shared)
+        key = rng.choice(panel.members)
+        panel.rail.chip(key).click()
+        return f"click on {key} in the panel of {list(panel.members)}"
+
+    def close_dock(rng):
+        if d.isVisible():
+            d.close()
+            pump(200)
+            return 'the dock closed'
+        qgis.utils.plugins[PACKAGE].run()
+        pump(400)
+        return 'the dock opened again'
+
+    def restart(rng):
+        if not d.isVisible() or d.isFloating():
+            return None
+        before = panels.groups()
+        area = window.dockWidgetArea(d)
+        state = window.saveState()
+        panels.attach_all(remember=False)
+        iface.removeDockWidget(d)
+        pump()
+        window.restoreState(state)
+        QSettings().setValue(module.DOCK_AREA_KEY, module._area_number(area))
+        module.place_dock(d, iface, area)
+        d.show()
+        panels.restore()
+        pump(200)
+        same = panels.groups() == before
+        if not same:
+            SWITCH['found'].append((SWITCH['done'], f"after a restart {panels.groups()}, before {before}"))
+        return f"restart: {'the same panels' if same else 'OTHER PANELS'}"
+
+    return [(10, 'detach', detach), (6, 'smart', smart), (8, 'group', group), (10, 'attach', attach),
+            (2, 'detach all', lambda rng: f"every section out: {panels.detach_all()}"),
+            (2, 'attach all', lambda rng: (panels.attach_all(), 'every section merged back')[1]),
+            (3, 'close panel', close_panel), (3, 'float', float_panel),
+            (7, 'open above', open_above), (9, 'open below', open_below), (4, 'open in panel', open_in_panel),
+            (5, 'headers', setting('APP.DOCKWIDGET.SECTION_HEADERS')),
+            (8, 'position', setting('APP.DOCKWIDGET.ACTION_BAR_POSITION')),
+            (2, 'alignment', setting('APP.DOCKWIDGET.ACTION_BAR_VERTICAL_ALIGNMENT')),
+            (5, 'filtering', setting('APP.OPTIONS.FILTERING.enabled')),
+            (4, 'exporting', setting('APP.OPTIONS.EXPORTING.enabled')),
+            (2, 'profile', setting('APP.DOCKWIDGET.UI_PROFILE')),
+            (1, 'theme', setting('APP.DOCKWIDGET.COLORS.ACTIVE_THEME')),
+            (2, 'dock', close_dock), (2, 'restart', restart)]
+
+
+def s_switch_begin():
+    import random
+    leave_welcome()
+    SWITCH.update(seed=int(os.environ.get('FM_SEED', '1')), wanted=int(os.environ.get('FM_SWITCHES', '100')),
+                  done=0, found=[], trail=[], resets=0, errors=len(STATE['python_errors']),
+                  settings={path: config_value(path) for path in SWITCH_SETTINGS})
+    SWITCH['rng'] = random.Random(SWITCH['seed'])
+    switch_to_default()
+    SWITCH['default'] = switch_print()
+    problems = switch_problems()
+    check('switch: the dock as it is by default is usable', not problems, '; '.join(problems))
+    print(f"   switch: seed {SWITCH['seed']}, {SWITCH['wanted']} moves, default {SWITCH['default']}", flush=True)
+    return waits(0.3)
+
+
+def switch_compare(label):
+    """Put the dock back as it is by default and tell what differs from before the walk."""
+    switch_to_default()
+    before = SWITCH['default']
+    settles(lambda: switch_print() == before and not switch_problems())
+    now = switch_print()
+    differs = {key: (before[key], now[key]) for key in before if now[key] != before[key]}
+    problems = switch_problems()
+    SWITCH['errors'] = len(STATE['python_errors'])
+    SWITCH['resets'] += 1
+    if differs or problems:
+        SWITCH['found'].append((SWITCH['done'], f"{label}: not as before the walk {differs} {problems}"))
+        print(f"   switch {SWITCH['done']:3d}: BACK TO DEFAULT differs {differs} {problems}", flush=True)
+    return not differs and not problems
+
+
+def s_switch_walk():
+    """A slice of the walk: 25 moves, the invariants after each, and the way back to the default at its end."""
+    moves = switch_moves()
+    rng = SWITCH['rng']
+    weights = [weight for weight, _name, _run in moves]
+    until = min(SWITCH['wanted'], SWITCH['done'] + 25)
+    while SWITCH['done'] < until:
+        _weight, name, run = rng.choices(moves, weights)[0]
+        try:
+            said = run(rng)
+        except Exception:
+            said = f"{name} RAISED {traceback.format_exc().strip().splitlines()[-1]}"
+            SWITCH['found'].append((SWITCH['done'], said))
+        if said is None:
+            continue  # nothing of the kind to do here: another move
+        SWITCH['done'] += 1
+        pump()
+        settles(lambda: not switch_problems(), 1.0)
+        problems = switch_problems()
+        SWITCH['errors'] = len(STATE['python_errors'])
+        SWITCH['trail'].append(said)
+        print(f"   switch {SWITCH['done']:3d}: {said}{'  <-- ' + '; '.join(problems) if problems else ''}", flush=True)
+        if problems:
+            SWITCH['found'].append((SWITCH['done'], f"after [{said}]: {'; '.join(problems)}"))
+    switch_compare(f"after {SWITCH['done']} moves")
+    return waits(0.2)
+
+
+def s_switch_end():
+    back = switch_compare('at the end')
+    found = SWITCH['found']
+    check(f"switch: {SWITCH['done']} moves at random (seed {SWITCH['seed']}), the dock usable after each",
+          not [what for _at, what in found if 'not as before the walk' not in what],
+          ' | '.join(f"#{at} {what}" for at, what in found if 'not as before the walk' not in what)[:1500])
+    check(f"switch: back to the default layout {SWITCH['resets']} times, each time as before the walk",
+          back and not [what for _at, what in found if 'not as before the walk' in what],
+          ' | '.join(f"#{at} {what}" for at, what in found if 'not as before the walk' in what)[:1500])
+    return waits(0.3)
+
+
+def bar_place():
+    """Where the bar that holds Filter is, seen from the stacks: ``top``, ``bottom``, ``left``, ``right``; None when
+    Filter is not shown."""
+    d = dock()
+    button = action_button('filter')
+    if button is None or not button.isVisibleTo(d):
+        return None
+    bar, splitter = button.parentWidget(), d.splitter_main
+    at, stacks = bar.mapTo(d, QPoint(0, 0)), splitter.mapTo(d, QPoint(0, 0))
+    if bar.height() > bar.width():  # a column of buttons, beside the stacks
+        return 'left' if at.x() < stacks.x() else 'right'
+    return 'top' if at.y() < stacks.y() else 'bottom'
+
+
+def s_switch_positions():
+    """Every place of the buttons from every other one: the bar is where the setting says, each time."""
+    d = dock()
+    leave_welcome()
+    path = 'APP.DOCKWIDGET.ACTION_BAR_POSITION'
+    before = config_value(path)
+    wrong = []
+    places = SWITCH_SETTINGS[path]
+    order = [(first, second) for first in places for second in places if first != second]
+    for first, second in order:
+        for value in (first, second):
+            if config_value(path) != value:
+                apply_settings({path: value})
+                pump(60)
+            open_section(d.FILTERING)
+            pump(40)
+            wanted = 'bottom' if value == 'sections' else value
+            if not settles(lambda: bar_place() == wanted):
+                wrong.append(f"{first} -> {second}: at {value} the buttons are at {bar_place()}")
+    apply_settings({path: before})
+    pump(60)
+    open_section(d.FILTERING)
+    check('switch: every place of the buttons from every other one, the bar where the setting says',
+          not wrong and bar_place() == ('bottom' if before == 'sections' else before), ' | '.join(wrong[:8]))
+    return waits(0.3)
+
+
+SWITCH_STEPS = [s_section_setup, s_vector_source, s_switch_positions, s_switch_begin,
+                *[s_switch_walk] * max(1, (int(os.environ.get('FM_SWITCHES', '100')) + 24) // 25), s_switch_end]
+
+
 # --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------
 
 
@@ -4878,6 +5325,8 @@ if os.environ.get('FM_ONLY') == 'layout':  # everything about the sections, thei
              *EXPLO_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'exploring':  # EXPLORING in its own panel, with its chooser of the current layer
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *EXPLO_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'switch':  # a walk at random through the layouts (FM_SEED, FM_SWITCHES)
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *SWITCH_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'mouse':  # the drags of the sections with a real pointer (XTest)
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *MOUSE_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'headers':  # the headers stacked instead of the rails, and back
