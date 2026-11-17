@@ -327,6 +327,8 @@ class ActionBarManager(LayoutManagerBase):
             if not prepared:
                 self._section_bars.prepare(self._position, detached, self._off_sections())
             self._section_bars.settle()
+        except RuntimeError:  # the dock is going away (a section opened or folded while the plugin unloads)
+            logger.debug("ActionBarManager: the buttons of the sections were not placed", exc_info=True)
         except Exception as e:
             logger.error(f"ActionBarManager: Error placing the buttons of the sections: {e}", exc_info=True)
 

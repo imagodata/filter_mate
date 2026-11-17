@@ -8,6 +8,10 @@ own, which is why the setup may turn the AGENT section off (settings_reference.p
 
 A step is a list of questions; a question has a key, one or several choices, and the choices ticked when it opens:
 the settings as they are, so answering without touching anything changes nothing.
+
+One answer is not a setting: where the sections go (all in the FilterMate panel, or in panels of QGIS,
+ui/layout/section_panels.py). QGIS keeps the place of its panels itself; ``layout_wanted`` says what to move, and
+the panel moves it when the settings are applied.
 """
 from __future__ import annotations
 
@@ -24,6 +28,7 @@ THEME = "APP.DOCKWIDGET.COLORS.ACTIVE_THEME"
 UI_PROFILE = "APP.DOCKWIDGET.UI_PROFILE"
 LANGUAGE = "APP.DOCKWIDGET.LANGUAGE"
 ACTION_BAR = "APP.DOCKWIDGET.ACTION_BAR_POSITION"
+SECTION_HEADERS = "APP.DOCKWIDGET.SECTION_HEADERS"
 AUTO_ZOOM = OPTIONS + "EXPLORATION.auto_zoom_on_filter"
 PERSIST_HISTORY = OPTIONS + "HISTORY.persist_history"
 HINTS = OPTIONS + "AUTO_OPTIMIZATION.show_optimization_hints"
@@ -36,8 +41,8 @@ RASTER_FORMAT = OPTIONS + "CROSS_FILTER.raster_export_format"
 POINT_CLOUD_FORMAT = OPTIONS + "CROSS_FILTER.point_cloud_export_format"
 
 # Steps, in the order they come; FILTERING and EXPORTING only when the section is kept.
-FEATURES, LOOK, FILTERING, EXPORTING = "features", "look", "filtering", "exporting"
-STEPS = (FEATURES, LOOK, FILTERING, EXPORTING)
+FEATURES, LOOK, LAYOUT, FILTERING, EXPORTING = "features", "look", "layout", "filtering", "exporting"
+STEPS = (FEATURES, LOOK, LAYOUT, FILTERING, EXPORTING)
 
 # Several choices, each one a setting on or off.
 SECTION_SWITCHES = {"filtering": FILTERING_ON, "exporting": EXPORTING_ON, "agent": AGENT_ON}
@@ -50,6 +55,10 @@ THEMES = ("auto", "light", "dark", "default")
 PROFILES = ("auto", "compact", "normal", "hidpi")
 LANGUAGES = ("auto", "en", "fr")
 ACTION_BARS = ("bottom", "top", "left", "right", "sections")  # sections: each section shows its own buttons
+HEADERS = ("rail", "stacked")  # a rail of chips per stack (the default), or the headers one above the other
+# Where the sections are: in the FilterMate panel, in panels of QGIS, or some of them apart (as they are now).
+IN_DOCK, IN_PANELS, AS_NOW = "dock", "panels", "as_now"
+LAYOUTS = (IN_DOCK, IN_PANELS)
 RASTER_FORMATS = ("COG", "GTiff")
 POINT_CLOUD_FORMATS = ("LAZ", "LAS", "COPC")
 
@@ -80,18 +89,21 @@ WEB_VALUES = {"large": {WFS_TIMEOUT: 120, REMOTE_TIMEOUT: 180}, "other": {WFS_TI
 # Every setting the setup may change: the values it reads first.
 PATHS = tuple(sorted({*SECTION_SWITCHES.values(), *DATA_SWITCHES.values(), *AFTER_FILTER_SWITCHES.values(),
                       *TARGET_SWITCHES.values(), *GROUP_SWITCHES.values(), THEME, UI_PROFILE, LANGUAGE, ACTION_BAR,
+                      SECTION_HEADERS,
                       RASTER_FORMAT, POINT_CLOUD_FORMAT, *_MEDIUM, *WEB_VALUES["large"],
                       *POSTGRES_VALUES["large"]}))
 
 
 @dataclass(frozen=True)
 class ProjectFacts:
-    """What the open project holds, for what the setup ticks first and says beside a choice."""
+    """What the open project holds, for what the setup ticks first and says beside a choice; and where the sections
+    of the panel are now (``IN_DOCK``, ``IN_PANELS``, ``AS_NOW`` when some are apart), "" when they cannot move."""
 
     rasters: int = 0
     point_clouds: int = 0
     postgres: int = 0
     web: int = 0
+    layout: str = ""
 
 
 @dataclass(frozen=True)
@@ -162,8 +174,12 @@ def step_questions(step: str, values: Mapping[str, Any], facts: ProjectFacts, an
                 Ask("size", tuple(Choice(size, size == "keep") for size in SIZES))]
     if step == LOOK:
         return [_one_of("theme", THEMES, values.get(THEME)), _one_of("profile", PROFILES, values.get(UI_PROFILE)),
-                _one_of("language", LANGUAGES, values.get(LANGUAGE)),
-                _one_of("action_bar", ACTION_BARS, values.get(ACTION_BAR))]
+                _one_of("language", LANGUAGES, values.get(LANGUAGE))]
+    if step == LAYOUT:
+        questions = [_one_of("panels", LAYOUTS, facts.layout)] if facts.layout else []
+        if isinstance(values.get(SECTION_HEADERS), str):  # a configuration from before the rails has no such setting
+            questions.append(_one_of("headers", HEADERS, values.get(SECTION_HEADERS)))
+        return questions + [_one_of("action_bar", ACTION_BARS, values.get(ACTION_BAR))]
     if step == FILTERING:
         questions = [_switches("after", AFTER_FILTER_SWITCHES, values)]
         data = kept_data(values, answers)
@@ -222,7 +238,8 @@ def changes(values: Mapping[str, Any], answers: Answers) -> List[Dict[str, Any]]
     one(LOOK, "theme", THEME)
     one(LOOK, "profile", UI_PROFILE)
     one(LOOK, "language", LANGUAGE)
-    one(LOOK, "action_bar", ACTION_BAR)
+    one(LAYOUT, "headers", SECTION_HEADERS)
+    one(LAYOUT, "action_bar", ACTION_BAR)
     switches(FILTERING, "after", AFTER_FILTER_SWITCHES)
     data = answers.get(FEATURES, "data")
     switches(FILTERING, "targets", {name: path for name, path in TARGET_SWITCHES.items()
@@ -231,6 +248,14 @@ def changes(values: Mapping[str, Any], answers: Answers) -> List[Dict[str, Any]]
     one(EXPORTING, "raster_format", RASTER_FORMAT)
     one(EXPORTING, "point_cloud_format", POINT_CLOUD_FORMAT)
     return [{"path": path, "value": value} for path, value in wanted.items() if not _same(values.get(path), value)]
+
+
+def layout_wanted(facts: ProjectFacts, answers: Answers) -> Optional[str]:
+    """Where the sections go when the answer moves them: ``IN_DOCK`` or ``IN_PANELS``. None when they stay where
+    they are: the question was not asked, or the answer is how they are now."""
+    chosen = answers.get(LAYOUT, "panels")
+    wanted = sorted(chosen)[0] if chosen else None
+    return wanted if wanted in LAYOUTS and wanted != facts.layout else None
 
 
 def _same(now: Any, value: Any) -> bool:

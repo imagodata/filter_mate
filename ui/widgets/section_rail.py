@@ -24,6 +24,16 @@ ICONS = {"agent": "agent", "exploring": "zoom", "filtering": "filter", "exportin
 RAIL_HEIGHT = 34  # as a section header
 CHIP_GAP = 6
 ICON_SIZE = 16
+# A widget that decides by itself what a dragged chip does on it (a rail, a panel of sections, the dock) bears this
+# property; anywhere else in the application, the rail the chip comes from takes the drop (``_Catcher``).
+TAKES_SECTIONS = "fm_takes_sections"
+
+
+def left_everything(taken: bool, button_down: bool) -> bool:
+    """A drag that nothing took ended out of every window of the application, rather than was given up: Escape
+    ends it with the button still down, a drop releases it. (Where the button is not known to be released, the
+    drop does nothing: safer than a panel made by an Escape.)"""
+    return not taken and not button_down
 
 
 def drop_index(centres: Sequence[float], x: float) -> int:
@@ -67,13 +77,47 @@ def format_order(order: Iterable[str]) -> str:
 def _rail_class():
     """The widget, made when Qt is there (the rules above are read without it)."""
     from qgis.PyQt.QtCore import QEvent, QMimeData, QObject, QPoint, QSize, Qt, pyqtSignal
-    from qgis.PyQt.QtGui import QDrag
+    from qgis.PyQt.QtGui import QCursor, QDrag
     from qgis.PyQt.QtWidgets import QApplication, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QWidget
+
+    class _Catcher(QObject):
+        """While a chip is dragged: a widget of the application that knows nothing of sections (the map, another
+        panel of QGIS) takes its drop all the same, and ``place`` says where. Without it nothing there accepts the
+        drag, and a drop cannot be told from a drag given up with Escape."""
+
+        def __init__(self, key: str, parent: Any) -> None:
+            super().__init__(parent)
+            self.key = key
+            self.place: Any = None
+
+        def eventFilter(self, watched: Any, event: Any) -> bool:  # noqa: N802 - Qt name
+            kind = event.type()
+            if kind not in (QEvent.Type.DragEnter, QEvent.Type.DragMove, QEvent.Type.Drop):
+                return False
+            try:
+                if not isinstance(watched, QWidget) or SectionRail.dragged_key(event.mimeData()) != self.key:
+                    return False
+                widget = watched
+                while widget is not None:  # a rail, a panel, the dock, or something in them: they decide
+                    if widget.property(TAKES_SECTIONS):
+                        return False
+                    widget = widget.parentWidget()
+                event.acceptProposedAction()
+                if kind == QEvent.Type.Drop:
+                    try:
+                        point = event.position().toPoint()  # Qt6
+                    except AttributeError:
+                        point = event.pos()
+                    self.place = watched.mapToGlobal(point)
+                return True
+            except RuntimeError:  # the widget went away
+                return False
 
     class SectionRail(QWidget):
         chosen = pyqtSignal(str)  # a click on the chip of this section
         reordered = pyqtSignal(list)  # its chips were dragged into this order
         dropped_in = pyqtSignal(str, int)  # the chip of this section, of another rail, was dropped here at this place
+        dropped_out = pyqtSignal(str, QPoint)  # its chip was dropped where nothing took it, at this place of the screen
         menu_requested = pyqtSignal(str, QPoint)  # a right click on the chip of this section, at this place of the screen
 
         def __init__(self, parent: Any = None, accepts: Optional[Callable[[str], bool]] = None,
@@ -88,6 +132,9 @@ def _rail_class():
             self._current: Optional[str] = None
             self._press: Any = None
             self._trailer: Any = None
+            self._dragging = False
+            self._retired: List[Any] = []  # chips that left while one of them was dragged: deleted once it ends
+            self.setProperty(TAKES_SECTIONS, True)
             self.setFixedHeight(RAIL_HEIGHT)
             self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
             self._row = QHBoxLayout(self)
@@ -123,8 +170,12 @@ def _rail_class():
             for key in [name for name in self._chips if name not in order]:
                 chip = self._chips.pop(key)
                 self._row.removeWidget(chip)
-                chip.setParent(None)
-                chip.deleteLater()
+                chip.hide()
+                if self._dragging:  # it may be the chip whose mouse move started the drag, still being handled
+                    self._retired.append(chip)
+                else:
+                    chip.setParent(None)
+                    chip.deleteLater()
                 self._hidden.discard(key)
             for key in order:
                 if key not in self._chips:
@@ -255,8 +306,36 @@ def _rail_class():
             drag.setHotSpot(QPoint(chip.width() // 2, chip.height() // 2))
             chip.setDown(False)
             run = getattr(drag, "exec", None) or drag.exec_  # PyQt5 before 5.15 only has exec_
-            run(Qt.DropAction.MoveAction)
+            catcher = self.catcher(str(key))
+            application = QApplication.instance()
+            application.installEventFilter(catcher)
+            self._dragging = True
+            try:
+                taken = run(Qt.DropAction.MoveAction)
+            finally:
+                self._dragging = False
+                application.removeEventFilter(catcher)
+            self.finish_drag(str(key), taken != Qt.DropAction.IgnoreAction, catcher.place,
+                             bool(QApplication.mouseButtons() & Qt.MouseButton.LeftButton))
+
+        def catcher(self, key: str) -> Any:
+            """What takes the drop of the chip of ``key`` where nothing of FilterMate does (an event filter of the
+            application, while the chip is dragged)."""
+            return _Catcher(key, self)
+
+        def finish_drag(self, key: str, taken: bool, place: Any, button_down: bool) -> None:
+            """The drag of the chip of ``key`` is over. ``place``: where it was dropped on a widget that takes no
+            section; else, taken by nothing with the button released, it was dropped out of the application. Its
+            owner then gives the section a panel there. A drag given up (Escape) changes nothing."""
+            for chip in self._retired:
+                chip.setParent(None)
+                chip.deleteLater()
+            self._retired = []
             self.set_current(self._current)
+            if place is not None:
+                self.dropped_out.emit(key, place)
+            elif left_everything(taken, button_down):
+                self.dropped_out.emit(key, QCursor.pos())
 
         @staticmethod
         def dragged_key(mime: Any) -> Optional[str]:

@@ -236,6 +236,7 @@ DISPLAY_SECTION = "APP.DOCKWIDGET"
 # Applied at once by the panel (ConfigModelManager.apply_settings); the others are read at their next use.
 LIVE = frozenset({
     "APP.DOCKWIDGET.COLORS.ACTIVE_THEME", "APP.DOCKWIDGET.UI_PROFILE", "APP.DOCKWIDGET.ACTION_BAR_POSITION",
+    "APP.DOCKWIDGET.SECTION_HEADERS",
     "APP.DOCKWIDGET.ACTION_BAR_VERTICAL_ALIGNMENT", "APP.OPTIONS.POINT_CLOUD.enabled", "APP.OPTIONS.RASTER.enabled",
     "APP.OPTIONS.CROSS_FILTER.vector_source_raster_targets",
     "APP.OPTIONS.CROSS_FILTER.vector_source_point_cloud_targets",

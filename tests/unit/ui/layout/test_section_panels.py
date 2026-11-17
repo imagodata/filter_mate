@@ -117,53 +117,129 @@ def test_a_detached_section_acts_whatever_is_open():
     assert not bars.section_active("exporting", None, ["filtering"])
 
 
-# --- what is apart, kept in the settings -------------------------------------------
+# --- the panels kept in the settings -------------------------------------------------
 
-def test_the_sections_apart_are_read_in_the_order_of_the_dock():
-    assert panels.parse_detached("exporting,filtering") == ("filtering", "exporting")
-    assert panels.parse_detached(["configuration", "agent"]) == ("agent", "configuration")
+def test_a_panel_is_kept_with_its_sections_in_their_order():
+    assert panels.parse_groups("agent,filtering+exporting") == (("agent",), ("filtering", "exporting"))
+    assert panels.parse_groups("configuration+filtering") == (("configuration", "filtering"),)
+
+
+def test_a_list_of_names_is_one_panel_each():
+    # What the build before the panels of several sections saved.
+    assert panels.parse_groups("filtering,exporting") == (("filtering",), ("exporting",))
+    assert panels.parse_groups(["agent", ("filtering", "exporting")]) == (("agent",), ("filtering", "exporting"))
+
+
+def test_a_list_holds_one_panel_per_item_as_its_sections_or_as_its_text():
+    # 2026-11-16, review: "filtering+exporting" in a list was read as one unknown name, and names alone were cut
+    # into letters when saved: the setup, which keeps what it found as a list, wiped what was kept.
+    assert panels.parse_groups(["agent", "filtering+exporting"]) == (("agent",), ("filtering", "exporting"))
+    assert panels.format_groups(["agent", "filtering"]) == "agent,filtering"
+    assert panels.format_groups(["agent", "filtering+exporting"]) == "agent,filtering+exporting"
 
 
 def test_unknown_names_noise_and_repeats_are_left_out():
-    assert panels.parse_detached("exporting, nothing, FILTERING, exporting") == ("filtering", "exporting")
-    assert panels.parse_detached("exploring") == ()  # EXPLORING stays in the dock
+    assert panels.parse_groups("exporting+nothing, FILTERING +exporting, ,exploring") == (("exporting",), ("filtering",))
+    assert panels.parse_groups("exploring") == ()  # EXPLORING stays in the dock
 
 
-def test_no_setting_is_no_section_apart():
+def test_no_setting_is_no_panel():
     for value in (None, "", 0, 12, {"filtering": True}):
-        assert panels.parse_detached(value) == ()
+        assert panels.parse_groups(value) == ()
 
 
 def test_what_is_saved_reads_back():
-    for keys in ((), ("filtering",), ("agent", "exporting"), panels.DETACHABLE):
-        assert panels.parse_detached(panels.format_detached(keys)) == keys
+    for groups in ((), (("filtering",),), (("agent",), ("exporting", "filtering")), (panels.DETACHABLE,)):
+        assert panels.parse_groups(panels.format_groups(groups)) == groups
+    assert panels.format_groups((("agent",), ("filtering", "exporting"))) == "agent,filtering+exporting"
 
 
-def test_what_is_apart_now_is_what_is_kept():
+def test_the_sections_apart_whatever_their_panel_in_the_order_of_the_dock():
+    assert panels.parse_detached("exporting+filtering,agent") == ("agent", "filtering", "exporting")
+    assert panels.parse_detached("") == ()
+
+
+def test_the_panels_as_they_are_now_are_what_is_kept():
     present = ("agent", "filtering", "exporting", "configuration")
-    assert panels.remembered(("filtering",), ("filtering", "exporting"), present) == ("filtering",)
-    assert panels.remembered((), ("agent",), present) == ()
+    assert panels.remembered((("filtering", "exporting"),), (("filtering",), ("agent",)), present) == (
+        ("filtering", "exporting"),)
+    assert panels.remembered((), (("agent",),), present) == ()
 
 
 def test_a_section_the_dock_does_not_hold_this_time_stays_kept():
     # AGENT was apart, then turned off: FILTERING leaves and comes back, AGENT is apart again the day it returns.
     present = ("filtering", "exporting", "configuration")
-    assert panels.remembered(("filtering",), ("agent", "filtering"), present) == ("agent", "filtering")
-    assert panels.remembered((), ("agent", "filtering"), present) == ("agent",)
+    assert panels.remembered((("filtering",),), (("agent",), ("filtering",)), present) == (("filtering",), ("agent",))
+    assert panels.remembered((), (("agent",), ("filtering",)), present) == (("agent",),)
 
 
-# --- where a panel goes the first time ---------------------------------------------
+def test_a_section_that_is_not_there_keeps_its_place_in_the_panel_it_shared():
+    # 2026-11-16, review: AGENT is installed after the others when the dock opens. Kept alone as soon as anything
+    # was remembered meanwhile, it lost the panel it shared, and the order of its sections.
+    present = ("filtering", "exporting", "configuration")
+    assert panels.remembered((("filtering",),), (("agent", "filtering"),), present) == (("agent", "filtering"),)
+    assert panels.remembered((("filtering", "configuration"),), (("filtering", "agent", "configuration"),),
+                             present) == (("filtering", "agent", "configuration"),)
+    assert panels.remembered((("exporting",),), (("exporting", "agent"),), present) == (("exporting", "agent"),)
+    # FILTERING turned off, EXPORTING put back in the dock: nothing of its panel is left to share.
+    assert panels.remembered((), (("filtering", "exporting"),), ("exporting", "configuration")) == (("filtering",),)
+    # The section it shared a panel with is in another panel now: it follows it there.
+    assert panels.remembered((("configuration", "filtering"),), (("agent", "filtering"),), present) == (
+        ("configuration", "agent", "filtering"),)
 
-def test_the_lower_sections_are_tabbed_together_the_nearest_first():
-    assert panels.tab_partners("exporting", ["filtering", "configuration"]) == ["filtering", "configuration"]
-    assert panels.tab_partners("configuration", ["filtering", "exporting"]) == ["exporting", "filtering"]
-    assert panels.tab_partners("filtering", ["configuration", "exporting"]) == ["exporting", "configuration"]
+
+# --- where a section goes when nothing says where -------------------------------------
+
+def test_the_lower_sections_go_together_as_in_the_dock():
+    assert panels.smart_group("exporting", (("filtering",),)) == "filtering"
+    assert panels.smart_group("configuration", (("agent",), ("exporting", "filtering"))) == "exporting"
 
 
-def test_agent_is_tabbed_with_none_of_them():
-    assert panels.tab_partners("agent", ["filtering", "exporting"]) == []
-    assert panels.tab_partners("filtering", ["agent"]) == []
+def test_the_first_lower_section_to_leave_gets_a_new_panel():
+    assert panels.smart_group("filtering", ()) is None
+    assert panels.smart_group("filtering", (("agent",),)) is None
 
+
+def test_agent_gets_its_own_panel():
+    assert panels.smart_group("agent", (("filtering", "exporting"),)) is None
+
+
+def test_a_section_does_not_join_the_panel_it_is_in():
+    assert panels.smart_group("filtering", (("filtering", "exporting"),)) is None
+    assert panels.smart_group("filtering", (("filtering",), ("exporting",))) == "exporting"
+
+
+def test_a_panel_is_named_after_its_sections():
+    assert panels.panel_title(["filtering"]) == "FILTERING"
+    assert panels.panel_title(["exporting", "filtering"]) == "EXPORTING · FILTERING"
+
+
+# --- two panels of FilterMate put together merge ---------------------------------------
+
+def test_nothing_tabbed_nothing_merged():
+    assert panels.fusion(["a", "b"], [[], []], []) is None
+    assert panels.fusion(["a"], [["layers"]], []) is None  # a tab of a panel of QGIS is left alone
+
+
+def test_a_panel_tabbed_with_the_dock_gives_its_sections_back():
+    assert panels.fusion(["a", "b"], [[], ["dock"]], ["b"]) == ("b", None)
+
+
+def test_the_panel_that_was_moved_gives_its_sections_to_the_one_that_was_there():
+    assert panels.fusion(["a", "b"], [["b"], ["a"]], [], mover="a") == ("a", "b")
+    assert panels.fusion(["a", "b"], [["b"], ["a"]], [], mover="b") == ("b", "a")
+
+
+def test_without_a_mover_the_newer_panel_joins_the_older():
+    assert panels.fusion(["a", "b"], [["b"], ["a"]], []) == ("b", "a")
+    assert panels.fusion(["a", "b", "c"], [[], ["c"], ["b"]], [], mover="dock") == ("c", "b")
+
+
+def test_the_dock_comes_first_when_both_are_tabbed():
+    assert panels.fusion(["a", "b"], [["b"], ["a"]], ["a", "b"]) == ("a", None)
+
+
+# --- where a new panel goes the first time ----------------------------------------------
 
 def test_a_panel_gets_the_height_its_section_asks_within_its_share():
     assert panels.panel_height(400, 800, 600) == 400
@@ -175,9 +251,24 @@ def test_a_panel_takes_no_more_than_the_dock_can_spare():
     assert panels.panel_height(400, 800, 250) == 250
 
 
-def test_a_dock_with_no_room_to_spare_gets_the_panel_as_a_tab():
+def test_a_dock_with_no_room_to_spare_gets_the_panel_beside_it():
     assert panels.panel_height(400, 800, panels.PANEL_MIN_HEIGHT - 1) == 0
     assert panels.panel_height(400, 0, 0) == 0
+
+
+def test_a_floating_panel_is_where_it_was_dropped_when_it_fits():
+    assert panels.floating_corner((400, 300), (360, 460), (0, 0, 1919, 1079)) == (400, 300)
+
+
+def test_a_floating_panel_dropped_near_an_edge_stays_whole_on_the_screen():
+    screen = (0, 0, 1919, 1079)
+    assert panels.floating_corner((-130, 288), (380, 460), screen) == (0, 288)
+    assert panels.floating_corner((1800, 900), (380, 460), screen) == (1540, 620)
+    assert panels.floating_corner((500, -40), (380, 460), (1920, 30, 3839, 1079)) == (1920, 30)  # a second screen
+
+
+def test_a_panel_larger_than_the_screen_shows_its_title():
+    assert panels.floating_corner((100, 100), (800, 900), (0, 0, 639, 479)) == (0, 0)
 
 
 # --- the dock itself, when QGIS starts ---------------------------------------------
@@ -200,39 +291,52 @@ def test_a_change_of_dock_position_wins_over_the_place_kept():
 
 def test_a_section_in_the_dock_can_leave_it_alone_or_with_the_others():
     for key in panels.DETACHABLE:
-        assert panels.menu_entries(key, []) == [("detach", key), ("detach_all", "")]
+        assert panels.menu_entries(key, ()) == [("detach", key), ("detach_all", "")]
 
 
 def test_exploring_never_leaves_the_dock():
-    assert panels.menu_entries("exploring", []) == [("detach_all", "")]
-    assert panels.menu_entries("exploring", panels.DETACHABLE) == [("attach_all", "")]
+    assert panels.menu_entries("exploring", ()) == [("detach_all", "")]
+    assert panels.menu_entries("exploring", (panels.DETACHABLE,)) == [("attach_all", "")]
 
 
 def test_the_last_section_in_the_dock_is_not_offered_with_the_others():
-    apart = ["agent", "exporting", "configuration"]
-    assert panels.menu_entries("filtering", apart) == [("detach", "filtering"), ("attach_all", "")]
+    apart = (("agent",), ("exporting", "configuration"))
+    assert panels.menu_entries("filtering", apart) == [
+        ("group", "exporting"), ("detach", "filtering"), ("group", "agent"), ("attach_all", "")]
 
 
-def test_a_section_apart_groups_with_the_dock_and_the_other_panels_then_merges_back():
-    assert panels.menu_entries("filtering", ["filtering"]) == [
-        ("group", panels.DOCK), ("attach", "filtering"), ("detach_all", ""), ("attach_all", "")]
-    assert panels.menu_entries("exporting", ["agent", "filtering", "exporting"]) == [
-        ("group", panels.DOCK), ("group", "agent"), ("group", "filtering"), ("attach", "exporting"),
-        ("detach_all", ""), ("attach_all", "")]
+def test_the_panel_of_its_stack_is_offered_first_to_a_section_of_the_dock():
+    # Where it goes when nothing says where: before a panel of its own, and before the panel of AGENT.
+    assert panels.menu_entries("exporting", (("agent",), ("filtering",))) == [
+        ("group", "filtering"), ("detach", "exporting"), ("group", "agent"), ("detach_all", ""), ("attach_all", "")]
 
 
-def test_every_section_apart_leaves_nothing_to_separate():
-    entries = panels.menu_entries("agent", panels.DETACHABLE)
-    assert ("detach_all", "") not in entries and entries[-1] == ("attach_all", "")
-    assert [name for command, name in entries if command == "group"] == [
-        panels.DOCK, "filtering", "exporting", "configuration"]
+def test_agent_is_offered_its_own_panel_first():
+    assert panels.menu_entries("agent", (("filtering",),))[:2] == [("detach", "agent"), ("group", "filtering")]
+
+
+def test_a_section_alone_in_its_panel_joins_another_one_or_merges_back():
+    assert panels.menu_entries("filtering", (("filtering",),)) == [
+        ("attach", "filtering"), ("detach_all", ""), ("attach_all", "")]
+    assert panels.menu_entries("exporting", (("agent",), ("filtering",), ("exporting",))) == [
+        ("group", "filtering"), ("group", "agent"), ("attach", "exporting"), ("detach_all", ""), ("attach_all", "")]
+
+
+def test_a_section_that_shares_its_panel_can_get_its_own():
+    assert panels.menu_entries("exporting", (("filtering", "exporting"),)) == [
+        ("detach", "exporting"), ("attach", "exporting"), ("detach_all", ""), ("attach_all", "")]
+
+
+def test_every_section_apart_leaves_nothing_to_take_out():
+    entries = panels.menu_entries("agent", (("agent",), ("filtering", "exporting", "configuration")))
+    assert entries == [("group", "filtering"), ("attach", "agent"), ("attach_all", "")]
 
 
 def test_a_section_turned_off_is_offered_nothing_and_is_not_counted():
     present = ("agent", "exporting", "configuration")  # FILTERING is turned off
-    assert panels.menu_entries("filtering", [], present) == [("detach_all", "")]
-    assert panels.menu_entries("exporting", ["agent", "configuration"], present) == [
-        ("detach", "exporting"), ("attach_all", "")]
+    assert panels.menu_entries("filtering", (), present) == [("detach_all", "")]
+    assert panels.menu_entries("exporting", (("agent",), ("configuration",)), present) == [
+        ("group", "configuration"), ("detach", "exporting"), ("group", "agent"), ("attach_all", "")]
 
 
 # --- a section turned off carries no button ------------------------------------------
@@ -246,3 +350,35 @@ def test_a_section_turned_off_leaves_its_buttons_to_the_bar_for_all():
 
 def test_a_section_turned_off_carries_nothing_even_when_it_was_apart():
     assert bars.bar_plan("bottom", ["filtering"], ["filtering"]) == {bars.ONE_BAR: bars.ACTION_ORDER}
+
+
+# --- the bar for all once a section took its buttons to its own panel (2026-11-16, audit) -------------------------
+
+
+def test_the_bar_for_all_shows_only_while_one_of_its_buttons_acts():
+    """FILTERING in its own panel left a bar in the dock for an Export greyed out beside About."""
+    left = bars.bar_plan("bottom", detached=("filtering",))[bars.ONE_BAR]
+    assert left == ("pushButton_action_export", "pushButton_action_qfieldcloud", "pushButton_action_about")
+    assert not bars.one_bar_serves(left, open_key=None)
+    assert not bars.one_bar_serves(left, open_key="filtering")  # its panel has its buttons
+    assert bars.one_bar_serves(left, open_key="exporting")
+    assert bars.one_bar_serves(left, open_key="configuration")
+    assert not bars.one_bar_serves(left, open_key=None, agent=True)  # nothing of FILTERING is left in it
+
+
+def test_what_stays_of_a_section_turned_off_keeps_the_bar():
+    left = bars.bar_plan("bottom", detached=("exporting",), off=("filtering",))[bars.ONE_BAR]
+    assert "pushButton_action_undo_filter" in left
+    assert bars.one_bar_serves(left, open_key=None, off=("filtering",))
+
+
+def test_undo_redo_and_compare_keep_the_bar_while_the_agent_walks_its_steps():
+    left = bars.bar_plan("bottom", detached=("exporting",))[bars.ONE_BAR]
+    assert set(bars.AGENT_BUTTONS) <= set(left)
+    assert not bars.one_bar_serves(left, open_key=None)
+    assert bars.one_bar_serves(left, open_key=None, agent=True)
+    assert bars.one_bar_serves(left, open_key="filtering")
+
+
+def test_a_button_of_no_section_always_acts():
+    assert bars.one_bar_serves(["pushButton_action_of_an_extension"], open_key=None)

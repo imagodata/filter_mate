@@ -250,19 +250,26 @@ class ConfigModelManager:
     # ========================================
 
     def reload_configuration_model(self):
-        """Reload config model from CONFIG_DATA and save to file."""
+        """Reload config model from CONFIG_DATA and save to file.
+
+        The new model takes the itemChanged handler of the one it replaces: without it an edit of the tree, by
+        the user, the setup or the agent, changed the tree and nothing else, with no error (2026-11-16: seen in
+        the GUI bench, whose later steps apply settings; the cancel path of ConfigController reconnects itself).
+        """
         from ...config.config import ENV_VARS
         dw = self.dockwidget
         if not dw.widgets_initialized:
             return
         try:
             from ...ui.widgets.json_view.model import JsonModel
+            self.disconnect_config_model_signal()
             dw.config_model = JsonModel(
                 data=dw.CONFIG_DATA,
                 editable_keys=False,
                 editable_values=True,
                 plugin_dir=dw.plugin_dir,
             )
+            self.connect_config_model_signal()
             container = getattr(dw, 'config_view_container', None)
             if container is not None:
                 container.model = dw.config_model  # its search reads this model, not the view's

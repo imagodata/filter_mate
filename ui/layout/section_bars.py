@@ -4,8 +4,12 @@
 * FILTERING has Filter, Undo, Redo, Compare and Unfilter; EXPORTING has Export (and QFieldCloud, with its extension);
   CONFIGURATION has About. The dock already ties them: a button is on only while its section is open.
 * ``ACTION_BAR_POSITION`` = ``sections``: no bar for all. Each section shows its own buttons at the bottom of the
-  dock while it is open; with none open below (AGENT or EXPLORING alone) there is no bar, and they get its room.
-* A section in its own panel (ui/layout/section_panels.py) takes its buttons with it, whatever the position.
+  dock while it is open; with none open below (EXPLORING alone) there is no bar, and it gets its room. With AGENT
+  open, the buttons of FILTERING show: Undo, Redo and Compare walk the steps of the agent then.
+* A section in its own panel (ui/layout/section_panels.py) takes its buttons with it, whatever the position. The
+  bar for all at the bottom, left with the buttons of the other sections, shows only while the section of one of
+  them is open: not for an Export greyed out beside About. At the top or on a side it stays: coming and going
+  there would move what is under or beside it at each section opened.
 
 The buttons are those of the form, moved from a bar to another: what is wired to them keeps working.
 """
@@ -30,6 +34,8 @@ SECTION_BUTTONS = {
 }
 # The page of each section in the tool box of the dock (its attribute on the dock).
 SECTION_PAGES = {"filtering": "FILTERING", "exporting": "EXPORTING", "configuration": "CONFIGURATION"}
+# With AGENT open in the dock they walk the steps of the agent (FilterMateDockWidget.agent_has_focus).
+AGENT_BUTTONS = ACTION_ORDER[1:4]
 BAR_NAME = "frame_actions"  # the bars of the sections are named as the one bar: its style rules apply to them
 GAP = "gap"  # in the signature of a row, a growing gap
 
@@ -45,6 +51,21 @@ def bar_plan(position: str, detached: Iterable[str] = (), off: Iterable[str] = (
     lent = {name for names in plan.values() for name in names}
     plan[ONE_BAR] = tuple(name for name in ACTION_ORDER if name not in lent)
     return plan
+
+
+def one_bar_serves(names: Iterable[str], open_key: Optional[str], off: Iterable[str] = (),
+                   agent: bool = False) -> bool:
+    """The bar for all is worth its room, once a section took its buttons to its own panel: one of the buttons
+    left in it (``names``: those it shows, not the ones hidden with a section turned off) serves. A button serves
+    while its section is the one open below, when its section is turned off (what stays of FILTERING: Undo, Redo
+    and Compare) and, for these three, while ``agent`` walks its steps."""
+    owners = {name: key for key, group in SECTION_BUTTONS.items() for name in group}
+    gone = set(off)
+    for name in names:
+        key = owners.get(name)
+        if key is None or key == open_key or key in gone or (agent and name in AGENT_BUTTONS):
+            return True
+    return False
 
 
 def _rank(name: Optional[str]) -> int:
@@ -101,6 +122,7 @@ class SectionBars:
         self._hosted: Dict[str, Any] = {}  # the layout of the panel that shows the bar of a section
         self._parked: Dict[Any, bool] = {}  # buttons out of a section, on their way to the one bar: shown or not
         self._plan = bar_plan("bottom")
+        self._position, self._off = "bottom", ()
         self._managed_one_bar = False
         self._watch: Any = None
         self._pending = False
@@ -116,6 +138,7 @@ class SectionBars:
         """The plan for ``position``: the buttons a section no longer carries leave its row, on their way to the one
         bar (``settle`` puts them there, unless the manager rebuilt it with them in between)."""
         self._plan = bar_plan(position, detached, off)
+        self._position, self._off = position, tuple(off)
         one_bar = getattr(self._dock, BAR_NAME, None)
         for key, frame in self._frames.items():
             keep = self._buttons(self._plan.get(key, ()))
@@ -313,20 +336,38 @@ class SectionBars:
                 return key
         return None
 
+    def _agent_walks(self) -> bool:
+        """AGENT is open in the dock: Undo, Redo and Compare walk its steps."""
+        focus = getattr(self._dock, "agent_has_focus", None)
+        try:
+            return bool(focus()) if callable(focus) else False
+        except RuntimeError:  # the dock went away
+            return False
+
     def _show(self) -> None:
-        """In the dock, the bar of the open section only; in a panel, the bar of its section. The one bar is shown
-        while it keeps a button."""
+        """In the dock, the bar of the open section only, and the bar of FILTERING while AGENT is open (Undo, Redo
+        and Compare walk its steps); in a panel, the bar of its section. The one bar is shown while it keeps a
+        button, and once a section took its own to a panel, while one of those left acts."""
         open_key = self.open_key()
+        agent = self._agent_walks()
         for key, frame in self._frames.items():
             carries = bool(self._plan.get(key)) and any(not button.isHidden() for button in
                                                          self._buttons(self._plan[key]))
-            frame.setVisible(carries and (key in self._hosted or key == open_key))
+            # With AGENT open and another section open below, that section keeps the row: two bars side by side
+            # would not fit, and the steps of the agent are undone from its thread too.
+            for_agent = agent and key == "filtering" and open_key in (None, "filtering")
+            frame.setVisible(carries and (key in self._hosted or key == open_key or for_agent))
         one_bar = getattr(self._dock, BAR_NAME, None)
         if one_bar is None:
             return
         if self.lent():
             self._managed_one_bar = True
-            one_bar.setVisible(bool(self._buttons(self._plan[ONE_BAR])))
+            # What the bar shows: not the buttons hidden with a section turned off (an empty bar stayed for them).
+            names = [name for name in self._plan[ONE_BAR] if getattr(self._dock, name, None) is not None
+                     and not _hidden_by_code(getattr(self._dock, name))]
+            comes_and_goes = self._position == "bottom"  # elsewhere it would move what is under or beside it
+            one_bar.setVisible(bool(names) and (not comes_and_goes
+                                                or one_bar_serves(names, open_key, self._off, agent)))
         elif self._managed_one_bar:  # every button is back: the bar as it was
             self._managed_one_bar = False
             one_bar.setVisible(True)

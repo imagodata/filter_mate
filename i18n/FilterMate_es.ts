@@ -673,6 +673,26 @@ Para qué: {}
         <translation>Secciones: FILTERING, EXPORTING, AGENT, solo las que usas</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>¿Configurar FilterMate?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>Unas pocas opciones y luego los ajustes antes y después: no hace falta ningún modelo de IA y nada cambia hasta que aplique. Más tarde: menú Vectorial &gt; FilterMate &gt; Configurar FilterMate; Cómo funciona FilterMate también está ahí.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>Aspecto: tema, tamaño del panel, idioma</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Disposición: las secciones en este panel o en paneles de QGIS, dónde van los botones</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
         <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
         <translation>Tus datos: ráster, nubes de puntos, PostgreSQL, servicios web, su tamaño</translation>
@@ -2015,6 +2035,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="645"/>
         <source>Set up FilterMate, no model needed</source>
         <translation>Configurar FilterMate, sin modelo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>Configurar FilterMate…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>Cómo funciona FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4369,6 +4399,41 @@ Haga clic en el indicador ★ y seleccione 'Añadir filtro actual a favoritos' p
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Configurar FilterMate con el agente</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>Unas pocas opciones y luego cada ajuste antes y después: no hace falta ningún modelo de IA</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>Cómo funciona FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>Qué hace cada sección, las secciones como paneles de QGIS, dónde están los botones</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>Novedades de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Un carril lista las secciones de FilterMate, una sección puede ser un panel de QGIS, y la configuración no necesita ningún modelo de IA.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Configurar FilterMate&lt;/b&gt; ofrece unas pocas opciones: las secciones que usa, sus datos, el aspecto, dónde van las secciones y sus botones. Muestra cada ajuste antes y después, y no envía nada a ningún sitio.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Un carril de secciones&lt;/b&gt; en cada pila del panel: haga clic en un chip para abrir su sección y arrástrelo para poner las secciones en otro orden.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Secciones como paneles&lt;/b&gt;, cuando usted lo pide (de forma predeterminada todas se quedan en el panel de FilterMate): haga clic derecho en el chip de AGENT, FILTERING, EXPORTING o CONFIGURATION para abrirla en su propio panel de QGIS. Haga clic derecho en el título de un panel para agruparlo con otro, en pestañas, o para volver a fusionarlo en FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Botones debajo de cada sección&lt;/b&gt;, y FILTERING o EXPORTING desactivados cuando no los usa.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtra, da estilo y trae datos a partir de una frase, con su propia clave de API o un modelo local de Ollama. &lt;b&gt;Cómo funciona FilterMate&lt;/b&gt;, en su menú, vuelve a explicar cada sección.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Las secciones de FilterMate pueden ser paneles de QGIS, y su configuración no necesita ningún modelo de IA.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Configurar FilterMate&lt;/b&gt; ofrece unas pocas opciones: las secciones que usa, sus datos, el aspecto, dónde van las secciones y sus botones. Muestra cada ajuste antes y después, y no envía nada a ningún sitio.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Secciones como paneles&lt;/b&gt;: haga clic derecho en el encabezado de AGENT, FILTERING, EXPORTING o CONFIGURATION para abrirla en su propio panel de QGIS. Haga clic derecho en el título de un panel para agruparlo con otro, en pestañas, o para volver a fusionarlo en FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Botones debajo de cada sección, y FILTERING o EXPORTING desactivados cuando no los usa.&lt;/b&gt;&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtra, da estilo y trae datos a partir de una frase, con su propia clave de API o un modelo local de Ollama. &lt;b&gt;Cómo funciona FilterMate&lt;/b&gt;, en su menú, vuelve a explicar cada sección.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>Configurar FilterMate</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -10730,9 +10795,9 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <translation>Abrir {} en su propio panel</translation>
     </message>
     <message>
-        <location filename="../../ui/layout/section_panels.py" line="781"/>
-        <source>Open every section in its own panel</source>
-        <translation>Abrir cada sección en su propio panel</translation>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Sacar todas las secciones de FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/layout/section_panels.py" line="782"/>
@@ -11491,6 +11556,106 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <translation>Debajo de cada sección</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>Disposición</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>Dónde van las secciones</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Encabezados</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Cómo lista el panel sus secciones</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Un carril de chips</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Lo predeterminado: una fila por pila, donde un clic en un chip abre su sección y un chip se arrastra a otro lugar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Encabezados, uno encima de otro</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>El nombre de cada sección en su propia línea.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>Un clic en un encabezado abre su sección.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>Todas en el panel de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>Lo predeterminado: un solo panel, donde un clic en un carril abre una sección.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>En paneles de QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT en su propio panel, FILTERING, EXPORTING y CONFIGURATION juntos en otro, junto al mapa o flotantes; EXPLORING se queda en FilterMate. Arrastre el chip de una sección a otro panel para agruparlos, haga clic derecho en él para volver a fusionarla en FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>Como están ahora</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>Algunas secciones están en su propio panel.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>Cada sección muestra sus propios botones mientras está abierta.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>Secciones: todas de vuelta en el panel de FilterMate (se aplica de inmediato)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Secciones: en paneles de QGIS (se aplica de inmediato)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Las secciones están en paneles de QGIS: arrastre un panel por su título, arrastre el chip de una sección a otro panel para agruparlos, haga clic derecho en él para volver a fusionarla en FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>Estos ajustes ya se restauraron.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Zoom a lo que se conserva</translation>
@@ -12063,6 +12228,89 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>Teselas vectoriales</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>Cómo funciona FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>Cómo funciona FilterMate, sección por sección. No hace falta ningún modelo de IA para leerlo y no se envía nada a ningún sitio.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>El panel tiene dos pilas, cada una con un carril que lista sus secciones: AGENT y EXPLORING arriba, FILTERING, EXPORTING y CONFIGURATION abajo. Haga clic en un chip de un carril para abrir su sección y arrástrelo a lo largo del carril para poner las secciones en otro orden.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>De forma predeterminada, todas las secciones están en este panel y nada se mueve si usted no lo pide. Una sección puede salir de él: haga clic derecho en el chip de AGENT, FILTERING, EXPORTING o CONFIGURATION en su carril y elija abrirla en su propio panel. Pasa a ser un panel de QGIS, que puede arrastrar junto al mapa, agrupar en pestañas con el panel Capas o hacer flotar en otra pantalla. EXPLORING se queda aquí: contiene la capa sobre la que trabajan las demás secciones.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panel contiene una sección o varias, listadas en un carril como aquí. Arrastre el chip de una sección a otro panel para agruparlos, a FilterMate para volver a fusionarla, o fuera de todo panel para darle uno nuevo; dos paneles de FilterMate reunidos en pestañas pasan a ser uno solo. Un clic derecho en un chip, o en el título de un panel, ofrece los mismos movimientos. Cerrar un panel vuelve a fusionar sus secciones en FilterMate. QGIS devuelve cada panel a donde lo dejó.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panel contiene una sección o varias. Haga clic derecho en el encabezado de una sección, o en el título de un panel, para agruparla con otro panel o para volver a fusionarla en FilterMate; dos paneles de FilterMate reunidos en pestañas pasan a ser uno solo. Cerrar un panel vuelve a fusionar sus secciones en FilterMate. QGIS devuelve cada panel a donde lo dejó.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>EXPLORING contiene la capa actual y lo que elige en ella: entidades de una capa vectorial, un rango de valores o clases de un ráster, clases o alturas de una nube de puntos. Las demás secciones trabajan sobre lo que selecciona.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>FILTERING filtra las capas que marca según esa selección: las que la intersecan, las que están a cierta distancia de ella... Filtrar aplica el filtro, Deshacer y Rehacer recorren el historial, Comparar muestra el mapa antes y después, Desfiltrar quita los filtros.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>EXPORTING escribe las capas tal como están filtradas: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>AGENT hace lo mismo a partir de una frase, y más (estilos, etiquetas, datos que traer), con un modelo que usted conecta: su propia clave de API u Ollama en este equipo. Cada petición se puede deshacer.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>CONFIGURATION enumera todos los ajustes. Configurar FilterMate pide los principales con unas pocas opciones y muestra cada ajuste antes y después.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>Desactivado en sus ajustes: {}. Configurar FilterMate recupera una sección.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
+        <translation>Una sección puede salir de este panel. Haga clic derecho en el encabezado de AGENT, FILTERING, EXPORTING o CONFIGURATION y elija abrirla en su propio panel: pasa a ser un panel de QGIS, que puede arrastrar junto al mapa, agrupar en pestañas con el panel Capas o hacer flotar en otra pantalla. EXPLORING se queda aquí: contiene la capa sobre la que trabajan las demás secciones.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>Los botones actúan en su propia sección: Filtrar, Deshacer, Rehacer, Comparar y Desfiltrar con FILTERING, Exportar con EXPORTING. Una sección en su propio panel se lleva sus botones; la configuración también puede mostrarlos debajo de cada sección.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>Configurar FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>Conectar un modelo</translation>
     </message>
 </context>
 <context>

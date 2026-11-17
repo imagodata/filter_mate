@@ -459,7 +459,7 @@
   {
    "name": "preview_filter",
    "title": "Try a filter",
-   "description": "Try what apply_filter would do on a private copy of the layer: nothing changes in the project. Returns valid, feature_count (-1: unknown) and error. Refused on web services and memory layers.",
+   "description": "Try an expression alone on a private copy of the layer, never combined with its filter: nothing changes. Returns valid, feature_count (-1: unknown) and error. Refused on web services and memory layers.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
@@ -542,7 +542,7 @@
        }
       ],
       "default": null,
-      "description": "Combine with the current filter: the new condition only, never a copy of it; omit to replace"
+      "description": "With the current filter: AND narrows, OR widens, AND NOT takes the condition out; omit to replace"
      }
     },
     "required": [
@@ -2621,7 +2621,7 @@
      },
      "crs": {
       "default": "",
-      "description": "EPSG:4326 for find_place",
+      "description": "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty",
       "maxLength": 64,
       "type": "string"
      },
