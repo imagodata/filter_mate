@@ -29,13 +29,6 @@ ICON_SIZE = 16
 TAKES_SECTIONS = "fm_takes_sections"
 
 
-def left_everything(taken: bool, button_down: bool) -> bool:
-    """A drag that nothing took ended out of every window of the application, rather than was given up: Escape
-    ends it with the button still down, a drop releases it. (Where the button is not known to be released, the
-    drop does nothing: safer than a panel made by an Escape.)"""
-    return not taken and not button_down
-
-
 def drop_index(centres: Sequence[float], x: float) -> int:
     """Where a chip dropped at ``x`` goes among chips whose centres are ``centres`` (left to right, the dragged
     one left out): before the first chip whose centre is right of ``x``."""
@@ -77,18 +70,46 @@ def format_order(order: Iterable[str]) -> str:
 def _rail_class():
     """The widget, made when Qt is there (the rules above are read without it)."""
     from qgis.PyQt.QtCore import QEvent, QMimeData, QObject, QPoint, QSize, Qt, pyqtSignal
-    from qgis.PyQt.QtGui import QCursor, QDrag
+    from qgis.PyQt.QtGui import QDrag
     from qgis.PyQt.QtWidgets import QApplication, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QWidget
 
     class _Catcher(QObject):
         """While a chip is dragged: a widget of the application that knows nothing of sections (the map, another
         panel of QGIS) takes its drop all the same, and ``place`` says where. Without it nothing there accepts the
-        drag, and a drop cannot be told from a drag given up with Escape."""
+        drag, and QDrag.exec answers the same for a drop nobody took and for a drag given up with Escape: nothing
+        tells them apart afterwards (Qt reports the button released in both cases, checked with a real pointer).
+
+        It watches the windows of the application, not the application: a drag over a widget that ignores it goes
+        up to its window (Qt passes DragEnter and DragMove to the parents), which then accepts it. A Python filter
+        of the whole application gets the events of objects being destroyed too, and sip crashed converting one
+        (QGIS 3.22, Qt 5.15.3, a real drag: sipSubClass_QgsGraphDirector, 17 November 2026)."""
 
         def __init__(self, key: str, parent: Any) -> None:
             super().__init__(parent)
             self.key = key
             self.place: Any = None
+            self._windows: List[Any] = []
+
+        def watch(self) -> None:
+            """The windows shown that are not of FilterMate (they decide themselves) take a drop of the chip."""
+            for window in QApplication.topLevelWidgets():
+                try:
+                    if not window.isVisible() or window.property(TAKES_SECTIONS):
+                        continue
+                    self._windows.append((window, window.acceptDrops()))
+                    window.setAcceptDrops(True)
+                    window.installEventFilter(self)
+                except RuntimeError:
+                    continue
+
+        def unwatch(self) -> None:
+            for window, accepted in self._windows:
+                try:
+                    window.removeEventFilter(self)
+                    window.setAcceptDrops(accepted)
+                except RuntimeError:  # the window went away
+                    pass
+            self._windows = []
 
         def eventFilter(self, watched: Any, event: Any) -> bool:  # noqa: N802 - Qt name
             kind = event.type()
@@ -97,11 +118,6 @@ def _rail_class():
             try:
                 if not isinstance(watched, QWidget) or SectionRail.dragged_key(event.mimeData()) != self.key:
                     return False
-                widget = watched
-                while widget is not None:  # a rail, a panel, the dock, or something in them: they decide
-                    if widget.property(TAKES_SECTIONS):
-                        return False
-                    widget = widget.parentWidget()
                 event.acceptProposedAction()
                 if kind == QEvent.Type.Drop:
                     try:
@@ -307,26 +323,25 @@ def _rail_class():
             chip.setDown(False)
             run = getattr(drag, "exec", None) or drag.exec_  # PyQt5 before 5.15 only has exec_
             catcher = self.catcher(str(key))
-            application = QApplication.instance()
-            application.installEventFilter(catcher)
+            catcher.watch()
             self._dragging = True
             try:
-                taken = run(Qt.DropAction.MoveAction)
+                run(Qt.DropAction.MoveAction)
             finally:
                 self._dragging = False
-                application.removeEventFilter(catcher)
-            self.finish_drag(str(key), taken != Qt.DropAction.IgnoreAction, catcher.place,
-                             bool(QApplication.mouseButtons() & Qt.MouseButton.LeftButton))
+                catcher.unwatch()
+            self.finish_drag(str(key), catcher.place)
 
         def catcher(self, key: str) -> Any:
             """What takes the drop of the chip of ``key`` where nothing of FilterMate does (an event filter of the
-            application, while the chip is dragged)."""
+            windows of the application, while the chip is dragged: ``watch``, ``unwatch``)."""
             return _Catcher(key, self)
 
-        def finish_drag(self, key: str, taken: bool, place: Any, button_down: bool) -> None:
-            """The drag of the chip of ``key`` is over. ``place``: where it was dropped on a widget that takes no
-            section; else, taken by nothing with the button released, it was dropped out of the application. Its
-            owner then gives the section a panel there. A drag given up (Escape) changes nothing."""
+        def finish_drag(self, key: str, place: Any) -> None:
+            """The drag of the chip of ``key`` is over. ``place``: where it was dropped on a widget of the
+            application that takes no section (the map, another panel of QGIS): its owner gives the section a
+            panel there. A drag that nothing took changes nothing: given up with Escape, or dropped out of the
+            windows of QGIS (on the desktop, another application)."""
             for chip in self._retired:
                 chip.setParent(None)
                 chip.deleteLater()
@@ -334,8 +349,6 @@ def _rail_class():
             self.set_current(self._current)
             if place is not None:
                 self.dropped_out.emit(key, place)
-            elif left_everything(taken, button_down):
-                self.dropped_out.emit(key, QCursor.pos())
 
         @staticmethod
         def dragged_key(mime: Any) -> Optional[str]:

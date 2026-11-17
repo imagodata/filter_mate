@@ -27,6 +27,22 @@ grep -E '^(PASS|FAIL|XFAIL|SKIP)' gui_ltr.log | awk '{print $1}' | sort | uniq -
 - A timeout with no output at all is the missing D-Bus or screen, not the change.
 - The repository is mounted read only; the script copies the plugin. The plugin log may complain it cannot write:
   noise, not an error.
+- `FM_ONLY=<set>` runs one set of steps (`sections`, `layout`, `mouse`, `headers`, `sync`...), `FM_STEPS=a,b` steps by
+  name: see the end of `run_gui_smoke.py`.
+
+## A real pointer (`FM_ONLY=mouse`)
+
+A drag started by the mouse (`QDrag.exec`, a dock dragged by its title) blocks the handler that started it, so the
+other steps call what Qt calls instead. `FM_ONLY=mouse` moves a real pointer from another process
+(`tests/qgis_headless/x_mouse.py`, XTest through ctypes: nothing to install) and checks what a hand does: chips
+dragged along a rail, onto the map, onto a panel, back onto the dock, Escape; a panel dropped as a tab.
+
+- Run it with a window manager, as a desktop has: in the container `apt-get install -y openbox`, then a session
+  script `openbox & sleep 1; exec qgis ...` under `xvfb-run`. Without one, QGIS 3.22 stops starting drags once a
+  floating panel exists and dies in `QDockWidget::event` (not seen with openbox: 14/14 in 3.22, LTR and latest,
+  17 November 2026). LTR and latest pass without one.
+- A native stack of a crash: `apt-get install -y gdb` in the container, then `gdb -batch -ex run -ex 'bt 40' --args
+  /usr/bin/qgis ...` (`qgis` is the binary in the 3.22 image).
 
 ## Other checks
 
