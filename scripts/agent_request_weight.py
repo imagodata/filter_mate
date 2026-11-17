@@ -271,11 +271,12 @@ CONVERSATION = (
 # Taken again on 2026-11-16 for lot 3 (14 layers, notes, widgets, 13 requests), on the code of main after lots 0 and 1
 # (867c4f24). The first one, for lot 0 (10 requests, 9 layers, main b77dea9c before lot 1): fingerprint 3a596d972f4d,
 # 21 calls, 1,381,796 characters sent, largest 80,432, cost 291,616.
-REFERENCE: Optional[Dict[str, Any]] = {  # lot 4 of the token diet (the cache): the breakpoint of the instructions
+REFERENCE: Optional[Dict[str, Any]] = {  # 2026-11-17: the fields of the active layer in the state (+0.2 %);
+    # lot 4 of the token diet (the cache): the breakpoint of the instructions
     # weighs 37 characters a call, read back by a new conversation and after a compaction, neither replayed here;
     # lot 2 with its review: sent 784,859, largest 35,602, cost 184,870; before (867c4f24): 1,408,656, 67,413, 340,333
     "date": "2026-11-16", "commit": "40d4e3ef", "fingerprint": "16efd34dcb03",  # with lot 4 and its review
-    "calls": 28, "sent": 785587, "largest": 35628, "cost": 185033,
+    "calls": 28, "sent": 787631, "largest": 35701, "cost": 185489,
 }
 MAX_RISE = 0.05
 

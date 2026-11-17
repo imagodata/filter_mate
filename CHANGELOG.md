@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### AGENT (experimental)
+
+- **The agent knows the fields of the active layer.** They come with the state of the project sent at each request, and again when the active layer changes: a small local model wrote a field name it had guessed (`dep` for `dept`) instead of reading the fields first.
+
 ## [5.1.1] - 2026-11-17
 
 The fixes of a review of 5.1.0, and what was merged since. The free quota of the agent is removed: AGENT works with

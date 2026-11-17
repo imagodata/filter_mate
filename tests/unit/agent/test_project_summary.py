@@ -119,3 +119,26 @@ def test_changes_are_bounded():
     before = project_state([{"layer_id": str(n), "name": f"l{n}"} for n in range(40)])
     lines = project_changes(before, project_state([{"layer_id": "x", "name": "x"}]))
     assert lines == ["- layers added: x", "- layers removed: l0, l1, l2, l3, l4 and 35 more"]
+
+
+def test_the_fields_of_the_active_layer_are_said():
+    """The quality gate of the token diet (2026-11-17): without them, qwen3:8b guessed "dep" for the field "dept"."""
+    view = {**VIEW, "active_fields": ["nom", "insee", "population", "dept"]}
+    text = project_summary(_rows(), [], view)
+    assert "Fields of the active layer: nom, insee, population, dept" in text.splitlines()
+    assert "Fields of the active layer" not in project_summary(_rows(), [], VIEW)
+
+
+def test_many_fields_are_bounded():
+    from core.agent.project_summary import MAX_FIELDS
+    view = {**VIEW, "active_fields": [f"f{index}" for index in range(MAX_FIELDS + 7)]}
+    line = next(line for line in project_summary(_rows(), [], view).splitlines() if line.startswith("Fields"))
+    assert line.endswith("and 7 more") and f"f{MAX_FIELDS - 1}," not in line.split(", ")[-1]
+
+
+def test_another_active_layer_comes_with_its_fields():
+    before = project_state(_rows(), [], {**VIEW, "active_fields": ["nom"]})
+    after = project_state(_rows(), [], {**VIEW, "active_layer_name": "routes", "active_fields": ["type", "nom"]})
+    assert project_changes(before, after) == ["- active layer is now: routes (fields: type, nom)"]
+    same = project_state(_rows(), [], {**VIEW, "active_fields": ["nom", "pop"]})
+    assert project_changes(before, same) == []  # the same layer: its fields are not sent again
