@@ -459,7 +459,8 @@ class SectionPanels:
         self._panels: List[Any] = []  # the oldest first
         self._home: Dict[str, Any] = {}  # the panel each section apart is in
         self._origins: Dict[str, Any] = {}  # the scroll area of the tool box a page came from
-        self._dock_minimum: Optional[int] = None  # the minimum height of the display profile, while it is relaxed
+        self._dock_minimum: Optional[int] = None  # the minimum height the display profile gave the dock
+        self._dock_relaxed = False  # the dock has no minimum of its own for now
         self._hidden_with_dock = False
         self._closing = False
         self._fusing = False
@@ -1063,9 +1064,12 @@ class SectionPanels:
             room = dock.height()
             wanted = 0 if STAYS in panel.members else self._height_below(panel)
             if STAYS in panel.members:
-                # Qt splits the room of the first of the two and moves the second one into it: the panel, added
-                # at the end of the area, is the first, and the dock comes under it.
+                # Qt splits the room of the first of the two and moves the second one into it. The panel first
+                # takes its place in the room of the dock, under it; then the dock comes under the panel. (The
+                # panel left at the end of the area, the dock went down there with it, below the panels of QGIS
+                # that were under it.)
                 share = max(PANEL_MIN_HEIGHT, int(room * EXPLORING_SHARE))
+                window.splitDockWidget(dock, panel, Qt.Orientation.Vertical)
                 window.splitDockWidget(panel, dock, Qt.Orientation.Vertical)
                 if room - share >= PANEL_MIN_HEIGHT:
                     window.resizeDocks([panel, dock], [share, room - share], Qt.Orientation.Vertical)
@@ -1136,14 +1140,19 @@ class SectionPanels:
         the dimensions of a profile were just applied, the minimum of the dock is the one to give back."""
         try:
             dock = self._dock
-            if any(key != "agent" for key in self._home):  # AGENT alone apart leaves the dock as tall as ever
-                if self._dock_minimum is None or profile_applied:
-                    self._dock_minimum = dock.minimumHeight()  # once: afterwards Qt writes what the contents need
+            apart = any(key != "agent" for key in self._home)  # AGENT alone apart leaves the dock as tall as ever
+            if profile_applied or (apart and self._dock_minimum is None):
+                # Read once per profile: afterwards Qt writes what the contents need, and a minimum read again
+                # after sections went, came back and went again was no longer the one of the profile.
+                self._dock_minimum = dock.minimumHeight()
+            if apart:
                 if dock.minimumHeight() > 0:
                     dock.setMinimumHeight(0)
-            elif self._dock_minimum is not None:
-                dock.setMinimumHeight(self._dock_minimum)
-                self._dock_minimum = None
+                self._dock_relaxed = True
+            elif self._dock_relaxed:
+                self._dock_relaxed = False
+                if self._dock_minimum is not None:
+                    dock.setMinimumHeight(self._dock_minimum)
         except RuntimeError:  # the dock went away
             pass
 

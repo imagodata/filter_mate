@@ -448,6 +448,11 @@ class DockSections(QObject):
             from ..widgets.layer_chooser_mirror import make_mirror
             mirror = self._layer_mirror = make_mirror(source, self._dock.frame_exploring)
             holder.insertWidget(0, mirror)
+            try:  # as the other lists of the dock: the wheel changes the layer only once the list has the focus
+                from ..widgets.wheel_guard import guard_input_wheel
+                guard_input_wheel(self._dock.frame_exploring)
+            except Exception:
+                logger.debug("The chooser of EXPLORING answers the wheel without the focus", exc_info=True)
         mirror.show()
 
     # --- the headers stacked, for who prefers them to the rails -----------------------------------------------------
@@ -526,7 +531,12 @@ class DockSections(QObject):
         page = self._pages.get(key)
         if page is not None:
             page.hide()
-        if not any(self._open_in_stack(name) for name in self._pages):
+        filtering_open = self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None)
+        if key == "exploring" and filtering_open:
+            # While it was away AGENT and FILTERING could be open together. Back in the dock, FILTERING works on
+            # EXPLORING again, which folds AGENT: the dock as it always is, its buttons those of FILTERING.
+            self._open_top("exploring")
+        elif not any(self._open_in_stack(name) for name in self._pages):
             self._open_top("exploring")  # EXPLORING is back, or nothing was open while it was away
 
     def _wire_top_header(self, key: str, header: SectionHeader) -> None:
@@ -584,7 +594,7 @@ class DockSections(QObject):
         (its own slot comes first): what was open is the page kept at the press."""
         for index in range(self._toolbox.count()):
             if self._toolbox.itemText(index) == button.text():
-                if index == self._current_before_press:
+                if index == self._current_before_press and self._alone() is None:  # not the only section left
                     self._toolbox.setCurrentWidget(self._nothing)
                 return
 
@@ -791,8 +801,9 @@ class DockSections(QObject):
         if shown and key in self._reopen:
             self._reopen.discard(key)
             # Not over AGENT: opening FILTERING opens EXPLORING, which would fold AGENT under its user. AGENT in
-            # its own panel folds nothing.
-            if self._toolbox.currentWidget() is self._nothing and not self._open_in_stack("agent"):
+            # its own panel folds nothing, nor does it with EXPLORING in its own.
+            folds_agent = self._open_in_stack("agent") and "exploring" not in self.detached
+            if self._toolbox.currentWidget() is self._nothing and not folds_agent:
                 self._toolbox.setCurrentWidget(page)
         self._fit()
         return True

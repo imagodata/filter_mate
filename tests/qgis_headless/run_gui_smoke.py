@@ -4242,6 +4242,13 @@ def s_explo_detach():
     check('explo: the menu of EXPLORING offers its own panel, and every section out',
           names == ['action_section_detach', 'action_section_detach_all'], str(names))
     grab_window('explo_0_dock')
+    window = iface.mainWindow()
+    probe = QDockWidget('probe', window)  # a panel of QGIS under the dock, in its area
+    probe.setObjectName('fm_bench_probe')
+    probe.setWidget(QLabel('probe'))
+    window.addDockWidget(window.dockWidgetArea(d), probe)
+    QApplication.processEvents()
+    EXPLO['probe'] = probe
     EXPLO['detached'] = panels.detach('exploring')
     return waits(0.8)
 
@@ -4261,10 +4268,20 @@ def s_explo_check():
           and abs(panel.mapToGlobal(QPoint(0, 0)).x() - d.mapToGlobal(QPoint(0, 0)).x()) <= 4
           and panel.height() >= 180 and d.height() >= 180,
           f"place={panel_place(panel)} panel={panel.height()} dock={d.height()}")
+    probe = EXPLO.pop('probe')
+    tops = [widget.mapToGlobal(QPoint(0, 0)).y() for widget in (panel, d, probe)]
+    # 2026-11-17, review: the dock went down to the end of its area with the panel, below the panels of QGIS.
+    check('explo: the dock keeps its place above the panel of QGIS that was under it',
+          tops == sorted(tops) and len(set(tops)) == 3 and not probe.isFloating(), f"panel, dock, probe at {tops}")
+    iface.mainWindow().removeDockWidget(probe)
+    probe.setParent(None)
+    probe.deleteLater()
+    QApplication.processEvents()
     check('explo: away from FILTERING, EXPLORING shows a chooser of the current layer that says the same',
           mirror is not None and mirror.isVisible() and panel.isAncestorOf(mirror) and d.FILTERING.isAncestorOf(combo)
           and mirror.currentIndex() == combo.currentIndex() and mirror.currentText().startswith(combo.currentText())
-          and mirror.count() == combo.count() and combo.currentLayer().id() == layer('zones').id(),
+          and mirror.count() == combo.count() and combo.currentLayer().id() == layer('zones').id()
+          and bool(mirror.property('fm_wheel_guarded')),  # the wheel changes the layer only once it has the focus
           f"mirror={mirror.currentText() if mirror is not None else None} combo={combo.currentText()}")
     check('explo: the dock keeps FILTERING open with its buttons, and asks less height than with EXPLORING in it',
           d.toolBox_tabTools.currentWidget() is d.FILTERING and action_button('filter').isVisible()
@@ -4339,6 +4356,24 @@ def s_explo_filter_check():
         check('explo: FILTERING opened again below leaves AGENT open and the panel of EXPLORING where it is',
               sections.is_open('agent') and toolbox.currentWidget() is d.FILTERING
               and panel_place(panels.panel('exploring')) == 'above', panel_place(panels.panel('exploring')))
+        open_section(None)
+        check('explo: with FILTERING folded under the open AGENT, Undo and Redo walk the steps of the agent',
+              sections.is_open('agent') and d.agent_has_focus())
+        open_section(d.FILTERING)
+        # 2026-11-17, review: back in the dock, EXPLORING stayed folded under AGENT with FILTERING open.
+        panels.attach('exploring')
+        QApplication.processEvents()
+        check('explo: back in the dock under AGENT and FILTERING open together, EXPLORING opens and folds AGENT',
+              sections.is_open('exploring') and not sections.is_open('agent') and toolbox.currentWidget() is d.FILTERING
+              and d.isAncestorOf(d.frame_exploring) and not d.agent_has_focus(),
+              f"exploring={sections.is_open('exploring')} agent={sections.is_open('agent')}")
+        panels.detach('exploring')
+        QApplication.processEvents()
+        chip.click()
+        QApplication.processEvents()
+        check('explo: taken out again, EXPLORING is back above the dock and AGENT opens beside FILTERING',
+              panel_place(panels.panel('exploring')) == 'above' and sections.is_open('agent')
+              and toolbox.currentWidget() is d.FILTERING, panel_place(panels.panel('exploring')))
         chip.click()
         QApplication.processEvents()
         check('explo: a click on the chip of the open AGENT folds it: nothing has to stay open above',
