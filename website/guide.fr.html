@@ -177,6 +177,31 @@
         Ouvrir AGENT replie EXPLORING et FILTERING ; ouvrir FILTERING ramène EXPLORING. AGENT est affiché par défaut et se masque dans l'onglet
         <a href="#configuration">Configuration</a>.
     </p>
+    <h3 id="panels">Le rail des sections, et les sections en panneaux de QGIS <small>(5.1.1)</small></h3>
+    <p>
+        Chaque pile liste ses sections dans un rail de pastilles : AGENT et EXPLORING en haut, FILTERING, EXPORTING et CONFIGURATION au-dessus de la pile du bas.
+        La section ouverte montre son nom, les autres leur icône. Cliquez sur une pastille pour ouvrir sa section ; faites-la glisser le long de son rail pour mettre les sections dans un autre ordre, qui est retenu.
+        Si vous préférez le nom de chaque section sur sa propre ligne, comme avant, choisissez <em>Des en-têtes, les uns au-dessus des autres</em> dans la configuration (<code>SECTION_HEADERS = stacked</code> dans l'onglet Configuration) : ce qui suit se fait alors sur un en-tête plutôt que sur une pastille.
+    </p>
+    <p>
+        Par défaut, toutes les sections restent dans le panneau FilterMate. Une section peut le quitter : faites un clic droit sur sa pastille, puis <em>Ouvrir &hellip; dans son propre panneau</em>, ou faites glisser la pastille hors du panneau.
+        Elle devient un panneau de QGIS, que vous déplacez à côté de la carte, mettez en onglet avec le panneau Couches ou faites flotter sur un autre écran. <em>Sortir toutes les sections de FilterMate</em> les déplace toutes d'un coup : AGENT dans son propre panneau, FILTERING, EXPORTING et CONFIGURATION ensemble dans un autre, EXPLORING restant dans le panneau FilterMate.
+        La dernière section du panneau FilterMate y reste toujours.
+    </p>
+    <p>
+        EXPLORING peut partir aussi : son panneau se place au-dessus de FilterMate la première fois, pour que ce qu'il sélectionne reste au-dessus de FILTERING.
+        Une fois EXPLORING et FILTERING séparés, EXPLORING montre en haut sa propre liste de couches : la couche courante se choisit dans l'un comme dans l'autre.
+    </p>
+    <p>
+        Un panneau contient une section ou plusieurs, listées dans un rail comme dans FilterMate. Faites glisser la pastille d'une section sur un autre panneau pour les regrouper, sur FilterMate pour la fusionner, ou hors de tout panneau pour lui en donner un nouveau ; deux panneaux de FilterMate mis ensemble en onglets n'en font plus qu'un.
+        Un clic droit sur une pastille, ou sur le titre d'un panneau, propose les mêmes déplacements (<em>Regrouper avec FILTERING</em>, <em>Fusionner &hellip; dans FilterMate</em>, comme la fermeture du panneau ; <em>Tout fusionner dans FilterMate</em> pour toutes).
+        QGIS remet chaque panneau là où vous l'avez laissé, et les sections séparées le sont de nouveau, dans les mêmes panneaux, à l'ouverture de FilterMate.
+    </p>
+    <p>
+        Une section dans son propre panneau emporte ses boutons, et ils agissent quoi que montre le panneau FilterMate : vous filtrez depuis le panneau FILTERING pendant qu'EXPLORING seul est ouvert.
+        Les boutons peuvent aussi se montrer sous chaque section (<em>Sous chaque section</em> dans la configuration), et FILTERING ou EXPORTING se désactivent quand vous ne vous en servez pas : la couche source se choisit alors en haut d'EXPLORING.
+        <em>Comment fonctionne FilterMate</em>, sur l'accueil d'AGENT, dans son menu <strong>&#8943;</strong> et dans <em>Vecteur &gt; FilterMate</em>, reprend tout cela dans le panneau, avec des liens qui le font.
+    </p>
     <p>
         Les captures de cette section ont été prises avant la section AGENT et les badges de la barre de titre : elles montrent le bouton des favoris à côté du badge de la couche et pas de section AGENT.
     </p>
@@ -906,10 +931,12 @@ processing.run("filtermate:batch_filter", {
         <figcaption>Une demande avec deux couches possibles : l'agent demande laquelle avant de changer quoi que ce soit.</figcaption>
     </figure>
 
-    <h3>Configurer FilterMate avec l'agent <small>(5.1.1)</small></h3>
+    <h3>Configurer FilterMate <small>(5.1.1)</small></h3>
     <p>
-        À la première ouverture d'une nouvelle version, AGENT propose une fois de configurer FilterMate. L'agent regarde ce que contient le projet, pose quelques questions (ce que vous en faites, votre écran, la langue et l'apparence, vos données), puis propose les réglages, chacun montré avant et après. Rien ne change avant votre clic sur <strong>Appliquer</strong>, et le changement s'annule comme toute autre étape.
-        Relancez-la quand vous voulez par le menu <em>Vecteur &gt; FilterMate &gt; Configurer FilterMate avec l'agent</em>, ou par le menu <strong>&#8943;</strong> du panneau. Vous pouvez aussi simplement demander : ce que fait un réglage, le thème sombre, pourquoi vos filtres sont lents.
+        À la première ouverture d'une nouvelle version, AGENT propose une fois de configurer FilterMate. La configuration ne demande aucun modèle d'IA et n'envoie rien nulle part : elle pose ses questions avec des cartes de choix, cochées selon vos réglages actuels.
+        Les sections que vous utilisez et vos données, l'apparence du panneau, la place des sections (toutes dans le panneau FilterMate, ce qui est le défaut, ou dans des panneaux de QGIS) et celle de leurs boutons, puis ce que vous filtrez et exportez.
+        La dernière carte montre chaque réglage avant et après ; rien ne change avant votre clic sur <strong>Appliquer</strong>, et un lien remet tout comme avant. Avec un modèle connecté, <em>Affiner la configuration avec l'agent</em> suit.
+        Relancez-la quand vous voulez par le menu <em>Vecteur &gt; FilterMate &gt; Configurer FilterMate</em>, ou par le menu <strong>&#8943;</strong> du panneau. Avec un modèle, vous pouvez aussi simplement demander : ce que fait un réglage, le thème sombre, pourquoi vos filtres sont lents.
     </p>
 
     <figure class="narrow">
