@@ -537,6 +537,16 @@ class ConfigController(BaseController):
                 splitter_manager = getattr(self.dockwidget, '_splitter_manager', None)
                 if splitter_manager:
                     splitter_manager.apply()
+                # The buttons and their bars at the sizes of the new profile: set at startup and when the bar
+                # moves only, they kept the sizes of the older profile until a restart (2026-11-17, review).
+                bar_manager = getattr(self.dockwidget, '_action_bar_manager', None)
+                if bar_manager is not None:
+                    bar_manager.apply_size_constraints()
+                    bar_manager.sync_sections()
+                # The splitter just sized the stacks for the profile: they fit their open sections again.
+                refit = getattr(self.dockwidget, '_refit_sections_after_dimensions', None)
+                if callable(refit):
+                    refit()
 
                 profile_display = UIConfig.get_profile_name().upper()
                 logger.info(f"UI profile changed to {profile_display} mode")

@@ -1050,6 +1050,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 panels = getattr(self, '_fm_panels', None)
                 if panels is not None:  # with a section in its own panel, the dock needs less than its profile asks
                     panels.relax_dock(profile_applied=True)
+                self._refit_sections_after_dimensions()
                 return
             except Exception as e:
                 logger.error(f"DimensionsManager.apply() FAILED: {e}", exc_info=True)
@@ -1090,6 +1091,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             panels = getattr(self, '_fm_panels', None)
             if panels is not None:
                 panels.relax_dock(profile_applied=True)
+            self._refit_sections_after_dimensions()
             logger.info("Successfully applied dynamic dimensions to all widgets")
         except Exception as e:
             logger.error(f"Error applying dynamic dimensions: {e}", exc_info=True)
@@ -7255,9 +7257,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try: self._exploring_cache.invalidate_all() if hasattr(self, '_exploring_cache') else None
         except Exception:  # nosec B110 - Cache may be None - expected
             pass
-        try: self._theme_watcher.remove_callback(self._on_qgis_theme_changed) if self._theme_watcher else None
-        except Exception:  # nosec B110 - Callback may not be registered - expected
-            pass
+        # The theme watcher keeps its callback: closing only hides the dock, and nothing added it again when the
+        # dock was shown, so ACTIVE_THEME = auto stopped following the theme of QGIS for the rest of the session
+        # (2026-11-17, review). The unload removes it (release_qgis_connections).
         # Closing only hides the dock (run() shows it again): the controllers are
         # torn down when the plugin unloads, not here.
         try: self._controller_integration.on_dock_closed() if self._controller_integration else None
@@ -7353,6 +7355,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # From finished() of the read, completed or terminated: never a Python function connected to
         # taskCompleted / taskTerminated, which QGIS 4.2.2 on Windows died entering (async_query.submit_query).
         task.when_settled(settled)
+
+    def _refit_sections_after_dimensions(self) -> None:
+        """The stacks of sections take the dimensions a profile or a theme just applied (dock_chrome.py)."""
+        sections = getattr(self, '_fm_sections', None)
+        refit = getattr(sections, 'dimensions_applied', None)
+        if callable(refit):
+            refit()
 
     def agent_has_focus(self) -> bool:
         """AGENT is open in the dock: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the

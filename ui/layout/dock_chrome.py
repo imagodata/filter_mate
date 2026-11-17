@@ -398,30 +398,33 @@ class DockSections(QObject):
         except RuntimeError:  # the dock went away
             pass
 
-    def _alone(self) -> Optional[str]:
-        """The only section the dock still shows (the others are in panels of QGIS, or turned off); None with
-        several, or with none."""
-        here = [key for key in self._pages if key not in self.detached] + self.bottom_rail.shown_sections()
-        return here[0] if len(here) == 1 else None
-
     def _open_alone(self) -> None:
-        """The only section left in the dock is open: a dock that shows one folded chip and nothing else is of no
-        use (AGENT with EXPLORING and the lower stack in panels, CONFIGURATION after every other section left)."""
-        key = self._alone()
-        if key is None:
+        """The dock always shows one open section. In the dock as it is by default one is always open above
+        (EXPLORING or AGENT). With EXPLORING in its own panel nothing has to be, and when nothing is open below
+        either (the open section left for a panel, was turned off, or something opened a section that is apart) the
+        dock showed folded chips and nothing else: the first section of the lower stack opens, else the one left
+        above (AGENT alone in the dock)."""
+        if self._anything_open():
             return
-        if key in self._pages:
-            if not self._open_in_stack(key):
-                self._open_top(key)
-        elif self._toolbox.currentWidget() is self._nothing:
-            page = getattr(self._dock, key.upper(), None)
-            if page is not None:
-                self._toolbox.setCurrentWidget(page)
+        below = self.bottom_rail.shown_sections()
+        above = [key for key in self._pages if key not in self.detached]
+        page = getattr(self._dock, below[0].upper(), None) if below else None
+        if page is not None:
+            self._toolbox.setCurrentWidget(page)
+        elif above:
+            self._open_top("exploring" if "exploring" in above else above[0])
+
+    def _anything_open(self) -> bool:
+        return any(self._open_in_stack(key) for key in self._pages) or self.bottom_key() is not None
 
     def _may_fold_top(self) -> bool:
         """What is open above may be folded: EXPLORING is in its own panel (in the dock, one section stays open
-        above), and the dock has another section to give the room to."""
-        return "exploring" in self.detached and self._alone() is None
+        above), and a section is open below to take the room: the last open section of the dock stays open."""
+        return "exploring" in self.detached and self.bottom_key() is not None
+
+    def _may_fold_bottom(self) -> bool:
+        """What is open below may be folded: a section is open above to take the room."""
+        return any(self._open_in_stack(key) for key in self._pages)
 
     # --- EXPLORING away from FILTERING ------------------------------------------------------------------------------
 
@@ -594,8 +597,10 @@ class DockSections(QObject):
         (its own slot comes first): what was open is the page kept at the press."""
         for index in range(self._toolbox.count()):
             if self._toolbox.itemText(index) == button.text():
-                if index == self._current_before_press and self._alone() is None:  # not the only section left
+                if index == self._current_before_press and self._may_fold_bottom():  # not the last one open
                     self._toolbox.setCurrentWidget(self._nothing)
+                elif index == self._current_before_press:
+                    self._refresh_headers()
                 return
 
     def bottom_key(self) -> Optional[str]:
@@ -739,13 +744,15 @@ class DockSections(QObject):
     # --- the bottom stack ------------------------------------------------------------
 
     def _on_bottom_chip(self, key: str) -> None:
-        """A click on a chip opens its section; on the chip of the open one, it folds the stack (not when it is
-        the only section of the dock: nothing else would show)."""
+        """A click on a chip opens its section; on the chip of the open one, it folds the stack (not when nothing
+        is open above: the dock would show its chips and nothing else)."""
         page = getattr(self._dock, key.upper(), None)
         if page is None:
             return
-        fold = self._toolbox.currentWidget() is page and self._alone() != key
+        fold = self._toolbox.currentWidget() is page and self._may_fold_bottom()
         self._toolbox.setCurrentWidget(self._nothing if fold else page)
+        if not fold:
+            self.bottom_rail.set_current(self.bottom_key())  # the click on the open chip unchecked it
 
     def _on_bottom_changed(self, _index: int) -> None:
         current = self._toolbox.currentWidget()
@@ -887,6 +894,17 @@ class DockSections(QObject):
                         self._splitter.setSizes([total - bottom.maximumHeight(), bottom.maximumHeight()])
                     else:
                         self._share_room()  # both open again: the share the handle was left at
+        except RuntimeError:  # the dock went away
+            pass
+
+    def dimensions_applied(self) -> None:
+        """A display profile, or a theme, just gave the dock its dimensions again: the limits kept for the lower
+        stack while nothing is open in it are those of before, and the stack is no longer held to its rail (a band
+        of 150 to 240 px stayed empty under it, and the older limits came back with the next section opened)."""
+        try:
+            self._bottom_limits = None
+            self._toolbox_minimum = None
+            self.refresh_rails()
         except RuntimeError:  # the dock went away
             pass
 

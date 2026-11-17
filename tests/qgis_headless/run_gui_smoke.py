@@ -2506,6 +2506,11 @@ def s_section_startup_check():
     position, wanted = os.environ.get('FM_ACTION_BAR'), os.environ.get('FM_DETACHED', '')
     QApplication.processEvents()
     grab('startup')
+    if position in ('top', 'bottom', 'left', 'right'):
+        open_section(d.FILTERING)
+        # 2026-11-17, review: 'top' was applied by a live change only, and came back at the bottom after a restart.
+        check(f"startup: the buttons are at the {position}, where the setting says",
+              settles(lambda: bar_place() == position), f"at {bar_place()}")
     if position == 'sections':
         bars = manager.section_bars()
         if not check('startup: the buttons are under their section', bars is not None
@@ -4811,7 +4816,7 @@ def switch_problems():
             found.append(f"{key} is not in the panel that holds it")
     saved = tuple(group for group in (tuple(key for key in group if key in present)
                                       for group in module.parse_groups(QSettings().value(DETACHED_KEY, ''))) if group)
-    if saved != panels.groups():
+    if set(saved) != set(panels.groups()):  # the panels in any order: a restored one is the newest again
         found.append(f"kept for the next time {saved}, shown {panels.groups()}")
     # A way to open each section.
     host_of = {key: (panels.panel(key) or d) for key in present}
@@ -4829,9 +4834,8 @@ def switch_problems():
         found.append(f"the lower stack shows {below}, which is not in the dock")
     if ('exploring' in in_dock and below == 'filtering' and sections._open_in_stack('agent')):
         found.append('AGENT and FILTERING open together in the dock, EXPLORING folded')
-    alone = sections._alone()
-    if alone is not None and not (sections._open_in_stack(alone) if alone in sections._pages else below == alone):
-        found.append(f"{alone}, the only section of the dock, is folded")
+    if in_dock and not open_above and below is None:
+        found.append(f"nothing is open in the dock, which holds {in_dock}")
     # The buttons where their section is.
     for name, owner in SWITCH_OWNERS.items():
         button = action_button(name)
@@ -4857,6 +4861,15 @@ def switch_problems():
         found.append(f"the second chooser is {'shown' if mirror_shown else 'hidden'} with EXPLORING and FILTERING "
                      f"{'both in the dock' if sections.together() else 'separated'}")
     # Room: an open section is not squeezed to nothing, the dock has its minimum when its sections are in it.
+    lower = d.splitter_main.widget(1)
+    if below is None and d.isVisible() and not d.visibleRegion().isEmpty() and lower.isVisibleTo(d):
+        rail = sections._bottom_headers_height(lower)
+        if lower.height() > rail + 6:
+            found.append(f"nothing is open below and the lower stack is {lower.height()} px high for {rail} px of "
+                         f"{'headers' if sections.stacked else 'rail'}")
+    watcher = getattr(d, '_theme_watcher', None)
+    if watcher is not None and d._on_qgis_theme_changed not in watcher._callbacks:
+        found.append('the dock no longer follows the theme of QGIS')
     relaxed = any(key != 'agent' for key in apart)
     if panels._dock_relaxed != relaxed:
         found.append(f"the minimum height of the dock is {'given up' if panels._dock_relaxed else 'kept'} with {apart} apart")
@@ -5139,6 +5152,9 @@ def s_switch_positions():
     leave_welcome()
     path = 'APP.DOCKWIDGET.ACTION_BAR_POSITION'
     before = config_value(path)
+    open_section(d.FILTERING)
+    pump(120)
+    gaps = spread(d.frame_actions)  # as the bar is when the dock opens
     wrong = []
     places = SWITCH_SETTINGS[path]
     order = [(first, second) for first in places for second in places if first != second]
@@ -5157,10 +5173,42 @@ def s_switch_positions():
     open_section(d.FILTERING)
     check('switch: every place of the buttons from every other one, the bar where the setting says',
           not wrong and bar_place() == ('bottom' if before == 'sections' else before), ' | '.join(wrong[:8]))
+
+    def same_look():
+        now = spread(d.frame_actions)
+        return len(now) == len(gaps) and all(abs(a - b) <= 3 for a, b in zip(now, gaps))
+    # 2026-11-17, review: rebuilt, the bar grouped its buttons in the centre; spread again once a section left.
+    check('switch: back at its place, the bar spreads its buttons as when the dock opened', settles(same_look),
+          f"gaps at the start {gaps}, now {spread(d.frame_actions)}")
     return waits(0.3)
 
 
-SWITCH_STEPS = [s_section_setup, s_vector_source, s_switch_positions, s_switch_begin,
+def s_switch_stack_back():
+    """The upper stack comes back from hidden (AGENT and EXPLORING were both in panels) while the lower one shows
+    its rail only: AGENT opened 0 px high, the room of the stacks being read from sizes that had none for it."""
+    d = dock()
+    panels, sections = d._fm_panels, d._fm_sections
+    if 'agent' not in sections._headers:
+        return None
+    leave_welcome()
+    panels.detach('agent')
+    panels.detach('exploring')
+    pump()
+    open_section(None)
+    hidden = not sections.top.isVisibleTo(d)
+    panels.attach('agent')
+    pump()
+    sections.top_rail.chip('agent').click()
+    page = sections._pages['agent']
+    roomy = settles(lambda: sections._open_in_stack('agent') and page.height() > 80)
+    check('switch: AGENT merged back to an upper stack that was hidden opens with room, nothing open below',
+          hidden and roomy, f"hidden before={hidden} AGENT {page.height()} px, splitter {d.splitter_main.sizes()} "
+          f"of {d.splitter_main.height()}")
+    leave_welcome()
+    return waits(0.3)
+
+
+SWITCH_STEPS = [s_section_setup, s_vector_source, s_switch_positions, s_switch_stack_back, s_switch_begin,
                 *[s_switch_walk] * max(1, (int(os.environ.get('FM_SWITCHES', '100')) + 24) // 25), s_switch_end]
 
 
@@ -5306,7 +5354,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
          *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, *EXPLO_STEPS,
-         s_finish]
+         *SWITCH_STEPS, s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
@@ -5322,7 +5370,7 @@ if os.environ.get('FM_STEPS'):  # steps by name, in this order: to find which on
                (globals()[name] if isinstance(globals()[name], list) else [globals()[name]])], s_finish]
 if os.environ.get('FM_ONLY') == 'layout':  # everything about the sections, their panels and the welcome, in a row
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS,
-             *EXPLO_STEPS, s_finish]
+             *EXPLO_STEPS, *SWITCH_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'exploring':  # EXPLORING in its own panel, with its chooser of the current layer
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *EXPLO_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'switch':  # a walk at random through the layouts (FM_SEED, FM_SWITCHES)

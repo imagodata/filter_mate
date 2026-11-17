@@ -8,6 +8,10 @@ All notable changes to FilterMate will be documented in this file.
 
 - **The agent knows the fields of the active layer.** They come with the state of the project sent at each request, and again when the active layer changes: a small local model wrote a field name it had guessed (`dep` for `dept`) instead of reading the fields first.
 
+### Dock
+
+- **Switching the layout in any order: what an audit of the switches found.** The place of the buttons moved from *top* to a side (*left*, *right*) left the row of the bottom above the stacks: *bottom* and *Under each section* then showed the buttons at the top until QGIS restarted. Set to *top*, the buttons came back at the bottom after a restart, the setting still saying top. Changing `ACTION_BAR_VERTICAL_ALIGNMENT` raised an error and waited for a restart: it applies at once. After its place was changed and put back the bar grouped its buttons in the centre: it spreads them as when the dock opens. A change of display profile left the buttons at the sizes of the older profile until a restart, and a change of profile or of theme left an empty band under the lower stack while nothing was open in it, and shrank a floating dock. Once the dock had been closed, the theme *auto* stopped following the theme of QGIS. AGENT merged back into the dock after AGENT and EXPLORING were both in panels opened with no height. The dock always shows one open section: with EXPLORING in its own panel, folding the last open one, or a section that leaves, no longer leaves folded chips and nothing else. Two panels of FilterMate put together as tabs no longer merge while a chip is being dragged. The headless bench now walks at random through the layouts (sections in the dock or in panels, rail or headers, every place of the buttons, sections turned off, display profile, theme, the dock closed, a restart), checks after each move that every section can be opened and has its buttons, and that the default layout comes back as it was.
+
 ## [5.1.1] - 2026-11-17
 
 The fixes of a review of 5.1.0, and what was merged since. The free quota of the agent is removed: AGENT works with

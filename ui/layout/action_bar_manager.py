@@ -175,6 +175,10 @@ class ActionBarManager(LayoutManagerBase):
             else:
                 # For top/bottom, use the default horizontal layout. Its size constraints too: without them the
                 # about button took its icon + padding (42 px) and the frame its stylesheet padding (63 px in all).
+                if self._position == 'top':
+                    # The .ui puts the bar at the bottom: 'top' was applied by a live change only, and came back
+                    # at the bottom after a restart while the setting still said top (2026-11-17, review).
+                    self.reposition_in_main_layout()
                 self.apply_size_constraints()
                 self.dockwidget.frame_actions.show()
                 self.dockwidget._current_action_bar_position = self._position
@@ -441,12 +445,10 @@ class ActionBarManager(LayoutManagerBase):
         new_layout = QtWidgets.QHBoxLayout(self.dockwidget.frame_actions)
         new_layout.setContentsMargins(*self.horizontal_bar_margins())
 
-        # Uniform fixed spacing between buttons
-        button_spacing = 8
-        new_layout.setSpacing(button_spacing)
-
-        # Leading spacer to center the button group
-        new_layout.addStretch(1)
+        # The buttons spread over the bar with the same gap between each two, as the bar of the .ui and the bars
+        # of the sections: grouped in the centre, the bar looked another way after its place was changed and put
+        # back, and yet another once a section left the dock (2026-11-17, review).
+        new_layout.setSpacing(0)
 
         for btn in action_buttons:
             btn.setParent(self.dockwidget.frame_actions)
@@ -457,8 +459,7 @@ class ActionBarManager(LayoutManagerBase):
             )
             new_layout.addWidget(btn)
 
-        # Trailing spacer to center the button group
-        new_layout.addStretch(1)
+        even_action_spacing(new_layout)
 
         logger.debug("ActionBarManager: Created horizontal layout")
 
