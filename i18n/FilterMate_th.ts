@@ -12249,8 +12249,8 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>โดยค่าเริ่มต้น ทุกส่วนอยู่ในแผงนี้ และไม่มีอะไรเคลื่อนที่หากคุณไม่สั่ง ส่วนหนึ่งสามารถแยกออกจากแผงนี้ได้ คลิกขวาที่ชิปของ AGENT, FILTERING, EXPORTING หรือ CONFIGURATION บนแถบของมัน แล้วเลือกเปิดในแผงของตัวเอง ส่วนนั้นจะกลายเป็นแผงของ QGIS ที่ลากไปไว้ข้างแผนที่ ซ้อนเป็นแท็บกับแผงเลเยอร์ หรือลอยบนหน้าจออื่นได้ EXPLORING จะอยู่ที่นี่ เพราะเก็บเลเยอร์ที่ส่วนอื่นใช้ทำงาน</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>โดยค่าเริ่มต้น ทุกส่วนอยู่ในแผงนี้ และไม่มีอะไรเคลื่อนที่หากคุณไม่สั่ง ส่วนหนึ่งสามารถแยกออกจากแผงนี้ได้ คลิกขวาที่ชิปของมันบนแถบ แล้วเลือกเปิดในแผงของตัวเอง ส่วนนั้นจะกลายเป็นแผงของ QGIS ที่ลากไปไว้ข้างแผนที่ ซ้อนเป็นแท็บกับแผงเลเยอร์ หรือลอยบนหน้าจออื่นได้ ส่วนสุดท้ายที่เหลืออยู่ที่นี่จะไม่แยกออกไป EXPLORING เก็บเลเยอร์ที่ส่วนอื่นใช้ทำงาน เมื่อแยกจาก FILTERING แล้ว EXPLORING จะแสดงรายการของตัวเองไว้เลือกเลเยอร์นั้น</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>ส่วนหนึ่งสามารถแยกออกจากแผงนี้ได้ คลิกขวาที่ส่วนหัวของ AGENT, FILTERING, EXPORTING หรือ CONFIGURATION แล้วเลือกเปิดในแผงของตัวเอง ส่วนนั้นจะกลายเป็นแผงของ QGIS ที่ลากไปไว้ข้างแผนที่ ซ้อนเป็นแท็บกับแผงเลเยอร์ หรือลอยบนหน้าจออื่นได้ EXPLORING จะอยู่ที่นี่ เพราะเก็บเลเยอร์ที่ส่วนอื่นใช้ทำงาน</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>ส่วนหนึ่งสามารถแยกออกจากแผงนี้ได้ คลิกขวาที่ส่วนหัวของมัน แล้วเลือกเปิดในแผงของตัวเอง ส่วนนั้นจะกลายเป็นแผงของ QGIS ที่ลากไปไว้ข้างแผนที่ ซ้อนเป็นแท็บกับแผงเลเยอร์ หรือลอยบนหน้าจออื่นได้ ส่วนสุดท้ายที่เหลืออยู่ที่นี่จะไม่แยกออกไป EXPLORING เก็บเลเยอร์ที่ส่วนอื่นใช้ทำงาน เมื่อแยกจาก FILTERING แล้ว EXPLORING จะแสดงรายการของตัวเองไว้เลือกเลเยอร์นั้น</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

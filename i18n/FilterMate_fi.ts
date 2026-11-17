@@ -12249,8 +12249,8 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Oletuksena jokainen osio on tässä paneelissa, eikä mikään liiku, ellet pyydä. Osio voi poistua siitä: napsauta AGENT-, FILTERING-, EXPORTING- tai CONFIGURATION-osion kapselia sen palkissa hiiren kakkospainikkeella ja valitse avaus omaan paneeliin. Siitä tulee QGIS-paneeli, jonka voit vetää kartan viereen, yhdistää välilehdeksi Tasot-paneelin kanssa tai jättää irralleen toiselle näytölle. EXPLORING pysyy täällä: se sisältää tason, jolla muut osiot työskentelevät.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Oletuksena jokainen osio on tässä paneelissa, eikä mikään liiku, ellet pyydä. Osio voi poistua siitä: napsauta osion kapselia sen palkissa hiiren kakkospainikkeella ja valitse avaus omaan paneeliin. Siitä tulee QGIS-paneeli, jonka voit vetää kartan viereen, yhdistää välilehdeksi Tasot-paneelin kanssa tai jättää irralleen toiselle näytölle. Viimeinen tänne jäävä osio pysyy täällä. EXPLORING sisältää tason, jolla muut osiot työskentelevät: kun se on erotettu FILTERING-osiosta, se näyttää oman luettelonsa, josta tämä taso valitaan.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Osio voi poistua tästä paneelista. Napsauta AGENT-, FILTERING-, EXPORTING- tai CONFIGURATION-osion otsikkoa hiiren kakkospainikkeella ja valitse avaus omaan paneeliin: siitä tulee QGIS-paneeli, jonka voit vetää kartan viereen, yhdistää välilehdeksi Tasot-paneelin kanssa tai jättää irralleen toiselle näytölle. EXPLORING pysyy täällä: se sisältää tason, jolla muut osiot työskentelevät.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Osio voi poistua tästä paneelista. Napsauta osion otsikkoa hiiren kakkospainikkeella ja valitse avaus omaan paneeliin: siitä tulee QGIS-paneeli, jonka voit vetää kartan viereen, yhdistää välilehdeksi Tasot-paneelin kanssa tai jättää irralleen toiselle näytölle. Viimeinen tänne jäävä osio pysyy täällä. EXPLORING sisältää tason, jolla muut osiot työskentelevät: kun se on erotettu FILTERING-osiosta, se näyttää oman luettelonsa, josta tämä taso valitaan.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

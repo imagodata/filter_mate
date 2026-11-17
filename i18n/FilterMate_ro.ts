@@ -12249,8 +12249,8 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Implicit, fiecare secțiune este în acest panou și nimic nu se mută dacă nu cereți. O secțiune îl poate părăsi: faceți clic dreapta pe chip-ul secțiunii AGENT, FILTERING, EXPORTING sau CONFIGURATION din bara sa, apoi alegeți să o deschideți în propriul panou. Devine un panou al QGIS, pe care îl puteți trage lângă hartă, îl puteți pune în filă cu panoul Straturi sau îl puteți lăsa să plutească pe alt ecran. EXPLORING rămâne aici: conține stratul pe care lucrează celelalte secțiuni.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Implicit, fiecare secțiune este în acest panou și nimic nu se mută dacă nu cereți. O secțiune îl poate părăsi: faceți clic dreapta pe chip-ul ei din bara sa, apoi alegeți să o deschideți în propriul panou. Devine un panou al QGIS, pe care îl puteți trage lângă hartă, îl puteți pune în filă cu panoul Straturi sau îl puteți lăsa să plutească pe alt ecran. Ultima secțiune rămasă aici nu pleacă. EXPLORING conține stratul pe care lucrează celelalte secțiuni: odată separat de FILTERING, își afișează propria listă pentru a alege acel strat.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>O secțiune poate părăsi acest panou. Faceți clic dreapta pe antetul AGENT, FILTERING, EXPORTING sau CONFIGURATION, apoi alegeți să o deschideți în propriul panou: devine un panou al QGIS, pe care îl puteți trage lângă hartă, îl puteți pune în filă cu panoul Straturi sau îl puteți lăsa să plutească pe alt ecran. EXPLORING rămâne aici: conține stratul pe care lucrează celelalte secțiuni.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>O secțiune poate părăsi acest panou. Faceți clic dreapta pe antetul ei, apoi alegeți să o deschideți în propriul panou: devine un panou al QGIS, pe care îl puteți trage lângă hartă, îl puteți pune în filă cu panoul Straturi sau îl puteți lăsa să plutească pe alt ecran. Ultima secțiune rămasă aici nu pleacă. EXPLORING conține stratul pe care lucrează celelalte secțiuni: odată separat de FILTERING, își afișează propria listă pentru a alege acel strat.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

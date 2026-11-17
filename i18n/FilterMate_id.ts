@@ -12249,8 +12249,8 @@ onnxruntime berasal dari PyPI dengan pip, model dari huggingface.co/{1}, dan set
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Secara bawaan setiap bagian berada di panel ini, dan tidak ada yang berpindah kecuali Anda memintanya. Sebuah bagian dapat keluar dari panel ini: klik kanan chip AGENT, FILTERING, EXPORTING, atau CONFIGURATION pada bilahnya, lalu pilih untuk membukanya di panelnya sendiri. Ia menjadi panel QGIS, yang bisa diseret ke samping peta, dijadikan tab bersama panel Lapisan, atau dibuat mengambang di layar lain. EXPLORING tetap di sini: ia berisi lapisan yang dikerjakan bagian lain.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Secara bawaan setiap bagian berada di panel ini, dan tidak ada yang berpindah kecuali Anda memintanya. Sebuah bagian dapat keluar dari panel ini: klik kanan chip-nya pada bilahnya, lalu pilih untuk membukanya di panelnya sendiri. Ia menjadi panel QGIS, yang bisa diseret ke samping peta, dijadikan tab bersama panel Lapisan, atau dibuat mengambang di layar lain. Bagian terakhir yang tersisa di sini tetap berada di sini. EXPLORING berisi lapisan yang dikerjakan bagian lain: setelah dipisahkan dari FILTERING, ia menampilkan daftarnya sendiri untuk memilih lapisan itu.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime berasal dari PyPI dengan pip, model dari huggingface.co/{1}, dan set
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Sebuah bagian dapat keluar dari panel ini. Klik kanan judul AGENT, FILTERING, EXPORTING, atau CONFIGURATION, lalu pilih untuk membukanya di panelnya sendiri: ia menjadi panel QGIS, yang bisa diseret ke samping peta, dijadikan tab bersama panel Lapisan, atau dibuat mengambang di layar lain. EXPLORING tetap di sini: ia berisi lapisan yang dikerjakan bagian lain.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Sebuah bagian dapat keluar dari panel ini. Klik kanan judulnya, lalu pilih untuk membukanya di panelnya sendiri: ia menjadi panel QGIS, yang bisa diseret ke samping peta, dijadikan tab bersama panel Lapisan, atau dibuat mengambang di layar lain. Bagian terakhir yang tersisa di sini tetap berada di sini. EXPLORING berisi lapisan yang dikerjakan bagian lain: setelah dipisahkan dari FILTERING, ia menampilkan daftarnya sendiri untuk memilih lapisan itu.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

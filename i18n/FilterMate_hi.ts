@@ -12249,8 +12249,8 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>डिफ़ॉल्ट रूप से हर अनुभाग इसी पैनल में रहता है, और आपके कहे बिना कुछ नहीं हिलता। कोई अनुभाग इससे बाहर जा सकता है: उसकी पट्टी में AGENT, FILTERING, EXPORTING या CONFIGURATION के चिप पर राइट-क्लिक करें, फिर उसे अपने पैनल में खोलना चुनें। वह QGIS का पैनल बन जाता है, जिसे नक्शे के बगल में खींचा जा सकता है, परत पैनल के साथ टैब में रखा जा सकता है या दूसरी स्क्रीन पर तैराया जा सकता है। EXPLORING यहीं रहता है: उसमें वह परत है जिस पर बाकी अनुभाग काम करते हैं।</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>डिफ़ॉल्ट रूप से हर अनुभाग इसी पैनल में रहता है, और आपके कहे बिना कुछ नहीं हिलता। कोई अनुभाग इससे बाहर जा सकता है: उसकी पट्टी में उसके चिप पर राइट-क्लिक करें, फिर उसे अपने पैनल में खोलना चुनें। वह QGIS का पैनल बन जाता है, जिसे नक्शे के बगल में खींचा जा सकता है, परत पैनल के साथ टैब में रखा जा सकता है या दूसरी स्क्रीन पर तैराया जा सकता है। यहाँ बचा आखिरी अनुभाग यहीं रहता है। EXPLORING में वह परत है जिस पर बाकी अनुभाग काम करते हैं: FILTERING से अलग होने पर वह उस परत को चुनने के लिए अपनी सूची दिखाता है।</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>कोई अनुभाग इस पैनल से बाहर जा सकता है। AGENT, FILTERING, EXPORTING या CONFIGURATION के शीर्षक पर राइट-क्लिक करें, फिर उसे अपने पैनल में खोलना चुनें: वह QGIS का पैनल बन जाता है, जिसे नक्शे के बगल में खींचा जा सकता है, परत पैनल के साथ टैब में रखा जा सकता है या दूसरी स्क्रीन पर तैराया जा सकता है। EXPLORING यहीं रहता है: उसमें वह परत है जिस पर बाकी अनुभाग काम करते हैं।</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>कोई अनुभाग इस पैनल से बाहर जा सकता है। उसके शीर्षक पर राइट-क्लिक करें, फिर उसे अपने पैनल में खोलना चुनें: वह QGIS का पैनल बन जाता है, जिसे नक्शे के बगल में खींचा जा सकता है, परत पैनल के साथ टैब में रखा जा सकता है या दूसरी स्क्रीन पर तैराया जा सकता है। यहाँ बचा आखिरी अनुभाग यहीं रहता है। EXPLORING में वह परत है जिस पर बाकी अनुभाग काम करते हैं: FILTERING से अलग होने पर वह उस परत को चुनने के लिए अपनी सूची दिखाता है।</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

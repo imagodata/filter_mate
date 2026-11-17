@@ -12249,8 +12249,8 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>Som standard ligger hver seksjon i dette panelet, og ingenting flyttes med mindre du ber om det. En seksjon kan forlate det: høyreklikk på chipen til AGENT, FILTERING, EXPORTING eller CONFIGURATION i bjelken og velg å åpne den i sitt eget panel. Den blir et panel i QGIS som kan dras ved siden av kartet, legges som fane sammen med Lag-panelet eller gjøres flytende på en annen skjerm. EXPLORING blir her: den inneholder laget de andre seksjonene jobber med.</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Som standard ligger hver seksjon i dette panelet, og ingenting flyttes med mindre du ber om det. En seksjon kan forlate det: høyreklikk på chipen i bjelken og velg å åpne den i sitt eget panel. Den blir et panel i QGIS som kan dras ved siden av kartet, legges som fane sammen med Lag-panelet eller gjøres flytende på en annen skjerm. Den siste seksjonen som er igjen her, blir værende. EXPLORING inneholder laget de andre seksjonene jobber med: når den er skilt fra FILTERING, viser den sin egen liste for å velge det laget.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>En seksjon kan forlate dette panelet. Høyreklikk på overskriften til AGENT, FILTERING, EXPORTING eller CONFIGURATION, og velg å åpne den i sitt eget panel: den blir et panel i QGIS som kan dras ved siden av kartet, legges som fane sammen med Lag-panelet eller gjøres flytende på en annen skjerm. EXPLORING blir her: den inneholder laget de andre seksjonene jobber med.</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>En seksjon kan forlate dette panelet. Høyreklikk på overskriften og velg å åpne den i sitt eget panel: den blir et panel i QGIS som kan dras ved siden av kartet, legges som fane sammen med Lag-panelet eller gjøres flytende på en annen skjerm. Den siste seksjonen som er igjen her, blir værende. EXPLORING inneholder laget de andre seksjonene jobber med: når den er skilt fra FILTERING, viser den sin egen liste for å velge det laget.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>

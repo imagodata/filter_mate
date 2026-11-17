@@ -12249,8 +12249,8 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
-        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>既定では、すべてのセクションがこのパネルの中にあり、頼まない限り何も動きません。セクションはここから出せます。レール上の AGENT、FILTERING、EXPORTING、CONFIGURATION のチップを右クリックし、専用のパネルで開く操作を選びます。そのセクションは QGIS のパネルになり、地図の横にドラッグしたり、レイヤパネルとタブにしたり、別の画面にフローティングで表示したりできます。EXPLORING はここに残ります。ほかのセクションが使うレイヤを保持しているためです。</translation>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>既定では、すべてのセクションがこのパネルの中にあり、頼まない限り何も動きません。セクションはここから出せます。レール上のそのチップを右クリックし、専用のパネルで開く操作を選びます。そのセクションは QGIS のパネルになり、地図の横にドラッグしたり、レイヤパネルとタブにしたり、別の画面にフローティングで表示したりできます。最後に残ったセクションはここに残ります。EXPLORING は、ほかのセクションが使うレイヤを保持しています。FILTERING から切り離されると、そのレイヤを選ぶための独自のリストを表示します。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
@@ -12294,8 +12294,8 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
-        <source>A section can leave this panel. Right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. EXPLORING stays here: it holds the layer the other sections work on.</source>
-        <translation>セクションは、このパネルから出せます。AGENT、FILTERING、EXPORTING、CONFIGURATION のヘッダーを右クリックし、専用のパネルで開く操作を選びます。そのセクションは QGIS のパネルになり、地図の横にドラッグしたり、レイヤパネルとタブにしたり、別の画面にフローティングで表示したりできます。EXPLORING はここに残ります。ほかのセクションが使うレイヤを保持しているためです。</translation>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>セクションは、このパネルから出せます。そのヘッダーを右クリックし、専用のパネルで開く操作を選びます。そのセクションは QGIS のパネルになり、地図の横にドラッグしたり、レイヤパネルとタブにしたり、別の画面にフローティングで表示したりできます。最後に残ったセクションはここに残ります。EXPLORING は、ほかのセクションが使うレイヤを保持しています。FILTERING から切り離されると、そのレイヤを選ぶための独自のリストを表示します。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
