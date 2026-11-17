@@ -183,7 +183,10 @@ class DimensionsManager(LayoutManagerBase):
         if preferred_width and preferred_height:
             # Only resize if current size is larger than preferred (don't expand small windows)
             current_size = self.dockwidget.size()
-            if current_size.width() > preferred_width or current_size.height() > preferred_height:
+            # Not a floating dock: this runs again at each change of profile or of theme, and shrank the window
+            # the user had sized (docked, QGIS lays the dock out and the resize does nothing).
+            floating = bool(getattr(self.dockwidget, 'isFloating', lambda: False)())
+            if not floating and (current_size.width() > preferred_width or current_size.height() > preferred_height):
                 self.dockwidget.resize(preferred_width, preferred_height)
                 logger.debug(f"Resized dockwidget to preferred size: {preferred_width}x{preferred_height}px")
 

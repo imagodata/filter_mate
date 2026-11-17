@@ -822,7 +822,10 @@ class SectionPanels:
                 panel.take(key)
         except RuntimeError:
             pass
-        self._settle_panel(panel)
+        try:
+            self._settle_panel(panel)
+        except RuntimeError:  # the panel went away: the other sections still have to come back (attach_all)
+            logger.debug("The panel of %s was gone when it was settled", key, exc_info=True)
         try:
             self._after_change()
         except RuntimeError:
@@ -1143,8 +1146,10 @@ class SectionPanels:
             apart = any(key != "agent" for key in self._home)  # AGENT alone apart leaves the dock as tall as ever
             if profile_applied or (apart and self._dock_minimum is None):
                 # Read once per profile: afterwards Qt writes what the contents need, and a minimum read again
-                # after sections went, came back and went again was no longer the one of the profile.
-                self._dock_minimum = dock.minimumHeight()
+                # after sections went, came back and went again was no longer the one of the profile. Not a
+                # minimum of 0: it is the one given up while sections are apart, when the profile set none.
+                if dock.minimumHeight() > 0:
+                    self._dock_minimum = dock.minimumHeight()
             if apart:
                 if dock.minimumHeight() > 0:
                     dock.setMinimumHeight(0)
@@ -1194,6 +1199,12 @@ class SectionPanels:
         if not late:
             self._fusion_pending = False
         if self._closing or self._fusing:
+            return False
+        if self._drag_running():
+            # A chip is being dragged, and the loop of its drag runs this timer: a merge now could delete the
+            # panel whose rail started the drag, under it. Looked at again once the drag is over.
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(FUSION_SETTLE_MS, lambda: self._fuse_tabbed(mover, late=True))
             return False
         window = self._main_window()
         if window is None:
@@ -1409,6 +1420,11 @@ class SectionPanels:
                 pass
         QTimer.singleShot(0, tell)
 
+    def _drag_running(self) -> bool:
+        """The chip of a section is being dragged, from a rail of the dock or of a panel."""
+        rails = getattr(self._dock, "_fm_rails", None)
+        return any(bool(getattr(rail, "_dragging", False)) for rail in rails) if isinstance(rails, list) else False
+
     def _on_bottom_changed(self, index: int) -> None:
         """Something opened a section that is apart (a script, the agent): its panel comes forward instead."""
         from .section_bars import SECTION_PAGES
@@ -1416,8 +1432,12 @@ class SectionPanels:
             page = self._dock.toolBox_tabTools.widget(index)
             for key in BOTTOM:
                 if key in self._home and page is getattr(self._dock, SECTION_PAGES[key], None):
-                    self._dock.toolBox_tabTools.setCurrentWidget(self._sections()._nothing)
+                    sections = self._sections()
+                    self._dock.toolBox_tabTools.setCurrentWidget(sections._nothing)
                     self.raise_panel(key)
+                    opener = getattr(sections, "_open_alone", None)
+                    if callable(opener):
+                        opener()  # what was open in the dock was folded for it: the dock keeps one section open
                     return
         except (RuntimeError, AttributeError):
             pass

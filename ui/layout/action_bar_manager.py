@@ -175,6 +175,10 @@ class ActionBarManager(LayoutManagerBase):
             else:
                 # For top/bottom, use the default horizontal layout. Its size constraints too: without them the
                 # about button took its icon + padding (42 px) and the frame its stylesheet padding (63 px in all).
+                if self._position == 'top':
+                    # The .ui puts the bar at the bottom: 'top' was applied by a live change only, and came back
+                    # at the bottom after a restart while the setting still said top (2026-11-17, review).
+                    self.reposition_in_main_layout()
                 self.apply_size_constraints()
                 self.dockwidget.frame_actions.show()
                 self.dockwidget._current_action_bar_position = self._position
@@ -210,6 +214,20 @@ class ActionBarManager(LayoutManagerBase):
         self._position = position
         self.apply_position()
         logger.debug(f"ActionBarManager: Position set to {position}")
+
+    def set_vertical_alignment(self, alignment: str) -> None:
+        """Where a bar on a side (left / right) stands: beside the stacks, from their top (``top``), or in the row
+        at the bottom of the dock (``bottom``). Applied at once when the bar is on a side; kept for the next time
+        it goes there otherwise. (The CONFIGURATION tree called this method before it existed: the setting raised
+        an error and waited for a restart.)"""
+        if alignment not in ('top', 'bottom'):
+            raise ValueError(f"Invalid alignment: {alignment}. Must be 'top' or 'bottom'")
+        if alignment == self._alignment:
+            return
+        self._alignment = alignment
+        if self._position in ('left', 'right'):
+            self.apply_position()
+        logger.debug(f"ActionBarManager: Alignment set to {alignment}")
 
     def _read_position_from_config(self) -> str:
         """
@@ -427,12 +445,10 @@ class ActionBarManager(LayoutManagerBase):
         new_layout = QtWidgets.QHBoxLayout(self.dockwidget.frame_actions)
         new_layout.setContentsMargins(*self.horizontal_bar_margins())
 
-        # Uniform fixed spacing between buttons
-        button_spacing = 8
-        new_layout.setSpacing(button_spacing)
-
-        # Leading spacer to center the button group
-        new_layout.addStretch(1)
+        # The buttons spread over the bar with the same gap between each two, as the bar of the .ui and the bars
+        # of the sections: grouped in the centre, the bar looked another way after its place was changed and put
+        # back, and yet another once a section left the dock (2026-11-17, review).
+        new_layout.setSpacing(0)
 
         for btn in action_buttons:
             btn.setParent(self.dockwidget.frame_actions)
@@ -443,8 +459,7 @@ class ActionBarManager(LayoutManagerBase):
             )
             new_layout.addWidget(btn)
 
-        # Trailing spacer to center the button group
-        new_layout.addStretch(1)
+        even_action_spacing(new_layout)
 
         logger.debug("ActionBarManager: Created horizontal layout")
 
@@ -523,6 +538,13 @@ class ActionBarManager(LayoutManagerBase):
         # Remove from container if present
         if container.indexOf(frame) >= 0:
             container.removeWidget(frame)
+        # And from the main column, where 'top' put it. Left there, a side position counted it when it looked for
+        # the place of the stacks: the bar then moved to the wrapper, and the wrapper went in one row too low,
+        # under the row of the bottom. From then on 'bottom' and 'sections' showed the buttons above the stacks,
+        # until a restart (2026-11-17, found by the bench that tries every position from every other one).
+        main = self.dockwidget.verticalLayout_main
+        if main.indexOf(frame) >= 0:
+            main.removeWidget(frame)
 
         frame.setParent(self.dockwidget.dockWidgetContents)
 

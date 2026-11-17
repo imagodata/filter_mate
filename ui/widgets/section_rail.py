@@ -330,7 +330,9 @@ def _rail_class():
             finally:
                 self._dragging = False
                 catcher.unwatch()
-            self.finish_drag(str(key), catcher.place)
+            place = catcher.place
+            catcher.deleteLater()  # one per drag: kept, they piled up as children of the rail
+            self.finish_drag(str(key), place)
 
         def catcher(self, key: str) -> Any:
             """What takes the drop of the chip of ``key`` where nothing of FilterMate does (an event filter of the
