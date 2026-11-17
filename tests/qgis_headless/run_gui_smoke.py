@@ -3221,8 +3221,8 @@ def s_section_group():
           'configuration' not in panels.detached() and d.isAncestorOf(d.CONFIGURATION)
           and bottom.shown_sections() == ['configuration'] and stack.members == ['filtering', 'exporting'],
           f"{panels.groups()} {bottom.shown_sections()}")
-    check('group: a panel takes the chip of a section of the dock, not one it holds',
-          stack.rail.takes('configuration', bottom) and not stack.rail.takes('exploring', sections.top_rail)
+    check('group: a panel takes the chip of a section of the dock, EXPLORING as the others, not one it holds',
+          stack.rail.takes('configuration', bottom) and stack.rail.takes('exploring', sections.top_rail)
           and panels.can_take('configuration', stack) and not panels.can_take('filtering', stack))
     stack.rail.drop('configuration', 0, bottom)
     QApplication.processEvents()

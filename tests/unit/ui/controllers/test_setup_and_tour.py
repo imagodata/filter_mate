@@ -561,7 +561,7 @@ def test_with_the_headers_stacked_the_tour_speaks_of_headers(world, chat):
     world.tour.WelcomeTour(chat).show()
     texts = [text for kind, text in chat.panel.said if kind == "text"]
     assert not any("rail" in text for text in texts)
-    assert any("Right-click the header of AGENT" in text for text in texts)
+    assert any("Right-click its header" in text for text in texts)
     assert any("Right-click the header of a section, or the title of a panel" in text for text in texts)
 
 
