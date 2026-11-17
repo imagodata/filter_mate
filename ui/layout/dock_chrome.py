@@ -393,9 +393,35 @@ class DockSections(QObject):
             self.bottom_rail.set_current(self.bottom_key())
             self._refresh_headers()
             self._place_layer_mirror()
+            self._open_alone()
             self._fit()
         except RuntimeError:  # the dock went away
             pass
+
+    def _alone(self) -> Optional[str]:
+        """The only section the dock still shows (the others are in panels of QGIS, or turned off); None with
+        several, or with none."""
+        here = [key for key in self._pages if key not in self.detached] + self.bottom_rail.shown_sections()
+        return here[0] if len(here) == 1 else None
+
+    def _open_alone(self) -> None:
+        """The only section left in the dock is open: a dock that shows one folded chip and nothing else is of no
+        use (AGENT with EXPLORING and the lower stack in panels, CONFIGURATION after every other section left)."""
+        key = self._alone()
+        if key is None:
+            return
+        if key in self._pages:
+            if not self._open_in_stack(key):
+                self._open_top(key)
+        elif self._toolbox.currentWidget() is self._nothing:
+            page = getattr(self._dock, key.upper(), None)
+            if page is not None:
+                self._toolbox.setCurrentWidget(page)
+
+    def _may_fold_top(self) -> bool:
+        """What is open above may be folded: EXPLORING is in its own panel (in the dock, one section stays open
+        above), and the dock has another section to give the room to."""
+        return "exploring" in self.detached and self._alone() is None
 
     # --- EXPLORING away from FILTERING ------------------------------------------------------------------------------
 
@@ -513,7 +539,7 @@ class DockSections(QObject):
         """A click on a folded header opens it; on the open one, it leaves it open (and checked: the click
         unchecked it), or folds it when nothing has to stay open above (``_on_top_chip``)."""
         if self._open_in_stack(key):
-            if "exploring" in self.detached:
+            if self._may_fold_top():
                 self._open_top(None)
             else:
                 self._headers[key].setChecked(True)
@@ -693,20 +719,23 @@ class DockSections(QObject):
     def _on_top_chip(self, key: str) -> None:
         """A click on the chip of a folded section opens it; on the open one, it leaves it open: one section
         stays open above. With EXPLORING in its own panel the open one (AGENT) folds, as a section below does:
-        nothing has to stay open there, and the lower stack takes the room."""
+        nothing has to stay open there, and the lower stack takes the room. Not when it is the only section of the
+        dock."""
         if not self._open_in_stack(key):
             self.open_top(key)
-        elif "exploring" in self.detached:
+        elif self._may_fold_top():
             self._open_top(None)
 
     # --- the bottom stack ------------------------------------------------------------
 
     def _on_bottom_chip(self, key: str) -> None:
-        """A click on a chip opens its section; on the chip of the open one, it folds the stack."""
+        """A click on a chip opens its section; on the chip of the open one, it folds the stack (not when it is
+        the only section of the dock: nothing else would show)."""
         page = getattr(self._dock, key.upper(), None)
         if page is None:
             return
-        self._toolbox.setCurrentWidget(self._nothing if self._toolbox.currentWidget() is page else page)
+        fold = self._toolbox.currentWidget() is page and self._alone() != key
+        self._toolbox.setCurrentWidget(self._nothing if fold else page)
 
     def _on_bottom_changed(self, _index: int) -> None:
         current = self._toolbox.currentWidget()

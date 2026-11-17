@@ -2522,11 +2522,20 @@ def s_section_startup_check():
             check('startup: they are spread evenly, Compare among them', len(gaps) == 6
                   and max(gaps[1:-1]) - min(gaps[1:-1]) <= 3 and abs(gaps[0] - gaps[-1]) <= 3, str(gaps))
     if wanted:
-        expected = tuple(key for key in ('agent', 'filtering', 'exporting', 'configuration') if key in wanted
-                         and (key != 'agent' or 'agent' in d._fm_sections._headers))
+        expected = tuple(key for key in ('agent', 'exploring', 'filtering', 'exporting', 'configuration')
+                         if key in wanted and (key != 'agent' or 'agent' in d._fm_sections._headers))
         check('startup: the sections left apart are in their panels', panels.detached() == expected
               and all(not panels.panel(key).isHidden() and panel_place(panels.panel(key)) != 'tab' for key in expected),
               f"{panels.detached()} expected {expected}")
+        if 'exploring' in expected:
+            mirror = explo_mirror()
+            check('startup: EXPLORING in its panel shows its chooser of the current layer, the dock keeps a section',
+                  mirror is not None and mirror.isVisible() and panels.panel('exploring').isAncestorOf(mirror)
+                  and bool(panels.in_dock()) and d.isVisible(), f"in dock={panels.in_dock()} groups={panels.groups()}")
+            if panels.in_dock() == ('agent',):
+                check('startup: AGENT, the only section left in the dock, is open',
+                      d._fm_sections._open_in_stack('agent') and d._fm_sections.is_open('agent'))
+            grab_window('startup_exploring_apart')
         if 'filtering' in expected:
             panel = panels.panel('filtering')
             panels.raise_panel('filtering')
@@ -4352,6 +4361,12 @@ def s_explo_all():
           and not panels.can_detach('configuration') and not panels.detach('configuration') and d.isVisible()
           and d.isAncestorOf(d.CONFIGURATION) and names == ['action_section_attach_all'],
           f"left={left} in dock={panels.in_dock()} menu={names}")
+    chip = d._fm_sections.bottom_rail.chip('configuration')
+    chip.click()
+    QApplication.processEvents()
+    check('explo: the only section left in the dock is open, and a click on its chip leaves it open',
+          d.toolBox_tabTools.currentWidget() is d.CONFIGURATION and d.CONFIGURATION.isVisible(),
+          d.toolBox_tabTools.currentWidget().objectName())
     grab_window('explo_5_every_section_out')
     return settled()  # the 2 s after Undo, when the dock puts the source layer back
 
@@ -4401,7 +4416,8 @@ def s_explo_off():
     QApplication.processEvents()
     check('explo: FILTERING, the last section of the dock, cannot leave it',
           panels.in_dock() == ('filtering',) and not panels.can_detach('filtering') and not panels.detach('filtering')
-          and not sections.top.isVisible() and d.isVisible(), f"in dock={panels.in_dock()} top={sections.top.isVisible()}")
+          and not sections.top.isVisible() and d.isVisible() and d.toolBox_tabTools.currentWidget() is d.FILTERING,
+          f"in dock={panels.in_dock()} top={sections.top.isVisible()}")
     grab_window('explo_7_filtering_alone')
     options['FILTERING'] = {'enabled': {'value': False}}
     changed = d.apply_section_options()
