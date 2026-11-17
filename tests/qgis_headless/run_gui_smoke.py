@@ -4477,10 +4477,15 @@ def s_explo_off():
     check('explo: merged back, EXPLORING is in the dock without its chooser, FILTERING holds its own',
           panels.detached() == () and not QSettings().value(DETACHED_KEY) and d.isAncestorOf(d.frame_exploring)
           and sections.is_open('exploring') and d.FILTERING.isAncestorOf(combo) and mirror.isHidden()
-          and d.minimumHeight() == EXPLO['minimum'] and d.toolBox_tabTools.currentWidget() is d.FILTERING
-          and len(STATE['python_errors']) == EXPLO['errors'],
-          f"apart={panels.detached()} saved={QSettings().value(DETACHED_KEY)!r} minimum={d.minimumHeight()} "
-          f"(was {EXPLO['minimum']}) errors={STATE['python_errors'][EXPLO['errors']:]}")
+          and d.toolBox_tabTools.currentWidget() is d.FILTERING and len(STATE['python_errors']) == EXPLO['errors'],
+          f"apart={panels.detached()} saved={QSettings().value(DETACHED_KEY)!r} "
+          f"errors={STATE['python_errors'][EXPLO['errors']:]}")
+    # The minimum of its profile, kept since the profile was applied: not the one it had when the steps began,
+    # which Qt may have raised since to what the contents needed then (399 for 357 after the steps before these).
+    check('explo: merged back, the dock has the minimum height of its profile again',
+          not panels._dock_relaxed and panels._dock_minimum is not None and panels._dock_minimum > 0
+          and d.minimumHeight() >= panels._dock_minimum,
+          f"minimum={d.minimumHeight()} profile={panels._dock_minimum} at the start={EXPLO['minimum']}")
     grab_window('explo_8_merged_back')
     return waits(0.3)
 
