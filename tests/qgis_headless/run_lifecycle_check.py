@@ -26,7 +26,9 @@ Checks (2026-10-17):
   per click on Filter; the dock closed with them apart: they are hidden and their entries of View > Panels are off
   until it is shown again (``FM_LIFECYCLE_ONLY=panels`` runs this group alone);
 - a project opened while the plugin runs: the whole layer change runs at most twice for the layer shown
-  (``FM_LIFECYCLE_ONLY=open``, which prints each caller and the log of the chain).
+  (``FM_LIFECYCLE_ONLY=open``, which prints each caller and the log of the chain);
+- the plugin unloaded with EXPLORING apart and a GeoPackage layer in its feature picker: no gather starts while it
+  unloads (no PostgreSQL case: no server in the headless images).
 
 Prints one ``PASS`` / ``FAIL`` line per check.
 """
@@ -985,6 +987,55 @@ def s_project_reopen_report():
     return settled(0.5)
 
 
+def s_picker_prepare():
+    """EXPLORING in its own panel with a layer and a feature in its feature picker (a GeoPackage layer)."""
+    d = dock()
+    d._fm_panels.attach_all()  # the sections apart of an earlier group go back
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+    east_a = next(feature for feature in layer('zones').getFeatures() if feature['name'] == 'east_a')
+    picker = d.mFeaturePickerWidget_exploring_single_selection
+    picker.setFeature(east_a.id())
+    took = d._fm_panels.detach('exploring')
+    STATE['picker_case'] = (bool(took), picker.layer() is not None)
+    since = time.time()
+    return lambda: time.time() - since > 2.0 and tasks_idle()
+
+
+def s_picker_unload():
+    """Unload with it: no gather of the feature picker may start while the plugin unloads (a gather that ends
+    after the unload crashed QGIS on 2026-09-14, QgsFeaturePickerModelBase::endUpdate)."""
+    from qgis.PyQt.QtWidgets import QComboBox
+    d = dock()
+    picker = d.mFeaturePickerWidget_exploring_single_selection
+    # the model of the picker is the one of its inner combo box (it is no child of the widget)
+    models = [box.model() for box in picker.findChildren(QComboBox) if hasattr(box.model(), 'isLoadingChanged')]
+    STATE['gathers'] = []
+    STATE['picker_models'] = len(models)
+    for model in models:
+        model.isLoadingChanged.connect(lambda m=model: STATE['gathers'].append(m.isLoading()))
+    picker.modelUpdated.connect(lambda *_args: STATE['gathers'].append('modelUpdated'))
+    STATE['picker_errors_before'] = len(STATE['python_errors'])
+    qgis.utils.unloadPlugin(PACKAGE)
+    since = time.time()
+    return lambda: time.time() - since > 3.0
+
+
+def s_picker_unload_check():
+    check('unload with EXPLORING apart and a layer in its feature picker: the case is set up',
+          STATE['picker_case'] == (True, True) and STATE['picker_models'] > 0,
+          f"(panel made, picker has a layer)={STATE['picker_case']} models watched={STATE['picker_models']}")
+    started = list(STATE['gathers'])  # a gather starting (isLoading) or ending (modelUpdated)
+    check('unload with EXPLORING apart and a layer in its feature picker: no gather starts while it unloads',
+          not started, f"{len(started)} gather(s) started, loading changes={STATE['gathers']}")
+    check('unload with EXPLORING apart and a layer in its feature picker: no panel and no error left',
+          not section_panels() and len(STATE['python_errors']) == STATE['picker_errors_before'],
+          '; '.join(STATE['python_errors'][STATE['picker_errors_before']:][:2]))
+    started = qgis.utils.loadPlugin(PACKAGE) and qgis.utils.startPlugin(PACKAGE)
+    check('unload with EXPLORING apart: the plugin starts again', started)
+    plugin().run()
+    return lambda: dock() is not None and registered('zones', 'zones_b', 'dem', 'pts') and tasks_idle()
+
+
 def s_finish():
     check('no Python error and no FilterMate critical message in the log', not STATE['python_errors'],
           '; '.join(STATE['python_errors'][:3]))
@@ -1012,14 +1063,15 @@ STEPS = ([s_setup, s_open_plugin, s_zones_current, s_select_source,
          + [s_safety_refresh_report]
          + [step for index in range(3)
             for step in (raster_picked_before_registration(index), raster_picked_before_registration_check(index))]
-         + [s_zones_current, s_panels_detach, s_panels_detach_check, s_panels_unload, s_panels_unloaded_check,
+         + [s_zones_current, s_picker_prepare, s_picker_unload, s_picker_unload_check,
+            s_zones_current, s_panels_detach, s_panels_detach_check, s_panels_unload, s_panels_unloaded_check,
             s_panels_reload_check, s_zones_current, s_panels_filter_ready, s_panels_click_filter,
             s_panels_click_filter_check,
             s_panels_close_dock, s_panels_close_dock_check, s_panels_reopen_dock, s_panels_reopen_dock_check]
          + [s_finish])
 if os.environ.get('FM_LIFECYCLE_ONLY') == 'panels':  # the sections apart, unload and closed dock alone
-    STEPS = ([s_setup, s_open_plugin, s_zones_current,
-              s_panels_detach, s_panels_detach_check, s_panels_unload, s_panels_unloaded_check,
+    STEPS = ([s_setup, s_open_plugin, s_zones_current, s_picker_prepare, s_picker_unload, s_picker_unload_check,
+              s_zones_current, s_panels_detach, s_panels_detach_check, s_panels_unload, s_panels_unloaded_check,
               s_panels_reload_check, s_zones_current, s_panels_filter_ready, s_panels_click_filter,
               s_panels_click_filter_check, s_panels_close_dock, s_panels_close_dock_check, s_panels_reopen_dock, s_panels_reopen_dock_check,
               s_finish])

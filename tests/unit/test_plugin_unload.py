@@ -131,9 +131,15 @@ class TestUnloadLeavesNothingBehind:
         calls = []
         app.dockwidget._controller_integration.teardown.side_effect = lambda: calls.append("teardown")
         app.dockwidget._fm_panels.shutdown.side_effect = lambda: calls.append("panels.shutdown")
+        picker = app.dockwidget.mFeaturePickerWidget_exploring_single_selection
+        picker.setLayer.side_effect = lambda layer: calls.append(f"picker.setLayer({layer})")
+        combo = app.dockwidget.comboBox_filtering_current_layer
+        combo.blockSignals.side_effect = lambda blocked: calls.append(f"combo.blockSignals({blocked})")
         app.dockwidget.release_qgis_connections.side_effect = lambda: calls.append("release")
         plugin.iface.removeDockWidget.side_effect = lambda dock: calls.append("removeDockWidget")
 
         plugin.unload()
 
-        assert calls == ["panels.shutdown", "teardown", "release", "removeDockWidget"]
+        # the pickers let go of their layer before EXPLORING comes back and shows its page (a gather would start)
+        assert calls[:4] == ["combo.blockSignals(True)", "picker.setLayer(None)", "panels.shutdown", "teardown"]
+        assert calls.index("release") < calls.index("removeDockWidget")
