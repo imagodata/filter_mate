@@ -29,6 +29,7 @@ UI_PROFILE = "APP.DOCKWIDGET.UI_PROFILE"
 LANGUAGE = "APP.DOCKWIDGET.LANGUAGE"
 ACTION_BAR = "APP.DOCKWIDGET.ACTION_BAR_POSITION"
 SECTION_HEADERS = "APP.DOCKWIDGET.SECTION_HEADERS"
+SECTION_HEIGHT = "APP.DOCKWIDGET.SECTION_HEIGHT"
 AUTO_ZOOM = OPTIONS + "EXPLORATION.auto_zoom_on_filter"
 PERSIST_HISTORY = OPTIONS + "HISTORY.persist_history"
 HINTS = OPTIONS + "AUTO_OPTIMIZATION.show_optimization_hints"
@@ -56,6 +57,7 @@ PROFILES = ("auto", "compact", "normal", "hidpi")
 LANGUAGES = ("auto", "en", "fr")
 ACTION_BARS = ("bottom", "top", "left", "right", "sections")  # sections: each section shows its own buttons
 HEADERS = ("rail", "stacked")  # a rail of chips per stack (the default), or the headers one above the other
+HEIGHTS = ("fit", "fill")  # the rows of FILTERING / EXPORTING one gap apart at the top (the default), or spread
 # Where the sections are: in the FilterMate panel, in panels of QGIS, or some of them apart (as they are now).
 IN_DOCK, IN_PANELS, AS_NOW = "dock", "panels", "as_now"
 LAYOUTS = (IN_DOCK, IN_PANELS)
@@ -89,7 +91,7 @@ WEB_VALUES = {"large": {WFS_TIMEOUT: 120, REMOTE_TIMEOUT: 180}, "other": {WFS_TI
 # Every setting the setup may change: the values it reads first.
 PATHS = tuple(sorted({*SECTION_SWITCHES.values(), *DATA_SWITCHES.values(), *AFTER_FILTER_SWITCHES.values(),
                       *TARGET_SWITCHES.values(), *GROUP_SWITCHES.values(), THEME, UI_PROFILE, LANGUAGE, ACTION_BAR,
-                      SECTION_HEADERS,
+                      SECTION_HEADERS, SECTION_HEIGHT,
                       RASTER_FORMAT, POINT_CLOUD_FORMAT, *_MEDIUM, *WEB_VALUES["large"],
                       *POSTGRES_VALUES["large"]}))
 
@@ -179,6 +181,8 @@ def step_questions(step: str, values: Mapping[str, Any], facts: ProjectFacts, an
         questions = [_one_of("panels", LAYOUTS, facts.layout)] if facts.layout else []
         if isinstance(values.get(SECTION_HEADERS), str):  # a configuration from before the rails has no such setting
             questions.append(_one_of("headers", HEADERS, values.get(SECTION_HEADERS)))
+        if isinstance(values.get(SECTION_HEIGHT), str):  # nor one from before the height of the rows
+            questions.append(_one_of("height", HEIGHTS, values.get(SECTION_HEIGHT)))
         return questions + [_one_of("action_bar", ACTION_BARS, values.get(ACTION_BAR))]
     if step == FILTERING:
         questions = [_switches("after", AFTER_FILTER_SWITCHES, values)]
@@ -239,6 +243,7 @@ def changes(values: Mapping[str, Any], answers: Answers) -> List[Dict[str, Any]]
     one(LOOK, "profile", UI_PROFILE)
     one(LOOK, "language", LANGUAGE)
     one(LAYOUT, "headers", SECTION_HEADERS)
+    one(LAYOUT, "height", SECTION_HEIGHT)
     one(LAYOUT, "action_bar", ACTION_BAR)
     switches(FILTERING, "after", AFTER_FILTER_SWITCHES)
     data = answers.get(FEATURES, "data")

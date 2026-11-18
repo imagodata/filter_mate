@@ -11601,9 +11601,19 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>शीर्षक</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Rows</source>
+        <translation>पंक्तियाँ</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>पैनल अपने अनुभागों को कैसे सूचीबद्ध करता है</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
+        <source>How the rows of FILTERING and EXPORTING use the height</source>
+        <translation>FILTERING और EXPORTING की पंक्तियाँ ऊँचाई का उपयोग कैसे करती हैं</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -11624,6 +11634,26 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
         <source>The name of each section on its own line.</source>
         <translation>हर अनुभाग का नाम अपनी अलग पंक्ति में।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>Packed at the top</source>
+        <translation>ऊपर सटी हुई</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>The default: each row at its own height, the room left under them.</source>
+        <translation>डिफ़ॉल्ट: हर पंक्ति अपनी ऊँचाई पर, बची जगह उनके नीचे।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>Spread over the height</source>
+        <translation>पूरी ऊँचाई में फैली</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>The rows share the whole height of the section.</source>
+        <translation>पंक्तियाँ अनुभाग की पूरी ऊँचाई आपस में बाँटती हैं।</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
