@@ -960,7 +960,8 @@ class AgentChatController(QObject):
         providers, current = self._menu_providers(values)
         mcp = getattr(self, "_mcp", None)
         listening = bool(getattr(mcp, "listening", values.mcp_enabled)) if mcp is not None else values.mcp_enabled
-        self.panel.fill_options(groups, [(entry.label, entry.same(current)) for entry in providers], listening)
+        self.panel.fill_options(groups, [(entry.label, entry.same(current), entry.ident) for entry in providers],
+                                listening)
 
     def _click_option(self, change) -> None:
         """A click in the menu: applied at once, or when the request or the recipe under way ends (its tools stay
@@ -978,17 +979,22 @@ class AgentChatController(QObject):
         from ...core.agent.agent_options import Change
         self._click_option(Change(sources_on=(source_id,)) if on else Change(sources_off=(source_id,)))
 
-    def _on_provider_chosen(self, index: int) -> None:
+    def _on_provider_chosen(self, ident: str) -> None:
+        """A provider of the menu: the entry the action carries, found in the list as it is now (it may have changed
+        since the menu opened: the current provider came or left its head)."""
         from ...core.agent.agent_options import Change
         providers, _current = self._menu_providers(load_settings())
-        if 0 <= index < len(providers):
-            self._click_option(Change(provider=providers[index]))
+        entry = next((entry for entry in providers if entry.ident == ident), None)
+        if entry is not None:
+            self._click_option(Change(provider=entry))
 
-    def _on_provider_forgotten(self, index: int) -> None:
+    def _on_provider_forgotten(self, ident: str) -> None:
+        """"Remove from the list": the entry the action carries, never the one in use."""
         from ...core.agent.agent_options import forget
-        providers, _current = self._menu_providers(load_settings())
-        if 0 <= index < len(providers):
-            write_providers(forget(providers, providers[index]))
+        providers, current = self._menu_providers(load_settings())
+        entry = next((entry for entry in providers if entry.ident == ident), None)
+        if entry is not None and not entry.same(current):
+            write_providers(forget(read_providers(), entry))  # the list as stored: the provider in use is not added
 
     def _on_mcp_toggled(self, on: bool) -> None:
         from ...core.agent.agent_options import Change

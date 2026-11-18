@@ -144,3 +144,9 @@ def test_allowed_always_still_asks_to_turn_on():
     policy = PermissionPolicy("autonomous")
     policy.rules = {"turn_on_agent_options": "allow"}
     assert policy.verdict(turn_on, {"mcp_server": True}) == ASK
+
+
+def test_ident_tells_two_providers_that_share_a_label():
+    first = ProviderEntry("openai", "gpt", "https://h/v1")
+    second = ProviderEntry("openai", "gpt", "https://h/v2")
+    assert first.label == second.label and first.ident != second.ident and not first.same(second)

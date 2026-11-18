@@ -39,6 +39,12 @@ class ProviderEntry:
         host = urlsplit(address).netloc if address and address != usual else ""
         return f"{self.preset} · {self.model}" + (f" · {host}" if host else "")
 
+    @property
+    def ident(self) -> str:
+        """What tells this provider from the others (``same``), for a menu action to carry: two share a label when
+        only the path of their address differs."""
+        return "\n".join((self.preset, self.model, self.base_url))
+
     def same(self, other: "ProviderEntry") -> bool:
         return (self.preset, self.model, self.base_url) == (other.preset, other.model, other.base_url)
 
