@@ -40,6 +40,9 @@ APPLIED_DIALECTS = (SQLITE, OGR_SQL, POSTGRESQL)
 # conversion is kept.
 HYBRID_MAX_FEATURES = 1_000_000
 
+# Features read between two looks at the cancellation of the task (as its other long readings, filter_task)
+CANCEL_CHECK_INTERVAL = 100
+
 # Functions of QGIS that read the feature id (or the selection, made of feature ids)
 _FEATURE_ID_FUNCTIONS = frozenset(('$id', 'is_selected', 'num_selected', 'get_feature_by_id'))
 
@@ -290,7 +293,8 @@ def native_subset(layer, expression):
     return subset_for_layer(layer, expression)
 
 
-def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=False, whole_layer=False):
+def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=False, whole_layer=False,
+                     is_canceled=None):
     """The subset of ``layer`` for ``expression`` in its source's own language.
 
     Args:
@@ -304,6 +308,9 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
             through its current subset: the new subset is not ANDed with that
             subset (it replaces it, or is ORed with it). Read on a copy of the
             layer without its subset (``_hybrid_subset``).
+        is_canceled: The task's ``isCanceled``: a hybrid subset reads every
+            feature of the layer, the reading stops when the task is canceled
+            (no list then; the task applies nothing).
         negated: Whether the subset will be written under NOT (AND NOT). OGR
             SQL gives FALSE to TRUE AND NULL: a translation holding AND, OR or
             NOT is then left to the former conversion, and so are texts (only
@@ -344,7 +351,7 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
     if not evaluate:
         return None
     try:
-        subset = _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer)
+        subset = _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer, is_canceled)
     except Unsupported as exc:
         logger.info('No hybrid subset for %s: %s', layer.name(), exc)
         return None
@@ -379,7 +386,7 @@ def _is_true(value):
     raise Unsupported('A condition gave a value that is not a boolean')
 
 
-def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=False):
+def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=False, is_canceled=None):
     """Let QGIS evaluate the expression on each feature, then list keys (``native_dialect.hybrid_sql``).
 
     Every feature is read and evaluated locally: the provider's own compiled
@@ -454,7 +461,9 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
         request.setSubsetOfAttributes(sorted(names), source.fields())
 
     passing, failing, seen = [], ([] if native is not None else None), set()
-    for feature in source.getFeatures(request):
+    for number, feature in enumerate(source.getFeatures(request)):
+        if is_canceled is not None and number % CANCEL_CHECK_INTERVAL == 0 and is_canceled():
+            raise Unsupported('The task was canceled after {} features'.format(number))
         value = feature[key_name]
         if is_null_value(value) or value in seen:
             raise Unsupported('The key {} is NULL or repeated'.format(key_name))

@@ -52,7 +52,8 @@ class _Layer:
 
 
 def _executor(current, old, operator):
-    executor = SimpleNamespace(layer=_Layer(current), primary_key="fid", old_subset=old, combine_operator=operator)
+    executor = SimpleNamespace(layer=_Layer(current), primary_key="fid", old_subset=old, combine_operator=operator,
+                               is_canceled=lambda: False)
     for name in _METHODS:
         setattr(executor, name, types.MethodType(NS[name], executor))
     return executor
@@ -96,3 +97,12 @@ def test_where_the_keys_are_read(calls, current, old, operator, evaluate, whole_
     assert "shown_kept" not in options  # no list without the keys of the old subset
     assert options["negated"] == ("NOT" in (operator or ""))
     assert options["key_name"] == "fid"
+    assert options["is_canceled"] is executor.is_canceled  # the reading of the whole layer sees a cancel
+
+
+def test_the_task_gives_the_executor_its_cancellation():
+    source = (_PATH.parents[2] / "tasks" / "filter_task.py").read_text(encoding="utf-8")
+    start = source.index("def _get_attribute_executor(self):")
+    body = source[start:source.index("def _get_spatial_executor(self):")]
+
+    assert "is_canceled=self.isCanceled" in body

@@ -341,6 +341,23 @@ def test_under_or_every_key_the_expression_keeps_is_listed(translation, monkeypa
     assert layer.reads == []  # the layer itself is not read
 
 
+def test_the_reading_stops_when_the_task_is_canceled(translation, monkeypatch):
+    rows = [{"fid": fid, "pop": fid} for fid in range(1, 11)]
+    _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", rows))
+    monkeypatch.setattr(translation, "CANCEL_CHECK_INTERVAL", 3)
+    asked = []
+
+    def canceled():
+        asked.append(True)
+        return len(asked) >= 2  # canceled while the second block is read
+
+    layer = _Layer("zones", rows, subset='"fid" IN (1, 2)', shown={1, 2})
+    with pytest.raises(translation.Unsupported, match="canceled after 3 features"):
+        _hybrid(translation, layer, whole_layer=True, is_canceled=canceled)
+    assert _hybrid(translation, layer, whole_layer=True, is_canceled=lambda: False) == (
+        '"fid" IS NOT NULL AND "fid" IN (3, 4, 5, 6, 7, 8, 9, 10)')
+
+
 def test_a_whole_translation_opens_no_copy(translation, monkeypatch):
     _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
     full = types.SimpleNamespace(status=translation.TranslationStatus.FULL, sql='"pop" > 2', composite=False,

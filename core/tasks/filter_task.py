@@ -539,7 +539,9 @@ class FilterEngineTask(QgsTask):
                 # `or 'AND'` kept every previous filter on the source layer.
                 combine_operator=self._get_source_combine_operator(),
                 task_bridge=self._task_bridge,
-                geometry_field=getattr(self, 'param_source_geom', None)
+                geometry_field=getattr(self, 'param_source_geom', None),
+                # 2026-11-18: a hybrid subset may read the whole layer (a second filter)
+                is_canceled=self.isCanceled
             )
         return self._attribute_executor
 

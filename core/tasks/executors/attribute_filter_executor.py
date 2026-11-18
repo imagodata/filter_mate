@@ -15,7 +15,7 @@ Location: core/tasks/executors/attribute_filter_executor.py
 """
 
 import logging
-from typing import Optional, Tuple, List, Any
+from typing import Optional, Tuple, List, Any, Callable
 
 from qgis.core import (
     QgsExpression,
@@ -79,7 +79,8 @@ class AttributeFilterExecutor:
         old_subset: Optional[str] = None,
         combine_operator: str = 'AND',
         task_bridge: Optional[Any] = None,
-        geometry_field: Optional[str] = None
+        geometry_field: Optional[str] = None,
+        is_canceled: Optional[Callable[[], bool]] = None
     ):
         """
         Initialize AttributeFilterExecutor.
@@ -95,6 +96,8 @@ class AttributeFilterExecutor:
             geometry_field: Geometry column of the layer (read from its URI
                 when omitted); $geometry and length() of the geometry are
                 written against it
+            is_canceled: The task's isCanceled, seen by the reading of every
+                feature a hybrid subset makes
         """
         self.layer = layer
         self.provider_type = provider_type
@@ -104,6 +107,7 @@ class AttributeFilterExecutor:
         self.combine_operator = combine_operator
         self.task_bridge = task_bridge
         self.geometry_field = geometry_field
+        self.is_canceled = is_canceled
         # Native SQL written by process_qgis_expression -> the QGIS expression it
         # came from: the source-geometry fallbacks evaluate an expression in QGIS,
         # which cannot read GLOB, CAST or COLLATE.
@@ -470,7 +474,8 @@ class AttributeFilterExecutor:
             native = subset_for_layer(self.layer, expression, key_name=self.primary_key,
                                       evaluate=self._keys_may_be_evaluated(),
                                       negated='NOT' in (self.combine_operator or '').upper(),
-                                      whole_layer=self._keys_read_on_whole_layer())
+                                      whole_layer=self._keys_read_on_whole_layer(),
+                                      is_canceled=self.is_canceled)
         except Exception as e:  # catch-all: the former conversion stays the fallback
             logger.debug(f"Native translation not available: {e}")
             return None
