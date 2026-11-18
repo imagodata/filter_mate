@@ -7990,15 +7990,18 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.launchingTask.emit('reload_layers')
 
     def _agent_panel_has_focus(self) -> bool:
-        """The focus is in the QGIS panel of AGENT, which does not hold FILTERING: Ctrl+Z and Ctrl+Y there are
-        for the steps of the agent (``agent_has_focus`` is false while AGENT is apart, the buttons keep to the
-        filters, whose bar they sit with). With FILTERING in the same panel they stay with the filters."""
+        """The focus is in the page of AGENT, which is the section open in its QGIS panel and not with FILTERING:
+        Ctrl+Z and Ctrl+Y there are for the steps of the agent (``agent_has_focus`` is false while AGENT is apart,
+        the buttons keep to the filters, whose bar they sit with). With FILTERING in the same panel, or another
+        section open in it (EXPLORING, EXPORTING: their widgets are not the agent's), they stay with the filters."""
         panel = getattr(getattr(self, '_fm_panels', None), 'panel', lambda _key: None)('agent')
         if getattr(self, '_agent_chat', None) is None or panel is None or 'filtering' in panel.members:
             return False
         try:
+            page = panel.page('agent')
             focus = QtWidgets.QApplication.focusWidget()
-            return focus is not None and (focus is panel or panel.isAncestorOf(focus))
+            return (page is not None and panel.current() == 'agent' and focus is not None
+                    and (focus is page or page.isAncestorOf(focus)))
         except RuntimeError:  # the panel went away
             return False
 

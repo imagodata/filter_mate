@@ -29,12 +29,27 @@ def _methods(focus):
     return namespace
 
 
-class _Panel:
-    def __init__(self, members, inside=()):
-        self.members, self._inside = list(members), list(inside)
+class _Page:
+    def __init__(self, inside=()):
+        self._inside = list(inside)
 
     def isAncestorOf(self, widget):  # noqa: N802 - Qt name
         return widget in self._inside
+
+
+class _Panel:
+    """A QGIS panel with sections, one open; ``inside`` is what the page of AGENT holds, ``elsewhere`` what the
+    other sections hold (the focus there is in the panel, not in AGENT)."""
+
+    def __init__(self, members, inside=(), current="agent"):
+        self.members, self._current = list(members), current
+        self._pages = {"agent": _Page(inside)}
+
+    def current(self):
+        return self._current
+
+    def page(self, key):
+        return self._pages.get(key)
 
 
 def _dock(focus, panel, chat=True):
@@ -93,3 +108,30 @@ def test_no_focus_is_not_the_panel_of_agent():
     dock = _dock(None, _Panel(["agent"], []))
     dock._on_undo_shortcut()
     dock.launchTaskEvent.assert_called_once_with(False, "undo")
+
+
+def test_exploring_open_in_the_panel_of_agent_keeps_the_filters():
+    """A panel of AGENT and EXPLORING, EXPLORING open, the focus in its feature picker: the last turn of the agent
+    must not be undone (layers can go with it) instead of the last filter."""
+    picker = object()  # in the page of EXPLORING, not in the one of AGENT
+    dock = _dock(picker, _Panel(["agent", "exploring"], [], current="exploring"))
+    dock._on_undo_shortcut()
+    dock._on_redo_shortcut()
+    assert [call.args for call in dock.launchTaskEvent.call_args_list] == [(False, "undo"), (False, "redo")]
+    dock._agent_chat._on_undo.assert_not_called()
+    dock._agent_chat._on_redo.assert_not_called()
+
+
+def test_a_focus_outside_the_page_of_agent_keeps_the_filters_even_while_it_is_open():
+    """AGENT open in a panel with EXPLORING, the focus in the rail of the panel or its title: not in the page."""
+    dock = _dock(object(), _Panel(["agent", "exploring"], [], current="agent"))
+    dock._on_undo_shortcut()
+    dock.launchTaskEvent.assert_called_once_with(False, "undo")
+
+
+def test_agent_open_with_exploring_in_its_panel_takes_the_shortcuts_in_its_page():
+    field = object()
+    dock = _dock(field, _Panel(["agent", "exploring"], [field], current="agent"))
+    dock._on_undo_shortcut()
+    dock._agent_chat._on_undo.assert_called_once_with()
+    dock.launchTaskEvent.assert_not_called()
