@@ -8,7 +8,10 @@ Layout changes of the FilterMate 5 design (mockup), applied once after setupUi.
 * One spacing scale (``SPACING`` in ``ui/styles/mockup_design.py``, also used by mockup.qss):
   every block between the same edges and 8 px apart, 6 px between two widgets (rows, fields,
   groups, rail and widgets), 8 px inside a group, 34 px title bands (section headers, collapsed
-  groups). FILTERING / EXPORTING rows grouped at the top.
+  groups).
+* FILTERING / EXPORTING rows one gap apart at the top of the section, or spread over its height
+  (``APP.DOCKWIDGET.SECTION_HEIGHT``, :func:`lay_out_rows`); each key button centred on its row
+  (:class:`_ColumnAligner`); the right margin only beside a scroll bar (:class:`_ScrollBarMargin`).
 * FILTERING, buffer: the buffer type and the segment count join the buffer
   value row (``25,00 m | Round | 5``). The emptied row and its spacer leave the
   values column, the buffer type button and its spacer leave the buttons
@@ -590,20 +593,84 @@ def tighten_vertical_rhythm(dw: Any) -> bool:
         return False
     if toolbox.layout() is not None:
         toolbox.layout().setSpacing(BLOCK_GAP)
-    # Rows of the values columns: one stretch between two rows, so a taller section (the
-    # splitter lets the user enlarge the lower zone) spreads its rows evenly and a short one
-    # keeps the row gap; the key buttons follow their rows (align_key_columns).
-    for name in ('verticalLayout_filtering_values', 'verticalLayout_exporting_values'):
-        values = getattr(dw, name, None)
-        if values is None:
+    # Rows of the values columns: one gap apart at the top of the section, or spread over its
+    # height (APP.DOCKWIDGET.SECTION_HEIGHT, lay_out_rows); the key buttons follow their rows
+    # (align_key_columns).
+    lay_out_rows(dw)
+    return True
+
+
+SECTION_FIT, SECTION_FILL = 'fit', 'fill'  # APP.DOCKWIDGET.SECTION_HEIGHT
+SECTION_HEIGHTS = (SECTION_FIT, SECTION_FILL)
+ROW_SECTIONS = ('filtering', 'exporting')  # the sections laid out in rows, a key button in front of each
+
+
+def section_height(config_data: Any) -> str:
+    """``APP.DOCKWIDGET.SECTION_HEIGHT``: ``fill`` when it says so, ``fit`` otherwise (the default, and a
+    configuration written before the setting, which has none)."""
+    try:
+        node = config_data['APP']['DOCKWIDGET']['SECTION_HEIGHT']
+    except (KeyError, TypeError):
+        return SECTION_FIT
+    value = node.get('value') if isinstance(node, dict) else node
+    return SECTION_FILL if isinstance(value, str) and value.strip().lower() == SECTION_FILL else SECTION_FIT
+
+
+def row_items(row_count: int, mode: str) -> list:
+    """Items of a values column of ``row_count`` rows: the row indexes, with one stretch (None) between two rows
+    when the rows fill the section; none when they fit (the rows one gap apart, the room left under them)."""
+    items = []
+    for index in range(row_count):
+        if index and mode == SECTION_FILL:
+            items.append(None)
+        items.append(index)
+    return items
+
+
+def lay_out_rows(dw: Any, mode: Any = None) -> bool:
+    """FILTERING and EXPORTING rows as ``APP.DOCKWIDGET.SECTION_HEIGHT`` says (``mode``, read from the
+    configuration of the dock when None); True when a section was laid out.
+
+    * ``fit`` (default): each row at its own height, one gap (``ROW_GAP``) apart. The page takes the height of
+      its rows: it is held to it in the scroll area that holds it (tool box or panel of QGIS, a ``Fixed``
+      vertical policy: neither stretched nor squeezed), so the room left stays under the section, the rail band ends with the last row, and a host
+      shorter than the rows scrolls instead of squeezing them.
+    * ``fill``: one stretch between two rows, the rows spread over the height of the section (5.0 to 5.1).
+
+    Run when the dock is built, after the dimension managers (they resize the spacers of these columns) and
+    when the setting changes; every spacer of the columns is rebuilt, so it can run any number of times.
+    """
+    if mode not in SECTION_HEIGHTS:
+        mode = section_height(getattr(dw, 'CONFIG_DATA', None))
+    from qgis.PyQt.QtWidgets import QSizePolicy
+    done = False
+    for section in ROW_SECTIONS:
+        values = getattr(dw, f'verticalLayout_{section}_values', None)
+        page = getattr(dw, section.upper(), None)
+        if values is None or page is None:
             continue
         values.setSpacing(ROW_GAP)
+        values.setContentsMargins(0, 0, 0, 0)  # rows on the rail band: top on its top, one gap beside it
         for position in reversed(range(values.count())):
             if values.itemAt(position).spacerItem() is not None:
-                values.takeAt(position)  # the .ui spacers: two of them between some rows
-        for position in reversed(range(1, values.count())):
-            values.insertStretch(position, 1)
-    return True
+                values.takeAt(position)  # the .ui spacers (two between some rows), or the stretches of before
+        rows = values.count()
+        for position, item in enumerate(row_items(rows, mode)):  # in order: each position is a final one
+            if item is None:
+                values.insertStretch(position, 1)
+        policy = page.sizePolicy()
+        wanted = QSizePolicy.Policy.Preferred if mode == SECTION_FILL else QSizePolicy.Policy.Fixed
+        if policy.verticalPolicy() != wanted:
+            policy.setVerticalPolicy(wanted)
+            page.setSizePolicy(policy)
+        values.invalidate()
+        page.updateGeometry()  # the scroll area reads the new hint and policy
+        done = True
+    dw.setProperty('fm_section_height', mode)
+    for aligner in ('_fm_aligner_filtering', '_fm_aligner_exporting'):
+        if getattr(dw, aligner, None) is not None:
+            getattr(dw, aligner).reset()
+    return done
 
 
 FILTERING_PAIRS = (
@@ -623,51 +690,93 @@ EXPORTING_PAIRS = (
 )
 
 
-def spacer_adjustments(deltas, adjustable=None) -> list:
-    """Height to add to the spacer above each button so its centre meets its row's.
+def key_column_plan(buttons, lead_now: int = 0, start: int = 0) -> tuple:
+    """Where the key buttons go so each one is centred on its row: ``(spacers, lead, overflow)``.
 
-    ``deltas[i]`` = row centre - button centre, measured before any change; moving
-    the spacer above button i also moves every later button, hence the running shift.
-    ``adjustable[i]`` False: no spacer above button i, it gets 0 and shifts nothing.
+    ``buttons``, in the order of the key column: ``(height, row_top, row_height, adjustable)``, the row in the
+    coordinates of the key column as it is now; ``height`` 0 for a hidden button (it takes no room), ``row_top``
+    None for a button without a row shown (it keeps its place, no spacer). ``adjustable`` False: no spacer above it.
+    ``lead_now``: the top margin of the values column now; ``start``: where the first item of the key column sits.
+
+    * ``spacers``: the height of the spacer above each button. Computed from the rows and the button heights alone,
+      not from where the buttons are: one pass is enough, whatever the spacers held before.
+    * ``lead``: the top margin the values column needs so the first button, when it is taller than its row, does
+      not have to start above the column (EXPORTING rows are 4 px lower than their buttons in the compact profile).
+    * ``overflow``: how far the last button ends under its row; the values column takes it as a bottom margin, so
+      the rail band holds the button instead of cutting it.
     """
-    shift, out = 0, []
-    for index, delta in enumerate(deltas):
-        if adjustable is not None and not adjustable[index]:
-            out.append(0)
+    shown = [(index, entry) for index, entry in enumerate(buttons) if entry[0] > 0 and entry[1] is not None]
+    if not shown:
+        return [0] * len(buttons), 0, 0
+    first, (height, row_top, row_height, _adjustable) = shown[0]
+    before = start + sum(entry[0] for entry in buttons[:first])
+    lead = max(0, before - (row_top - lead_now + (row_height - height) // 2))
+    shift = lead - lead_now
+    spacers, cursor, last_row_end = [], start, 0
+    for height, row_top, row_height, adjustable in buttons:
+        if height <= 0 or row_top is None or not adjustable:
+            spacers.append(0)
+            cursor += max(0, height)
             continue
-        needed = int(round(delta)) - shift
-        out.append(needed)
-        shift += needed
-    return out
+        top = row_top + shift + (row_height - height) // 2
+        spacer = max(0, top - cursor)
+        spacers.append(spacer)
+        cursor += spacer + height
+        last_row_end = row_top + shift + row_height
+    # The whole column against the last row: a shown button without a row after it hangs below too.
+    overflow = max(0, cursor - last_row_end)
+    return spacers, lead, overflow
 
 
 class _ColumnAligner(QObject if QObject is not None else object):
     """Puts each key button in front of its value row, exactly.
 
-    The two columns of FILTERING / EXPORTING are separate layouts; their expanding
-    spacers only lined up while the page was stretched. Here the spacer above each
-    button gets the height that centres it on its row, after every layout pass.
+    The two columns of FILTERING / EXPORTING are separate layouts. Here the spacer above each button gets the
+    height that centres it on its row (:func:`key_column_plan`), after every layout pass; the values column gets
+    the margins that keep the first and the last button inside the rail band.
 
-    The layout is invalidated only when a spacer really changed, and at most
-    ``MAX_ROUNDS`` passes follow one another until the next resize or show: when the
-    exact position cannot be reached (spacer already at 0, no spacer) the aligner stops
-    instead of looping on its own layout requests. Hidden pages are left alone.
+    The heights come from the rows and the buttons alone (5.0 to 5.1.1 added to each spacer what the button was off
+    by, which needed every layout pass to be over first: after a change of the rows the aligner ran out of passes
+    and the last buttons stayed 10 to 17 px off their rows). The layout is invalidated only when a spacer or a
+    margin really changed, and at most ``MAX_ROUNDS`` passes follow one another until the next resize or show.
+    Hidden pages are left alone.
     """
 
     MAX_ROUNDS = 6
 
-    def __init__(self, page: Any, keys_layout: Any, pairs) -> None:
+    def __init__(self, page: Any, keys_layout: Any, pairs, values_layout: Any = None) -> None:
         super().__init__(page)
-        self._page, self._keys, self._pairs = page, keys_layout, list(pairs)
+        self._page, self._keys, self._pairs, self._values = page, keys_layout, list(pairs), values_layout
         self._pending = False
         self._rounds = 0
+        self._top_spacer()
         page.installEventFilter(self)
+
+    def _top_spacer(self) -> None:
+        """A spacer above the first button, so it meets its row too (it had none: a row a few pixels taller than
+        the button, or a top margin of the values column, left it above its row)."""
+        first = self._keys.itemAt(0) if self._keys.count() else None
+        if first is not None and first.widget() is not None:
+            from qgis.PyQt.QtWidgets import QSizePolicy, QSpacerItem
+            # insertSpacerItem hands the spacer to the layout: with insertItem, PyQt5 (QGIS 3.22) deleted it with
+            # its Python wrapper and QGIS died at the next walk through the column (dimension managers).
+            self._keys.insertSpacerItem(0, QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))
+
+    def reset(self) -> None:
+        """The rows moved for another reason than a resize (other spacing, rows fit or fill): align again."""
+        self._rounds = 0
+        self.schedule()
 
     def eventFilter(self, watched, event):  # noqa: N802 - Qt override
         try:
             kind = event.type()
             if kind in (QEvent.Type.Resize, QEvent.Type.Show):
                 self._rounds = 0
+            if kind == QEvent.Type.Show:
+                # Rows laid out another way while the page was hidden: Qt posts the new hint to a visible parent
+                # only. The tool box resizes the page when it opens it (bench step s_rows_hidden_change passes
+                # without this); a panel of QGIS brought back from behind a tab may not.
+                self._page.updateGeometry()
             if kind in (QEvent.Type.Resize, QEvent.Type.Show, QEvent.Type.LayoutRequest):
                 self.schedule()
         except RuntimeError:
@@ -681,52 +790,78 @@ class _ColumnAligner(QObject if QObject is not None else object):
             from qgis.PyQt.QtCore import QTimer
             QTimer.singleShot(0, self.align)
 
-    def _spacer_above(self, button: Any):
-        index = self._keys.indexOf(button)
-        for position in range(index - 1, -1, -1):
-            item = self._keys.itemAt(position)
-            if item.widget() is not None and isinstance(item.widget(), type(button)):
-                return None  # reached the previous button: no spacer of its own
+    def _slots(self):
+        """``(spacer above or None, button)`` in the order of the key column, and the spacers that belong to no
+        button (several in a row, or after the last button): those are held at 0."""
+        from qgis.PyQt.QtWidgets import QAbstractButton
+        slots, spare, pending = [], [], None
+        for index in range(self._keys.count()):
+            item = self._keys.itemAt(index)
             if item.spacerItem() is not None:
-                return item.spacerItem()
-        return None
+                if pending is not None:
+                    spare.append(pending)
+                pending = item.spacerItem()
+            elif isinstance(item.widget(), QAbstractButton):
+                slots.append((pending, item.widget()))
+                pending = None
+        if pending is not None:
+            spare.append(pending)
+        return slots, spare
 
     def align(self) -> None:
         self._pending = False
         try:
             if not self._page.isVisible():
                 return
-            if self._pairs:  # the holder of the key column (its first button may be lent to EXPLORING)
-                _keys_follow_rows(self._keys.parentWidget() or self._pairs[0][0].parentWidget())
-            rows = []
-            for button, value in self._pairs:
-                if button.isHidden() or value.isHidden() or self._keys.indexOf(button) < 0:
-                    continue
-                spacer = self._spacer_above(button)
-                b = button.mapTo(self._page, button.rect().center()).y()
-                v = value.mapTo(self._page, value.rect().center()).y()
-                rows.append((spacer, v - b))
-            if not rows or all(abs(delta) < 1 for _, delta in rows):
+            holder = self._keys.parentWidget() or (self._pairs[0][0].parentWidget() if self._pairs else None)
+            if holder is None:
+                return
+            _keys_follow_rows(holder)  # the holder of the key column (its first button may be lent to EXPLORING)
+            from qgis.PyQt.QtCore import QPoint
+            from qgis.PyQt.QtWidgets import QSizePolicy
+            rows = {button: value for button, value in self._pairs}
+            offset = holder.mapTo(self._page, QPoint(0, 0)).y()
+            slots, spare = self._slots()
+            entries = []
+            for spacer, button in slots:
+                value = rows.get(button)
+                if button.isHidden():
+                    entries.append((0, None, 0, spacer is not None))
+                elif value is None or value.isHidden() or not value.isVisibleTo(self._page):
+                    entries.append((button.height(), None, 0, spacer is not None))
+                else:
+                    top = value.mapTo(self._page, QPoint(0, 0)).y() - offset
+                    entries.append((button.height(), top, value.height(), spacer is not None))
+            margins = self._values.contentsMargins() if self._values is not None else None
+            container = holder.layout()
+            start = (container.contentsMargins().top() if container is not None else 0) \
+                + self._keys.contentsMargins().top()
+            spacers, lead, overflow = key_column_plan(entries, margins.top() if margins is not None else 0, start)
+            wanted = [(spacer, height) for (spacer, _button), height in zip(slots, spacers)] + \
+                [(spacer, 0) for spacer in spare]
+            margins_off = margins is not None and (margins.top(), margins.bottom()) != (lead, overflow)
+            if not margins_off and not any(_spacer_off(spacer, height, QSizePolicy) for spacer, height in wanted):
                 self._rounds = 0
                 return
             if self._rounds >= self.MAX_ROUNDS:
-                return  # cannot be reached exactly: wait for the next resize, show or aligned pass
-            from qgis.PyQt.QtWidgets import QSizePolicy
-            changed = False
-            adjustments = spacer_adjustments([delta for _, delta in rows], [spacer is not None for spacer, _ in rows])
-            for (spacer, _), needed in zip(rows, adjustments):
-                if spacer is None or needed == 0:
-                    continue
-                current = spacer.sizeHint().height()
-                height = max(0, current + needed)
-                if height != current:
-                    spacer.changeSize(spacer.sizeHint().width(), height, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-                    changed = True
-            if changed:
-                self._rounds += 1
-                self._keys.invalidate()
+                return  # still moving: nothing changed until the next resize or show
+            self._rounds += 1
+            for spacer, height in wanted:
+                if _spacer_off(spacer, height, QSizePolicy):
+                    spacer.changeSize(spacer.sizeHint().width(), height, QSizePolicy.Policy.Minimum,
+                                      QSizePolicy.Policy.Fixed)
+            if margins_off:
+                self._values.setContentsMargins(margins.left(), lead, margins.right(), overflow)
+            self._keys.invalidate()  # changeSize alone does not: the buttons kept their old places
         except RuntimeError:
             pass  # widgets deleted (plugin closing)
+
+
+def _spacer_off(spacer: Any, height: int, size_policy: Any) -> bool:
+    """``spacer`` is not ``height`` high and fixed (the dimension managers make them expanding)."""
+    if spacer is None:
+        return False
+    return spacer.sizeHint().height() != height or spacer.sizePolicy().verticalPolicy() != size_policy.Policy.Fixed
 
 
 def _keys_follow_rows(holder: Any) -> None:
@@ -763,7 +898,8 @@ def align_key_columns(dw: Any) -> bool:
         if page is None or keys is None or not widgets:
             continue
         if getattr(dw, f'_fm_aligner_{page_name.lower()}', None) is None:
-            setattr(dw, f'_fm_aligner_{page_name.lower()}', _ColumnAligner(page, keys, widgets))
+            values = getattr(dw, f'verticalLayout_{page_name.lower()}_values', None)
+            setattr(dw, f'_fm_aligner_{page_name.lower()}', _ColumnAligner(page, keys, widgets, values))
         done = True
     return done
 
@@ -1034,7 +1170,9 @@ def harmonize_spacing(dw: Any) -> bool:
     _set_layout(getattr(dw, 'horizontalLayout_exploring_rail_and_groups', None), (RAIL_LEFT_INSET, 0, 0, 0), RAIL_GAP)
     # A small right margin, like a default Qt layout, between the widgets and the scroll bar,
     # and one gap under the last widget so a scrolled panel does not end flush on the edge.
-    _set_layout(getattr(dw, 'gridLayout_main_header', None), (0, 0, SCROLLBAR_MARGIN, GAP))
+    # The right margin only while the scroll bar shows (follow_scroll_bar): the same edge as the blocks otherwise.
+    follow_scroll_bar(dw, getattr(dw, 'scrollAreaWidgetContents', None), getattr(dw, 'gridLayout_main_header', None),
+                      (0, 0, GAP))
     _set_layout(getattr(dw, 'gridLayout_main_actions', None), (0, 0, 0, 0))
     _set_layout(getattr(dw, 'verticalLayout_exploring_tabs_content', None), (0, 0, 0, 0), GROUP_GAP)
     for name in ('mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection',
@@ -1048,13 +1186,22 @@ def harmonize_spacing(dw: Any) -> bool:
     if stack is not None:
         _set_layout(stack.layout(), (0, 0, 0, 0))
     # FILTERING / EXPORTING: rail on the section edge, widgets one gap beside it, rows one gap apart.
-    for section in ('filtering', 'exporting'):
-        _set_layout(getattr(dw, f'horizontalLayout_{section}_main', None), (0, 0, SCROLLBAR_MARGIN, 0), 0)
+    # The key buttons are kept apart by the spacers alone (the aligner sizes them): a layout spacing counted twice
+    # around each spacer (4 px in the normal profile) kept them 44 px apart for rows 43 px apart, and the last one
+    # ended under its row, cut at the bottom of a short section.
+    for section in ROW_SECTIONS:
+        main = getattr(dw, f'horizontalLayout_{section}_main', None)
+        _set_layout(main, None, 0)
+        follow_scroll_bar(dw, getattr(dw, section.upper(), None), main, (0, 0, 0))
         _set_layout(getattr(dw, f'horizontalLayout_{section}_content', None), (0, 0, 0, 0), RAIL_GAP)
+        keys = getattr(dw, f'verticalLayout_{section}_keys', None)
+        _set_layout(keys, (0, 0, 0, 0), 0)
+        if keys is not None:  # at the top of the band, where the aligner counts from (the managers centre it)
+            from qgis.PyQt.QtCore import Qt
+            keys.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
         values = getattr(dw, f'verticalLayout_{section}_values', None)
         if values is None:
             continue
-        values.setSpacing(ROW_GAP)
         for row in _row_layouts(values):
             if isinstance(row, QBoxLayout) and row.direction() in (QBoxLayout.Direction.LeftToRight,
                                                                    QBoxLayout.Direction.RightToLeft):
@@ -1064,10 +1211,86 @@ def harmonize_spacing(dw: Any) -> bool:
         m = configuration.layout().contentsMargins()
         configuration.layout().setContentsMargins(m.left(), m.top(), SCROLLBAR_MARGIN, m.bottom())
     _crs_row_gap(dw)
-    for aligner in ('_fm_aligner_filtering', '_fm_aligner_exporting'):
-        if getattr(dw, aligner, None) is not None:
-            getattr(dw, aligner).schedule()  # geometry is stale until the layouts have run
+    # The managers above resized the spacers of the rows: laid out again as the setting says. It also aligns
+    # the key buttons again once the layouts have run (geometry is stale until then).
+    lay_out_rows(dw)
     return True
+
+
+class _ScrollBarMargin(QObject if QObject is not None else object):
+    """The right margin of a scrolled content is the gap to the scroll bar while that bar shows, and nothing
+    otherwise: the widgets then end on the same edge as the blocks around them (strip, rails, headers), as far
+    from the right edge of the dock as the rails are from its left edge. It was always there: 6 px more on the
+    right than on the left of every row (user report of 18 November 2026, "centrer").
+
+    Checked after each resize of the content (a scroll bar that comes or goes resizes the viewport, hence the
+    content of a resizable scroll area) and when the content changes parent (a section into a panel of QGIS, and
+    back to the tool box), a turn of the loop later: Qt shows the bar after it has resized the content.
+    """
+
+    def __init__(self, content: Any, layout: Any, margins) -> None:
+        super().__init__(content)
+        self._content, self._layout, self._margins = content, layout, tuple(margins)
+        self._pending = False
+        content.installEventFilter(self)
+
+    def set_margins(self, margins) -> None:
+        """``(left, top, bottom)``, the margins that do not depend on the scroll bar."""
+        self._margins = tuple(margins)
+        self.apply()
+
+    def eventFilter(self, watched, event):  # noqa: N802 - Qt override
+        try:
+            if event.type() in (QEvent.Type.Resize, QEvent.Type.Show, QEvent.Type.ParentChange):
+                self._schedule()
+        except RuntimeError:
+            pass
+        return False
+
+    def _schedule(self) -> None:
+        if not self._pending:
+            self._pending = True
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(0, self.apply)
+
+    def bar_shown(self) -> bool:
+        """The vertical scroll bar of the scroll area holding the content shows (the area itself may be hidden)."""
+        from qgis.PyQt.QtWidgets import QAbstractScrollArea
+        viewport = self._content.parentWidget()
+        area = viewport.parentWidget() if viewport is not None else None
+        if not isinstance(area, QAbstractScrollArea) or area.viewport() is not viewport:
+            return False
+        return area.verticalScrollBar().isVisibleTo(area)
+
+    def apply(self) -> None:
+        self._pending = False
+        try:
+            left, top, bottom = self._margins
+            right = scroll_bar_margin(self.bar_shown())
+            current = self._layout.contentsMargins()
+            if (current.left(), current.top(), current.right(), current.bottom()) != (left, top, right, bottom):
+                self._layout.setContentsMargins(left, top, right, bottom)
+        except RuntimeError:
+            pass  # deleted (plugin closing)
+
+
+def scroll_bar_margin(bar_shown: bool) -> int:
+    """Right margin of a scrolled content: one gap from the scroll bar, none without it."""
+    return SCROLLBAR_MARGIN if bar_shown else 0
+
+
+def follow_scroll_bar(dw: Any, content: Any, layout: Any, margins) -> None:
+    """``layout`` (of ``content``) gets ``margins`` (left, top, bottom) and a right margin that follows the scroll
+    bar beside ``content`` (:class:`_ScrollBarMargin`, made once per content)."""
+    if content is None or layout is None or QObject is None:
+        return
+    followers = getattr(dw, '_fm_scroll_bar_margins', None)
+    if followers is None:
+        followers = dw._fm_scroll_bar_margins = {}
+    follower = followers.get(content.objectName())
+    if follower is None:
+        follower = followers[content.objectName()] = _ScrollBarMargin(content, layout, margins)
+    follower.set_margins(margins)
 
 
 def even_exploring_groups(dw: Any) -> bool:

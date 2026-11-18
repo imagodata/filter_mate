@@ -8,6 +8,7 @@ Migrated from modules/appUtils.py to infrastructure/database/sql_utils.py
 """
 
 import logging
+import re
 import sys
 import time as _perf
 from contextlib import contextmanager
@@ -101,6 +102,156 @@ def _postgres_connection_lost(layer, errors_before: int) -> bool:
     except ImportError:
         return False
     return postgres_connection_lost(layer, errors_before)
+
+
+# 2026-11-18: a GeoPackage (or a SQLite file) read by GDAL accepts a subset its SQL cannot run, a function it does
+# not have for instance: setSubsetString returns True, the provider keeps no error, the layer then reads no
+# feature and the filter was reported as a success (measured in QGIS 3.22, 3.44 and 4.3). The former text
+# conversion writes such subsets for the geometric functions it does not know (bounds_width, num_points...), when
+# neither the native SQL nor a list of keys is written: a second filter on a layer already filtered, AND NOT, more
+# than a million features. The count of the layer does not tell: QGIS reads an approximate one, without the subset,
+# for a table without gpkg_ogr_contents or past 100,000 rows. So the statement is prepared first, without a row read.
+_SQL_FILE_STORAGES = ('gpkg', 'sqlite')
+_WHOLE_STATEMENT = re.compile(r'\s*(SELECT|WITH)\b', re.IGNORECASE)  # QGIS runs such a subset as a statement of its own
+_QUOTED = re.compile(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"")
+# What a source may lack or refuse: a function (a name before a parenthesis that is not a word of SQL), the table
+# of a subquery, a column given with its table, an operator of QGIS that SQLite has not (~, REGEXP, MATCH, ILIKE),
+# a quote left open, an operator left at the end. A quoted name alone never fails: unknown, SQLite reads it as a text.
+_MAY_LACK = re.compile(
+    r'\b(?!(?:IN|AND|OR|NOT|IS|LIKE|GLOB|BETWEEN|CASE|WHEN|THEN|ELSE|CAST|EXISTS|VALUES|AS|ON)\b)[A-Za-z_][A-Za-z0-9_]*\s*\('
+    r'|\b(?:SELECT|REGEXP|MATCH|ILIKE)\b|(?<![0-9])\.(?![0-9])|[~\'"]'
+    r'|(?:[=<>!+\-*/%|&]|\b(?:AND|OR|NOT|IN|IS|LIKE|GLOB|BETWEEN))\s*$', re.IGNORECASE)
+# A variable or a function of QGIS left as it was ($length, @threshold): for SQLite a parameter with no value, NULL
+# with no error, and a layer that reads no feature.
+_LEFT_FROM_QGIS = re.compile(r'[$@][A-Za-z_][A-Za-z0-9_]*')
+_OUT = '§'  # stands for a text or a quoted name taken out of a subset: a sign no SQL holds outside a text
+_UNRUNNABLE = re.compile(
+    r'no such (?:function|column|table|collation sequence|module): ?[^\s,;)]+'
+    r'|near "[^"]*": syntax error|unrecognized token: ?[^\s,;)]+|incomplete input', re.IGNORECASE)
+
+
+def _is_sql_file_layer(layer) -> bool:
+    """Whether ``layer`` is a GeoPackage or a SQLite file read by GDAL (the ``ogr`` provider)."""
+    try:
+        provider_type = layer.providerType()
+        if not isinstance(provider_type, str) or provider_type.lower() != 'ogr':
+            return False
+        storage = layer.dataProvider().storageType()
+        return isinstance(storage, str) and storage.lower() in _SQL_FILE_STORAGES
+    except Exception:  # catch-all safety net: a deleted layer, a provider without a storage type
+        return False
+
+
+def _may_not_run(subset_expression: str) -> bool:
+    """Whether a subset holds what its source may lack (``_MAY_LACK``), outside its texts and quoted names.
+
+    Lists of keys and comparisons of fields, most of what the plugin writes, are
+    not prepared: opening the file again costs 2 ms for one table, 50 ms for 300.
+    """
+    return bool(_MAY_LACK.search(_QUOTED.sub(_OUT, subset_expression)))
+
+
+def _sql_file_table(layer):
+    """What GDAL opens for a GeoPackage / SQLite layer: (file name, table name, table index, open options)."""
+    from qgis.core import QgsProviderRegistry
+    parts = QgsProviderRegistry.instance().decodeUri('ogr', layer.dataProvider().dataSourceUri())
+    path = parts.get('path')
+    if not isinstance(path, str) or not path:
+        return None
+    prefix, suffix = parts.get('vsiPrefix'), parts.get('vsiSuffix')
+    filename = (prefix if isinstance(prefix, str) else '') + path + (suffix if isinstance(suffix, str) else '')
+    options = parts.get('openOptions')
+    options = [option for option in options if isinstance(option, str)] if isinstance(options, (list, tuple)) else []
+    return filename, parts.get('layerName'), parts.get('layerId'), options
+
+
+def _unrunnable_subset(layer, subset_expression):
+    """What stops the source of a GeoPackage / SQLite layer from running a subset, before it is set.
+
+    The statement QGIS will read the layer with is prepared on a connection of
+    its own, opened read only and never waiting for a lock:
+    ``EXPLAIN SELECT 1 FROM "table" m WHERE <subset>`` (``m`` is the name QGIS
+    gives the table; EXPLAIN takes a LIMIT, a comment or a semicolon at the end
+    of the subset as QGIS does). No row is read, whatever the size of the table.
+
+    Returns:
+        SQLite's own words ("no such function: bounds_width"), the variable or
+        the function of QGIS left in the subset ($length, @threshold: for
+        SQLite a parameter with no value, NULL with no error), or None: the
+        source runs the subset, or nothing can tell (no GDAL in this Python, a
+        subset that is a whole statement or holds nothing a source may lack, a
+        file that cannot be opened now, an error that is not about the SQL,
+        such as a locked file).
+    """
+    if not subset_expression or _WHOLE_STATEMENT.match(subset_expression):
+        return None
+    left = _LEFT_FROM_QGIS.search(_QUOTED.sub(_OUT, subset_expression))
+    if left is not None:
+        return 'not known to the source: {}'.format(left.group(0))
+    if not _may_not_run(subset_expression):
+        return None
+    try:
+        from osgeo import gdal
+        source = _sql_file_table(layer)
+    except Exception as exc:  # catch-all safety net: no GDAL, a deleted layer
+        logger.debug(f"[SQL] Subset not prepared before it is set: {exc}")
+        return None
+    if source is None:
+        return None
+    filename, table, index, options = source
+    local_option = getattr(gdal, 'SetThreadLocalConfigOption', None)
+    busy = dataset = None
+    waiting = False
+    gdal.PushErrorHandler('CPLQuietErrorHandler')  # the errors stay readable, out of the log of QGIS
+    try:
+        if local_option:  # a locked file is not waited for, on this thread only (GDAL 3.4 has the setting)
+            busy = gdal.GetThreadLocalConfigOption('SQLITE_BUSY_TIMEOUT', None)
+            local_option('SQLITE_BUSY_TIMEOUT', '0')
+            waiting = True
+        dataset = gdal.OpenEx(filename, gdal.OF_VECTOR | gdal.OF_READONLY, allowed_drivers=['GPKG', 'SQLite'],
+                              open_options=options)
+        if dataset is None:
+            return None
+        if not isinstance(table, str) or not table:
+            if index not in (None, ''):
+                found = dataset.GetLayer(int(index))
+            else:
+                found = dataset.GetLayer(0) if dataset.GetLayerCount() == 1 else None
+            table = found.GetName() if found is not None else ''
+        if not table:
+            return None
+        statement = 'EXPLAIN SELECT 1 FROM "{}" m WHERE {}'.format(table.replace('"', '""'), subset_expression)
+        gdal.ErrorReset()
+        try:
+            rows = dataset.ExecuteSQL(statement)
+        except RuntimeError as exc:  # gdal.UseExceptions(), turned on by another plugin or by GDAL 4
+            message = str(exc)
+        else:
+            if rows is not None:
+                dataset.ReleaseResultSet(rows)
+                return None
+            message = gdal.GetLastErrorMsg() or ''
+        found = _UNRUNNABLE.search(message)
+        return found.group(0) if found else None
+    except Exception as exc:  # catch-all safety net: nothing can tell, the provider decides as before
+        logger.debug(f"[SQL] Subset not prepared before it is set: {exc}")
+        return None
+    finally:
+        dataset = None  # closes the connection
+        try:
+            if waiting:
+                local_option('SQLITE_BUSY_TIMEOUT', busy)
+        finally:
+            gdal.PopErrorHandler()
+
+
+def _remember_refusal(layer, reason: str) -> None:
+    """Keep (or, with an empty text, forget) why a subset of ``layer`` was refused, for the message of the refusal."""
+    try:
+        from ...adapters.qgis.server_filter_translation import remember_server_filter_error
+        remember_server_filter_error(layer, reason)
+    except Exception:  # nosec B110 - no QGIS (unit tests) or a layer that cannot be a key: the generic reason is shown
+        pass
 
 
 def _layer_count_label(layer) -> str:
@@ -303,8 +454,18 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
             # FIX 2026-02-11: Detach FeaturePickerWidget before subset change to prevent crash
             _t_phase = _perf.perf_counter()
             errors_before = _provider_error_count(layer)
-            with feature_picker_guard(layer):
-                result = layer.setSubsetString(subset_expression)
+            sql_file = _is_sql_file_layer(layer)
+            if sql_file:
+                _remember_refusal(layer, '')  # the reason of a former refusal is never shown for another one
+            unrunnable = _unrunnable_subset(layer, subset_expression) if sql_file else None
+            if unrunnable is not None:
+                # the provider would accept it and read no feature: refused before it is set, with SQLite's words
+                _remember_refusal(layer, unrunnable)
+                logger.warning(f"[SQL] Subset of layer '{layer.name()}' not set, its source cannot run it: {unrunnable}")
+                result = False
+            else:
+                with feature_picker_guard(layer):
+                    result = layer.setSubsetString(subset_expression)
             # 2026-11-16: the server gone, every step below that opens a connection again
             # waits for it (retry, count, probe): skipped, the refusal says why on its own.
             connection_lost = not result and _postgres_connection_lost(layer, errors_before)

@@ -275,8 +275,9 @@ def test_the_layout_is_asked_with_the_buttons_ticked_as_it_is(world, chat):
     _answer(world, chat)  # features
     _answer(world, chat)  # look
     layout = chat.panel.questions[-1]
-    assert [question.header for question in layout] == ["Layout", "Headers", "Buttons"]
+    assert [question.header for question in layout] == ["Layout", "Headers", "Rows", "Buttons"]
     assert [option.label for option in layout[1].options if option.selected] == ["A rail of chips"]
+    assert [option.label for option in layout[2].options if option.selected] == ["Packed at the top"]
     assert [option.label for option in layout[0].options if option.selected] == ["All in the FilterMate panel"]
     assert len(layout[0].options) == 2  # nothing apart: "As they are now" is not a choice
 
@@ -503,7 +504,7 @@ def test_a_panel_without_sections_to_move_asks_the_buttons_alone(world, chat):
     chat.wizard.start()
     _answer(world, chat)
     _answer(world, chat)
-    assert [question.header for question in chat.panel.questions[-1]] == ["Headers", "Buttons"]
+    assert [question.header for question in chat.panel.questions[-1]] == ["Headers", "Rows", "Buttons"]
 
 
 # --- the tour ----------------------------------------------------------------------------------------------------------

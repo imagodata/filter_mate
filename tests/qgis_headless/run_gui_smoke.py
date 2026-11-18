@@ -3547,7 +3547,7 @@ def s_setup_layout_check():
     d = dock()
     panels, manager = d._fm_panels, d._action_bar_manager
     check('setup: the layout is a step of its own, the sections asked with the buttons',
-          WELCOME['started'] is True and ['Layout', 'Headers', 'Buttons'] in WELCOME['asked']
+          WELCOME['started'] is True and ['Layout', 'Headers', 'Rows', 'Buttons'] in WELCOME['asked']
           and len(WELCOME['asked']) == 5,
           str(WELCOME['asked']))
     check('setup: the sections and the buttons on the card of the changes, nothing moved before Apply',
@@ -4733,6 +4733,7 @@ MOUSE_STEPS = [s_section_setup, s_mouse_setup, s_mouse_reorder, s_mouse_reorder_
 SWITCH = {}
 SWITCH_SETTINGS = {
     'APP.DOCKWIDGET.SECTION_HEADERS': ('rail', 'stacked'),
+    'APP.DOCKWIDGET.SECTION_HEIGHT': ('fit', 'fill'),
     'APP.DOCKWIDGET.ACTION_BAR_POSITION': ('bottom', 'top', 'left', 'right', 'sections'),
     'APP.DOCKWIDGET.ACTION_BAR_VERTICAL_ALIGNMENT': ('top', 'bottom'),
     'APP.OPTIONS.FILTERING.enabled': (True, False),
@@ -5052,6 +5053,7 @@ def switch_moves():
             (3, 'close panel', close_panel), (3, 'float', float_panel),
             (7, 'open above', open_above), (9, 'open below', open_below), (4, 'open in panel', open_in_panel),
             (5, 'headers', setting('APP.DOCKWIDGET.SECTION_HEADERS')),
+            (2, 'height', setting('APP.DOCKWIDGET.SECTION_HEIGHT')),
             (8, 'position', setting('APP.DOCKWIDGET.ACTION_BAR_POSITION')),
             (2, 'alignment', setting('APP.DOCKWIDGET.ACTION_BAR_VERTICAL_ALIGNMENT')),
             (5, 'filtering', setting('APP.OPTIONS.FILTERING.enabled')),
@@ -5212,6 +5214,209 @@ SWITCH_STEPS = [s_section_setup, s_vector_source, s_switch_positions, s_switch_s
                 *[s_switch_walk] * max(1, (int(os.environ.get('FM_SWITCHES', '100')) + 24) // 25), s_switch_end]
 
 
+# --- the rows of FILTERING / EXPORTING: packed at the top or spread (APP.DOCKWIDGET.SECTION_HEIGHT, FM_ONLY=rows) ------
+#
+# 18 November 2026: the rows were spread over the whole height of the section, the rail band ran down to the action
+# bar, and in a short section the key buttons drifted under their rows (a layout spacing counted twice around each
+# spacer) until the last one was cut. Now: each button in front of its row, the rows one gap apart at the top
+# (``fit``, the default), a short section scrolls, and the right margin is the gap to a scroll bar only when one shows.
+
+ROWS = {}
+
+
+def mockup_module():
+    return importlib.import_module(f'{PACKAGE}.ui.layout.mockup_layout')
+
+
+def row_report(section):
+    """What a section shows of its rows: ``(deltas, gaps, cut, page, area)``. ``deltas``: row centre - key button
+    centre, per shown row; ``gaps``: between two shown rows; ``cut``: buttons that end below the rail band."""
+    d = dock()
+    module = mockup_module()
+    page = getattr(d, section.upper())
+    holder = getattr(d, f'widget_{section}_keys')
+    pairs = module.FILTERING_PAIRS if section == 'filtering' else module.EXPORTING_PAIRS
+    deltas, cut = [], []
+    for button_name, value_name in pairs:
+        button, value = getattr(d, button_name, None), getattr(d, value_name, None)
+        if button is None or value is None or not button.isVisibleTo(page) or not value.isVisibleTo(page):
+            continue
+        b = button.mapTo(page, button.rect().center()).y()
+        v = value.mapTo(page, value.rect().center()).y()
+        deltas.append(v - b)
+        if button.mapTo(holder, button.rect().bottomLeft()).y() > holder.height() - 1:
+            cut.append(button_name)
+    values = getattr(d, f'verticalLayout_{section}_values')
+    rows = [values.itemAt(i).geometry() for i in range(values.count())
+            if values.itemAt(i).spacerItem() is None and not values.itemAt(i).isEmpty()]
+    gaps = [lower.top() - upper.bottom() - 1 for upper, lower in zip(rows, rows[1:])]
+    viewport = page.parentWidget()
+    area = viewport.parentWidget() if viewport is not None else None
+    return deltas, gaps, cut, page, area if isinstance(area, QScrollArea) else None
+
+
+def rows_text(section):
+    deltas, gaps, cut, page, area = row_report(section)
+    bar = area.verticalScrollBar() if area is not None else None
+    main = getattr(dock(), f'horizontalLayout_{section}_main').contentsMargins()
+    return (f"{section}: deltas={deltas} gaps={gaps} cut={cut} page={page.height()} hint={page.sizeHint().height()} "
+            f"viewport={area.viewport().height() if area else None} bar max={bar.maximum() if bar else None} "
+            f"shown={bar.isVisibleTo(area) if bar else None} right margin={main.right()}")
+
+
+def rows_aligned(section):
+    deltas, _gaps, cut, _page, _area = row_report(section)
+    return len(deltas) >= 4 and all(abs(delta) <= 1 for delta in deltas) and not cut
+
+
+def rows_packed(section):
+    """``fit``: the rows one gap apart, the page held to them: inside a taller viewport, or scrolled in a shorter one."""
+    _deltas, gaps, _cut, page, area = row_report(section)
+    gap = mockup_module().ROW_GAP
+    if len(gaps) < 3 or not all(abs(value - gap) <= 1 for value in gaps) or area is None:
+        return False
+    held = abs(page.height() - page.sizeHint().height()) <= 1
+    return held and (page.height() < area.viewport().height() or area.verticalScrollBar().maximum() > 0)
+
+
+def right_margin_follows_bar(section):
+    _deltas, _gaps, _cut, _page, area = row_report(section)
+    if area is None:
+        return False
+    shown = area.verticalScrollBar().isVisibleTo(area)
+    right = getattr(dock(), f'horizontalLayout_{section}_main').contentsMargins().right()
+    return right == mockup_module().scroll_bar_margin(shown)
+
+
+def s_rows_setup():
+    d = dock()
+    leave_welcome()
+    ROWS['height'] = config_value('APP.DOCKWIDGET.SECTION_HEIGHT')
+    ROWS['sizes'] = d.main_splitter.sizes()
+    d._fm_sections.open_top('exploring')
+    open_section(d.FILTERING)
+    return waits(0.6)
+
+
+def s_rows_fit_check():
+    d = dock()
+    check('rows: a configuration of now fits the rows (the default)', ROWS['height'] == 'fit'
+          and d.property('fm_section_height') == 'fit', f"setting={ROWS['height']} dock={d.property('fm_section_height')}")
+    check('rows: FILTERING, each key button in front of its row', settles(lambda: rows_aligned('filtering')),
+          rows_text('filtering'))
+    check('rows: FILTERING rows one gap apart at the top, the room left under them',
+          settles(lambda: rows_packed('filtering')), rows_text('filtering'))
+    check('rows: FILTERING right margin only beside a scroll bar', settles(lambda: right_margin_follows_bar('filtering')),
+          rows_text('filtering'))
+    exploring = d.findChild(QWidget, 'scrollAreaWidgetContents')
+    area = d.scrollArea_frame_exploring
+    check('rows: EXPLORING right margin only beside a scroll bar', settles(
+        lambda: d.gridLayout_main_header.contentsMargins().right()
+        == mockup_module().scroll_bar_margin(area.verticalScrollBar().isVisibleTo(area))),
+        f"right={d.gridLayout_main_header.contentsMargins().right()} bar={area.verticalScrollBar().isVisibleTo(area)} "
+        f"content={exploring is not None}")
+    open_section(d.EXPORTING)
+    return waits(0.6)
+
+
+def s_rows_exporting_check():
+    d = dock()
+    check('rows: EXPORTING, each key button in front of its row', settles(lambda: rows_aligned('exporting')),
+          rows_text('exporting'))
+    check('rows: EXPORTING rows one gap apart at the top', settles(lambda: rows_packed('exporting')),
+          rows_text('exporting'))
+    open_section(d.FILTERING)
+    total = sum(d.main_splitter.sizes())
+    d.main_splitter.setSizes([total - 150, 150])  # a short lower stack: the rows no longer fit
+    return waits(0.6)
+
+
+def s_rows_short_check():
+    d = dock()
+    area = row_report('filtering')[4]
+    check('rows: a short FILTERING scrolls, its rows not squeezed',
+          settles(lambda: area is not None and area.verticalScrollBar().maximum() > 0
+                  and all(abs(value - mockup_module().ROW_GAP) <= 1 for value in row_report('filtering')[1])),
+          rows_text('filtering'))
+    check('rows: a short FILTERING keeps each button in front of its row, none cut',
+          settles(lambda: rows_aligned('filtering')), rows_text('filtering'))
+    check('rows: a short FILTERING keeps one gap from its scroll bar', settles(lambda: right_margin_follows_bar('filtering')),
+          rows_text('filtering'))
+    d.main_splitter.setSizes(ROWS['sizes'])
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fill'})
+    return waits(0.6)
+
+
+def s_rows_fill_check():
+    d = dock()
+    gap = mockup_module().ROW_GAP
+    check('rows: SECTION_HEIGHT = fill applied at once, the rows spread over the section',
+          d.property('fm_section_height') == 'fill' and settles(lambda: min(row_report('filtering')[1] or [0]) > gap + 4),
+          rows_text('filtering'))
+    check('rows: spread, each key button still in front of its row', settles(lambda: rows_aligned('filtering')),
+          rows_text('filtering'))
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fit'})
+    return waits(0.6)
+
+
+def s_rows_hidden_change():
+    """The setting changed while FILTERING is closed (CONFIGURATION open, as in the tree): its hidden scroll area was
+    told nothing and kept the old height when FILTERING opened again (review of 18 November 2026)."""
+    d = dock()
+    open_section(d.CONFIGURATION)
+    pump(200)
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fill'})
+    pump(200)
+    open_section(d.FILTERING)
+    check('rows: fill set while FILTERING was closed, spread when it opens',
+          settles(lambda: min(row_report('filtering')[1] or [0]) > mockup_module().ROW_GAP + 4
+                  and rows_aligned('filtering')), rows_text('filtering'))
+    open_section(d.CONFIGURATION)
+    pump(200)
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fit'})
+    pump(200)
+    open_section(d.FILTERING)
+    return waits(0.6)
+
+
+def s_rows_fit_again_check():
+    d = dock()
+    check('rows: fit set while FILTERING was closed, then fit again: the rows one gap apart', d.property('fm_section_height') == 'fit'
+          and settles(lambda: rows_packed('filtering') and rows_aligned('filtering')), rows_text('filtering'))
+    if d._fm_panels.can_detach('filtering'):
+        d._fm_panels.detach('filtering')
+    return waits(0.8)
+
+
+def s_rows_panel_check():
+    d = dock()
+    panel = d._fm_panels.panel('filtering')
+    if panel is None:
+        report('SKIP', 'rows: FILTERING in a panel of QGIS', 'it cannot leave the dock here')
+        return None
+    check('rows: FILTERING in its own panel, rows packed and buttons in front of them',
+          settles(lambda: rows_packed('filtering') and rows_aligned('filtering')), rows_text('filtering'))
+    check('rows: FILTERING in its own panel, right margin only beside a scroll bar',
+          settles(lambda: right_margin_follows_bar('filtering')), rows_text('filtering'))
+    d._fm_panels.attach('filtering')
+    return waits(0.8)
+
+
+def s_rows_end():
+    d = dock()
+    check('rows: FILTERING back in the dock, packed and aligned',
+          settles(lambda: d.isAncestorOf(d.FILTERING) and rows_packed('filtering') and rows_aligned('filtering')),
+          rows_text('filtering'))
+    if config_value('APP.DOCKWIDGET.SECTION_HEIGHT') != ROWS['height']:
+        apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': ROWS['height']})
+    d.main_splitter.setSizes(ROWS['sizes'])
+    return waits(0.4)
+
+
+ROWS_STEPS = [s_rows_setup, s_rows_fit_check, s_rows_exporting_check, s_rows_short_check, s_rows_fill_check,
+              s_rows_hidden_change, s_rows_fit_again_check, s_rows_panel_check, s_rows_end]
+
+
 # --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------
 
 
@@ -5354,7 +5559,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
          *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, *EXPLO_STEPS,
-         *SWITCH_STEPS, s_finish]
+         *SWITCH_STEPS, *ROWS_STEPS, s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
@@ -5387,6 +5592,8 @@ if os.environ.get('FM_ONLY') == 'sync':  # what a section in its own panel still
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SYNC_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'layout_shots':  # the window in each layout, as pictures in FM_GRAB_DIR
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SHOT_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'rows':  # the rows of FILTERING / EXPORTING packed or spread, and their key buttons
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *ROWS_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 
