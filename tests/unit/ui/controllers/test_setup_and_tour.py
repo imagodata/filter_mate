@@ -305,6 +305,22 @@ def test_apply_moves_the_sections_and_the_link_puts_them_back(world, chat):
     assert chat.wizard.revert() is False  # put back once
 
 
+def test_a_link_that_failed_is_not_marked_as_done(world, chat):
+    """Put back failed ("Nothing changed"): the change stayed set, and the link said it was put back already."""
+    card = _run(world, chat, pick=[("Buttons", "Top")])
+    card.apply_requested.emit()
+    assert world.applied[-1] == {world.wizard.ACTION_BAR: "top"}
+    world.fail = True
+    assert chat.wizard.revert() is False
+    assert ("note", "Nothing changed: the settings could not be applied.") in chat.panel.said
+    chat.panel.said.clear()
+    world.fail = False
+    assert chat.wizard.revert() is True  # the same link, tried again
+    assert world.applied[-1] == {world.wizard.ACTION_BAR: "bottom"}
+    assert ("note", "These settings were already put back.") not in chat.panel.said
+    assert chat.wizard.revert() is False  # put back once
+
+
 def test_the_link_puts_back_the_sections_that_were_apart_only(world, chat):
     panels = chat._parent_widget._fm_panels = FakePanels(apart=("filtering",))
     chat.wizard = world.setup.SetupWizard(chat)
