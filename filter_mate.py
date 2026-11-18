@@ -1512,6 +1512,16 @@ class FilterMate:
         # never send the dock a closeEvent (and closing it only hides it).
         if self.app and self.app.dockwidget:
             self.app.dockwidget.shutdown_agent_panel(unloading=True)
+            # The sections shown in their own QGIS panel go back to the dock, and their panels go with it. Before
+            # the controllers are torn down (2026-11-18): putting a page back changes the open one in the tool box,
+            # which makes the dock update its buttons and emit undoRedoStateRequested; that ran on a dock whose
+            # controllers were gone. The panels' own deletion (deleteLater) takes the event loop, after the unload.
+            try:
+                panels = getattr(self.app.dockwidget, '_fm_panels', None)
+                if panels is not None:
+                    panels.shutdown()
+            except Exception as e:
+                logger.debug(f"FilterMate: section panels not removed: {e}")
             try:
                 integration = getattr(self.app.dockwidget, '_controller_integration', None)
                 if integration is not None:
@@ -1589,13 +1599,6 @@ class FilterMate:
         # cleared and crashed QGIS (access violation in
         # QgsFeaturePickerModelBase::endUpdate).
         if self.app and self.app.dockwidget:
-            # The sections shown in their own QGIS panel go back to the dock, and their panels go with it.
-            try:
-                panels = getattr(self.app.dockwidget, '_fm_panels', None)
-                if panels is not None:
-                    panels.shutdown()
-            except Exception as e:
-                logger.debug(f"FilterMate: section panels not removed: {e}")
             try:
                 self.iface.removeDockWidget(self.app.dockwidget)
             except Exception as e:

@@ -19,7 +19,14 @@ Checks (2026-10-17):
 - unload then load the plugin again: no second toolbar, and QGIS no longer calls the unloaded instance
   (project fileNameChanged, layer tree view currentLayerChanged, selectionChanged);
 - a layer picked in the combo box right before a late refresh of the panel stays the panel's layer
-  (``run_gui_smoke.py`` "a late refresh keeps the layer the user picked", repeated).
+  (``run_gui_smoke.py`` "a late refresh keeps the layer the user picked", repeated);
+- the plugin unloaded with AGENT, FILTERING and EXPLORING in their own panels: the sections come back while the
+  controllers are up, no panel and no "FilterMate: " action of the menu of the panels left, the saved panels
+  kept, nothing critical or raised; loaded again, one panel per group, one F5 per panel, one ``launchingTask``
+  per click on Filter; the dock closed with them apart: they are hidden and their entries of View > Panels are off
+  until it is shown again (``FM_LIFECYCLE_ONLY=panels`` runs this group alone);
+- a project opened while the plugin runs: the whole layer change runs at most twice for the layer shown
+  (``FM_LIFECYCLE_ONLY=open``, which prints each caller and the log of the chain).
 
 Prints one ``PASS`` / ``FAIL`` line per check.
 """
@@ -715,6 +722,269 @@ def raster_picked_before_registration_check(round_index):
     return step
 
 
+PANEL_PREFIX = 'FilterMatePanel_'
+APART = ('agent', 'filtering', 'exploring')
+
+
+def section_panels():
+    """The ``QDockWidget`` panels of FilterMate in the main window of QGIS."""
+    from qgis.PyQt.QtWidgets import QDockWidget
+    found = []
+    for widget in iface.mainWindow().findChildren(QDockWidget):
+        try:
+            if widget.objectName().startswith(PANEL_PREFIX):
+                found.append(widget)
+        except RuntimeError:
+            continue
+    return found
+
+
+def panel_menu_actions():
+    """The actions "FilterMate: ..." of View > Panels of QGIS: [(text, enabled)]."""
+    from qgis.PyQt.QtWidgets import QMenu
+    menu = iface.mainWindow().findChild(QMenu, 'mPanelMenu')
+    if menu is None:
+        return None
+    return [(action.text(), action.isEnabled()) for action in menu.actions() if action.text().startswith('FilterMate: ')]
+
+
+def f5_shortcuts(panel):
+    from qgis.PyQt.QtGui import QKeySequence
+    try:
+        from qgis.PyQt.QtGui import QShortcut
+    except ImportError:  # QGIS < 3.34.2 (Qt5)
+        from qgis.PyQt.QtWidgets import QShortcut
+    return [shortcut for shortcut in panel.findChildren(QShortcut) if shortcut.key() == QKeySequence('F5')]
+
+
+def s_panels_detach():
+    """AGENT, FILTERING and EXPLORING in their own panels, the way run_gui_smoke does it."""
+    panels = dock()._fm_panels
+    took = {key: panels.detach(key) for key in APART if panels.can_detach(key)}
+    STATE['panels_saved'] = QSettings().value('FilterMate/panels/detached')
+    STATE['panels_groups'] = panels.groups()
+    since = time.time()
+    return lambda: time.time() - since > 2.0 and len(section_panels()) >= len(took)
+
+
+def s_panels_detach_check():
+    panels = dock()._fm_panels
+    check('panels: AGENT, FILTERING and EXPLORING are in their own panels', set(panels.detached()) == set(APART)
+          and len(section_panels()) == len(APART), f"apart={panels.detached()} panels={len(section_panels())}")
+    return settled(1.0)
+
+
+def install_unload_probe():
+    """Record what the dock does while the plugin unloads, and whether its controllers were already torn down
+    (FilterMate.unload tears them down before the sections come back to the dock): a change of the open page of
+    the tool box, and undoRedoStateRequested (select_tabTools_index emits it). Connected to the instance: a class
+    patch would not reach the slots already connected."""
+    d = dock()
+    STATE['dock_calls'] = []
+
+    def note(name):
+        integration = getattr(d, '_controller_integration', None)
+        up = integration is not None and getattr(integration, '_is_setup', True)
+        STATE['dock_calls'].append((name, 'controllers up' if up else 'controllers torn down'))
+
+    d.toolBox_tabTools.currentChanged.connect(lambda *_args: note('toolbox currentChanged'))
+    d.undoRedoStateRequested.connect(lambda *_args: note('undoRedoStateRequested'))
+
+
+def s_panels_unload():
+    STATE['panel_errors_before'] = len(STATE['python_errors'])
+    STATE['panel_criticals_before'] = len(STATE['criticals'])
+    install_unload_probe()
+    qgis.utils.unloadPlugin(PACKAGE)
+    since = time.time()
+    return lambda: time.time() - since > 2.0  # the event loop runs: deleteLater, queued signals, singleShots
+
+
+def s_panels_unloaded_check():
+    left = [panel.objectName() for panel in section_panels()]
+    actions = panel_menu_actions()
+    check('panels unload: no panel of FilterMate is left in the main window', not left, str(left))
+    check('panels unload: no "FilterMate: " action is left in the menu of the panels', actions == [], str(actions))
+    check('panels unload: the saved panels are unchanged (they come back at the next load)',
+          QSettings().value('FilterMate/panels/detached') == STATE['panels_saved'],
+          f"before={STATE['panels_saved']!r} after={QSettings().value('FilterMate/panels/detached')!r}")
+    late = [call for call in STATE['dock_calls'] if call[1] != 'controllers up']
+    check('panels unload: the sections come back while the controllers are still up (nothing runs on a dock '
+          'already torn down)', not late, f"calls during the unload: {STATE['dock_calls']}")
+    check('panels unload: no critical message and no Python error',
+          len(STATE['python_errors']) == STATE['panel_errors_before']
+          and len(STATE['criticals']) == STATE['panel_criticals_before'],
+          '; '.join((STATE['python_errors'][STATE['panel_errors_before']:]
+                     + STATE['criticals'][STATE['panel_criticals_before']:])[:3]))
+    started = qgis.utils.loadPlugin(PACKAGE) and qgis.utils.startPlugin(PACKAGE)
+    check('panels unload: the plugin starts again', started)
+    install_manage_task_probe()  # before run(): the dock's signal connects to the method as it is then
+    plugin().run()
+    return lambda: (dock() is not None and registered('zones', 'zones_b', 'dem', 'pts') and tasks_idle()
+                    and len(section_panels()) >= len(STATE['panels_groups']))
+
+
+def s_panels_reload_check():
+    panels = dock()._fm_panels
+    found = section_panels()
+    names = [panel.objectName() for panel in found]
+    check('panels reload: one panel per group, as before', len(found) == len(set(names))
+          and panels.groups() == STATE['panels_groups'],
+          f"before={STATE['panels_groups']} after={panels.groups()} panels={names}")
+    counts = {panel.objectName(): len(f5_shortcuts(panel)) for panel in found}
+    check('panels reload: one F5 shortcut per panel', found and all(count == 1 for count in counts.values()),
+          str(counts))
+    actions = panel_menu_actions()
+    check('panels reload: one "FilterMate: " action per panel in the menu of the panels',
+          actions is not None and len(actions) == len(found) and all(on for _text, on in actions), str(actions))
+    return settled(1.0)
+
+
+def s_panels_filter_ready():
+    return s_select_source()
+
+
+def install_manage_task_probe():
+    """Count the calls of FilterMateApp.manage_task (what launchingTask is connected to), per name."""
+    import importlib
+    cls = importlib.import_module(f'{PACKAGE}.filter_mate_app').FilterMateApp
+    original = cls.manage_task
+    STATE['managed'] = []
+
+    def counted(self, task_name, *args, **kwargs):
+        STATE['managed'].append(task_name)
+        return original(self, task_name, *args, **kwargs)
+
+    cls.manage_task = counted
+
+
+def s_panels_click_filter():
+    """A click on Filter of the reloaded panel: one emission of launchingTask, one task launched."""
+    d = dock()
+    STATE['launches'] = []
+    STATE['managed'] = []
+    d.launchingTask.connect(lambda name: STATE['launches'].append(name))
+    d.pushButton_action_filter.click()
+    return settled_after(lambda: True, 3.0)
+
+
+def s_panels_click_filter_check():
+    check('panels reload: a click on Filter emits launchingTask once and launches one task',
+          STATE['launches'] == ['filter'] and STATE['managed'] == ['filter'],
+          f"launchingTask={STATE['launches']} manage_task={STATE['managed']}")
+    run_task('reset')
+    return settled()
+
+
+def s_panels_close_dock():
+    """The dock closed with a section apart: what its panels offer in the menu of the panels."""
+    STATE['close_before'] = panel_menu_actions()
+    dock().close()
+    since = time.time()
+    return lambda: time.time() - since > 1.0
+
+
+def s_panels_close_dock_check():
+    from qgis.PyQt.QtWidgets import QMenu
+    actions = panel_menu_actions()
+    hidden = [panel.objectName() for panel in section_panels() if not panel.isVisible()]
+    check('dock closed: its panels are hidden', len(hidden) == len(section_panels()) > 0,
+          f"hidden={hidden} of {len(section_panels())}; layer chooser={dock().comboBox_filtering_current_layer.currentLayer()}")
+    check('dock closed: the panel actions of the menu of the panels are off',
+          bool(actions) and not any(on for _text, on in actions), f"before={STATE['close_before']} now={actions}")
+    # What a user does: View > Panels > "FilterMate: ..." on a panel hidden with the dock. A menu never runs a
+    # disabled entry (QAction.trigger() does, in Qt5), so only the enabled ones are triggered.
+    menu = iface.mainWindow().findChild(QMenu, 'mPanelMenu')
+    triggered = [action for action in menu.actions() if action.text().startswith('FilterMate: ') and action.isEnabled()]
+    for action in triggered:
+        action.trigger()
+    shown = [panel.objectName() for panel in section_panels() if panel.isVisible()]
+    check('dock closed: triggering a panel action does not bring a panel back while the dock is closed',
+          not shown, f"visible now={shown} dock visible={dock().isVisible()} "
+          f"combo layer={dock().comboBox_filtering_current_layer.currentLayer()}")
+    return settled(0.5)
+
+
+def s_panels_reopen_dock():
+    plugin().run()
+    since = time.time()
+    return lambda: time.time() - since > 1.5
+
+
+def s_panels_reopen_dock_check():
+    actions = panel_menu_actions()
+    shown = [panel.objectName() for panel in section_panels() if panel.isVisible()]
+    check('dock reopened: the panels are shown and their actions on again',
+          len(shown) == len(section_panels()) > 0 and bool(actions) and all(on for _text, on in actions),
+          f"visible={shown} actions={actions}")
+    return settled(1.0)
+
+
+def s_project_save():
+    """A project file with the fixture layers (the one open now), saved for the next step."""
+    STATE['project_path'] = os.path.join(FIXTURES, 'lifecycle_open.qgz')
+    project.setFileName(STATE['project_path'])
+    project.write()
+    return settled(1.0)
+
+
+def install_layer_change_probe():
+    """The calls of FilterMateDockWidget.current_layer_changed from now on, with their callers (slots look the
+    method up when they run: a class patch reaches them)."""
+    import importlib
+    cls = importlib.import_module(f'{PACKAGE}.filter_mate_dockwidget').FilterMateDockWidget
+    original = cls.current_layer_changed
+    STATE['layer_changes'] = []
+    STATE['chain_log'] = []
+    words = ('current_layer_changed ENTRY', 'current_layer_changed SUCCESS', 'New project loaded', 'Refreshing UI with',
+             'UI refreshed with', 'Already updating', 'deferring', 'Deferring', 'BLOCKED', 'blocked', 'Reinitializing',
+             'project_read', 'current_layer_changed:', 'unregistered', 'awaiting', 'Skipping', 'skipping',
+             'same layer', 'already current', 'Safety timer')
+
+    class Chain(logging.Handler):
+        def emit(self, record):
+            message = record.getMessage()
+            if any(word in message for word in words):
+                STATE['chain_log'].append(f"{record.created - STATE['started']:7.2f}s {message.splitlines()[0][:150]}")
+
+    for name in ('FilterMate.App', 'FilterMate.LayerTaskCompletionHandler'):
+        logging.getLogger(name).addHandler(Chain(level=logging.DEBUG))
+        logging.getLogger(name).setLevel(logging.DEBUG)
+
+    def counted(self, layer, *args, **kwargs):
+        frames = [f"{os.path.basename(f.filename)}:{f.lineno} {f.name}" for f in traceback.extract_stack()[:-1]]
+        useful = [f for f in frames if 'filter_mate' in f or 'dockwidget' in f or 'app' in f][-4:]
+        STATE['layer_changes'].append((round(time.time() - STATE['started'], 2), layer.name() if layer else None,
+                                       kwargs, useful))
+        return original(self, layer, *args, **kwargs)
+
+    cls.current_layer_changed = counted
+
+
+def s_project_reopen():
+    """Open the saved project in the running QGIS (File > Open): how many times the layer change runs."""
+    install_layer_change_probe()
+    iface.addProject(STATE['project_path'])
+    return settled_after(lambda: registered('zones', 'zones_b', 'dem', 'pts'), 4.0)
+
+
+def s_project_reopen_report():
+    changes = STATE['layer_changes']
+    print(f"   current_layer_changed calls after opening the project: {len(changes)}", flush=True)
+    for when, name, kwargs, callers in changes:
+        print(f"   {when:7.2f}s {name} {kwargs}\n      from: " + ' <- '.join(reversed(callers)), flush=True)
+    print("   the plugin log of the chain:\n" + '\n'.join(f"      {line}" for line in STATE['chain_log']), flush=True)
+    log = STATE['chain_log']
+    opened = next((index for index, line in enumerate(log) if 'Disconnecting old layer store' in line), 0)
+    passes = sum('current_layer_changed SUCCESS' in line for line in log[opened:])  # after the project was read
+    # Two are the work: the result of add_layers shows the layer, then the refresh of the panel after the project
+    # was read. The replays of the requests deferred while the panel was busy made it three to four (5.1.1 log: three
+    # in a second, 131 + 47 + 49 ms).
+    check('opening a project: the whole layer change runs at most twice for the layer shown',
+          0 < passes <= 2, f"{passes} full change(s); {len(changes)} call(s) reached current_layer_changed")
+    return settled(0.5)
+
+
 def s_finish():
     check('no Python error and no FilterMate critical message in the log', not STATE['python_errors'],
           '; '.join(STATE['python_errors'][:3]))
@@ -742,7 +1012,20 @@ STEPS = ([s_setup, s_open_plugin, s_zones_current, s_select_source,
          + [s_safety_refresh_report]
          + [step for index in range(3)
             for step in (raster_picked_before_registration(index), raster_picked_before_registration_check(index))]
+         + [s_zones_current, s_panels_detach, s_panels_detach_check, s_panels_unload, s_panels_unloaded_check,
+            s_panels_reload_check, s_zones_current, s_panels_filter_ready, s_panels_click_filter,
+            s_panels_click_filter_check,
+            s_panels_close_dock, s_panels_close_dock_check, s_panels_reopen_dock, s_panels_reopen_dock_check]
          + [s_finish])
+if os.environ.get('FM_LIFECYCLE_ONLY') == 'panels':  # the sections apart, unload and closed dock alone
+    STEPS = ([s_setup, s_open_plugin, s_zones_current,
+              s_panels_detach, s_panels_detach_check, s_panels_unload, s_panels_unloaded_check,
+              s_panels_reload_check, s_zones_current, s_panels_filter_ready, s_panels_click_filter,
+              s_panels_click_filter_check, s_panels_close_dock, s_panels_close_dock_check, s_panels_reopen_dock, s_panels_reopen_dock_check,
+              s_finish])
+if os.environ.get('FM_LIFECYCLE_ONLY') == 'open':  # a project opened while the plugin runs
+    STEPS = [s_setup, s_open_plugin, s_zones_current, s_project_save, s_project_reopen, s_project_reopen_report,
+             s_finish]
 if os.environ.get('FM_LIFECYCLE_ONLY') == 'await':  # the raster picked before its registration alone
     STEPS = ([s_setup, s_open_plugin, s_zones_current]
              + [step for index in range(3)
