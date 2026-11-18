@@ -983,9 +983,9 @@ class AgentChatController(QObject):
         """A provider of the menu: the entry the action carries, found in the list as it is now (it may have changed
         since the menu opened: the current provider came or left its head)."""
         from ...core.agent.agent_options import Change
-        providers, _current = self._menu_providers(load_settings())
+        providers, current = self._menu_providers(load_settings())
         entry = next((entry for entry in providers if entry.ident == ident), None)
-        if entry is not None:
+        if entry is not None and not entry.same(current):  # already the one in use: no new conversation for it
             self._click_option(Change(provider=entry))
 
     def _on_provider_forgotten(self, ident: str) -> None:

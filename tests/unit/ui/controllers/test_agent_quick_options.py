@@ -315,6 +315,19 @@ def test_a_provider_chosen_is_the_one_clicked_even_when_the_head_of_the_list_wen
     assert host.store["values"].model == "gemma3"
 
 
+def test_a_provider_that_became_the_one_in_use_is_not_switched_to(host, monkeypatch):
+    qwen = _entry("ollama", "qwen3:8b", "http://localhost:11434", "", key=False)
+    _menu_host(host, monkeypatch, [qwen])
+    host.panel = SimpleNamespace(set_status=MagicMock())
+    host.store["values"] = agent_settings.AgentSettings(preset="ollama", model="qwen3:8b",
+                                                        base_url="http://localhost:11434", consent=True,
+                                                        consent_target=qwen.consent_target)
+    Controller._on_provider_chosen(host, qwen.ident)  # clicked in a menu opened before the switch
+    host._restart_engine.assert_not_called()
+    host._policy.forget.assert_not_called()
+    host._say.assert_not_called()
+
+
 def test_a_provider_that_left_the_list_is_not_chosen(host, monkeypatch):
     state = _menu_host(host, monkeypatch, [])
     host.panel = SimpleNamespace(set_status=MagicMock())
