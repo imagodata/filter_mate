@@ -438,3 +438,41 @@ class TestRefusedFilterReason:
         failures = []
         apply_pending_subset_requests([(layer, '')], refuse, failures=failures)
         assert failures == [f"Cables: {self.reasons.NO_REASON}"]
+
+
+@pytest.mark.unit
+class TestFailureAfterTheSubsetIsSet:
+    """2026-11-18: a reload() or a repaint that raised after setSubsetString succeeded counted the layer as
+    refused: its history went back to before run() while it carried the new filter, and the message said
+    "previous filter kept"."""
+
+    @pytest.fixture(autouse=True)
+    def _providers(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_POSTGRES", "postgres", raising=False)
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_SPATIALITE", "spatialite", raising=False)
+
+    def test_a_repaint_that_raises_after_the_set_is_no_refusal(self):
+        layer = _make_layer("cables", "dbname='/data/x.sqlite' table=\"cables\"", provider="spatialite")
+        layer.triggerRepaint.side_effect = RuntimeError("wrapped C/C++ object has been deleted")
+        failures, refused = [], []
+        applied = apply_pending_subset_requests([(layer, '"id" > 3')], MagicMock(return_value=True),
+                                                failures=failures, refusals=refused)
+        assert (applied, failures, refused) == (1, [], [])
+
+    def test_a_repaint_that_raises_on_a_filter_already_set_is_no_refusal(self):
+        layer = _make_layer("cables", "dbname='bd' table=\"cables\"", provider="postgres")
+        layer.subsetString.return_value = '"id" > 3'
+        layer.triggerRepaint.side_effect = RuntimeError("gone")
+        failures, refused = [], []
+        assert apply_pending_subset_requests([(layer, '"id" > 3')], MagicMock(return_value=True),
+                                             failures=failures, refusals=refused) == 1
+        assert (failures, refused) == ([], [])
+
+    def test_a_set_that_raises_is_still_a_refusal(self):
+        layer = _make_layer("cables", "dbname='bd' table=\"cables\"", provider="postgres")
+        failures, refused = [], []
+        applied = apply_pending_subset_requests([(layer, '"id" > 3')], MagicMock(side_effect=RuntimeError("boom")),
+                                                failures=failures, refusals=refused)
+        assert applied == 0
+        assert refused == [("cables_id", "cables", "boom")]

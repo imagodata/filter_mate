@@ -368,6 +368,9 @@ def apply_pending_subset_requests(
     for layer, expression in pending_requests:
         layer_started = _perf_time.perf_counter()
         phase_details = ''
+        # 2026-11-18: the subset is on the layer (set now or already there): what fails after it
+        # (reload, repaint) is no refusal (its history was put back, "previous filter kept" said).
+        in_place = False
         try:
 
             if not layer or not is_valid_layer(layer):
@@ -396,6 +399,7 @@ def apply_pending_subset_requests(
 
             # Check if filter already applied
             if current_subset.strip() == expression_str.strip():
+                in_place = True
                 # Filter already applied. PERF 2026-09-12: same rules as a new
                 # filter below - no reload() on PostgreSQL/OGR (a reload reopens
                 # a GeoPackage and forces a full recount), reload kept on
@@ -448,6 +452,7 @@ def apply_pending_subset_requests(
                         import time as _time
                         _time.sleep(0.3)
                         success = safe_set_subset_fn(layer, expression_str)
+                    in_place = bool(success)
 
                     extent_fallback = _extent_fallback()
                     if success and extent_fallback is not None:
@@ -458,7 +463,7 @@ def apply_pending_subset_requests(
                         # that case is set instead, and said: the layer is filtered, not left whole with an error.
                         by_extent = extent_fallback.take(layer.id(), expression_str)
                         if by_extent and safe_set_subset_fn(layer, by_extent):
-                            success = True
+                            success = in_place = True
                             expression_str = by_extent
                             _say_cut_by_extent(layer, by_extent)
 
@@ -544,15 +549,21 @@ def apply_pending_subset_requests(
 
         except Exception as e:  # catch-all safety net: subset application must not crash finished()
             import traceback
-            logger.error(f"  ✗ Error applying subset string: {e}")
-            logger.error(f"    → Traceback: {traceback.format_exc()}")
-            QgsMessageLog.logMessage(
-                f"finished() ✗ Exception: {layer.name() if layer else 'Unknown'} - {str(e)}",
-                "FilterMate", Qgis.MessageLevel.Critical
-            )
-            if failures is not None:
-                failures.append(f"{layer.name() if layer else 'Unknown'}: {e}")
-            _note_refused(refusals, layer, str(e))
+            if in_place:
+                # Counted where the branch ends, which the exception skipped
+                logger.warning(f"  ⚠️ Subset set, but the refresh after it failed: {e}")
+                logger.debug(f"    → Traceback: {traceback.format_exc()}")
+                applied_count += 1
+            else:
+                logger.error(f"  ✗ Error applying subset string: {e}")
+                logger.error(f"    → Traceback: {traceback.format_exc()}")
+                QgsMessageLog.logMessage(
+                    f"finished() ✗ Exception: {layer.name() if layer else 'Unknown'} - {str(e)}",
+                    "FilterMate", Qgis.MessageLevel.Critical
+                )
+                if failures is not None:
+                    failures.append(f"{layer.name() if layer else 'Unknown'}: {e}")
+                _note_refused(refusals, layer, str(e))
 
         # Track last-touched DB path so the next iteration knows whether the
         # lock-error retry applies (same shared SQLite file).
