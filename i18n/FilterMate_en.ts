@@ -4391,6 +4391,36 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>Reset configuration and database</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Give your opinion</source>
+        <translation>Give your opinion</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Suggest a feature</source>
+        <translation>Suggest a feature</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Test the experimental features</source>
+        <translation>Test the experimental features</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Training and services</source>
+        <translation>Training and services</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>FilterMate has run {} filters for you. Thirty seconds to rate it?</source>
+        <translation>FilterMate has run {} filters for you. Thirty seconds to rate it?</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>Give my opinion</source>
+        <translation>Give my opinion</translation>
+    </message>
+    <message>
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Set up FilterMate with the agent</translation>

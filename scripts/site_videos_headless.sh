@@ -80,7 +80,7 @@ case "$cmd" in
         mapfile -t extra < <(passed_env)
         for c in "$@"; do
             echo "== clip $c"
-            run --name "fmvideo_$c" -e QGIS_PLUGINPATH=/w/plugins -e FM_VIDEO_OUT=/w/out -e FM_CLIP="$c" -e FM_THEME=light \
+            run --name "fmvideo_$c" -e FILTERMATE_NO_FEEDBACK_INVITE=1 -e QGIS_PLUGINPATH=/w/plugins -e FM_VIDEO_OUT=/w/out -e FM_CLIP="$c" -e FM_THEME=light \
                 -e FM5_DIR=/data -e FM_GPKG="/bd/$GPKG_NAME" "${extra[@]}" "$IMAGE" bash -c \
                 "timeout ${FM_TIMEOUT:-1500} dbus-run-session -- xvfb-run -a -s '-screen 0 1920x1200x24' qgis --nologo --noversioncheck --lang en --profiles-path /w/profiles --profile fmvideo --code /w/scripts/site_videos.py" \
                 > "$WORK/out/$c.stdout.txt" 2>&1 || echo "  clip $c ended with $?"

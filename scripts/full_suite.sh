@@ -55,7 +55,7 @@ if [ -n "$gdal_files" ]; then
     else
         echo "== 2. $IMAGE: $gdal_files"
         set +e +o pipefail
-        docker run --rm -e PYTHONDONTWRITEBYTECODE=1 -e QT_QPA_PLATFORM=offscreen \
+        docker run --rm -e PYTHONDONTWRITEBYTECODE=1 -e QT_QPA_PLATFORM=offscreen -e FILTERMATE_NO_FEEDBACK_INVITE=1 \
             -v "$ROOT":/w/filter_mate:ro -w /w/filter_mate "$IMAGE" bash -c \
             "pip install -q --break-system-packages --root-user-action=ignore 'pytest<9.2' pytest-mock shapely pyproj numpy >/dev/null \
              && python3 -m pytest -o addopts= -p no:cacheprovider -q -rfEs $gdal_files" \

@@ -4396,6 +4396,36 @@ I-click ang ★ indicator at piliin ang 'Idagdag ang kasalukuyang filter sa mga 
         <translation>I-reset ang pagsasaayos at database</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Give your opinion</source>
+        <translation>Ibigay ang iyong opinyon</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Suggest a feature</source>
+        <translation>Magmungkahi ng feature</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Test the experimental features</source>
+        <translation>Subukan ang mga experimental na feature</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Training and services</source>
+        <translation>Pagsasanay at serbisyo</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>FilterMate has run {} filters for you. Thirty seconds to rate it?</source>
+        <translation>Nagpatakbo ang FilterMate ng {} filter para sa iyo. Tatlumpung segundo para i-rate ito?</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>Give my opinion</source>
+        <translation>Ibigay ang aking opinyon</translation>
+    </message>
+    <message>
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>I-set up ang FilterMate gamit ang agent</translation>

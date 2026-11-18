@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Feedback: four entries in Vector > FilterMate (give your opinion, suggest a feature, test the experimental features, training and services) open the feedback page of the site; after 20 successful filters, one message offers the short review form, once ever. The plugin sends nothing itself.
 - Site: a FilterMate Cloud page with the tiers to test and a waitlist; cookie-free audience measure.
 - Tools: `scripts/tally_forms.py` creates the Tally forms in English and French: usage (with a rating and a review), review, training and services, feature suggestion, testers, and the Cloud waitlist.
 

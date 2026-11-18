@@ -4396,6 +4396,36 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>重置配置和数据库</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Give your opinion</source>
+        <translation>提出您的意见</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Suggest a feature</source>
+        <translation>建议新功能</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Test the experimental features</source>
+        <translation>测试实验性功能</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Training and services</source>
+        <translation>培训与服务</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>FilterMate has run {} filters for you. Thirty seconds to rate it?</source>
+        <translation>FilterMate 已为您执行了 {} 次筛选。花三十秒为它评分？</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>Give my opinion</source>
+        <translation>提出意见</translation>
+    </message>
+    <message>
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>使用智能体设置 FilterMate</translation>

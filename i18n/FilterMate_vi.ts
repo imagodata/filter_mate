@@ -4396,6 +4396,36 @@ Nhan vao chi bao ★ va chon 'Them bo loc hien tai vao yeu thich' de luu yeu thi
         <translation>Đặt lại cấu hình và cơ sở dữ liệu</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Give your opinion</source>
+        <translation>Góp ý của bạn</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Suggest a feature</source>
+        <translation>Đề xuất tính năng</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Test the experimental features</source>
+        <translation>Dùng thử các tính năng thử nghiệm</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Training and services</source>
+        <translation>Đào tạo và dịch vụ</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>FilterMate has run {} filters for you. Thirty seconds to rate it?</source>
+        <translation>FilterMate đã chạy {} bộ lọc cho bạn. Ba mươi giây để đánh giá?</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>Give my opinion</source>
+        <translation>Gửi góp ý</translation>
+    </message>
+    <message>
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Thiết lập FilterMate với tác tử</translation>

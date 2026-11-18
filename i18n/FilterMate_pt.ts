@@ -4396,6 +4396,36 @@ Clique no indicador ★ e selecione 'Adicionar filtro atual aos favoritos' para 
         <translation>Redefinir configuração e banco de dados</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Give your opinion</source>
+        <translation>Dar a sua opinião</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Suggest a feature</source>
+        <translation>Sugerir uma funcionalidade</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Test the experimental features</source>
+        <translation>Testar as funcionalidades experimentais</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Training and services</source>
+        <translation>Formação e serviços</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>FilterMate has run {} filters for you. Thirty seconds to rate it?</source>
+        <translation>O FilterMate aplicou {} filtros por si. Trinta segundos para o avaliar?</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>Give my opinion</source>
+        <translation>Dar a minha opinião</translation>
+    </message>
+    <message>
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Configurar o FilterMate com o agente</translation>

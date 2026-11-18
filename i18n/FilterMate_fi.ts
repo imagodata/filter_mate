@@ -4396,6 +4396,36 @@ Napsauta ★-ilmaisinta ja valitse 'Lisaa nykyinen suodatin suosikkeihin' tallen
         <translation>Palauta asetukset ja tietokanta</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Give your opinion</source>
+        <translation>Kerro mielipiteesi</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Suggest a feature</source>
+        <translation>Ehdota ominaisuutta</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Test the experimental features</source>
+        <translation>Testaa kokeellisia ominaisuuksia</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Training and services</source>
+        <translation>Koulutus ja palvelut</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>FilterMate has run {} filters for you. Thirty seconds to rate it?</source>
+        <translation>FilterMate on ajanut puolestasi {} suodatinta. Kolmekymmentä sekuntia sen arvioimiseen?</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>Give my opinion</source>
+        <translation>Kerro mielipiteeni</translation>
+    </message>
+    <message>
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Määritä FilterMate agentin avulla</translation>
