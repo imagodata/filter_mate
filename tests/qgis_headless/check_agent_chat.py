@@ -473,6 +473,14 @@ def check_key_store():
     check("own key deleted by its owner", agent_settings.delete_own_key(own) and own not in manager.configIds())
     check("a configuration of the user is not deleted", stored and not agent_settings.delete_own_key(foreign.id())
           and foreign.id() in manager.configIds())
+    lookalike = QgsAuthMethodConfig("Basic")  # the name of ours, not the user name FilterMate sets
+    lookalike.setName("FilterMate agent key")
+    lookalike.setConfig("username", "someone")
+    lookalike.setConfig("password", "theirs")
+    stored_like, lookalike = manager.storeAuthenticationConfig(lookalike)
+    check("a configuration with our name but not our user name is not deleted", stored_like
+          and not agent_settings.delete_own_key(lookalike.id()) and lookalike.id() in manager.configIds())
+    manager.removeAuthenticationConfig(lookalike.id())
     check("an unknown or empty place deletes nothing", not agent_settings.delete_own_key("nope123")
           and not agent_settings.delete_own_key(""))
     manager.removeAuthenticationConfig(foreign.id())

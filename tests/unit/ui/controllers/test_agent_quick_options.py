@@ -342,6 +342,15 @@ def test_the_key_of_a_forgotten_provider_goes_when_it_is_its_own(host, monkeypat
     assert state["stored"] == (other,) and deleted == ["keyB"]
 
 
+def test_a_deletion_is_logged_with_the_id_of_the_configuration_only(host, monkeypatch, caplog):
+    mine = _entry("mistral", "small", "", "keyB")
+    _menu_host(host, monkeypatch, [mine])
+    monkeypatch.setattr(chat_controller, "delete_own_key", lambda authcfg: True)
+    with caplog.at_level("INFO", logger="FilterMate.agent"):
+        Controller._on_provider_forgotten(host, mine.ident)
+    assert "keyB deleted" in caplog.text and "secret" not in caplog.text
+
+
 @pytest.mark.parametrize("shared_with", ["list", "settings", "waiting"])
 def test_a_key_another_entry_uses_stays(host, monkeypatch, shared_with):
     other = _entry("openai", "gpt", "", "keyB" if shared_with == "list" else "keyA")

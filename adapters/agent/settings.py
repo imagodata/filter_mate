@@ -26,6 +26,7 @@ _PREFIX = "filter_mate/agent/"
 _METHOD = "Basic"
 _KEY_FIELD = "password"
 _AUTH_NAME = "FilterMate agent key"
+_KEY_USER = "filtermate-agent"  # the user name FilterMate sets on the configurations it makes
 DEFAULT_PRESET = "anthropic"
 MAX_TOKENS = 16000
 
@@ -208,7 +209,7 @@ def store_key(key: str, authcfg: str = "") -> str:
     manager = _auth_manager()
     config = QgsAuthMethodConfig(_METHOD)
     config.setName(_AUTH_NAME)
-    config.setConfig("username", "filtermate-agent")
+    config.setConfig("username", _KEY_USER)
     config.setConfig(_KEY_FIELD, key)
     if authcfg and authcfg in manager.configIds():
         config.setId(authcfg)
@@ -254,7 +255,8 @@ def delete_key(authcfg: str) -> None:
 
 
 def delete_own_key(authcfg: str) -> bool:
-    """Delete ``authcfg`` when it is a configuration FilterMate made for a key (by its name); True when it went.
+    """Delete ``authcfg`` when it is a configuration FilterMate made for a key (its name, its method and the user
+    name it sets); True when it went.
 
     Raises:
         KeyStoreError: The database is locked or unavailable.
@@ -262,9 +264,14 @@ def delete_own_key(authcfg: str) -> bool:
     if not authcfg:
         return False
     manager = _auth_manager()
-    config = manager.availableAuthMethodConfigs().get(authcfg)
-    if config is None or config.name() != _AUTH_NAME or config.method() != _METHOD:
+    listed = manager.availableAuthMethodConfigs().get(authcfg)
+    if listed is None or listed.name() != _AUTH_NAME or listed.method() != _METHOD:
         return False  # the user's own configuration, or one of another plugin: not ours to delete
+    config = QgsAuthMethodConfig()
+    result = manager.loadAuthenticationConfig(authcfg, config, True)
+    loaded, config = (result[0], result[1]) if isinstance(result, tuple) else (result, config)
+    if not loaded or config.config("username") != _KEY_USER:
+        return False
     return bool(manager.removeAuthenticationConfig(authcfg))
 
 

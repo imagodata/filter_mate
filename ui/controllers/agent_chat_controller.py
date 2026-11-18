@@ -1004,9 +1004,12 @@ class AgentChatController(QObject):
         authcfg = key_to_delete(entry, remaining, in_use, target_of(entry.preset, entry.base_url))
         if authcfg:
             try:
-                delete_own_key(authcfg)
+                gone = delete_own_key(authcfg)
             except KeyStoreError:
                 logger.warning("Agent: the key of a provider left out of the list was kept", exc_info=True)
+            else:  # the id of the configuration is no secret
+                logger.info("Agent: authentication configuration %s %s", authcfg,
+                            "deleted with its provider" if gone else "kept (not made by FilterMate, or not deleted)")
 
     def _on_mcp_toggled(self, on: bool) -> None:
         from ...core.agent.agent_options import Change
