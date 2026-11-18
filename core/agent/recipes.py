@@ -154,6 +154,11 @@ def _too_deep(value: Any, limit: int = MAX_ARGUMENT_DEPTH) -> bool:
     return False
 
 
+def _never_kept(name: Any) -> bool:
+    """A tool no recipe holds (``NOT_KEPT``, the tools of the connectors)."""
+    return isinstance(name, str) and (name in NOT_KEPT or name.startswith(CONNECTOR_PREFIX))
+
+
 def _clean_step(step: Any) -> Optional[Dict[str, Any]]:
     if not isinstance(step, dict) or not isinstance(step.get("tool"), str) or not isinstance(step.get("arguments"), dict):
         return None
@@ -288,6 +293,10 @@ def _clean(recipe: Any) -> Optional[Dict[str, Any]]:
     if any(isinstance(item, dict) and _too_deep(item.get("arguments")) for item in recipe["steps"][:MAX_STEPS]):
         # 2026-11-13: 1,500 levels in a forged recipe raised RecursionError in the run, which left the panel busy.
         # The whole recipe, not the step: without one of its steps a recipe does something else.
+        return None
+    if any(isinstance(item, dict) and _never_kept(item.get("tool")) for item in recipe["steps"][:MAX_STEPS]):
+        # 2026-11-18: no recipe made here holds such a step (``kept`` refuses it when a request is saved). One in a
+        # file comes from another hand: the whole recipe, since the others would run without it and do something else.
         return None
     steps = [step for step in (_clean_step(item) for item in recipe["steps"][:MAX_STEPS]) if step is not None]
     if not name or not steps:

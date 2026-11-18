@@ -48,14 +48,14 @@ class TestKept:
         assert {"turn_off_agent_options", "turn_on_agent_options", "ask_user", "agent_options"} <= chat_only
         assert chat_only <= NOT_KEPT
 
-    def test_a_step_of_the_chat_alone_in_a_stored_recipe_is_left_out(self):
-        stored = json.dumps([{"id": "r1", "name": "Forged", "steps": [
-            {"tool": "apply_filter", "arguments": {"layer": "a", "expression": "1"}},
-            {"tool": "turn_off_agent_options", "arguments": {"sources": ["datagouv"]}},
-            {"tool": "turn_on_agent_options", "arguments": {"mcp_server": True}}]}])
-        assert [step["tool"] for step in parse(stored)[0]["steps"]] == ["apply_filter"]
-        assert parse(json.dumps([{"id": "r2", "name": "Only", "steps": [
-            {"tool": "ask_user", "arguments": {}}]}])) == []
+    @pytest.mark.parametrize("tool", ["turn_off_agent_options", "turn_on_agent_options", "ask_user", "run_pyqgis",
+                                      "change_settings", "mcp_github_create_issue"])
+    def test_a_stored_recipe_naming_a_tool_never_kept_is_refused_whole(self, tool):
+        """Without one of its steps a recipe does something else: the rest of it must not run."""
+        good = {"tool": "apply_filter", "arguments": {"layer": "a", "expression": "1"}}
+        stored = json.dumps([{"id": "r1", "name": "Forged", "steps": [good, {"tool": tool, "arguments": {}}, good]}])
+        assert parse(stored) == []
+        assert len(parse(json.dumps([{"id": "r1", "name": "Fine", "steps": [good]}]))) == 1
 
     def test_connector_tools_are_not_kept(self):
         assert not kept("mcp_github_create_issue", ToolSpec("mcp_github_create_issue", "", open_world=True), False)
