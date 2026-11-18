@@ -7166,6 +7166,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         singleton) kept calling the slots of the unloaded dock, its debounce
         timers could still fire, and the module kept it as the active dock.
         """
+        self._released = True  # shown again while the sections come back (showEvent): not the active dock any more
         for timer_name in ('_feature_picker_debounce_timer', '_expression_debounce_timer'):
             timer = getattr(self, timer_name, None)
             if timer is not None:
@@ -7227,7 +7228,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         ``sql_utils.feature_picker_guard``) and a dock shown again (the toolbar button, View > Panels) is not
         constructed again."""
         global _active_dockwidget
-        _active_dockwidget = self
+        if not getattr(self, '_released', False):  # the plugin unloads: this dock is going away, not coming back
+            _active_dockwidget = self
         super().showEvent(event)
 
     def closeEvent(self, event):

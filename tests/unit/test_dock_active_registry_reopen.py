@@ -57,3 +57,24 @@ def test_the_close_event_still_leaves_the_registry():
     close = next(node for node in cls.body if isinstance(node, ast.FunctionDef) and node.name == "closeEvent")
     text = ast.get_source_segment(source, close)
     assert "_active_dockwidget = None" in text and "if _active_dockwidget is self" in text
+
+
+def test_a_dock_released_by_the_unload_does_not_register_again():
+    """Unloading: release_qgis_connections empties the registry, then the panels give their sections back and a
+    dock that was a tab behind one of them comes to the front: its show event must not take the registry again."""
+    namespace = _dock_class()
+    dock = namespace["Dock"]()
+    dock._released = True  # what release_qgis_connections sets
+    namespace["_active_dockwidget"] = None
+    dock.showEvent("event")
+    assert namespace["_active_dockwidget"] is None
+    assert dock.shown == ["event"]
+
+
+def test_the_release_sets_the_flag_that_the_show_event_reads():
+    source = (ROOT / "filter_mate_dockwidget.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "FilterMateDockWidget")
+    release = next(node for node in cls.body if isinstance(node, ast.FunctionDef)
+                   and node.name == "release_qgis_connections")
+    assert "self._released = True" in ast.get_source_segment(source, release)
