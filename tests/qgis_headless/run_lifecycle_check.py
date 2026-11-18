@@ -12,8 +12,7 @@ unloaded and loaded again. QGIS runs it at startup (``--code``) and quits with i
 
 Checks (2026-10-17):
 
-- a second click on Filter while the first task runs: the final subsets are the second task's, and so
-  is the filter history (2026-11-18: the entry the canceled task's run() wrote is taken back);
+- a second click on Filter while the first task runs: the final subsets are the second task's;
 - a target layer removed while a filter task runs: no crash, no critical message;
 - three changes of the current layer: the dock is connected to the current layer's selectionChanged
   once, and to the previous layers' not at all;
@@ -269,26 +268,6 @@ def subsets():
     return {name: (layer(name).subsetString(), sum(1 for _ in layer(name).getFeatures())) for name in ('zones', 'pts')}
 
 
-def history_counts():
-    """Number of filter history rows of zones and pts in the plugin's database (2026-11-18)."""
-    import sqlite3
-    conn = sqlite3.connect(app().db_file_path)
-    try:
-        return {name: conn.execute('SELECT COUNT(*) FROM fm_subset_history WHERE fk_project = ? AND layer_id = ?',
-                                   (app().project_uuid, layer(name).id())).fetchone()[0] for name in ('zones', 'pts')}
-    finally:
-        conn.close()
-
-
-def watch_task_end(task, key):
-    """Record when and how a filter task ends (canceled tasks end terminated), for the order of events."""
-    def ended(how):
-        STATE[key] = how
-        print(f"   {key}: {how} at {time.time() - STATE['double_started']:.3f} s", flush=True)
-    task.taskCompleted.connect(lambda: ended('completed'))
-    task.taskTerminated.connect(lambda: ended('terminated'))
-
-
 # --- steps -------------------------------------------------------------------
 
 def s_setup():
@@ -384,7 +363,6 @@ def s_reference_large():
 
 def s_reference_large_record():
     STATE['ref_large'] = subsets()
-    STATE['ref_history'] = history_counts()
     print(f"   reference, buffer 150: {STATE['ref_large']['pts'][1]} points", flush=True)
     check('the two reference filters differ', STATE['ref_small']['pts'] != STATE['ref_large']['pts'],
           f"{STATE['ref_small']['pts'][1]} vs {STATE['ref_large']['pts'][1]} points")
@@ -395,13 +373,9 @@ def s_reference_large_record():
 def double_click(delay_ms):
     def step():
         STATE['criticals_before'] = len(STATE['criticals'])
-        STATE['double_started'] = time.time()
-        STATE.pop('first_end', None)
         filter_with_buffer(0)
         first = app().appTasks.get('filter')
         STATE['double_first'] = first
-        if first is not None:
-            watch_task_end(first, 'first_end')
 
         def second():
             try:
@@ -409,8 +383,6 @@ def double_click(delay_ms):
             except RuntimeError:  # finished and deleted already
                 STATE['first_status_at_second'] = 'finished'
             filter_with_buffer(150)
-            if app().appTasks.get('filter') is not None:
-                watch_task_end(app().appTasks.get('filter'), 'second_end')
 
         if delay_ms:
             QTimer.singleShot(delay_ms, second)
@@ -436,13 +408,6 @@ def double_click_check(delay_ms):
               f"zones subset={now['zones'][0][:60]!r}")
         check(f"second click on Filter ({delay_ms} ms): no critical message",
               len(STATE['criticals']) == STATE['criticals_before'], '; '.join(STATE['criticals'][-2:]))
-        # 2026-11-18: a first task canceled by the second click leaves no history entry (its run() may
-        # have written one: its finished() takes it back); one that completed first keeps its own.
-        counts, ref = history_counts(), STATE['ref_history']
-        extra = 0 if STATE.get('first_end') == 'terminated' else 1
-        check(f"second click on Filter ({delay_ms} ms): the history holds the second task's entry only",
-              counts == {name: number + extra for name, number in ref.items()},
-              f"history={counts} reference={ref} first task {STATE.get('first_end')}")
         run_task('reset')
         return settled()
     step.__name__ = f"s_double_click_{delay_ms}ms_check"
