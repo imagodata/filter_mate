@@ -683,6 +683,28 @@ class TestToolsLeaveAtACompaction:
         chat.add_user_text("f")
         assert chat.dropped == () and chat.tool_names == ("read", "zoom")
 
+    def test_the_summary_still_names_what_a_tool_taken_out_changed(self):
+        """Audit 2026-11-18: ``writes`` came from the tools of the moment, so a write tool dropped at a compaction
+        left "asked ... | answered ..." with no "changed:" when its request was summed up later."""
+        chat = self.chat()
+        self.request(chat, "a")
+        chat.offer([self.TOOLS["style"]])
+        chat.add_user_text("b")
+        chat.accept_turn(turn(STOP_TOOL_USE, ToolCallPart("c1", "style", {"layer": "roads"})))
+        chat.add_tool_results([ToolResultPart("c1", "ok" * 500)])
+        chat.accept_turn(turn(STOP_END, TextPart("styled")))
+        for text in "cdef":
+            self.request(chat, text)
+        chat._limits = AgentLimits(max_history_chars=800)  # the results go first: the idle tool leaves alone
+        chat.add_user_text("g")
+        assert chat.dropped == ("style",) and not chat.summarized
+        chat.accept_turn(turn(STOP_END, TextPart("done")))
+        chat._limits = AgentLimits(max_history_chars=200)
+        chat.add_user_text("h")
+        assert chat.summarized
+        summary = chat.messages[0].parts[0].text
+        assert "changed: style roads" in summary
+
 
 class TestContextAfterACompaction:
     """Lot 3: the session asks the whole context at the first request and after it rewrote the history."""

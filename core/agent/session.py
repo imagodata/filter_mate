@@ -136,6 +136,9 @@ class AgentSession:
         self._system = system
         self._limits = limits
         self._weights: Dict[str, int] = {}
+        # Every tool that changes the project offered at any time of the conversation, even one taken out since:
+        # the summary of a compaction names what it changed in requests that ran before it left.
+        self._writers: Dict[str, None] = dict.fromkeys(tool.name for tool in self._tools if not tool.read_only)
         self._start_weight = self._tools_weight() if limits.shrinks_with_tools else 0
         self._messages: List[Message] = []
         self._turns = 0
@@ -183,7 +186,7 @@ class AgentSession:
         """
         first = not self._messages
         self._messages = [_without_images(message) for message in self._messages]
-        writes = [tool.name for tool in self._tools if not tool.read_only]
+        writes = list(self._writers)
         trimmed = 0
         budget = self.history_limit()
         if sum(_size(message) for message in self._messages) > budget:
@@ -208,6 +211,7 @@ class AgentSession:
         known = {tool.name for tool in self._tools}
         added = tuple(tool for tool in tools if tool.name not in known)
         self._tools = self._tools + added
+        self._writers.update(dict.fromkeys(tool.name for tool in added if not tool.read_only))
         if self._core:
             for tool in added:
                 if tool.name not in self._core and not tool.name.startswith(CONNECTOR_TOOL_PREFIX):
