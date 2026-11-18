@@ -285,7 +285,11 @@ class Captions:
             if not text:
                 continue
             if e.get('style') == 'result':
-                img = _pill(text, round(26 * k), ACCENT + (245,), INK + (255,), pad=(round(24 * k), round(12 * k)))
+                size = round(26 * k)
+                img = _pill(text, size, ACCENT + (245,), INK + (255,), pad=(round(24 * k), round(12 * k)))
+                if img.width > 0.62 * OUT_W:   # a long line: smaller letters, the panels beside the map stay clear
+                    size = max(round(size * 0.62 * OUT_W / img.width), round(18 * k))
+                    img = _pill(text, size, ACCENT + (245,), INK + (255,), pad=(round(20 * k), round(11 * k)))
             else:
                 badge, _, rest = text.partition(' · ')
                 badge, text = (badge, rest) if rest and badge.isdigit() else (None, text)
