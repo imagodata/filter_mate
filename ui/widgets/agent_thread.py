@@ -30,7 +30,7 @@ ERROR_COLORS = {"light": ("#fdf3f3", "#f0c2c2", "#8c1d1d"), "dark": ("#3a2224", 
 # thread wider than its frame, every line of it cut on the right. Such a word is given places to wrap.
 LONG_WORD = 24  # characters
 ZWSP = "\u200b"  # an invisible place to wrap; never copied (AgentThread._clean_clipboard)
-_LINE_BREAKS = re.compile("\r\n|[\r\u2028\u2029]")
+_LINE_BREAKS = re.compile("\r\n|[\r\u2028\u2029\ufdd0\ufdd1]")
 _LONG_WORD = re.compile(r"\S{%d,}" % (LONG_WORD + 1))
 _WORD_SEPARATOR = re.compile(r"([/\\_.\-?&=,;:@#|+~])")
 _HEADING = re.compile(r"^\s{0,3}#{1,6}\s+")
@@ -39,9 +39,10 @@ _EMPHASIS = re.compile(r"(\*\*|__)(.+?)\1")
 _CODE = re.compile(r"`([^`\n]+)`")
 
 
-def _plain_breaks(text: str) -> str:
-    """``text`` with every line or paragraph break as ``\\n``, as the clipboard holds a copy of a QLabel."""
-    return _LINE_BREAKS.sub("\n", text)
+def _as_copied(text: str) -> str:
+    """``text`` as the clipboard holds the copy of a QLabel selection: every line or paragraph break as ``\\n``, the
+    no-break space as a space (Qt's plain text of a selection does both; ``selectedText()`` does neither)."""
+    return _LINE_BREAKS.sub("\n", text).replace("\u00a0", " ")
 
 
 def _tr(text: str) -> str:
@@ -918,9 +919,9 @@ class AgentThread(QScrollArea):
             text = clipboard.text() if clipboard is not None else ""
             if ZWSP not in text:
                 return
-            copied = _plain_breaks(text)
+            copied = _as_copied(text)
             for label in self._content.findChildren(QLabel):
-                if label.hasSelectedText() and _plain_breaks(label.selectedText()) == copied:
+                if label.hasSelectedText() and _as_copied(label.selectedText()) == copied:
                     clipboard.setText(text.replace(ZWSP, ""))
                     return
         except RuntimeError:  # the thread went away

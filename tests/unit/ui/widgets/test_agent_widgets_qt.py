@@ -342,6 +342,22 @@ class TestWidth:
         _run(50)
         assert QtWidgets.QApplication.clipboard().text() == text
 
+    def test_a_copy_of_a_french_text_with_no_break_spaces_is_cleaned(self, thread):
+        """Qt copies a no-break space as a space, selectedText() keeps it: 'Chemin\\u00a0: C:\\...' never matched."""
+        from PyQt5 import QtTest
+        text = f"Chemin\u00a0: {self.PATH}"
+        thread.add_text(text)
+        thread.end_answer()
+        thread.show()
+        label = thread._items[-1].widget
+        label.setSelection(0, len(label.text()))
+        assert "\u00a0" in label.selectedText() and thread_module.ZWSP in label.selectedText()
+        QtWidgets.QApplication.clipboard().clear()
+        label.setFocus()
+        QtTest.QTest.keyClick(label, Qt.Key_C, Qt.ControlModifier)  # a real copy
+        _run(50)
+        assert QtWidgets.QApplication.clipboard().text() == f"Chemin : {self.PATH}"
+
     def test_a_text_of_another_origin_keeps_its_zwsp(self, thread):
         thread.add_text(self.PATH)
         thread.end_answer()
