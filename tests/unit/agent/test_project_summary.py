@@ -242,3 +242,40 @@ def test_a_new_order_of_the_fields_is_not_a_change_and_a_failed_reading_is_not_n
                                         "active_fields": []}, previous=_state(active_layer_id="c",
                                                                                  active_fields=["x"]))
     assert other["active_field_names"] == frozenset()
+
+
+def test_the_view_lines_come_before_the_cap():
+    """Review 2026-11-18: added last, the CRS, the active layer and the view were cut silently by the cap when nine
+    other changes came first."""
+    from core.agent.project_summary import MAX_CHANGES
+
+    def row(name, **kind):
+        return {"layer_id": name, "name": name, "active_filter_expression": "", "visible": True, **kind}
+    before_rows = [row("kept", active_filter_expression="a = 1"), row("old"), row("gone"), row("shown", visible=False),
+                   row("hidden"), row("cleared"), row("selected")]
+    after_rows = [row("kept", active_filter_expression="a = 2"), row("new"), row("shown"), row("hidden", visible=False),
+                  row("cleared"), row("selected"), row("renamed", layer_id="old")]
+    # 9 kinds of change on the layers: added, removed, renamed, filter changed, filter removed, shown, hidden,
+    # selection changed, selection cleared
+    before_rows[1]["active_filter_expression"] = "b = 1"
+    after_rows[1]["active_filter_expression"] = ""
+    before = project_state(before_rows, [{"layer_id": "cleared", "name": "cleared", "selected_count": 1},
+                                         {"layer_id": "selected", "name": "selected", "selected_count": 1}], VIEW)
+    view = {**VIEW, "project_crs": "EPSG:4326", "canvas_crs": "EPSG:3857", "extent": [0.0, 0.0, 9.0, 9.0],
+            "active_layer_name": "", "active_fields": []}
+    after = project_state(after_rows, [{"layer_id": "selected", "name": "selected", "selected_count": 4}], view)
+    lines = project_changes(before, after)
+    assert len(lines) <= MAX_CHANGES
+    assert "- project CRS is now: EPSG:4326" in lines and "- no active layer now" in lines
+    assert any(line.startswith("- map canvas CRS") for line in lines)
+    assert any(line.startswith("- the map view moved") for line in lines)
+    assert any(line.startswith("- and ") and "more changes" in line for line in lines)
+
+
+def test_a_crs_without_identifier_is_said_by_its_description():
+    custom = "Custom Lambert (EPSG:0)"
+    assert project_changes(_state(), _state(project_crs=custom, canvas_crs=custom)) == [f"- project CRS is now: {custom}"]
+    assert project_changes(_state(project_crs=custom, canvas_crs=custom),
+                           _state(project_crs=custom, canvas_crs=custom)) == []
+    assert f"Map: CRS {custom}" in project_summary(_rows(), [], {**VIEW, "project_crs": custom, "canvas_crs": custom})
+    assert len(project_state(_rows(), [], {**VIEW, "project_crs": "x" * 500})["crs"]) <= 81

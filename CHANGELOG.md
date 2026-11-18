@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent, project update: the lines about the CRS, the active layer and the view are kept when many other changes come first (the cap of 12 lines cut them silently; what it cuts among the layers is now counted), and a CRS defined in the project, which has no identifier, is given by its description in `map_context` and in the state, so its change is told and the canvas no longer falls back on the CRS of the project.
 - Agent, project update: the fields of the active layer are compared as a set of names, so a new order is no change, and a reading of them that failed once (no field) says nothing and keeps the names the model was told, instead of "none" and then the whole list at the next request.
 - Agent, project update: a renamed layer is said with its whole new name (each side of `old -> new` is cut alone: the old one at 60 characters, the new one at 100), and when more layers were renamed than the line names (5) the whole state of the project is sent again instead of "and 15 more".
 - Agent: `turn_off_agent_options` is documented as it behaves: like the other changes of the project it runs alone from the standard level, is asked at the careful level and refused at the advisor level (the catalog said "without a question"); a test now covers the four levels.

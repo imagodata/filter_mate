@@ -17,6 +17,7 @@ MAX_SELECTIONS = 10
 MAX_FIELDS = 40  # of the active layer, in the state sent with a request
 MAX_CHANGES = 12
 MAX_NAMES = 5
+MAX_CRS_CHARS = 80  # of a CRS that has no identifier: its description
 # Only a tool of the core is named (core/agent/families.py): the others take a call to use_tools first.
 HEADER = "Project when this request was sent (for reference; describe_layer gives the details of a layer):"
 CHANGES_HEADER = "Changed in QGIS since your last answer (by the user, or another application):"
@@ -49,8 +50,13 @@ def _coordinates(extent: Sequence[float]) -> str:
     return " ".join(f"{item:.{digits}f}" for item in extent)
 
 
+def _crs(value: Any) -> str:
+    """A CRS as the view gives it (an identifier, or the short description of one that has none), cut."""
+    return _cut(str(value or ""), MAX_CRS_CHARS)
+
+
 def _map_line(view: Mapping[str, Any]) -> str:
-    project_crs = str(view.get("project_crs") or "")
+    project_crs = _crs(view.get("project_crs"))
     parts: List[str] = [f"CRS {project_crs}"] if project_crs else []
     if view.get("available"):
         scale = view.get("scale")
@@ -58,7 +64,7 @@ def _map_line(view: Mapping[str, Any]) -> str:
             parts.append(f"scale 1:{round(scale)}")
         extent = _extent(view.get("extent"))
         if extent is not None:
-            canvas_crs = str(view.get("canvas_crs") or project_crs)
+            canvas_crs = _crs(view.get("canvas_crs")) or project_crs
             parts.append(f"visible extent{f' ({canvas_crs})' if canvas_crs != project_crs else ''} "
                          f"xmin ymin xmax ymax = {_coordinates(extent)}")
         active = view.get("active_layer_name")
@@ -103,7 +109,7 @@ def project_state(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapp
     selected = {str(item.get("layer_id") or item.get("name", "")): (str(item.get("name", "")),
                                                                      int(item.get("selected_count") or 0))
                 for item in selections if isinstance(item, Mapping)}
-    project_crs = str(view.get("project_crs") or "")
+    project_crs = _crs(view.get("project_crs"))
     state = {"layers": rows, "selections": selected, "active": str(view.get("active_layer_name") or ""),
              "active_id": str(view.get("active_layer_id") or ""), "active_fields": _fields_text(view),
              "active_field_names": frozenset(str(name) for name in (view.get("active_fields") or ()) if str(name))}
@@ -111,7 +117,7 @@ def project_state(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapp
         state["active_fields"] = previous.get("active_fields", "")
         state["active_field_names"] = previous.get("active_field_names", frozenset())
     return {**state,
-            "crs": project_crs, "canvas_crs": str(view.get("canvas_crs") or project_crs),
+            "crs": project_crs, "canvas_crs": _crs(view.get("canvas_crs")) or project_crs,
             "extent": _extent(view.get("extent")) if view.get("available") else None}
 
 
@@ -218,8 +224,12 @@ def project_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List
     say("selection changed", [f"{name} ({count} selected)" for key, (name, count) in selected.items()
                               if key in new and was_selected.get(key, ("", 0))[1] != count])
     say("selection cleared", [name for key, (name, _) in was_selected.items() if key in new and key not in selected])
-    lines.extend(_view_changes(before, after))
-    return lines[:MAX_CHANGES]
+    # The CRS, the active layer and the view first before the cap: what the model most needs not to be wrong on.
+    view = _view_changes(before, after)
+    room = MAX_CHANGES - len(view)
+    if len(lines) > room:
+        lines = lines[:room - 1] + [f"- and {len(lines) - room + 1} more changes (read the layers to see them)"]
+    return lines + view
 
 
 def project_summary(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapping[str, Any]] = (),
@@ -245,7 +255,7 @@ def project_summary(layers: Iterable[Mapping[str, Any]], selections: Iterable[Ma
     fields = _fields_text(view)
     if fields:
         lines.append(f"Fields of the active layer: {fields}")
-    project_crs = str(view.get("project_crs") or "")
+    project_crs = _crs(view.get("project_crs"))
     lines.extend(_layer_line(row, project_crs) for row in rows[:MAX_LAYERS])
     if len(rows) > MAX_LAYERS:
         lines.append(f"- and {len(rows) - MAX_LAYERS} more layers")

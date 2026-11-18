@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Audit 2026-11-18: ``layer_statistics`` ranked its groups by number of features whatever was asked.
+"""Answers of the introspection tools.
+
+Audit 2026-11-18: ``layer_statistics`` ranked its groups by number of features whatever was asked.
 
 "Which commune has the largest built area?", grouped by commune with ``measure=area``, answered with the ten
 communes holding the most buildings: when the true largest was not among them, only ``truncated`` said so.
@@ -125,3 +127,21 @@ def test_without_a_field_or_a_measure_the_groups_are_ranked_by_features(building
     assert answer["groups"][0]["feature_count"] == 3
     text = introspection.layer_statistics("buildings", "commune", group_by="commune", limit=3)
     assert text["ranked_by"] == "feature_count"
+
+
+def test_a_crs_without_identifier_is_given_by_its_description():
+    """Review 2026-11-18: authid() is "" for a CRS defined in the project: map_context gave no CRS, so a change of it
+    could not be told to the model."""
+    class Crs:
+        def __init__(self, authid, description):
+            self._authid, self._description = authid, description
+
+        def authid(self):
+            return self._authid
+
+        def description(self):
+            return self._description
+
+    assert introspection._crs_label(Crs("EPSG:2154", "RGF93 v1 / Lambert-93")) == "EPSG:2154"
+    assert introspection._crs_label(Crs("", "Custom Lambert")) == "Custom Lambert"
+    assert introspection._crs_label(Crs("", "")) == ""
