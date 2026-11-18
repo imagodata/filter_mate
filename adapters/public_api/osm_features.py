@@ -18,9 +18,9 @@ from urllib.parse import quote
 
 from ...core.agent.open_data import KIND_OVERPASS, megabytes, resolve_platform
 from ...core.agent.osm import (
-    ANOTHER as _ANOTHER, ATTRIBUTION, GEOMETRIES, LAYER_KINDS, MAX_BYTES, OSM_TYPES, Tag, area_problem, columns,
-    cut_problem, default_name, gdal_config, layer_title, matches, overpass_query, read_tags, remark_problem,
-    status_problem, status_refusal,
+    ANOTHER as _ANOTHER, ATTRIBUTION, GEOMETRIES, LAYER_KINDS, MAX_BYTES, OSM_TYPES, Tag, area_problem, closed_way_is_area,
+    columns, cut_problem, default_name, gdal_config, layer_title, matches, overpass_query, read_tags, remark_problem,
+    status_problem, status_refusal, way_tags,
 )
 from ...core.agent.elevation import quiet_message
 from ..agent.bounded_http import STOPPED as HTTP_STOPPED, TOO_LARGE, TOO_LONG, HttpFailure, fetch
@@ -187,6 +187,12 @@ def _convert(osm_path: str, config_path: str, gpkg_path: str, tags: Sequence[Tag
                           if definition.GetFieldIndex(name) >= 0}
                 if not matches(tags, values):
                     continue
+                if (geometry != 'lines' and kind == 'lines' and origin.GetName() == 'lines'
+                        and _is_closed_ring(ogr, shape) and closed_way_is_area(way_tags(values, tags))):
+                    # GDAL draws a closed way as an area from a whole key; power=substation, railway=platform or
+                    # man_made=wastewater_plant are areas for some values of their key only: said here, by OSM's rules.
+                    # Not when lines are asked: a hedge or a wall that closes comes back as the line it is mapped.
+                    shape, kind = ogr.ForceToPolygon(shape.Clone()), 'polygons'
                 where = 'points' if geometry == 'points' else kind
                 if geometry in ('lines', 'polygons') and kind != geometry:
                     continue
@@ -238,6 +244,14 @@ def _convert(osm_path: str, config_path: str, gpkg_path: str, tags: Sequence[Tag
             layers.clear()
             target = None
             source = None
+
+
+def _is_closed_ring(ogr, shape) -> bool:
+    """Whether ``shape`` is a line of four points or more that ends where it starts: a closed way."""
+    if ogr.GT_Flatten(shape.GetGeometryType()) != ogr.wkbLineString:
+        return False
+    count = shape.GetPointCount()
+    return count >= 4 and shape.GetPoint_2D(0) == shape.GetPoint_2D(count - 1)
 
 
 def _add(path: str, kind: str, title: str):

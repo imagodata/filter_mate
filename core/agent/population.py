@@ -115,6 +115,49 @@ def grid_for(source: PopulationSource, bbox: Sequence[float],
     return factor, bounds, width, height, note
 
 
+EXCESS = 1.1  # a layer that covers more than this many times the area asked says so
+
+
+def native_pixels(source: PopulationSource, bbox: Sequence[float]) -> int:
+    """How many pixels of the source ``bbox`` covers, on the grid of the source (whole pixels)."""
+    west, south, east, north = snapped(source, bbox, 1)
+    return max(1, int(round((east - west) / source.step))) * max(1, int(round((north - south) / source.step)))
+
+
+def exact_total_fits(source: PopulationSource, bbox: Sequence[float]) -> bool:
+    """Whether the people of ``bbox`` can be summed on the pixels of the source, within the pixels one call may read
+    (``MAX_PIXELS``)."""
+    return native_pixels(source, bbox) <= MAX_PIXELS
+
+
+def extent_note(source: PopulationSource, bbox: Sequence[float], written: Sequence[float], factor: int,
+                counted: Optional[Sequence[float]]) -> str:
+    """What a model must know about the surface a total covers; "" when it is no wider than the area asked.
+
+    A pixel written is a block of ``factor`` x ``factor`` pixels of the source, on the grid of the source: the layer
+    reaches to the blocks around the area, up to 40 times its surface at 10 km (2026-11-18, a district of 3.5 km2:
+    1.1 times at 100 m, 2.4 at 1 km, 40 at 10 km). ``counted``: the bounds the total was summed on, on the pixels of
+    the source whatever the resolution (the whole pixels the area touches); None when it is the sum of the layer.
+    """
+    asked, covered = area_km2(bbox), area_km2(written)
+    size = f"about {factor * source.step * _METRES_PER_DEGREE:,.0f} m"
+    if counted is None:
+        if covered <= asked * EXCESS:
+            return ""
+        return (f"total is the sum of the whole layer, {covered:,.2f} km2 against the {asked:,.2f} km2 asked "
+                f"({covered / asked:,.1f} times): its pixels are blocks of {size}, so it counts the people of that "
+                "larger rectangle, not of the area asked")
+    summed = area_km2(counted)
+    if covered <= asked * EXCESS and summed <= asked * EXCESS:
+        return ""
+    notes = [f"total counts the whole pixels of the source (30 m) that the area touches, {summed:,.2f} km2 for the "
+             f"{asked:,.2f} km2 asked, whatever the resolution"]
+    if covered > summed * EXCESS:
+        notes.append(f"the pixels of the layer are blocks of {size} and cover {covered:,.2f} km2, so the sum of the "
+                     "layer is larger than total")
+    return "; ".join(notes)
+
+
 _SOURCE = re.compile(r'<SourceFilename relativeToVRT="(\d)">([^<]*)</SourceFilename>')
 _DESTINATION = re.compile(r'<DstRect xOff="(-?\d+)" yOff="(-?\d+)" xSize="(\d+)" ySize="(\d+)"\s*/>')
 _FILE = re.compile(r'[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*\.tif')

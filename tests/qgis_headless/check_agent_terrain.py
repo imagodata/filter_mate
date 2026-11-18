@@ -544,9 +544,57 @@ def check_elevation(project, work):
         project.removeMapLayer(in_lambert["layer_id"])
         coast = terrain.add_elevation(extent_wkt="POLYGON((4.9 45.7, 5.1 45.7, 5.1 45.8, 4.9 45.8, 4.9 45.7))",
                                       crs="4326")
-        check("elevation: a tile the source does not have is written at 0 m, and said so", "open sea" in coast["note"]
-              and "leaves out" in coast["note"] and coast["minimum"] == 0, coast)
+        coast_layer = project.mapLayer(coast["layer_id"])
+        coast_set = gdal.Open(coast_layer.source())  # kept: a band outlives nothing of its dataset
+        coast_band = coast_set.GetRasterBand(1)
+        check("elevation: a tile the source does not have is no data, said so and left out of the figures",
+              "open sea" in coast["note"] and "leaves out" in coast["note"] and "no data" in coast["note"]
+              and coast_band.GetNoDataValue() == -9999.0 and coast["minimum"] > 200, (coast, coast_band.GetNoDataValue()))
         project.removeMapLayer(coast["layer_id"])
+        # An area on the south edge of a tile: its rectangle in UTM 31N reaches the square below (2026-11-18: 2.5 % of
+        # the grid was written at 0 m, in the corners, and nothing was said).
+        edge = "POLYGON((4.3 45.0, 4.7 45.0, 4.7 45.3, 4.3 45.3, 4.3 45.0))"
+        south_tile = os.path.join(work, "south.tif")
+        make_dem(south_tile, 4326, (4.0, 45.0), 1.0 / 1200, size=1200, slope=0.3)
+        with open(south_tile, "rb") as handle:
+            tiles[TILE.replace("N45", "N44")] = handle.read()
+
+        def holes(made_edge):
+            opened = gdal.Open(project.mapLayer(made_edge["layer_id"]).source())
+            band = opened.GetRasterBand(1)
+            values = band.ReadAsArray()
+            return int((values == 0).sum()), int((values == band.GetNoDataValue()).sum()), values.size
+
+        whole_edge = terrain.add_elevation(extent_wkt=edge, crs="EPSG:4326")
+        zero, empty, pixels = holes(whole_edge)
+        check("elevation: the corners of the grid come from the squares they fall in, no 0 m and no hole",
+              zero == 0 and empty == 0 and "no data" not in whole_edge["note"] and whole_edge["minimum"] > 200,
+              (zero, empty, pixels, whole_edge))
+        project.removeMapLayer(whole_edge["layer_id"])
+        del tiles[TILE.replace("N45", "N44")]
+        gdal.VSICurlClearCache()
+        part_edge = terrain.add_elevation(extent_wkt=edge, crs="EPSG:4326")
+        zero, empty, pixels = holes(part_edge)
+        check("elevation: a corner no square covers is no data (never 0 m), said so, and not in the figures",
+              zero == 0 and 0 < empty < pixels // 10 and "no data" in part_edge["note"] and part_edge["minimum"] > 200,
+              (zero, empty, pixels, part_edge))
+        project.removeMapLayer(part_edge["layer_id"])
+        # A CRS the user defined (an authid of QGIS alone, which GDAL refuses) is given to GDAL as a WKT.
+        registry = QgsApplication.coordinateReferenceSystemRegistry()
+        custom = QgsCoordinateReferenceSystem.fromProj("+proj=tmerc +lat_0=0 +lon_0=4.8 +k=0.9996 +x_0=500000 +y_0=0 "
+                                                       "+ellps=WGS84 +units=m +no_defs")
+        added = registry.addUserCrs(custom, "FilterMate test CRS") if hasattr(registry, "addUserCrs") else -1
+        user = QgsCoordinateReferenceSystem(f"USER:{added}") if added > 0 else QgsCoordinateReferenceSystem()
+        if user.isValid() and user.authid().startswith("USER:"):
+            project.setCrs(user)
+            in_user = terrain.add_elevation(extent_wkt=LYON, crs="EPSG:4326")
+            check("elevation: a project in a CRS of the user is written in it, not refused as unreadable",
+                  in_user["crs_authid"] == user.authid() and in_user["width"] > 300 and in_user["minimum"] > 200, in_user)
+            project.removeMapLayer(in_user["layer_id"])
+            project.setCrs(QgsCoordinateReferenceSystem("EPSG:3857"))
+            registry.removeUserCrs(added)
+        else:
+            print(f"INFO no CRS of the user in this QGIS ({user.authid()!r}): that check is skipped", flush=True)
         project.setCrs(QgsCoordinateReferenceSystem("EPSG:27700"))
         british = terrain.add_elevation(extent_wkt=LYON, crs="EPSG:4326")
         check("elevation: not on the grid of another country, which stretches the ground",
@@ -591,6 +639,16 @@ def check_elevation(project, work):
             check(f"elevation: {label} is refused, nothing added nor kept", needle in said
                   and len(project.mapLayers()) == count and written() == files, said)
 
+        # A grid that holds no data at all (a tile read for a corner the grid never touches) is refused as before, not
+        # added as a layer of min 0 and max 0 (the statistics of a band of no data are [0, 0, 0] with an error).
+        every_pixel = terrain._empty_pixels
+        terrain._empty_pixels = lambda dataset: dataset.RasterXSize * dataset.RasterYSize
+        try:
+            said = refused(terrain.add_elevation, extent_wkt=LYON, crs="EPSG:4326")
+        finally:
+            terrain._empty_pixels = every_pixel
+        check("elevation: a grid with no data at all is refused as no tile, nothing added nor kept",
+              "has no tile there" in said and len(project.mapLayers()) == count and written() == files, said)
         from filter_mate.adapters.public_api import operations
         delay[0] = 0.4
         # While the source is asked which tiles it has, then while the tile is read.
