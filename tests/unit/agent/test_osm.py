@@ -226,3 +226,15 @@ def test_a_key_that_is_an_area_for_some_values_only_is_not_made_one_for_all_by_t
     for key in ("power", "highway", "railway", "man_made", "waterway", "barrier", "area"):
         assert key not in areas, key
     assert "healthcare" in areas and "amenity" in areas
+
+
+def test_a_key_the_table_decides_by_value_is_not_an_area_for_all_its_values_in_gdal():
+    """GDAL ranks a closed way of its keys as an area: natural=tree_row, cliff or coastline and aeroway=taxiway came out
+    as polygons whatever the table says (measured with GDAL 3.4.1), and a request for lines lost them."""
+    areas = gdal_config(read_tags([{"key": "natural"}])).splitlines()[0].split("=", 1)[1].split(",")
+    assert "natural" not in areas and "aeroway" not in areas
+    assert {"amenity", "building", "landuse", "leisure", "highway=platform", "public_transport=platform"} <= set(areas)
+    assert not any("=" in key and key not in ("highway=platform", "public_transport=platform") for key in areas)
+    # What the table says of them is decided from the tags of the feature.
+    assert closed_way_is_area({"natural": "wood"}) and not closed_way_is_area({"natural": "tree_row"})
+    assert closed_way_is_area({"aeroway": "runway"}) and not closed_way_is_area({"aeroway": "taxiway"})

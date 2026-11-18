@@ -25,12 +25,13 @@ OSM_TYPES = {"points": "node", "lines": "way", "multilinestrings": "relation"}
 _KEY = re.compile(r"[A-Za-z][A-Za-z0-9_:.-]{0,59}")
 # A value goes between double quotes in the query: no quote, no backslash, nothing that does not print.
 _VALUE = re.compile(r"[^\"\\\x00-\x1f\x7f]{1,80}")
-# A closed way is an area when it carries one of these keys (the list of GDAL), a line otherwise. The keys asked are
-# added, but those of what is drawn as a line even when it closes (a roundabout, a fence, a ring road): for these the
-# rules of OpenStreetMap decide, tag by tag, in ``closed_way_is_area``.
-_AREA_KEYS = ("aeroway", "amenity", "boundary", "building", "craft", "geological", "historic", "landuse", "leisure",
-              "military", "natural", "office", "place", "shop", "sport", "tourism", "highway=platform",
-              "public_transport=platform")
+# A closed way is an area when it carries one of these keys (the list of GDAL, less the keys the table below decides
+# value by value: GDAL ranks a way of its keys as an area whatever the value, a natural=tree_row or an
+# aeroway=taxiway that closes included). The keys asked are added, but those of what is drawn as a line even when it
+# closes (a roundabout, a fence, a ring road): for these the rules of OpenStreetMap decide, tag by tag, in
+# ``closed_way_is_area``.
+_AREA_KEYS = ("amenity", "boundary", "building", "craft", "geological", "historic", "landuse", "leisure", "military",
+              "office", "place", "shop", "sport", "tourism", "highway=platform", "public_transport=platform")
 _LINE_KEYS = frozenset({"highway", "waterway", "railway", "barrier", "aerialway", "route", "power", "man_made",
                         "name", "ref", "bridge", "tunnel", "oneway", "surface", "maxspeed", "lanes"})
 # "A closed way is an area": the table of the wiki (Key:area) and of osmtogeojson (polygon-features), by key. Every
@@ -213,8 +214,11 @@ def gdal_config(tags: Sequence[Tag]) -> str:
     """The configuration of the OSM driver of GDAL for these tags: each key asked is a column of every layer, the
     other tags stay together in ``other_tags``.
 
-    GDAL (3.4 as 3.12) turns a closed way into an area from a whole key; a key that is an area for some values only
-    (``power=substation``, not ``power=line``) is left to ``closed_way_is_area``, read from the tags of the feature.
+    GDAL turns a closed way into an area from a whole key. A key that is an area for some values only
+    (``power=substation``, not ``power=line``; ``natural=wood``, not ``natural=tree_row``) is left to
+    ``closed_way_is_area``, read from the tags of the feature: no ``key=value`` is added to the list, GDAL 3.4.1 honours
+    those of its own list (``highway=platform``) but loses them all as soon as a key has two values listed
+    (2026-11-18: ``power=substation,power=plant`` left even ``highway=platform`` a line).
 
     Written without a ``[general]`` section, which GDAL 3.4 does not know and GDAL 3.12 does not need.
     """
