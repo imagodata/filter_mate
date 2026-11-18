@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Site: a FilterMate Cloud page with the tiers to test and a waitlist; cookie-free audience measure.
+
 ## [5.1.1] - 2026-11-17
 
 The fixes of a review of 5.1.0, and what was merged since. The free quota of the agent is removed: AGENT works with
