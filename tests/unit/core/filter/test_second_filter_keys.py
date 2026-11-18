@@ -5,7 +5,8 @@
 ``> 2`` (the new subset replacing the first), the features were read through the first subset, so no list was
 written and the former conversion's ``bounds_width("geom") > 2`` was refused by SQLite. Keys are now read on the
 whole layer whenever the new subset is not ANDed with the subset the layer has (replace, OR, AND with another
-one), still never under AND NOT. Under OR with the subset the layer shows, the keys it keeps are not listed again.
+one), still never under AND NOT. Under OR the list holds every key the expression keeps (review of 2026-11-18: it is
+also the selection the targets are filtered by; one without the keys of the old subset made it narrower).
 Methods extracted with ast (the module needs the plugin package).
 """
 import ast
@@ -22,8 +23,7 @@ pytestmark = pytest.mark.unit
 
 _PATH = Path(__file__).resolve().parents[4] / "core" / "tasks" / "executors" / "attribute_filter_executor.py"
 _PACKAGE = "fm_second_filter_keys_test"
-_METHODS = ("_native_subset", "_keys_may_be_evaluated", "_keys_read_on_whole_layer", "_shown_features_kept",
-            "_current_subset")
+_METHODS = ("_native_subset", "_keys_may_be_evaluated", "_keys_read_on_whole_layer", "_current_subset")
 
 
 def _namespace():
@@ -73,25 +73,26 @@ def calls(monkeypatch):
     return recorded
 
 
-@pytest.mark.parametrize("current, old, operator, evaluate, whole_layer, shown_kept", [
-    ("", None, None, True, False, False),          # the first filter: the layer is the whole layer
-    ("", None, "OR", True, False, False),
-    (OLD, OLD, "AND", True, False, False),         # ANDed with the subset the layer has: through it (unchanged)
-    (OLD, OLD, None, True, True, False),           # replaced: the second filter of the defect
-    (OLD, OLD, "OR", True, True, True),            # ORed: the keys the old subset keeps are left out
-    (OLD, '"pop" > 2', "OR", True, True, False),   # ORed with another subset than the layer's
-    (OLD, '"pop" > 2', "AND", True, True, False),  # ANDed with another subset than the layer's
-    (OLD, None, "AND", True, True, False),         # no old subset: the new expression alone
-    (OLD, OLD, "AND NOT", False, True, False),     # never a list under NOT (FALSE and NULL differ)
-    ("", None, "AND NOT", False, False, False),
-    (RuntimeError, OLD, None, False, False, False),  # a deleted layer
+@pytest.mark.parametrize("current, old, operator, evaluate, whole_layer", [
+    ("", None, None, True, False),          # the first filter: the layer is the whole layer
+    ("", None, "OR", True, False),
+    (OLD, OLD, "AND", True, False),         # ANDed with the subset the layer has: through it (unchanged)
+    (OLD, OLD, None, True, True),           # replaced: the second filter of the defect
+    (OLD, OLD, "OR", True, True),           # ORed: every key, those the old subset keeps too
+    (OLD, '"pop" > 2', "OR", True, True),   # ORed with another subset than the layer's
+    (OLD, '"pop" > 2', "AND", True, True),  # ANDed with another subset than the layer's
+    (OLD, None, "AND", True, True),         # no old subset: the new expression alone
+    (OLD, OLD, "AND NOT", False, True),     # never a list under NOT (FALSE and NULL differ)
+    ("", None, "AND NOT", False, False),
+    (RuntimeError, OLD, None, False, False),  # a deleted layer
 ])
-def test_where_the_keys_are_read(calls, current, old, operator, evaluate, whole_layer, shown_kept):
+def test_where_the_keys_are_read(calls, current, old, operator, evaluate, whole_layer):
     executor = _executor(current, old, operator)
 
     assert executor._native_subset(' bounds_width($geometry) > 2') == "subset"
     assert len(calls) == 1
     options = calls[0]
-    assert (options["evaluate"], options["whole_layer"], options["shown_kept"]) == (evaluate, whole_layer, shown_kept)
+    assert (options["evaluate"], options["whole_layer"]) == (evaluate, whole_layer)
+    assert "shown_kept" not in options  # no list without the keys of the old subset
     assert options["negated"] == ("NOT" in (operator or ""))
     assert options["key_name"] == "fid"

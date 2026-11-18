@@ -287,8 +287,7 @@ def native_subset(layer, expression):
     return subset_for_layer(layer, expression)
 
 
-def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=False, whole_layer=False,
-                     shown_kept=False):
+def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=False, whole_layer=False):
     """The subset of ``layer`` for ``expression`` in its source's own language.
 
     Args:
@@ -302,9 +301,6 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
             through its current subset: the new subset is not ANDed with that
             subset (it replaces it, or is ORed with it). Read on a copy of the
             layer without its subset (``_hybrid_subset``).
-        shown_kept: With ``whole_layer``: the features the layer shows now are
-            kept anyway (the new subset is ORed with its current one); their
-            keys are not listed again.
         negated: Whether the subset will be written under NOT (AND NOT). OGR
             SQL gives FALSE to TRUE AND NULL: a translation holding AND, OR or
             NOT is then left to the former conversion, and so are texts (only
@@ -345,7 +341,7 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
     if not evaluate:
         return None
     try:
-        subset = _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer, shown_kept)
+        subset = _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer)
     except Unsupported as exc:
         logger.info('No hybrid subset for %s: %s', layer.name(), exc)
         return None
@@ -380,7 +376,7 @@ def _is_true(value):
     raise Unsupported('A condition gave a value that is not a boolean')
 
 
-def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=False, shown_kept=False):
+def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=False):
     """Let QGIS evaluate the expression on each feature, then list keys (``native_dialect.hybrid_sql``).
 
     Every feature is read and evaluated locally: the provider's own compiled
@@ -449,9 +445,6 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
     if QgsFeatureRequest.ALL_ATTRIBUTES not in names:
         names.add(key_name)
         request.setSubsetOfAttributes(sorted(names), source.fields())
-    # Under OR with the subset the layer shows, its features are kept by that subset: listed once, the keys of
-    # a chain of ORs stay within the features of the layer.
-    shown = _shown_keys(layer, key_name) if shown_kept and source is not layer else frozenset()
 
     passing, failing, seen = [], ([] if native is not None else None), set()
     for feature in source.getFeatures(request):
@@ -471,8 +464,7 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
         if kept and not in_native:
             raise Unsupported('The native part rejects a feature the expression keeps')
         if kept:
-            if value not in shown:
-                passing.append(value)
+            passing.append(value)
         elif failing is not None and in_native:
             failing.append(value)
     subset = hybrid_sql(native_sql, passing, failing, key, numeric, dialect)
@@ -516,16 +508,6 @@ def _check_copy_reads_like_layer(layer, copy, names, whole, dialect):
                 raise Unsupported('The field {} is not read in the source as in the layer'.format(name))
     if dialect == POSTGRESQL and ('$id' in whole.referencedFunctions() or 'id' in whole.referencedVariables()):
         raise Unsupported('$id of a PostgreSQL layer is not its key: another number in a copy')
-
-
-def _shown_keys(layer, key_name):
-    """The keys of the features ``layer`` shows, read through its subset."""
-    from qgis.core import QgsFeatureRequest
-    request = QgsFeatureRequest()
-    request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
-    request.setSubsetOfAttributes([key_name], layer.fields())
-    return frozenset(value for value in (feature[key_name] for feature in layer.getFeatures(request))
-                     if not is_null_value(value))
 
 
 __all__ = ['constant_variables', 'field_types', 'native_dialect_for_layer', 'native_geometry', 'native_subset',

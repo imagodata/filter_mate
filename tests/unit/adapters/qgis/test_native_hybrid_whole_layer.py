@@ -287,21 +287,13 @@ def test_dollar_id_of_a_geopackage_copy_is_its_fid(translation, monkeypatch):
         '"fid" IS NOT NULL AND "fid" IN (3, 4, 5)')
 
 
-def test_under_or_the_keys_the_old_subset_keeps_are_not_listed_again(translation, monkeypatch):
+def test_under_or_every_key_the_expression_keeps_is_listed(translation, monkeypatch):
+    """The list is also the selection the targets are filtered by: never without the keys the old subset keeps."""
     layer = _Layer("zones", ROWS, subset='"fid" IN (2, 3)', shown={2, 3})
-    copy = _Layer("zones (unfiltered)", ROWS)
-    _with_copy(translation, monkeypatch, copy)
-
-    assert _hybrid(translation, layer, whole_layer=True, shown_kept=True) == '"fid" IS NOT NULL AND "fid" IN (5)'
-    assert len(layer.reads) == 1 and layer.reads[0].attributes == ["fid"]  # the shown keys only
-
-
-def test_under_or_nothing_new_gives_a_contradiction(translation, monkeypatch):
-    layer = _Layer("zones", ROWS, subset='"pop" > 2', shown={2, 3, 5})
     _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
 
-    # ( "pop" > 2 ) OR ( "fid" <> "fid" ): the old subset alone
-    assert _hybrid(translation, layer, whole_layer=True, shown_kept=True) == '"fid" <> "fid"'
+    assert _hybrid(translation, layer, whole_layer=True) == '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)'
+    assert layer.reads == []  # the layer itself is not read
 
 
 def test_a_whole_translation_opens_no_copy(translation, monkeypatch):

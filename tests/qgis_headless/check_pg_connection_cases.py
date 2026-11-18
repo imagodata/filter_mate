@@ -544,12 +544,26 @@ def native_steps(expression):
 # 2026-11-18: the source filtered again without Unfilter, replaced then ORed, by expressions QGIS evaluates in part.
 # Replaced, the keys used to be read through the first subset (no list: the former conversion); they are read on a
 # copy of the layer without its subset, opened and closed in the task's thread: its connection must not stay.
+# The OR filters a target from a task without features (as the API or the agent send it): the target follows the
+# selection of the second filter whole, also the squares the old subset keeps (review of 2026-11-18: the list
+# written for the source left them out, and so did the EXISTS of the target).
 NATIVE_REFILTERS = [
-    ('x_min($geometry) > 700500 AND "id" <= 1000', None),
-    ('x_min($geometry) > 700800 AND "id" <= 1500', None),  # ids 1001 to 1500 lie outside the first subset
-    ('x_min($geometry) > 700900 AND "id" <= 2000', None),
-    ('x_min($geometry) < 700100 AND "id" <= 300', 'OR'),
+    ('x_min($geometry) > 700500 AND "id" <= 1000', None, ()),
+    ('x_min($geometry) > 700800 AND "id" <= 1500', None, ()),  # ids 1001 to 1500 lie outside the first subset
+    ('x_min($geometry) > 700900 AND "id" <= 2000', None, ()),
+    ('x_min($geometry) > 700850 AND "id" <= 600', 'OR', (TGT_A,)),  # ids <= 600 east of 700900: in both
 ]
+
+
+def without_task_features(enabled):
+    """The next filter tasks get no features, only the expression of the selection."""
+    from filter_mate.core.tasks.filter_task import FilterEngineTask
+    original = STATE.setdefault('task_init', FilterEngineTask.__init__)
+
+    def init(self, description, task_action, task_parameters, *args, **kwargs):
+        task_parameters.get('task', {})['features'] = []
+        original(self, description, task_action, task_parameters, *args, **kwargs)
+    FilterEngineTask.__init__ = init if enabled else original
 
 
 def qgis_backends():
@@ -558,13 +572,14 @@ def qgis_backends():
                "AND application_name <> '' AND pid <> pg_backend_pid()")[0][0]
 
 
-def native_refilter_steps(index, expression, operator):
+def native_refilter_steps(index, expression, operator, targets):
     def configure_step():
         STATE['refilter_shown'] = sorted(feature['id'] for feature in layer(SRC).getFeatures())
-        return configure(expression, (), buffered=False, operator=operator)
+        return configure(expression, targets, buffered=False, operator=operator)
 
     def filter_step():
         STATE['refilter_started'] = time.time()
+        without_task_features(bool(targets))
         return run_task('filter')
 
     def check_step():
@@ -579,6 +594,11 @@ def native_refilter_steps(index, expression, operator):
               f"QGIS connections {STATE['refilter_backends']}", flush=True)
         check(f"native refilter {operator or 'replace'}: {expression}: the source keeps QGIS's {len(wanted)} features, "
               "as a list of keys", got == wanted and '"id" IN (' in subset, f"count={len(got)} expected={len(wanted)}")
+        without_task_features(False)
+        for name in targets:
+            ids = reference_ids(expression)  # the selection of this filter on the whole layer, not the source filter
+            check_count(f"native refilter {operator or 'replace'}, no task features: the target follows the whole "
+                        "selection", name, expected(name, f"s.id IN ({', '.join(map(str, ids))})", buffered=False))
 
     for function, name in ((configure_step, 'configure'), (filter_step, 'filter'), (check_step, 'check')):
         function.__name__ = f"s_native_refilter_{name}_{index}"
@@ -714,8 +734,8 @@ CASES = {
     'no_psycopg2': [s_plain_configure, s_plain_filter, s_plain_check, s_unfilter, s_unfilter_check,
                     s_buffer_configure, s_buffer_filter, s_buffer_check, s_no_connection_check],
     'native': [step for expression in NATIVE_EXPRESSIONS for step in native_steps(expression)]
-    + [step for index, (expression, operator) in enumerate(NATIVE_REFILTERS)
-       for step in native_refilter_steps(index + 1, expression, operator)] + [s_native_refilter_end]
+    + [step for index, (expression, operator, targets) in enumerate(NATIVE_REFILTERS)
+       for step in native_refilter_steps(index + 1, expression, operator, targets)] + [s_native_refilter_end]
     + [s_native_geometric_configure, s_plain_filter, s_native_geometric_check],
     'or_buffer': [s_first_configure, s_first_filter, s_first_check, s_second_configure, s_second_filter,
                   s_second_check],

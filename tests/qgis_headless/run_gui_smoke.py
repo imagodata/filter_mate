@@ -5425,9 +5425,10 @@ ROWS_STEPS = [s_rows_setup, s_rows_fit_check, s_rows_exporting_check, s_rows_sho
 # straddle and west_a 100 m, east_b and west_b 50 m.
 REFILTERS = [
     ('bounds_width($geometry) > 60', None),
-    ('bounds_width($geometry) < 60 AND x_min($geometry) > 700500', 'OR'),  # east_b added to the three
-    ('bounds_width($geometry) > 40', None),  # replaced: the five, not the four of the subset it replaces
+    ('bounds_width($geometry) > 40', None),  # replaced: the five, not the three of the subset it replaces
     ('$area > 5000', None),  # west_b: 5,000 m2 on the plane, more on the ellipsoid; QGIS keeps it, ST_Area did not
+    # ORed: east_a and west_b, kept by the old subset too, are listed with east_b (the selection of the targets)
+    ('bounds_width($geometry) < 60 OR x_min($geometry) > 700650', 'OR'),
 ]
 REFILTER_BUTTONS = ('pushButton_checkable_filtering_layers_to_filter', 'pushButton_checkable_filtering_geometric_predicates',
                     'pushButton_checkable_filtering_current_layer_combine_operator')
@@ -5492,9 +5493,12 @@ def _refilter_steps(text, operator):
         zones, (old, shown) = layer('zones'), STATE['refilter_old']
         subset, expected = zones.subsetString(), refilter_reference(text)
         if operator == 'OR':
-            expected = sorted(set(expected) | set(shown))
+            # the new part is also the selection the targets follow: every zone the expression keeps
+            fids = {feature['name']: feature.id() for feature in QgsVectorLayer(
+                M['zones'] + '|layername=zones', 'zones fids', 'ogr').getFeatures()}
             new_part = subset[len(f'( {old} ) OR ( '):] if subset.startswith(f'( {old} ) OR ( ') else ''
-            listed = bool(listed_fids(new_part)) and not listed_fids(new_part) & listed_fids(old)
+            listed = listed_fids(new_part) == {fids[name] for name in expected}
+            expected = sorted(set(expected) | set(shown))
         else:
             listed = subset.startswith('"fid" IS NOT NULL AND "fid" IN (')
         refused = [message for message in message_bar_texts() if 'previous filter kept' in message]

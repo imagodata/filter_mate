@@ -395,7 +395,11 @@ def run_executor(layer, provider_type, text, old=None, operator=None):
     accepted = bool(combined) and executor.apply_filter(combined)
     got = keys(layer) if accepted else None
     layer.setSubsetString('')
+    LAST_RUN.update(executor=executor, processed=processed, combined=combined)
     return processed in executor.native_origins, combined, got
+
+
+LAST_RUN = {}  # the executor, its subset and the combined one of the last run_executor
 
 
 def hybrid_path(label, layer, provider_type):
@@ -427,21 +431,19 @@ def hybrid_path(label, layer, provider_type):
 HYBRID_PROVIDERS = ('spatialite', 'postgresql')  # the plugin's provider types of the SQLite and PostgreSQL sources
 
 
-def listed_keys(subset):
-    """The keys of the lists ``IN (...)`` of a subset."""
-    import re
-    return {int(value) for values in re.findall(r'\bIN \(([-\d, ]+)\)', subset or '') for value in values.split(',')}
-
-
 def refilter_path(label, layer, provider_type, pairs, errors_drop=False):
     """A second filter on a layer whose first filter listed keys: replaced, ORed and ANDed with that list.
 
     2026-11-18: replaced or ORed, the keys were not read (the features came
     through the first subset) and the former conversion wrote the second one.
     Where the first is a list, the second must be one too (the same function
-    on the same features: QGIS evaluates it there), keep what QGIS keeps and,
-    under OR, list no key the first list keeps.
+    on the same features: QGIS evaluates it there) and keep what QGIS keeps.
+    The selection the targets are filtered by (ExpressionFacadeHandler.
+    _source_selection: the new subset itself under OR and replace) must keep
+    what the second expression keeps on the whole layer, also the features the
+    first list keeps (review of 2026-11-18: a list without them under OR).
     """
+    from filter_mate.core.tasks.expression_facade_handler import ExpressionFacadeHandler
     for first, second in pairs:
         written, old, _ = run_executor(layer, provider_type, first)
         if not written or ' IN (' not in (old or ''):
@@ -451,12 +453,16 @@ def refilter_path(label, layer, provider_type, pairs, errors_drop=False):
             expected = combined_reference(layer, old, operator, second, errors_drop)
             written, subset, got = run_executor(layer, provider_type, second, old, operator)
             status = ('PASS' if got == expected else 'FAIL') if written else 'FAIL'
-            new_part = (subset or '').split(' ) OR ( ', 1)[-1] if operator == 'OR' else ''
-            again = listed_keys(new_part) & listed_keys(old)
-            if again:
-                status = 'FAIL'  # listed by the old subset already: an OR chain would grow at each step
+            selection = ExpressionFacadeHandler._source_selection(
+                LAST_RUN['executor'], LAST_RUN['processed'], LAST_RUN['combined'])
+            layer.setSubsetString(selection or '')
+            selected = keys(layer) if selection else None
+            layer.setSubsetString('')
+            wanted = (expected if operator == 'AND' else reference(layer, second, errors_drop))
+            if selected != wanted:
+                status = 'FAIL'  # the targets would follow another selection than the second filter's
             report(status, f"{label} refilter {operator}: {first} -> {second}",
-                   f"subset={subset!r:.200} expected={expected} got={got} listed again={sorted(again)}")
+                   f"subset={subset!r:.200} expected={expected} got={got} selection={selected} wanted={wanted}")
 
 
 def combined_reference(layer, old, operator, text, errors_drop=False):

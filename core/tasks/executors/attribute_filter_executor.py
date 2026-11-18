@@ -470,8 +470,7 @@ class AttributeFilterExecutor:
             native = subset_for_layer(self.layer, expression, key_name=self.primary_key,
                                       evaluate=self._keys_may_be_evaluated(),
                                       negated='NOT' in (self.combine_operator or '').upper(),
-                                      whole_layer=self._keys_read_on_whole_layer(),
-                                      shown_kept=self._shown_features_kept())
+                                      whole_layer=self._keys_read_on_whole_layer())
         except Exception as e:  # catch-all: the former conversion stays the fallback
             logger.debug(f"Native translation not available: {e}")
             return None
@@ -504,23 +503,18 @@ class AttributeFilterExecutor:
         where the first one listed keys; ``$area > 100`` was measured planar
         by ``ST_Area`` the second time. They are now read as the first filter
         reads them, on the whole layer (a copy of it without its subset).
+
+        Under OR the list holds every key the expression keeps, also those the
+        old subset keeps: it is the selection the targets are filtered by
+        (ExpressionFacadeHandler._source_selection, the EXISTS of PostgreSQL),
+        which a list without them made narrower (review of 2026-11-18). A
+        chain of ORs adds one list per filter, each within HYBRID_MAX_KEYS.
         """
         current = self._current_subset()
         if not current:
             return False
         operator = (self.combine_operator or '').strip().upper()
         return not (operator == 'AND' and current == (self.old_subset or '').strip())
-
-    def _shown_features_kept(self) -> bool:
-        """Whether the features the layer shows now are kept by the new subset whatever the expression.
-
-        Under OR with the subset the layer shows: ``( old ) OR ( keys )`` needs
-        no key of the features ``old`` keeps (a chain of ORs would list them
-        again at each step).
-        """
-        current = self._current_subset()
-        operator = (self.combine_operator or '').strip().upper()
-        return bool(current) and operator == 'OR' and current == (self.old_subset or '').strip()
 
     def _current_subset(self) -> Optional[str]:
         """The layer's subset, stripped; None when the layer cannot be read (deleted)."""
