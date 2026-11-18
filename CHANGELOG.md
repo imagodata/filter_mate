@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: an error while the project is read for a request no longer leaves the chat busy for good; the request comes back in the input line and the next one goes.
 - Agent: a recipe of a project made by someone else can no longer turn the sources of the agent off or on (or ask a question): the tools of the chat alone are neither kept in a recipe nor run by one.
 - Agent: unticking a source from the quick menu or by the agent now updates the MCP server at once; the source stayed usable by other applications until the settings were saved.
 - Agent: going back from the advisor, careful or autonomous level to the standard one in the middle of a conversation is now told to the model, which kept describing the steps instead of acting.

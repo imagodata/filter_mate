@@ -159,7 +159,15 @@ class ChatEngine:
         self._busy, self._cancelled = True, False
         self._tries = 0
         self._generation += 1
-        self._session.add_user_text(text, context)
+        try:
+            self._session.add_user_text(text, context)
+        except Exception:
+            # The context is computed in there, from the project: an error must not leave the engine busy, which
+            # would refuse every later request. Nothing was added to the conversation (the message goes in last), so
+            # it ends as a request that could not be sent, and the interface gives it back.
+            logger.exception("Agent request could not be prepared")
+            self._finish(ChatOutcome(OUTCOME_FAILED, error=ProviderError(ERROR_STREAM, "The request could not be sent.")))
+            return True
         dropped = tuple(getattr(self._session, "dropped", ()) or ())
         if dropped:
             self._executor.withdraw(dropped)
