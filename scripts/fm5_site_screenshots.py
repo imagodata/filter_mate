@@ -17,18 +17,24 @@ Images written (``fm5_<topic>.png``):
 * ``fm5_export_tab``           dock, EXPORTING tab with a raster, a point cloud and a vector layer
 * ``fm5_configuration``        dock, Configuration tab at the RASTER / POINT_CLOUD options
 
-Data. With ``FM5_DATA`` / ``FM5_GPKG`` / ``FM5_TILE`` set, the script uses the maintainer's real data (IGN
-BD TOPO GeoPackage, MNT 1 m, LiDAR HD COPC tile of Cerdagne), like ``scripts/fm5_gui_check.py``. Without them it
+Data. With ``FM5_DATA`` / ``FM5_GPKG`` / ``FM5_TILE`` set, the script uses real data: the square kilometre of
+Fenouillet and Saint-Alban (Toulouse Métropole) of the site's videos, IGN BD TOPO buildings, roads and parcels
+(``estavar.gpkg``, the name is kept for the scripts that read it), RGE ALTI DTM (``FM5_DTM``, default
+``mnt_village.tif``) and LiDAR HD COPC (``estavar_village.copc.laz``). Without them it
 falls back to the synthetic fixtures of ``tests/qgis_headless/make_fixtures.py`` (``FM_FIXTURES`` folder), so it
 also runs in the official QGIS Docker images. Images made on synthetic data are INTERIM: regenerate them on the
 real data before publishing the site.
 
+Without a screen (Docker, Xvfb, a 1.5 scale; the data folder is mounted on /data)::
+
+    scripts/guide_screenshots_headless.sh fm5        # PNGs in ~/dev/fm-guide/out/fm5, then ``publish``
+
 Windows, real data (PowerShell; QGIS 4.2, plugin loaded from the repository through QGIS_PLUGINPATH)::
 
     $env:QGIS_PLUGINPATH = "\\\\wsl.localhost\\Ubuntu\\home\\simon\\dev"   # folder that contains filter_mate/
-    $env:FM5_DATA = "\\\\wsl.localhost\\Ubuntu\\home\\simon\\fm5_testdata"  # mnt_1m.tif, classes_2m.tif
-    $env:FM5_GPKG = "$env:LOCALAPPDATA\\Temp\\fm5\\cerdagne.gpkg"           # batiment / parcelle / troncon_de_route
-    $env:FM5_TILE = "<...>\\LHD_FXX_0616_6153_PTS_C_LAMB93_IGN69.copc.laz"
+    $env:FM5_DATA = "<...>\\data_tm"                                       # mnt_village.tif
+    $env:FM5_GPKG = "<...>\\data_tm\\estavar.gpkg"                          # batiment / parcelle / troncon_de_route
+    $env:FM5_TILE = "<...>\\data_tm\\estavar_village.copc.laz"
     $env:FM5_SITE_OUT = "<repo>\\website\\img\\guide"
     qgis-bin.exe --nologo --noversioncheck --lang en --profiles-path "$env:TEMP\\fm5\\profiles" --profile fm5 `
         --code <repo>\\scripts\\fm5_site_screenshots.py
@@ -102,8 +108,10 @@ project = QgsProject.instance()
 
 if REAL:
     # name of the layers in the project, as in fm5_gui_check.py
-    DS = {'vector': 'batiment', 'other_vector': 'parcelle', 'raster': 'mnt', 'cloud': 'lhd', 'multi': 'parcelle', 'multi_display': '"idu"',
-          'raster_range': (1240.0, 1270.0), 'cloud_class': 6}
+    # Fenouillet / Saint-Alban: the DTM spans 123 to 134 m; the range keeps the low ground (above 130 m there are
+    # only the embankments of the roads)
+    DS = {'vector': 'batiment', 'other_vector': 'parcelle', 'raster': 'mnt', 'cloud': 'lhd', 'multi': 'parcelle',
+          'multi_display': '"id"', 'vector_display': '"usage_1"', 'raster_range': (123.0, 126.0), 'cloud_class': 6}
 else:
     FIXTURES = os.environ.get('FM_FIXTURES', '/tmp/fm')
     try:
@@ -113,6 +121,7 @@ else:
         print(f"FAIL   fixtures not readable in {FIXTURES}: {_exc} (run make_fixtures.py first)", flush=True)
         os._exit(3)
     DS = {'vector': 'zones', 'other_vector': None, 'raster': 'dem', 'cloud': 'cloud', 'multi': 'zones', 'multi_display': '',
+          'vector_display': '',
           'raster_range': tuple(M['east_range']), 'cloud_class': 6}
 
 
@@ -293,7 +302,7 @@ def save_map(name, extent, names):
     settings = QgsMapSettings(iface.mapCanvas().mapSettings())
     settings.setLayers([layer(item) for item in names if layer(item) is not None])
     settings.setBackgroundColor(QColor('#ffffff'))
-    settings.setOutputSize(QSize(1431, 886))  # 954 x 591 at 1.5 device pixel ratio, as the guide expects
+    settings.setOutputSize(QSize(1431, 886))  # 954 x 591 in the guide; 2147 x 1329 px at the 1.5 pixel ratio
     settings.setOutputDpi(144)
     settings.setExtent(extent)
     job = QgsMapRendererSequentialJob(settings)
@@ -337,7 +346,7 @@ def s_setup():
         data, gpkg, tile = os.environ['FM5_DATA'], os.environ['FM5_GPKG'], os.environ['FM5_TILE']
         for name in ('batiment', 'parcelle', 'troncon_de_route'):
             layers.append(QgsVectorLayer(f'{gpkg}|layername={name}', name, 'ogr'))
-        layers.append(QgsRasterLayer(os.path.join(data, 'mnt_1m.tif'), 'mnt', 'gdal'))
+        layers.append(QgsRasterLayer(os.path.join(data, os.environ.get('FM5_DTM', 'mnt_village.tif')), 'mnt', 'gdal'))
         if has_point_clouds():
             from qgis.core import QgsPointCloudLayer
             layers.append(QgsPointCloudLayer(tile, 'lhd', 'copc'))
@@ -368,11 +377,14 @@ def s_open_plugin():
     settings.setValue('FilterMate/whats_new_seen', 99)
     settings.setValue('qgis/digitizing/validate_geometries', 0)
     plugins = os.path.join(tempfile.mkdtemp(prefix='fm_site_'), 'plugins')
-    shutil.copytree(REPO, os.path.join(plugins, PACKAGE), ignore=shutil.ignore_patterns(*EXCLUDED))
-    sys.path.insert(0, plugins)
-    qgis.utils.plugin_paths.insert(0, plugins)
-    qgis.utils.updateAvailablePlugins()
-    started = qgis.utils.loadPlugin(PACKAGE) and qgis.utils.startPlugin(PACKAGE)
+    if os.environ.get('FM_PLUGIN_LOADED'):  # the headless runner put a copy on QGIS_PLUGINPATH: QGIS started it
+        started = PACKAGE in qgis.utils.plugins or (qgis.utils.loadPlugin(PACKAGE) and qgis.utils.startPlugin(PACKAGE))
+    else:
+        shutil.copytree(REPO, os.path.join(plugins, PACKAGE), ignore=shutil.ignore_patterns(*EXCLUDED))
+        sys.path.insert(0, plugins)
+        qgis.utils.plugin_paths.insert(0, plugins)
+        qgis.utils.updateAvailablePlugins()
+        started = qgis.utils.loadPlugin(PACKAGE) and qgis.utils.startPlugin(PACKAGE)
     check('plugin starts with iface', started and PACKAGE in qgis.utils.plugins)
     from filter_mate.adapters.qgis.coverage_layers import cache
     cache.set_cache_root(os.path.join(os.path.dirname(plugins), 'cache'))
@@ -381,7 +393,14 @@ def s_open_plugin():
 
 
 def s_dock_ready():
+    """The dock of a new install, 440 px wide: the rail of sections, every section in it, EXPLORING and FILTERING
+    open."""
     d = dock()
+    if d._fm_panels.detached():
+        d._fm_panels.attach_all()
+    d._fm_sections.open_top('exploring')
+    d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
+    d.setMinimumWidth(0)
     mw = iface.mainWindow()
     mw.resizeDocks([d], [440], Qt.Orientation.Horizontal)
     check('dock open', d.isVisible())
@@ -396,7 +415,7 @@ def s_vector_source():
 
 def s_vector_select():
     d = dock()
-    d.toolBox_tabTools.setCurrentIndex(0)
+    d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
     d.mGroupBox_exploring_single_selection.setChecked(True)
     source = layer(DS['vector'])
     if REAL:  # the largest building inside the DTM: its clip reads at site scale
@@ -406,6 +425,9 @@ def s_vector_select():
     else:
         feature = next(f for f in source.getFeatures() if f['name'] == 'east_a')
     STATE['selection_box'] = feature.geometry().boundingBox()
+    STATE['selection_fid'] = feature.id()
+    if DS['vector_display']:  # a readable label in the picker (the use of the building, not its number of homes)
+        d.mFieldExpressionWidget_exploring_single_selection.setExpression(DS['vector_display'])
     d.mFeaturePickerWidget_exploring_single_selection.setFeature(feature.id())
     STATE['targets'] = [DS['raster']] + ([DS['cloud']] if has_point_clouds() else [])
     set_targets(STATE['targets'])
@@ -414,7 +436,8 @@ def s_vector_select():
     # 30 m around one building on the real data; the synthetic zones are small squares in a 1 km DEM
     d.mQgsDoubleSpinBox_filtering_buffer_value.setValue(30.0 if REAL else 150.0)
     ready = targets_ready(STATE['targets'])
-    return lambda: bool(dock().get_current_features()[0]) and ready()
+    since = time.time()  # and the selection strip told the feature (it follows a moment later)
+    return lambda: bool(dock().get_current_features()[0]) and ready() and time.time() - since > 3.0
 
 
 def dump_rows(tag):
@@ -482,7 +505,7 @@ def labelled_features(source, picks):
 
 def s_multi_select():
     d = dock()
-    d.toolBox_tabTools.setCurrentIndex(0)
+    d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
     d.mGroupBox_exploring_multiple_selection.setChecked(True)
     if DS['multi_display']:  # a readable label per row in the picker (the cadastre id, not the commune name)
         layer(DS['multi']).setDisplayExpression(DS['multi_display'])
@@ -684,7 +707,9 @@ def s_back_to_vector():
 
 def s_export_tab():
     d = dock()
-    d.toolBox_tabTools.setCurrentIndex(1)
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+    d.mFeaturePickerWidget_exploring_single_selection.setFeature(STATE['selection_fid'])  # the building of the clip
+    d.toolBox_tabTools.setCurrentWidget(d.EXPORTING)
     d.pushButton_checkable_exporting_layers.setChecked(True)
     combo = d.checkableComboBoxLayer_exporting_layers
     wanted = [DS['raster'], DS['vector']] + ([DS['cloud']] if has_point_clouds() else [])
@@ -707,8 +732,8 @@ def s_config_tab():
     from qgis.PyQt.QtCore import QModelIndex
     from qgis.PyQt.QtWidgets import QAbstractItemView, QTreeView
     d = dock()
-    d.toolBox_tabTools.setCurrentIndex(2)
-    page = d.toolBox_tabTools.widget(2)
+    d.toolBox_tabTools.setCurrentWidget(d.CONFIGURATION)
+    page = d.CONFIGURATION
     found = []
 
     def walk(view, model, parent):
