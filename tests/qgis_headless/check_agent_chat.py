@@ -479,6 +479,32 @@ def check_key_store():
     return authcfg
 
 
+def check_undo_point_of_a_call():
+    """A call the executor refuses (malformed arguments) answers its mistake, not 'undo point failed'; a valid call
+    whose undo point cannot be made is refused and its tool does not run."""
+    from unittest.mock import MagicMock, patch
+    from filter_mate.adapters.agent.turn_checkpoint import TurnCheckpoint
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder
+    from filter_mate.core.agent.chat_engine import ChatEngine
+    from filter_mate.core.agent.messages import ToolCallPart
+    from filter_mate.core.agent.tool_catalog import chat_tools
+    from filter_mate.core.agent.tool_executor import ToolExecutor
+
+    ran = []
+    spec = next(tool for tool in chat_tools() if tool.name == "set_layer_options")
+    executor = ToolExecutor([spec], {"set_layer_options": lambda arguments: ran.append(arguments) or {"ok": True}})
+    engine = ChatEngine(MagicMock(), executor, MagicMock(), MagicMock(), TurnCheckpoint())
+    for index, arguments in enumerate(({"layers": 5}, {"layers": True}, {"layers": "communes"})):
+        result = engine._run_one(ToolCallPart(f"m{index}", "set_layer_options", arguments))
+        check(f"undo point: malformed arguments {arguments} get the validation message",
+              result.is_error and "Invalid arguments" in result.content and not ran, result.content)
+    valid = ToolCallPart("v1", "set_layer_options", {"layers": [{"layer": "communes", "exploring": {"is_tracking": True}}]})
+    with patch.object(EffectsRecorder, "before_call", side_effect=ValueError("not serialisable")):
+        result = engine._run_one(valid)
+    check("undo point: a valid call whose undo point fails is refused, its tool does not run",
+          result.is_error and "undo point could not be made" in result.content and not ran, result.content)
+
+
 def check_checkpoint(layer):
     from filter_mate.adapters.agent.turn_checkpoint import TurnCheckpoint
 
@@ -503,16 +529,7 @@ def check_checkpoint(layer):
           (layer.subsetString(), skipped))
     layer.setSubsetString("")
     check("the commit outside a turn is harmless", list(TurnCheckpoint().commit()) == [])
-    from filter_mate.core.agent.messages import ToolCallPart
-    malformed = TurnCheckpoint()
-    try:
-        malformed.begin(ToolCallPart("m1", "set_layer_options", {"layers": 5}))
-        began = True
-    except Exception as exc:  # noqa: BLE001
-        began = repr(exc)
-    check("a call with a malformed argument still begins its undo point (the tool answers its mistake)",
-          began is True, began)
-    malformed.discard()
+    check_undo_point_of_a_call()
     layer.setSubsetString('"pop" = 100')
     checkpoint.begin()
     layer.setSubsetString('"pop" > 1000')

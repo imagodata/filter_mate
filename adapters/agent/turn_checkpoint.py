@@ -107,14 +107,11 @@ class TurnCheckpoint:
         self._calls.append(call)
         self._step_recorder = EffectsRecorder(settings=False)
         if call is not None:
-            # What the recorders keep of a call is read from its arguments, which the model wrote: a malformed one
-            # (``layers`` a number) must reach the tool, which answers its mistake, not stop here as a refusal.
-            for recorder, extra in ((self._effects, (len(self._steps) - 1,)), (self._step_recorder, ())):
-                try:  # what is kept for the undo never keeps a change from being made
-                    recorder.before_call(call, *extra)
-                except Exception:  # noqa: BLE001
-                    logger.warning("Agent undo: what %s changes was not kept", getattr(call, "name", "a call"),
-                                   exc_info=True)
+            self._effects.before_call(call, len(self._steps) - 1)
+            try:  # what a step did is for "undo back to here" only: it never keeps a change from being made
+                self._step_recorder.before_call(call)
+            except Exception:  # noqa: BLE001
+                logger.debug("Agent undo: a step not recorded", exc_info=True)
 
     def end(self) -> None:
         """Called once the change ``begin`` announced was made: what comes to the project from now until the next

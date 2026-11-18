@@ -123,22 +123,26 @@ def test_a_turn_discarded_with_its_project_is_never_recorded(checkpoint_module):
     assert not history.can_undo(checkpoint_module.HISTORY_KEY)
 
 
-def test_a_recorder_that_fails_on_a_call_does_not_refuse_it(monkeypatch, checkpoint_module):
-    """2026-11-18: a call with a malformed argument (``layers`` a number) made the recorder of the turn raise in
-    begin(), and the tool was refused as 'undo point failed' instead of answering its mistake."""
+def test_a_recorder_of_the_turn_that_fails_refuses_the_call_but_not_the_one_of_the_step(monkeypatch, checkpoint_module):
+    """A valid call whose capture fails is refused (begin raises): run, it would leave the undo silently incomplete.
+    The recorder of a step only serves "undo back to here": its failure keeps nothing from being made."""
     class Failing(Effects):
         def before_call(self, call, step=0):
-            raise TypeError("'int' object is not iterable")
+            raise ValueError("not serialisable")
 
-    holder, history = checkpoint_module._test_holder, checkpoint_module._test_service.history
-    layer = Layer("roads")
-    holder.project = Project([layer])
+    class FailingStep(Effects):
+        def before_call(self, call, step=0):
+            if not self._turn:
+                raise ValueError("not serialisable")
+
+    holder = checkpoint_module._test_holder
+    holder.project = Project([Layer("roads")])
+    call = types.SimpleNamespace(name="set_layer_options", arguments={"layers": []})
     monkeypatch.setattr(checkpoint_module, "EffectsRecorder", Failing)
-    checkpoint = checkpoint_module.TurnCheckpoint()
-    checkpoint.begin(types.SimpleNamespace(name="set_layer_options", arguments={"layers": 5}))  # does not raise
-    layer.subset = "x > 1"  # the filters of the turn are still kept
-    assert list(checkpoint.commit()) == ["roads"]
-    assert history.can_undo(checkpoint_module.HISTORY_KEY)
+    with pytest.raises(ValueError):
+        checkpoint_module.TurnCheckpoint().begin(call)
+    monkeypatch.setattr(checkpoint_module, "EffectsRecorder", FailingStep)
+    checkpoint_module.TurnCheckpoint().begin(call)  # does not raise
 
 
 def test_a_turn_kept_open_is_recorded(checkpoint_module):
