@@ -908,9 +908,6 @@ QWidget#widget_exploring_keys QPushButton:!checkable {
     /* Dimensions managed by UIConfig for profile-specific sizing */
 }
 
-QWidget#widget_exploring_keys QPushButton:!checkable::icon {
-    filter: {icon_filter};
-}
 
 QWidget#widget_exploring_keys QPushButton:!checkable:hover {
     background-color: {color_accent_light_bg};
@@ -937,9 +934,6 @@ QWidget#widget_exploring_keys QPushButton:checkable {
     /* Dimensions managed by UIConfig for profile-specific sizing */
 }
 
-QWidget#widget_exploring_keys QPushButton:checkable::icon {
-    filter: {icon_filter};
-}
 
 QWidget#widget_exploring_keys QPushButton:checkable:hover:!checked {
     background-color: {color_accent_light_bg};
@@ -986,9 +980,6 @@ QWidget#widget_filtering_keys QPushButton:checkable {
     /* Dimensions managed by UIConfig for profile-specific sizing */
 }
 
-QWidget#widget_filtering_keys QPushButton:checkable::icon {
-    filter: {icon_filter};
-}
 
 QWidget#widget_filtering_keys QPushButton:checkable:hover:!checked {
     background-color: {color_accent_light_bg};
@@ -1035,9 +1026,6 @@ QWidget#widget_exporting_keys QPushButton:checkable {
     /* Dimensions managed by UIConfig for profile-specific sizing */
 }
 
-QWidget#widget_exporting_keys QPushButton:checkable::icon {
-    filter: {icon_filter};
-}
 
 QWidget#widget_exporting_keys QPushButton:checkable:hover:!checked {
     background-color: {color_accent_light_bg};
@@ -1112,9 +1100,6 @@ QFrame#frame_actions QPushButton:!checkable {
     /* Dimensions managed by UIConfig for profile-specific sizing */
 }
 
-QFrame#frame_actions QPushButton:!checkable::icon {
-    filter: {icon_filter};
-}
 
 QFrame#frame_actions QPushButton:!checkable:hover {
     background-color: {color_accent_light_bg};
