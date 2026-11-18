@@ -129,6 +129,8 @@ def unfiltered_copy(layer):
         for key in ('subset', 'sql', 'filter'):
             parts.pop(key, None)
         uri = registry.encodeUri(provider, parts) if parts else layer.source()
+        if provider == 'postgres':
+            uri = _with_key_check_of(layer.source(), uri)
         options = QgsVectorLayer.LayerOptions(False, False)
         options.skipCrsValidation = True
         clone = QgsVectorLayer(uri, f"{layer.name()} (unfiltered)", provider, options)
@@ -140,6 +142,22 @@ def unfiltered_copy(layer):
         logger.debug(f"Unfiltered reading of {layer.name()} unavailable: {exc}")
     logger.warning(f"{layer.name()} cannot be read without its current filter")
     return None
+
+
+def _with_key_check_of(source, uri):
+    """``uri`` with the ``checkPrimaryKeyUnicity`` of the PostgreSQL URI ``source``.
+
+    QGIS 3.22 drops it when it reads the URI back (3.44 keeps it): on a view
+    whose layer says ``checkPrimaryKeyUnicity='0'``, each copy would count the
+    distinct keys of the whole view again (review of 2026-11-18).
+    """
+    from qgis.core import QgsDataSourceUri
+    name = 'checkPrimaryKeyUnicity'
+    original, copy = QgsDataSourceUri(source), QgsDataSourceUri(uri)
+    if not original.hasParam(name) or copy.hasParam(name):
+        return uri
+    copy.setParam(name, original.param(name))
+    return copy.uri(False)  # an authcfg stays a reference, never expanded
 
 
 def selection_request(expression, layer, context=None):
