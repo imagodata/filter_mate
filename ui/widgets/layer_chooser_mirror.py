@@ -13,8 +13,11 @@ shows is read again a few times a second while this one is in view, on top of th
 """
 from __future__ import annotations
 
+import logging
 import time
 from typing import Any, Optional
+
+logger = logging.getLogger("FilterMate")
 
 FOLLOW_MS = 400  # how often what the first chooser shows is read again, while this one is in view
 NAME = "comboBox_exploring_current_layer"
@@ -26,6 +29,17 @@ def next_index(shown: int, source: int, list_open: bool) -> Optional[int]:
     if list_open or shown == source:
         return None
     return source
+
+
+def _current_id(dock: Any) -> Optional[str]:
+    """The id of the layer the dock has as current, None when it has none or it was deleted since."""
+    current = getattr(dock, "current_layer", None)
+    if current is None:
+        return None
+    try:
+        return current.id()
+    except RuntimeError:  # the C++ layer is gone: as no layer
+        return None
 
 
 def record_user_pick(dock: Any, layer: Any) -> None:
@@ -41,8 +55,7 @@ def record_user_pick(dock: Any, layer: Any) -> None:
     if callable(end_window):
         end_window()
         return
-    current = getattr(dock, "current_layer", None)
-    if (current is None or current.id() != layer_id) and not getattr(dock, "_filtering_in_progress", False):
+    if _current_id(dock) != layer_id and not getattr(dock, "_filtering_in_progress", False):
         dock.current_layer_changed(layer, manual_change=True)
 
 
@@ -60,10 +73,9 @@ def choose(source: Any, dock: Any, index: int) -> None:
     picked = source.currentLayer() if hasattr(source, "currentLayer") else None
     if dock is None or picked is None:
         return
-    current = getattr(dock, "current_layer", None)
     # The first chooser may already show the layer while the dock does not have it (its handler was
     # disconnected): picking it here is the choice that makes it current.
-    if changed or current is None or current.id() != picked.id():
+    if changed or _current_id(dock) != picked.id():
         record_user_pick(dock, picked)
 
 
@@ -113,8 +125,10 @@ def _mirror_class():
             its own list, does not see this one, and the dock put the layer of the filter back over it."""
             try:
                 choose(self._source, self._dock, index)
-            except (RuntimeError, AttributeError):  # the first chooser went away with the dock
+            except RuntimeError:  # the first chooser went away with the dock
                 pass
+            except AttributeError:  # not the same: a defect of ours must leave a trace
+                logger.debug("A layer chosen in the chooser of EXPLORING was not noted", exc_info=True)
 
         def showEvent(self, event: Any) -> None:  # noqa: N802 - Qt name
             super().showEvent(event)

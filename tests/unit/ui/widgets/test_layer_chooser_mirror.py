@@ -146,3 +146,23 @@ def test_without_a_dock_it_only_moves_the_first_chooser():
     source = _Source(layers)
     mirror.choose(source, None, 1)
     assert source.set_layers == ["b"]
+
+
+class _DeletedLayer:
+    def id(self):
+        raise RuntimeError("wrapped C/C++ object of type QgsVectorLayer has been deleted")
+
+
+def test_a_current_layer_deleted_meanwhile_counts_as_no_layer():
+    """Its ``id()`` raised, the pick was lost in ``_choose`` and the check after the filter put the old layer back."""
+    layers = _two_layers()
+    dock = _Dock(current=_DeletedLayer())
+    mirror.choose(_Source(layers), dock, 1)
+    assert dock._user_layer_pick[1] == "b" and dock.changes == [("b", True)]
+
+
+def test_the_same_layer_chosen_again_with_a_deleted_current_layer_is_applied():
+    layers = _two_layers()
+    dock = _Dock(current=_DeletedLayer())
+    mirror.choose(_Source(layers, shown=1), dock, 1)  # the chooser already shows it
+    assert dock.changes == [("b", True)]
