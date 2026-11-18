@@ -1211,7 +1211,7 @@
   {
    "name": "set_layer_style",
    "title": "Style a layer",
-   "description": "Change how a layer is drawn: one symbol, categories, classes, rules, a raster ramp or a shaded relief, its opacity and blending. Replaces the style; a field of more than 100 values cannot be categorized. Returns mode, field, classes (how many), ramp, method; for a raster, band, minimum and maximum. Undoing the turn of the chat brings the previous style back.",
+   "description": "Change how a layer is drawn: one symbol, categories, classes, rules, a raster ramp or a shaded relief, its opacity and blending. Replaces the style; a field of more than 100 values cannot be categorized. Returns mode, field, classes (how many), ramp, method; for a raster, band, minimum and maximum or a note. Undoing the turn of the chat brings the previous style back.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,
@@ -2507,7 +2507,7 @@
      },
      "target_crs": {
       "default": "",
-      "description": "A CRS in metres to write in (default: the project's when in metres, else the UTM zone)",
+      "description": "A CRS in metres to write in (default: the project's when its projection keeps angles, as UTM, Lambert conformal or a stereographic does, else the UTM zone)",
       "maxLength": 64,
       "type": "string"
      },
