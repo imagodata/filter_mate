@@ -88,10 +88,10 @@
     </p>
     <div class="cards story-index">
         <a class="card story-card" href="#s1"><span class="story-card-media"><img src="video/export.webp" alt="Saint-Gaudens filtered and ready to export" loading="lazy" width="1280" height="720"><b aria-hidden="true">01</b></span><div class="story-card-copy"><span class="badge">Consultancy</span><h4>The commune dossier in three minutes</h4><p>Scope 12 department-wide layers to one commune and deliver a styled GeoPackage.</p><span class="story-outcome">12 layers · <strong>12,380 buildings</strong></span></div></a>
-        <a class="card story-card" href="#s2"><span class="story-card-media"><img src="video/noise.webp" alt="Buildings near the main roads of Muret" loading="lazy" width="1280" height="720"><b aria-hidden="true">02</b></span><div class="story-card-copy"><span class="badge">Planning</span><h4>Which buildings are near the main roads?</h4><p>A buffer computed by expression from each road category.</p><span class="story-outcome"><strong>2,753 buildings</strong> · 78 public buildings</span></div></a>
-        <a class="card story-card" href="#s3"><span class="story-card-media"><img src="video/buffer.webp" alt="Buildings filtered around the water surfaces of Grenade" loading="lazy" width="1280" height="720"><b aria-hidden="true">03</b></span><div class="story-card-copy"><span class="badge">Risk</span><h4>Buildings near watercourses</h4><p>A 300 m then 100 m band, with undo and replay.</p><span class="story-outcome">300 m · <strong>14,426 buildings</strong></span></div></a>
-        <a class="card story-card" href="#s4"><span class="story-card-media"><img src="video/bridges.webp" alt="Road crossings over permanent watercourses in Toulouse Métropole" loading="lazy" width="1280" height="720"><b aria-hidden="true">04</b></span><div class="story-card-copy"><span class="badge">Structures</span><h4>Find crossings to inspect</h4><p>Scope a 37-commune EPCI, then apply the Cross predicate.</p><span class="story-outcome"><strong>747 roads</strong> · 364 structures</span></div></a>
-        <a class="card story-card" href="#s5"><span class="story-card-media"><img src="video/brush.webp" alt="Vegetation near homes in Bagnères-de-Luchon" loading="lazy" width="1280" height="720"><b aria-hidden="true">05</b></span><div class="story-card-copy"><span class="badge">Forestry</span><h4>Clearing brush around homes</h4><p>Expression selection, 50 m buffer, then an attribute filter.</p><span class="story-outcome"><strong>58 woods and forests</strong></span></div></a>
+        <a class="card story-card" href="#s2"><span class="story-card-media"><img src="video/noise.webp" alt="Buildings near the main roads of Muret" loading="lazy" width="1280" height="720"><b aria-hidden="true">02</b></span><div class="story-card-copy"><span class="badge">Planning</span><h4>Which buildings are near the main roads?</h4><p>A buffer computed by expression from each road category.</p><span class="story-outcome"><strong>2,196 buildings</strong> · 75 public buildings</span></div></a>
+        <a class="card story-card" href="#s3"><span class="story-card-media"><img src="video/buffer.webp" alt="Buildings filtered around the water surfaces of Grenade" loading="lazy" width="1280" height="720"><b aria-hidden="true">03</b></span><div class="story-card-copy"><span class="badge">Risk</span><h4>Buildings near watercourses</h4><p>A 300 m then 100 m band, with undo and replay.</p><span class="story-outcome">300 m · <strong>2,913 buildings</strong></span></div></a>
+        <a class="card story-card" href="#s4"><span class="story-card-media"><img src="video/bridges.webp" alt="Road crossings over permanent watercourses in Toulouse Métropole" loading="lazy" width="1280" height="720"><b aria-hidden="true">04</b></span><div class="story-card-copy"><span class="badge">Structures</span><h4>Find crossings to inspect</h4><p>Scope a 37-commune EPCI, then apply the Cross predicate.</p><span class="story-outcome"><strong>708 roads</strong> · 343 structures</span></div></a>
+        <a class="card story-card" href="#s5"><span class="story-card-media"><img src="video/brush.webp" alt="Vegetation near homes in Bagnères-de-Luchon" loading="lazy" width="1280" height="720"><b aria-hidden="true">05</b></span><div class="story-card-copy"><span class="badge">Forestry</span><h4>Clearing brush around homes</h4><p>Expression selection, 50 m buffer, then an attribute filter.</p><span class="story-outcome"><strong>57 woods and forests</strong></span></div></a>
         <a class="card story-card" href="#s6"><span class="story-card-media"><img src="video/hamlets.webp" alt="Hamlets more than 200 metres from paved roads in Aspet" loading="lazy" width="1280" height="720"><b aria-hidden="true">06</b></span><div class="story-card-copy"><span class="badge">Rescue</span><h4>Hamlets far from paved roads</h4><p>Disjoint finds what lies outside a 200 m buffer.</p><span class="story-outcome"><strong>22 hamlets</strong> beyond 200 m</span></div></a>
         <a class="card story-card" href="#s7"><span class="story-card-media"><img src="video/favorites.webp" alt="A saved filter replayed from the favorites menu" loading="lazy" width="1280" height="720"><b aria-hidden="true">07</b></span><div class="story-card-copy"><span class="badge">Team</span><h4>The query library</h4><p>Save, describe, replay and share a complete filter.</p><span class="story-outcome">Same result · <strong>one click</strong></span></div></a>
         <a class="card story-card" href="#s8"><span class="story-card-media"><img src="video/processing.webp" alt="Batch filtering from the QGIS Processing toolbox" loading="lazy" width="1280" height="720"><b aria-hidden="true">08</b></span><div class="story-card-copy"><span class="badge">GIS administration</span><h4>Objects modified since a date</h4><p>Apply one date expression to four layers from Processing.</p><span class="story-outcome"><strong>4 layers</strong> · 1.6 million objects</span></div></a>
@@ -135,9 +135,9 @@
         <code>filtermate.log</code>. Hardware and cache conditions were not recorded: these observations describe individual runs, not a reproducible benchmark.
     </div>
     <div class="callout warn">
-        <strong>One rule to know.</strong> On GeoPackage, a new spatial filter applied to a target layer replaces that layer's previous spatial filter;
-        the AND combine operator only applies to an existing attribute filter, or to the source layer. Stories 2, 3 and 4 take advantage of it
-        (the question deliberately spills over the commune boundary), story 6 works around it with an attribute scope.
+        <strong>One rule to know.</strong> A new spatial filter applied to a target layer combines with that layer's previous filter by the operator you choose, AND by default:
+        the scope set on the commune stays, and the counts of stories 2 to 5 are those of the commune. To let a question spill over the boundary,
+        uncheck the combination: the new filter then replaces the scope. Each of these stories gives both numbers.
     </div>
 </section>
 
@@ -220,7 +220,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <div><h4>The need</h4><p>Nadia explores buildings near the main roads of <strong>Muret</strong>, crossed by the A64 motorway and several departmental roads. Study distances of 300 m and 250 m, chosen by road importance, demonstrate a variable buffer. The result counts buildings and public-access facilities, not residents.</p></div>
         <div><h4>The FilterMate translation</h4><p>After scoping on Muret, the source layer becomes <strong>troncon_de_route</strong> with the <strong>custom selection</strong> <code>"importance" IN ('1', '2')</code>. The <strong>buffer is an expression</strong> evaluated for each segment: 300 m for importance 1, 250 m for importance 2. The <strong>Flat</strong> buffer type avoids round ends at segment tips. Targets: <em>batiment</em> and <em>erp</em>.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Selection</dt><dd><code>"importance" IN ('1', '2')</code></dd></div><div><dt>Targets</dt><dd><code>batiment</code>, <code>erp</code></dd></div><div><dt>Relation</dt><dd>Intersect, buffer by expression, Flat</dd></div><div><dt>Result</dt><dd><strong>2,753</strong> buildings, 78 public buildings</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Selection</dt><dd><code>"importance" IN ('1', '2')</code></dd></div><div><dt>Targets</dt><dd><code>batiment</code>, <code>erp</code></dd></div><div><dt>Relation</dt><dd>Intersect, buffer by expression, Flat</dd></div><div><dt>Result</dt><dd><strong>2,196</strong> buildings, 75 public buildings</dd></div></dl>
     <ol class="steps">
         <li><strong>Scope Muret.</strong> Same gesture as in story 1: commune as source, Muret in single selection, every layer as target, Intersect, Filter. Muret has 19,458 buildings, 354 public buildings and 5,512 road segments.
             <figure><img src="img/stories/s2-00.webp" alt="Step 1: Muret scoped, buildings, public buildings, roads and railway limited to the commune" loading="lazy" width="1600" height="900"><figcaption>Step 1. The commune is scoped; the A64 crosses it from north-east to south-west.</figcaption></figure>
@@ -242,7 +242,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         </li>
     </ol>
     <h3>Result</h3>
-    <p><strong>2,753 buildings</strong> and <strong>78 public buildings</strong> lie in the buffer zones of the 102 segments of importance 1 and 2 of Muret, of which 2,196 buildings and 75 public buildings in the commune itself: the buffer reaches the neighbours, because a new spatial filter replaces the scope (see "One rule to know").</p>
+    <p><strong>2,196 buildings</strong> and <strong>75 public buildings</strong> of Muret lie in the buffer zones of its 102 segments of importance 1 and 2: the new spatial filter combines with the scope of the commune (AND). With the combination unchecked it replaces the scope and the buffer reaches the neighbours: 2,753 buildings and 78 public buildings (see "One rule to know").</p>
     <div class="callout tip">
         <strong>Going further.</strong> The same expression can read a study distance stored in a verified attribute. A purely geometric alternative is <code>"largeur_de_chaussee" * 3</code>.
         Segments with an empty width need a <code>coalesce("largeur_de_chaussee", 3)</code>.
@@ -263,7 +263,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <div><h4>The need</h4><p>Julien explores the surroundings of watercourses in <strong>Grenade</strong>, at the confluence of the Garonne and the Save. He compares buildings within 300 m and 100 m of the water surfaces, then restores the first result with Undo.</p></div>
         <div><h4>The FilterMate translation</h4><p>Source: <strong>surface_hydrographique</strong>, scoped on Grenade, with a <strong>multiple selection</strong> and <em>Select All</em> (77 surfaces). Targets: buildings, public buildings and roads, Intersect predicate, <strong>300 m buffer</strong>. A second Filter at 100 m, then <strong>Undo</strong> in the action bar.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>surface_hydrographique</code></dd></div><div><dt>Selection</dt><dd>77 surfaces (Select All)</dd></div><div><dt>Targets</dt><dd>buildings, public buildings, roads</dd></div><div><dt>Relation</dt><dd>Intersect, 300 then 100 m, Undo</dd></div><div><dt>Result</dt><dd><strong>14,426</strong> buildings at 300 m</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>surface_hydrographique</code></dd></div><div><dt>Selection</dt><dd>77 surfaces (Select All)</dd></div><div><dt>Targets</dt><dd>buildings, public buildings, roads</dd></div><div><dt>Relation</dt><dd>Intersect, 300 then 100 m, Undo</dd></div><div><dt>Result</dt><dd><strong>2,913</strong> buildings at 300 m</dd></div></dl>
     <ol class="steps">
         <li><strong>Scope Grenade.</strong> 6,998 buildings, 79 public buildings, 1,978 road segments and 77 water surfaces.
             <figure><img src="img/stories/s3-00.webp" alt="Step 1: Grenade scoped, the Garonne and the Save in blue" loading="lazy" width="1600" height="900"><figcaption>Step 1. The water surfaces (Garonne to the east, Save to the south) are now the only ones on the map.</figcaption></figure>
@@ -287,15 +287,14 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
     <table>
         <thead><tr><th>Band</th><th>Buildings</th><th>Public buildings</th><th>Road segments</th></tr></thead>
         <tbody>
-            <tr><td>300 m around Grenade's water surfaces</td><td><strong>14,426</strong></td><td><strong>178</strong></td><td><strong>6,310</strong></td></tr>
-            <tr><td>100 m</td><td><strong>2,770</strong></td><td><strong>28</strong></td><td><strong>1,949</strong></td></tr>
+            <tr><td>300 m around Grenade's water surfaces</td><td><strong>2,913</strong></td><td><strong>27</strong></td><td><strong>1,020</strong></td></tr>
+            <tr><td>100 m</td><td><strong>606</strong></td><td><strong>3</strong></td><td><strong>420</strong></td></tr>
         </tbody>
     </table>
     </div>
     <div class="callout">
-        <strong>Why more than the commune?</strong> Grenade has 6,998 buildings, the 300 m band holds 14,426: the Garonne polygons touching the commune
-        stretch for tens of kilometres and the buffer follows them into the neighbours. To stay inside the commune, take <em>troncon_hydrographique</em>
-        as source, whose segments are short, or export the commune first (story 1) and work on the resulting file.
+        <strong>Beyond the commune.</strong> The Garonne polygons touching Grenade stretch for tens of kilometres. With the combination unchecked, the buffer follows them
+        into the neighbours: 14,426 buildings, 178 public buildings and 6,310 road segments at 300 m, 2,770, 28 and 1,949 at 100 m.
     </div>
 </section>
 
@@ -313,7 +312,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <div><h4>The need</h4><p>Karim manages the engineering structures of <strong>Toulouse Métropole</strong>: 37 communes, close to 99,000 road segments. He wants the inventory of the places where roads cross a permanent watercourse, segments and structures, to plan inspections.</p></div>
         <div><h4>The FilterMate translation</h4><p>Scoping is done this time on the <strong>epci</strong> layer. Then the source becomes <strong>troncon_hydrographique</strong> with the custom selection <code>"persistance" = 'Permanent'</code>, the targets <em>troncon_de_route</em> and <em>construction_lineaire</em>, and the <strong>Cross</strong> predicate, without buffer: a road running along the river is not kept, a road crossing it is.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>troncon_hydrographique</code></dd></div><div><dt>Selection</dt><dd><code>"persistance" = 'Permanent'</code></dd></div><div><dt>Targets</dt><dd>roads, linear structures</dd></div><div><dt>Relation</dt><dd>Cross, no buffer</dd></div><div><dt>Result</dt><dd><strong>747</strong> road segments, 364 structures</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>troncon_hydrographique</code></dd></div><div><dt>Selection</dt><dd><code>"persistance" = 'Permanent'</code></dd></div><div><dt>Targets</dt><dd>roads, linear structures</dd></div><div><dt>Relation</dt><dd>Cross, no buffer</dd></div><div><dt>Result</dt><dd><strong>708</strong> road segments, 343 structures</dd></div></dl>
     <ol class="steps">
         <li><strong>Scope the EPCI.</strong> <em>epci</em> layer as source, "Toulouse Métropole" in single selection on <code>"nom_officiel"</code>, every other layer as target, Intersect. The filter returns 98,687 road segments, 1,844 watercourse segments, 1,181 linear constructions and 70 touched communes.
             <figure><img src="img/stories/s4-00.webp" alt="Step 1: Toulouse Métropole scoped, the Garonne crosses the metropolis from south to north" loading="lazy" width="1600" height="900"><figcaption>Step 1. The whole metropolis, Garonne, Hers and Touch included.</figcaption></figure>
@@ -331,7 +330,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         </li>
     </ol>
     <h3>Result</h3>
-    <p><strong>747 road segments</strong> and <strong>364 linear constructions</strong> (mostly bridges) cross one of the 691 permanent watercourse segments of the metropolis. The same computation done outside FilterMate with GEOS gives the same numbers.</p>
+    <p><strong>708 road segments</strong> and <strong>343 linear constructions</strong> (mostly bridges) of the metropolis cross its 691 permanent watercourse segments. The same computation done outside FilterMate with GEOS, against the union of those segments, gives the same numbers. With the combination unchecked, the segments just outside the boundary count too: 747 and 364.</p>
     <div class="callout tip">
         <strong>Why not Intersect?</strong> With Intersect and a buffer of a few metres, every road running along a bank would be kept as well. Cross only keeps
         what goes across. The <em>Touch</em> predicate would only keep segments ending exactly on the bank.
@@ -351,7 +350,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <div><h4>The need</h4><p>Élodie, at the town hall of <strong>Bagnères-de-Luchon</strong>, maps vegetation near homes using a study distance of 50 m. She distinguishes woods and forests from hedges to prepare a field review. This filter does not determine owners’ brush-clearing obligations.</p></div>
         <div><h4>The FilterMate translation</h4><p>Source <strong>batiment</strong> with the custom selection <code>"usage_1" = 'Résidentiel'</code>, targets <em>zone_de_vegetation</em> and <em>haie</em>, Intersect, <strong>50 m buffer</strong>. Then a second, <strong>attribute</strong> filter on the vegetation layer turned source, <strong>combined with AND</strong> with the previous spatial filter.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>batiment</code></dd></div><div><dt>Selection</dt><dd><code>"usage_1" = 'Résidentiel'</code></dd></div><div><dt>Targets</dt><dd><code>zone_de_vegetation</code>, <code>haie</code></dd></div><div><dt>Relation</dt><dd>Intersect, 50 m buffer, then AND</dd></div><div><dt>Result</dt><dd><strong>58</strong> woods and forests, 48 hedges</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>batiment</code></dd></div><div><dt>Selection</dt><dd><code>"usage_1" = 'Résidentiel'</code></dd></div><div><dt>Targets</dt><dd><code>zone_de_vegetation</code>, <code>haie</code></dd></div><div><dt>Relation</dt><dd>Intersect, 50 m buffer, then AND</dd></div><div><dt>Result</dt><dd><strong>57</strong> woods and forests, 46 hedges</dd></div></dl>
     <ol class="steps">
         <li><strong>Scope Luchon.</strong> 3,699 buildings, 269 vegetation zones, 123 hedges.
             <figure><img src="img/stories/s5-00.webp" alt="Step 1: Bagnères-de-Luchon scoped, vegetation in green, buildings in red" loading="lazy" width="1600" height="900"><figcaption>Step 1. The inhabited valley and the wooded slopes.</figcaption></figure>
@@ -359,7 +358,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <li><strong>Keep only dwellings.</strong> Source <em>batiment</em>, Custom selection <code>"usage_1" = 'Résidentiel'</code>: 1,619 buildings.
             <figure><img src="img/stories/s5-01.webp" alt="Step 2: residential buildings are highlighted" loading="lazy" width="1600" height="900"><figcaption>Step 2. Outbuildings, farm and industrial buildings are left out of the source.</figcaption></figure>
         </li>
-        <li><strong>50 m.</strong> Targets <em>zone_de_vegetation</em> and <em>haie</em>, Intersect, Buffer 50. Filter: 119 vegetation zones and 48 hedges remain.
+        <li><strong>50 m.</strong> Targets <em>zone_de_vegetation</em> and <em>haie</em>, Intersect, Buffer 50. Filter: 117 vegetation zones and 46 hedges remain.
             <figure><img src="img/stories/s5-02.webp" alt="Step 3: vegetation within 50 m of a dwelling" loading="lazy" width="1600" height="900"><figcaption>Step 3. Hedges and undifferentiated woods are still there.</figcaption></figure>
         </li>
         <li><strong>Keep only woods and forests.</strong> Click <em>zone_de_vegetation</em> in the Layers panel: it becomes the source. Custom selection:
@@ -373,7 +372,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         </li>
     </ol>
     <h3>Result</h3>
-    <p>Out of the commune's 269 vegetation zones, <strong>119</strong> touch the 50 m band around a dwelling, among which <strong>58 woods and forests</strong>; 48 hedges are in the same case.</p>
+    <p>Out of the commune's 269 vegetation zones, <strong>117</strong> touch the 50 m band around a dwelling, among which <strong>57 woods and forests</strong>; 46 hedges are in the same case. With the combination unchecked: 119, 58 and 48.</p>
     <h4>Under the hood</h4>
     <p>The vegetation layer's filter after step 5 keeps the spatial clause and adds the attribute clause:</p>
     <pre><code>(ROWID IN (SELECT id FROM "rtree_zone_de_vegetation_geometrie" WHERE …)
@@ -431,7 +430,7 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
         <div><h4>The need</h4><p>Julien (story 3) will redo the 300 m band at every BD TOPO update and wants his colleagues to replay it without him. The filter must exist outside his head: named, described, reapplicable in one click, exportable.</p></div>
         <div><h4>The FilterMate translation</h4><p>A <strong>favorite</strong> records the complete filter: source layer, selection, predicates, buffer, target layers. The menu opens from the ★ badge in the header; the <strong>manager</strong> lets you rename, describe, change the scope (this project or all projects) and <strong>export as JSON</strong>. With the sharing extension, a shared git repository becomes the team library.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd>favorite</dd></div><div><dt>Selection</dt><dd>settings of story 3</dd></div><div><dt>Targets</dt><dd>3 layers</dd></div><div><dt>Relation</dt><dd>replayed in one click</dd></div><div><dt>Result</dt><dd><strong>14,426</strong> buildings, as in story 3</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd>favorite</dd></div><div><dt>Selection</dt><dd>settings of story 3</dd></div><div><dt>Targets</dt><dd>3 layers</dd></div><div><dt>Relation</dt><dd>replayed in one click</dd></div><div><dt>Result</dt><dd>story 3 at 300 m, in one click</dd></div></dl>
     <ol class="steps">
         <li><strong>Save.</strong> The 300 m filter of story 3 is applied. Click the ★ badge then <em>Add filter</em>, name it "PPRI Garonne 300 m".
             <figure><img src="img/stories/s7-01.webp" alt="Step 1: the message bar confirms that the PPRI Garonne 300 m favorite was added" loading="lazy" width="1600" height="900"><figcaption>Step 1. The message bar confirms the save; the favorite immediately shows in the Quick filtering section of the ★ menu.</figcaption></figure>
@@ -439,7 +438,7 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
         <li><strong>Unfilter.</strong> The three layers get the whole department back: 1,173,829 buildings.
             <figure><img src="img/stories/s7-02.webp" alt="Step 2: after Unfilter, every feature is back" loading="lazy" width="1600" height="900"><figcaption>Step 2. Back to the unfiltered state.</figcaption></figure>
         </li>
-        <li><strong>Replay.</strong> ★ badge then "PPRI Garonne 300 m": the filter reapplies, with the same 14,426 buildings, 178 public buildings and 6,310 segments.
+        <li><strong>Replay.</strong> ★ badge then "PPRI Garonne 300 m": the filter reapplies with the same settings: 300 m around the 77 water surfaces.
             <figure><img src="img/stories/s7-03.webp" alt="Step 3: the reapplied favorite gives exactly the result of story 3" loading="lazy" width="1600" height="900"><figcaption>Step 3. Same result, one click.</figcaption></figure>
         </li>
         <li><strong>Describe and share.</strong> <em>Manage favorites…</em> opens the manager: description, tags, scope, exact expression, Remote tab to publish to a git repository. <em>Export…</em> writes a JSON file to send to a colleague, who imports it from the same menu.
@@ -747,7 +746,7 @@ processing.run("filtermate:batch_filter", {
         <li><strong>For illustrated recipes 13 to 16</strong>, load the layers named in each recipe and follow the settings. The diagrams show expected results; areas and counts will depend on your data.</li>
     </ol>
     <div class="callout">
-        <strong>Verification.</strong> The counts of stories 1 to 8 were measured with FilterMate 5.0, whose engine keeps the source geometry exact. Those of stories 2, 3 and 4 were also recomputed independently with GEOS (PyQGIS, without FilterMate): the numbers are identical. Earlier versions of this page, measured with a source simplified by up to 100 m, differed (story 4: 1,112 road segments instead of 747).
+        <strong>Verification.</strong> The counts of stories 1 to 8 were measured with FilterMate 5.0, whose engine keeps the source geometry exact, and those of stories 2, 3 and 4 again with FilterMate 5.1.1, scope kept. Both sets were also recomputed independently with GEOS (without FilterMate): the numbers are identical. Earlier versions of this page, measured with a source simplified by up to 100 m, differed (story 4: 1,112 road segments instead of 747).
     </div>
 </section>
 

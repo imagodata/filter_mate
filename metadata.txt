@@ -1,93 +1,82 @@
-# This file contains metadata for your plugin.
-
-# This file should be included when you package your plugin.
-# Mandatory items:
+# Metadata of FilterMate, read by QGIS and by plugins.qgis.org.
+# No HTML in description, about or changelog, and no percent sign anywhere: QGIS
+# reads this file with interpolation. Continuation lines are indented.
 
 [general]
 name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
-description=🧭 Explore, 🔍 filter and 📦 export vector 🗺️, raster 🏔️ and LiDAR point cloud ☁️ layers from one panel, on any data source (PostgreSQL, Spatialite, GeoPackage, OGR), by hand or 🤖 from a sentence with an AI agent. QGIS 3.22 to 4.x.
+description=Filter every layer of a project by its relation to a selection: vector, raster and LiDAR point clouds, on PostGIS, GeoPackage, Spatialite or files, with undo, favorites, export and an optional AI agent.
 version=5.1.1
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=🧭 FilterMate explores, filters and exports vector, raster and LiDAR point cloud layers from one panel.
+about=🧭 FilterMate filters several layers at once by their relation to what you select, for vector, raster and LiDAR point cloud layers, from one panel.
 
-    Pick a layer, select what matters on it, and FilterMate filters the other layers of the project by their relation to that selection: buildings near main roads, parcels on steep slopes, LiDAR points beneath rooftops, a DTM clipped around a church. Filters stay on the existing project layers, keep their styles, can be undone, saved as favorites, exported and replayed from Processing.
+    Pick a layer, select what matters on it, and the other layers of the project are filtered by their relation to that selection: buildings near main roads, parcels on steep slopes, LiDAR points beneath rooftops, a DTM clipped around a church. On vector layers a filter is the layer's own subset string, its definition query: nothing is copied, styles stay. Rasters and point clouds are cut and keep their id, style and place in the layer tree. Every filter can be undone, saved as a favorite, exported, and replayed from Processing or Python.
 
     🧭 EXPLORING selects on the current layer, whatever its kind:
     - 🗺️ vector: one feature, several, or an expression;
     - 🏔️ raster: band, pixel value picked on the map, value range on a live histogram, classes, raster calculator expression;
     - ☁️ point cloud (LAS, LAZ, COPC, EPT, VPC): ASPRS / LiDAR HD classes, Z, intensity and return ranges, attribute conditions, height above a DTM.
 
-    🔍 FILTERING relates that selection to layers of any kind (9 source / target combinations) with geometric predicates, a buffer, AND / OR with existing filters and a minimum coverage for polygons. Web maps (WMS, WMTS, tile basemaps) can be filtered too: captured over the area, then cut like a local raster. Filtered rasters and point clouds keep their id, style and place in the layer tree, and the project is always saved with the original sources.
+    🔍 FILTERING relates that selection to layers of any kind (9 source / target combinations) with geometric predicates, a buffer, AND / OR with existing filters and a minimum coverage for polygons. Web maps (WMS, WMTS, tile basemaps) are filtered too: captured over the area, then cut like a local raster. The project is always saved with the original sources.
 
     📦 EXPORTING writes the filtered layers: vector formats, GeoPackage with an embedded QGIS project, GeoTIFF / COG, LAZ / LAS / COPC.
 
     🤖 AGENT mode (experimental) is a chat in the panel that drives FilterMate and QGIS from a sentence: "buildings above 1200 m in the selected commune". How it works:
-    1. You choose the model: Claude, Mistral, OpenAI or a compatible server with your own API key, kept in the authentication database of QGIS, or a local Ollama model, with which your requests stay on your computer. No account and no telemetry: FilterMate holds no key and has no server of its own. The settings guide you (a link to create a key, a Test button, the download of an Ollama model).
+    1. You choose the model: Claude, Mistral, OpenAI or a compatible server with your own API key, kept in the authentication database of QGIS, or a local Ollama model, with which your requests stay on your computer. No account, no telemetry: FilterMate holds no key and has no server of its own. The settings guide you (a link to create a key, a Test button, the download of an Ollama model).
     2. You write what you want in the AGENT section. With each request go your message, the extent of the map and the layer tree (names, types, fields, CRS); field values and an image of the map go only if you allow them, and the chat asks for your consent the first time you use a provider.
     3. The agent works step by step with its tools, each step shown in the thread: it reads before it acts, tries a filter before applying it, and asks with choices to click when a choice is yours.
     4. You stay in control: filters apply at once and each step, or the whole request, can be undone; exports, deletions and added or removed layers are confirmed; you choose how far it goes alone (four levels of autonomy, a rule per tool, layers it must never change).
     What it does:
     - 🔎 reads the project: layers, fields and their values, statistics, samples of features, what lies at a point, the map as you see it;
-    - 🔍 filters: by attributes, across layers (geometric predicates, buffer), by a geometry, point clouds, favorites; it tries a filter before applying it, and undoes or redoes it;
+    - 🔍 filters by attributes, across layers (geometric predicates, buffer), by a geometry, point clouds, favorites, and undoes or redoes;
     - 🎯 selects features, zooms, shows and hides layers, keeps bookmarks and map themes;
     - 🎨 styles and labels layers (rules, color ramps, labels by expression or along lines), groups, renames, duplicates and removes layers, adds fields and joins tables;
     - ✏️ adds, updates and deletes features in the edit buffer, saved by you;
     - 🌍 brings data in, each from a source you tick: files, WFS, WMS and WMTS services, the tables of a PostgreSQL connection, web basemaps, open data portals, Sentinel-2 scenes, the elevation of an area and its contour lines, OpenStreetMap features, the population, the natural risks of France; it finds a place by its name;
     - ⚙️ runs the Processing algorithms of QGIS; draws objects with SAM and finds similar ones;
     - 🖨️ makes and exports print layouts, sets the CRS of the project, exports the filtered layers;
-    - 🧩 asks with choices to click when a choice is yours, follows your own skills, uses the MCP servers you connect, and keeps a request as a recipe that runs again without any model.
+    - 🧩 follows your own skills, uses the MCP servers you connect, and keeps a request as a recipe that runs again without any model.
     An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run. A built-in MCP server, off by default, lets Claude Code or another client on your computer use the same tools. With no model at all, Set up FilterMate asks the main settings with a few choices, and How FilterMate works tells the panel section by section. What is sent, to whom and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
 
     🧩 Objects drawn by SAM (experimental): on an orthophoto, a click or a box and the SAM 2.1 model draws the object, locally on your CPU; similar objects are proposed, to keep or reject. The objects filter other layers, become a polygon layer, or are drawn from a layer of points or footprints in Processing.
 
-    ✨ Also: PostgreSQL / PostGIS, Spatialite, GeoPackage and OGR backends with spatial indexes; the sections of the panel listed in a rail, and shown as panels of QGIS when you ask, alone or grouped; undo / redo and the history of the project, to go back to before any step; Compare, the map before and after a filter on each side of a line; favorites shared through git repositories; ten Processing algorithms and four models, qgis_process, Python and REST APIs, MCP servers; light and dark themes; 34 languages. QGIS 3.22 to 4.x, Qt5 and Qt6.
+    ✨ Also: PostgreSQL / PostGIS, Spatialite, GeoPackage and OGR backends with spatial indexes; the sections of the panel in a rail, or as panels of QGIS, alone or grouped; undo / redo and the history of the project, to go back to before any step; Compare, the map before and after a filter on each side of a line; favorites shared through git repositories; ten Processing algorithms and four models, qgis_process, Python and REST APIs, MCP servers; light and dark themes; 34 languages; QGIS 3.22 to 4.x, Qt5 and Qt6.
 
     🔧 Optional: psycopg2 for PostgreSQL, PDAL 2.4+ for the height above a DTM and COPC writing, onnxruntime and the SAM model (62 MB) for the objects, installed after a confirmation.
 
     📖 User guide: https://imagodata.github.io/filter_mate/guide.html
     💡 Sixteen use cases in English and French: https://imagodata.github.io/filter_mate/stories.html
+    💬 Your opinion, an idea, a review or a test: https://imagodata.github.io/filter_mate/feedback.html?ref=qgis-listing
 
 tracker=https://github.com/imagodata/filter_mate/issues
 repository=https://github.com/imagodata/filter_mate
-# End of mandatory metadata
-
-# Recommended items: regexp
-
-hasProcessingProvider=yes
-
-changelog=v5.1.1 (2026-11-17): Dock - the layout switches in any order: the place of the buttons, the display profile and the theme no longer leave the buttons at the wrong place or at the wrong size, the dock always shows one open section, and the buttons set at the top stay there after a restart; a rail of chips lists the sections of each stack (the headers stacked one above the other stay a choice); every section can leave the dock for a panel of QGIS, alone or grouped with others, by a right-click on its chip or by dragging it, EXPLORING included, which then shows its own chooser of the current layer; the dock is never left empty and QGIS puts each panel back where you left it; the buttons can sit under each section; FILTERING and EXPORTING can be turned off. AGENT - Set up FilterMate asks with cards of choices and needs no AI model; How FilterMate works tells the panel in the thread, with links that do what they say; shorter requests (a conversation of ten requests costs 29 percent less) and a cache of the provider that serves more; an Undo a layer refuses no longer loses the layers of the turn; the agent knows the fields of the active layer. The free quota is removed: the agent works with your own API key or a local Ollama model, and its settings guide both (a link to create a key, a Test button, the list and the download of Ollama models). The data a request needs when the project has none, each from a source you tick: the elevation of an area (a relief map with a hillshade, contour lines and index contours in one sentence, Copernicus DEM 30 m, worldwide), the features OpenStreetMap maps there by tags (hospitals, buildings, roads, restaurants... as layers to filter, count or make a heatmap of), how many people live there (a population grid of 30 m for most countries, summed exactly, by district with the zonal statistics of QGIS), and the natural risks of France (flood areas, risk plans, groundwater and clay, from Géorisques). The agent sets FilterMate up with you (offered once per version, and from the menu Vector > FilterMate), asks its questions as cards with choices to click, takes its tools on demand (lighter requests for a slow or local model) and follows your own skills (a SKILL.md in your QGIS profile or next to a project, read and allowed by you first). Asked for the objects like those drawn in the dock, it takes all of them as examples. New sources to tick - web basemaps (OpenStreetMap, Carto, IGN, Google Satellite), WMS and WMTS image services, a geocoder (zoom to a place by its name) and the tables of a PostgreSQL connection of QGIS. Labels by an expression or along lines, a style by rules, the opacity of a layer alone, a shaded relief, blending modes, a ramp cut at its extremes or in steps. A local Ollama model gets lighter tool descriptions, so every tool still fits in 32k of context. A request that stops midway keeps what it changed, and a busy provider is asked again; undoing a request takes back what the agent did and only that; a yes for the conversation holds for one host or one layer. New skills for the chains of a request, the choice of a style and the Processing algorithms by task; heatmaps and interpolations run in QGIS 4; a filter of a GeoPackage is counted once and ten times as fast; the conversation follows the width of the dock. After a review of 5.1.0 - an action asked with others keeps its own details and its own question, a damaged recipe no longer leaves the panel busy, a link that leads to your own machine or network is not read, profiles and settings are bounded, a key typed for one server is never sent to another. Dock - Compare, beside Redo, shows the map before and after the last filter, or a state you pinned, on each side of a line across the map; the history of the project is one panel, where you go back to before any step; the number of features told after a filter is the number shown; web maps are no longer offered for export; the buttons of the action bar are evenly spaced. Filtering - a WMS, a WMTS or a tile basemap can be a layer to filter (captured over the area, then cut); a WFS layer whose matching features cannot be listed in an address is cut by the extent of the source, and the dock says so; filtering a WFS layer just added no longer waits a minute; variables of QGIS, of the project and of the layer in the filter of a database or a file; Undo and Redo give each layer its own filter and never take the step of another layer; a filter on a text without its case works again on a PostgreSQL database that is not in UTF-8; no more filter by the whole source when its geometry cannot be prepared.
-    v5.1.0 (2026-11-13): First version published since 5.0.2. Two experimental sections. AGENT - a chat in the dock that filters, selects, zooms, adds open data and exports from a sentence, with Claude, Mistral, OpenAI, a compatible server or a local Ollama model and your own API key (kept in the QGIS authentication database), or a few free requests a month through a relay of FilterMate to Claude Haiku 5.5. The map, the layer tree and what changed go with each request, and the agent reads statistics, samples of features and what lies at a point instead of guessing, runs Processing algorithms of QGIS that make layers (native and qgis providers only, each layer made removed when the turn is undone), styles and labels a layer, edits features in the edit buffer without ever saving them, and reads, draws or finds similar objects with SAM. Filters apply at once and each step of a request can be undone or redone; exports and added or removed layers are confirmed; a filter written by the model is one plain WHERE clause checked against a list. Optional sources, all off until ticked: open data portals, WFS services, Sentinel-2 scenes, remote MCP connectors. An expert mode, off by default, lets the agent run Python code in QGIS, shown and confirmed at each run and not undone. An MCP server built into the plugin, off by default, lets Claude Code or another client on this computer use the same tools. Objects drawn by SAM - in the raster pipette, a click or a box and the SAM 2.1 model draws the object locally on the CPU (onnxruntime and the 62 MB model installed after a confirmation); similar objects are proposals to keep or reject; To layer turns them into a polygon layer; a new Processing algorithm draws one object per point or polygon of a layer, and Processing, the REST API and MCP accept objects as a raster selection. Dock - two stacks of sections (AGENT and EXPLORING above, FILTERING, EXPORTING and CONFIGURATION below), favorites, float and close in the title bar. The REST API and the stdio MCP server accept only plain WHERE clauses in apply_filter and preview_filter (breaking). Translations of AGENT, the favorites menu and the Processing algorithms restored in the 34 languages. Also in this version: levels of autonomy for the agent, exceptions tool by tool and layers protected from it; widgets and charts it makes under the conversation; recipes, a request of the agent kept in the project and run again without any model, and live recipes that run again by themselves when the edits of their source are saved; the layer tree, map themes, bookmarks, fields and joins; Ollama through its own API, the models installed listed, and a lighter set of tools for a slow computer; attribute filters written in the native SQL of their source; PostgreSQL through the pg_service of a layer; AND NOT without a filter keeps the whole layer minus the selection; a geometric filter joined to the previous one under OR and AND; a PostgreSQL expression that cannot be written in SQL evaluated by QGIS; on Shapefile, GeoJSON and FlatGeobuf a filter on a text keeps its case; the agent proposes changes of settings in the thread and shares them as profiles.
-    v5.0.2 (2026-11-06): Changing between vector layers - the single selection list is no longer empty (the link filter of the previous layer stayed on it), no feature appears selected that nobody picked, and the display field chosen for a layer is kept. A vector layer picked before its registration is shown once registered. The dock no longer stops reacting after a layer is removed. Small scaled screens - a 1080p laptop scaled to 150 percent gets the compact profile instead of a dock too tall for its area, and the EXPLORING tools scroll instead of overlapping. The UI_PROFILE setting now works, at once and at startup. Several features that failed only in QGIS work: custom expressions in the exploring features, layers saved without their linking option, choosing where to save a single exported layer, the expression debounce setting. A custom expression matching nothing no longer empties the single selection list. Scrolling the dock no longer changes a list or a number by accident: they answer the wheel once clicked. Search bar in the Configuration tab. One order for the EXPLORING tools on every layer kind.
-    Release notes of every version: https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md
-
-# Tags are comma separated with spaces allowed
-tags=python,filter,vector,raster,point cloud,lidar,las,laz,copc,dem,layers,geofilter,search,postgis,ogr,spatialite,data,exploration,subset,export,ai,agent,llm,mcp,sam,segmentation,open data
-
 homepage=https://imagodata.github.io/filter_mate/
-category=Plugins
+
+# Optional items
+
+category=Vector
 icon=icon.png
-# experimental flag
+hasProcessingProvider=yes
 experimental=False
-
-# deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
+server=False
 
-# Since QGIS 3.8, a comma separated list of plugins to be installed
-# (or upgraded) can be specified.
-# Check the documentation for more information.
-# plugin_dependencies=
+# Comma separated, spaces allowed inside a tag. Words people search the plugin list with.
+tags=filter,spatial filter,multi-layer,subset,definition query,query,selection,buffer,vector,raster,point cloud,lidar,las,laz,copc,dem,postgis,postgresql,geopackage,spatialite,wfs,wms,export,processing,favorites,undo,ai,agent,llm,ollama,mcp,sam,segmentation,open data
 
 # Python packages FilterMate installs when this Python lacks them and the user agrees,
 # into the QGIS profile (adapters/qgis/python_dependencies.py). Not plugin_dependencies:
 # that key only names other QGIS plugins.
 python_dependencies=onnxruntime
 
-Category of the plugin: Raster, Vector, Database or Web
-#category=Database
-
-# If the plugin can run on QGIS Server.
-server=False
+changelog=v5.1.1 (2026-11-17):
+    - Dock: the sections listed in a rail of chips; any section, EXPLORING included, can leave the dock for a panel of QGIS, alone or grouped, and comes back where you left it; buttons under each section; FILTERING and EXPORTING can be turned off; Compare shows the map before and after a filter on each side of a line; the history of the project is one panel, to go back to before any step.
+    - AGENT: the free quota is removed, the agent works with your own API key or a local Ollama model and its settings guide both; Set up FilterMate and How FilterMate works need no model; new sources to tick (elevation and contour lines worldwide, OpenStreetMap features, population, natural risks of France, web basemaps, WMS and WMTS, the tables of a PostgreSQL connection, a geocoder); labels by expression or along lines, styles by rules, blending modes; your own skills; shorter requests (29 percent cheaper over ten requests) and lighter tools for a local model.
+    - Filtering: a WMS, a WMTS or a tile basemap can be filtered; variables of QGIS, the project and the layer in filters; Undo and Redo per layer; the number of features told after a filter is the one shown; a filter of a GeoPackage counted ten times as fast; WFS fixes.
+    - After a review of 5.1.0: links to your own machine or network are not read, a key typed for one server is never sent to another, damaged recipes no longer block the panel, profiles and settings are bounded.
+    v5.1.0 (2026-11-13): two experimental sections, AGENT (a chat that filters, selects, styles, edits, adds open data and exports from a sentence, with Claude, Mistral, OpenAI, a compatible server or Ollama) and objects drawn by SAM 2.1 on the CPU; recipes run again without any model; levels of autonomy; a built-in MCP server; attribute filters in the native SQL of their source; geometric filters joined under OR and AND. Breaking: the REST API and the stdio MCP server accept only plain WHERE clauses.
+    v5.0.2 (2026-11-06): fixes when changing between vector layers; the compact profile on scaled 1080p screens; the mouse wheel no longer changes a list by accident; a search bar in the Configuration tab.
+    Release notes of every version: https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md

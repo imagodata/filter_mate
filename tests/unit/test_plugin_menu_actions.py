@@ -19,7 +19,8 @@ from unittest.mock import MagicMock
 import pytest
 
 _PLUGIN = Path(__file__).resolve().parents[2] / "filter_mate.py"
-_NAMES = ["add_action", "_add_menu_actions", "retranslate_actions"]
+_NAMES = ["add_action", "_add_menu_actions", "_feedback_entries", "retranslate_actions"]
+_FEEDBACK = {"Give your opinion", "Suggest a feature", "Test the experimental features", "Training and services"}
 
 
 class _Action:
@@ -43,7 +44,8 @@ def _plugin():
     cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "FilterMate")
     methods = [n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name in _NAMES]
     assert sorted(n.name for n in methods) == sorted(_NAMES)
-    namespace = {"logger": MagicMock(), "QIcon": MagicMock(), "QAction": _Action, "os": os}
+    namespace = {"logger": MagicMock(), "QIcon": MagicMock(), "QAction": _Action, "os": os,
+                 "feedback_forms": MagicMock()}
     exec(compile(ast.Module(body=methods, type_ignores=[]), str(_PLUGIN), "exec"), namespace)
     plugin = types.SimpleNamespace(iface=MagicMock(), toolbar=MagicMock(), actions=[], menu="&FilterMate",
                                    plugin_dir="/plugin", tr=lambda message: message)
@@ -60,7 +62,7 @@ def test_each_entry_keeps_its_own_words_after_a_language_change():
     plugin._add_menu_actions()
     english = {action.text: action for action in plugin.actions}
     assert set(english) == {"FilterMate", "Set up FilterMate", "How FilterMate works",
-                            "Reset configuration and database"}
+                            "Reset configuration and database"} | _FEEDBACK
     assert not any("agent" in action.text.lower() or "agent" in action.tip.lower() for action in plugin.actions)
 
     plugin.tr = lambda message: "FR:" + message  # the language changed while QGIS runs
@@ -68,8 +70,9 @@ def test_each_entry_keeps_its_own_words_after_a_language_change():
 
     for text, action in english.items():
         assert action.text == "FR:" + text
-        assert action.tip.startswith("FR:")
-    assert len({action.text for action in plugin.actions}) == 4  # no two entries under one name
+        if text not in _FEEDBACK:  # the feedback entries have no tip
+            assert action.tip.startswith("FR:")
+    assert len({action.text for action in plugin.actions}) == 8  # no two entries under one name
 
 
 @pytest.mark.unit
@@ -83,5 +86,6 @@ def test_the_entries_of_an_extension_are_left_alone():
     plugin.retranslate_actions()
     assert extension.text == "QFieldCloud"
     assert sorted(action.text for action in plugin.actions if action is not extension) == [
-        "FR:FilterMate", "FR:How FilterMate works", "FR:Reset configuration and database",
-        "FR:Set up FilterMate"]
+        "FR:FilterMate", "FR:Give your opinion", "FR:How FilterMate works", "FR:Reset configuration and database",
+        "FR:Set up FilterMate", "FR:Suggest a feature", "FR:Test the experimental features",
+        "FR:Training and services"]

@@ -36,6 +36,7 @@ import os.path
 from .filter_mate_app import FilterMateApp
 from .config.config import reload_config, get_config_json_path
 from .infrastructure.logging import get_logger
+from .infrastructure import feedback_forms
 
 logger = get_logger(__name__)
 
@@ -174,6 +175,7 @@ class FilterMate:
             self.translator.load(locale_path)
             QCoreApplication.installTranslator(self.translator)
             self._current_locale = locale
+            feedback_forms.set_locale(locale)
             logger.info(f"Loaded translation: {locale}")
         else:
             self._current_locale = None
@@ -272,6 +274,7 @@ class FilterMate:
             if loaded:
                 QCoreApplication.installTranslator(self.translator)
                 self._current_locale = locale
+                feedback_forms.set_locale(locale)
                 test = self.tr('Open FilterMate panel')
                 logger.info(f"Reloaded translation: {locale} (test: '{test}')")
             else:
@@ -319,6 +322,25 @@ class FilterMate:
             add_to_toolbar=False,
             status_tip=self.tr(u'Reset the default configuration and delete the SQLite database'))
 
+        # The forms of the feedback page of the site: the plugin only opens the page (no data sent)
+        self._feedback_actions = {}
+        for form, text in self._feedback_entries():
+            self._feedback_actions[form] = self.add_action(
+                icon_path,
+                text=text,
+                callback=lambda checked=False, f=form: feedback_forms.open_form(f, 'plugin-menu'),
+                parent=self.iface.mainWindow(),
+                add_to_toolbar=False)
+
+    def _feedback_entries(self):
+        """(form, menu text) of the feedback entries of Vector > FilterMate."""
+        return (
+            ('usage', self.tr(u'Give your opinion')),
+            ('feature', self.tr(u'Suggest a feature')),
+            ('testers', self.tr(u'Test the experimental features')),
+            ('services', self.tr(u'Training and services')),
+        )
+
     def retranslate_actions(self):
         """Retranslate menu and toolbar action texts after a language change.
 
@@ -340,6 +362,12 @@ class FilterMate:
             if action is not None:
                 action.setText(text)
                 action.setStatusTip(status_tip)
+        feedback_actions = getattr(self, '_feedback_actions', None)
+        if feedback_actions:
+            for form, text in self._feedback_entries():
+                action = feedback_actions.get(form)
+                if action is not None:
+                    action.setText(text)
 
     def add_action(
         self,

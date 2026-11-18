@@ -49,6 +49,7 @@ SOURCES = \
     ../extensions/qfieldcloud/ui/settings_dialog.py \
     ../infrastructure/database/sql_utils.py \
     ../infrastructure/feedback/__init__.py \
+    ../infrastructure/feedback_forms.py \
     ../processing/algorithms/batch_filter_algorithm.py \
     ../processing/algorithms/common.py \
     ../processing/algorithms/cross_filter_algorithm.py \
