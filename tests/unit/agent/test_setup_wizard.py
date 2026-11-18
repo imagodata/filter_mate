@@ -127,6 +127,34 @@ def test_the_project_ticks_its_kinds_of_data(values):
 def test_same_number_and_switch():
     assert wizard._same(60, 60.0)
     assert not wizard._same(True, 1)
+    assert wizard._same("true", True) and wizard._same("off", False) and not wizard._same("true", False)
+    assert not wizard._same("maybe", True) and not wizard._same(None, False)
+
+
+def _answer_as_ticked(values):
+    answers, done = wizard.Answers(), []
+    step = wizard.next_step(done, values, answers)
+    while step is not None:
+        questions = wizard.step_questions(step, values, wizard.ProjectFacts(), answers)
+        answers.record(step, {ask.key: [choice.key for choice in ask.choices if choice.selected]
+                              for ask in questions})
+        done.append(step)
+        step = wizard.next_step(done, values, answers)
+    return answers
+
+
+@pytest.mark.parametrize("written", ["true", "True", " on ", "1", "yes"])
+def test_a_switch_written_as_text_stays_on_when_nothing_is_touched(values, written):
+    """config.json edited by hand: the rest of the plugin reads "true" as on; the setup turned it off."""
+    for path in (*wizard.SECTION_SWITCHES.values(), *wizard.DATA_SWITCHES.values()):
+        values[path] = written
+    assert wizard.changes(values, _answer_as_ticked(values)) == []
+
+
+def test_a_switch_written_as_false_text_is_off(values):
+    values[wizard.EXPORTING_ON] = "false"
+    assert wizard.kept_sections(values, wizard.Answers()) == {"filtering", "agent"}
+    assert wizard.changes(values, _answer_as_ticked(values)) == []
 
 
 # --- where the sections go: asked with the buttons, moved by the panel, never a setting ------------------------------

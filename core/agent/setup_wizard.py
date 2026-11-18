@@ -134,8 +134,23 @@ class Answers:
         return self.by_step.get(step, {}).get(question)
 
 
+_FALSE_STRINGS = frozenset({"false", "0", "no", "off", ""})
+_TRUE_STRINGS = frozenset({"true", "1", "yes", "on"})
+
+
+def flag(value: Any) -> Optional[bool]:
+    """A switch as the rest of the plugin reads it (``_get_option_bool``): a hand-edited config.json may hold
+    "true" or "off" as a text. None when it is no switch at all (absent, or another text or number)."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        text = value.strip().lower()
+        return False if text in _FALSE_STRINGS else True if text in _TRUE_STRINGS else None
+    return None
+
+
 def _on(values: Mapping[str, Any], path: str) -> bool:
-    return values.get(path) is True
+    return flag(values.get(path)) is True
 
 
 def _switches(key: str, switches: Mapping[str, str], values: Mapping[str, Any]) -> Ask:
@@ -155,14 +170,14 @@ def kept_sections(values: Mapping[str, Any], answers: Answers) -> Set[str]:
     chosen = answers.get(FEATURES, "sections")
     if chosen is not None:
         return set(chosen)
-    return {name for name, path in SECTION_SWITCHES.items() if values.get(path) is not False}
+    return {name for name, path in SECTION_SWITCHES.items() if flag(values.get(path)) is not False}
 
 
 def kept_data(values: Mapping[str, Any], answers: Answers) -> Set[str]:
     chosen = answers.get(FEATURES, "data")
     if chosen is not None:
         return set(chosen)
-    return {name for name, path in DATA_SWITCHES.items() if values.get(path) is not False}
+    return {name for name, path in DATA_SWITCHES.items() if flag(values.get(path)) is not False}
 
 
 def step_questions(step: str, values: Mapping[str, Any], facts: ProjectFacts, answers: Answers) -> List[Ask]:
@@ -261,5 +276,6 @@ def layout_wanted(facts: ProjectFacts, answers: Answers) -> Optional[str]:
 def _same(now: Any, value: Any) -> bool:
     """60 and 60.0 are the same timeout; true and 1 are not the same switch."""
     if isinstance(now, bool) or isinstance(value, bool):
-        return now is value
+        # "true" written in config.json is the switch on: answering without touching it must not turn it off.
+        return flag(now) is flag(value) and flag(now) is not None
     return now == value
