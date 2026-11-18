@@ -39,18 +39,26 @@ class ProviderEntry:
         host = urlsplit(address).netloc if address and address != usual else ""
         return f"{self.preset} · {self.model}" + (f" · {host}" if host else "")
 
+    @property
+    def ident(self) -> str:
+        """What tells this provider from the others (``same``), for a menu action to carry: two share a label when
+        only the path of their address differs."""
+        return "\n".join((self.preset, self.model, self.base_url))
+
     def same(self, other: "ProviderEntry") -> bool:
         return (self.preset, self.model, self.base_url) == (other.preset, other.model, other.base_url)
 
 
 @dataclass(frozen=True)
 class Change:
-    """What to change: sources to tick and to untick, the MCP server (None: unchanged), another provider."""
+    """What to change: sources to tick and to untick, the MCP server (None: unchanged), another provider.
+    ``by_agent``: queued by a tool of the chat during a request (about the project then open), not clicked."""
 
     sources_on: Tuple[str, ...] = ()
     sources_off: Tuple[str, ...] = ()
     mcp_server: Optional[bool] = None
     provider: Optional[ProviderEntry] = None
+    by_agent: bool = False
 
 
 def remember(entries: Sequence[ProviderEntry], entry: ProviderEntry, keep: int = MAX_PROVIDERS) -> Tuple[ProviderEntry, ...]:
@@ -60,6 +68,22 @@ def remember(entries: Sequence[ProviderEntry], entry: ProviderEntry, keep: int =
 
 def forget(entries: Sequence[ProviderEntry], entry: ProviderEntry) -> Tuple[ProviderEntry, ...]:
     return tuple(other for other in entries if not other.same(entry))
+
+
+def key_to_delete(entry: ProviderEntry, remaining: Sequence[ProviderEntry], in_use: Sequence[str], target: str) -> str:
+    """The authentication configuration to delete with ``entry`` left out of the list, "" when it is not certain that
+    the key is this entry's alone.
+
+    ``remaining``: the entries the list keeps; ``in_use``: the configurations the settings in use or a change
+    waiting hold; ``target``: the server ``entry`` sends to. The key must have been stored for that server (a
+    legacy entry shared one place between servers: whose key it holds is unknown), and no other entry may use the
+    place. A secret of the user deleted wrongly is worse than one left."""
+    authcfg = entry.authcfg
+    if not authcfg or not target or entry.key_target != target or authcfg in in_use:
+        return ""
+    if any(other.authcfg == authcfg for other in remaining):
+        return ""
+    return authcfg
 
 
 def options_view(sources: Sequence[Source], enabled_ids: Sequence[str], providers: Sequence[ProviderEntry],

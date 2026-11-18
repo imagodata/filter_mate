@@ -51,9 +51,17 @@ def test_a_box_given_with_its_value_is_kept():
     assert problems == [] and clean["filtering"] == {"buffer_type": "Flat", "has_buffer_type": False}
 
 
+def test_a_listed_raster_target_is_kept():
+    listed = LayerFacts("mnt_f6", "mnt", False, listed_target=True)
+    clean, problems = check_layer_changes(
+        {}, {"layers_to_filter": ["routes", "mnt"]}, layer=COMMUNES, layers=[COMMUNES, ROUTES, listed],
+        predicates=PREDICATES, expression_problem=no_problem, fields=FIELDS)
+    assert problems == [] and clean["filtering"]["layers_to_filter"] == ["routes_c3", "mnt_f6"]
+
+
 @pytest.mark.parametrize("filtering, problem", [
     ({"layers_to_filter": ["communes"]}, "layers_to_filter: not the layer itself"),
-    ({"layers_to_filter": ["mnt"]}, "layers_to_filter: mnt is not a vector layer"),
+    ({"layers_to_filter": ["mnt"]}, "layers_to_filter: mnt is not a target the panel lists for a vector layer"),
     ({"geometric_predicates": ["Near"]}, "geometric_predicates: Near is not one of"),
     ({"buffer_value": 2e6}, "buffer_value: between -1000000 and 1000000"),
     ({"buffer_value": "far"}, "buffer_value: a number"),
