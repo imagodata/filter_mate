@@ -791,6 +791,51 @@ L'exécuter ?</translation>
         <translation>Configuration lancée.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="641"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Quelques choix, puis les réglages avant et après : aucun modèle d'IA n'est nécessaire, rien ne change tant que vous n'appliquez pas. Plus tard : menu Vecteur &gt; FilterMate &gt; Configurer FilterMate avec l'agent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="646"/>
+        <source>Sections: FILTERING, EXPORTING, AGENT, only those you use</source>
+        <translation>Sections : FILTERING, EXPORTING, AGENT, seulement celles que vous utilisez</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>Configurer FilterMate ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>Quelques choix, puis les réglages avant et après : aucun modèle d'IA n'est nécessaire, rien ne change tant que vous n'appliquez pas. Plus tard : menu Vecteur &gt; FilterMate &gt; Configurer FilterMate ; Comment fonctionne FilterMate s'y trouve aussi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>Apparence : thème, taille du panneau, langue</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Disposition : les sections dans ce panneau ou dans des panneaux de QGIS, la place des boutons</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
+        <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
+        <translation>Vos données : rasters, nuages de points, PostgreSQL, services web, leur taille</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="648"/>
+        <source>Look: theme, size of the panel, language, buttons</source>
+        <translation>Apparence : thème, taille du panneau, langue, boutons</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>Wait for the end of the request, then try again.</source>
+        <translation>Attendez la fin de la requête, puis réessayez.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
         <source>Not now: the menu starts it when you want.</source>
         <translation>Plus tard : le menu la lance quand vous voulez.</translation>
@@ -1995,6 +2040,21 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="429"/>
         <source>Connect a provider</source>
         <translation>Connecter un fournisseur</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="645"/>
+        <source>Set up FilterMate, no model needed</source>
+        <translation>Configurer FilterMate, sans modèle</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>Configurer FilterMate…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>Comment fonctionne FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4354,6 +4414,41 @@ Cliquez sur l'indicateur ★ et sélectionnez « Ajouter le filtre actuel aux fa
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Configurer FilterMate avec l'agent</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>Quelques choix, puis chaque réglage avant et après : aucun modèle d'IA n'est nécessaire</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>Comment fonctionne FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>Ce que fait chaque section, les sections en panneaux de QGIS, la place des boutons</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>Nouveautés de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Un rail liste les sections de FilterMate, une section peut devenir un panneau de QGIS, et la configuration ne demande aucun modèle d'IA.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Configurer FilterMate&lt;/b&gt; pose quelques choix : les sections que vous utilisez, vos données, l'apparence, la place des sections et de leurs boutons. Elle montre chaque réglage avant et après, et n'envoie rien nulle part.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Un rail de sections&lt;/b&gt; dans chaque pile du panneau : cliquez sur une pastille pour ouvrir sa section, faites-la glisser pour mettre les sections dans un autre ordre.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections en panneaux&lt;/b&gt;, quand vous le demandez (par défaut elles restent toutes dans le panneau FilterMate) : faites un clic droit sur la pastille d'AGENT, FILTERING, EXPORTING ou CONFIGURATION pour l'ouvrir dans son propre panneau de QGIS. Faites un clic droit sur le titre d'un panneau pour le regrouper avec un autre, en onglets, ou pour le fusionner dans FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Boutons sous chaque section&lt;/b&gt;, et FILTERING ou EXPORTING désactivés quand vous ne vous en servez pas.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtre, met en forme et fait venir des données à partir d'une phrase, avec votre propre clé d'API ou un modèle Ollama local. &lt;b&gt;Comment fonctionne FilterMate&lt;/b&gt;, dans son menu, reprend chaque section.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Les sections de FilterMate peuvent devenir des panneaux de QGIS, et sa configuration ne demande aucun modèle d'IA.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Configurer FilterMate&lt;/b&gt; pose quelques choix : les sections que vous utilisez, vos données, l'apparence, la place des sections et de leurs boutons. Elle montre chaque réglage avant et après, et n'envoie rien nulle part.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections en panneaux&lt;/b&gt; : faites un clic droit sur l'en-tête d'AGENT, FILTERING, EXPORTING ou CONFIGURATION pour l'ouvrir dans son propre panneau de QGIS. Faites un clic droit sur le titre d'un panneau pour le regrouper avec un autre, en onglets, ou pour le fusionner dans FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Boutons sous chaque section&lt;/b&gt;, et FILTERING ou EXPORTING désactivés quand vous ne vous en servez pas.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtre, met en forme et fait venir des données à partir d'une phrase, avec votre propre clé d'API ou un modèle Ollama local. &lt;b&gt;Comment fonctionne FilterMate&lt;/b&gt;, dans son menu, reprend chaque section.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>Configurer FilterMate</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -10817,6 +10912,34 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>Ouvrir {} dans son propre panneau</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Sortir toutes les sections de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>Regrouper avec {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>Fusionner {} dans FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>Tout fusionner dans FilterMate</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11217,6 +11340,549 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0} : le fournisseur a rejeté le filtre et la restauration a échoué.</translation>
+    </message>
+</context>
+<context>
+    <name>SetupWizard</name>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Sections</source>
+        <translation>Sections</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Data</source>
+        <translation>Données</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Size</source>
+        <translation>Taille</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Theme</source>
+        <translation>Thème</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Panel</source>
+        <translation>Panneau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Language</source>
+        <translation>Langue</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Buttons</source>
+        <translation>Boutons</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Filtering</source>
+        <translation>Filtrage</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Targets</source>
+        <translation>Cibles</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Groups</source>
+        <translation>Groupes</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Rasters</source>
+        <translation>Rasters</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Clouds</source>
+        <translation>Nuages</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="42"/>
+        <source>Which sections of the panel do you use? EXPLORING is always there.</source>
+        <translation>Quelles sections du panneau utilisez-vous ? EXPLORING est toujours présent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Which data do you work with, besides vector layers?</source>
+        <translation>Avec quelles données travaillez-vous, en plus des couches vectorielles ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>How big are your layers, most of the time?</source>
+        <translation>Quelle est la taille de vos couches, la plupart du temps ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="45"/>
+        <source>Colours of the panel</source>
+        <translation>Couleurs du panneau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="46"/>
+        <source>Size of the panel</source>
+        <translation>Taille du panneau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="47"/>
+        <source>Language of the panel</source>
+        <translation>Langue du panneau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="48"/>
+        <source>Where the action buttons go (Filter, Export...)</source>
+        <translation>Où placer les boutons d'action (Filtrer, Exporter...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="49"/>
+        <source>When you filter</source>
+        <translation>Quand vous filtrez</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="50"/>
+        <source>A vector layer also filters these layers (cut to its features)</source>
+        <translation>Une couche vectorielle filtre aussi ces couches (découpées à ses entités)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="51"/>
+        <source>When you export to a file, keep the groups of the layer tree</source>
+        <translation>Lors d'un export vers un fichier, conserver les groupes de l'arbre des couches</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="52"/>
+        <source>Format of the rasters exported</source>
+        <translation>Format des rasters exportés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Format of the point clouds exported</source>
+        <translation>Format des nuages de points exportés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="150"/>
+        <source>Set up FilterMate: a few choices, ticked as your settings are now. Nothing is sent anywhere, and nothing changes until you apply.</source>
+        <translation>Configurer FilterMate : quelques choix, cochés selon vos réglages actuels. Rien n'est envoyé nulle part, et rien ne change tant que vous n'appliquez pas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Stop the setup</source>
+        <translation>Arrêter la configuration</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Setup stopped.</source>
+        <translation>Configuration arrêtée.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="202"/>
+        <source>Setup stopped: nothing changed. Menu Vector &gt; FilterMate starts it again.</source>
+        <translation>Configuration arrêtée : rien n'a changé. Le menu Vecteur &gt; FilterMate la relance.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="220"/>
+        <source>Your settings of FilterMate</source>
+        <translation>Vos réglages de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="221"/>
+        <source>They stay for every project; Undo puts them back.</source>
+        <translation>Ils restent pour tous les projets ; Annuler les remet comme avant.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Apply</source>
+        <translation>Appliquer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Cancel</source>
+        <translation>Annuler</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Applied.</source>
+        <translation>Appliqué.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Rien n'a changé : les réglages n'ont pas pu être appliqués.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>Certains de ces réglages ont changé depuis : ils sont laissés tels quels.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Réglages remis comme avant.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Remettre mes réglages comme avant</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Ils restent pour tous les projets ; le lien qui suit les remet comme avant.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Not applied: nothing changed.</source>
+        <translation>Non appliqué : rien n'a changé.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="230"/>
+        <source>Setup of FilterMate</source>
+        <translation>Configuration de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="65"/>
+        <source>Filter layers by the features selected in EXPLORING. Off: the source layer is chosen at the top of EXPLORING.</source>
+        <translation>Filtrer les couches selon les entités sélectionnées dans EXPLORING. Désactivé : la couche source se choisit en haut d'EXPLORING.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="67"/>
+        <source>Export layers to files (GeoPackage, Shapefile, KML...), QFieldCloud.</source>
+        <translation>Exporter des couches vers des fichiers (GeoPackage, Shapefile, KML...) et QFieldCloud.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="69"/>
+        <source>Filter from a sentence, with a model you connect. Without a model it keeps this setup.</source>
+        <translation>Filtrer à partir d'une phrase, avec un modèle que vous connectez. Sans modèle, elle propose toujours cette configuration.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="73"/>
+        <source>Rasters (images, DEMs)</source>
+        <translation>Rasters (images, MNT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="74"/>
+        <source>Point clouds (LiDAR)</source>
+        <translation>Nuages de points (LiDAR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="75"/>
+        <source>PostgreSQL / PostGIS</source>
+        <translation>PostgreSQL / PostGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="76"/>
+        <source>Web services (WFS, WMS)</source>
+        <translation>Services web (WFS, WMS)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>Small: under 10,000 features</source>
+        <translation>Petites : moins de 10 000 entités</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>A shorter wait while you type an expression.</source>
+        <translation>Une attente plus courte pendant la saisie d'une expression.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>Medium: up to 100,000</source>
+        <translation>Moyennes : jusqu'à 100 000</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>The usual settings.</source>
+        <translation>Les réglages habituels.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Large: 100,000 features or more</source>
+        <translation>Grandes : 100 000 entités ou plus</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Longer timeouts, fewer warnings.</source>
+        <translation>Délais plus longs, moins d'avertissements.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="82"/>
+        <source>Keep my settings</source>
+        <translation>Garder mes réglages</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>As QGIS</source>
+        <translation>Comme QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Light</source>
+        <translation>Clair</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Dark</source>
+        <translation>Sombre</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="85"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Fit to the screen</source>
+        <translation>Adapter à l'écran</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Compact (small screen)</source>
+        <translation>Compact (petit écran)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Large (4K, Retina)</source>
+        <translation>Grand (4K, Retina)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Bottom</source>
+        <translation>En bas</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Top</source>
+        <translation>En haut</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Left</source>
+        <translation>À gauche</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Right</source>
+        <translation>À droite</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>Sous chaque section</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>Disposition</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>Où placer les sections</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>En-têtes</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Comment le panneau liste ses sections</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Un rail de pastilles</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Par défaut : une rangée par pile, où un clic sur une pastille ouvre sa section et où une pastille se fait glisser à une autre place.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Des en-têtes, les uns au-dessus des autres</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Le nom de chaque section sur sa propre ligne.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>Un clic sur un en-tête ouvre sa section.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>Toutes dans le panneau FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>Par défaut : un seul panneau, où un clic dans un rail ouvre une section.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>Dans des panneaux de QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT dans son propre panneau, FILTERING, EXPORTING et CONFIGURATION ensemble dans un autre, à côté de la carte ou flottants ; EXPLORING reste dans FilterMate. Faites glisser la pastille d'une section sur un autre panneau pour les regrouper, faites un clic droit dessus pour la fusionner dans FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>Comme elles sont maintenant</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>Certaines sections sont dans leur propre panneau.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>Chaque section montre ses propres boutons tant qu'elle est ouverte.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>Sections : toutes de retour dans le panneau FilterMate (appliqué tout de suite)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Sections : dans des panneaux de QGIS (appliqué tout de suite)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Les sections sont dans des panneaux de QGIS : déplacez un panneau par son titre, faites glisser la pastille d'une section sur un autre panneau pour les regrouper, faites un clic droit dessus pour la fusionner dans FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>Ces réglages ont déjà été remis comme avant.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="91"/>
+        <source>Zoom to what is kept</source>
+        <translation>Zoomer sur ce qui est conservé</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="92"/>
+        <source>Keep the history of filters in the project</source>
+        <translation>Conserver l'historique des filtres dans le projet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="93"/>
+        <source>Show optimization tips</source>
+        <translation>Afficher les conseils d'optimisation</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="94"/>
+        <source>Let FilterMate choose the fastest way</source>
+        <translation>Laisser FilterMate choisir la méthode la plus rapide</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="95"/>
+        <source>Point clouds</source>
+        <translation>Nuages de points</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a GeoPackage</source>
+        <translation>Dans un GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a KML</source>
+        <translation>Dans un KML</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Cloud Optimized GeoTIFF</source>
+        <translation>Cloud Optimized GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>GeoTIFF</source>
+        <translation>GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAZ (compressed)</source>
+        <translation>LAZ (compressé)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAS</source>
+        <translation>LAS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="99"/>
+        <source>COPC (cloud optimized)</source>
+        <translation>COPC (optimisé pour le cloud)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>Next</source>
+        <translation>Suivant</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>See the changes</source>
+        <translation>Voir les changements</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="209"/>
+        <source>Nothing to change: FilterMate already works this way.</source>
+        <translation>Rien à changer : FilterMate fonctionne déjà ainsi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="256"/>
+        <source>Refine the setup with the agent</source>
+        <translation>Affiner la configuration avec l'agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="258"/>
+        <source>Connect a model to filter from a sentence</source>
+        <translation>Connecter un modèle pour filtrer à partir d'une phrase</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>{} in this project</source>
+        <translation>{} dans ce projet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="216"/>
+        <source>These settings could not be prepared: change them in the configuration of the panel.</source>
+        <translation>Ces réglages n'ont pas pu être préparés : modifiez-les dans la configuration du panneau.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="248"/>
+        <source>FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show it again: this setup, or {}.</source>
+        <translation>FILTERING est masqué : la couche source se choisit en haut d'EXPLORING. Pour le réafficher : cette configuration, ou {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>The AGENT section goes after restarting QGIS. To bring it back: {}.</source>
+        <translation>La section AGENT disparaît au redémarrage de QGIS. Pour la retrouver : {}.</translation>
     </message>
 </context>
 <context>
@@ -11686,6 +12352,89 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>Tuiles vectorielles</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>Comment fonctionne FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>Comment fonctionne FilterMate, section par section. Aucun modèle d'IA n'est nécessaire pour lire ceci, et rien n'est envoyé nulle part.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>Le panneau a deux piles, chacune avec un rail qui liste ses sections : AGENT et EXPLORING en haut, FILTERING, EXPORTING et CONFIGURATION en bas. Cliquez sur une pastille d'un rail pour ouvrir sa section, faites-la glisser le long du rail pour mettre les sections dans un autre ordre.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Par défaut, toutes les sections sont dans ce panneau, et rien ne bouge sans que vous le demandiez. Une section peut le quitter : faites un clic droit sur sa pastille dans son rail, puis choisissez de l'ouvrir dans son propre panneau. Elle devient un panneau de QGIS, à déplacer à côté de la carte, à mettre en onglet avec le panneau Couches ou à faire flotter sur un autre écran. La dernière section qui reste ici ne part pas. EXPLORING contient la couche sur laquelle les autres sections travaillent : une fois séparé de FILTERING, il montre sa propre liste pour choisir cette couche.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panneau tient une section ou plusieurs, listées dans un rail comme ici. Faites glisser la pastille d'une section sur un autre panneau pour les regrouper, sur FilterMate pour la fusionner, ou hors de tout panneau pour lui en donner un nouveau ; deux panneaux de FilterMate mis en onglets l'un de l'autre n'en font plus qu'un. Un clic droit sur une pastille, ou sur le titre d'un panneau, propose les mêmes déplacements. Fermer un panneau fusionne ses sections dans FilterMate. QGIS remet chaque panneau là où vous l'avez laissé.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Un panneau tient une section ou plusieurs. Faites un clic droit sur l'en-tête d'une section, ou sur le titre d'un panneau, pour la regrouper avec un autre panneau ou pour la fusionner dans FilterMate ; deux panneaux de FilterMate mis en onglets l'un de l'autre n'en font plus qu'un. Fermer un panneau fusionne ses sections dans FilterMate. QGIS remet chaque panneau là où vous l'avez laissé.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>EXPLORING contient la couche courante et ce que vous y choisissez : des entités d'une couche vecteur, une plage de valeurs ou des classes d'un raster, des classes ou des hauteurs d'un nuage de points. Les autres sections travaillent sur ce qu'il sélectionne.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>FILTERING filtre les couches que vous cochez par cette sélection : celles qui l'intersectent, qui se trouvent à une certaine distance... Filtrer applique, Annuler et Rétablir parcourent l'historique, Comparer montre la carte avant et après, Défiltrer retire les filtres.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>EXPORTING écrit les couches telles qu'elles sont filtrées : GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>AGENT fait la même chose à partir d'une phrase, et davantage (styles, étiquettes, données à faire venir), avec un modèle que vous connectez : votre propre clé d'API, ou Ollama sur cet ordinateur. Chaque demande peut être annulée.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>CONFIGURATION liste tous les réglages. Configurer FilterMate demande les principaux en quelques choix, et montre chaque réglage avant et après.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>Désactivé dans vos réglages : {}. Configurer FilterMate ramène une section.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Une section peut quitter ce panneau. Faites un clic droit sur son en-tête, puis choisissez de l'ouvrir dans son propre panneau : elle devient un panneau de QGIS, à déplacer à côté de la carte, à mettre en onglet avec le panneau Couches ou à faire flotter sur un autre écran. La dernière section qui reste ici ne part pas. EXPLORING contient la couche sur laquelle les autres sections travaillent : une fois séparé de FILTERING, il montre sa propre liste pour choisir cette couche.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>Les boutons agissent dans leur propre section : Filtrer, Annuler, Rétablir, Comparer et Défiltrer avec FILTERING, Exporter avec EXPORTING. Une section dans son propre panneau emporte ses boutons ; la configuration peut aussi les montrer sous chaque section.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>Configurer FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>Connecter un modèle</translation>
     </message>
 </context>
 <context>

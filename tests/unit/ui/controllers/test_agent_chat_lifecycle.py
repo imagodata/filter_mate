@@ -199,6 +199,8 @@ def ctrl_module(monkeypatch):
     _module(monkeypatch, ".ui.widgets.agent_widgets_strip", number_text=str)
     bounded_http = _load(monkeypatch, "adapters.agent.bounded_http", "adapters/agent/bounded_http.py")
     _load(monkeypatch, "ui.controllers.history_tips", "ui/controllers/history_tips.py")
+    _load(monkeypatch, "ui.controllers.setup_wizard", "ui/controllers/setup_wizard.py")
+    _load(monkeypatch, "ui.controllers.welcome_tour", "ui/controllers/welcome_tour.py")
     module = _load(monkeypatch, "ui.controllers.agent_chat_controller", "ui/controllers/agent_chat_controller.py")
     module._test_bounded_http = bounded_http
     module._test_store = store
@@ -804,7 +806,20 @@ def offer(ctrl_module, controller, dock, monkeypatch):
     dock._fm_sections = types.SimpleNamespace(is_open=lambda key: state.agent_open,
                                               open_top=lambda key: state.opened.append(key))
     controller._on_send = state.sent.append
+    # The setup asks with cards, no request (ui/controllers/setup_wizard.py): its start counts as what was sent.
+    controller._wizard = types.SimpleNamespace(start=lambda: state.sent.append("setup"), forget=lambda: None,
+                                               offer_back_again=lambda: state.sent.append("back link"))
     return state
+
+
+def test_the_setup_sends_nothing_to_a_model(controller, offer):
+    assert controller.start_setup() is True
+    assert offer.sent == ["setup"]
+
+
+def test_refining_the_setup_asks_the_model(controller, offer):
+    assert controller.start_model_setup() is True
+    assert len(offer.sent) == 1 and offer.sent[0] != "setup"
 
 
 def test_an_offer_nobody_saw_is_not_kept_as_made(controller, offer):
@@ -813,6 +828,10 @@ def test_an_offer_nobody_saw_is_not_kept_as_made(controller, offer):
     assert len(offer.cards) == 1 and offer.key not in FakeSettings.values
     assert controller.offer_setup_once("9.9.9") is False and len(offer.cards) == 1  # one card, not one per call
 
+    controller._on_panel_shown()  # shown behind another tab, as QGIS restores a panel: nobody saw the card
+    assert offer.key not in FakeSettings.values
+
+    offer.agent_open = True
     controller._on_panel_shown()  # the user opens AGENT: the card is in view
     assert FakeSettings.values[offer.key] == "9.9.9"
     assert controller.offer_setup_once("9.9.9") is False
@@ -824,6 +843,32 @@ def test_an_offer_made_in_the_open_section_is_kept_at_once(controller, offer):
     assert FakeSettings.values[offer.key] == "9.9.9"
 
 
+def test_an_offer_in_a_panel_just_put_back_waits_for_the_tabs_to_be_laid_out(controller, offer, dock):
+    """2026-11-16, review: AGENT in its own panel, put back behind the tab of the dock when QGIS starts. Qt had
+    not laid the tabs out yet: the panel read as in view and the offer was kept as seen."""
+    dock._fm_sections.detached = {"agent"}
+    offer.agent_open = True  # what Qt says before the layout
+    assert controller.offer_setup_once("9.9.9") is True
+    assert offer.key not in FakeSettings.values  # asked again a moment later (QTimer), and when its tab comes
+
+    offer.agent_open = False  # laid out: behind the tab of the dock
+    controller._on_panel_shown()
+    assert offer.key not in FakeSettings.values
+    offer.agent_open = True  # the user clicks its tab
+    controller._on_panel_shown()
+    assert FakeSettings.values[offer.key] == "9.9.9"
+
+
+def test_in_view_is_asked_of_a_dock_that_knows_it(controller, offer, dock):
+    """Open in the dock is not in view when the dock is behind the tab of another panel of QGIS."""
+    offer.agent_open = True
+    dock._fm_sections.in_view = lambda key: False
+    dock._fm_sections.bring_in_view = lambda key: offer.opened.append(("in view", key))
+    assert controller._agent_shown() is False
+    controller._show_agent()
+    assert offer.opened == [("in view", "agent")]
+
+
 def test_an_offer_nobody_saw_comes_back_in_the_thread_of_another_project(controller, offer):
     """Opening a project empties the thread: the card went with it, for good."""
     controller.offer_setup_once("9.9.9")
@@ -831,7 +876,9 @@ def test_an_offer_nobody_saw_comes_back_in_the_thread_of_another_project(control
     project.cleared.emit()
     project.readProject.emit()
     assert len(offer.cards) >= 2 and not offer.cards[-1].done and offer.key not in FakeSettings.values
+    assert "back link" in offer.sent  # what puts the settings of the setup back returns with the thread
 
+    offer.agent_open = True
     controller._on_panel_shown()
     shown = len(offer.cards)
     project.cleared.emit()

@@ -663,6 +663,51 @@ Patakbuhin?</translation>
         <translation>Nasimulan na ang setup.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="641"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Ilang pagpipilian, pagkatapos ay ang mga setting bago at pagkatapos: hindi kailangan ng AI model, walang magbabago hangga't hindi mo ito ilalapat. Mamaya: menu Vector &gt; FilterMate &gt; I-set up ang FilterMate gamit ang agent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="646"/>
+        <source>Sections: FILTERING, EXPORTING, AGENT, only those you use</source>
+        <translation>Mga seksyon: FILTERING, EXPORTING, AGENT, ang mga ginagamit mo lang</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>I-set up ang FilterMate?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>Ilang pagpipilian, tapos ipapakita ang mga setting bago at pagkatapos: hindi kailangan ng AI model, at walang magbabago hangga't hindi mo ito inilalapat. Sa susunod: menu na Vector &gt; FilterMate &gt; I-set up ang FilterMate; nandoon din ang Paano gumagana ang FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>Hitsura: tema, laki ng panel, wika</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Layout: ang mga seksyon sa panel na ito o sa mga panel ng QGIS, kung saan ilalagay ang mga button</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
+        <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
+        <translation>Ang iyong data: mga raster, point cloud, PostgreSQL, web service, ang laki ng mga ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="648"/>
+        <source>Look: theme, size of the panel, language, buttons</source>
+        <translation>Hitsura: tema, laki ng panel, wika, mga button</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>Wait for the end of the request, then try again.</source>
+        <translation>Hintayin ang pagtatapos ng request, pagkatapos ay subukan muli.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
         <source>Not now: the menu starts it when you want.</source>
         <translation>Hindi ngayon: sisimulan ito ng menu kapag gusto ninyo.</translation>
@@ -1985,6 +2030,21 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="429"/>
         <source>Connect a provider</source>
         <translation>Ikonekta ang isang provider</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="645"/>
+        <source>Set up FilterMate, no model needed</source>
+        <translation>I-set up ang FilterMate, walang model na kailangan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>I-set up ang FilterMate…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>Paano gumagana ang FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4339,6 +4399,41 @@ I-click ang ★ indicator at piliin ang 'Idagdag ang kasalukuyang filter sa mga 
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>I-set up ang FilterMate gamit ang agent</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>Ilang pagpipilian, tapos bawat setting bago at pagkatapos: hindi kailangan ng AI model</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>Paano gumagana ang FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>Ang ginagawa ng bawat seksyon, ang mga seksyon bilang mga panel ng QGIS, kung nasaan ang mga button</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>Ano ang bago sa FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Naglilista ang isang bar ng mga seksyon ng FilterMate, maaaring maging panel ng QGIS ang isang seksyon, at hindi kailangan ng AI model sa setup nito.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;I-set up ang FilterMate&lt;/b&gt; ay nagtatanong ng ilang pagpipilian: ang mga seksyong ginagamit mo, ang iyong data, ang hitsura, at kung saan ilalagay ang mga seksyon at ang mga button nito. Ipinapakita nito ang bawat setting bago at pagkatapos, at walang ipinapadala saanman.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Isang bar ng mga seksyon&lt;/b&gt; sa bawat stack ng panel: i-click ang isang chip para buksan ang seksyon nito, i-drag ito para ayusin ang mga seksyon sa ibang pagkakasunod-sunod.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Mga seksyon bilang mga panel&lt;/b&gt;, kapag hiniling mo (bilang default, nananatili silang lahat sa panel ng FilterMate): i-right-click ang chip ng AGENT, FILTERING, EXPORTING o CONFIGURATION para buksan ito sa sarili nitong panel ng QGIS. I-right-click ang pamagat ng isang panel para igrupo ito sa iba pa bilang mga tab, o isanib muli sa FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Mga button sa ilalim ng bawat seksyon&lt;/b&gt;, at puwedeng i-off ang FILTERING o EXPORTING kapag hindi mo ginagamit.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; ay nagfi-filter, nag-i-style at nagpapasok ng data mula sa isang pangungusap, gamit ang sarili mong API key o isang lokal na Ollama model. &lt;b&gt;Paano gumagana ang FilterMate&lt;/b&gt;, sa menu nito, ay nagsasabi muli ng bawat seksyon.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Maaaring maging mga panel ng QGIS ang mga seksyon ng FilterMate, at hindi kailangan ng AI model sa setup nito.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;I-set up ang FilterMate&lt;/b&gt; ay nagtatanong ng ilang pagpipilian: ang mga seksyong ginagamit mo, ang iyong data, ang hitsura, at kung saan ilalagay ang mga seksyon at ang mga button nito. Ipinapakita nito ang bawat setting bago at pagkatapos, at walang ipinapadala saanman.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Mga seksyon bilang mga panel&lt;/b&gt;: i-right-click ang header ng AGENT, FILTERING, EXPORTING o CONFIGURATION para buksan ito sa sarili nitong panel ng QGIS. I-right-click ang pamagat ng isang panel para igrupo ito sa iba pa bilang mga tab, o isanib muli sa FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Mga button sa ilalim ng bawat seksyon&lt;/b&gt;, at puwedeng i-off ang FILTERING o EXPORTING kapag hindi mo ginagamit.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; ay nagfi-filter, nag-i-style at nagpapasok ng data mula sa isang pangungusap, gamit ang sarili mong API key o isang lokal na Ollama model. &lt;b&gt;Paano gumagana ang FilterMate&lt;/b&gt;, sa menu nito, ay nagsasabi muli ng bawat seksyon.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>I-set up ang FilterMate</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -10693,6 +10788,34 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>Buksan ang {} sa sarili nitong panel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Ilabas ang lahat ng seksyon mula sa FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>Igrupo kasama ang {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>Isanib muli ang {} sa FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>Isanib muli ang lahat ng seksyon sa FilterMate</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11093,6 +11216,549 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: tinanggihan ng provider ang filter at nabigo ang pagbabalik.</translation>
+    </message>
+</context>
+<context>
+    <name>SetupWizard</name>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Sections</source>
+        <translation>Seksyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Data</source>
+        <translation>Data</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Size</source>
+        <translation>Laki</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Theme</source>
+        <translation>Tema</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Panel</source>
+        <translation>Panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Language</source>
+        <translation>Wika</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Buttons</source>
+        <translation>Button</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Filtering</source>
+        <translation>Pag-filter</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Targets</source>
+        <translation>Target</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Groups</source>
+        <translation>Grupo</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Rasters</source>
+        <translation>Raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Clouds</source>
+        <translation>Point cloud</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="42"/>
+        <source>Which sections of the panel do you use? EXPLORING is always there.</source>
+        <translation>Aling mga seksyon ng panel ang ginagamit mo? Palaging nandiyan ang EXPLORING.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Which data do you work with, besides vector layers?</source>
+        <translation>Anong data ang ginagamit mo, bukod sa mga vector layer?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>How big are your layers, most of the time?</source>
+        <translation>Gaano kalaki ang iyong mga layer sa karamihan ng oras?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="45"/>
+        <source>Colours of the panel</source>
+        <translation>Mga kulay ng panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="46"/>
+        <source>Size of the panel</source>
+        <translation>Laki ng panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="47"/>
+        <source>Language of the panel</source>
+        <translation>Wika ng panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="48"/>
+        <source>Where the action buttons go (Filter, Export...)</source>
+        <translation>Saan ilalagay ang mga action button (I-filter, I-export...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="49"/>
+        <source>When you filter</source>
+        <translation>Kapag nag-filter ka</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="50"/>
+        <source>A vector layer also filters these layers (cut to its features)</source>
+        <translation>Nagfi-filter din ang isang vector layer sa mga layer na ito (pinutol sa mga feature nito)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="51"/>
+        <source>When you export to a file, keep the groups of the layer tree</source>
+        <translation>Kapag nag-export sa file, panatilihin ang mga grupo ng layer tree</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="52"/>
+        <source>Format of the rasters exported</source>
+        <translation>Format ng mga na-export na raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Format of the point clouds exported</source>
+        <translation>Format ng mga na-export na point cloud</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="150"/>
+        <source>Set up FilterMate: a few choices, ticked as your settings are now. Nothing is sent anywhere, and nothing changes until you apply.</source>
+        <translation>I-set up ang FilterMate: ilang pagpipilian, may tsek ayon sa kasalukuyan mong mga setting. Walang ipinapadala kahit saan, at walang magbabago hangga't hindi mo ito ilalapat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Stop the setup</source>
+        <translation>Ihinto ang setup</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Setup stopped.</source>
+        <translation>Itinigil ang setup.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="202"/>
+        <source>Setup stopped: nothing changed. Menu Vector &gt; FilterMate starts it again.</source>
+        <translation>Itinigil ang setup: walang nagbago. Muli itong sinisimulan ng menu Vector &gt; FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="220"/>
+        <source>Your settings of FilterMate</source>
+        <translation>Ang iyong mga setting ng FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="221"/>
+        <source>They stay for every project; Undo puts them back.</source>
+        <translation>Mananatili ang mga ito sa bawat proyekto; ibabalik sila ng I-undo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Apply</source>
+        <translation>Ilapat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Cancel</source>
+        <translation>Kanselahin</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Applied.</source>
+        <translation>Nailapat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Walang nagbago: hindi nailapat ang mga setting.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>May ilan sa mga setting na ito na nagbago mula noon: iniiwan ang mga ito kung ano sila.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Naibalik ang mga setting sa dati.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Ibalik ang aking mga setting sa dati</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Mananatili ang mga ito sa bawat proyekto; ibabalik sila ng sumusunod na link sa dati nilang ayos.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Not applied: nothing changed.</source>
+        <translation>Hindi nailapat: walang nagbago.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="230"/>
+        <source>Setup of FilterMate</source>
+        <translation>Setup ng FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="65"/>
+        <source>Filter layers by the features selected in EXPLORING. Off: the source layer is chosen at the top of EXPLORING.</source>
+        <translation>I-filter ang mga layer ayon sa mga feature na napili sa EXPLORING. Naka-off: pinipili ang source layer sa itaas ng EXPLORING.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="67"/>
+        <source>Export layers to files (GeoPackage, Shapefile, KML...), QFieldCloud.</source>
+        <translation>I-export ang mga layer sa mga file (GeoPackage, Shapefile, KML...) at sa QFieldCloud.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="69"/>
+        <source>Filter from a sentence, with a model you connect. Without a model it keeps this setup.</source>
+        <translation>Mag-filter mula sa isang pangungusap, gamit ang modelong ikokonekta mo. Kung walang model, mananatili ang setup na ito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="73"/>
+        <source>Rasters (images, DEMs)</source>
+        <translation>Raster (mga larawan, DEM)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="74"/>
+        <source>Point clouds (LiDAR)</source>
+        <translation>Point cloud (LiDAR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="75"/>
+        <source>PostgreSQL / PostGIS</source>
+        <translation>PostgreSQL / PostGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="76"/>
+        <source>Web services (WFS, WMS)</source>
+        <translation>Web service (WFS, WMS)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>Small: under 10,000 features</source>
+        <translation>Maliit: wala pang 10,000 feature</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>A shorter wait while you type an expression.</source>
+        <translation>Mas maikling paghihintay habang nagta-type ng expression.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>Medium: up to 100,000</source>
+        <translation>Katamtaman: hanggang 100,000</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>The usual settings.</source>
+        <translation>Ang karaniwang mga setting.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Large: 100,000 features or more</source>
+        <translation>Malaki: 100,000 feature o higit pa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Longer timeouts, fewer warnings.</source>
+        <translation>Mas mahahabang timeout, mas kaunting babala.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="82"/>
+        <source>Keep my settings</source>
+        <translation>Panatilihin ang aking mga setting</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>As QGIS</source>
+        <translation>Gaya ng QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Light</source>
+        <translation>Maliwanag</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Dark</source>
+        <translation>Madilim</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="85"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Fit to the screen</source>
+        <translation>Iangkop sa screen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Compact (small screen)</source>
+        <translation>Compact (maliit na screen)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Large (4K, Retina)</source>
+        <translation>Malaki (4K, Retina)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Bottom</source>
+        <translation>Ibaba</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Top</source>
+        <translation>Itaas</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Left</source>
+        <translation>Kaliwa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Right</source>
+        <translation>Kanan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>Sa ilalim ng bawat seksyon</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>Layout</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>Saan ilalagay ang mga seksyon</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Mga header</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Paano inililista ng panel ang mga seksyon nito</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Isang bar ng mga chip</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Ang default: isang hanay bawat stack, kung saan nagbubukas ng seksyon ang pag-click sa isang chip at iniidrag ang chip sa ibang lugar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Mga header, isa sa ibabaw ng isa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Ang pangalan ng bawat seksyon sa sarili nitong linya.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>Ang pag-click sa header ay magbubukas ng seksyon nito.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>Lahat sa panel ng FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>Ang default: isang panel, kung saan nagbubukas ng seksyon ang pag-click sa isang bar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>Sa mga panel ng QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>Ang AGENT ay nasa sarili nitong panel, ang FILTERING, EXPORTING at CONFIGURATION ay magkakasama sa isa pa, sa tabi ng mapa o lumulutang; nananatili ang EXPLORING sa FilterMate. I-drag ang chip ng isang seksyon sa ibang panel para igrupo ang mga ito, i-right-click ito para isanib muli sa FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>Ayon sa kasalukuyan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>Ang ilang seksyon ay nasa sarili nilang panel.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>Ipinapakita ng bawat seksyon ang sarili nitong mga button habang bukas ito.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>Mga seksyon: lahat ay nakabalik sa panel ng FilterMate (agad na inilalapat)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Mga seksyon: sa mga panel ng QGIS (agad na inilalapat)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Nasa mga panel ng QGIS ang mga seksyon: i-drag ang isang panel sa pamagat nito, i-drag ang chip ng isang seksyon sa ibang panel para igrupo ang mga ito, i-right-click ito para isanib muli sa FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>Naibalik na ang mga setting na ito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="91"/>
+        <source>Zoom to what is kept</source>
+        <translation>I-zoom sa natira</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="92"/>
+        <source>Keep the history of filters in the project</source>
+        <translation>Panatilihin ang kasaysayan ng mga filter sa proyekto</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="93"/>
+        <source>Show optimization tips</source>
+        <translation>Ipakita ang mga tip sa pag-optimize</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="94"/>
+        <source>Let FilterMate choose the fastest way</source>
+        <translation>Hayaang piliin ng FilterMate ang pinakamabilis na paraan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="95"/>
+        <source>Point clouds</source>
+        <translation>Mga point cloud</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a GeoPackage</source>
+        <translation>Sa isang GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a KML</source>
+        <translation>Sa isang KML</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Cloud Optimized GeoTIFF</source>
+        <translation>Cloud Optimized GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>GeoTIFF</source>
+        <translation>GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAZ (compressed)</source>
+        <translation>LAZ (naka-compress)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAS</source>
+        <translation>LAS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="99"/>
+        <source>COPC (cloud optimized)</source>
+        <translation>COPC (naka-optimize para sa cloud)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>Next</source>
+        <translation>Susunod</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>See the changes</source>
+        <translation>Tingnan ang mga pagbabago</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="209"/>
+        <source>Nothing to change: FilterMate already works this way.</source>
+        <translation>Walang babaguhin: ganito na ang paggana ng FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="256"/>
+        <source>Refine the setup with the agent</source>
+        <translation>Pinuhin ang setup gamit ang agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="258"/>
+        <source>Connect a model to filter from a sentence</source>
+        <translation>Ikonekta ang isang model para mag-filter mula sa pangungusap</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>{} in this project</source>
+        <translation>{} sa proyektong ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="216"/>
+        <source>These settings could not be prepared: change them in the configuration of the panel.</source>
+        <translation>Hindi nakahanda ang mga setting na ito: baguhin ang mga ito sa configuration ng panel.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="248"/>
+        <source>FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show it again: this setup, or {}.</source>
+        <translation>Nakatago ang FILTERING: pinipili ang source layer sa itaas ng EXPLORING. Para ipakita itong muli: ang setup na ito, o {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>The AGENT section goes after restarting QGIS. To bring it back: {}.</source>
+        <translation>Mawawala ang seksyong AGENT pagkatapos i-restart ang QGIS. Para maibalik ito: {}.</translation>
     </message>
 </context>
 <context>
@@ -11562,6 +12228,89 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>Mga vector tile</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>Paano gumagana ang FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>Paano gumagana ang FilterMate, isa-isang seksyon. Hindi kailangan ng AI model para basahin ito, at walang ipinapadala saanman.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>May dalawang stack ang panel, bawat isa ay may bar na naglilista ng mga seksyon nito: AGENT at EXPLORING sa itaas, FILTERING, EXPORTING at CONFIGURATION sa ibaba. I-click ang isang chip ng bar para buksan ang seksyon nito, i-drag ito sa kahabaan ng bar para ayusin ang mga seksyon sa ibang pagkakasunod-sunod.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Bilang default, nasa panel na ito ang bawat seksyon, at walang gumagalaw maliban kung hihilingin mo. Maaaring umalis ang isang seksyon dito: i-right-click ang chip nito sa bar, at piliing buksan ito sa sarili nitong panel. Magiging panel ito ng QGIS na maaari mong i-drag sa tabi ng mapa, gawing tab kasama ng Layers panel, o ilutang sa ibang screen. Hindi aalis ang huling seksyong natitira rito. Hawak ng EXPLORING ang layer na pinagtatrabahuhan ng iba pang seksyon: kapag nahiwalay na ito sa FILTERING, magpapakita ito ng sarili nitong listahan para piliin ang layer na iyon.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Maaaring maglaman ang isang panel ng isang seksyon o ilan, na nakalista sa isang bar tulad ng dito. I-drag ang chip ng isang seksyon sa ibang panel para igrupo ang mga ito, sa FilterMate para isanib muli, o palabas sa lahat ng panel para bigyan ito ng bago; nagiging iisa ang dalawang panel ng FilterMate na pinagsama-sama bilang mga tab. Nag-aalok ng parehong paglilipat ang right-click sa isang chip, o sa pamagat ng isang panel. Naisasanib muli sa FilterMate ang mga seksyon ng isang panel kapag isinara ito. Ibinabalik ng QGIS ang bawat panel kung saan mo ito iniwan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Maaaring maglaman ang isang panel ng isang seksyon o ilan. I-right-click ang header ng isang seksyon, o ang pamagat ng isang panel, para igrupo ito sa ibang panel o isanib muli sa FilterMate; nagiging iisa ang dalawang panel ng FilterMate na pinagsama-sama bilang mga tab. Naisasanib muli sa FilterMate ang mga seksyon ng isang panel kapag isinara ito. Ibinabalik ng QGIS ang bawat panel kung saan mo ito iniwan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>Hawak ng EXPLORING ang kasalukuyang layer at ang pinipili mo roon: mga feature ng vector layer, saklaw ng mga halaga o mga klase ng raster, mga klase o taas ng point cloud. Gumagana ang iba pang seksyon sa kung ano ang pinipili nito.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>Ang FILTERING ay nagfi-filter ng mga layer na nilagyan mo ng tsek ayon sa pagpiling iyon: ang mga nagsasalubong dito, o nasa loob ng isang distansya mula rito... Ang I-filter ay naglalapat, ang I-undo at I-redo ay naglalakad sa history, ang Ihambing ay nagpapakita ng mapa bago at pagkatapos, ang Alisin ang filter ay nag-aalis ng mga filter.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>Ine-export ng EXPORTING ang mga layer sa estado nilang naka-filter: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>Ginagawa rin ito ng AGENT mula sa isang pangungusap, at higit pa (mga style, label, data na ipapasok), gamit ang model na ikinonekta mo: sarili mong API key, o Ollama sa computer na ito. Maaaring i-undo ang bawat kahilingan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>Inililista ng CONFIGURATION ang bawat setting. Ang I-set up ang FilterMate ay nagtatanong ng mga pangunahin sa ilang pagpipilian, at ipinapakita ang bawat setting bago at pagkatapos.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>Naka-off sa iyong mga setting: {}. Ibinabalik ng I-set up ang FilterMate ang isang seksyon.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Maaaring umalis ang isang seksyon sa panel na ito. I-right-click ang header nito, at piliing buksan ito sa sarili nitong panel: magiging panel ito ng QGIS na maaari mong i-drag sa tabi ng mapa, gawing tab kasama ng Layers panel, o ilutang sa ibang screen. Hindi aalis ang huling seksyong natitira rito. Hawak ng EXPLORING ang layer na pinagtatrabahuhan ng iba pang seksyon: kapag nahiwalay na ito sa FILTERING, magpapakita ito ng sarili nitong listahan para piliin ang layer na iyon.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>Kumikilos ang mga button sa sarili nilang seksyon: I-filter, I-undo, I-redo, Ihambing at Alisin ang filter sa FILTERING, I-export sa EXPORTING. Dala ng isang seksyon sa sarili nitong panel ang mga button nito; maipapakita rin ng setup ang mga ito sa ilalim ng bawat seksyon.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>I-set up ang FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>Ikonekta ang isang model</translation>
     </message>
 </context>
 <context>

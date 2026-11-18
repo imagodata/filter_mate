@@ -663,6 +663,51 @@ Spustit?</translation>
         <translation>Nastavení spuštěno.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="641"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Několik voleb, poté nastavení před a po: není potřeba žádný model AI a nic se nezmění, dokud nepoužijete změny. Později: nabídka Vektor &gt; FilterMate &gt; Nastavit FilterMate s agentem.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="646"/>
+        <source>Sections: FILTERING, EXPORTING, AGENT, only those you use</source>
+        <translation>Sekce: FILTERING, EXPORTING, AGENT, jen ty, které používáte</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>Nastavit FilterMate?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>Pár voleb, pak nastavení před a po změně: není potřeba žádný model AI a nic se nezmění, dokud změny nepoužijete. Později: nabídka Vektor &gt; FilterMate &gt; Nastavit FilterMate; najdete tam i Jak FilterMate funguje.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>Vzhled: motiv, velikost panelu, jazyk</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>Rozvržení: sekce v tomto panelu, nebo v panelech QGIS, umístění tlačítek</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
+        <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
+        <translation>Vaše data: rastry, mračna bodů, PostgreSQL, webové služby, jejich velikost</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="648"/>
+        <source>Look: theme, size of the panel, language, buttons</source>
+        <translation>Vzhled: motiv, velikost panelu, jazyk, tlačítka</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>Wait for the end of the request, then try again.</source>
+        <translation>Počkejte na dokončení požadavku a zkuste to znovu.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
         <source>Not now: the menu starts it when you want.</source>
         <translation>Teď ne: nabídka ho spustí, kdy budete chtít.</translation>
@@ -1985,6 +2030,21 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="429"/>
         <source>Connect a provider</source>
         <translation>Připojit poskytovatele</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="645"/>
+        <source>Set up FilterMate, no model needed</source>
+        <translation>Nastavit FilterMate, bez modelu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>Nastavit FilterMate…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>Jak FilterMate funguje</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4338,6 +4398,41 @@ Klikněte na indikátor ★ a vyberte „Přidat aktuální filtr do oblíbenýc
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>Nastavit FilterMate s agentem</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>Pár voleb, pak každé nastavení před a po: není potřeba žádný model AI</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>Jak FilterMate funguje</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>Co dělá každá sekce, sekce jako panely QGIS, kde jsou tlačítka</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>Novinky ve FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Lišta vypisuje sekce FilterMate, sekce může být panelem QGIS a nastavení nepotřebuje žádný model AI.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Nastavit FilterMate&lt;/b&gt; se zeptá na pár voleb: sekce, které používáte, vaše data, vzhled, umístění sekcí a jejich tlačítek. Ukáže každé nastavení před a po a nic nikam neodesílá.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Lišta sekcí&lt;/b&gt; v každém bloku panelu: kliknutím na čip otevřete jeho sekci, přetažením změníte pořadí sekcí.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sekce jako panely&lt;/b&gt;, když o to požádáte (ve výchozím stavu zůstávají všechny v panelu FilterMate): klikněte pravým tlačítkem na čip sekce AGENT, FILTERING, EXPORTING nebo CONFIGURATION a otevřete ji ve vlastním panelu QGIS. Kliknutím pravým tlačítkem na název panelu ho seskupíte s jiným, jako karty, nebo sloučíte zpět do FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Tlačítka pod každou sekcí&lt;/b&gt; a vypnuté FILTERING nebo EXPORTING, když je nepoužíváte.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtruje, upravuje styly a přidává data z jedné věty, s vaším vlastním klíčem API nebo místním modelem Ollama. &lt;b&gt;Jak FilterMate funguje&lt;/b&gt; v jeho nabídce znovu popíše každou sekci.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Sekce FilterMate mohou být panely QGIS a jeho nastavení nepotřebuje žádný model AI.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Nastavit FilterMate&lt;/b&gt; se zeptá na pár voleb: sekce, které používáte, vaše data, vzhled, umístění sekcí a jejich tlačítek. Ukáže každé nastavení před a po a nic nikam neodesílá.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sekce jako panely&lt;/b&gt;: klikněte pravým tlačítkem na záhlaví AGENT, FILTERING, EXPORTING nebo CONFIGURATION a otevřete ho ve vlastním panelu QGIS. Kliknutím pravým tlačítkem na název panelu ho seskupíte s jiným, jako karty, nebo sloučíte zpět do FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Tlačítka pod každou sekcí&lt;/b&gt; a vypnuté FILTERING nebo EXPORTING, když je nepoužíváte.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtruje, upravuje styly a přidává data z jedné věty, s vaším vlastním klíčem API nebo místním modelem Ollama. &lt;b&gt;Jak FilterMate funguje&lt;/b&gt; v jeho nabídce znovu popíše každou sekci.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>Nastavit FilterMate</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -10675,6 +10770,34 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>Otevřít {} ve vlastním panelu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>Vyjmout všechny sekce z FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>Seskupit s {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>Sloučit {} zpět do FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>Sloučit všechny sekce zpět do FilterMate</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11075,6 +11198,549 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: poskytovatel odmítl filtr a obnovení selhalo.</translation>
+    </message>
+</context>
+<context>
+    <name>SetupWizard</name>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Sections</source>
+        <translation>Sekce</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Data</source>
+        <translation>Data</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Size</source>
+        <translation>Velikost</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Theme</source>
+        <translation>Motiv</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Panel</source>
+        <translation>Panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Language</source>
+        <translation>Jazyk</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Buttons</source>
+        <translation>Tlačítka</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Filtering</source>
+        <translation>Filtrování</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Targets</source>
+        <translation>Cíle</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Groups</source>
+        <translation>Skupiny</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Rasters</source>
+        <translation>Rastry</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Clouds</source>
+        <translation>Mračna</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="42"/>
+        <source>Which sections of the panel do you use? EXPLORING is always there.</source>
+        <translation>Které sekce panelu používáte? EXPLORING je vždy k dispozici.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Which data do you work with, besides vector layers?</source>
+        <translation>S jakými daty pracujete kromě vektorových vrstev?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>How big are your layers, most of the time?</source>
+        <translation>Jak velké jsou vaše vrstvy ve většině případů?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="45"/>
+        <source>Colours of the panel</source>
+        <translation>Barvy panelu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="46"/>
+        <source>Size of the panel</source>
+        <translation>Velikost panelu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="47"/>
+        <source>Language of the panel</source>
+        <translation>Jazyk panelu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="48"/>
+        <source>Where the action buttons go (Filter, Export...)</source>
+        <translation>Kam patří tlačítka akcí (Filtrovat, Exportovat...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="49"/>
+        <source>When you filter</source>
+        <translation>Při filtrování</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="50"/>
+        <source>A vector layer also filters these layers (cut to its features)</source>
+        <translation>Vektorová vrstva filtruje také tyto vrstvy (oříznuté podle jejích prvků)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="51"/>
+        <source>When you export to a file, keep the groups of the layer tree</source>
+        <translation>Při exportu do souboru zachovat skupiny stromu vrstev</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="52"/>
+        <source>Format of the rasters exported</source>
+        <translation>Formát exportovaných rastrů</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Format of the point clouds exported</source>
+        <translation>Formát exportovaných mračen bodů</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="150"/>
+        <source>Set up FilterMate: a few choices, ticked as your settings are now. Nothing is sent anywhere, and nothing changes until you apply.</source>
+        <translation>Nastavení FilterMate: pár voleb, zaškrtnutých podle vašeho současného nastavení. Nic se nikam neodesílá a nic se nezmění, dokud nepoužijete změny.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Stop the setup</source>
+        <translation>Zastavit nastavení</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Setup stopped.</source>
+        <translation>Nastavení zastaveno.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="202"/>
+        <source>Setup stopped: nothing changed. Menu Vector &gt; FilterMate starts it again.</source>
+        <translation>Nastavení zastaveno: nic se nezměnilo. Nabídka Vektor &gt; FilterMate ho spustí znovu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="220"/>
+        <source>Your settings of FilterMate</source>
+        <translation>Vaše nastavení FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="221"/>
+        <source>They stay for every project; Undo puts them back.</source>
+        <translation>Platí pro všechny projekty; „Vrátit“ je obnoví.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Apply</source>
+        <translation>Použít</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Cancel</source>
+        <translation>Zrušit</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Applied.</source>
+        <translation>Použito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>Nic se nezměnilo: nastavení se nepodařilo použít.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>Některá z těchto nastavení se mezitím změnila: zůstávají, jak jsou.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>Nastavení bylo vráceno, jak bylo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>Vrátit mé nastavení, jak bylo</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>Platí pro všechny projekty; odkaz níže je vrátí tak, jak byly.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Not applied: nothing changed.</source>
+        <translation>Nepoužito: nic se nezměnilo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="230"/>
+        <source>Setup of FilterMate</source>
+        <translation>Nastavení FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="65"/>
+        <source>Filter layers by the features selected in EXPLORING. Off: the source layer is chosen at the top of EXPLORING.</source>
+        <translation>Filtrovat vrstvy podle prvků vybraných v EXPLORING. Vypnuto: zdrojová vrstva se vybírá nahoře v EXPLORING.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="67"/>
+        <source>Export layers to files (GeoPackage, Shapefile, KML...), QFieldCloud.</source>
+        <translation>Export vrstev do souborů (GeoPackage, Shapefile, KML...) a do QFieldCloud.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="69"/>
+        <source>Filter from a sentence, with a model you connect. Without a model it keeps this setup.</source>
+        <translation>Filtrování z věty pomocí modelu, který připojíte. Bez modelu zůstane toto nastavení.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="73"/>
+        <source>Rasters (images, DEMs)</source>
+        <translation>Rastry (snímky, DMT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="74"/>
+        <source>Point clouds (LiDAR)</source>
+        <translation>Mračna bodů (LiDAR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="75"/>
+        <source>PostgreSQL / PostGIS</source>
+        <translation>PostgreSQL / PostGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="76"/>
+        <source>Web services (WFS, WMS)</source>
+        <translation>Webové služby (WFS, WMS)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>Small: under 10,000 features</source>
+        <translation>Malé: méně než 10 000 prvků</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>A shorter wait while you type an expression.</source>
+        <translation>Kratší prodleva při psaní výrazu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>Medium: up to 100,000</source>
+        <translation>Střední: do 100 000</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>The usual settings.</source>
+        <translation>Obvyklé nastavení.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Large: 100,000 features or more</source>
+        <translation>Velké: 100 000 prvků nebo více</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Longer timeouts, fewer warnings.</source>
+        <translation>Delší časové limity, méně upozornění.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="82"/>
+        <source>Keep my settings</source>
+        <translation>Ponechat mé nastavení</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>As QGIS</source>
+        <translation>Jako QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Light</source>
+        <translation>Světlý</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Dark</source>
+        <translation>Tmavý</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="85"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Fit to the screen</source>
+        <translation>Přizpůsobit obrazovce</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Compact (small screen)</source>
+        <translation>Kompaktní (malá obrazovka)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Normal</source>
+        <translation>Normální</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Large (4K, Retina)</source>
+        <translation>Velký (4K, Retina)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Bottom</source>
+        <translation>Dole</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Top</source>
+        <translation>Nahoře</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Left</source>
+        <translation>Vlevo</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Right</source>
+        <translation>Vpravo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>Pod každou sekcí</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>Rozvržení</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>Kam umístit sekce</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>Záhlaví</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>Jak panel vypisuje své sekce</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>Lišta čipů</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>Výchozí stav: jeden řádek na blok, kde kliknutí na čip otevře jeho sekci a čip se přetahuje na jiné místo.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>Záhlaví, jedno nad druhým</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>Název každé sekce na vlastním řádku.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>Kliknutí na záhlaví otevře jeho sekci.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>Všechny v panelu FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>Výchozí stav: jeden panel, kde kliknutí na liště otevře sekci.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>V panelech QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT ve vlastním panelu, FILTERING, EXPORTING a CONFIGURATION spolu v jiném, vedle mapy nebo plovoucí; EXPLORING zůstává ve FilterMate. Přetáhněte čip sekce na jiný panel, abyste je seskupili, kliknutím pravým tlačítkem na něj sekci sloučíte zpět do FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>Tak, jak jsou teď</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>Některé sekce jsou ve vlastním panelu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>Každá sekce zobrazuje vlastní tlačítka, dokud je otevřená.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>Sekce: všechny zpět v panelu FilterMate (použije se okamžitě)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>Sekce: v panelech QGIS (použije se okamžitě)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>Sekce jsou v panelech QGIS: přetáhněte panel za název; přetáhněte čip sekce na jiný panel, abyste je seskupili, kliknutím pravým tlačítkem na něj sekci sloučíte zpět do FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>Tato nastavení už byla vrácena, jak byla.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="91"/>
+        <source>Zoom to what is kept</source>
+        <translation>Přiblížit na zachované</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="92"/>
+        <source>Keep the history of filters in the project</source>
+        <translation>Uchovávat historii filtrů v projektu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="93"/>
+        <source>Show optimization tips</source>
+        <translation>Zobrazovat tipy k optimalizaci</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="94"/>
+        <source>Let FilterMate choose the fastest way</source>
+        <translation>Nechat FilterMate vybrat nejrychlejší způsob</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="95"/>
+        <source>Point clouds</source>
+        <translation>Mračna bodů</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a GeoPackage</source>
+        <translation>Do GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a KML</source>
+        <translation>Do KML</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Cloud Optimized GeoTIFF</source>
+        <translation>Cloud Optimized GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>GeoTIFF</source>
+        <translation>GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAZ (compressed)</source>
+        <translation>LAZ (komprimovaný)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAS</source>
+        <translation>LAS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="99"/>
+        <source>COPC (cloud optimized)</source>
+        <translation>COPC (optimalizovaný pro cloud)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>Next</source>
+        <translation>Další</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>See the changes</source>
+        <translation>Zobrazit změny</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="209"/>
+        <source>Nothing to change: FilterMate already works this way.</source>
+        <translation>Není co měnit: FilterMate už takto funguje.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="256"/>
+        <source>Refine the setup with the agent</source>
+        <translation>Doladit nastavení s agentem</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="258"/>
+        <source>Connect a model to filter from a sentence</source>
+        <translation>Připojte model a filtrujte z věty</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>{} in this project</source>
+        <translation>{} v tomto projektu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="216"/>
+        <source>These settings could not be prepared: change them in the configuration of the panel.</source>
+        <translation>Toto nastavení se nepodařilo připravit: změňte je v konfiguraci panelu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="248"/>
+        <source>FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show it again: this setup, or {}.</source>
+        <translation>FILTERING je skryté: zdrojová vrstva se vybírá nahoře v EXPLORING. Chcete-li je znovu zobrazit: toto nastavení nebo {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>The AGENT section goes after restarting QGIS. To bring it back: {}.</source>
+        <translation>Sekce AGENT zmizí po restartu QGIS. Chcete-li ji vrátit: {}.</translation>
     </message>
 </context>
 <context>
@@ -11544,6 +12210,89 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>Vektorové dlaždice</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>Jak FilterMate funguje</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>Jak FilterMate funguje, sekci po sekci. K přečtení není potřeba žádný model AI a nic se nikam neodesílá.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>Panel má dva bloky, každý s lištou, která vypisuje jeho sekce: AGENT a EXPLORING nahoře, FILTERING, EXPORTING a CONFIGURATION dole. Kliknutím na čip na liště otevřete jeho sekci, přetažením čipu podél lišty změníte pořadí sekcí.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Ve výchozím stavu je každá sekce v tomto panelu a nic se nepřesouvá, dokud o to nepožádáte. Sekce ho může opustit: klikněte pravým tlačítkem na čip sekce na její liště a zvolte otevření ve vlastním panelu. Stane se panelem QGIS, který můžete přetáhnout vedle mapy, spojit do karet s panelem Vrstvy nebo nechat plovoucí na jiné obrazovce. Poslední sekce, která tady zbývá, zůstává. EXPLORING obsahuje vrstvu, se kterou ostatní sekce pracují: po oddělení od FILTERING zobrazuje vlastní seznam pro výběr této vrstvy.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Panel obsahuje jednu sekci nebo několik, vypsaných na liště jako zde. Přetáhněte čip sekce na jiný panel, abyste je seskupili, na FilterMate, abyste ji sloučili zpět, nebo mimo všechny panely, abyste jí dali nový; dva panely FilterMate složené do karet se stanou jedním. Kliknutí pravým tlačítkem na čip nebo na název panelu nabízí stejné přesuny. Zavřením panelu se jeho sekce sloučí zpět do FilterMate. QGIS vrátí každý panel na místo, kde jste ho nechali.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>Panel obsahuje jednu sekci nebo několik. Kliknutím pravým tlačítkem na záhlaví sekce nebo na název panelu ji seskupíte s jiným panelem nebo sloučíte zpět do FilterMate; dva panely FilterMate složené do karet se stanou jedním. Zavřením panelu se jeho sekce sloučí zpět do FilterMate. QGIS vrátí každý panel na místo, kde jste ho nechali.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>EXPLORING obsahuje aktuální vrstvu a to, co v ní vyberete: prvky vektorové vrstvy, rozsah hodnot nebo třídy rastru, třídy nebo výšky mračna bodů. Ostatní sekce pracují s tím, co vybere.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>FILTERING filtruje vrstvy, které zaškrtnete, podle tohoto výběru: ty, které se s ním protínají, leží v určité vzdálenosti od něj... Filtrovat použije filtr, Vrátit a Znovu procházejí historií, Porovnat ukáže mapu před a po, Zrušit filtr filtry odstraní.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>EXPORTING zapíše vrstvy tak, jak jsou vyfiltrované: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>AGENT dělá totéž z jedné věty a umí i víc (styly, popisky, data k přidání) s modelem, který připojíte: vlastní klíč API, nebo Ollama v tomto počítači. Každý požadavek lze vrátit zpět.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>CONFIGURATION uvádí všechna nastavení. Nastavit FilterMate se zeptá na ta hlavní v několika volbách a ukáže každé nastavení před a po.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>Vypnuto ve vašem nastavení: {}. Nastavit FilterMate sekci vrátí.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>Sekce může opustit tento panel. Klikněte pravým tlačítkem na záhlaví sekce a zvolte otevření ve vlastním panelu: stane se panelem QGIS, který můžete přetáhnout vedle mapy, spojit do karet s panelem Vrstvy nebo nechat plovoucí na jiné obrazovce. Poslední sekce, která tady zbývá, zůstává. EXPLORING obsahuje vrstvu, se kterou ostatní sekce pracují: po oddělení od FILTERING zobrazuje vlastní seznam pro výběr této vrstvy.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>Tlačítka působí ve své sekci: Filtrovat, Vrátit, Znovu, Porovnat a Zrušit filtr u FILTERING, Exportovat u EXPORTING. Sekce ve vlastním panelu si tlačítka bere s sebou; Nastavit FilterMate je může zobrazit i pod každou sekcí.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>Nastavit FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>Připojit model</translation>
     </message>
 </context>
 <context>

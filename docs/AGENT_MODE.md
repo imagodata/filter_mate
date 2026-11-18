@@ -739,10 +739,11 @@ Each entry was checked to answer without an account; `tests/qgis_headless/check_
 
 A description is read at every request. With every tool offered to a local model (the families off), the
 instructions and the tools must hold in the 32k context Ollama is asked for: beyond, it asks for 64k, which
-doubles the memory of the model. A local model is not sent what only checks an argument (`maxLength`,
-`minLength`, `maxItems`, `minItems`, `additionalProperties`), and an optional value (`anyOf` a type or null) is
-written as its type (`providers/ollama_chat.wire_schema`): the plugin checks every call against the whole schema
-of the catalog, so nothing is lost, and 6,600 characters were won. On 2026-11-15, 71 tools and the instructions
+doubles the memory of the model. No model is sent what only checks an argument (`maxLength`, `minLength`,
+`maxItems`, `minItems`, `additionalProperties`, `title`), an empty default or a bound beyond a million, and an
+optional value (`anyOf` a type or null) is written as its type (`core/agent/tool_schema.for_model`; Ollama only
+until lot 2 of the token diet, 2026-11-16): the plugin checks every call against the whole schema of the catalog
+and takes its defaults from it, so nothing is lost. On 2026-11-15, 71 tools and the instructions
 weigh 94,343 characters for 100,352 at most: about 6,000 characters are left. A test fails when the step is
 passed (`test_ollama_provider.py`).
 
@@ -779,6 +780,43 @@ server of the plugin serves 53 (the chat's tools without its own, plus `map_imag
   own way (the first vector one, the first of the kind wanted, the first of any kind), in no order the user sees.
 - **`set_layer_style` mode `keep`**: the opacity alone; every other mode replaces the style. An image drawn by its
   service (WMS, WMTS, tiles) takes no other mode: it has no band value to stretch.
+
+### Shorter tools and instructions (token diet, lot 2, 2026-11-16)
+
+The fixed part of a request with the default settings (the instructions with the index, and the tools of the core)
+went from 32,491 (30,941 once the light form of the schemas was sent to every provider) to 19,966 characters
+(`test_tool_weight.py` bounds it under 20,000). The light form keeps a bound that guides a call (a length of 100 at
+most, a number of items of 20 at most that is not the size of an enum, the schema of the values of a map) and drops the
+guards; `test_tool_constraints.py` keeps a snapshot of what every tool accepts, so that a rewritten description never
+takes a constraint with it. A description says what the tool does,
+what it returns and the rule that avoids a frequent mistake; examples and rare cases live in the skill of the task
+(the derivatives of a DTM in `terrain`, the objects drawn in the dock and `segments` in `raster-objects`). A tool weighs
+2,000 characters at most as the model reads it, except cross_filter (3,500) and set_layer_style (3,200), whose schemas
+alone weigh 1,687 and 1,464. The summaries of the index are 60 characters at most, and the sources not ticked are one
+paragraph (`chat_setup.MISSING_SOURCES`). The conversation of the bench: cost 257,561 -> 184,870, largest request
+47,659 -> 35,602.
+
+### The fields of the active layer (2026-11-17)
+
+The state of the project sent with a request names the fields of the active layer (40 at most, names only, never a
+value), and a later request says them again when the active layer changes (`core/agent/project_summary.py`). The
+quality gate of the token diet found that qwen3:8b, given the state without them, wrote a field it had guessed in 11
+runs of 12 of `narrow_with_and` (`dep`, `department`, `code_dep` for `dept`); with them, the right field in 3 of 3.
+
+### The start of a request stays the same (token diet, lot 4, 2026-11-16)
+
+Each provider's cache serves the start a request shares with an earlier one. The instructions are the way of working,
+then the index, then what a setting says (values not shared, sources ticked or not, connectors): nothing that depends
+on a setting comes before what does not. The tools a setting brings or changes (`chat_setup.SETTING_TOOLS`: the sources,
+the expert mode, the values shared, load_skill and the skills it lists) come after the others, and a tool added by use_tools or load_skill goes at the end. Anthropic gets a
+second breakpoint at the end of the instructions (the tools come before them), next to the automatic one at the end of
+the request: the tools and the instructions are read again after a compaction rewrites the history (unless that
+compaction takes out tools added and left unused, which then costs one write of the cache), and by the next
+conversation of the same settings within the five minutes of the cache (19,539 characters of its first request on the
+bench). Ollama keeps the largest `num_ctx` of a conversation: a smaller one after a compaction would load the model
+again. `agent_request_weight.py --conversation` fails when, between two calls of one request with the same tools and
+the same `num_ctx`, a provider's cache does not serve the whole call before. A tool added still costs Anthropic its
+cache: the tools come first in its request.
 
 ### The options of the panels (2026-11-16)
 

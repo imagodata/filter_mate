@@ -1,0 +1,2765 @@
+{
+ "add_basemap": {
+  "properties": {
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "platform": {
+    "maxLength": 2000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "platform"
+  ],
+  "type": "object"
+ },
+ "add_database_table": {
+  "additionalProperties": false,
+  "properties": {
+   "connection": {
+    "maxLength": 100,
+    "minLength": 1,
+    "type": "string"
+   },
+   "geometry_column": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "schema": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "table": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "connection",
+   "schema",
+   "table"
+  ],
+  "type": "object"
+ },
+ "add_elevation": {
+  "properties": {
+   "crs": {
+    "default": "",
+    "maxLength": 64,
+    "type": "string"
+   },
+   "extent_wkt": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "platform": {
+    "default": "copernicus_dem",
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "resolution": {
+    "anyOf": [
+     {
+      "maximum": 5000,
+      "minimum": 10,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "target_crs": {
+    "default": "",
+    "maxLength": 64,
+    "type": "string"
+   }
+  },
+  "type": "object"
+ },
+ "add_features": {
+  "properties": {
+   "crs": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "features": {
+    "items": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "maxItems": 100,
+    "minItems": 1,
+    "type": "array"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "features"
+  ],
+  "type": "object"
+ },
+ "add_field": {
+  "properties": {
+   "formula": {
+    "default": "",
+    "maxLength": 10000,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "length": {
+    "default": 0,
+    "maximum": 10000,
+    "minimum": 0,
+    "type": "integer"
+   },
+   "name": {
+    "maxLength": 63,
+    "minLength": 1,
+    "type": "string"
+   },
+   "type": {
+    "default": "text",
+    "enum": [
+     "integer",
+     "integer64",
+     "decimal",
+     "text",
+     "date",
+     "datetime",
+     "boolean"
+    ],
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "name"
+  ],
+  "type": "object"
+ },
+ "add_layer": {
+  "properties": {
+   "kind": {
+    "default": "vector",
+    "enum": [
+     "vector",
+     "raster",
+     "point_cloud"
+    ],
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "source": {
+    "maxLength": 2000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "source"
+  ],
+  "type": "object"
+ },
+ "add_osm_features": {
+  "properties": {
+   "crs": {
+    "default": "",
+    "maxLength": 64,
+    "type": "string"
+   },
+   "extent_wkt": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "geometry": {
+    "default": "as_mapped",
+    "enum": [
+     "as_mapped",
+     "points",
+     "lines",
+     "polygons"
+    ],
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 180,
+    "type": "string"
+   },
+   "platform": {
+    "default": "overpass_fr",
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "tags": {
+    "items": {
+     "additionalProperties": false,
+     "properties": {
+      "key": {
+       "maxLength": 60,
+       "minLength": 1,
+       "pattern": "^[A-Za-z][A-Za-z0-9_:.-]*$",
+       "type": "string"
+      },
+      "value": {
+       "default": "",
+       "maxLength": 80,
+       "type": "string"
+      }
+     },
+     "required": [
+      "key"
+     ],
+     "type": "object"
+    },
+    "maxItems": 10,
+    "minItems": 1,
+    "type": "array"
+   }
+  },
+  "required": [
+   "tags"
+  ],
+  "type": "object"
+ },
+ "add_population": {
+  "properties": {
+   "crs": {
+    "default": "",
+    "maxLength": 64,
+    "type": "string"
+   },
+   "extent_wkt": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "platform": {
+    "default": "meta_population",
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "resolution": {
+    "anyOf": [
+     {
+      "maximum": 10000,
+      "minimum": 30,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   }
+  },
+  "type": "object"
+ },
+ "add_project_note": {
+  "additionalProperties": false,
+  "properties": {
+   "text": {
+    "maxLength": 300,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "text"
+  ],
+  "type": "object"
+ },
+ "add_service_layer": {
+  "properties": {
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "platform": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "typename": {
+    "maxLength": 300,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "platform",
+   "typename"
+  ],
+  "type": "object"
+ },
+ "agent_options": {
+  "additionalProperties": false,
+  "properties": {},
+  "type": "object"
+ },
+ "apply_favorite": {
+  "properties": {
+   "favorite_id": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "favorite_id"
+  ],
+  "type": "object"
+ },
+ "apply_filter": {
+  "properties": {
+   "expression": {
+    "maxLength": 500000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "layer_name": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "operator": {
+    "anyOf": [
+     {
+      "enum": [
+       "AND",
+       "OR",
+       "AND NOT"
+      ],
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "source": {
+    "default": "mcp",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer_name",
+   "expression"
+  ],
+  "type": "object"
+ },
+ "apply_settings_profile": {
+  "additionalProperties": false,
+  "properties": {
+   "name": {
+    "maxLength": 60,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "name"
+  ],
+  "type": "object"
+ },
+ "ask_user": {
+  "additionalProperties": false,
+  "properties": {
+   "questions": {
+    "items": {
+     "additionalProperties": false,
+     "properties": {
+      "header": {
+       "maxLength": 12,
+       "minLength": 1,
+       "type": "string"
+      },
+      "multi_select": {
+       "default": false,
+       "type": "boolean"
+      },
+      "options": {
+       "items": {
+        "additionalProperties": false,
+        "properties": {
+         "description": {
+          "maxLength": 200,
+          "type": "string"
+         },
+         "label": {
+          "maxLength": 60,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "label"
+        ],
+        "type": "object"
+       },
+       "maxItems": 4,
+       "minItems": 2,
+       "type": "array"
+      },
+      "question": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     "required": [
+      "question",
+      "header",
+      "options"
+     ],
+     "type": "object"
+    },
+    "maxItems": 4,
+    "minItems": 1,
+    "type": "array"
+   }
+  },
+  "required": [
+   "questions"
+  ],
+  "type": "object"
+ },
+ "bookmark": {
+  "properties": {
+   "action": {
+    "enum": [
+     "list",
+     "add",
+     "zoom",
+     "remove"
+    ],
+    "type": "string"
+   },
+   "crs": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "extent_wkt": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "action"
+  ],
+  "type": "object"
+ },
+ "change_settings": {
+  "additionalProperties": false,
+  "properties": {
+   "changes": {
+    "items": {
+     "additionalProperties": false,
+     "properties": {
+      "path": {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      },
+      "value": {
+       "type": [
+        "string",
+        "number",
+        "boolean"
+       ]
+      }
+     },
+     "required": [
+      "path",
+      "value"
+     ],
+     "type": "object"
+    },
+    "maxItems": 10,
+    "minItems": 1,
+    "type": "array"
+   },
+   "reason": {
+    "maxLength": 300,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "changes",
+   "reason"
+  ],
+  "type": "object"
+ },
+ "clear_filters": {
+  "properties": {
+   "layers": {
+    "items": {
+     "type": "string"
+    },
+    "maxItems": 1000,
+    "minItems": 1,
+    "type": "array"
+   }
+  },
+  "required": [
+   "layers"
+  ],
+  "type": "object"
+ },
+ "contour_lines": {
+  "properties": {
+   "band": {
+    "default": 1,
+    "maximum": 1000,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "index_interval": {
+    "anyOf": [
+     {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "interval": {
+    "exclusiveMinimum": 0,
+    "maximum": 100000,
+    "type": "number"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "min_length": {
+    "anyOf": [
+     {
+      "maximum": 1000000000.0,
+      "minimum": 0,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "interval"
+  ],
+  "type": "object"
+ },
+ "create_layout": {
+  "properties": {
+   "extent": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "number"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "extent_layer": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "layers": {
+    "anyOf": [
+     {
+      "items": {
+       "maxLength": 1000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "legend": {
+    "default": true,
+    "type": "boolean"
+   },
+   "name": {
+    "maxLength": 100,
+    "minLength": 1,
+    "type": "string"
+   },
+   "north_arrow": {
+    "default": true,
+    "type": "boolean"
+   },
+   "orientation": {
+    "default": "landscape",
+    "enum": [
+     "landscape",
+     "portrait"
+    ],
+    "type": "string"
+   },
+   "page": {
+    "default": "A4",
+    "enum": [
+     "A4",
+     "A3",
+     "A5",
+     "Letter"
+    ],
+    "type": "string"
+   },
+   "scale_bar": {
+    "default": true,
+    "type": "boolean"
+   },
+   "title": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "name"
+  ],
+  "type": "object"
+ },
+ "create_widget": {
+  "additionalProperties": false,
+  "properties": {
+   "aggregate": {
+    "default": "count",
+    "enum": [
+     "count",
+     "sum",
+     "mean",
+     "min",
+     "max"
+    ],
+    "type": "string"
+   },
+   "field": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "kind": {
+    "enum": [
+     "range",
+     "values",
+     "stat",
+     "chart"
+    ],
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "title": {
+    "maxLength": 60,
+    "type": "string"
+   }
+  },
+  "required": [
+   "kind",
+   "layer"
+  ],
+  "type": "object"
+ },
+ "cross_filter": {
+  "properties": {
+   "buffer": {
+    "default": 0.0,
+    "maximum": 10000000.0,
+    "minimum": -10000000.0,
+    "type": "number"
+   },
+   "coverage_min": {
+    "default": 0.0,
+    "maximum": 100,
+    "minimum": 0,
+    "type": "number"
+   },
+   "filter_source": {
+    "default": false,
+    "type": "boolean"
+   },
+   "operator": {
+    "anyOf": [
+     {
+      "enum": [
+       "AND",
+       "OR",
+       "AND NOT"
+      ],
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "point_cloud_criteria": {
+    "anyOf": [
+     {
+      "additionalProperties": false,
+      "properties": {
+       "classes": {
+        "items": {
+         "type": "integer"
+        },
+        "type": "array"
+       },
+       "expression": {
+        "default": "",
+        "maxLength": 2000,
+        "type": "string"
+       },
+       "intensity_max": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null
+       },
+       "intensity_min": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null
+       },
+       "return_number": {
+        "anyOf": [
+         {
+          "maximum": 15,
+          "minimum": 1,
+          "type": "integer"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null
+       },
+       "z_max": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null
+       },
+       "z_min": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null
+       }
+      },
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "predicates": {
+    "default": [
+     "Intersect"
+    ],
+    "items": {
+     "enum": [
+      "Intersect",
+      "Contain",
+      "Disjoint",
+      "Equal",
+      "Touch",
+      "Overlap",
+      "Are within",
+      "Cross"
+     ],
+     "type": "string"
+    },
+    "maxItems": 8,
+    "type": "array"
+   },
+   "raster_selection": {
+    "anyOf": [
+     {
+      "additionalProperties": false,
+      "properties": {
+       "band": {
+        "default": 1,
+        "minimum": 1,
+        "type": "integer"
+       },
+       "classes": {
+        "items": {
+         "type": "integer"
+        },
+        "type": "array"
+       },
+       "derivative": {
+        "default": "value",
+        "enum": [
+         "value",
+         "slope_degrees",
+         "slope_percent",
+         "aspect",
+         "hillshade",
+         "roughness"
+        ],
+        "type": "string"
+       },
+       "dock_objects": {
+        "default": false,
+        "type": "boolean"
+       },
+       "expression": {
+        "default": "",
+        "maxLength": 2000,
+        "type": "string"
+       },
+       "maximum": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null
+       },
+       "minimum": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null
+       },
+       "mode": {
+        "default": "range",
+        "enum": [
+         "range",
+         "classes",
+         "expression"
+        ],
+        "type": "string"
+       },
+       "segments": {
+        "items": {
+         "type": "string"
+        },
+        "maxItems": 10000,
+        "type": "array"
+       }
+      },
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "selected_only": {
+    "default": true,
+    "type": "boolean"
+   },
+   "source_layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "target_layers": {
+    "items": {
+     "type": "string"
+    },
+    "maxItems": 1000,
+    "minItems": 1,
+    "type": "array"
+   }
+  },
+  "required": [
+   "source_layer",
+   "target_layers"
+  ],
+  "type": "object"
+ },
+ "delete_features": {
+  "properties": {
+   "expression": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "selected_only": {
+    "default": false,
+    "type": "boolean"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "describe_algorithm": {
+  "properties": {
+   "algorithm_id": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "algorithm_id"
+  ],
+  "type": "object"
+ },
+ "describe_layer": {
+  "properties": {
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "describe_settings": {
+  "additionalProperties": false,
+  "properties": {
+   "changed_only": {
+    "default": false,
+    "type": "boolean"
+   },
+   "limit": {
+    "default": 25,
+    "maximum": 60,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "query": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "section": {
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "type": "object"
+ },
+ "diagnose_performance": {
+  "additionalProperties": false,
+  "properties": {},
+  "type": "object"
+ },
+ "duplicate_layer": {
+  "properties": {
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "export_layers": {
+  "properties": {
+   "crs": {
+    "anyOf": [
+     {
+      "maxLength": 64,
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "layers": {
+    "items": {
+     "type": "string"
+    },
+    "maxItems": 1000,
+    "minItems": 1,
+    "type": "array"
+   },
+   "point_cloud_format": {
+    "default": "LAZ",
+    "enum": [
+     "LAZ",
+     "COPC",
+     "LAS",
+     "GPKG",
+     "CSV"
+    ],
+    "type": "string"
+   },
+   "raster_format": {
+    "default": "COG",
+    "enum": [
+     "COG",
+     "GTiff"
+    ],
+    "type": "string"
+   },
+   "subfolder": {
+    "default": "export",
+    "maxLength": 300,
+    "type": "string"
+   },
+   "vector_format": {
+    "default": "GPKG",
+    "enum": [
+     "GPKG",
+     "GeoJSON",
+     "ESRI Shapefile",
+     "FlatGeobuf",
+     "CSV"
+    ],
+    "type": "string"
+   }
+  },
+  "required": [
+   "layers"
+  ],
+  "type": "object"
+ },
+ "export_layout": {
+  "properties": {
+   "dpi": {
+    "default": 150,
+    "maximum": 600,
+    "minimum": 72,
+    "type": "integer"
+   },
+   "format": {
+    "default": "pdf",
+    "enum": [
+     "pdf",
+     "png"
+    ],
+    "type": "string"
+   },
+   "name": {
+    "maxLength": 100,
+    "minLength": 1,
+    "type": "string"
+   },
+   "subfolder": {
+    "default": "layouts",
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "name"
+  ],
+  "type": "object"
+ },
+ "export_options": {
+  "properties": {},
+  "type": "object"
+ },
+ "export_settings_profile": {
+  "additionalProperties": false,
+  "properties": {
+   "name": {
+    "maxLength": 60,
+    "minLength": 1,
+    "type": "string"
+   },
+   "replace": {
+    "default": false,
+    "type": "boolean"
+   }
+  },
+  "required": [
+   "name"
+  ],
+  "type": "object"
+ },
+ "field_values": {
+  "properties": {
+   "field": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "limit": {
+    "default": 20,
+    "maximum": 200,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "search": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "field"
+  ],
+  "type": "object"
+ },
+ "filter_state": {
+  "properties": {},
+  "type": "object"
+ },
+ "find_algorithms": {
+  "properties": {
+   "limit": {
+    "default": 20,
+    "maximum": 50,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "query": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "query"
+  ],
+  "type": "object"
+ },
+ "find_place": {
+  "properties": {
+   "limit": {
+    "default": 5,
+    "maximum": 10,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "platform": {
+    "default": "ign_geocoder",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "query": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "query"
+  ],
+  "type": "object"
+ },
+ "geometry_filter": {
+  "properties": {
+   "buffer": {
+    "default": 0.0,
+    "maximum": 10000000.0,
+    "minimum": -10000000.0,
+    "type": "number"
+   },
+   "coverage_min": {
+    "default": 0.0,
+    "maximum": 100,
+    "minimum": 0,
+    "type": "number"
+   },
+   "crs": {
+    "maxLength": 64,
+    "minLength": 1,
+    "type": "string"
+   },
+   "operator": {
+    "anyOf": [
+     {
+      "enum": [
+       "AND",
+       "OR",
+       "AND NOT"
+      ],
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "predicates": {
+    "default": [
+     "Intersect"
+    ],
+    "items": {
+     "enum": [
+      "Intersect",
+      "Contain",
+      "Disjoint",
+      "Equal",
+      "Touch",
+      "Overlap",
+      "Are within",
+      "Cross"
+     ],
+     "type": "string"
+    },
+    "maxItems": 8,
+    "type": "array"
+   },
+   "target_layers": {
+    "items": {
+     "type": "string"
+    },
+    "maxItems": 1000,
+    "minItems": 1,
+    "type": "array"
+   },
+   "wkt": {
+    "maxLength": 1000000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "wkt",
+   "crs",
+   "target_layers"
+  ],
+  "type": "object"
+ },
+ "get_setting": {
+  "additionalProperties": false,
+  "properties": {
+   "path": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "path"
+  ],
+  "type": "object"
+ },
+ "group_layers": {
+  "properties": {
+   "above": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "at_top": {
+    "default": true,
+    "type": "boolean"
+   },
+   "group": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "layers": {
+    "items": {
+     "type": "string"
+    },
+    "maxItems": 1000,
+    "minItems": 1,
+    "type": "array"
+   }
+  },
+  "required": [
+   "layers"
+  ],
+  "type": "object"
+ },
+ "identify_at": {
+  "properties": {
+   "crs": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "layers": {
+    "anyOf": [
+     {
+      "items": {
+       "maxLength": 1000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "limit": {
+    "default": 5,
+    "maximum": 20,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "tolerance": {
+    "anyOf": [
+     {
+      "maximum": 1000000000.0,
+      "minimum": 0,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "x": {
+    "maximum": 1000000000.0,
+    "minimum": -1000000000.0,
+    "type": "number"
+   },
+   "y": {
+    "maximum": 1000000000.0,
+    "minimum": -1000000000.0,
+    "type": "number"
+   }
+  },
+  "required": [
+   "x",
+   "y"
+  ],
+  "type": "object"
+ },
+ "join_layers": {
+  "properties": {
+   "fields": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 200,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "join_field": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "join_layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "prefix": {
+    "anyOf": [
+     {
+      "maxLength": 50,
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "target_field": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "join_layer",
+   "target_field",
+   "join_field"
+  ],
+  "type": "object"
+ },
+ "layer_options": {
+  "properties": {
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "layer_statistics": {
+  "properties": {
+   "field": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "group_by": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "limit": {
+    "default": 10,
+    "maximum": 100,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "measure": {
+    "default": "",
+    "enum": [
+     "",
+     "length",
+     "area"
+    ],
+    "type": "string"
+   },
+   "selected_only": {
+    "default": false,
+    "type": "boolean"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "list_database_tables": {
+  "additionalProperties": false,
+  "properties": {
+   "connection": {
+    "maxLength": 100,
+    "minLength": 1,
+    "type": "string"
+   },
+   "limit": {
+    "default": 50,
+    "maximum": 50,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "schema": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "search": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "connection"
+  ],
+  "type": "object"
+ },
+ "list_favorites": {
+  "properties": {},
+  "type": "object"
+ },
+ "list_layers": {
+  "properties": {
+   "kind": {
+    "anyOf": [
+     {
+      "enum": [
+       "vector",
+       "raster",
+       "point_cloud"
+      ],
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "limit": {
+    "default": 200,
+    "maximum": 500,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "name_contains": {
+    "anyOf": [
+     {
+      "maxLength": 200,
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   }
+  },
+  "type": "object"
+ },
+ "load_skill": {
+  "additionalProperties": false,
+  "properties": {
+   "name": {
+    "enum": [
+     "analysis",
+     "cartography",
+     "configuration",
+     "dashboards",
+     "editing",
+     "open-data",
+     "panels",
+     "raster-objects",
+     "terrain",
+     "workflows"
+    ],
+    "type": "string"
+   }
+  },
+  "required": [
+   "name"
+  ],
+  "type": "object"
+ },
+ "map_context": {
+  "properties": {},
+  "type": "object"
+ },
+ "map_theme": {
+  "properties": {
+   "action": {
+    "enum": [
+     "list",
+     "save",
+     "apply",
+     "remove"
+    ],
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "action"
+  ],
+  "type": "object"
+ },
+ "point_cloud_filter": {
+  "properties": {
+   "criteria": {
+    "additionalProperties": false,
+    "properties": {
+     "classes": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "expression": {
+      "default": "",
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "intensity_max": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "intensity_min": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "return_number": {
+      "anyOf": [
+       {
+        "maximum": 15,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "z_max": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "z_min": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     }
+    },
+    "type": "object"
+   },
+   "layers": {
+    "items": {
+     "type": "string"
+    },
+    "maxItems": 1000,
+    "minItems": 1,
+    "type": "array"
+   },
+   "operator": {
+    "anyOf": [
+     {
+      "enum": [
+       "AND",
+       "OR",
+       "AND NOT"
+      ],
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   }
+  },
+  "required": [
+   "layers",
+   "criteria"
+  ],
+  "type": "object"
+ },
+ "preview_filter": {
+  "properties": {
+   "expression": {
+    "maxLength": 500000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "layer_name": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer_name",
+   "expression"
+  ],
+  "type": "object"
+ },
+ "remove_layers": {
+  "properties": {
+   "layers": {
+    "items": {
+     "type": "string"
+    },
+    "maxItems": 1000,
+    "minItems": 1,
+    "type": "array"
+   }
+  },
+  "required": [
+   "layers"
+  ],
+  "type": "object"
+ },
+ "remove_project_note": {
+  "additionalProperties": false,
+  "properties": {
+   "number": {
+    "maximum": 20,
+    "minimum": 1,
+    "type": "integer"
+   }
+  },
+  "required": [
+   "number"
+  ],
+  "type": "object"
+ },
+ "remove_recipe": {
+  "additionalProperties": false,
+  "properties": {
+   "recipe_id": {
+    "maxLength": 20,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "recipe_id"
+  ],
+  "type": "object"
+ },
+ "remove_widget": {
+  "additionalProperties": false,
+  "properties": {
+   "widget_id": {
+    "maxLength": 20,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "widget_id"
+  ],
+  "type": "object"
+ },
+ "rename_layer": {
+  "properties": {
+   "group": {
+    "default": false,
+    "type": "boolean"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "name": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "name"
+  ],
+  "type": "object"
+ },
+ "run_algorithm": {
+  "properties": {
+   "algorithm_id": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "names": {
+    "anyOf": [
+     {
+      "additionalProperties": {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "parameters": {
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   }
+  },
+  "required": [
+   "algorithm_id"
+  ],
+  "type": "object"
+ },
+ "run_pyqgis": {
+  "additionalProperties": false,
+  "properties": {
+   "code": {
+    "maxLength": 20000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "purpose": {
+    "maxLength": 300,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "purpose",
+   "code"
+  ],
+  "type": "object"
+ },
+ "sample_features": {
+  "properties": {
+   "expression": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "fields": {
+    "anyOf": [
+     {
+      "items": {
+       "maxLength": 1000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "geometry": {
+    "default": false,
+    "type": "boolean"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "limit": {
+    "default": 3,
+    "maximum": 20,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "selected_only": {
+    "default": false,
+    "type": "boolean"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "save_recipe": {
+  "additionalProperties": false,
+  "properties": {
+   "name": {
+    "maxLength": 60,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "name"
+  ],
+  "type": "object"
+ },
+ "search_imagery": {
+  "properties": {
+   "bbox": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "number"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "collections": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 5,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "end": {
+    "default": "",
+    "maxLength": 10,
+    "type": "string"
+   },
+   "limit": {
+    "default": 5,
+    "maximum": 20,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "max_cloud": {
+    "default": 20.0,
+    "maximum": 100,
+    "minimum": 0,
+    "type": "number"
+   },
+   "platform": {
+    "default": "earth_search",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "start": {
+    "default": "",
+    "maxLength": 10,
+    "type": "string"
+   }
+  },
+  "type": "object"
+ },
+ "search_open_data": {
+  "properties": {
+   "limit": {
+    "default": 10,
+    "maximum": 20,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "platform": {
+    "default": "datagouv",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "query": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "query"
+  ],
+  "type": "object"
+ },
+ "segment_objects": {
+  "properties": {
+   "guide_layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "limit": {
+    "default": 50,
+    "maximum": 200,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "raster": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "selected_only": {
+    "default": true,
+    "type": "boolean"
+   }
+  },
+  "required": [
+   "raster",
+   "guide_layer"
+  ],
+  "type": "object"
+ },
+ "select_features": {
+  "properties": {
+   "add": {
+    "default": false,
+    "type": "boolean"
+   },
+   "clear": {
+    "default": false,
+    "type": "boolean"
+   },
+   "expression": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "set_export_options": {
+  "properties": {
+   "changes": {
+    "additionalProperties": true,
+    "type": "object"
+   },
+   "reason": {
+    "default": "",
+    "maxLength": 500,
+    "type": "string"
+   }
+  },
+  "required": [
+   "changes"
+  ],
+  "type": "object"
+ },
+ "set_labels": {
+  "properties": {
+   "buffer": {
+    "default": true,
+    "type": "boolean"
+   },
+   "color": {
+    "default": "",
+    "maxLength": 50,
+    "type": "string"
+   },
+   "enabled": {
+    "default": true,
+    "type": "boolean"
+   },
+   "expression": {
+    "default": "",
+    "maxLength": 2000,
+    "type": "string"
+   },
+   "field": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "placement": {
+    "default": "auto",
+    "enum": [
+     "auto",
+     "curved",
+     "horizontal"
+    ],
+    "type": "string"
+   },
+   "size": {
+    "anyOf": [
+     {
+      "maximum": 72,
+      "minimum": 4,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "visible_from_scale": {
+    "anyOf": [
+     {
+      "maximum": 1000000000.0,
+      "minimum": 1,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "set_layer_options": {
+  "properties": {
+   "layers": {
+    "items": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "maxItems": 50,
+    "minItems": 1,
+    "type": "array"
+   },
+   "reason": {
+    "default": "",
+    "maxLength": 500,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layers"
+  ],
+  "type": "object"
+ },
+ "set_layer_style": {
+  "properties": {
+   "band": {
+    "default": 1,
+    "maximum": 1000,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "blend": {
+    "default": "",
+    "enum": [
+     "",
+     "normal",
+     "multiply",
+     "screen",
+     "overlay",
+     "soft_light"
+    ],
+    "type": "string"
+   },
+   "classes": {
+    "default": 5,
+    "maximum": 12,
+    "minimum": 2,
+    "type": "integer"
+   },
+   "color": {
+    "default": "",
+    "maxLength": 50,
+    "type": "string"
+   },
+   "cut": {
+    "anyOf": [
+     {
+      "exclusiveMinimum": 0,
+      "maximum": 49,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "discrete": {
+    "default": false,
+    "type": "boolean"
+   },
+   "field": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "invert": {
+    "default": false,
+    "type": "boolean"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "maximum": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "method": {
+    "default": "quantile",
+    "enum": [
+     "quantile",
+     "equal_interval",
+     "jenks",
+     "pretty",
+     "stddev"
+    ],
+    "type": "string"
+   },
+   "minimum": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "mode": {
+    "enum": [
+     "single",
+     "categorized",
+     "graduated",
+     "rules",
+     "pseudocolor",
+     "gray",
+     "hillshade",
+     "keep"
+    ],
+    "type": "string"
+   },
+   "multidirectional": {
+    "default": false,
+    "type": "boolean"
+   },
+   "opacity": {
+    "anyOf": [
+     {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "ramp": {
+    "default": "",
+    "maxLength": 100,
+    "type": "string"
+   },
+   "rules": {
+    "anyOf": [
+     {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "color": {
+         "maxLength": 50,
+         "minLength": 1,
+         "type": "string"
+        },
+        "expression": {
+         "default": "",
+         "maxLength": 2000,
+         "type": "string"
+        },
+        "label": {
+         "default": "",
+         "maxLength": 100,
+         "type": "string"
+        },
+        "width": {
+         "anyOf": [
+          {
+           "exclusiveMinimum": 0,
+           "maximum": 20,
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        }
+       },
+       "required": [
+        "color"
+       ],
+       "type": "object"
+      },
+      "maxItems": 20,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "width": {
+    "anyOf": [
+     {
+      "exclusiveMinimum": 0,
+      "maximum": 20,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "z_factor": {
+    "anyOf": [
+     {
+      "exclusiveMinimum": 0,
+      "maximum": 1000,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   }
+  },
+  "required": [
+   "layer",
+   "mode"
+  ],
+  "type": "object"
+ },
+ "set_layers_visibility": {
+  "properties": {
+   "layers": {
+    "items": {
+     "type": "string"
+    },
+    "maxItems": 1000,
+    "minItems": 1,
+    "type": "array"
+   },
+   "visible": {
+    "type": "boolean"
+   }
+  },
+  "required": [
+   "layers",
+   "visible"
+  ],
+  "type": "object"
+ },
+ "set_project_crs": {
+  "properties": {
+   "crs": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "crs"
+  ],
+  "type": "object"
+ },
+ "show_settings_link": {
+  "additionalProperties": false,
+  "properties": {
+   "path": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "target": {
+    "enum": [
+     "provider",
+     "sources",
+     "autonomy",
+     "tools",
+     "other_applications",
+     "setting"
+    ],
+    "type": "string"
+   }
+  },
+  "required": [
+   "target"
+  ],
+  "type": "object"
+ },
+ "similar_objects": {
+  "properties": {
+   "example_layer": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "extent_crs": {
+    "default": "",
+    "maxLength": 64,
+    "type": "string"
+   },
+   "extent_wkt": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "raster": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "same_shape": {
+    "default": true,
+    "type": "boolean"
+   },
+   "use_dock_object": {
+    "default": false,
+    "type": "boolean"
+   }
+  },
+  "required": [
+   "raster"
+  ],
+  "type": "object"
+ },
+ "turn_off_agent_options": {
+  "additionalProperties": false,
+  "properties": {
+   "mcp_server": {
+    "enum": [
+     false
+    ],
+    "type": "boolean"
+   },
+   "sources": {
+    "items": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "maxItems": 100,
+    "type": "array"
+   }
+  },
+  "type": "object"
+ },
+ "turn_on_agent_options": {
+  "additionalProperties": false,
+  "properties": {
+   "mcp_server": {
+    "enum": [
+     true
+    ],
+    "type": "boolean"
+   },
+   "provider": {
+    "maxLength": 300,
+    "type": "string"
+   },
+   "sources": {
+    "items": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "maxItems": 100,
+    "type": "array"
+   }
+  },
+  "type": "object"
+ },
+ "undo_agent_step": {
+  "additionalProperties": false,
+  "properties": {},
+  "type": "object"
+ },
+ "update_features": {
+  "properties": {
+   "expression": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "formulas": {
+    "anyOf": [
+     {
+      "additionalProperties": {
+       "maxLength": 10000,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "selected_only": {
+    "default": false,
+    "type": "boolean"
+   },
+   "values": {
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "view_map": {
+  "additionalProperties": false,
+  "properties": {
+   "crs": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "extent_wkt": {
+    "maxLength": 10000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "width": {
+    "default": 1024,
+    "maximum": 1568,
+    "minimum": 256,
+    "type": "integer"
+   }
+  },
+  "type": "object"
+ },
+ "zoom_to": {
+  "properties": {
+   "crs": {
+    "anyOf": [
+     {
+      "maxLength": 64,
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "extent_wkt": {
+    "anyOf": [
+     {
+      "maxLength": 100000,
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "layer": {
+    "anyOf": [
+     {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "selected_only": {
+    "default": false,
+    "type": "boolean"
+   }
+  },
+  "type": "object"
+ }
+}

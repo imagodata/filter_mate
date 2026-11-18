@@ -17,7 +17,7 @@ from ...core.domain.filter_state import CrossOperation, LayerSnapshot
 from ...core.domain.layer_kind import LayerKind
 from ..public_api.operations import _api_service, busy_reason, layer_kind
 from ..qgis.coverage_layers.snapshots import take_snapshot
-from .turn_effects import EffectsRecorder, apply_effects
+from .turn_effects import EffectsRecorder, apply_effects, takes_away
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -278,17 +278,18 @@ class TurnCheckpoint:
         """Why nothing can be restored now, "" when it can."""
         return busy_reason()
 
-    def _apply(self, operation: CrossOperation, use_before: bool,
-               keep: FrozenSet[str] = frozenset()) -> Tuple[List[str], List[str], bool]:
+    def _apply(self, operation: CrossOperation, use_before: bool, keep: FrozenSet[str] = frozenset(),
+               going: FrozenSet[str] = frozenset()) -> Tuple[List[str], List[str], bool]:
         """Put the layers of a turn in one of its states: ``(changed, left as they are, a layer refused)``.
 
         A layer the user changed since is left alone and does not hold the history back. A layer that refused (being
         edited) is seen by comparing the states afterwards: that can be tried again. A layer whose id is in ``keep``
-        (protected from the agent) is left as it is.
+        (protected from the agent) is left as it is. A layer whose id is in ``going`` leaves the project next: its
+        filter is not touched, and cannot refuse.
         """
         service = _api_service()
         project = QgsProject.instance()
-        changes = [pair for pair in operation.changes if pair[0].layer_id not in keep]
+        changes = [pair for pair in operation.changes if pair[0].layer_id not in keep and pair[0].layer_id not in going]
         pairs = reversed(changes) if use_before else changes
         restored = set(service._restore(pairs, use_before=use_before, project=project))
         names, left = [], list(service.last_skipped)
@@ -312,35 +313,69 @@ class TurnCheckpoint:
 
     @staticmethod
     def _effects_of(operation: CrossOperation, back: bool, keep: FrozenSet[str] = frozenset(),
-                    presence: Optional[bool] = None, edits: Optional[bool] = None):
+                    presence: Optional[bool] = None, edits: Optional[bool] = None, coming: Optional[bool] = None,
+                    going: FrozenSet[str] = frozenset()):
         """Apply the effects of ``operation`` towards its state before (``back``) or after; ``(done, left)``."""
         reversed_ = getattr(operation, "effects_reversed", False)
-        # A layer whose filter the operation restores must leave the editing mode the turn put it in.
-        filtered = frozenset(before.layer_id for before, _after in operation.changes)
+        # A layer whose filter the operation restores must leave the editing mode the turn put it in; one that goes
+        # away next (``going``) keeps it, and its edits come back if a layer refuses its filter.
+        filtered = frozenset(before.layer_id for before, _after in operation.changes) - going
         return apply_effects(getattr(operation, "effects", ()), undo=back != reversed_, keep=keep, presence=presence,
-                             edits=edits, close=filtered)
+                             edits=edits, close=filtered, coming=coming)
+
+    @staticmethod
+    def _going(operation: CrossOperation, back: bool, keep: FrozenSet[str] = frozenset()) -> FrozenSet[str]:
+        """The layers that leave the project when ``operation`` goes to its state before (``back``) or after."""
+        undo = back != getattr(operation, "effects_reversed", False)
+        return frozenset(effect[1] for effect in getattr(operation, "effects", ())
+                         if takes_away(effect, undo) and effect[1] not in keep)
+
+    @staticmethod
+    def _brought(before: set) -> set:
+        """The ids of the layers in the project now that were not in ``before``: what the pass that brings layers
+        back just added, read right after it (a layer added later, by the user or a task, is not counted)."""
+        return set(QgsProject.instance().mapLayers()) - before
+
+    @staticmethod
+    def _take_back(brought: set) -> None:
+        """Remove ``brought``: the layers a move that a layer then refused had just brought back (``_brought``). Only
+        those: a layer that came in meanwhile (a Processing output finished while QGIS waited) stays."""
+        project = QgsProject.instance()
+        for layer_id in brought:
+            if project.mapLayer(layer_id) is not None:
+                project.removeMapLayer(layer_id)
 
     def _move(self, operation: CrossOperation, back: bool, keep: FrozenSet[str] = frozenset()):
         """``operation`` to its state before (``back``) or after: ``(changed, left as they are, a layer refused)``.
 
-        The layers added or removed first (a filter needs its layer), then the filters, then the rest (a filter empties
-        a selection). The edits of the turn go with the rest, except when they are undone: QGIS filters no layer being
-        edited, so they are taken back before the filters, and a layer the turn put in editing mode leaves it. When a
-        layer refused, the layers and the edits go back as far as they can and nothing else changes.
+        The layers that come back first (a filter needs its layer), then the filters, then the layers that go away
+        and the rest (a filter empties a selection). The edits of the turn go with the rest, except when they are
+        undone: QGIS filters no layer being edited, so they are taken back before the filters, and a layer the turn put
+        in editing mode leaves it. When a layer refused its filter (being edited), the edits go back as far as they
+        can, what came back goes away again and nothing else changes.
+
+        2026-11-13 (review of 5.1.0): the layers that go away were removed before the filters, and a refusal brought
+        them back from their definition: a memory layer the turn had added did not come back, a file layer came back
+        without its style nor its edits. They now leave once the filters are restored, so a refusal finds them as they
+        were.
         """
         undoing = back != getattr(operation, "effects_reversed", False)
-        done, not_done = self._effects_of(operation, back, keep, presence=True)
+        going = self._going(operation, back, keep)
+        present = set(QgsProject.instance().mapLayers())
+        done, not_done = self._effects_of(operation, back, keep, presence=True, coming=True)
+        brought = self._brought(present)
         if undoing:
-            edited, not_edited = self._effects_of(operation, back, keep, presence=False, edits=True)
+            edited, not_edited = self._effects_of(operation, back, keep, presence=False, edits=True, going=going)
             done, not_done = done + edited, not_done + not_edited
-        names, left, refused = self._apply(operation, use_before=back, keep=keep)
+        names, left, refused = self._apply(operation, use_before=back, keep=keep, going=going)
         if refused:
             if undoing:
                 self._effects_of(operation, not back, keep, presence=False, edits=True)
-            self._effects_of(operation, not back, presence=True)
+            self._take_back(brought)
             return names, left, True
+        gone, not_gone = self._effects_of(operation, back, keep, presence=True, coming=False)
         more, not_more = self._effects_of(operation, back, keep, presence=False, edits=False if undoing else None)
-        return _merged(names, done + more), _merged(left, not_done + not_more), False
+        return _merged(names, done + gone + more), _merged(left, not_done + not_gone + not_more), False
 
     def undo_to_step(self, step: int, description: str = "") -> Tuple[List[str], List[str]]:
         """The last turn as it was before its step ``step``: a new step of the history, undoable.
@@ -393,24 +428,30 @@ class TurnCheckpoint:
         pairs = pairs_of(())
         if not pairs and not effects:
             return [], []
-        done, not_done = apply_effects(effects, undo=True, presence=True)
+        present = set(project.mapLayers())
+        done, not_done = apply_effects(effects, undo=True, presence=True, coming=True)
+        brought = self._brought(present)
         pairs += pairs_of({now.layer_id for now, _target in pairs})
         # Its effects are those of the steps, undone: undoing this operation applies them again.
         operation = CrossOperation(HISTORY_KEY, tuple(pairs), description=description[:MAX_LABEL],
                                    effects=effects, effects_reversed=True)
+        # A layer a later step added leaves below, once the filters are back: its own filter is left as it is (the
+        # operation keeps it, for the day it is undone), and a layer that refuses finds it still in the project.
+        going = self._going(operation, back=False)
         # The edits before the filters: a layer being edited refuses a filter (see _move).
         edited, not_edited = apply_effects(effects, undo=True, presence=False, edits=True,
-                                           close=frozenset(now.layer_id for now, _target in pairs))
+                                           close=frozenset(now.layer_id for now, _target in pairs) - going)
         done, not_done = done + edited, not_done + not_edited
-        names, left, refused = self._apply(operation, use_before=False) if pairs else ([], [], False)
+        names, left, refused = self._apply(operation, use_before=False, going=going) if pairs else ([], [], False)
         if refused:  # a layer refused (being edited by the user): what moved goes back, it can be tried again
             apply_effects(effects, undo=False, presence=False, edits=True)
-            apply_effects(effects, undo=False, presence=True)
+            self._take_back(brought)
             return names, left
+        gone, not_gone = apply_effects(effects, undo=True, presence=True, coming=False)
         more, not_more = apply_effects(effects, undo=True, presence=False, edits=False)
-        if names or done or more:
+        if names or done or gone or more:
             history.push(operation)
-        return _merged(names, done + more), _merged(left, not_done + not_more)
+        return _merged(names, done + gone + more), _merged(left, not_done + not_gone + not_more)
 
     @staticmethod
     def _settings_back_to(effects, step: int):

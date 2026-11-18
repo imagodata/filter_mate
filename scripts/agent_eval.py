@@ -45,6 +45,7 @@ from agent.performance import summary as performance_summary  # noqa: E402
 from agent.questions import answers_payload, parse_questions  # noqa: E402
 from agent.families import bringing, split_tools, unlocked, use_tools_handler  # noqa: E402
 from agent.tool_index import index_block  # noqa: E402
+from agent.chat_setup import stable_order  # noqa: E402
 from agent.skills import SKILLS, load as load_skill  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
 from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, USE_TOOLS, chat_tools, load_catalog, with_skill_tool  # noqa: E402
@@ -861,8 +862,15 @@ def skill_loader(load: Callable[[Dict[str, Any]], Any], hidden: Dict[str, Any],
 
 def _project_rows(project: SimulatedProject):
     handlers = project.handlers()
+    view = dict(handlers["map_context"]({}))
+    active = view.get("active_layer_name")
+    if active:  # the fields of the active layer, as the chat reads them (core/agent/project_summary.py)
+        try:
+            view["active_fields"] = [field["name"] for field in handlers["describe_layer"]({"layer": active}).get("fields", [])]
+        except Exception:
+            pass
     return (handlers["list_layers"]({})["layers"], [{"name": name, "selected_count": 1} for name in project.selected],
-            handlers["map_context"]({}))
+            view)
 
 
 def project_context(project: SimulatedProject, before: Optional[Dict[str, Any]] = None) -> str:
@@ -887,8 +895,8 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
     # Off by default (the expert mode: a case says "expert": true to turn it on), or nothing to draw in a simulated
     # project (view_map).
     left_out = ("view_map",) if case.get("expert") else ("run_pyqgis", "view_map")
-    tools = tuple(tool for tool in chat_tools() if tool.name not in left_out
-                  and (not filtering or tool.name in FILTERING_TOOLS))
+    tools = tuple(stable_order([tool for tool in chat_tools() if tool.name not in left_out
+                                and (not filtering or tool.name in FILTERING_TOOLS)]))  # as the chat (lot 4)
     offered = {tool.name for tool in tools}
     tools = tuple(with_skill_tool(tools, offered))
     hidden: Dict[str, Any] = {}
@@ -902,7 +910,8 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
         tools, index = tuple(start), index_block(available)
         if isinstance(transport, ScriptedTransport):
             transport.use_first(held)
-    session = AgentSession(provider, tools, (prompt or SYSTEM_PROMPT) + (FILTERING_NOTE if filtering else "") + index,
+    # The way of working, the index, then what a setting says, as core/agent/chat_setup.py orders them (lot 4)
+    session = AgentSession(provider, tools, (prompt or SYSTEM_PROMPT) + index + (FILTERING_NOTE if filtering else ""),
                            AgentLimits())
     project.offered = offered
     handlers_of_case = project.handlers()
@@ -1012,9 +1021,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             parser.error(f"--baseline was run with other options: {differ}")
 
     kind, base_url = PRESETS[args.provider if args.live else "anthropic"]
-    provider = create_provider(ProviderConfig(
-        kind=kind, model=args.model or "scripted", base_url=args.base_url or base_url,
-        api_key=os.environ.get(KEY_VARIABLE, "") if args.live else ""))
+    config = ProviderConfig(kind=kind, model=args.model or "scripted", base_url=args.base_url or base_url,
+                            api_key=os.environ.get(KEY_VARIABLE, "") if args.live else "")
     results = []
     filtering = args.tools == "filtering"
     legacy_prompt = ""
@@ -1028,6 +1036,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for attempt in range(1, args.repeat + 1):
             transport = UrllibTransport(args.timeout) if args.live else ScriptedTransport(expected_script(case))
             started = time.monotonic()
+            provider = create_provider(config)  # one per run, as the chat makes one per conversation (lot 4)
             result = run_case(case, provider, transport, filtering, prompt=legacy_prompt, families=args.families)
             result["seconds"] = round(time.monotonic() - started, 1)
             result["attempt"] = attempt

@@ -30,6 +30,7 @@ class Option:
 
     label: str
     description: str = ""
+    selected: bool = False  # ticked when the card opens (the setup shows the settings as they are)
 
 
 @dataclass(frozen=True)

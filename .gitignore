@@ -122,3 +122,8 @@ docs/communication/**
 !docs/communication/**/*.html
 !docs/communication/**/*.py
 !docs/communication/**/*.qgz
+
+# Internal notes: kept on disk, not published (decision of 2026-11-16)
+docs/internal/
+.claude/memory.md
+docs/communication/strategy.md

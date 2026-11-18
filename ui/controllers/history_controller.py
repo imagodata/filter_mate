@@ -434,7 +434,8 @@ class HistoryController(QObject):
         agent_focus = getattr(dock, "agent_has_focus", None)
         if callable(agent_focus) and agent_focus():
             return self._agent_focus()
-        if getattr(dock, "tabTools_current_index", 0) != 0:
+        if (getattr(dock, "tabTools_current_index", 0) != 0
+                and getattr(dock, "filtering_detached", False) is not True):  # FILTERING in its own panel acts
             return UndoFocus()
         coverage = self._coverage()
         layer = getattr(coverage, "active_layer", None) if coverage is not None else None
@@ -575,9 +576,24 @@ class HistoryController(QObject):
         panel.tree.setFocus()
         return panel
 
+    def _host(self, anchor):
+        """The dock, or the QGIS panel that holds ``anchor`` when its section is shown in its own panel
+        (ui/layout/section_panels.py): the history opens over the buttons, wherever they are."""
+        widget = anchor
+        for _level in range(32):
+            if widget is None or widget is self._dock:
+                break
+            inherits = getattr(widget, "inherits", None)
+            if callable(inherits) and inherits("QDockWidget") is True:
+                return widget
+            parent = getattr(widget, "parentWidget", None)
+            widget = parent() if callable(parent) else None
+        return self._dock
+
     def _place(self, panel: HistoryPanel, anchor) -> None:
-        """Over the dock, its bottom on the top of ``anchor``, inside the screen."""
-        dock = self._dock
+        """Over the dock (or the panel of the section of ``anchor``), its bottom on the top of ``anchor``, inside
+        the screen."""
+        dock = self._host(anchor)
         top_left = dock.mapToGlobal(QPoint(0, 0))
         bottom = anchor.mapToGlobal(QPoint(0, 0)).y() if anchor is not None else top_left.y() + dock.height()
         screen = QGuiApplication.screenAt(top_left) or QGuiApplication.primaryScreen()

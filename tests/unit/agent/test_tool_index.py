@@ -11,7 +11,7 @@ pytestmark = pytest.mark.unit
 def test_every_tool_of_the_chat_has_a_summary():
     for tool in chat_tools():
         assert tool.summary, tool.name
-        assert len(tool.summary) <= MAX_SUMMARY == 90, (tool.name, len(tool.summary))
+        assert len(tool.summary) <= MAX_SUMMARY == 60, (tool.name, len(tool.summary))
         assert not tool.summary.endswith(".") and "\n" not in tool.summary, tool.name
 
 
@@ -25,7 +25,7 @@ def test_index_lists_the_tools_in_order():
 
 
 def test_index_of_every_tool_stays_small():
-    assert len(index_block(chat_tools())) <= MAX_INDEX == 7000
+    assert len(index_block(chat_tools())) <= MAX_INDEX == 4800
 
 
 def test_no_index_without_tool():

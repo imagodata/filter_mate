@@ -76,8 +76,9 @@ the original source back, and project files are always saved with the original s
   and each step can be undone; exports and added or removed layers are confirmed. You choose how far it goes alone
   (four levels of autonomy, a rule per tool, layers it must never change). Recipes keep a request in the project and run
   it again without any model, or by themselves each time the edits of their source are saved. When a choice is yours
-  it asks with choices to click; it sets FilterMate up with you (offered once per version, and from the menu
-  Vector > FilterMate); a team can give it its own skills, a `SKILL.md` you read and allow first. When the
+  it asks with choices to click; *Set up FilterMate* asks the main settings with a few choices, with no model at all
+  (offered once per version, and from the menu Vector > FilterMate), and *How FilterMate works* tells the panel
+  section by section; a team can give it its own skills, a `SKILL.md` you read and allow first. When the
   project has no such layer, it brings in what a request needs: the elevation of an area (a relief map with its
   contours in one sentence), OpenStreetMap features by tags, the population of an area, the natural risks of France. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: web basemaps (OpenStreetMap, Carto, IGN,
   Google Satellite), a geocoder, the tables of a PostgreSQL connection of QGIS, open data portals, WFS, WMS and WMTS
@@ -99,6 +100,11 @@ the original source back, and project files are always saved with the original s
 - ⚙️ **Automation**: ten Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
   other plugins, an optional REST API, and two MCP servers for AI assistants: one built into the plugin, one over stdio
   ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
+- 🪟 **Sections as panels of QGIS**: a rail lists the sections of the panel (or headers, one above the other, if you
+  prefer). Any section leaves the panel for a panel of QGIS, alone or grouped with others, by a right-click on its chip
+  or by dragging it, and comes back the same way; QGIS puts each panel back where you left it. EXPLORING in its own
+  panel shows its own list to choose the current layer. The buttons can sit under each section, and FILTERING or
+  EXPORTING can be turned off. Nothing moves unless you ask.
 - 🔧 **Configuration**: search a setting by name; display profile automatic from the screen or chosen (compact, normal, hidpi).
 - 🧩 **QGIS 3.22 to 4.x**, Qt5 and Qt6, 🌗 light and dark themes, 🌍 34 languages.
 
@@ -141,6 +147,7 @@ The same operation is available as the `filtermate:cross_filter_from_raster` Pro
 | 📖 [User guide](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) | Step by step: first filter, exploring, predicates and buffers, rasters and point clouds, favorites, export, backends, configuration. |
 | 💡 [Use cases](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage](https://imagodata.github.io/filter_mate/stories.fr.html) | Sixteen business questions covering all nine combinations: twelve QGIS recordings and four illustrated recipes, in English and French. |
 | 🤖 [docs/AGENT_MODE.md](docs/AGENT_MODE.md) | The AGENT section: providers, tools, levels of autonomy, undo, recipes, widgets, sources, the built-in MCP server. |
+| 🔒 [docs/AI_AND_DATA.md](docs/AI_AND_DATA.md) | AI and data: what the AGENT sends, to whom and when; no account, no telemetry. |
 | 🧩 [docs/SEGMENTATION.md](docs/SEGMENTATION.md) | Objects drawn by SAM: set up, use, Processing, what it is good at, with measured results. |
 | ⚙️ [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API, MCP servers. |
 | ⭐ [docs/favorites_sharing/](docs/favorites_sharing/USER_GUIDE.md) | Sharing favorites through git repositories. |
@@ -158,9 +165,10 @@ The scripts of `tests/qgis_headless/` load the plugin in the official QGIS Docke
 the dock with its GUI. Start with [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a map of the source tree and
 [CONTRIBUTING.md](CONTRIBUTING.md) for the code rules (Qt5 / Qt6 guards, translations, zip build, pull requests).
 
-🐛 Bugs and 💬 ideas: [GitHub issues](https://github.com/imagodata/filter_mate/issues).
+🐛 Bugs and 💬 ideas: [GitHub issues](https://github.com/imagodata/filter_mate/issues) · 💬 Questions and news: [Discord](https://discord.gg/9DNbuVYQ).
 
 ## 📄 License
 
-GNU General Public License v3.0, see [LICENSE](LICENSE). Developed by [imagodata](https://github.com/imagodata) · simon.ducournau+filter_mate@gmail.com.
+GNU General Public License v3.0, see [LICENSE](LICENSE); the name and the logo are covered by
+[TRADEMARKS.md](TRADEMARKS.md). Developed by [imagodata](https://github.com/imagodata) · simon.ducournau+filter_mate@gmail.com.
 Map data in the screenshots: BD TOPO® and LiDAR HD © IGN, Licence Ouverte 2.0.

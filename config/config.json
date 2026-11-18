@@ -130,9 +130,18 @@
           "top",
           "bottom",
           "left",
-          "right"
+          "right",
+          "sections"
         ],
-        "description": "Position of the action bar: 'top' (horizontal at top), 'bottom' (horizontal at bottom), 'left' (vertical on left side), 'right' (vertical on right side)"
+        "description": "Position of the action bar: 'top' (horizontal at top), 'bottom' (horizontal at bottom), 'left' (vertical on left side), 'right' (vertical on right side), 'sections' (no bar for all: each section shows its own buttons while it is open - Filter, Undo, Redo, Compare and Unfilter for FILTERING, Export for EXPORTING, About for CONFIGURATION)"
+      },
+      "SECTION_HEADERS": {
+        "value": "rail",
+        "choices": [
+          "rail",
+          "stacked"
+        ],
+        "description": "How the panel lists its sections: 'rail' (one row of chips per stack: a click on a chip opens its section, a chip is dragged to another place), 'stacked' (the name of each section on its own line, one above the other)"
       },
       "ACTION_BAR_VERTICAL_ALIGNMENT": {
         "value": "top",
@@ -750,6 +759,22 @@
           "value": true,
           "_hidden": true,
           "description": "Marks a configuration in which the AGENT section was turned on once, when it became on by default"
+        }
+      },
+      "FILTERING": {
+        "description": "The FILTERING section of the panel: filter layers by the features selected in EXPLORING",
+        "enabled": {
+          "value": true,
+          "choices": [true, false],
+          "description": "Show the FILTERING section and its Filter and Unfilter buttons (Undo and Redo stay, for the agent and the history). Off: the source layer chooser goes to the top of EXPLORING"
+        }
+      },
+      "EXPORTING": {
+        "description": "The EXPORTING section of the panel: export layers to files",
+        "enabled": {
+          "value": true,
+          "choices": [true, false],
+          "description": "Show the EXPORTING section and its buttons (Export, QFieldCloud)"
         }
       },
       "EXPLORATION": {

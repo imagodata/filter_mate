@@ -231,7 +231,9 @@ class AppInitializer:
         dockwidget = self._get_dockwidget() if self._get_dockwidget else None
 
         if dockwidget:
-            iface_obj.addDockWidget(dock_position, dockwidget)
+            # Where QGIS remembers the dock when sections were in their own panels, else at its position
+            from ...ui.layout.section_panels import place_dock
+            place_dock(dockwidget, iface_obj, dock_position)
             dockwidget.show()
             logger.info(f"FilterMate App.run(): DockWidget shown at position {dock_position}")
 

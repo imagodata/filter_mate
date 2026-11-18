@@ -507,6 +507,12 @@ def update_section_icons(dw: Any, dark: Any = None) -> bool:
                 label.setPixmap(icon.pixmap(64, 64))
         except RuntimeError:  # the dock went away
             pass
+    for rail in getattr(dw, '_fm_rails', None) or ():  # the chips of the rails of sections (ui/widgets/section_rail.py)
+        try:
+            rail.refresh_icons(dark)
+            drawn = True
+        except RuntimeError:  # a rail that went with its panel
+            pass
     return drawn
 
 
@@ -690,8 +696,8 @@ class _ColumnAligner(QObject if QObject is not None else object):
         try:
             if not self._page.isVisible():
                 return
-            if self._pairs:
-                _keys_follow_rows(self._pairs[0][0].parentWidget())
+            if self._pairs:  # the holder of the key column (its first button may be lent to EXPLORING)
+                _keys_follow_rows(self._keys.parentWidget() or self._pairs[0][0].parentWidget())
             rows = []
             for button, value in self._pairs:
                 if button.isHidden() or value.isHidden() or self._keys.indexOf(button) < 0:

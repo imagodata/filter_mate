@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+RAIL_CHIP = "pushButton_rail_section"  # the chips of ui/widgets/section_rail.py: sized by their rail, not here
+
 
 class ButtonStyler(StylerBase):
     """
@@ -215,6 +217,8 @@ class ButtonStyler(StylerBase):
             # Skip key sidebar buttons - their sizing is managed by DimensionsManager
             if any(container.isAncestorOf(button) for container in key_containers):
                 continue
+            if button.objectName() == RAIL_CHIP:
+                continue  # the chips of the rails of sections size themselves (ui/widgets/section_rail.py)
 
             # Set cursor to pointing hand
             button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -252,7 +256,7 @@ class ButtonStyler(StylerBase):
         icon_size = self._get_icon('standard')
 
         for button in self.dockwidget.findChildren(QPushButton):
-            if button.isCheckable():
+            if button.isCheckable() and button.objectName() != RAIL_CHIP:
                 # Set icon size
                 button.setIconSize(QSize(icon_size, icon_size))
 

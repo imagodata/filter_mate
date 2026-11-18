@@ -264,6 +264,7 @@ class AgentPanel(QFrame):
     undo_requested = pyqtSignal()
     settings_requested = pyqtSignal()
     setup_requested = pyqtSignal()
+    tour_requested = pyqtSignal()  # how FilterMate works, told in the thread (ui/controllers/welcome_tour.py)
     shown = pyqtSignal()  # the panel comes in view: its section opens, or the dock shows it
     new_conversation_requested = pyqtSignal()
     redo_requested = pyqtSignal()
@@ -378,8 +379,10 @@ class AgentPanel(QFrame):
         self.set_recipes([], False)
         self.new_action = menu.addAction(_tr("New conversation"))
         self.new_action.triggered.connect(self.new_conversation_requested)
-        self.setup_action = menu.addAction(_tr("Set FilterMate up with the agent…"))
+        self.setup_action = menu.addAction(_tr("Set up FilterMate…"))
         self.setup_action.triggered.connect(self.setup_requested)
+        self.tour_action = menu.addAction(_tr("How FilterMate works"))
+        self.tour_action.triggered.connect(self.tour_requested)
         # Sources, model and the MCP server of the plugin, turned on or off without opening the settings.
         menu.addSeparator()
         self.sources_menu = menu.addMenu(_tr("Sources"))
@@ -641,6 +644,15 @@ class AgentPanel(QFrame):
         self.configure_button = QPushButton(_tr("Connect a provider"), page)
         self.configure_button.setObjectName("pushButton_agent_configure")
         self.configure_button.clicked.connect(self.settings_requested)
+        # The setup needs no model: cards of choices in the thread (ui/controllers/setup_wizard.py).
+        self.setup_button = QPushButton(_tr("Set up FilterMate, no model needed"), page)
+        self.setup_button.setObjectName("pushButton_agent_setup")
+        self.setup_button.clicked.connect(self.setup_requested)
+        # What each section does, the panels, the buttons: told in the thread, with or without a model.
+        self.tour_button = QPushButton(_tr("How FilterMate works"), page)
+        self.tour_button.setObjectName("pushButton_agent_tour")
+        self.tour_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.tour_button.clicked.connect(self.tour_requested)
         self.try_label = QLabel(_tr("TRY"), page)
         self.try_label.setObjectName("label_agent_try")
         page.setObjectName("widget_agent_welcome")
@@ -652,6 +664,7 @@ class AgentPanel(QFrame):
         layout.addWidget(self.welcome_text)
         layout.addWidget(self.welcome_note)
         layout.addWidget(self.configure_button, 0, Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.setup_button, 0, Qt.AlignmentFlag.AlignLeft)
         layout.addSpacing(4)
         layout.addWidget(self.try_label)
         self.example_buttons = []
@@ -661,6 +674,7 @@ class AgentPanel(QFrame):
             button.clicked.connect(lambda _checked=False, value=text: self.use_example(value))
             layout.addWidget(button)
             self.example_buttons.append(button)
+        layout.addWidget(self.tour_button, 0, Qt.AlignmentFlag.AlignLeft)  # under what the welcome offers, either way
         layout.addStretch(1)
         self.set_ready(False)
         return page
@@ -715,6 +729,12 @@ class AgentPanel(QFrame):
             f"QPushButton#pushButton_agent_example:hover {{ border-color: {palette['fm_active_border']}; }}"
             f"QPushButton#pushButton_agent_configure {{ padding: 8px 16px; font-weight: 500; border: none;"
             f" border-radius: 6px; background: {palette['fm_accent']}; color: {palette['fm_accent_text']}; }}"
+            f"QPushButton#pushButton_agent_setup {{ padding: 8px 16px; border: 1px solid {palette['fm_group_border']};"
+            f" border-radius: 6px; background: {palette['fm_group']}; color: {palette['fm_text']}; }}"
+            f"QPushButton#pushButton_agent_setup:hover {{ border-color: {palette['fm_active_border']}; }}"
+            f"QPushButton#pushButton_agent_tour {{ padding: 4px 0; font-size: 12px; font-weight: 500; border: none;"
+            f" background: transparent; color: {palette['fm_accent']}; text-align: left; }}"
+            f"QPushButton#pushButton_agent_tour:hover {{ text-decoration: underline; }}"
             f"QLabel#label_agent_welcome_note {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
             f" {palette['fm_group_border']}; padding: 0 0 0 10px; }}"
             f"QFrame#frame_agent_history {{ background: {palette['fm_list']}; border: 1px solid"
@@ -872,6 +892,7 @@ class AgentPanel(QFrame):
         self.welcome_icon.setVisible(not ready)
         self.welcome_note.setVisible(not ready)
         self.configure_button.setVisible(not ready)
+        self.setup_button.setVisible(not ready)
         # Nothing can be asked before a provider is set up (mockup: Welcome board); the menu still opens the settings.
         if hasattr(self, "send_button"):
             self.input.setEnabled(ready)
@@ -992,13 +1013,13 @@ class AgentPanel(QFrame):
         self._in_answer = False
         return card
 
-    def add_question_card(self, texts: dict, questions):
+    def add_question_card(self, texts: dict, questions, free_other: bool = True):
         """The questions of ask_user in the thread, with choices to click and a free Other (agent_thread).
 
         The thread is shown even from the history page: the turn waits for the answer.
         """
         self.stack.setCurrentIndex(_THREAD_PAGE)
-        card = self.thread.add_question_card(texts, questions)
+        card = self.thread.add_question_card(texts, questions, free_other=free_other)
         self._in_answer = False
         return card
 

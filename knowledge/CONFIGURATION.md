@@ -28,6 +28,7 @@ config.json
 │   │   ├── UI_PROFILE
 │   │   ├── DOCK_POSITION
 │   │   ├── ACTION_BAR_POSITION
+│   │   ├── SECTION_HEADERS
 │   │   ├── ACTION_BAR_VERTICAL_ALIGNMENT
 │   │   ├── PushButton/ (ICONS, ICONS_SIZES)
 │   │   └── COLORS/ (ACTIVE_THEME, THEMES)
@@ -87,8 +88,20 @@ config.json
 ### Action Bar Position
 - **Key:** `APP.DOCKWIDGET.ACTION_BAR_POSITION`
 - **Default:** `bottom`
-- **Choices:** `top`, `bottom`, `left`, `right`
+- **Choices:** `top`, `bottom`, `left`, `right`, `sections`
 - When `left` or `right`: buttons stack vertically
+- When `sections`: no bar for all; each section shows its own buttons at the bottom of the dock while it is open
+  (FILTERING: Filter, Undo, Redo, Compare, Unfilter; EXPORTING: Export; CONFIGURATION: About)
+- A section opened in its own QGIS panel (right-click its header) takes its buttons with it, whatever the position
+
+### Section Headers
+- **Key:** `APP.DOCKWIDGET.SECTION_HEADERS`
+- **Default:** `rail`
+- **Choices:** `rail`, `stacked`
+- `rail`: each stack lists its sections in one row of chips; a click on a chip opens its section, a chip is dragged
+  along its rail to put the sections in another order (kept for the next time)
+- `stacked`: the name of each section on its own line, one above the other; the order is the usual one
+- Applied at once. The right-click menu of a section (its own panel, group, merge) is on its chip or on its header
 
 ### Action Bar Vertical Alignment
 - **Key:** `APP.DOCKWIDGET.ACTION_BAR_VERTICAL_ALIGNMENT`

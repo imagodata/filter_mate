@@ -250,19 +250,26 @@ class ConfigModelManager:
     # ========================================
 
     def reload_configuration_model(self):
-        """Reload config model from CONFIG_DATA and save to file."""
+        """Reload config model from CONFIG_DATA and save to file.
+
+        The new model takes the itemChanged handler of the one it replaces: without it an edit of the tree, by
+        the user, the setup or the agent, changed the tree and nothing else, with no error (2026-11-16: seen in
+        the GUI bench, whose later steps apply settings; the cancel path of ConfigController reconnects itself).
+        """
         from ...config.config import ENV_VARS
         dw = self.dockwidget
         if not dw.widgets_initialized:
             return
         try:
             from ...ui.widgets.json_view.model import JsonModel
+            self.disconnect_config_model_signal()
             dw.config_model = JsonModel(
                 data=dw.CONFIG_DATA,
                 editable_keys=False,
                 editable_values=True,
                 plugin_dir=dw.plugin_dir,
             )
+            self.connect_config_model_signal()
             container = getattr(dw, 'config_view_container', None)
             if container is not None:
                 container.model = dw.config_model  # its search reads this model, not the view's
@@ -328,6 +335,7 @@ class ConfigModelManager:
                 self._write_config(ENV_VARS)
                 self._realign_layer_kinds(kinds_before)
                 self._realign_target_options(targets_before)
+                self._realign_sections()
             except Exception:
                 logger.exception("Configuration not put back after a failed change")
             raise RuntimeError(f"the settings could not be applied ({exc})") from exc
@@ -593,6 +601,12 @@ class ConfigModelManager:
             logger.debug(f"Target options unreadable: {e}")
             return None
 
+    def _realign_sections(self):
+        """FILTERING / EXPORTING shown as the configuration put back says (APP.OPTIONS.<NAME>.enabled)."""
+        apply_options = getattr(self.dockwidget, 'apply_section_options', None)
+        if callable(apply_options):
+            apply_options()
+
     def _realign_target_options(self, before):
         """The configuration read from disk changed which rasters / point clouds a vector source
         lists as targets: fill the FILTERING targets list again (PropertyController)."""
@@ -683,6 +697,7 @@ class ConfigModelManager:
                 logger.warning(f"Could not reload config from disk: {e}")
             self._realign_layer_kinds(kinds_before)
             self._realign_target_options(targets_before)
+            self._realign_sections()
 
             from ...ui.widgets.json_view.model import JsonModel
             dw.config_model = JsonModel(

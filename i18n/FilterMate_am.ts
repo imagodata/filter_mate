@@ -663,6 +663,51 @@ Run it?</source>
         <translation>ማዋቀሩ ተጀምሯል።</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="641"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>ጥቂት ምርጫዎች፣ ከዚያ ቅንብሮቹ ከለውጥ በፊት እና በኋላ ይታያሉ፡ የAI ሞዴል አያስፈልግም፣ እስኪተገብሩ ድረስ ምንም አይቀየርም። በኋላ፡ ምናሌ ቬክተር &gt; FilterMate &gt; FilterMateን በወኪሉ አዋቅር።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="646"/>
+        <source>Sections: FILTERING, EXPORTING, AGENT, only those you use</source>
+        <translation>ክፍሎች፡ FILTERING፣ EXPORTING፣ AGENT፣ የሚጠቀሙባቸው ብቻ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>FilterMateን ማዋቀር ይፈልጋሉ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>ጥቂት ምርጫዎች፣ ከዚያም ቅንብሮቹ ከለውጡ በፊትና በኋላ ይታያሉ፦ የAI ሞዴል አያስፈልግም፣ እስኪተገብሩ ድረስ ምንም አይለወጥም። በኋላ ላይ፦ ምናሌ ቬክተር &gt; FilterMate &gt; FilterMateን አዋቅር፤ FilterMate እንዴት እንደሚሰራ የሚለውም እዚያ አለ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>መልክ፦ ገጽታ፣ የፓነሉ መጠን፣ ቋንቋ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>አቀማመጥ፦ ክፍሎቹ በዚህ ፓነል ውስጥ ወይም በQGIS ፓነሎች ውስጥ፣ የአዝራሮቹ ቦታ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
+        <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
+        <translation>ውሂብዎ፡ ራስተሮች፣ የነጥብ ደመናዎች፣ PostgreSQL፣ የድር አገልግሎቶች፣ መጠናቸው</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="648"/>
+        <source>Look: theme, size of the panel, language, buttons</source>
+        <translation>መልክ፡ ገጽታ፣ የፓነሉ መጠን፣ ቋንቋ፣ አዝራሮች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>Wait for the end of the request, then try again.</source>
+        <translation>የጥያቄው መጨረሻ ይጠብቁ፣ ከዚያ እንደገና ይሞክሩ።</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
         <source>Not now: the menu starts it when you want.</source>
         <translation>አሁን አይደለም፦ በፈለጉ ጊዜ ምናሌው ያስጀምረዋል።</translation>
@@ -1985,6 +2030,21 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="429"/>
         <source>Connect a provider</source>
         <translation>አቅራቢ ያገናኙ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="645"/>
+        <source>Set up FilterMate, no model needed</source>
+        <translation>FilterMate ማዋቀር፣ ሞዴል አያስፈልግም</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>FilterMateን አዋቅር…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>FilterMate እንዴት እንደሚሰራ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4339,6 +4399,41 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>FilterMateን በወኪሉ አዋቅር</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>ጥቂት ምርጫዎች፣ ከዚያም እያንዳንዱ ቅንብር ከለውጡ በፊትና በኋላ፦ የAI ሞዴል አያስፈልግም</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>FilterMate እንዴት እንደሚሰራ</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>እያንዳንዱ ክፍል የሚሰራው፣ ክፍሎቹ እንደ QGIS ፓነሎች፣ የአዝራሮቹ ቦታ</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>በFilterMate ውስጥ ያሉ አዳዲስ ነገሮች</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;ረድፍ የFilterMate ክፍሎችን ይዘረዝራል፣ አንድ ክፍል የQGIS ፓነል ሊሆን ይችላል፣ ማዋቀሩም የAI ሞዴል አያስፈልገውም።&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;FilterMateን አዋቅር&lt;/b&gt; ጥቂት ምርጫዎችን ይጠይቃል፦ የሚጠቀሙባቸውን ክፍሎች፣ ውሂብዎን፣ መልኩን፣ እና ክፍሎቹና አዝራሮቻቸው የሚቀመጡበትን። እያንዳንዱን ቅንብር ከለውጡ በፊትና በኋላ ያሳያል፣ ምንም ነገርም ወደ የትም አይልክም።&lt;/li&gt;&lt;li&gt;&lt;b&gt;የክፍሎች ረድፍ&lt;/b&gt; በእያንዳንዱ የፓነሉ ክምር ውስጥ፦ ክፍሉን ለመክፈት ቺፕ ጠቅ ያድርጉ፣ ክፍሎቹን በሌላ ቅደም ተከተል ለማስቀመጥ ቺፑን ይጎትቱ።&lt;/li&gt;&lt;li&gt;&lt;b&gt;ክፍሎች እንደ ፓነሎች&lt;/b&gt;፣ ሲጠይቁ (በነባሪ ሁሉም በFilterMate ፓነል ውስጥ ይቆያሉ)፦ የAGENT፣ FILTERING፣ EXPORTING ወይም CONFIGURATION ቺፕ ላይ በቀኝ ጠቅ ያድርጉ፣ በራሱ የQGIS ፓነል ውስጥ ለመክፈት። የአንድ ፓነል ርዕስ ላይ በቀኝ ጠቅ ያድርጉ፣ ከሌላ ፓነል ጋር እንደ ትሮች ለማቧደን ወይም ወደ FilterMate መልሶ ለማዋሃድ።&lt;/li&gt;&lt;li&gt;&lt;b&gt;ከእያንዳንዱ ክፍል በታች ያሉ አዝራሮች&lt;/b&gt;፣ እና ካልተጠቀሙባቸው FILTERING ወይም EXPORTING ሊጠፉ ይችላሉ።&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; ከአንድ ዓረፍተ ነገር ያጣራል፣ ዘይቤ ይሰጣል እና ውሂብ ያስገባል፣ በራስዎ የAPI ቁልፍ ወይም በአካባቢያዊ የOllama ሞዴል። &lt;b&gt;FilterMate እንዴት እንደሚሰራ&lt;/b&gt;፣ በምናሌው ውስጥ፣ እያንዳንዱን ክፍል እንደገና ይነግርዎታል።&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;የFilterMate ክፍሎች የQGIS ፓነሎች ሊሆኑ ይችላሉ፣ ማዋቀሩም የAI ሞዴል አያስፈልገውም።&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;FilterMateን አዋቅር&lt;/b&gt; ጥቂት ምርጫዎችን ይጠይቃል፦ የሚጠቀሙባቸውን ክፍሎች፣ ውሂብዎን፣ መልኩን፣ እና ክፍሎቹና አዝራሮቻቸው የሚቀመጡበትን። እያንዳንዱን ቅንብር ከለውጡ በፊትና በኋላ ያሳያል፣ ምንም ነገርም ወደ የትም አይልክም።&lt;/li&gt;&lt;li&gt;&lt;b&gt;ክፍሎች እንደ ፓነሎች&lt;/b&gt;፦ የAGENT፣ FILTERING፣ EXPORTING ወይም CONFIGURATION ርዕስ ላይ በቀኝ ጠቅ ያድርጉ፣ በራሱ የQGIS ፓነል ውስጥ ለመክፈት። የአንድ ፓነል ርዕስ ላይ በቀኝ ጠቅ ያድርጉ፣ ከሌላ ፓነል ጋር እንደ ትሮች ለማቧደን ወይም ወደ FilterMate መልሶ ለማዋሃድ።&lt;/li&gt;&lt;li&gt;&lt;b&gt;ከእያንዳንዱ ክፍል በታች ያሉ አዝራሮች&lt;/b&gt;፣ እና ካልተጠቀሙባቸው FILTERING ወይም EXPORTING ሊጠፉ ይችላሉ።&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; ከአንድ ዓረፍተ ነገር ያጣራል፣ ዘይቤ ይሰጣል እና ውሂብ ያስገባል፣ በራስዎ የAPI ቁልፍ ወይም በአካባቢያዊ የOllama ሞዴል። &lt;b&gt;FilterMate እንዴት እንደሚሰራ&lt;/b&gt;፣ በምናሌው ውስጥ፣ እያንዳንዱን ክፍል እንደገና ይነግርዎታል።&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>FilterMateን አዋቅር</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -10693,6 +10788,34 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>{}ን በራሱ ፓነል ውስጥ ክፈት</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>ሁሉንም ክፍሎች ከFilterMate አውጣ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>ከ{} ጋር አቧድን</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>{}ን ወደ FilterMate መልሰህ አዋህድ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>ሁሉንም ክፍሎች ወደ FilterMate መልሰህ አዋህድ</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11093,6 +11216,549 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: አቅራቢው ማጣሪያውን ውድቅ አደረገ እና መመለሱ አልተሳካም።</translation>
+    </message>
+</context>
+<context>
+    <name>SetupWizard</name>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Sections</source>
+        <translation>ክፍሎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Data</source>
+        <translation>ውሂብ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Size</source>
+        <translation>መጠን</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Theme</source>
+        <translation>ገጽታ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Panel</source>
+        <translation>ፓነል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Language</source>
+        <translation>ቋንቋ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Buttons</source>
+        <translation>አዝራሮች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Filtering</source>
+        <translation>ማጣራት</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Targets</source>
+        <translation>ኢላማዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Groups</source>
+        <translation>ቡድኖች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Rasters</source>
+        <translation>ራስተሮች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Clouds</source>
+        <translation>ደመናዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="42"/>
+        <source>Which sections of the panel do you use? EXPLORING is always there.</source>
+        <translation>የትኞቹን የፓነሉ ክፍሎች ይጠቀማሉ? EXPLORING ሁልጊዜ አለ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Which data do you work with, besides vector layers?</source>
+        <translation>ከቬክተር ንብርብሮች በተጨማሪ ምን ዓይነት ውሂብ ይጠቀማሉ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>How big are your layers, most of the time?</source>
+        <translation>ንብርብሮችዎ ብዙ ጊዜ ምን ያህል ትልቅ ናቸው?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="45"/>
+        <source>Colours of the panel</source>
+        <translation>የፓነሉ ቀለሞች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="46"/>
+        <source>Size of the panel</source>
+        <translation>የፓነሉ መጠን</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="47"/>
+        <source>Language of the panel</source>
+        <translation>የፓነሉ ቋንቋ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="48"/>
+        <source>Where the action buttons go (Filter, Export...)</source>
+        <translation>የድርጊት አዝራሮች የሚቀመጡበት (አጣራ፣ ላክ...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="49"/>
+        <source>When you filter</source>
+        <translation>ሲያጣሩ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="50"/>
+        <source>A vector layer also filters these layers (cut to its features)</source>
+        <translation>የቬክተር ንብርብር እነዚህንም ንብርብሮች ያጣራል (በገጽታዎቹ ተቆርጠው)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="51"/>
+        <source>When you export to a file, keep the groups of the layer tree</source>
+        <translation>ወደ ፋይል ሲልኩ የንብርብር ዛፍ ቡድኖችን ያቆዩ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="52"/>
+        <source>Format of the rasters exported</source>
+        <translation>የተላኩ ራስተሮች ቅርጸት</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Format of the point clouds exported</source>
+        <translation>የተላኩ የነጥብ ደመናዎች ቅርጸት</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="150"/>
+        <source>Set up FilterMate: a few choices, ticked as your settings are now. Nothing is sent anywhere, and nothing changes until you apply.</source>
+        <translation>FilterMate ማዋቀር፡ ጥቂት ምርጫዎች፣ አሁን ባሉት ቅንብሮችዎ መሠረት ምልክት የተደረገባቸው። ምንም ወደ የትም አይላክም፣ እስኪተገብሩም ድረስ ምንም አይቀየርም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Stop the setup</source>
+        <translation>ማዋቀሩን አቁም</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Setup stopped.</source>
+        <translation>ማዋቀሩ ቆሟል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="202"/>
+        <source>Setup stopped: nothing changed. Menu Vector &gt; FilterMate starts it again.</source>
+        <translation>ማዋቀሩ ቆሟል፡ ምንም አልተቀየረም። ምናሌ ቬክተር &gt; FilterMate እንደገና ይጀምረዋል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="220"/>
+        <source>Your settings of FilterMate</source>
+        <translation>የFilterMate ቅንብሮችዎ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="221"/>
+        <source>They stay for every project; Undo puts them back.</source>
+        <translation>ለሁሉም ፕሮጀክቶች ይቆያሉ፤ «ቀልብስ» ወደ ቀድሞው ይመልሳቸዋል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Apply</source>
+        <translation>ተግብር</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Cancel</source>
+        <translation>ሰርዝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Applied.</source>
+        <translation>ተተግብሯል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>ምንም አልተቀየረም፡ ቅንብሮቹ ሊተገበሩ አልቻሉም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>ከዚያ በኋላ ከእነዚህ ቅንብሮች አንዳንዶቹ ተቀይረዋል፡ እንዳሉ ይቀራሉ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>ቅንብሮቹ ወደ ቀድሞው ተመልሰዋል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>ቅንብሮቼን ወደ ቀድሞው መልስ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>ለሁሉም ፕሮጀክቶች ይቆያሉ፤ የሚከተለው አገናኝ ወደ ቀድሞው ይመልሳቸዋል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Not applied: nothing changed.</source>
+        <translation>አልተተገበረም፡ ምንም አልተቀየረም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="230"/>
+        <source>Setup of FilterMate</source>
+        <translation>የFilterMate ማዋቀር</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="65"/>
+        <source>Filter layers by the features selected in EXPLORING. Off: the source layer is chosen at the top of EXPLORING.</source>
+        <translation>ንብርብሮችን በEXPLORING ውስጥ በተመረጡ ገጽታዎች አጣራ። ሲጠፋ፡ የምንጭ ንብርብሩ በEXPLORING ላይኛው ክፍል ይመረጣል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="67"/>
+        <source>Export layers to files (GeoPackage, Shapefile, KML...), QFieldCloud.</source>
+        <translation>ንብርብሮችን ወደ ፋይሎች (GeoPackage፣ Shapefile፣ KML...) እና QFieldCloud ላክ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="69"/>
+        <source>Filter from a sentence, with a model you connect. Without a model it keeps this setup.</source>
+        <translation>በሚያገናኙት ሞዴል አንድ ዓረፍተ ነገር በመጻፍ አጣራ። ያለ ሞዴል ይህ ማዋቀር ይቀራል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="73"/>
+        <source>Rasters (images, DEMs)</source>
+        <translation>ራስተሮች (ምስሎች፣ DEM)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="74"/>
+        <source>Point clouds (LiDAR)</source>
+        <translation>የነጥብ ደመናዎች (LiDAR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="75"/>
+        <source>PostgreSQL / PostGIS</source>
+        <translation>PostgreSQL / PostGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="76"/>
+        <source>Web services (WFS, WMS)</source>
+        <translation>የድር አገልግሎቶች (WFS፣ WMS)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>Small: under 10,000 features</source>
+        <translation>ትንሽ፡ ከ10,000 ገጽታዎች በታች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>A shorter wait while you type an expression.</source>
+        <translation>አገላለጽ ሲጽፉ አጭር ጥበቃ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>Medium: up to 100,000</source>
+        <translation>መካከለኛ፡ እስከ 100,000</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>The usual settings.</source>
+        <translation>የተለመዱ ቅንብሮች።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Large: 100,000 features or more</source>
+        <translation>ትልቅ፡ 100,000 ወይም ከዚያ በላይ ገጽታዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Longer timeouts, fewer warnings.</source>
+        <translation>ረዘም ያሉ የጊዜ ገደቦች፣ ጥቂት ማስጠንቀቂያዎች።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="82"/>
+        <source>Keep my settings</source>
+        <translation>ቅንብሮቼን አቆይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>As QGIS</source>
+        <translation>እንደ QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Light</source>
+        <translation>ብሩህ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Dark</source>
+        <translation>ጨለማ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="85"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Fit to the screen</source>
+        <translation>ከማያ ገጹ ጋር አመቻች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Compact (small screen)</source>
+        <translation>የታመቀ (ትንሽ ማያ ገጽ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Normal</source>
+        <translation>መደበኛ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Large (4K, Retina)</source>
+        <translation>ትልቅ (4K፣ Retina)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Bottom</source>
+        <translation>ታች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Top</source>
+        <translation>ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Left</source>
+        <translation>ግራ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Right</source>
+        <translation>ቀኝ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>ከእያንዳንዱ ክፍል በታች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>አቀማመጥ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>ክፍሎቹ የሚቀመጡበት</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>ርዕሶች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>ፓነሉ ክፍሎቹን የሚዘረዝርበት መንገድ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>የቺፖች ረድፍ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>ነባሪው፦ ለእያንዳንዱ ክምር አንድ ረድፍ፣ በቺፕ ላይ ጠቅ ማድረግ ክፍሉን የሚከፍትበትና ቺፕ ወደ ሌላ ቦታ የሚጎተትበት።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>ርዕሶች፣ አንዱ ከሌላው በላይ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>የእያንዳንዱ ክፍል ስም በራሱ መስመር ላይ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>ርዕስ ላይ ጠቅ ማድረግ ክፍሉን ይከፍታል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>ሁሉም በFilterMate ፓነል ውስጥ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>ነባሪው፦ አንድ ፓነል፣ በረድፍ ላይ ጠቅ ማድረግ ክፍልን የሚከፍትበት።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>በQGIS ፓነሎች ውስጥ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT በራሱ ፓነል ውስጥ፣ FILTERING፣ EXPORTING እና CONFIGURATION በሌላ ፓነል ውስጥ አንድ ላይ፣ ከካርታው አጠገብ ወይም ተንሳፋፊ፤ EXPLORING በFilterMate ውስጥ ይቀራል። ለማቧደን የአንድን ክፍል ቺፕ ወደ ሌላ ፓነል ይጎትቱት፣ መልሶ ለማዋሃድ በቀኝ ጠቅ ያድርጉት።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>አሁን እንዳሉ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>አንዳንድ ክፍሎች በራሳቸው ፓነል ውስጥ ናቸው።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>እያንዳንዱ ክፍል ክፍት በሆነበት ጊዜ የራሱን አዝራሮች ያሳያል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>ክፍሎች፦ ሁሉም ወደ FilterMate ፓነል ተመልሰዋል (ወዲያውኑ ተፈጻሚ ይሆናል)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>ክፍሎች፦ በQGIS ፓነሎች ውስጥ (ወዲያውኑ ተፈጻሚ ይሆናል)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>ክፍሎቹ በQGIS ፓነሎች ውስጥ ናቸው፦ ፓነልን በርዕሱ ይጎትቱ፤ ለማቧደን የአንድን ክፍል ቺፕ ወደ ሌላ ፓነል ይጎትቱት፣ መልሶ ወደ FilterMate ለማዋሃድ በቀኝ ጠቅ ያድርጉት።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>እነዚህ ቅንብሮች ቀድሞውኑ ተመልሰዋል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="91"/>
+        <source>Zoom to what is kept</source>
+        <translation>ወደሚቀረው አጉላ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="92"/>
+        <source>Keep the history of filters in the project</source>
+        <translation>የማጣሪያዎችን ታሪክ በፕሮጀክቱ ውስጥ አቆይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="93"/>
+        <source>Show optimization tips</source>
+        <translation>የማመቻቸት ምክሮችን አሳይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="94"/>
+        <source>Let FilterMate choose the fastest way</source>
+        <translation>FilterMate ፈጣኑን መንገድ ይምረጥ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="95"/>
+        <source>Point clouds</source>
+        <translation>የነጥብ ደመናዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a GeoPackage</source>
+        <translation>በGeoPackage ውስጥ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a KML</source>
+        <translation>በKML ውስጥ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Cloud Optimized GeoTIFF</source>
+        <translation>Cloud Optimized GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>GeoTIFF</source>
+        <translation>GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAZ (compressed)</source>
+        <translation>LAZ (የተጨመቀ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAS</source>
+        <translation>LAS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="99"/>
+        <source>COPC (cloud optimized)</source>
+        <translation>COPC (ለደመና የተመቻቸ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>Next</source>
+        <translation>ቀጣይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>See the changes</source>
+        <translation>ለውጦቹን እይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="209"/>
+        <source>Nothing to change: FilterMate already works this way.</source>
+        <translation>ምንም የሚቀየር የለም፡ FilterMate አስቀድሞ በዚህ መንገድ ይሠራል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="256"/>
+        <source>Refine the setup with the agent</source>
+        <translation>ማዋቀሩን ከወኪሉ ጋር አጣራ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="258"/>
+        <source>Connect a model to filter from a sentence</source>
+        <translation>ከዓረፍተ ነገር ለማጣራት ሞዴል አገናኝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>{} in this project</source>
+        <translation>{} በዚህ ፕሮጀክት ውስጥ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="216"/>
+        <source>These settings could not be prepared: change them in the configuration of the panel.</source>
+        <translation>እነዚህ ቅንብሮች ሊዘጋጁ አልቻሉም፡ በፓነሉ ውቅር ውስጥ ይቀይሯቸው።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="248"/>
+        <source>FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show it again: this setup, or {}.</source>
+        <translation>FILTERING ተደብቋል፡ የምንጭ ንብርብሩ በEXPLORING ላይኛው ክፍል ይመረጣል። እንደገና ለማሳየት፡ ይህ ማዋቀር ወይም {}።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>The AGENT section goes after restarting QGIS. To bring it back: {}.</source>
+        <translation>የAGENT ክፍል QGIS ከተጀመረ በኋላ ይጠፋል። ለመመለስ፡ {}።</translation>
     </message>
 </context>
 <context>
@@ -11562,6 +12228,89 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>የቬክተር ንጣፎች</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>FilterMate እንዴት እንደሚሰራ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>FilterMate እንዴት እንደሚሰራ፣ ክፍል በክፍል። ይህን ለማንበብ የAI ሞዴል አያስፈልግም፣ ምንም ነገርም ወደ የትም አይላክም።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>ፓነሉ ሁለት ክምሮች አሉት፣ እያንዳንዳቸው ክፍሎቻቸውን የሚዘረዝር ረድፍ አላቸው፦ AGENT እና EXPLORING ከላይ፣ FILTERING፣ EXPORTING እና CONFIGURATION ከታች። ክፍሉን ለመክፈት በረድፍ ላይ ያለውን ቺፕ ጠቅ ያድርጉ፣ ክፍሎቹን በሌላ ቅደም ተከተል ለማስቀመጥ ቺፑን በረድፉ ላይ ይጎትቱት።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>በነባሪ እያንዳንዱ ክፍል በዚህ ፓነል ውስጥ ነው፣ እርስዎ ካልጠየቁ ምንም አይንቀሳቀስም። አንድ ክፍል ከዚህ መውጣት ይችላል፦ በረድፉ ላይ ባለው ቺፑ ላይ በቀኝ ጠቅ ያድርጉ፣ ከዚያ በራሱ ፓነል ውስጥ መክፈትን ይምረጡ። የQGIS ፓነል ይሆናል፤ ከካርታው አጠገብ ሊጎትቱት፣ ከንብርብሮች ፓነል ጋር በትር ሊያደርጉት ወይም በሌላ ማያ ገጽ ላይ ሊያንሳፍፉት ይችላሉ። እዚህ የቀረው የመጨረሻ ክፍል እዚሁ ይቆያል። EXPLORING ሌሎቹ ክፍሎች የሚሰሩበትን ንብርብር ይይዛል፦ ከFILTERING ከተለየ በኋላ ያንን ንብርብር ለመምረጥ የራሱን ዝርዝር ያሳያል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>አንድ ፓነል አንድ ክፍል ወይም ብዙ ክፍሎችን ይይዛል፣ እዚህ እንዳለው በረድፍ ውስጥ ተዘርዝረው። ለማቧደን የአንድን ክፍል ቺፕ ወደ ሌላ ፓነል፣ መልሶ ለማዋሃድ ወደ FilterMate፣ ወይም አዲስ ፓነል ለመስጠት ከሁሉም ፓነሎች ውጭ ይጎትቱት፤ እንደ ትሮች አንድ ላይ የተቀመጡ ሁለት የFilterMate ፓነሎች አንድ ይሆናሉ። በቺፕ ላይ ወይም በፓነል ርዕስ ላይ በቀኝ ጠቅ ማድረግ ተመሳሳይ እንቅስቃሴዎችን ያቀርባል። ፓነልን መዝጋት ክፍሎቹን መልሶ ያዋህዳል። QGIS እያንዳንዱን ፓነል ትተውት በነበረበት ቦታ ይመልሰዋል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>አንድ ፓነል አንድ ክፍል ወይም ብዙ ክፍሎችን ይይዛል። የአንድ ክፍል ርዕስ ላይ ወይም የፓነል ርዕስ ላይ በቀኝ ጠቅ ያድርጉ፣ ከሌላ ፓነል ጋር ለማቧደን ወይም መልሶ ወደ FilterMate ለማዋሃድ፤ እንደ ትሮች አንድ ላይ የተቀመጡ ሁለት የFilterMate ፓነሎች አንድ ይሆናሉ። ፓነልን መዝጋት ክፍሎቹን መልሶ ያዋህዳል። QGIS እያንዳንዱን ፓነል ትተውት በነበረበት ቦታ ይመልሰዋል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>EXPLORING የአሁኑን ንብርብር እና በውስጡ የሚመርጡትን ይይዛል፦ የቬክተር ንብርብር ባህሪያት፣ የራስተር የእሴቶች ክልል ወይም ምድቦች፣ የነጥብ ደመና ምድቦች ወይም ከፍታዎች። ሌሎቹ ክፍሎች የሚሰሩት እሱ በሚመርጠው ላይ ነው።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>FILTERING ምልክት ያደረጉባቸውን ንብርብሮች በዚያ ምርጫ ያጣራል፦ ከእሱ ጋር የሚቆራረጡትን፣ ከእሱ በተወሰነ ርቀት ውስጥ የሚገኙትን... አጣራ ያስፈጽማል፤ ቀልብስ እና እንደገና አድርግ ታሪኩን ያሳልፋሉ፤ አነጻጽር ካርታውን ከለውጡ በፊትና በኋላ ያሳያል፤ ማጣሪያ አንሳ ማጣሪያዎቹን ያስወግዳል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>EXPORTING ንብርብሮቹን እንደተጣሩ ይልካል፦ GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>AGENT ከአንድ ዓረፍተ ነገር ተመሳሳዩን ያደርጋል፣ ከዚያም በላይ (ዘይቤዎች፣ መሰየሚያዎች፣ የሚገቡ ውሂቦች)፣ ባገናኙት ሞዴል፦ የራስዎ የAPI ቁልፍ ወይም በዚህ ኮምፒውተር ላይ ያለው Ollama። እያንዳንዱ ጥያቄ ሊቀለበስ ይችላል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>CONFIGURATION ሁሉንም ቅንብሮች ይዘረዝራል። FilterMateን አዋቅር ዋና ዋናዎቹን በጥቂት ምርጫዎች ይጠይቃል፣ እያንዳንዱንም ቅንብር ከለውጡ በፊትና በኋላ ያሳያል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>በቅንብሮችዎ ውስጥ ጠፍቷል፦ {}። FilterMateን አዋቅር አንድ ክፍል ይመልሳል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>አንድ ክፍል ከዚህ ፓነል መውጣት ይችላል። በርዕሱ ላይ በቀኝ ጠቅ ያድርጉ፣ ከዚያ በራሱ ፓነል ውስጥ መክፈትን ይምረጡ፦ የQGIS ፓነል ይሆናል፤ ከካርታው አጠገብ ሊጎትቱት፣ ከንብርብሮች ፓነል ጋር በትር ሊያደርጉት ወይም በሌላ ማያ ገጽ ላይ ሊያንሳፍፉት ይችላሉ። እዚህ የቀረው የመጨረሻ ክፍል እዚሁ ይቆያል። EXPLORING ሌሎቹ ክፍሎች የሚሰሩበትን ንብርብር ይይዛል፦ ከFILTERING ከተለየ በኋላ ያንን ንብርብር ለመምረጥ የራሱን ዝርዝር ያሳያል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>አዝራሮቹ በራሳቸው ክፍል ውስጥ ይሰራሉ፦ አጣራ፣ ቀልብስ፣ እንደገና አድርግ፣ አነጻጽር እና ማጣሪያ አንሳ ከFILTERING ጋር፣ ላክ ከEXPORTING ጋር። በራሱ ፓነል ውስጥ ያለ ክፍል አዝራሮቹን ይዞ ይሄዳል፤ ማዋቀሩ ከእያንዳንዱ ክፍል በታች ሊያሳያቸውም ይችላል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>FilterMateን አዋቅር</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>ሞዴል አገናኝ</translation>
     </message>
 </context>
 <context>

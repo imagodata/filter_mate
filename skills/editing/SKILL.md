@@ -1,7 +1,7 @@
 ---
 name: editing
 title: Edit the data of a layer
-description: change, delete or add features of a vector layer, in its edit buffer, when the user asks to change the data itself
+description: change, delete or add features when the user asks to change the data itself
 metadata:
   version: 1
   plugin_min: 5.1.0

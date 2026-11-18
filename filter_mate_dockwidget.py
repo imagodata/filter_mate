@@ -193,6 +193,13 @@ class ClickableLabel(QtWidgets.QLabel):
         event.accept()
 
 
+def _apart(sections, *keys) -> bool:
+    """One of the sections ``keys`` is shown in its own QGIS panel (``DockSections.detached``). Read with getattr
+    and compared one key at a time: tests hand the dock plain objects and mocks as its sections."""
+    detached = getattr(sections, 'detached', None)
+    return isinstance(detached, (set, frozenset, list, tuple)) and any(key in detached for key in keys)
+
+
 class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     """Main dockwidget UI component for FilterMate QGIS plugin.
 
@@ -829,6 +836,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._setup_backend_indicator()
         from .ui.layout.dock_chrome import install_dock_chrome
         install_dock_chrome(self)  # favorites in the title bar, two stacks of sections
+        from .ui.layout.section_panels import install_section_panels
+        install_section_panels(self)  # a section can go to its own QGIS panel
         self._setup_action_bar_layout()
         self._setup_exploring_tab_widgets()
         self._setup_filtering_tab_widgets()
@@ -1038,6 +1047,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     logger.warning("DimensionsManager.apply() returned False - UI may be misconfigured")
                     iface.messageBar().pushWarning("FilterMate", self.tr("UI configuration incomplete - check logs"))
                 self._harmonize_mockup_spacing()
+                panels = getattr(self, '_fm_panels', None)
+                if panels is not None:  # with a section in its own panel, the dock needs less than its profile asks
+                    panels.relax_dock(profile_applied=True)
+                self._refit_sections_after_dimensions()
                 return
             except Exception as e:
                 logger.error(f"DimensionsManager.apply() FAILED: {e}", exc_info=True)
@@ -1075,6 +1088,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self._align_key_layouts()
             # FilterMate 5 design: one set of gaps and field heights, after the managers above.
             self._harmonize_mockup_spacing()
+            panels = getattr(self, '_fm_panels', None)
+            if panels is not None:
+                panels.relax_dock(profile_applied=True)
+            self._refit_sections_after_dimensions()
             logger.info("Successfully applied dynamic dimensions to all widgets")
         except Exception as e:
             logger.error(f"Error applying dynamic dimensions: {e}", exc_info=True)
@@ -2197,9 +2214,19 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self.current_layer and not self.current_layer_selection_connection:
             self._ensure_layer_signals_connected(self.current_layer)
         self.widgetsInitialized.emit(); self._setup_keyboard_shortcuts()
+        self.apply_section_options()
         if self._pending_layers_update:
             self._pending_layers_update = False; pl, pr, weak_self = self.PROJECT_LAYERS, self.PROJECT, weakref.ref(self)
             QTimer.singleShot(100, lambda: weak_self() and weak_self().get_project_layers_from_app(pl, pr))
+
+    def apply_section_options(self):
+        """FILTERING / EXPORTING shown or hidden as APP.OPTIONS.<NAME>.enabled says (ui/layout/dock_chrome.py)."""
+        try:
+            from .ui.layout.dock_chrome import apply_section_options
+            return apply_section_options(self)
+        except Exception as e:
+            logger.warning(f"Sections not applied: {e}")
+            return []
 
     def _connect_initial_widget_signals(self):
         """
@@ -3531,21 +3558,49 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.debug("select_tabTools_index: SKIPPED (widgets not initialized)")
             return
         self.tabTools_current_index = self._section_index(self.widgets["DOCK"]["TOOLS"]["WIDGET"])
-        #                           FILTER  UNDO   REDO   UNFILT EXPORT QFCLOUD
-        states = {
-            0: (True,  True,  True,  True,  False, False),  # FILTERING
-            1: (False, False, False, False, True,  True),    # EXPORTING
-            2: (False, False, False, False, False, False),   # EXPLORING
-        }
-        s = states.get(self.tabTools_current_index, (False,) * 6)
+        # The buttons of a section act while it is the one open below, or while it is in its own panel.
+        filtering, exporting = self.section_active('filtering'), self.section_active('exporting')
+        #    FILTER     UNDO       REDO       UNFILT     EXPORT     QFCLOUD
+        s = (filtering, filtering, filtering, filtering, exporting, exporting)
         logger.info(f"select_tabTools_index: index={self.tabTools_current_index}, EXPORT enabled={s[4]}")
         for i, name in enumerate(['FILTER', 'UNDO_FILTER', 'REDO_FILTER', 'UNFILTER', 'EXPORT', 'QFIELDCLOUD']):
             widget_info = self.widgets["ACTION"].get(name)
             if widget_info and widget_info.get("WIDGET"):
                 widget_info["WIDGET"].setEnabled(s[i])
         self.widgets["ACTION"]["ABOUT"]["WIDGET"].setEnabled(True)
+        if self._action_bar_manager:  # the bar of the open section; a button that came late goes to its section
+            self._action_bar_manager.sync_sections()
         self.set_exporting_properties()
         self.undoRedoStateRequested.emit()
+
+    def detached_sections(self) -> tuple:
+        """The sections shown in their own QGIS panel (ui/layout/section_panels.py)."""
+        panels = getattr(self, '_fm_panels', None)
+        try:
+            return tuple(panels.detached()) if panels is not None else ()
+        except Exception:  # the dock is being built, or goes away
+            return ()
+
+    def section_active(self, key: str) -> bool:
+        """The buttons of the section ``key`` act: it is the one open below, or it is in its own panel."""
+        from .ui.layout.section_bars import section_active
+        open_key = {0: 'filtering', 1: 'exporting', 2: 'configuration'}.get(self.tabTools_current_index)
+        return section_active(key, open_key, self.detached_sections())
+
+    @property
+    def filtering_detached(self) -> bool:
+        """FILTERING is in its own panel: Undo and Redo walk its history whatever is open in the dock."""
+        return 'filtering' in self.detached_sections()
+
+    def restore_section_panels(self) -> None:
+        """The sections that were in their own panel the last time, there again. Never blocks the dock."""
+        panels = getattr(self, '_fm_panels', None)
+        if panels is None:
+            return
+        try:
+            panels.restore()
+        except Exception:
+            logger.exception("The panels of the sections could not be restored")
 
     def _connect_groupbox_signals_directly(self):
         """v4.0 S18: Connect groupbox signals for exclusive behavior.
@@ -7155,6 +7210,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 self._agent_chat = AgentChatController(lambda page: add_agent_section(self, page), plugin, self)
         except Exception:
             logger.exception("Agent panel could not be installed")
+        self.restore_section_panels()  # every section is in the dock by now, AGENT the last
 
     def shutdown_agent_panel(self, unloading=False):
         """Stop a running request; when the plugin unloads, also let go of the project."""
@@ -7201,9 +7257,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try: self._exploring_cache.invalidate_all() if hasattr(self, '_exploring_cache') else None
         except Exception:  # nosec B110 - Cache may be None - expected
             pass
-        try: self._theme_watcher.remove_callback(self._on_qgis_theme_changed) if self._theme_watcher else None
-        except Exception:  # nosec B110 - Callback may not be registered - expected
-            pass
+        # The theme watcher keeps its callback: closing only hides the dock, and nothing added it again when the
+        # dock was shown, so ACTIVE_THEME = auto stopped following the theme of QGIS for the rest of the session
+        # (2026-11-17, review). The unload removes it (release_qgis_connections).
         # Closing only hides the dock (run() shows it again): the controllers are
         # torn down when the plugin unloads, not here.
         try: self._controller_integration.on_dock_closed() if self._controller_integration else None
@@ -7300,12 +7356,27 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # taskCompleted / taskTerminated, which QGIS 4.2.2 on Windows died entering (async_query.submit_query).
         task.when_settled(settled)
 
+    def _refit_sections_after_dimensions(self) -> None:
+        """The stacks of sections take the dimensions a profile or a theme just applied (dock_chrome.py)."""
+        sections = getattr(self, '_fm_sections', None)
+        refit = getattr(sections, 'dimensions_applied', None)
+        if callable(refit):
+            refit()
+
     def agent_has_focus(self) -> bool:
-        """AGENT is open: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the agent."""
+        """AGENT is open in the dock: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the
+        agent. Not while AGENT or FILTERING is in its own panel (ui/layout/section_panels.py): they show side by
+        side then, Undo and Redo sit with FILTERING and keep walking its history; the steps of the agent are undone
+        from its own history. Nor while FILTERING is open under AGENT, which EXPLORING in its own panel allows
+        (in the dock, AGENT open folds FILTERING): the buttons are those of the section they sit with."""
         sections = getattr(self, '_fm_sections', None)
         # Read with getattr: tests call the methods of the dock on plain objects.
-        return (getattr(self, '_agent_chat', None) is not None and sections is not None
-                and bool(getattr(sections, 'is_open', lambda _key: False)('agent')))
+        if (getattr(self, '_agent_chat', None) is None or sections is None
+                or _apart(sections, 'agent', 'filtering')
+                or not bool(getattr(sections, 'is_open', lambda _key: False)('agent'))):
+            return False
+        beside = _apart(sections, 'exploring') and getattr(sections, 'bottom_key', lambda: None)() == 'filtering'
+        return not beside
 
     def _history_controller(self):
         integration = getattr(self, '_controller_integration', None)
@@ -7362,8 +7433,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             - Attempts to recover current_layer from saved ID or combobox if None
             - Export task syncs HAS_LAYERS_TO_EXPORT flag before execution
         """
-        chat, sections = getattr(self, '_agent_chat', None), getattr(self, '_fm_sections', None)
-        if task_name in ('undo', 'redo') and chat is not None and sections is not None and sections.is_open('agent'):
+        chat = getattr(self, '_agent_chat', None)
+        # The same rule as the buttons, which show the history they walk (2026-11-17, review: with EXPLORING in its
+        # own panel they showed the filters, and a click undid a step of the agent).
+        if task_name in ('undo', 'redo') and chat is not None and self.agent_has_focus():
             # AGENT open: a step of the agent, not a dock or coverage filter (the buttons show its history).
             (chat._on_undo if task_name == 'undo' else chat._on_redo)()
             return
@@ -7863,21 +7936,40 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def _setup_keyboard_shortcuts(self):
         """Setup keyboard shortcuts: F5=reload layers, Ctrl+Z=undo, Ctrl+Y=redo."""
+        self._reload_shortcut, self._undo_shortcut, self._redo_shortcut = self.keyboard_shortcuts_for(self)
+        logger.debug("Keyboard shortcuts initialized: F5 = Reload layers, Ctrl+Z = Undo, Ctrl+Y = Redo")
+
+    def keyboard_shortcuts_for(self, widget):
+        """F5, Ctrl+Z and Ctrl+Y while the focus is in ``widget``: the dock, or the QGIS panel of one of its sections
+        (ui/layout/section_panels.py), whose widgets are no longer children of the dock. They go with ``widget``."""
         from qgis.PyQt.QtGui import QKeySequence
         try:
             from qgis.PyQt.QtGui import QShortcut
         except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
             from qgis.PyQt.QtWidgets import QShortcut
-        self._reload_shortcut = QShortcut(QKeySequence("F5"), self)
-        self._reload_shortcut.activated.connect(self._on_reload_layers_shortcut)
-        self._reload_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self._undo_shortcut = QShortcut(QKeySequence.StandardKey.Undo, self)
-        self._undo_shortcut.activated.connect(self._on_undo_shortcut)
-        self._undo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self._redo_shortcut = QShortcut(QKeySequence.StandardKey.Redo, self)
-        self._redo_shortcut.activated.connect(self._on_redo_shortcut)
-        self._redo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        logger.debug("Keyboard shortcuts initialized: F5 = Reload layers, Ctrl+Z = Undo, Ctrl+Y = Redo")
+        shortcuts = []
+        for keys, slot in ((QKeySequence("F5"), self._on_reload_layers_shortcut),
+                           (QKeySequence.StandardKey.Undo, self._on_undo_shortcut),
+                           (QKeySequence.StandardKey.Redo, self._on_redo_shortcut)):
+            shortcut = QShortcut(keys, widget)
+            shortcut.activated.connect(slot)
+            shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            shortcuts.append(shortcut)
+        return shortcuts
+
+    def findChildren(self, *args, **kwargs):  # noqa: N802 - Qt name
+        """The children of the dock, and what its sections shown in their own QGIS panel hold: moved there, their
+        widgets are no longer children of the dock, and the passes that style, size and redraw the icons of the dock
+        (theme, display profile) look for them here."""
+        found = super().findChildren(*args, **kwargs)
+        panels = getattr(self, '_fm_panels', None)
+        if panels is None:
+            return found
+        try:
+            return list(found) + panels.find_children(*args, **kwargs)
+        except Exception:  # the passes still get the widgets of the dock
+            logger.debug("The widgets of the section panels were not listed", exc_info=True)
+            return found
 
     def _on_reload_layers_shortcut(self):
         """Handle F5 shortcut to reload layers."""

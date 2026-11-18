@@ -663,6 +663,51 @@ Run it?</source>
         <translation>सेटअप शुरू हो गया।</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="641"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>कुछ विकल्प, फिर पहले और बाद की सेटिंग: AI मॉडल की ज़रूरत नहीं, लागू करने तक कुछ नहीं बदलता। बाद में: मेनू वेक्टर &gt; FilterMate &gt; एजेंट के साथ FilterMate सेट अप करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="646"/>
+        <source>Sections: FILTERING, EXPORTING, AGENT, only those you use</source>
+        <translation>अनुभाग: FILTERING, EXPORTING, AGENT, केवल वे जिन्हें आप उपयोग करते हैं</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="644"/>
+        <source>Set up FilterMate?</source>
+        <translation>FilterMate सेट करें?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="645"/>
+        <source>A few choices, then the settings shown before and after: no AI model needed, nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate; How FilterMate works is there too.</source>
+        <translation>कुछ विकल्प चुनें, फिर सेटिंग पहले और बाद के रूप में दिखाई जाती हैं: किसी AI मॉडल की ज़रूरत नहीं है, जब तक आप लागू नहीं करते कुछ नहीं बदलता। बाद में: वेक्टर &gt; FilterMate &gt; FilterMate सेट करें मेनू; FilterMate कैसे काम करता है भी वहीं मिलेगा।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Look: theme, size of the panel, language</source>
+        <translation>रूप-रंग: थीम, पैनल का आकार, भाषा</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="658"/>
+        <source>Layout: the sections in this panel or in panels of QGIS, where the buttons go</source>
+        <translation>लेआउट: अनुभाग इसी पैनल में या QGIS के पैनलों में, बटन कहाँ रहें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="647"/>
+        <source>Your data: rasters, point clouds, PostgreSQL, web services, their size</source>
+        <translation>आपका डेटा: रास्टर, पॉइंट क्लाउड, PostgreSQL, वेब सेवाएँ, उनका आकार</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="648"/>
+        <source>Look: theme, size of the panel, language, buttons</source>
+        <translation>रूप-रंग: थीम, पैनल का आकार, भाषा, बटन</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>Wait for the end of the request, then try again.</source>
+        <translation>अनुरोध पूरा होने तक प्रतीक्षा करें, फिर दोबारा प्रयास करें।</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
         <source>Not now: the menu starts it when you want.</source>
         <translation>अभी नहीं: जब आप चाहें, मेनू इसे शुरू करता है।</translation>
@@ -1985,6 +2030,21 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="429"/>
         <source>Connect a provider</source>
         <translation>प्रदाता जोड़ें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="645"/>
+        <source>Set up FilterMate, no model needed</source>
+        <translation>FilterMate सेट करें, मॉडल की ज़रूरत नहीं</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="382"/>
+        <source>Set up FilterMate…</source>
+        <translation>FilterMate सेट करें…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="384"/>
+        <source>How FilterMate works</source>
+        <translation>FilterMate कैसे काम करता है</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
@@ -4339,6 +4399,41 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>एजेंट के साथ FilterMate सेट अप करें</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="301"/>
+        <source>A few choices, then every setting before and after: no AI model needed</source>
+        <translation>कुछ विकल्प, फिर हर सेटिंग पहले और बाद में: AI मॉडल की ज़रूरत नहीं</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="306"/>
+        <source>How FilterMate works</source>
+        <translation>FilterMate कैसे काम करता है</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="310"/>
+        <source>What each section does, the sections as panels of QGIS, where the buttons are</source>
+        <translation>हर अनुभाग क्या करता है, अनुभाग QGIS के पैनल के रूप में, बटन कहाँ हैं</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1900"/>
+        <source>What's new in FilterMate</source>
+        <translation>FilterMate में नया क्या है</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;पट्टी FilterMate के अनुभागों की सूची दिखाती है, कोई अनुभाग QGIS का पैनल बन सकता है, और उसके सेटअप में AI मॉडल की ज़रूरत नहीं।&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;FilterMate सेट करें&lt;/b&gt; कुछ विकल्प पूछता है: आप कौन से अनुभाग इस्तेमाल करते हैं, आपका डेटा, रूप-रंग, अनुभागों और उनके बटनों की जगह। यह हर सेटिंग पहले और बाद में दिखाता है और कुछ भी कहीं नहीं भेजता।&lt;/li&gt;&lt;li&gt;&lt;b&gt;अनुभागों की पट्टी&lt;/b&gt; पैनल के हर स्टैक में: किसी अनुभाग को खोलने के लिए चिप पर क्लिक करें, अनुभागों को दूसरे क्रम में रखने के लिए चिप को खींचें।&lt;/li&gt;&lt;li&gt;&lt;b&gt;पैनल के रूप में अनुभाग&lt;/b&gt;, जब आप कहें (डिफ़ॉल्ट रूप से सब FilterMate पैनल में रहते हैं): AGENT, FILTERING, EXPORTING या CONFIGURATION के चिप पर राइट-क्लिक करके उसे QGIS के अपने पैनल में खोलें। किसी पैनल के शीर्षक पर राइट-क्लिक करके उसे किसी दूसरे के साथ टैब में समूहित करें, या वापस FilterMate में मिलाएँ।&lt;/li&gt;&lt;li&gt;&lt;b&gt;हर अनुभाग के नीचे बटन&lt;/b&gt;, और जब आप FILTERING या EXPORTING इस्तेमाल न करें तो उन्हें बंद करने की सुविधा।&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; एक वाक्य से फ़िल्टर करता है, स्टाइल देता है और डेटा लाता है, आपकी अपनी API कुंजी या स्थानीय Ollama मॉडल के साथ। &lt;b&gt;FilterMate कैसे काम करता है&lt;/b&gt;, उसके मेनू में, हर अनुभाग को फिर से समझाता है।&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1906"/>
+        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate के अनुभाग QGIS के पैनल बन सकते हैं, और उसके सेटअप में AI मॉडल की ज़रूरत नहीं।&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;FilterMate सेट करें&lt;/b&gt; कुछ विकल्प पूछता है: आप कौन से अनुभाग इस्तेमाल करते हैं, आपका डेटा, रूप-रंग, अनुभागों और उनके बटनों की जगह। यह हर सेटिंग पहले और बाद में दिखाता है और कुछ भी कहीं नहीं भेजता।&lt;/li&gt;&lt;li&gt;&lt;b&gt;पैनल के रूप में अनुभाग&lt;/b&gt;: AGENT, FILTERING, EXPORTING या CONFIGURATION के शीर्षक पर राइट-क्लिक करके उसे QGIS के अपने पैनल में खोलें। किसी पैनल के शीर्षक पर राइट-क्लिक करके उसे किसी दूसरे के साथ टैब में समूहित करें, या वापस FilterMate में मिलाएँ।&lt;/li&gt;&lt;li&gt;&lt;b&gt;हर अनुभाग के नीचे बटन&lt;/b&gt;, और जब आप FILTERING या EXPORTING इस्तेमाल न करें तो उन्हें बंद करने की सुविधा।&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; एक वाक्य से फ़िल्टर करता है, स्टाइल देता है और डेटा लाता है, आपकी अपनी API कुंजी या स्थानीय Ollama मॉडल के साथ। &lt;b&gt;FilterMate कैसे काम करता है&lt;/b&gt;, उसके मेनू में, हर अनुभाग को फिर से समझाता है।&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1930"/>
+        <source>Set up FilterMate</source>
+        <translation>FilterMate सेट करें</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="425"/>
@@ -10693,6 +10788,34 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
     </message>
 </context>
 <context>
+    <name>SectionPanels</name>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="570"/>
+        <source>Open {} in its own panel</source>
+        <translation>{} को उसके अपने पैनल में खोलें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="1129"/>
+        <source>Take every section out of FilterMate</source>
+        <translation>सभी अनुभागों को FilterMate से बाहर निकालें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="782"/>
+        <source>Group with {}</source>
+        <translation>{} के साथ समूहित करें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="783"/>
+        <source>Merge {} back into FilterMate</source>
+        <translation>{} को वापस FilterMate में मिलाएँ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/layout/section_panels.py" line="784"/>
+        <source>Merge every section back into FilterMate</source>
+        <translation>सभी अनुभागों को वापस FilterMate में मिलाएँ</translation>
+    </message>
+</context>
+<context>
     <name>SegmentationController</name>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
@@ -11093,6 +11216,549 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: प्रदाता ने फ़िल्टर अस्वीकार कर दिया और पुनर्स्थापना विफल रही।</translation>
+    </message>
+</context>
+<context>
+    <name>SetupWizard</name>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Sections</source>
+        <translation>अनुभाग</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Data</source>
+        <translation>डेटा</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Size</source>
+        <translation>आकार</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="34"/>
+        <source>Theme</source>
+        <translation>थीम</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Panel</source>
+        <translation>पैनल</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Language</source>
+        <translation>भाषा</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="35"/>
+        <source>Buttons</source>
+        <translation>बटन</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Filtering</source>
+        <translation>फ़िल्टरिंग</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Targets</source>
+        <translation>लक्ष्य</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="36"/>
+        <source>Groups</source>
+        <translation>समूह</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Rasters</source>
+        <translation>रास्टर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="37"/>
+        <source>Clouds</source>
+        <translation>क्लाउड</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="42"/>
+        <source>Which sections of the panel do you use? EXPLORING is always there.</source>
+        <translation>आप पैनल के कौन-से अनुभाग उपयोग करते हैं? EXPLORING हमेशा मौजूद रहता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Which data do you work with, besides vector layers?</source>
+        <translation>वेक्टर परतों के अलावा आप किस डेटा के साथ काम करते हैं?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>How big are your layers, most of the time?</source>
+        <translation>आपकी परतें अधिकतर कितनी बड़ी होती हैं?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="45"/>
+        <source>Colours of the panel</source>
+        <translation>पैनल के रंग</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="46"/>
+        <source>Size of the panel</source>
+        <translation>पैनल का आकार</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="47"/>
+        <source>Language of the panel</source>
+        <translation>पैनल की भाषा</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="48"/>
+        <source>Where the action buttons go (Filter, Export...)</source>
+        <translation>कार्रवाई बटन कहाँ रहें (फ़िल्टर, निर्यात करें...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="49"/>
+        <source>When you filter</source>
+        <translation>फ़िल्टर करते समय</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="50"/>
+        <source>A vector layer also filters these layers (cut to its features)</source>
+        <translation>एक वेक्टर परत इन परतों को भी फ़िल्टर करती है (अपने फ़ीचर तक काटकर)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="51"/>
+        <source>When you export to a file, keep the groups of the layer tree</source>
+        <translation>फ़ाइल में निर्यात करते समय परत वृक्ष के समूह बनाए रखें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="52"/>
+        <source>Format of the rasters exported</source>
+        <translation>निर्यात किए गए रास्टर का प्रारूप</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Format of the point clouds exported</source>
+        <translation>निर्यात किए गए पॉइंट क्लाउड का प्रारूप</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="150"/>
+        <source>Set up FilterMate: a few choices, ticked as your settings are now. Nothing is sent anywhere, and nothing changes until you apply.</source>
+        <translation>FilterMate सेट करें: कुछ विकल्प, आपकी मौजूदा सेटिंग के अनुसार चिह्नित। कुछ भी कहीं नहीं भेजा जाता, और लागू करने तक कुछ नहीं बदलता।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Stop the setup</source>
+        <translation>सेटअप रोकें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="181"/>
+        <source>Setup stopped.</source>
+        <translation>सेटअप रोक दिया गया।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="202"/>
+        <source>Setup stopped: nothing changed. Menu Vector &gt; FilterMate starts it again.</source>
+        <translation>सेटअप रोका गया: कुछ नहीं बदला। मेनू वेक्टर &gt; FilterMate इसे फिर से शुरू करता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="220"/>
+        <source>Your settings of FilterMate</source>
+        <translation>आपकी FilterMate सेटिंग</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="221"/>
+        <source>They stay for every project; Undo puts them back.</source>
+        <translation>ये हर प्रोजेक्ट के लिए बने रहते हैं; पूर्ववत करें इन्हें वापस ला देता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Apply</source>
+        <translation>लागू करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="222"/>
+        <source>Cancel</source>
+        <translation>रद्द करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Applied.</source>
+        <translation>लागू किया गया।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="282"/>
+        <source>Nothing changed: the settings could not be applied.</source>
+        <translation>कुछ नहीं बदला: सेटिंग लागू नहीं की जा सकीं।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="275"/>
+        <source>Some of these settings changed since: they are left as they are.</source>
+        <translation>इनमें से कुछ सेटिंग तब से बदल चुकी हैं: उन्हें जैसा है वैसा ही छोड़ दिया गया है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="265"/>
+        <source>Settings put back as they were.</source>
+        <translation>सेटिंग पहले जैसी कर दी गईं।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>Put my settings back as they were</source>
+        <translation>मेरी सेटिंग पहले जैसी करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="224"/>
+        <source>They stay for every project; the link that follows puts them back as they were.</source>
+        <translation>ये हर प्रोजेक्ट के लिए बने रहते हैं; नीचे दिया गया लिंक इन्हें पहले जैसा कर देता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="223"/>
+        <source>Not applied: nothing changed.</source>
+        <translation>लागू नहीं किया गया: कुछ नहीं बदला।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="230"/>
+        <source>Setup of FilterMate</source>
+        <translation>FilterMate सेटअप</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="65"/>
+        <source>Filter layers by the features selected in EXPLORING. Off: the source layer is chosen at the top of EXPLORING.</source>
+        <translation>EXPLORING में चुने गए फ़ीचर के आधार पर परतें फ़िल्टर करें। बंद होने पर: स्रोत परत EXPLORING के ऊपर चुनी जाती है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="67"/>
+        <source>Export layers to files (GeoPackage, Shapefile, KML...), QFieldCloud.</source>
+        <translation>परतों को फ़ाइलों (GeoPackage, Shapefile, KML...) और QFieldCloud में निर्यात करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="69"/>
+        <source>Filter from a sentence, with a model you connect. Without a model it keeps this setup.</source>
+        <translation>एक वाक्य से फ़िल्टर करें, आपके जोड़े गए मॉडल के साथ। मॉडल के बिना यही सेटअप बना रहता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="73"/>
+        <source>Rasters (images, DEMs)</source>
+        <translation>रास्टर (इमेज, DEM)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="74"/>
+        <source>Point clouds (LiDAR)</source>
+        <translation>पॉइंट क्लाउड (LiDAR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="75"/>
+        <source>PostgreSQL / PostGIS</source>
+        <translation>PostgreSQL / PostGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="76"/>
+        <source>Web services (WFS, WMS)</source>
+        <translation>वेब सेवाएँ (WFS, WMS)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>Small: under 10,000 features</source>
+        <translation>छोटी: 10,000 से कम फ़ीचर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="79"/>
+        <source>A shorter wait while you type an expression.</source>
+        <translation>एक्सप्रेशन टाइप करते समय कम प्रतीक्षा।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>Medium: up to 100,000</source>
+        <translation>मध्यम: 1,00,000 तक</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="80"/>
+        <source>The usual settings.</source>
+        <translation>सामान्य सेटिंग।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Large: 100,000 features or more</source>
+        <translation>बड़ी: 1,00,000 या अधिक फ़ीचर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="81"/>
+        <source>Longer timeouts, fewer warnings.</source>
+        <translation>लंबी टाइमआउट, कम चेतावनियाँ।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="82"/>
+        <source>Keep my settings</source>
+        <translation>मेरी सेटिंग रखें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>As QGIS</source>
+        <translation>QGIS जैसा</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Light</source>
+        <translation>हल्का</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="84"/>
+        <source>Dark</source>
+        <translation>गहरा</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="85"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Fit to the screen</source>
+        <translation>स्क्रीन के अनुसार</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="86"/>
+        <source>Compact (small screen)</source>
+        <translation>कॉम्पैक्ट (छोटी स्क्रीन)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Normal</source>
+        <translation>सामान्य</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="87"/>
+        <source>Large (4K, Retina)</source>
+        <translation>बड़ा (4K, Retina)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Bottom</source>
+        <translation>नीचे</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Top</source>
+        <translation>ऊपर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="89"/>
+        <source>Left</source>
+        <translation>बाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Right</source>
+        <translation>दाएँ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="90"/>
+        <source>Under each section</source>
+        <translation>हर अनुभाग के नीचे</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="39"/>
+        <source>Layout</source>
+        <translation>लेआउट</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="53"/>
+        <source>Where the sections go</source>
+        <translation>अनुभाग कहाँ रहें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="40"/>
+        <source>Headers</source>
+        <translation>शीर्षक</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
+        <source>How the panel lists its sections</source>
+        <translation>पैनल अपने अनुभागों को कैसे सूचीबद्ध करता है</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>A rail of chips</source>
+        <translation>चिप की एक पट्टी</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
+        <source>The default: one row per stack, where a click on a chip opens its section and a chip is dragged to another place.</source>
+        <translation>डिफ़ॉल्ट: हर स्टैक के लिए एक पंक्ति, जहाँ किसी चिप पर क्लिक करने से उसका अनुभाग खुलता है और चिप को दूसरी जगह खींचा जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>Headers, one above the other</source>
+        <translation>शीर्षक, एक के ऊपर एक</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
+        <source>The name of each section on its own line.</source>
+        <translation>हर अनुभाग का नाम अपनी अलग पंक्ति में।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>A click on a header opens its section.</source>
+        <translation>किसी शीर्षक पर क्लिक करने से उसका अनुभाग खुलता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="96"/>
+        <source>All in the FilterMate panel</source>
+        <translation>सभी FilterMate पैनल में</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="97"/>
+        <source>The default: one panel, where a click in a rail opens a section.</source>
+        <translation>डिफ़ॉल्ट: एक पैनल, जहाँ पट्टी में क्लिक करने से एक अनुभाग खुलता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="99"/>
+        <source>In panels of QGIS</source>
+        <translation>QGIS के पैनलों में</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="100"/>
+        <source>AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, beside the map or floating; EXPLORING stays in FilterMate. Drag the chip of a section onto another panel to group them, right-click it to merge it back.</source>
+        <translation>AGENT अपने अलग पैनल में, FILTERING, EXPORTING और CONFIGURATION एक साथ दूसरे पैनल में, नक्शे के बगल में या तैरते हुए; EXPLORING FilterMate में ही रहता है। किसी अनुभाग के चिप को दूसरे पैनल पर खींचें ताकि वे समूहित हों, उस पर राइट-क्लिक करके उसे वापस FilterMate में मिलाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>As they are now</source>
+        <translation>जैसे अभी हैं</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="101"/>
+        <source>Some sections are in their own panel.</source>
+        <translation>कुछ अनुभाग अपने ही पैनल में हैं।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="105"/>
+        <source>Each section shows its own buttons while it is open.</source>
+        <translation>हर अनुभाग खुला होने पर अपने बटन दिखाता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="293"/>
+        <source>Sections: all back in the FilterMate panel (applied at once)</source>
+        <translation>अनुभाग: सभी वापस FilterMate पैनल में (तुरंत लागू)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="298"/>
+        <source>Sections: in panels of QGIS (applied at once)</source>
+        <translation>अनुभाग: QGIS के पैनलों में (तुरंत लागू)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="448"/>
+        <source>The sections are in panels of QGIS: drag a panel by its title, drag the chip of a section onto another panel to group them, right-click it to merge it back into FilterMate.</source>
+        <translation>अनुभाग QGIS के पैनलों में हैं: किसी पैनल को उसके शीर्षक से खींचें, किसी अनुभाग के चिप को दूसरे पैनल पर खींचें ताकि वे समूहित हों, उस पर राइट-क्लिक करके उसे वापस FilterMate में मिलाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="335"/>
+        <source>These settings were already put back.</source>
+        <translation>ये सेटिंग पहले ही पहले जैसी कर दी गई हैं।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="91"/>
+        <source>Zoom to what is kept</source>
+        <translation>जो रखा गया है उस पर ज़ूम करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="92"/>
+        <source>Keep the history of filters in the project</source>
+        <translation>फ़िल्टर का इतिहास प्रोजेक्ट में रखें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="93"/>
+        <source>Show optimization tips</source>
+        <translation>ऑप्टिमाइज़ेशन सुझाव दिखाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="94"/>
+        <source>Let FilterMate choose the fastest way</source>
+        <translation>FilterMate को सबसे तेज़ तरीका चुनने दें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="95"/>
+        <source>Point clouds</source>
+        <translation>पॉइंट क्लाउड</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a GeoPackage</source>
+        <translation>GeoPackage में</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="96"/>
+        <source>In a KML</source>
+        <translation>KML में</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>Cloud Optimized GeoTIFF</source>
+        <translation>Cloud Optimized GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="97"/>
+        <source>GeoTIFF</source>
+        <translation>GeoTIFF</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAZ (compressed)</source>
+        <translation>LAZ (संपीड़ित)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="98"/>
+        <source>LAS</source>
+        <translation>LAS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="99"/>
+        <source>COPC (cloud optimized)</source>
+        <translation>COPC (क्लाउड के लिए अनुकूलित)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>Next</source>
+        <translation>आगे</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="180"/>
+        <source>See the changes</source>
+        <translation>बदलाव देखें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="209"/>
+        <source>Nothing to change: FilterMate already works this way.</source>
+        <translation>बदलने को कुछ नहीं: FilterMate पहले से इसी तरह काम करता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="256"/>
+        <source>Refine the setup with the agent</source>
+        <translation>एजेंट के साथ सेटअप को बेहतर बनाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="258"/>
+        <source>Connect a model to filter from a sentence</source>
+        <translation>वाक्य से फ़िल्टर करने के लिए मॉडल जोड़ें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>{} in this project</source>
+        <translation>इस प्रोजेक्ट में {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="216"/>
+        <source>These settings could not be prepared: change them in the configuration of the panel.</source>
+        <translation>ये सेटिंग तैयार नहीं की जा सकीं: इन्हें पैनल के कॉन्फ़िगरेशन में बदलें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="248"/>
+        <source>FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show it again: this setup, or {}.</source>
+        <translation>FILTERING छिपा है: स्रोत परत EXPLORING के ऊपर चुनी जाती है। इसे फिर दिखाने के लिए: यह सेटअप, या {}।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="251"/>
+        <source>The AGENT section goes after restarting QGIS. To bring it back: {}.</source>
+        <translation>QGIS को पुनः आरंभ करने के बाद AGENT अनुभाग हट जाता है। इसे वापस लाने के लिए: {}।</translation>
     </message>
 </context>
 <context>
@@ -11562,6 +12228,89 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="295"/>
         <source>Vector tiles</source>
         <translation>वेक्टर टाइल</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeTour</name>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="26"/>
+        <source>How FilterMate works</source>
+        <translation>FilterMate कैसे काम करता है</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="31"/>
+        <source>How FilterMate works, section by section. No AI model is needed to read this, and nothing is sent anywhere.</source>
+        <translation>FilterMate कैसे काम करता है, अनुभाग-दर-अनुभाग। इसे पढ़ने के लिए किसी AI मॉडल की ज़रूरत नहीं है, और कुछ भी कहीं नहीं भेजा जाता।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>The panel has two stacks, each with a rail that lists its sections: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. Click a chip of a rail to open its section, drag it along the rail to put the sections in another order.</source>
+        <translation>पैनल में दो स्टैक हैं, हर एक में एक पट्टी है जो उसके अनुभागों की सूची दिखाती है: ऊपर AGENT और EXPLORING, नीचे FILTERING, EXPORTING और CONFIGURATION। किसी अनुभाग को खोलने के लिए पट्टी के उसके चिप पर क्लिक करें, अनुभागों को दूसरे क्रम में रखने के लिए चिप को पट्टी के साथ खींचें।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="49"/>
+        <source>By default every section is in this panel, and nothing moves unless you ask. A section can leave it: right-click its chip in its rail, then choose to open it in its own panel. It becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>डिफ़ॉल्ट रूप से हर अनुभाग इसी पैनल में रहता है, और आपके कहे बिना कुछ नहीं हिलता। कोई अनुभाग इससे बाहर जा सकता है: उसकी पट्टी में उसके चिप पर राइट-क्लिक करें, फिर उसे अपने पैनल में खोलना चुनें। वह QGIS का पैनल बन जाता है, जिसे नक्शे के बगल में खींचा जा सकता है, परत पैनल के साथ टैब में रखा जा सकता है या दूसरी स्क्रीन पर तैराया जा सकता है। यहाँ बचा आखिरी अनुभाग यहीं रहता है। EXPLORING में वह परत है जिस पर बाकी अनुभाग काम करते हैं: FILTERING से अलग होने पर वह उस परत को चुनने के लिए अपनी सूची दिखाता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="54"/>
+        <source>A panel holds one section or several, listed in a rail as here. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one. A right-click on a chip, or on the title of a panel, offers the same moves. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>एक पैनल में एक अनुभाग या कई अनुभाग हो सकते हैं, जो यहाँ की तरह पट्टी में सूचीबद्ध होते हैं। किसी अनुभाग के चिप को समूहित करने के लिए दूसरे पैनल पर, वापस मिलाने के लिए FilterMate पर, या उसे नया पैनल देने के लिए हर पैनल से बाहर खींचें; FilterMate के दो पैनल टैब के रूप में साथ रखे जाने पर एक हो जाते हैं। किसी चिप पर, या किसी पैनल के शीर्षक पर, राइट-क्लिक करने से यही सब चालें मिलती हैं। पैनल बंद करने पर उसके अनुभाग वापस FilterMate में मिल जाते हैं। QGIS हर पैनल को वहीं रखता है जहाँ आपने उसे छोड़ा था।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>A panel holds one section or several. Right-click the header of a section, or the title of a panel, to group it with another panel or to merge it back into FilterMate; two panels of FilterMate put together as tabs become one. Closing a panel merges its sections back. QGIS puts every panel back where you left it.</source>
+        <translation>एक पैनल में एक अनुभाग या कई अनुभाग हो सकते हैं। किसी अनुभाग के शीर्षक पर, या किसी पैनल के शीर्षक पर, राइट-क्लिक करके उसे दूसरे पैनल के साथ समूहित करें या वापस FilterMate में मिलाएँ; FilterMate के दो पैनल टैब के रूप में साथ रखे जाने पर एक हो जाते हैं। पैनल बंद करने पर उसके अनुभाग वापस FilterMate में मिल जाते हैं। QGIS हर पैनल को वहीं रखता है जहाँ आपने उसे छोड़ा था।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="33"/>
+        <source>EXPLORING holds the current layer and what you pick in it: features of a vector layer, a range of values or classes of a raster, classes or heights of a point cloud. The other sections work on what it selects.</source>
+        <translation>EXPLORING में मौजूदा परत और उसमें आपका चुना हुआ रहता है: वेक्टर परत के फ़ीचर, रास्टर के मानों की सीमा या वर्ग, पॉइंट क्लाउड के वर्ग या ऊँचाइयाँ। बाकी अनुभाग उसी चयन पर काम करते हैं।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="36"/>
+        <source>FILTERING filters the layers you tick by that selection: those that intersect it, lie within a distance of it... Filter applies, Undo and Redo walk the history, Compare shows the map before and after, Unfilter removes the filters.</source>
+        <translation>FILTERING आपकी टिक की हुई परतों को उस चयन के आधार पर फ़िल्टर करता है: जो उससे मिलती हैं, या उससे एक निश्चित दूरी के भीतर हैं... फ़िल्टर करें लागू करता है, पूर्ववत करें और फिर से करें इतिहास में आगे-पीछे जाते हैं, तुलना करें नक्शे को पहले और बाद में दिखाता है, फ़िल्टर हटाएँ फ़िल्टर हटा देता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="39"/>
+        <source>EXPORTING writes the layers as they are filtered: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</source>
+        <translation>EXPORTING परतों को फ़िल्टर किए गए रूप में ही लिखता है: GeoPackage, Shapefile, KML, GeoTIFF, LAZ...</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="41"/>
+        <source>AGENT does the same from a sentence, and more (styles, labels, data to bring in), with a model you connect: your own API key, or Ollama on this computer. Each request can be undone.</source>
+        <translation>AGENT एक वाक्य से वही काम करता है, और उससे ज़्यादा भी (स्टाइल, लेबल, लाया जाने वाला डेटा), आपके जोड़े गए मॉडल के साथ: आपकी अपनी API कुंजी, या इस कंप्यूटर पर Ollama। हर अनुरोध को पूर्ववत किया जा सकता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="43"/>
+        <source>CONFIGURATION lists every setting. Set up FilterMate asks the main ones with a few choices, and shows each setting before and after.</source>
+        <translation>CONFIGURATION सभी सेटिंग की सूची देता है। FilterMate सेट करें मुख्य सेटिंग कुछ विकल्पों में पूछता है और हर सेटिंग पहले और बाद में दिखाता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="45"/>
+        <source>Turned off in your settings: {}. Set up FilterMate brings a section back.</source>
+        <translation>आपकी सेटिंग में बंद: {}। FilterMate सेट करें एक अनुभाग को वापस ले आता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="46"/>
+        <source>A section can leave this panel. Right-click its header, then choose to open it in its own panel: it becomes a panel of QGIS, to drag beside the map, to tab with the Layers panel or to float on another screen. The last section left here stays. EXPLORING holds the layer the other sections work on: once separated from FILTERING, it shows its own list to choose that layer.</source>
+        <translation>कोई अनुभाग इस पैनल से बाहर जा सकता है। उसके शीर्षक पर राइट-क्लिक करें, फिर उसे अपने पैनल में खोलना चुनें: वह QGIS का पैनल बन जाता है, जिसे नक्शे के बगल में खींचा जा सकता है, परत पैनल के साथ टैब में रखा जा सकता है या दूसरी स्क्रीन पर तैराया जा सकता है। यहाँ बचा आखिरी अनुभाग यहीं रहता है। EXPLORING में वह परत है जिस पर बाकी अनुभाग काम करते हैं: FILTERING से अलग होने पर वह उस परत को चुनने के लिए अपनी सूची दिखाता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="53"/>
+        <source>The buttons act in their own section: Filter, Undo, Redo, Compare and Unfilter with FILTERING, Export with EXPORTING. A section in its own panel takes its buttons with it; the setup can also show them under each section.</source>
+        <translation>बटन अपने ही अनुभाग में काम करते हैं: फ़िल्टर करें, पूर्ववत करें, फिर से करें, तुलना करें और फ़िल्टर हटाएँ FILTERING के साथ, निर्यात करें EXPORTING के साथ। अपने पैनल में गया अनुभाग अपने बटन साथ ले जाता है; सेटअप उन्हें हर अनुभाग के नीचे भी दिखा सकता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="64"/>
+        <source>Set up FilterMate</source>
+        <translation>FilterMate सेट करें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/welcome_tour.py" line="65"/>
+        <source>Connect a model</source>
+        <translation>मॉडल जोड़ें</translation>
     </message>
 </context>
 <context>

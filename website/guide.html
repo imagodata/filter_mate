@@ -179,6 +179,31 @@
         Opening AGENT folds EXPLORING and FILTERING; opening FILTERING brings EXPLORING back. AGENT is shown by default and can be hidden in the
         <a href="#configuration">Configuration</a> tab.
     </p>
+    <h3 id="panels">The rail of sections, and sections as panels of QGIS <small>(5.1.1)</small></h3>
+    <p>
+        Each stack lists its sections in a rail of chips: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION above the lower stack.
+        The open section shows its name, the others their icon. Click a chip to open its section; drag it along its rail to put the sections in another order, which is kept.
+        If you prefer the name of each section on its own line, as before, choose <em>Headers, one above the other</em> in the setup (<code>SECTION_HEADERS = stacked</code> in the Configuration tab): what follows is then done on a header instead of a chip.
+    </p>
+    <p>
+        By default every section stays in the FilterMate panel. A section can leave it: right-click its chip, then <em>Open &hellip; in its own panel</em>, or drag the chip out of the panel.
+        It becomes a panel of QGIS, which you drag beside the map, tab with the Layers panel or float on another screen. <em>Take every section out of FilterMate</em> moves them all at once: AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, EXPLORING staying in the FilterMate panel.
+        The last section of the FilterMate panel always stays in it.
+    </p>
+    <p>
+        EXPLORING can leave too: its panel goes above FilterMate the first time, so that what it selects stays over FILTERING.
+        Once EXPLORING and FILTERING are separated, EXPLORING shows its own list of layers at its top: the current layer is chosen in either of them.
+    </p>
+    <p>
+        A panel holds one section or several, listed in a rail as in FilterMate. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one.
+        A right-click on a chip, or on the title of a panel, offers the same moves (<em>Group with FILTERING</em>, <em>Merge &hellip; back into FilterMate</em>, as closing the panel does; <em>Merge every section back into FilterMate</em> for all of them).
+        QGIS puts each panel back where you left it, and the sections that were apart are apart again, in the same panels, when FilterMate opens.
+    </p>
+    <p>
+        A section in its own panel takes its buttons with it, and they act whatever the FilterMate panel shows: you filter from the FILTERING panel while EXPLORING alone is open.
+        The buttons can also be shown under each section (<em>Under each section</em> in the setup), and FILTERING or EXPORTING can be turned off when you do not use them: the source layer is then chosen at the top of EXPLORING.
+        <em>How FilterMate works</em>, on the welcome of AGENT, in its <strong>&#8943;</strong> menu and in <em>Vector &gt; FilterMate</em>, tells all this in the panel, with links that do it.
+    </p>
     <p>
         The screenshots of this section were taken before the AGENT section and the title bar badges: they show the favorites button beside the layer badge and no AGENT section.
     </p>
@@ -908,10 +933,12 @@ processing.run("filtermate:batch_filter", {
         <figcaption>A request with two possible layers: the agent asks which one before it changes anything.</figcaption>
     </figure>
 
-    <h3>Set FilterMate up with the agent <small>(5.1.1)</small></h3>
+    <h3>Set up FilterMate <small>(5.1.1)</small></h3>
     <p>
-        The first time a new version opens, AGENT offers once to set FilterMate up. The agent looks at what the project holds, asks a few questions (what you do with it, your screen, language and look, your data), then proposes the settings, each shown before and after. Nothing changes until you click <strong>Apply</strong>, and the change is undone like any other step.
-        Start it again at any time from the menu <em>Vector &gt; FilterMate &gt; Set up FilterMate with the agent</em>, or from the <strong>&#8943;</strong> menu of the panel. You can also simply ask: what a setting does, the dark theme, why your filters are slow.
+        The first time a new version opens, AGENT offers once to set FilterMate up. The setup needs no AI model and sends nothing anywhere: it asks with cards of choices, ticked as your settings are now.
+        Which sections you use and which data you work with, the look of the panel, where the sections go (all in the FilterMate panel, which is the default, or in panels of QGIS) and where their buttons go, then what you filter and export.
+        The last card shows every setting before and after; nothing changes until you click <strong>Apply</strong>, and a link puts everything back as it was. With a model connected, <em>Refine the setup with the agent</em> follows.
+        Start it again at any time from the menu <em>Vector &gt; FilterMate &gt; Set up FilterMate</em>, or from the <strong>&#8943;</strong> menu of the panel. With a model you can also simply ask: what a setting does, the dark theme, why your filters are slow.
     </p>
 
     <figure class="narrow">
