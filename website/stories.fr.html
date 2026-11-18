@@ -60,7 +60,7 @@
         <li><a href="#s9"><span class="num">9</span>Les parcelles en forte pente</a></li>
         <li><a href="#s10"><span class="num">10</span>La hauteur du bâti, mesurée par le LiDAR</a></li>
         <li><a href="#s11"><span class="num">11</span>Les routes à élaguer</a></li>
-        <li><a href="#s12"><span class="num">12</span>Le lot de relevé autour de l’église</a></li>
+        <li><a href="#s12"><span class="num">12</span>Le lot de relevé autour d’un bâtiment</a></li>
         <li><a href="#s13"><span class="num">13</span>La végétation sur une orthophoto RVB</a></li>
         <li><a href="#s14"><span class="num">14</span>Les points LiDAR sous les toits</a></li>
         <li><a href="#s15"><span class="num">15</span>Le MNT au droit des points sol</a></li>
@@ -84,7 +84,7 @@
     <p class="lead">
         Chaque histoire part d'une question posée dans un service technique, une collectivité ou un bureau d'études, puis la traduit
         en réglages FilterMate, étape par étape. Les douze premiers récits montrent les enregistrements QGIS et leurs résultats chiffrés,
-        en Haute-Garonne puis à Estavar. Quatre recettes illustrées complètent les neuf combinaisons de types de couches, avec les données
+        en Haute-Garonne puis sur un kilomètre carré au nord de Toulouse. Quatre recettes illustrées complètent les neuf combinaisons de types de couches, avec les données
         à préparer, les réglages et le résultat attendu.
     </p>
     <div class="cards story-index">
@@ -99,7 +99,7 @@
         <a class="card story-card" href="#s9"><span class="story-card-media"><img src="video/slope.webp" alt="Les parcelles en forte pente" loading="lazy" width="1280" height="720"><b aria-hidden="true">09</b></span><div class="story-card-copy"><span class="badge">Urbanisme</span><h4>Les parcelles en forte pente</h4><p>La pente calculée depuis le MNT, une plage sur l’histogramme, une couverture minimale.</p><span class="story-outcome"><strong>58 parcelles</strong> · pente ≥ 30 %</span></div></a>
         <a class="card story-card" href="#s10"><span class="story-card-media"><img src="video/heights.webp" alt="La hauteur du bâti" loading="lazy" width="1280" height="720"><b aria-hidden="true">10</b></span><div class="story-card-copy"><span class="badge">Instruction</span><h4>La hauteur du bâti</h4><p>Classe bâtiment et hauteur au-dessus du MNT, calculée par PDAL.</p><span class="story-outcome"><strong>57 bâtiments</strong> au-dessus de 9 m</span></div></a>
         <a class="card story-card" href="#s11"><span class="story-card-media"><img src="video/pruning.webp" alt="Les routes à élaguer" loading="lazy" width="1280" height="720"><b aria-hidden="true">11</b></span><div class="story-card-copy"><span class="badge">Voirie</span><h4>Les routes à élaguer</h4><p>Végétation haute de plus de 8 m, à 3 m des tronçons.</p><span class="story-outcome"><strong>91 tronçons</strong> sur 172</span></div></a>
-        <a class="card story-card" href="#s12"><span class="story-card-media"><img src="video/survey.webp" alt="Le lot de relevé autour de l’église" loading="lazy" width="1280" height="720"><b aria-hidden="true">12</b></span><div class="story-card-copy"><span class="badge">Patrimoine</span><h4>Le lot de relevé autour de l’église</h4><p>Un vecteur découpe un MNT et un nuage, puis tout part dans un ZIP.</p><span class="story-outcome">GeoTIFF + LAZ · <strong>ZIP</strong></span></div></a>
+        <a class="card story-card" href="#s12"><span class="story-card-media"><img src="video/survey.webp" alt="Le lot de relevé autour d’un bâtiment" loading="lazy" width="1280" height="720"><b aria-hidden="true">12</b></span><div class="story-card-copy"><span class="badge">Patrimoine</span><h4>Le lot de relevé autour d’un bâtiment</h4><p>Un vecteur découpe un MNT et un nuage, puis tout part dans un ZIP.</p><span class="story-outcome">GeoTIFF + LAZ · <strong>ZIP</strong></span></div></a>
         <a class="card story-card" href="#s13"><span class="story-card-media"><img src="img/combinations/ndvi.svg" alt="Schéma : un masque de végétation de l’ortho IRC conserve les pixels correspondants de l’ortho RVB" loading="lazy" width="1280" height="720"><b aria-hidden="true">13</b></span><div class="story-card-copy"><span class="badge">Espaces verts</span><h4>La végétation sur une orthophoto RVB</h4><p>Le NDVI de l’image infrarouge devient le masque d’une autre image.</p><span class="story-outcome">Raster → raster · <strong>NDVI &gt; 0,3</strong></span></div></a>
         <a class="card story-card" href="#s14"><span class="story-card-media"><img src="img/combinations/roofs.svg" alt="Schéma : les toits sélectionnés à la pipette sur une orthophoto découpent le nuage LiDAR" loading="lazy" width="1280" height="720"><b aria-hidden="true">14</b></span><div class="story-card-copy"><span class="badge">Bâtiment</span><h4>Les points LiDAR sous les toits</h4><p>Un objet repéré sur l’orthophoto isole les points à son aplomb.</p><span class="story-outcome">Raster → LiDAR · <strong>pipette objet</strong></span></div></a>
         <a class="card story-card" href="#s15"><span class="story-card-media"><img src="img/combinations/ground.svg" alt="Schéma : l’empreinte des points de classe sol restreint les pixels du MNT" loading="lazy" width="1280" height="720"><b aria-hidden="true">15</b></span><div class="story-card-copy"><span class="badge">Topographie</span><h4>Le MNT au droit des points sol</h4><p>Les points classés sol définissent où conserver les altitudes du raster.</p><span class="story-outcome">LiDAR → raster · <strong>classe 2</strong></span></div></a>
@@ -597,31 +597,31 @@ processing.run("filtermate:batch_filter", {
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/survey.webp" data-src="video/survey.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">12</span>Le lot de relevé autour de l’église</h2>
-        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Le lot de relevé autour de l’église"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
-        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Estavar (Pyrénées-Orientales).</p>
+        <h2><span class="num">12</span>Le lot de relevé autour d’un bâtiment</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Le lot de relevé autour d’un bâtiment"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Fenouillet et Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Un architecte du patrimoine prépare la restauration de l’<strong>église d’Estavar</strong>. Il demande le nuage de points et le MNT de l’église et de ses abords, à 50 m, dans un fichier qu’il peut ouvrir sans QGIS.</p></div>
-        <div><h4>La traduction FilterMate</h4><p>Source vecteur, cibles raster et nuage : <strong>batiment</strong> avec <code>"nature" = 'Eglise'</code>, tampon de 50 m, cibles <em>mnt</em> et <em>lhd</em>. Le MNT est découpé en VRT, le nuage en COPC dérivé ; les couches gardent leur identifiant et leur style. EXPORTING écrit ensuite GeoTIFF et LAZ dans un ZIP.</p></div>
+        <div><h4>Le besoin</h4><p>Un bureau d’études étudie la pose de panneaux solaires sur le toit du <strong>bâtiment le plus haut d’une zone d’activités</strong> (17,4 m), au nord de Toulouse. Il demande le nuage de points et le MNT du bâtiment et de ses abords, à 50 m, dans un fichier qu’il peut ouvrir sans QGIS.</p></div>
+        <div><h4>La traduction FilterMate</h4><p>Source vecteur, cibles raster et nuage : <strong>batiment</strong> avec <code>"hauteur" &gt;= 17</code>, tampon de 50 m, cibles <em>mnt</em> et <em>lhd</em>. Le MNT est découpé en VRT, le nuage en COPC dérivé ; les couches gardent leur identifiant et leur style. EXPORTING écrit ensuite GeoTIFF et LAZ dans un ZIP.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>batiment</code></dd></div><div><dt>Sélection</dt><dd><code>"nature" = 'Eglise'</code></dd></div><div><dt>Cibles</dt><dd><code>mnt</code> (raster), <code>lhd</code> (nuage)</dd></div><div><dt>Relation</dt><dd>Intersect, tampon 50 m</dd></div><div><dt>Résultat</dt><dd>GeoTIFF 45 Ko + LAZ 1,0 Mo</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>batiment</code></dd></div><div><dt>Sélection</dt><dd><code>"hauteur" &gt;= 17</code></dd></div><div><dt>Cibles</dt><dd><code>mnt</code> (raster), <code>lhd</code> (nuage)</dd></div><div><dt>Relation</dt><dd>Intersect, tampon 50 m</dd></div><div><dt>Résultat</dt><dd>GeoTIFF 246 Ko + LAZ 856 Ko</dd></div></dl>
     <ol class="steps">
-        <li><strong>L’église.</strong> Source <em>batiment</em>, Custom selection <code>"nature" = 'Eglise'</code>.
-            <figure><img src="img/stories/s12-01.webp" alt="Étape 1 : l’église sélectionnée" loading="lazy" width="1600" height="900"><figcaption>Étape 1.</figcaption></figure>
+        <li><strong>Le bâtiment.</strong> Source <em>batiment</em>, Custom selection <code>"hauteur" &gt;= 17</code> : un bâtiment sur 918.
+            <figure><img src="img/stories/s12-01.webp" alt="Étape 1 : le bâtiment le plus haut sélectionné" loading="lazy" width="1600" height="900"><figcaption>Étape 1.</figcaption></figure>
         </li>
         <li><strong>50 m autour, sur le MNT et le nuage.</strong> Cibles <em>mnt</em> et <em>lhd</em>, Intersect, Buffer 50.
             <figure><img src="img/stories/s12-02.webp" alt="Étape 2 : cibles raster et nuage de points, tampon de 50 m" loading="lazy" width="1600" height="900"><figcaption>Étape 2. Un raster et un nuage dans la même liste de cibles que des vecteurs.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s12-03.webp" alt="Étape 3 : MNT et nuage découpés autour de l’église" loading="lazy" width="1600" height="900"><figcaption>Étape 3. Undo rendrait les couches entières.</figcaption></figure>
+            <figure><img src="img/stories/s12-03.webp" alt="Étape 3 : MNT et nuage découpés autour du bâtiment" loading="lazy" width="1600" height="900"><figcaption>Étape 3. Undo rendrait les couches entières.</figcaption></figure>
         </li>
         <li><strong>Exporter.</strong> EXPORTING : couches <em>mnt</em> et <em>lhd</em>, dossier, chemin du ZIP, Export.
             <figure><img src="img/stories/s12-04.webp" alt="Étape 4 : l’onglet EXPORTING avec les deux couches et le ZIP" loading="lazy" width="1600" height="900"><figcaption>Étape 4.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p>Un ZIP de 1,1 Mo : le MNT (GeoTIFF, 45 Ko) et le nuage (LAZ, 1,0 Mo) de l’église et de ses abords.</p>
+    <p>Un ZIP de 1,1 Mo : le MNT (GeoTIFF, 246 Ko) et le nuage (LAZ, 856 Ko) du bâtiment et de ses abords.</p>
 </section>
 <!-- 13 ------------------------------------------------------------------ -->
 <section id="s13">
