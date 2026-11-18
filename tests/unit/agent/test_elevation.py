@@ -3,8 +3,9 @@
 import pytest
 
 from core.agent.elevation import (
-    MAX_LEVELS, MAX_MESSAGE, MAX_PIXELS, MAX_TILES, SOURCES, bbox_problem, contour_problem, ground_size, is_index,
-    gdal_srs, known, metric_grid, quiet_message, resolution_for, tile_name, tile_url, tiles_for, utm_authid,
+    MAX_LEVELS, MAX_MESSAGE, MAX_PIXELS, MAX_TILES, NO_DATA, SOURCES, bbox_problem, contour_problem, ground_size,
+    is_index, empty_note, gdal_srs, known, metric_grid, quiet_message, resolution_for, tile_name, tile_url, tiles_for,
+    tiles_for_grid, utm_authid,
 )
 from core.agent.open_data import KIND_ELEVATION, NO_DATA_KINDS, resolve_platform
 from core.agent.sources import BUILT_IN, describe_enabled
@@ -196,6 +197,37 @@ def test_a_message_is_one_short_line_and_never_empty():
     assert quiet_message("") == quiet_message(None) == "no reason given"
     assert quiet_message("a\n  b\tc") == "a b c"
     assert len(quiet_message("x" * 5000)) == MAX_MESSAGE
+
+
+def test_the_corners_of_a_grid_in_metres_are_read_from_the_squares_they_fall_in():
+    """[4.5, 45, 5, 45.5] sits on the south edge of N45: its UTM 31N rectangle reaches down into N44 (measured on the
+    real model: 2.5 % of the grid written at 0 m)."""
+    asked = [4.5, 45.0, 5.0, 45.5]
+    assert tiles_for(asked) == [(45, 4)]
+    envelope = [4.48, 44.98, 5.02, 45.52]  # what cs2cs gives for the rectangle of the area in UTM 31N, give or take
+    assert tiles_for_grid(asked, envelope) == [(44, 4), (44, 5), (45, 4), (45, 5)]
+    # Inside a square, the corners stay in it: nothing more is read.
+    assert tiles_for_grid([4.3, 45.3, 4.7, 45.7], [4.29, 45.29, 4.71, 45.71]) == [(45, 4)]
+    # The globe is not left: the antimeridian is clipped, no square of E180 is asked.
+    assert tiles_for_grid([179.0, 60.0, 180.0, 61.0], [178.9, 59.9, 180.4, 61.1]) == [
+        (row, column) for row in (59, 60, 61) for column in (178, 179)]
+
+
+def test_the_corners_stay_empty_when_they_would_need_more_squares_than_one_call_reads():
+    asked = [0.1, 40.1, 3.9, 43.9]  # 4 x 4 squares
+    assert len(tiles_for(asked)) == MAX_TILES
+    assert tiles_for_grid(asked, [-0.2, 39.8, 4.2, 44.2]) == tiles_for(asked)
+    with pytest.raises(ValueError, match="16 at most"):
+        tiles_for_grid([0, 40, 9, 49], [0, 40, 9, 49])
+
+
+def test_what_no_tile_reaches_is_said_by_its_share():
+    assert NO_DATA < -1000  # below any height of the earth: the Dead Sea is at -430 m
+    assert empty_note(0, 1000, "has no tile") == "" and empty_note(5, 0, "has no tile") == ""
+    note = empty_note(25_000, 100_000, "has no tile there")
+    assert note.startswith("25 % of the grid is empty (no data)") and "minimum, maximum and mean" in note
+    assert "has no tile there" in note
+    assert empty_note(40, 100_000, "x").startswith("under 1 %")
 
 
 @pytest.mark.parametrize("authid, expected", [

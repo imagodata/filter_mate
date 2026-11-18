@@ -95,6 +95,26 @@ def tiles_for(bbox: Sequence[float]) -> List[Tuple[int, int]]:
     return [(latitude, longitude) for latitude in rows for longitude in columns]
 
 
+def tiles_for_grid(bbox: Sequence[float], envelope: Sequence[float]) -> List[Tuple[int, int]]:
+    """The squares to read for a grid written in a metric CRS: those of the area asked, and those its corners reach.
+
+    ``envelope`` is the bounds of the grid, in degrees: wider than ``bbox`` because a rectangle of a UTM zone or of a
+    national grid is not one in longitude and latitude. A corner that falls in a square nobody read would be written
+    empty (2026-11-18: [4.5, 45, 5, 45.5] in UTM 31N left 2.5 % of the grid at 0 m, along its south edge). When
+    these squares are more than one call reads, those of the area asked are read, and the corners stay empty.
+
+    Raises:
+        ValueError: Bounds that are none, or an area of more squares than one call reads.
+    """
+    asked = tiles_for(bbox)
+    west, south, east, north = envelope
+    wider = [max(west, -180.0), max(south, -90.0), min(east, 180.0), min(north, 90.0)]
+    try:
+        return sorted(set(asked) | set(tiles_for(wider)))
+    except ValueError:
+        return asked
+
+
 def utm_authid(longitude: float, latitude: float) -> str:
     """The UTM zone of a place, as an EPSG code: metres, and little distortion over a town or a region."""
     zone = int(math.floor((max(-180.0, min(179.999, longitude)) + 180.0) / 6.0)) + 1
@@ -152,6 +172,19 @@ def resolution_for(bbox: Sequence[float], asked: Optional[float], finest: float)
                          f"pixels: ask for {fitting:g} m or more, or for a smaller area")
     note = "" if asked >= finest else f"the source measures every {finest:g} m: a finer grid adds no detail"
     return float(asked), note
+
+
+NO_DATA = -9999.0  # what the grid holds where no tile of the model reaches: written as its no-data value
+
+
+def empty_note(empty: int, pixels: int, why: str) -> str:
+    """What a model must know when part of a grid holds no elevation: said by its share, and left out of the figures
+    (minimum, maximum, mean) and of every slope, shade or contour drawn from it. "" when nothing is empty."""
+    if empty <= 0 or pixels <= 0:
+        return ""
+    share = 100.0 * empty / pixels
+    shown = f"{share:.0f} %" if share >= 1 else "under 1 %"
+    return f"{shown} of the grid is empty (no data), left out of minimum, maximum and mean: the model {why}"
 
 
 def contour_problem(minimum: float, maximum: float, interval: float, index_interval: Optional[float],
