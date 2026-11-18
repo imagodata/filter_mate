@@ -28,6 +28,10 @@ EXPRESSIONS = {
     "virtual": ({"double_pop"}, set(), set(), lambda feature: True),
     "by_id": (set(), {"$id"}, set(), lambda feature: feature["fid"] > 2),
     "geometric": ({"pop"}, set(), set(), lambda feature: feature["pop"] > 2),  # reads the geometry
+    "selected": (set(), {"is_selected"}, set(), lambda feature: feature["fid"] > 2),
+    "selected_count": (set(), {"num_selected"}, set(), lambda feature: feature["fid"] > 2),
+    "by_feature_id": (set(), {"get_feature_by_id", "attribute"}, set(), lambda feature: feature["fid"] > 2),
+    "at_id": (set(), {"var"}, {"id"}, lambda feature: feature["fid"] > 2),
 }
 
 
@@ -269,21 +273,23 @@ def test_a_copy_without_the_geometry_of_the_layer_gives_no_list(translation, mon
         '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)')
 
 
-def test_dollar_id_of_a_postgresql_copy_gives_no_list(translation, monkeypatch):
+@pytest.mark.parametrize("text", ["by_id", "selected", "selected_count", "by_feature_id", "at_id"])
+def test_the_feature_id_of_a_postgresql_copy_is_never_read(translation, monkeypatch, text):
     translation.dialect = translation.POSTGRESQL
     _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
 
     with pytest.raises(translation.Unsupported):
-        _hybrid(translation, _filtered_layer(), "by_id", whole_layer=True)
+        _hybrid(translation, _filtered_layer(), text, whole_layer=True)
     # read through the layer itself (AND with its subset), $id is the one its provider gives it
     layer = _Layer("zones", ROWS, subset='"pop" >= 0')
     assert _hybrid(translation, layer, "by_id") == '"fid" IS NOT NULL AND "fid" IN (3, 4, 5)'
 
 
-def test_dollar_id_of_a_geopackage_copy_is_its_fid(translation, monkeypatch):
+@pytest.mark.parametrize("text", ["by_id", "selected"])
+def test_the_feature_id_of_a_geopackage_copy_is_its_fid(translation, monkeypatch, text):
     _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
 
-    assert _hybrid(translation, _filtered_layer(), "by_id", whole_layer=True) == (
+    assert _hybrid(translation, _filtered_layer(), text, whole_layer=True) == (
         '"fid" IS NOT NULL AND "fid" IN (3, 4, 5)')
 
 

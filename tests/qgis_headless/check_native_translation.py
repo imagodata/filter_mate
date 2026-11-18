@@ -426,9 +426,46 @@ def hybrid_path(label, layer, provider_type):
         report(status, f"{label} combined {operator}: {old} / {text}",
                f"subset={subset!r:.160} expected={expected} got={got}")
     refilter_path(label, layer, provider_type, REFILTER_PAIRS)
+    selected_path(label, layer, provider_type)
 
 
 HYBRID_PROVIDERS = ('spatialite', 'postgresql')  # the plugin's provider types of the SQLite and PostgreSQL sources
+
+
+def selected_path(label, layer, provider_type):
+    """is_selected() in a second filter that replaces a list, read on the copy of the layer without its subset.
+
+    The copy has no selection: is_selected() reads the one of the layer of the
+    context (the layer itself) at the id of each feature of the copy. A
+    GeoPackage numbers its features in the file (the same ids in the copy): a
+    list, the features QGIS keeps, also those outside the first subset. A copy
+    of a PostgreSQL layer may number them another way: no list (review of
+    2026-11-18). Ids 2 and 5 selected, outside the first list (1, 3, 11).
+    """
+    first, text = 'regexp_match("nom", \'^R\') > 0', 'is_selected() OR "pop" > 9'
+    written, old, _ = run_executor(layer, provider_type, first)
+    if not written or ' IN (' not in (old or ''):
+        report('OLD', f"{label} selected: {first}", f"first subset={old!r:.160}")
+        return
+    from filter_mate.core.tasks.executors.attribute_filter_executor import AttributeFilterExecutor
+    layer.setSubsetString(old)
+    layer.selectByIds([2, 5])  # the feature ids are the ids here (GeoPackage fid, PostgreSQL integer key)
+    key = 'id' if provider_type == 'postgresql' else 'fid'
+    executor = AttributeFilterExecutor(layer=layer, provider_type=provider_type, primary_key=key, old_subset=old,
+                                       combine_operator=None)
+    processed, _ = executor.process_qgis_expression(text)
+    written = processed in executor.native_origins
+    accepted = bool(processed) and executor.apply_filter(processed)
+    got = keys(layer) if accepted else None
+    layer.removeSelection()
+    layer.setSubsetString('')
+    expected = sorted({2, 5} | {row[0] for row in ROWS if row[1] is not None and row[1] > 9})
+    if provider_type == 'postgresql':
+        status = 'FAIL' if written else 'PASS'
+    else:
+        status = 'PASS' if written and got == expected else 'FAIL'
+    report(status, f"{label} selected replace: {first} -> {text}",
+           f"subset={processed!r:.160} expected={expected} got={got} written={written}")
 
 
 def refilter_path(label, layer, provider_type, pairs, errors_drop=False):

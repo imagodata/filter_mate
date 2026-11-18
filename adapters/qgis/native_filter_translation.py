@@ -40,6 +40,9 @@ APPLIED_DIALECTS = (SQLITE, OGR_SQL, POSTGRESQL)
 # conversion is kept.
 HYBRID_MAX_FEATURES = 1_000_000
 
+# Functions of QGIS that read the feature id (or the selection, made of feature ids)
+_FEATURE_ID_FUNCTIONS = frozenset(('$id', 'is_selected', 'num_selected', 'get_feature_by_id'))
+
 # OGR storages whose attribute filter is run by SQLite, and by the OGR SQL engine.
 # Any other storage (a database or a service opened through OGR) is not translated.
 _SQLITE_STORAGES = ('gpkg', 'sqlite')
@@ -490,9 +493,13 @@ def _check_copy_reads_like_layer(layer, copy, names, whole, dialect):
     at its index among the layer's fields, which the copy's must give back
     (a joined or virtual field is not in the copy). Its geometry must be of
     the layer's type (a URI read back without its geometry column would give
-    none). ``$id`` of a PostgreSQL layer is a number its provider gives each
-    feature (the key itself only for one integer column): it may be another
-    one in the copy.
+    none). The feature id of a PostgreSQL layer is a number its provider gives
+    each feature (the key itself only for one integer column): it may be
+    another one in the copy, so nothing that reads it (``$id``, ``@id``,
+    ``is_selected()``, ``get_feature_by_id``...) is evaluated there. A
+    GeoPackage or SQLite file gives the same ids to the copy: ``is_selected()``
+    reads the selection of the layer of the context, the layer itself
+    (measured, check_native_translation.selected_path).
     """
     from qgis.core import QgsFeatureRequest
     if whole.needsGeometry() and copy.wkbType() != layer.wkbType():
@@ -506,8 +513,9 @@ def _check_copy_reads_like_layer(layer, copy, names, whole, dialect):
             index = layer_fields.indexFromName(name)
             if index < 0 or copy_fields.indexFromName(name) != index:
                 raise Unsupported('The field {} is not read in the source as in the layer'.format(name))
-    if dialect == POSTGRESQL and ('$id' in whole.referencedFunctions() or 'id' in whole.referencedVariables()):
-        raise Unsupported('$id of a PostgreSQL layer is not its key: another number in a copy')
+    if dialect == POSTGRESQL and (set(whole.referencedFunctions()) & _FEATURE_ID_FUNCTIONS
+                                  or 'id' in whole.referencedVariables()):
+        raise Unsupported('The feature id of a PostgreSQL layer is not its key: another number in a copy')
 
 
 __all__ = ['constant_variables', 'field_types', 'native_dialect_for_layer', 'native_geometry', 'native_subset',
