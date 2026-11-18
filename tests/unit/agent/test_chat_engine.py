@@ -678,3 +678,21 @@ def test_a_tool_dropped_at_a_compaction_is_held_again():
     assert released == ["zoom"]
     answer = executor.execute(call("zoom")).content
     assert 'call use_tools with "zoom" first' in answer and '"cartography"' in answer
+
+
+def test_a_context_that_fails_does_not_leave_the_engine_busy(setup):
+    """The context is a deferred call run inside send() once the engine is busy: its error refused every later request."""
+    engine, session, transport, listener, _checkpoint, _seen = setup
+    assert engine.send("first")
+    transport.emit(turn(STOP_END, TextPart("ok")))
+    before = list(session._messages)
+
+    def broken(full):
+        raise RuntimeError("project unreadable")
+
+    assert engine.send("second", broken) is True
+    assert not engine.busy
+    assert listener.outcomes[-1].status == "failed" and listener.outcomes[-1].kept_steps == 0
+    assert session._messages == before  # nothing of the failed request, and the earlier one stays
+    assert engine.send("third")  # the next request goes
+    assert engine.busy and len(transport.starts) == 2

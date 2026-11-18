@@ -674,6 +674,20 @@ def test_a_recipe_runs_with_every_tool_not_the_lighter_set_of_a_local_model(ctrl
     assert asked == [False]
 
 
+@pytest.mark.parametrize("name", ["turn_off_agent_options", "turn_on_agent_options", "ask_user"])
+def test_a_recipe_never_runs_a_tool_of_the_chat_alone(ctrl_module, controller, monkeypatch, name):
+    """A recipe of a received project turned the sources of the agent off, without a question."""
+    ran = []
+    _recipe_tools(monkeypatch, controller, ran, names=("apply_filter", name))
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": {"layer_name": "A", "expression": "1"}, "label": "one"},
+        {"tool": name, "arguments": {"sources": ["datagouv"]}, "label": "two"}]}]
+    controller.panel.reset_mock()
+    assert controller.run_recipe("r1") is False
+    assert ran == ["apply_filter"]  # the second step is not run
+    assert "Step 2 needs a tool" in controller.panel.add_note.call_args[0][0]
+
+
 def test_a_panel_that_fails_at_the_start_of_a_recipe_is_not_left_busy(ctrl_module, controller, monkeypatch):
     ran = []
     _recipe_tools(monkeypatch, controller, ran)
@@ -965,3 +979,191 @@ def test_other_tools_under_the_same_provider_keep_the_thread(controller):
     controller._reset_view()  # another provider: nothing of it goes on
     assert controller.panel.clear_thread.called and not controller._policy.granted
     assert controller._recap_from == len(controller._transcript)
+
+
+# --- the context of a request taken out of the conversation is sent again ----------------------------------------
+
+ROW = {"layer_id": "c1", "name": "communes", "layer_kind": "vector", "feature_count": 10,
+       "active_filter_expression": ""}
+
+
+def _sent_texts(engine):
+    """The text of every message of the user the model would be sent now."""
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    return [message.text for message in engine._session._messages if message.role == messages.ROLE_USER]
+
+
+def _news(engine):
+    """How many messages of the user carry the change of the project, and the protected layer."""
+    texts = _sent_texts(engine)
+    return (sum("communes" in text and "Changed in QGIS" in text for text in texts),
+            sum("Communes" in text for text in texts))
+
+
+@pytest.fixture
+def news(ctrl_module, controller):
+    """A first request done; then the user filtered a layer and protected another: news for the next request."""
+    state = {"rows": [dict(ROW)]}
+    controller._read_project = lambda: (state["rows"], [], {})
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("first")
+    transport.starts[-1](_end_turn(ctrl_module))
+    state["rows"] = [dict(ROW, active_filter_expression='"dept" = \'31\'')]
+    controller._protection.names = lambda: ["Communes"]
+    return engine, transport
+
+
+def test_stop_before_any_step_sends_the_news_of_the_request_again(controller, news):
+    engine, _transport = news
+    controller._on_send("second")  # carries the news
+    assert _news(engine) == (1, 1)
+    engine.cancel()  # nothing ran: the request leaves the conversation with its news
+    assert _news(engine) == (0, 0)
+    controller._on_send("third")
+    assert _news(engine) == (1, 1), "the model never learned of the change"
+
+
+def test_a_refusal_before_any_step_sends_the_news_of_the_request_again(ctrl_module, controller, news):
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    engine, transport = news
+    controller._on_send("second")
+    transport.starts[-1](messages.TurnComplete(messages.Message(messages.ROLE_ASSISTANT, ()), messages.STOP_REFUSAL))
+    assert _news(engine) == (0, 0)
+    controller._on_send("third")
+    assert _news(engine) == (1, 1), "the model never learned of the change"
+
+
+def test_stop_after_a_step_keeps_the_news_it_carried(ctrl_module, controller, news):
+    engine, transport = news
+    controller._on_send("second")
+    transport.starts[-1](_tool_turn(ctrl_module))
+    engine.cancel()  # a step ran: the request stays in the conversation, with its news
+    assert _news(engine) == (1, 1)
+    controller._on_send("third")
+    assert _news(engine) == (1, 1)  # told once, not again
+
+
+@pytest.mark.parametrize("how", ["stop", "refusal", "failure"])
+def test_a_removal_is_told_after_a_request_that_left_the_conversation(ctrl_module, controller, monkeypatch, how):
+    """Level back to standard and protection removed, then a request taken out: the history still holds the advisor
+    note and the protected layer of the first request, and the next request must say both are gone."""
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    monkeypatch.setattr(SETTINGS, "autonomy", "advisor")
+    controller._read_project = lambda: ([dict(ROW)], [], {})  # a project that can be read: deltas, not full states
+    controller._protection.names = lambda: ["Communes"]
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("first")
+    transport.starts[-1](_end_turn(ctrl_module))
+    monkeypatch.setattr(SETTINGS, "autonomy", "standard")
+    controller._protection.names = lambda: []
+    controller._on_send("second")
+    assert any("standard again" in text for text in _sent_texts(engine))
+    if how == "stop":
+        engine.cancel()
+    elif how == "refusal":
+        transport.starts[-1](messages.TurnComplete(messages.Message(messages.ROLE_ASSISTANT, ()),
+                                                   messages.STOP_REFUSAL))
+    else:
+        transport.starts[-1](_failure(ctrl_module))
+    assert not any("standard again" in text for text in _sent_texts(engine))
+    controller._on_send("third")
+    last = _sent_texts(engine)[-1]
+    assert "standard again" in last and "No layer is protected" in last
+
+
+def test_a_request_taken_out_after_a_compaction_sends_everything_again(ctrl_module, controller):
+    """A compaction during the request may have taken the context of the earlier ones: the next request is full."""
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("first")
+    transport.starts[-1](_end_turn(ctrl_module))
+    controller._on_send("second")
+    engine._session.rewritten = True  # as add_user_text sets it when it summed the history up
+    engine.cancel()
+    assert controller._context_memory.empty
+
+
+def test_the_recap_of_a_thread_taken_up_again_survives_a_refusal(ctrl_module, controller):
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._recap = "Earlier in this thread: ..."
+    controller._on_send("first")
+    assert controller._recap == ""  # sent with the request
+    transport.starts[-1](messages.TurnComplete(messages.Message(messages.ROLE_ASSISTANT, ()), messages.STOP_REFUSAL))
+    assert controller._recap == "Earlier in this thread: ..."  # the message that carried it left the conversation
+    controller._on_send("again")
+    assert "Earlier in this thread" in _sent_texts(engine)[-1]
+
+
+@pytest.mark.parametrize("how", ["stop", "failure"])
+def test_the_cards_answered_come_back_when_the_request_left_the_conversation(ctrl_module, controller, how):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._settings_outcomes = ["declined: theme"]
+    controller._on_send("first")
+    assert controller._settings_outcomes == [] and "declined: theme" in _sent_texts(engine)[-1]
+    if how == "stop":
+        engine.cancel()
+    else:
+        transport.starts[-1](_failure(ctrl_module))
+    assert controller._settings_outcomes == ["declined: theme"]
+    controller._on_send("second")
+    assert "declined: theme" in _sent_texts(engine)[-1]
+
+
+def test_the_cards_answered_stay_said_when_the_request_stays(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._settings_outcomes = ["declined: theme"]
+    controller._on_send("first")
+    transport.starts[-1](_end_turn(ctrl_module))
+    assert controller._settings_outcomes == []
+
+
+@pytest.mark.parametrize("steps, kind", [(False, "stream"), (True, "bad_request")])
+def test_a_failure_that_took_the_request_out_sends_its_news_again(ctrl_module, controller, news, steps, kind):
+    """No step kept, or the server refused what the history holds (the request is forgotten whole): the news of the
+    project that the request carried are told again, and the state seen does not move."""
+    engine, transport = news
+    controller._on_send("second")
+    if steps:
+        transport.starts[-1](_tool_turn(ctrl_module))
+    transport.starts[-1](_failure(ctrl_module, kind))
+    assert _news(engine) == (0, 0)
+    controller._on_send("third")
+    assert _news(engine) == (1, 1), "the model never learned of the change"
+
+
+# --- the setup reads each switch as the plugin does ---------------------------------------------------------------
+
+READ_VALUES = [1, 0, None, "maybe", "true", "false", True, False, "", " Off ", 0.0, 2, "yes"]
+
+
+@pytest.mark.parametrize("written", READ_VALUES, ids=repr)
+def test_the_setup_reads_each_switch_as_the_plugin_does(ctrl_module, monkeypatch, written):
+    """Each kind of switch of the setup, run on the same value as the reader the plugin uses for it: the sections
+    (section_enabled), AGENT (agent_enabled), the others (_get_option_bool)."""
+    from core.agent import setup_wizard as wizard
+    from ui.layout.dock_chrome import section_enabled
+    for name in (".core.optimization", ".core.optimization.config_provider"):
+        _module(monkeypatch, name, get_optimization_thresholds=MagicMock())
+    _module(monkeypatch, ".config")
+    config = _load(monkeypatch, "config.config", "config/config.py")
+
+    def config_of(path, value):
+        _app, _options, section, key = path.split(".")
+        return {"APP": {"OPTIONS": {section: {key: {"value": value}}}}}
+
+    for path in (wizard.FILTERING_ON, wizard.EXPORTING_ON):
+        assert wizard.read_switch(path, written) is section_enabled(config_of(path, written), path.split(".")[2].lower()), path
+    assert wizard.read_switch(wizard.AGENT_ON, written) is ctrl_module.agent_enabled(config_of(wizard.AGENT_ON, written))
+    # Not in config.json at all: the readers' default (section_enabled, agent_enabled, _get_option_bool)
+    assert wizard.read_switch(wizard.AGENT_ON) is ctrl_module.agent_enabled({}) is True
+    assert wizard.read_switch(wizard.FILTERING_ON) is section_enabled({}, "filtering") is True
+    for path in sorted(wizard.SWITCHES - wizard.SECTION_READ - {wizard.AGENT_ON}):
+        default = path not in wizard._UNSET_OFF
+        assert wizard.read_switch(path, written) is config._get_option_bool(written, default), path
+        assert wizard.read_switch(path, None) is default, path

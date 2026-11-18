@@ -148,6 +148,11 @@ class ChatEngine:
         return self._session.usage
 
     @property
+    def rewritten(self) -> bool:
+        """The history was rewritten (summed up, trimmed) when the last request began."""
+        return bool(getattr(self._session, "rewritten", True))
+
+    @property
     def summarized(self) -> int:
         """Requests of this conversation summed up so far, to keep what is sent short."""
         return self._session.summarized
@@ -159,7 +164,15 @@ class ChatEngine:
         self._busy, self._cancelled = True, False
         self._tries = 0
         self._generation += 1
-        self._session.add_user_text(text, context)
+        try:
+            self._session.add_user_text(text, context)
+        except Exception:
+            # The context is computed in there, from the project: an error must not leave the engine busy, which
+            # would refuse every later request. Nothing was added to the conversation (the message goes in last), so
+            # it ends as a request that could not be sent, and the interface gives it back.
+            logger.exception("Agent request could not be prepared")
+            self._finish(ChatOutcome(OUTCOME_FAILED, error=ProviderError(ERROR_STREAM, "The request could not be sent.")))
+            return True
         dropped = tuple(getattr(self._session, "dropped", ()) or ())
         if dropped:
             self._executor.withdraw(dropped)

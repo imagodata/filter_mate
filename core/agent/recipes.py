@@ -48,6 +48,11 @@ NOT_KEPT = frozenset({
     "remove_widget", "save_recipe", "remove_recipe",
     # The settings of FilterMate belong to this machine, not to a project: a recipe from another .qgz never sets them.
     "change_settings", "export_settings_profile", "apply_settings_profile",
+    # The other tools of the chat alone (ToolSpec.chat_only): the options of the agent (a recipe from a received project
+    # must not turn its sources off or on), its questions and settings links, the databases the user ticked.
+    # tests/unit/agent/test_recipes.py checks that every chat_only tool of the catalog is here.
+    "agent_options", "turn_on_agent_options", "turn_off_agent_options", "ask_user", "show_settings_link",
+    "list_database_tables", "add_database_table",
 })
 CONNECTOR_PREFIX = "mcp_"
 
@@ -147,6 +152,11 @@ def _too_deep(value: Any, limit: int = MAX_ARGUMENT_DEPTH) -> bool:
             return True
         pending.extend((child, depth + 1) for child in children)
     return False
+
+
+def _never_kept(name: Any) -> bool:
+    """A tool no recipe holds (``NOT_KEPT``, the tools of the connectors)."""
+    return isinstance(name, str) and (name in NOT_KEPT or name.startswith(CONNECTOR_PREFIX))
 
 
 def _clean_step(step: Any) -> Optional[Dict[str, Any]]:
@@ -283,6 +293,10 @@ def _clean(recipe: Any) -> Optional[Dict[str, Any]]:
     if any(isinstance(item, dict) and _too_deep(item.get("arguments")) for item in recipe["steps"][:MAX_STEPS]):
         # 2026-11-13: 1,500 levels in a forged recipe raised RecursionError in the run, which left the panel busy.
         # The whole recipe, not the step: without one of its steps a recipe does something else.
+        return None
+    if any(isinstance(item, dict) and _never_kept(item.get("tool")) for item in recipe["steps"][:MAX_STEPS]):
+        # 2026-11-18: no recipe made here holds such a step (``kept`` refuses it when a request is saved). One in a
+        # file comes from another hand: the whole recipe, since the others would run without it and do something else.
         return None
     steps = [step for step in (_clean_step(item) for item in recipe["steps"][:MAX_STEPS]) if step is not None]
     if not name or not steps:

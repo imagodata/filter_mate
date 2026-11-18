@@ -929,10 +929,13 @@ class AgentChatController(QObject):
             self._say(_tr("The conversation goes on with {}; it is not told what came before.").format(provider.label))
         elif wanted.enabled_sources != values.enabled_sources:
             self._restart_engine()  # other tools: another conversation with the model, under the same thread
-        if wanted.mcp_enabled != values.mcp_enabled:
+        server_switched = wanted.mcp_enabled != values.mcp_enabled
+        if server_switched or wanted.enabled_sources != values.enabled_sources:
+            # A source unticked must leave the tools the server offers to other applications at once, as it does
+            # when the settings box is saved.
             self._sync_mcp()
             mcp = getattr(self, "_mcp", None)
-            if wanted.mcp_enabled and mcp is not None and getattr(mcp, "error", ""):
+            if server_switched and wanted.mcp_enabled and mcp is not None and getattr(mcp, "error", ""):
                 save_settings(replace(wanted, mcp_enabled=False))  # it did not start: the box says so
         self._refresh_ready()
         return ""
@@ -1605,6 +1608,9 @@ class AgentChatController(QObject):
         values = load_settings()
         # No model runs a recipe: the lighter set of a small local model would stop its steps (2026-11-13)
         tools, handlers, _active = self.tools_and_handlers(values, for_chat=False)
+        # A recipe never runs a tool of the chat alone (the options of the agent, its questions): the recipes of a
+        # project made by someone else must not turn its sources off or on. A step that names one stops the run.
+        tools = [tool for tool in tools if not tool.chat_only]
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         available = {tool.name for tool in tools}
         self._policy.set_level(values.autonomy)
@@ -2266,6 +2272,7 @@ class AgentChatController(QObject):
         # conversation with itself, so it is kept for the next one (_recap_sent).
         recap, self._recap = getattr(self, "_recap", ""), ""
         self._recap_sent = recap
+        self._outcomes_sent = []
         self._engine.send(text, lambda full: "\n\n".join(part for part in (self._project_context(full), recap) if part))
         self._show_undo_state()  # Undo of the action bar and Ctrl+Z wait for the end of the turn
         if self._engine.summarized > summarized:
@@ -2365,6 +2372,7 @@ class AgentChatController(QObject):
         except Exception:  # the request goes without them
             protected = []
         outcomes, self._settings_outcomes = self._settings_outcomes, []  # the cards answered since the last request
+        self._outcomes_sent = outcomes  # given back if the request is taken out of the conversation
         return compose(self._context_memory.delta(ContextParts(
             summary=summary, notes=notes, widgets=widgets_part(widgets), recipes=recipes,
             protected=protected_part(protected), decided=decided_part(outcomes), level=level_note(self._policy.level)),
@@ -3019,8 +3027,14 @@ class AgentChatController(QObject):
             listed, one_line(str(reason), 300))
 
     def on_finished(self, outcome: ChatOutcome) -> None:
-        # What the request carried is known to the model, unless it failed before reaching it (lot 3).
-        if outcome.status == OUTCOME_FAILED or self._abandoned:
+        # What the request carried is known to the model, unless it failed before reaching it or was taken out of
+        # the conversation with its context (lot 3).
+        dropped = self._request_dropped(outcome)
+        if self._abandoned:
+            self._context_memory.forget()
+        elif dropped:
+            self._take_back_request()
+        elif outcome.status == OUTCOME_FAILED:
             self._context_memory.forget()
         else:
             self._context_memory.sent()
@@ -3049,8 +3063,10 @@ class AgentChatController(QObject):
         self._save_transcript()
         self._refresh_history()
         # What a request that broke off did is in the conversation, with a note saying it stopped there
-        # (AgentSession.interrupt_request): the project as it is now is no news to the model.
-        self._remember_project()
+        # (AgentSession.interrupt_request): the project as it is now is no news to the model. A request taken out
+        # of the conversation took its news with it: the next one tells them again.
+        if not dropped:
+            self._remember_project()
         kept = outcome.kept_steps
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
             message = self._error_message(outcome.error)
@@ -3083,6 +3099,30 @@ class AgentChatController(QObject):
             self.panel.show_error(*self._stop_words(outcome.reason, kept))
             return
         self._say(self._usage_words())  # the cards of the turn say what changed (mockup)
+
+    @staticmethod
+    def _request_dropped(outcome: ChatOutcome) -> bool:
+        """Whether the request left the conversation with the message that carried its context
+        (``AgentSession.interrupt_request``): Stop, a refusal or a failure before any step that changed something,
+        and a request the server refused for what it holds (``ChatEngine._interrupt``), whatever it had done."""
+        if outcome.status == OUTCOME_FAILED:
+            return not outcome.kept_steps or (outcome.error is not None and outcome.error.kind == ERROR_BAD_REQUEST)
+        broke_off = outcome.status == OUTCOME_CANCELLED or (
+            outcome.status == OUTCOME_STOPPED and outcome.reason == REASON_REFUSED)
+        return broke_off and not outcome.kept_steps
+
+    def _take_back_request(self) -> None:
+        """What a request taken out of the conversation carried goes to the next one: the changes of the project (the
+        state seen is not moved), the removals and the level, the cards the user answered, the recap of a thread
+        taken up again."""
+        engine = getattr(self, "_engine", None)
+        if engine is not None and not getattr(engine, "rewritten", True):
+            self._context_memory.drop()  # what the earlier requests sent is still in the history
+        else:  # a compaction during the request may have taken their context away
+            self._context_memory.forget()
+        self._settings_outcomes = list(getattr(self, "_outcomes_sent", ())) + self._settings_outcomes
+        self._outcomes_sent = []
+        self._recap = getattr(self, "_recap_sent", "") or getattr(self, "_recap", "")
 
     def _usage_words(self) -> str:
         """What the request weighed, for the line under the thread: the user pays for it, or waits for it."""

@@ -97,6 +97,30 @@ def test_the_mcp_server_follows(host):
     host._restart_engine.assert_not_called()
 
 
+def test_a_source_ticked_or_unticked_reaches_the_mcp_server(host):
+    host.store["values"] = agent_settings.AgentSettings(preset="anthropic", model="m", consent=True, authcfg="key1",
+                                                        enabled_sources=("datagouv", "osm_tiles"), mcp_enabled=True)
+    Controller.apply_agent_options(host, Change(sources_off=("osm_tiles",)))
+    assert host.store["values"].enabled_sources == ("datagouv",)
+    host._sync_mcp.assert_called_once()  # the tools the other applications see follow the sources
+    host._sync_mcp.reset_mock()
+    Controller.apply_agent_options(host, Change(sources_on=("osm_tiles",)))
+    host._sync_mcp.assert_called_once()
+
+
+def test_a_change_that_touches_neither_sources_nor_server_leaves_the_mcp_server(host):
+    Controller.apply_agent_options(host, Change(sources_on=("datagouv",)))  # already on
+    host._sync_mcp.assert_not_called()
+
+
+def test_a_server_that_fails_after_a_source_change_stays_ticked(host):
+    host.store["values"] = agent_settings.AgentSettings(preset="anthropic", model="m", consent=True, authcfg="key1",
+                                                        enabled_sources=("datagouv",), mcp_enabled=True)
+    host._mcp = SimpleNamespace(error="tools unavailable")
+    Controller.apply_agent_options(host, Change(sources_off=("datagouv",)))
+    assert host.store["values"].mcp_enabled is True  # the user did not ask for the server to go
+
+
 def test_a_pending_change_applies_over_the_current_settings(host):
     host._pending_options.append(Change(sources_off=("datagouv",)))
     host.store["values"] = agent_settings.AgentSettings(  # the user ticked another meanwhile, from the menu

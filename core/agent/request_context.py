@@ -49,7 +49,9 @@ def decided_part(outcomes: Sequence[str]) -> str:
 REMOVED = {"notes": "The notes of this project were all removed.",
            "widgets": "The widgets of the panel were all removed.",
            "recipes": "No recipe is kept in this project any more.",
-           "protected": "No layer is protected from the agent any more."}
+           "protected": "No layer is protected from the agent any more.",
+           "level": ("Level of autonomy chosen by the user: standard again. The tools that change the project run as "
+                     "usual, so act when asked instead of only describing the steps; the user confirms what needs it.")}
 # Sent again only when they changed; the state of the project (summary) and the settings decided are the caller's.
 _REPEATED = ("notes", "widgets", "recipes", "protected", "level")
 
@@ -83,6 +85,11 @@ class ContextMemory:
         """The request went to the model: what it carried is known from now on."""
         if self._pending is not None:
             self._sent, self._pending = self._pending, None
+
+    def drop(self) -> None:
+        """The request was taken out of the conversation with its context: what it was to send was never said. What
+        the earlier requests sent stays known, and the next one tells what changed since (the removals too)."""
+        self._pending = None
 
     def forget(self) -> None:
         """Another conversation with the model: it knows nothing yet."""

@@ -129,6 +129,40 @@ def test_same_number_and_switch():
     assert not wizard._same(True, 1)
 
 
+def _answer_as_ticked(values):
+    answers, done = wizard.Answers(), []
+    step = wizard.next_step(done, values, answers)
+    while step is not None:
+        questions = wizard.step_questions(step, values, wizard.ProjectFacts(), answers)
+        answers.record(step, {ask.key: [choice.key for choice in ask.choices if choice.selected]
+                              for ask in questions})
+        done.append(step)
+        step = wizard.next_step(done, values, answers)
+    return answers
+
+
+VALUES = [1, 0, None, "maybe", "true", "false", True, False, "", " Off ", 0.0, 2, "yes"]
+
+
+@pytest.mark.parametrize("written", VALUES, ids=repr)
+def test_answering_without_touching_changes_nothing_whatever_config_json_holds(values, written):
+    """config.json edited by hand: a switch read as on by the plugin is ticked, one read as off is not, and the
+    answers as ticked write nothing."""
+    for path in wizard.SWITCHES:
+        values[path] = written
+    answers = _answer_as_ticked(values)
+    assert wizard.changes(values, answers) == []
+    for path, name in ((wizard.FILTERING_ON, "filtering"), (wizard.EXPORTING_ON, "exporting"),
+                       (wizard.AGENT_ON, "agent")):
+        assert (name in answers.get(wizard.FEATURES, "sections")) is wizard.read_switch(path, written)
+
+
+def test_a_section_written_as_false_text_is_off(values):
+    values[wizard.EXPORTING_ON] = "false"
+    assert wizard.kept_sections(values, wizard.Answers()) == {"filtering", "agent"}
+    assert wizard.changes(values, _answer_as_ticked(values)) == []
+
+
 # --- where the sections go: asked with the buttons, moved by the panel, never a setting ------------------------------
 
 
@@ -204,6 +238,12 @@ def test_a_configuration_without_the_setting_is_not_asked(values):
                                                                            wizard.SECTION_HEIGHT)}
     layout = wizard.step_questions(wizard.LAYOUT, older, wizard.ProjectFacts(), wizard.Answers())
     assert [ask.key for ask in layout] == ["action_bar"]
+
+
+def test_answering_without_touching_changes_nothing_when_config_json_holds_no_switch(values):
+    for path in wizard.SWITCHES:
+        values.pop(path, None)
+    assert wizard.changes(values, _answer_as_ticked(values)) == []
 
 
 # --- how the rows of FILTERING / EXPORTING use the height: packed at the top (the default) or spread ---------------
