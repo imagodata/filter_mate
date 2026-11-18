@@ -123,6 +123,28 @@ def test_a_turn_discarded_with_its_project_is_never_recorded(checkpoint_module):
     assert not history.can_undo(checkpoint_module.HISTORY_KEY)
 
 
+def test_a_recorder_of_the_turn_that_fails_refuses_the_call_but_not_the_one_of_the_step(monkeypatch, checkpoint_module):
+    """A valid call whose capture fails is refused (begin raises): run, it would leave the undo silently incomplete.
+    The recorder of a step only serves "undo back to here": its failure keeps nothing from being made."""
+    class Failing(Effects):
+        def before_call(self, call, step=0):
+            raise ValueError("not serialisable")
+
+    class FailingStep(Effects):
+        def before_call(self, call, step=0):
+            if not self._turn:
+                raise ValueError("not serialisable")
+
+    holder = checkpoint_module._test_holder
+    holder.project = Project([Layer("roads")])
+    call = types.SimpleNamespace(name="set_layer_options", arguments={"layers": []})
+    monkeypatch.setattr(checkpoint_module, "EffectsRecorder", Failing)
+    with pytest.raises(ValueError):
+        checkpoint_module.TurnCheckpoint().begin(call)
+    monkeypatch.setattr(checkpoint_module, "EffectsRecorder", FailingStep)
+    checkpoint_module.TurnCheckpoint().begin(call)  # does not raise
+
+
 def test_a_turn_kept_open_is_recorded(checkpoint_module):
     holder, history = checkpoint_module._test_holder, checkpoint_module._test_service.history
     layer = Layer("roads")

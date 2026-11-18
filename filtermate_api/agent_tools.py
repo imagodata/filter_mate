@@ -368,6 +368,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 <= value <= top:
                 raise ToolFailure(f"{key} is a number from 0 to {top}")
             options[key] = float(value)
+        # A range read from the pixels of a raster is a value as much as a field: not told to a user who shares none.
+        options["share_values"] = share_values
         answer = asdict(accessor.set_layer_style(args["layer"], args["mode"], **options))
         # What the call did not set is not told: a hillshade has no ramp, a vector no band.
         return {key: value for key, value in answer.items()

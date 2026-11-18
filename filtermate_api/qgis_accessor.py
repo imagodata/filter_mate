@@ -315,7 +315,9 @@ class QGISFilterMateAccessor:
             crs_authid = _safe(crs_obj.authid, "") if crs_obj else ""
             if kind == "vector":
                 if count_module is not None:
+                    tables = count_module.table_seconds()
                     count = _safe(lambda: count_module.exact_feature_count(layer, deadline - time.monotonic()), None)
+                    deadline += count_module.table_seconds() - tables  # a whole table counted has a budget of its own
                     count = -1 if count is None else count
                 else:  # the plugin modules are not there: what QGIS says
                     count = _safe(layer.featureCount, -1)

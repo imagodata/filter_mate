@@ -101,8 +101,19 @@ def _project_saved() -> bool:
     return bool(QgsProject.instance().absoluteFilePath())
 
 
+def _is_listed_target(layer) -> bool:
+    """A raster or point cloud the panel lists among the targets of a vector layer (the rule of its list, options of
+    CROSS_FILTER included): the panel keeps them in ``layers_to_filter`` beside the vector layers."""
+    from ..qgis.point_cloud_capability import is_listed_coverage_target
+    return is_listed_coverage_target(layer, True)
+
+
 def _facts(project) -> List[LayerFacts]:
-    return [LayerFacts(layer_id, layer.name(), _is_vector(layer)) for layer_id, layer in project.mapLayers().items()]
+    facts = []
+    for layer_id, layer in project.mapLayers().items():
+        vector = _is_vector(layer)
+        facts.append(LayerFacts(layer_id, layer.name(), vector, not vector and _is_listed_target(layer)))
+    return facts
 
 
 def _found(reference: Any, facts: Sequence[LayerFacts]) -> LayerFacts:

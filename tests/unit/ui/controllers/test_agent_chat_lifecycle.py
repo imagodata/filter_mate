@@ -587,7 +587,7 @@ def test_the_summary_does_not_count_a_web_service(ctrl_module, controller, monke
     _module(monkeypatch, ".adapters.qgis.coverage_layers.snapshots", registry=lambda: {})
     _module(monkeypatch, ".adapters.qgis.source_capability_probe", counts_cheaply=lambda layer: not layer.remote)
     _module(monkeypatch, ".adapters.qgis.feature_count", COUNT_BUDGET=1.0,
-            exact_feature_count=lambda layer, budget: 7 if budget > 0 else None)
+            exact_feature_count=lambda layer, budget: 7 if budget > 0 else None, table_seconds=lambda: 0.0)
     rows = controller._layer_rows()
     assert wfs.counted == 0  # featureCount() of a web service can be a request to its server
     # The count of a filtered GeoPackage can be the count of its whole table (feature_count.py): not read.

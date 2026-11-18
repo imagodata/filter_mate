@@ -329,6 +329,45 @@ class TestWidth:
         _run(50)
         assert QtWidgets.QApplication.clipboard().text() == self.PATH
 
+    def test_a_copy_over_several_lines_is_cleaned_too(self, thread):
+        """A QLabel gives its breaks as U+2029 in selectedText() and as \\n on the clipboard: they must still match."""
+        text = f"Exported to\n{self.PATH}\n\nand to\n{self.PATH}"
+        thread.add_text(text)
+        thread.end_answer()
+        label = thread._items[-1].widget
+        label.setSelection(0, len(label.text()))
+        selected = label.selectedText()
+        assert thread_module.ZWSP in selected and "\u2029" in selected
+        QtWidgets.QApplication.clipboard().setText(selected.replace("\u2029", "\n"))
+        _run(50)
+        assert QtWidgets.QApplication.clipboard().text() == text
+
+    def test_a_copy_of_a_french_text_with_no_break_spaces_is_cleaned(self, thread):
+        """Qt copies a no-break space as a space, selectedText() keeps it: 'Chemin\\u00a0: C:\\...' never matched."""
+        from PyQt5 import QtTest
+        text = f"Chemin\u00a0: {self.PATH}"
+        thread.add_text(text)
+        thread.end_answer()
+        thread.show()
+        label = thread._items[-1].widget
+        label.setSelection(0, len(label.text()))
+        assert "\u00a0" in label.selectedText() and thread_module.ZWSP in label.selectedText()
+        QtWidgets.QApplication.clipboard().clear()
+        label.setFocus()
+        QtTest.QTest.keyClick(label, Qt.Key_C, Qt.ControlModifier)  # a real copy
+        _run(50)
+        assert QtWidgets.QApplication.clipboard().text() == f"Chemin : {self.PATH}"
+
+    def test_a_text_of_another_origin_keeps_its_zwsp(self, thread):
+        thread.add_text(self.PATH)
+        thread.end_answer()
+        label = thread._items[-1].widget
+        label.setSelection(0, 5)
+        other = "a\u200bb\nc"
+        QtWidgets.QApplication.clipboard().setText(other)
+        _run(50)
+        assert QtWidgets.QApplication.clipboard().text() == other
+
     def test_a_long_link_is_cut_with_an_ellipsis_and_keeps_its_text_in_its_tooltip(self, thread):
         label = "Open the settings of the exports of the layouts in the tab of the configuration, section Layouts"
         thread.add_link(label, lambda: None)

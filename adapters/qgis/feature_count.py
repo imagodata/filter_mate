@@ -33,9 +33,13 @@ feature (a selective filter on a big table goes through it all before the
 first one). A file locked by another connection is not waited for
 (``SQLITE_BUSY_TIMEOUT`` 0 for this thread; GDAL 3.2 has no such setting and
 waits 5 s, as for QGIS): no number. A layer without a
-subset keeps ``featureCount()``: on a table of 100 000 features or more
-without ``gpkg_ogr_contents`` that is ``MAX(fid) - MIN(fid) + 1``, more than
-the features when fids have holes. A subset QGIS may run as a query of its
+subset keeps ``featureCount()``, but for a table of 100 000 features or more
+without ``gpkg_ogr_contents``: that count is ``MAX(fid) - MIN(fid) + 1``, more
+than the features when fids have holes (deleted features), so the table is
+counted (``SELECT COUNT(*)``, read only, within a budget of its own,
+``TABLE_BUDGET``: the statement is interrupted past it) and there is no number past it; a count that failed is
+remembered while the file is as it is, so that a cold table does not freeze the interface at every call. A table being
+edited keeps the count of QGIS, which holds the edit buffer. A subset QGIS may run as a query of its
 own (starting with SELECT or WITH), made of several queries (UNION,
 INTERSECT, EXCEPT: what it reads depends on the columns asked) or drawn at
 random (``random()``: another answer at each reading) has no number.
@@ -43,12 +47,18 @@ random (``random()``: another answer at each reading) has no number.
 import logging
 import os
 import re
+import sqlite3
+import threading
 import time
 from collections import OrderedDict
+from contextlib import closing
 from typing import Any, Optional, Tuple
+from urllib.request import pathname2url
 
 logger = logging.getLogger(__name__)
 
+TABLE_BUDGET = 0.25  # seconds of their own that counting a whole table may take, apart from COUNT_BUDGET
+APPROX_FROM = 100_000  # rows of a table from which QGIS stops counting it (without gpkg_ogr_contents, by its fids)
 COUNT_BUDGET = 1.0  # seconds of the calling thread one count may take
 CLOCK_EVERY = 64  # features read between two looks at the clock (every feature costs no more: measured)
 CACHE_SIZE = 64
@@ -78,9 +88,13 @@ def exact_feature_count(layer: Any, budget: Optional[float] = None) -> Optional[
     (``source_capability_probe.counts_cheaply``).
     """
     try:
-        subset = (layer.subsetString() or '') if _is_geopackage(layer) else ''
+        geopackage = _is_geopackage(layer)
+        subset = (layer.subsetString() or '') if geopackage else ''
         if not subset.strip():
-            return _known(layer.featureCount())
+            count = _known(layer.featureCount())
+            if geopackage and count is not None and count >= APPROX_FROM:
+                return _whole_table(layer, count)
+            return count
         if layer.isModified():  # the file does not hold the edits yet
             return None
         path, table, index = source_parts(layer.source())
@@ -98,6 +112,125 @@ def exact_feature_count(layer: Any, budget: Optional[float] = None) -> Optional[
         while len(_CACHE) > CACHE_SIZE:
             _CACHE.popitem(last=False)
     return count
+
+
+_FAILED = object()  # in the cache: this table was tried in this state of its file and could not be counted
+_table_seconds = 0.0  # what counting whole tables has taken, for the callers that share one budget between layers
+
+
+def table_seconds() -> float:
+    """Seconds spent so far counting whole tables (``_whole_table``). A caller that lists many layers within one
+    budget adds the difference to its deadline: a table counted for the first time must not eat what the filtered
+    layers listed after it are given."""
+    return _table_seconds
+
+
+def _whole_table(layer: Any, count: int) -> Optional[int]:
+    """The features of a GeoPackage table with no subset, ``count`` being what ``featureCount()`` says of it.
+
+    From ``APPROX_FROM`` rows QGIS does not count a table without a row for it in ``gpkg_ogr_contents``: it answers
+    ``MAX(fid) - MIN(fid) + 1``, too many when fids have holes. ``count`` is kept when the table has its row of counts
+    (GDAL keeps it right), when the layer is being edited (it holds the edit buffer, which the file does not) or when
+    it is not a table this module reads (a layer of one geometry type out of a mixed table, QGIS counts it by
+    reading); else the table is counted, within ``TABLE_BUDGET`` seconds of its own. A count that fails, or is cut
+    by that budget, is remembered for the file as it is (a cold table of a million rows would otherwise freeze the
+    interface for the budget at every call): None until the file changes.
+    """
+    global _table_seconds
+    try:
+        if layer.isModified():  # the file does not hold the edits yet: QGIS counts them in
+            return count
+        path, table, index = source_parts(layer.source())
+    except (RuntimeError, AttributeError):  # a layer deleted meanwhile
+        return None
+    if path is None:
+        return count
+    key = _cache_key(path, table, index, '')
+    if key is not None and key in _CACHE:
+        _CACHE.move_to_end(key)
+        found = _CACHE[key]
+        return None if found is _FAILED else found
+    started = _clock()
+    try:
+        counted = _count_rows(path, table, index, TABLE_BUDGET)
+    finally:
+        _table_seconds += _clock() - started
+    if counted is _HAS_CONTENTS:
+        return count
+    if counted is _NOT_TRIED:
+        return None
+    if key is not None:
+        _CACHE[key] = _FAILED if counted is None else counted
+        while len(_CACHE) > CACHE_SIZE:
+            _CACHE.popitem(last=False)
+    return counted
+
+
+_HAS_CONTENTS = object()  # the row of counts of GDAL for this table is there: what QGIS reads from it is right
+_NOT_TRIED = object()  # nothing was read (no time, no name): nothing to remember
+
+
+def _count_rows(path: str, table: str, index: int, budget: float) -> Any:
+    """``SELECT COUNT(*)`` of a table of the GeoPackage at ``path``, read only, stopped past ``budget`` seconds; None
+    then or on an error, ``_HAS_CONTENTS`` when ``gpkg_ogr_contents`` holds a count for this table, ``_NOT_TRIED``
+    when nothing could be read."""
+    if budget <= 0:
+        return _NOT_TRIED
+    deadline = _clock() + budget
+    if not table:
+        table = _table_name(path, index)
+        if not table:
+            return _NOT_TRIED
+    try:
+        # Not waited for when another connection locks the file (timeout 0), as for the reading of a subset.
+        with closing(sqlite3.connect(f"file:{pathname2url(path)}?mode=ro", uri=True, timeout=0)) as database:
+            # COUNT(*) is one step of SQLite that a progress handler cannot cut: the statement is interrupted from
+            # another thread once the budget is spent.
+            timer = threading.Timer(max(deadline - _clock(), 0.0), database.interrupt)
+            timer.daemon = True
+            timer.start()
+            try:
+                if _has_count(database, table):
+                    return _HAS_CONTENTS
+                row = database.execute('SELECT COUNT(*) FROM "%s"' % table.replace('"', '""')).fetchone()
+            finally:
+                timer.cancel()
+                timer.join()  # before the connection is closed: an interrupt of a closed one raises
+    except sqlite3.Error:  # interrupted past the budget, locked, no such table, not a database
+        return None
+    return row[0] if row and isinstance(row[0], int) else None
+
+
+def _has_count(database: Any, table: str) -> bool:
+    """Whether ``gpkg_ogr_contents`` holds a number of features for ``table``: only then does QGIS read it from there
+    (no row, or a NULL one, and it falls back on its fids)."""
+    try:
+        row = database.execute("SELECT feature_count FROM gpkg_ogr_contents WHERE table_name = ? COLLATE NOCASE",
+                               (table,)).fetchone()
+    except sqlite3.OperationalError as exc:
+        if 'interrupted' in str(exc):
+            raise
+        return False  # no such table: a file not written by GDAL
+    return bool(row) and row[0] is not None
+
+
+def _table_name(path: str, index: int) -> str:
+    """The name of the layer of the GeoPackage at ``path`` that QGIS opens when its source names none."""
+    try:
+        from osgeo import gdal
+    except ImportError:
+        return ''
+    gdal.PushErrorHandler('CPLQuietErrorHandler')
+    dataset = layer = None
+    try:
+        dataset = gdal.OpenEx(path, gdal.OF_VECTOR | gdal.OF_READONLY, allowed_drivers=['GPKG'])
+        layer = None if dataset is None else dataset.GetLayer(index)
+        return layer.GetName() if layer is not None else ''
+    except RuntimeError:  # GDAL exceptions turned on by someone else
+        return ''
+    finally:
+        layer = dataset = None
+        gdal.PopErrorHandler()
 
 
 def _counted_table(layer: Any) -> Optional[Tuple[str, str, int, str]]:

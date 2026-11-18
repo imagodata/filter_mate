@@ -320,6 +320,8 @@ class StyleResult:
     azimuth: Optional[float] = None
     altitude: Optional[float] = None
     z_factor: Optional[float] = None
+    # What the model must know about the answer (a range left out because the user shares no values).
+    note: str = ""
 
 
 @dataclass(frozen=True)
