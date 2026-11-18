@@ -85,6 +85,7 @@
         Each story starts with a question asked in a technical department, a local authority or a consultancy, then translates it into
         FilterMate settings, step by step. The first twelve stories show QGIS recordings and counted results, in Haute-Garonne
         and then on one square kilometre north of Toulouse. Four illustrated recipes complete all nine combinations of layer types, with settings and expected results.
+        In the recordings of stories 1 to 5 the sections of FilterMate are laid out as panels around the map; the steps are the same in the default panel.
     </p>
     <div class="cards story-index">
         <a class="card story-card" href="#s1"><span class="story-card-media"><img src="video/export.webp" alt="Saint-Gaudens filtered and ready to export" loading="lazy" width="1280" height="720"><b aria-hidden="true">01</b></span><div class="story-card-copy"><span class="badge">Consultancy</span><h4>The commune dossier in three minutes</h4><p>Scope 12 department-wide layers to one commune and deliver a styled GeoPackage.</p><span class="story-outcome">12 layers · <strong>12,380 buildings</strong></span></div></a>
@@ -326,7 +327,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <li><strong>Cross.</strong> Targets <em>troncon_de_route</em> and <em>construction_lineaire</em>, Cross predicate alone, Buffer row off. Filter.
             <figure><img src="img/stories/s4-03.webp" alt="Step 4: the Cross predicate is the only one ticked, the Buffer row is off" loading="lazy" width="1600" height="900"><figcaption>Step 4. One predicate, no buffer.</figcaption></figure>
             <figure><img src="img/stories/s4-04.webp" alt="Step 4b: only the road segments and structures crossing a watercourse remain" loading="lazy" width="1600" height="900"><figcaption>Result at metropolis scale: the crossings draw the river network.</figcaption></figure>
-            <figure><img src="img/stories/s4-05.webp" alt="Zoom on the north of Toulouse: bridges over the Garonne and the Hers" loading="lazy" width="1600" height="900"><figcaption>Zoom on the north of Toulouse: every remaining segment is a bridge or a crossing.</figcaption></figure>
+            <figure><img src="img/stories/s4-05.webp" alt="A structure over a watercourse, framed by Tracking after a click on the next arrow of the picker" loading="lazy" width="1600" height="900"><figcaption>Walking through the result: EXPLORING on the structures, Tracking on, the next arrow of the picker. The map goes to each crossing in turn.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
