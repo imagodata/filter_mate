@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent, errors: the text of a failure sent to the model also hides the folders of a path after a colon (`GPKG:C:\Users\Jean Dupont\...\a.gpkg:roads`), between quotes, relative or going up (`'Clients ACME/x.tif'`, `../Jean Dupont/x.tif`, `Projet/Client ACME.qgz`); a path ends after its file, so the file of `Permission denied for /home/u/x.gpkg in read/write mode` and of two paths separated by a comma are kept; `service=driveway` is no connection parameter. Left as is: an unquoted relative path with a space in its first folder (`Clients ACME/sub/x.tif` gives `Clients x.tif`).
 - Agent, population: when the second reading that sums the people of the area asked fails or takes too long, the layer already written is kept and its own sum is the total, with the note that it is not exact; the whole call failed before. A Stop still stops it.
 - Agent, population: at 30 m the total is the whole 30 m pixels the area touches, like at any resolution, and says so; the note no longer advises a finer resolution (there is none) or a smaller area (which widens the gap), and no longer says "inside the area asked" of pixels that stick out of it: it gives the surface counted for the surface asked.
 - Agent, elevation: an area where no tile reaches the grid (a tile read only for a corner the grid never touches, as at sea) is refused as before, "has no tile there", instead of adding a layer of no data with a minimum and a maximum of 0.

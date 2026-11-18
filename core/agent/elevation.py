@@ -236,16 +236,28 @@ _ADDRESS = re.compile(r"(?:/vsi[a-z0-9_]+/)*[a-z][a-z0-9+.-]*://[^\s'\"`<>]+", r
 _PAIR = r"""[A-Za-z_]+\s*=\s*(?:'(?:[^'\\]|\\.)*'|"[^"]*"|\S+)"""
 # A database connection (GDAL "PG:dbname=... password=..."): its host, its user and its password are not for a model.
 _CONNECTION = re.compile(rf"\b(?:PG|MSSQL|MYSQL|OCI|ODBC)\s*:\s*(?:{_PAIR}\s*)+", re.IGNORECASE)
-# What names an account, wherever it is written (a connection string of QGIS, the message of a driver).
-_SECRET = re.compile(r"\b(?:host|hostaddr|dbname|database|user|username|password|passwd|pwd|service|authcfg|token|"
+# What names an account, wherever it is written (a connection string of QGIS, the message of a driver). Not the
+# words that are tags of OpenStreetMap too (service=driveway).
+_SECRET = re.compile(r"\b(?:host|hostaddr|dbname|user|username|password|passwd|pwd|authcfg|token|"
                      r"apikey|api_key|secret|sslkey|sslcert)\s*=\s*(?:'(?:[^'\\]|\\.)*'|\"[^\"]*\"|\S+)", re.IGNORECASE)
-# A path of this machine or of a store (a drive, a share, a root: C:\Users\..., /vsis3/bucket/...). A folder may hold
-# spaces (the name of a person, of a client) and a message does not say where the path ends: it runs to a colon or a
-# quote, and only what follows its last separator is kept (with what comes after the name on that stretch).
-_PATH = re.compile(r"""(?<![\w.:\\/-])(?:[A-Za-z]:[\\/]|\\\\|/(?=[^\s\\/]))[^:'"`<>|*?\r\n]*""")
-# A relative path written without a space (data/sub/x.tif); "read/write" is none: its last part has an extension.
-_RELATIVE = re.compile(r"""[^\s'"`<>:|*?\\/]+(?:[\\/][^\s'"`<>:|*?\\/]+)*[\\/]([^\s'"`<>:|*?\\/]+\.[A-Za-z0-9]{1,5})\b""")
+# A path of this machine or of a store (a drive, a share, a root, ~, .. : C:\Users\..., /vsis3/bucket/..., after a
+# colon too: GPKG:C:\...\a.gpkg:roads). A folder may hold spaces (the name of a person, of a client) and a message does
+# not say where the path ends: it ends after the first part that has an extension (the file), else at a colon or a
+# quote. Only that last part is kept: the folders hold the name of the user and of their clients.
+_STOP = r"""[^\\/:'"`<>|*?\r\n]"""
+_FILE = rf"""{_STOP}*?\.[A-Za-z][A-Za-z0-9]{{0,4}}(?=[\s,;:'"`)\]>]|$)"""
+_PATH = re.compile(rf"""(?:(?<![A-Za-z0-9_])[A-Za-z]:[\\/]|(?<![\w.\\/~-])(?:\\\\|/(?=[^\s\\/:])|~[\\/]|\.{{1,2}}[\\/]))"""
+                   rf"""(?:(?:{_STOP}*[\\/])*?{_FILE}|[^:'"`<>|*?\r\n]*)""")
+# A name with folders between quotes (GDAL quotes what it opens): 'Clients ACME/x.tif'.
+_QUOTED = re.compile(rf"""(['"`])[^'"`\r\n]*[\\/]({_STOP}*?\.[A-Za-z][A-Za-z0-9]{{0,4}})(?=['"`])""")
+# A relative path whose first part has no space (Projet/Client ACME.qgz, data/sub/x.tif); "read/write" is none: its
+# last part has no extension.
+_RELATIVE = re.compile(rf"""(?<![\w.:\\/~-])[^\s'"`<>:|*?\\/]+[\\/](?:{_STOP}*[\\/])*?({_FILE})""")
 MAX_MESSAGE = 300
+
+
+def _last_part(found: "re.Match[str]") -> str:
+    return re.split(r"[\\/]", found.group(0))[-1]
 
 
 def quiet_message(text: str) -> str:
@@ -255,6 +267,7 @@ def quiet_message(text: str) -> str:
     text = _ADDRESS.sub("its address", text or "")
     text = _CONNECTION.sub("a database connection ", text)
     text = _SECRET.sub("", text)
-    text = _PATH.sub(lambda found: re.split(r"[\\/]", found.group(0))[-1], text)
+    text = _QUOTED.sub(lambda found: found.group(0)[0] + found.group(2), text)
+    text = _PATH.sub(_last_part, text)
     text = _RELATIVE.sub(lambda found: found.group(1), text)
     return " ".join(text.split())[:MAX_MESSAGE] or "no reason given"

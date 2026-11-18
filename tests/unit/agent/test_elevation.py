@@ -183,6 +183,24 @@ def test_what_a_library_said_goes_to_a_model_without_an_address_nor_a_folder(sai
     ("PG: dbname='ign' host=db.client.example port=5432 user=jean password='s3 cret' sslmode=require",
      "a database connection", ("ign", "client", "5432", "jean", "s3 cret", "password")),
     ("PQconnectdb failed: dbname=ign host=10.0.0.5 password=hunter2 refused", "refused", ("hunter2", "10.0.0.5", "ign")),
+    # A path after a colon (the name of a driver, of an error), a path between quotes, a path of the folder above.
+    ("GPKG:C:\\Users\\Jean Dupont\\ACME\\a.gpkg:roads cannot be opened", "GPKG:a.gpkg:roads cannot be opened",
+     ("Jean", "ACME", "Users")),
+    ("ERROR 4:C:\\Users\\Jean Dupont\\a.tif: No such file", "a.tif: No such file", ("Jean", "Users")),
+    ('NETCDF:"/home/jean dupont/a.nc":var failed', 'NETCDF:"a.nc":var failed', ("jean", "dupont", "/home")),
+    ("'Clients ACME/x.tif' not found", "'x.tif' not found", ("Clients", "ACME")),
+    ('"../../Jean Dupont/x.tif" missing', '"x.tif" missing', ("Jean", "Dupont", "..")),
+    ("../Jean Dupont/x.tif not found", "x.tif not found", ("Jean", "Dupont")),
+    ("~/Clients ACME/x.tif not found", "x.tif not found", ("Clients", "ACME", "~")),
+    ("Projet/Client ACME.qgz: open failed", "Client ACME.qgz: open failed", ("Projet",)),
+    # The file is the part that has an extension: what follows it is a sentence, "read/write" no path.
+    ("Permission denied for /home/u/x.gpkg in read/write mode", "Permission denied for x.gpkg in read/write mode",
+     ("/home", "/u/")),
+    # Two paths: each keeps its file.
+    ("/home/jean/My Docs/x.tif, /home/jean/My Docs/y.tif missing", "x.tif, y.tif missing", ("jean", "Docs")),
+    # Not paths, not connection parameters: tags of OpenStreetMap, ratios, dates.
+    ("no highway=service with service=driveway here", "no highway=service with service=driveway here", ()),
+    ("Error /: invalid path", "Error /: invalid path", ()),
     # Not paths: what is said as a sentence stays.
     ("the read/write mode is 50 / 60", "the read/write mode is 50 / 60", ()),
 ])
