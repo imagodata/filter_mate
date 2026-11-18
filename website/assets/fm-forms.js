@@ -7,11 +7,11 @@
  */
 (function () {
     var FORMS = {
-        usage:    { en: null, fr: null },
-        review:   { en: null, fr: null },
-        feature:  { en: null, fr: null },
-        testers:  { en: null, fr: null },
-        services: { en: null, fr: null }
+        usage:    { en: '0V85zP', fr: 'zEMv4Z' },
+        review:   { en: '5X95ov', fr: 'db0VXD' },
+        feature:  { en: 'laOZXV', fr: 'RWol1v' },
+        testers:  { en: 'o9RQY5', fr: 'GepyaQ' },
+        services: { en: 'YjGyXz', fr: 'Dqpy9X' }
     };
 
     var lang = (document.documentElement.lang || 'en').slice(0, 2) === 'fr' ? 'fr' : 'en';
