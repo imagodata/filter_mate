@@ -236,8 +236,10 @@ def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[fl
         if minimum is None and maximum is None:
             raise ValueError(f"band {band} of '{layer.name()}' has no range of values to stretch")
         if not share_values:
-            raise ValueError(f"minimum must be below maximum; the range given does not fit the values of band {band} "
-                             f"of '{layer.name()}'")
+            # Which bound is out, and by how much, would tell the range of the band a bit at a time.
+            raise ValueError(f"the range given cannot be applied to band {band} of '{layer.name()}'. The user shares no "
+                             "values, so the range read from the band is not told: give both minimum and maximum, or "
+                             "neither")
         raise ValueError(f"minimum ({low:g}) must be below maximum ({high:g}); band {band} of '{layer.name()}' "
                          f"ranges from {stats.minimumValue:g} to {stats.maximumValue:g}")
     return low, high
@@ -491,6 +493,9 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
                                                               cut, bool(discrete), classes, bool(share_values))
             found.setRenderer(renderer)
             answer.update({'band': band, **_told_range(low, high, minimum, maximum, bool(share_values))})
+            if not share_values and (minimum is None or maximum is None):
+                answer['note'] = ("minimum and maximum are not told: the user shares no values. The style is applied "
+                                  "with the range read from the band, so there is no need to call again for it")
             if ramp_used:
                 answer['ramp'] = ramp_used
             if discrete and mode == 'pseudocolor':

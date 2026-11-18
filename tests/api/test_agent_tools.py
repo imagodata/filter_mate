@@ -642,6 +642,16 @@ class TestHandlers:
                                                                             "cut": 2}))
             assert not result.is_error and seen[-1]["share_values"] is shared  # QGIS is told, which hides the range
 
+    def test_the_note_on_a_range_left_out_reaches_the_model(self, tmp_path):
+        from filtermate_api.accessor import StyleResult
+        accessor = Accessor()
+        accessor.set_layer_style = lambda layer, mode, **options: StyleResult(
+            layer_name=layer, mode=mode, band=1, note="minimum and maximum are not told")
+        executor = ToolExecutor(chat_tools(), build_handlers(accessor, tmp_path, share_values=False))
+        answer = json.loads(executor.execute(ToolCallPart("c", "set_layer_style", {
+            "layer": "communes", "mode": "pseudocolor", "cut": 2})).content)
+        assert answer["note"] == "minimum and maximum are not told" and "minimum" not in answer
+
     def test_a_relief_is_a_style(self, api):
         accessor, root = api
         seen = []

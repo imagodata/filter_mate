@@ -90,4 +90,7 @@ def test_a_refusal_does_not_tell_the_range_of_the_band_without_the_values():
         style._band_range(_Layer(), 1, 950.0, None, None, True)
     with pytest.raises(ValueError) as refused:
         style._band_range(_Layer(), 1, 950.0, None, None, False)
-    assert "must be below" in str(refused.value) and "100" not in str(refused.value) and "900" not in str(refused.value)
+    said = str(refused.value)
+    # No number, and no word on which side the bound falls (the range would come back one bit at a time), but what to do.
+    assert "cannot be applied" in said and "both minimum and maximum" in said
+    assert "100" not in said and "900" not in said and "below" not in said and "above" not in said

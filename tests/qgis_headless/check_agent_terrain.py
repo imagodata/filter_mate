@@ -584,7 +584,7 @@ def check_elevation(project, work):
             check(f"elevation: not on {authid} ({terrain._projection_method(crs)}), which distorts slopes",
                   crs.isValid() and distorted["crs_authid"] == "EPSG:32631", distorted)
             project.removeMapLayer(distorted["layer_id"])
-        for authid in ("EPSG:32631", "EPSG:2154", "EPSG:27700", "EPSG:3031"):
+        for authid in ("EPSG:32631", "EPSG:2154", "EPSG:27700", "EPSG:3031", "EPSG:3375", "EPSG:32661", "EPSG:27200", "EPSG:29701"):
             check(f"elevation: {authid} keeps the angles ({terrain._projection_method(QgsCoordinateReferenceSystem(authid))})",
                   terrain.metric_grid(terrain._projection_method(QgsCoordinateReferenceSystem(authid)), True, True))
         project.setCrs(QgsCoordinateReferenceSystem("EPSG:3857"))
@@ -879,10 +879,12 @@ def check_tools(project, work):
         error, content = quiet("set_layer_style", layer="Relief", mode="pseudocolor", ramp="Spectral", cut=2)
         answer = {} if error else json.loads(content)
         check("tool set_layer_style: without the values, the range read from the pixels is not told", not error
-              and answer.get("mode") == "pseudocolor" and "minimum" not in answer and "maximum" not in answer, content)
+              and answer.get("mode") == "pseudocolor" and "minimum" not in answer and "maximum" not in answer
+              and "no need to call again" in answer.get("note", ""), content)
         error, content = quiet("set_layer_style", layer="Relief", mode="gray", minimum=900000)
-        check("tool set_layer_style: nor in a refusal", error and "must be below" in content
-              and "ranges from" not in content, content)
+        check("tool set_layer_style: nor in a refusal, which says what to do and not which side", error
+              and "both minimum and maximum" in content and "ranges from" not in content
+              and "below" not in content, content)
         error, content = quiet("set_layer_style", layer="Relief", mode="gray", minimum=0, maximum=3000)
         answer = {} if error else json.loads(content)
         check("tool set_layer_style: a range the model gave comes back", not error and answer.get("minimum") == 0.0
