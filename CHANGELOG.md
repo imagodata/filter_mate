@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent, population: when the second reading that sums the people of the area asked fails or takes too long, the layer already written is kept and its own sum is the total, with the note that it is not exact; the whole call failed before. A Stop still stops it.
 - Agent, population: at 30 m the total is the whole 30 m pixels the area touches, like at any resolution, and says so; the note no longer advises a finer resolution (there is none) or a smaller area (which widens the gap), and no longer says "inside the area asked" of pixels that stick out of it: it gives the surface counted for the surface asked.
 - Agent, elevation: an area where no tile reaches the grid (a tile read only for a corner the grid never touches, as at sea) is refused as before, "has no tile there", instead of adding a layer of no data with a minimum and a maximum of 0.
 - Agent, OpenStreetMap: asking for `lines` gives back a hedge, a wall or a pier that closes as the line it is mapped; the conversion of closed ways to areas (857f3837) took them out of that request.

@@ -22,7 +22,7 @@ from ...core.agent.population import (
 )
 from ...core.agent.osm import area_km2
 from .operations import running
-from .terrain import _Gdal, _area_in_degrees, _attempt, _ended_error, _in_background, _under_the_data
+from .terrain import STOPPED, _Gdal, _area_in_degrees, _attempt, _ended_error, _in_background, _under_the_data
 
 CRS = 'EPSG:4326'  # the grid of the source: a pixel written is a block of its pixels, never a part of one
 _NOTE = ("total is the people of the rectangle around the area, not of a boundary: for the people inside "
@@ -172,7 +172,14 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
             maximum = float(numpy.nanmax(values)) if filled else 0.0
             exact = count_bounds is not None
             if exact and factor > 1:  # at the pixels of the source, the layer is already the people of the bounds
-                total = _sum_pixels(gdal, url, count_bounds, size / factor, ended)
+                try:
+                    total = _sum_pixels(gdal, url, count_bounds, size / factor, ended)
+                except ValueError:
+                    # The layer is written: a second reading that fails or lasts too long leaves its own sum as the
+                    # total, said as such, rather than losing it. A Stop is a Stop.
+                    if ended() == STOPPED:
+                        raise
+                    exact = False
             if total <= 0 and anyone:
                 raise ValueError("the population grid holds no people in this area (sea, or nobody lives there)")
             answer = {'width': dataset.RasterXSize, 'height': dataset.RasterYSize, 'total': total,

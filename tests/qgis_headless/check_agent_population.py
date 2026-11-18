@@ -250,6 +250,23 @@ def check_population(project, work):
                   and (not wide or "whatever the resolution" in exact["note"]) and "finer" not in exact["note"]
                   and "inside the area" not in exact["note"], (exact, expected, held))
             project.removeMapLayer(exact["layer_id"])
+        # The second reading, for the total, fails: the layer is written, its own sum is the total and it is said so.
+        second = adapter._sum_pixels
+
+        def broken(*_arguments):
+            raise ValueError("the population grid could not be read from its server: boom")
+        adapter._sum_pixels = broken
+        try:
+            after = adapter.add_population(extent_wkt=cut, crs="EPSG:4326", resolution=1000)
+        finally:
+            adapter._sum_pixels = second
+        shown = gdal.Open(project.mapLayer(after["layer_id"]).source())
+        held = float(numpy.nansum(shown.GetRasterBand(1).ReadAsArray()))
+        shown = None
+        check("population: a second reading that fails leaves the total of the layer, said so, and the layer is kept",
+              after["total"] == held and "sum of the whole layer" in after["note"]
+              and after["summed_km2"] > after["asked_km2"] * 2 and project.mapLayer(after["layer_id"]) is not None, after)
+        project.removeMapLayer(after["layer_id"])
         fits = adapter.exact_total_fits
         adapter.exact_total_fits = lambda *_arguments: False  # an area too large to be summed on the pixels of the source
         try:
