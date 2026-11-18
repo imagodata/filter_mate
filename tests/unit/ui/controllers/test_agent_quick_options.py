@@ -284,3 +284,23 @@ def test_the_question_names_the_sources_and_where_data_goes(host, monkeypatch):
     question = host._ask_user.call_args.args[1]
     assert "(MCP connectors)" in question and "sends what the agent asks to" in question
     assert "other applications on this computer" in question and "osm_mcp" not in question
+
+
+# --- 2026-11-18, audit: what the user clicked while a request ran is not dropped with the project --------
+
+def test_closing_the_project_keeps_what_the_user_clicked(monkeypatch):
+    clicked = Change(sources_on=("osm_tiles",))
+    queued = Change(sources_off=("datagouv",), by_agent=True)
+    host = MagicMock()
+    host._pending_options = [clicked, queued, Change(provider=_entry("ollama", "q", "u", "", key=False))]
+    host._replaying, host._engine = False, None
+    Controller._on_project_cleared(host)
+    assert len(host._pending_options) == 2 and host._pending_options[0] is clicked
+    assert not any(change.by_agent for change in host._pending_options)
+
+
+def test_the_tools_of_the_chat_mark_what_they_queue(host, monkeypatch):
+    _tools_host(host, monkeypatch)
+    Controller._turn_off_options_tool(host, {"sources": ["datagouv"]})
+    Controller._turn_on_options_tool(host, {"provider": "ollama · qwen3:8b"})
+    assert [change.by_agent for change in host._pending_options] == [True, True]

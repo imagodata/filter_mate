@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: closing the project no longer drops what you clicked in the menu "⋯" (a source, a provider) while a request ran; only what the agent itself queued for that project is dropped.
 - Agent: undoing a turn that added a layer and then set its options (or renamed it) no longer ends with "Changed since, left as is" for that layer: the layer is removed by the undo itself, so there is nothing left to put back.
 - Agent: copying several lines of the thread leaves no invisible character in the text any more. A path or an address of more than 24 characters copied with a line break around it kept the zero-width spaces that let it wrap (a path pasted in a terminal did not work): the label gives its breaks as U+2029 and the clipboard as a newline, so the copy was not recognised.
 - Agent: `set_layer_options` accepts, in `layers_to_filter`, the rasters and point clouds the panel lists as targets of the layer; it refused the very list `layer_options` gave back ("mnt is not a vector layer"), and a retry without the raster dropped that target from the panel without a word.

@@ -45,12 +45,14 @@ class ProviderEntry:
 
 @dataclass(frozen=True)
 class Change:
-    """What to change: sources to tick and to untick, the MCP server (None: unchanged), another provider."""
+    """What to change: sources to tick and to untick, the MCP server (None: unchanged), another provider.
+    ``by_agent``: queued by a tool of the chat during a request (about the project then open), not clicked."""
 
     sources_on: Tuple[str, ...] = ()
     sources_off: Tuple[str, ...] = ()
     mcp_server: Optional[bool] = None
     provider: Optional[ProviderEntry] = None
+    by_agent: bool = False
 
 
 def remember(entries: Sequence[ProviderEntry], entry: ProviderEntry, keep: int = MAX_PROVIDERS) -> Tuple[ProviderEntry, ...]:

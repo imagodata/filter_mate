@@ -571,7 +571,8 @@ class AgentChatController(QObject):
         # application is making (its layers compared with the next project's, an Undo would remove them all).
         self._checkpoint.discard()
         self._turn_cards, self._auto_pin = [], None  # the map read for the pin was the closed project's
-        self._pending_options = []  # asked about the project that went away
+        # What the agent queued was asked in the project that went away; a click of the user in the menu was not.
+        self._pending_options = [change for change in self._pending_options if not change.by_agent]
         self._mcp.forget_change()
         self._replay_stop = True  # a recipe stops before its next step
         if self._replaying:
@@ -1016,7 +1017,7 @@ class AgentChatController(QObject):
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
         if change != Change():
-            self._pending_options.append(change)
+            self._pending_options.append(replace(change, by_agent=True))
         return dict(answer, applies="after this request")
 
     def _turn_on_options_tool(self, arguments) -> dict:
@@ -1033,7 +1034,7 @@ class AgentChatController(QObject):
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
         if change != Change():
-            self._pending_options.append(change)
+            self._pending_options.append(replace(change, by_agent=True))
         return dict(answer, applies="in a new conversation" if change.provider is not None else "after this request")
 
     def _turn_on_question(self, change) -> str:
