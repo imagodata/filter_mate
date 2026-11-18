@@ -3547,7 +3547,7 @@ def s_setup_layout_check():
     d = dock()
     panels, manager = d._fm_panels, d._action_bar_manager
     check('setup: the layout is a step of its own, the sections asked with the buttons',
-          WELCOME['started'] is True and ['Layout', 'Headers', 'Buttons'] in WELCOME['asked']
+          WELCOME['started'] is True and ['Layout', 'Headers', 'Rows', 'Buttons'] in WELCOME['asked']
           and len(WELCOME['asked']) == 5,
           str(WELCOME['asked']))
     check('setup: the sections and the buttons on the card of the changes, nothing moved before Apply',
@@ -5270,11 +5270,13 @@ def rows_aligned(section):
 
 
 def rows_packed(section):
-    """``fit``: the rows one gap apart, the page held to them inside a taller viewport."""
+    """``fit``: the rows one gap apart, the page held to them: inside a taller viewport, or scrolled in a shorter one."""
     _deltas, gaps, _cut, page, area = row_report(section)
     gap = mockup_module().ROW_GAP
-    return (len(gaps) >= 3 and all(abs(value - gap) <= 1 for value in gaps) and area is not None
-            and abs(page.height() - page.sizeHint().height()) <= 1 and page.height() < area.viewport().height())
+    if len(gaps) < 3 or not all(abs(value - gap) <= 1 for value in gaps) or area is None:
+        return False
+    held = abs(page.height() - page.sizeHint().height()) <= 1
+    return held and (page.height() < area.viewport().height() or area.verticalScrollBar().maximum() > 0)
 
 
 def right_margin_follows_bar(section):
@@ -5357,9 +5359,29 @@ def s_rows_fill_check():
     return waits(0.6)
 
 
+def s_rows_hidden_change():
+    """The setting changed while FILTERING is closed (CONFIGURATION open, as in the tree): its hidden scroll area was
+    told nothing and kept the old height when FILTERING opened again (review of 18 November 2026)."""
+    d = dock()
+    open_section(d.CONFIGURATION)
+    pump(200)
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fill'})
+    pump(200)
+    open_section(d.FILTERING)
+    check('rows: fill set while FILTERING was closed, spread when it opens',
+          settles(lambda: min(row_report('filtering')[1] or [0]) > mockup_module().ROW_GAP + 4
+                  and rows_aligned('filtering')), rows_text('filtering'))
+    open_section(d.CONFIGURATION)
+    pump(200)
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fit'})
+    pump(200)
+    open_section(d.FILTERING)
+    return waits(0.6)
+
+
 def s_rows_fit_again_check():
     d = dock()
-    check('rows: SECTION_HEIGHT = fit again, the rows one gap apart', d.property('fm_section_height') == 'fit'
+    check('rows: fit set while FILTERING was closed, then fit again: the rows one gap apart', d.property('fm_section_height') == 'fit'
           and settles(lambda: rows_packed('filtering') and rows_aligned('filtering')), rows_text('filtering'))
     if d._fm_panels.can_detach('filtering'):
         d._fm_panels.detach('filtering')
@@ -5392,7 +5414,7 @@ def s_rows_end():
 
 
 ROWS_STEPS = [s_rows_setup, s_rows_fit_check, s_rows_exporting_check, s_rows_short_check, s_rows_fill_check,
-              s_rows_fit_again_check, s_rows_panel_check, s_rows_end]
+              s_rows_hidden_change, s_rows_fit_again_check, s_rows_panel_check, s_rows_end]
 
 
 # --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------

@@ -151,6 +151,10 @@ def test_key_column_plan_hidden_buttons_and_rows():
     assert layout.key_column_plan(rows) == ([0, 0, 6, 0, 12], 0, 0)
 
 
+def test_key_column_plan_a_trailing_button_without_row_counts_in_the_overflow():
+    assert layout.key_column_plan([(32, 0, 32, True), (32, None, 0, True)]) == ([0, 0], 0, 32)
+
+
 def test_key_column_plan_a_button_without_spacer_above_shifts_nothing():
     rows = [(32, 4, 32, False), (32, 42, 32, True)]
     assert layout.key_column_plan(rows) == ([0, 10], 0, 0)
@@ -288,7 +292,7 @@ class _Aligner:
 @pytest.fixture
 def dock(monkeypatch):
     widgets = types.ModuleType("qgis.PyQt.QtWidgets")
-    widgets.QSizePolicy = types.SimpleNamespace(Policy=types.SimpleNamespace(Preferred='Preferred', Maximum='Maximum'))
+    widgets.QSizePolicy = types.SimpleNamespace(Policy=types.SimpleNamespace(Preferred='Preferred', Fixed='Fixed'))
     for name, module in (("qgis", types.ModuleType("qgis")), ("qgis.PyQt", types.ModuleType("qgis.PyQt")),
                          ("qgis.PyQt.QtWidgets", widgets)):
         monkeypatch.setitem(sys.modules, name, module)
@@ -311,7 +315,7 @@ def test_rows_fit_by_default_one_gap_apart_page_held_to_its_rows(dock):
     assert exporting.entries() == ['layers', 'crs', 'styles', 'format']
     assert filtering.spacing == layout.ROW_GAP == layout.SPACING['fm_gap']
     assert filtering.margins == (0, 0, 0, 0)
-    assert dock.FILTERING.policy.vertical == dock.EXPORTING.policy.vertical == 'Maximum'
+    assert dock.FILTERING.policy.vertical == dock.EXPORTING.policy.vertical == 'Fixed'
     assert dock.property('fm_section_height') == 'fit'
     assert dock._fm_aligner_filtering.resets == dock._fm_aligner_exporting.resets == 1  # the buttons follow
 
@@ -327,7 +331,7 @@ def test_rows_fill_one_stretch_between_two_rows_and_back(dock):
     assert filtering.entries().count('stretch') == 4
     layout.lay_out_rows(dock, 'fit')  # the setting changed: the argument wins over the configuration
     assert filtering.entries() == ['source', 'layers', 'operators', 'predicates', 'buffer']
-    assert dock.FILTERING.policy.vertical == 'Maximum' and dock.property('fm_section_height') == 'fit'
+    assert dock.FILTERING.policy.vertical == 'Fixed' and dock.property('fm_section_height') == 'fit'
 
 
 def test_rows_of_a_form_without_the_columns_are_left_alone(dock):

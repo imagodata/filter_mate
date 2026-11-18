@@ -632,8 +632,8 @@ def lay_out_rows(dw: Any, mode: Any = None) -> bool:
     configuration of the dock when None); True when a section was laid out.
 
     * ``fit`` (default): each row at its own height, one gap (``ROW_GAP``) apart. The page takes the height of
-      its rows: it is held to it in the scroll area that holds it (tool box or panel of QGIS, a ``Maximum``
-      policy), so the room left stays under the section, the rail band ends with the last row, and a host
+      its rows: it is held to it in the scroll area that holds it (tool box or panel of QGIS, a ``Fixed``
+      vertical policy: neither stretched nor squeezed), so the room left stays under the section, the rail band ends with the last row, and a host
       shorter than the rows scrolls instead of squeezing them.
     * ``fill``: one stretch between two rows, the rows spread over the height of the section (5.0 to 5.1).
 
@@ -659,7 +659,7 @@ def lay_out_rows(dw: Any, mode: Any = None) -> bool:
             if item is None:
                 values.insertStretch(position, 1)
         policy = page.sizePolicy()
-        wanted = QSizePolicy.Policy.Preferred if mode == SECTION_FILL else QSizePolicy.Policy.Maximum
+        wanted = QSizePolicy.Policy.Preferred if mode == SECTION_FILL else QSizePolicy.Policy.Fixed
         if policy.verticalPolicy() != wanted:
             policy.setVerticalPolicy(wanted)
             page.setSizePolicy(policy)
@@ -712,7 +712,7 @@ def key_column_plan(buttons, lead_now: int = 0, start: int = 0) -> tuple:
     before = start + sum(entry[0] for entry in buttons[:first])
     lead = max(0, before - (row_top - lead_now + (row_height - height) // 2))
     shift = lead - lead_now
-    spacers, cursor, overflow = [], start, 0
+    spacers, cursor, last_row_end = [], start, 0
     for height, row_top, row_height, adjustable in buttons:
         if height <= 0 or row_top is None or not adjustable:
             spacers.append(0)
@@ -722,7 +722,9 @@ def key_column_plan(buttons, lead_now: int = 0, start: int = 0) -> tuple:
         spacer = max(0, top - cursor)
         spacers.append(spacer)
         cursor += spacer + height
-        overflow = max(0, cursor - (row_top + shift + row_height))
+        last_row_end = row_top + shift + row_height
+    # The whole column against the last row: a shown button without a row after it hangs below too.
+    overflow = max(0, cursor - last_row_end)
     return spacers, lead, overflow
 
 
@@ -756,7 +758,9 @@ class _ColumnAligner(QObject if QObject is not None else object):
         first = self._keys.itemAt(0) if self._keys.count() else None
         if first is not None and first.widget() is not None:
             from qgis.PyQt.QtWidgets import QSizePolicy, QSpacerItem
-            self._keys.insertItem(0, QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))
+            # insertSpacerItem hands the spacer to the layout: with insertItem, PyQt5 (QGIS 3.22) deleted it with
+            # its Python wrapper and QGIS died at the next walk through the column (dimension managers).
+            self._keys.insertSpacerItem(0, QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))
 
     def reset(self) -> None:
         """The rows moved for another reason than a resize (other spacing, rows fit or fill): align again."""
@@ -768,6 +772,11 @@ class _ColumnAligner(QObject if QObject is not None else object):
             kind = event.type()
             if kind in (QEvent.Type.Resize, QEvent.Type.Show):
                 self._rounds = 0
+            if kind == QEvent.Type.Show:
+                # Rows laid out another way while the page was hidden: Qt posts the new hint to a visible parent
+                # only. The tool box resizes the page when it opens it (bench step s_rows_hidden_change passes
+                # without this); a panel of QGIS brought back from behind a tab may not.
+                self._page.updateGeometry()
             if kind in (QEvent.Type.Resize, QEvent.Type.Show, QEvent.Type.LayoutRequest):
                 self.schedule()
         except RuntimeError:
@@ -828,33 +837,31 @@ class _ColumnAligner(QObject if QObject is not None else object):
             start = (container.contentsMargins().top() if container is not None else 0) \
                 + self._keys.contentsMargins().top()
             spacers, lead, overflow = key_column_plan(entries, margins.top() if margins is not None else 0, start)
-            changed = False
-            for (spacer, _button), height in zip(slots, spacers):
-                changed |= _fix_spacer(spacer, height, QSizePolicy)
-            for spacer in spare:
-                changed |= _fix_spacer(spacer, 0, QSizePolicy)
-            if margins is not None and (margins.top(), margins.bottom()) != (lead, overflow):
-                self._values.setContentsMargins(margins.left(), lead, margins.right(), overflow)
-                changed = True
-            if not changed:
+            wanted = [(spacer, height) for (spacer, _button), height in zip(slots, spacers)] + \
+                [(spacer, 0) for spacer in spare]
+            margins_off = margins is not None and (margins.top(), margins.bottom()) != (lead, overflow)
+            if not margins_off and not any(_spacer_off(spacer, height, QSizePolicy) for spacer, height in wanted):
                 self._rounds = 0
                 return
             if self._rounds >= self.MAX_ROUNDS:
-                return  # still moving: wait for the next resize or show
+                return  # still moving: nothing changed until the next resize or show
             self._rounds += 1
-            self._keys.invalidate()
+            for spacer, height in wanted:
+                if _spacer_off(spacer, height, QSizePolicy):
+                    spacer.changeSize(spacer.sizeHint().width(), height, QSizePolicy.Policy.Minimum,
+                                      QSizePolicy.Policy.Fixed)
+            if margins_off:
+                self._values.setContentsMargins(margins.left(), lead, margins.right(), overflow)
+            self._keys.invalidate()  # changeSize alone does not: the buttons kept their old places
         except RuntimeError:
             pass  # widgets deleted (plugin closing)
 
 
-def _fix_spacer(spacer: Any, height: int, size_policy: Any) -> bool:
-    """``spacer`` at ``height``, fixed (the dimension managers make them expanding); True when it changed."""
+def _spacer_off(spacer: Any, height: int, size_policy: Any) -> bool:
+    """``spacer`` is not ``height`` high and fixed (the dimension managers make them expanding)."""
     if spacer is None:
         return False
-    if spacer.sizeHint().height() == height and spacer.sizePolicy().verticalPolicy() == size_policy.Policy.Fixed:
-        return False
-    spacer.changeSize(spacer.sizeHint().width(), height, size_policy.Policy.Minimum, size_policy.Policy.Fixed)
-    return True
+    return spacer.sizeHint().height() != height or spacer.sizePolicy().verticalPolicy() != size_policy.Policy.Fixed
 
 
 def _keys_follow_rows(holder: Any) -> None:
