@@ -80,7 +80,7 @@ def test_the_utm_zone_of_a_place(longitude, latitude, authid):
     assert utm_authid(longitude, latitude) == authid
 
 
-@pytest.mark.parametrize("method", ["utm", "tmerc", "lcc", "stere", "sterea", "UTM", " lcc "])
+@pytest.mark.parametrize("method", ["utm", "tmerc", "lcc", "stere", "sterea", "omerc", "labrd", "nzmg", "UTM", " lcc "])
 def test_elevation_is_written_on_the_crs_of_the_project_when_its_projection_keeps_the_angles(method):
     assert metric_grid(method, projected=True, metres=True)
 

@@ -24,10 +24,12 @@ _METRES_PER_DEGREE = 111_320.0
 # The methods of projection (the PROJ name QGIS gives: ``QgsCoordinateReferenceSystem.operation().id()``) that keep the
 # angles, so that a slope read on the grid is the slope of the ground, to the scale of the projection (near 1 where the
 # CRS is made for): transverse Mercator and UTM, Lambert conformal conic, stereographic (polar, oblique), the Swiss
-# oblique Mercator and the Krovak of the Czech national grid. Not Mercator, Web Mercator included (its scale grows as
-# 1 / cos(latitude)), nor an equal-area, equidistant or compromise projection (Equal Earth, Plate Carree, Mollweide,
+# oblique Mercator, the Krovak of the Czech national grid, Hotine oblique Mercator (Malaysia), Laborde (Madagascar) and
+# the New Zealand map grid. (UPS is named stere by PROJ; no CRS probed was named lcca.) Not Mercator, Web Mercator
+# included (its scale grows as 1 / cos(latitude)), nor an equal-area, equidistant or compromise projection (Equal Earth, Plate Carree, Mollweide,
 # Lambert azimuthal equal area): their scale differs along the two axes, or from one place to the next.
-CONFORMAL_METHODS = frozenset(("utm", "tmerc", "etmerc", "lcc", "stere", "sterea", "somerc", "krovak"))
+CONFORMAL_METHODS = frozenset(("utm", "tmerc", "etmerc", "lcc", "stere", "sterea", "somerc", "krovak", "omerc", "labrd",
+                               "nzmg"))
 
 
 @dataclass(frozen=True)

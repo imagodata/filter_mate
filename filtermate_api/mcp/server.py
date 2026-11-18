@@ -983,7 +983,8 @@ def build_server(client: FilterMateClient) -> Any:
         resolution: Annotated[Optional[float], Field(ge=10, le=5000, description=(
             "Pixel size in metres (default 30, coarser for a large area)"))] = None,
         target_crs: Annotated[str, Field(max_length=64, description=(
-            "A CRS in metres to write in (default: the project's when in metres, else the UTM zone)"))] = "",
+            "A CRS in metres to write in (default: the project's when its projection keeps angles, as UTM, Lambert "
+            "conformal or a stereographic does, else the UTM zone)"))] = "",
         name: Annotated[str, Field(max_length=200, description="Name of the layer in the project")] = "",
     ) -> Dict[str, Any]:
         """Add the elevation of an area to the project as a raster layer (a digital elevation model), read from an
