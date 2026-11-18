@@ -2524,10 +2524,226 @@ SETUP = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + [
                     (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
 
 
+# ------------------------------------------------------------------ second cut of the stories: the dock laid out
+# What the plain takes leave out. The sections apart: EXPLORING left of the map, FILTERING right of it, so the map
+# stays in the picture while the widgets are used. The side buttons of EXPLORING: identify, zoom, selecting,
+# tracking, and the browser of the picker to walk through a result. And the English text of the edit: the question
+# of the take (title), one line per step (caption), the count it ends on (result), drawn by site_video_render.py.
+def title(text):
+    """The question of the take, kept in a corner of the edited video."""
+    return (0, lambda: REC.event('title', text=text))
+
+
+def caption(text, style='step'):
+    """One line at the bottom of the edited video, until the next one ('' clears it). 'N · text' numbers the step."""
+    return (0, lambda: REC.event('caption', text=text, style=style))
+
+
+def result(template, names=()):
+    """The line the take ends on, its counts read from the layers at that moment:
+    '{batiment:,} buildings · {erp:,} public buildings'."""
+    def _s():
+        text = template.format(**counts(names)) if names else template
+        REC.event('caption', text=text, style='result')
+        log(f'result {text}')
+    return (0, _s)
+
+
+def explo():
+    return panel_of('exploring')
+
+
+def lay_out(left='exploring', width=400, height=520, right=410, under=True):
+    """Unrecorded: the section ``left`` in its own panel, left of the map; the dock keeps the other sections, right
+    of the map. ``under``: the panel sits under the layer tree, ``height`` tall (a denser panel, a wider map); else
+    it stands between the tree and the map."""
+    def _s():
+        panels, window = section_panels(), iface.mainWindow()
+        if panels.panel(left) is None and not panels.detach(left, remember=False):
+            log(f'{left} could not leave the dock: {panels.groups()}')
+            return
+        panel = panels.panel(left)
+        layers = window.findChild(QDockWidget, 'Layers')
+        panel.setFloating(False)
+        if under:
+            window.splitDockWidget(layers, panel, Qt.Orientation.Vertical)
+            window.resizeDocks([layers], [width], Qt.Orientation.Horizontal)
+            total = layers.height() + panel.height()
+            window.resizeDocks([layers, panel], [max(total - height, 160), height], Qt.Orientation.Vertical)
+        else:
+            window.splitDockWidget(layers, panel, Qt.Orientation.Horizontal)
+            window.resizeDocks([layers, panel], [196, width], Qt.Orientation.Horizontal)
+        dock().setMinimumWidth(0)
+        window.resizeDocks([dock()], [right], Qt.Orientation.Horizontal)
+        dock().toolBox_tabTools.setCurrentWidget(dock().FILTERING)
+        QTimer.singleShot(800, lambda: log(
+            f'laid out: {panels.groups()}, {left} {rect_of(panel)}, dock {rect_of(dock())}, '
+            f'map {rect_of(iface.mapCanvas())}'))
+    return _s
+
+
+def single_group():
+    """Single selection opened by the check box of its group, as a click there does."""
+    d = dock()
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+    name = iface.activeLayer().name()
+    if DISPLAY.get(name):
+        d.mFieldExpressionWidget_exploring_single_selection.setExpression(DISPLAY[name])
+
+
+def picker_next():
+    """The 'next' button of the browser of the single selection picker."""
+    from qgis.PyQt.QtWidgets import QToolButton
+    buttons = [b for b in dock().mFeaturePickerWidget_exploring_single_selection.findChildren(QToolButton)
+               if b.isVisible()]
+    return buttons[-1] if buttons else dock().mFeaturePickerWidget_exploring_single_selection
+
+
+def walk(times, each=1500):
+    """Next, next, next: with tracking on, the map goes to each feature of the result."""
+    steps = []
+    for i in range(times):
+        steps += act(picker_next, lambda: picker_next().click(), lead=500, after=200 if i else 700) + [hold(each)]
+    return steps
+
+
+def identify():
+    return act('pushButton_exploring_identify', lambda: dock().pushButton_exploring_identify.click(),
+               lead=700, after=300)
+
+
+def back_to_scene():
+    """The framing of the scene again, tracking off: the closing shot shows the whole result."""
+    dock().pushButton_checkable_exploring_tracking.setChecked(False)
+    refocus()
+
+
+def ending2(verify=None):
+    """ending() with a longer last look. The sections stay apart: merging them back just before quitting aborted
+    QGIS (pure virtual call), and site_videos_headless.sh forgets the panels of the profile before each take."""
+    steps = [(0, cam('full', dur=1.6)), (2600, stop_recording)]
+    if verify:
+        steps.append((0, lambda: counts(verify)))
+    return steps + [(500, quit_when_idle)]
+
+
+# noise, second cut (story 2): EXPLORING left of the map, FILTERING right. The main roads of Muret picked by an
+# expression in the chooser of EXPLORING and flashed (identify), the buffer by road class, Filter.
+NOISE2 = boot(S2_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_NOISE}\'', 1.2) + scope('commune') + [
+    (500, lay_out()), (1500, wait_idle()),
+] + recorded_scene(1.2) + [
+    title('Which buildings are near the main roads?'), hold(500),
+    caption('1 · Pick the main roads'), (0, cam(explo, dur=1.2, pad=14)), hold(300),
+] + chooser_pick('troncon_de_route', keep=900) + typed_custom('"importance" IN (\'1\', \'2\')', per_char=24) \
+    + settle() + [(0, cam('full', dur=1.1)), hold(200)] + identify() + [
+    note_expr('major roads', 'troncon_de_route', '"importance" IN (\'1\', \'2\')'),
+    hold(1200), still('s2-01'),
+    caption('2 · Target the buildings'), (0, cam(FILTER_ZONE, dur=1.2, pad=40)),
+] + targets(['batiment', 'erp'], per_item=220, close_after=500) + predicates(['intersect'], per_item=260, close_after=500) + [
+    caption('3 · Buffer by road class: 300, 250 or 100 m'),
+] + act('pushButton_checkable_filtering_buffer_value', buffer_value(0), lead=600, after=500) \
+    + act('mPropertyOverrideButton_filtering_buffer_value_property',
+          buffer_expr_dialog(NOISE_EXPR, keep_menu=1200, keep_dialog=2400), lead=600, after=500) \
+    + combo_choose('comboBox_filtering_buffer_type', 'Flat', keep=800) + [
+    hold(300), still('s2-03'), caption('4 · Filter'), (200, cam('full', dur=1.1)),
+] + run_filter() + [
+    result('{batiment:,} buildings · {erp:,} public buildings', ['batiment', 'erp']),
+    hold(1200), still('s2-04'), (0, cam('canvas', dur=1.4, drift=1.04)), hold(2600), still('s2-05'),
+] + ending2(['batiment', 'erp', 'troncon_de_route'])
+
+# bridges, second cut (story 4): the same two panels. The permanent watercourses of Toulouse Métropole flashed, the
+# roads and structures that cross them kept; then the structures walked one by one, tracking on: the map follows.
+BRIDGES2 = boot(S4_LAYERS, 'epci', '"nom_officiel" = \'Toulouse Métropole\'', 1.1, dense_scale=400000) \
+    + scope('epci') + [(500, lay_out()), (1500, wait_idle())] + recorded_scene(1.1) + [
+    title('Which crossings to inspect?'), hold(500),
+    caption('1 · Pick the permanent watercourses'), (0, cam(explo, dur=1.2, pad=14)), hold(300),
+] + chooser_pick('troncon_hydrographique', keep=900) + typed_custom('"persistance" = \'Permanent\'', per_char=24) \
+    + settle() + [
+    note('scope', ['troncon_de_route', 'troncon_hydrographique', 'construction_lineaire', 'commune']),
+    note_expr('permanent', 'troncon_hydrographique', '"persistance" = \'Permanent\''),
+    still('s4-01'), (0, cam('full', dur=1.1)), hold(200),
+] + identify() + [
+    hold(1200), still('s4-02'),
+    caption('2 · Target roads and structures that cross them'), (0, cam(FILTER_ZONE, dur=1.2, pad=40)),
+] + targets(['troncon_de_route', 'construction_lineaire'], per_item=220, close_after=500) \
+    + predicates(['cross'], per_item=260, close_after=500) + [
+    hold(300), still('s4-03'), caption('3 · Filter'), (200, cam('full', dur=1.1)),
+] + run_filter() + [
+    result('{troncon_de_route:,} road sections · {construction_lineaire:,} structures',
+           ['troncon_de_route', 'construction_lineaire']),
+    hold(2600), still('s4-04'),
+    caption('4 · Walk through them, the map follows'), (0, cam(explo, dur=1.2, pad=14)),
+] + chooser_pick('construction_lineaire', keep=900) \
+    + act(gb_check('mGroupBox_exploring_single_selection'), single_group, lead=600, after=400) \
+    + act('pushButton_checkable_exploring_tracking', enable('pushButton_checkable_exploring_tracking'),
+          lead=600, after=400) + [
+    (300, cam('full', dur=1.1)),
+] + walk(3, each=1700) + [still('s4-05'), (0, back_to_scene)] + settle() + [
+    result('{troncon_de_route:,} road sections · {construction_lineaire:,} structures',
+           ['troncon_de_route', 'construction_lineaire']), hold(2200),
+] + ending2(['troncon_de_route', 'construction_lineaire'])
+
+
+def expo():
+    return panel_of('exporting')
+
+
+def clean_export_dir():
+    """What an earlier take left in the export folder would go into the ZIP of this one."""
+    if os.path.isdir(EXPORT_DIR):
+        for name in os.listdir(EXPORT_DIR):
+            path = os.path.join(EXPORT_DIR, name)
+            if os.path.isfile(path):
+                os.remove(path)
+
+
+def zip_written():
+    """Re-armed until the ZIP of the export is on the disk."""
+    return not any(name.endswith('.zip') for name in (os.listdir(EXPORT_DIR) if os.path.isdir(EXPORT_DIR) else []))
+
+
+def exported():
+    """Log what the export wrote (the result line of the take says it)."""
+    names = sorted(os.listdir(EXPORT_DIR)) if os.path.isdir(EXPORT_DIR) else []
+    log(f'exported {[(n, os.path.getsize(os.path.join(EXPORT_DIR, n))) for n in names]}')
+
+
+# export, second cut (story 1): EXPORTING in its own panel left of the map, with its Export button; the dock keeps
+# EXPLORING and FILTERING, right. The six buttons of EXPORTING, one after the other, then Export.
+EXPORT2 = boot(S1_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_EXPORT}\'', 1.3) + scope('commune') + [
+    (0, clean_export_dir), (500, lay_out('exporting')), (1500, wait_idle()),
+] + recorded_scene(1.3) + [
+    note('scope', S1_TARGETS),
+    title('One commune, one file to hand over'), hold(500),
+    caption('1 · Choose the layers'), (0, cam(expo, dur=1.2, pad=14)), hold(300),
+] + act('pushButton_checkable_exporting_layers', enable('pushButton_checkable_exporting_layers'), lead=600, after=400) \
+    + combo_check('checkableComboBoxLayer_exporting_layers', S1_TARGETS, per_item=150, close_after=500) + [
+    (200, export_layers_changed), caption('2 · Projection, styles, format'),
+] + act('pushButton_checkable_exporting_projection', enable('pushButton_checkable_exporting_projection'),
+        lead=600, after=400) \
+    + act('pushButton_checkable_exporting_styles', enable('pushButton_checkable_exporting_styles'),
+          lead=600, after=400) \
+    + act('pushButton_checkable_exporting_datatype', enable('pushButton_checkable_exporting_datatype'),
+          lead=600, after=400) + [
+    (300, export_datatype), caption('3 · Folder and ZIP'),
+] + act('pushButton_checkable_exporting_output_folder', enable('pushButton_checkable_exporting_output_folder'),
+        lead=600, after=400) \
+    + act(folder_edit, lambda: folder_edit().clear(), lead=500, after=300) \
+    + type_into(folder_edit, EXPORT_DIR, per_char=20, clear=False) \
+    + act('pushButton_checkable_exporting_zip', enable('pushButton_checkable_exporting_zip'), lead=600, after=400) + [
+    (300, export_zip), hold(500), still('s1-04'), caption('4 · Export'), (0, cam('full', dur=1.1)),
+] + act('pushButton_action_export', export_with_recap, lead=700, after=500) + [(2400, mark('still:s1-05'))] \
+    + settle(3.0) + [
+    (300, speed(4.0)), (300, zip_written), (300, speed(1.0)),
+    (0, exported), result(f'{len(S1_TARGETS)} layers · one GeoPackage, styles kept · zipped'), hold(3200),
+] + ending2()
+
+
 CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'layout': LAYOUT, 'setup': SETUP,
 'metropole': METROPOLE, 'compare': COMPARE, 'sam': SAM, 'agent': AGENT, 'postgis': POSTGIS, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
          'brush': BRUSH, 'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT, 'processing': PROCESSING,
-         'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY}
+         'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY,
+         'noise2': NOISE2, 'bridges2': BRIDGES2, 'export2': EXPORT2}
 STEPS = CLIPS[CLIP]
 
 
