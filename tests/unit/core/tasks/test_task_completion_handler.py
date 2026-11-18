@@ -476,3 +476,42 @@ class TestFailureAfterTheSubsetIsSet:
                                                 failures=failures, refusals=refused)
         assert applied == 0
         assert refused == [("cables_id", "cables", "boom")]
+
+
+@pytest.mark.unit
+class TestDeferredLargeSubsets:
+    """2026-11-18: a subset over 1 MB is set by a timer after finished(); its refusal was never reported to the
+    caller (no history put back, the views of an unfilter dropped before it was set)."""
+
+    @pytest.fixture(autouse=True)
+    def _timer(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        self.timers = []
+        monkeypatch.setattr(_tch, "QTimer", types.SimpleNamespace(
+            singleShot=lambda delay, slot: self.timers.append(slot)))
+        monkeypatch.setattr(_tch, "QCoreApplication",
+                            types.SimpleNamespace(translate=lambda context, text: text), raising=False)
+
+    def _large(self):
+        return "fid IN (" + ",".join(str(i) for i in range(200_000)) + ")"
+
+    def test_the_deferred_layers_are_named_and_their_end_reported(self):
+        layer = _make_layer("parcels", "/data/x.gpkg|layername=parcels", provider="ogr")
+        deferred, ends = [], []
+        applied = apply_pending_subset_requests([(layer, self._large())], MagicMock(return_value=True),
+                                                failures=[], refusals=[], deferred=deferred,
+                                                on_deferred_done=ends.append)
+        assert (applied, deferred, ends) == (0, ["parcels_id"], [])
+        self.timers.pop()()
+        assert ends == [[]]
+
+    def test_a_deferred_refusal_is_reported_with_its_reason(self):
+        layer = _make_layer("parcels", "/data/x.gpkg|layername=parcels", provider="ogr")
+        error = MagicMock()
+        error.message.return_value = "too long"
+        layer.error.return_value = error
+        ends = []
+        apply_pending_subset_requests([(layer, self._large())], MagicMock(return_value=False),
+                                      deferred=[], on_deferred_done=ends.append)
+        self.timers.pop()()
+        assert ends == [[("parcels_id", "parcels", "too long")]]

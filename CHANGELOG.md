@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Filter: a filter over 1 MB (a long list of keys), set a moment after the others, is handled like them: when refused its history is put back, and an Unfilter or a Reset drops its PostgreSQL views only once it is set and nothing was refused (they were dropped while the layer still read them).
 - Filter: the warnings of a filter (a web service cut by the extent of the source, read up to its budget) come once the filters are set, and not for a layer whose filter was then refused: "Cut by the extent of the source" was shown right before "Filter not applied, previous filter kept" for the same layer.
 - Filter: a layer whose filter was set, then whose reload or repaint failed, is no longer counted as refused: it kept the new filter while its history went back to before the task, the message said "previous filter kept" and the next Unfilter went one step too far back.
 - Filter: a filter canceled by a second click on Filter no longer leaves its entry in the filter history. Its run() had written it already while its filter was never set: after the second filter, Unfilter applied the canceled one, and when the second filter was refused the first Unfilter seemed to do nothing. The canceled task deletes exactly the rows it inserted (by their ids), whatever the newer task wrote meanwhile, and a refused newer task no longer writes them back.

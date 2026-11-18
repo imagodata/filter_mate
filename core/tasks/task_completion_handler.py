@@ -267,6 +267,8 @@ def apply_pending_subset_requests(
     safe_set_subset_fn: Callable[[Any, str], bool],  # Callable[[QgsVectorLayer, str], bool]
     failures: Optional[List[str]] = None,
     refusals: Optional[List[Tuple[str, str, str]]] = None,
+    deferred: Optional[List[str]] = None,
+    on_deferred_done: Optional[Callable[[List[Tuple[str, str, str]]], None]] = None,
 ) -> int:
     """
     Apply pending subset string requests on main thread.
@@ -283,6 +285,10 @@ def apply_pending_subset_requests(
         refusals: When given, receives (layer id, layer name, reason) per refused
             filter (2026-11-16: its filter history is put back, the warning groups
             the layers by reason)
+        deferred: When given, receives the id of each layer whose subset (over 1 MB)
+            is set later, out of this call (2026-11-18)
+        on_deferred_done: Called once those subsets are set, with the (layer id, layer
+            name, reason) of those refused (2026-11-18)
 
     Returns:
         int: Number of successfully applied filters
@@ -583,7 +589,13 @@ def apply_pending_subset_requests(
     # Handle large expressions with deferred application
     if large_expressions:
         logger.info(f"  📦 Applying {len(large_expressions)} large expressions with deferred processing")
-        _schedule_deferred_filter_application(large_expressions, safe_set_subset_fn)
+        if deferred is not None:
+            for lyr, _expr in large_expressions:
+                try:
+                    deferred.append(lyr.id())
+                except (RuntimeError, AttributeError):
+                    deferred.append('')
+        _schedule_deferred_filter_application(large_expressions, safe_set_subset_fn, on_done=on_deferred_done)
 
     perf_mark_end("apply_subsets", f"{applied_count} layer(s) on the main thread")
     return applied_count
@@ -591,7 +603,8 @@ def apply_pending_subset_requests(
 
 def _schedule_deferred_filter_application(
     large_expressions: List[Tuple[Any, str]],  # List[Tuple[QgsVectorLayer, str]]
-    safe_set_subset_fn: Callable[[Any, str], bool]  # Callable[[QgsVectorLayer, str], bool]
+    safe_set_subset_fn: Callable[[Any, str], bool],  # Callable[[QgsVectorLayer, str], bool]
+    on_done: Optional[Callable[[List[Tuple[str, str, str]]], None]] = None,
 ) -> None:
     """
     Schedule deferred application of large filter expressions.
@@ -601,13 +614,21 @@ def _schedule_deferred_filter_application(
     Args:
         large_expressions: List of (layer, expression) tuples with large expressions
         safe_set_subset_fn: Function to safely set subset string
+        on_done: Called at the end with the (layer id, layer name, reason) of the
+            refused filters (2026-11-18: their history is put back, the views they
+            read kept, as for the filters set in the loop)
     """
     def apply_deferred_filters():
         """Apply large filter expressions with UI breathing room."""
+        refused: List[Tuple[str, str, str]] = []
         for lyr, expr in large_expressions:
+            in_place = False
             try:
                 if lyr and is_valid_layer(lyr):
-                    success = safe_set_subset_fn(lyr, expr)
+                    watch = _subset_failure_watch(lyr)
+                    with watch:
+                        success = safe_set_subset_fn(lyr, expr)
+                    in_place = bool(success)
                     if success:
                         lyr.triggerRepaint()
                         QgsMessageLog.logMessage(
@@ -616,6 +637,7 @@ def _schedule_deferred_filter_application(
                         )
                     else:
                         logger.error(f"Failed to apply deferred filter to {lyr.name()}")
+                        _note_refused(refused, lyr, watch.reason())
                         # 2026-10-17: deferred after the task messages: say it here
                         try:
                             iface.messageBar().pushWarning(
@@ -628,12 +650,20 @@ def _schedule_deferred_filter_application(
                             pass
             except (RuntimeError, AttributeError, ValueError) as e:
                 logger.error(f"Error applying deferred filter: {e}")
+                if not in_place:
+                    _note_refused(refused, lyr, str(e))
 
         # Final canvas refresh
         try:
             iface.mapCanvas().refresh()
         except (RuntimeError, AttributeError):
             pass
+
+        if on_done is not None:
+            try:
+                on_done(refused)
+            except Exception as e:  # catch-all safety net: a timer slot must not raise
+                logger.warning(f"End of the deferred filters not handled: {e}")
 
     # Defer to allow UI to breathe
     QTimer.singleShot(100, apply_deferred_filters)

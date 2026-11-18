@@ -87,7 +87,7 @@ def finished(monkeypatch):
                         types.SimpleNamespace(translate=lambda context, text: text), raising=False)
 
     def run(canceled, result=True, exception=None, task_action="filter", pending=None, task_parameters=None,
-            restore_history_fn=None, discard_history_fn=None, warning_messages=None):
+            restore_history_fn=None, discard_history_fn=None, warning_messages=None, close_connections_fn=None):
         handler.handle_finished(
             result=result, task_action=task_action, message_category="FilterLayers",
             is_canceled_fn=lambda: canceled, warning_messages=warning_messages or [],
@@ -98,6 +98,7 @@ def finished(monkeypatch):
             task_description="Filtering data", restore_selection_fn=MagicMock(), task_bridge=None,
             cleanup_safe_intersect_fn=MagicMock(), cleanup_canceled_mv_fn=cleanup_canceled,
             restore_history_fn=restore_history_fn, discard_history_fn=discard_history_fn,
+            close_connections_fn=close_connections_fn,
         )
 
     return types.SimpleNamespace(run=run, apply=apply, iface=iface, handler=handler, cleanup_mv=cleanup_mv,
@@ -215,7 +216,7 @@ def test_filters_applied_everywhere_still_say_success(finished):
 
 
 def _refuse(finished, refused=(("cables_id", "Cables", "lost"),), applied=0):
-    def apply(requests, fn, failures=None, refusals=None):
+    def apply(requests, fn, failures=None, refusals=None, **kwargs):
         for layer_id, name, reason in refused:
             failures.append(f"{name}: {reason}")
             refusals.append((layer_id, name, reason))
@@ -310,3 +311,47 @@ def test_no_warning_left_nothing_is_shown(finished, monkeypatch):
     _refuse(finished)
     finished.run(canceled=False, warning_messages=["Cables: Cut by the extent of the source"])
     display.assert_not_called()
+
+
+def _defer(finished, layer_id="parcels_id"):
+    """The apply loop leaves one subset over 1 MB to its timer; the test plays the timer."""
+    held = {}
+
+    def apply(requests, fn, failures=None, refusals=None, deferred=None, on_deferred_done=None):
+        deferred.append(layer_id)
+        held["done"] = on_deferred_done
+        return 0
+    finished.apply.side_effect = apply
+    return held
+
+
+@pytest.mark.parametrize("action", ["unfilter", "reset"])
+def test_the_views_wait_for_the_deferred_subsets(finished, action):
+    """2026-11-18: an unfilter putting back a subset over 1 MB (a long key list) on PostgreSQL dropped the views
+    the layer still read, 100 ms before its new subset was set."""
+    held = _defer(finished)
+    close = MagicMock()
+    params = {"task": {}}
+    finished.run(canceled=False, task_action=action, task_parameters=params, close_connections_fn=close)
+    finished.cleanup_mv.assert_not_called()
+    assert params["_apply_applied"] == 1  # counted as applied: no "nothing applied" before it is set
+    held["done"]([])
+    finished.cleanup_mv.assert_called_once_with()
+    close.assert_called_once_with()
+
+
+def test_a_deferred_subset_refused_puts_its_history_back_and_keeps_the_views(finished):
+    held = _defer(finished)
+    restore = MagicMock()
+    finished.run(canceled=False, task_action="unfilter", restore_history_fn=restore)
+    restore.assert_not_called()
+    held["done"]([("parcels_id", "Parcels", "connection lost")])
+    restore.assert_called_once_with(["parcels_id"])
+    finished.cleanup_mv.assert_not_called()
+
+
+def test_a_deferred_filter_keeps_its_views(finished):
+    held = _defer(finished)
+    finished.run(canceled=False, task_action="filter")
+    held["done"]([])
+    finished.cleanup_mv.assert_not_called()

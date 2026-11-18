@@ -3264,6 +3264,7 @@ class FilterEngineTask(QgsTask):
             cleanup_canceled_mv_fn=self._cleanup_canceled_task_views,
             restore_history_fn=self._restore_refused_history,
             discard_history_fn=self._discard_canceled_history,
+            close_connections_fn=self._close_main_thread_connections,
         )
         # 2026-10-17: the views of canceled tasks nothing reads, then the connection a view
         # cleanup opened on the main thread: closed now

@@ -114,6 +114,7 @@ class FinishedHandler:
         cleanup_canceled_mv_fn: Optional[Callable[[], None]] = None,
         restore_history_fn: Optional[Callable[[List[str]], None]] = None,
         discard_history_fn: Optional[Callable[[], None]] = None,
+        close_connections_fn: Optional[Callable[[], None]] = None,
     ) -> Tuple[List[str], List, Optional[Any]]:
         """Handle task completion with cleanup and user notifications.
 
@@ -154,6 +155,8 @@ class FinishedHandler:
                 filter the provider refused, as it was before the task (2026-11-16).
             discard_history_fn: For a canceled task: deletes the history rows its run()
                 inserted, its subsets being dropped (2026-11-18).
+            close_connections_fn: Closes the connections opened on the main thread, after
+                the view cleanup that waits for the deferred subsets (2026-11-18).
 
         Returns:
             Tuple of (cleared_warnings, cleared_pending_requests, cleared_ogr_source_geom)
@@ -190,23 +193,44 @@ class FinishedHandler:
         # Apply pending subset strings on main thread
         apply_failures: List[str] = []
         refusals: List[Tuple[str, str, str]] = []
+        deferred: List[str] = []
         applied_count = 0
+
+        def restore_refused_history(refused: List[Tuple[str, str, str]]) -> None:
+            # 2026-11-16: run() already wrote the history of the refused layers (entry
+            # added, last one or all deleted) while they keep their previous filter.
+            refused_layer_ids = [layer_id for layer_id, _name, _reason in refused if layer_id]
+            if refused_layer_ids and restore_history_fn is not None:
+                try:
+                    restore_history_fn(refused_layer_ids)
+                except Exception as e:  # catch-all safety net: the history must not break finished()
+                    logger.warning(f"Filter history of the refused layers not put back: {e}")
+
+        def deferred_done(deferred_refusals: List[Tuple[str, str, str]]) -> None:
+            # 2026-11-18: the subsets over 1 MB, set after finished() by a timer: their refusals put
+            # back the history too, and the views of a reset / unfilter are dropped only now, when
+            # nothing was refused (they were dropped before these layers left them).
+            restore_refused_history(deferred_refusals)
+            if task_action in ('reset', 'unfilter'):
+                if refusals or deferred_refusals:
+                    logger.info(f"Views kept: the filter of {len(refusals) + len(deferred_refusals)} "
+                                "layer(s) was refused")
+                else:
+                    cleanup_mv_fn()
+                    if close_connections_fn is not None:
+                        close_connections_fn()
+
         if pending_subset_requests:
             applied_count = apply_pending_subset_requests(
                 pending_subset_requests,
                 safe_set_subset_fn,
                 failures=apply_failures,
                 refusals=refusals,
+                deferred=deferred,
+                on_deferred_done=deferred_done,
             )
             logger.info(f"Applied {applied_count} pending subset requests")
-            # 2026-11-16: run() already wrote the history of the refused layers (entry
-            # added, last one or all deleted) while they keep their previous filter.
-            refused_layer_ids = [layer_id for layer_id, _name, _reason in refusals if layer_id]
-            if refused_layer_ids and restore_history_fn is not None:
-                try:
-                    restore_history_fn(refused_layer_ids)
-                except Exception as e:  # catch-all safety net: the history must not break finished()
-                    logger.warning(f"Filter history of the refused layers not put back: {e}")
+            restore_refused_history(refusals)
 
             # E6: Delegated canvas refresh to task_completion_handler
             schedule_canvas_refresh(
@@ -240,6 +264,8 @@ class FinishedHandler:
         elif task_action in ('reset', 'unfilter'):
             if refusals:
                 logger.info(f"Views kept: the filter of {len(refusals)} layer(s) was refused")
+            elif deferred:
+                logger.info(f"Views kept until the deferred filter of {len(deferred)} layer(s) is set")
             else:
                 cleanup_mv_fn()
 
@@ -251,7 +277,8 @@ class FinishedHandler:
         # (FilterResultHandler): no "Successfully removed filters" after them.
         if isinstance(task_parameters, dict):
             task_parameters['_apply_failures'] = list(apply_failures)
-            task_parameters['_apply_applied'] = applied_count
+            # 2026-11-18: a deferred subset counts as applied here (one refused later says so itself)
+            task_parameters['_apply_applied'] = applied_count + len(deferred)
 
         # Handle result messages
         self._handle_result_messages(
