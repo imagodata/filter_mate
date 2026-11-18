@@ -14,7 +14,9 @@ FilterMate on PostGIS: three cases of the 2026-11-12 PostgreSQL fixes (QGIS GUI 
 - ``native``: attribute filters of the source written in the native SQL of PostgreSQL (ILIKE, the
   tolerance of a real equality, a float division, a project variable, x_min of the geometry) or as a
   hybrid list of keys (regexp_match), each
-  compared with QGIS's own answer, then a geometric filter from the source filtered that way.
+  compared with QGIS's own answer; the source filtered again without Unfilter, replaced then ORed (2026-11-18:
+  the keys read on a copy of the layer without its subset, whose connection does not stay open); then a
+  geometric filter from the source filtered that way.
 - ``or_buffer``: a first filter with a buffer expression from a selection holding OR and BETWEEN,
   then a second one on another selection with the OR operator, to the same target and to a new one
   (#368: the distant layers followed the previous subset of the source, its OR written as AND). The
@@ -539,6 +541,58 @@ def native_steps(expression):
     return [configure_step, filter_step, check_step, unfilter_step]
 
 
+# 2026-11-18: the source filtered again without Unfilter, replaced then ORed, by expressions QGIS evaluates in part.
+# Replaced, the keys used to be read through the first subset (no list: the former conversion); they are read on a
+# copy of the layer without its subset, opened and closed in the task's thread: its connection must not stay.
+NATIVE_REFILTERS = [
+    ('x_min($geometry) > 700500 AND "id" <= 1000', None),
+    ('x_min($geometry) > 700800 AND "id" <= 1500', None),  # ids 1001 to 1500 lie outside the first subset
+    ('x_min($geometry) > 700900 AND "id" <= 2000', None),
+    ('x_min($geometry) < 700100 AND "id" <= 300', 'OR'),
+]
+
+
+def qgis_backends():
+    """The connections of QGIS itself to the database (psycopg2's have no application name)."""
+    return sql("SELECT count(*) FROM pg_stat_activity WHERE backend_type = 'client backend' "
+               "AND application_name <> '' AND pid <> pg_backend_pid()")[0][0]
+
+
+def native_refilter_steps(index, expression, operator):
+    def configure_step():
+        STATE['refilter_shown'] = sorted(feature['id'] for feature in layer(SRC).getFeatures())
+        return configure(expression, (), buffered=False, operator=operator)
+
+    def filter_step():
+        STATE['refilter_started'] = time.time()
+        return run_task('filter')
+
+    def check_step():
+        wanted = reference_ids(expression)
+        if operator == 'OR':
+            wanted = sorted(set(wanted) | set(STATE['refilter_shown']))
+        source = layer(SRC)
+        got = sorted(feature['id'] for feature in source.getFeatures())
+        subset = source.subsetString()
+        STATE.setdefault('refilter_backends', []).append(qgis_backends())
+        print(f"   subset({SRC}) = {subset[:200]!r}; filter and settle {time.time() - STATE['refilter_started']:.1f}s; "
+              f"QGIS connections {STATE['refilter_backends']}", flush=True)
+        check(f"native refilter {operator or 'replace'}: {expression}: the source keeps QGIS's {len(wanted)} features, "
+              "as a list of keys", got == wanted and '"id" IN (' in subset, f"count={len(got)} expected={len(wanted)}")
+
+    for function, name in ((configure_step, 'configure'), (filter_step, 'filter'), (check_step, 'check')):
+        function.__name__ = f"s_native_refilter_{name}_{index}"
+    return [configure_step, filter_step, check_step]
+
+
+def s_native_refilter_end():
+    backends = STATE.get('refilter_backends', [])
+    check('native refilter: the copies without subset leave no connection open',
+          len(backends) > 2 and max(backends[1:]) <= backends[1], f"QGIS connections after each filter {backends}")
+    set_combine_operator(None)
+    return run_task('unfilter')
+
+
 def s_native_geometric_configure():
     return configure(NATIVE_GEOMETRIC, (TGT_A,), buffered=False)
 
@@ -660,6 +714,8 @@ CASES = {
     'no_psycopg2': [s_plain_configure, s_plain_filter, s_plain_check, s_unfilter, s_unfilter_check,
                     s_buffer_configure, s_buffer_filter, s_buffer_check, s_no_connection_check],
     'native': [step for expression in NATIVE_EXPRESSIONS for step in native_steps(expression)]
+    + [step for index, (expression, operator) in enumerate(NATIVE_REFILTERS)
+       for step in native_refilter_steps(index + 1, expression, operator)] + [s_native_refilter_end]
     + [s_native_geometric_configure, s_plain_filter, s_native_geometric_check],
     'or_buffer': [s_first_configure, s_first_filter, s_first_check, s_second_configure, s_second_filter,
                   s_second_check],

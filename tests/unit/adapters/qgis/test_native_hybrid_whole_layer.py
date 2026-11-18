@@ -27,6 +27,7 @@ EXPRESSIONS = {
     "all": ({ALL_ATTRIBUTES}, set(), set(), lambda feature: feature["pop"] > 2),
     "virtual": ({"double_pop"}, set(), set(), lambda feature: True),
     "by_id": (set(), {"$id"}, set(), lambda feature: feature["fid"] > 2),
+    "geometric": ({"pop"}, set(), set(), lambda feature: feature["pop"] > 2),  # reads the geometry
 }
 
 
@@ -47,8 +48,8 @@ class _Fields:
 class _Layer:
     """A layer of rows {fid, pop}: ``shown`` are the fids its subset keeps."""
 
-    def __init__(self, name, rows, subset="", shown=None, fields=("fid", "pop"), editable=False):
-        self._name, self._rows, self._subset, self._editable = name, rows, subset, editable
+    def __init__(self, name, rows, subset="", shown=None, fields=("fid", "pop"), editable=False, wkb=3):
+        self._name, self._rows, self._subset, self._editable, self._wkb = name, rows, subset, editable, wkb
         self._shown = set(shown) if shown is not None else {row["fid"] for row in rows}
         self._fields = _Fields(fields)
         self.reads = []
@@ -61,6 +62,9 @@ class _Layer:
 
     def isEditable(self):
         return self._editable
+
+    def wkbType(self):
+        return self._wkb
 
     def fields(self):
         return self._fields
@@ -75,6 +79,7 @@ class _Layer:
 
 class _Expression:
     def __init__(self, text):
+        self.text = text
         self.columns, self.functions, self.variables, self.value = EXPRESSIONS[text]
 
     def hasParserError(self):
@@ -93,7 +98,7 @@ class _Expression:
         return set(self.variables)
 
     def needsGeometry(self):
-        return False
+        return self.text == "geometric"
 
     def evaluate(self, context):
         return self.value(context.feature)
@@ -250,6 +255,18 @@ def test_every_attribute_is_read_on_a_copy_with_the_same_fields(translation, mon
     _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
 
     assert _hybrid(translation, _filtered_layer(), "all", whole_layer=True) == '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)'
+
+
+def test_a_copy_without_the_geometry_of_the_layer_gives_no_list(translation, monkeypatch):
+    copy = _Layer("zones (unfiltered)", ROWS, wkb=100)  # read back without its geometry column
+    _with_copy(translation, monkeypatch, copy)
+
+    with pytest.raises(translation.Unsupported):
+        _hybrid(translation, _filtered_layer(), "geometric", whole_layer=True)
+    assert copy.reads == []
+    _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
+    assert _hybrid(translation, _filtered_layer(), "geometric", whole_layer=True) == (
+        '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)')
 
 
 def test_dollar_id_of_a_postgresql_copy_gives_no_list(translation, monkeypatch):

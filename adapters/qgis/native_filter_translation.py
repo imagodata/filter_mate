@@ -496,11 +496,15 @@ def _check_copy_reads_like_layer(layer, copy, names, whole, dialect):
 
     The expression is prepared in the context of the layer: each field is read
     at its index among the layer's fields, which the copy's must give back
-    (a joined or virtual field is not in the copy). ``$id`` of a PostgreSQL
-    layer is a number its provider gives each feature (the key itself only
-    for one integer column): it may be another one in the copy.
+    (a joined or virtual field is not in the copy). Its geometry must be of
+    the layer's type (a URI read back without its geometry column would give
+    none). ``$id`` of a PostgreSQL layer is a number its provider gives each
+    feature (the key itself only for one integer column): it may be another
+    one in the copy.
     """
     from qgis.core import QgsFeatureRequest
+    if whole.needsGeometry() and copy.wkbType() != layer.wkbType():
+        raise Unsupported('The source gives another geometry than the layer: {}'.format(copy.wkbType()))
     layer_fields, copy_fields = layer.fields(), copy.fields()
     if QgsFeatureRequest.ALL_ATTRIBUTES in names:
         if list(layer_fields.names()) != list(copy_fields.names()):
