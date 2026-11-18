@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Dock: FILTERING and EXPORTING compact. Their rows keep their own height, one gap (6 px) apart, at the top of the section; the room left stays under them, the rail band ends with the last row, and a section shorter than its rows scrolls. Each key button sits in front of its row in every host (dock, panel of QGIS, short dock): its place is now computed from the rows (it drifted by 1 px per row, the last button ended under its row and was cut in a short section, 10 to 17 px off after a change of the rows). The right margin of FILTERING, EXPORTING and EXPLORING is the gap to a scroll bar only while one shows: the widgets end as far from the right edge as the rails are from the left one. New setting `APP.DOCKWIDGET.SECTION_HEIGHT`: `fit` (default) or `fill` (the rows spread over the whole height, as in 5.1.1), applied at once, asked in the layout step of *Set up FilterMate*, translated in the 34 languages.
 - Dock: Ctrl+Z and Ctrl+Y typed in the QGIS panel of AGENT undo and redo the steps of the agent, not a filter of the dock (the panel of AGENT shared the shortcuts of the dock, which walk the filters when AGENT is not in the dock). With FILTERING in the same panel they keep to the filters.
 - Log: no more warning at every start-up about the auto-current-layer button having no widget to control (it has none on purpose); a name that matches no widget still warns.
 - Dock: after the dock was closed and opened again, the feature picker of EXPLORING was no longer detached before a filter changed the layer's subset (the guard against the `sqlite3_bind_int64` crash did not find the dock). The dock registers itself again when it is shown.
@@ -14,6 +15,7 @@ All notable changes to FilterMate will be documented in this file.
 - Tools: `scripts/tally_forms.py` creates the Tally forms in English and French: usage (with a rating and a review), review, training and services, feature suggestion, testers, and the Cloud waitlist.
 - Site: a feedback page (`feedback.html`, `feedback.fr.html`) with the usage, review, feature, testers and services forms, linked from every footer, the Cloud page, the README and the GitHub issue chooser; the generator of the translated home pages works again since the Cloud link (#511).
 - Point clouds: a QGIS built without PDAL (the qgis/qgis Docker images, some Linux packages) exports LAZ, LAS and COPC through the `pdal` tool when it is installed. It already clipped the cloud with that tool, then refused to export the clip, and the ZIP of a raster and point cloud export held the raster alone. A cloud with a filter expression is still refused, the tool cannot apply it.
+- Filter: a GeoPackage accepted a filter its SQL could not run (a geometric function it does not have, such as `bounds_width` or `num_points`, on a layer already filtered, under AND NOT, or past a million features): the layer then showed no feature and the filter was said to be applied. Such a filter is now refused, the previous one stays, and the message says what the source lacks.
 
 ## [5.1.1] - 2026-11-17
 

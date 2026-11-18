@@ -11601,9 +11601,19 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <translation>ส่วนหัว</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Rows</source>
+        <translation>แถว</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>วิธีที่แผงแสดงรายการส่วนของตน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
+        <source>How the rows of FILTERING and EXPORTING use the height</source>
+        <translation>แถวของ FILTERING และ EXPORTING ใช้ความสูงอย่างไร</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -11624,6 +11634,26 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
         <source>The name of each section on its own line.</source>
         <translation>ชื่อของแต่ละส่วนอยู่บนบรรทัดของตัวเอง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>Packed at the top</source>
+        <translation>ชิดด้านบน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>The default: each row at its own height, the room left under them.</source>
+        <translation>ค่าเริ่มต้น: แต่ละแถวสูงตามขนาดของตัวเอง พื้นที่ที่เหลืออยู่ด้านล่าง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>Spread over the height</source>
+        <translation>กระจายเต็มความสูง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>The rows share the whole height of the section.</source>
+        <translation>แถวต่างๆ แบ่งความสูงทั้งหมดของส่วนนี้</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>

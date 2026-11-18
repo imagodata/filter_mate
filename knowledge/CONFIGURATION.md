@@ -29,6 +29,7 @@ config.json
 │   │   ├── DOCK_POSITION
 │   │   ├── ACTION_BAR_POSITION
 │   │   ├── SECTION_HEADERS
+│   │   ├── SECTION_HEIGHT
 │   │   ├── ACTION_BAR_VERTICAL_ALIGNMENT
 │   │   ├── PushButton/ (ICONS, ICONS_SIZES)
 │   │   └── COLORS/ (ACTIVE_THEME, THEMES)
@@ -102,6 +103,16 @@ config.json
   along its rail to put the sections in another order (kept for the next time)
 - `stacked`: the name of each section on its own line, one above the other; the order is the usual one
 - Applied at once. The right-click menu of a section (its own panel, group, merge) is on its chip or on its header
+
+### Section Height
+- **Key:** `APP.DOCKWIDGET.SECTION_HEIGHT`
+- **Default:** `fit`
+- **Choices:** `fit`, `fill`
+- `fit`: the rows of FILTERING and EXPORTING keep their own height, one gap (6 px) apart, at the top of the section;
+  the room left stays under them, the rail band ends with the last row, a section shorter than its rows scrolls
+- `fill`: the rows spread over the whole height of the section (the layout of 5.0 to 5.1.1)
+- Applied at once; in the dock, in a panel of QGIS and with the headers stacked alike. A configuration written
+  before the setting gets `fit`. The size of the widgets themselves is `UI_PROFILE`
 
 ### Action Bar Vertical Alignment
 - **Key:** `APP.DOCKWIDGET.ACTION_BAR_VERTICAL_ALIGNMENT`

@@ -1049,13 +1049,14 @@ def section_enabled(config_data: Any, key: str) -> bool:
 
 def apply_section_options(dock: Any) -> list:
     """Show or hide FILTERING and EXPORTING as the configuration says, and list the sections by rails or by headers
-    stacked (``APP.DOCKWIDGET.SECTION_HEADERS``); the keys of the sections whose state changed, ``headers`` when
-    the way they are listed did."""
+    stacked (``APP.DOCKWIDGET.SECTION_HEADERS``), and lay out the rows of FILTERING and EXPORTING
+    (``APP.DOCKWIDGET.SECTION_HEIGHT``); the keys of the sections whose state changed, ``headers`` when the way they
+    are listed did, ``height`` when the rows were laid out another way."""
     sections = getattr(dock, "_fm_sections", None)
-    if sections is None:
-        return []
-    changed = []
     config_data = getattr(dock, "CONFIG_DATA", None) or {}
+    if sections is None:
+        return _apply_section_height(dock, config_data, [])
+    changed = []
     for key in SECTION_PAGES:
         wanted = section_enabled(config_data, key)
         try:
@@ -1075,6 +1076,19 @@ def apply_section_options(dock: Any) -> list:
                 manager.sync_sections()
     except RuntimeError:  # the dock went away
         pass
+    return _apply_section_height(dock, config_data, changed)
+
+
+def _apply_section_height(dock: Any, config_data: Any, changed: list) -> list:
+    """The rows of FILTERING and EXPORTING one gap apart, or spread (``APP.DOCKWIDGET.SECTION_HEIGHT``): ``changed``
+    with ``height`` added when they were laid out another way. A failure here loses no other change."""
+    try:
+        from .mockup_layout import lay_out_rows, section_height
+        mode = section_height(config_data)
+        if dock.property("fm_section_height") != mode and lay_out_rows(dock, mode):
+            changed.append("height")
+    except Exception as exc:  # the dock went away (RuntimeError), or a form without the rows
+        logger.warning(f"Rows of the sections not laid out: {exc}")
     return changed
 
 

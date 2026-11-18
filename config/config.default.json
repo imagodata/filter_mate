@@ -143,6 +143,14 @@
         ],
         "description": "How the panel lists its sections: 'rail' (one row of chips per stack: a click on a chip opens its section, a chip is dragged to another place), 'stacked' (the name of each section on its own line, one above the other)"
       },
+      "SECTION_HEIGHT": {
+        "value": "fit",
+        "choices": [
+          "fit",
+          "fill"
+        ],
+        "description": "Height of the rows of FILTERING and EXPORTING: 'fit' (each row at its own height, one gap apart, at the top of the section; the room left stays under them, and a short section scrolls), 'fill' (the rows spread over the whole height of the section)"
+      },
       "ACTION_BAR_VERTICAL_ALIGNMENT": {
         "value": "top",
         "choices": [
