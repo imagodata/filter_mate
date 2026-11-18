@@ -683,6 +683,28 @@ class TestToolsLeaveAtACompaction:
         chat.add_user_text("f")
         assert chat.dropped == () and chat.tool_names == ("read", "zoom")
 
+    def test_the_summary_still_names_what_a_tool_taken_out_changed(self):
+        """Audit 2026-11-18: ``writes`` came from the tools of the moment, so a write tool dropped at a compaction
+        left "asked ... | answered ..." with no "changed:" when its request was summed up later."""
+        chat = self.chat()
+        self.request(chat, "a")
+        chat.offer([self.TOOLS["style"]])
+        chat.add_user_text("b")
+        chat.accept_turn(turn(STOP_TOOL_USE, ToolCallPart("c1", "style", {"layer": "roads"})))
+        chat.add_tool_results([ToolResultPart("c1", "ok" * 500)])
+        chat.accept_turn(turn(STOP_END, TextPart("styled")))
+        for text in "cdef":
+            self.request(chat, text)
+        chat._limits = AgentLimits(max_history_chars=800)  # the results go first: the idle tool leaves alone
+        chat.add_user_text("g")
+        assert chat.dropped == ("style",) and not chat.summarized
+        chat.accept_turn(turn(STOP_END, TextPart("done")))
+        chat._limits = AgentLimits(max_history_chars=200)
+        chat.add_user_text("h")
+        assert chat.summarized
+        summary = chat.messages[0].parts[0].text
+        assert "changed: style roads" in summary
+
 
 class TestContextAfterACompaction:
     """Lot 3: the session asks the whole context at the first request and after it rewrote the history."""
@@ -722,6 +744,68 @@ class TestHistoryBudget:
         step = int((CONTEXT_STEPS[1] - ANSWER_ROOM) * CHARS_PER_TOKEN)
         assert history_budget("ollama", 30_000) == step - 30_000
         assert history_budget("ollama", step) == 20_000  # at least
+
+    def test_the_tools_offered_later_take_their_weight_off_the_budget(self):
+        """Audit 2026-11-18: the budget counted the core tools only; with ten more offered by a skill the request
+        went from the 32k step to the 64k one (the model loaded again, its cache doubled) and no compaction ran."""
+        from core.agent.compaction import _size
+        from core.agent.families import split_tools
+        from core.agent.providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS
+        from core.agent.session import history_budget, tools_weight
+        start, more = split_tools(chat_tools())
+        prompt = 7_000
+        step = int((CONTEXT_STEPS[1] - ANSWER_ROOM) * CHARS_PER_TOKEN)
+
+        def history_of(chat):
+            return sum(_size(message) for message in chat.messages)
+
+        def run(shrinks):
+            budget = history_budget("ollama", prompt + tools_weight(start))
+            provider = create_provider(ProviderConfig("ollama", "m", base_url="http://localhost:11434"))
+            chat = AgentSession(provider, start, "p" * prompt,
+                                AgentLimits(max_history_chars=budget, shrinks_with_tools=shrinks),
+                                core={tool.name for tool in start})
+            for index in range(3):  # a history just under the budget of the start
+                chat.add_user_text(f"r{index}")
+                chat.accept_turn(turn(STOP_END, TextPart("a" * ((budget - 1_000) // 3))))
+            chat.offer(more[:10])
+            chat.add_user_text("next")
+            return chat, prompt + tools_weight(chat.tools) + history_of(chat)
+
+        grown, total = run(True)
+        assert grown.summarized and total <= step  # compacted before the request needed the 64k step
+        _, total = run(False)
+        assert total > step  # what the budget of the start alone gave
+
+    def test_idle_tools_leave_before_the_history_is_summed_up(self):
+        """Review 2026-11-18: the budget was worked out before the idle tools were taken out: the history was summed
+        up with loss because of tools that left at once after."""
+        from core.agent.compaction import _size
+        from core.agent.families import split_tools
+        from core.agent.session import history_budget, tools_weight
+        start, more = split_tools(chat_tools())
+        budget = history_budget("ollama", 7_000 + tools_weight(start))
+        provider = create_provider(ProviderConfig("ollama", "m", base_url="http://localhost:11434"))
+        chat = AgentSession(provider, start, "p" * 7_000, AgentLimits(max_history_chars=budget,
+                                                                      shrinks_with_tools=True),
+                            core={tool.name for tool in start})
+        grown = tools_weight(more[:10])
+        answer = TextPart("a" * ((budget - grown) // 5))  # five answers fit the budget of the start less the tools
+        chat.add_user_text("r0")
+        chat.accept_turn(turn(STOP_END, answer))
+        chat.offer(more[:10])
+        for index in range(1, 5):  # four more requests: the ten tools stay unused for more than three
+            chat.add_user_text(f"r{index}")
+            chat.accept_turn(turn(STOP_END, answer))
+        assert budget - grown < sum(_size(message) for message in chat.messages) + 100 < budget
+        chat.add_user_text("next")
+        assert chat.dropped and not chat.summarized and not chat.rewritten
+        assert chat.tool_names == tuple(tool.name for tool in start)
+
+    def test_the_budget_of_a_remote_provider_does_not_move(self):
+        chat = session()
+        chat.offer([ToolSpec("zoom", "z", {"type": "object", "properties": {}})])
+        assert chat.history_limit() == chat._limits.max_history_chars
 
     def test_the_result_cap_is_8000(self):
         assert MAX_RESULT_CHARS == 8000

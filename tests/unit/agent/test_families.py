@@ -174,3 +174,42 @@ def test_nothing_is_marked_added_when_the_offer_fails():
     with pytest.raises(ToolFailure, match="over"):
         run({"names": ["a"]})
     assert "a" in available
+
+
+def _named(text):
+    import re
+    return {tool.name for tool in chat_tools() if re.search(r"\b%s\b" % re.escape(tool.name), text)}
+
+
+def test_the_state_header_names_core_tools_only():
+    """Audit 2026-11-18: it named list_layers and filter_state, held until use_tools adds them: a direct call by
+    the model cost a round trip (the HELD answer)."""
+    from core.agent.project_summary import HEADER
+    assert _named(HEADER) and _named(HEADER) <= CORE
+
+
+def test_the_settings_link_of_the_missing_sources_says_how_to_get_it():
+    from core.agent.chat_setup import chat_instructions
+    index = [tool for tool in chat_tools() if tool.name not in CORE][:5] + [
+        tool for tool in chat_tools() if tool.name == "show_settings_link"]
+    with_index, without = chat_instructions([], available=index), chat_instructions([])
+    assert "show_settings_link" not in CORE
+    # the mention follows the tool, so that "it" cannot be read as the sources
+    assert "call show_settings_link (added by use_tools) with target sources;" in with_index
+    assert "use_tools" not in without  # the families off: every tool is offered, and use_tools is not
+    assert "show_settings_link with target sources;" in without
+
+
+def test_a_settings_link_turned_off_is_not_sent_for():
+    """Review 2026-11-18: use_tools cannot add a tool set to "never": the hint was false, and so was the link."""
+    from core.agent.chat_setup import MISSING_TITLE, chat_instructions
+    index = [tool for tool in chat_tools() if tool.name == "show_settings_link"]
+
+    def note(text):
+        return text.split(MISSING_TITLE)[1]  # the index above lists the tool: only the note is read
+    for text in (chat_instructions([], available=index, settings_link=False),
+                 chat_instructions([], settings_link=False)):
+        assert "show_settings_link" not in note(text) and "never guess coordinates" in note(text)
+        assert "ticked in the Sources tab of the settings of the agent;" in note(text)
+    # a tool the conversation does not have is no more offered by the note
+    assert "show_settings_link" not in note(chat_instructions([], offered=["describe_layer"], available=index))

@@ -17,8 +17,9 @@ MAX_SELECTIONS = 10
 MAX_FIELDS = 40  # of the active layer, in the state sent with a request
 MAX_CHANGES = 12
 MAX_NAMES = 5
-HEADER = ("Project when this request was sent (for reference; list_layers, describe_layer and filter_state give "
-          "the details):")
+MAX_CRS_CHARS = 80  # of a CRS that has no identifier: its description
+# Only a tool of the core is named (core/agent/families.py): the others take a call to use_tools first.
+HEADER = "Project when this request was sent (for reference; describe_layer gives the details of a layer):"
 CHANGES_HEADER = "Changed in QGIS since your last answer (by the user, or another application):"
 # Token diet, lot 3: a request after the first sends what changed only, or this line.
 UNCHANGED = "Project unchanged since the last request."
@@ -49,8 +50,13 @@ def _coordinates(extent: Sequence[float]) -> str:
     return " ".join(f"{item:.{digits}f}" for item in extent)
 
 
+def _crs(value: Any) -> str:
+    """A CRS as the view gives it (an identifier, or the short description of one that has none), cut."""
+    return _cut(str(value or ""), MAX_CRS_CHARS)
+
+
 def _map_line(view: Mapping[str, Any]) -> str:
-    project_crs = str(view.get("project_crs") or "")
+    project_crs = _crs(view.get("project_crs"))
     parts: List[str] = [f"CRS {project_crs}"] if project_crs else []
     if view.get("available"):
         scale = view.get("scale")
@@ -58,7 +64,7 @@ def _map_line(view: Mapping[str, Any]) -> str:
             parts.append(f"scale 1:{round(scale)}")
         extent = _extent(view.get("extent"))
         if extent is not None:
-            canvas_crs = str(view.get("canvas_crs") or project_crs)
+            canvas_crs = _crs(view.get("canvas_crs")) or project_crs
             parts.append(f"visible extent{f' ({canvas_crs})' if canvas_crs != project_crs else ''} "
                          f"xmin ymin xmax ymax = {_coordinates(extent)}")
         active = view.get("active_layer_name")
@@ -87,8 +93,12 @@ def _layer_line(row: Mapping[str, Any], project_crs: str) -> str:
 
 
 def project_state(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapping[str, Any]] = (),
-                  view: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
-    """What two requests are compared on: the layers with their filter and visibility, the selections, the view."""
+                  view: Optional[Mapping[str, Any]] = None,
+                  previous: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
+    """What two requests are compared on: the layers with their filter and visibility, the selections, the view.
+
+    ``previous``: the state before. A reading of the fields of the active layer that failed once (no field at all)
+    keeps the fields of ``previous`` when the active layer is the same: the model was told them already."""
     view = view or {}
     rows: Dict[str, Dict[str, Any]] = {}
     for row in layers:
@@ -99,8 +109,15 @@ def project_state(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapp
     selected = {str(item.get("layer_id") or item.get("name", "")): (str(item.get("name", "")),
                                                                      int(item.get("selected_count") or 0))
                 for item in selections if isinstance(item, Mapping)}
-    return {"layers": rows, "selections": selected, "active": str(view.get("active_layer_name") or ""),
-            "active_fields": _fields_text(view),
+    project_crs = _crs(view.get("project_crs"))
+    state = {"layers": rows, "selections": selected, "active": str(view.get("active_layer_name") or ""),
+             "active_id": str(view.get("active_layer_id") or ""), "active_fields": _fields_text(view),
+             "active_field_names": frozenset(str(name) for name in (view.get("active_fields") or ()) if str(name))}
+    if previous and not state["active_field_names"] and _same_layer(previous, state):
+        state["active_fields"] = previous.get("active_fields", "")
+        state["active_field_names"] = previous.get("active_field_names", frozenset())
+    return {**state,
+            "crs": project_crs, "canvas_crs": _crs(view.get("canvas_crs")) or project_crs,
             "extent": _extent(view.get("extent")) if view.get("available") else None}
 
 
@@ -130,6 +147,57 @@ def _moved(before: Optional[Sequence[float]], after: Optional[Sequence[float]]) 
     return any(abs(a - b) > size * _SAME_VIEW for a, b in zip(before, after))
 
 
+MAX_OLD_NAME = 60  # of a renamed layer: it only says which layer it was
+
+
+def _renamed(kept: Sequence[Any]) -> List[str]:
+    """``old -> new`` for each layer of ``kept`` (pairs of rows) whose name changed."""
+    return [f"{_cut(was['name'], MAX_OLD_NAME)} -> {_cut(row['name'], 100)}" for was, row in kept
+            if was["name"] != row["name"]]
+
+
+def too_many_renames(before: Mapping[str, Any], after: Mapping[str, Any]) -> bool:
+    """More renamed layers than the line of changes names: the model could not learn their new names from it."""
+    old, new = before.get("layers", {}), after.get("layers", {})
+    return len(_renamed([(old[key], row) for key, row in new.items() if key in old])) > MAX_NAMES
+
+
+def _same_layer(before: Mapping[str, Any], after: Mapping[str, Any]) -> bool:
+    """The active layer of two states is one layer: by id, by name for a state that has none."""
+    if before.get("active_id") and after.get("active_id"):
+        return before["active_id"] == after["active_id"]
+    return before.get("active", "") == after.get("active", "")
+
+
+def _view_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List[str]:
+    """The lines about the map and the active layer: CRS, active layer and its fields, where the view looks now.
+
+    The model keeps the state of its first request in its history: what moved is said with its new value, a
+    coordinate or a CRS it would otherwise go on assuming."""
+    lines: List[str] = []
+    crs, canvas = after.get("crs", ""), after.get("canvas_crs", "")
+    project_moved = bool(crs and before.get("crs") and crs != before["crs"])
+    if project_moved:
+        lines.append(f"- project CRS is now: {crs}")
+    was_canvas = before.get("canvas_crs", "")
+    if canvas and was_canvas and canvas != was_canvas and not (project_moved and canvas == crs):
+        lines.append(f"- map canvas CRS is now: {canvas}")
+    fields = after.get("active_fields") or ""
+    if not after.get("active"):
+        if before.get("active"):
+            lines.append("- no active layer now")
+    elif not _same_layer(before, after):
+        lines.append(f"- active layer is now: {_cut(after['active'], 100)}" + (f" (fields: {fields})" if fields else ""))
+    elif after.get("active_field_names") and after["active_field_names"] != before.get("active_field_names"):
+        # The names as a set (their order is not a change), and none read is a reading that failed, not no field.
+        lines.append(f"- fields of the active layer are now: {fields}")
+    extent = after.get("extent")
+    if _moved(before.get("extent"), extent):
+        where = f" ({canvas})" if canvas and canvas != crs else ""
+        lines.append(f"- the map view moved: visible extent{where} xmin ymin xmax ymax = {_coordinates(extent)}")
+    return lines
+
+
 def project_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List[str]:
     """One line per kind of change between two ``project_state``: what the user did between two requests."""
     old, new = before.get("layers", {}), after.get("layers", {})
@@ -142,6 +210,12 @@ def project_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List
     say("layers added", [row["name"] for key, row in new.items() if key not in old])
     say("layers removed", [row["name"] for key, row in old.items() if key not in new])
     kept = [(old[key], row) for key, row in new.items() if key in old]
+    # By id, so a renamed layer is not a removed one and a new one: the model calls it by its new name, which is
+    # all the line is worth: each side is cut alone, the new one at the length of a layer line.
+    renamed = _renamed(kept)
+    if renamed:
+        more = f" and {len(renamed) - MAX_NAMES} more" if len(renamed) > MAX_NAMES else ""
+        lines.append("- layers renamed: " + ", ".join(renamed[:MAX_NAMES]) + more)
     say("filter changed", [row["name"] for was, row in kept if row["filter"] and row["filter"] != was["filter"]])
     say("filter removed", [row["name"] for was, row in kept if was["filter"] and not row["filter"]])
     say("now shown", [row["name"] for was, row in kept if row["visible"] and not was["visible"]])
@@ -150,12 +224,12 @@ def project_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List
     say("selection changed", [f"{name} ({count} selected)" for key, (name, count) in selected.items()
                               if key in new and was_selected.get(key, ("", 0))[1] != count])
     say("selection cleared", [name for key, (name, _) in was_selected.items() if key in new and key not in selected])
-    if after.get("active") and after.get("active") != before.get("active"):
-        fields = after.get("active_fields") or ""
-        lines.append(f"- active layer is now: {_cut(after['active'], 100)}" + (f" (fields: {fields})" if fields else ""))
-    if _moved(before.get("extent"), after.get("extent")):
-        lines.append("- the map view moved")
-    return lines[:MAX_CHANGES]
+    # The CRS, the active layer and the view first before the cap: what the model most needs not to be wrong on.
+    view = _view_changes(before, after)
+    room = MAX_CHANGES - len(view)
+    if len(lines) > room:
+        lines = lines[:room - 1] + [f"- and {len(lines) - room + 1} more changes (read the layers to see them)"]
+    return lines + view
 
 
 def project_summary(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapping[str, Any]] = (),
@@ -181,7 +255,7 @@ def project_summary(layers: Iterable[Mapping[str, Any]], selections: Iterable[Ma
     fields = _fields_text(view)
     if fields:
         lines.append(f"Fields of the active layer: {fields}")
-    project_crs = str(view.get("project_crs") or "")
+    project_crs = _crs(view.get("project_crs"))
     lines.extend(_layer_line(row, project_crs) for row in rows[:MAX_LAYERS])
     if len(rows) > MAX_LAYERS:
         lines.append(f"- and {len(rows) - MAX_LAYERS} more layers")
@@ -207,5 +281,9 @@ def project_update(layers: Iterable[Mapping[str, Any]], selections: Iterable[Map
     the request after the first, whose history holds the whole state already (token diet, lot 3)."""
     rows = list(layers)
     chosen = [item for item in selections if isinstance(item, Mapping)]
-    changes = project_changes(before or {}, project_state(rows, chosen, view or {}))
+    state = project_state(rows, chosen, view or {})
+    if before and too_many_renames(before, state):
+        # The line cannot name them all: the whole state goes again, as after a rewrite of the history.
+        return project_summary(rows, chosen, view)
+    changes = project_changes(before or {}, state)
     return "\n".join([CHANGES_HEADER] + changes) if changes else UNCHANGED
