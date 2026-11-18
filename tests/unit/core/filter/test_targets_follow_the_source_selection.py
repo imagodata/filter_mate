@@ -10,8 +10,9 @@ SpatiaLite / OGR read x (refused when it keeps nothing). The selection is read
 as those backends read it (selection_reads_whole_layer): through the old subset
 under AND and AND NOT, on the whole layer under OR and replace.
 
-The facade is loaded by path under the conftest's mocked ``filter_mate`` tree
-(see test_source_subset_after_task_recorded.py).
+The facade is loaded by path under the mocked ``filter_mate`` tree of tests/unit/core/tasks/conftest.py
+(see test_source_subset_after_task_recorded.py). 2026-11-18: put in place by the fixture, as that conftest
+no longer leaves it in ``sys.modules`` for the other directories.
 """
 import importlib.util
 import sys
@@ -31,6 +32,8 @@ OLD = '"src"."dep" = \'31\''
 
 @pytest.fixture
 def facade_module():
+    from tests.unit.core.tasks import conftest as tasks_conftest
+    saved = tasks_conftest._install()
     name = "filter_mate.core.tasks.expression_facade_handler"
     spec = importlib.util.spec_from_file_location(name, _TASKS_DIR / "expression_facade_handler.py")
     module = importlib.util.module_from_spec(spec)
@@ -40,6 +43,7 @@ def facade_module():
         yield module
     finally:
         sys.modules.pop(name, None)
+        tasks_conftest._restore(saved)
 
 
 def _task(old_subset, operator):

@@ -85,6 +85,9 @@ def finished(monkeypatch):
     monkeypatch.setattr(module, "QgsProject", MagicMock(instance=MagicMock(return_value=project)))
     monkeypatch.setattr(module, "QCoreApplication",
                         types.SimpleNamespace(translate=lambda context, text: text), raising=False)
+    # 2026-11-18: a sibling suite may leave the MagicMock class itself as qgis.core's QgsMessageLog / Qgis
+    monkeypatch.setattr(module, "QgsMessageLog", MagicMock())
+    monkeypatch.setattr(module, "Qgis", MagicMock())
 
     def run(canceled, result=True, exception=None, task_action="filter", pending=None, task_parameters=None,
             restore_history_fn=None, discard_history_fn=None, warning_messages=None, close_connections_fn=None):

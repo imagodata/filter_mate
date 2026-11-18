@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Tests: the conftest of tests/unit/core/tasks puts back what it placed in `sys.modules` (the `core` alias, the mocked `filter_mate` tree) after its directory is collected and after its tests run; run before tests/unit/infrastructure/database, it failed 40 tests there on "No module named 'core.domain'".
 - Filter: a layer that became invalid during a filter (its source gone) is listed among the filters not applied, with its history put back; it was skipped in silence, and when every layer was in that case "Filter task : Layer(s) filtered" was shown while nothing was set.
 - Filter: a filter over 1 MB (a long list of keys), set a moment after the others, is handled like them: when refused its history is put back, and an Unfilter or a Reset drops its PostgreSQL views only once it is set and nothing was refused (they were dropped while the layer still read them).
 - Filter: the warnings of a filter (a web service cut by the extent of the source, read up to its budget) come once the filters are set, and not for a layer whose filter was then refused: "Cut by the extent of the source" was shown right before "Filter not applied, previous filter kept" for the same layer.
