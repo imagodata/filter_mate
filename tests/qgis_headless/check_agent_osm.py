@@ -334,6 +334,13 @@ def check_features(project, work):
               shapes)
         check("closed ways: none is given twice (a line and an area)", len(seen) == len(set(seen)) == 14, seen)
         project.removeMapLayers([row["layer_id"] for row in made["layers"]])
+        made = ask(tags=wanted, geometry="lines")
+        lines = sorted(feature["osm_id"] for row in made["layers"]
+                       for feature in project.mapLayer(row["layer_id"]).getFeatures())
+        check("closed ways: lines asked, a hedge or a pier that closes comes back as the line it is mapped, none is "
+              "turned into an area", [row["geometry"] for row in made["layers"]] == ["lines"]
+              and {"303", "313"} <= set(lines) and "309" not in lines and len(lines) == 13, (lines, made))
+        project.removeMapLayers([row["layer_id"] for row in made["layers"]])
         made = ask(tags=[{"key": "power", "value": "substation"}], geometry="polygons")
         check("closed ways: polygons of power=substation are found, not 'no feature' (area=no is left out)",
               made["feature_count"] == 1 and made["layers"][0]["geometry"] == "polygons", made)

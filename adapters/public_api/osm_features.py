@@ -187,10 +187,11 @@ def _convert(osm_path: str, config_path: str, gpkg_path: str, tags: Sequence[Tag
                           if definition.GetFieldIndex(name) >= 0}
                 if not matches(tags, values):
                     continue
-                if (kind == 'lines' and origin.GetName() == 'lines' and _is_closed_ring(ogr, shape)
-                        and closed_way_is_area(way_tags(values, tags))):
+                if (geometry != 'lines' and kind == 'lines' and origin.GetName() == 'lines'
+                        and _is_closed_ring(ogr, shape) and closed_way_is_area(way_tags(values, tags))):
                     # GDAL draws a closed way as an area from a whole key; power=substation, railway=platform or
                     # man_made=wastewater_plant are areas for some values of their key only: said here, by OSM's rules.
+                    # Not when lines are asked: a hedge or a wall that closes comes back as the line it is mapped.
                     shape, kind = ogr.ForceToPolygon(shape.Clone()), 'polygons'
                 where = 'points' if geometry == 'points' else kind
                 if geometry in ('lines', 'polygons') and kind != geometry:
