@@ -1528,6 +1528,9 @@ def s_close_dock():
     check('back to a vector layer: vector groups again', dock().mGroupBox_exploring_single_selection.isVisible())
     STATE['coverage_before_close'] = coverage()
     dock().close()  # the X of the dock title bar: run() shows the same dock again
+    module = sys.modules[f'{PACKAGE}.filter_mate_dockwidget']
+    check('closing the dock takes it off the registry of the feature picker guard',
+          module._active_dockwidget is None, repr(module._active_dockwidget))
     since = time.time()
     return lambda: not dock().isVisible() and time.time() - since > 1
 
@@ -1541,6 +1544,10 @@ def s_reopen_pick_raster():
     """closeEvent used to tear the controllers down: a raster picked in the reopened dock left the vector
     layer current, without its EXPLORING page."""
     integration = dock()._controller_integration
+    module = sys.modules[f'{PACKAGE}.filter_mate_dockwidget']
+    # 2026-11-18, audit: the guard of QgsFeaturePickerWidget (sql_utils.feature_picker_guard) finds no dock otherwise
+    check('the dock shown again is the active dock again: the feature picker guard finds it',
+          module._active_dockwidget is dock(), repr(module._active_dockwidget))
     check('closing the dock keeps its controllers', dock().isVisible() and integration.registry is not None
           and coverage() is STATE['coverage_before_close'] and coverage_connected(),
           f"registry={integration.registry!r} coverage={coverage()!r}")

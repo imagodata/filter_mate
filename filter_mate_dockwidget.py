@@ -7221,6 +7221,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except Exception:
                 logger.exception("Agent panel could not be stopped")
 
+    def showEvent(self, event):  # noqa: N802 - Qt name
+        """Register again as the active dock: closeEvent took it off the registry (FeaturePickerWidget guard of
+        ``sql_utils.feature_picker_guard``) and a dock shown again (the toolbar button, View > Panels) is not
+        constructed again."""
+        global _active_dockwidget
+        _active_dockwidget = self
+        super().showEvent(event)
+
     def closeEvent(self, event):
         """Handle dockwidget close event.
 
