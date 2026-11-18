@@ -6,6 +6,7 @@ All notable changes to FilterMate will be documented in this file.
 
 - Site: a FilterMate Cloud page with the tiers to test and a waitlist; cookie-free audience measure.
 - Tools: `scripts/tally_forms.py` creates the Tally forms in English and French: usage (with a rating and a review), review, training and services, feature suggestion, testers, and the Cloud waitlist.
+- Site: a feedback page (`feedback.html`, `feedback.fr.html`) with the usage, review, feature, testers and services forms, linked from every footer, the Cloud page, the README and the GitHub issue chooser; the generator of the translated home pages works again since the Cloud link (#511).
 
 ## [5.1.1] - 2026-11-17
 
