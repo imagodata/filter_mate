@@ -159,19 +159,35 @@
     <h2><span class="num">3</span>The panel at a glance</h2>
     <p>FilterMate is a dock panel. By default it opens on the right side of the QGIS window and can be moved, floated or resized like any other QGIS panel.</p>
     <figure>
-        <img src="img/guide/qgis-window.png" alt="QGIS 4.2 with a small BD TOPO project and the FilterMate panel docked on the right" loading="lazy" width="1600" height="945">
+        <img src="img/guide/qgis-window.png" alt="QGIS 4.2 with a small BD TOPO project and the FilterMate panel docked on the right" loading="lazy" width="1600" height="800">
         <figcaption>QGIS 4.2 with the FilterMate panel docked on the right. The project holds five GeoPackage layers.</figcaption>
     </figure>
 
-    <p>The panel is made of five areas, from top to bottom:</p>
-    <div class="table-wrap">
-    <table>
-        <tr><th>Area</th><th>What it does</th></tr>
-        <tr><td><strong>Title bar badges</strong></td><td>Favorites, detach and close are badges of the panel's title bar. The &#9733; button opens the favorites menu; it turns amber once favorites are saved. A button next to it folds EXPLORING. The colored source tag of the layer card shows the kind of the current layer and what reads it: the backend for a vector layer (PostgreSQL, Spatialite, OGR, Memory), the provider for a raster or a point cloud. For example <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
-        <tr><td><strong>Upper stack</strong></td><td><strong>Agent</strong>, then the <strong>Exploring</strong> zone. AGENT is a chat that filters from a sentence (<a href="#agent">section 14</a>). Exploring selects on the current layer, described by the card at the top. For a vector layer: single, multiple or expression-based selection, plus a vertical rail of navigation buttons. Rasters and point clouds get their own tools (<a href="#raster-lidar">section 13</a>).</td></tr>
-        <tr><td><strong>Lower stack</strong></td><td>Three collapsible sections: <strong>Filtering</strong>, <strong>Exporting</strong> and <strong>Configuration</strong>.</td></tr>
-        <tr><td><strong>Action bar</strong></td><td>The seven buttons that actually do something: Filter, Undo, Redo, Compare, Unfilter, Export, About.</td></tr>
-    </table>
+    <p>The panel is made of four areas, from top to bottom:</p>
+    <div class="fig-aside">
+        <figure class="narrow">
+            <img src="img/guide/dock-overview.png" alt="The whole FilterMate panel: the AGENT and EXPLORING chips above, the FILTERING, EXPORTING and CONFIGURATION chips below, FILTERING open" loading="lazy" width="620" height="1074">
+            <figcaption>The whole panel as a new install shows it: a rail of chips above each stack, EXPLORING and FILTERING open.</figcaption>
+        </figure>
+        <div>
+            <div class="table-wrap">
+            <table>
+                <tr><th>Area</th><th>What it does</th></tr>
+                <tr><td><strong>Title bar badges</strong></td><td>Favorites, detach and close are badges of the panel's title bar. The &#9733; button opens the favorites menu; it turns amber once favorites are saved. A button next to it folds EXPLORING. The colored source tag of the layer card shows the kind of the current layer and what reads it: the backend for a vector layer (PostgreSQL, Spatialite, OGR, Memory), the provider for a raster or a point cloud. For example <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
+                <tr><td><strong>Upper stack</strong></td><td><strong>Agent</strong>, then the <strong>Exploring</strong> zone. AGENT is a chat that filters from a sentence (<a href="#agent">section 14</a>). Exploring selects on the current layer, described by the card at the top. For a vector layer: single, multiple or expression-based selection, plus a vertical rail of navigation buttons. Rasters and point clouds get their own tools (<a href="#raster-lidar">section 13</a>).</td></tr>
+                <tr><td><strong>Lower stack</strong></td><td>Three collapsible sections: <strong>Filtering</strong>, <strong>Exporting</strong> and <strong>Configuration</strong>.</td></tr>
+                <tr><td><strong>Action bar</strong></td><td>The seven buttons that actually do something: Filter, Undo, Redo, Compare, Unfilter, Export, About.</td></tr>
+            </table>
+            </div>
+            <figure>
+                <img src="img/guide/header-badges.png" alt="The title bar of the FilterMate panel with the favorites, detach and close badges" loading="lazy" width="620" height="42">
+                <figcaption>Title bar: the favorites badge (&#9733;), detach and close. The source tag of the current layer, here <em>Vector · Spatialite</em>, is on the layer card of EXPLORING.</figcaption>
+            </figure>
+            <figure>
+                <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Compare, Unfilter, Export and About" loading="lazy" width="357" height="49">
+                <figcaption>Action bar after a filter: Undo is enabled, Redo is not yet, Compare is on.</figcaption>
+            </figure>
+        </div>
     </div>
 
     <p>
@@ -199,7 +215,7 @@
         Once EXPLORING and FILTERING are separated, EXPLORING shows its own list of layers at its top: the current layer is chosen in either of them.
     </p>
     <figure>
-        <img src="img/guide/panels-beside-map.png" alt="QGIS with FILTERING and EXPORTING in one panel under the Layers panel, left of the map, and EXPLORING alone in the FilterMate panel on the right" loading="lazy" width="1600" height="945">
+        <img src="img/guide/panels-beside-map.png" alt="QGIS with FILTERING and EXPORTING in one panel under the Layers panel, left of the map, and EXPLORING alone in the FilterMate panel on the right" loading="lazy" width="1600" height="800">
         <figcaption>FILTERING and EXPORTING grouped in a panel of QGIS, under the Layers panel, beside the map. EXPLORING, alone in the FilterMate panel, shows its own list of layers.</figcaption>
     </figure>
     <p>
@@ -207,48 +223,30 @@
         A right-click on a chip, or on the title of a panel, offers the same moves (<em>Group with FILTERING</em>, <em>Merge &hellip; back into FilterMate</em>, as closing the panel does; <em>Merge every section back into FilterMate</em> for all of them).
         QGIS puts each panel back where you left it, and the sections that were apart are apart again, in the same panels, when FilterMate opens.
     </p>
-    <div class="fig-row">
-        <figure class="narrow">
-            <img src="img/guide/panels-grouped.png" alt="The panel FILTERING · EXPORTING: its rail with the two chips, FILTERING open, its buttons at the bottom" loading="lazy" width="620" height="851">
-            <figcaption>A panel that groups two sections: its title names them, its rail lists them, and the buttons of FILTERING come with it.</figcaption>
-        </figure>
-        <figure class="narrow">
-            <img src="img/guide/panels-exploring.png" alt="EXPLORING in its own panel above the FilterMate panel, with a list of layers at its top" loading="lazy" width="620" height="1314">
-            <figcaption>EXPLORING in its own panel, above FilterMate: the list at its top chooses the current layer.</figcaption>
-        </figure>
-    </div>
+    <figure class="narrow">
+        <img src="img/guide/panels-grouped.png" alt="The panel FILTERING · EXPORTING: its rail with the two chips, FILTERING open, its buttons at the bottom" loading="lazy" width="620" height="560">
+        <figcaption>A panel that groups two sections: its title names them, its rail lists them, and the buttons of FILTERING come with it.</figcaption>
+    </figure>
     <p>
         A section in its own panel takes its buttons with it, and they act whatever the FilterMate panel shows: you filter from the FILTERING panel while EXPLORING alone is open.
         The buttons can also be shown under each section (<em>Under each section</em> in the setup), and FILTERING or EXPORTING can be turned off when you do not use them: the source layer is then chosen at the top of EXPLORING.
         <em>How FilterMate works</em>, on the welcome of AGENT, in its <strong>&#8943;</strong> menu and in <em>Vector &gt; FilterMate</em>, tells all this in the panel, with links that do it.
     </p>
+    <figure class="medium">
+        <img src="img/guide/panels-section-buttons.png" alt="FILTERING open with Filter, Undo, Redo, Compare and Unfilter under it; EXPORTING open with Export under it" loading="lazy" width="1252" height="564">
+        <figcaption>Buttons under each section: FILTERING shows its filter buttons, EXPORTING its Export button.</figcaption>
+    </figure>
     <div class="fig-row">
-        <figure>
-            <img src="img/guide/panels-section-buttons.png" alt="FILTERING open with Filter, Undo, Redo, Compare and Unfilter under it; EXPORTING open with Export under it" loading="lazy" width="1252" height="684">
-            <figcaption>Buttons under each section: FILTERING shows its filter buttons, EXPORTING its Export button.</figcaption>
+        <figure class="narrow">
+            <img src="img/guide/panels-exploring.png" alt="EXPLORING in its own panel above the FilterMate panel, with a list of layers at its top" loading="lazy" width="620" height="1074">
+            <figcaption>EXPLORING in its own panel, above FilterMate: the list at its top chooses the current layer.</figcaption>
         </figure>
         <figure class="narrow">
-            <img src="img/guide/panels-stacked.png" alt="The FilterMate panel with one header per section, AGENT, EXPLORING, FILTERING, EXPORTING and CONFIGURATION, one above the other" loading="lazy" width="620" height="1314">
+            <img src="img/guide/panels-stacked.png" alt="The FilterMate panel with one header per section, AGENT, EXPLORING, FILTERING, EXPORTING and CONFIGURATION, one above the other" loading="lazy" width="620" height="1074">
             <figcaption>Headers one above the other (<code>SECTION_HEADERS = stacked</code>) in place of the rails.</figcaption>
         </figure>
     </div>
 
-    <div class="fig-row">
-        <figure class="narrow">
-            <img src="img/guide/dock-overview.png" alt="The whole FilterMate panel: the AGENT and EXPLORING chips above, the FILTERING, EXPORTING and CONFIGURATION chips below, FILTERING open" loading="lazy" width="620" height="1314">
-            <figcaption>The whole panel as a new install shows it: a rail of chips above each stack, EXPLORING and FILTERING open.</figcaption>
-        </figure>
-        <div>
-            <figure>
-                <img src="img/guide/header-badges.png" alt="The title bar of the FilterMate panel with the favorites, detach and close badges" loading="lazy" width="620" height="42">
-                <figcaption>Title bar: the favorites badge (&#9733;), detach and close. The source tag of the current layer, here <em>Vector · Spatialite</em>, is on the layer card of EXPLORING.</figcaption>
-            </figure>
-            <figure>
-                <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Compare, Unfilter, Export and About" loading="lazy" width="357" height="49">
-                <figcaption>Action bar after a filter: Undo is enabled, Redo is not yet, Compare is on.</figcaption>
-            </figure>
-        </div>
-    </div>
 
     <div class="callout tip">
         <strong>Tip</strong> The panel follows the QGIS theme (Default, Night Mapping, Blend of Gray). You can force a light or dark look
@@ -274,7 +272,7 @@
 
     <h3>Single selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy" width="602" height="573">
+        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy" width="602" height="521">
         <figcaption>Single selection on a road layer: the feature is picked by name, the field below sets which attribute is displayed.</figcaption>
     </figure>
     <p>
@@ -285,7 +283,7 @@
 
     <h3>Multiple selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy" width="602" height="573">
+        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy" width="602" height="521">
         <figcaption>Multiple selection: four roads are checked. The line above the list summarises the selection; the text box filters the list as you type.</figcaption>
     </figure>
     <p>
@@ -295,7 +293,7 @@
 
     <h3>Custom selection (expression)</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy" width="602" height="573">
+        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy" width="602" height="521">
         <figcaption>Custom selection: any QGIS expression, here roads whose importance is 3 or 4.</figcaption>
     </figure>
     <p>
@@ -333,7 +331,7 @@
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy" width="602" height="599">
+        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy" width="602" height="396">
         <figcaption>Filtering tab: source layer, two target layers, combine operators, Intersect predicate, 50 m round buffer.</figcaption>
     </figure>
     <p>
@@ -536,7 +534,7 @@ AND ST_Intersects("geom",
         <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy" width="602" height="599">
+        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy" width="602" height="462">
         <figcaption>Exporting tab: layers, CRS, style format, output format, output folder with batch mode, ZIP.</figcaption>
     </figure>
     <p>
@@ -569,7 +567,7 @@ AND ST_Intersects("geom",
 <section id="configuration">
     <h2><span class="num">10</span>Configuration</h2>
     <figure class="narrow">
-        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy" width="602" height="599">
+        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy" width="602" height="485">
         <figcaption>Configuration tab: a search field above a tree of settings, edited in place. Changes are saved immediately.</figcaption>
     </figure>
     <p>
@@ -715,11 +713,11 @@ processing.run("filtermate:batch_filter", {
     </p>
     <div class="fig-row">
         <figure class="narrow">
-            <img src="img/guide/fm5_raster_exploring.png" alt="The EXPLORING panel of a raster: band, pixel value, value range with histogram; FILTERING unchanged with a minimum coverage" loading="lazy" width="440" height="1086">
+            <img src="img/guide/fm5_raster_exploring.png" alt="The EXPLORING panel of a raster: band, pixel value, value range with histogram; FILTERING unchanged with a minimum coverage" loading="lazy" width="660" height="1179">
             <figcaption>Raster: value range on the histogram, vector targets with a 50 % minimum coverage.</figcaption>
         </figure>
         <figure class="narrow">
-            <img src="img/guide/fm5_pointcloud_exploring.png" alt="The EXPLORING panel of a point cloud: ASPRS / LiDAR HD classes, attribute ranges" loading="lazy" width="440" height="1086">
+            <img src="img/guide/fm5_pointcloud_exploring.png" alt="The EXPLORING panel of a point cloud: ASPRS / LiDAR HD classes, attribute ranges" loading="lazy" width="660" height="1179">
             <figcaption>Point cloud: classes (here class 6, building) and attribute ranges.</figcaption>
         </figure>
     </div>
@@ -851,26 +849,26 @@ processing.run("filtermate:batch_filter", {
     </p>
     <div class="fig-row">
         <figure class="narrow">
-            <img src="img/guide/fm5_filtering_targets.png" alt="FILTERING with a vector source and a raster and a point cloud in the list of layers to filter" loading="lazy" width="440" height="1086">
+            <img src="img/guide/fm5_filtering_targets.png" alt="FILTERING with a vector source and a raster and a point cloud in the list of layers to filter" loading="lazy" width="660" height="1179">
             <figcaption>FILTERING from a vector layer: the raster and the point cloud are listed with the other targets.</figcaption>
         </figure>
         <figure class="narrow">
-            <img src="img/guide/fm5_export_tab.png" alt="EXPORTING with a raster, a point cloud and a vector layer checked" loading="lazy" width="440" height="1086">
+            <img src="img/guide/fm5_export_tab.png" alt="EXPORTING with a raster, a point cloud and a vector layer checked" loading="lazy" width="660" height="1179">
             <figcaption>EXPORTING: a raster, a point cloud and a vector layer in the same export.</figcaption>
         </figure>
     </div>
     <h3>Results on the map</h3>
     <div class="fig-row">
         <figure>
-            <img src="img/guide/fm5_vector_to_raster.png" alt="A raster clipped around a selected polygon on the QGIS map canvas" loading="lazy" width="954" height="591">
+            <img src="img/guide/fm5_vector_to_raster.png" alt="A raster clipped around a selected polygon on the QGIS map canvas" loading="lazy" width="2147" height="1329">
             <figcaption>Vector → raster: the pixels around the selected building are kept (buffer 30 m).</figcaption>
         </figure>
         <figure>
-            <img src="img/guide/fm5_raster_to_vector.png" alt="Polygons kept by a raster value range, the other pixels hidden by the live preview" loading="lazy" width="954" height="591">
+            <img src="img/guide/fm5_raster_to_vector.png" alt="Polygons kept by a raster value range, the other pixels hidden by the live preview" loading="lazy" width="2147" height="1329">
             <figcaption>Raster → vector: polygons that satisfy the value range; the preview hides the other pixels.</figcaption>
         </figure>
         <figure>
-            <img src="img/guide/fm5_pointcloud_to_vector.png" alt="Building points (class 6) inside the polygon kept by the point cloud filter" loading="lazy" width="954" height="591">
+            <img src="img/guide/fm5_pointcloud_to_vector.png" alt="Building points (class 6) inside the polygon kept by the point cloud filter" loading="lazy" width="2147" height="1329">
             <figcaption>Point cloud → vector: the buildings that hold class 6 (building) points.</figcaption>
         </figure>
     </div>
@@ -887,7 +885,7 @@ processing.run("filtermate:batch_filter", {
         The <code>APP.OPTIONS.CROSS_FILTER.*</code> options set the point cloud clip mode (exact or bounding box), the maximum raster pixels, the footprint resolution, the cache size and the path of <code>pdal</code>.
     </p>
     <figure class="narrow">
-        <img src="img/guide/fm5_configuration.png" alt="Configuration tab showing the RASTER and POINT_CLOUD enabled options" loading="lazy" width="440" height="1086">
+        <img src="img/guide/fm5_configuration.png" alt="Configuration tab showing the RASTER and POINT_CLOUD enabled options" loading="lazy" width="660" height="1179">
         <figcaption>Configuration tab: the RASTER and POINT_CLOUD options.</figcaption>
     </figure>
     <div class="callout"><p><strong>PDAL.</strong> The height above a DTM and the direct writing of COPC files need PDAL 2.4 or later. With an older PDAL, point cloud targets are clipped by the QGIS exporter, a COPC export writes LAZ with a message, and the height above a DTM is disabled with a message naming the version.</p></div>

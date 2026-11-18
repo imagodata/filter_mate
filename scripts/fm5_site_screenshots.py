@@ -337,8 +337,8 @@ def style_layers():
 
 def s_setup():
     mw = iface.mainWindow()
-    WIN = [int(v) for v in os.environ.get('FM5_WIN', '1700x1250').split('x')]
-    mw.resize(*WIN)  # tall: the dock shows EXPLORING, FILTERING and the tabs together
+    WIN = [int(v) for v in os.environ.get('FM5_WIN', '1700x950').split('x')]
+    mw.resize(*WIN)  # the dock shows EXPLORING, FILTERING and the tabs together, with no empty band under the rows
     mw.show()
     iface.mapCanvas().renderComplete.connect(lambda painter: STATE.update(rendered=True))
     layers = []
