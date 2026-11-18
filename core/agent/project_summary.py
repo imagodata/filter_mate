@@ -99,8 +99,10 @@ def project_state(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapp
     selected = {str(item.get("layer_id") or item.get("name", "")): (str(item.get("name", "")),
                                                                      int(item.get("selected_count") or 0))
                 for item in selections if isinstance(item, Mapping)}
+    project_crs = str(view.get("project_crs") or "")
     return {"layers": rows, "selections": selected, "active": str(view.get("active_layer_name") or ""),
-            "active_fields": _fields_text(view),
+            "active_id": str(view.get("active_layer_id") or ""), "active_fields": _fields_text(view),
+            "crs": project_crs, "canvas_crs": str(view.get("canvas_crs") or project_crs),
             "extent": _extent(view.get("extent")) if view.get("available") else None}
 
 
@@ -130,6 +132,41 @@ def _moved(before: Optional[Sequence[float]], after: Optional[Sequence[float]]) 
     return any(abs(a - b) > size * _SAME_VIEW for a, b in zip(before, after))
 
 
+def _same_layer(before: Mapping[str, Any], after: Mapping[str, Any]) -> bool:
+    """The active layer of two states is one layer: by id, by name for a state that has none."""
+    if before.get("active_id") and after.get("active_id"):
+        return before["active_id"] == after["active_id"]
+    return before.get("active", "") == after.get("active", "")
+
+
+def _view_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List[str]:
+    """The lines about the map and the active layer: CRS, active layer and its fields, where the view looks now.
+
+    The model keeps the state of its first request in its history: what moved is said with its new value, a
+    coordinate or a CRS it would otherwise go on assuming."""
+    lines: List[str] = []
+    crs, canvas = after.get("crs", ""), after.get("canvas_crs", "")
+    project_moved = bool(crs and before.get("crs") and crs != before["crs"])
+    if project_moved:
+        lines.append(f"- project CRS is now: {crs}")
+    was_canvas = before.get("canvas_crs", "")
+    if canvas and was_canvas and canvas != was_canvas and not (project_moved and canvas == crs):
+        lines.append(f"- map canvas CRS is now: {canvas}")
+    fields = after.get("active_fields") or ""
+    if not after.get("active"):
+        if before.get("active"):
+            lines.append("- no active layer now")
+    elif not _same_layer(before, after):
+        lines.append(f"- active layer is now: {_cut(after['active'], 100)}" + (f" (fields: {fields})" if fields else ""))
+    elif fields != (before.get("active_fields") or ""):
+        lines.append(f"- fields of the active layer are now: {fields or 'none'}")
+    extent = after.get("extent")
+    if _moved(before.get("extent"), extent):
+        where = f" ({canvas})" if canvas and canvas != crs else ""
+        lines.append(f"- the map view moved: visible extent{where} xmin ymin xmax ymax = {_coordinates(extent)}")
+    return lines
+
+
 def project_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List[str]:
     """One line per kind of change between two ``project_state``: what the user did between two requests."""
     old, new = before.get("layers", {}), after.get("layers", {})
@@ -142,6 +179,9 @@ def project_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List
     say("layers added", [row["name"] for key, row in new.items() if key not in old])
     say("layers removed", [row["name"] for key, row in old.items() if key not in new])
     kept = [(old[key], row) for key, row in new.items() if key in old]
+    # By id, so a renamed layer is not a removed one and a new one: the model calls it by its new name.
+    say("layers renamed", [f"{_cut(was['name'], 100)} -> {row['name']}" for was, row in kept
+                           if was["name"] != row["name"]])
     say("filter changed", [row["name"] for was, row in kept if row["filter"] and row["filter"] != was["filter"]])
     say("filter removed", [row["name"] for was, row in kept if was["filter"] and not row["filter"]])
     say("now shown", [row["name"] for was, row in kept if row["visible"] and not was["visible"]])
@@ -150,11 +190,7 @@ def project_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List
     say("selection changed", [f"{name} ({count} selected)" for key, (name, count) in selected.items()
                               if key in new and was_selected.get(key, ("", 0))[1] != count])
     say("selection cleared", [name for key, (name, _) in was_selected.items() if key in new and key not in selected])
-    if after.get("active") and after.get("active") != before.get("active"):
-        fields = after.get("active_fields") or ""
-        lines.append(f"- active layer is now: {_cut(after['active'], 100)}" + (f" (fields: {fields})" if fields else ""))
-    if _moved(before.get("extent"), after.get("extent")):
-        lines.append("- the map view moved")
+    lines.extend(_view_changes(before, after))
     return lines[:MAX_CHANGES]
 
 
