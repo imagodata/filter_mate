@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Dock: a layer chosen in the chooser of EXPLORING, when EXPLORING is in its own panel, counts as a choice of the user, as one made in FILTERING does. The dock put the layer of the filter back over it when it was chosen while a filter ran, in the two seconds after a filter or an Undo, and did not apply it when the layer chooser of FILTERING was disconnected (both choosers showed it, Filter acted on the other layer).
 - Metadata: a shorter description; the about opens on what people search (several layers filtered at once, definition queries); tags chosen for the plugin list search; a short changelog; category Vector (Plugins is not a value plugins.qgis.org knows); a stray line that read as a key removed.
 - Feedback: four entries in Vector > FilterMate (give your opinion, suggest a feature, test the experimental features, training and services) open the feedback page of the site; after 20 successful filters, one message offers the short review form, once ever. The plugin sends nothing itself.
 - Site: a FilterMate Cloud page with the tiers to test and a waitlist; cookie-free audience measure.
