@@ -136,25 +136,56 @@ class Answers:
 
 _FALSE_STRINGS = frozenset({"false", "0", "no", "off", ""})
 _TRUE_STRINGS = frozenset({"true", "1", "yes", "on"})
+# Read where the plugin reads them: the sections as ``section_enabled`` (ui/layout/dock_chrome.py), AGENT as
+# ``agent_enabled`` (ui/controllers/agent_chat_controller.py), the others as ``_get_option_bool``
+# (config/config.py). The setup reads the value of a switch exactly so, which is what makes answering without
+# touching anything change nothing, whatever a hand-edited config.json holds. tests/unit/agent/test_setup_wizard.py
+# compares each with the real reader.
+SECTION_READ = frozenset({FILTERING_ON, EXPORTING_ON})
+# What an unset switch reads as for the others (RASTER and POINT_CLOUD: off when unset, as their readers say).
+_UNSET_OFF = frozenset({RASTER_ON, POINT_CLOUD_ON, GPKG_GROUPS, KML_GROUPS})
 
 
-def flag(value: Any) -> Optional[bool]:
-    """A switch as the rest of the plugin reads it (``_get_option_bool``): a hand-edited config.json may hold
-    "true" or "off" as a text. None when it is no switch at all (absent, or another text or number)."""
-    if isinstance(value, bool):
-        return value
+def _option_bool(value: Any, default: bool) -> bool:
+    """``config.config._get_option_bool`` on a value already taken out of its ``{"value": ...}``."""
     if isinstance(value, str):
         text = value.strip().lower()
-        return False if text in _FALSE_STRINGS else True if text in _TRUE_STRINGS else None
-    return None
+        if text in _FALSE_STRINGS:
+            return False
+        if text in _TRUE_STRINGS:
+            return True
+        return default
+    return default if value is None else bool(value)
 
 
-def _on(values: Mapping[str, Any], path: str) -> bool:
-    return flag(values.get(path)) is True
+ABSENT = object()  # a setting config.json does not hold at all, which is not the same as a null
+
+
+def read_switch(path: str, value: Any = ABSENT) -> bool:
+    """Whether the setting ``path``, holding ``value`` in config.json (``ABSENT`` when it has none), reads as on for
+    the plugin."""
+    if path in SECTION_READ:  # off on a value that says no, on for anything else
+        if value is None or value is ABSENT:
+            return True
+        if isinstance(value, str):
+            return value.strip().lower() not in ("false", "0", "no", "off")
+        return value is not False and value != 0
+    if path == AGENT_ON:  # on only for True, and when it is not there at all (a null is off)
+        return value is ABSENT or value is True
+    return _option_bool(None if value is ABSENT else value, path not in _UNSET_OFF)
+
+
+SWITCHES = frozenset({*SECTION_SWITCHES.values(), *DATA_SWITCHES.values(), *AFTER_FILTER_SWITCHES.values(),
+                      *TARGET_SWITCHES.values(), *GROUP_SWITCHES.values()})
+
+
+def is_on(values: Mapping[str, Any], path: str) -> bool:
+    """Whether the switch ``path`` of ``values`` (the settings as config.json holds them) reads as on."""
+    return read_switch(path, values.get(path, ABSENT))
 
 
 def _switches(key: str, switches: Mapping[str, str], values: Mapping[str, Any]) -> Ask:
-    return Ask(key, tuple(Choice(name, _on(values, path)) for name, path in switches.items()), multi=True)
+    return Ask(key, tuple(Choice(name, is_on(values, path)) for name, path in switches.items()), multi=True)
 
 
 def _one_of(key: str, keys: Sequence[str], current: Any) -> Ask:
@@ -170,20 +201,20 @@ def kept_sections(values: Mapping[str, Any], answers: Answers) -> Set[str]:
     chosen = answers.get(FEATURES, "sections")
     if chosen is not None:
         return set(chosen)
-    return {name for name, path in SECTION_SWITCHES.items() if flag(values.get(path)) is not False}
+    return {name for name, path in SECTION_SWITCHES.items() if read_switch(path, values.get(path, ABSENT))}
 
 
 def kept_data(values: Mapping[str, Any], answers: Answers) -> Set[str]:
     chosen = answers.get(FEATURES, "data")
     if chosen is not None:
         return set(chosen)
-    return {name for name, path in DATA_SWITCHES.items() if flag(values.get(path)) is not False}
+    return {name for name, path in DATA_SWITCHES.items() if read_switch(path, values.get(path, ABSENT))}
 
 
 def step_questions(step: str, values: Mapping[str, Any], facts: ProjectFacts, answers: Answers) -> List[Ask]:
     """The questions of ``step``, their choices ticked as the settings are now."""
     if step == FEATURES:
-        data = [Choice("rasters", _on(values, RASTER_ON)), Choice("point_clouds", _on(values, POINT_CLOUD_ON)),
+        data = [Choice("rasters", is_on(values, RASTER_ON)), Choice("point_clouds", is_on(values, POINT_CLOUD_ON)),
                 Choice("postgres", facts.postgres > 0), Choice("web", facts.web > 0)]
         return [_switches("sections", SECTION_SWITCHES, values), Ask("data", tuple(data), multi=True),
                 Ask("size", tuple(Choice(size, size == "keep") for size in SIZES))]
@@ -262,7 +293,9 @@ def changes(values: Mapping[str, Any], answers: Answers) -> List[Dict[str, Any]]
     switches(EXPORTING, "groups", GROUP_SWITCHES)
     one(EXPORTING, "raster_format", RASTER_FORMAT)
     one(EXPORTING, "point_cloud_format", POINT_CLOUD_FORMAT)
-    return [{"path": path, "value": value} for path, value in wanted.items() if not _same(values.get(path), value)]
+    return [{"path": path, "value": value} for path, value in wanted.items()
+            if not (read_switch(path, values.get(path, ABSENT)) is value if path in SWITCHES else
+                    _same(values.get(path), value))]
 
 
 def layout_wanted(facts: ProjectFacts, answers: Answers) -> Optional[str]:
@@ -276,6 +309,5 @@ def layout_wanted(facts: ProjectFacts, answers: Answers) -> Optional[str]:
 def _same(now: Any, value: Any) -> bool:
     """60 and 60.0 are the same timeout; true and 1 are not the same switch."""
     if isinstance(now, bool) or isinstance(value, bool):
-        # "true" written in config.json is the switch on: answering without touching it must not turn it off.
-        return flag(now) is flag(value) and flag(now) is not None
+        return now is value
     return now == value

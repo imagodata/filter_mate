@@ -462,10 +462,10 @@ class SetupWizard:
             panel.add_note(_tr("The sections are in panels of QGIS: drag a panel by its title, drag the chip of a "
                                "section onto another panel to group them, right-click it to merge it back into "
                                "FilterMate."))
-        if wizard.flag(self._values.get(wizard.FILTERING_ON)) is not False and "filtering" not in sections:
+        if wizard.is_on(self._values, wizard.FILTERING_ON) and "filtering" not in sections:
             panel.add_note(_tr("FILTERING is hidden: the source layer is chosen at the top of EXPLORING. To show "
                                "it again: this setup, or {}.").format(self._where(wizard.FILTERING_ON)))
-        if wizard.flag(self._values.get(wizard.AGENT_ON)) is not False and "agent" not in sections:
+        if wizard.is_on(self._values, wizard.AGENT_ON) and "agent" not in sections:
             panel.add_note(_tr("The AGENT section goes after restarting QGIS. To bring it back: {}.").format(
                 self._where(wizard.AGENT_ON)))
             panel.add_link(tour_title(), self._chat.show_tour)

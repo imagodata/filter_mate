@@ -1135,3 +1135,35 @@ def test_a_failure_that_took_the_request_out_sends_its_news_again(ctrl_module, c
     assert _news(engine) == (0, 0)
     controller._on_send("third")
     assert _news(engine) == (1, 1), "the model never learned of the change"
+
+
+# --- the setup reads each switch as the plugin does ---------------------------------------------------------------
+
+READ_VALUES = [1, 0, None, "maybe", "true", "false", True, False, "", " Off ", 0.0, 2, "yes"]
+
+
+@pytest.mark.parametrize("written", READ_VALUES, ids=repr)
+def test_the_setup_reads_each_switch_as_the_plugin_does(ctrl_module, monkeypatch, written):
+    """Each kind of switch of the setup, run on the same value as the reader the plugin uses for it: the sections
+    (section_enabled), AGENT (agent_enabled), the others (_get_option_bool)."""
+    from core.agent import setup_wizard as wizard
+    from ui.layout.dock_chrome import section_enabled
+    for name in (".core.optimization", ".core.optimization.config_provider"):
+        _module(monkeypatch, name, get_optimization_thresholds=MagicMock())
+    _module(monkeypatch, ".config")
+    config = _load(monkeypatch, "config.config", "config/config.py")
+
+    def config_of(path, value):
+        _app, _options, section, key = path.split(".")
+        return {"APP": {"OPTIONS": {section: {key: {"value": value}}}}}
+
+    for path in (wizard.FILTERING_ON, wizard.EXPORTING_ON):
+        assert wizard.read_switch(path, written) is section_enabled(config_of(path, written), path.split(".")[2].lower()), path
+    assert wizard.read_switch(wizard.AGENT_ON, written) is ctrl_module.agent_enabled(config_of(wizard.AGENT_ON, written))
+    # Not in config.json at all: the readers' default (section_enabled, agent_enabled, _get_option_bool)
+    assert wizard.read_switch(wizard.AGENT_ON) is ctrl_module.agent_enabled({}) is True
+    assert wizard.read_switch(wizard.FILTERING_ON) is section_enabled({}, "filtering") is True
+    for path in sorted(wizard.SWITCHES - wizard.SECTION_READ - {wizard.AGENT_ON}):
+        default = path not in wizard._UNSET_OFF
+        assert wizard.read_switch(path, written) is config._get_option_bool(written, default), path
+        assert wizard.read_switch(path, None) is default, path
