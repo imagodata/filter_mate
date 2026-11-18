@@ -60,7 +60,7 @@
         <li><a href="#s9"><span class="num">9</span>Parcels on steep slopes</a></li>
         <li><a href="#s10"><span class="num">10</span>Building heights, measured by LiDAR</a></li>
         <li><a href="#s11"><span class="num">11</span>Roads to prune</a></li>
-        <li><a href="#s12"><span class="num">12</span>The survey package around the church</a></li>
+        <li><a href="#s12"><span class="num">12</span>The survey package around a building</a></li>
         <li><a href="#s13"><span class="num">13</span>Vegetation on an RGB orthophoto</a></li>
         <li><a href="#s14"><span class="num">14</span>LiDAR points beneath rooftops</a></li>
         <li><a href="#s15"><span class="num">15</span>The DTM beneath ground points</a></li>
@@ -84,7 +84,7 @@
     <p class="lead">
         Each story starts with a question asked in a technical department, a local authority or a consultancy, then translates it into
         FilterMate settings, step by step. The first twelve stories show QGIS recordings and counted results, in Haute-Garonne
-        and then Estavar. Four illustrated recipes complete all nine combinations of layer types, with settings and expected results.
+        and then on one square kilometre north of Toulouse. Four illustrated recipes complete all nine combinations of layer types, with settings and expected results.
     </p>
     <div class="cards story-index">
         <a class="card story-card" href="#s1"><span class="story-card-media"><img src="video/export.webp" alt="Saint-Gaudens filtered and ready to export" loading="lazy" width="1280" height="720"><b aria-hidden="true">01</b></span><div class="story-card-copy"><span class="badge">Consultancy</span><h4>The commune dossier in three minutes</h4><p>Scope 12 department-wide layers to one commune and deliver a styled GeoPackage.</p><span class="story-outcome">12 layers · <strong>12,380 buildings</strong></span></div></a>
@@ -98,7 +98,7 @@
         <a class="card story-card" href="#s9"><span class="story-card-media"><img src="video/slope.webp" alt="Parcels on steep slopes" loading="lazy" width="1280" height="720"><b aria-hidden="true">09</b></span><div class="story-card-copy"><span class="badge">Planning</span><h4>Parcels on steep slopes</h4><p>The slope computed from the DTM, a range on the histogram, a minimum coverage.</p><span class="story-outcome"><strong>58 parcels</strong> · slope ≥ 30 %</span></div></a>
         <a class="card story-card" href="#s10"><span class="story-card-media"><img src="video/heights.webp" alt="Building heights" loading="lazy" width="1280" height="720"><b aria-hidden="true">10</b></span><div class="story-card-copy"><span class="badge">Permits</span><h4>Building heights</h4><p>Building class and height above the DTM, computed by PDAL.</p><span class="story-outcome"><strong>57 buildings</strong> above 9 m</span></div></a>
         <a class="card story-card" href="#s11"><span class="story-card-media"><img src="video/pruning.webp" alt="Roads to prune" loading="lazy" width="1280" height="720"><b aria-hidden="true">11</b></span><div class="story-card-copy"><span class="badge">Roads</span><h4>Roads to prune</h4><p>High vegetation taller than 8 m, within 3 m of the roads.</p><span class="story-outcome"><strong>91 segments</strong> out of 172</span></div></a>
-        <a class="card story-card" href="#s12"><span class="story-card-media"><img src="video/survey.webp" alt="The survey package around the church" loading="lazy" width="1280" height="720"><b aria-hidden="true">12</b></span><div class="story-card-copy"><span class="badge">Heritage</span><h4>The survey package around the church</h4><p>A vector clips a DTM and a cloud, then everything goes into a ZIP.</p><span class="story-outcome">GeoTIFF + LAZ · <strong>ZIP</strong></span></div></a>
+        <a class="card story-card" href="#s12"><span class="story-card-media"><img src="video/survey.webp" alt="The survey package around a building" loading="lazy" width="1280" height="720"><b aria-hidden="true">12</b></span><div class="story-card-copy"><span class="badge">Heritage</span><h4>The survey package around a building</h4><p>A vector clips a DTM and a cloud, then everything goes into a ZIP.</p><span class="story-outcome">GeoTIFF + LAZ · <strong>ZIP</strong></span></div></a>
         <a class="card story-card" href="#s13"><span class="story-card-media"><img src="img/combinations/ndvi-en.svg" alt="Schematic: a vegetation mask from a colour infrared orthophoto retains the corresponding pixels in an RGB orthophoto" loading="lazy" width="1280" height="720"><b aria-hidden="true">13</b></span><div class="story-card-copy"><span class="badge">Parks</span><h4>Vegetation on an RGB orthophoto</h4><p>The NDVI from an infrared image becomes a mask for another image.</p><span class="story-outcome">Raster → raster · <strong>NDVI &gt; 0.3</strong></span></div></a>
         <a class="card story-card" href="#s14"><span class="story-card-media"><img src="img/combinations/roofs-en.svg" alt="Schematic: rooftops picked on an orthophoto clip the LiDAR point cloud" loading="lazy" width="1280" height="720"><b aria-hidden="true">14</b></span><div class="story-card-copy"><span class="badge">Buildings</span><h4>LiDAR points beneath rooftops</h4><p>An object picked on the orthophoto isolates the points beneath its footprint.</p><span class="story-outcome">Raster → LiDAR · <strong>object pipette</strong></span></div></a>
         <a class="card story-card" href="#s15"><span class="story-card-media"><img src="img/combinations/ground-en.svg" alt="Schematic: the footprint of ground-class points restricts the DTM pixels" loading="lazy" width="1280" height="720"><b aria-hidden="true">15</b></span><div class="story-card-copy"><span class="badge">Surveying</span><h4>The DTM beneath ground points</h4><p>Ground-class points define where to retain the raster elevations.</p><span class="story-outcome">LiDAR → raster · <strong>class 2</strong></span></div></a>
@@ -596,31 +596,31 @@ processing.run("filtermate:batch_filter", {
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/survey.webp" data-src="video/survey.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">12</span>The survey package around the church</h2>
-        <button class="watch" type="button" data-watch aria-label="Watch the video: The survey package around the church"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        <p class="credit">LiDAR HD and BD TOPO® © IGN, Etalab cadastre, Estavar (Pyrénées-Orientales).</p>
+        <h2><span class="num">12</span>The survey package around a building</h2>
+        <button class="watch" type="button" data-watch aria-label="Watch the video: The survey package around a building"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+        <p class="credit">LiDAR HD and BD TOPO® © IGN, Etalab cadastre, Fenouillet and Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
-        <div><h4>The need</h4><p>A heritage architect prepares the restoration of the <strong>church of Estavar</strong>. They ask for the point cloud and the DTM of the church and its surroundings, 50 m around, in a file they can open without QGIS.</p></div>
-        <div><h4>The FilterMate translation</h4><p>Vector source, raster and point cloud targets: <strong>batiment</strong> with <code>"nature" = 'Eglise'</code>, a 50 m buffer, targets <em>mnt</em> and <em>lhd</em>. The DTM is clipped as a VRT, the cloud as a derived COPC; the layers keep their id and style. EXPORTING then writes GeoTIFF and LAZ into a ZIP.</p></div>
+        <div><h4>The need</h4><p>A design office studies solar panels on the roof of the <strong>tallest building of a business park</strong> (17.4 m), north of Toulouse. It asks for the point cloud and the DTM of the building and its surroundings, 50 m around, in a file it can open without QGIS.</p></div>
+        <div><h4>The FilterMate translation</h4><p>Vector source, raster and point cloud targets: <strong>batiment</strong> with <code>"hauteur" &gt;= 17</code>, a 50 m buffer, targets <em>mnt</em> and <em>lhd</em>. The DTM is clipped as a VRT, the cloud as a derived COPC; the layers keep their id and style. EXPORTING then writes GeoTIFF and LAZ into a ZIP.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>batiment</code></dd></div><div><dt>Selection</dt><dd><code>"nature" = 'Eglise'</code></dd></div><div><dt>Targets</dt><dd><code>mnt</code> (raster), <code>lhd</code> (point cloud)</dd></div><div><dt>Relation</dt><dd>Intersect, 50 m buffer</dd></div><div><dt>Result</dt><dd>GeoTIFF 45 KB + LAZ 1.0 MB</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>batiment</code></dd></div><div><dt>Selection</dt><dd><code>"hauteur" &gt;= 17</code></dd></div><div><dt>Targets</dt><dd><code>mnt</code> (raster), <code>lhd</code> (point cloud)</dd></div><div><dt>Relation</dt><dd>Intersect, 50 m buffer</dd></div><div><dt>Result</dt><dd>GeoTIFF 246 KB + LAZ 856 KB</dd></div></dl>
     <ol class="steps">
-        <li><strong>The church.</strong> Source <em>batiment</em>, Custom selection <code>"nature" = 'Eglise'</code>.
-            <figure><img src="img/stories/s12-01.webp" alt="Step 1: the church selected" loading="lazy" width="1600" height="900"><figcaption>Step 1.</figcaption></figure>
+        <li><strong>The building.</strong> Source <em>batiment</em>, Custom selection <code>"hauteur" &gt;= 17</code>: one building of 918.
+            <figure><img src="img/stories/s12-01.webp" alt="Step 1: the tallest building selected" loading="lazy" width="1600" height="900"><figcaption>Step 1.</figcaption></figure>
         </li>
         <li><strong>50 m around, on the DTM and the cloud.</strong> Targets <em>mnt</em> and <em>lhd</em>, Intersect, Buffer 50.
             <figure><img src="img/stories/s12-02.webp" alt="Step 2: raster and point cloud targets, 50 m buffer" loading="lazy" width="1600" height="900"><figcaption>Step 2. A raster and a cloud in the same target list as vectors.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s12-03.webp" alt="Step 3: DTM and cloud clipped around the church" loading="lazy" width="1600" height="900"><figcaption>Step 3. Undo would bring the whole layers back.</figcaption></figure>
+            <figure><img src="img/stories/s12-03.webp" alt="Step 3: DTM and cloud clipped around the building" loading="lazy" width="1600" height="900"><figcaption>Step 3. Undo would bring the whole layers back.</figcaption></figure>
         </li>
         <li><strong>Export.</strong> EXPORTING: layers <em>mnt</em> and <em>lhd</em>, folder, ZIP path, Export.
             <figure><img src="img/stories/s12-04.webp" alt="Step 4: the EXPORTING tab with both layers and the ZIP" loading="lazy" width="1600" height="900"><figcaption>Step 4.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
-    <p>A 1.1 MB ZIP: the DTM (GeoTIFF, 45 KB) and the cloud (LAZ, 1.0 MB) of the church and its surroundings.</p>
+    <p>A 1.1 MB ZIP: the DTM (GeoTIFF, 246 KB) and the cloud (LAZ, 856 KB) of the building and its surroundings.</p>
 </section>
 <!-- 13 ------------------------------------------------------------------ -->
 <section id="s13">
