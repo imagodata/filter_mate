@@ -72,11 +72,10 @@ from ...core.agent.request_context import (
 )
 from ...core.agent.messages import request_usage
 from ...core.agent.session import (
-    REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget,
+    REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget, tools_weight,
 )
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
-from ...core.agent.tool_schema import for_model
 from ...core.agent.tool_catalog import (
     ADD_NOTE, ADD_TABLE, ASK_USER, CREATE_WIDGET, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
@@ -1986,9 +1985,10 @@ class AgentChatController(QObject):
             values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered, index)
         # Lot 3: the history a provider gets before the compaction, after what the instructions and tools take.
         # Measured on the form of the schemas the providers send (lot 2, core/agent/tool_schema.py).
-        fixed = len(prompt) + len(json.dumps([[tool.name, tool.description, for_model(tool.input_schema)]
-                                              for tool in tools], ensure_ascii=False))
-        limits = AgentLimits(max_history_chars=history_budget(PRESETS[values.preset][0], fixed))
+        # The tools a skill or use_tools offers later are taken off it by the session (``shrinks_with_tools``).
+        kind = PRESETS[values.preset][0]
+        limits = AgentLimits(max_history_chars=history_budget(kind, len(prompt) + tools_weight(tools)),
+                             shrinks_with_tools=kind == "ollama")
         session = AgentSession(provider, tools, prompt, limits, core=CORE if index else ())
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)

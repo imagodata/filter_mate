@@ -723,5 +723,42 @@ class TestHistoryBudget:
         assert history_budget("ollama", 30_000) == step - 30_000
         assert history_budget("ollama", step) == 20_000  # at least
 
+    def test_the_tools_offered_later_take_their_weight_off_the_budget(self):
+        """Audit 2026-11-18: the budget counted the core tools only; with ten more offered by a skill the request
+        went from the 32k step to the 64k one (the model loaded again, its cache doubled) and no compaction ran."""
+        from core.agent.compaction import _size
+        from core.agent.families import split_tools
+        from core.agent.providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS
+        from core.agent.session import history_budget, tools_weight
+        start, more = split_tools(chat_tools())
+        prompt = 7_000
+        step = int((CONTEXT_STEPS[1] - ANSWER_ROOM) * CHARS_PER_TOKEN)
+
+        def history_of(chat):
+            return sum(_size(message) for message in chat.messages)
+
+        def run(shrinks):
+            budget = history_budget("ollama", prompt + tools_weight(start))
+            provider = create_provider(ProviderConfig("ollama", "m", base_url="http://localhost:11434"))
+            chat = AgentSession(provider, start, "p" * prompt,
+                                AgentLimits(max_history_chars=budget, shrinks_with_tools=shrinks),
+                                core={tool.name for tool in start})
+            for index in range(3):  # a history just under the budget of the start
+                chat.add_user_text(f"r{index}")
+                chat.accept_turn(turn(STOP_END, TextPart("a" * ((budget - 1_000) // 3))))
+            chat.offer(more[:10])
+            chat.add_user_text("next")
+            return chat, prompt + tools_weight(chat.tools) + history_of(chat)
+
+        grown, total = run(True)
+        assert grown.summarized and total <= step  # compacted before the request needed the 64k step
+        _, total = run(False)
+        assert total > step  # what the budget of the start alone gave
+
+    def test_the_budget_of_a_remote_provider_does_not_move(self):
+        chat = session()
+        chat.offer([ToolSpec("zoom", "z", {"type": "object", "properties": {}})])
+        assert chat.history_limit() == chat._limits.max_history_chars
+
     def test_the_result_cap_is_8000(self):
         assert MAX_RESULT_CHARS == 8000
