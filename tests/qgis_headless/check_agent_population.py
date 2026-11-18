@@ -233,6 +233,53 @@ def check_population(project, work):
                   other["total"] == people and other["name"] == "Habitants"
                   and abs(shown.rasterUnitsPerPixelX() - real.step * factor) < 1e-12, other)
             project.removeMapLayer(other["layer_id"])
+        # A rectangle that cuts through a town: the total is the people of the area asked, whatever the pixels written
+        # (2026-11-18: the sum of the blocks around it, 1.8 to 40 times its surface, with nothing said).
+        cut = "POLYGON((4.8105 45.7305, 4.8205 45.7305, 4.8205 45.7405, 4.8105 45.7405, 4.8105 45.7305))"
+        cut_bounds = population.snapped(real, (4.8105, 45.7305, 4.8205, 45.7405), 1)
+        expected = round((cut_bounds[2] - cut_bounds[0]) / real.step) * round((cut_bounds[3] - cut_bounds[1]) / real.step)
+        for resolution in (30, 100, 1000, 10000):
+            exact = adapter.add_population(extent_wkt=cut, crs="EPSG:4326", resolution=resolution)
+            shown = gdal.Open(project.mapLayer(exact["layer_id"]).source())
+            held = float(numpy.nansum(shown.GetRasterBand(1).ReadAsArray()))
+            shown = None
+            wide = resolution > 100  # blocks of more than 3 pixels: the layer is a good deal wider than the area
+            check(f"population: a rectangle in a town, at {resolution} m: the total is the people of the area asked",
+                  exact["total"] == expected and exact["asked_km2"] < 1.5 and exact["summed_km2"] < 1.5
+                  and (held > expected * 1.5 if wide else held >= expected)
+                  and (not wide or "whatever the resolution" in exact["note"]) and "finer" not in exact["note"]
+                  and "inside the area" not in exact["note"], (exact, expected, held))
+            project.removeMapLayer(exact["layer_id"])
+        # The second reading, for the total, fails: the layer is written, its own sum is the total and it is said so.
+        second = adapter._sum_pixels
+
+        def broken(*_arguments):
+            raise ValueError("the population grid could not be read from its server: boom")
+        adapter._sum_pixels = broken
+        try:
+            after = adapter.add_population(extent_wkt=cut, crs="EPSG:4326", resolution=1000)
+        finally:
+            adapter._sum_pixels = second
+        shown = gdal.Open(project.mapLayer(after["layer_id"]).source())
+        held = float(numpy.nansum(shown.GetRasterBand(1).ReadAsArray()))
+        shown = None
+        check("population: a second reading that fails leaves the total of the layer, said so, and the layer is kept",
+              after["total"] == held and "sum of the whole layer" in after["note"]
+              and after["summed_km2"] > after["asked_km2"] * 2 and project.mapLayer(after["layer_id"]) is not None, after)
+        project.removeMapLayer(after["layer_id"])
+        fits = adapter.exact_total_fits
+        adapter.exact_total_fits = lambda *_arguments: False  # an area too large to be summed on the pixels of the source
+        try:
+            rough = adapter.add_population(extent_wkt=cut, crs="EPSG:4326", resolution=1000)
+        finally:
+            adapter.exact_total_fits = fits
+        shown = gdal.Open(project.mapLayer(rough["layer_id"]).source())
+        held = float(numpy.nansum(shown.GetRasterBand(1).ReadAsArray()))
+        shown = None
+        check("population: when the pixels of the source do not fit in a call, the total is the layer's, and the surface "
+              "summed and the note say so", rough["total"] == held and rough["summed_km2"] > rough["asked_km2"] * 2
+              and "sum of the whole layer" in rough["note"] and len(rough["summed_bounds"]) == 4, rough)
+        project.removeMapLayer(rough["layer_id"])
         lambert = adapter.add_population(extent_wkt="POLYGON((838000 6515000, 848000 6515000, 848000 6525000, "
                                                     "838000 6525000, 838000 6515000))", crs="EPSG:2154")
         check("population: an area given in another CRS", lambert["total"] > 0 and lambert["crs_authid"] == "EPSG:4326",

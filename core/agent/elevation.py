@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import dataclass
-from typing import List, Optional, Sequence, Tuple
+from typing import Callable, List, Optional, Sequence, Tuple
 
 # What one call may cost: the squares of one degree read, and the pixels written (float32: 4 bytes each).
 MAX_TILES = 16
@@ -95,10 +95,43 @@ def tiles_for(bbox: Sequence[float]) -> List[Tuple[int, int]]:
     return [(latitude, longitude) for latitude in rows for longitude in columns]
 
 
+def tiles_for_grid(bbox: Sequence[float], envelope: Sequence[float]) -> List[Tuple[int, int]]:
+    """The squares to read for a grid written in a metric CRS: those of the area asked, and those its corners reach.
+
+    ``envelope`` is the bounds of the grid, in degrees: wider than ``bbox`` because a rectangle of a UTM zone or of a
+    national grid is not one in longitude and latitude. A corner that falls in a square nobody read would be written
+    empty (2026-11-18: [4.5, 45, 5, 45.5] in UTM 31N left 2.5 % of the grid at 0 m, along its south edge). When
+    these squares are more than one call reads, those of the area asked are read, and the corners stay empty.
+
+    Raises:
+        ValueError: Bounds that are none, or an area of more squares than one call reads.
+    """
+    asked = tiles_for(bbox)
+    west, south, east, north = envelope
+    wider = [max(west, -180.0), max(south, -90.0), min(east, 180.0), min(north, 90.0)]
+    try:
+        return sorted(set(asked) | set(tiles_for(wider)))
+    except ValueError:
+        return asked
+
+
 def utm_authid(longitude: float, latitude: float) -> str:
     """The UTM zone of a place, as an EPSG code: metres, and little distortion over a town or a region."""
     zone = int(math.floor((max(-180.0, min(179.999, longitude)) + 180.0) / 6.0)) + 1
     return f"EPSG:{(32600 if latitude >= 0 else 32700) + zone}"
+
+
+_GDAL_AUTHORITIES = re.compile(r"(?:EPSG|ESRI|IGNF):[A-Za-z0-9_.]+", re.IGNORECASE)
+
+
+def gdal_srs(authid: str, wkt: Callable[[], str]) -> str:
+    """The text that names a CRS to GDAL: its authid when GDAL has that authority (EPSG, ESRI, IGNF), its WKT otherwise.
+
+    A CRS the user defined has an authid of QGIS alone (``USER:100000``), which GDAL does not know: it refused it, and
+    the elevation was said not to be readable from its server. ``wkt`` is called only then.
+    """
+    authid = (authid or "").strip()
+    return authid if _GDAL_AUTHORITIES.fullmatch(authid) else wkt()
 
 
 def metric_grid(authid: str, projected: bool, metres: bool) -> bool:
@@ -139,6 +172,19 @@ def resolution_for(bbox: Sequence[float], asked: Optional[float], finest: float)
                          f"pixels: ask for {fitting:g} m or more, or for a smaller area")
     note = "" if asked >= finest else f"the source measures every {finest:g} m: a finer grid adds no detail"
     return float(asked), note
+
+
+NO_DATA = -9999.0  # what the grid holds where no tile of the model reaches: written as its no-data value
+
+
+def empty_note(empty: int, pixels: int, why: str) -> str:
+    """What a model must know when part of a grid holds no elevation: said by its share, and left out of the figures
+    (minimum, maximum, mean) and of every slope, shade or contour drawn from it. "" when nothing is empty."""
+    if empty <= 0 or pixels <= 0:
+        return ""
+    share = 100.0 * empty / pixels
+    shown = f"{share:.0f} %" if share >= 1 else "under 1 %"
+    return f"{shown} of the grid is empty (no data), left out of minimum, maximum and mean: the model {why}"
 
 
 def contour_problem(minimum: float, maximum: float, interval: float, index_interval: Optional[float],
@@ -184,17 +230,44 @@ def is_index(elevation: float, index_interval: float) -> bool:
     return abs(ratio - round(ratio)) < 1e-6
 
 
-# An address: any scheme, with the /vsi... prefixes GDAL reads it through. A folder: what ends with a separator,
-# under a root or a drive.
+# An address: any scheme, with the /vsi... prefixes GDAL reads it through.
 _ADDRESS = re.compile(r"(?:/vsi[a-z0-9_]+/)*[a-z][a-z0-9+.-]*://[^\s'\"`<>]+", re.IGNORECASE)
-_VSI = re.compile(r"/vsi[a-z0-9_]+/", re.IGNORECASE)
-_FOLDER = re.compile(r"(?:[A-Za-z]:)?(?:[\\/][^\s\\/'\"`<>]+)+[\\/]")
+# One key=value of a connection: the value is quoted, or runs to the next space.
+_PAIR = r"""[A-Za-z_]+\s*=\s*(?:'(?:[^'\\]|\\.)*'|"[^"]*"|\S+)"""
+# A database connection (GDAL "PG:dbname=... password=..."): its host, its user and its password are not for a model.
+_CONNECTION = re.compile(rf"\b(?:PG|MSSQL|MYSQL|OCI|ODBC)\s*:\s*(?:{_PAIR}\s*)+", re.IGNORECASE)
+# What names an account, wherever it is written (a connection string of QGIS, the message of a driver). Not the
+# words that are tags of OpenStreetMap too (service=driveway).
+_SECRET = re.compile(r"\b(?:host|hostaddr|dbname|user|username|password|passwd|pwd|authcfg|token|"
+                     r"apikey|api_key|secret|sslkey|sslcert)\s*=\s*(?:'(?:[^'\\]|\\.)*'|\"[^\"]*\"|\S+)", re.IGNORECASE)
+# A path of this machine or of a store (a drive, a share, a root, ~, .. : C:\Users\..., /vsis3/bucket/..., after a
+# colon too: GPKG:C:\...\a.gpkg:roads). A folder may hold spaces (the name of a person, of a client) and a message does
+# not say where the path ends: it ends after the first part that has an extension (the file), else at a colon or a
+# quote. Only that last part is kept: the folders hold the name of the user and of their clients.
+_STOP = r"""[^\\/:'"`<>|*?\r\n]"""
+_FILE = rf"""{_STOP}*?\.[A-Za-z][A-Za-z0-9]{{0,4}}(?=[\s,;:'"`)\]>]|$)"""
+_PATH = re.compile(rf"""(?:(?<![A-Za-z0-9_])[A-Za-z]:[\\/]|(?<![\w.\\/~-])(?:\\\\|/(?=[^\s\\/:])|~[\\/]|\.{{1,2}}[\\/]))"""
+                   rf"""(?:(?:{_STOP}*[\\/])*?{_FILE}|[^:'"`<>|*?\r\n]*)""")
+# A name with folders between quotes (GDAL quotes what it opens): 'Clients ACME/x.tif'.
+_QUOTED = re.compile(rf"""(['"`])[^'"`\r\n]*[\\/]({_STOP}*?\.[A-Za-z][A-Za-z0-9]{{0,4}})(?=['"`])""")
+# A relative path whose first part has no space (Projet/Client ACME.qgz, data/sub/x.tif); "read/write" is none: its
+# last part has no extension.
+_RELATIVE = re.compile(rf"""(?<![\w.:\\/~-])[^\s'"`<>:|*?\\/]+[\\/](?:{_STOP}*[\\/])*?({_FILE})""")
 MAX_MESSAGE = 300
+
+
+def _last_part(found: "re.Match[str]") -> str:
+    return re.split(r"[\\/]", found.group(0))[-1]
 
 
 def quiet_message(text: str) -> str:
     """What a library said of a failure, in one short line a model may read: no address (it may hold the key of an
-    account, or be the source of a layer of the user) and no folder of this machine, only the name of a file."""
+    account, or be the source of a layer of the user), no connection to a database, and of a path only the name of
+    its file: the folders hold the name of the user and of their clients."""
     text = _ADDRESS.sub("its address", text or "")
-    text = _FOLDER.sub("", _VSI.sub("", text))
+    text = _CONNECTION.sub("a database connection ", text)
+    text = _SECRET.sub("", text)
+    text = _QUOTED.sub(lambda found: found.group(0)[0] + found.group(2), text)
+    text = _PATH.sub(_last_part, text)
+    text = _RELATIVE.sub(lambda found: found.group(1), text)
     return " ".join(text.split())[:MAX_MESSAGE] or "no reason given"
