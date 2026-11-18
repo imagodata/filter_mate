@@ -639,6 +639,16 @@ def check_elevation(project, work):
             check(f"elevation: {label} is refused, nothing added nor kept", needle in said
                   and len(project.mapLayers()) == count and written() == files, said)
 
+        # A grid that holds no data at all (a tile read for a corner the grid never touches) is refused as before, not
+        # added as a layer of min 0 and max 0 (the statistics of a band of no data are [0, 0, 0] with an error).
+        every_pixel = terrain._empty_pixels
+        terrain._empty_pixels = lambda dataset: dataset.RasterXSize * dataset.RasterYSize
+        try:
+            said = refused(terrain.add_elevation, extent_wkt=LYON, crs="EPSG:4326")
+        finally:
+            terrain._empty_pixels = every_pixel
+        check("elevation: a grid with no data at all is refused as no tile, nothing added nor kept",
+              "has no tile there" in said and len(project.mapLayers()) == count and written() == files, said)
         from filter_mate.adapters.public_api import operations
         delay[0] = 0.4
         # While the source is asked which tiles it has, then while the tile is read.

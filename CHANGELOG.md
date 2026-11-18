@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent, elevation: an area where no tile reaches the grid (a tile read only for a corner the grid never touches, as at sea) is refused as before, "has no tile there", instead of adding a layer of no data with a minimum and a maximum of 0.
 - Agent, OpenStreetMap: asking for `lines` gives back a hedge, a wall or a pier that closes as the line it is mapped; the conversion of closed ways to areas (857f3837) took them out of that request.
 - Agent, OpenStreetMap: a closed `natural=tree_row`, `cliff`, `ridge`, `coastline` or `aeroway=taxiway` is a line, as the table of OpenStreetMap says, not an area: GDAL ranked them as areas by their key whatever the value, which the table of 857f3837 could not undo. A closed `natural=wood` is still an area, and none is given twice.
 - Agent, elevation: the tiles read are those of the grid written, not only of the area asked. The grid is the rectangle of the area in a UTM zone or a national grid, wider than the area in degrees: its corners fell in tiles never read and were written at 0 m (3.9 % of the grid for [4, 45, 5, 46], measured on the real model), pulling the minimum to 0 and the mean down, and bending contours and slopes at the edge, with no note. What no tile reaches (a corner beyond the tile limit of one call, open sea, a country the model leaves out) is now no data (-9999), left out of minimum, maximum and mean and said in the note with its share.

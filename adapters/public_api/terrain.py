@@ -457,6 +457,10 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
             path = os.path.join(folder, f"{source.id}_{size:g}m.tif")
             crs_text = gdal_srs(grid_crs.authid(), grid_crs.toWkt)
             read = _in_background('add_elevation', lambda ended: _warp(urls, path, crs_text, bounds, size, ended))
+            if read['empty'] >= read['width'] * read['height']:
+                # A tile read for a corner of the grid that the grid never touches: no tile covers the area, and a
+                # layer of no data alone (its statistics are 0, 0, 0 with an error) would be added.
+                raise ValueError(f"{source.title} {_NO_TILE}")
         title = (name or '').strip()[:200] or f"Elevation ({source.title.split(' (')[0]} {size:g} m)"
         layer = QgsRasterLayer(path, title, 'gdal')
         if not layer.isValid():
