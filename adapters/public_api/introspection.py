@@ -389,6 +389,11 @@ def _provider_error(layer) -> str:
     return str(errors[-1])[:MAX_VALUE_CHARS] if errors else ''
 
 
+def _crs_label(crs) -> str:
+    """A CRS as its identifier, or its short description when it has none (a CRS defined in the project)."""
+    return str(_safe(crs.authid, '') or _safe(crs.description, '') or '')
+
+
 def map_context() -> Dict[str, Any]:
     """CRS, extent, scale, active layer and selections; ``available`` False without a canvas."""
     from qgis.core import QgsProject, QgsVectorLayer
@@ -397,7 +402,7 @@ def map_context() -> Dict[str, Any]:
     except ImportError:
         iface = None
     project = QgsProject.instance()
-    context: Dict[str, Any] = {'project_crs': _safe(lambda: project.crs().authid(), '') or ''}
+    context: Dict[str, Any] = {'project_crs': _crs_label(project.crs())}
     selections: List[Dict[str, Any]] = []
     for layer in project.mapLayers().values():
         if isinstance(layer, QgsVectorLayer):
@@ -412,7 +417,7 @@ def map_context() -> Dict[str, Any]:
         return {**context, 'available': False}
     context.update({
         'available': True,
-        'canvas_crs': _safe(lambda: canvas.mapSettings().destinationCrs().authid(), '') or '',
+        'canvas_crs': _safe(lambda: _crs_label(canvas.mapSettings().destinationCrs()), '') or '',
         'extent_wkt': _safe(lambda: canvas.extent().asWktPolygon(), '') or '',
         'extent': _rectangle(_safe(canvas.extent)),
         'scale': _safe(canvas.scale),
@@ -627,9 +632,15 @@ def layer_statistics(reference: str, field_name: str = '', group_by: str = '', m
         answer['statistics'] = overall.summary()
     if group_index >= 0:
         limit = max(1, min(int(limit), MAX_GROUPS))
-        ranked = sorted(groups.items(), key=lambda item: (-(item[1].count + item[1].nulls), str(item[0])))
+        # The largest by what was asked: the sum of the numbers of a field or of a measure, else the features. Ranked by
+        # the number of features, a question of "which commune has the largest built area" lost its answer past the
+        # groups kept (audit 2026-11-18).
+        by_sum = numeric and not counting
+        ranked = sorted(groups.items(), key=lambda item: (-item[1].total if by_sum else 0,
+                                                          -(item[1].count + item[1].nulls), str(item[0])))
         answer.update({
             'group_by': fields.at(group_index).name(), 'groups_total': len(ranked), 'truncated': len(ranked) > limit,
+            'ranked_by': 'sum' if by_sum else 'feature_count',
             'groups': [{'value': key, 'feature_count': series.count + series.nulls,
                         **({} if counting else series.summary())} for key, series in ranked[:limit]]})
     return answer

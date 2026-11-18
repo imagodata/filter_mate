@@ -81,3 +81,12 @@ def test_source_tools():
     assert chat_setup.SOURCE_TOOLS == {"search_open_data", "add_service_layer", "search_imagery", "add_basemap",
                                        "add_elevation", "add_osm_features", "add_population", "find_place",
                                        "list_database_tables", "add_database_table"}
+
+
+def test_a_settings_link_turned_off_in_the_tools_tab_is_not_named_by_the_note():
+    """Review 2026-11-18: the note sent the model to a tool the user turned off."""
+    values = agent_settings.AgentSettings(preset="anthropic", model="m",
+                                          tool_rules='{"show_settings_link": "never"}')
+    text = Controller._prompt(values, [])
+    assert "never guess coordinates" in text and "call show_settings_link" not in text
+    assert "call show_settings_link" in Controller._prompt(CONFIGS["default"][0], [])

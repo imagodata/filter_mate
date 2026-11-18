@@ -6,6 +6,7 @@ drive it from signals. :func:`run_exchange` is the blocking way, for the evaluat
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from typing import Callable, Collection, Dict, List, Optional, Protocol, Sequence, Tuple, Union
 
@@ -18,6 +19,7 @@ from .messages import (
 from .providers.base import HttpRequest, Provider
 from .tool_catalog import ToolSpec
 from .tool_executor import ToolExecutor
+from .tool_schema import for_model
 
 STATUS_DONE = "done"
 STATUS_RUN_TOOLS = "run_tools"
@@ -43,6 +45,10 @@ class AgentLimits:
     # Past this many characters (about a quarter as many tokens), the oldest requests are summed up in a few lines
     # (core/agent/compaction.py) before a new one is sent.
     max_history_chars: int = 120_000
+    # ``max_history_chars`` was worked out for the tools the session starts with (``history_budget``): every
+    # character the tools offered since add to the request is taken off it, so the compaction steps in before the
+    # request needs a larger context (Ollama: a larger ``num_ctx`` loads the model again).
+    shrinks_with_tools: bool = False
 
 
 # Token diet, lot 1: a tool added and not called during this many requests leaves the request at a compaction.
@@ -61,6 +67,16 @@ def history_budget(provider_kind: str, fixed_chars: int) -> int:
         return REMOTE_HISTORY
     from .providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS
     return max(MIN_LOCAL_HISTORY, int((CONTEXT_STEPS[1] - ANSWER_ROOM) * CHARS_PER_TOKEN) - fixed_chars)
+
+
+def tool_weight(tool: ToolSpec) -> int:
+    """Characters a tool adds to a request, in the form the providers send (a separator included)."""
+    return len(json.dumps([tool.name, tool.description, for_model(tool.input_schema)], ensure_ascii=False)) + 2
+
+
+def tools_weight(tools: Sequence[ToolSpec]) -> int:
+    """Characters ``tools`` add to a request: the ``fixed_chars`` of ``history_budget``, instructions apart."""
+    return sum(tool_weight(tool) for tool in tools)
 
 
 TURNS_LEFT_NOTE = ("{} model turns left for this request: finish what is under way and answer now. If something "
@@ -119,6 +135,11 @@ class AgentSession:
         self.dropped: Tuple[str, ...] = ()
         self._system = system
         self._limits = limits
+        self._weights: Dict[str, int] = {}
+        # Every tool that changes the project offered at any time of the conversation, even one taken out since:
+        # the summary of a compaction names what it changed in requests that ran before it left.
+        self._writers: Dict[str, None] = dict.fromkeys(tool.name for tool in self._tools if not tool.read_only)
+        self._start_weight = self._tools_weight() if limits.shrinks_with_tools else 0
         self._messages: List[Message] = []
         self._turns = 0
         self._request_start = 0
@@ -141,6 +162,23 @@ class AgentSession:
         """The tools ``next_request`` offers, in their order."""
         return self._tools
 
+    def _tools_weight(self) -> int:
+        total = 0
+        for tool in self._tools:
+            if tool.name not in self._weights:
+                self._weights[tool.name] = tool_weight(tool)
+            total += self._weights[tool.name]
+        return total
+
+    def history_limit(self) -> int:
+        """Characters of history before the compaction: ``max_history_chars``, less what the tools offered since the
+        start add to the request when the limits say so (``shrinks_with_tools``), ``MIN_LOCAL_HISTORY`` at least."""
+        limit = self._limits.max_history_chars
+        if not self._limits.shrinks_with_tools:
+            return limit
+        grown = max(0, self._tools_weight() - self._start_weight)
+        return max(min(limit, MIN_LOCAL_HISTORY), limit - grown)
+
     def add_user_text(self, text: str, context: Union[str, Callable[[bool], str]] = "") -> None:
         """Start a new request of the user; ``context`` (the state of the project) follows it in the same message.
 
@@ -148,19 +186,26 @@ class AgentSession:
         """
         first = not self._messages
         self._messages = [_without_images(message) for message in self._messages]
-        writes = [tool.name for tool in self._tools if not tool.read_only]
+        writes = list(self._writers)
         trimmed = 0
-        if sum(_size(message) for message in self._messages) > self._limits.max_history_chars:
+        size = sum(_size(message) for message in self._messages)
+        dropped: Tuple[str, ...] = ()
+        if size > self.history_limit():
+            # The tools nobody calls go first: they make the budget smaller (Ollama), and a history summed up with
+            # loss only because of tools that leave at once would have been kept (review 2026-11-18).
+            dropped = self._drop_idle(self._requests + 1)
+        budget = self.history_limit()
+        if size > budget:
             # Lot 3: the results of old requests go first; requests are summed up only if that is not enough.
             self._messages, trimmed = trim_results(self._messages)
-        self._messages, summarized = compact(self._messages, self._limits.max_history_chars, writes)
+        self._messages, summarized = compact(self._messages, budget, writes)
         self.summarized += summarized
         # Lot 3: the history was rewritten; the next context carries the whole state again.
         self.rewritten = bool(summarized or trimmed)
         if callable(context):  # the whole state at the first request and after a rewrite, what changed otherwise
             context = context(first or self.rewritten)
         self._requests += 1
-        self.dropped = self._drop_idle() if self.rewritten else ()
+        self.dropped = dropped
         self._request_start = len(self._messages)
         parts = (TextPart(text),) + ((TextPart(context),) if context else ())
         self._messages.append(Message(ROLE_USER, parts))
@@ -172,19 +217,20 @@ class AgentSession:
         known = {tool.name for tool in self._tools}
         added = tuple(tool for tool in tools if tool.name not in known)
         self._tools = self._tools + added
+        self._writers.update(dict.fromkeys(tool.name for tool in added if not tool.read_only))
         if self._core:
             for tool in added:
                 if tool.name not in self._core and not tool.name.startswith(CONNECTOR_TOOL_PREFIX):
                     self._added_at[tool.name] = self._requests
 
-    def _drop_idle(self) -> Tuple[str, ...]:
-        """Take out of the request the tools added and not called in the last ``MAX_IDLE_REQUESTS`` requests: at a
-        compaction only, which rewrites the history. Since lot 4 the tools and the instructions are read again from
-        the cache after a compaction, unless a tool is taken out here: the tools come first, so the cache of the
-        request then starts over from that tool (Anthropic: from the start). Kept, to keep a long conversation
-        light (lot 1), at the price of one write of the cache."""
+    def _drop_idle(self, requests: int) -> Tuple[str, ...]:
+        """Take out of the request the tools added and not called in the last ``MAX_IDLE_REQUESTS`` requests (this one
+        being the ``requests``-th): when the history is past its budget only, before it is cut. Since lot 4 the tools
+        and the instructions are read again from the cache after a compaction, unless a tool is taken out here: the
+        tools come first, so the cache of the request then starts over from that tool (Anthropic: from the start).
+        Kept, to keep a long conversation light (lot 1), at the price of one write of the cache."""
         idle = sorted(name for name, added in self._added_at.items()
-                      if max(added, self._used_at.get(name, 0)) < self._requests - MAX_IDLE_REQUESTS)
+                      if max(added, self._used_at.get(name, 0)) < requests - MAX_IDLE_REQUESTS)
         for name in idle:
             self._added_at.pop(name, None)
             self._used_at.pop(name, None)
