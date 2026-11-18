@@ -189,6 +189,9 @@ def test_the_state_header_names_core_tools_only():
 
 
 def test_the_settings_link_of_the_missing_sources_says_how_to_get_it():
-    from core.agent.chat_setup import MISSING_RULE
-    assert "show_settings_link" not in CORE and "use_tools" in MISSING_RULE
-    assert _named(MISSING_RULE) <= CORE | {"show_settings_link"}
+    from core.agent.chat_setup import chat_instructions
+    index = [tool for tool in chat_tools() if tool.name not in CORE][:5]
+    with_index, without = chat_instructions([], available=index), chat_instructions([])
+    assert "show_settings_link" not in CORE
+    assert "show_settings_link with target sources (use_tools adds it);" in with_index
+    assert "use_tools" not in without  # the families off: every tool is offered, and use_tools is not
