@@ -184,17 +184,31 @@ def is_index(elevation: float, index_interval: float) -> bool:
     return abs(ratio - round(ratio)) < 1e-6
 
 
-# An address: any scheme, with the /vsi... prefixes GDAL reads it through. A folder: what ends with a separator,
-# under a root or a drive.
+# An address: any scheme, with the /vsi... prefixes GDAL reads it through.
 _ADDRESS = re.compile(r"(?:/vsi[a-z0-9_]+/)*[a-z][a-z0-9+.-]*://[^\s'\"`<>]+", re.IGNORECASE)
-_VSI = re.compile(r"/vsi[a-z0-9_]+/", re.IGNORECASE)
-_FOLDER = re.compile(r"(?:[A-Za-z]:)?(?:[\\/][^\s\\/'\"`<>]+)+[\\/]")
+# One key=value of a connection: the value is quoted, or runs to the next space.
+_PAIR = r"""[A-Za-z_]+\s*=\s*(?:'(?:[^'\\]|\\.)*'|"[^"]*"|\S+)"""
+# A database connection (GDAL "PG:dbname=... password=..."): its host, its user and its password are not for a model.
+_CONNECTION = re.compile(rf"\b(?:PG|MSSQL|MYSQL|OCI|ODBC)\s*:\s*(?:{_PAIR}\s*)+", re.IGNORECASE)
+# What names an account, wherever it is written (a connection string of QGIS, the message of a driver).
+_SECRET = re.compile(r"\b(?:host|hostaddr|dbname|database|user|username|password|passwd|pwd|service|authcfg|token|"
+                     r"apikey|api_key|secret|sslkey|sslcert)\s*=\s*(?:'(?:[^'\\]|\\.)*'|\"[^\"]*\"|\S+)", re.IGNORECASE)
+# A path of this machine or of a store (a drive, a share, a root: C:\Users\..., /vsis3/bucket/...). A folder may hold
+# spaces (the name of a person, of a client) and a message does not say where the path ends: it runs to a colon or a
+# quote, and only what follows its last separator is kept (with what comes after the name on that stretch).
+_PATH = re.compile(r"""(?<![\w.:\\/-])(?:[A-Za-z]:[\\/]|\\\\|/(?=[^\s\\/]))[^:'"`<>|*?\r\n]*""")
+# A relative path written without a space (data/sub/x.tif); "read/write" is none: its last part has an extension.
+_RELATIVE = re.compile(r"""[^\s'"`<>:|*?\\/]+(?:[\\/][^\s'"`<>:|*?\\/]+)*[\\/]([^\s'"`<>:|*?\\/]+\.[A-Za-z0-9]{1,5})\b""")
 MAX_MESSAGE = 300
 
 
 def quiet_message(text: str) -> str:
     """What a library said of a failure, in one short line a model may read: no address (it may hold the key of an
-    account, or be the source of a layer of the user) and no folder of this machine, only the name of a file."""
+    account, or be the source of a layer of the user), no connection to a database, and of a path only the name of
+    its file: the folders hold the name of the user and of their clients."""
     text = _ADDRESS.sub("its address", text or "")
-    text = _FOLDER.sub("", _VSI.sub("", text))
+    text = _CONNECTION.sub("a database connection ", text)
+    text = _SECRET.sub("", text)
+    text = _PATH.sub(lambda found: re.split(r"[\\/]", found.group(0))[-1], text)
+    text = _RELATIVE.sub(lambda found: found.group(1), text)
     return " ".join(text.split())[:MAX_MESSAGE] or "no reason given"

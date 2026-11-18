@@ -168,6 +168,30 @@ def test_what_a_library_said_goes_to_a_model_without_an_address_nor_a_folder(sai
         assert word not in message, (word, message)
 
 
+@pytest.mark.parametrize("said, kept, gone", [
+    # The folders of a path hold the name of the person and of their clients, spaces included.
+    ("C:\\Users\\Jean Dupont\\AppData\\Local\\Temp\\x.tif: No such file or directory",
+     "x.tif: No such file or directory", ("Jean", "Dupont", "AppData", "Users")),
+    ("Cannot open /vsis3/my-private-bucket/dir/key.tif", "key.tif", ("my-private-bucket", "vsis3", "dir")),
+    ("D:/projets/client secret/dem.tif: Permission denied", "dem.tif: Permission denied",
+     ("projets", "client", "secret")),
+    ("\\\\serveur\\partage compta\\mnt.tif: not recognized", "mnt.tif: not recognized", ("serveur", "compta")),
+    ("`/home/jean dupont/data/mnt.tif' not recognized", "mnt.tif' not recognized", ("jean", "dupont", "/home")),
+    ("Cannot open data/clients/dem.tif", "Cannot open dem.tif", ("data", "clients")),
+    # What a driver says of a connection: no host, no user, no password.
+    ("PG: dbname='ign' host=db.client.example port=5432 user=jean password='s3 cret' sslmode=require",
+     "a database connection", ("ign", "client", "5432", "jean", "s3 cret", "password")),
+    ("PQconnectdb failed: dbname=ign host=10.0.0.5 password=hunter2 refused", "refused", ("hunter2", "10.0.0.5", "ign")),
+    # Not paths: what is said as a sentence stays.
+    ("the read/write mode is 50 / 60", "the read/write mode is 50 / 60", ()),
+])
+def test_a_message_keeps_the_name_of_a_file_and_no_folder_nor_connection(said, kept, gone):
+    message = quiet_message(said)
+    assert kept in message, message
+    for word in gone:
+        assert word not in message, (word, message)
+
+
 def test_a_message_is_one_short_line_and_never_empty():
     assert quiet_message("") == quiet_message(None) == "no reason given"
     assert quiet_message("a\n  b\tc") == "a b c"
