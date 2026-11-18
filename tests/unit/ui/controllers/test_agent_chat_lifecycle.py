@@ -965,3 +965,66 @@ def test_other_tools_under_the_same_provider_keep_the_thread(controller):
     controller._reset_view()  # another provider: nothing of it goes on
     assert controller.panel.clear_thread.called and not controller._policy.granted
     assert controller._recap_from == len(controller._transcript)
+
+
+# --- the context of a request taken out of the conversation is sent again ----------------------------------------
+
+ROW = {"layer_id": "c1", "name": "communes", "layer_kind": "vector", "feature_count": 10,
+       "active_filter_expression": ""}
+
+
+def _sent_texts(engine):
+    """The text of every message of the user the model would be sent now."""
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    return [message.text for message in engine._session._messages if message.role == messages.ROLE_USER]
+
+
+def _news(engine):
+    """How many messages of the user carry the change of the project, and the protected layer."""
+    texts = _sent_texts(engine)
+    return (sum("communes" in text and "Changed in QGIS" in text for text in texts),
+            sum("Communes" in text for text in texts))
+
+
+@pytest.fixture
+def news(ctrl_module, controller):
+    """A first request done; then the user filtered a layer and protected another: news for the next request."""
+    state = {"rows": [dict(ROW)]}
+    controller._read_project = lambda: (state["rows"], [], {})
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("first")
+    transport.starts[-1](_end_turn(ctrl_module))
+    state["rows"] = [dict(ROW, active_filter_expression='"dept" = \'31\'')]
+    controller._protection.names = lambda: ["Communes"]
+    return engine, transport
+
+
+def test_stop_before_any_step_sends_the_news_of_the_request_again(controller, news):
+    engine, _transport = news
+    controller._on_send("second")  # carries the news
+    assert _news(engine) == (1, 1)
+    engine.cancel()  # nothing ran: the request leaves the conversation with its news
+    assert _news(engine) == (0, 0)
+    controller._on_send("third")
+    assert _news(engine) == (1, 1), "the model never learned of the change"
+
+
+def test_a_refusal_before_any_step_sends_the_news_of_the_request_again(ctrl_module, controller, news):
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    engine, transport = news
+    controller._on_send("second")
+    transport.starts[-1](messages.TurnComplete(messages.Message(messages.ROLE_ASSISTANT, ()), messages.STOP_REFUSAL))
+    assert _news(engine) == (0, 0)
+    controller._on_send("third")
+    assert _news(engine) == (1, 1), "the model never learned of the change"
+
+
+def test_stop_after_a_step_keeps_the_news_it_carried(ctrl_module, controller, news):
+    engine, transport = news
+    controller._on_send("second")
+    transport.starts[-1](_tool_turn(ctrl_module))
+    engine.cancel()  # a step ran: the request stays in the conversation, with its news
+    assert _news(engine) == (1, 1)
+    controller._on_send("third")
+    assert _news(engine) == (1, 1)  # told once, not again

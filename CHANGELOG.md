@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: Stop, or a refusal of the model, before any step that changed something takes the request out of the conversation; the change of the project, the notes or the protected layers it carried is now sent again with the next request, instead of 'Project unchanged'.
 - Metadata: a shorter description; the about opens on what people search (several layers filtered at once, definition queries); tags chosen for the plugin list search; a short changelog; category Vector (Plugins is not a value plugins.qgis.org knows); a stray line that read as a key removed.
 - Feedback: four entries in Vector > FilterMate (give your opinion, suggest a feature, test the experimental features, training and services) open the feedback page of the site; after 20 successful filters, one message offers the short review form, once ever. The plugin sends nothing itself.
 - Site: a FilterMate Cloud page with the tiers to test and a waitlist; cookie-free audience measure.

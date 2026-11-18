@@ -3019,8 +3019,10 @@ class AgentChatController(QObject):
             listed, one_line(str(reason), 300))
 
     def on_finished(self, outcome: ChatOutcome) -> None:
-        # What the request carried is known to the model, unless it failed before reaching it (lot 3).
-        if outcome.status == OUTCOME_FAILED or self._abandoned:
+        # What the request carried is known to the model, unless it failed before reaching it or was taken out of
+        # the conversation with its context (lot 3).
+        dropped = self._request_dropped(outcome)
+        if outcome.status == OUTCOME_FAILED or self._abandoned or dropped:
             self._context_memory.forget()
         else:
             self._context_memory.sent()
@@ -3049,8 +3051,10 @@ class AgentChatController(QObject):
         self._save_transcript()
         self._refresh_history()
         # What a request that broke off did is in the conversation, with a note saying it stopped there
-        # (AgentSession.interrupt_request): the project as it is now is no news to the model.
-        self._remember_project()
+        # (AgentSession.interrupt_request): the project as it is now is no news to the model. A request taken out
+        # of the conversation took its news with it: the next one tells them again.
+        if not dropped:
+            self._remember_project()
         kept = outcome.kept_steps
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
             message = self._error_message(outcome.error)
@@ -3083,6 +3087,14 @@ class AgentChatController(QObject):
             self.panel.show_error(*self._stop_words(outcome.reason, kept))
             return
         self._say(self._usage_words())  # the cards of the turn say what changed (mockup)
+
+    @staticmethod
+    def _request_dropped(outcome: ChatOutcome) -> bool:
+        """Whether the request left the conversation with the message that carried its context: Stop or a refusal
+        before any step that changed something (``AgentSession.interrupt_request`` forgets it then)."""
+        broke_off = outcome.status == OUTCOME_CANCELLED or (
+            outcome.status == OUTCOME_STOPPED and outcome.reason == REASON_REFUSED)
+        return broke_off and not outcome.kept_steps
 
     def _usage_words(self) -> str:
         """What the request weighed, for the line under the thread: the user pays for it, or waits for it."""

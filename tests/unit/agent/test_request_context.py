@@ -73,3 +73,14 @@ def test_a_new_conversation_sends_everything():
     memory.sent()
     memory.forget()
     assert memory.empty and memory.delta(ContextParts(summary="S", notes="N"), full=False).notes == "N"
+
+
+def test_back_to_the_standard_level_is_told_once():
+    from core.agent.permissions import ADVISOR, STANDARD, level_note
+    memory = ContextMemory()
+    memory.delta(ContextParts(summary="S", level=level_note(ADVISOR)), full=False)
+    memory.sent()
+    back = memory.delta(ContextParts(summary="U", level=level_note(STANDARD)), full=False)
+    assert back.level.startswith("Level of autonomy chosen by the user: standard again")
+    memory.sent()
+    assert memory.delta(ContextParts(summary="U", level=level_note(STANDARD)), full=False).level == ""
