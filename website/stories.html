@@ -91,7 +91,7 @@
         <a class="card story-card" href="#s2"><span class="story-card-media"><img src="video/noise.webp" alt="Buildings near the main roads of Muret" loading="lazy" width="1280" height="720"><b aria-hidden="true">02</b></span><div class="story-card-copy"><span class="badge">Planning</span><h4>Which buildings are near the main roads?</h4><p>A buffer computed by expression from each road category.</p><span class="story-outcome"><strong>2,196 buildings</strong> · 75 public buildings</span></div></a>
         <a class="card story-card" href="#s3"><span class="story-card-media"><img src="video/buffer.webp" alt="Buildings filtered around the water surfaces of Grenade" loading="lazy" width="1280" height="720"><b aria-hidden="true">03</b></span><div class="story-card-copy"><span class="badge">Risk</span><h4>Buildings near watercourses</h4><p>A 300 m then 100 m band, with undo and replay.</p><span class="story-outcome">300 m · <strong>2,913 buildings</strong></span></div></a>
         <a class="card story-card" href="#s4"><span class="story-card-media"><img src="video/bridges.webp" alt="Road crossings over permanent watercourses in Toulouse Métropole" loading="lazy" width="1280" height="720"><b aria-hidden="true">04</b></span><div class="story-card-copy"><span class="badge">Structures</span><h4>Find crossings to inspect</h4><p>Scope a 37-commune EPCI, then apply the Cross predicate.</p><span class="story-outcome"><strong>708 roads</strong> · 343 structures</span></div></a>
-        <a class="card story-card" href="#s5"><span class="story-card-media"><img src="video/brush.webp" alt="Vegetation near homes in Bagnères-de-Luchon" loading="lazy" width="1280" height="720"><b aria-hidden="true">05</b></span><div class="story-card-copy"><span class="badge">Forestry</span><h4>Clearing brush around homes</h4><p>Expression selection, 50 m buffer, then an attribute filter.</p><span class="story-outcome"><strong>58 woods and forests</strong></span></div></a>
+        <a class="card story-card" href="#s5"><span class="story-card-media"><img src="video/brush.webp" alt="Vegetation near homes in Bagnères-de-Luchon" loading="lazy" width="1280" height="720"><b aria-hidden="true">05</b></span><div class="story-card-copy"><span class="badge">Forestry</span><h4>Clearing brush around homes</h4><p>Expression selection, 50 m buffer, then an attribute filter.</p><span class="story-outcome"><strong>57 woods and forests</strong></span></div></a>
         <a class="card story-card" href="#s6"><span class="story-card-media"><img src="video/hamlets.webp" alt="Hamlets more than 200 metres from paved roads in Aspet" loading="lazy" width="1280" height="720"><b aria-hidden="true">06</b></span><div class="story-card-copy"><span class="badge">Rescue</span><h4>Hamlets far from paved roads</h4><p>Disjoint finds what lies outside a 200 m buffer.</p><span class="story-outcome"><strong>22 hamlets</strong> beyond 200 m</span></div></a>
         <a class="card story-card" href="#s7"><span class="story-card-media"><img src="video/favorites.webp" alt="A saved filter replayed from the favorites menu" loading="lazy" width="1280" height="720"><b aria-hidden="true">07</b></span><div class="story-card-copy"><span class="badge">Team</span><h4>The query library</h4><p>Save, describe, replay and share a complete filter.</p><span class="story-outcome">Same result · <strong>one click</strong></span></div></a>
         <a class="card story-card" href="#s8"><span class="story-card-media"><img src="video/processing.webp" alt="Batch filtering from the QGIS Processing toolbox" loading="lazy" width="1280" height="720"><b aria-hidden="true">08</b></span><div class="story-card-copy"><span class="badge">GIS administration</span><h4>Objects modified since a date</h4><p>Apply one date expression to four layers from Processing.</p><span class="story-outcome"><strong>4 layers</strong> · 1.6 million objects</span></div></a>
@@ -136,7 +136,7 @@
     </div>
     <div class="callout warn">
         <strong>One rule to know.</strong> A new spatial filter applied to a target layer combines with that layer's previous filter by the operator you choose, AND by default:
-        the scope set on the commune stays, and the counts of stories 2, 3 and 4 are those of the commune. To let a question spill over the boundary,
+        the scope set on the commune stays, and the counts of stories 2 to 5 are those of the commune. To let a question spill over the boundary,
         uncheck the combination: the new filter then replaces the scope. Each of these stories gives both numbers.
     </div>
 </section>
@@ -350,7 +350,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <div><h4>The need</h4><p>Élodie, at the town hall of <strong>Bagnères-de-Luchon</strong>, maps vegetation near homes using a study distance of 50 m. She distinguishes woods and forests from hedges to prepare a field review. This filter does not determine owners’ brush-clearing obligations.</p></div>
         <div><h4>The FilterMate translation</h4><p>Source <strong>batiment</strong> with the custom selection <code>"usage_1" = 'Résidentiel'</code>, targets <em>zone_de_vegetation</em> and <em>haie</em>, Intersect, <strong>50 m buffer</strong>. Then a second, <strong>attribute</strong> filter on the vegetation layer turned source, <strong>combined with AND</strong> with the previous spatial filter.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>batiment</code></dd></div><div><dt>Selection</dt><dd><code>"usage_1" = 'Résidentiel'</code></dd></div><div><dt>Targets</dt><dd><code>zone_de_vegetation</code>, <code>haie</code></dd></div><div><dt>Relation</dt><dd>Intersect, 50 m buffer, then AND</dd></div><div><dt>Result</dt><dd><strong>58</strong> woods and forests, 48 hedges</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>batiment</code></dd></div><div><dt>Selection</dt><dd><code>"usage_1" = 'Résidentiel'</code></dd></div><div><dt>Targets</dt><dd><code>zone_de_vegetation</code>, <code>haie</code></dd></div><div><dt>Relation</dt><dd>Intersect, 50 m buffer, then AND</dd></div><div><dt>Result</dt><dd><strong>57</strong> woods and forests, 46 hedges</dd></div></dl>
     <ol class="steps">
         <li><strong>Scope Luchon.</strong> 3,699 buildings, 269 vegetation zones, 123 hedges.
             <figure><img src="img/stories/s5-00.webp" alt="Step 1: Bagnères-de-Luchon scoped, vegetation in green, buildings in red" loading="lazy" width="1600" height="900"><figcaption>Step 1. The inhabited valley and the wooded slopes.</figcaption></figure>
@@ -358,7 +358,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <li><strong>Keep only dwellings.</strong> Source <em>batiment</em>, Custom selection <code>"usage_1" = 'Résidentiel'</code>: 1,619 buildings.
             <figure><img src="img/stories/s5-01.webp" alt="Step 2: residential buildings are highlighted" loading="lazy" width="1600" height="900"><figcaption>Step 2. Outbuildings, farm and industrial buildings are left out of the source.</figcaption></figure>
         </li>
-        <li><strong>50 m.</strong> Targets <em>zone_de_vegetation</em> and <em>haie</em>, Intersect, Buffer 50. Filter: 119 vegetation zones and 48 hedges remain.
+        <li><strong>50 m.</strong> Targets <em>zone_de_vegetation</em> and <em>haie</em>, Intersect, Buffer 50. Filter: 117 vegetation zones and 46 hedges remain.
             <figure><img src="img/stories/s5-02.webp" alt="Step 3: vegetation within 50 m of a dwelling" loading="lazy" width="1600" height="900"><figcaption>Step 3. Hedges and undifferentiated woods are still there.</figcaption></figure>
         </li>
         <li><strong>Keep only woods and forests.</strong> Click <em>zone_de_vegetation</em> in the Layers panel: it becomes the source. Custom selection:
@@ -372,7 +372,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         </li>
     </ol>
     <h3>Result</h3>
-    <p>Out of the commune's 269 vegetation zones, <strong>119</strong> touch the 50 m band around a dwelling, among which <strong>58 woods and forests</strong>; 48 hedges are in the same case.</p>
+    <p>Out of the commune's 269 vegetation zones, <strong>117</strong> touch the 50 m band around a dwelling, among which <strong>57 woods and forests</strong>; 46 hedges are in the same case. With the combination unchecked: 119, 58 and 48.</p>
     <h4>Under the hood</h4>
     <p>The vegetation layer's filter after step 5 keeps the spatial clause and adds the attribute clause:</p>
     <pre><code>(ROWID IN (SELECT id FROM "rtree_zone_de_vegetation_geometrie" WHERE …)
