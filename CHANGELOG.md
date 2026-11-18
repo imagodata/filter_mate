@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Project opening: the layer change of the panel no longer runs again for a layer it has just been shown. The replay, 150 ms later, of a request deferred while the panel was busy (the result of add_layers, then the refresh of the panel, both asked for the layer) ran the whole chain a third and fourth time, 47 to 130 ms each; the two real passes remain. A request from the user still runs after an automatic pass.
 - Dock closed: the sections that were in their own panel stay closed with it. Their entries of View > Panels are off until the dock is shown again; with the dock closed (its layer chooser emptied, the agent stopped, the map tools given back) a panel brought back by View > Panels worked on nothing, which the classic dock never allowed (regression of the panels).
 - Dock, style sheets: no more `Qt: Unknown property box-shadow` (and `cursor`, `text-overflow`, `overflow`, `transform`) in the message bar of QGIS 4.3, which shows every message of Qt; the style sheets used web properties that Qt ignores, so nothing changes on screen.
 - Layer management, log: the line after a task says what was done (`11 of 12 layer(s) registered; left out (no geometry, or its properties could not be built): 1 ('table')`), where it said "12 layer(s) added" for a table without geometry left out on purpose; a removal counts the layers it removed, not the difference of two lengths. Log only.

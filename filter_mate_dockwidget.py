@@ -6087,6 +6087,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.debug("✓ Step 6: Layer signals reconnected")
 
             logger.info(f"=== current_layer_changed SUCCESS === layer: {validated_layer.name()}")
+            try:  # what _defer_layer_change reads: a replay of a request this pass already served is skipped
+                import time
+                self._last_layer_change = (validated_layer.id(), time.perf_counter(), bool(manual_change))
+            except RuntimeError:  # layer deleted meanwhile
+                self._last_layer_change = None
         except Exception as e:
             logger.error(f"❌ Error in current_layer_changed: {e}")
             import traceback
@@ -6238,6 +6243,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 record_pending_pick()  # an input in the same pass of the event loop is looked at first
             picked_at, picked_id = getattr(s, '_user_layer_pick', None) or (0.0, None)
             if picked_at >= deferred_at and picked_id != captured_id:
+                return
+            # 2026-11-18: while the plugin was busy a full change to this very layer ran (the project opening:
+            # the result of add_layers, then the refresh of the panel, each asked for the layer and one of them
+            # ran): replaying the request ran the whole chain again for nothing. A manual request still runs
+            # after an automatic pass.
+            done_id, done_at, done_manual = getattr(s, '_last_layer_change', None) or (None, 0.0, False)
+            if done_id == captured_id and done_at >= deferred_at and (done_manual or not manual_change):
+                logger.debug("current_layer_changed: deferred request already served by a later change, skipped")
                 return
             fresh = QgsProject.instance().mapLayer(captured_id)
             if fresh: s.current_layer_changed(fresh, manual_change=manual_change)
