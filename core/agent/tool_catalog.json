@@ -158,7 +158,7 @@
   {
    "name": "layer_statistics",
    "title": "Statistics of a layer",
-   "description": "Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group, on what it shows now or its selection: \"how many\", \"what total\", what a filter kept. Returns feature_count, statistics, unit, groups, groups_total, truncated. Refused on web services and above 500000 features: filter or select first.",
+   "description": "Count, sum, mean, minimum, maximum of a field or of the geometries of a layer, in all or by group, on what it shows or its selection: \"how many\", \"what total\", what a filter kept. Returns feature_count, statistics, unit, groups, groups_total, truncated, ranked_by. Refused on web services and above 500000 features: filter or select first.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,

@@ -245,11 +245,11 @@ def build_server(client: FilterMateClient) -> Any:
         limit: Annotated[int, Field(ge=1, le=100, description=(
             "Top groups, by sum (else count)"))] = 10,
     ) -> Dict[str, Any]:
-        """Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group,
-        on what it shows now or its selection: "how many", "what total", what a filter kept.
+        """Count, sum, mean, minimum, maximum of a field or of the geometries of a layer, in all or by group,
+        on what it shows or its selection: "how many", "what total", what a filter kept.
 
-        Returns feature_count, statistics, unit, groups, groups_total, truncated. Refused on web services and above
-        500000 features: filter or select first.
+        Returns feature_count, statistics, unit, groups, groups_total, truncated, ranked_by. Refused on web services
+        and above 500000 features: filter or select first.
         """
         return await call("POST", "/layers/statistics", _body(
             layer=layer, field=field, group_by=group_by, measure=measure, selected_only=selected_only, limit=limit))
