@@ -79,7 +79,7 @@ from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
     ADD_NOTE, ADD_TABLE, ASK_USER, CREATE_WIDGET, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
-    TURN_OFF_OPTIONS, TURN_ON_OPTIONS,
+    TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...core.domain.layer_kind import LayerKind
@@ -2057,7 +2057,8 @@ class AgentChatController(QObject):
         nothing ticked, and a tool turned off in the Tools tab is missing with its source ticked."""
         return chat_instructions(active, send_values=values.send_values,
                                  filtering=AgentChatController.local_filtering(values),
-                                 configured_basemaps=configured_basemaps, offered=offered, available=available)
+                                 configured_basemaps=configured_basemaps, offered=offered, available=available,
+                                 settings_link=values.rules.get(SHOW_SETTINGS_LINK) != RULE_NEVER)
 
     @staticmethod
     def local_filtering(values: AgentSettings) -> bool:
