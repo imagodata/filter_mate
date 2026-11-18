@@ -469,7 +469,9 @@ class AttributeFilterExecutor:
             from ....adapters.qgis.native_filter_translation import subset_for_layer
             native = subset_for_layer(self.layer, expression, key_name=self.primary_key,
                                       evaluate=self._keys_may_be_evaluated(),
-                                      negated='NOT' in (self.combine_operator or '').upper())
+                                      negated='NOT' in (self.combine_operator or '').upper(),
+                                      whole_layer=self._keys_read_on_whole_layer(),
+                                      shown_kept=self._shown_features_kept())
         except Exception as e:  # catch-all: the former conversion stays the fallback
             logger.debug(f"Native translation not available: {e}")
             return None
@@ -479,27 +481,53 @@ class AttributeFilterExecutor:
         return native
 
     def _keys_may_be_evaluated(self) -> bool:
-        """Whether keys QGIS keeps now, through the layer, may stand for the expression in the new subset.
+        """Whether keys QGIS keeps now may stand for the expression in the new subset.
 
         A list of keys keeps the same features as the expression but is never
         NULL: under the NOT of an 'AND NOT' combination the rows where the
         expression is NULL would come back. That NOT is written with an old
         subset and, since 2026-11-12, without one too (``NOT (new)``,
-        ExpressionFacadeHandler.combine_with_old_subset). And the features are
-        read through the layer's current subset: right when the new subset is
-        ANDed with that same subset, wrong when it replaces it or is ORed with it.
+        ExpressionFacadeHandler.combine_with_old_subset).
         """
-        operator = (self.combine_operator or '').upper()
-        old = (self.old_subset or '').strip()
-        if 'NOT' in operator:
+        if 'NOT' in (self.combine_operator or '').upper():
             return False
-        try:
-            current = (self.layer.subsetString() or '').strip()
-        except (RuntimeError, AttributeError):
-            return False
+        return self._current_subset() is not None
+
+    def _keys_read_on_whole_layer(self) -> bool:
+        """Whether those features are read on the whole layer rather than through its current subset.
+
+        Through the subset is right when the new subset is ANDed with that same
+        subset, wrong when it replaces it or is ORed with it (or ANDed with
+        another one). 2026-11-18: these cases wrote no list, and the second
+        filter of a GeoPackage by ``bounds_width($geometry) > 2`` became the
+        former conversion's ``bounds_width("geom") > 2``, refused by SQLite,
+        where the first one listed keys; ``$area > 100`` was measured planar
+        by ``ST_Area`` the second time. They are now read as the first filter
+        reads them, on the whole layer (a copy of it without its subset).
+        """
+        current = self._current_subset()
         if not current:
-            return True
-        return bool(old) and operator == 'AND' and current == old
+            return False
+        operator = (self.combine_operator or '').strip().upper()
+        return not (operator == 'AND' and current == (self.old_subset or '').strip())
+
+    def _shown_features_kept(self) -> bool:
+        """Whether the features the layer shows now are kept by the new subset whatever the expression.
+
+        Under OR with the subset the layer shows: ``( old ) OR ( keys )`` needs
+        no key of the features ``old`` keeps (a chain of ORs would list them
+        again at each step).
+        """
+        current = self._current_subset()
+        operator = (self.combine_operator or '').strip().upper()
+        return bool(current) and operator == 'OR' and current == (self.old_subset or '').strip()
+
+    def _current_subset(self) -> Optional[str]:
+        """The layer's subset, stripped; None when the layer cannot be read (deleted)."""
+        try:
+            return (self.layer.subsetString() or '').strip()
+        except (RuntimeError, AttributeError):
+            return None
 
     def _convert_to_postgis(self, expression: str) -> str:
         """

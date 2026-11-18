@@ -357,7 +357,8 @@ HYBRID_CASES = [
     'with_variable(\'seuil\', 9, "pop" > @seuil)',          # @seuil is 9 there, not the project's 5
     '"ratio" > 1e-30 AND regexp_match("nom", \'^R\') > 0',     # dump() writes 1e-30 as 0: no native part
 ]
-# (old subset, combine operator, expression): hybrid with AND only, the former path otherwise
+# (old subset, combine operator, expression): never a list of keys under AND NOT; since 2026-11-18 one read on
+# the whole layer when the new subset replaces the old one or is ORed with it (through the layer under AND)
 COMBINED_CASES = [
     (None, 'AND NOT', 'regexp_match("nom", \'o\') > 0'),     # NOT ( new ): never a list of keys
     (None, 'AND NOT', '"pop" > 5 AND "ratio" < 2'),
@@ -366,6 +367,14 @@ COMBINED_CASES = [
     ('"pop" > 2', 'OR', 'regexp_match("nom", \'o\') > 0'),
     ('"pop" > 2', 'AND NOT', 'regexp_match("nom", \'o\') > 0'),
     ('"pop" > 2', None, 'regexp_match("nom", \'o\') > 0'),
+    ('"id" IN (1, 2, 3)', None, '"pop" > 5 AND regexp_match("nom", \'^R\') > 0'),  # the old subset keeps none
+    ('"id" IN (1, 2, 3)', 'OR', '"pop" > 5 AND regexp_match("nom", \'^R\') > 0'),
+]
+# A second filter on a layer the first one filtered by a list of keys, as the dock runs them (2026-11-18:
+# replaced, it was the former conversion's, which SQLite refuses for a function of QGIS)
+REFILTER_PAIRS = [
+    ('regexp_match("nom", \'^R\') > 0', 'regexp_match("nom", \'o\') > 0'),
+    ('length("nom") >= 4', 'length("nom") = 5'),
 ]
 
 
@@ -405,11 +414,49 @@ def hybrid_path(label, layer, provider_type):
         layer.setSubsetString('')
         expected = combined_reference(layer, old, operator, text)
         written, subset, got = run_executor(layer, provider_type, text, old, operator)
-        status = ('PASS' if got == expected else 'FAIL') if written else 'OLD'
-        if operator != 'AND' and written and ' IN (' in (subset or ''):
-            status = 'FAIL'  # a list of keys read through the old subset, or negated: never written
+        negated = 'NOT' in (operator or '')
+        status = ('PASS' if got == expected else 'FAIL') if written else (
+            'FAIL' if provider_type in HYBRID_PROVIDERS and not negated else 'OLD')
+        if negated and written and ' IN (' in (subset or ''):
+            status = 'FAIL'  # a list of keys under NOT: never written
         report(status, f"{label} combined {operator}: {old} / {text}",
                f"subset={subset!r:.160} expected={expected} got={got}")
+    refilter_path(label, layer, provider_type, REFILTER_PAIRS)
+
+
+HYBRID_PROVIDERS = ('spatialite', 'postgresql')  # the plugin's provider types of the SQLite and PostgreSQL sources
+
+
+def listed_keys(subset):
+    """The keys of the lists ``IN (...)`` of a subset."""
+    import re
+    return {int(value) for values in re.findall(r'\bIN \(([-\d, ]+)\)', subset or '') for value in values.split(',')}
+
+
+def refilter_path(label, layer, provider_type, pairs, errors_drop=False):
+    """A second filter on a layer whose first filter listed keys: replaced, ORed and ANDed with that list.
+
+    2026-11-18: replaced or ORed, the keys were not read (the features came
+    through the first subset) and the former conversion wrote the second one.
+    Where the first is a list, the second must be one too (the same function
+    on the same features: QGIS evaluates it there), keep what QGIS keeps and,
+    under OR, list no key the first list keeps.
+    """
+    for first, second in pairs:
+        written, old, _ = run_executor(layer, provider_type, first)
+        if not written or ' IN (' not in (old or ''):
+            report('OLD', f"{label} refilter: {first}", f"first subset={old!r:.160}")
+            continue
+        for operator in (None, 'OR', 'AND'):
+            expected = combined_reference(layer, old, operator, second, errors_drop)
+            written, subset, got = run_executor(layer, provider_type, second, old, operator)
+            status = ('PASS' if got == expected else 'FAIL') if written else 'FAIL'
+            new_part = (subset or '').split(' ) OR ( ', 1)[-1] if operator == 'OR' else ''
+            again = listed_keys(new_part) & listed_keys(old)
+            if again:
+                status = 'FAIL'  # listed by the old subset already: an OR chain would grow at each step
+            report(status, f"{label} refilter {operator}: {first} -> {second}",
+                   f"subset={subset!r:.200} expected={expected} got={got} listed again={sorted(again)}")
 
 
 def combined_reference(layer, old, operator, text, errors_drop=False):
@@ -609,6 +656,13 @@ GEOM_COMBINED_CASES = [
     ('"pop" > 2', 'OR', f'x_min($geometry) > {X} AND "pop" < 5', BOUNDS),
     ('"pop" > 2', 'AND', f'x_min($geometry) > {X}', BOUNDS),
 ]
+# The defect of 2026-11-18 as found in the dock (refilter_path): functions of the geometry no source runs
+GEOM_REFILTER_PAIRS = [
+    ('bounds_width($geometry) > 1', 'bounds_width($geometry) > 100'),
+    ('num_points($geometry) > 1', 'num_points($geometry) > 3'),
+    ('$area > 1', '$area > 1000'),
+    ('$length > 1', '$length > 500'),
+]
 POINTS = [
     (1, 1, 'POINT (700123.456789 6600234.5678)'), (2, 2, 'POINT (700500 6600500)'),
     (3, 3, 'POINT (700777.125 6600111.875)'), (4, 4, 'POINT (700499.99999999994 6600500.0000000001)'),
@@ -749,6 +803,7 @@ def geometry_path(label, layer, provider_type, tags):
         status = ('PASS' if got == expected else 'FAIL') if written else ('FAIL' if must else 'OLD')
         report(status, f"{label} combined {operator}: {old} / {text}",
                f"subset={subset!r:.240} expected={expected} got={got}")
+    refilter_path(label, layer, provider_type, GEOM_REFILTER_PAIRS, errors_drop=True)
 
 
 def set_variables(layers):
