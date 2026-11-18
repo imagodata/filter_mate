@@ -54,7 +54,8 @@ _APP, panel_module = _load()
 
 GROUPS = [("Open data platforms", [("datagouv", "data.gouv.fr", True), ("ign_wfs", "IGN (WFS)", False)]),
           ("MCP connectors", [("osm_mcp", "OpenStreetMap (MCP)", False)])]
-PROVIDERS = [("anthropic · claude-haiku-5-5", True), ("ollama · qwen3:8b", False)]
+PROVIDERS = [("anthropic · claude-haiku-5-5", True, "anthropic\nclaude-haiku-5-5\n"),
+             ("ollama · qwen3:8b", False, "ollama\nqwen3:8b\nhttp://localhost:11434")]
 
 
 def _filled():
@@ -90,9 +91,18 @@ def test_the_current_provider_is_checked_and_another_is_chosen():
     chosen = []
     panel.provider_chosen.connect(chosen.append)
     entries = [action for action in panel.models_menu.actions() if action.isCheckable()]
-    assert [(action.text(), action.isChecked()) for action in entries] == PROVIDERS
+    assert [(action.text(), action.isChecked()) for action in entries] == [(label, on) for label, on, _ident in PROVIDERS]
     entries[1].trigger()
-    assert chosen == [1]
+    assert chosen == [PROVIDERS[1][2]]  # the provider itself, not its rank in a list that may change
+
+
+def test_a_provider_is_forgotten_by_what_the_action_carries():
+    panel = _filled()
+    forgotten = []
+    panel.provider_forgotten.connect(forgotten.append)
+    forget = next(action.menu() for action in panel.models_menu.actions() if action.menu() is not None)
+    forget.actions()[0].trigger()
+    assert forgotten == [PROVIDERS[1][2]]
 
 
 def test_options_are_asked_when_the_menu_opens():

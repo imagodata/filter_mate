@@ -153,7 +153,8 @@ def test_the_menu_is_filled_from_the_settings(host, monkeypatch):
     groups, providers, mcp_on = host.panel.fill_options.call_args.args
     ticked = [source_id for _title, rows in groups for source_id, _name, on in rows if on]
     assert ticked == ["datagouv"] and len([row for _t, rows in groups for row in rows]) == len(BUILT_IN)
-    assert providers == [("anthropic · m", True), ("ollama · qwen3:8b", False)] and mcp_on is False
+    assert providers == [("anthropic · m", True, "anthropic\nm\n"), ("ollama · qwen3:8b", False, "ollama\nqwen3:8b\nu")]
+    assert mcp_on is False
 
 
 # --- the tools of the chat: they queue, the end of the request applies ----------------------------------------------
@@ -284,3 +285,133 @@ def test_the_question_names_the_sources_and_where_data_goes(host, monkeypatch):
     question = host._ask_user.call_args.args[1]
     assert "(MCP connectors)" in question and "sends what the agent asks to" in question
     assert "other applications on this computer" in question and "osm_mcp" not in question
+
+
+# --- 2026-11-18, audit: the menu acts on the entry it showed, not on its rank --------------------------------------
+
+def _menu_host(host, monkeypatch, stored):
+    """The provider in use is not in the list kept (it is shown first); ``stored`` is the list kept."""
+    state = {"stored": tuple(stored), "written": []}
+    monkeypatch.setattr(chat_controller, "read_providers", lambda: state["stored"])
+    monkeypatch.setattr(chat_controller, "write_providers", lambda entries: (
+        state.update(stored=tuple(entries)), state["written"].append(tuple(entries))))
+    monkeypatch.setattr(chat_controller, "qgis_databases", lambda: [])
+    host._click_option = lambda change: Controller._click_option(host, change)
+    return state
+
+
+def test_a_provider_chosen_is_the_one_clicked_even_when_the_head_of_the_list_went(host, monkeypatch):
+    first = _entry("ollama", "qwen3:8b", "http://localhost:11434", "", key=False)
+    second = _entry("ollama", "gemma3", "http://localhost:11434", "", key=False)
+    _menu_host(host, monkeypatch, [first, second])
+    host.panel = SimpleNamespace(set_status=MagicMock())
+    # the menu showed [anthropic (in use, not kept), qwen3, gemma3]; the user clicks gemma3, third of the menu...
+    clicked = second.ident
+    # ...but the provider in use changed meanwhile: the list is now [qwen3, gemma3] and gemma3 is the second
+    host.store["values"] = agent_settings.AgentSettings(preset="ollama", model="qwen3:8b",
+                                                        base_url="http://localhost:11434", consent=True,
+                                                        consent_target=first.consent_target)
+    Controller._on_provider_chosen(host, clicked)
+    assert host.store["values"].model == "gemma3"
+
+
+def test_a_provider_that_became_the_one_in_use_is_not_switched_to(host, monkeypatch):
+    qwen = _entry("ollama", "qwen3:8b", "http://localhost:11434", "", key=False)
+    _menu_host(host, monkeypatch, [qwen])
+    host.panel = SimpleNamespace(set_status=MagicMock())
+    host.store["values"] = agent_settings.AgentSettings(preset="ollama", model="qwen3:8b",
+                                                        base_url="http://localhost:11434", consent=True,
+                                                        consent_target=qwen.consent_target)
+    Controller._on_provider_chosen(host, qwen.ident)  # clicked in a menu opened before the switch
+    host._restart_engine.assert_not_called()
+    host._policy.forget.assert_not_called()
+    host._say.assert_not_called()
+
+
+def test_a_provider_that_left_the_list_is_not_chosen(host, monkeypatch):
+    state = _menu_host(host, monkeypatch, [])
+    host.panel = SimpleNamespace(set_status=MagicMock())
+    Controller._on_provider_chosen(host, "ollama\ngone\nu")
+    assert host.store["values"].preset == "anthropic" and state["written"] == []
+
+
+def test_a_provider_forgotten_is_the_one_clicked_and_the_one_in_use_is_not_kept(host, monkeypatch):
+    first = _entry("ollama", "qwen3:8b", "http://localhost:11434", "", key=False)
+    second = _entry("ollama", "gemma3", "http://localhost:11434", "", key=False)
+    state = _menu_host(host, monkeypatch, [first, second])
+    Controller._on_provider_forgotten(host, second.ident)
+    assert state["stored"] == (first,)  # the provider in use (anthropic) was not added to the list on the way
+    Controller._on_provider_forgotten(host, "anthropic\nm\n")  # the one in use cannot be removed
+    assert state["stored"] == (first,) and len(state["written"]) == 1
+
+
+def test_the_key_of_a_forgotten_provider_goes_when_it_is_its_own(host, monkeypatch):
+    other = _entry("openai", "gpt", "", "keyA")
+    mine = _entry("mistral", "small", "", "keyB")
+    state = _menu_host(host, monkeypatch, [other, mine])
+    deleted = []
+    monkeypatch.setattr(chat_controller, "delete_own_key", deleted.append)
+    Controller._on_provider_forgotten(host, mine.ident)
+    assert state["stored"] == (other,) and deleted == ["keyB"]
+
+
+def test_a_deletion_is_logged_with_the_id_of_the_configuration_only(host, monkeypatch, caplog):
+    mine = _entry("mistral", "small", "", "keyB")
+    _menu_host(host, monkeypatch, [mine])
+    monkeypatch.setattr(chat_controller, "delete_own_key", lambda authcfg: True)
+    with caplog.at_level("INFO", logger="FilterMate.agent"):
+        Controller._on_provider_forgotten(host, mine.ident)
+    assert "keyB deleted" in caplog.text and "secret" not in caplog.text
+
+
+@pytest.mark.parametrize("shared_with", ["list", "settings", "waiting"])
+def test_a_key_another_entry_uses_stays(host, monkeypatch, shared_with):
+    other = _entry("openai", "gpt", "", "keyB" if shared_with == "list" else "keyA")
+    mine = _entry("mistral", "small", "", "keyB")
+    _menu_host(host, monkeypatch, [other, mine])
+    deleted = []
+    monkeypatch.setattr(chat_controller, "delete_own_key", deleted.append)
+    if shared_with == "settings":  # the settings in use hold the place
+        host.store["values"] = agent_settings.AgentSettings(preset="anthropic", model="m", consent=True, authcfg="keyB")
+    if shared_with == "waiting":  # a switch queued for the end of the request holds it
+        host._pending_options.append(Change(provider=_entry("anthropic", "x", "", "keyB")))
+    Controller._on_provider_forgotten(host, mine.ident)
+    assert deleted == []
+
+
+def test_a_key_not_stored_for_its_server_stays(host, monkeypatch):
+    legacy = ProviderEntry("mistral", "small", "", "keyB", "https://api.mistral.ai/v1", "")  # an old shared place
+    _menu_host(host, monkeypatch, [legacy])
+    deleted = []
+    monkeypatch.setattr(chat_controller, "delete_own_key", deleted.append)
+    Controller._on_provider_forgotten(host, legacy.ident)
+    assert deleted == []
+
+
+def test_a_locked_key_store_does_not_stop_the_removal(host, monkeypatch):
+    mine = _entry("mistral", "small", "", "keyB")
+    state = _menu_host(host, monkeypatch, [mine])
+
+    def locked(_authcfg):
+        raise chat_controller.KeyStoreError("master password")
+    monkeypatch.setattr(chat_controller, "delete_own_key", locked)
+    Controller._on_provider_forgotten(host, mine.ident)
+    assert state["stored"] == ()
+
+
+def test_closing_the_project_keeps_what_the_user_clicked(monkeypatch):
+    clicked = Change(sources_on=("osm_tiles",))
+    queued = Change(sources_off=("datagouv",), by_agent=True)
+    host = MagicMock()
+    host._pending_options = [clicked, queued, Change(provider=_entry("ollama", "q", "u", "", key=False))]
+    host._replaying, host._engine = False, None
+    Controller._on_project_cleared(host)
+    assert len(host._pending_options) == 2 and host._pending_options[0] is clicked
+    assert not any(change.by_agent for change in host._pending_options)
+
+
+def test_the_tools_of_the_chat_mark_what_they_queue(host, monkeypatch):
+    _tools_host(host, monkeypatch)
+    Controller._turn_off_options_tool(host, {"sources": ["datagouv"]})
+    Controller._turn_on_options_tool(host, {"provider": "ollama · qwen3:8b"})
+    assert [change.by_agent for change in host._pending_options] == [True, True]

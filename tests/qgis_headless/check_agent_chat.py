@@ -24,7 +24,8 @@ os.environ["QGIS_CUSTOM_CONFIG_PATH"] = HOME
 os.environ["QGIS_AUTH_DB_DIR_PATH"] = HOME
 
 from qgis.core import (  # noqa: E402
-    Qgis, QgsApplication, QgsFeature, QgsGeometry, QgsPointXY, QgsProject, QgsSettings, QgsVectorFileWriter,
+    Qgis, QgsApplication, QgsAuthMethodConfig, QgsFeature, QgsGeometry, QgsPointXY, QgsProject, QgsSettings,
+    QgsVectorFileWriter,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer  # noqa: E402
@@ -462,7 +463,54 @@ def check_key_store():
     disposable = agent_settings.store_key("x")
     agent_settings.delete_key(disposable)
     check("key deleted", disposable not in manager.configIds())
+    # A provider left out of the list takes its key along only when FilterMate made that configuration.
+    own = agent_settings.store_key("y")
+    foreign = QgsAuthMethodConfig("Basic")
+    foreign.setName("My own login")
+    foreign.setConfig("username", "someone")
+    foreign.setConfig("password", "theirs")
+    stored, foreign = manager.storeAuthenticationConfig(foreign)
+    check("own key deleted by its owner", agent_settings.delete_own_key(own) and own not in manager.configIds())
+    check("a configuration of the user is not deleted", stored and not agent_settings.delete_own_key(foreign.id())
+          and foreign.id() in manager.configIds())
+    lookalike = QgsAuthMethodConfig("Basic")  # the name of ours, not the user name FilterMate sets
+    lookalike.setName("FilterMate agent key")
+    lookalike.setConfig("username", "someone")
+    lookalike.setConfig("password", "theirs")
+    stored_like, lookalike = manager.storeAuthenticationConfig(lookalike)
+    check("a configuration with our name but not our user name is not deleted", stored_like
+          and not agent_settings.delete_own_key(lookalike.id()) and lookalike.id() in manager.configIds())
+    manager.removeAuthenticationConfig(lookalike.id())
+    check("an unknown or empty place deletes nothing", not agent_settings.delete_own_key("nope123")
+          and not agent_settings.delete_own_key(""))
+    manager.removeAuthenticationConfig(foreign.id())
     return authcfg
+
+
+def check_undo_point_of_a_call():
+    """A call the executor refuses (malformed arguments) answers its mistake, not 'undo point failed'; a valid call
+    whose undo point cannot be made is refused and its tool does not run."""
+    from unittest.mock import MagicMock, patch
+    from filter_mate.adapters.agent.turn_checkpoint import TurnCheckpoint
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder
+    from filter_mate.core.agent.chat_engine import ChatEngine
+    from filter_mate.core.agent.messages import ToolCallPart
+    from filter_mate.core.agent.tool_catalog import chat_tools
+    from filter_mate.core.agent.tool_executor import ToolExecutor
+
+    ran = []
+    spec = next(tool for tool in chat_tools() if tool.name == "set_layer_options")
+    executor = ToolExecutor([spec], {"set_layer_options": lambda arguments: ran.append(arguments) or {"ok": True}})
+    engine = ChatEngine(MagicMock(), executor, MagicMock(), MagicMock(), TurnCheckpoint())
+    for index, arguments in enumerate(({"layers": 5}, {"layers": True}, {"layers": "communes"})):
+        result = engine._run_one(ToolCallPart(f"m{index}", "set_layer_options", arguments))
+        check(f"undo point: malformed arguments {arguments} get the validation message",
+              result.is_error and "Invalid arguments" in result.content and not ran, result.content)
+    valid = ToolCallPart("v1", "set_layer_options", {"layers": [{"layer": "communes", "exploring": {"is_tracking": True}}]})
+    with patch.object(EffectsRecorder, "before_call", side_effect=ValueError("not serialisable")):
+        result = engine._run_one(valid)
+    check("undo point: a valid call whose undo point fails is refused, its tool does not run",
+          result.is_error and "undo point could not be made" in result.content and not ran, result.content)
 
 
 def check_checkpoint(layer):
@@ -489,6 +537,7 @@ def check_checkpoint(layer):
           (layer.subsetString(), skipped))
     layer.setSubsetString("")
     check("the commit outside a turn is harmless", list(TurnCheckpoint().commit()) == [])
+    check_undo_point_of_a_call()
     layer.setSubsetString('"pop" = 100')
     checkpoint.begin()
     layer.setSubsetString('"pop" > 1000')

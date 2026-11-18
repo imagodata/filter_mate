@@ -3,7 +3,7 @@
 import pytest
 
 from core.agent.agent_options import (
-    Change, ProviderEntry, apply_change, options_view, plan_off, plan_on, remember)
+    Change, ProviderEntry, apply_change, key_to_delete, options_view, plan_off, plan_on, remember)
 from core.agent.open_data import (
     KIND_DATABASE, KIND_DATAGOUV, KIND_ELEVATION, KIND_GEOCODER, KIND_POPULATION, KIND_STAC, KIND_WFS, KIND_XYZ)
 from core.agent.sources import KIND_MCP, Source, source_group
@@ -104,6 +104,22 @@ def test_turning_on_is_asked_at_every_level_turning_off_is_not(level):
         assert policy.verdict(tools["turn_off_agent_options"], {"sources": ["datagouv"]}) != ASK
 
 
+def test_turning_off_follows_the_other_settings_of_the_project_at_every_level():
+    """Audit 2026-11-18: the catalog said "without a question", but the careful level asks and the advisor refuses,
+    as for set_layer_options (class project): narrowing what the agent reaches is a change of the project like them,
+    and nothing leaves QGIS by it. The skill words it "without a question unless the level asks for every change"."""
+    from core.agent.permissions import ASK, REFUSE, RUN, PermissionPolicy
+    from core.agent.tool_catalog import chat_tools
+    tools = {tool.name: tool for tool in chat_tools()}
+    off, same_class = tools["turn_off_agent_options"], tools["set_layer_options"]
+    verdicts = {}
+    for level in ("advisor", "careful", "standard", "autonomous"):
+        policy = PermissionPolicy(level)
+        verdicts[level] = policy.verdict(off, {"sources": ["datagouv"]})
+        assert verdicts[level] == policy.verdict(same_class, {"layers": [{"layer": "a"}]}), level
+    assert verdicts == {"advisor": REFUSE, "careful": ASK, "standard": RUN, "autonomous": RUN}
+
+
 # --- 2026-11-16, review of #505: a key never goes to another provider, a withdrawn consent never comes back ---------
 
 def test_a_key_shared_with_another_provider_is_refused():
@@ -144,3 +160,29 @@ def test_allowed_always_still_asks_to_turn_on():
     policy = PermissionPolicy("autonomous")
     policy.rules = {"turn_on_agent_options": "allow"}
     assert policy.verdict(turn_on, {"mcp_server": True}) == ASK
+
+
+def test_ident_tells_two_providers_that_share_a_label():
+    first = ProviderEntry("openai", "gpt", "https://h/v1")
+    second = ProviderEntry("openai", "gpt", "https://h/v2")
+    assert first.label == second.label and first.ident != second.ident and not first.same(second)
+
+
+KEPT = ProviderEntry("openai", "gpt", "", "keyA", "https://api.openai.com/v1", "https://api.openai.com/v1")
+MINE = ProviderEntry("mistral", "small", "", "keyB", "https://m", "https://m")
+
+
+def test_the_key_goes_when_only_the_forgotten_entry_holds_it():
+    assert key_to_delete(MINE, [KEPT], ["keyA"], "https://m") == "keyB"
+
+
+@pytest.mark.parametrize("entry, remaining, in_use, target", [
+    (MINE, [ProviderEntry("openai", "gpt", "", "keyB", "u", "u")], [], "https://m"),  # another entry holds the place
+    (MINE, [KEPT], ["keyB"], "https://m"),  # the settings in use, or a change waiting
+    (ProviderEntry("mistral", "small", "", "keyB", "https://m", ""), [], [], "https://m"),  # legacy: whose key?
+    (ProviderEntry("mistral", "small", "", "keyB", "https://m", "https://other"), [], [], "https://m"),
+    (ProviderEntry("mistral", "small", "", "", "https://m", ""), [], [], "https://m"),  # no key at all
+    (MINE, [], [], ""),
+])
+def test_the_key_stays_when_it_is_not_certainly_its_own(entry, remaining, in_use, target):
+    assert key_to_delete(entry, remaining, in_use, target) == ""

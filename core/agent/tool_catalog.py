@@ -260,7 +260,9 @@ CHAT_ONLY = (
             "required": ["questions"], "additionalProperties": False},
         read_only=True, chat_only=True),
     # The options of the agent itself (2026-11-16, core/agent/agent_options.py): what it reaches, read; turned off
-    # without a question (that only narrows it); turned on once the user says yes, at every level.
+    # (that only narrows it) like any other change of the project: run alone from the standard level, asked at the
+    # careful one, refused at the advisor one (core/agent/permissions.py: class "project", as set_layer_options);
+    # turned on once the user says yes, at every level.
     ToolSpec(
         AGENT_OPTIONS,
         "The options of the agent: the provider and model in use and those the user set up, each source and MCP "

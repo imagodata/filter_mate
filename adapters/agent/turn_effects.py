@@ -99,7 +99,7 @@ def _setting_paths(arguments: Dict[str, Any]) -> List[str]:
             return [row["path"] for row in planned_profile(arguments)[0]]
         except ValueError:
             return []
-    for change in arguments.get("changes") or ():
+    for change in _listed(arguments.get("changes")):
         try:
             path = get(rows, str(change.get("path", "")))["path"]
         except (LookupError, AttributeError):
@@ -184,6 +184,12 @@ def _recipes_label() -> str:
 def _notes_label() -> str:
     from qgis.PyQt.QtCore import QCoreApplication
     return QCoreApplication.translate("AgentChat", "project notes")
+
+
+def _listed(value: Any) -> Sequence[Any]:
+    """``value`` when it is a list or a tuple, else nothing: the arguments are what the model wrote, and a malformed
+    call (``layers`` a number or a string) is refused by the executor before its tool, with nothing to keep."""
+    return value if isinstance(value, (list, tuple)) else ()
 
 
 def _resolve(project: QgsProject, reference: Any) -> Any:
@@ -376,9 +382,11 @@ class EffectsRecorder:
         self._call_ids = set(project.mapLayers())
         name = getattr(call, "name", "")
         arguments = getattr(call, "arguments", {}) or {}
+        if not isinstance(arguments, dict):
+            arguments = {}
         try:
             if name == "remove_layers":
-                for reference in arguments.get("layers") or ():
+                for reference in _listed(arguments.get("layers")):
                     layer = _resolve(project, reference)
                     if layer is not None and layer.id() not in self._removed:
                         self._removed[layer.id()] = (_definition(layer), _place(project, layer.id()), layer.providerType(),
@@ -455,7 +463,7 @@ class EffectsRecorder:
             elif name in PANEL_TOOLS:
                 from ..public_api.panel_options import layer_state, running_dock
                 dock = running_dock()
-                for item in arguments.get("layers") or ():
+                for item in _listed(arguments.get("layers")):
                     layer = _resolve(project, item.get("layer")) if isinstance(item, dict) else None
                     state = layer_state(dock, layer.id()) if layer is not None else None
                     if state is not None and layer.id() not in self._panel_layers:
@@ -466,7 +474,7 @@ class EffectsRecorder:
                 if state is not None and self._export_panel is None:
                     self._export_panel = _panel_json({"EXPORTING": state})
             elif name == "set_layers_visibility":
-                for reference in arguments.get("layers") or ():
+                for reference in _listed(arguments.get("layers")):
                     layer = _resolve(project, reference)
                     visible = _visible(project, layer.id()) if layer is not None else None
                     if visible is not None and layer.id() not in self._visibility:
@@ -748,10 +756,13 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
     project = QgsProject.instance()
     done: List[str] = []
     left: List[str] = []
+    leaving = {effect[1] for effect in effects if takes_away(effect, undo) and effect[1] not in keep}
     for effect in (reversed(effects) if undo else effects):
         kind, layer_id = effect[0], effect[1]
         if presence is not None and (kind in ("added", "removed")) != presence:
             continue
+        if kind not in ("added", "removed") and layer_id in leaving and project.mapLayer(layer_id) is None:
+            continue  # what the turn did to a layer this very undo (or redo) removed: nothing left to put back
         if edits is not None and (kind == "edits") != edits:
             continue
         if coming is not None and kind in ("added", "removed") and takes_away(effect, undo) == coming:
