@@ -18,6 +18,11 @@ The edit follows the events logged during the recording: the virtual camera
 eases between the framed regions (log-space zoom, cubic easing) and drifts
 slowly while holding; a drawn cursor travels to each widget and ripples on
 each click; ``speed`` events fast-forward the waits.
+
+English text is drawn over the picture (FM_CAPTIONS=0 leaves it out): a ``title`` event is the
+question of the clip, kept in the top left corner; each ``caption`` event is a line at the
+bottom, shown until the next one (style ``step``, or ``result`` for the count the take ends
+on). The camera keeps what it frames clear of both.
 """
 import bisect
 import json
@@ -26,7 +31,7 @@ import os
 import subprocess
 import sys
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.environ.get('FM_VIDEO_OUT', r'C:\Users\Simon\AppData\Local\Temp\fm_video')
 FFMPEG = os.environ.get('FM_FFMPEG', 'ffmpeg')
@@ -36,6 +41,11 @@ LOOP = 1.2          # seconds of cross-fade back into the first frame
 MAX_ZOOM = 2.6      # smallest framed width = window width / MAX_ZOOM
 MOVE = 0.8          # longest cursor travel, seconds
 CRF = os.environ.get('FM_CRF', '30')
+CAPTIONS = os.environ.get('FM_CAPTIONS', '1') != '0'
+FONT_BOLD = os.environ.get('FM_FONT_BOLD', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')
+FONT = os.environ.get('FM_FONT', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
+SAFE_TOP, SAFE_BOTTOM = 0.09, 0.15   # share of the picture the title and the captions may cover
+INK, PAPER, ACCENT = (20, 24, 28), (255, 255, 255), (255, 225, 77)
 
 
 def ease(u):
@@ -78,9 +88,10 @@ class Clock:
 class Camera:
     """Camera state (cx, cy, w) in logical window pixels, fixed 16:9 aspect."""
 
-    def __init__(self, events, clock, size):
+    def __init__(self, events, clock, size, safe=(0.0, 0.0)):
         self.W, self.H = size
         self.aspect = OUT_W / OUT_H
+        self.safe = safe   # share of the picture kept free at the top and at the bottom (text)
         self.shots = []
         for e in events:
             if e['kind'] == 'camera':
@@ -98,8 +109,11 @@ class Camera:
     def fit(self, rect):
         x, y, w, h = rect
         cx, cy = x + w / 2, y + h / 2
-        w = max(w, h * self.aspect, self.W / MAX_ZOOM)
+        top, bottom = self.safe
+        w = max(w, h / (1 - top - bottom) * self.aspect, self.W / MAX_ZOOM)
         w = min(w, self.W, self.H * self.aspect)
+        # the region sits in the middle of what the text leaves free
+        cy += (bottom - top) * (w / self.aspect) / 2
         return self.clamp((cx, cy, w))
 
     def clamp(self, c):
@@ -207,6 +221,88 @@ def draw_ripple(frame, x, y, age):
     frame.alpha_composite(over)
 
 
+# ------------------------------------------------------------------ text
+def _font(path, size):
+    try:
+        return ImageFont.truetype(path, size)
+    except OSError:
+        return ImageFont.load_default()
+
+
+def _pill(text, size, fill, ink, badge=None, pad=(22, 13), radius=None):
+    """Rounded label, supersampled: ``badge`` (a step number) is drawn in a disc on its left."""
+    s = 2
+    font = _font(FONT_BOLD, size * s)
+    probe = ImageDraw.Draw(Image.new('RGBA', (8, 8)))
+    box = probe.textbbox((0, 0), text, font=font)
+    tw, th = box[2] - box[0], size * s * 1.25
+    px, py = pad[0] * s, pad[1] * s
+    disc = int(th * 1.15) if badge else 0
+    W, H = int(tw + 2 * px + (disc + px * 0.6 if badge else 0)), int(th + 2 * py)
+    img = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=(radius or H // 2), fill=fill)
+    x = px
+    if badge:
+        cy = H // 2
+        d.ellipse([x, cy - disc // 2, x + disc, cy + disc // 2], fill=ACCENT + (255,))
+        bf = _font(FONT_BOLD, int(size * s * 0.92))
+        bb = d.textbbox((0, 0), badge, font=bf)
+        d.text((x + disc / 2 - (bb[2] + bb[0]) / 2, cy - (bb[3] + bb[1]) / 2), badge, font=bf, fill=INK + (255,))
+        x += disc + px * 0.6
+    d.text((x - box[0], H / 2 - (box[3] + box[1]) / 2), text, font=font, fill=ink)
+    return img.resize((W // s, H // s), Image.Resampling.LANCZOS)
+
+
+class Captions:
+    """The text over the picture: the question (``title``), then one line at a time (``caption``)."""
+
+    FADE = 0.3
+
+    def __init__(self, events, clock, duration):
+        k = OUT_W / 1280.0
+        self.k = k
+        title = next((e for e in events if e['kind'] == 'title' and e.get('text')), None)
+        self.title = _pill(title['text'], round(19 * k), INK + (215,), PAPER + (255,),
+                           pad=(round(16 * k), round(9 * k))) if title else None
+        self.title_t = clock.out(title['t']) if title else 0.0
+        raw = sorted(((clock.out(e['t']), e) for e in events if e['kind'] == 'caption'), key=lambda p: p[0])
+        self.items = []   # (start, end, image)
+        for i, (t, e) in enumerate(raw):
+            end = raw[i + 1][0] if i + 1 < len(raw) else duration
+            text = (e.get('text') or '').strip()
+            if not text:
+                continue
+            if e.get('style') == 'result':
+                img = _pill(text, round(26 * k), ACCENT + (245,), INK + (255,), pad=(round(24 * k), round(12 * k)))
+            else:
+                badge, _, rest = text.partition(' · ')
+                badge, text = (badge, rest) if rest and badge.isdigit() else (None, text)
+                img = _pill(text, round(24 * k), INK + (225,), PAPER + (255,), badge=badge,
+                            pad=(round(22 * k), round(12 * k)))
+            self.items.append((t, end, img))
+        self.any = bool(self.items or self.title)
+
+    @staticmethod
+    def _faded(img, alpha):
+        if alpha >= 1:
+            return img
+        out = img.copy()
+        out.putalpha(out.getchannel('A').point(lambda v: int(v * alpha)))
+        return out
+
+    def draw(self, frame, to):
+        if self.title is not None and to >= self.title_t:
+            a = min((to - self.title_t) / self.FADE, 1.0)
+            frame.alpha_composite(self._faded(self.title, a), (round(22 * self.k), round(18 * self.k)))
+        for start, end, img in self.items:
+            if start <= to < end:
+                a = min((to - start) / self.FADE, (end - to) / self.FADE, 1.0)
+                rise = round((1 - ease(min((to - start) / self.FADE, 1.0))) * 10 * self.k)
+                frame.alpha_composite(self._faded(img, max(a, 0.0)),
+                                      ((OUT_W - img.width) // 2, OUT_H - img.height - round(34 * self.k) + rise))
+
+
 # ------------------------------------------------------------------ render
 def close_gaps(times, events, longest=1.0, keep=0.4):
     """Shrink every hole of more than `longest` s between two frames to `keep` s.
@@ -244,7 +340,8 @@ def render(clip):
     dpr = meta['dpr']
     size = tuple(meta['size'])
     clock = Clock(events, times[-1])
-    camera = Camera(events, clock, size)
+    text = Captions(events if CAPTIONS else [], clock, clock.duration)
+    camera = Camera(events, clock, size, (SAFE_TOP if text.title else 0.0, SAFE_BOTTOM if text.items else 0.0))
     cursor = Cursor(events, clock)
     sprite, hotspot = cursor_sprite()
     duration = clock.duration
@@ -316,6 +413,8 @@ def render(clip):
                 spr = spr.copy()
                 spr.putalpha(spr.getchannel('A').point(lambda v: int(v * c[2])))
             frame.alpha_composite(spr, (int(px - hotspot[0]), int(py - hotspot[1])))
+        if text.any:
+            text.draw(frame, to)
         return frame.convert('RGB')
 
     first = compose(0.0)
