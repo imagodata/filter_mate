@@ -12,6 +12,7 @@ import math
 import re
 from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple
+from xml.etree import ElementTree
 
 from .osm import area_km2
 
@@ -158,28 +159,92 @@ def extent_note(source: PopulationSource, bbox: Sequence[float], written: Sequen
     return "; ".join(notes)
 
 
-_SOURCE = re.compile(r'<SourceFilename relativeToVRT="(\d)">([^<]*)</SourceFilename>')
-_DESTINATION = re.compile(r'<DstRect xOff="(-?\d+)" yOff="(-?\d+)" xSize="(\d+)" ySize="(\d+)"\s*/>')
 _FILE = re.compile(r'[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*\.tif')
 NOT_COVERED = ("the population grid does not cover this area: it leaves out some countries (among them China, Russia "
                "and Iran)")
+_REFUSED = "the population grid sent by its server names a file that is not its own: refused"
+_UNREADABLE = "the population grid sent by its server cannot be read as one"
+# What a VRT that only lists GeoTIFFs holds (measured on the real one, 2026-11-18: 13 kinds of element). GDAL reads
+# the names of elements and attributes without regard to case, and a VRT can name files in more places than its
+# sources (a warped or derived band): anything else is refused rather than looked through for a file.
+_ELEMENTS = frozenset((
+    "VRTDataset", "SRS", "GeoTransform", "VRTRasterBand", "NoDataValue", "ColorInterp", "ComplexSource", "SimpleSource",
+    "SourceFilename", "SourceBand", "SourceProperties", "SrcRect", "DstRect", "NODATA", "Metadata", "MDI",
+    "Description", "Offset", "Scale", "UnitType"))
+_SOURCES = ("ComplexSource", "SimpleSource")
+
+
+@dataclass(frozen=True)
+class VerifiedVrt:
+    """A VRT checked to list GeoTIFFs of its own folder, and written so that nothing else can be read from it."""
+
+    text: str  # its sources named by their whole address: it is read from memory, no longer from its server
+    rects: Tuple[Tuple[int, int, int, int], ...]  # the pixels each file fills, ``(column, row, width, height)``
+
+
+def verify_vrt(vrt_xml: str, folder: str) -> VerifiedVrt:
+    """Parse a VRT and keep only what is known to be safe: the files it names are GeoTIFFs of its own folder.
+
+    The text is parsed, not searched: GDAL reads an attribute or an element whatever the case of its name, and
+    accepts files that a pattern over the text does not see (``relativetoVRT="0"``, ``shared="0"``). Every element
+    must be of the kinds a list of GeoTIFFs holds, each source names one file relative to the VRT with a name made of
+    letters, digits and ``_.-`` between slashes, and the text returned names them by ``folder`` (the address of its
+    folder) so that the VRT read is the VRT checked, not a second reading of the server.
+
+    Args:
+        vrt_xml: The text of the VRT as its server sent it.
+        folder: The address of the folder that holds it, without a trailing slash, as GDAL opens it
+            (``/vsicurl/https://...``); the files are read from there.
+
+    Raises:
+        ValueError: A VRT that cannot be read as a list of GeoTIFFs, or that names a file elsewhere than beside it (a
+            path of this machine, a parent folder, an address, a file that is no GeoTIFF).
+    """
+    if re.search(r"<!\s*(DOCTYPE|ENTITY)", vrt_xml, re.IGNORECASE):  # entities: a text that grows when it is parsed
+        raise ValueError(_UNREADABLE)
+    try:
+        root = ElementTree.fromstring(vrt_xml)
+    except ElementTree.ParseError:
+        raise ValueError(_UNREADABLE) from None
+    if root.tag != "VRTDataset" or len(root.findall("GeoTransform")) != 1:
+        raise ValueError(_UNREADABLE)
+    for element in root.iter():
+        if not isinstance(element.tag, str) or element.tag not in _ELEMENTS:
+            raise ValueError(_REFUSED)
+        if any(key.lower() == "subclass" for key in element.attrib):  # a warped or derived dataset or band
+            raise ValueError(_REFUSED)
+    names = [element for element in root.iter("SourceFilename")]
+    sources = [element for tag in _SOURCES for element in root.iter(tag)]
+    rects = []
+    for source in sources:
+        files, rectangles = source.findall("SourceFilename"), source.findall("DstRect")
+        if len(files) != 1 or len(rectangles) != 1:
+            raise ValueError(_UNREADABLE)
+        named, rectangle = files[0], rectangles[0]
+        name = named.text or ""
+        if (named.attrib.get("relativeToVRT") != "1" or set(named.attrib) - {"relativeToVRT", "shared"}
+                or named.attrib.get("shared", "0") not in ("0", "1") or len(named) or not _FILE.fullmatch(name)
+                or ".." in name.split("/") or "." in name.split("/")):
+            raise ValueError(_REFUSED)
+        try:
+            rects.append(tuple(int(rectangle.attrib[key]) for key in ("xOff", "yOff", "xSize", "ySize")))
+        except (KeyError, ValueError):
+            raise ValueError(_UNREADABLE) from None
+        named.attrib.clear()
+        named.set("relativeToVRT", "0")
+        named.text = f"{folder}/{name}"
+    if not rects or len(names) != len(sources):  # a SourceFilename out of a source is a file nothing here counted
+        raise ValueError(_UNREADABLE)
+    return VerifiedVrt(ElementTree.tostring(root, encoding="unicode"), tuple(rects))
 
 
 def covered_rects(vrt_xml: str) -> List[Tuple[int, int, int, int]]:
     """The pixels of the grid its files fill, ``(column, row, width, height)``, from the text of its VRT.
 
     Raises:
-        ValueError: A VRT that names a file elsewhere than beside it (a path of this machine, a parent folder, an
-            address), or a file that is no GeoTIFF: what a server sends names its own files only.
+        ValueError: A VRT that names a file elsewhere than beside it, or that cannot be read (see ``verify_vrt``).
     """
-    files = _SOURCE.findall(vrt_xml)
-    rects = [tuple(int(value) for value in found) for found in _DESTINATION.findall(vrt_xml)]
-    if not files or len(files) != len(rects):
-        raise ValueError("the population grid sent by its server cannot be read as one")
-    for relative, name in files:
-        if relative != "1" or not _FILE.fullmatch(name) or ".." in name.split("/"):
-            raise ValueError("the population grid sent by its server names a file that is not its own: refused")
-    return rects
+    return list(verify_vrt(vrt_xml, ".").rects)
 
 
 _GEOTRANSFORM = re.compile(r"<GeoTransform>([^<]*)</GeoTransform>")

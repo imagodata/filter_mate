@@ -321,6 +321,10 @@ def check_population(project, work):
                 ("a VRT that names a file of this machine",
                  lambda text: text.replace('relativeToVRT="1">lyon.tif', 'relativeToVRT="0">/etc/hostname'),
                  "not its own"),
+                ("a VRT whose second file is named in a way a pattern misses (no rectangle, relativetoVRT)",
+                 lambda text: text.replace("</ComplexSource>", "</ComplexSource><ComplexSource><SourceFilename "
+                                           'relativetoVRT="0">/etc/hostname</SourceFilename></ComplexSource>', 1),
+                 "cannot be read|not its own"),
                 ("a VRT that names an address", lambda text: text.replace(
                     'relativeToVRT="1">lyon.tif', 'relativeToVRT="1">/vsicurl/http://127.0.0.1:9/a.tif'), "not its own"),
                 ("a grid whose pixels moved", lambda text: moved(text), "changed its pixels")):
@@ -329,9 +333,33 @@ def check_population(project, work):
             gdal.VSICurlClearCache()
             said = refused(adapter.add_population, extent_wkt=LYON, crs="EPSG:4326")
             files[GRID] = sound
-            check(f"refused: {label}, nothing added nor kept", needle in said and len(project.mapLayers()) == count
-                  and written() == files_kept, said)
+            check(f"refused: {label}, nothing added nor kept", any(part in said for part in needle.split("|"))
+                  and len(project.mapLayers()) == count and written() == files_kept, said)
         gdal.VSICurlClearCache()
+        # What is read is the VRT that was checked: with the grid gone from its server right after it was read once,
+        # the people are still read, from the copy in memory; and no copy is left behind.
+        original = adapter._vrt_text
+
+        def read_once(handle, address):
+            text = original(handle, address)
+            files.pop(GRID, None)
+            handle.VSICurlClearCache()
+            return text
+        sound = files[GRID]
+        adapter._vrt_text = read_once
+        gdal.VSICurlClearCache()
+        try:
+            once = adapter.add_population(extent_wkt=LYON, crs="EPSG:4326")
+        finally:
+            adapter._vrt_text = original
+            files[GRID] = sound
+            gdal.VSICurlClearCache()
+        check("population: the VRT read is the VRT checked, not a second reading of the server",
+              once["total"] == people, once)
+        project.removeMapLayer(once["layer_id"])
+        files_kept = written()
+        check("population: no copy of the VRT is left in memory", not [name for name in (gdal.ReadDir("/vsimem/") or [])
+                                                                       if name.startswith("filtermate_population_")])
 
         delay[0] = 1.5
         busy = []
