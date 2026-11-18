@@ -301,7 +301,10 @@ def speed(factor):
 
 
 def mark(name):
-    return lambda: REC.event('mark', name=name)
+    def _s():
+        REC.event('mark', name=name)
+    _s.mark = name   # texted() finds the stills of a scene by their name
+    return _s
 
 
 def note(label, names):
@@ -326,6 +329,33 @@ def note_expr(label, name, expr):
 def still(name):
     """A step image of the stories, cut from the recording by site_video_render.py (img/stories/<name>.webp)."""
     return (0, mark('still:' + name))
+
+
+# The English text of the edit, drawn by site_video_render.py over the picture.
+def title(text):
+    """The question of the take, kept in a corner of the edited video."""
+    def _s():
+        REC.event('title', text=text)
+    _s.text = True
+    return (0, _s)
+
+
+def caption(text, style='step'):
+    """One line at the bottom of the edited video, until the next one ('' clears it). 'N · text' numbers the step."""
+    def _s():
+        REC.event('caption', text=text, style=style)
+    _s.text = True
+    return (0, _s)
+
+
+def result(template, names=()):
+    """The line the take ends on, its counts read from the layers at that moment:
+    '{batiment:,} buildings · {erp:,} public buildings'."""
+    def _s():
+        text = template.format(**counts(names)) if names else template
+        REC.event('caption', text=text, style='result')
+        log(f'result {text}')
+    return (0, _s)
 
 
 # ------------------------------------------------------------------ helpers from recipe_screenshots.py
@@ -1042,10 +1072,15 @@ def refocus():
         zoom_focus(STATE['scene_scale'])()
 
 
+def filtered():
+    """Nothing to do: the place in a scene where a filter is over (texted() puts the result line there)."""
+    return None
+
+
 def run_filter(fast=4.0):
     """Click Filter, fast-forward while the task runs, restore the framing, let the canvas redraw."""
     return act('pushButton_action_filter', click_filter) + [
-        (300, speed(fast)), (1500, wait_idle()), (0, refocus), (600, wait_idle()), (400, speed(1.0)),
+        (300, speed(fast)), (1500, wait_idle()), (0, refocus), (600, wait_idle()), (400, speed(1.0)), (0, filtered),
     ]
 
 
@@ -1196,16 +1231,19 @@ EXPLORE = boot(EXPLORE_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', scale
     (0, restyle('commune', (138, 143, 134, 40), '#5b636b', 0.5, selection_alpha=180)),
     (0, restyle('epci', None, '#39474f', 1.2)),
     (500, source('commune')), (1500, single_mode(tracking=True)), (1000, rec_start),
-    (0, cam('full', dur=0, drift=1.03)), (1000, cam(EXPLORE_ZONE, dur=1.5, pad=30)),
+    (0, cam('full', dur=0, drift=1.03)),
+    title('Three ways to pick features'), caption('1 · Single selection: type a name, the map follows'),
+    (1000, cam(EXPLORE_ZONE, dur=1.5, pad=30)),
 ] + act('pushButton_checkable_exploring_selecting', enable('pushButton_checkable_exploring_selecting')) \
     + act(picker_edit) + type_into(picker_edit, 'Toulou', per_char=150) + [
     (900, pick_focus)] + settle() + show_map(2800) + [
+    caption('2 · Multiple selection: tick several'),
     (0, cam(['mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection'], dur=1.4, pad=30)),
 ] + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode) + [hold(1500)] + [
     (0, cam('mGroupBox_exploring_multiple_selection', dur=1.2, pad=30)),
 ] + multi_check(['Blagnac', 'Colomiers', 'Tournefeuille', 'Balma']) + settle() + show_map(3000) + [
-    (0, cam(EXPLORE_ZONE, dur=1.4, pad=30)),
-] + typed_custom('"population" > 20000') \
+    caption('3 · Custom selection: any expression'), (0, cam(EXPLORE_ZONE, dur=1.4, pad=30)),
+] + typed_custom('"population" > 20000') + [caption('4 · Selecting and Zoom: straight to the result')] \
     + act('pushButton_checkable_exploring_selecting', enable('pushButton_checkable_exploring_selecting', False)) \
     + act('pushButton_checkable_exploring_selecting', enable('pushButton_checkable_exploring_selecting'), after=500) \
     + act('pushButton_exploring_zoom', lambda: dock().pushButton_exploring_zoom.click()) \
@@ -1286,10 +1324,14 @@ COMPARE = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Blagnac\'', 1.2) + scop
     (300, lambda: check_combo_items(dock().comboBox_filtering_geometric_predicates, ['intersect'], True)),
     (300, buffer_value(100)), (300, combine(None, 'AND')),
     (500, click_filter), (3000, wait_idle()), hold(1500),
-] + recorded_scene(1.2) + show_map(2200) + [(0, quiet_message_bar), (0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
-    + act(compare_button, click_compare) + [(500, swipe_ready()), (0, cam('canvas', dur=1.4)), hold(1000)] \
+] + recorded_scene(1.2) + [title('Before and after, side by side'),
+                           caption('1 · A filter is on: 100 m around the water')] + show_map(2200) + [
+    caption('2 · Click Compare'), (0, quiet_message_bar), (0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
+    + act(compare_button, click_compare) + [
+    (500, swipe_ready()), caption('3 · Drag the line: before on the left, after on the right'),
+    (0, cam('canvas', dur=1.4)), hold(1000)] \
     + sweep(0.5, 0.15) + [hold(600)] + sweep(0.15, 0.85, ms=3600, steps=56) + [hold(600)] + sweep(0.85, 0.5, ms=1800, steps=28) \
-    + [hold(1000), (0, lambda: log(f'swipe item {swipe_item()} busy={getattr(swipe_item(), "busy", None)}')),
+    + [hold(1000), caption('4 · Click Compare again to close'), (0, lambda: log(f'swipe item {swipe_item()} busy={getattr(swipe_item(), "busy", None)}')),
        (0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
     + act(compare_button, click_compare) + [hold(800)] + ending(S3_FLOOD_TARGETS)
 
@@ -1485,7 +1527,7 @@ FAVORITES = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.
     still('s7-02'),
     (0, cam(['favorites_indicator_label', 'mGroupBox_exploring_single_selection'], dur=1.4, pad=30)),
 ] + act(fav_indicator, fav_menu(FAV_NAME, fav_apply)) + [(1000, mark('still:s7-03'))] + settle(3.0) + [(0, refocus)] + settle() + show_map(3500) + [
-    still('s7-04'), (0, fav_cleanup)] + ending()
+    still('s7-04'), (0, fav_cleanup)] + ending(S3_FLOOD_TARGETS)
 
 EXPORT_ZONE = ['pushButton_checkable_exporting_layers', 'pushButton_checkable_exporting_zip']
 
@@ -1603,7 +1645,7 @@ PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, de
     + recorded_scene(1.0) + [
     (0, show_toolbox), (600, cam(lambda: rect_of(toolbox_dock()), dur=1.4, pad=20)),
 ] + act(toolbox_search) + type_into(toolbox_search, 'filtermate', per_char=120) + [
-    hold(1200), still('s8-01'), (0, s8_dialog), (400, cam(lambda: rect_of(STATE['proc']), dur=1.4, pad=30)), hold(1500),
+    hold(1200), still('s8-01'), (0, s8_dialog), (400, cam(lambda: rect_of(STATE['proc']), dur=1.4, pad=30)), hold(2800),
     still('s8-02'),
 ] + act(run_button, s8_run) + settle(3.0) + [(0, refocus)] + settle() + show_map(4500, 1.05) + [still('s8-03')] \
     + ending(S8_TARGETS)
@@ -1842,7 +1884,7 @@ def class_condition(code, dtm, hag, story):
 def run_filter_long(fast=8.0):
     """run_filter() when PDAL computes the height above ground before the filter."""
     return act('pushButton_action_filter', click_filter) + [
-        (300, speed(fast)), (1500, wait_long()), (0, refocus), (600, wait_idle()), (400, speed(1.0)),
+        (300, speed(fast)), (1500, wait_long()), (0, refocus), (600, wait_idle()), (400, speed(1.0)), (0, filtered),
     ]
 
 
@@ -2082,7 +2124,8 @@ SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + FM5_QUIET_
     + [(400, cam(['pushButton_action_export', 'pushButton_checkable_exporting_zip'], dur=1.2, pad=40))] \
     + [hold(600), still('s12-04'), (0, lambda: log(f"export props {dock().project_props.get('EXPORTING')}"))] \
     + act('pushButton_action_export', export_with_recap) + [hold(1500)] \
-    + settle(4.0) + [(0, wait_long())] + show_map(3000) + ending()
+    + settle(4.0) + [(0, wait_long()), result('One ZIP: the terrain model (GeoTIFF) and the point cloud (LAZ)')] \
+    + show_map(3000) + ending()
 
 # ------------------------------------------------------------------ FilterMate 5.1: the dock, its panels, its settings
 # The sections of the dock (rail of chips by default) leave it for panels of QGIS, share a panel, come back; the
@@ -2220,15 +2263,19 @@ PANELS_LAYERS = ['commune', 'zone_de_vegetation', 'surface_hydrographique', 'bat
 # panels: FILTERING leaves the dock by the menu of its chip, EXPORTING joins its panel, a chip of the panel opens its
 # section, the panel goes next to the map, then every section merges back into the dock.
 PANELS = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + staged(1.15) + [
+    title('The sections become QGIS panels'), caption('1 · FILTERING leaves the dock for its own panel'),
     hold(1400),
     (0, cam('dock', dur=1.4, pad=12)), hold(800),
 ] + section_menu('filtering', 'detach') + [
     hold(300), (0, share_column('filtering')), hold(600), (0, cam('full', dur=1.4)), hold(1800),
-    (0, cam('dock', dur=1.3, pad=12)),
+    caption('2 · EXPORTING joins that panel'), (0, cam('dock', dur=1.3, pad=12)),
 ] + section_menu('exporting', 'group_filtering') + [
     hold(400), (0, cam(lambda: panel_of('filtering'), dur=1.3, pad=12)), hold(1600),
-] + chip_click('filtering', lambda: panel_of('filtering')) + [hold(1400), (0, cam('full', dur=1.4)), hold(600)] \
-    + beside_map('filtering') + [hold(2400), (0, cam(lambda: panel_of('filtering'), dur=1.3, pad=12)), hold(600)] \
+] + chip_click('filtering', lambda: panel_of('filtering')) + [hold(1400), (0, cam('full', dur=1.4)),
+                                                                       caption('3 · Drag the panel next to the map'),
+                                                                       hold(600)] \
+    + beside_map('filtering') + [hold(2400), caption('4 · Merge everything back into the dock'),
+                                 (0, cam(lambda: panel_of('filtering'), dur=1.3, pad=12)), hold(600)] \
     + section_menu('filtering', 'attach_all', holder=lambda: panel_of('filtering')) + [
     hold(500), (0, cam('full', dur=1.4)), hold(2600), (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
 
@@ -2281,16 +2328,19 @@ def pick_where(name, expr):
 # EXPLORING back into the dock.
 EXPLORING_PANEL = boot(EXPLO_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.0) + staged(1.0) + [
     (0, lambda: iface.mapCanvas().setSelectionColor(QColor(255, 216, 61, 120))),
+    title('EXPLORING in its own panel'), caption('1 · EXPLORING leaves the dock'),
     hold(1200), (0, cam('dock', dur=1.4, pad=12)), hold(700),
 ] + section_menu('exploring', 'detach') + [
     hold(300), (0, share_column('exploring', 0.55)), hold(500), (0, cam('full', dur=1.4)), hold(1600),
+    caption('2 · Its own layer chooser: buildings, then communes'),
     (0, cam(lambda: panel_of('exploring'), dur=1.3, pad=12)), hold(500),
-] + chooser_pick('batiment') + [hold(2200)] + chooser_pick('commune') + [hold(1200)] \
+] + chooser_pick('batiment') + [hold(2200)] + chooser_pick('commune') + [
+    hold(1200), caption('3 · Tracking on: pick a commune, the map follows')] \
     + act('pushButton_checkable_exploring_tracking', enable('pushButton_checkable_exploring_tracking')) \
     + act('pushButton_checkable_exploring_selecting', enable('pushButton_checkable_exploring_selecting'), after=500) \
     + act(picker_edit) + type_into(picker_edit, 'Portet', per_char=130) + [
     (900, pick_where('commune', '"nom_officiel" = \'Portet-sur-Garonne\''))] + settle() + show_map(3200, 1.04) + [
-    (0, cam(lambda: panel_of('exploring'), dur=1.3, pad=12)), hold(400),
+    caption('4 · Back into the dock'), (0, cam(lambda: panel_of('exploring'), dur=1.3, pad=12)), hold(400),
 ] + section_menu('exploring', 'attach', holder=lambda: panel_of('exploring')) + [
     hold(400), (0, cam('full', dur=1.4)), hold(2400), (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
 
@@ -2407,14 +2457,16 @@ BAR = ('APP', 'DOCKWIDGET', 'ACTION_BAR_POSITION')
 # layout: CONFIGURATION, two settings typed in its search and chosen in the tree, applied at once: the headers stacked
 # instead of the rails, the buttons under each section instead of one bar; then FILTERING and EXPORTING opened.
 LAYOUT = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + staged(1.15) + [
+    title('The dock, laid out your way'), caption('1 · Open CONFIGURATION'),
     hold(1200), (0, cam('dock', dur=1.4, pad=12)), hold(1200),
 ] + act(toolbox_button('config'), lambda: dock().toolBox_tabTools.setCurrentWidget(dock().CONFIGURATION)) + [
     hold(700), (0, cam(lambda: dock().config_view_container, dur=1.2, pad=16)), hold(500),
-] + config_find('SECTION_HEADERS') + [hold(700)] + config_choose(HEADERS, 'stacked') + [
+] + [caption('2 · Section headers: stacked instead of the rail')] + config_find('SECTION_HEADERS') + [hold(700)] + config_choose(HEADERS, 'stacked') + [
     hold(900), (0, cam('dock', dur=1.2, pad=12)), hold(2200),
     (0, cam(lambda: dock().config_view_container, dur=1.2, pad=16)), hold(400),
-] + config_find('ACTION_BAR_POSITION') + [hold(700)] + config_choose(BAR, 'sections') + [
+] + [caption('3 · Action buttons: under each section')] + config_find('ACTION_BAR_POSITION') + [hold(700)] + config_choose(BAR, 'sections') + [
     hold(900), (0, cam(lambda: [dock().toolBox_tabTools, dock().pushButton_action_filter], dur=1.2, pad=16)), hold(400)] \
+    + [caption('4 · Applied at once: each section has its own buttons')] \
     + header_click('filtering') + [hold(2200)] + header_click('exporting') + [hold(2200)] \
     + header_click('filtering') + [hold(800), (0, cam('full', dur=1.4)), hold(2400),
                                    (0, stop_recording), (500, quit_when_idle)]
@@ -2515,11 +2567,15 @@ def apply_card():
 # of QGIS, the buttons under each section", Apply: the sections leave the dock, their buttons with them.
 SETUP = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + [
     (0, lambda: agent_chat().new_conversation())] + staged(1.15) + [
+    title('A setup with no AI model'), caption('1 · Open AGENT'),
     hold(1000), (0, cam('dock', dur=1.4, pad=12)), hold(500),
-] + agent_open_visible() + [hold(900), (0, cam(agent_panel, dur=1.3, pad=12)), hold(500)] \
+] + agent_open_visible() + [hold(900), (0, cam(agent_panel, dur=1.3, pad=12)), hold(500),
+                            caption('2 · Set up FilterMate: cards of choices, no model needed')] \
     + act(lambda: agent_panel().setup_button, lambda: agent_panel().setup_button.click()) + [hold(1000)] \
-    + setup_card() + setup_card() + setup_card(layout=True) + setup_card() + setup_card() + [
-    hold(400), (0, cam(agent_panel, dur=1.0, pad=12)),
+    + setup_card() + setup_card() + [caption('3 · The layout: sections in panels, buttons under each')] \
+    + setup_card(layout=True) + setup_card() + setup_card() + [
+    hold(400), caption('4 · Apply: the sections leave the dock, their buttons with them'),
+    (0, cam(agent_panel, dur=1.0, pad=12)),
 ] + apply_card() + [hold(1200), (0, cam('full', dur=1.5)), hold(3600),
                     (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
 
@@ -2529,26 +2585,6 @@ SETUP = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + [
 # stays in the picture while the widgets are used. The side buttons of EXPLORING: identify, zoom, selecting,
 # tracking, and the browser of the picker to walk through a result. And the English text of the edit: the question
 # of the take (title), one line per step (caption), the count it ends on (result), drawn by site_video_render.py.
-def title(text):
-    """The question of the take, kept in a corner of the edited video."""
-    return (0, lambda: REC.event('title', text=text))
-
-
-def caption(text, style='step'):
-    """One line at the bottom of the edited video, until the next one ('' clears it). 'N · text' numbers the step."""
-    return (0, lambda: REC.event('caption', text=text, style=style))
-
-
-def result(template, names=()):
-    """The line the take ends on, its counts read from the layers at that moment:
-    '{batiment:,} buildings · {erp:,} public buildings'."""
-    def _s():
-        text = template.format(**counts(names)) if names else template
-        REC.event('caption', text=text, style='result')
-        log(f'result {text}')
-    return (0, _s)
-
-
 def explo():
     return panel_of('exploring')
 
@@ -2575,7 +2611,8 @@ def lay_out(left='exploring', width=400, height=600, right=410, under=True):
             window.resizeDocks([layers, panel], [196, width], Qt.Orientation.Horizontal)
         dock().setMinimumWidth(0)
         window.resizeDocks([dock()], [right], Qt.Orientation.Horizontal)
-        dock().toolBox_tabTools.setCurrentWidget(dock().FILTERING)
+        if left != 'filtering':
+            dock().toolBox_tabTools.setCurrentWidget(dock().FILTERING)
         QTimer.singleShot(800, lambda: log(
             f'laid out: {panels.groups()}, {left} {rect_of(panel)}, dock {rect_of(dock())}, '
             f'map {rect_of(iface.mapCanvas())}'))
@@ -2632,7 +2669,7 @@ def ending2(verify=None):
 NOISE2 = boot(S2_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_NOISE}\'', 1.2) + scope('commune') + [
     (500, lay_out()), (1500, wait_idle()),
 ] + recorded_scene(1.2) + [
-    title('Which buildings are near the main roads?'), hold(500),
+    still('s2-00'), title('Which buildings are near the main roads?'), hold(500),
     caption('1 · Pick the main roads'), (0, cam(explo, dur=1.2, pad=14)), hold(300),
 ] + chooser_pick('troncon_de_route', keep=900) + typed_custom('"importance" IN (\'1\', \'2\')', per_char=24) \
     + settle() + [(0, cam('full', dur=1.1)), hold(200)] + identify() + [
@@ -2648,14 +2685,14 @@ NOISE2 = boot(S2_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_NOISE}\'', 1.2) 
     hold(300), still('s2-03'), caption('4 · Filter'), (200, cam('full', dur=1.1)),
 ] + run_filter() + [
     result('{batiment:,} buildings · {erp:,} public buildings', ['batiment', 'erp']),
-    hold(1200), still('s2-04'), (0, cam('canvas', dur=1.4, drift=1.04)), hold(2600), still('s2-05'),
-] + ending2(['batiment', 'erp', 'troncon_de_route'])
+    hold(1800), still('s2-04'), (0, zoom_focus(0.5)),
+] + settle() + show_map(2600, 1.05) + [still('s2-05')] + ending2(['batiment', 'erp', 'troncon_de_route'])
 
 # bridges, second cut (story 4): the same two panels. The permanent watercourses of Toulouse Métropole flashed, the
 # roads and structures that cross them kept; then the structures walked one by one, tracking on: the map follows.
 BRIDGES2 = boot(S4_LAYERS, 'epci', '"nom_officiel" = \'Toulouse Métropole\'', 1.1, dense_scale=400000) \
     + scope('epci') + [(500, lay_out()), (1500, wait_idle())] + recorded_scene(1.1) + [
-    title('Which crossings to inspect?'), hold(500),
+    still('s4-00'), title('Which crossings to inspect?'), hold(500),
     caption('1 · Pick the permanent watercourses'), (0, cam(explo, dur=1.2, pad=14)), hold(300),
 ] + chooser_pick('troncon_hydrographique', keep=900) + typed_custom('"persistance" = \'Permanent\'', per_char=24) \
     + settle() + [
@@ -2671,14 +2708,14 @@ BRIDGES2 = boot(S4_LAYERS, 'epci', '"nom_officiel" = \'Toulouse Métropole\'', 1
 ] + run_filter() + [
     result('{troncon_de_route:,} road sections · {construction_lineaire:,} structures',
            ['troncon_de_route', 'construction_lineaire']),
-    hold(2600), still('s4-04'),
+    hold(1800), still('s4-04'),
     caption('4 · Walk through them, the map follows'), (0, cam(explo, dur=1.2, pad=14)),
 ] + chooser_pick('construction_lineaire', keep=900) \
     + act(gb_check('mGroupBox_exploring_single_selection'), single_group, lead=600, after=400) \
     + act('pushButton_checkable_exploring_tracking', enable('pushButton_checkable_exploring_tracking'),
           lead=600, after=400) + [
     (300, cam('full', dur=1.1)),
-] + walk(3, each=1700) + [still('s4-05'), (0, back_to_scene)] + settle() + [
+] + walk(3, each=1300) + [still('s4-05'), (0, back_to_scene)] + settle() + [
     result('{troncon_de_route:,} road sections · {construction_lineaire:,} structures',
            ['troncon_de_route', 'construction_lineaire']), hold(2200),
 ] + ending2(['troncon_de_route', 'construction_lineaire'])
@@ -2757,7 +2794,7 @@ S3_RESULT = '{batiment:,} buildings · {erp:,} public buildings · {troncon_de_r
 BUFFER2 = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2) + scope('commune') + [
     (300, bar_in_sections), (500, lay_out()), (1500, wait_idle()),
 ] + recorded_scene(1.2) + [
-    title('What stands near the river?'), hold(500),
+    still('s3-00'), title('What stands near the river?'), hold(500),
     caption('1 · Pick all the water surfaces'), (0, cam(explo, dur=1.2, pad=14)), hold(300),
 ] + chooser_pick('surface_hydrographique', keep=900) \
     + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode, lead=600, after=400) + [hold(900)] \
@@ -2768,25 +2805,140 @@ BUFFER2 = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2)
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0), lead=600, after=400) + typed_buffer(300) + [
     hold(300), still('s3-02'), caption('3 · Filter'), (200, cam('full', dur=1.1)),
 ] + run_filter() + [
-    note('300 m', S3_FLOOD_TARGETS), result('300 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(2600), still('s3-03'),
+    note('300 m', S3_FLOOD_TARGETS), result('300 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1800), still('s3-03'),
     caption('4 · Try 100 m'), (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + typed_buffer(100) + run_filter() + [
     (0, cam('full', dur=1.1)),
-    note('100 m', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(2600), still('s3-04'),
+    note('100 m', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1800), still('s3-04'),
     caption('5 · Undo, Redo: back and forth between the two'), (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + act('pushButton_action_undo_filter', click_undo, lead=700, after=400) + settle(4.0) + [(0, refocus)] + settle() + [
-    (0, cam('full', dur=1.1)), note('undo', S3_FLOOD_TARGETS), hold(2000), still('s3-05'),
+    (0, cam('full', dur=1.1)), note('undo', S3_FLOOD_TARGETS), result('300 m again', ()), hold(1500), still('s3-05'),
     (0, cam(ACTION_ZONE, dur=1.1, pad=40)),
 ] + act('pushButton_action_redo_filter', click_redo, lead=700, after=400) + settle(4.0) + [(0, refocus)] + settle() + [
-    note('redo', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(2200),
+    note('redo', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1400),
 ] + ending2(S3_FLOOD_TARGETS)
 
 
+def settled_counts(names, quiet=6):
+    """Re-armed until the counts of ``names`` have stayed the same for ``quiet`` polls (a favorite replayed filters
+    its layers one after the other, with no task to wait for)."""
+    seen = {'last': None, 'same': 0}
+
+    def _s():
+        now = tuple(counts(names).values())
+        seen['same'] = seen['same'] + 1 if now == seen['last'] else 0
+        seen['last'] = now
+        return seen['same'] < quiet
+    _s.max_tries = 120
+    return _s
+
+
+def texted(steps, question, inserts, layout=None):
+    """The steps of a take with its text. ``question`` (the title) comes right after the recording starts, then each
+    (anchor, step or list of steps) of ``inserts``, where the anchor is 'start' (the recording starts), the name of a
+    step image ('s6-02': right after it; ('s6-04', 2): two steps before it), 'filtered' or 'filtered1' (the first,
+    the second filter of the scene is over). ``layout``: steps run before the recording (a section set apart)."""
+    out = list(steps)
+
+    def place(anchor):
+        name, before = anchor if isinstance(anchor, tuple) else (anchor, 0)
+        if name == 'start':
+            hits = [i for i, (_d, fn) in enumerate(out) if fn is rec_start]
+        elif name.startswith('filtered'):
+            hits = [i for i, (_d, fn) in enumerate(out) if fn is filtered][int(name[8:] or 0):]
+        else:
+            hits = [i for i, (_d, fn) in enumerate(out) if getattr(fn, 'mark', None) == 'still:' + name]
+        if not hits:
+            raise KeyError(f'no {anchor} in the scene')
+        return hits[0] - before if before else hits[0] + 1
+
+    if layout:
+        i = place('start') - 1
+        if i >= 3 and getattr(out[i - 3][1], '__name__', '') == 'remember':
+            i -= 3   # before the framing of recorded_scene(): the map is framed in its final size
+        out[i:i] = list(layout)
+    for anchor, new in [('start', title(question))] + list(inserts):
+        i = place(anchor)
+        if anchor == 'start':   # after what the title, or an earlier line, put there
+            while i < len(out) and getattr(out[i][1], 'text', False):
+                i += 1
+        new = new if isinstance(new, list) else [new]
+        out[i:i] = new
+    return out
+
+
+HERO = texted(HERO, 'One commune out of a whole department', [
+    ('start', caption('1 · Pick the commune')),
+    ('s1-01', caption('2 · Target the 12 other layers')),
+    ('s1-02', caption('3 · Filter')),
+    ('filtered', result('12 layers · {batiment:,} buildings', ['batiment'])),
+])
+BRUSH = texted(BRUSH, 'Where to clear brush around homes?', [
+    ('start', caption('1 · Pick the homes')),
+    ('s5-01', caption('2 · Target vegetation and hedges, 50 m around')),
+    ('filtered', result('{zone_de_vegetation:,} vegetation areas · {haie:,} hedges', ['zone_de_vegetation', 'haie'])),
+    ('s5-02', caption('3 · Keep the woods only')),
+    ('s5-03', caption('4 · Filter again')),
+    ('filtered1', result('{zone_de_vegetation:,} woods · {haie:,} hedges within 50 m of a home',
+                         ['zone_de_vegetation', 'haie'])),
+], layout=[(500, lay_out('filtering')), (1500, wait_idle())])
+HAMLETS = texted(HAMLETS, 'Which hamlets are far from a paved road?', [
+    ('start', caption('1 · Pick the paved roads')),
+    ('s6-02', caption('2 · Target the places: none within 200 m')),
+    ('s6-03', caption('3 · Filter')),
+    ('filtered', result('{zone_d_habitation:,} places more than 200 m from a paved road', ['zone_d_habitation'])),
+])
+FAVORITES = texted(FAVORITES, 'A filter saved, replayed in one click', [
+    ('start', caption('1 · Save the filter as a favorite')),
+    ('s7-01', caption('2 · Clear everything')),
+    ('s7-02', caption('3 · Replay it from the favorites')),
+    (('s7-04', 2), [(300, speed(3.0)), (300, settled_counts(S3_FLOOD_TARGETS)), (0, speed(1.0)),
+                    result(S3_RESULT, S3_FLOOD_TARGETS)]),
+])
+PROCESSING = texted(PROCESSING, 'What changed since a date?', [
+    ('start', caption('1 · FilterMate in the Processing toolbox')),
+    ('s8-01', caption('2 · Batch filter: four layers, one expression')),
+    ('s8-02', caption('3 · Run')),
+    (('s8-03', 2), result('Modified since 15 March 2025: {batiment:,} buildings · {troncon_de_route:,} roads',
+                          ['batiment', 'troncon_de_route'])),
+])
+SLOPE = texted(SLOPE, 'Which parcels lie on steep slopes?', [
+    ('start', caption('1 · Compute the slope of the terrain model')),
+    ('s9-01', caption(f'2 · Keep {FM5_SLOPE_MIN:g} % and steeper')),
+    ('s9-02', caption('3 · Target the parcels at least half on it')),
+    ('s9-03', caption('4 · Filter')),
+    ('filtered', result('{parcelle:,} parcels on steep slopes', ['parcelle'])),
+])
+FM5_HEIGHT_MIN = int(os.environ.get('FM5_HEIGHT', '7'))
+HEIGHTS = texted(HEIGHTS, f'Which buildings rise above {FM5_HEIGHT_MIN} m?', [
+    ('start', caption('1 · Pick the building points of the LiDAR cloud')),
+    ('s10-01', caption(f'2 · Keep the points {FM5_HEIGHT_MIN} m above the ground')),
+    ('s10-02', caption('3 · Target the buildings half covered by them')),
+    ('s10-03', caption('4 · Filter')),
+    ('filtered', result('{batiment:,} buildings rise to ' + str(FM5_HEIGHT_MIN) + ' m or more', ['batiment'])),
+])
+PRUNING = texted(PRUNING, 'Which roads need pruning?', [
+    ('start', caption('1 · Pick the high vegetation of the LiDAR cloud')),
+    ('s11-01', caption('2 · Keep what stands 8 m above the ground')),
+    ('s11-02', caption('3 · Target the roads within 3 m')),
+    ('s11-03', caption('4 · Filter')),
+    ('filtered', result('{troncon_de_route:,} road sections to prune', ['troncon_de_route'])),
+])
+SURVEY = texted(SURVEY, 'A survey package around one building', [
+    ('start', caption('1 · Pick the tallest building')),
+    ('s12-01', caption('2 · Target the terrain model and the point cloud, 50 m around')),
+    ('s12-02', caption('3 · Filter')),
+    ('s12-03', caption('4 · Export both into one ZIP')),
+])
+
+
 CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'layout': LAYOUT, 'setup': SETUP,
-'metropole': METROPOLE, 'compare': COMPARE, 'sam': SAM, 'agent': AGENT, 'postgis': POSTGIS, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
-         'brush': BRUSH, 'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT, 'processing': PROCESSING,
+         'metropole': METROPOLE, 'compare': COMPARE, 'sam': SAM, 'agent': AGENT, 'postgis': POSTGIS,
+         'explore': EXPLORE, 'buffer': BUFFER2, 'noise': NOISE2, 'bridges': BRIDGES2, 'brush': BRUSH,
+         'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT2, 'processing': PROCESSING,
          'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY,
-         'noise2': NOISE2, 'bridges2': BRIDGES2, 'export2': EXPORT2, 'buffer2': BUFFER2}
+         # the first cut of the four stories told again with the dock laid out (the teaser was edited from them)
+         'noise_plain': NOISE, 'buffer_plain': BUFFER, 'bridges_plain': BRIDGES, 'export_plain': EXPORT}
 STEPS = CLIPS[CLIP]
 
 
