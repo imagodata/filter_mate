@@ -1608,6 +1608,9 @@ class AgentChatController(QObject):
         values = load_settings()
         # No model runs a recipe: the lighter set of a small local model would stop its steps (2026-11-13)
         tools, handlers, _active = self.tools_and_handlers(values, for_chat=False)
+        # A recipe never runs a tool of the chat alone (the options of the agent, its questions): the recipes of a
+        # project made by someone else must not turn its sources off or on. A step that names one stops the run.
+        tools = [tool for tool in tools if not tool.chat_only]
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         available = {tool.name for tool in tools}
         self._policy.set_level(values.autonomy)

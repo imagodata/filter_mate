@@ -42,6 +42,21 @@ class TestKept:
         assert not kept("run_pyqgis", ToolSpec("run_pyqgis", "", destructive=True), failed=False)
         assert not kept("unknown_tool", None, failed=False)
 
+    def test_no_tool_of_the_chat_alone_is_kept(self):
+        """The options of the agent, its questions: a recipe of a received project must never replay them."""
+        chat_only = {tool.name for tool in chat_tools() if tool.chat_only}
+        assert {"turn_off_agent_options", "turn_on_agent_options", "ask_user", "agent_options"} <= chat_only
+        assert chat_only <= NOT_KEPT
+
+    def test_a_step_of_the_chat_alone_in_a_stored_recipe_is_left_out(self):
+        stored = json.dumps([{"id": "r1", "name": "Forged", "steps": [
+            {"tool": "apply_filter", "arguments": {"layer": "a", "expression": "1"}},
+            {"tool": "turn_off_agent_options", "arguments": {"sources": ["datagouv"]}},
+            {"tool": "turn_on_agent_options", "arguments": {"mcp_server": True}}]}])
+        assert [step["tool"] for step in parse(stored)[0]["steps"]] == ["apply_filter"]
+        assert parse(json.dumps([{"id": "r2", "name": "Only", "steps": [
+            {"tool": "ask_user", "arguments": {}}]}])) == []
+
     def test_connector_tools_are_not_kept(self):
         assert not kept("mcp_github_create_issue", ToolSpec("mcp_github_create_issue", "", open_world=True), False)
 

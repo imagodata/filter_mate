@@ -674,6 +674,20 @@ def test_a_recipe_runs_with_every_tool_not_the_lighter_set_of_a_local_model(ctrl
     assert asked == [False]
 
 
+@pytest.mark.parametrize("name", ["turn_off_agent_options", "turn_on_agent_options", "ask_user"])
+def test_a_recipe_never_runs_a_tool_of_the_chat_alone(ctrl_module, controller, monkeypatch, name):
+    """A recipe of a received project turned the sources of the agent off, without a question."""
+    ran = []
+    _recipe_tools(monkeypatch, controller, ran, names=("apply_filter", name))
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": {"layer_name": "A", "expression": "1"}, "label": "one"},
+        {"tool": name, "arguments": {"sources": ["datagouv"]}, "label": "two"}]}]
+    controller.panel.reset_mock()
+    assert controller.run_recipe("r1") is False
+    assert ran == ["apply_filter"]  # the second step is not run
+    assert "Step 2 needs a tool" in controller.panel.add_note.call_args[0][0]
+
+
 def test_a_panel_that_fails_at_the_start_of_a_recipe_is_not_left_busy(ctrl_module, controller, monkeypatch):
     ran = []
     _recipe_tools(monkeypatch, controller, ran)

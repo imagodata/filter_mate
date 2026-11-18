@@ -48,6 +48,11 @@ NOT_KEPT = frozenset({
     "remove_widget", "save_recipe", "remove_recipe",
     # The settings of FilterMate belong to this machine, not to a project: a recipe from another .qgz never sets them.
     "change_settings", "export_settings_profile", "apply_settings_profile",
+    # The other tools of the chat alone (ToolSpec.chat_only): the options of the agent (a recipe from a received project
+    # must not turn its sources off or on), its questions and settings links, the databases the user ticked.
+    # tests/unit/agent/test_recipes.py checks that every chat_only tool of the catalog is here.
+    "agent_options", "turn_on_agent_options", "turn_off_agent_options", "ask_user", "show_settings_link",
+    "list_database_tables", "add_database_table",
 })
 CONNECTOR_PREFIX = "mcp_"
 
