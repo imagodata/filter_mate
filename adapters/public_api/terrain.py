@@ -235,9 +235,19 @@ def _area_in_degrees(extent_wkt: str, crs: str) -> List[float]:
     return bbox
 
 
+def _projection_method(crs) -> str:
+    """The method of projection of ``crs`` as PROJ names it ("utm", "lcc", "eqearth"), "" when QGIS does not say. The
+    same in QGIS 3.22 (from 3.20) and 4, whatever the authority of the CRS."""
+    try:
+        return str(crs.operation().id() or '')
+    except (AttributeError, RuntimeError):
+        return ''
+
+
 def _grid_crs(target_crs: str, bbox: Sequence[float]):
-    """The CRS the elevation is written in: the one asked, the one of the project when it is in metres, keeps
-    distances and is made for this area, else the UTM zone of the area.
+    """The CRS the elevation is written in: the one asked, the one of the project when it is in metres, its projection
+    keeps the angles (UTM, transverse Mercator, Lambert conformal conic, stereographic: not Web Mercator, Equal Earth,
+    Plate Carree...) and it is made for this area, else the UTM zone of the area.
 
     Raises:
         ValueError: A CRS asked that QGIS does not know, or that is not in metres.
@@ -256,7 +266,7 @@ def _grid_crs(target_crs: str, bbox: Sequence[float]):
                              "for the UTM zone of the area")
         return asked
     project = QgsProject.instance().crs()
-    if metric_grid(project.authid(), not project.isGeographic(), in_metres(project)):
+    if metric_grid(_projection_method(project), not project.isGeographic(), in_metres(project)):
         # A national grid far from its country stretches the ground (Lambert-93 over Japan): only where it is made for.
         made_for = project.bounds()
         if made_for.isNull() or made_for.isEmpty() or made_for.contains(QgsRectangle(bbox[0], bbox[1], bbox[2], bbox[3])):

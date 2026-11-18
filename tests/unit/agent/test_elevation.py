@@ -80,12 +80,27 @@ def test_the_utm_zone_of_a_place(longitude, latitude, authid):
     assert utm_authid(longitude, latitude) == authid
 
 
-def test_elevation_is_written_on_the_crs_of_the_project_only_when_it_keeps_distances():
-    assert metric_grid("EPSG:2154", projected=True, metres=True)
-    assert not metric_grid("EPSG:3857", projected=True, metres=True)  # the metres of the equator
-    assert not metric_grid("epsg:3857", projected=True, metres=True)
-    assert not metric_grid("EPSG:4326", projected=False, metres=False)
-    assert not metric_grid("EPSG:2227", projected=True, metres=False)  # feet
+@pytest.mark.parametrize("method", ["utm", "tmerc", "lcc", "stere", "sterea", "UTM", " lcc "])
+def test_elevation_is_written_on_the_crs_of_the_project_when_its_projection_keeps_the_angles(method):
+    assert metric_grid(method, projected=True, metres=True)
+
+
+@pytest.mark.parametrize("method", [
+    "merc",       # Web Mercator and Mercator: the metres of the equator, 1.43 times too long at 45 degrees
+    "eqearth",    # Equal Earth, EPSG:8857
+    "eqc",        # Plate Carree, EPSG:4087 and ESRI:54001
+    "moll",       # Mollweide
+    "laea",       # Lambert azimuthal equal area, EPSG:3035, far from its centre
+    "aea", "cea", "", "longlat",
+])
+def test_elevation_is_not_written_on_a_projection_that_distorts_slopes(method):
+    assert not metric_grid(method, projected=True, metres=True)
+
+
+def test_elevation_is_not_written_on_a_geographic_crs_nor_one_in_feet():
+    assert not metric_grid("longlat", projected=False, metres=False)
+    assert not metric_grid("lcc", projected=True, metres=False)  # feet (EPSG:2227)
+    assert not metric_grid("utm", projected=False, metres=True)
 
 
 def test_a_town_is_written_at_the_resolution_of_the_source():

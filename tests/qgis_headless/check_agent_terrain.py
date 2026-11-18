@@ -532,6 +532,19 @@ def check_elevation(project, work):
         check("elevation: not on Web Mercator, whose metres are not those of the ground",
               mercator["crs_authid"] == "EPSG:32631", mercator)
         project.removeMapLayer(mercator["layer_id"])
+        # Projections that are metric but not conformal: the same grid as Web Mercator, the UTM zone of the area
+        # (2026-11-18: Equal Earth, Plate Carree, Mollweide and LAEA were kept, their bounds covering the area).
+        for authid in ("EPSG:8857", "EPSG:4087", "ESRI:54001", "ESRI:54009", "EPSG:3035"):
+            crs = QgsCoordinateReferenceSystem(authid)
+            project.setCrs(crs)
+            distorted = terrain.add_elevation(extent_wkt=LYON, crs="EPSG:4326")
+            check(f"elevation: not on {authid} ({terrain._projection_method(crs)}), which distorts slopes",
+                  crs.isValid() and distorted["crs_authid"] == "EPSG:32631", distorted)
+            project.removeMapLayer(distorted["layer_id"])
+        for authid in ("EPSG:32631", "EPSG:2154", "EPSG:27700", "EPSG:3031"):
+            check(f"elevation: {authid} keeps the angles ({terrain._projection_method(QgsCoordinateReferenceSystem(authid))})",
+                  terrain.metric_grid(terrain._projection_method(QgsCoordinateReferenceSystem(authid)), True, True))
+        project.setCrs(QgsCoordinateReferenceSystem("EPSG:3857"))
         asked_3857 = terrain.add_elevation(extent_wkt=LYON, crs="EPSG:4326", target_crs="EPSG:3857")
         check("elevation: a CRS in metres asked is followed", asked_3857["crs_authid"] == "EPSG:3857", asked_3857)
         project.removeMapLayer(asked_3857["layer_id"])
