@@ -17,8 +17,8 @@ MAX_SELECTIONS = 10
 MAX_FIELDS = 40  # of the active layer, in the state sent with a request
 MAX_CHANGES = 12
 MAX_NAMES = 5
-HEADER = ("Project when this request was sent (for reference; list_layers, describe_layer and filter_state give "
-          "the details):")
+# Only a tool of the core is named (core/agent/families.py): the others take a call to use_tools first.
+HEADER = "Project when this request was sent (for reference; describe_layer gives the details of a layer):"
 CHANGES_HEADER = "Changed in QGIS since your last answer (by the user, or another application):"
 # Token diet, lot 3: a request after the first sends what changed only, or this line.
 UNCHANGED = "Project unchanged since the last request."

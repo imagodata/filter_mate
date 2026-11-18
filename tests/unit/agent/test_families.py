@@ -174,3 +174,21 @@ def test_nothing_is_marked_added_when_the_offer_fails():
     with pytest.raises(ToolFailure, match="over"):
         run({"names": ["a"]})
     assert "a" in available
+
+
+def _named(text):
+    import re
+    return {tool.name for tool in chat_tools() if re.search(r"\b%s\b" % re.escape(tool.name), text)}
+
+
+def test_the_state_header_names_core_tools_only():
+    """Audit 2026-11-18: it named list_layers and filter_state, held until use_tools adds them: a direct call by
+    the model cost a round trip (the HELD answer)."""
+    from core.agent.project_summary import HEADER
+    assert _named(HEADER) and _named(HEADER) <= CORE
+
+
+def test_the_settings_link_of_the_missing_sources_says_how_to_get_it():
+    from core.agent.chat_setup import MISSING_RULE
+    assert "show_settings_link" not in CORE and "use_tools" in MISSING_RULE
+    assert _named(MISSING_RULE) <= CORE | {"show_settings_link"}

@@ -37,7 +37,8 @@ MISSING_SOURCES = {
 }
 MISSING_TITLE = "\n\nSources not ticked, their tools not offered: "
 MISSING_RULE = (". When one is needed and no tool offered gives the same, say it can be ticked in the Sources tab of "
-                "the settings of the agent and call show_settings_link with target sources; never guess coordinates.")
+                "the settings of the agent and call show_settings_link with target sources (use_tools adds it); never "
+                "guess coordinates.")
 
 
 def missing_sources_note(missing: Sequence[str]) -> str:
