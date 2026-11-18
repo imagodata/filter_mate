@@ -348,10 +348,6 @@
    SCROLLBAR - Dynamic width (SCOPED to FilterMate)
    ======================================================================== */
 
-#dockWidgetContents QScrollBar {
-    cursor: pointer;
-}
-
 #dockWidgetContents QScrollBar:vertical {
     background-color: {color_bg_0};
     width: {scrollbar_width};
@@ -362,12 +358,10 @@
     background-color: {color_2};
     min-height: 20px;
     border-radius: 2px;
-    cursor: pointer;
 }
 
 #dockWidgetContents QScrollBar::handle:vertical:hover {
     background-color: {color_accent};
-    cursor: pointer;
 }
 
 #dockWidgetContents QScrollBar::add-line:vertical,
@@ -385,12 +379,10 @@
     background-color: {color_2};
     min-width: 20px;
     border-radius: 2px;
-    cursor: pointer;
 }
 
 #dockWidgetContents QScrollBar::handle:horizontal:hover {
     background-color: {color_accent};
-    cursor: pointer;
 }
 
 #dockWidgetContents QScrollBar::add-line:horizontal,
