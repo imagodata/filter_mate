@@ -2272,6 +2272,7 @@ class AgentChatController(QObject):
         # conversation with itself, so it is kept for the next one (_recap_sent).
         recap, self._recap = getattr(self, "_recap", ""), ""
         self._recap_sent = recap
+        self._outcomes_sent = []
         self._engine.send(text, lambda full: "\n\n".join(part for part in (self._project_context(full), recap) if part))
         self._show_undo_state()  # Undo of the action bar and Ctrl+Z wait for the end of the turn
         if self._engine.summarized > summarized:
@@ -2371,6 +2372,7 @@ class AgentChatController(QObject):
         except Exception:  # the request goes without them
             protected = []
         outcomes, self._settings_outcomes = self._settings_outcomes, []  # the cards answered since the last request
+        self._outcomes_sent = outcomes  # given back if the request is taken out of the conversation
         return compose(self._context_memory.delta(ContextParts(
             summary=summary, notes=notes, widgets=widgets_part(widgets), recipes=recipes,
             protected=protected_part(protected), decided=decided_part(outcomes), level=level_note(self._policy.level)),
@@ -3028,7 +3030,11 @@ class AgentChatController(QObject):
         # What the request carried is known to the model, unless it failed before reaching it or was taken out of
         # the conversation with its context (lot 3).
         dropped = self._request_dropped(outcome)
-        if outcome.status == OUTCOME_FAILED or self._abandoned or dropped:
+        if self._abandoned:
+            self._context_memory.forget()
+        elif dropped:
+            self._take_back_request()
+        elif outcome.status == OUTCOME_FAILED:
             self._context_memory.forget()
         else:
             self._context_memory.sent()
@@ -3096,11 +3102,27 @@ class AgentChatController(QObject):
 
     @staticmethod
     def _request_dropped(outcome: ChatOutcome) -> bool:
-        """Whether the request left the conversation with the message that carried its context: Stop or a refusal
-        before any step that changed something (``AgentSession.interrupt_request`` forgets it then)."""
+        """Whether the request left the conversation with the message that carried its context
+        (``AgentSession.interrupt_request``): Stop, a refusal or a failure before any step that changed something,
+        and a request the server refused for what it holds (``ChatEngine._interrupt``), whatever it had done."""
+        if outcome.status == OUTCOME_FAILED:
+            return not outcome.kept_steps or (outcome.error is not None and outcome.error.kind == ERROR_BAD_REQUEST)
         broke_off = outcome.status == OUTCOME_CANCELLED or (
             outcome.status == OUTCOME_STOPPED and outcome.reason == REASON_REFUSED)
         return broke_off and not outcome.kept_steps
+
+    def _take_back_request(self) -> None:
+        """What a request taken out of the conversation carried goes to the next one: the changes of the project (the
+        state seen is not moved), the removals and the level, the cards the user answered, the recap of a thread
+        taken up again."""
+        engine = getattr(self, "_engine", None)
+        if engine is not None and not getattr(engine, "rewritten", True):
+            self._context_memory.drop()  # what the earlier requests sent is still in the history
+        else:  # a compaction during the request may have taken their context away
+            self._context_memory.forget()
+        self._settings_outcomes = list(getattr(self, "_outcomes_sent", ())) + self._settings_outcomes
+        self._outcomes_sent = []
+        self._recap = getattr(self, "_recap_sent", "") or getattr(self, "_recap", "")
 
     def _usage_words(self) -> str:
         """What the request weighed, for the line under the thread: the user pays for it, or waits for it."""

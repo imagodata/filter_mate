@@ -84,3 +84,18 @@ def test_back_to_the_standard_level_is_told_once():
     assert back.level.startswith("Level of autonomy chosen by the user: standard again")
     memory.sent()
     assert memory.delta(ContextParts(summary="U", level=level_note(STANDARD)), full=False).level == ""
+
+
+def test_drop_keeps_what_the_earlier_requests_sent():
+    from core.agent.permissions import ADVISOR, STANDARD, level_note
+    memory = ContextMemory()
+    memory.delta(ContextParts(summary="S", protected="P", level=level_note(ADVISOR)), full=False)
+    memory.sent()
+    memory.delta(ContextParts(summary="U", level=level_note(STANDARD)), full=False)
+    memory.drop()  # the request that carried that delta left the conversation
+    assert not memory.empty
+    again = memory.delta(ContextParts(summary="U", level=level_note(STANDARD)), full=False)
+    assert again.level.startswith("Level of autonomy chosen by the user: standard again")
+    assert again.protected == "No layer is protected from the agent any more."
+    memory.forget()
+    assert memory.empty

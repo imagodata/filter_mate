@@ -148,6 +148,11 @@ class ChatEngine:
         return self._session.usage
 
     @property
+    def rewritten(self) -> bool:
+        """The history was rewritten (summed up, trimmed) when the last request began."""
+        return bool(getattr(self._session, "rewritten", True))
+
+    @property
     def summarized(self) -> int:
         """Requests of this conversation summed up so far, to keep what is sent short."""
         return self._session.summarized

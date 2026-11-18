@@ -86,6 +86,11 @@ class ContextMemory:
         if self._pending is not None:
             self._sent, self._pending = self._pending, None
 
+    def drop(self) -> None:
+        """The request was taken out of the conversation with its context: what it was to send was never said. What
+        the earlier requests sent stays known, and the next one tells what changed since (the removals too)."""
+        self._pending = None
+
     def forget(self) -> None:
         """Another conversation with the model: it knows nothing yet."""
         self._sent = self._pending = None

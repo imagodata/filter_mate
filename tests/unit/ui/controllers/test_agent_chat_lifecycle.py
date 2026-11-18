@@ -1042,3 +1042,96 @@ def test_stop_after_a_step_keeps_the_news_it_carried(ctrl_module, controller, ne
     assert _news(engine) == (1, 1)
     controller._on_send("third")
     assert _news(engine) == (1, 1)  # told once, not again
+
+
+@pytest.mark.parametrize("how", ["stop", "refusal", "failure"])
+def test_a_removal_is_told_after_a_request_that_left_the_conversation(ctrl_module, controller, monkeypatch, how):
+    """Level back to standard and protection removed, then a request taken out: the history still holds the advisor
+    note and the protected layer of the first request, and the next request must say both are gone."""
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    monkeypatch.setattr(SETTINGS, "autonomy", "advisor")
+    controller._read_project = lambda: ([dict(ROW)], [], {})  # a project that can be read: deltas, not full states
+    controller._protection.names = lambda: ["Communes"]
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("first")
+    transport.starts[-1](_end_turn(ctrl_module))
+    monkeypatch.setattr(SETTINGS, "autonomy", "standard")
+    controller._protection.names = lambda: []
+    controller._on_send("second")
+    assert any("standard again" in text for text in _sent_texts(engine))
+    if how == "stop":
+        engine.cancel()
+    elif how == "refusal":
+        transport.starts[-1](messages.TurnComplete(messages.Message(messages.ROLE_ASSISTANT, ()),
+                                                   messages.STOP_REFUSAL))
+    else:
+        transport.starts[-1](_failure(ctrl_module))
+    assert not any("standard again" in text for text in _sent_texts(engine))
+    controller._on_send("third")
+    last = _sent_texts(engine)[-1]
+    assert "standard again" in last and "No layer is protected" in last
+
+
+def test_a_request_taken_out_after_a_compaction_sends_everything_again(ctrl_module, controller):
+    """A compaction during the request may have taken the context of the earlier ones: the next request is full."""
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("first")
+    transport.starts[-1](_end_turn(ctrl_module))
+    controller._on_send("second")
+    engine._session.rewritten = True  # as add_user_text sets it when it summed the history up
+    engine.cancel()
+    assert controller._context_memory.empty
+
+
+def test_the_recap_of_a_thread_taken_up_again_survives_a_refusal(ctrl_module, controller):
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._recap = "Earlier in this thread: ..."
+    controller._on_send("first")
+    assert controller._recap == ""  # sent with the request
+    transport.starts[-1](messages.TurnComplete(messages.Message(messages.ROLE_ASSISTANT, ()), messages.STOP_REFUSAL))
+    assert controller._recap == "Earlier in this thread: ..."  # the message that carried it left the conversation
+    controller._on_send("again")
+    assert "Earlier in this thread" in _sent_texts(engine)[-1]
+
+
+@pytest.mark.parametrize("how", ["stop", "failure"])
+def test_the_cards_answered_come_back_when_the_request_left_the_conversation(ctrl_module, controller, how):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._settings_outcomes = ["declined: theme"]
+    controller._on_send("first")
+    assert controller._settings_outcomes == [] and "declined: theme" in _sent_texts(engine)[-1]
+    if how == "stop":
+        engine.cancel()
+    else:
+        transport.starts[-1](_failure(ctrl_module))
+    assert controller._settings_outcomes == ["declined: theme"]
+    controller._on_send("second")
+    assert "declined: theme" in _sent_texts(engine)[-1]
+
+
+def test_the_cards_answered_stay_said_when_the_request_stays(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._settings_outcomes = ["declined: theme"]
+    controller._on_send("first")
+    transport.starts[-1](_end_turn(ctrl_module))
+    assert controller._settings_outcomes == []
+
+
+@pytest.mark.parametrize("steps, kind", [(False, "stream"), (True, "bad_request")])
+def test_a_failure_that_took_the_request_out_sends_its_news_again(ctrl_module, controller, news, steps, kind):
+    """No step kept, or the server refused what the history holds (the request is forgotten whole): the news of the
+    project that the request carried are told again, and the state seen does not move."""
+    engine, transport = news
+    controller._on_send("second")
+    if steps:
+        transport.starts[-1](_tool_turn(ctrl_module))
+    transport.starts[-1](_failure(ctrl_module, kind))
+    assert _news(engine) == (0, 0)
+    controller._on_send("third")
+    assert _news(engine) == (1, 1), "the model never learned of the change"
