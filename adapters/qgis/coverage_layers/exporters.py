@@ -13,6 +13,7 @@ Export raster and point cloud layers as they are currently filtered.
   COPC of a cloud without a filter expression instead.
 """
 import logging
+import math
 import os
 import tempfile
 from dataclasses import dataclass
@@ -213,30 +214,54 @@ def private_point_cloud(layer):
         return layer
 
 
-NO_LAS_WRITER = 'QGIS is built without PDAL: it cannot write LAS / LAZ files, export as GeoPackage or CSV'
+def _no_las_writer(reason: str) -> str:
+    return f'QGIS is built without PDAL and the pdal tool cannot write this file ({reason}): export as GeoPackage or CSV'
 
 
-def _pdal_stages(layer, crs):
-    """Reader stages of the ``pdal`` tool for a LAS / LAZ / COPC export by a QGIS built without PDAL.
+def _pdal_pipeline(layer, fmt: str, crs):
+    """Stages and writer options of the ``pdal`` tool for a LAS / LAZ / COPC export by a QGIS built without PDAL.
 
     Such a QGIS still clips a cloud with the pdal tool (a derived COPC, read
     by its copc provider), then refused to export it (2026-11-18). The tool
     cannot apply a QGIS filter expression: a cloud with a subset string is
-    still refused. Returns ``(stages, error)``, stages None when refused.
+    still refused. Returns ``(stages, writer, error)``, the writer without
+    its file name; stages None when refused.
     """
     from . import pdal_cli
+    source = layer.source()
     if (layer.subsetString() or '').strip():
-        return None, NO_LAS_WRITER + ' (the pdal tool cannot apply the filter expression of the layer)'
-    reason = pdal_cli.copc_unavailable_reason()
-    if reason:
-        return None, f'{NO_LAS_WRITER} ({reason}: the pdal tool 2.4 or later writes them)'
+        return None, None, _no_las_writer('it cannot apply the filter expression of the layer')
+    if pdal_cli.is_remote_source(source):
+        return None, None, _no_las_writer('it does not read a whole remote point cloud')
     try:
-        stages = pdal_cli.read_stages(layer.source())
-    except ValueError as exc:
-        return None, f'{NO_LAS_WRITER} ({exc})'
-    if crs is not None and crs.isValid() and crs != layer.crs():
-        stages.append({"type": "filters.reprojection", "out_srs": pdal_cli.srs_for(crs)})
-    return stages, ''
+        reader = pdal_cli.reader_for(source)
+    except ValueError:
+        return None, None, _no_las_writer('it has no reader for this point cloud format')
+    # writers.copc and readers.copc came with PDAL 2.4; writers.las is older.
+    if fmt == 'COPC' or reader == 'readers.copc':
+        reason = pdal_cli.copc_unavailable_reason()
+    else:
+        reason = '' if pdal_cli.is_available() else 'pdal not found'
+    if reason:
+        return None, None, _no_las_writer(reason)
+    stages = pdal_cli.read_stages(source)
+    layer_crs = layer.crs()
+    layer_srs = pdal_cli.srs_for(layer_crs) if layer_crs.isValid() else ''
+    writer = {"type": "writers.copc" if fmt == 'COPC' else "writers.las", "forward": "all", "extra_dims": "all"}
+    if fmt != 'COPC':  # 'true' = LASzip or LazPerf, whichever this PDAL has
+        writer["compression"] = 'true' if fmt == 'LAZ' else 'false'
+    if crs is not None and crs.isValid() and crs != layer_crs:
+        reprojection = {"type": "filters.reprojection", "out_srs": pdal_cli.srs_for(crs)}
+        if layer_srs:  # the CRS QGIS gives the layer, as the exporter reads it
+            reprojection["in_srs"] = layer_srs
+        stages.append(reprojection)
+        # The forwarded scale is that of the input units: 0.01 degree (~1 km) once in EPSG:4326.
+        # Its "auto" value, read on the first point of a streamed pipeline, gave a scale of 1.
+        xy = '0.0000001' if crs.isGeographic() else '0.01'  # ~1 cm either way
+        writer.update({"scale_x": xy, "scale_y": xy, "scale_z": '0.01', "offset_x": 'auto', "offset_y": 'auto', "offset_z": 'auto'})
+    elif layer_srs:
+        writer["a_srs"] = layer_srs
+    return stages, writer, ''
 
 
 class PointCloudExportJob:
@@ -246,7 +271,7 @@ class PointCloudExportJob:
     (constructor); :meth:`run` may be called from a task thread. The exporter
     reads a private copy of the layer (:func:`private_point_cloud`). A QGIS
     built without PDAL has the ``pdal`` tool write LAS / LAZ / COPC instead
-    (:func:`_pdal_stages`).
+    (:func:`_pdal_pipeline`).
     """
 
     def __init__(self, layer, path: str, fmt: str = 'LAZ', crs=None) -> None:
@@ -258,13 +283,9 @@ class PointCloudExportJob:
         self.fmt = fmt.upper() if fmt else 'LAZ'
         self.exporter = None
         self.source = None
-        self.stages = None  # pdal tool reader stages, instead of the exporter
+        self.stages = None  # pdal tool pipeline, instead of the exporter
         self.error = ''
         self._temporary = None
-        exporter_class = point_cloud_exporter_class()
-        if exporter_class is None:
-            self.error = exporter_unavailable_message()
-            return
         if self.fmt not in POINT_CLOUD_FORMATS:
             self.error = f'unsupported point cloud format {self.fmt}'
             return
@@ -277,19 +298,20 @@ class PointCloudExportJob:
             return
         stages = None
         if self.fmt in ('LAZ', 'LAS', 'COPC') and not qgis_reads_las():
-            stages, self.error = _pdal_stages(layer, crs)
+            stages, writer, self.error = _pdal_pipeline(layer, self.fmt, crs)
             if stages is None:
+                return
+        else:
+            exporter_class = point_cloud_exporter_class()
+            if exporter_class is None:
+                self.error = exporter_unavailable_message()
                 return
         _check_destination(path, export_sources((layer,)))
         os.makedirs(os.path.dirname(os.path.abspath(path)) or '.', exist_ok=True)
         if stages is not None:
             self._temporary = tempfile.TemporaryDirectory(prefix='.filtermate-export-', dir=os.path.dirname(os.path.abspath(path)))
             self.target = os.path.join(self._temporary.name, 'points' + POINT_CLOUD_FORMATS[self.fmt])
-            if self.fmt == 'COPC':
-                writer = {"type": "writers.copc", "filename": self.target}
-            else:  # 'true' = LASzip or LazPerf, whichever this PDAL has
-                writer = {"type": "writers.las", "filename": self.target, "compression": 'true' if self.fmt == 'LAZ' else 'false'}
-            writer.update({"forward": "all", "extra_dims": "all"})
+            writer["filename"] = self.target
             self.stages = stages + [writer]
             return
         self.source = private_point_cloud(layer)
@@ -383,7 +405,8 @@ class PointCloudExportJob:
     def _run_pdal(self, feedback=None) -> ExportResult:
         from . import pdal_cli
         canceled = feedback.isCanceled if feedback is not None else None
-        ok, message = pdal_cli.run_pipeline(self.stages, is_canceled=canceled)
+        # No time limit: a large cloud takes what it takes, the task stays cancelable.
+        ok, message = pdal_cli.run_pipeline(self.stages, timeout=math.inf, is_canceled=canceled)
         if canceled is not None and canceled():
             _remove(self.target)
             return ExportResult(False, self.path, 'canceled')
