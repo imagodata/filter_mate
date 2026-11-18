@@ -11601,9 +11601,19 @@ O onnxruntime vem do PyPI com o pip, o modelo de huggingface.co/{1}, cada arquiv
         <translation>Cabeçalhos</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Rows</source>
+        <translation>Linhas</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Como o painel lista as suas secções</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
+        <source>How the rows of FILTERING and EXPORTING use the height</source>
+        <translation>Como as linhas de FILTERING e EXPORTING ocupam a altura</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -11624,6 +11634,26 @@ O onnxruntime vem do PyPI com o pip, o modelo de huggingface.co/{1}, cada arquiv
         <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
         <source>The name of each section on its own line.</source>
         <translation>O nome de cada secção na sua própria linha.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>Packed at the top</source>
+        <translation>Agrupadas no topo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>The default: each row at its own height, the room left under them.</source>
+        <translation>Predefinição: cada linha com a sua altura, o espaço restante por baixo.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>Spread over the height</source>
+        <translation>Distribuídas pela altura</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>The rows share the whole height of the section.</source>
+        <translation>As linhas partilham toda a altura da secção.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>

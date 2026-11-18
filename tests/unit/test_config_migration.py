@@ -763,3 +763,29 @@ class TestAgentOnByDefault:
         config_helpers._migrate_config(user, default)
         assert user["APP"]["OPTIONS"]["AGENT"]["enabled"]["value"] is True
 
+
+class TestSectionHeight:
+    """APP.DOCKWIDGET.SECTION_HEIGHT (the rows of FILTERING / EXPORTING packed at the top or spread): a
+    configuration written before the setting gets it with the default, a choice already made is kept."""
+
+    @staticmethod
+    def _default():
+        return json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+
+    def test_the_defaults_fit(self):
+        node = self._default()["APP"]["DOCKWIDGET"]["SECTION_HEIGHT"]
+        assert node["value"] == "fit" and node["choices"] == ["fit", "fill"]
+
+    def test_a_configuration_without_it_gets_fit(self, config_helpers):
+        default = self._default()
+        user = {"APP": {"DOCKWIDGET": {"SECTION_HEADERS": {"value": "stacked", "choices": ["rail", "stacked"]}}}}
+        assert config_helpers._migrate_config(user, default)
+        dockwidget = user["APP"]["DOCKWIDGET"]
+        assert dockwidget["SECTION_HEIGHT"]["value"] == "fit" and dockwidget["SECTION_HEADERS"]["value"] == "stacked"
+
+    def test_fill_is_kept(self, config_helpers):
+        default = self._default()
+        user = {"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fill", "description": "old"}}}}
+        config_helpers._migrate_config(user, default)
+        node = user["APP"]["DOCKWIDGET"]["SECTION_HEIGHT"]
+        assert node["value"] == "fill" and node["choices"] == ["fit", "fill"] and node["description"] != "old"

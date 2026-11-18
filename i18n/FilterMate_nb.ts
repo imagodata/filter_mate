@@ -11601,9 +11601,19 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
         <translation>Overskrifter</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Rows</source>
+        <translation>Rader</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Hvordan panelet viser seksjonene sine</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
+        <source>How the rows of FILTERING and EXPORTING use the height</source>
+        <translation>Hvordan radene i FILTERING og EXPORTING bruker høyden</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -11624,6 +11634,26 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
         <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
         <source>The name of each section on its own line.</source>
         <translation>Navnet på hver seksjon på sin egen linje.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>Packed at the top</source>
+        <translation>Samlet øverst</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>The default: each row at its own height, the room left under them.</source>
+        <translation>Standard: hver rad i sin egen høyde, den ledige plassen under dem.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>Spread over the height</source>
+        <translation>Fordelt over høyden</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>The rows share the whole height of the section.</source>
+        <translation>Radene deler hele seksjonens høyde.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>

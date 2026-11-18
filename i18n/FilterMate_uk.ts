@@ -11601,9 +11601,19 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <translation>Заголовки</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Rows</source>
+        <translation>Рядки</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Як панель перелічує свої розділи</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
+        <source>How the rows of FILTERING and EXPORTING use the height</source>
+        <translation>Як рядки FILTERING і EXPORTING використовують висоту</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -11624,6 +11634,26 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
         <source>The name of each section on its own line.</source>
         <translation>Назва кожного розділу в окремому рядку.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>Packed at the top</source>
+        <translation>Зібрані вгорі</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>The default: each row at its own height, the room left under them.</source>
+        <translation>Типово: кожен рядок своєї висоти, вільне місце під ними.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>Spread over the height</source>
+        <translation>Розподілені по висоті</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>The rows share the whole height of the section.</source>
+        <translation>Рядки ділять усю висоту розділу.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>

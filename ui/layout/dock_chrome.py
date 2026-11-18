@@ -1049,8 +1049,9 @@ def section_enabled(config_data: Any, key: str) -> bool:
 
 def apply_section_options(dock: Any) -> list:
     """Show or hide FILTERING and EXPORTING as the configuration says, and list the sections by rails or by headers
-    stacked (``APP.DOCKWIDGET.SECTION_HEADERS``); the keys of the sections whose state changed, ``headers`` when
-    the way they are listed did."""
+    stacked (``APP.DOCKWIDGET.SECTION_HEADERS``), and lay out the rows of FILTERING and EXPORTING
+    (``APP.DOCKWIDGET.SECTION_HEIGHT``); the keys of the sections whose state changed, ``headers`` when the way they
+    are listed did, ``height`` when the rows were laid out another way."""
     sections = getattr(dock, "_fm_sections", None)
     if sections is None:
         return []
@@ -1073,6 +1074,13 @@ def apply_section_options(dock: Any) -> list:
             manager = getattr(dock, "_action_bar_manager", None)
             if manager is not None:
                 manager.sync_sections()
+    except RuntimeError:  # the dock went away
+        pass
+    try:  # the rows of FILTERING and EXPORTING one gap apart, or spread (APP.DOCKWIDGET.SECTION_HEIGHT)
+        from .mockup_layout import lay_out_rows, section_height
+        mode = section_height(config_data)
+        if dock.property("fm_section_height") != mode and lay_out_rows(dock, mode):
+            changed.append("height")
     except RuntimeError:  # the dock went away
         pass
     return changed

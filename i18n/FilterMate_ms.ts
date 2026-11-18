@@ -11601,9 +11601,19 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <translation>Pengepala</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Rows</source>
+        <translation>Baris</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Cara panel menyenaraikan bahagiannya</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
+        <source>How the rows of FILTERING and EXPORTING use the height</source>
+        <translation>Cara baris FILTERING dan EXPORTING menggunakan ketinggian</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -11624,6 +11634,26 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <location filename="../../ui/controllers/setup_wizard.py" line="109"/>
         <source>The name of each section on its own line.</source>
         <translation>Nama setiap bahagian pada barisnya sendiri.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>Packed at the top</source>
+        <translation>Rapat di atas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
+        <source>The default: each row at its own height, the room left under them.</source>
+        <translation>Lalai: setiap baris pada ketinggiannya sendiri, ruang yang tinggal di bawahnya.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>Spread over the height</source>
+        <translation>Tersebar pada ketinggian</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="118"/>
+        <source>The rows share the whole height of the section.</source>
+        <translation>Baris-baris berkongsi seluruh ketinggian bahagian.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="96"/>

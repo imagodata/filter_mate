@@ -38,7 +38,7 @@ LANGUAGE_NAMES = {"en": "English", "fr": "Français", "de": "Deutsch", "es": "Es
 def _headers() -> Dict[str, str]:
     return {"sections": _tr("Sections"), "data": _tr("Data"), "size": _tr("Size"), "theme": _tr("Theme"),
             "profile": _tr("Panel"), "language": _tr("Language"), "panels": _tr("Layout"),
-            "headers": _tr("Headers"),
+            "headers": _tr("Headers"), "height": _tr("Rows"),
             "action_bar": _tr("Buttons"),
             "after": _tr("Filtering"), "targets": _tr("Targets"), "groups": _tr("Groups"),
             "raster_format": _tr("Rasters"), "point_cloud_format": _tr("Clouds")}
@@ -54,6 +54,7 @@ def _questions() -> Dict[str, str]:
         "language": _tr("Language of the panel"),
         "panels": _tr("Where the sections go"),
         "headers": _tr("How the panel lists its sections"),
+        "height": _tr("How the rows of FILTERING and EXPORTING use the height"),
         "action_bar": _tr("Where the action buttons go (Filter, Export...)"),
         "after": _tr("When you filter"),
         "targets": _tr("A vector layer also filters these layers (cut to its features)"),
@@ -111,6 +112,11 @@ def _labels(facts: wizard.ProjectFacts, stacked: bool = False) -> Dict[str, Dict
             "rail": (_tr("A rail of chips"), _tr("The default: one row per stack, where a click on a chip opens "
                                                  "its section and a chip is dragged to another place.")),
             "stacked": (_tr("Headers, one above the other"), _tr("The name of each section on its own line.")),
+        },
+        "height": {
+            "fit": (_tr("Packed at the top"), _tr("The default: each row at its own height, the room left under "
+                                                  "them.")),
+            "fill": (_tr("Spread over the height"), _tr("The rows share the whole height of the section.")),
         },
         "action_bar": {"bottom": (_tr("Bottom"), ""), "top": (_tr("Top"), ""), "left": (_tr("Left"), ""),
                        "right": (_tr("Right"), ""),
