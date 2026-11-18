@@ -132,22 +132,24 @@ def trim_results(messages: Sequence[Message], keep: int = 2) -> Tuple[List[Messa
     if len(starts) <= keep:
         return messages, 0
     limit = starts[-keep]
-    names = {part.call_id: part.name for message in messages for part in message.parts
-             if isinstance(part, ToolCallPart)}
     count = 0
     for index in range(limit):
         message = messages[index]
         if message.role != ROLE_USER or not any(isinstance(part, ToolResultPart) for part in message.parts):
             continue
+        # By position, like the answers of the engine: Ollama numbers its calls call_0, call_1... in every turn, so
+        # an id alone names the last turn that used it, not this one.
+        calls = messages[index - 1].tool_calls if index and messages[index - 1].role == ROLE_ASSISTANT else ()
         parts = []
+        rank = 0
         for part in message.parts:
-            if (isinstance(part, ToolResultPart) and len(part.content) > MIN_TRIMMED
-                    and not part.content.startswith(_TRIMMED_START)):
-                parts.append(ToolResultPart(part.call_id, TRIMMED.format(len(part.content),
-                                                                         names.get(part.call_id, "the tool")),
-                                            part.is_error))
-                count += 1
-            else:
-                parts.append(part)
+            if isinstance(part, ToolResultPart):
+                name = calls[rank].name if rank < len(calls) else next(
+                    (call.name for call in calls if call.call_id == part.call_id), "the tool")
+                rank += 1
+                if len(part.content) > MIN_TRIMMED and not part.content.startswith(_TRIMMED_START):
+                    part = ToolResultPart(part.call_id, TRIMMED.format(len(part.content), name), part.is_error)
+                    count += 1
+            parts.append(part)
         messages[index] = Message(message.role, tuple(parts))
     return messages, count

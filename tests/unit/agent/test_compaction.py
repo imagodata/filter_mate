@@ -118,6 +118,21 @@ def test_a_trimmed_result_names_its_tool():
     assert "call apply_filter again" in _results(trimmed)[0].content
 
 
+def test_ollama_ids_that_restart_each_turn_still_name_the_right_tool():
+    """Audit 2026-11-18: Ollama calls are call_0, call_1... in every turn; an id table kept the last turn's name."""
+    def turn(*names):
+        return [Message(ROLE_ASSISTANT, tuple(ToolCallPart(f"call_{rank}", name, {}) for rank, name in enumerate(names))),
+                Message(ROLE_USER, tuple(ToolResultPart(f"call_{rank}", "v" * 1000) for rank in range(len(names))))]
+    messages = [Message(ROLE_USER, (TextPart("one"),))] + turn("field_values", "layer_statistics") + [
+        Message(ROLE_ASSISTANT, (TextPart("ok"),)), Message(ROLE_USER, (TextPart("two"),))] + turn("map_context") + [
+        Message(ROLE_ASSISTANT, (TextPart("ok"),)), Message(ROLE_USER, (TextPart("three"),)),
+        Message(ROLE_ASSISTANT, (TextPart("ok"),)), Message(ROLE_USER, (TextPart("four"),)),
+        Message(ROLE_ASSISTANT, (TextPart("ok"),))]
+    contents = [part.content for part in _results(trim_results(messages)[0])]
+    assert [content.split("call ")[1].split(" again")[0] for content in contents] == [
+        "field_values", "layer_statistics", "map_context"]
+
+
 def test_a_result_trimmed_once_is_left_as_it_is_and_small_ones_stay():
     once, _ = trim_results(conversation(4, size=3000))
     again, count = trim_results(once)
