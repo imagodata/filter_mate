@@ -10,6 +10,7 @@ All notable changes to FilterMate will be documented in this file.
 - Tools: `scripts/tally_forms.py` creates the Tally forms in English and French: usage (with a rating and a review), review, training and services, feature suggestion, testers, and the Cloud waitlist.
 - Site: a feedback page (`feedback.html`, `feedback.fr.html`) with the usage, review, feature, testers and services forms, linked from every footer, the Cloud page, the README and the GitHub issue chooser; the generator of the translated home pages works again since the Cloud link (#511).
 - Point clouds: a QGIS built without PDAL (the qgis/qgis Docker images, some Linux packages) exports LAZ, LAS and COPC through the `pdal` tool when it is installed. It already clipped the cloud with that tool, then refused to export the clip, and the ZIP of a raster and point cloud export held the raster alone. A cloud with a filter expression is still refused, the tool cannot apply it.
+- Filter: a GeoPackage accepted a filter its SQL could not run (a geometric function it does not have, such as `bounds_width` or `num_points`, on a layer already filtered, under AND NOT, or past a million features): the layer then showed no feature and the filter was said to be applied. Such a filter is now refused, the previous one stays, and the message says what the source lacks.
 
 ## [5.1.1] - 2026-11-17
 
