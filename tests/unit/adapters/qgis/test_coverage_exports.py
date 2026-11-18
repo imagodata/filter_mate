@@ -160,11 +160,17 @@ class FakeIndex:
 
 
 class FakeCloud:
-    def __init__(self, provider='copc', indexed=True):
-        self._provider, self._indexed = provider, indexed
+    def __init__(self, provider='copc', indexed=True, subset=''):
+        self._provider, self._indexed, self._subset = provider, indexed, subset
 
     def name(self):
         return 'cloud'
+
+    def source(self):
+        return '/data/cloud.copc.laz'
+
+    def subsetString(self):
+        return self._subset
 
     def providerType(self):
         return self._provider
@@ -273,9 +279,70 @@ class TestPointCloudExport:
         """2026-10-18: the exporter of a QGIS built without PDAL wrote no LAS and said nothing:
         "No such file or directory: cloud.partial.laz"."""
         monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: False)
+        monkeypatch.setattr(fk.load('pdal_cli'), 'copc_unavailable_reason', lambda: 'pdal not found')
         result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / name), fmt).run()
         assert result.success is not refused
         assert ('built without PDAL' in result.message) is refused
+
+
+class TestPointCloudExportByPdalTool:
+    """2026-11-18: QGIS without its pdal provider (the qgis/qgis Docker images) clipped the cloud with
+    the pdal tool, then refused to export the clip: the survey video zipped the DTM without the LAZ."""
+
+    @pytest.fixture
+    def pdal_tool(self, cloud_export, monkeypatch):
+        pdal = fk.load('pdal_cli')
+        monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: False)
+        monkeypatch.setattr(pdal, 'copc_unavailable_reason', lambda: '')
+        runs = []
+
+        def run_pipeline(stages, timeout=3600.0, is_canceled=None):
+            runs.append(stages)
+            with open(stages[-1]['filename'], 'wb') as stream:
+                stream.write(b'LASF')
+            return True, ''
+
+        monkeypatch.setattr(pdal, 'run_pipeline', run_pipeline)
+        return runs
+
+    @pytest.mark.parametrize("fmt, name, writer", [
+        ('LAZ', 'cloud.laz', {'type': 'writers.las', 'compression': 'true'}),
+        ('LAS', 'cloud.las', {'type': 'writers.las', 'compression': 'false'}),
+        ('COPC', 'cloud.copc.laz', {'type': 'writers.copc'}),
+    ])
+    def test_the_pdal_tool_writes_the_las_qgis_cannot(self, pdal_tool, tmp_path, fmt, name, writer):
+        result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / name), fmt).run()
+        assert result.success, result.message
+        assert os.listdir(tmp_path) == [name]
+        [stages] = pdal_tool
+        assert stages[0] == {'type': 'readers.copc', 'filename': '/data/cloud.copc.laz'}
+        assert {key: stages[-1][key] for key in writer} == writer
+        assert stages[-1]['forward'] == 'all' and stages[-1]['extra_dims'] == 'all'
+        assert not FakeExporter.made
+
+    def test_a_filter_expression_is_still_refused(self, pdal_tool, tmp_path):
+        """The pdal tool cannot apply a QGIS filter expression: all the points would be written."""
+        result = exporters.PointCloudExportJob(FakeCloud(subset='"Classification" = 6'), str(tmp_path / 'cloud.laz')).run()
+        assert not result.success and 'built without PDAL' in result.message and 'filter expression' in result.message
+        assert pdal_tool == [] and os.listdir(tmp_path) == []
+
+    def test_a_failed_pipeline_leaves_nothing(self, pdal_tool, tmp_path, monkeypatch):
+        def failed(stages, timeout=3600.0, is_canceled=None):
+            with open(stages[-1]['filename'], 'wb') as stream:
+                stream.write(b'LA')
+            return False, 'writers.las: disk full'
+
+        monkeypatch.setattr(fk.load('pdal_cli'), 'run_pipeline', failed)
+        result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / 'cloud.laz')).run()
+        assert not result.success and result.message == 'pdal: writers.las: disk full'
+        assert os.listdir(tmp_path) == []
+
+    def test_a_canceled_export_leaves_nothing(self, pdal_tool, tmp_path):
+        feedback = fk.FakeFeedback()
+        feedback.cancel()
+        result = exporters.export_point_cloud(FakeCloud(), str(tmp_path / 'cloud.laz'), feedback=feedback)
+        assert not result.success and result.message == 'canceled'
+        assert os.listdir(tmp_path) == []
 
 
 class TestPointCloudExporterMissing:

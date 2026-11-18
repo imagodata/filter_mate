@@ -8,7 +8,9 @@ Export raster and point cloud layers as they are currently filtered.
   NoData. Optional reprojection with ``gdal.Warp``.
 * Point cloud: ``QgsPointCloudLayerExporter`` honors the subset string; the
   derived file of a clipped layer already holds the clipped points. LAZ, LAS,
-  GPKG (points) and CSV; COPC through ``pdal translate`` when available.
+  GPKG (points) and CSV; COPC through ``pdal translate`` when available. A
+  QGIS built without PDAL writes no LAS: the ``pdal`` tool writes LAS / LAZ /
+  COPC of a cloud without a filter expression instead.
 """
 import logging
 import os
@@ -211,12 +213,40 @@ def private_point_cloud(layer):
         return layer
 
 
+NO_LAS_WRITER = 'QGIS is built without PDAL: it cannot write LAS / LAZ files, export as GeoPackage or CSV'
+
+
+def _pdal_stages(layer, crs):
+    """Reader stages of the ``pdal`` tool for a LAS / LAZ / COPC export by a QGIS built without PDAL.
+
+    Such a QGIS still clips a cloud with the pdal tool (a derived COPC, read
+    by its copc provider), then refused to export it (2026-11-18). The tool
+    cannot apply a QGIS filter expression: a cloud with a subset string is
+    still refused. Returns ``(stages, error)``, stages None when refused.
+    """
+    from . import pdal_cli
+    if (layer.subsetString() or '').strip():
+        return None, NO_LAS_WRITER + ' (the pdal tool cannot apply the filter expression of the layer)'
+    reason = pdal_cli.copc_unavailable_reason()
+    if reason:
+        return None, f'{NO_LAS_WRITER} ({reason}: the pdal tool 2.4 or later writes them)'
+    try:
+        stages = pdal_cli.read_stages(layer.source())
+    except ValueError as exc:
+        return None, f'{NO_LAS_WRITER} ({exc})'
+    if crs is not None and crs.isValid() and crs != layer.crs():
+        stages.append({"type": "filters.reprojection", "out_srs": pdal_cli.srs_for(crs)})
+    return stages, ''
+
+
 class PointCloudExportJob:
     """Write the points of a point cloud layer that pass its current filter.
 
     ``QgsPointCloudLayerExporter.prepareExport`` must run on the main thread
     (constructor); :meth:`run` may be called from a task thread. The exporter
-    reads a private copy of the layer (:func:`private_point_cloud`).
+    reads a private copy of the layer (:func:`private_point_cloud`). A QGIS
+    built without PDAL has the ``pdal`` tool write LAS / LAZ / COPC instead
+    (:func:`_pdal_stages`).
     """
 
     def __init__(self, layer, path: str, fmt: str = 'LAZ', crs=None) -> None:
@@ -228,6 +258,7 @@ class PointCloudExportJob:
         self.fmt = fmt.upper() if fmt else 'LAZ'
         self.exporter = None
         self.source = None
+        self.stages = None  # pdal tool reader stages, instead of the exporter
         self.error = ''
         self._temporary = None
         exporter_class = point_cloud_exporter_class()
@@ -237,9 +268,6 @@ class PointCloudExportJob:
         if self.fmt not in POINT_CLOUD_FORMATS:
             self.error = f'unsupported point cloud format {self.fmt}'
             return
-        if self.fmt in ('LAZ', 'LAS', 'COPC') and not qgis_reads_las():
-            self.error = 'QGIS is built without PDAL: it cannot write LAS / LAZ files, export as GeoPackage or CSV'
-            return
         # The exporter reads the layer index without checking it (crash on a null one).
         if layer.providerType() == 'vpc':
             self.error = 'a virtual point cloud (VPC) cannot be exported: export its tiles'
@@ -247,8 +275,23 @@ class PointCloudExportJob:
         if not index_ready(layer):
             self.error = 'the point cloud has no index yet (LAS file being indexed): try again later'
             return
+        stages = None
+        if self.fmt in ('LAZ', 'LAS', 'COPC') and not qgis_reads_las():
+            stages, self.error = _pdal_stages(layer, crs)
+            if stages is None:
+                return
         _check_destination(path, export_sources((layer,)))
         os.makedirs(os.path.dirname(os.path.abspath(path)) or '.', exist_ok=True)
+        if stages is not None:
+            self._temporary = tempfile.TemporaryDirectory(prefix='.filtermate-export-', dir=os.path.dirname(os.path.abspath(path)))
+            self.target = os.path.join(self._temporary.name, 'points' + POINT_CLOUD_FORMATS[self.fmt])
+            if self.fmt == 'COPC':
+                writer = {"type": "writers.copc", "filename": self.target}
+            else:  # 'true' = LASzip or LazPerf, whichever this PDAL has
+                writer = {"type": "writers.las", "filename": self.target, "compression": 'true' if self.fmt == 'LAZ' else 'false'}
+            writer.update({"forward": "all", "extra_dims": "all"})
+            self.stages = stages + [writer]
+            return
         self.source = private_point_cloud(layer)
         exporter = exporter_class(self.source)
         exporter.setAllAttributes()
@@ -301,6 +344,8 @@ class PointCloudExportJob:
 
     def _run(self, feedback=None) -> ExportResult:
         path = self.path
+        if self.stages is not None:
+            return self._run_pdal(feedback)
         if self.exporter is None:
             return ExportResult(False, path, self.error or 'exporter unavailable')
         if self.fmt == 'COPC':
@@ -334,6 +379,18 @@ class PointCloudExportJob:
                 return ExportResult(False, path, 'canceled' if feedback is not None and feedback.isCanceled() else message)
             return _rename(copc, path)
         return _rename(self.target, path)
+
+    def _run_pdal(self, feedback=None) -> ExportResult:
+        from . import pdal_cli
+        canceled = feedback.isCanceled if feedback is not None else None
+        ok, message = pdal_cli.run_pipeline(self.stages, is_canceled=canceled)
+        if canceled is not None and canceled():
+            _remove(self.target)
+            return ExportResult(False, self.path, 'canceled')
+        if not ok:
+            _remove(self.target)
+            return ExportResult(False, self.path, f'pdal: {message}')
+        return _rename(self.target, self.path)
 
 
 def _rename(written: str, path: str) -> ExportResult:
