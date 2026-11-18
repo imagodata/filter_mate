@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent, OpenStreetMap: a closed way that OpenStreetMap draws as an area for some values of its key only (`power=substation` or `plant`, `man_made=wastewater_plant`, `railway=platform` or `station`, `waterway=dam` or `riverbank`, `highway=services`, `barrier=hedge` or `wall`) came out as a ring line, and asking for `polygons` answered that nothing was there. It is now an area by the table of OpenStreetMap, value by value (a closed `highway=residential` stays a loop of street, `area=no` and `area=yes` win).
 - Metadata: a shorter description; the about opens on what people search (several layers filtered at once, definition queries); tags chosen for the plugin list search; a short changelog; category Vector (Plugins is not a value plugins.qgis.org knows); a stray line that read as a key removed.
 - Feedback: four entries in Vector > FilterMate (give your opinion, suggest a feature, test the experimental features, training and services) open the feedback page of the site; after 20 successful filters, one message offers the short review form, once ever. The plugin sends nothing itself.
 - Site: a FilterMate Cloud page with the tiers to test and a waitlist; cookie-free audience measure.

@@ -113,6 +113,24 @@ def odd_document():
             + nodes + ways + relations + "</osm>\n").encode("utf-8")
 
 
+def closed_ways_document():
+    """Closed ways of which OpenStreetMap makes areas for some values of a key only: a substation, a platform, a
+    wastewater plant, a hedge (areas), a loop of street, a closed river, a power line, a substation with area=no, a
+    fence (lines)."""
+    cases = [("power", "substation", ""), ("railway", "platform", ""), ("man_made", "wastewater_plant", ""),
+             ("barrier", "hedge", ""), ("highway", "residential", ""), ("waterway", "river", ""),
+             ("power", "line", ""), ("power", "substation", '<tag k="area" v="no"/>'), ("barrier", "fence", ""),
+             ("highway", "residential", '<tag k="area" v="yes"/>')]
+    nodes, ways = "", ""
+    for index, (key, value, more) in enumerate(cases):
+        first = 1000 + index * 10
+        made, ring = square(first, 4.80 + index * 0.002, 45.75)
+        nodes += made
+        ways += f'  <way id="{300 + index}">{ring}<tag k="{key}" v="{value}"/>{more}</way>\n'
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n<osm version="0.6" generator="check_agent_osm">\n'
+            + nodes + ways + "</osm>\n").encode("utf-8")
+
+
 def serve_overpass(state):
     """An Overpass server on this machine. ``state``: ``status`` (what it answers), ``body`` (its document),
     ``delay`` (seconds before it answers); what was asked is kept in ``state["asked"]``."""
@@ -297,6 +315,29 @@ def check_features(project, work):
             check(f"features: shapes that are none do not make a whole answer refused ({kind})",
                   not said and "9" in names and made["feature_count"] == len(names), (said, names))
             project.removeMapLayers([row["layer_id"] for row in made["layers"]])
+        # A closed way is an area by the rules of OpenStreetMap, key by key: GDAL reads a whole key or nothing.
+        state["body"] = closed_ways_document()
+        wanted = [{"key": key} for key in ("power", "railway", "man_made", "barrier", "highway", "waterway")]
+        made = ask(tags=wanted)
+        shapes = {}
+        for row in made["layers"]:
+            for feature in project.mapLayer(row["layer_id"]).getFeatures():
+                shapes[feature["osm_id"]] = row["geometry"]
+        check("closed ways: an area for some values of its key is an area (substation, platform, wastewater plant, "
+              "hedge, a street with area=yes)", all(shapes.get(str(way)) == "polygons" for way in (300, 301, 302, 303, 309)), shapes)
+        check("closed ways: a loop of street, a closed river, a power line, a fence and area=no stay lines",
+              all(shapes.get(str(way)) == "lines" for way in (304, 305, 306, 307, 308)), shapes)
+        project.removeMapLayers([row["layer_id"] for row in made["layers"]])
+        made = ask(tags=[{"key": "power", "value": "substation"}], geometry="polygons")
+        check("closed ways: polygons of power=substation are found, not 'no feature' (area=no is left out)",
+              made["feature_count"] == 1 and made["layers"][0]["geometry"] == "polygons", made)
+        project.removeMapLayers([row["layer_id"] for row in made["layers"]])
+        made = ask(tags=[{"key": "highway", "value": "residential"}], geometry="polygons")
+        only = [feature["osm_id"] for feature in project.mapLayer(made["layers"][0]["layer_id"]).getFeatures()]
+        check("closed ways: a closed highway=residential is no area, except with area=yes",
+              made["feature_count"] == 1 and only == ["309"], (made, only))
+        project.removeMapLayers([row["layer_id"] for row in made["layers"]])
+        project.removeMapLayers([layer.id() for layer in project.mapLayers().values() if layer.id() != data.id()])
         state["body"] = osm_document()
 
         count, files = len(project.mapLayers()), kept()

@@ -26,12 +26,31 @@ _KEY = re.compile(r"[A-Za-z][A-Za-z0-9_:.-]{0,59}")
 # A value goes between double quotes in the query: no quote, no backslash, nothing that does not print.
 _VALUE = re.compile(r"[^\"\\\x00-\x1f\x7f]{1,80}")
 # A closed way is an area when it carries one of these keys (the list of GDAL), a line otherwise. The keys asked are
-# added, but those of what is drawn as a line even when it closes (a roundabout, a fence, a ring road).
+# added, but those of what is drawn as a line even when it closes (a roundabout, a fence, a ring road): for these the
+# rules of OpenStreetMap decide, tag by tag, in ``closed_way_is_area``.
 _AREA_KEYS = ("aeroway", "amenity", "boundary", "building", "craft", "geological", "historic", "landuse", "leisure",
               "military", "natural", "office", "place", "shop", "sport", "tourism", "highway=platform",
               "public_transport=platform")
 _LINE_KEYS = frozenset({"highway", "waterway", "railway", "barrier", "aerialway", "route", "power", "man_made",
                         "name", "ref", "bridge", "tunnel", "oneway", "surface", "maxspeed", "lanes"})
+# "A closed way is an area": the table of the wiki (Key:area) and of osmtogeojson (polygon-features), by key. Every
+# value makes an area; or only the values of a list (a closed highway=residential is a loop of street, a
+# highway=services a car park); or every value but those of a list (a closed natural=cliff is a line).
+_AREA_ANY = frozenset({"building", "landuse", "amenity", "leisure", "area", "boundary", "place", "shop", "tourism",
+                       "historic", "public_transport", "office", "building:part", "military", "ruins", "area:highway",
+                       "craft", "golf", "indoor"})
+_AREA_ONLY = {
+    "highway": frozenset({"services", "rest_area", "escape", "elevator"}),
+    "waterway": frozenset({"riverbank", "dock", "boatyard", "dam"}),
+    "barrier": frozenset({"city_wall", "ditch", "hedge", "retaining_wall", "wall", "spikes"}),
+    "railway": frozenset({"station", "turntable", "roundhouse", "platform"}),
+    "power": frozenset({"plant", "substation", "generator", "transformer"}),
+}
+_AREA_BUT = {
+    "natural": frozenset({"coastline", "cliff", "ridge", "arete", "tree_row"}),
+    "man_made": frozenset({"cutline", "embankment", "pipeline"}),
+    "aeroway": frozenset({"taxiway"}),
+}
 # The columns every layer made has, which a key asked cannot be.
 OWN_COLUMNS = ("osm_id", "osm_type", "other_tags")
 # Names a column of a key cannot take, whatever their case: a GeoPackage tells no column from another by its
@@ -119,6 +138,45 @@ def read_tags(tags: object) -> List[Tag]:
     return read
 
 
+def closed_way_is_area(tags: Mapping[str, str]) -> bool:
+    """Whether a closed way with these tags (all of them, by key) is an area, by the rules OpenStreetMap writes.
+
+    ``area=no`` makes a line of it whatever else it carries, and ``area=yes`` an area; otherwise one tag of the table
+    (``_AREA_ANY``, ``_AREA_ONLY``, ``_AREA_BUT``) is enough, and a value of ``no`` (``building=no``) counts for
+    nothing. GDAL reads the whole key or nothing, so a way whose key is only an area for some values (``power``,
+    ``railway``, ``man_made``) is left a line by it, and is turned into an area from this.
+    """
+    if tags.get("area") == "no":
+        return False
+    for key, value in tags.items():
+        if value in (None, "", "no"):
+            continue
+        if key in _AREA_ANY:
+            return True
+        if key in _AREA_ONLY and value in _AREA_ONLY[key]:
+            return True
+        if key in _AREA_BUT and value not in _AREA_BUT[key]:
+            return True
+    return False
+
+
+_HSTORE = re.compile(r'"((?:[^"\\]|\\.)*)"\s*=>\s*"((?:[^"\\]|\\.)*)"')
+_UNESCAPE = re.compile(r"\\(.)")
+
+
+def way_tags(values: Mapping[str, Optional[str]], asked: Sequence[Tag]) -> Dict[str, str]:
+    """Every tag of a feature read, by key: the columns of the keys asked, and the ``other_tags`` GDAL keeps the rest
+    in (``"power"=>"substation","area"=>"no"``)."""
+    found: Dict[str, str] = {}
+    for key, value in _HSTORE.findall(values.get("other_tags") or ""):
+        found[_UNESCAPE.sub(r"\1", key)] = _UNESCAPE.sub(r"\1", value)
+    for tag in asked:
+        value = values.get(tag.column)
+        if value not in (None, ""):
+            found[tag.key] = value
+    return found
+
+
 def area_km2(bbox: Sequence[float]) -> float:
     """The surface of ``[west, south, east, north]`` in square kilometres, on the ground at its middle latitude."""
     west, south, east, north = bbox
@@ -155,10 +213,16 @@ def gdal_config(tags: Sequence[Tag]) -> str:
     """The configuration of the OSM driver of GDAL for these tags: each key asked is a column of every layer, the
     other tags stay together in ``other_tags``.
 
+    GDAL (3.4 as 3.12) turns a closed way into an area from a whole key; a key that is an area for some values only
+    (``power=substation``, not ``power=line``) is left to ``closed_way_is_area``, read from the tags of the feature.
+
     Written without a ``[general]`` section, which GDAL 3.4 does not know and GDAL 3.12 does not need.
     """
     keys = list(dict.fromkeys(["name"] + [tag.key for tag in tags]))
-    areas = list(_AREA_KEYS) + [tag.key for tag in tags if tag.key not in _LINE_KEYS and tag.key not in _AREA_KEYS]
+    # A key asked that the table knows is decided by ``closed_way_is_area`` (a value at a time); one it does not know
+    # (healthcare) is an area as a whole, as the keys of GDAL are.
+    known_keys = _LINE_KEYS | _AREA_ANY | frozenset(_AREA_ONLY) | frozenset(_AREA_BUT) | frozenset(_AREA_KEYS)
+    areas = list(_AREA_KEYS) + [tag.key for tag in tags if tag.key not in known_keys]
     text = [f"closed_ways_are_polygons={','.join(dict.fromkeys(areas))}", "attribute_name_laundering=yes"]
     for layer in _GDAL_LAYERS:
         text += [f"[{layer}]", "osm_id=yes"]

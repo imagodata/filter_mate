@@ -6,9 +6,8 @@ import pytest
 from core.agent.open_data import KIND_OVERPASS, KINDS, NO_DATA_KINDS, NO_FILE_KINDS, parse_extra_domains, resolve_platform
 from core.agent.osm import (
     DEFAULT_SERVER, GEOMETRIES, MAX_AREA_KM2, MAX_BYTES, MAX_TAGS, SERVERS, Tag, area_km2, area_problem, columns,
-    cut_problem, default_name,
-    gdal_config, layer_title, matches, overpass_query, read_tags, remark_problem, status_problem, status_refusal,
-    summary,
+    closed_way_is_area, cut_problem, default_name, gdal_config, layer_title, matches, overpass_query, read_tags,
+    remark_problem, status_problem, status_refusal, summary, way_tags,
 )
 from core.agent.sources import BUILT_IN, describe_enabled, make_source, model_name, platform_aliases, platform_domains
 
@@ -174,3 +173,56 @@ def test_names_of_the_layers_made():
     assert layer_title("Hôpitaux", "points", several=False) == "Hôpitaux"
     assert summary({"points": 3, "lines": 0, "polygons": 29}) == {"points": 3, "polygons": 29}
     assert GEOMETRIES[0] == "as_mapped"
+
+
+@pytest.mark.parametrize("tags", [
+    {"power": "substation"}, {"power": "plant"}, {"power": "generator"}, {"man_made": "wastewater_plant"},
+    {"man_made": "tower"}, {"railway": "platform"}, {"railway": "station"}, {"waterway": "dam"},
+    {"waterway": "riverbank"}, {"waterway": "dock"}, {"highway": "services"}, {"highway": "rest_area"},
+    {"barrier": "hedge"}, {"barrier": "wall"}, {"natural": "wood"}, {"building": "yes"}, {"landuse": "forest"},
+    {"public_transport": "station"}, {"highway": "residential", "area": "yes"},
+    {"healthcare": "hospital", "amenity": "hospital"},
+])
+def test_a_closed_way_that_osm_draws_as_an_area_is_one(tags):
+    """The regression of 2026-11-18: these came out as rings, and ``polygons`` answered "no feature"."""
+    assert closed_way_is_area(tags)
+
+
+@pytest.mark.parametrize("tags", [
+    {"highway": "residential"}, {"highway": "primary"}, {"railway": "rail"}, {"waterway": "river"},
+    {"barrier": "fence"}, {"power": "line"}, {"power": "minor_line"}, {"man_made": "pipeline"},
+    {"man_made": "embankment"}, {"natural": "cliff"}, {"natural": "coastline"}, {"aeroway": "taxiway"},
+    {"route": "bus"}, {"name": "Place Bellecour"}, {}, {"building": "no"},
+    # area=no wins over everything: a fenced yard drawn as a line, a building that is a wall.
+    {"building": "yes", "area": "no"}, {"power": "substation", "area": "no"}, {"leisure": "pitch", "area": "no"},
+])
+def test_a_closed_way_that_osm_draws_as_a_line_is_one(tags):
+    """A closed highway=residential is a loop of street, not a surface: asking for the key must not make an area."""
+    assert not closed_way_is_area(tags)
+
+
+def test_one_tag_of_the_table_is_enough_and_the_others_do_not_forbid_it():
+    assert closed_way_is_area({"highway": "residential", "leisure": "park"})
+    assert closed_way_is_area({"power": "line", "landuse": "industrial"})
+    assert closed_way_is_area({"waterway": "river", "natural": "water"})
+    assert not closed_way_is_area({"highway": "residential", "name": "Rue X", "surface": "asphalt"})
+
+
+def test_the_tags_of_a_feature_are_its_columns_and_its_other_tags():
+    asked = read_tags([{"key": "power", "value": "substation"}, {"key": "addr:street"}])
+    values = {"name": "Poste", "power": "substation", "addr_street": "Rue X",
+              "other_tags": '"area"=>"no","note"=>"a \\"quoted\\" word","operator"=>"RTE"'}
+    found = way_tags(values, asked)
+    assert found == {"area": "no", "note": 'a "quoted" word', "operator": "RTE", "power": "substation",
+                     "addr:street": "Rue X"}
+    assert not closed_way_is_area(found)  # area=no, read from other_tags
+    assert way_tags({"power": None, "other_tags": None}, asked) == {}
+
+
+def test_a_key_that_is_an_area_for_some_values_only_is_not_made_one_for_all_by_the_config():
+    config = gdal_config(read_tags([{"key": "power", "value": "substation"}, {"key": "highway", "value": "residential"},
+                                    {"key": "railway"}, {"key": "man_made"}, {"key": "area"}, {"key": "healthcare"}]))
+    areas = config.splitlines()[0].split("=", 1)[1].split(",")
+    for key in ("power", "highway", "railway", "man_made", "waterway", "barrier", "area"):
+        assert key not in areas, key
+    assert "healthcare" in areas and "amenity" in areas
