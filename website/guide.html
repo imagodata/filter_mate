@@ -190,33 +190,58 @@
         It becomes a panel of QGIS, which you drag beside the map, tab with the Layers panel or float on another screen. <em>Take every section out of FilterMate</em> moves them all at once: AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, EXPLORING staying in the FilterMate panel.
         The last section of the FilterMate panel always stays in it.
     </p>
+    <figure class="narrow">
+        <img src="img/guide/panels-chip-menu.png" alt="The menu of the FILTERING chip: Open FILTERING in its own panel, Take every section out of FilterMate" loading="lazy" width="620" height="192">
+        <figcaption>A right-click on the FILTERING chip: open it in its own panel, or take every section out.</figcaption>
+    </figure>
     <p>
         EXPLORING can leave too: its panel goes above FilterMate the first time, so that what it selects stays over FILTERING.
         Once EXPLORING and FILTERING are separated, EXPLORING shows its own list of layers at its top: the current layer is chosen in either of them.
     </p>
+    <figure>
+        <img src="img/guide/panels-beside-map.png" alt="QGIS with FILTERING and EXPORTING in one panel under the Layers panel, left of the map, and EXPLORING alone in the FilterMate panel on the right" loading="lazy" width="1600" height="945">
+        <figcaption>FILTERING and EXPORTING grouped in a panel of QGIS, under the Layers panel, beside the map. EXPLORING, alone in the FilterMate panel, shows its own list of layers.</figcaption>
+    </figure>
     <p>
         A panel holds one section or several, listed in a rail as in FilterMate. Drag the chip of a section onto another panel to group them, onto FilterMate to merge it back, or out of every panel to give it a new one; two panels of FilterMate put together as tabs become one.
         A right-click on a chip, or on the title of a panel, offers the same moves (<em>Group with FILTERING</em>, <em>Merge &hellip; back into FilterMate</em>, as closing the panel does; <em>Merge every section back into FilterMate</em> for all of them).
         QGIS puts each panel back where you left it, and the sections that were apart are apart again, in the same panels, when FilterMate opens.
     </p>
+    <div class="fig-row">
+        <figure class="narrow">
+            <img src="img/guide/panels-grouped.png" alt="The panel FILTERING · EXPORTING: its rail with the two chips, FILTERING open, its buttons at the bottom" loading="lazy" width="620" height="851">
+            <figcaption>A panel that groups two sections: its title names them, its rail lists them, and the buttons of FILTERING come with it.</figcaption>
+        </figure>
+        <figure class="narrow">
+            <img src="img/guide/panels-exploring.png" alt="EXPLORING in its own panel above the FilterMate panel, with a list of layers at its top" loading="lazy" width="620" height="1314">
+            <figcaption>EXPLORING in its own panel, above FilterMate: the list at its top chooses the current layer.</figcaption>
+        </figure>
+    </div>
     <p>
         A section in its own panel takes its buttons with it, and they act whatever the FilterMate panel shows: you filter from the FILTERING panel while EXPLORING alone is open.
         The buttons can also be shown under each section (<em>Under each section</em> in the setup), and FILTERING or EXPORTING can be turned off when you do not use them: the source layer is then chosen at the top of EXPLORING.
         <em>How FilterMate works</em>, on the welcome of AGENT, in its <strong>&#8943;</strong> menu and in <em>Vector &gt; FilterMate</em>, tells all this in the panel, with links that do it.
     </p>
-    <p>
-        The screenshots of this section were taken before the AGENT section and the title bar badges: they show the favorites button beside the layer badge and no AGENT section.
-    </p>
+    <div class="fig-row">
+        <figure>
+            <img src="img/guide/panels-section-buttons.png" alt="FILTERING open with Filter, Undo, Redo, Compare and Unfilter under it; EXPORTING open with Export under it" loading="lazy" width="1252" height="684">
+            <figcaption>Buttons under each section: FILTERING shows its filter buttons, EXPORTING its Export button.</figcaption>
+        </figure>
+        <figure class="narrow">
+            <img src="img/guide/panels-stacked.png" alt="The FilterMate panel with one header per section, AGENT, EXPLORING, FILTERING, EXPORTING and CONFIGURATION, one above the other" loading="lazy" width="620" height="1314">
+            <figcaption>Headers one above the other (<code>SECTION_HEADERS = stacked</code>) in place of the rails.</figcaption>
+        </figure>
+    </div>
 
     <div class="fig-row">
         <figure class="narrow">
-            <img src="img/guide/dock-overview.png" alt="The whole FilterMate panel with the Filtering tab open" loading="lazy" width="620" height="1308">
-            <figcaption>The whole panel with the Filtering tab open.</figcaption>
+            <img src="img/guide/dock-overview.png" alt="The whole FilterMate panel: the AGENT and EXPLORING chips above, the FILTERING, EXPORTING and CONFIGURATION chips below, FILTERING open" loading="lazy" width="620" height="1314">
+            <figcaption>The whole panel as a new install shows it: a rail of chips above each stack, EXPLORING and FILTERING open.</figcaption>
         </figure>
         <div>
             <figure>
-                <img src="img/guide/header-badges.png" alt="Favorites and backend badges in the panel header" loading="lazy" width="614" height="48">
-                <figcaption>Header: the favorites button and the current layer, a vector layer read by the Spatialite backend.</figcaption>
+                <img src="img/guide/header-badges.png" alt="The title bar of the FilterMate panel with the favorites, detach and close badges" loading="lazy" width="620" height="42">
+                <figcaption>Title bar: the favorites badge (&#9733;), detach and close. The source tag of the current layer, here <em>Vector · Spatialite</em>, is on the layer card of EXPLORING.</figcaption>
             </figure>
             <figure>
                 <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Compare, Unfilter, Export and About" loading="lazy" width="357" height="49">
@@ -249,7 +274,7 @@
 
     <h3>Single selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy" width="596" height="449">
+        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy" width="602" height="573">
         <figcaption>Single selection on a road layer: the feature is picked by name, the field below sets which attribute is displayed.</figcaption>
     </figure>
     <p>
@@ -260,7 +285,7 @@
 
     <h3>Multiple selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy" width="596" height="449">
+        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy" width="602" height="573">
         <figcaption>Multiple selection: four roads are checked. The line above the list summarises the selection; the text box filters the list as you type.</figcaption>
     </figure>
     <p>
@@ -270,7 +295,7 @@
 
     <h3>Custom selection (expression)</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy" width="596" height="449">
+        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy" width="602" height="573">
         <figcaption>Custom selection: any QGIS expression, here roads whose importance is 3 or 4.</figcaption>
     </figure>
     <p>
@@ -308,7 +333,7 @@
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy" width="590" height="617">
+        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy" width="602" height="599">
         <figcaption>Filtering tab: source layer, two target layers, combine operators, Intersect predicate, 50 m round buffer.</figcaption>
     </figure>
     <p>
@@ -472,7 +497,7 @@ AND ST_Intersects("geom",
     </p>
     <div class="fig-row">
         <figure class="tiny">
-            <img src="img/guide/favorites-menu.png" alt="The favorites menu opened from the star badge" loading="lazy" width="351" height="396">
+            <img src="img/guide/favorites-menu.png" alt="The favorites menu opened from the star badge" loading="lazy" width="390" height="372">
             <figcaption>Click the &#9733; badge to open the favorites menu.</figcaption>
         </figure>
         <div>
@@ -511,7 +536,7 @@ AND ST_Intersects("geom",
         <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy" width="590" height="617">
+        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy" width="602" height="599">
         <figcaption>Exporting tab: layers, CRS, style format, output format, output folder with batch mode, ZIP.</figcaption>
     </figure>
     <p>
@@ -544,8 +569,8 @@ AND ST_Intersects("geom",
 <section id="configuration">
     <h2><span class="num">10</span>Configuration</h2>
     <figure class="narrow">
-        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy" width="590" height="617">
-        <figcaption>Configuration tab: a tree of settings, edited in place. Changes are saved immediately. This capture predates the search bar.</figcaption>
+        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy" width="602" height="599">
+        <figcaption>Configuration tab: a search field above a tree of settings, edited in place. Changes are saved immediately.</figcaption>
     </figure>
     <p>
         The Configuration tab exposes FilterMate's settings as a tree. Double-click a value to edit it; drop-down values offer their allowed choices.
@@ -644,7 +669,7 @@ AND ST_Intersects("geom",
         <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/processing-batch-filter.png" alt="The batch filter algorithm dialog in the Processing Toolbox" loading="lazy" width="801" height="524">
+        <img src="img/guide/processing-batch-filter.png" alt="The batch filter algorithm dialog in the Processing Toolbox" loading="lazy" width="953" height="515">
         <figcaption>The <em>Filter several layers (batch)</em> algorithm: pick layers, type an expression, run.</figcaption>
     </figure>
     <p>
@@ -679,7 +704,7 @@ processing.run("filtermate:batch_filter", {
         <div class="sheet-scrim"></div>
         <h2><span class="num">13</span>Rasters and point clouds <small>(5.0)</small></h2>
         <button class="watch" type="button" data-watch aria-label="Watch the video: Rasters and point clouds"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        <p class="credit">LiDAR HD, BD TOPO® © IGN, Estavar (Pyrénées-Orientales).</p>
+        <p class="credit">LiDAR HD, BD TOPO® © IGN, Fenouillet and Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="callout tip"><p><strong>New in 5.0.</strong> Raster and LiDAR point cloud layers are first-class sources and targets. Requirements are unchanged: QGIS 3.22 or later (point clouds from 3.26), Qt5 or Qt6. PDAL 2.4 or later is optional (height above a DTM, direct COPC writing).</p></div>
     <p>
@@ -689,11 +714,11 @@ processing.run("filtermate:batch_filter", {
     </p>
     <div class="fig-row">
         <figure class="narrow">
-            <img src="img/guide/fm5_raster_exploring.png" alt="The EXPLORING panel of a raster: band, pixel value, value range with histogram; FILTERING unchanged with a minimum coverage" loading="lazy" width="440" height="1082">
+            <img src="img/guide/fm5_raster_exploring.png" alt="The EXPLORING panel of a raster: band, pixel value, value range with histogram; FILTERING unchanged with a minimum coverage" loading="lazy" width="440" height="1086">
             <figcaption>Raster: value range on the histogram, vector targets with a 50 % minimum coverage.</figcaption>
         </figure>
         <figure class="narrow">
-            <img src="img/guide/fm5_pointcloud_exploring.png" alt="The EXPLORING panel of a point cloud: ASPRS / LiDAR HD classes, attribute ranges" loading="lazy" width="440" height="1082">
+            <img src="img/guide/fm5_pointcloud_exploring.png" alt="The EXPLORING panel of a point cloud: ASPRS / LiDAR HD classes, attribute ranges" loading="lazy" width="440" height="1086">
             <figcaption>Point cloud: classes (here class 6, building) and attribute ranges.</figcaption>
         </figure>
     </div>
@@ -790,8 +815,8 @@ processing.run("filtermate:batch_filter", {
     </table>
     </div>
     <figure class="video-figure">
-        <button class="example-media" type="button" data-watch data-video="video/survey.mp4" data-poster="video/survey.webp" aria-label="Watch the survey delivery example"><img src="video/survey.webp" alt="The church and 50 m around it clip the terrain model and the point cloud, then both are exported" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
-        <figcaption>Vector source, raster and point cloud targets: the church and 50 m around it clip both, then EXPORTING writes them to a ZIP.</figcaption>
+        <button class="example-media" type="button" data-watch data-video="video/survey.mp4" data-poster="video/survey.webp" aria-label="Watch the survey delivery example"><img src="video/survey.webp" alt="The tallest building of the square and 50 m around it clip the terrain model and the point cloud, then both are exported" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+        <figcaption>Vector source, raster and point cloud targets: the tallest building of the square and 50 m around it clip both, then EXPORTING writes them to a ZIP.</figcaption>
     </figure>
     <h3 id="combinations">Nine combinations</h3>
     <p>
@@ -837,7 +862,7 @@ processing.run("filtermate:batch_filter", {
     <div class="fig-row">
         <figure>
             <img src="img/guide/fm5_vector_to_raster.png" alt="A raster clipped around a selected polygon on the QGIS map canvas" loading="lazy" width="954" height="591">
-            <figcaption>Vector → raster: the pixels around the selected polygon are kept (buffer 150 m).</figcaption>
+            <figcaption>Vector → raster: the pixels around the selected building are kept (buffer 30 m).</figcaption>
         </figure>
         <figure>
             <img src="img/guide/fm5_raster_to_vector.png" alt="Polygons kept by a raster value range, the other pixels hidden by the live preview" loading="lazy" width="954" height="591">
@@ -845,10 +870,10 @@ processing.run("filtermate:batch_filter", {
         </figure>
         <figure>
             <img src="img/guide/fm5_pointcloud_to_vector.png" alt="Building points (class 6) inside the polygon kept by the point cloud filter" loading="lazy" width="954" height="591">
-            <figcaption>Point cloud → vector: the polygon that contains class 6 (building) points.</figcaption>
+            <figcaption>Point cloud → vector: the buildings that hold class 6 (building) points.</figcaption>
         </figure>
     </div>
-    <p>These screenshots were taken in QGIS 4.2 on a small synthetic data set.</p>
+    <p>These screenshots were taken in QGIS 4.2 on the IGN data of Fenouillet and Saint-Alban (Haute-Garonne).</p>
     <h3>Undo, project files, export</h3>
     <p>
         Clipped rasters (VRT) and point clouds (COPC) keep the layer id, style and position. Undo, Redo and Unfilter put the original sources back; the project is always saved with
