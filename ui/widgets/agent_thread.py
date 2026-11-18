@@ -30,12 +30,18 @@ ERROR_COLORS = {"light": ("#fdf3f3", "#f0c2c2", "#8c1d1d"), "dark": ("#3a2224", 
 # thread wider than its frame, every line of it cut on the right. Such a word is given places to wrap.
 LONG_WORD = 24  # characters
 ZWSP = "\u200b"  # an invisible place to wrap; never copied (AgentThread._clean_clipboard)
+_LINE_BREAKS = re.compile("\r\n|[\r\u2028\u2029]")
 _LONG_WORD = re.compile(r"\S{%d,}" % (LONG_WORD + 1))
 _WORD_SEPARATOR = re.compile(r"([/\\_.\-?&=,;:@#|+~])")
 _HEADING = re.compile(r"^\s{0,3}#{1,6}\s+")
 _BULLET = re.compile(r"^(\s*)[-*+]\s+")
 _EMPHASIS = re.compile(r"(\*\*|__)(.+?)\1")
 _CODE = re.compile(r"`([^`\n]+)`")
+
+
+def _plain_breaks(text: str) -> str:
+    """``text`` with every line or paragraph break as ``\\n``, as the clipboard holds a copy of a QLabel."""
+    return _LINE_BREAKS.sub("\n", text)
 
 
 def _tr(text: str) -> str:
@@ -905,14 +911,16 @@ class AgentThread(QScrollArea):
 
     def _clean_clipboard(self) -> None:
         """Text copied from the thread without the places to wrap its long words (ZWSP): a path pasted elsewhere
-        must be the path. Only a copy of a selection of this thread is changed."""
+        must be the path. Only a copy of a selection of this thread is changed: a text of another origin keeps its
+        ZWSP. A QLabel gives its line breaks as U+2029 in ``selectedText()`` and as ``\\n`` on the clipboard."""
         try:
             clipboard = QApplication.clipboard()
             text = clipboard.text() if clipboard is not None else ""
             if ZWSP not in text:
                 return
+            copied = _plain_breaks(text)
             for label in self._content.findChildren(QLabel):
-                if label.hasSelectedText() and label.selectedText() == text:
+                if label.hasSelectedText() and _plain_breaks(label.selectedText()) == copied:
                     clipboard.setText(text.replace(ZWSP, ""))
                     return
         except RuntimeError:  # the thread went away
