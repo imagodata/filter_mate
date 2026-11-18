@@ -1105,6 +1105,28 @@ def check_panel_options(project, gpkg, shp, work):
         done, left = apply_effects(effects, undo=True)
         check("panels: undo leaves what the user changed since", stored["exploring"]["single_selection_expression"]
               == '"pop"' and "communes" in left, (done, left))
+        # A layer the turn added, whose options it then set: undone the way the checkpoint does (the layers that go away
+        # leave once the filters are restored, before the rest), the layer leaves with its options and nothing is "left".
+        added_turn = EffectsRecorder()
+        added_turn.before_call(ToolCallPart("n1", "run_algorithm", {}))
+        extra = QgsVectorLayer("Point?crs=EPSG:2154&field=id:integer", "extra", "memory")
+        project.addMapLayer(extra)
+        extra_id = extra.id()
+        added_turn.after_call()
+        dock.PROJECT_LAYERS[extra_id] = props()  # FilterMate has read the layer
+        extra_options = [{"layer": "extra", "exploring": {"is_tracking": True}}]
+        added_turn.before_call(ToolCallPart("n2", "set_layer_options", {"layers": extra_options}))
+        panel_options.set_layer_options(dock, extra_options)
+        added_turn.after_call()
+        added_effects = added_turn.finish()
+        check("panels: the turn that added a layer and set its options keeps both",
+              sorted(effect[0] for effect in added_effects) == ["added", "layer_options"], added_effects)
+        gone, not_gone = apply_effects(added_effects, undo=True, presence=True, coming=False)
+        more, not_more = apply_effects(added_effects, undo=True, presence=False, edits=False)
+        check("panels: undoing it removes the layer and leaves no option 'as is'",
+              project.mapLayer(extra_id) is None and "extra" in gone and not not_gone and not not_more,
+              (gone, not_gone, more, not_more))
+        dock.PROJECT_LAYERS.pop(extra_id, None)
     finally:
         if before is None:
             utils.plugins.pop(PLUGIN_PACKAGE, None)

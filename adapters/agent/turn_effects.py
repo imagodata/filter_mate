@@ -748,10 +748,13 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
     project = QgsProject.instance()
     done: List[str] = []
     left: List[str] = []
+    leaving = {effect[1] for effect in effects if takes_away(effect, undo)}
     for effect in (reversed(effects) if undo else effects):
         kind, layer_id = effect[0], effect[1]
         if presence is not None and (kind in ("added", "removed")) != presence:
             continue
+        if kind not in ("added", "removed") and layer_id in leaving and project.mapLayer(layer_id) is None:
+            continue  # what the turn did to a layer this very undo (or redo) removed: nothing left to put back
         if edits is not None and (kind == "edits") != edits:
             continue
         if coming is not None and kind in ("added", "removed") and takes_away(effect, undo) == coming:
