@@ -407,16 +407,7 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
         raise Unsupported('The expression is not a condition')
     if layer.isEditable():
         raise Unsupported('The layer is being edited: its subset cannot change')
-    source = layer
-    if whole_layer and (layer.subsetString() or '').strip():
-        source = _unfiltered_copy(layer)
-        if source is None:
-            raise Unsupported('The layer cannot be read without its current subset')
-    count = feature_count_or_none(source)
-    if count is None or count < 0 or count > HYBRID_MAX_FEATURES:
-        raise Unsupported('{} features: unknown, or more than the {} evaluated in QGIS'.format(
-            count, HYBRID_MAX_FEATURES))
-    fields = source.dataProvider().fields()
+    fields = layer.dataProvider().fields()  # the source's fields: the copy's too
     index = fields.indexFromName(key_name) if key_name else -1
     if index < 0:
         raise Unsupported('No key field of the source: {}'.format(key_name))
@@ -439,12 +430,25 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
                     sorted(native.referencedColumns()), sorted(result.native_columns))
         native, native_sql = None, ''
 
+    # The copy is opened once the key and the expression are known to serve (review of 2026-11-18: without a key it
+    # was opened and counted for nothing, a whole count(*) on PostgreSQL)
+    source = layer
+    if whole_layer and (layer.subsetString() or '').strip():
+        _check_expression_for_copy(whole, dialect)
+        source = _unfiltered_copy(layer)
+        if source is None:
+            raise Unsupported('The layer cannot be read without its current subset')
+    count = feature_count_or_none(source)
+    if count is None or count < 0 or count > HYBRID_MAX_FEATURES:
+        raise Unsupported('{} features: unknown, or more than the {} evaluated in QGIS'.format(
+            count, HYBRID_MAX_FEATURES))
+
     request = QgsFeatureRequest()
     if not any(parsed.needsGeometry() for parsed in filter(None, (whole, native))):
         request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
     names = set(whole.referencedColumns()) | (set(native.referencedColumns()) if native else set())
     if source is not layer:
-        _check_copy_reads_like_layer(layer, source, names, whole, dialect)
+        _check_copy_reads_like_layer(layer, source, names, whole)
     if QgsFeatureRequest.ALL_ATTRIBUTES not in names:
         names.add(key_name)
         request.setSubsetOfAttributes(sorted(names), source.fields())
@@ -486,16 +490,12 @@ def _unfiltered_copy(layer):
     return unfiltered_copy(layer)
 
 
-def _check_copy_reads_like_layer(layer, copy, names, whole, dialect):
-    """Refuse a copy without subset whose features the expression would not read as the layer's.
+def _check_expression_for_copy(whole, dialect):
+    """Refuse, before the copy is opened, an expression its features would not give the layer's answer to.
 
-    The expression is prepared in the context of the layer: each field is read
-    at its index among the layer's fields, which the copy's must give back
-    (a joined or virtual field is not in the copy). Its geometry must be of
-    the layer's type (a URI read back without its geometry column would give
-    none). The feature id of a PostgreSQL layer is a number its provider gives
-    each feature (the key itself only for one integer column): it may be
-    another one in the copy, so nothing that reads it (``$id``, ``@id``,
+    The feature id of a PostgreSQL layer is a number its provider gives each
+    feature (the key itself only for one integer column): it may be another
+    one in the copy, so nothing that reads it (``$id``, ``@id``,
     ``is_selected()``, ``get_feature_by_id``...) is evaluated there. A
     GeoPackage or SQLite file gives the same ids to the copy: ``is_selected()``
     reads the selection of the layer of the context, the layer itself
@@ -505,12 +505,27 @@ def _check_copy_reads_like_layer(layer, copy, names, whole, dialect):
     filter aggregates the whole layer, so no list mixes the two (review of
     2026-11-18).
     """
-    from qgis.core import QgsExpression, QgsFeatureRequest
+    from qgis.core import QgsExpression
     functions = QgsExpression.Functions()
     aggregates = sorted(name for name in whole.referencedFunctions() if QgsExpression.functionIndex(name) >= 0
                         and 'Aggregates' in functions[QgsExpression.functionIndex(name)].groups())
     if aggregates:
         raise Unsupported('An aggregate is read through the subset of the layer: {}'.format(', '.join(aggregates)))
+    if dialect == POSTGRESQL and (set(whole.referencedFunctions()) & _FEATURE_ID_FUNCTIONS
+                                  or 'id' in whole.referencedVariables()):
+        raise Unsupported('The feature id of a PostgreSQL layer is not its key: another number in a copy')
+
+
+def _check_copy_reads_like_layer(layer, copy, names, whole):
+    """Refuse a copy without subset whose features the expression would not read as the layer's.
+
+    The expression is prepared in the context of the layer: each field is read
+    at its index among the layer's fields, which the copy's must give back
+    (a joined or virtual field is not in the copy). Its geometry must be of
+    the layer's type (a URI read back without its geometry column would give
+    none).
+    """
+    from qgis.core import QgsFeatureRequest
     if whole.needsGeometry() and copy.wkbType() != layer.wkbType():
         raise Unsupported('The source gives another geometry than the layer: {}'.format(copy.wkbType()))
     layer_fields, copy_fields = layer.fields(), copy.fields()
@@ -522,9 +537,6 @@ def _check_copy_reads_like_layer(layer, copy, names, whole, dialect):
             index = layer_fields.indexFromName(name)
             if index < 0 or copy_fields.indexFromName(name) != index:
                 raise Unsupported('The field {} is not read in the source as in the layer'.format(name))
-    if dialect == POSTGRESQL and (set(whole.referencedFunctions()) & _FEATURE_ID_FUNCTIONS
-                                  or 'id' in whole.referencedVariables()):
-        raise Unsupported('The feature id of a PostgreSQL layer is not its key: another number in a copy')
 
 
 __all__ = ['constant_variables', 'field_types', 'native_dialect_for_layer', 'native_geometry', 'native_subset',

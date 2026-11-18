@@ -157,7 +157,9 @@ def translation(monkeypatch):
     package.__path__ = []
     probe = types.ModuleType(_PACKAGE + ".source_capability_probe")
     probe.counts = {}
-    probe.feature_count_or_none = lambda layer: probe.counts.get(layer.name(), len(layer._rows))
+    probe.counted = []
+    probe.feature_count_or_none = lambda layer: probe.counted.append(layer.name()) or probe.counts.get(
+        layer.name(), len(layer._rows))
     monkeypatch.setitem(sys.modules, _PACKAGE, package)
     monkeypatch.setitem(sys.modules, _PACKAGE + ".source_capability_probe", probe)
     spec = importlib.util.spec_from_file_location(_PACKAGE + ".native_filter_translation", _PATH)
@@ -245,6 +247,14 @@ def test_an_edited_layer_opens_no_copy(translation, monkeypatch):
     assert translation.copies == []
 
 
+def test_without_a_key_the_copy_is_neither_opened_nor_counted(translation, monkeypatch):
+    _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
+
+    with pytest.raises(translation.Unsupported):
+        translation._hybrid_subset(_filtered_layer(), "big", _result(), "", "no_such_key", whole_layer=True)
+    assert translation.copies == [] and translation.probe.counted == []
+
+
 def test_the_whole_layer_is_counted_against_the_limit(translation, monkeypatch):
     layer, copy = _filtered_layer(), _Layer("zones (unfiltered)", ROWS)
     _with_copy(translation, monkeypatch, copy)
@@ -295,7 +305,7 @@ def test_an_aggregate_is_never_mixed_with_keys_of_the_whole_layer(translation, m
 
     with pytest.raises(translation.Unsupported):
         _hybrid(translation, _filtered_layer(), text, whole_layer=True)
-    assert copy.reads == []
+    assert translation.copies == []  # refused before the copy is opened
     # through the layer itself (AND with its subset, or no subset), as before
     assert _hybrid(translation, _Layer("zones", ROWS), text, whole_layer=True) == (
         '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)')
@@ -308,6 +318,7 @@ def test_the_feature_id_of_a_postgresql_copy_is_never_read(translation, monkeypa
 
     with pytest.raises(translation.Unsupported):
         _hybrid(translation, _filtered_layer(), text, whole_layer=True)
+    assert translation.copies == []  # refused before the copy is opened
     # read through the layer itself (AND with its subset), $id is the one its provider gives it
     layer = _Layer("zones", ROWS, subset='"pop" >= 0')
     assert _hybrid(translation, layer, "by_id") == '"fid" IS NOT NULL AND "fid" IN (3, 4, 5)'
