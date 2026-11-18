@@ -449,7 +449,7 @@ class DockSections(QObject):
             if source is None or holder is None:
                 return
             from ..widgets.layer_chooser_mirror import make_mirror
-            mirror = self._layer_mirror = make_mirror(source, self._dock.frame_exploring)
+            mirror = self._layer_mirror = make_mirror(source, self._dock.frame_exploring, self._dock)
             holder.insertWidget(0, mirror)
             try:  # as the other lists of the dock: the wheel changes the layer only once the list has the focus
                 from ..widgets.wheel_guard import guard_input_wheel

@@ -3419,7 +3419,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     logger.warning(f"_setup_conditional_widget_states: Widget {widget_name} not found for {pushbutton_name}")
 
             if not widgets_to_control:
-                logger.warning(f"_setup_conditional_widget_states: No widgets found for {pushbutton_name}")
+                if widget_names:  # names that match no widget; an empty list is meant (nothing to enable / disable)
+                    logger.warning(f"_setup_conditional_widget_states: No widgets found for {pushbutton_name}")
                 continue
 
             # Connect the toggled signal
@@ -7165,6 +7166,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         singleton) kept calling the slots of the unloaded dock, its debounce
         timers could still fire, and the module kept it as the active dock.
         """
+        self._released = True  # shown again while the sections come back (showEvent): not the active dock any more
         for timer_name in ('_feature_picker_debounce_timer', '_expression_debounce_timer'):
             timer = getattr(self, timer_name, None)
             if timer is not None:
@@ -7220,6 +7222,15 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 chat.shutdown() if unloading else chat.stop()
             except Exception:
                 logger.exception("Agent panel could not be stopped")
+
+    def showEvent(self, event):  # noqa: N802 - Qt name
+        """Register again as the active dock: closeEvent took it off the registry (FeaturePickerWidget guard of
+        ``sql_utils.feature_picker_guard``) and a dock shown again (the toolbar button, View > Panels) is not
+        constructed again."""
+        global _active_dockwidget
+        if not getattr(self, '_released', False):  # the plugin unloads: this dock is going away, not coming back
+            _active_dockwidget = self
+        super().showEvent(event)
 
     def closeEvent(self, event):
         """Handle dockwidget close event.
@@ -7980,12 +7991,34 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             )
         self.launchingTask.emit('reload_layers')
 
+    def _agent_panel_has_focus(self) -> bool:
+        """The focus is in the page of AGENT, which is the section open in its QGIS panel and not with FILTERING:
+        Ctrl+Z and Ctrl+Y there are for the steps of the agent (``agent_has_focus`` is false while AGENT is apart,
+        the buttons keep to the filters, whose bar they sit with). With FILTERING in the same panel, or another
+        section open in it (EXPLORING, EXPORTING: their widgets are not the agent's), they stay with the filters."""
+        panel = getattr(getattr(self, '_fm_panels', None), 'panel', lambda _key: None)('agent')
+        if getattr(self, '_agent_chat', None) is None or panel is None or 'filtering' in panel.members:
+            return False
+        try:
+            page = panel.page('agent')
+            focus = QtWidgets.QApplication.focusWidget()
+            return (page is not None and panel.current() == 'agent' and focus is not None
+                    and (focus is page or page.isAncestorOf(focus)))
+        except RuntimeError:  # the panel went away
+            return False
+
     def _on_undo_shortcut(self):
-        """Handle Ctrl+Z to undo last filter."""
+        """Handle Ctrl+Z to undo last filter, or the last step of the agent from the panel of AGENT."""
+        if self._agent_panel_has_focus():
+            self._agent_chat._on_undo()
+            return
         uw = self.widgets.get("ACTION", {}).get("UNDO_FILTER", {}).get("WIDGET")
         if uw and uw.isEnabled(): self.launchTaskEvent(False, 'undo')
 
     def _on_redo_shortcut(self):
-        """Handle Ctrl+Y to redo last filter."""
+        """Handle Ctrl+Y to redo last filter, or the last step undone of the agent from the panel of AGENT."""
+        if self._agent_panel_has_focus():
+            self._agent_chat._on_redo()
+            return
         rw = self.widgets.get("ACTION", {}).get("REDO_FILTER", {}).get("WIDGET")
         if rw and rw.isEnabled(): self.launchTaskEvent(False, 'redo')

@@ -13,7 +13,11 @@ shows is read again a few times a second while this one is in view, on top of th
 """
 from __future__ import annotations
 
+import logging
+import time
 from typing import Any, Optional
+
+logger = logging.getLogger("FilterMate")
 
 FOLLOW_MS = 400  # how often what the first chooser shows is read again, while this one is in view
 NAME = "comboBox_exploring_current_layer"
@@ -27,6 +31,54 @@ def next_index(shown: int, source: int, list_open: bool) -> Optional[int]:
     return source
 
 
+def _current_id(dock: Any) -> Optional[str]:
+    """The id of the layer the dock has as current, None when it has none or it was deleted since."""
+    current = getattr(dock, "current_layer", None)
+    if current is None:
+        return None
+    try:
+        return current.id()
+    except RuntimeError:  # the C++ layer is gone: as no layer
+        return None
+
+
+def record_user_pick(dock: Any, layer: Any) -> None:
+    """Note ``layer`` as the layer the user picked, as ``ConfigurationManager._stamp_user_layer_picks`` does for the
+    chooser of FILTERING: the checks that put the source layer back after a filter or an undo leave a layer picked
+    since alone (``dock._user_layer_pick``), a pick made in the window that follows a filter ends it (its handler
+    applies the pick), and a pick the dock did not take (the chooser's handler was disconnected: start-up
+    refreshes, a task that adds layers) is applied now unless a filter runs (the one that ends the task applies it).
+    """
+    layer_id = layer.id()
+    dock._user_layer_pick = (time.perf_counter(), layer_id)
+    end_window = getattr(dock, "_end_post_filter_window", None)
+    if callable(end_window):
+        end_window()
+        return
+    if _current_id(dock) != layer_id and not getattr(dock, "_filtering_in_progress", False):
+        dock.current_layer_changed(layer, manual_change=True)
+
+
+def choose(source: Any, dock: Any, index: int) -> None:
+    """The user picked row ``index`` in the chooser tied to ``source``: ``source`` takes the layer, and ``dock``
+    (None: nobody keeps the picks) notes it as the user's."""
+    changed = index != source.currentIndex()
+    if changed:
+        layer = source.layer(index) if hasattr(source, "layer") else None
+        if layer is not None and hasattr(source, "setLayer"):
+            source.setLayer(layer)
+        else:
+            source.setCurrentIndex(index)
+            source.activated.emit(index)
+    picked = source.currentLayer() if hasattr(source, "currentLayer") else None
+    if dock is None or picked is None:
+        return
+    # The first chooser may already show the layer while the dock does not have it (its handler was
+    # disconnected): picking it here is the choice that makes it current.
+    if changed or _current_id(dock) != picked.id():
+        record_user_pick(dock, picked)
+
+
 def _mirror_class():
     from qgis.PyQt.QtCore import QTimer
     from qgis.PyQt.QtWidgets import QComboBox, QSizePolicy
@@ -34,9 +86,10 @@ def _mirror_class():
     class LayerChooserMirror(QComboBox):
         """The chooser of the current layer again, tied to ``source`` (the one of FILTERING)."""
 
-        def __init__(self, source: Any, parent: Any = None) -> None:
+        def __init__(self, source: Any, parent: Any = None, dock: Any = None) -> None:
             super().__init__(parent)
             self._source = source
+            self._dock = dock  # who keeps the layer the user picked (``record_user_pick``)
             self.setObjectName(NAME)
             self.setModel(source.model())  # one list for both: what QGIS lists, filtered as the first chooser is
             self.setIconSize(source.iconSize())
@@ -67,19 +120,15 @@ def _mirror_class():
         def _choose(self, index: int) -> None:
             """The user picked a layer here: the first chooser takes it as a choice made in its own list, and the
             dock follows as it always does. Its row set by code would not do: QgsMapLayerComboBox says
-            ``layerChanged``, which the dock follows, for a choice of the user and for ``setLayer`` only."""
+            ``layerChanged``, which the dock follows, for a choice of the user and for ``setLayer`` only. It is
+            also noted as the user's choice (``record_user_pick``): the first chooser, which notes what is done in
+            its own list, does not see this one, and the dock put the layer of the filter back over it."""
             try:
-                source = self._source
-                if index == source.currentIndex():
-                    return
-                layer = source.layer(index) if hasattr(source, "layer") else None
-                if layer is not None and hasattr(source, "setLayer"):
-                    source.setLayer(layer)
-                else:
-                    source.setCurrentIndex(index)
-                    source.activated.emit(index)
+                choose(self._source, self._dock, index)
             except RuntimeError:  # the first chooser went away with the dock
                 pass
+            except AttributeError:  # not the same: a defect of ours must leave a trace
+                logger.debug("A layer chosen in the chooser of EXPLORING was not noted", exc_info=True)
 
         def showEvent(self, event: Any) -> None:  # noqa: N802 - Qt name
             super().showEvent(event)
@@ -108,12 +157,12 @@ def _mirror_class():
     return LayerChooserMirror
 
 
-def make_mirror(source: Any, parent: Any = None) -> Any:
-    """A chooser tied to ``source`` (the class is made once, when Qt is there)."""
+def make_mirror(source: Any, parent: Any = None, dock: Any = None) -> Any:
+    """A chooser tied to ``source`` (the class is made once, when Qt is there); ``dock`` notes the picks."""
     global _CLASS
     if _CLASS is None:
         _CLASS = _mirror_class()
-    return _CLASS(source, parent)
+    return _CLASS(source, parent, dock)
 
 
 _CLASS: Any = None
