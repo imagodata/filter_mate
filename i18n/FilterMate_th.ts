@@ -4396,6 +4396,36 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>รีเซ็ตการกำหนดค่าและฐานข้อมูล</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Give your opinion</source>
+        <translation>แสดงความคิดเห็น</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Suggest a feature</source>
+        <translation>เสนอฟีเจอร์</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Test the experimental features</source>
+        <translation>ทดลองใช้ฟีเจอร์ทดลอง</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Training and services</source>
+        <translation>การฝึกอบรมและบริการ</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>FilterMate has run {} filters for you. Thirty seconds to rate it?</source>
+        <translation>FilterMate เรียกใช้ตัวกรองให้คุณแล้ว {} ครั้ง ใช้เวลาสามสิบวินาทีเพื่อให้คะแนนไหม?</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>Give my opinion</source>
+        <translation>ให้ความคิดเห็น</translation>
+    </message>
+    <message>
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>ตั้งค่า FilterMate ด้วยเอเจนต์</translation>

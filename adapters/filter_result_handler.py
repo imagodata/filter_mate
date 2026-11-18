@@ -36,6 +36,7 @@ except ImportError:  # test harnesses that stub the infrastructure package
         return None
 from ..config.feedback_config import should_show_message
 from ..infrastructure.feedback import show_success_with_backend, show_info
+from ..infrastructure import feedback_forms
 
 logger = get_app_logger()
 
@@ -207,6 +208,9 @@ class FilterResultHandler:
         else:
             self._show_task_completion_message(task_name, source_layer, display_backend, layer_count, is_fallback,
                                                feature_count=feature_count)
+            # 2026-11-18: after enough successful filters, the one invitation to give a review
+            if task_name == 'filter':
+                feedback_forms.maybe_invite(self._get_iface())
 
         # Update backend indicator with actual backend used
         self._update_backend_indicator(task_parameters, provider_type, display_backend, is_fallback)

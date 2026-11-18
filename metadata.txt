@@ -50,6 +50,7 @@ about=🧭 FilterMate explores, filters and exports vector, raster and LiDAR poi
 
     📖 User guide: https://imagodata.github.io/filter_mate/guide.html
     💡 Sixteen use cases in English and French: https://imagodata.github.io/filter_mate/stories.html
+    💬 Your opinion, an idea, a review or a test: https://imagodata.github.io/filter_mate/feedback.html?ref=qgis-listing
 
 tracker=https://github.com/imagodata/filter_mate/issues
 repository=https://github.com/imagodata/filter_mate

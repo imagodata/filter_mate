@@ -4396,6 +4396,36 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>कॉन्फ़िगरेशन और डेटाबेस रीसेट करें</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Give your opinion</source>
+        <translation>अपनी राय दें</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Suggest a feature</source>
+        <translation>एक सुविधा सुझाएँ</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Test the experimental features</source>
+        <translation>प्रायोगिक सुविधाएँ आज़माएँ</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1"/>
+        <source>Training and services</source>
+        <translation>प्रशिक्षण और सेवाएँ</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>FilterMate has run {} filters for you. Thirty seconds to rate it?</source>
+        <translation>FilterMate ने आपके लिए {} फ़िल्टर चलाए हैं। इसे रेट करने के लिए तीस सेकंड?</translation>
+    </message>
+    <message>
+        <location filename="../../infrastructure/feedback_forms.py" line="1"/>
+        <source>Give my opinion</source>
+        <translation>मेरी राय दें</translation>
+    </message>
+    <message>
         <location filename="../../filter_mate.py" line="421"/>
         <source>Set up FilterMate with the agent</source>
         <translation>एजेंट के साथ FilterMate सेट अप करें</translation>

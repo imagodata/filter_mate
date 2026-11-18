@@ -73,6 +73,7 @@ class TestForcedLanguage:
             "QSettings": lambda: types.SimpleNamespace(value=lambda key: "en_US"),
             "QTranslator": lambda: translator, "QCoreApplication": MagicMock(),
             "get_config_json_path": lambda: str(profile_config),
+            "feedback_forms": MagicMock(),
         })
 
         plugin = _Plugin()
