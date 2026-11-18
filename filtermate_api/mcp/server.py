@@ -581,9 +581,8 @@ def build_server(client: FilterMateClient) -> Any:
         """Change how a layer is drawn: one symbol, categories, classes, rules, a raster ramp or a shaded relief,
         its opacity and blending. Replaces the style; a field of more than 100 values cannot be categorized.
 
-        Returns mode, field, classes (how many), ramp, method; for a raster, band, minimum and maximum (a note instead when
-        the user shares no values). Undoing the
-        turn of the chat brings the previous style back.
+        Returns mode, field, classes (how many), ramp, method; for a raster, band, minimum and maximum or a note. Undoing the turn of the
+        chat brings the previous style back.
         """
         return await call("POST", "/layers/style", _body(
             layer=layer, mode=mode, field=field, color=color, ramp=ramp, classes=classes, method=method,
