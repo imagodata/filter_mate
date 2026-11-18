@@ -133,6 +133,17 @@ def test_ollama_ids_that_restart_each_turn_still_name_the_right_tool():
         "field_values", "layer_statistics", "map_context"]
 
 
+def test_a_unique_id_names_its_call_even_when_the_results_are_not_all_there():
+    """Review 2026-11-18: by position alone, one result missing would name the wrong tool."""
+    messages = [Message(ROLE_USER, (TextPart("one"),)),
+                Message(ROLE_ASSISTANT, (ToolCallPart("c1", "map_context", {}), ToolCallPart("c2", "field_values", {}))),
+                Message(ROLE_USER, (ToolResultPart("c2", "v" * 1000),)),  # the result of c1 is not there
+                Message(ROLE_ASSISTANT, (TextPart("ok"),)), Message(ROLE_USER, (TextPart("two"),)),
+                Message(ROLE_ASSISTANT, (TextPart("ok"),)), Message(ROLE_USER, (TextPart("three"),)),
+                Message(ROLE_ASSISTANT, (TextPart("ok"),))]
+    assert "call field_values again" in _results(trim_results(messages)[0])[0].content
+
+
 def test_a_result_trimmed_once_is_left_as_it_is_and_small_ones_stay():
     once, _ = trim_results(conversation(4, size=3000))
     again, count = trim_results(once)

@@ -137,15 +137,18 @@ def trim_results(messages: Sequence[Message], keep: int = 2) -> Tuple[List[Messa
         message = messages[index]
         if message.role != ROLE_USER or not any(isinstance(part, ToolResultPart) for part in message.parts):
             continue
-        # By position, like the answers of the engine: Ollama numbers its calls call_0, call_1... in every turn, so
-        # an id alone names the last turn that used it, not this one.
+        # By id when it is the only one of its turn, else by position, like the answers of the engine: Ollama numbers
+        # its calls call_0, call_1... in every turn, so a table of ids for the whole conversation names the last turn.
         calls = messages[index - 1].tool_calls if index and messages[index - 1].role == ROLE_ASSISTANT else ()
+        ids = [call.call_id for call in calls]
         parts = []
         rank = 0
         for part in message.parts:
             if isinstance(part, ToolResultPart):
-                name = calls[rank].name if rank < len(calls) else next(
-                    (call.name for call in calls if call.call_id == part.call_id), "the tool")
+                if ids.count(part.call_id) == 1:
+                    name = calls[ids.index(part.call_id)].name
+                else:
+                    name = calls[rank].name if rank < len(calls) else "the tool"
                 rank += 1
                 if len(part.content) > MIN_TRIMMED and not part.content.startswith(_TRIMMED_START):
                     part = ToolResultPart(part.call_id, TRIMMED.format(len(part.content), name), part.is_error)
