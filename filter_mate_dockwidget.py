@@ -3419,7 +3419,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     logger.warning(f"_setup_conditional_widget_states: Widget {widget_name} not found for {pushbutton_name}")
 
             if not widgets_to_control:
-                logger.warning(f"_setup_conditional_widget_states: No widgets found for {pushbutton_name}")
+                if widget_names:  # names that match no widget; an empty list is meant (nothing to enable / disable)
+                    logger.warning(f"_setup_conditional_widget_states: No widgets found for {pushbutton_name}")
                 continue
 
             # Connect the toggled signal
