@@ -2315,7 +2315,7 @@ class AgentChatController(QObject):
         from ...adapters.public_api.introspection import tree_places
         from ...adapters.public_api.operations import layer_kind
         from ...adapters.qgis.coverage_layers.snapshots import registry
-        from ...adapters.qgis.feature_count import COUNT_BUDGET, exact_feature_count
+        from ...adapters.qgis.feature_count import COUNT_BUDGET, exact_feature_count, table_seconds
         from ...adapters.qgis.source_capability_probe import counts_cheaply
         places, derived = tree_places() or {}, registry()
         rows = []
@@ -2326,7 +2326,9 @@ class AgentChatController(QObject):
                 if kind not in (LayerKind.VECTOR, LayerKind.RASTER, LayerKind.POINT_CLOUD) or not layer.isValid():
                     continue
                 if kind is LayerKind.VECTOR:
+                    tables = table_seconds()
                     count = exact_feature_count(layer, deadline - time.monotonic()) if counts_cheaply(layer) else None
+                    deadline += table_seconds() - tables  # a whole table counted has a budget of its own
                 else:
                     count = layer.pointCount() if kind is LayerKind.POINT_CLOUD else None
                 subset = (layer.subsetString() or "") if hasattr(layer, "subsetString") else ""

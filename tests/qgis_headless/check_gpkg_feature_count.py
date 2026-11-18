@@ -281,18 +281,37 @@ def main(work):
     rows = [] if error else [row for row in content["layers"] if row["name"] == "troncon"]
     check("list_layers: 130 000", rows and rows[0]["feature_count"] == 130_000, rows)
     if exact_feature_count is not None:
-        budget_was = feature_count.COUNT_BUDGET
+        budget_was = feature_count.TABLE_BUDGET
         feature_count._CACHE.clear()
-        feature_count.COUNT_BUDGET = 0
+        feature_count.TABLE_BUDGET = 0
         try:
             count = introspection.describe_layer(holes.id())["feature_count"]
         finally:
-            feature_count.COUNT_BUDGET = budget_was
+            feature_count.TABLE_BUDGET = budget_was
         check("the same table not counted in time: no number rather than 150 000", count == -1, count)
         started = time.perf_counter()
         feature_count._CACHE.clear()
         count = exact_feature_count(holes)
         print(f"INFO the table without gpkg_ogr_contents counted: {count} in {time.perf_counter() - started:.2f} s")
+    # A big layer being edited: the count of QGIS holds the edit buffer, the file does not.
+    holes.startEditing()
+    holes.deleteFeature(1)
+    shown = introspection.describe_layer(holes.id())["feature_count"]
+    check("a big layer with edits in progress: the number of QGIS, buffer included",
+          holes.isModified() and shown == holes.featureCount() and shown > 0, (shown, holes.featureCount()))
+    holes.rollBack()
+    # A row of counts missing, or NULL, for the table: QGIS falls back on its fids, so the table is counted.
+    for label, statement in (("no row", "DELETE FROM gpkg_ogr_contents WHERE table_name = 'voie'"),
+                             ("a NULL row", "UPDATE gpkg_ogr_contents SET feature_count = NULL WHERE table_name = 'voie'")):
+        path = os.path.join(work, f"voie_{label.replace(' ', '_')}.gpkg")
+        make_gpkg(path, "voie", 120_000, delete="fid % 5 = 0")
+        dataset = ogr.Open(path, 1)
+        dataset.ExecuteSQL(statement)
+        dataset = None
+        voie = add(f"{path}|layername=voie", f"voie {label}")
+        print(f"INFO gpkg_ogr_contents with {label}: QGIS featureCount() {voie.featureCount()}")
+        check(f"gpkg_ogr_contents with {label} for the table: the features, not the fids",
+              introspection.describe_layer(voie.id())["feature_count"] == 96_000, (voie.featureCount(), label))
     # With the table of counts of GDAL, the number it holds is right and is kept.
     plain = add(make_gpkg(os.path.join(work, "plain.gpkg"), "route", 110_000), "route")
     check("a table of 110 000 features with gpkg_ogr_contents: 110 000",
