@@ -128,6 +128,14 @@ def raster_look(layer):
     return look
 
 
+def temp_contours():
+    """The contour GeoPackages in the temporary folder of the Processing framework."""
+    from qgis.core import QgsProcessingUtils
+    root = QgsProcessingUtils.tempFolder()
+    return {os.path.join(folder, name) for folder, _dirs, names in os.walk(root) for name in names
+            if name.startswith("contours.gpkg")}
+
+
 def check_contours(project, work):
     from filter_mate.adapters.public_api import terrain
     from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
@@ -188,6 +196,7 @@ def check_contours(project, work):
           wide["left_out"] > 1 and wide["minimum"] == 100 and wide["feature_count"] < made["feature_count"], wide)
     project.removeMapLayer(wide["layer_id"])
     count = len(project.mapLayers())
+    left = temp_contours()
     for label, call, needle in (
             ("a minimum length below zero", lambda: terrain.contour_lines("dem", 25, min_length=-1), "min_length"),
             ("an interval of zero", lambda: terrain.contour_lines("dem", 0), "above zero"),
@@ -198,7 +207,8 @@ def check_contours(project, work):
             ("a band it does not have", lambda: terrain.contour_lines("dem", 25, band=2), "bands 1 to 1"),
             ("an unknown layer", lambda: terrain.contour_lines("nope", 25), "not found")):
         said = refused(call)
-        check(f"contours: {label} is refused, nothing added", needle in said and len(project.mapLayers()) == count, said)
+        check(f"contours: {label} is refused, nothing added, no file left", needle in said
+              and len(project.mapLayers()) == count and temp_contours() == left, said)
     quiet = refused(terrain.contour_lines, "dem", 0.5, share_values=False)
     check("contours: a refusal names no height of the raster when its values are not shared",
           "more than 500 levels over the heights of this raster" in quiet and "between" not in quiet
@@ -206,6 +216,39 @@ def check_contours(project, work):
     quiet = refused(terrain.contour_lines, "dem", 1000, share_values=False)
     check("contours: nor when no contour is found", quiet.startswith("no contour every 1000")
           and "between" not in quiet, quiet)
+    # A Stop that comes once the GeoPackage is written, and a layer that does not open: nothing is left behind.
+    real_contours = terrain._contours
+
+    def stopped_late(*arguments):
+        real_contours(*arguments)
+        raise ValueError(terrain.STOPPED)
+    terrain._contours = stopped_late
+    try:
+        said = refused(terrain.contour_lines, "dem", 25)
+    finally:
+        terrain._contours = real_contours
+    check("contours: a Stop after the file is written leaves no file and no layer", said == "stopped"
+          and temp_contours() == left and len(project.mapLayers()) == count, (said, temp_contours() - left))
+    # The user removes the raster while it is read: the contours are made all the same, from the file.
+    gone = QgsRasterLayer(path, "gone")
+    project.addMapLayer(gone)
+    gone_id = gone.id()
+
+    def slowly(*arguments):
+        time.sleep(0.4)
+        return real_contours(*arguments)
+    terrain._contours = slowly
+    QTimer.singleShot(100, lambda: project.removeMapLayer(gone_id))
+    try:
+        said = refused(terrain.contour_lines, "gone", 25)
+        removed = project.mapLayer(gone_id) is None
+    finally:
+        terrain._contours = real_contours
+    # (a refusal "" means a result: the layer added)
+    added = [found for found in project.mapLayers().values() if found.name() == "Contours 25"]
+    check("contours: a raster removed during the reading does not raise, its contours are made", removed and said == ""
+          and len(added) == 1 and added[0].isValid() and added[0].crs().authid() == "EPSG:32631", (said, removed, len(added)))
+    project.removeMapLayers([found.id() for found in added])
     hidden = terrain.contour_lines("dem", 50, share_values=False)
     check("contours: nor in the answer", hidden["minimum"] is None and hidden["maximum"] is None
           and hidden["feature_count"] > 3, hidden)
