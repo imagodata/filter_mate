@@ -32,7 +32,13 @@ EXPRESSIONS = {
     "selected_count": (set(), {"num_selected"}, set(), lambda feature: feature["fid"] > 2),
     "by_feature_id": (set(), {"get_feature_by_id", "attribute"}, set(), lambda feature: feature["fid"] > 2),
     "at_id": (set(), {"var"}, {"id"}, lambda feature: feature["fid"] > 2),
+    "above_mean": ({"pop"}, {"mean"}, set(), lambda feature: feature["pop"] > 4),
+    "relation_sum": ({"pop"}, {"relation_aggregate", "abs"}, set(), lambda feature: feature["pop"] > 4),
 }
+# QGIS function -> its groups (QgsExpression.Functions()[i].groups())
+GROUPS = {"mean": ["Aggregates"], "relation_aggregate": ["Aggregates"], "abs": ["Math"], "is_selected": ["Record"],
+          "num_selected": ["Record"], "get_feature_by_id": ["Record"], "attribute": ["Record"], "var": ["General"],
+          "$id": ["Record"]}
 
 
 class _Fields:
@@ -109,6 +115,14 @@ class _Expression:
 
     def hasEvalError(self):
         return False
+
+    @staticmethod
+    def functionIndex(name):
+        return sorted(GROUPS).index(name) if name in GROUPS else -1
+
+    @staticmethod
+    def Functions():
+        return [types.SimpleNamespace(groups=lambda groups=GROUPS[name]: groups) for name in sorted(GROUPS)]
 
 
 class _Context:
@@ -270,6 +284,20 @@ def test_a_copy_without_the_geometry_of_the_layer_gives_no_list(translation, mon
     assert copy.reads == []
     _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
     assert _hybrid(translation, _filtered_layer(), "geometric", whole_layer=True) == (
+        '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)')
+
+
+@pytest.mark.parametrize("text", ["above_mean", "relation_sum"])
+def test_an_aggregate_is_never_mixed_with_keys_of_the_whole_layer(translation, monkeypatch, text):
+    """QGIS aggregates on the layer of the context, through its subset: no list read on the copy."""
+    copy = _Layer("zones (unfiltered)", ROWS)
+    _with_copy(translation, monkeypatch, copy)
+
+    with pytest.raises(translation.Unsupported):
+        _hybrid(translation, _filtered_layer(), text, whole_layer=True)
+    assert copy.reads == []
+    # through the layer itself (AND with its subset, or no subset), as before
+    assert _hybrid(translation, _Layer("zones", ROWS), text, whole_layer=True) == (
         '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)')
 
 

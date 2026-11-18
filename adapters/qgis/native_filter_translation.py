@@ -499,9 +499,18 @@ def _check_copy_reads_like_layer(layer, copy, names, whole, dialect):
     ``is_selected()``, ``get_feature_by_id``...) is evaluated there. A
     GeoPackage or SQLite file gives the same ids to the copy: ``is_selected()``
     reads the selection of the layer of the context, the layer itself
-    (measured, check_native_translation.selected_path).
+    (measured, check_native_translation.selected_path). An aggregate
+    (``mean("pop")``) is computed by QGIS on the layer of the context, through
+    its subset, while the keys would come from the whole layer: the first
+    filter aggregates the whole layer, so no list mixes the two (review of
+    2026-11-18).
     """
-    from qgis.core import QgsFeatureRequest
+    from qgis.core import QgsExpression, QgsFeatureRequest
+    functions = QgsExpression.Functions()
+    aggregates = sorted(name for name in whole.referencedFunctions() if QgsExpression.functionIndex(name) >= 0
+                        and 'Aggregates' in functions[QgsExpression.functionIndex(name)].groups())
+    if aggregates:
+        raise Unsupported('An aggregate is read through the subset of the layer: {}'.format(', '.join(aggregates)))
     if whole.needsGeometry() and copy.wkbType() != layer.wkbType():
         raise Unsupported('The source gives another geometry than the layer: {}'.format(copy.wkbType()))
     layer_fields, copy_fields = layer.fields(), copy.fields()
