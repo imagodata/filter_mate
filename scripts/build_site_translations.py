@@ -84,7 +84,7 @@ def build(check=False):
     # Translate before injecting the autonyms, which stay unchanged in every locale.
     template = re.sub(r'<(?:span class="lang"[^>]*|details class="language-menu")>.*?</(?:span|details)>', '__LANGUAGE_MENU__', english)
     template = re.sub(r'    <link rel="alternate"[^>]+>\n?', '', template)
-    keep = {'FilterMate', 'GitHub', 'Discord', 'PostgreSQL', 'SpatiaLite', 'OGR', 'GPL-3.0', 'EN', 'FR', '< 1 s', '→'}
+    keep = {'FilterMate', 'GitHub', 'Discord', 'Cloud', 'PostgreSQL', 'SpatiaLite', 'OGR', 'GPL-3.0', 'EN', 'FR', '< 1 s', '→'}
     for index, lang in enumerate(data['languages']):
         messages = {row[0]: row[index + 1] for row in data['messages']}
         missing = set()
@@ -120,8 +120,8 @@ def build(check=False):
         page = page.replace('content="https://imagodata.github.io/filter_mate/"', f'content="https://imagodata.github.io/filter_mate/{filename}"')
         page = page.replace('rel="canonical" href="https://imagodata.github.io/filter_mate/"', f'rel="canonical" href="https://imagodata.github.io/filter_mate/{filename}"')
         page = insert_alternates(page)
-        for target in ('guide.html', 'stories.html', 'roadmap.html'):
-            page = re.sub(r'(<a\b[^>]*href="' + re.escape(target) + r'(?:#[^"]*)?"[^>]*>)(.*?)(</a>)',
+        for target in ('guide.html', 'stories.html', 'roadmap.html', 'cloud.html', 'feedback.html'):
+            page = re.sub(r'(<a\b[^>]*href="' + re.escape(target) + r'(?:[?#][^"]*)?"[^>]*>)(.*?)(</a>)',
                           lambda m: m[1].replace('>', ' hreflang="en">', 1) + m[2] + ' <small lang="en">(EN)</small>' + m[3], page)
         page = page.replace('<script src="assets/fm.js">', f'<script src="assets/i18n/{lang.lower()}.js"></script>\n<script src="assets/fm.js">')
         write(ROOT / filename, page)
@@ -131,7 +131,8 @@ def build(check=False):
     for lang in ('en', 'fr'):
         file = ROOT / LANGUAGES[lang][1]
         write(file, update_languages(file.read_text(encoding='utf-8'), lang))
-    urls = [filename for _, filename in LANGUAGES.values()] + ['guide.html', 'guide.fr.html', 'stories.html', 'stories.fr.html', 'roadmap.html', 'roadmap.fr.html']
+    urls = [filename for _, filename in LANGUAGES.values()] + ['guide.html', 'guide.fr.html', 'stories.html', 'stories.fr.html', 'roadmap.html', 'roadmap.fr.html',
+                                                                 'cloud.html', 'cloud.fr.html', 'feedback.html', 'feedback.fr.html']
     sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     sitemap += ''.join(f'  <url><loc>https://imagodata.github.io/filter_mate/{name if name != "index.html" else ""}</loc></url>\n' for name in urls)
     write(ROOT / 'sitemap.xml', sitemap + '</urlset>\n')

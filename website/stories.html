@@ -504,29 +504,29 @@ processing.run("filtermate:batch_filter", {
         <div class="sheet-scrim"></div>
         <h2><span class="num">9</span>Parcels on steep slopes</h2>
         <button class="watch" type="button" data-watch aria-label="Watch the video: Parcels on steep slopes"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        <p class="credit">LiDAR HD and BD TOPO® © IGN, Etalab cadastre, Estavar (Pyrénées-Orientales).</p>
+        <p class="credit">LiDAR HD and BD TOPO® © IGN, Etalab cadastre, Fenouillet and Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
-        <div><h4>The need</h4><p>At the town hall of <strong>Estavar</strong>, in Cerdagne, the local plan is being revised: which parcels of the village lie mostly on slopes above 30 %, hard to build on and prone to gullying?</p></div>
-        <div><h4>The FilterMate translation</h4><p>With <strong>mnt</strong> as the current layer, EXPLORING shows its raster tools. <strong>Compute on</strong> switches to <em>Slope (%)</em>: the slope is computed on the fly from the DTM, without an intermediate raster. The <strong>value range</strong> 30 % → maximum, read on the slope histogram, becomes the source geometry. FILTERING keeps the <em>parcels</em> covered at least <strong>50 %</strong> by it.</p></div>
+        <div><h4>The need</h4><p>At the town hall of <strong>Fenouillet</strong>, north of Toulouse, the local plan is being revised: which parcels of the square lie mostly on slopes above 15 %, the embankments and banks where building costs more?</p></div>
+        <div><h4>The FilterMate translation</h4><p>With <strong>mnt</strong> as the current layer, EXPLORING shows its raster tools. <strong>Compute on</strong> switches to <em>Slope (%)</em>: the slope is computed on the fly from the DTM, without an intermediate raster. The <strong>value range</strong> 15 % → maximum, read on the slope histogram, becomes the source geometry. FILTERING keeps the <em>parcels</em> covered at least <strong>50 %</strong> by it.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>mnt</code> DTM, computed slope (%)</dd></div><div><dt>Selection</dt><dd>Slope range ≥ 30 %</dd></div><div><dt>Targets</dt><dd><code>parcelle</code></dd></div><div><dt>Relation</dt><dd>Intersect, coverage ≥ 50 %</dd></div><div><dt>Result</dt><dd><strong>58</strong> parcels</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>mnt</code> DTM, computed slope (%)</dd></div><div><dt>Selection</dt><dd>Slope range ≥ 15 %</dd></div><div><dt>Targets</dt><dd><code>parcelle</code></dd></div><div><dt>Relation</dt><dd>Intersect, coverage ≥ 50 %</dd></div><div><dt>Result</dt><dd><strong>34</strong> parcels out of 678</dd></div></dl>
     <ol class="steps">
         <li><strong>Compute the slope.</strong> Click <em>mnt</em> in the Layers panel, then <strong>Compute on</strong> → <em>Slope (%)</em>. The histogram now shows the slope.
             <figure><img src="img/stories/s9-01.webp" alt="Step 1: Compute on set to Slope (%) for the DTM" loading="lazy" width="1600" height="900"><figcaption>Step 1. Slope, aspect, hillshade and roughness are computed from the DTM.</figcaption></figure>
         </li>
-        <li><strong>Pick the range.</strong> Tick <strong>Value range</strong> and type 30 in Min. The share of kept pixels shows under the histogram: 12.9 %.
-            <figure><img src="img/stories/s9-02.webp" alt="Step 2: slope range from 30 % to the maximum on the histogram" loading="lazy" width="1600" height="900"><figcaption>Step 2. The tail of the histogram: the steep hillsides. The backdrop shows the same slope, computed by gdaldem.</figcaption></figure>
+        <li><strong>Pick the range.</strong> Tick <strong>Value range</strong> and type 15 in Min. The share of kept pixels shows under the histogram: 10.4 %.
+            <figure><img src="img/stories/s9-02.webp" alt="Step 2: slope range from 15 % to the maximum on the histogram" loading="lazy" width="1600" height="900"><figcaption>Step 2. The tail of the histogram: the steep hillsides. The backdrop shows the same slope as a precomputed raster.</figcaption></figure>
         </li>
         <li><strong>Relate to the parcels.</strong> Target <em>parcelle</em>, Intersect predicate, <strong>cov. ≥ 50 %</strong> next to the predicates.
             <figure><img src="img/stories/s9-03.webp" alt="Step 3: parcelle target, Intersect and a 50 % minimum coverage" loading="lazy" width="1600" height="900"><figcaption>Step 3. Without a minimum coverage, a parcel grazed by an embankment would count.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s9-04.webp" alt="Step 4: the parcels on steep slopes" loading="lazy" width="1600" height="900"><figcaption>Step 4. 58 parcels.</figcaption></figure>
+            <figure><img src="img/stories/s9-04.webp" alt="Step 4: the parcels on steep slopes" loading="lazy" width="1600" height="900"><figcaption>Step 4. 34 parcels.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
-    <p><strong>58 parcels</strong> of the square kilometre have at least half of their area on slopes above 30 %. The same filter on a precomputed slope raster (<code>gdaldem slope -p</code>) gives the same count.</p>
+    <p><strong>34 parcels</strong> out of 678 in the square kilometre have at least half of their area on slopes above 15 %.</p>
     <div class="callout"><strong>Slope is not hazard.</strong> A steep slope is not a hazard zone: cross-check with the risk prevention plans before any decision.</div>
 </section>
 <!-- 10 ------------------------------------------------------------------ -->
@@ -536,29 +536,29 @@ processing.run("filtermate:batch_filter", {
         <div class="sheet-scrim"></div>
         <h2><span class="num">10</span>Building heights, measured by LiDAR</h2>
         <button class="watch" type="button" data-watch aria-label="Watch the video: Building heights, measured by LiDAR"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        <p class="credit">LiDAR HD and BD TOPO® © IGN, Etalab cadastre, Estavar (Pyrénées-Orientales).</p>
+        <p class="credit">LiDAR HD and BD TOPO® © IGN, Etalab cadastre, Fenouillet and Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
-        <div><h4>The need</h4><p>The planning rules cap building heights. The permit office wants the buildings of the village that rise more than <strong>9 m</strong> above natural ground, measured rather than declared.</p></div>
-        <div><h4>The FilterMate translation</h4><p>With the <strong>point cloud</strong> as the current layer, ATTRIBUTES gets a <code>Classification = 6</code> (building) condition and a <strong>height above the DTM ≥ 9 m</strong>, computed by PDAL at the first filter. The footprint of the kept points is the source geometry; a 50 % coverage leaves out the terraced neighbours.</p></div>
+        <div><h4>The need</h4><p>The planning rules cap building heights. The permit office of Fenouillet wants the buildings of the square that rise more than <strong>7 m</strong> above natural ground, measured rather than declared.</p></div>
+        <div><h4>The FilterMate translation</h4><p>With the <strong>point cloud</strong> as the current layer, ATTRIBUTES gets a <code>Classification = 6</code> (building) condition and a <strong>height above the DTM ≥ 7 m</strong>, computed by PDAL at the first filter. The footprint of the kept points is the source geometry; a 50 % coverage leaves out the terraced neighbours.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd>LiDAR HD point cloud (COPC)</dd></div><div><dt>Selection</dt><dd><code>Classification = 6</code> and height ≥ 9 m</dd></div><div><dt>Targets</dt><dd><code>batiment</code></dd></div><div><dt>Relation</dt><dd>Intersect, coverage ≥ 50 %</dd></div><div><dt>Result</dt><dd><strong>57</strong> buildings</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd>LiDAR HD point cloud (COPC)</dd></div><div><dt>Selection</dt><dd><code>Classification = 6</code> and height ≥ 7 m</dd></div><div><dt>Targets</dt><dd><code>batiment</code></dd></div><div><dt>Relation</dt><dd>Intersect, coverage ≥ 50 %</dd></div><div><dt>Result</dt><dd><strong>121</strong> buildings out of 918</dd></div></dl>
     <ol class="steps">
         <li><strong>The building points.</strong> Click <em>lhd</em>, tick ATTRIBUTES, <strong>+ Condition</strong>, then Classification = 6. The eye button isolates them on the map.
             <figure><img src="img/stories/s10-01.webp" alt="Step 1: Classification = 6 condition in ATTRIBUTES" loading="lazy" width="1600" height="900"><figcaption>Step 1. Classes are conditions too: they combine with the height.</figcaption></figure>
         </li>
-        <li><strong>The height.</strong> Tick <em>Height above DTM ≥</em>, type 9 and pick the <em>mnt</em> DTM.
+        <li><strong>The height.</strong> Tick <em>Height above DTM ≥</em>, type 7 and pick the <em>mnt</em> DTM.
             <figure><img src="img/stories/s10-02.webp" alt="Step 2: height above the DTM of at least 9 m" loading="lazy" width="1600" height="900"><figcaption>Step 2. PDAL computes the height at the first filter, once for the layer.</figcaption></figure>
         </li>
         <li><strong>Relate to the buildings.</strong> Target <em>batiment</em>, Intersect, cov. ≥ 50 %.
             <figure><img src="img/stories/s10-03.webp" alt="Step 3: batiment target, 50 % minimum coverage" loading="lazy" width="1600" height="900"><figcaption>Step 3.</figcaption></figure>
         </li>
-        <li><strong>Filter.</strong> The height takes 75 s on 20.4 million points, then the filter is instant.
+        <li><strong>Filter.</strong> PDAL computes the height of the 17.3 million points at the first filter, then the filter is instant.
             <figure><img src="img/stories/s10-04.webp" alt="Step 4: the buildings above 9 m" loading="lazy" width="1600" height="900"><figcaption>Step 4. 57 buildings.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
-    <p><strong>57 buildings</strong> out of 668 have at least half of their footprint under roof points more than 9 m high. BD TOPO lists 68 at 9 m or more: check the differences on site.</p>
+    <p><strong>121 buildings</strong> out of 918 have at least half of their footprint under roof points more than 7 m high. BD TOPO lists 80 at 7 m or more: check the differences on site.</p>
     <div class="callout"><strong>Natural ground.</strong> The DTM is interpolated from the ground points; on a slope the height measured downhill is larger.</div>
 </section>
 <!-- 11 ------------------------------------------------------------------ -->
@@ -568,13 +568,13 @@ processing.run("filtermate:batch_filter", {
         <div class="sheet-scrim"></div>
         <h2><span class="num">11</span>Roads to prune</h2>
         <button class="watch" type="button" data-watch aria-label="Watch the video: Roads to prune"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        <p class="credit">LiDAR HD and BD TOPO® © IGN, Etalab cadastre, Estavar (Pyrénées-Orientales).</p>
+        <p class="credit">LiDAR HD and BD TOPO® © IGN, Etalab cadastre, Fenouillet and Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
         <div><h4>The need</h4><p>The local road service plans its pruning campaign: which segments are lined with trees taller than <strong>8 m</strong> within <strong>3 m</strong> of the road?</p></div>
         <div><h4>The FilterMate translation</h4><p>Same move as story 10: <code>Classification = 5</code> (high vegetation) and height ≥ 8 m. This time the targets are <strong>lines</strong>: <em>troncon_de_route</em>, with a 3 m buffer around the tree footprint.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd>LiDAR HD point cloud</dd></div><div><dt>Selection</dt><dd><code>Classification = 5</code> and height ≥ 8 m</dd></div><div><dt>Targets</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Relation</dt><dd>Intersect, 3 m buffer</dd></div><div><dt>Result</dt><dd><strong>91</strong> segments out of 172</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd>LiDAR HD point cloud</dd></div><div><dt>Selection</dt><dd><code>Classification = 5</code> and height ≥ 8 m</dd></div><div><dt>Targets</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Relation</dt><dd>Intersect, 3 m buffer</dd></div><div><dt>Result</dt><dd><strong>83</strong> segments out of 376</dd></div></dl>
     <ol class="steps">
         <li><strong>The high vegetation.</strong> ATTRIBUTES, + Condition, Classification = 5, then the eye to see it.
             <figure><img src="img/stories/s11-01.webp" alt="Step 1: Classification = 5 condition" loading="lazy" width="1600" height="900"><figcaption>Step 1.</figcaption></figure>
@@ -590,7 +590,7 @@ processing.run("filtermate:batch_filter", {
         </li>
     </ol>
     <h3>Result</h3>
-    <p><strong>91 segments</strong> out of 172 have trees taller than 8 m within 3 m: the starting list of the campaign, to rank on site.</p>
+    <p><strong>83 segments</strong> out of 376 have trees taller than 8 m within 3 m: the starting list of the campaign, to rank on site.</p>
 </section>
 <!-- 12 ------------------------------------------------------------------ -->
 <section id="s12">
@@ -753,7 +753,7 @@ processing.run("filtermate:batch_filter", {
 
 <footer class="doc-foot">
     <p>FilterMate 5.1, GPL-3.0, by imagodata. Map data in the videos and screenshots: BD TOPO® © IGN, Licence Ouverte 2.0.</p>
-    <p><a href="index.html">Home</a>, <a href="guide.html">User guide</a>, <a href="stories.html">Use cases</a>, <a href="roadmap.html">Roadmap</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
+    <p><a href="index.html">Home</a>, <a href="guide.html">User guide</a>, <a href="stories.html">Use cases</a>, <a href="roadmap.html">Roadmap</a>, <a href="feedback.html?ref=site-footer">Your feedback</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
 </footer>
 
 </main>

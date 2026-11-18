@@ -916,3 +916,6 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .cloud .cloud-form iframe { display: block; width: 100%; border: 0; }
 .cloud .cloud-fallback { color: var(--text-2); margin: 12px 0 0; overflow-wrap: anywhere; }
 .cloud .section-subtitle a { overflow-wrap: anywhere; }
+.feedback .feedback-jump { display: flex; flex-wrap: wrap; gap: 8px 20px; list-style: none; padding: 0; margin: 20px 0 0; }
+.feedback .feedback-jump a { font-weight: 600; }
+.feedback .section { scroll-margin-top: 72px; }

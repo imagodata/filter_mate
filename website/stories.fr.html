@@ -505,29 +505,29 @@ processing.run("filtermate:batch_filter", {
         <div class="sheet-scrim"></div>
         <h2><span class="num">9</span>Les parcelles en forte pente</h2>
         <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Les parcelles en forte pente"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
-        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Estavar (Pyrénées-Orientales).</p>
+        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Fenouillet et Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>À la mairie d’<strong>Estavar</strong>, en Cerdagne, on révise le document d’urbanisme : quelles parcelles du village sont pour l’essentiel sur une pente de plus de 30 %, donc peu constructibles et exposées au ravinement ?</p></div>
-        <div><h4>La traduction FilterMate</h4><p>Couche <strong>mnt</strong> courante : EXPLORING montre ses outils raster. La liste <strong>Compute on</strong> passe sur <em>Slope (%)</em> : la pente est calculée à la volée sur le MNT, sans raster intermédiaire. La <strong>plage de valeurs</strong> 30 % → maximum, lue sur l’histogramme de la pente, devient la géométrie source. FILTERING garde les <em>parcelles</em> couvertes à au moins <strong>50 %</strong> par cette géométrie.</p></div>
+        <div><h4>Le besoin</h4><p>À la mairie de <strong>Fenouillet</strong>, au nord de Toulouse, on révise le document d’urbanisme : quelles parcelles du carré sont pour l’essentiel sur une pente de plus de 15 %, les talus et les berges où construire coûte plus cher ?</p></div>
+        <div><h4>La traduction FilterMate</h4><p>Couche <strong>mnt</strong> courante : EXPLORING montre ses outils raster. La liste <strong>Compute on</strong> passe sur <em>Slope (%)</em> : la pente est calculée à la volée sur le MNT, sans raster intermédiaire. La <strong>plage de valeurs</strong> 15 % → maximum, lue sur l’histogramme de la pente, devient la géométrie source. FILTERING garde les <em>parcelles</em> couvertes à au moins <strong>50 %</strong> par cette géométrie.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd>MNT <code>mnt</code>, pente calculée (%)</dd></div><div><dt>Sélection</dt><dd>Plage de pente ≥ 30 %</dd></div><div><dt>Cibles</dt><dd><code>parcelle</code></dd></div><div><dt>Relation</dt><dd>Intersect, couverture ≥ 50 %</dd></div><div><dt>Résultat</dt><dd><strong>58</strong> parcelles</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd>MNT <code>mnt</code>, pente calculée (%)</dd></div><div><dt>Sélection</dt><dd>Plage de pente ≥ 15 %</dd></div><div><dt>Cibles</dt><dd><code>parcelle</code></dd></div><div><dt>Relation</dt><dd>Intersect, couverture ≥ 50 %</dd></div><div><dt>Résultat</dt><dd><strong>34</strong> parcelles sur 678</dd></div></dl>
     <ol class="steps">
         <li><strong>Calculer la pente.</strong> Cliquez sur <em>mnt</em> dans le panneau Couches, puis <strong>Compute on</strong> → <em>Slope (%)</em>. L’histogramme montre désormais la pente.
             <figure><img src="img/stories/s9-01.webp" alt="Étape 1 : Compute on réglé sur Slope (%) pour le MNT" loading="lazy" width="1600" height="900"><figcaption>Étape 1. Pente, exposition, ombrage et rugosité sont calculés depuis le MNT.</figcaption></figure>
         </li>
-        <li><strong>Choisir la plage.</strong> Cochez <strong>Value range</strong> et tapez 30 dans Min. La part des pixels retenus s’affiche sous l’histogramme : 12,9 %.
-            <figure><img src="img/stories/s9-02.webp" alt="Étape 2 : plage de pente de 30 % au maximum sur l’histogramme" loading="lazy" width="1600" height="900"><figcaption>Étape 2. La queue de l’histogramme : les versants raides. Le fond de carte montre la même pente, calculée par gdaldem.</figcaption></figure>
+        <li><strong>Choisir la plage.</strong> Cochez <strong>Value range</strong> et tapez 15 dans Min. La part des pixels retenus s’affiche sous l’histogramme : 10,4 %.
+            <figure><img src="img/stories/s9-02.webp" alt="Étape 2 : plage de pente de 15 % au maximum sur l’histogramme" loading="lazy" width="1600" height="900"><figcaption>Étape 2. La queue de l’histogramme : les versants raides. Le fond de carte montre la même pente, en raster précalculé.</figcaption></figure>
         </li>
         <li><strong>Relier aux parcelles.</strong> Cible <em>parcelle</em>, prédicat Intersect, <strong>cov. ≥ 50 %</strong> à côté des prédicats.
             <figure><img src="img/stories/s9-03.webp" alt="Étape 3 : cible parcelle, Intersect et couverture minimale de 50 %" loading="lazy" width="1600" height="900"><figcaption>Étape 3. Sans couverture minimale, une parcelle effleurée par un talus compterait.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s9-04.webp" alt="Étape 4 : les parcelles en forte pente" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 58 parcelles.</figcaption></figure>
+            <figure><img src="img/stories/s9-04.webp" alt="Étape 4 : les parcelles en forte pente" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 34 parcelles.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p><strong>58 parcelles</strong> du kilomètre carré ont au moins la moitié de leur surface sur une pente de plus de 30 %. Le même filtre avec un raster de pente précalculé (<code>gdaldem slope -p</code>) donne le même nombre.</p>
+    <p><strong>34 parcelles</strong> sur 678 du kilomètre carré ont au moins la moitié de leur surface sur une pente de plus de 15 %.</p>
     <div class="callout"><strong>Pente et risque.</strong> Une pente forte n’est pas une zone d’aléa : croisez avec les documents de prévention des risques avant toute décision.</div>
 </section>
 <!-- 10 ------------------------------------------------------------------ -->
@@ -537,29 +537,29 @@ processing.run("filtermate:batch_filter", {
         <div class="sheet-scrim"></div>
         <h2><span class="num">10</span>La hauteur du bâti, mesurée par le LiDAR</h2>
         <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: La hauteur du bâti, mesurée par le LiDAR"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
-        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Estavar (Pyrénées-Orientales).</p>
+        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Fenouillet et Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Le règlement d’urbanisme limite la hauteur des constructions. Le service instructeur veut repérer les bâtiments du village qui dépassent <strong>9 m</strong> au-dessus du terrain naturel, mesurés et non déclarés.</p></div>
-        <div><h4>La traduction FilterMate</h4><p>Couche <strong>nuage de points</strong> courante. Dans ATTRIBUTES, une condition <code>Classification = 6</code> (bâtiment) et la <strong>hauteur au-dessus du MNT ≥ 9 m</strong>, calculée par PDAL au premier filtre. L’empreinte des points retenus est la géométrie source ; une couverture de 50 % écarte les voisins mitoyens.</p></div>
+        <div><h4>Le besoin</h4><p>Le règlement d’urbanisme limite la hauteur des constructions. Le service instructeur de Fenouillet veut repérer les bâtiments du carré qui dépassent <strong>7 m</strong> au-dessus du terrain naturel, mesurés et non déclarés.</p></div>
+        <div><h4>La traduction FilterMate</h4><p>Couche <strong>nuage de points</strong> courante. Dans ATTRIBUTES, une condition <code>Classification = 6</code> (bâtiment) et la <strong>hauteur au-dessus du MNT ≥ 7 m</strong>, calculée par PDAL au premier filtre. L’empreinte des points retenus est la géométrie source ; une couverture de 50 % écarte les voisins mitoyens.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd>nuage LiDAR HD (COPC)</dd></div><div><dt>Sélection</dt><dd><code>Classification = 6</code> et hauteur ≥ 9 m</dd></div><div><dt>Cibles</dt><dd><code>batiment</code></dd></div><div><dt>Relation</dt><dd>Intersect, couverture ≥ 50 %</dd></div><div><dt>Résultat</dt><dd><strong>57</strong> bâtiments</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd>nuage LiDAR HD (COPC)</dd></div><div><dt>Sélection</dt><dd><code>Classification = 6</code> et hauteur ≥ 7 m</dd></div><div><dt>Cibles</dt><dd><code>batiment</code></dd></div><div><dt>Relation</dt><dd>Intersect, couverture ≥ 50 %</dd></div><div><dt>Résultat</dt><dd><strong>121</strong> bâtiments sur 918</dd></div></dl>
     <ol class="steps">
         <li><strong>Les points de bâtiment.</strong> Cliquez sur <em>lhd</em>, cochez ATTRIBUTES, <strong>+ Condition</strong>, puis Classification = 6. Le bouton œil les isole sur la carte.
             <figure><img src="img/stories/s10-01.webp" alt="Étape 1 : condition Classification = 6 dans ATTRIBUTES" loading="lazy" width="1600" height="900"><figcaption>Étape 1. Les classes sont aussi des conditions : elles se combinent avec la hauteur.</figcaption></figure>
         </li>
-        <li><strong>La hauteur.</strong> Cochez <em>Height above DTM ≥</em>, tapez 9 et choisissez le MNT <em>mnt</em>.
-            <figure><img src="img/stories/s10-02.webp" alt="Étape 2 : hauteur au-dessus du MNT supérieure ou égale à 9 m" loading="lazy" width="1600" height="900"><figcaption>Étape 2. PDAL calcule la hauteur au premier filtre, une fois pour la couche.</figcaption></figure>
+        <li><strong>La hauteur.</strong> Cochez <em>Height above DTM ≥</em>, tapez 7 et choisissez le MNT <em>mnt</em>.
+            <figure><img src="img/stories/s10-02.webp" alt="Étape 2 : hauteur au-dessus du MNT supérieure ou égale à 7 m" loading="lazy" width="1600" height="900"><figcaption>Étape 2. PDAL calcule la hauteur au premier filtre, une fois pour la couche.</figcaption></figure>
         </li>
         <li><strong>Relier au bâti.</strong> Cible <em>batiment</em>, Intersect, cov. ≥ 50 %.
             <figure><img src="img/stories/s10-03.webp" alt="Étape 3 : cible batiment, couverture minimale de 50 %" loading="lazy" width="1600" height="900"><figcaption>Étape 3.</figcaption></figure>
         </li>
-        <li><strong>Filter.</strong> La hauteur est calculée en 75 s sur 20,4 millions de points, puis le filtre est immédiat.
-            <figure><img src="img/stories/s10-04.webp" alt="Étape 4 : les bâtiments de plus de 9 m" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 57 bâtiments.</figcaption></figure>
+        <li><strong>Filter.</strong> PDAL calcule la hauteur des 17,3 millions de points au premier filtre, puis le filtre est immédiat.
+            <figure><img src="img/stories/s10-04.webp" alt="Étape 4 : les bâtiments de plus de 7 m" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 121 bâtiments.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p><strong>57 bâtiments</strong> sur 668 ont au moins la moitié de leur emprise sous des points de toit à plus de 9 m. La BD TOPO en déclare 68 de 9 m ou plus : les écarts sont à vérifier sur place.</p>
+    <p><strong>121 bâtiments</strong> sur 918 ont au moins la moitié de leur emprise sous des points de toit à plus de 7 m. La BD TOPO en déclare 80 de 7 m ou plus : les écarts sont à vérifier sur place.</p>
     <div class="callout"><strong>Terrain naturel.</strong> Le MNT est interpolé des points sol ; sur un terrain en pente, la hauteur mesurée côté aval est plus forte.</div>
 </section>
 <!-- 11 ------------------------------------------------------------------ -->
@@ -569,13 +569,13 @@ processing.run("filtermate:batch_filter", {
         <div class="sheet-scrim"></div>
         <h2><span class="num">11</span>Les routes à élaguer</h2>
         <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Les routes à élaguer"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
-        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Estavar (Pyrénées-Orientales).</p>
+        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Fenouillet et Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
         <div><h4>Le besoin</h4><p>L’exploitant de la voirie communale prépare la campagne d’élagage : quels tronçons sont bordés d’arbres de plus de <strong>8 m</strong> à moins de <strong>3 m</strong> de la chaussée ?</p></div>
         <div><h4>La traduction FilterMate</h4><p>Même mouvement que l’histoire 10 : <code>Classification = 5</code> (végétation haute) et hauteur ≥ 8 m. Cette fois les cibles sont des <strong>lignes</strong> : <em>troncon_de_route</em>, avec un tampon de 3 m autour de l’empreinte des arbres.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd>nuage LiDAR HD</dd></div><div><dt>Sélection</dt><dd><code>Classification = 5</code> et hauteur ≥ 8 m</dd></div><div><dt>Cibles</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Relation</dt><dd>Intersect, tampon 3 m</dd></div><div><dt>Résultat</dt><dd><strong>91</strong> tronçons sur 172</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd>nuage LiDAR HD</dd></div><div><dt>Sélection</dt><dd><code>Classification = 5</code> et hauteur ≥ 8 m</dd></div><div><dt>Cibles</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Relation</dt><dd>Intersect, tampon 3 m</dd></div><div><dt>Résultat</dt><dd><strong>83</strong> tronçons sur 376</dd></div></dl>
     <ol class="steps">
         <li><strong>La végétation haute.</strong> ATTRIBUTES, + Condition, Classification = 5, puis l’œil pour la voir.
             <figure><img src="img/stories/s11-01.webp" alt="Étape 1 : condition Classification = 5" loading="lazy" width="1600" height="900"><figcaption>Étape 1.</figcaption></figure>
@@ -587,11 +587,11 @@ processing.run("filtermate:batch_filter", {
             <figure><img src="img/stories/s11-03.webp" alt="Étape 3 : cible troncon_de_route avec un tampon de 3 m" loading="lazy" width="1600" height="900"><figcaption>Étape 3.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s11-04.webp" alt="Étape 4 : les tronçons bordés d’arbres hauts" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 91 tronçons.</figcaption></figure>
+            <figure><img src="img/stories/s11-04.webp" alt="Étape 4 : les tronçons bordés d’arbres hauts" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 83 tronçons.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p><strong>91 tronçons</strong> sur 172 ont des arbres de plus de 8 m à moins de 3 m : la liste de départ de la campagne, à hiérarchiser sur le terrain.</p>
+    <p><strong>83 tronçons</strong> sur 376 ont des arbres de plus de 8 m à moins de 3 m : la liste de départ de la campagne, à hiérarchiser sur le terrain.</p>
 </section>
 <!-- 12 ------------------------------------------------------------------ -->
 <section id="s12">
@@ -754,7 +754,7 @@ processing.run("filtermate:batch_filter", {
 
 <footer class="doc-foot">
     <p>FilterMate 5.1, GPL-3.0, par imagodata. Données des vidéos et des captures : BD TOPO® © IGN, Licence Ouverte 2.0.</p>
-    <p><a href="index.fr.html">Accueil</a>, <a href="guide.fr.html">Guide utilisateur</a>, <a href="stories.fr.html">Cas d'usage</a>, <a href="roadmap.fr.html">Feuille de route</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
+    <p><a href="index.fr.html">Accueil</a>, <a href="guide.fr.html">Guide utilisateur</a>, <a href="stories.fr.html">Cas d'usage</a>, <a href="roadmap.fr.html">Feuille de route</a>, <a href="feedback.fr.html?ref=site-footer">Votre avis</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
 </footer>
 
 </main>

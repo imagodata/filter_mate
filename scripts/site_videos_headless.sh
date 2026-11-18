@@ -5,6 +5,8 @@
 #
 #   scripts/site_videos_headless.sh image                 build the image (QGIS stable + ffmpeg + fonts + pdal)
 #   scripts/site_videos_headless.sh clip hero bridges ... record, then edit each clip (one QGIS at a time)
+#   scripts/site_videos_headless.sh clip hero-dark ...    the dark version: profile fmvideo-dark (Night Mapping)
+#   scripts/site_videos_headless.sh publish hero hero-dark ...  copy the edited MP4 / WebP into website/video/
 #   scripts/site_videos_headless.sh sam-model             fetch SAM 2.1 and onnxruntime into the recording profile
 #
 # Environment:
@@ -13,7 +15,7 @@
 #   FM_GPKG_NAME   its file name
 #   FM5_DATA       folder of the raster / point cloud square (mnt_village.tif, pente_village.tif, estavar.gpkg,
 #                  estavar_village.copc.laz, ortho_rvb.tif), see "data" of scripts/site_videos.sh
-#   FM_SIZE        size of the edited video (default 1920x1080)
+#   FM_SIZE        size of the edited video (default 1920x1080; the site uses FM_SIZE=1280x720 FM_CRF=30)
 #   FM_DOCKER_ARGS more arguments of docker run: "--network host" for a local Ollama (clip agent),
 #                  "--network <net>" to reach a PostGIS container (clip postgis, with FM_PG)
 #   every FM_* / FM5_* variable of scripts/site_videos.py set in this shell is passed to QGIS (FM_PLACE_RIVER,
@@ -41,21 +43,34 @@ GPKG_NAME="${FM_GPKG_NAME:-BDT_3-5_GPKG_LAMB93_D031-ED2026-03-15.gpkg}"
 DATA="${FM5_DATA:-$WORK/data}"
 PROFILE="$WORK/profiles/profiles/fmvideo"
 
+seed_profile() {
+    # A new profile stops on QGIS's first-run dialog before --code runs: start from settings that went through it,
+    # FilterMate enabled, its welcome and the offer of its setup dismissed. fmvideo-dark has the Night Mapping theme.
+    # Before every take, what a take may have left is forgotten: the sections apart, the order of the rails and the
+    # layout settings (config.json), so each one starts from the dock of a new install.
+    local dir="$WORK/profiles/profiles/$1"
+    mkdir -p "$dir/QGIS"
+    if [ ! -f "$dir/QGIS/QGIS4.ini" ]; then
+        printf '%s\n' '[Processing]' 'hasPortedOldLog=true' '' '[PythonPlugins]' 'processing=true' 'filter_mate=true' '' \
+            '[qgis]' 'style=fusion' 'toolbarIconSize=24' '' '[authentication]' 'using-generated-random-password=true' '' \
+            '[rendering]' 'main-canvas-preview-jobs=true' '' '[FilterMate]' 'discord_welcome_dismissed=true' \
+            'whats_new_seen=99' "agent\\setup_offered_version=$(sed -n 's/^version=//p' "$REPO/metadata.txt")" '' \
+            '[locale]' 'userLocale=en' > "$dir/QGIS/QGIS4.ini"
+        if [ "$1" = fmvideo-dark ]; then printf '%s\n' '' '[UI]' 'UITheme=Night Mapping' >> "$dir/QGIS/QGIS4.ini"; fi
+        cp "$dir/QGIS/QGIS4.ini" "$dir/QGIS/QGIS3.ini"
+    fi
+    sed -i -e '/^panels\\/d' -e '/^sections\\/d' "$dir/QGIS/QGIS4.ini"
+    rm -f "$dir/FilterMate/config.json"
+}
+
 sync_code() {
-    mkdir -p "$WORK/plugins" "$WORK/out" "$WORK/scripts" "$PROFILE/QGIS" "$DATA"
+    mkdir -p "$WORK/plugins" "$WORK/out" "$WORK/scripts" "$DATA"
     cp "$REPO/scripts/site_videos.py" "$REPO/scripts/site_video_render.py" "$REPO/scripts/site_stills.json" "$WORK/scripts/"
     rsync -a --delete \
         --exclude .git --exclude .github --exclude .claude --exclude .serena --exclude _bmad --exclude _bmad-output \
         --exclude tests --exclude website --exclude docs --exclude scripts --exclude knowledge --exclude logs \
         --exclude __pycache__ --exclude '*.pyc' --exclude dist --exclude build --exclude reports --exclude research_notes \
         "${FM_PLUGIN_SRC:-$REPO}/" "$WORK/plugins/filter_mate/"
-    if [ ! -f "$PROFILE/QGIS/QGIS4.ini" ]; then
-        printf '%s\n' '[Processing]' 'hasPortedOldLog=true' '' '[PythonPlugins]' 'processing=true' 'filter_mate=true' '' \
-            '[qgis]' 'style=fusion' 'toolbarIconSize=24' '' '[authentication]' 'using-generated-random-password=true' '' \
-            '[rendering]' 'main-canvas-preview-jobs=true' '' '[FilterMate]' 'discord_welcome_dismissed=true' '' \
-            '[locale]' 'userLocale=en' > "$PROFILE/QGIS/QGIS4.ini"
-        cp "$PROFILE/QGIS/QGIS4.ini" "$PROFILE/QGIS/QGIS3.ini"
-    fi
 }
 
 passed_env() {
@@ -80,13 +95,21 @@ case "$cmd" in
         mapfile -t extra < <(passed_env)
         for c in "$@"; do
             echo "== clip $c"
-            run --name "fmvideo_$c" -e FILTERMATE_NO_FEEDBACK_INVITE=1 -e QGIS_PLUGINPATH=/w/plugins -e FM_VIDEO_OUT=/w/out -e FM_CLIP="$c" -e FM_THEME=light \
-                -e FM5_DIR=/data -e FM_GPKG="/bd/$GPKG_NAME" "${extra[@]}" "$IMAGE" bash -c \
-                "timeout ${FM_TIMEOUT:-1500} dbus-run-session -- xvfb-run -a -s '-screen 0 1920x1200x24' qgis --nologo --noversioncheck --lang en --profiles-path /w/profiles --profile fmvideo --code /w/scripts/site_videos.py" \
+            scene="${c%-dark}"; theme=light; profile=fmvideo
+            if [ "$scene" != "$c" ]; then theme=dark; profile=fmvideo-dark; fi
+            seed_profile "$profile"
+            run --name "fmvideo_$c" -e FILTERMATE_NO_FEEDBACK_INVITE=1 -e QGIS_PLUGINPATH=/w/plugins -e FM_VIDEO_OUT=/w/out -e FM_CLIP="$scene" \
+                -e FM5_DIR=/data -e FM_GPKG="/bd/$GPKG_NAME" "${extra[@]}" -e FM_THEME="$theme" "$IMAGE" bash -c \
+                "timeout ${FM_TIMEOUT:-1500} dbus-run-session -- xvfb-run -a -s '-screen 0 1920x1200x24' qgis --nologo --noversioncheck --lang en --profiles-path /w/profiles --profile $profile --code /w/scripts/site_videos.py" \
                 > "$WORK/out/$c.stdout.txt" 2>&1 || echo "  clip $c ended with $?"
             grep -n 'stopped\|Traceback\|counts' "$WORK/out/$c/capture.log" | cut -c1-300 | tail -3 || true
             run -e FM_VIDEO_OUT=/w/out -e FM_SIZE="${FM_SIZE:-1920x1080}" -e FM_CRF="${FM_CRF:-23}" "$IMAGE" \
                 python3 /w/scripts/site_video_render.py "$c" 2>&1 | tail -1
+        done
+        ;;
+    publish)
+        for c in "$@"; do
+            cp "$WORK/out/site/$c.mp4" "$WORK/out/site/$c.webp" "$REPO/website/video/" && echo "published $c"
         done
         ;;
     sam-model)
@@ -103,5 +126,5 @@ case "$cmd" in
             python3 -m pip install -q --no-cache-dir --target /w/profiles/profiles/fmvideo/filtermate/python/$V --constraint /tmp/c.txt onnxruntime'
         ;;
     *)
-        sed -n 2,34p "$0"; exit 1 ;;
+        sed -n 2,36p "$0"; exit 1 ;;
 esac

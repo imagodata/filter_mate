@@ -509,7 +509,16 @@ def open_plugin():
 
 
 def size_dock():
+    """The dock as a new install shows it, DOCK_WIDTH wide: every section in it, EXPLORING and FILTERING open."""
     d = dock()
+    panels = getattr(d, '_fm_panels', None)
+    if panels is not None and panels.detached():
+        log(f'sections apart at the start: {panels.groups()}, merged back')
+        panels.attach_all()
+    sections = getattr(d, '_fm_sections', None)
+    if sections is not None:
+        sections.open_top('exploring')
+    d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
     d.setMinimumWidth(0)
     iface.mainWindow().resizeDocks([d], [DOCK_WIDTH], Qt.Orientation.Horizontal)
 
@@ -783,10 +792,30 @@ def typed_custom(expr, per_char=45):
     return act(custom_edit, custom_mode) + type_into(custom_edit, expr, per_char) + [(400, custom(expr))]
 
 
+SECTION_KEYS = ('agent', 'exploring', 'filtering', 'exporting', 'configuration')
+
+
+def section_key(text):
+    return next(key for key in SECTION_KEYS if key.startswith(text.lower()[:5]))
+
+
+def chip(key, holder=None):
+    """The chip of a section in the rail of the dock (or of the panel ``holder``)."""
+    if holder is not None:
+        return holder.rail.chip(key)
+    sections = dock()._fm_sections
+    rail = sections.top_rail if key in ('agent', 'exploring') else sections.bottom_rail
+    return rail.chip(key)
+
+
 def toolbox_button(text):
-    """The header button of a page of the Filtering / Exporting / Configuration toolbox."""
+    """What opens the Filtering / Exporting / Configuration page: its chip in the rail of the dock (the default since
+    5.1), or its header in the tool box when the headers are stacked (APP.DOCKWIDGET.SECTION_HEADERS)."""
     def _r():
         from qgis.PyQt.QtWidgets import QAbstractButton
+        sections = getattr(dock(), '_fm_sections', None)
+        if sections is not None and not sections.stacked:
+            return rect_of(chip(section_key(text)))
         for b in dock().toolBox_tabTools.findChildren(QAbstractButton):
             if text.lower() in b.text().lower():
                 return rect_of(b)
@@ -1206,7 +1235,8 @@ BUFFER = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2) 
     + ending(S3_FLOOD_TARGETS)
 
 
-# compare (teaser 5.1.1): the Garonne and 300 m around in Blagnac, then Compare: before left of the line, after right.
+# compare: the water of Blagnac and 100 m around (300 m in the teaser of 5.1.1), then Compare: before left of the line,
+# after right.
 def swipe_item():
     for it in iface.mapCanvas().scene().items():
         if type(it).__name__ == 'SwipeItem':
@@ -1247,19 +1277,20 @@ def click_compare():
     compare_button().click()
 
 
-COMPARE = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Blagnac\'', 1.2) + scope('commune') + recorded_scene(1.2) \
-    + pick_layer('surface_hydrographique') + [
-    (1200, cam(['mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection'], dur=1.4, pad=30)),
-] + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode) + [
-    hold(1500),
-] + select_all_multi_menu() + [hold(400), (0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
-    + targets(S3_FLOOD_TARGETS) + predicates(['intersect']) \
-    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(300) + and_targets() + [
-    hold(500), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + show_map(2500) + [(0, quiet_message_bar), (0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
-    + act(compare_button, click_compare) + [(500, swipe_ready()), (0, cam('canvas', dur=1.4)), hold(1200)] \
-    + sweep(0.5, 0.15) + [hold(700)] + sweep(0.15, 0.85, ms=3600, steps=56) + [hold(700)] + sweep(0.85, 0.5, ms=1800, steps=28) \
-    + [hold(1200), (0, lambda: log(f'swipe item {swipe_item()} busy={getattr(swipe_item(), "busy", None)}'))] \
+# The filter is set up and run before the recording (story 3 shows how); the take is Compare itself.
+COMPARE = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Blagnac\'', 1.2) + scope('commune') + [
+    (500, source('surface_hydrographique')), (2000, multi_mode), (3000, select_all_multi), hold(4000),
+    (500, filtering_tab),
+    (300, lambda: check_combo_items(dock().checkableComboBoxLayer_filtering_layers_to_filter, S3_FLOOD_TARGETS, True)),
+    (300, refresh_targets),
+    (300, lambda: check_combo_items(dock().comboBox_filtering_geometric_predicates, ['intersect'], True)),
+    (300, buffer_value(100)), (300, combine(None, 'AND')),
+    (500, click_filter), (3000, wait_idle()), hold(1500),
+] + recorded_scene(1.2) + show_map(2200) + [(0, quiet_message_bar), (0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
+    + act(compare_button, click_compare) + [(500, swipe_ready()), (0, cam('canvas', dur=1.4)), hold(1000)] \
+    + sweep(0.5, 0.15) + [hold(600)] + sweep(0.15, 0.85, ms=3600, steps=56) + [hold(600)] + sweep(0.85, 0.5, ms=1800, steps=28) \
+    + [hold(1000), (0, lambda: log(f'swipe item {swipe_item()} busy={getattr(swipe_item(), "busy", None)}')),
+       (0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
     + act(compare_button, click_compare) + [hold(800)] + ending(S3_FLOOD_TARGETS)
 
 
@@ -1579,23 +1610,31 @@ PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, de
 
 
 # ------------------------------------------------------------------ FilterMate 5: raster and LiDAR
-# Estavar (Cerdagne, Pyrénées-Orientales): one square kilometre of the village cut from the
-# IGN LiDAR HD tiles 0617_6152 and 0617_6153 (COPC), the DTM interpolated from
-# their ground points (1 m), its slope in percent, BD TOPO (IGN WFS) and Etalab cadastre.
-# scripts/site_videos.sh documents how the files of fm_video\data are made.
+# Fenouillet / Saint-Alban (Toulouse Métropole, since November 2026; Estavar before): one square kilometre,
+# 571000-572000 x 6289000-6290000, cut from the IGN LiDAR HD (COPC), the DTM interpolated from its ground points
+# (0.5 m), its slope in percent, BD TOPO and Etalab cadastre. The files keep the names they had for Estavar
+# (mnt_village.tif, pente_village.tif, estavar.gpkg, estavar_village.copc.laz); scripts/site_videos.sh documents
+# how the Estavar ones were made, the Toulouse Métropole ones come from the same steps on another square.
 FM5_DIR = os.environ.get('FM5_DIR', os.path.join(ROOT, 'data'))
 FM5_DTM = os.path.join(FM5_DIR, 'mnt_village.tif')
 FM5_SLOPE = os.path.join(FM5_DIR, 'pente_village.tif')
 FM5_GPKG = os.path.join(FM5_DIR, 'estavar.gpkg')
 FM5_TILE = os.path.join(FM5_DIR, 'estavar_village.copc.laz')
-# FM5_EXTENT ("xmin,ymin,xmax,ymax"), FM5_DTM_RANGE ("low,high" in metres), FM5_HEIGHT, FM5_SURVEY_EXPR, FM5_SURVEY_RECT,
-# FM5_SURVEY_ZIP: another square kilometre than Estavar (the teaser uses Fenouillet / Saint-Alban, Toulouse Métropole)
-FM5_EXTENT = tuple(float(v) for v in os.environ.get('FM5_EXTENT', '617000,6152100,618000,6153100').split(','))
-_DTM_LOW, _DTM_HIGH = (float(v) for v in os.environ.get('FM5_DTM_RANGE', '1200,1315').split(','))
+# FM5_EXTENT ("xmin,ymin,xmax,ymax"), FM5_DTM_RANGE ("low,high" in metres), FM5_SLOPE_MIN (%), FM5_HEIGHT (m),
+# FM5_SURVEY_EXPR, FM5_SURVEY_RECT, FM5_SURVEY_ZIP: another square kilometre than Fenouillet (Estavar was
+# 617000,6152100,618000,6153100 with 1200,1315, slope 30, height 9, "nature" = 'Eglise', 617207,6152391,617507,6152691)
+FM5_EXTENT = tuple(float(v) for v in os.environ.get('FM5_EXTENT', '571000,6289000,572000,6290000').split(','))
+_DTM_LOW, _DTM_HIGH = (float(v) for v in os.environ.get('FM5_DTM_RANGE', '122,135').split(','))
+# The square is flat (122-135 m): the steep ground is the embankments and banks, 15 % rather than the 30 % of Estavar.
+FM5_SLOPE_MIN = float(os.environ.get('FM5_SLOPE_MIN', '15'))
 DTM_COLORS = [(round(_DTM_LOW + f * (_DTM_HIGH - _DTM_LOW), 1), c) for f, c in
               ((0.0, '#3f7d4f'), (0.217, '#8fb46a'), (0.435, '#d8d39a'), (0.696, '#c8a27a'), (1.0, '#f3efe8'))]
 FM5_STYLE = {'troncon_de_route': ('#e07b24', 1.1, 1.0)}  # readable on the hillshade, light or dark
 SLOPE_COLORS = [(0, '#f4f1e4'), (15, '#e8d48c'), (30, '#de8f3c'), (60, '#ad3a2c'), (100, '#5c1a22')]
+
+
+# The buildings of Fenouillet cover the square (a commercial zone): grey where they are only the setting.
+FM5_QUIET_BUILDINGS = [(0, restyle('batiment', (150, 150, 150, 150), '#6b6b6b', 0.2))]
 
 
 def ramp_layer(path, name, colors, opacity):
@@ -1843,36 +1882,39 @@ def combo_pick(get_combo, data, keep=1200):
     return act(get_combo, show) + [(keep, choose), hold(350)]
 
 
-# slope (story 9): slope of the DTM computed on the fly (Compute on: Slope %) >= 30 % -> parcels at
+# slope (story 9): slope of the DTM computed on the fly (Compute on: Slope %) >= FM5_SLOPE_MIN -> parcels at
 # least half on it. The pente layer is only the backdrop: a derivative has no map preview.
-SLOPE = boot5(['hillshade', 'pente', 'mnt', 'parcelle', 'batiment'], hidden=('mnt',)) + fm5_scene() \
+SLOPE = boot5(['hillshade', 'pente', 'mnt', 'parcelle', 'batiment'], hidden=('mnt',)) + FM5_QUIET_BUILDINGS + [
+    (0, restyle('parcelle', None, '#1d4ed8', 0.7))] + fm5_scene() \
     + to_exploring('mnt') + combo_pick(lambda: raster_panel()._derivative_combo, 'slope_percent') + [
     hold(900), still('s9-01'),
 ] + act(group_check(lambda: raster_panel()._range_group), open_group(lambda: raster_panel()._range_group)) + [
     hold(600), (0, ensure_visible(lambda: raster_panel()._max_spin)), hold(300),
     (0, cam(lambda: raster_panel()._range_group, dur=1.2, pad=30)),
-] + typed_spin(lambda: raster_panel()._min_spin, 30) + [hold(1300), still('s9-02'), (0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+] + typed_spin(lambda: raster_panel()._min_spin, FM5_SLOPE_MIN) + [hold(1300), still('s9-02'), (0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
     + targets(['parcelle']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
     hold(600), still('s9-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + [(0, lambda: counts(['parcelle', 'batiment']))] + show_map(4500, 1.05) + [still('s9-04')] \
+] + run_filter() + [(0, lambda: counts(['parcelle', 'batiment'])), (0, quiet_message_bar)] + show_map(4500, 1.05) \
+    + [still('s9-04')] \
     + ending(['parcelle'])
 
-# heights (story 10): building points (class 6) more than 9 m above the DTM (PDAL) -> buildings with
+# heights (story 10): building points (class 6) more than FM5_HEIGHT m above the DTM (PDAL) -> buildings with
 # at least half of their footprint under such points.
 HEIGHTS = boot5(['hillshade', 'mnt', 'lhd', 'batiment'], hidden=('mnt',)) + fm5_scene() + to_exploring('lhd') \
-    + class_condition(6, 'mnt', int(os.environ.get('FM5_HEIGHT', '9')), 's10') + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + class_condition(6, 'mnt', int(os.environ.get('FM5_HEIGHT', '7')), 's10') + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
     + targets(['batiment']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
     (200, buffer_off), hold(500), still('s10-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter_long() + [(0, lambda: counts(['batiment']))] + show_map(4500, 1.05) + [still('s10-04')] \
+] + run_filter_long() + [(0, lambda: counts(['batiment'])), (0, quiet_message_bar)] + show_map(4500, 1.05) + [still('s10-04')] \
     + ending(['batiment'])
 
 # pruning (story 11): high vegetation (class 5) more than 8 m above the DTM -> road segments within 3 m.
-PRUNING = boot5(['hillshade', 'mnt', 'lhd', 'batiment', 'troncon_de_route'], hidden=('mnt',)) + fm5_scene() \
+PRUNING = boot5(['hillshade', 'mnt', 'lhd', 'batiment', 'troncon_de_route'], hidden=('mnt',)) + FM5_QUIET_BUILDINGS \
+    + fm5_scene() \
     + to_exploring('lhd') + class_condition(5, 'mnt', 8, 's11') + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
     + targets(['troncon_de_route']) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(3) + [
     hold(500), still('s11-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter_long() + [(0, lambda: counts(['troncon_de_route']))] + show_map(4500, 1.05) + [still('s11-04')] \
+] + run_filter_long() + [(0, lambda: counts(['troncon_de_route'])), (0, quiet_message_bar)] + show_map(4500, 1.05) + [still('s11-04')] \
     + ending(['troncon_de_route'])
 
 
@@ -2011,18 +2053,20 @@ def zip_edit():
     return dock().lineEdit_exporting_zip
 
 
-SURVEY_ZIP = os.path.join(EXPORT_DIR, os.environ.get('FM5_SURVEY_ZIP', 'estavar_eglise.zip'))
+SURVEY_ZIP = os.path.join(EXPORT_DIR, os.environ.get('FM5_SURVEY_ZIP', 'fenouillet_batiment.zip'))
 
 
-# survey (story 12): the church and 50 m around clip the DTM and the LiDAR, then both are exported.
-SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + fm5_scene() + pick_layer('batiment') + [
+# survey (story 12): the tallest building of the square (17.4 m; the church at Estavar) and 50 m around clip the DTM
+# and the LiDAR, then both are exported.
+SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + FM5_QUIET_BUILDINGS + fm5_scene() \
+    + pick_layer('batiment') + [
     (1500, cam(EXPLORE_ZONE, dur=1.4, pad=30)),
-] + typed_custom(os.environ.get('FM5_SURVEY_EXPR', '"nature" = \'Eglise\''), per_char=70) + settle() + show_map(2000) + [
+] + typed_custom(os.environ.get('FM5_SURVEY_EXPR', '"hauteur" >= 17'), per_char=70) + settle() + show_map(2000) + [
     still('s12-01'), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(['mnt', 'lhd']) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(50) + [
     hold(500), still('s12-02'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + [(0, zoom_rect(*(float(v) for v in os.environ.get('FM5_SURVEY_RECT', '617207,6152391,617507,6152691').split(','))))] + settle() + show_map(4000, 1.05) + [
+] + run_filter() + [(0, zoom_rect(*(float(v) for v in os.environ.get('FM5_SURVEY_RECT', '571414,6289121,571714,6289421').split(','))))] + settle() + show_map(4000, 1.05) + [
     still('s12-03'),
     (0, cam('dock', dur=1.4, pad=10)),
 ] + act(toolbox_button('export'), lambda: dock().toolBox_tabTools.setCurrentIndex(1)) + [
@@ -2040,7 +2084,448 @@ SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + fm5_scene(
     + act('pushButton_action_export', export_with_recap) + [hold(1500)] \
     + settle(4.0) + [(0, wait_long())] + show_map(3000) + ending()
 
-CLIPS = {'hero': HERO, 'metropole': METROPOLE, 'compare': COMPARE, 'sam': SAM, 'agent': AGENT, 'postgis': POSTGIS, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
+# ------------------------------------------------------------------ FilterMate 5.1: the dock, its panels, its settings
+# The sections of the dock (rail of chips by default) leave it for panels of QGIS, share a panel, come back; the
+# layout settings apply at once; the setup with no model asks where the sections go. The menus and cards shown
+# are the real ones: a step opens them where a click would, glides to the entry, then triggers it.
+def section_panels():
+    return dock()._fm_panels
+
+
+def panel_of(key):
+    return section_panels().panel(key)
+
+
+def section_menu(key, command, holder=None, keep=1700):
+    """Right click on the chip of ``key`` (in the dock, or in the rail of the panel ``holder``, a callable): the menu
+    of the section opens at the chip, the cursor glides to the entry ``action_section_<command>`` and clicks it."""
+    def target():
+        return chip(key, holder() if holder is not None else None)
+
+    def open_menu():
+        where = target()
+        parent = holder() if holder is not None else dock()
+        menu = section_panels().build_menu(key, parent)
+        if menu is None:
+            log(f'no menu for {key}')
+            return
+        STATE['section_menu'] = menu
+        menu.popup(where.mapToGlobal(QPoint(where.width() // 2, where.height() // 2)))
+        if menu not in REC.windows:
+            REC.windows.append(menu)
+        log(f'menu of {key}: {[a.objectName() for a in menu.actions() if not a.isSeparator()]}')
+
+        def entry():
+            return next((a for a in menu.actions() if a.objectName() == 'action_section_' + command), None)
+
+        def highlight():
+            action = entry()
+            if action is None:
+                log(f'menu entry not found: {command}')
+                return
+            r = to_main(menu, menu.actionGeometry(action))
+            REC.event('point', x=r.center().x(), y=r.center().y())
+            menu.setActiveAction(action)
+
+        def activate():
+            action = entry()
+            if action is not None:
+                r = to_main(menu, menu.actionGeometry(action))
+                REC.event('click', x=r.center().x(), y=r.center().y())
+            menu.close()
+            if menu in REC.windows:
+                REC.windows.remove(menu)
+            if action is not None:
+                action.trigger()
+                log(f'{command} {key}: groups {section_panels().groups()}')
+
+        QTimer.singleShot(350, highlight)
+        QTimer.singleShot(keep, activate)
+
+    return act(target, open_menu) + [hold(keep + 600)]
+
+
+def chip_click(key, holder=None):
+    """A left click on a chip: its section opens (in the dock, or in the panel ``holder``)."""
+    def target():
+        return chip(key, holder() if holder is not None else None)
+    return act(target, lambda: target().click())
+
+
+def share_column(key, part=0.58):
+    """The panel of ``key`` and the dock share the column: the panel gets ``part`` of the height."""
+    def _s():
+        panel, d = panel_of(key), dock()
+        if panel is None or panel.isFloating():
+            return
+        total = panel.height() + d.height()
+        first, second = (panel, d) if panel.y() < d.y() else (d, panel)
+        sizes = [int(total * part), total - int(total * part)] if first is panel else \
+            [total - int(total * part), int(total * part)]
+        iface.mainWindow().resizeDocks([first, second], sizes, Qt.Orientation.Vertical)
+    return _s
+
+
+def beside_map(key):
+    """The panel of ``key`` dragged by its title next to the map, left of it (a QGIS gesture: the cursor glides from
+    the title to the edge of the map, the panel lands there)."""
+    def title():
+        panel = panel_of(key)
+        r = rect_of(panel)
+        return QRect(r.x() + 20, r.y(), 140, 22)
+
+    def edge():
+        r = rect_of(iface.mapCanvas())
+        return QRect(r.x() + 30, r.y() + r.height() // 3, 1, 1)
+
+    def drop():
+        window = iface.mainWindow()
+        layers = window.findChild(QDockWidget, 'Layers')
+        panel = panel_of(key)
+        window.splitDockWidget(layers, panel, Qt.Orientation.Horizontal)
+        window.resizeDocks([layers, panel], [250, DOCK_WIDTH - 20], Qt.Orientation.Horizontal)
+        log(f'{key} beside the map: {rect_of(panel)}')
+
+    return [(600, point(title)), (700, lambda: REC.event('click', **dict(zip(('x', 'y'), (title().center().x(),
+                                                                                       title().center().y())))))] + [
+        (900, point(edge)), (500, drop)]
+
+
+def merge_all():
+    """Back to the dock, whatever is apart (end of a take: the next one starts from the dock of a new install)."""
+    if section_panels().detached():
+        section_panels().attach_all()
+
+
+def staged(scale, target_names=('batiment', 'troncon_de_route'), predicate='intersect'):
+    """Unrecorded: Muret picked in EXPLORING, FILTERING set on some targets (so its page is not empty), the commune
+    framed at ``scale``."""
+    def remember():
+        STATE['scene_scale'] = scale
+    return [
+        (0, restyle('commune', None, '#5b636b', 0.8, selection_alpha=120)),
+        (500, source('commune')), (1500, single_mode(tracking=False)), (1500, pick_focus), (500, filtering_tab),
+        (500, enable('pushButton_checkable_filtering_layers_to_filter')),
+        (300, lambda: check_combo_items(dock().checkableComboBoxLayer_filtering_layers_to_filter, list(target_names),
+                                        uncheck_others=True)),
+        (300, refresh_targets),
+        (300, enable('pushButton_checkable_filtering_geometric_predicates')),
+        (300, lambda: check_combo_items(dock().comboBox_filtering_geometric_predicates, [predicate], True)),
+        (0, remember), (500, zoom_focus(scale)), (1500, wait_idle()), (500, rec_start),
+        (0, cam('full', dur=0, drift=1.03))]
+
+
+PANELS_LAYERS = ['commune', 'zone_de_vegetation', 'surface_hydrographique', 'batiment', 'troncon_de_route']
+
+# panels: FILTERING leaves the dock by the menu of its chip, EXPORTING joins its panel, a chip of the panel opens its
+# section, the panel goes next to the map, then every section merges back into the dock.
+PANELS = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + staged(1.15) + [
+    hold(1400),
+    (0, cam('dock', dur=1.4, pad=12)), hold(800),
+] + section_menu('filtering', 'detach') + [
+    hold(300), (0, share_column('filtering')), hold(600), (0, cam('full', dur=1.4)), hold(1800),
+    (0, cam('dock', dur=1.3, pad=12)),
+] + section_menu('exporting', 'group_filtering') + [
+    hold(400), (0, cam(lambda: panel_of('filtering'), dur=1.3, pad=12)), hold(1600),
+] + chip_click('filtering', lambda: panel_of('filtering')) + [hold(1400), (0, cam('full', dur=1.4)), hold(600)] \
+    + beside_map('filtering') + [hold(2400), (0, cam(lambda: panel_of('filtering'), dur=1.3, pad=12)), hold(600)] \
+    + section_menu('filtering', 'attach_all', holder=lambda: panel_of('filtering')) + [
+    hold(500), (0, cam('full', dur=1.4)), hold(2600), (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
+
+
+def explo_chooser():
+    """The chooser of the current layer EXPLORING shows once it is away from FILTERING."""
+    from qgis.PyQt.QtWidgets import QComboBox
+    return dock().frame_exploring.findChild(QComboBox, 'comboBox_exploring_current_layer')
+
+
+def chooser_pick(name, keep=1300):
+    """Open the chooser of EXPLORING and choose the layer ``name`` in its list (as a click there does)."""
+    def show():
+        explo_chooser().showPopup()
+
+    def choose():
+        combo = explo_chooser()
+        index = next((i for i in range(combo.count()) if combo.itemText(i).split(' [')[0] == name), -1)
+        if index < 0:
+            log(f'layer not in the chooser: {name} {[combo.itemText(i) for i in range(combo.count())]}')
+            hide_popup()
+            return
+        view = combo.view()
+        r = to_main(view.viewport(), view.visualRect(combo.model().index(index, 0)))
+        REC.event('point', x=r.center().x(), y=r.center().y())
+        REC.event('click', x=r.center().x(), y=r.center().y())
+        hide_popup()
+        combo.setCurrentIndex(index)
+        combo.activated.emit(index)
+        log(f'chooser -> {combo.currentText()}, current layer {iface.activeLayer().name()}')
+
+    return act(explo_chooser, show) + [(keep, choose), hold(400)]
+
+
+EXPLO_LAYERS = PANELS_LAYERS
+
+def pick_where(name, expr):
+    """The single selection picker of EXPLORING set on the feature of ``name`` matching ``expr``."""
+    def _s():
+        fids = fids_where(name, expr)
+        log(f'pick {name} {expr} -> {fids[:3]}')
+        if fids:
+            dock().mFeaturePickerWidget_exploring_single_selection.setFeature(fids[0])
+        hide_popup()
+    return _s
+
+
+# exploring-panel: EXPLORING in its own panel, with its chooser of the current layer: the buildings chosen there
+# (their page follows), the communes chosen again, Portet-sur-Garonne picked with tracking on: the map follows; then
+# EXPLORING back into the dock.
+EXPLORING_PANEL = boot(EXPLO_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.0) + staged(1.0) + [
+    (0, lambda: iface.mapCanvas().setSelectionColor(QColor(255, 216, 61, 120))),
+    hold(1200), (0, cam('dock', dur=1.4, pad=12)), hold(700),
+] + section_menu('exploring', 'detach') + [
+    hold(300), (0, share_column('exploring', 0.55)), hold(500), (0, cam('full', dur=1.4)), hold(1600),
+    (0, cam(lambda: panel_of('exploring'), dur=1.3, pad=12)), hold(500),
+] + chooser_pick('batiment') + [hold(2200)] + chooser_pick('commune') + [hold(1200)] \
+    + act('pushButton_checkable_exploring_tracking', enable('pushButton_checkable_exploring_tracking')) \
+    + act('pushButton_checkable_exploring_selecting', enable('pushButton_checkable_exploring_selecting'), after=500) \
+    + act(picker_edit) + type_into(picker_edit, 'Portet', per_char=130) + [
+    (900, pick_where('commune', '"nom_officiel" = \'Portet-sur-Garonne\''))] + settle() + show_map(3200, 1.04) + [
+    (0, cam(lambda: panel_of('exploring'), dur=1.3, pad=12)), hold(400),
+] + section_menu('exploring', 'attach', holder=lambda: panel_of('exploring')) + [
+    hold(400), (0, cam('full', dur=1.4)), hold(2400), (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
+
+
+def config_search():
+    from qgis.PyQt.QtWidgets import QLineEdit as _Edit
+    return dock().config_view_container.findChild(_Edit)
+
+
+def config_item(path):
+    """Value item of a key path of the CONFIGURATION tree (a key shown under its display name keeps it in UserRole)."""
+    parent, item = dock().config_model.invisibleRootItem(), None
+    for key in path:
+        rows = [row for row in range(parent.rowCount())
+                if key in (parent.child(row, 0).data(Qt.ItemDataRole.UserRole), parent.child(row, 0).text())]
+        if not rows:
+            return None
+        item, parent = parent.child(rows[0], 1), parent.child(rows[0], 0)
+    return item
+
+
+def view_index(view, item):
+    """Index of ``item`` in the tree of CONFIGURATION (JsonView keeps its model in an attribute named ``model``)."""
+    from qgis.PyQt.QtWidgets import QTreeView
+    model = QTreeView.model(view)
+    return model.mapFromSource(item.index()) if hasattr(model, 'mapFromSource') else item.index()
+
+
+def config_value_rect(path):
+    def _r():
+        view = dock().config_view
+        item = config_item(path)
+        if item is None:
+            return rect_of(view)
+        index = view_index(view, item)
+        view.scrollTo(index)
+        return to_main(view.viewport(), view.visualRect(index))
+    return _r
+
+
+def config_choose(path, value, keep=1300):
+    """Open the editor of a choice of the CONFIGURATION tree, choose ``value`` in its list, commit it: the setting
+    applies at once (as a choice of the user does)."""
+    def editor():
+        from qgis.PyQt.QtWidgets import QComboBox
+        view = dock().config_view
+        return next((c for c in view.viewport().findChildren(QComboBox) if c.isVisible()), None)
+
+    def open_editor():
+        view = dock().config_view
+        item = config_item(path)
+        index = view_index(view, item)
+        view.setCurrentIndex(index)
+        view.edit(index)
+
+        def popup():
+            combo = editor()
+            if combo is None:
+                log(f'no editor for {path}')
+                return
+            combo.showPopup()
+        QTimer.singleShot(250, popup)
+
+    def choose():
+        combo = editor()
+        if combo is None:
+            hide_popup()
+            return
+        i = combo.findText(value)
+        if i < 0:
+            i = combo.findText(value, Qt.MatchFlag.MatchContains)
+        if combo.view().isVisible() and i >= 0:
+            r = to_main(combo.view().viewport(), combo.view().visualRect(combo.model().index(i, 0)))
+            REC.event('point', x=r.center().x(), y=r.center().y())
+            REC.event('click', x=r.center().x(), y=r.center().y())
+        hide_popup()
+        combo.setCurrentIndex(i)
+        view = dock().config_view
+        view.commitData(combo)
+        from qgis.PyQt.QtWidgets import QAbstractItemDelegate
+        view.closeEditor(combo, QAbstractItemDelegate.EndEditHint.NoHint)
+        log(f'{".".join(path)} -> {value}: {config_item(path).data(Qt.ItemDataRole.UserRole).get("value")}')
+
+    return act(config_value_rect(path), open_editor) + [(keep, choose), hold(500)]
+
+
+def config_find(text):
+    """Click the search field of CONFIGURATION and type the name of a setting: the tree goes to it."""
+    return act(config_search, lambda: config_search().setFocus()) + type_into(config_search, text, per_char=70) \
+        + [(400, lambda: dock().config_view_container._on_search_enter())]
+
+
+def stacked_header(key):
+    """The header of a section when the headers are stacked."""
+    def _r():
+        sections = dock()._fm_sections
+        if key in sections._headers:
+            return rect_of(sections._headers[key])
+        return toolbox_button(key)()
+    return _r
+
+
+def header_click(key):
+    def run():
+        d = dock()
+        page = getattr(d, key.upper())
+        d.toolBox_tabTools.setCurrentWidget(page)
+    return act(stacked_header(key), run)
+
+
+HEADERS = ('APP', 'DOCKWIDGET', 'SECTION_HEADERS')
+BAR = ('APP', 'DOCKWIDGET', 'ACTION_BAR_POSITION')
+
+# layout: CONFIGURATION, two settings typed in its search and chosen in the tree, applied at once: the headers stacked
+# instead of the rails, the buttons under each section instead of one bar; then FILTERING and EXPORTING opened.
+LAYOUT = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + staged(1.15) + [
+    hold(1200), (0, cam('dock', dur=1.4, pad=12)), hold(1200),
+] + act(toolbox_button('config'), lambda: dock().toolBox_tabTools.setCurrentWidget(dock().CONFIGURATION)) + [
+    hold(700), (0, cam(lambda: dock().config_view_container, dur=1.2, pad=16)), hold(500),
+] + config_find('SECTION_HEADERS') + [hold(700)] + config_choose(HEADERS, 'stacked') + [
+    hold(900), (0, cam('dock', dur=1.2, pad=12)), hold(2200),
+    (0, cam(lambda: dock().config_view_container, dur=1.2, pad=16)), hold(400),
+] + config_find('ACTION_BAR_POSITION') + [hold(700)] + config_choose(BAR, 'sections') + [
+    hold(900), (0, cam(lambda: [dock().toolBox_tabTools, dock().pushButton_action_filter], dur=1.2, pad=16)), hold(400)] \
+    + header_click('filtering') + [hold(2200)] + header_click('exporting') + [hold(2200)] \
+    + header_click('filtering') + [hold(800), (0, cam('full', dur=1.4)), hold(2400),
+                                   (0, stop_recording), (500, quit_when_idle)]
+
+
+def agent_open_visible():
+    return chip_click('agent')
+
+
+def wizard_card():
+    return agent_chat()._wizard._card
+
+
+def card_option(label):
+    def _r():
+        card = wizard_card()
+        for buttons, _other, _field in card._groups:
+            for button, text in buttons:
+                if text == label:
+                    return rect_of(button)
+        return rect_of(card)
+    return _r
+
+
+def card_button(label):
+    card = wizard_card()
+    for buttons, _other, _field in (card._groups if card is not None else ()):
+        for button, text in buttons:
+            if text == label:
+                return button
+    return None
+
+
+def maybe_tick(label):
+    """Tick ``label`` on the card in view, when it is one of its choices (the steps of the setup vary)."""
+    def aim():
+        b = card_button(label)
+        if b is not None and not b.isChecked():
+            r = rect_of(b)
+            REC.event('point', x=r.x() + 10, y=r.center().y())
+
+    def tick():
+        b = card_button(label)
+        if b is not None and not b.isChecked():
+            r = rect_of(b)
+            REC.event('click', x=r.x() + 10, y=r.center().y())
+            b.setChecked(True)
+    return [(500, aim), (750, tick)]
+
+
+def card_in_view():
+    card = wizard_card()
+    if card is not None:
+        agent_panel().thread.ensureWidgetVisible(card, 10, 10)
+        log('card: ' + ' | '.join(f'{c.text()}: ' + ', '.join(f'{t}{"*" if b.isChecked() else ""}' for b, t in g[0])
+                                  for c, g in zip(card._chips, card._groups)))
+
+
+def card_answer():
+    """Answer the card in view (its choices as they are, or ticked just before); nothing when the cards are over."""
+    def aim():
+        card = wizard_card()
+        if card is not None:
+            r = rect_of(card.answer_button)
+            REC.event('point', x=r.center().x(), y=r.center().y())
+
+    def answer():
+        card = wizard_card()
+        if card is not None:
+            r = rect_of(card.answer_button)
+            REC.event('click', x=r.center().x(), y=r.center().y())
+            card.answer_button.click()
+    return [(0, card_in_view), hold(300), (400, aim), (550, answer), hold(600)]
+
+
+def setup_card(layout=False):
+    """One card of the setup, answered as it comes; ``layout``: the step that asks where the sections go, answered
+    in panels of QGIS with the buttons under each section."""
+    ticks = maybe_tick('In panels of QGIS') + maybe_tick('Under each section') if layout else []
+    return [(0, card_in_view)] + ticks + card_answer()
+
+
+def settings_card():
+    return agent_chat()._settings_cards[-1]
+
+
+def apply_card():
+    """Apply on the card that sums the changes up (logged)."""
+    def run():
+        card = settings_card()
+        log('changes: ' + ' | '.join(row.text() for row in card.rows))
+        card.apply_button.click()
+    return [(0, lambda: agent_panel().thread.ensureWidgetVisible(settings_card(), 10, 10)), hold(400)] \
+        + act(lambda: settings_card().apply_button, run)
+
+
+# setup: "Set up FilterMate, no model needed" in AGENT: cards of choices, the step of the layout answered "in panels
+# of QGIS, the buttons under each section", Apply: the sections leave the dock, their buttons with them.
+SETUP = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + [
+    (0, lambda: agent_chat().new_conversation())] + staged(1.15) + [
+    hold(1000), (0, cam('dock', dur=1.4, pad=12)), hold(500),
+] + agent_open_visible() + [hold(900), (0, cam(agent_panel, dur=1.3, pad=12)), hold(500)] \
+    + act(lambda: agent_panel().setup_button, lambda: agent_panel().setup_button.click()) + [hold(1000)] \
+    + setup_card() + setup_card() + setup_card(layout=True) + setup_card() + setup_card() + [
+    hold(400), (0, cam(agent_panel, dur=1.0, pad=12)),
+] + apply_card() + [hold(1200), (0, cam('full', dur=1.5)), hold(3600),
+                    (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
+
+
+CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'layout': LAYOUT, 'setup': SETUP,
+'metropole': METROPOLE, 'compare': COMPARE, 'sam': SAM, 'agent': AGENT, 'postgis': POSTGIS, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
          'brush': BRUSH, 'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT, 'processing': PROCESSING,
          'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY}
 STEPS = CLIPS[CLIP]
