@@ -3,8 +3,9 @@
 import pytest
 
 from core.agent.elevation import (
-    MAX_LEVELS, MAX_MESSAGE, MAX_PIXELS, MAX_TILES, SOURCES, bbox_problem, contour_problem, ground_size, is_index,
-    known, metric_grid, quiet_message, resolution_for, tile_name, tile_url, tiles_for, utm_authid,
+    MAX_LEVELS, MAX_MESSAGE, MAX_PIXELS, MAX_TILES, NO_DATA, SOURCES, bbox_problem, contour_problem, ground_size,
+    is_index, empty_note, gdal_srs, known, metric_grid, quiet_message, resolution_for, tile_name, tile_url, tiles_for,
+    tiles_for_grid, utm_authid,
 )
 from core.agent.open_data import KIND_ELEVATION, NO_DATA_KINDS, resolve_platform
 from core.agent.sources import BUILT_IN, describe_enabled
@@ -168,7 +169,95 @@ def test_what_a_library_said_goes_to_a_model_without_an_address_nor_a_folder(sai
         assert word not in message, (word, message)
 
 
+@pytest.mark.parametrize("said, kept, gone", [
+    # The folders of a path hold the name of the person and of their clients, spaces included.
+    ("C:\\Users\\Jean Dupont\\AppData\\Local\\Temp\\x.tif: No such file or directory",
+     "x.tif: No such file or directory", ("Jean", "Dupont", "AppData", "Users")),
+    ("Cannot open /vsis3/my-private-bucket/dir/key.tif", "key.tif", ("my-private-bucket", "vsis3", "dir")),
+    ("D:/projets/client secret/dem.tif: Permission denied", "dem.tif: Permission denied",
+     ("projets", "client", "secret")),
+    ("\\\\serveur\\partage compta\\mnt.tif: not recognized", "mnt.tif: not recognized", ("serveur", "compta")),
+    ("`/home/jean dupont/data/mnt.tif' not recognized", "mnt.tif' not recognized", ("jean", "dupont", "/home")),
+    ("Cannot open data/clients/dem.tif", "Cannot open dem.tif", ("data", "clients")),
+    # What a driver says of a connection: no host, no user, no password.
+    ("PG: dbname='ign' host=db.client.example port=5432 user=jean password='s3 cret' sslmode=require",
+     "a database connection", ("ign", "client", "5432", "jean", "s3 cret", "password")),
+    ("PQconnectdb failed: dbname=ign host=10.0.0.5 password=hunter2 refused", "refused", ("hunter2", "10.0.0.5", "ign")),
+    # A path after a colon (the name of a driver, of an error), a path between quotes, a path of the folder above.
+    ("GPKG:C:\\Users\\Jean Dupont\\ACME\\a.gpkg:roads cannot be opened", "GPKG:a.gpkg:roads cannot be opened",
+     ("Jean", "ACME", "Users")),
+    ("ERROR 4:C:\\Users\\Jean Dupont\\a.tif: No such file", "a.tif: No such file", ("Jean", "Users")),
+    ('NETCDF:"/home/jean dupont/a.nc":var failed', 'NETCDF:"a.nc":var failed', ("jean", "dupont", "/home")),
+    ("'Clients ACME/x.tif' not found", "'x.tif' not found", ("Clients", "ACME")),
+    ('"../../Jean Dupont/x.tif" missing', '"x.tif" missing', ("Jean", "Dupont", "..")),
+    ("../Jean Dupont/x.tif not found", "x.tif not found", ("Jean", "Dupont")),
+    ("~/Clients ACME/x.tif not found", "x.tif not found", ("Clients", "ACME", "~")),
+    ("Projet/Client ACME.qgz: open failed", "Client ACME.qgz: open failed", ("Projet",)),
+    # The file is the part that has an extension: what follows it is a sentence, "read/write" no path.
+    ("Permission denied for /home/u/x.gpkg in read/write mode", "Permission denied for x.gpkg in read/write mode",
+     ("/home", "/u/")),
+    # Two paths: each keeps its file.
+    ("/home/jean/My Docs/x.tif, /home/jean/My Docs/y.tif missing", "x.tif, y.tif missing", ("jean", "Docs")),
+    # Not paths, not connection parameters: tags of OpenStreetMap, ratios, dates.
+    ("no highway=service with service=driveway here", "no highway=service with service=driveway here", ()),
+    ("Error /: invalid path", "Error /: invalid path", ()),
+    # Not paths: what is said as a sentence stays.
+    ("the read/write mode is 50 / 60", "the read/write mode is 50 / 60", ()),
+])
+def test_a_message_keeps_the_name_of_a_file_and_no_folder_nor_connection(said, kept, gone):
+    message = quiet_message(said)
+    assert kept in message, message
+    for word in gone:
+        assert word not in message, (word, message)
+
+
 def test_a_message_is_one_short_line_and_never_empty():
     assert quiet_message("") == quiet_message(None) == "no reason given"
     assert quiet_message("a\n  b\tc") == "a b c"
     assert len(quiet_message("x" * 5000)) == MAX_MESSAGE
+
+
+def test_the_corners_of_a_grid_in_metres_are_read_from_the_squares_they_fall_in():
+    """[4.5, 45, 5, 45.5] sits on the south edge of N45: its UTM 31N rectangle reaches down into N44 (measured on the
+    real model: 2.5 % of the grid written at 0 m)."""
+    asked = [4.5, 45.0, 5.0, 45.5]
+    assert tiles_for(asked) == [(45, 4)]
+    envelope = [4.48, 44.98, 5.02, 45.52]  # what cs2cs gives for the rectangle of the area in UTM 31N, give or take
+    assert tiles_for_grid(asked, envelope) == [(44, 4), (44, 5), (45, 4), (45, 5)]
+    # Inside a square, the corners stay in it: nothing more is read.
+    assert tiles_for_grid([4.3, 45.3, 4.7, 45.7], [4.29, 45.29, 4.71, 45.71]) == [(45, 4)]
+    # The globe is not left: the antimeridian is clipped, no square of E180 is asked.
+    assert tiles_for_grid([179.0, 60.0, 180.0, 61.0], [178.9, 59.9, 180.4, 61.1]) == [
+        (row, column) for row in (59, 60, 61) for column in (178, 179)]
+
+
+def test_the_corners_stay_empty_when_they_would_need_more_squares_than_one_call_reads():
+    asked = [0.1, 40.1, 3.9, 43.9]  # 4 x 4 squares
+    assert len(tiles_for(asked)) == MAX_TILES
+    assert tiles_for_grid(asked, [-0.2, 39.8, 4.2, 44.2]) == tiles_for(asked)
+    with pytest.raises(ValueError, match="16 at most"):
+        tiles_for_grid([0, 40, 9, 49], [0, 40, 9, 49])
+
+
+def test_what_no_tile_reaches_is_said_by_its_share():
+    assert NO_DATA < -1000  # below any height of the earth: the Dead Sea is at -430 m
+    assert empty_note(0, 1000, "has no tile") == "" and empty_note(5, 0, "has no tile") == ""
+    note = empty_note(25_000, 100_000, "has no tile there")
+    assert note.startswith("25 % of the grid is empty (no data)") and "minimum, maximum and mean" in note
+    assert "has no tile there" in note
+    assert empty_note(40, 100_000, "x").startswith("under 1 %")
+
+
+@pytest.mark.parametrize("authid, expected", [
+    ("EPSG:32631", "EPSG:32631"), ("epsg:2154", "epsg:2154"), ("ESRI:102003", "ESRI:102003"), ("IGNF:LAMB93", "IGNF:LAMB93"),
+    # A CRS of the user has an authid of QGIS alone, which GDAL refuses: its WKT is given.
+    ("USER:100000", "WKT"), ("", "WKT"), (None, "WKT"), ("PROJ:foo", "WKT"), ("EPSG:", "WKT"),
+])
+def test_gdal_is_told_a_crs_by_its_authid_only_when_it_knows_the_authority(authid, expected):
+    assert gdal_srs(authid, lambda: "WKT") == expected
+
+
+def test_the_wkt_is_asked_for_only_when_it_is_needed():
+    def never():
+        raise AssertionError("the WKT of a CRS GDAL knows is not computed")
+    assert gdal_srs("EPSG:2154", never) == "EPSG:2154"

@@ -19,8 +19,8 @@ import time
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from ...core.agent.elevation import (
-    MAX_CONTOUR_PIXELS, ElevationSource, contour_problem, is_index, known, metric_grid, quiet_message, resolution_for,
-    tile_url, tiles_for, utm_authid,
+    MAX_CONTOUR_PIXELS, NO_DATA, ElevationSource, contour_problem, empty_note, gdal_srs, is_index, known, metric_grid,
+    quiet_message, resolution_for, tile_url, tiles_for, tiles_for_grid, utm_authid,
 )
 from ...core.agent.open_data import KIND_ELEVATION, megabytes, resolve_platform
 from ...core.domain.layer_kind import LayerKind
@@ -291,6 +291,19 @@ def _grid(bbox: Sequence[float], crs, resolution: float) -> Tuple[Tuple[float, f
     return bounds, width, height
 
 
+def _grid_in_degrees(bounds: Sequence[float], crs, bbox: Sequence[float]) -> List[float]:
+    """The bounds of the grid written, in longitude and latitude: wider than the area asked, the rectangle of a metric
+    CRS being no rectangle on the globe. ``bbox`` (the area asked) when they cannot be told."""
+    from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsCsException, QgsProject, QgsRectangle
+    try:
+        rect = QgsCoordinateTransform(crs, QgsCoordinateReferenceSystem('EPSG:4326'), QgsProject.instance()) \
+            .transformBoundingBox(QgsRectangle(bounds[0], bounds[1], bounds[2], bounds[3]))
+    except QgsCsException:
+        return list(bbox)
+    wider = [rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum()]
+    return wider if all(math.isfinite(value) for value in wider) else list(bbox)
+
+
 def _tiles_there(source: ElevationSource, tiles: Sequence[Tuple[int, int]]) -> List[str]:
     """The addresses of the tiles of ``tiles`` the server has.
 
@@ -318,6 +331,7 @@ def _warp(urls: Sequence[str], path: str, crs_text: str, bounds: Sequence[float]
     """Read the part of the tiles the grid needs and write it at ``path``; its statistics. Worker thread."""
     with _Gdal(tiles=True) as gdal:
         opened = []
+        sources: Any = None
         try:
             for url in urls:  # one by one: Stop is heard between two tiles, and a tile that fails says why
                 reason = ended()
@@ -330,10 +344,12 @@ def _warp(urls: Sequence[str], path: str, crs_text: str, bounds: Sequence[float]
                 if tile is None:
                     raise ValueError(f"a tile of the elevation could not be read from its server: {failure}")
                 opened.append(tile)
+            sources = _mosaic(gdal, opened)
             dataset, failure = _attempt(gdal, lambda: gdal.Warp(
-                path, opened, format='GTiff', dstSRS=crs_text, xRes=resolution, yRes=resolution,
+                path, sources, format='GTiff', dstSRS=crs_text, xRes=resolution, yRes=resolution,
                 outputBounds=tuple(bounds), resampleAlg='bilinear', outputType=gdal.GDT_Float32,
-                creationOptions=['COMPRESS=DEFLATE', 'PREDICTOR=3', 'TILED=YES'],
+                # What no tile reaches is no data, not 0 m: a corner of the grid, open sea, a country left out.
+                dstNodata=NO_DATA, creationOptions=['COMPRESS=DEFLATE', 'PREDICTOR=3', 'TILED=YES'],
                 callback=lambda _done, _message, _data: 0 if ended() else 1))
             reason = ended()
             if reason:
@@ -344,12 +360,45 @@ def _warp(urls: Sequence[str], path: str, crs_text: str, bounds: Sequence[float]
             read, _failure = _attempt(gdal, lambda: dataset.GetRasterBand(1).ComputeStatistics(False))
             minimum, maximum, mean = (read[0], read[1], read[2]) if read and len(read) >= 3 else (float('nan'),) * 3
             answer = {'width': dataset.RasterXSize, 'height': dataset.RasterYSize, 'minimum': minimum,
-                      'maximum': maximum, 'mean': mean}
+                      'maximum': maximum, 'mean': mean, 'empty': _empty_pixels(dataset)}
             dataset.FlushCache()
             dataset = None  # closes the file before QGIS opens it
             return answer
         finally:
+            sources = None
             opened.clear()
+
+
+def _mosaic(gdal, tiles: Sequence[Any]):
+    """What the grid is warped from: the tiles as one virtual mosaic when they share their pixel size, else the tiles.
+
+    Warped one by one, a pixel of the grid within a source pixel of the edge of a tile is left out by the bilinear
+    kernel of GDAL 3.4 (it reaches beyond that tile), and the next tile does not cover it: a seam of no data along the
+    limit of two tiles (2026-11-18: 113 pixels of 10 million between N45 and N44 with the real model, 119 of 1.2 million
+    in the bench; none with GDAL 3.12). One mosaic has no seam. Tiles of other pixel sizes (the model is coarser in x
+    at high latitudes) stay separate: a mosaic would resample them to one.
+    """
+    if len(tiles) < 2:
+        return list(tiles)
+    sizes = {(round(tile.GetGeoTransform()[1], 12), round(tile.GetGeoTransform()[5], 12)) for tile in tiles}
+    if len(sizes) != 1:
+        return list(tiles)
+    mosaic, _failure = _attempt(gdal, lambda: gdal.BuildVRT('', list(tiles)))
+    return mosaic if mosaic is not None else list(tiles)
+
+
+def _empty_pixels(dataset) -> int:
+    """How many pixels of the first band hold no data (``NO_DATA``), read by strips of about a million pixels."""
+    try:
+        band = dataset.GetRasterBand(1)
+        step = max(1, 1_000_000 // max(1, dataset.RasterXSize))
+        empty = 0
+        for row in range(0, dataset.RasterYSize, step):
+            strip = band.ReadAsArray(0, row, dataset.RasterXSize, min(step, dataset.RasterYSize - row))
+            empty += int((strip == NO_DATA).sum())
+        return empty
+    except (ImportError, RuntimeError, AttributeError, TypeError):  # no numpy here, or a band that cannot be read
+        return 0
 
 
 def _only_web_images(node) -> bool:
@@ -397,7 +446,10 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
     """Add the elevation of an area as a raster layer, read from an elevation model the user allowed.
 
     Only the part of each tile the area needs is read, warped on a grid in metres and written as one GeoTIFF in the
-    QGIS profile, where the project finds it again. The layer goes under the data, above the web basemaps.
+    QGIS profile, where the project finds it again. The layer goes under the data, above the web basemaps. Tiles are
+    chosen for the grid written (the rectangle of the area in a CRS in metres, wider than the area in degrees), and
+    what no tile reaches (open sea, a country the model leaves out) is no data (``NO_DATA``), said in the note and
+    left out of minimum, maximum and mean.
 
     Raises:
         ValueError: Not an elevation source, an area that cannot be read or is too large, no elevation there, a
@@ -406,10 +458,13 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
     from qgis.core import QgsApplication, QgsProject, QgsRasterLayer
     source = _elevation_source(platform, extra_domains)
     bbox = _area_in_degrees(extent_wkt, crs)
-    tiles = tiles_for(bbox)
+    tiles_for(bbox)  # refuses an area of too many squares before anything is asked
     size, coarser = resolution_for(bbox, resolution, source.resolution)
     grid_crs = _grid_crs(target_crs, bbox)
     bounds, _width, _height = _grid(bbox, grid_crs, size)
+    # The grid is the rectangle around the area in the CRS of metres, wider than the area in degrees: its corners are
+    # read from the tiles they fall in, or they would be written empty.
+    tiles = tiles_for_grid(bbox, _grid_in_degrees(bounds, grid_crs, bbox))
     root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data')
     folder = ''
     kept = False
@@ -421,8 +476,12 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
             os.makedirs(root, exist_ok=True)
             folder = tempfile.mkdtemp(prefix='elevation-', dir=root)
             path = os.path.join(folder, f"{source.id}_{size:g}m.tif")
-            crs_text = grid_crs.authid() or grid_crs.toWkt()
+            crs_text = gdal_srs(grid_crs.authid(), grid_crs.toWkt)
             read = _in_background('add_elevation', lambda ended: _warp(urls, path, crs_text, bounds, size, ended))
+            if read['empty'] >= read['width'] * read['height']:
+                # A tile read for a corner of the grid that the grid never touches: no tile covers the area, and a
+                # layer of no data alone (its statistics are 0, 0, 0 with an error) would be added.
+                raise ValueError(f"{source.title} {_NO_TILE}")
         title = (name or '').strip()[:200] or f"Elevation ({source.title.split(' (')[0]} {size:g} m)"
         layer = QgsRasterLayer(path, title, 'gdal')
         if not layer.isValid():
@@ -438,14 +497,13 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
     finally:
         if folder and not kept:
             shutil.rmtree(folder, ignore_errors=True)
-    notes = [note for note in (coarser, _DSM_NOTE) if note]
-    if len(urls) < len(tiles):
-        notes.append(f"for part of the area the model {_NO_TILE}: written at 0 m")
+    notes = [coarser]
+    notes += [empty_note(read['empty'], read['width'] * read['height'], _NO_TILE), _DSM_NOTE]
     return {'layer_id': layer.id(), 'name': layer.name(), 'platform': platform, 'crs_authid': grid_crs.authid(),
             'resolution': size, 'width': read['width'], 'height': read['height'],
             'minimum': _rounded(read['minimum']), 'maximum': _rounded(read['maximum']), 'mean': _rounded(read['mean']),
             'size': megabytes(os.path.getsize(path)) if os.path.isfile(path) else '',
-            'attribution': source.attribution, 'note': '; '.join(notes)}
+            'attribution': source.attribution, 'note': '; '.join(note for note in notes if note)}
 
 
 def check_elevation(platform: str, extra_domains: str = '') -> Dict[str, Any]:
