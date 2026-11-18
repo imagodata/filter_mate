@@ -273,8 +273,30 @@ def main(work):
                           delete="fid % 5 = 0 AND fid <= 100000"), "troncon")
     print(f"INFO no gpkg_ogr_contents, 130 000 features, fids 1 to 150 000: QGIS featureCount() {holes.featureCount()}")
     count = introspection.describe_layer(holes.id())["feature_count"]
-    # Left as it was: without a subset the count of QGIS is kept (feature_count.py says so).
-    check("describe_layer of a table without filter: what QGIS says", count == holes.featureCount(), count)
+    # 2026-11-18: the count of QGIS was kept as it was and told as exact (150 000 for 130 000 features): the table is
+    # counted (the module promises a number that is exact, or none).
+    check("describe_layer of a table without filter and without gpkg_ogr_contents: the features, not the fids",
+          holes.featureCount() == 150_000 and count == 130_000, (count, holes.featureCount()))
+    error, content = tool("list_layers")
+    rows = [] if error else [row for row in content["layers"] if row["name"] == "troncon"]
+    check("list_layers: 130 000", rows and rows[0]["feature_count"] == 130_000, rows)
+    if exact_feature_count is not None:
+        budget_was = feature_count.COUNT_BUDGET
+        feature_count._CACHE.clear()
+        feature_count.COUNT_BUDGET = 0
+        try:
+            count = introspection.describe_layer(holes.id())["feature_count"]
+        finally:
+            feature_count.COUNT_BUDGET = budget_was
+        check("the same table not counted in time: no number rather than 150 000", count == -1, count)
+        started = time.perf_counter()
+        feature_count._CACHE.clear()
+        count = exact_feature_count(holes)
+        print(f"INFO the table without gpkg_ogr_contents counted: {count} in {time.perf_counter() - started:.2f} s")
+    # With the table of counts of GDAL, the number it holds is right and is kept.
+    plain = add(make_gpkg(os.path.join(work, "plain.gpkg"), "route", 110_000), "route")
+    check("a table of 110 000 features with gpkg_ogr_contents: 110 000",
+          introspection.describe_layer(plain.id())["feature_count"] == 110_000, plain.featureCount())
 
     # --- a small GeoPackage written by GDAL: QGIS was right, it stays right
     small = add(make_gpkg(os.path.join(work, "estavar.gpkg"), "bati", 918), "bati")
