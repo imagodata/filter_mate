@@ -1127,6 +1127,26 @@ def check_panel_options(project, gpkg, shp, work):
               project.mapLayer(extra_id) is None and "extra" in gone and not not_gone and not not_more,
               (gone, not_gone, more, not_more))
         dock.PROJECT_LAYERS.pop(extra_id, None)
+        if gdal is not None:  # a raster the panel lists among the targets is given back as layer_options names it
+            from filter_mate.config.config import ENV_VARS
+            raster_option = ENV_VARS.setdefault("CONFIG_DATA", {}).setdefault("APP", {}).setdefault(
+                "OPTIONS", {}).setdefault("RASTER", {})  # the option of the dock, off when unset
+            raster_was = raster_option.get("enabled")
+            raster_option["enabled"] = {"value": True}
+            raster_path = os.path.join(work, "mnt_panel.tif")
+            make_raster(raster_path)
+            dem = QgsRasterLayer(raster_path, "mnt")
+            project.addMapLayer(dem)
+            dock.PROJECT_LAYERS[gpkg.id()]["filtering"]["layers_to_filter"] = [shp.id(), dem.id()]
+            named = panel_options.layer_options(dock, "communes")["filtering"]["layers_to_filter"]
+            echoed = refused(panel_options.set_layer_options, dock,
+                             [{"layer": "communes", "filtering": {"layers_to_filter": named}}])
+            check("panels: the list of targets read, raster included, is accepted back",
+                  named == ["routes", "mnt"] and echoed == "", (named, echoed))
+            check("panels: the raster target is kept",
+                  dock.PROJECT_LAYERS[gpkg.id()]["filtering"]["layers_to_filter"] == [shp.id(), dem.id()])
+            project.removeMapLayer(dem.id())
+            raster_option.pop("enabled", None) if raster_was is None else raster_option.update(enabled=raster_was)
     finally:
         if before is None:
             utils.plugins.pop(PLUGIN_PACKAGE, None)
