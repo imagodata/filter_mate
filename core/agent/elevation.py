@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import dataclass
-from typing import List, Optional, Sequence, Tuple
+from typing import Callable, List, Optional, Sequence, Tuple
 
 # What one call may cost: the squares of one degree read, and the pixels written (float32: 4 bytes each).
 MAX_TILES = 16
@@ -99,6 +99,19 @@ def utm_authid(longitude: float, latitude: float) -> str:
     """The UTM zone of a place, as an EPSG code: metres, and little distortion over a town or a region."""
     zone = int(math.floor((max(-180.0, min(179.999, longitude)) + 180.0) / 6.0)) + 1
     return f"EPSG:{(32600 if latitude >= 0 else 32700) + zone}"
+
+
+_GDAL_AUTHORITIES = re.compile(r"(?:EPSG|ESRI|IGNF):[A-Za-z0-9_.]+", re.IGNORECASE)
+
+
+def gdal_srs(authid: str, wkt: Callable[[], str]) -> str:
+    """The text that names a CRS to GDAL: its authid when GDAL has that authority (EPSG, ESRI, IGNF), its WKT otherwise.
+
+    A CRS the user defined has an authid of QGIS alone (``USER:100000``), which GDAL does not know: it refused it, and
+    the elevation was said not to be readable from its server. ``wkt`` is called only then.
+    """
+    authid = (authid or "").strip()
+    return authid if _GDAL_AUTHORITIES.fullmatch(authid) else wkt()
 
 
 def metric_grid(authid: str, projected: bool, metres: bool) -> bool:

@@ -547,6 +547,22 @@ def check_elevation(project, work):
         check("elevation: a tile the source does not have is written at 0 m, and said so", "open sea" in coast["note"]
               and "leaves out" in coast["note"] and coast["minimum"] == 0, coast)
         project.removeMapLayer(coast["layer_id"])
+        # A CRS the user defined (an authid of QGIS alone, which GDAL refuses) is given to GDAL as a WKT.
+        registry = QgsApplication.coordinateReferenceSystemRegistry()
+        custom = QgsCoordinateReferenceSystem.fromProj("+proj=tmerc +lat_0=0 +lon_0=4.8 +k=0.9996 +x_0=500000 +y_0=0 "
+                                                       "+ellps=WGS84 +units=m +no_defs")
+        added = registry.addUserCrs(custom, "FilterMate test CRS") if hasattr(registry, "addUserCrs") else -1
+        user = QgsCoordinateReferenceSystem(f"USER:{added}") if added > 0 else QgsCoordinateReferenceSystem()
+        if user.isValid() and user.authid().startswith("USER:"):
+            project.setCrs(user)
+            in_user = terrain.add_elevation(extent_wkt=LYON, crs="EPSG:4326")
+            check("elevation: a project in a CRS of the user is written in it, not refused as unreadable",
+                  in_user["crs_authid"] == user.authid() and in_user["width"] > 300 and in_user["minimum"] > 200, in_user)
+            project.removeMapLayer(in_user["layer_id"])
+            project.setCrs(QgsCoordinateReferenceSystem("EPSG:3857"))
+            registry.removeUserCrs(added)
+        else:
+            print(f"INFO no CRS of the user in this QGIS ({user.authid()!r}): that check is skipped", flush=True)
         project.setCrs(QgsCoordinateReferenceSystem("EPSG:27700"))
         british = terrain.add_elevation(extent_wkt=LYON, crs="EPSG:4326")
         check("elevation: not on the grid of another country, which stretches the ground",

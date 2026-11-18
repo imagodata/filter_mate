@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent, elevation: a project in a CRS you defined (its identifier is `USER:100000`, which GDAL does not know) is written in it, from its WKT; it was refused as an elevation that could not be read from its server.
 - Agent, errors: the text of a failure sent to the model keeps the name of the file of a path and nothing of its folders, spaces included (`C:\Users\Jean Dupont\...\x.tif` gave `Jean Dupontx.tif`, `/vsis3/bucket/dir/key.tif` gave `bucketkey.tif`), and a database connection (`PG: ... password=...`) is hidden.
 - Agent, OpenStreetMap: a closed way that OpenStreetMap draws as an area for some values of its key only (`power=substation` or `plant`, `man_made=wastewater_plant`, `railway=platform` or `station`, `waterway=dam` or `riverbank`, `highway=services`, `barrier=hedge` or `wall`) came out as a ring line, and asking for `polygons` answered that nothing was there. It is now an area by the table of OpenStreetMap, value by value (a closed `highway=residential` stays a loop of street, `area=no` and `area=yes` win).
 - Metadata: a shorter description; the about opens on what people search (several layers filtered at once, definition queries); tags chosen for the plugin list search; a short changelog; category Vector (Plugins is not a value plugins.qgis.org knows); a stray line that read as a key removed.

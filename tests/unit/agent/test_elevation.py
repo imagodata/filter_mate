@@ -4,7 +4,7 @@ import pytest
 
 from core.agent.elevation import (
     MAX_LEVELS, MAX_MESSAGE, MAX_PIXELS, MAX_TILES, SOURCES, bbox_problem, contour_problem, ground_size, is_index,
-    known, metric_grid, quiet_message, resolution_for, tile_name, tile_url, tiles_for, utm_authid,
+    gdal_srs, known, metric_grid, quiet_message, resolution_for, tile_name, tile_url, tiles_for, utm_authid,
 )
 from core.agent.open_data import KIND_ELEVATION, NO_DATA_KINDS, resolve_platform
 from core.agent.sources import BUILT_IN, describe_enabled
@@ -196,3 +196,18 @@ def test_a_message_is_one_short_line_and_never_empty():
     assert quiet_message("") == quiet_message(None) == "no reason given"
     assert quiet_message("a\n  b\tc") == "a b c"
     assert len(quiet_message("x" * 5000)) == MAX_MESSAGE
+
+
+@pytest.mark.parametrize("authid, expected", [
+    ("EPSG:32631", "EPSG:32631"), ("epsg:2154", "epsg:2154"), ("ESRI:102003", "ESRI:102003"), ("IGNF:LAMB93", "IGNF:LAMB93"),
+    # A CRS of the user has an authid of QGIS alone, which GDAL refuses: its WKT is given.
+    ("USER:100000", "WKT"), ("", "WKT"), (None, "WKT"), ("PROJ:foo", "WKT"), ("EPSG:", "WKT"),
+])
+def test_gdal_is_told_a_crs_by_its_authid_only_when_it_knows_the_authority(authid, expected):
+    assert gdal_srs(authid, lambda: "WKT") == expected
+
+
+def test_the_wkt_is_asked_for_only_when_it_is_needed():
+    def never():
+        raise AssertionError("the WKT of a CRS GDAL knows is not computed")
+    assert gdal_srs("EPSG:2154", never) == "EPSG:2154"

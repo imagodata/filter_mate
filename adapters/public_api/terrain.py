@@ -19,7 +19,7 @@ import time
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from ...core.agent.elevation import (
-    MAX_CONTOUR_PIXELS, ElevationSource, contour_problem, is_index, known, metric_grid, quiet_message, resolution_for,
+    MAX_CONTOUR_PIXELS, ElevationSource, contour_problem, gdal_srs, is_index, known, metric_grid, quiet_message, resolution_for,
     tile_url, tiles_for, utm_authid,
 )
 from ...core.agent.open_data import KIND_ELEVATION, megabytes, resolve_platform
@@ -421,7 +421,7 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
             os.makedirs(root, exist_ok=True)
             folder = tempfile.mkdtemp(prefix='elevation-', dir=root)
             path = os.path.join(folder, f"{source.id}_{size:g}m.tif")
-            crs_text = grid_crs.authid() or grid_crs.toWkt()
+            crs_text = gdal_srs(grid_crs.authid(), grid_crs.toWkt)
             read = _in_background('add_elevation', lambda ended: _warp(urls, path, crs_text, bounds, size, ended))
         title = (name or '').strip()[:200] or f"Elevation ({source.title.split(' (')[0]} {size:g} m)"
         layer = QgsRasterLayer(path, title, 'gdal')
