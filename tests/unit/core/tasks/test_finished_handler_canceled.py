@@ -87,10 +87,10 @@ def finished(monkeypatch):
                         types.SimpleNamespace(translate=lambda context, text: text), raising=False)
 
     def run(canceled, result=True, exception=None, task_action="filter", pending=None, task_parameters=None,
-            restore_history_fn=None, discard_history_fn=None):
+            restore_history_fn=None, discard_history_fn=None, warning_messages=None):
         handler.handle_finished(
             result=result, task_action=task_action, message_category="FilterLayers",
-            is_canceled_fn=lambda: canceled, warning_messages=[],
+            is_canceled_fn=lambda: canceled, warning_messages=warning_messages or [],
             pending_subset_requests=pending if pending is not None else [(MagicMock(), '"id" > 3')],
             safe_set_subset_fn=MagicMock(), is_complex_filter_fn=MagicMock(), single_canvas_refresh_fn=MagicMock(),
             cleanup_mv_fn=cleanup_mv, ogr_source_geom=None, exception=exception, task_message=None,
@@ -101,7 +101,7 @@ def finished(monkeypatch):
         )
 
     return types.SimpleNamespace(run=run, apply=apply, iface=iface, handler=handler, cleanup_mv=cleanup_mv,
-                                 cleanup_canceled=cleanup_canceled, project=project)
+                                 cleanup_canceled=cleanup_canceled, project=project, module=module)
 
 
 def test_a_completed_task_applies_its_subsets(finished, monkeypatch):
@@ -290,3 +290,23 @@ def test_a_completed_task_keeps_its_history(finished):
 def test_a_failing_discard_does_not_break_finished(finished):
     finished.run(canceled=True, discard_history_fn=MagicMock(side_effect=OSError("locked")))
     finished.apply.assert_not_called()
+
+
+def test_the_warnings_of_the_run_come_after_the_subsets_without_the_refused_layers(finished, monkeypatch):
+    """2026-11-18: "Cables: Cut by the extent of the source…" was shown, then the same filter refused."""
+    order = []
+    display = MagicMock(side_effect=lambda messages: order.append(("warnings", list(messages))))
+    monkeypatch.setattr(finished.module, "tch_display_warnings", display)
+    _refuse(finished)
+    refuse = finished.apply.side_effect
+    finished.apply.side_effect = lambda *args, **kwargs: (order.append(("apply",)), refuse(*args, **kwargs))[1]
+    finished.run(canceled=False, warning_messages=["Cables: Cut by the extent of the source", "Conduites: Cut by the extent"])
+    assert order == [("apply",), ("warnings", ["Conduites: Cut by the extent"])]
+
+
+def test_no_warning_left_nothing_is_shown(finished, monkeypatch):
+    display = MagicMock()
+    monkeypatch.setattr(finished.module, "tch_display_warnings", display)
+    _refuse(finished)
+    finished.run(canceled=False, warning_messages=["Cables: Cut by the extent of the source"])
+    display.assert_not_called()

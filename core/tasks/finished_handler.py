@@ -118,8 +118,8 @@ class FinishedHandler:
         """Handle task completion with cleanup and user notifications.
 
         Called by QGIS task manager when task completes. Performs:
-        1. Display warning messages collected during task execution
-        2. Apply pending subset string requests on main Qt thread
+        1. Apply pending subset string requests on main Qt thread
+        2. Display warning messages collected during task execution (not those of refused layers)
         3. Cleanup PostgreSQL materialized views (for reset/unfilter only)
         4. Cleanup memory layers
         5. Show success/error message in QGIS message bar
@@ -160,10 +160,6 @@ class FinishedHandler:
             so the caller can update its own state.
         """
         from qgis.utils import iface
-
-        # E6: Delegate warning display to task_completion_handler
-        if warning_messages:
-            tch_display_warnings(warning_messages)
 
         # 2026-10-17: a canceled task applies nothing, even when its run()
         # completed: canceled by a newer task (a second click on Filter),
@@ -217,6 +213,16 @@ class FinishedHandler:
                 is_complex_filter_fn,
                 single_canvas_refresh_fn
             )
+
+        # E6: Delegate warning display to task_completion_handler. 2026-11-18: once the subsets are
+        # applied, without those of the refused layers ("X: Cut by the extent of the source…" came
+        # right before "Filter not applied, previous filter kept: X: …").
+        if warning_messages:
+            refused_prefixes = tuple(f"{name}: " for _layer_id, name, _reason in refusals)
+            shown = [message for message in warning_messages
+                     if not (refused_prefixes and str(message).startswith(refused_prefixes))]
+            if shown:
+                tch_display_warnings(shown)
 
         # Only cleanup MVs on reset/unfilter actions, NOT on filter
         # When filtering, materialized views are referenced by the layer's subsetString.
