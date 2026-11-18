@@ -188,8 +188,14 @@ class AgentSession:
         self._messages = [_without_images(message) for message in self._messages]
         writes = list(self._writers)
         trimmed = 0
+        size = sum(_size(message) for message in self._messages)
+        dropped: Tuple[str, ...] = ()
+        if size > self.history_limit():
+            # The tools nobody calls go first: they make the budget smaller (Ollama), and a history summed up with
+            # loss only because of tools that leave at once would have been kept (review 2026-11-18).
+            dropped = self._drop_idle(self._requests + 1)
         budget = self.history_limit()
-        if sum(_size(message) for message in self._messages) > budget:
+        if size > budget:
             # Lot 3: the results of old requests go first; requests are summed up only if that is not enough.
             self._messages, trimmed = trim_results(self._messages)
         self._messages, summarized = compact(self._messages, budget, writes)
@@ -199,7 +205,7 @@ class AgentSession:
         if callable(context):  # the whole state at the first request and after a rewrite, what changed otherwise
             context = context(first or self.rewritten)
         self._requests += 1
-        self.dropped = self._drop_idle() if self.rewritten else ()
+        self.dropped = dropped
         self._request_start = len(self._messages)
         parts = (TextPart(text),) + ((TextPart(context),) if context else ())
         self._messages.append(Message(ROLE_USER, parts))
@@ -217,14 +223,14 @@ class AgentSession:
                 if tool.name not in self._core and not tool.name.startswith(CONNECTOR_TOOL_PREFIX):
                     self._added_at[tool.name] = self._requests
 
-    def _drop_idle(self) -> Tuple[str, ...]:
-        """Take out of the request the tools added and not called in the last ``MAX_IDLE_REQUESTS`` requests: at a
-        compaction only, which rewrites the history. Since lot 4 the tools and the instructions are read again from
-        the cache after a compaction, unless a tool is taken out here: the tools come first, so the cache of the
-        request then starts over from that tool (Anthropic: from the start). Kept, to keep a long conversation
-        light (lot 1), at the price of one write of the cache."""
+    def _drop_idle(self, requests: int) -> Tuple[str, ...]:
+        """Take out of the request the tools added and not called in the last ``MAX_IDLE_REQUESTS`` requests (this one
+        being the ``requests``-th): when the history is past its budget only, before it is cut. Since lot 4 the tools
+        and the instructions are read again from the cache after a compaction, unless a tool is taken out here: the
+        tools come first, so the cache of the request then starts over from that tool (Anthropic: from the start).
+        Kept, to keep a long conversation light (lot 1), at the price of one write of the cache."""
         idle = sorted(name for name, added in self._added_at.items()
-                      if max(added, self._used_at.get(name, 0)) < self._requests - MAX_IDLE_REQUESTS)
+                      if max(added, self._used_at.get(name, 0)) < requests - MAX_IDLE_REQUESTS)
         for name in idle:
             self._added_at.pop(name, None)
             self._used_at.pop(name, None)

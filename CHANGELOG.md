@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent, Ollama: the tools nobody has called for three requests leave the request before the history is cut, not after: the budget was worked out with them, so a history that fitted without them was summed up with loss and the tools left at once after.
 - Agent, project update: the lines about the CRS, the active layer and the view are kept when many other changes come first (the cap of 12 lines cut them silently; what it cuts among the layers is now counted), and a CRS defined in the project, which has no identifier, is given by its description in `map_context` and in the state, so its change is told and the canvas no longer falls back on the CRS of the project.
 - Agent, project update: the fields of the active layer are compared as a set of names, so a new order is no change, and a reading of them that failed once (no field) says nothing and keeps the names the model was told, instead of "none" and then the whole list at the next request.
 - Agent, project update: a renamed layer is said with its whole new name (each side of `old -> new` is cut alone: the old one at 60 characters, the new one at 100), and when more layers were renamed than the line names (5) the whole state of the project is sent again instead of "and 15 more".

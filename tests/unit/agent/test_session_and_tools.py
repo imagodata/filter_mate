@@ -777,6 +777,31 @@ class TestHistoryBudget:
         _, total = run(False)
         assert total > step  # what the budget of the start alone gave
 
+    def test_idle_tools_leave_before_the_history_is_summed_up(self):
+        """Review 2026-11-18: the budget was worked out before the idle tools were taken out: the history was summed
+        up with loss because of tools that left at once after."""
+        from core.agent.compaction import _size
+        from core.agent.families import split_tools
+        from core.agent.session import history_budget, tools_weight
+        start, more = split_tools(chat_tools())
+        budget = history_budget("ollama", 7_000 + tools_weight(start))
+        provider = create_provider(ProviderConfig("ollama", "m", base_url="http://localhost:11434"))
+        chat = AgentSession(provider, start, "p" * 7_000, AgentLimits(max_history_chars=budget,
+                                                                      shrinks_with_tools=True),
+                            core={tool.name for tool in start})
+        grown = tools_weight(more[:10])
+        answer = TextPart("a" * ((budget - grown) // 5))  # five answers fit the budget of the start less the tools
+        chat.add_user_text("r0")
+        chat.accept_turn(turn(STOP_END, answer))
+        chat.offer(more[:10])
+        for index in range(1, 5):  # four more requests: the ten tools stay unused for more than three
+            chat.add_user_text(f"r{index}")
+            chat.accept_turn(turn(STOP_END, answer))
+        assert budget - grown < sum(_size(message) for message in chat.messages) + 100 < budget
+        chat.add_user_text("next")
+        assert chat.dropped and not chat.summarized and not chat.rewritten
+        assert chat.tool_names == tuple(tool.name for tool in start)
+
     def test_the_budget_of_a_remote_provider_does_not_move(self):
         chat = session()
         chat.offer([ToolSpec("zoom", "z", {"type": "object", "properties": {}})])
