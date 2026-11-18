@@ -565,9 +565,14 @@ class PopulationResult:
     resolution: str = ""
     width: int = 0
     height: int = 0
-    # People in the pixels written (the area, grown to whole pixels), and in the most crowded pixel.
+    # People of the area asked (summed on the pixels of the source; the layer when the area is too large for that),
+    # and in the most crowded pixel of the layer.
     total: int = 0
     maximum: Optional[float] = None
+    # What the total covers: its bounds (west, south, east, north), its surface and the surface asked, in km2.
+    summed_bounds: List[float] = field(default_factory=list)
+    summed_km2: float = 0.0
+    asked_km2: float = 0.0
     size: str = ""
     attribution: str = ""
     note: str = ""
