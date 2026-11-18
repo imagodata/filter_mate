@@ -228,6 +228,75 @@
 
 <hr class="divider">
 
+<!-- ===== SINCE 5.1.0 ===== -->
+<section class="section" id="since-510">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                Nouveautés
+            </div>
+            <h2 class="section-title">Depuis la sortie de la 5.1.0</h2>
+            <p class="section-subtitle">Publié dans FilterMate 5.1.1 le 17 novembre 2026. Détails dans le <a href="https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md">journal des modifications</a>.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card highlight fade-in">
+                <span class="star-label">Nouveau</span>
+                <div class="feature-title">Les sections en panneaux de QGIS</div>
+                <div class="feature-desc">Chaque section peut quitter le dock pour un panneau de QGIS : à côté de la carte, en onglet avec le panneau Couches ou Traitements, ou flottant sur un second écran. Un panneau contient plusieurs sections : déposez une pastille dessus pour le rejoindre, et rendez une section au dock. Dans son propre panneau, EXPLORING a son propre choix de la couche courante.</div>
+                <div class="feature-tags"><span class="tag must">Panneau</span><span class="tag sprint">Disposition</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Un rail de sections</div>
+                <div class="feature-desc">Chaque pile du dock a une rangée de pastilles : AGENT et EXPLORING en haut, FILTERING, EXPORTING et CONFIGURATION en dessous. Les en-têtes empilés restent un réglage (<code>SECTION_HEADERS</code>). FILTERING et EXPORTING peuvent être désactivés.</div>
+                <div class="feature-tags"><span class="tag should">Panneau</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Les boutons sous chaque section</div>
+                <div class="feature-desc"><code>ACTION_BAR_POSITION</code> accepte <code>sections</code> : chaque section montre ses propres boutons quand elle est ouverte. La barre peut aussi se placer en haut, sur un côté ou en bas.</div>
+                <div class="feature-tags"><span class="tag should">Panneau</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Comparer avant et après</div>
+                <div class="feature-desc">Un bouton à côté de Rétablir montre la carte d’avant la dernière opération à gauche d’une ligne, et la carte telle qu’elle est à droite. Un clic droit épingle un état pour le comparer plus tard. Chaque carte de l’agent qui a changé la carte a aussi Comparer.</div>
+                <div class="feature-tags"><span class="tag must">FILTERING</span><span class="tag sprint">Comparer</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Un seul historique, retour avant n’importe quelle étape</div>
+                <div class="feature-desc">Les filtres du dock, ceux de chaque raster et nuage de points et les demandes de l’agent, dans une seule liste (clic droit sur Annuler ou Rétablir). <em>Revenir avant cette étape</em> remet chaque couche modifiée depuis comme elle était.</div>
+                <div class="feature-tags"><span class="tag should">FILTERING</span><span class="tag sprint">Annuler</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Configuration sans modèle, et Comment fonctionne FilterMate</div>
+                <div class="feature-desc"><em>Configurer FilterMate</em> pose ses questions par des cartes de choix (votre usage, votre écran, langue et apparence, place des sections) et n’envoie rien à un modèle. <em>Comment fonctionne FilterMate</em> présente le panneau section par section dans le fil d’AGENT.</div>
+                <div class="feature-tags"><span class="tag should">AGENT</span></div>
+            </div>
+            <div class="feature-card highlight-purple fade-in">
+                <span class="star-label">Nouveau · expérimental</span>
+                <div class="feature-title">Les données qu’apporte l’agent</div>
+                <div class="feature-desc">Quand le projet n’en a pas : le relief d’une zone (une carte du relief avec ses courbes de niveau en une phrase), ce qu’OpenStreetMap y cartographie, combien de personnes y vivent, les risques naturels en France (Géorisques), des fonds de carte web, des couches WMS et WMTS et les tables d’une connexion PostgreSQL, parmi les sources que vous cochez.</div>
+                <div class="feature-tags"><span class="tag must">AGENT</span><span class="tag sprint">Expérimental</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Vos propres compétences, des questions à cliquer</div>
+                <div class="feature-desc">Une équipe écrit ses propres consignes pour l’agent dans un dossier contenant un <code>SKILL.md</code>, dans <code>FilterMate/skills</code> du profil QGIS. Quand une décision vous revient, l’agent la pose par une carte de choix à cliquer.</div>
+                <div class="feature-tags"><span class="tag should">AGENT</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Cartes web filtrées, WFS par emprise, variables</div>
+                <div class="feature-desc">Un WMS, un WMTS ou un fond de tuiles coché parmi les couches à filtrer est capturé sur la zone que garde la source, puis découpé. Une couche WFS dont les entités retenues ne peuvent pas être listées est coupée par l’emprise de la source, et le dock le dit. Les filtres lisent les variables de QGIS, du projet et de la couche.</div>
+                <div class="feature-tags"><span class="tag should">FILTERING</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Corrections</div>
+                <div class="feature-desc">Le quota gratuit est supprimé : l’agent fonctionne avec votre propre clé d’API ou un modèle Ollama local. Le nombre annoncé après un filtre est exact sur les gros GeoPackage, QGIS ne se ferme plus au hasard après SAM, et Annuler et Rétablir rendent à chaque couche son propre filtre.</div>
+                <div class="feature-tags"><span class="tag sprint">Corrigé</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
 <!-- ===== SINCE 5.0.0 ===== -->
 <section class="section" id="since">
     <div class="container">
@@ -277,7 +346,7 @@
             </div>
             <div class="feature-card fade-in">
                 <div class="feature-title">Deux piles de sections</div>
-                <div class="feature-desc">AGENT et EXPLORING au-dessus de la poignée du séparateur, FILTERING, EXPORTING et CONFIGURATION en dessous, une section ouverte au plus dans chaque pile. Ouvrir AGENT replie EXPLORING et FILTERING. Les favoris, le détachement et la fermeture sont des badges de la barre de titre.</div>
+                <div class="feature-desc">AGENT et EXPLORING au-dessus de la poignée du séparateur, FILTERING, EXPORTING et CONFIGURATION en dessous, une section ouverte au plus dans chaque pile. Ouvrir AGENT replie EXPLORING et FILTERING. Les favoris, le détachement et la fermeture sont des badges de la barre de titre. Remplacé dans la 5.1.1 par le rail des sections.</div>
                 <div class="feature-tags"><span class="tag should">Panneau</span></div>
             </div>
             <div class="feature-card fade-in">

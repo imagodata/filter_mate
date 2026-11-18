@@ -702,6 +702,8 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .video-figure { max-width: 760px; }
 .video-figure .example-media { display: block; }
 .fm5-videos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.fm5-videos.single { grid-template-columns: 1fr; }
+.layout { background: var(--bg-2); border-block: 1px solid var(--rule); }
 .fm5-videos .example-media { box-shadow: 0 24px 60px rgba(22, 35, 43, .16); }
 .fm5-videos .example-media .media-play { left: 12px; bottom: 10px; padding: 6px 9px; font-size: .8rem; }
 .fm5-videos .example-media .case-number { top: 10px; left: 12px; font-size: .9rem; }

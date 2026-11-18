@@ -228,6 +228,75 @@
 
 <hr class="divider">
 
+<!-- ===== SINCE 5.1.0 ===== -->
+<section class="section" id="since-510">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                What's new
+            </div>
+            <h2 class="section-title">Since the 5.1.0 release</h2>
+            <p class="section-subtitle">Published in FilterMate 5.1.1 on 2026-11-17. Details in the <a href="https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md">changelog</a>.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card highlight fade-in">
+                <span class="star-label">New</span>
+                <div class="feature-title">Sections as panels of QGIS</div>
+                <div class="feature-desc">Every section can leave the dock for a panel of QGIS: beside the map, in a tab with the Layers or the Processing panel, or floating on a second screen. A panel holds several sections: drop a chip on it to join it, and merge a section back into the dock. In its own panel, EXPLORING gets its own chooser of the current layer.</div>
+                <div class="feature-tags"><span class="tag must">Panel</span><span class="tag sprint">Layout</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">A rail of sections</div>
+                <div class="feature-desc">Each stack of the dock has one row of chips: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION below. The headers stacked one above the other stay a setting (<code>SECTION_HEADERS</code>). FILTERING and EXPORTING can be turned off.</div>
+                <div class="feature-tags"><span class="tag should">Panel</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Buttons under each section</div>
+                <div class="feature-desc"><code>ACTION_BAR_POSITION</code> takes <code>sections</code>: each section shows its own buttons while it is open. The bar can also sit at the top, on a side or at the bottom.</div>
+                <div class="feature-tags"><span class="tag should">Panel</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Compare before and after</div>
+                <div class="feature-desc">A button beside Redo shows the map before the last operation on the left of a line, and the map as it is on its right. Right-click it to pin a state and compare with it later. Each card of the agent that changed the map has Compare too.</div>
+                <div class="feature-tags"><span class="tag must">FILTERING</span><span class="tag sprint">Compare</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">One history, back to before any step</div>
+                <div class="feature-desc">The filters of the dock, those of each raster and point cloud and the requests of the agent, in one list (right-click Undo or Redo). <em>Go back to before this step</em> sets every layer changed since as it was.</div>
+                <div class="feature-tags"><span class="tag should">FILTERING</span><span class="tag sprint">Undo</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Setup with no model, and How FilterMate works</div>
+                <div class="feature-desc"><em>Set up FilterMate</em> asks with cards of choices (what you do, your screen, language and look, where the sections go) and sends nothing to a model. <em>How FilterMate works</em> tells the panel section by section in the AGENT thread.</div>
+                <div class="feature-tags"><span class="tag should">AGENT</span></div>
+            </div>
+            <div class="feature-card highlight-purple fade-in">
+                <span class="star-label">New · experimental</span>
+                <div class="feature-title">Data the agent brings</div>
+                <div class="feature-desc">When the project has none: the elevation of an area (a relief map with its contours in one sentence), what OpenStreetMap maps there, how many people live there, the natural risks of France (Géorisques), web basemaps, WMS and WMTS layers and the tables of a PostgreSQL connection, among the sources you tick.</div>
+                <div class="feature-tags"><span class="tag must">AGENT</span><span class="tag sprint">Experimental</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Your own skills, questions to click</div>
+                <div class="feature-desc">A team writes its own instructions for the agent as a folder holding a <code>SKILL.md</code>, in <code>FilterMate/skills</code> of the QGIS profile. When a decision is yours, the agent asks with a card of choices to click.</div>
+                <div class="feature-tags"><span class="tag should">AGENT</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Web maps filtered, WFS by extent, variables</div>
+                <div class="feature-desc">A WMS, WMTS or tile basemap ticked among the layers to filter is captured over the area the source keeps, then clipped. A WFS layer whose matching features cannot be listed is cut by the extent of the source, and the dock says so. Filters read the variables of QGIS, of the project and of the layer.</div>
+                <div class="feature-tags"><span class="tag should">FILTERING</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Fixes</div>
+                <div class="feature-desc">The free quota is removed: the agent works with your own API key or a local Ollama model. The count after a filter is exact on large GeoPackage files, QGIS no longer closes at random after SAM, and Undo and Redo give each layer its own filter.</div>
+                <div class="feature-tags"><span class="tag sprint">Fixed</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
 <!-- ===== SINCE 5.0.0 ===== -->
 <section class="section" id="since">
     <div class="container">
@@ -277,7 +346,7 @@
             </div>
             <div class="feature-card fade-in">
                 <div class="feature-title">Two stacks of sections</div>
-                <div class="feature-desc">AGENT and EXPLORING above the splitter handle, FILTERING, EXPORTING and CONFIGURATION below, one section open at most in each stack. Opening AGENT folds EXPLORING and FILTERING. Favorites, detach and close are badges of the title bar.</div>
+                <div class="feature-desc">AGENT and EXPLORING above the splitter handle, FILTERING, EXPORTING and CONFIGURATION below, one section open at most in each stack. Opening AGENT folds EXPLORING and FILTERING. Favorites, detach and close are badges of the title bar. Replaced in 5.1.1 by the rail of sections.</div>
                 <div class="feature-tags"><span class="tag should">Panel</span></div>
             </div>
             <div class="feature-card fade-in">
