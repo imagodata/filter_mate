@@ -1,0 +1,12 @@
+# Links shown next to "Open a blank issue" when someone opens a new issue.
+blank_issues_enabled: true
+contact_links:
+  - name: Suggest a feature without writing an issue
+    url: https://imagodata.github.io/filter_mate/feedback.html?ref=github#feature
+    about: A short form, no GitHub knowledge needed. Bugs are better reported here as issues.
+  - name: Training, funded features and services
+    url: https://imagodata.github.io/filter_mate/feedback.html?ref=github#services
+    about: Ask imagodata for training on QGIS and FilterMate, a funded feature published as open source, or a domain pack.
+  - name: Discord
+    url: https://discord.gg/9DNbuVYQ
+    about: Questions and discussion with other users.

@@ -9,6 +9,8 @@
 [![Website](https://img.shields.io/badge/docs-website-16232b)](https://imagodata.github.io/filter_mate)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 
+**Your feedback shapes FilterMate:** [how you use it](https://imagodata.github.io/filter_mate/feedback.html?ref=readme#usage) · [a quick review](https://imagodata.github.io/filter_mate/feedback.html?ref=readme#review) · [suggest a feature](https://imagodata.github.io/filter_mate/feedback.html?ref=readme#feature) · [become a tester](https://imagodata.github.io/filter_mate/feedback.html?ref=readme#testers) · [training and services](https://imagodata.github.io/filter_mate/feedback.html?ref=readme#services)
+
 Pick a layer, select what matters on it, and FilterMate filters every other layer of the project by its relation to
 that selection: buildings near main roads, parcels on steep slopes, LiDAR points beneath rooftops, a DTM
 clipped around a church. The filters stay on the existing project layers, keep their styles, can be undone, saved as favorites, exported,
