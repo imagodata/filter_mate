@@ -1319,11 +1319,15 @@ def click_compare():
 COMPARE = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Blagnac\'', 1.2) + scope('commune') + [
     (500, source('surface_hydrographique')), (2000, multi_mode), (3000, select_all_multi), hold(4000),
     (500, filtering_tab),
+    # The rows of FILTERING are kept per source layer: the targets and the predicates are switched on for this one
+    # (without it the task filters the source only, in 0.01 s, and the take shows the scope instead of the band).
+    (300, enable('pushButton_checkable_filtering_layers_to_filter')),
     (300, lambda: check_combo_items(dock().checkableComboBoxLayer_filtering_layers_to_filter, S3_FLOOD_TARGETS, True)),
     (300, refresh_targets),
+    (300, enable('pushButton_checkable_filtering_geometric_predicates')),
     (300, lambda: check_combo_items(dock().comboBox_filtering_geometric_predicates, ['intersect'], True)),
     (300, buffer_value(100)), (300, combine(None, 'AND')),
-    (500, click_filter), (3000, wait_idle()), hold(1500),
+    (500, click_filter), (3000, wait_idle()), hold(1500), note('staged 100 m', S3_FLOOD_TARGETS),
 ] + recorded_scene(1.2) + [title('Before and after, side by side'),
                            caption('1 · A filter is on: 100 m around the water')] + show_map(2200) + [
     caption('2 · Click Compare'), (0, quiet_message_bar), (0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
@@ -1514,11 +1518,15 @@ def fav_cleanup():
 FAVORITES = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2) + [(0, no_auto_zoom)] + scope('commune') + [
     (500, source('surface_hydrographique')), (2000, multi_mode), (3000, select_all_multi), hold(4000),
     (500, filtering_tab),
+    # The rows of FILTERING are kept per source layer: the targets and the predicates are switched on for this one
+    # (without it the task filters the source only, in 0.01 s, and the take shows the scope instead of the band).
+    (300, enable('pushButton_checkable_filtering_layers_to_filter')),
     (300, lambda: check_combo_items(dock().checkableComboBoxLayer_filtering_layers_to_filter, S3_FLOOD_TARGETS, True)),
     (300, refresh_targets),
+    (300, enable('pushButton_checkable_filtering_geometric_predicates')),
     (300, lambda: check_combo_items(dock().comboBox_filtering_geometric_predicates, ['intersect'], True)),
     (300, buffer_value(300)), (300, combine(None, 'AND')),
-    (500, click_filter), (3000, wait_idle()), hold(1500),
+    (500, click_filter), (3000, wait_idle()), hold(1500), note('staged 300 m', S3_FLOOD_TARGETS),
 ] + recorded_scene(1.2) + [
     (0, cam(['favorites_indicator_label', 'mGroupBox_exploring_single_selection'], dur=1.4, pad=30)),
 ] + act(fav_indicator, fav_menu('add', fav_add)) + [(1000, mark('still:s7-01')), hold(200)] + show_map(2200) + [
