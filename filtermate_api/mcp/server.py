@@ -31,8 +31,18 @@ from .rest_client import FilterMateAPIError, FilterMateClient, quote_segment
 from .settings import ConfigError, parse_settings
 
 SERVER_NAME = "filtermate"
-# add_layer may follow redirects (4 x 20 s), download for 180 s, then open the copy: wait for all of it.
-ADD_LAYER_TIMEOUT = 330.0
+# How long a call that adds a layer may last before the client gives up, from the longest of the plugin's own limits
+# (tests/api/test_mcp_add_layer_timeout.py reads them in the code):
+#   30 s    the REST API waits that long for the main thread of QGIS to start the call (main_thread.py)
+#   + 90 s  add_osm_features: Overpass has that long to answer (osm_features.REQUEST_TIMEOUT_MS)
+#   + 240 s then the answer is converted, at most that long (terrain.READ_TIMEOUT_S, shared by elevation, population,
+#           contours and OpenStreetMap; elevation asks its tiles for 20 s first, add_layer follows 4 redirects of
+#           20 s and downloads for 180 s: both shorter)
+#   + 60 s  what comes after the last limit: the reading that was told to stop ends its step, the layers are opened,
+#           styled and added, the answer written
+# 30 + 90 + 240 + 60 = 420. A client that gives up before the plugin does shows a timeout while the layers arrive,
+# and a second call adds them again (330 s, the sum of the two limits alone, left no room for that).
+ADD_LAYER_TIMEOUT = 420.0
 
 INSTRUCTIONS = """\
 Drives FilterMate, the QGIS filtering plugin, through its local REST API. QGIS must be running with the API started.
