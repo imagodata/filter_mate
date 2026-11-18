@@ -141,6 +141,17 @@ class Camera:
             return self.full
         return self._during(i, to)
 
+    def at_bottom(self, start, end):
+        """A close shot held between ``start`` and ``end`` reaches the bottom edge of the window."""
+        times = [s[0] for s in self.shots]
+        first = max(bisect.bisect_right(times, start) - 1, 0)
+        for t, (cx, cy, w), _dur, _drift in self.shots[first:]:
+            if t >= end:
+                break
+            if w < 0.97 * self.W and cy + w / self.aspect / 2 > self.H - 2:
+                return True
+        return False
+
 
 # ------------------------------------------------------------------ cursor
 class Cursor:
@@ -259,7 +270,7 @@ class Captions:
 
     FADE = 0.3
 
-    def __init__(self, events, clock, duration):
+    def __init__(self, events, clock, duration, camera=None):
         k = OUT_W / 1280.0
         self.k = k
         title = next((e for e in events if e['kind'] == 'title' and e.get('text')), None)
@@ -280,7 +291,10 @@ class Captions:
                 badge, text = (badge, rest) if rest and badge.isdigit() else (None, text)
                 img = _pill(text, round(24 * k), INK + (225,), PAPER + (255,), badge=badge,
                             pad=(round(22 * k), round(12 * k)))
-            self.items.append((t, end, img))
+            # A step line goes under the title when the camera frames the bottom of the window during it (the
+            # action buttons, the status bar): at the bottom it would hide what the step is about.
+            top = e.get('style') != 'result' and camera is not None and camera.at_bottom(t, end)
+            self.items.append((t, end, img, top))
         self.any = bool(self.items or self.title)
 
     @staticmethod
@@ -295,12 +309,16 @@ class Captions:
         if self.title is not None and to >= self.title_t:
             a = min((to - self.title_t) / self.FADE, 1.0)
             frame.alpha_composite(self._faded(self.title, a), (round(22 * self.k), round(18 * self.k)))
-        for start, end, img in self.items:
+        for start, end, img, top in self.items:
             if start <= to < end:
                 a = min((to - start) / self.FADE, (end - to) / self.FADE, 1.0)
                 rise = round((1 - ease(min((to - start) / self.FADE, 1.0))) * 10 * self.k)
-                frame.alpha_composite(self._faded(img, max(a, 0.0)),
-                                      ((OUT_W - img.width) // 2, OUT_H - img.height - round(34 * self.k) + rise))
+                if top:
+                    under = (self.title.height + round(8 * self.k)) if self.title is not None else 0
+                    where = (round(22 * self.k), round(18 * self.k) + under - rise)
+                else:
+                    where = ((OUT_W - img.width) // 2, OUT_H - img.height - round(34 * self.k) + rise)
+                frame.alpha_composite(self._faded(img, max(a, 0.0)), where)
 
 
 # ------------------------------------------------------------------ render
@@ -340,8 +358,10 @@ def render(clip):
     dpr = meta['dpr']
     size = tuple(meta['size'])
     clock = Clock(events, times[-1])
-    text = Captions(events if CAPTIONS else [], clock, clock.duration)
-    camera = Camera(events, clock, size, (SAFE_TOP if text.title else 0.0, SAFE_BOTTOM if text.items else 0.0))
+    has = {e['kind'] for e in events} if CAPTIONS else set()
+    camera = Camera(events, clock, size,
+                    (SAFE_TOP if 'title' in has else 0.0, SAFE_BOTTOM if 'caption' in has else 0.0))
+    text = Captions(events if CAPTIONS else [], clock, clock.duration, camera)
     cursor = Cursor(events, clock)
     sprite, hotspot = cursor_sprite()
     duration = clock.duration

@@ -26,7 +26,7 @@ def test_the_choices_are_those_of_the_settings(settings):
     by_path = {row.path: row for row in settings}
     for path, keys in ((wizard.THEME, wizard.THEMES), (wizard.UI_PROFILE, wizard.PROFILES),
                        (wizard.LANGUAGE, wizard.LANGUAGES), (wizard.ACTION_BAR, wizard.ACTION_BARS),
-                       (wizard.SECTION_HEADERS, wizard.HEADERS),
+                       (wizard.SECTION_HEADERS, wizard.HEADERS), (wizard.SECTION_HEIGHT, wizard.HEIGHTS),
                        (wizard.RASTER_FORMAT, wizard.RASTER_FORMATS),
                        (wizard.POINT_CLOUD_FORMAT, wizard.POINT_CLOUD_FORMATS)):
         assert set(keys) <= set(by_path[path].choices), path
@@ -171,7 +171,7 @@ def test_the_layout_step_asks_the_panels_and_the_buttons(values):
     look = wizard.step_questions(wizard.LOOK, values, facts, wizard.Answers())
     assert [ask.key for ask in look] == ["theme", "profile", "language"]
     layout = wizard.step_questions(wizard.LAYOUT, values, facts, wizard.Answers())
-    assert [ask.key for ask in layout] == ["panels", "headers", "action_bar"]
+    assert [ask.key for ask in layout] == ["panels", "headers", "height", "action_bar"]
     panels = layout[0]
     assert [choice.key for choice in panels.choices] == list(wizard.LAYOUTS) and not panels.multi
     assert [choice.key for choice in panels.choices if choice.selected] == [wizard.IN_DOCK]
@@ -180,7 +180,7 @@ def test_the_layout_step_asks_the_panels_and_the_buttons(values):
 def test_sections_that_cannot_move_are_not_asked(values):
     """A panel without sections to move (a dock of an older layout): the buttons alone."""
     layout = wizard.step_questions(wizard.LAYOUT, values, wizard.ProjectFacts(), wizard.Answers())
-    assert [ask.key for ask in layout] == ["headers", "action_bar"]
+    assert [ask.key for ask in layout] == ["headers", "height", "action_bar"]
 
 
 def test_some_sections_apart_is_a_choice_of_its_own_ticked(values):
@@ -234,7 +234,8 @@ def test_the_rails_are_ticked_and_the_headers_stacked_are_a_choice(values):
 
 
 def test_a_configuration_without_the_setting_is_not_asked(values):
-    older = {path: value for path, value in values.items() if path != wizard.SECTION_HEADERS}
+    older = {path: value for path, value in values.items() if path not in (wizard.SECTION_HEADERS,
+                                                                           wizard.SECTION_HEIGHT)}
     layout = wizard.step_questions(wizard.LAYOUT, older, wizard.ProjectFacts(), wizard.Answers())
     assert [ask.key for ask in layout] == ["action_bar"]
 
@@ -243,3 +244,25 @@ def test_answering_without_touching_changes_nothing_when_config_json_holds_no_sw
     for path in wizard.SWITCHES:
         values.pop(path, None)
     assert wizard.changes(values, _answer_as_ticked(values)) == []
+
+
+# --- how the rows of FILTERING / EXPORTING use the height: packed at the top (the default) or spread ---------------
+
+
+def test_the_rows_fit_by_default_and_fill_is_a_choice(values):
+    height = [ask for ask in wizard.step_questions(wizard.LAYOUT, values, wizard.ProjectFacts(), wizard.Answers())
+              if ask.key == "height"][0]
+    assert [choice.key for choice in height.choices] == ["fit", "fill"] and not height.multi
+    assert [choice.key for choice in height.choices if choice.selected] == ["fit"]
+    answers = wizard.Answers()
+    answers.record(wizard.LAYOUT, {"height": ["fill"], "action_bar": ["bottom"]})
+    assert wizard.changes(values, answers) == [{"path": wizard.SECTION_HEIGHT, "value": "fill"}]
+    answers.record(wizard.LAYOUT, {"height": ["fit"], "action_bar": ["bottom"]})
+    assert wizard.changes(values, answers) == []  # the default: nothing changes
+
+
+def test_the_height_of_the_rows_is_applied_at_once(settings):
+    from core.agent.settings_reference import EFFECT_NOW, LIVE
+    assert wizard.SECTION_HEIGHT in LIVE
+    rows = plan(settings, [{"path": wizard.SECTION_HEIGHT, "value": "fill"}], by_user=True)
+    assert rows and rows[0]["effect"] == EFFECT_NOW

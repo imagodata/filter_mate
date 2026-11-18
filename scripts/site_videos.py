@@ -2738,12 +2738,55 @@ EXPORT2 = boot(S1_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_EXPORT}\'', 1.3
     (0, exported), result(f'{len(S1_TARGETS)} layers · one GeoPackage, styles kept · zipped'), hold(3200),
 ] + ending2()
 
+def bar_in_sections():
+    """Unrecorded: no bar for all, each section shows its own buttons (ACTION_BAR_POSITION = sections)."""
+    manager = getattr(dock(), '_action_bar_manager', None)
+    if manager is not None:
+        manager.set_position('sections')
+    log(f'action bar in sections: {manager is not None}')
+
+
+def click_redo():
+    dock().pushButton_action_redo_filter.click()
+
+
+S3_RESULT = '{batiment:,} buildings · {erp:,} public buildings · {troncon_de_route:,} road sections'
+
+# buffer, second cut (story 3): EXPLORING left of the map, FILTERING right with its own buttons under it (no bar for
+# all). The water of Grenade, 300 m then 100 m around it, then Undo and Redo walk the two steps.
+BUFFER2 = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2) + scope('commune') + [
+    (300, bar_in_sections), (500, lay_out()), (1500, wait_idle()),
+] + recorded_scene(1.2) + [
+    title('What stands near the river?'), hold(500),
+    caption('1 · Pick all the water surfaces'), (0, cam(explo, dur=1.2, pad=14)), hold(300),
+] + chooser_pick('surface_hydrographique', keep=900) \
+    + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode, lead=600, after=400) + [hold(900)] \
+    + select_all_multi_menu(keep=1300) + settle() + [
+    hold(300), still('s3-01'),
+    caption('2 · Target buildings and roads, 300 m around'), (0, cam(FILTER_ZONE, dur=1.2, pad=40)),
+] + targets(S3_FLOOD_TARGETS, per_item=220, close_after=500) + predicates(['intersect'], per_item=260, close_after=500) \
+    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0), lead=600, after=400) + typed_buffer(300) + [
+    hold(300), still('s3-02'), caption('3 · Filter'), (200, cam('full', dur=1.1)),
+] + run_filter() + [
+    note('300 m', S3_FLOOD_TARGETS), result('300 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(2600), still('s3-03'),
+    caption('4 · Try 100 m'), (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + typed_buffer(100) + run_filter() + [
+    (0, cam('full', dur=1.1)),
+    note('100 m', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(2600), still('s3-04'),
+    caption('5 · Undo, Redo: back and forth between the two'), (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + act('pushButton_action_undo_filter', click_undo, lead=700, after=400) + settle(4.0) + [(0, refocus)] + settle() + [
+    (0, cam('full', dur=1.1)), note('undo', S3_FLOOD_TARGETS), hold(2000), still('s3-05'),
+    (0, cam(ACTION_ZONE, dur=1.1, pad=40)),
+] + act('pushButton_action_redo_filter', click_redo, lead=700, after=400) + settle(4.0) + [(0, refocus)] + settle() + [
+    note('redo', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(2200),
+] + ending2(S3_FLOOD_TARGETS)
+
 
 CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'layout': LAYOUT, 'setup': SETUP,
 'metropole': METROPOLE, 'compare': COMPARE, 'sam': SAM, 'agent': AGENT, 'postgis': POSTGIS, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
          'brush': BRUSH, 'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT, 'processing': PROCESSING,
          'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY,
-         'noise2': NOISE2, 'bridges2': BRIDGES2, 'export2': EXPORT2}
+         'noise2': NOISE2, 'bridges2': BRIDGES2, 'export2': EXPORT2, 'buffer2': BUFFER2}
 STEPS = CLIPS[CLIP]
 
 
