@@ -199,7 +199,7 @@
      },
      "limit": {
       "default": 10,
-      "description": "Groups, the largest first",
+      "description": "Top groups, by sum (else count)",
       "maximum": 100,
       "minimum": 1,
       "type": "integer"

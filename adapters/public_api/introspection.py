@@ -627,9 +627,15 @@ def layer_statistics(reference: str, field_name: str = '', group_by: str = '', m
         answer['statistics'] = overall.summary()
     if group_index >= 0:
         limit = max(1, min(int(limit), MAX_GROUPS))
-        ranked = sorted(groups.items(), key=lambda item: (-(item[1].count + item[1].nulls), str(item[0])))
+        # The largest by what was asked: the sum of the numbers of a field or of a measure, else the features. Ranked by
+        # the number of features, a question of "which commune has the largest built area" lost its answer past the
+        # groups kept (audit 2026-11-18).
+        by_sum = numeric and not counting
+        ranked = sorted(groups.items(), key=lambda item: (-item[1].total if by_sum else 0,
+                                                          -(item[1].count + item[1].nulls), str(item[0])))
         answer.update({
             'group_by': fields.at(group_index).name(), 'groups_total': len(ranked), 'truncated': len(ranked) > limit,
+            'ranked_by': 'sum' if by_sum else 'feature_count',
             'groups': [{'value': key, 'feature_count': series.count + series.nulls,
                         **({} if counting else series.summary())} for key, series in ranked[:limit]]})
     return answer

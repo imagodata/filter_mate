@@ -242,7 +242,8 @@ def build_server(client: FilterMateClient) -> Any:
         measure: Annotated[Literal["", "length", "area"], Field(description=(
             "Of the geometries instead of a field: m (perimeter of polygons) or m2"))] = "",
         selected_only: bool = False,
-        limit: Annotated[int, Field(ge=1, le=100, description="Groups, the largest first")] = 10,
+        limit: Annotated[int, Field(ge=1, le=100, description=(
+            "Top groups, by sum (else count)"))] = 10,
     ) -> Dict[str, Any]:
         """Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group,
         on what it shows now or its selection: "how many", "what total", what a filter kept.

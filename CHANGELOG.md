@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent, `layer_statistics`: with `group_by`, the groups are ranked by the sum of the field or of the measure (`area`, `length`) asked, and by their number of features only without one; the answer says which in `ranked_by`. They were always ranked by feature count, so "which commune has the largest built area?" could miss the answer when it was not among the 10 communes with the most buildings, and only `truncated` hinted at it.
 - Agent: the instructions no longer send the model to a tool it must add first. The header of the project state named `list_layers` and `filter_state`, and the note about the sources not ticked sent it to `show_settings_link`; with the families on, a direct call to a tool not yet added costs a round trip. The header names `describe_layer` only (in the core), and the note says `use_tools` adds the link.
 - Agent, compaction: under Ollama, a result taken out to save room names the tool that gave it. Ollama numbers its calls `call_0`, `call_1` in every turn and the name was looked up by id, so the line said "call map_context again" for a `field_values` result. The tool is now found by position in the turn.
 - Agent, compaction: the summary of an old request still says "changed: set_layer_style roads" when the tool was taken out of the request at an earlier compaction. The write tools were read from the tools of the moment; they are now those offered at any time of the conversation.
