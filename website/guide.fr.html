@@ -158,19 +158,35 @@
     <h2><span class="num">3</span>Le panneau en un coup d'œil</h2>
     <p>FilterMate est un panneau ancrable. Par défaut il s'ouvre à droite de la fenêtre QGIS et se déplace, se détache ou se redimensionne comme n'importe quel panneau QGIS.</p>
     <figure>
-        <img src="img/guide/qgis-window.png" alt="QGIS 4.2 avec un petit projet BD TOPO et le panneau FilterMate ancré à droite" loading="lazy" width="1600" height="945">
+        <img src="img/guide/qgis-window.png" alt="QGIS 4.2 avec un petit projet BD TOPO et le panneau FilterMate ancré à droite" loading="lazy" width="1600" height="800">
         <figcaption>QGIS 4.2 avec le panneau FilterMate ancré à droite. Le projet contient cinq couches GeoPackage.</figcaption>
     </figure>
 
-    <p>Le panneau se compose de cinq zones, de haut en bas :</p>
-    <div class="table-wrap">
-    <table>
-        <tr><th>Zone</th><th>Rôle</th></tr>
-        <tr><td><strong>Badges de la barre de titre</strong></td><td>Les favoris, le détachement et la fermeture sont des badges de la barre de titre du panneau. Le bouton &#9733; ouvre le menu des favoris ; il passe à l'orange dès que des favoris sont enregistrés. Un bouton à côté replie EXPLORING. L'étiquette colorée de la source, dans la fiche de la couche, indique le type de la couche courante et ce qui la lit : le backend pour une couche vecteur (PostgreSQL, Spatialite, OGR, Memory), le fournisseur pour un raster ou un nuage de points. Par exemple <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
-        <tr><td><strong>Pile du haut</strong></td><td><strong>Agent</strong>, puis la zone <strong>Exploring</strong>. AGENT est un tchat qui filtre à partir d'une phrase (<a href="#agent">section 14</a>). Exploring sélectionne sur la couche courante, décrite par la fiche en haut de la zone. Pour une couche vecteur : sélection simple, multiple ou par expression, plus une colonne de boutons de navigation. Les rasters et les nuages de points ont leurs propres outils (<a href="#raster-lidar">section 13</a>).</td></tr>
-        <tr><td><strong>Pile du bas</strong></td><td>Trois sections repliables : <strong>Filtering</strong>, <strong>Exporting</strong> et <strong>Configuration</strong>.</td></tr>
-        <tr><td><strong>Barre d'actions</strong></td><td>Les sept boutons qui agissent réellement : Filter, Undo, Redo, Compare, Unfilter, Export, About.</td></tr>
-    </table>
+    <p>Le panneau se compose de quatre zones, de haut en bas :</p>
+    <div class="fig-aside">
+        <figure class="narrow">
+            <img src="img/guide/dock-overview.png" alt="Le panneau FilterMate complet : les pastilles AGENT et EXPLORING en haut, FILTERING, EXPORTING et CONFIGURATION en bas, FILTERING ouvert" loading="lazy" width="620" height="1074">
+            <figcaption>Le panneau complet tel qu'une nouvelle installation le montre : un rail de pastilles au-dessus de chaque pile, EXPLORING et FILTERING ouverts.</figcaption>
+        </figure>
+        <div>
+            <div class="table-wrap">
+            <table>
+                <tr><th>Zone</th><th>Rôle</th></tr>
+                <tr><td><strong>Badges de la barre de titre</strong></td><td>Les favoris, le détachement et la fermeture sont des badges de la barre de titre du panneau. Le bouton &#9733; ouvre le menu des favoris ; il passe à l'orange dès que des favoris sont enregistrés. Un bouton à côté replie EXPLORING. L'étiquette colorée de la source, dans la fiche de la couche, indique le type de la couche courante et ce qui la lit : le backend pour une couche vecteur (PostgreSQL, Spatialite, OGR, Memory), le fournisseur pour un raster ou un nuage de points. Par exemple <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
+                <tr><td><strong>Pile du haut</strong></td><td><strong>Agent</strong>, puis la zone <strong>Exploring</strong>. AGENT est un tchat qui filtre à partir d'une phrase (<a href="#agent">section 14</a>). Exploring sélectionne sur la couche courante, décrite par la fiche en haut de la zone. Pour une couche vecteur : sélection simple, multiple ou par expression, plus une colonne de boutons de navigation. Les rasters et les nuages de points ont leurs propres outils (<a href="#raster-lidar">section 13</a>).</td></tr>
+                <tr><td><strong>Pile du bas</strong></td><td>Trois sections repliables : <strong>Filtering</strong>, <strong>Exporting</strong> et <strong>Configuration</strong>.</td></tr>
+                <tr><td><strong>Barre d'actions</strong></td><td>Les sept boutons qui agissent réellement : Filter, Undo, Redo, Compare, Unfilter, Export, About.</td></tr>
+            </table>
+            </div>
+            <figure>
+                <img src="img/guide/header-badges.png" alt="La barre de titre du panneau FilterMate avec les badges favoris, détacher et fermer" loading="lazy" width="620" height="42">
+                <figcaption>Barre de titre : le badge des favoris (&#9733;), détacher et fermer. L'étiquette de source de la couche courante, ici <em>Vector · Spatialite</em>, est sur la carte de la couche d'EXPLORING.</figcaption>
+            </figure>
+            <figure>
+                <img src="img/guide/action-bar.png" alt="La barre d'actions avec Filter, Undo, Redo, Compare, Unfilter, Export et About" loading="lazy" width="357" height="49">
+                <figcaption>Barre d'actions après un filtre : Undo est actif, Redo pas encore, Compare est enclenché.</figcaption>
+            </figure>
+        </div>
     </div>
 
     <p>
@@ -198,7 +214,7 @@
         Une fois EXPLORING et FILTERING séparés, EXPLORING montre en haut sa propre liste de couches : la couche courante se choisit dans l'un comme dans l'autre.
     </p>
     <figure>
-        <img src="img/guide/panels-beside-map.png" alt="QGIS avec FILTERING et EXPORTING dans un même panneau sous le panneau Couches, à gauche de la carte, et EXPLORING seul dans le panneau FilterMate à droite" loading="lazy" width="1600" height="945">
+        <img src="img/guide/panels-beside-map.png" alt="QGIS avec FILTERING et EXPORTING dans un même panneau sous le panneau Couches, à gauche de la carte, et EXPLORING seul dans le panneau FilterMate à droite" loading="lazy" width="1600" height="800">
         <figcaption>FILTERING et EXPORTING regroupés dans un panneau de QGIS, sous le panneau Couches, à côté de la carte. EXPLORING, seul dans le panneau FilterMate, montre sa propre liste de couches.</figcaption>
     </figure>
     <p>
@@ -206,48 +222,30 @@
         Un clic droit sur une pastille, ou sur le titre d'un panneau, propose les mêmes déplacements (<em>Regrouper avec FILTERING</em>, <em>Fusionner &hellip; dans FilterMate</em>, comme la fermeture du panneau ; <em>Tout fusionner dans FilterMate</em> pour toutes).
         QGIS remet chaque panneau là où vous l'avez laissé, et les sections séparées le sont de nouveau, dans les mêmes panneaux, à l'ouverture de FilterMate.
     </p>
-    <div class="fig-row">
-        <figure class="narrow">
-            <img src="img/guide/panels-grouped.png" alt="Le panneau FILTERING · EXPORTING : son rail avec les deux pastilles, FILTERING ouvert, ses boutons en bas" loading="lazy" width="620" height="851">
-            <figcaption>Un panneau qui regroupe deux sections : son titre les nomme, son rail les liste, et les boutons de FILTERING le suivent.</figcaption>
-        </figure>
-        <figure class="narrow">
-            <img src="img/guide/panels-exploring.png" alt="EXPLORING dans son propre panneau au-dessus du panneau FilterMate, avec une liste de couches en haut" loading="lazy" width="620" height="1314">
-            <figcaption>EXPLORING dans son propre panneau, au-dessus de FilterMate : la liste du haut choisit la couche courante.</figcaption>
-        </figure>
-    </div>
+    <figure class="narrow">
+        <img src="img/guide/panels-grouped.png" alt="Le panneau FILTERING · EXPORTING : son rail avec les deux pastilles, FILTERING ouvert, ses boutons en bas" loading="lazy" width="620" height="560">
+        <figcaption>Un panneau qui regroupe deux sections : son titre les nomme, son rail les liste, et les boutons de FILTERING le suivent.</figcaption>
+    </figure>
     <p>
         Une section dans son propre panneau emporte ses boutons, et ils agissent quoi que montre le panneau FilterMate : vous filtrez depuis le panneau FILTERING pendant qu'EXPLORING seul est ouvert.
         Les boutons peuvent aussi se montrer sous chaque section (<em>Sous chaque section</em> dans la configuration), et FILTERING ou EXPORTING se désactivent quand vous ne vous en servez pas : la couche source se choisit alors en haut d'EXPLORING.
         <em>Comment fonctionne FilterMate</em>, sur l'accueil d'AGENT, dans son menu <strong>&#8943;</strong> et dans <em>Vecteur &gt; FilterMate</em>, reprend tout cela dans le panneau, avec des liens qui le font.
     </p>
+    <figure class="medium">
+        <img src="img/guide/panels-section-buttons.png" alt="FILTERING ouvert avec Filter, Undo, Redo, Compare et Unfilter dessous ; EXPORTING ouvert avec Export dessous" loading="lazy" width="1252" height="564">
+        <figcaption>Les boutons sous chaque section : FILTERING montre ses boutons de filtre, EXPORTING son bouton Export.</figcaption>
+    </figure>
     <div class="fig-row">
-        <figure>
-            <img src="img/guide/panels-section-buttons.png" alt="FILTERING ouvert avec Filter, Undo, Redo, Compare et Unfilter dessous ; EXPORTING ouvert avec Export dessous" loading="lazy" width="1252" height="684">
-            <figcaption>Les boutons sous chaque section : FILTERING montre ses boutons de filtre, EXPORTING son bouton Export.</figcaption>
+        <figure class="narrow">
+            <img src="img/guide/panels-exploring.png" alt="EXPLORING dans son propre panneau au-dessus du panneau FilterMate, avec une liste de couches en haut" loading="lazy" width="620" height="1074">
+            <figcaption>EXPLORING dans son propre panneau, au-dessus de FilterMate : la liste du haut choisit la couche courante.</figcaption>
         </figure>
         <figure class="narrow">
-            <img src="img/guide/panels-stacked.png" alt="Le panneau FilterMate avec un en-tête par section, AGENT, EXPLORING, FILTERING, EXPORTING et CONFIGURATION, les uns au-dessus des autres" loading="lazy" width="620" height="1314">
+            <img src="img/guide/panels-stacked.png" alt="Le panneau FilterMate avec un en-tête par section, AGENT, EXPLORING, FILTERING, EXPORTING et CONFIGURATION, les uns au-dessus des autres" loading="lazy" width="620" height="1074">
             <figcaption>Les en-têtes les uns au-dessus des autres (<code>SECTION_HEADERS = stacked</code>) à la place des rails.</figcaption>
         </figure>
     </div>
 
-    <div class="fig-row">
-        <figure class="narrow">
-            <img src="img/guide/dock-overview.png" alt="Le panneau FilterMate complet : les pastilles AGENT et EXPLORING en haut, FILTERING, EXPORTING et CONFIGURATION en bas, FILTERING ouvert" loading="lazy" width="620" height="1314">
-            <figcaption>Le panneau complet tel qu'une nouvelle installation le montre : un rail de pastilles au-dessus de chaque pile, EXPLORING et FILTERING ouverts.</figcaption>
-        </figure>
-        <div>
-            <figure>
-                <img src="img/guide/header-badges.png" alt="La barre de titre du panneau FilterMate avec les badges favoris, détacher et fermer" loading="lazy" width="620" height="42">
-                <figcaption>Barre de titre : le badge des favoris (&#9733;), détacher et fermer. L'étiquette de source de la couche courante, ici <em>Vector · Spatialite</em>, est sur la carte de la couche d'EXPLORING.</figcaption>
-            </figure>
-            <figure>
-                <img src="img/guide/action-bar.png" alt="La barre d'actions avec Filter, Undo, Redo, Compare, Unfilter, Export et About" loading="lazy" width="357" height="49">
-                <figcaption>Barre d'actions après un filtre : Undo est actif, Redo pas encore, Compare est enclenché.</figcaption>
-            </figure>
-        </div>
-    </div>
 
     <div class="callout tip">
         <strong>Astuce</strong> Le panneau suit le thème de QGIS (Default, Night Mapping, Blend of Gray). Vous pouvez forcer un aspect clair ou sombre
@@ -273,7 +271,7 @@
 
     <h3>Sélection simple</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-single.png" alt="Sélection simple avec une route choisie par son nom" loading="lazy" width="602" height="573">
+        <img src="img/guide/exploring-single.png" alt="Sélection simple avec une route choisie par son nom" loading="lazy" width="602" height="521">
         <figcaption>Sélection simple sur une couche de routes : l'entité est choisie par son nom, le champ en dessous définit l'attribut affiché.</figcaption>
     </figure>
     <p>
@@ -284,7 +282,7 @@
 
     <h3>Sélection multiple</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-multiple.png" alt="Sélection multiple avec quatre routes cochées" loading="lazy" width="602" height="573">
+        <img src="img/guide/exploring-multiple.png" alt="Sélection multiple avec quatre routes cochées" loading="lazy" width="602" height="521">
         <figcaption>Sélection multiple : quatre routes sont cochées. La ligne au-dessus de la liste résume la sélection ; le champ de texte filtre la liste au fil de la saisie.</figcaption>
     </figure>
     <p>
@@ -294,7 +292,7 @@
 
     <h3>Sélection personnalisée (expression)</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-custom.png" alt="Sélection personnalisée avec une expression QGIS" loading="lazy" width="602" height="573">
+        <img src="img/guide/exploring-custom.png" alt="Sélection personnalisée avec une expression QGIS" loading="lazy" width="602" height="521">
         <figcaption>Sélection personnalisée : n'importe quelle expression QGIS, ici les routes d'importance 3 ou 4.</figcaption>
     </figure>
     <p>
@@ -332,7 +330,7 @@
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/filtering-tab.png" alt="L'onglet Filtering avec couches cibles, prédicat et tampon définis" loading="lazy" width="602" height="599">
+        <img src="img/guide/filtering-tab.png" alt="L'onglet Filtering avec couches cibles, prédicat et tampon définis" loading="lazy" width="602" height="396">
         <figcaption>Onglet Filtering : couche source, deux couches cibles, opérateurs de combinaison, prédicat Intersect, tampon rond de 50 m.</figcaption>
     </figure>
     <p>
@@ -535,7 +533,7 @@ AND ST_Intersects("geom",
         <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/export-tab.png" alt="L'onglet Exporting" loading="lazy" width="602" height="599">
+        <img src="img/guide/export-tab.png" alt="L'onglet Exporting" loading="lazy" width="602" height="462">
         <figcaption>Onglet Exporting : couches, CRS, format de style, format de sortie, dossier de sortie avec mode batch, ZIP.</figcaption>
     </figure>
     <p>
@@ -568,7 +566,7 @@ AND ST_Intersects("geom",
 <section id="configuration">
     <h2><span class="num">10</span>Configuration</h2>
     <figure class="narrow">
-        <img src="img/guide/configuration-tab.png" alt="L'onglet Configuration avec l'arbre des réglages" loading="lazy" width="602" height="599">
+        <img src="img/guide/configuration-tab.png" alt="L'onglet Configuration avec l'arbre des réglages" loading="lazy" width="602" height="485">
         <figcaption>Onglet Configuration : un champ de recherche au-dessus d'un arbre de réglages, modifiés sur place. Les changements sont enregistrés immédiatement.</figcaption>
     </figure>
     <p>
@@ -714,11 +712,11 @@ processing.run("filtermate:batch_filter", {
     </p>
     <div class="fig-row">
         <figure class="narrow">
-            <img src="img/guide/fm5_raster_exploring.png" alt="Le panneau EXPLORING d'un raster : bande, valeur au pixel, plage de valeurs avec histogramme ; FILTERING inchangé avec une couverture minimale" loading="lazy" width="440" height="1086">
+            <img src="img/guide/fm5_raster_exploring.png" alt="Le panneau EXPLORING d'un raster : bande, valeur au pixel, plage de valeurs avec histogramme ; FILTERING inchangé avec une couverture minimale" loading="lazy" width="660" height="1179">
             <figcaption>Raster : plage de valeurs sur l'histogramme, cibles vecteur avec une couverture minimale de 50 %.</figcaption>
         </figure>
         <figure class="narrow">
-            <img src="img/guide/fm5_pointcloud_exploring.png" alt="Le panneau EXPLORING d'un nuage de points : classes ASPRS / LiDAR HD, plages d'attributs" loading="lazy" width="440" height="1086">
+            <img src="img/guide/fm5_pointcloud_exploring.png" alt="Le panneau EXPLORING d'un nuage de points : classes ASPRS / LiDAR HD, plages d'attributs" loading="lazy" width="660" height="1179">
             <figcaption>Nuage de points : classes (ici la classe 6, bâtiment) et plages d'attributs.</figcaption>
         </figure>
     </div>
@@ -850,26 +848,26 @@ processing.run("filtermate:batch_filter", {
     </p>
     <div class="fig-row">
         <figure class="narrow">
-            <img src="img/guide/fm5_filtering_targets.png" alt="FILTERING avec une source vecteur, un raster et un nuage de points dans la liste des couches à filtrer" loading="lazy" width="440" height="1086">
+            <img src="img/guide/fm5_filtering_targets.png" alt="FILTERING avec une source vecteur, un raster et un nuage de points dans la liste des couches à filtrer" loading="lazy" width="660" height="1179">
             <figcaption>FILTERING depuis une couche vecteur : le raster et le nuage de points figurent parmi les cibles.</figcaption>
         </figure>
         <figure class="narrow">
-            <img src="img/guide/fm5_export_tab.png" alt="EXPORTING avec un raster, un nuage de points et une couche vecteur cochés" loading="lazy" width="440" height="1086">
+            <img src="img/guide/fm5_export_tab.png" alt="EXPORTING avec un raster, un nuage de points et une couche vecteur cochés" loading="lazy" width="660" height="1179">
             <figcaption>EXPORTING : un raster, un nuage de points et une couche vecteur dans le même export.</figcaption>
         </figure>
     </div>
     <h3>Résultats sur la carte</h3>
     <div class="fig-row">
         <figure>
-            <img src="img/guide/fm5_vector_to_raster.png" alt="Un raster découpé autour d'un polygone sélectionné sur le canevas QGIS" loading="lazy" width="954" height="591">
+            <img src="img/guide/fm5_vector_to_raster.png" alt="Un raster découpé autour d'un polygone sélectionné sur le canevas QGIS" loading="lazy" width="2147" height="1329">
             <figcaption>Vecteur → raster : les pixels autour du bâtiment sélectionné sont conservés (tampon de 30 m).</figcaption>
         </figure>
         <figure>
-            <img src="img/guide/fm5_raster_to_vector.png" alt="Polygones retenus par une plage de valeurs raster, les autres pixels masqués par l'aperçu" loading="lazy" width="954" height="591">
+            <img src="img/guide/fm5_raster_to_vector.png" alt="Polygones retenus par une plage de valeurs raster, les autres pixels masqués par l'aperçu" loading="lazy" width="2147" height="1329">
             <figcaption>Raster → vecteur : les polygones qui vérifient la plage de valeurs ; l'aperçu masque les autres pixels.</figcaption>
         </figure>
         <figure>
-            <img src="img/guide/fm5_pointcloud_to_vector.png" alt="Points de bâtiment (classe 6) dans le polygone retenu par le filtre du nuage de points" loading="lazy" width="954" height="591">
+            <img src="img/guide/fm5_pointcloud_to_vector.png" alt="Points de bâtiment (classe 6) dans le polygone retenu par le filtre du nuage de points" loading="lazy" width="2147" height="1329">
             <figcaption>Nuage de points → vecteur : les bâtiments qui contiennent des points de la classe 6 (bâtiment).</figcaption>
         </figure>
     </div>
@@ -886,7 +884,7 @@ processing.run("filtermate:batch_filter", {
         Les options <code>APP.OPTIONS.CROSS_FILTER.*</code> règlent le mode de découpe des nuages de points (exact ou boîte englobante), le nombre maximal de pixels raster, la résolution de l'empreinte, la taille du cache et le chemin de <code>pdal</code>.
     </p>
     <figure class="narrow">
-        <img src="img/guide/fm5_configuration.png" alt="Onglet Configuration avec les options RASTER et POINT_CLOUD activées" loading="lazy" width="440" height="1086">
+        <img src="img/guide/fm5_configuration.png" alt="Onglet Configuration avec les options RASTER et POINT_CLOUD activées" loading="lazy" width="660" height="1179">
         <figcaption>Onglet Configuration : les options RASTER et POINT_CLOUD.</figcaption>
     </figure>
     <div class="callout"><p><strong>PDAL.</strong> La hauteur au-dessus d'un MNT et l'écriture directe de fichiers COPC demandent PDAL 2.4 ou plus récent. Avec un PDAL plus ancien, les cibles nuage de points sont découpées par l'exporteur de QGIS, un export COPC écrit du LAZ avec un message, et la hauteur au-dessus d'un MNT est désactivée avec un message qui nomme la version.</p></div>

@@ -48,6 +48,9 @@ LOG = os.path.join(OUT, 'shots.log')
 GPKG = os.environ.get('FM_GUIDE_GPKG') or r'C:\Users\Simon\Documents\31.gpkg'
 EXPORT_DIR = os.environ.get('FM_GUIDE_EXPORT_DIR') or '/home/me/Documents/export'  # only typed in the field
 DOCK_WIDTH = 413  # logical pixels: 620 px wide images at the 1.5 scale
+# The rows of FILTERING and EXPORTING are packed at the top of their section: a window no taller than the panel needs,
+# and a lower stack no taller than its rows (fit_stacks), so the pictures of the panel hold no empty band.
+WINDOW_HEIGHT = int(os.environ.get('FM_GUIDE_HEIGHT', '880'))
 STEP_TIMEOUT = 60.0
 STATE = {}
 
@@ -121,9 +124,29 @@ def exploring_rect():
 
 
 def lower_rect():
-    """The lower stack: its rail of chips and the open section (FILTERING, EXPORTING or CONFIGURATION)."""
+    """The lower stack: its rail of chips and the open section (FILTERING, EXPORTING or CONFIGURATION), down to the
+    last row of the section (the room its packed rows leave under them is not in the picture)."""
     d = dock()
-    return rect_in(sections().bottom_rail, d).united(rect_in(d.toolBox_tabTools, d)).adjusted(-2, -2, 2, 2)
+    box = rect_in(d.toolBox_tabTools, d)
+    page = d.toolBox_tabTools.currentWidget()
+    rows = rect_in(page, d).intersected(box) if page is not None else box
+    if rows.height() < 60:
+        rows = box
+    return rect_in(sections().bottom_rail, d).united(QRect(box.x(), rows.y(), box.width(), rows.height())) \
+        .adjusted(-2, -2, 2, 6)
+
+
+def fit_stacks():
+    """The handle between the stacks set so that the lower one is as tall as its rows: EXPLORING gets the rest."""
+    d = dock()
+    splitter, page = d.splitter_main, d.toolBox_tabTools.currentWidget()
+    if page is None or page is d.CONFIGURATION:
+        return
+    need = sections().bottom_rail.height() + max(page.sizeHint().height(), page.minimumSizeHint().height()) + 22
+    total = sum(splitter.sizes())
+    if 0 < need < total:
+        splitter.setSizes([total - need, need])
+    log(f'stacks {splitter.sizes()} for rows of {need}')
 
 
 def under_section_rect():
@@ -189,7 +212,7 @@ def s_setup():
     settings.setValue('qgis/digitizing/validate_geometries', 0)
     mw = iface.mainWindow()
     mw.showNormal()
-    mw.resize(1760, 1040)
+    mw.resize(1760, WINDOW_HEIGHT)
     for name in ['commune', 'cours_d_eau', 'haie', 'troncon_de_route', 'batiment']:
         vl = QgsVectorLayer(f'{GPKG}|layername={name}', name, 'ogr')
         log(f'{name} valid={vl.isValid()} count={vl.featureCount()}')
@@ -217,6 +240,7 @@ def s_after_open():
     iface.mainWindow().resizeDocks([d], [DOCK_WIDTH], Qt.Orientation.Horizontal)
     sections().open_top('exploring')
     d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
+    QTimer.singleShot(1200, fit_stacks)
     return settled(3.0)
 
 
@@ -460,7 +484,7 @@ def s_beside_map():
     layers = window.findChild(QDockWidget, 'Layers')
     panel = panels().panel('filtering')
     window.splitDockWidget(layers, panel, Qt.Orientation.Vertical)
-    window.resizeDocks([layers, panel], [300, 560], Qt.Orientation.Vertical)
+    window.resizeDocks([layers, panel], [340, 376], Qt.Orientation.Vertical)
     window.resizeDocks([layers], [DOCK_WIDTH], Qt.Orientation.Horizontal)
     panel.open('filtering')
     box = layer('troncon_de_route').getFeature(STATE['road_fid']).geometry().boundingBox()
@@ -517,6 +541,7 @@ def s_section_buttons():
     apply({'APP.DOCKWIDGET.ACTION_BAR_POSITION': 'sections'})
     d = dock()
     d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
+    QTimer.singleShot(1200, fit_stacks)
     return settled(2.5)
 
 
@@ -551,6 +576,7 @@ def s_grab_section_buttons():
 
 def s_stacked():
     apply({'APP.DOCKWIDGET.SECTION_HEADERS': 'stacked'})
+    QTimer.singleShot(1200, fit_stacks)
     return settled(2.5)
 
 
