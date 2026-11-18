@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Metadata: a shorter description; the about opens on what people search (several layers filtered at once, definition queries); tags chosen for the plugin list search; a short changelog; category Vector (Plugins is not a value plugins.qgis.org knows); a stray line that read as a key removed.
 - Feedback: four entries in Vector > FilterMate (give your opinion, suggest a feature, test the experimental features, training and services) open the feedback page of the site; after 20 successful filters, one message offers the short review form, once ever. The plugin sends nothing itself.
 - Site: a FilterMate Cloud page with the tiers to test and a waitlist; cookie-free audience measure.
 - Tools: `scripts/tally_forms.py` creates the Tally forms in English and French: usage (with a rating and a review), review, training and services, feature suggestion, testers, and the Cloud waitlist.
