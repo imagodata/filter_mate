@@ -83,7 +83,9 @@ def _layer_ids(key: str, references: Any, layers: Sequence[LayerFacts], problems
         elif not_this is not None and layer.layer_id == not_this.layer_id:
             problems.append(f"{key}: not the layer itself")
         elif vector_only and not (layer.vector or layer.listed_target):
-            problems.append(f"{key}: {layer.name} is not a vector layer")
+            problems.append(f"{key}: {layer.name} is not a target the panel lists for a vector layer (a vector layer, "
+                            "or a raster or point cloud while FilterMate's options for raster and point cloud targets "
+                            "are on)")
         elif layer.layer_id not in ids:
             ids.append(layer.layer_id)
     return ids

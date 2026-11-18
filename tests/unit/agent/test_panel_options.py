@@ -61,7 +61,7 @@ def test_a_listed_raster_target_is_kept():
 
 @pytest.mark.parametrize("filtering, problem", [
     ({"layers_to_filter": ["communes"]}, "layers_to_filter: not the layer itself"),
-    ({"layers_to_filter": ["mnt"]}, "layers_to_filter: mnt is not a vector layer"),
+    ({"layers_to_filter": ["mnt"]}, "layers_to_filter: mnt is not a target the panel lists for a vector layer"),
     ({"geometric_predicates": ["Near"]}, "geometric_predicates: Near is not one of"),
     ({"buffer_value": 2e6}, "buffer_value: between -1000000 and 1000000"),
     ({"buffer_value": "far"}, "buffer_value: a number"),

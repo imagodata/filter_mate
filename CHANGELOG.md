@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: `set_layer_options` says what is true when a raster or point cloud is refused among the targets (the panel does not list it any more, its option being off), instead of "is not a vector layer".
 - Agent: choosing, in the Model menu, a provider that became the one in use since the menu opened does nothing; it restarted the conversation with the model, forgot what was allowed and said that the conversation goes on with it.
 - Agent: copying text of the thread that holds a no-break space (a French answer, `Chemin : C:\...`) leaves no invisible character in a long path either: Qt copies the no-break space as a space, and the copy was not recognised as coming from the thread.
 - Agent: a tool call whose arguments are malformed (`layers` a number or a string instead of a list, for `set_layer_options`, `remove_layers`, `set_layers_visibility`) now gets the message of the validation, which says what is wrong; the model was answered "undo point failed" instead, and could not correct itself. A valid call whose undo point cannot be made is still refused.

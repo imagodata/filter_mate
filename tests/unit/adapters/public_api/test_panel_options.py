@@ -155,7 +155,7 @@ def test_a_raster_target_the_panel_lists_is_accepted_and_kept(dock, project, mon
 
 
 def test_a_raster_the_panel_does_not_list_is_still_refused(dock, project):
-    with pytest.raises(ValueError, match="communes: layers_to_filter: mnt is not a vector layer"):
+    with pytest.raises(ValueError, match="communes: layers_to_filter: mnt is not a target the panel lists"):
         panel_options.set_layer_options(
             dock, [{"layer": "communes", "filtering": {"layers_to_filter": ["routes", "mnt"]}}], project=project)
     assert dock.PROJECT_LAYERS[COMMUNES.id()]["filtering"]["layers_to_filter"] == []
