@@ -2553,7 +2553,7 @@ def explo():
     return panel_of('exploring')
 
 
-def lay_out(left='exploring', width=400, height=520, right=410, under=True):
+def lay_out(left='exploring', width=400, height=600, right=410, under=True):
     """Unrecorded: the section ``left`` in its own panel, left of the map; the dock keeps the other sections, right
     of the map. ``under``: the panel sits under the layer tree, ``height`` tall (a denser panel, a wider map); else
     it stands between the tree and the map."""
