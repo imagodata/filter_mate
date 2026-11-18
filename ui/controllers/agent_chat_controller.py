@@ -72,15 +72,14 @@ from ...core.agent.request_context import (
 )
 from ...core.agent.messages import request_usage
 from ...core.agent.session import (
-    REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget,
+    REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget, tools_weight,
 )
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
-from ...core.agent.tool_schema import for_model
 from ...core.agent.tool_catalog import (
     ADD_NOTE, ADD_TABLE, ASK_USER, CREATE_WIDGET, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
-    TURN_OFF_OPTIONS, TURN_ON_OPTIONS,
+    TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...core.domain.layer_kind import LayerKind
@@ -2008,9 +2007,10 @@ class AgentChatController(QObject):
             values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered, index)
         # Lot 3: the history a provider gets before the compaction, after what the instructions and tools take.
         # Measured on the form of the schemas the providers send (lot 2, core/agent/tool_schema.py).
-        fixed = len(prompt) + len(json.dumps([[tool.name, tool.description, for_model(tool.input_schema)]
-                                              for tool in tools], ensure_ascii=False))
-        limits = AgentLimits(max_history_chars=history_budget(PRESETS[values.preset][0], fixed))
+        # The tools a skill or use_tools offers later are taken off it by the session (``shrinks_with_tools``).
+        kind = PRESETS[values.preset][0]
+        limits = AgentLimits(max_history_chars=history_budget(kind, len(prompt) + tools_weight(tools)),
+                             shrinks_with_tools=kind == "ollama")
         session = AgentSession(provider, tools, prompt, limits, core=CORE if index else ())
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
@@ -2079,7 +2079,8 @@ class AgentChatController(QObject):
         nothing ticked, and a tool turned off in the Tools tab is missing with its source ticked."""
         return chat_instructions(active, send_values=values.send_values,
                                  filtering=AgentChatController.local_filtering(values),
-                                 configured_basemaps=configured_basemaps, offered=offered, available=available)
+                                 configured_basemaps=configured_basemaps, offered=offered, available=available,
+                                 settings_link=values.rules.get(SHOW_SETTINGS_LINK) != RULE_NEVER)
 
     @staticmethod
     def local_filtering(values: AgentSettings) -> bool:
@@ -2415,7 +2416,7 @@ class AgentChatController(QObject):
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""
         read = self._read_project()
-        self._seen = None if read is None else project_state(*read)
+        self._seen = None if read is None else project_state(*read, previous=self._seen)
 
     def _on_stop(self) -> None:
         abort_active(CHAT_WAITS)  # a connector or a platform the chat waits for, not a call of another application

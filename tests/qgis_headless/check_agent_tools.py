@@ -232,6 +232,8 @@ def check_reading(introspection, project, gpkg, work):
     groups = {row["value"]: row for row in by_zone["groups"]}
     check("a field summed by group", (groups["a"]["sum"], groups["a"]["mean"], groups["b"]["sum"]) == (40.0, 20.0, 5.0),
           by_zone)
+    check("the groups are ranked by the measure, the features without one",
+          area["ranked_by"] == "sum" and by_zone["ranked_by"] == "sum" and many["ranked_by"] == "feature_count", area)
     json.dumps(area)
 
     sample = introspection.sample_features("communes", limit=2)

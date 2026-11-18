@@ -104,6 +104,22 @@ def test_turning_on_is_asked_at_every_level_turning_off_is_not(level):
         assert policy.verdict(tools["turn_off_agent_options"], {"sources": ["datagouv"]}) != ASK
 
 
+def test_turning_off_follows_the_other_settings_of_the_project_at_every_level():
+    """Audit 2026-11-18: the catalog said "without a question", but the careful level asks and the advisor refuses,
+    as for set_layer_options (class project): narrowing what the agent reaches is a change of the project like them,
+    and nothing leaves QGIS by it. The skill words it "without a question unless the level asks for every change"."""
+    from core.agent.permissions import ASK, REFUSE, RUN, PermissionPolicy
+    from core.agent.tool_catalog import chat_tools
+    tools = {tool.name: tool for tool in chat_tools()}
+    off, same_class = tools["turn_off_agent_options"], tools["set_layer_options"]
+    verdicts = {}
+    for level in ("advisor", "careful", "standard", "autonomous"):
+        policy = PermissionPolicy(level)
+        verdicts[level] = policy.verdict(off, {"sources": ["datagouv"]})
+        assert verdicts[level] == policy.verdict(same_class, {"layers": [{"layer": "a"}]}), level
+    assert verdicts == {"advisor": REFUSE, "careful": ASK, "standard": RUN, "autonomous": RUN}
+
+
 # --- 2026-11-16, review of #505: a key never goes to another provider, a withdrawn consent never comes back ---------
 
 def test_a_key_shared_with_another_provider_is_refused():
