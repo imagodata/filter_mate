@@ -14,7 +14,7 @@ from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 
 from ...adapters.agent.qt_transport import QtTransport
 from ...adapters.agent.settings import (
-    AgentSettings, KeyStoreError, delete_key, load_settings, provider_config, read_key, save_settings, store_key,
+    AgentSettings, KeyStoreError, delete_key, delete_own_key, load_settings, provider_config, read_key, save_settings, store_key,
     target_of, current_provider, read_providers, write_providers,
 )
 from ...adapters.agent import transcript_store
@@ -989,12 +989,24 @@ class AgentChatController(QObject):
             self._click_option(Change(provider=entry))
 
     def _on_provider_forgotten(self, ident: str) -> None:
-        """"Remove from the list": the entry the action carries, never the one in use."""
-        from ...core.agent.agent_options import forget
-        providers, current = self._menu_providers(load_settings())
+        """"Remove from the list": the entry the action carries, never the one in use. Its key leaves the
+        authentication database of QGIS only when it is this entry's alone (``key_to_delete``)."""
+        from ...core.agent.agent_options import forget, key_to_delete
+        values = load_settings()
+        providers, current = self._menu_providers(values)
         entry = next((entry for entry in providers if entry.ident == ident), None)
-        if entry is not None and not entry.same(current):
-            write_providers(forget(read_providers(), entry))  # the list as stored: the provider in use is not added
+        if entry is None or entry.same(current):
+            return
+        remaining = forget(read_providers(), entry)  # the list as stored: the provider in use is not added to it
+        write_providers(remaining)
+        in_use = [values.authcfg] + [change.provider.authcfg for change in self._pending_options
+                                     if change.provider is not None]
+        authcfg = key_to_delete(entry, remaining, in_use, target_of(entry.preset, entry.base_url))
+        if authcfg:
+            try:
+                delete_own_key(authcfg)
+            except KeyStoreError:
+                logger.warning("Agent: the key of a provider left out of the list was kept", exc_info=True)
 
     def _on_mcp_toggled(self, on: bool) -> None:
         from ...core.agent.agent_options import Change

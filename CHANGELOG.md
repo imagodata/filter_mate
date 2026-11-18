@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: "Remove from the list" in the Model menu now also deletes the key of that provider from the authentication database of QGIS, but only when FilterMate made that configuration (its name), the key was stored for that provider's server, and no other provider in the list, the settings in use or a switch waiting holds the same place. Otherwise the key stays (an old setup shared one place between providers; a secret deleted by mistake is worse than one left).
 - Agent: the menu "⋯" > Model acts on the provider you clicked, not on its rank in a list read again at the click. When the provider in use changed while the menu was open (a request ended and applied a switch), the rank pointed to another provider, or to none, and "Remove from the list" could remove the wrong one; removing one no longer adds the provider in use to the saved list either.
 - Agent: closing the project no longer drops what you clicked in the menu "⋯" (a source, a provider) while a request ran; only what the agent itself queued for that project is dropped.
 - Agent: undoing a turn that added a layer and then set its options (or renamed it) no longer ends with "Changed since, left as is" for that layer: the layer is removed by the undo itself, so there is nothing left to put back.

@@ -70,6 +70,22 @@ def forget(entries: Sequence[ProviderEntry], entry: ProviderEntry) -> Tuple[Prov
     return tuple(other for other in entries if not other.same(entry))
 
 
+def key_to_delete(entry: ProviderEntry, remaining: Sequence[ProviderEntry], in_use: Sequence[str], target: str) -> str:
+    """The authentication configuration to delete with ``entry`` left out of the list, "" when it is not certain that
+    the key is this entry's alone.
+
+    ``remaining``: the entries the list keeps; ``in_use``: the configurations the settings in use or a change
+    waiting hold; ``target``: the server ``entry`` sends to. The key must have been stored for that server (a
+    legacy entry shared one place between servers: whose key it holds is unknown), and no other entry may use the
+    place. A secret of the user deleted wrongly is worse than one left."""
+    authcfg = entry.authcfg
+    if not authcfg or not target or entry.key_target != target or authcfg in in_use:
+        return ""
+    if any(other.authcfg == authcfg for other in remaining):
+        return ""
+    return authcfg
+
+
 def options_view(sources: Sequence[Source], enabled_ids: Sequence[str], providers: Sequence[ProviderEntry],
                  current: ProviderEntry, mcp_on: bool) -> Dict[str, Any]:
     """What agent_options answers."""

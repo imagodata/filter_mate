@@ -332,6 +332,51 @@ def test_a_provider_forgotten_is_the_one_clicked_and_the_one_in_use_is_not_kept(
     assert state["stored"] == (first,) and len(state["written"]) == 1
 
 
+def test_the_key_of_a_forgotten_provider_goes_when_it_is_its_own(host, monkeypatch):
+    other = _entry("openai", "gpt", "", "keyA")
+    mine = _entry("mistral", "small", "", "keyB")
+    state = _menu_host(host, monkeypatch, [other, mine])
+    deleted = []
+    monkeypatch.setattr(chat_controller, "delete_own_key", deleted.append)
+    Controller._on_provider_forgotten(host, mine.ident)
+    assert state["stored"] == (other,) and deleted == ["keyB"]
+
+
+@pytest.mark.parametrize("shared_with", ["list", "settings", "waiting"])
+def test_a_key_another_entry_uses_stays(host, monkeypatch, shared_with):
+    other = _entry("openai", "gpt", "", "keyB" if shared_with == "list" else "keyA")
+    mine = _entry("mistral", "small", "", "keyB")
+    _menu_host(host, monkeypatch, [other, mine])
+    deleted = []
+    monkeypatch.setattr(chat_controller, "delete_own_key", deleted.append)
+    if shared_with == "settings":  # the settings in use hold the place
+        host.store["values"] = agent_settings.AgentSettings(preset="anthropic", model="m", consent=True, authcfg="keyB")
+    if shared_with == "waiting":  # a switch queued for the end of the request holds it
+        host._pending_options.append(Change(provider=_entry("anthropic", "x", "", "keyB")))
+    Controller._on_provider_forgotten(host, mine.ident)
+    assert deleted == []
+
+
+def test_a_key_not_stored_for_its_server_stays(host, monkeypatch):
+    legacy = ProviderEntry("mistral", "small", "", "keyB", "https://api.mistral.ai/v1", "")  # an old shared place
+    _menu_host(host, monkeypatch, [legacy])
+    deleted = []
+    monkeypatch.setattr(chat_controller, "delete_own_key", deleted.append)
+    Controller._on_provider_forgotten(host, legacy.ident)
+    assert deleted == []
+
+
+def test_a_locked_key_store_does_not_stop_the_removal(host, monkeypatch):
+    mine = _entry("mistral", "small", "", "keyB")
+    state = _menu_host(host, monkeypatch, [mine])
+
+    def locked(_authcfg):
+        raise chat_controller.KeyStoreError("master password")
+    monkeypatch.setattr(chat_controller, "delete_own_key", locked)
+    Controller._on_provider_forgotten(host, mine.ident)
+    assert state["stored"] == ()
+
+
 def test_closing_the_project_keeps_what_the_user_clicked(monkeypatch):
     clicked = Change(sources_on=("osm_tiles",))
     queued = Change(sources_off=("datagouv",), by_agent=True)

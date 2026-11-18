@@ -24,7 +24,8 @@ os.environ["QGIS_CUSTOM_CONFIG_PATH"] = HOME
 os.environ["QGIS_AUTH_DB_DIR_PATH"] = HOME
 
 from qgis.core import (  # noqa: E402
-    Qgis, QgsApplication, QgsFeature, QgsGeometry, QgsPointXY, QgsProject, QgsSettings, QgsVectorFileWriter,
+    Qgis, QgsApplication, QgsAuthMethodConfig, QgsFeature, QgsGeometry, QgsPointXY, QgsProject, QgsSettings,
+    QgsVectorFileWriter,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer  # noqa: E402
@@ -462,6 +463,19 @@ def check_key_store():
     disposable = agent_settings.store_key("x")
     agent_settings.delete_key(disposable)
     check("key deleted", disposable not in manager.configIds())
+    # A provider left out of the list takes its key along only when FilterMate made that configuration.
+    own = agent_settings.store_key("y")
+    foreign = QgsAuthMethodConfig("Basic")
+    foreign.setName("My own login")
+    foreign.setConfig("username", "someone")
+    foreign.setConfig("password", "theirs")
+    stored, foreign = manager.storeAuthenticationConfig(foreign)
+    check("own key deleted by its owner", agent_settings.delete_own_key(own) and own not in manager.configIds())
+    check("a configuration of the user is not deleted", stored and not agent_settings.delete_own_key(foreign.id())
+          and foreign.id() in manager.configIds())
+    check("an unknown or empty place deletes nothing", not agent_settings.delete_own_key("nope123")
+          and not agent_settings.delete_own_key(""))
+    manager.removeAuthenticationConfig(foreign.id())
     return authcfg
 
 

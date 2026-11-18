@@ -253,6 +253,21 @@ def delete_key(authcfg: str) -> None:
             manager.removeAuthenticationConfig(authcfg)
 
 
+def delete_own_key(authcfg: str) -> bool:
+    """Delete ``authcfg`` when it is a configuration FilterMate made for a key (by its name); True when it went.
+
+    Raises:
+        KeyStoreError: The database is locked or unavailable.
+    """
+    if not authcfg:
+        return False
+    manager = _auth_manager()
+    config = manager.availableAuthMethodConfigs().get(authcfg)
+    if config is None or config.name() != _AUTH_NAME or config.method() != _METHOD:
+        return False  # the user's own configuration, or one of another plugin: not ours to delete
+    return bool(manager.removeAuthenticationConfig(authcfg))
+
+
 def provider_config(values: AgentSettings, key: Optional[str]) -> ProviderConfig:
     kind, base_url = PRESETS[values.preset]
     return ProviderConfig(kind=kind, model=values.model, base_url=values.base_url or base_url, api_key=key or "",
