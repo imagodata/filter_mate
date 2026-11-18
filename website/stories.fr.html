@@ -89,9 +89,9 @@
     </p>
     <div class="cards story-index">
         <a class="card story-card" href="#s1"><span class="story-card-media"><img src="video/export.webp" alt="Saint-Gaudens filtrée et prête à être exportée" loading="lazy" width="1280" height="720"><b aria-hidden="true">01</b></span><div class="story-card-copy"><span class="badge">Bureau d'études</span><h4>Le dossier communal en trois minutes</h4><p>Cadrer 12 couches départementales et livrer un GeoPackage stylé.</p><span class="story-outcome">12 couches · <strong>12 380 bâtiments</strong></span></div></a>
-        <a class="card story-card" href="#s2"><span class="story-card-media"><img src="video/noise.webp" alt="Bâtiments proches des grands axes de Muret" loading="lazy" width="1280" height="720"><b aria-hidden="true">02</b></span><div class="story-card-copy"><span class="badge">Urbanisme</span><h4>Quels bâtiments sont proches des grands axes ?</h4><p>Un tampon calculé par expression selon chaque catégorie de route.</p><span class="story-outcome"><strong>2 753 bâtiments</strong> · 78 ERP</span></div></a>
-        <a class="card story-card" href="#s3"><span class="story-card-media"><img src="video/buffer.webp" alt="Bâtiments filtrés autour des surfaces en eau de Grenade" loading="lazy" width="1280" height="720"><b aria-hidden="true">03</b></span><div class="story-card-copy"><span class="badge">Risques</span><h4>Les bâtiments proches des cours d’eau</h4><p>Une bande de 300 m puis 100 m, avec annulation et rejeu.</p><span class="story-outcome">300 m · <strong>14 426 bâtiments</strong></span></div></a>
-        <a class="card story-card" href="#s4"><span class="story-card-media"><img src="video/bridges.webp" alt="Franchissements des cours d'eau permanents dans Toulouse Métropole" loading="lazy" width="1280" height="720"><b aria-hidden="true">04</b></span><div class="story-card-copy"><span class="badge">Ouvrages d'art</span><h4>Repérer les franchissements à vérifier</h4><p>Cadrer un EPCI de 37 communes, puis appliquer le prédicat Cross.</p><span class="story-outcome"><strong>747 routes</strong> · 364 ouvrages</span></div></a>
+        <a class="card story-card" href="#s2"><span class="story-card-media"><img src="video/noise.webp" alt="Bâtiments proches des grands axes de Muret" loading="lazy" width="1280" height="720"><b aria-hidden="true">02</b></span><div class="story-card-copy"><span class="badge">Urbanisme</span><h4>Quels bâtiments sont proches des grands axes ?</h4><p>Un tampon calculé par expression selon chaque catégorie de route.</p><span class="story-outcome"><strong>2 196 bâtiments</strong> · 75 ERP</span></div></a>
+        <a class="card story-card" href="#s3"><span class="story-card-media"><img src="video/buffer.webp" alt="Bâtiments filtrés autour des surfaces en eau de Grenade" loading="lazy" width="1280" height="720"><b aria-hidden="true">03</b></span><div class="story-card-copy"><span class="badge">Risques</span><h4>Les bâtiments proches des cours d’eau</h4><p>Une bande de 300 m puis 100 m, avec annulation et rejeu.</p><span class="story-outcome">300 m · <strong>2 913 bâtiments</strong></span></div></a>
+        <a class="card story-card" href="#s4"><span class="story-card-media"><img src="video/bridges.webp" alt="Franchissements des cours d'eau permanents dans Toulouse Métropole" loading="lazy" width="1280" height="720"><b aria-hidden="true">04</b></span><div class="story-card-copy"><span class="badge">Ouvrages d'art</span><h4>Repérer les franchissements à vérifier</h4><p>Cadrer un EPCI de 37 communes, puis appliquer le prédicat Cross.</p><span class="story-outcome"><strong>708 routes</strong> · 343 ouvrages</span></div></a>
         <a class="card story-card" href="#s5"><span class="story-card-media"><img src="video/brush.webp" alt="Végétation proche des maisons de Bagnères-de-Luchon" loading="lazy" width="1280" height="720"><b aria-hidden="true">05</b></span><div class="story-card-copy"><span class="badge">Forêt</span><h4>Débroussailler autour des maisons</h4><p>Sélection par expression, tampon de 50 m, puis filtre attributaire.</p><span class="story-outcome"><strong>58 bois et forêts</strong></span></div></a>
         <a class="card story-card" href="#s6"><span class="story-card-media"><img src="video/hamlets.webp" alt="Hameaux à plus de 200 mètres des routes revêtues à Aspet" loading="lazy" width="1280" height="720"><b aria-hidden="true">06</b></span><div class="story-card-copy"><span class="badge">Secours</span><h4>Les hameaux éloignés des routes revêtues</h4><p>Disjoint trouve ce qui reste au-delà d'une zone de 200 m.</p><span class="story-outcome"><strong>22 hameaux</strong> au-delà de 200 m</span></div></a>
         <a class="card story-card" href="#s7"><span class="story-card-media"><img src="video/favorites.webp" alt="Un filtre enregistré puis rejoué depuis les favoris" loading="lazy" width="1280" height="720"><b aria-hidden="true">07</b></span><div class="story-card-copy"><span class="badge">Équipe</span><h4>La bibliothèque de requêtes</h4><p>Enregistrer, décrire, rejouer et partager un filtre complet.</p><span class="story-outcome">Même résultat · <strong>un clic</strong></span></div></a>
@@ -136,9 +136,9 @@
         proviennent de <code>filtermate.log</code>. Le matériel et les conditions de cache n’ont pas été consignés : ces relevés illustrent une exécution et ne constituent pas un benchmark reproductible.
     </div>
     <div class="callout warn">
-        <strong>Une règle à connaître.</strong> Sur GeoPackage, un nouveau filtre spatial appliqué à une couche cible remplace le filtre spatial
-        précédent de cette couche ; l'opérateur de combinaison AND ne s'applique qu'à un filtre attributaire existant, ou à la couche source.
-        Les histoires 2, 3 et 4 en tirent parti (la question déborde volontairement de la commune), l'histoire 6 la contourne avec un cadrage attributaire.
+        <strong>Une règle à connaître.</strong> Un nouveau filtre spatial appliqué à une couche cible se combine avec le filtre précédent de cette couche par l'opérateur choisi, AND par défaut :
+        le cadrage posé sur la commune reste, et les effectifs des histoires 2, 3 et 4 sont ceux de la commune. Pour qu'une question déborde de la limite,
+        décochez la combinaison : le nouveau filtre remplace alors le cadrage. Chacune de ces histoires donne les deux nombres.
     </div>
 </section>
 
@@ -221,7 +221,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <div><h4>Le besoin</h4><p>Nadia étudie la proximité des bâtiments aux grands axes de <strong>Muret</strong>, traversée par l’A64 et plusieurs départementales. Elle utilise des distances d’étude de 300 m et 250 m selon l’importance des routes pour démontrer un tampon variable. Le résultat dénombre des bâtiments et des ERP, pas des habitants.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Après le cadrage sur Muret, la couche source devient <strong>troncon_de_route</strong>, avec une <strong>sélection personnalisée</strong> <code>"importance" IN ('1', '2')</code>. Le <strong>tampon est une expression</strong> évaluée pour chaque tronçon : 300 m pour l'importance 1, 250 m pour la 2. Le type de tampon <strong>Flat</strong> évite les arrondis en bout de tronçon. Cibles : <em>batiment</em> et <em>erp</em>.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Sélection</dt><dd><code>"importance" IN ('1', '2')</code></dd></div><div><dt>Cibles</dt><dd><code>batiment</code>, <code>erp</code></dd></div><div><dt>Relation</dt><dd>Intersect, tampon par expression, Flat</dd></div><div><dt>Résultat</dt><dd><strong>2 753</strong> bâtiments, 78 ERP</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Sélection</dt><dd><code>"importance" IN ('1', '2')</code></dd></div><div><dt>Cibles</dt><dd><code>batiment</code>, <code>erp</code></dd></div><div><dt>Relation</dt><dd>Intersect, tampon par expression, Flat</dd></div><div><dt>Résultat</dt><dd><strong>2 196</strong> bâtiments, 75 ERP</dd></div></dl>
     <ol class="steps">
         <li><strong>Cadrer Muret.</strong> Même geste qu'à l'histoire 1 : commune en source, Muret en sélection simple, toutes les couches en cibles, Intersect, Filter. Muret compte 19 458 bâtiments, 354 ERP et 5 512 tronçons de route.
             <figure><img src="img/stories/s2-00.webp" alt="Étape 1 : Muret cadrée, bâtiments, ERP, routes et voie ferrée limités à la commune" loading="lazy" width="1600" height="900"><figcaption>Étape 1. La commune est cadrée ; l'A64 traverse le territoire du nord-est au sud-ouest.</figcaption></figure>
@@ -243,7 +243,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p><strong>2 753 bâtiments</strong> et <strong>78 ERP</strong> se trouvent dans les zones tampons des 102 tronçons d'importance 1 et 2 de Muret, dont 2 196 bâtiments et 75 ERP sur la commune même : le tampon déborde chez les voisins, car un nouveau filtre spatial remplace le cadrage (voir « Une règle à connaître »).</p>
+    <p><strong>2 196 bâtiments</strong> et <strong>75 ERP</strong> de Muret se trouvent dans les zones tampons de ses 102 tronçons d'importance 1 et 2 : le nouveau filtre spatial se combine avec le cadrage de la commune (AND). Combinaison décochée, il remplace le cadrage et le tampon déborde chez les voisins : 2 753 bâtiments et 78 ERP (voir « Une règle à connaître »).</p>
     <div class="callout tip">
         <strong>Pour aller plus loin.</strong> La même expression peut lire une distance d’étude stockée dans un attribut. Autre exemple purement géométrique : <code>"largeur_de_chaussee" * 3</code>.
         Les tronçons dont la largeur est vide demandent un <code>coalesce("largeur_de_chaussee", 3)</code>.
@@ -264,7 +264,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <div><h4>Le besoin</h4><p>Julien prépare une exploration cartographique à <strong>Grenade</strong>, à la confluence de la Garonne et de la Save. Il compare les bâtiments situés à moins de 300 m puis de 100 m des surfaces en eau et revient au premier résultat avec Undo.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Source : <strong>surface_hydrographique</strong>, cadrée sur Grenade, avec une <strong>sélection multiple</strong> et <em>Select All</em> (77 surfaces). Cibles : bâtiments, ERP et routes, prédicat Intersect, <strong>tampon de 300 m</strong>. Second Filter à 100 m, puis <strong>Undo</strong> dans la barre d'actions.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>surface_hydrographique</code></dd></div><div><dt>Sélection</dt><dd>77 surfaces (Select All)</dd></div><div><dt>Cibles</dt><dd>bâtiments, ERP, routes</dd></div><div><dt>Relation</dt><dd>Intersect, 300 puis 100 m, Undo</dd></div><div><dt>Résultat</dt><dd><strong>14 426</strong> bâtiments à 300 m</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>surface_hydrographique</code></dd></div><div><dt>Sélection</dt><dd>77 surfaces (Select All)</dd></div><div><dt>Cibles</dt><dd>bâtiments, ERP, routes</dd></div><div><dt>Relation</dt><dd>Intersect, 300 puis 100 m, Undo</dd></div><div><dt>Résultat</dt><dd><strong>2 913</strong> bâtiments à 300 m</dd></div></dl>
     <ol class="steps">
         <li><strong>Cadrer Grenade.</strong> 6 998 bâtiments, 79 ERP, 1 978 tronçons de route et 77 surfaces en eau.
             <figure><img src="img/stories/s3-00.webp" alt="Étape 1 : Grenade cadrée, la Garonne et la Save en bleu" loading="lazy" width="1600" height="900"><figcaption>Étape 1. Les surfaces en eau (Garonne à l'est, Save au sud) sont désormais les seules de la carte.</figcaption></figure>
@@ -288,15 +288,14 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
     <table>
         <thead><tr><th>Bande</th><th>Bâtiments</th><th>ERP</th><th>Tronçons de route</th></tr></thead>
         <tbody>
-            <tr><td>300 m autour des surfaces en eau de Grenade</td><td><strong>14 426</strong></td><td><strong>178</strong></td><td><strong>6 310</strong></td></tr>
-            <tr><td>100 m</td><td><strong>2 770</strong></td><td><strong>28</strong></td><td><strong>1 949</strong></td></tr>
+            <tr><td>300 m autour des surfaces en eau de Grenade</td><td><strong>2 913</strong></td><td><strong>27</strong></td><td><strong>1 020</strong></td></tr>
+            <tr><td>100 m</td><td><strong>606</strong></td><td><strong>3</strong></td><td><strong>420</strong></td></tr>
         </tbody>
     </table>
     </div>
     <div class="callout">
-        <strong>Pourquoi plus que la commune ?</strong> Grenade compte 6 998 bâtiments, la bande de 300 m en contient 14 426 : les polygones de la Garonne qui touchent
-        la commune s'étendent sur des dizaines de kilomètres et le tampon les suit chez les voisins. Pour rester dans la commune, prenez <em>troncon_hydrographique</em>
-        comme source, dont les tronçons sont courts, ou exportez d'abord la commune (histoire 1) et travaillez sur le fichier obtenu.
+        <strong>Au-delà de la commune.</strong> Les polygones de la Garonne qui touchent Grenade s'étendent sur des dizaines de kilomètres. Combinaison décochée, le tampon les suit
+        chez les voisins : 14 426 bâtiments, 178 ERP et 6 310 tronçons à 300 m, 2 770, 28 et 1 949 à 100 m.
     </div>
 </section>
 
@@ -314,7 +313,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <div><h4>Le besoin</h4><p>Karim gère les ouvrages d'art de <strong>Toulouse Métropole</strong> : 37 communes, près de 99 000 tronçons de route. Il veut l'inventaire des endroits où la voirie franchit un cours d'eau permanent, tronçons et ouvrages, pour planifier les inspections.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Le cadrage se fait cette fois sur la couche <strong>epci</strong>. Puis la source devient <strong>troncon_hydrographique</strong> avec la sélection personnalisée <code>"persistance" = 'Permanent'</code>, les cibles <em>troncon_de_route</em> et <em>construction_lineaire</em>, et le prédicat <strong>Cross</strong>, sans tampon : une route qui longe la rivière n'est pas retenue, une route qui la traverse l'est.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>troncon_hydrographique</code></dd></div><div><dt>Sélection</dt><dd><code>"persistance" = 'Permanent'</code></dd></div><div><dt>Cibles</dt><dd>routes, constructions linéaires</dd></div><div><dt>Relation</dt><dd>Cross, sans tampon</dd></div><div><dt>Résultat</dt><dd><strong>747</strong> tronçons, 364 ouvrages</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>troncon_hydrographique</code></dd></div><div><dt>Sélection</dt><dd><code>"persistance" = 'Permanent'</code></dd></div><div><dt>Cibles</dt><dd>routes, constructions linéaires</dd></div><div><dt>Relation</dt><dd>Cross, sans tampon</dd></div><div><dt>Résultat</dt><dd><strong>708</strong> tronçons, 343 ouvrages</dd></div></dl>
     <ol class="steps">
         <li><strong>Cadrer l'EPCI.</strong> Couche <em>epci</em> en source, « Toulouse Métropole » en sélection simple sur <code>"nom_officiel"</code>, toutes les autres couches en cibles, Intersect. Le filtrage ramène 98 687 tronçons de route, 1 844 tronçons hydrographiques, 1 181 constructions linéaires et 70 communes touchées.
             <figure><img src="img/stories/s4-00.webp" alt="Étape 1 : Toulouse Métropole cadrée, la Garonne traverse la métropole du sud au nord" loading="lazy" width="1600" height="900"><figcaption>Étape 1. La métropole entière, Garonne, Hers et Touch compris.</figcaption></figure>
@@ -332,7 +331,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p><strong>747 tronçons de route</strong> et <strong>364 constructions linéaires</strong> (ponts, pour l'essentiel) franchissent l'un des 691 tronçons de cours d'eau permanents de la métropole. Le même calcul fait hors FilterMate avec GEOS donne les mêmes nombres.</p>
+    <p><strong>708 tronçons de route</strong> et <strong>343 constructions linéaires</strong> (ponts, pour l'essentiel) de la métropole franchissent ses 691 tronçons de cours d'eau permanents. Le même calcul fait hors FilterMate avec GEOS, contre l'union de ces tronçons, donne les mêmes nombres. Combinaison décochée, les tronçons juste au-delà de la limite comptent aussi : 747 et 364.</p>
     <div class="callout tip">
         <strong>Pourquoi pas Intersect ?</strong> Avec Intersect et un tampon de quelques mètres, toutes les routes qui longent une berge seraient retenues aussi. Cross ne garde
         que ce qui traverse. Le prédicat <em>Touch</em>, lui, ne retiendrait que les tronçons qui s'arrêtent exactement sur la rive.
@@ -432,7 +431,7 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
         <div><h4>Le besoin</h4><p>Julien (histoire 3) refera la bande des 300 m à chaque mise à jour de la BD TOPO et veut que ses collègues puissent la rejouer sans lui. Le filtre doit exister en dehors de sa tête : nommé, décrit, réapplicable en un clic, exportable.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Un <strong>favori</strong> enregistre le filtre complet : couche source, sélection, prédicats, tampon, couches cibles. Le menu s'ouvre par le badge ★ de l'en-tête ; le <strong>gestionnaire</strong> permet de renommer, décrire, changer la portée (ce projet ou tous les projets) et d'<strong>exporter en JSON</strong>. Avec l'extension de partage, un dépôt git commun sert de bibliothèque d'équipe.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd>favori</dd></div><div><dt>Sélection</dt><dd>réglages de l’histoire 3</dd></div><div><dt>Cibles</dt><dd>3 couches</dd></div><div><dt>Relation</dt><dd>rejoué en un clic</dd></div><div><dt>Résultat</dt><dd><strong>14 426</strong> bâtiments, comme à l’histoire 3</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd>favori</dd></div><div><dt>Sélection</dt><dd>réglages de l’histoire 3</dd></div><div><dt>Cibles</dt><dd>3 couches</dd></div><div><dt>Relation</dt><dd>rejoué en un clic</dd></div><div><dt>Résultat</dt><dd>l’histoire 3 à 300 m, en un clic</dd></div></dl>
     <ol class="steps">
         <li><strong>Enregistrer.</strong> Le filtre à 300 m de l'histoire 3 est appliqué. Cliquez sur le badge ★ puis <em>Add filter</em>, nommez-le « PPRI Garonne 300 m ».
             <figure><img src="img/stories/s7-01.webp" alt="Étape 1 : la barre de messages confirme l'ajout du favori PPRI Garonne 300 m" loading="lazy" width="1600" height="900"><figcaption>Étape 1. La barre de messages confirme l'enregistrement ; le favori apparaît aussitôt dans la section Filtrage rapide du menu ★.</figcaption></figure>
@@ -440,7 +439,7 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
         <li><strong>Unfilter.</strong> Les trois couches retrouvent la totalité du département : 1 173 829 bâtiments.
             <figure><img src="img/stories/s7-02.webp" alt="Étape 2 : après Unfilter, toutes les entités sont de retour" loading="lazy" width="1600" height="900"><figcaption>Étape 2. Retour à l'état non filtré.</figcaption></figure>
         </li>
-        <li><strong>Rejouer.</strong> Badge ★ puis « PPRI Garonne 300 m » : le filtre se réapplique, avec les mêmes 14 426 bâtiments, 178 ERP et 6 310 tronçons.
+        <li><strong>Rejouer.</strong> Badge ★ puis « PPRI Garonne 300 m » : le filtre se réapplique avec les mêmes réglages : 300 m autour des 77 surfaces en eau.
             <figure><img src="img/stories/s7-03.webp" alt="Étape 3 : le favori réappliqué redonne exactement le résultat de l'histoire 3" loading="lazy" width="1600" height="900"><figcaption>Étape 3. Même résultat, un seul clic.</figcaption></figure>
         </li>
         <li><strong>Décrire et partager.</strong> <em>Manage favorites…</em> ouvre le gestionnaire : description, tags, portée, expression exacte, onglet Remote pour publier vers un dépôt git. <em>Export…</em> écrit un fichier JSON à envoyer à un collègue, qui l'importera depuis le même menu.
@@ -748,7 +747,7 @@ processing.run("filtermate:batch_filter", {
         <li><strong>Pour les recettes illustrées 13 à 16</strong>, chargez les couches nommées dans chaque recette et suivez les réglages indiqués. Les schémas représentent les résultats attendus ; les surfaces et les effectifs dépendront de vos données.</li>
     </ol>
     <div class="callout">
-        <strong>Vérification.</strong> Les effectifs des histoires 1 à 8 ont été mesurés avec FilterMate 5.0, dont le moteur garde la géométrie source exacte. Ceux des histoires 2, 3 et 4 ont en outre été recalculés indépendamment avec GEOS (PyQGIS, sans FilterMate) : les nombres sont identiques. Les versions précédentes de cette page, mesurées avec une source simplifiée jusqu’à 100 m, en différaient (histoire 4 : 1 112 tronçons au lieu de 747).
+        <strong>Vérification.</strong> Les effectifs des histoires 1 à 8 ont été mesurés avec FilterMate 5.0, dont le moteur garde la géométrie source exacte, et ceux des histoires 2, 3 et 4 de nouveau avec FilterMate 5.1.1, cadrage conservé. Les deux séries ont en outre été recalculées indépendamment avec GEOS (sans FilterMate) : les nombres sont identiques. Les versions précédentes de cette page, mesurées avec une source simplifiée jusqu’à 100 m, en différaient (histoire 4 : 1 112 tronçons au lieu de 747).
     </div>
 </section>
 
