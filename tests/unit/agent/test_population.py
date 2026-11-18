@@ -5,9 +5,11 @@ import math
 import pytest
 
 from core.agent.open_data import KIND_POPULATION, NO_DATA_KINDS, NO_FILE_KINDS, resolve_platform
+from core.agent.osm import area_km2
 from core.agent.population import (
-    DEFAULT_RESOLUTION, MAX_AREA_KM2, MAX_PIXELS, SOURCES, area_problem, covered_rects, covered_share, grid_for,
-    grid_url, known, on_the_grid, pixel_metres, resolution_label, snapped, vrt_geotransform,
+    DEFAULT_RESOLUTION, MAX_AREA_KM2, MAX_PIXELS, SOURCES, area_problem, covered_rects, covered_share, exact_total_fits,
+    extent_note, grid_for, grid_url, known, native_pixels, on_the_grid, pixel_metres, resolution_label, snapped,
+    vrt_geotransform,
 )
 from core.agent.sources import BUILT_IN, describe_enabled
 
@@ -128,3 +130,42 @@ def test_an_area_is_bounded():
     assert area_problem((-1.27, 44.19, 0.32, 45.58)) == ""  # a department
     problem = area_problem((-5.0, 42.0, 8.0, 51.0))  # France
     assert f"{MAX_AREA_KM2:,.0f}" in problem and "smaller" in problem
+
+
+# A district of 3.46 km2 (1.86 km on each side) near Lyon, as the review measured it.
+DISTRICT = (4.83, 45.75, 4.83 + 1.86 / (111.32 * math.cos(math.radians(45.75))), 45.75 + 1.86 / 111.32)
+
+
+def test_the_layer_reaches_beyond_the_area_asked_by_whole_blocks_and_it_is_measured():
+    """2026-11-18: the total was the sum of the blocks around the area, 1.1 times its surface at 100 m, 2.4 at 1 km and
+    40 at 10 km (the maximum of the schema), and the answer said nothing of it."""
+    asked = area_km2(DISTRICT)
+    assert 3.4 < asked < 3.5
+    ratios = {}
+    for resolution in (100, 1000, 10000):
+        _factor, bounds, _w, _h, _note = grid_for(META, DISTRICT, resolution)
+        ratios[resolution] = area_km2(bounds) / asked
+    assert ratios[100] < 1.2 and 2 < ratios[1000] < 4 and 30 < ratios[10000] < 50, ratios
+
+
+def test_the_pixels_of_the_source_inside_the_area_are_counted_when_they_fit_in_one_call():
+    assert 3_000 < native_pixels(META, DISTRICT) < 6_000  # 1.9 km at 30 m: about 62 x 62 pixels
+    assert exact_total_fits(META, DISTRICT) and exact_total_fits(META, LYON)
+    assert not exact_total_fits(META, (-1.27, 44.19, 0.32, 45.58))  # the Gironde: 16 million pixels exceeded
+    assert native_pixels(META, DISTRICT) <= MAX_PIXELS
+
+
+def test_a_layer_wider_than_the_area_asked_says_what_the_total_covers():
+    for resolution in (1000, 10000):
+        factor, bounds, _w, _h, _note = grid_for(META, DISTRICT, resolution)
+        exact = extent_note(META, DISTRICT, bounds, factor, True)
+        assert "inside the area asked (3.46 km2)" in exact and "whatever the resolution" in exact
+        assert "the sum of the layer is larger than total" in exact
+        rough = extent_note(META, DISTRICT, bounds, factor, False)
+        assert "sum of the whole layer" in rough and "times" in rough and "not the population of the area" in rough
+    factor, bounds, _w, _h, _note = grid_for(META, DISTRICT, 10000)
+    assert "139." in extent_note(META, DISTRICT, bounds, factor, False)  # the surface summed, measured: 139 km2
+    # A layer that is no wider than a tenth more than the area says nothing: blocks of 3 pixels around a region.
+    factor, bounds, _w, _h, _note = grid_for(META, LYON, None)
+    assert extent_note(META, LYON, bounds, factor, True) == ""
+    assert extent_note(META, LYON, LYON, 1, False) == ""

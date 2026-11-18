@@ -233,6 +233,35 @@ def check_population(project, work):
                   other["total"] == people and other["name"] == "Habitants"
                   and abs(shown.rasterUnitsPerPixelX() - real.step * factor) < 1e-12, other)
             project.removeMapLayer(other["layer_id"])
+        # A rectangle that cuts through a town: the total is the people of the area asked, whatever the pixels written
+        # (2026-11-18: the sum of the blocks around it, 1.8 to 40 times its surface, with nothing said).
+        cut = "POLYGON((4.8105 45.7305, 4.8205 45.7305, 4.8205 45.7405, 4.8105 45.7405, 4.8105 45.7305))"
+        cut_bounds = population.snapped(real, (4.8105, 45.7305, 4.8205, 45.7405), 1)
+        expected = round((cut_bounds[2] - cut_bounds[0]) / real.step) * round((cut_bounds[3] - cut_bounds[1]) / real.step)
+        for resolution in (100, 1000, 10000):
+            exact = adapter.add_population(extent_wkt=cut, crs="EPSG:4326", resolution=resolution)
+            shown = gdal.Open(project.mapLayer(exact["layer_id"]).source())
+            held = float(numpy.nansum(shown.GetRasterBand(1).ReadAsArray()))
+            shown = None
+            wide = resolution > 100
+            check(f"population: a rectangle in a town, at {resolution} m: the total is the people of the area asked",
+                  exact["total"] == expected and exact["asked_km2"] < 1.5 and exact["summed_km2"] < 1.5
+                  and (held > expected * 1.5 if wide else held >= expected)
+                  and (not wide or "whatever the resolution" in exact["note"]), (exact, expected, held))
+            project.removeMapLayer(exact["layer_id"])
+        fits = adapter.exact_total_fits
+        adapter.exact_total_fits = lambda *_arguments: False  # an area too large to be summed on the pixels of the source
+        try:
+            rough = adapter.add_population(extent_wkt=cut, crs="EPSG:4326", resolution=1000)
+        finally:
+            adapter.exact_total_fits = fits
+        shown = gdal.Open(project.mapLayer(rough["layer_id"]).source())
+        held = float(numpy.nansum(shown.GetRasterBand(1).ReadAsArray()))
+        shown = None
+        check("population: when the pixels of the source do not fit in a call, the total is the layer's, and the surface "
+              "summed and the note say so", rough["total"] == held and rough["summed_km2"] > rough["asked_km2"] * 2
+              and "sum of the whole layer" in rough["note"] and len(rough["summed_bounds"]) == 4, rough)
+        project.removeMapLayer(rough["layer_id"])
         lambert = adapter.add_population(extent_wkt="POLYGON((838000 6515000, 848000 6515000, 848000 6525000, "
                                                     "838000 6525000, 838000 6515000))", crs="EPSG:2154")
         check("population: an area given in another CRS", lambert["total"] > 0 and lambert["crs_authid"] == "EPSG:4326",

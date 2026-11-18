@@ -17,9 +17,10 @@ from typing import Any, Callable, Dict, Optional, Sequence
 from ...core.agent.elevation import quiet_message
 from ...core.agent.open_data import KIND_POPULATION, megabytes, resolve_platform
 from ...core.agent.population import (
-    MAX_VRT_BYTES, NOT_COVERED, PopulationSource, area_problem, covered_rects, covered_share, grid_for, grid_url,
-    known, on_the_grid, resolution_label, vrt_geotransform,
+    MAX_VRT_BYTES, NOT_COVERED, PopulationSource, area_problem, covered_rects, covered_share, exact_total_fits,
+    extent_note, grid_for, grid_url, known, on_the_grid, resolution_label, snapped, vrt_geotransform,
 )
+from ...core.agent.osm import area_km2
 from .operations import running
 from .terrain import _Gdal, _area_in_degrees, _attempt, _ended_error, _in_background, _under_the_data
 
@@ -29,6 +30,7 @@ _NOTE = ("total is the people of the rectangle around the area, not of a boundar
          "this layer and STATISTICS [1] (sum). People estimated from a census and the buildings seen on satellite "
          "images (2015 to 2020 by country): say so before a number is taken as a census")
 _MIN_GDAL = 3010000  # resampleAlg=sum: GDAL 3.1
+_STRIP_PIXELS = 4_000_000  # what is summed at a time on the pixels of the source: 16 MB
 
 
 def _population_source(platform: str, extra_domains: str) -> PopulationSource:
@@ -81,11 +83,50 @@ def _grid_problem(gdal, url: str, source: PopulationSource, bounds: Sequence[flo
     return covered_share(covered_rects(text), (left, top), step, bounds)
 
 
+def _sum_pixels(gdal, url: str, bounds: Sequence[float], step: float, ended: Callable[[], str]) -> float:
+    """The people of ``bounds`` (whole pixels of the source, ``step`` degrees), summed on those pixels as they are, by
+    strips so that a large area is not held at once. Worker thread.
+
+    Raises:
+        ValueError: Stopped, too long, or a strip that cannot be read.
+    """
+    import numpy
+    west, south, east, north = bounds
+    width = max(1, int(round((east - west) / step)))
+    height = max(1, int(round((north - south) / step)))
+    rows = max(1, _STRIP_PIXELS // width)
+    total = 0.0
+    for first in range(0, height, rows):
+        last = min(height, first + rows)
+        strip = (west, north - last * step, east, north - first * step)
+        dataset, failure = _attempt(gdal, lambda strip=strip: gdal.Warp(
+            '', '/vsicurl/' + url, format='MEM', xRes=step, yRes=step, outputBounds=strip, resampleAlg='near',
+            overviewLevel='NONE', outputType=gdal.GDT_Float32, dstNodata=float('nan'),
+            callback=lambda _done, _message, _data: 0 if ended() else 1))
+        reason = ended()
+        if reason:
+            raise _ended_error(reason)
+        if dataset is None:
+            raise ValueError(f"the population grid could not be read from its server: {failure}")
+        try:
+            values = dataset.GetRasterBand(1).ReadAsArray()
+        except RuntimeError:  # GDAL raises once another plugin turned its exceptions on
+            values = None
+        dataset = None
+        if values is None:
+            raise ValueError("the population grid was read but its pixels cannot be")
+        if numpy.isfinite(values).any():
+            total += float(numpy.nansum(values, dtype='float64'))
+    return total
+
+
 def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int,
-          ended: Callable[[], str], anyone: bool = True, source: Optional[PopulationSource] = None) -> Dict[str, Any]:
+          ended: Callable[[], str], anyone: bool = True, source: Optional[PopulationSource] = None,
+          count_bounds: Optional[Sequence[float]] = None) -> Dict[str, Any]:
     """Write the people of ``bounds`` to a GeoTIFF at ``path``, by pixels of ``size`` degrees (``factor`` x
     ``factor`` pixels of the source, summed); what it holds. Worker thread. ``anyone``: an area where nobody lives
-    is refused (a grid that answers is enough for a Test).
+    is refused (a grid that answers is enough for a Test). ``count_bounds``: the total is the people of these bounds,
+    summed on the pixels of the source (the pixels written reach beyond the area asked, to whole blocks).
 
     Raises:
         ValueError: Stopped, too long, a grid that cannot be read, or no people at all in the area.
@@ -128,10 +169,13 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
                 raise ValueError("the population grid was read but its pixels cannot be")
             filled = bool(numpy.isfinite(values).any())
             total = float(numpy.nansum(values, dtype='float64')) if filled else 0.0
+            maximum = float(numpy.nanmax(values)) if filled else 0.0
+            if count_bounds is not None:
+                total = _sum_pixels(gdal, url, count_bounds, size / factor, ended)
             if total <= 0 and anyone:
                 raise ValueError("the population grid holds no people in this area (sea, or nobody lives there)")
             answer = {'width': dataset.RasterXSize, 'height': dataset.RasterYSize, 'total': total,
-                      'maximum': float(numpy.nanmax(values)) if filled else 0.0, 'covered': share}
+                      'maximum': maximum, 'covered': share}
             dataset.FlushCache()
             return answer
         finally:
@@ -158,6 +202,11 @@ def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs:
     if problem:
         raise ValueError(problem)
     factor, bounds, _width, _height, coarser = grid_for(source, bbox, resolution)
+    # The pixels written are blocks of the grid of the source around the area: their sum is that of a larger
+    # rectangle. The total is the people of the area asked, summed on the pixels of the source, when they fit in one
+    # call; else it is that of the layer, and the answer gives the surface it covers.
+    exact = factor > 1 and exact_total_fits(source, bbox)
+    counted = tuple(snapped(source, bbox, 1)) if exact else None
     latitude = (bbox[1] + bbox[3]) / 2.0
     shown = resolution_label(source, factor, latitude)
     root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data')
@@ -169,7 +218,8 @@ def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs:
             folder = tempfile.mkdtemp(prefix='population-', dir=root)
             path = os.path.join(folder, f"{source.id}_{factor}.tif")
             read = _in_background('add_population', lambda ended: _read(
-                grid_url(source), path, bounds, source.step * factor, factor, ended, source=source))
+                grid_url(source), path, bounds, source.step * factor, factor, ended, source=source,
+                count_bounds=counted))
         title = (name or '').strip()[:200] or f"Population ({shown.replace('about ', '')})"
         layer = QgsRasterLayer(path, title, 'gdal')
         if not layer.isValid():
@@ -189,7 +239,11 @@ def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs:
             'resolution': shown, 'width': read['width'], 'height': read['height'],
             'total': int(round(read['total'])), 'maximum': round(read['maximum'], 1),
             'size': megabytes(os.path.getsize(path)) if os.path.isfile(path) else '',
-            'attribution': source.attribution, 'note': '; '.join(note for note in (coarser, _outside(read), _NOTE) if note)}
+            'summed_bounds': [round(value, 6) for value in (counted or bounds)],
+            'summed_km2': round(area_km2(counted or bounds), 2), 'asked_km2': round(area_km2(bbox), 2),
+            'attribution': source.attribution,
+            'note': '; '.join(note for note in (coarser, extent_note(source, bbox, bounds, factor, exact),
+                                                _outside(read), _NOTE) if note)}
 
 
 def _outside(read: Dict[str, Any]) -> str:
