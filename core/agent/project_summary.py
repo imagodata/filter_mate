@@ -132,6 +132,21 @@ def _moved(before: Optional[Sequence[float]], after: Optional[Sequence[float]]) 
     return any(abs(a - b) > size * _SAME_VIEW for a, b in zip(before, after))
 
 
+MAX_OLD_NAME = 60  # of a renamed layer: it only says which layer it was
+
+
+def _renamed(kept: Sequence[Any]) -> List[str]:
+    """``old -> new`` for each layer of ``kept`` (pairs of rows) whose name changed."""
+    return [f"{_cut(was['name'], MAX_OLD_NAME)} -> {_cut(row['name'], 100)}" for was, row in kept
+            if was["name"] != row["name"]]
+
+
+def too_many_renames(before: Mapping[str, Any], after: Mapping[str, Any]) -> bool:
+    """More renamed layers than the line of changes names: the model could not learn their new names from it."""
+    old, new = before.get("layers", {}), after.get("layers", {})
+    return len(_renamed([(old[key], row) for key, row in new.items() if key in old])) > MAX_NAMES
+
+
 def _same_layer(before: Mapping[str, Any], after: Mapping[str, Any]) -> bool:
     """The active layer of two states is one layer: by id, by name for a state that has none."""
     if before.get("active_id") and after.get("active_id"):
@@ -179,9 +194,12 @@ def project_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List
     say("layers added", [row["name"] for key, row in new.items() if key not in old])
     say("layers removed", [row["name"] for key, row in old.items() if key not in new])
     kept = [(old[key], row) for key, row in new.items() if key in old]
-    # By id, so a renamed layer is not a removed one and a new one: the model calls it by its new name.
-    say("layers renamed", [f"{_cut(was['name'], 100)} -> {row['name']}" for was, row in kept
-                           if was["name"] != row["name"]])
+    # By id, so a renamed layer is not a removed one and a new one: the model calls it by its new name, which is
+    # all the line is worth: each side is cut alone, the new one at the length of a layer line.
+    renamed = _renamed(kept)
+    if renamed:
+        more = f" and {len(renamed) - MAX_NAMES} more" if len(renamed) > MAX_NAMES else ""
+        lines.append("- layers renamed: " + ", ".join(renamed[:MAX_NAMES]) + more)
     say("filter changed", [row["name"] for was, row in kept if row["filter"] and row["filter"] != was["filter"]])
     say("filter removed", [row["name"] for was, row in kept if was["filter"] and not row["filter"]])
     say("now shown", [row["name"] for was, row in kept if row["visible"] and not was["visible"]])
@@ -243,5 +261,9 @@ def project_update(layers: Iterable[Mapping[str, Any]], selections: Iterable[Map
     the request after the first, whose history holds the whole state already (token diet, lot 3)."""
     rows = list(layers)
     chosen = [item for item in selections if isinstance(item, Mapping)]
-    changes = project_changes(before or {}, project_state(rows, chosen, view or {}))
+    state = project_state(rows, chosen, view or {})
+    if before and too_many_renames(before, state):
+        # The line cannot name them all: the whole state goes again, as after a rewrite of the history.
+        return project_summary(rows, chosen, view)
+    changes = project_changes(before or {}, state)
     return "\n".join([CHANGES_HEADER] + changes) if changes else UNCHANGED

@@ -197,3 +197,31 @@ def test_the_update_after_a_rename_and_a_new_crs_says_both():
     text = project_update(rows, [], {**VIEW, "project_crs": "EPSG:4326", "canvas_crs": "EPSG:4326"}, before)
     assert text.splitlines() == [CHANGES_HEADER, "- layers added: parcels", "- layers renamed: roads -> streets",
                                  "- project CRS is now: EPSG:4326"]
+
+
+def test_a_rename_keeps_its_new_name_whole_on_each_side():
+    """Review 2026-11-18: the entry went through the cut of 100 characters of the names: two names of 60 characters
+    lost the end of the new one, and an old name of 100 lost the new one altogether."""
+    from core.agent.project_summary import project_update
+    old, new = "BD TOPO batiments Toulouse Metropole filtre par commune 2024 v3", "Batiments de Toulouse Metropole " \
+        "renommes pour la carte"
+    before = project_state([{"layer_id": "a", "name": old}], [], VIEW)
+    text = project_update([{"layer_id": "a", "name": new}], [], VIEW, before)
+    assert f"-> {new}" in text and old[:60] in text
+    huge = "O" * 100
+    before = project_state([{"layer_id": "a", "name": huge}], [], VIEW)
+    line = project_changes(before, project_state([{"layer_id": "a", "name": "Streets"}], [], VIEW))
+    assert line == [f"- layers renamed: {'O' * 60}… -> Streets"]
+
+
+def test_more_renames_than_the_line_names_send_the_whole_state_again():
+    from core.agent.project_summary import MAX_NAMES, project_update
+    before = project_state([{"layer_id": str(n), "name": f"old{n}"} for n in range(MAX_NAMES + 3)], [], VIEW)
+    rows = [{"layer_id": str(n), "name": f"new{n}", "layer_kind": "vector"} for n in range(MAX_NAMES + 3)]
+    text = project_update(rows, [], VIEW, before)
+    assert text.splitlines()[0] == HEADER and CHANGES_HEADER not in text
+    assert all(f"- new{n} (" in text for n in range(MAX_NAMES + 3))
+    few = project_update(rows[:MAX_NAMES] + [{"layer_id": str(n), "name": f"old{n}"} for n in range(MAX_NAMES,
+                                                                                                MAX_NAMES + 3)],
+                         [], VIEW, before)
+    assert few.startswith(CHANGES_HEADER) and few.count(" -> new") == MAX_NAMES
