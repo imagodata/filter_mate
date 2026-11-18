@@ -252,6 +252,26 @@ def _note_refused(refusals: Optional[List[Tuple[str, str, str]]], layer: Any, re
     refusals.append((layer_id, name, reason))
 
 
+def _invalid_layer_reason() -> str:
+    """The reason of a filter not set on an invalid layer (a message already translated, reused)."""
+    return QCoreApplication.translate(
+        "FilterApplicationService", "Layer is invalid or its source cannot be found. Operation cancelled.")
+
+
+def _note_invalid_layer(failures: Optional[List[str]], refusals: Optional[List[Tuple[str, str, str]]],
+                        layer: Any) -> None:
+    """A layer invalid when its subset was to be set: a refusal, logged."""
+    reason = _invalid_layer_reason()
+    try:
+        name = layer.name() if layer is not None else 'Unknown'
+    except (RuntimeError, AttributeError):
+        name = 'Unknown'
+    logger.warning(f"  ✗ Filter not set, layer invalid: {name}")
+    if failures is not None:
+        failures.append(f"{name}: {reason}")
+    _note_refused(refusals, layer, reason)
+
+
 def _subset_failure_watch(layer: Any):
     """A SubsetFailureWatch for the layer (see adapters/qgis/subset_failure_reason.py)."""
     try:
@@ -384,6 +404,9 @@ def apply_pending_subset_requests(
                     f"finished() ✗ Layer invalid: {layer.name() if layer else 'None'}",
                     "FilterMate", Qgis.MessageLevel.Warning
                 )
+                # 2026-11-18: noted as refused (its filter is not set, its history goes back): skipped
+                # in silence, a task whose layers were all invalid said "Layer(s) filtered".
+                _note_invalid_layer(failures, refusals, layer)
                 continue
 
             # PERF 2026-09-12: the fixed 0.2-0.5 s pause between layers of the
@@ -629,25 +652,29 @@ def _schedule_deferred_filter_application(
                     with watch:
                         success = safe_set_subset_fn(lyr, expr)
                     in_place = bool(success)
-                    if success:
-                        lyr.triggerRepaint()
-                        QgsMessageLog.logMessage(
-                            f"finished() ✓ Deferred: {lyr.name()} → (count pending)",
-                            "FilterMate", Qgis.MessageLevel.Info
+                    reason = '' if success else watch.reason()
+                else:
+                    # 2026-11-18: invalid by now: refused, as in the loop (it was skipped in silence)
+                    success, reason = False, _invalid_layer_reason()
+                if success:
+                    lyr.triggerRepaint()
+                    QgsMessageLog.logMessage(
+                        f"finished() ✓ Deferred: {lyr.name()} → (count pending)",
+                        "FilterMate", Qgis.MessageLevel.Info
+                    )
+                else:
+                    logger.error(f"Failed to apply deferred filter to {lyr.name()}")
+                    _note_refused(refused, lyr, reason)
+                    # 2026-10-17: deferred after the task messages: say it here
+                    try:
+                        iface.messageBar().pushWarning(
+                            "FilterMate",
+                            QCoreApplication.translate(
+                                "TaskCompletionHandler", "The filter of {0} could not be applied; it keeps its previous filter."
+                            ).format(lyr.name())
                         )
-                    else:
-                        logger.error(f"Failed to apply deferred filter to {lyr.name()}")
-                        _note_refused(refused, lyr, watch.reason())
-                        # 2026-10-17: deferred after the task messages: say it here
-                        try:
-                            iface.messageBar().pushWarning(
-                                "FilterMate",
-                                QCoreApplication.translate(
-                                    "TaskCompletionHandler", "The filter of {0} could not be applied; it keeps its previous filter."
-                                ).format(lyr.name())
-                            )
-                        except (RuntimeError, AttributeError):
-                            pass
+                    except (RuntimeError, AttributeError):
+                        pass
             except (RuntimeError, AttributeError, ValueError) as e:
                 logger.error(f"Error applying deferred filter: {e}")
                 if not in_place:

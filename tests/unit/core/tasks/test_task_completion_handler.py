@@ -515,3 +515,40 @@ class TestDeferredLargeSubsets:
                                       deferred=[], on_deferred_done=ends.append)
         self.timers.pop()()
         assert ends == [[("parcels_id", "parcels", "too long")]]
+
+
+@pytest.mark.unit
+class TestInvalidLayer:
+    """2026-11-18: a layer invalid when its subset was to be set was skipped in silence: with every layer in
+    that case, "Filter task : Layer(s) filtered" came while nothing was set, and the history kept the entry."""
+
+    REASON = "Layer is invalid or its source cannot be found. Operation cancelled."
+
+    @pytest.fixture(autouse=True)
+    def _env(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        monkeypatch.setattr(_tch, "is_valid_layer", lambda layer: layer is not None and layer.isValid())
+        self.timers = []
+        monkeypatch.setattr(_tch, "QTimer", types.SimpleNamespace(
+            singleShot=lambda delay, slot: self.timers.append(slot)))
+        monkeypatch.setattr(_tch, "QCoreApplication",
+                            types.SimpleNamespace(translate=lambda context, text: text), raising=False)
+
+    def test_an_invalid_layer_is_a_refusal(self):
+        layer = _make_layer("cables", "/data/x.gpkg|layername=cables", provider="ogr")
+        layer.isValid.return_value = False
+        safe_set, failures, refused = MagicMock(return_value=True), [], []
+        applied = apply_pending_subset_requests([(layer, '"id" > 3')], safe_set, failures=failures, refusals=refused)
+        assert applied == 0
+        safe_set.assert_not_called()
+        assert refused == [("cables_id", "cables", self.REASON)]
+        assert failures == [f"cables: {self.REASON}"]
+
+    def test_a_layer_invalid_when_its_deferred_subset_comes_is_a_refusal(self):
+        layer = _make_layer("parcels", "/data/x.gpkg|layername=parcels", provider="ogr")
+        ends = []
+        apply_pending_subset_requests([(layer, "fid IN (" + "1," * 600_000 + "1)")], MagicMock(return_value=True),
+                                      deferred=[], on_deferred_done=ends.append)
+        layer.isValid.return_value = False
+        self.timers.pop()()
+        assert ends == [[("parcels_id", "parcels", self.REASON)]]
