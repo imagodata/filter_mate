@@ -7989,12 +7989,31 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             )
         self.launchingTask.emit('reload_layers')
 
+    def _agent_panel_has_focus(self) -> bool:
+        """The focus is in the QGIS panel of AGENT, which does not hold FILTERING: Ctrl+Z and Ctrl+Y there are
+        for the steps of the agent (``agent_has_focus`` is false while AGENT is apart, the buttons keep to the
+        filters, whose bar they sit with). With FILTERING in the same panel they stay with the filters."""
+        panel = getattr(getattr(self, '_fm_panels', None), 'panel', lambda _key: None)('agent')
+        if getattr(self, '_agent_chat', None) is None or panel is None or 'filtering' in panel.members:
+            return False
+        try:
+            focus = QtWidgets.QApplication.focusWidget()
+            return focus is not None and (focus is panel or panel.isAncestorOf(focus))
+        except RuntimeError:  # the panel went away
+            return False
+
     def _on_undo_shortcut(self):
-        """Handle Ctrl+Z to undo last filter."""
+        """Handle Ctrl+Z to undo last filter, or the last step of the agent from the panel of AGENT."""
+        if self._agent_panel_has_focus():
+            self._agent_chat._on_undo()
+            return
         uw = self.widgets.get("ACTION", {}).get("UNDO_FILTER", {}).get("WIDGET")
         if uw and uw.isEnabled(): self.launchTaskEvent(False, 'undo')
 
     def _on_redo_shortcut(self):
-        """Handle Ctrl+Y to redo last filter."""
+        """Handle Ctrl+Y to redo last filter, or the last step undone of the agent from the panel of AGENT."""
+        if self._agent_panel_has_focus():
+            self._agent_chat._on_redo()
+            return
         rw = self.widgets.get("ACTION", {}).get("REDO_FILTER", {}).get("WIDGET")
         if rw and rw.isEnabled(): self.launchTaskEvent(False, 'redo')

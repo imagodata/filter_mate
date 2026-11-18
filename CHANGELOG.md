@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Dock: Ctrl+Z and Ctrl+Y typed in the QGIS panel of AGENT undo and redo the steps of the agent, not a filter of the dock (the panel of AGENT shared the shortcuts of the dock, which walk the filters when AGENT is not in the dock). With FILTERING in the same panel they keep to the filters.
 - Log: no more warning at every start-up about the auto-current-layer button having no widget to control (it has none on purpose); a name that matches no widget still warns.
 - Dock: after the dock was closed and opened again, the feature picker of EXPLORING was no longer detached before a filter changed the layer's subset (the guard against the `sqlite3_bind_int64` crash did not find the dock). The dock registers itself again when it is shown.
 - Dock: a layer chosen in the chooser of EXPLORING, when EXPLORING is in its own panel, counts as a choice of the user, as one made in FILTERING does. The dock put the layer of the filter back over it when it was chosen while a filter ran, in the two seconds after a filter or an Undo, and did not apply it when the layer chooser of FILTERING was disconnected (both choosers showed it, Filter acted on the other layer).
