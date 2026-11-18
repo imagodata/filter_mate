@@ -74,3 +74,20 @@ def test_bad_bounds_are_refused(minimum, maximum, message):
 ])
 def test_good_bounds(minimum, maximum, expected):
     assert style._band_range(_Layer(), 1, minimum, maximum) == expected
+
+
+# The setting "Allow attribute values to be sent" off: contour_lines tells no height, so a style tells no range read
+# from the pixels either (2026-11-18: the extremes and the percentiles of a cut went to the model).
+def test_the_range_read_from_the_band_is_not_told_without_the_values():
+    assert style._told_range(100.0, 900.0, None, None, True) == {"minimum": 100.0, "maximum": 900.0}
+    assert style._told_range(100.0, 900.0, None, None, False) == {"minimum": None, "maximum": None}
+    # A bound the model gave comes back as it knows it; the other, read from the band, does not.
+    assert style._told_range(300.0, 900.0, 300.0, None, False) == {"minimum": 300.0, "maximum": None}
+
+
+def test_a_refusal_does_not_tell_the_range_of_the_band_without_the_values():
+    with pytest.raises(ValueError, match=r"ranges from 100 to 900"):
+        style._band_range(_Layer(), 1, 950.0, None, None, True)
+    with pytest.raises(ValueError) as refused:
+        style._band_range(_Layer(), 1, 950.0, None, None, False)
+    assert "must be below" in str(refused.value) and "100" not in str(refused.value) and "900" not in str(refused.value)

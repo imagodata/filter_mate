@@ -819,6 +819,18 @@ def check_tools(project, work):
         answer = {} if error else json.loads(content)
         check("tool contour_lines: without the values, the heights are not told", not error
               and "minimum" not in answer and "maximum" not in answer and answer["feature_count"] > 1, content)
+        quiet = tools(["copernicus_dem"], share_values=False)
+        error, content = quiet("set_layer_style", layer="Relief", mode="pseudocolor", ramp="Spectral", cut=2)
+        answer = {} if error else json.loads(content)
+        check("tool set_layer_style: without the values, the range read from the pixels is not told", not error
+              and answer.get("mode") == "pseudocolor" and "minimum" not in answer and "maximum" not in answer, content)
+        error, content = quiet("set_layer_style", layer="Relief", mode="gray", minimum=900000)
+        check("tool set_layer_style: nor in a refusal", error and "must be below" in content
+              and "ranges from" not in content, content)
+        error, content = quiet("set_layer_style", layer="Relief", mode="gray", minimum=0, maximum=3000)
+        answer = {} if error else json.loads(content)
+        check("tool set_layer_style: a range the model gave comes back", not error and answer.get("minimum") == 0.0
+              and answer.get("maximum") == 3000.0, content)
     finally:
         terrain.known = elevation.known
         server.shutdown()

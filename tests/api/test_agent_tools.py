@@ -631,6 +631,17 @@ class TestHandlers:
         executor.execute(ToolCallPart("c", "contour_lines", {"layer": "communes", "interval": 25}))
         assert seen[0]["share_values"] is False  # a refusal names no height either: QGIS is told
 
+    def test_the_range_of_a_raster_style_is_a_value_of_the_project(self, tmp_path):
+        accessor = Accessor()
+        seen = []
+        accessor.set_layer_style = lambda layer, mode, **options: seen.append(options) \
+            or InMemoryAccessor.set_layer_style(accessor, layer, mode, **options)
+        for shared in (False, True):
+            executor = ToolExecutor(chat_tools(), build_handlers(accessor, tmp_path, share_values=shared))
+            result = executor.execute(ToolCallPart("c", "set_layer_style", {"layer": "communes", "mode": "pseudocolor",
+                                                                            "cut": 2}))
+            assert not result.is_error and seen[-1]["share_values"] is shared  # QGIS is told, which hides the range
+
     def test_a_relief_is_a_style(self, api):
         accessor, root = api
         seen = []
