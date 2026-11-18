@@ -113,6 +113,7 @@ class FinishedHandler:
         cleanup_safe_intersect_fn: Callable[[], None],
         cleanup_canceled_mv_fn: Optional[Callable[[], None]] = None,
         restore_history_fn: Optional[Callable[[List[str]], None]] = None,
+        discard_history_fn: Optional[Callable[[], None]] = None,
     ) -> Tuple[List[str], List, Optional[Any]]:
         """Handle task completion with cleanup and user notifications.
 
@@ -151,6 +152,8 @@ class FinishedHandler:
                 created that nothing uses (instead of cleanup_mv_fn).
             restore_history_fn: Puts back the filter history of the layers whose
                 filter the provider refused, as it was before the task (2026-11-16).
+            discard_history_fn: For a canceled task: deletes the history rows its run()
+                inserted, its subsets being dropped (2026-11-18).
 
         Returns:
             Tuple of (cleared_warnings, cleared_pending_requests, cleared_ogr_source_geom)
@@ -171,6 +174,13 @@ class FinishedHandler:
                 logger.info(f"Task was canceled - its {len(pending_subset_requests)} pending subset "
                             "request(s) are dropped")
             pending_subset_requests = []
+            # 2026-11-18: and the history entries its run() wrote for them (only its own rows: the
+            # newer task may have written its entries already).
+            if discard_history_fn is not None:
+                try:
+                    discard_history_fn()
+                except Exception as e:  # catch-all safety net: the history must not break finished()
+                    logger.warning(f"Filter history of the canceled task not taken back: {e}")
 
         # 2026-10-17: a target removed from the project during the task is left out (the
         # task depends on its source layer only); the other targets get their subsets.

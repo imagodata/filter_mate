@@ -100,3 +100,132 @@ def test_a_database_without_the_table(hs, tmp_path):
     path = str(tmp_path / "empty.sqlite")
     sqlite3.connect(path).close()
     assert hs.take_history_snapshot(path, "p", ["cables"]) is None
+
+
+# 2026-11-18: a task canceled by a second click (filter A, then filter B) applies nothing, yet its run()
+# may have inserted its entry already. Its finished() deletes exactly the rows it inserted, by the ids
+# recorded when they were written, in whatever order the two tasks write and finish.
+
+_REPO_PATH = pathlib.Path(__file__).resolve().parents[4] / "adapters" / "repositories" / "history_repository.py"
+
+
+@pytest.fixture
+def repo():
+    spec = importlib.util.spec_from_file_location("fm_history_repository_test", _REPO_PATH)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class _Task:
+    """What a filter task does with the history: snapshot when run() starts, rows inserted, finished()."""
+
+    def __init__(self, hs, repo, db, layer="cables"):
+        self.hs, self.repo, self.db, self.layer = hs, repo, db, layer
+        self.inserted = []
+        self.snapshot = None
+
+    def start(self):
+        self.snapshot = self.hs.take_history_snapshot(self.db, "p", [self.layer])
+
+    def write(self, subset, seq_order):
+        """The insert of run(), in a thread of its own, recorded as run() records it."""
+        import threading
+
+        def insert():
+            with self.repo.recording_history_inserts(self.inserted):
+                conn = sqlite3.connect(self.db)
+                try:
+                    self.repo.HistoryRepository(conn).insert("p", self.layer, subset, seq_order, "zones")
+                finally:
+                    conn.close()
+        worker = threading.Thread(target=insert)
+        worker.start()
+        worker.join()
+
+    def finish_canceled(self):
+        self.hs.discard_history_rows(self.db, "p", self.inserted)
+
+    def finish_refused(self):
+        self.hs.restore_history(self.db, "p", self.snapshot, [self.layer])
+
+
+def _subsets(path):
+    return [subset for _id, subset in _rows(path, "cables")]
+
+
+def test_the_inserts_of_a_thread_are_recorded_in_its_list_only(repo, db):
+    import threading
+    mine = []
+    with repo.recording_history_inserts(mine):
+        conn = sqlite3.connect(db)
+        row_id = repo.HistoryRepository(conn).insert("p", "cables", "x", 3, "zones")
+        worker = threading.Thread(target=lambda: repo.HistoryRepository(sqlite3.connect(db)).insert(
+            "p", "cables", "y", 4, "zones"))  # another thread, not recording: not in my list
+        worker.start()
+        worker.join()
+        conn.close()
+    assert mine == [row_id]
+    assert repo.recorded_history_inserts() is None  # the recording ends with the block
+
+
+@pytest.mark.parametrize("b_refused", [False, True])
+def test_a_canceled_task_finished_before_the_newer_one_writes(hs, repo, db, b_refused):
+    """A writes F1, B starts (its snapshot holds F1), A's finished(), then B writes F2."""
+    task_a, task_b = _Task(hs, repo, db), _Task(hs, repo, db)
+    task_a.start()
+    task_a.write("F1", 3)
+    task_b.start()
+    assert "F1" in [row[-1] for row in task_b.snapshot["cables"]]
+    task_a.finish_canceled()
+    task_b.write("F2", 3)
+    if b_refused:
+        task_b.finish_refused()  # its snapshot holds F1: not written back
+        assert _subsets(db) == ['"id" > 1', '"id" > 2']
+    else:
+        assert _subsets(db) == ['"id" > 1', '"id" > 2', "F2"]
+
+
+@pytest.mark.parametrize("b_refused", [False, True])
+def test_a_canceled_task_finished_after_the_newer_one(hs, repo, db, b_refused):
+    """A writes F1, B starts and writes F2 and finishes, then A's finished() comes (its run() was longer)."""
+    task_a, task_b = _Task(hs, repo, db), _Task(hs, repo, db)
+    task_a.start()
+    task_a.write("F1", 3)
+    task_b.start()
+    task_b.write("F2", 4)
+    if b_refused:
+        task_b.finish_refused()  # puts back its snapshot: F0 and F1
+    task_a.finish_canceled()  # B's F2 stays, A's F1 goes
+    assert _subsets(db) == ['"id" > 1', '"id" > 2'] + ([] if b_refused else ["F2"])
+
+
+@pytest.mark.parametrize("b_refused", [False, True])
+def test_a_canceled_task_that_writes_after_the_newer_one(hs, repo, db, b_refused):
+    """A is canceled before its insert: B starts and writes F2 first, A's run() writes F1 late."""
+    task_a, task_b = _Task(hs, repo, db), _Task(hs, repo, db)
+    task_a.start()
+    task_b.start()
+    task_b.write("F2", 3)
+    task_a.write("F1", 3)  # same seq_order: both read the history before the other's insert
+    if b_refused:
+        task_b.finish_refused()
+    task_a.finish_canceled()
+    assert _subsets(db) == ['"id" > 1', '"id" > 2'] + ([] if b_refused else ["F2"])
+
+
+def test_without_the_history_file_the_ids_are_still_remembered(hs, repo, db):
+    """The rows cannot be deleted now (file gone): a later restore still leaves them out."""
+    task_a, task_b = _Task(hs, repo, db), _Task(hs, repo, db)
+    task_a.start()
+    task_a.write("F1", 3)
+    task_b.start()
+    assert hs.discard_history_rows("/nowhere/filterMate_db.sqlite", "p", task_a.inserted) == 0
+    task_b.finish_refused()
+    assert _subsets(db) == ['"id" > 1', '"id" > 2']
+
+
+def test_a_canceled_task_leaves_the_rows_of_other_tasks(hs, db):
+    assert hs.discard_history_rows(db, "p", []) == 0
+    assert hs.discard_history_rows(db, "p", ["unknown"]) == 0
+    assert len(_rows(db, "cables")) == 2

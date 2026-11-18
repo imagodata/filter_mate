@@ -87,7 +87,7 @@ def finished(monkeypatch):
                         types.SimpleNamespace(translate=lambda context, text: text), raising=False)
 
     def run(canceled, result=True, exception=None, task_action="filter", pending=None, task_parameters=None,
-            restore_history_fn=None):
+            restore_history_fn=None, discard_history_fn=None):
         handler.handle_finished(
             result=result, task_action=task_action, message_category="FilterLayers",
             is_canceled_fn=lambda: canceled, warning_messages=[],
@@ -97,7 +97,7 @@ def finished(monkeypatch):
             source_layer=MagicMock(), task_parameters=task_parameters or {}, failed_layer_names=[], layers_count=1,
             task_description="Filtering data", restore_selection_fn=MagicMock(), task_bridge=None,
             cleanup_safe_intersect_fn=MagicMock(), cleanup_canceled_mv_fn=cleanup_canceled,
-            restore_history_fn=restore_history_fn,
+            restore_history_fn=restore_history_fn, discard_history_fn=discard_history_fn,
         )
 
     return types.SimpleNamespace(run=run, apply=apply, iface=iface, handler=handler, cleanup_mv=cleanup_mv,
@@ -270,3 +270,23 @@ def test_views_kept_when_a_filter_is_refused(finished, action):
 def test_views_dropped_when_every_filter_is_removed(finished, action):
     finished.run(canceled=False, task_action=action)
     finished.cleanup_mv.assert_called_once()
+
+
+def test_a_canceled_task_takes_back_the_history_its_run_wrote(finished):
+    """2026-11-18: canceled by a second click after its run() inserted its entry: the entry stayed,
+    and the next unfilter applied a filter that was never set."""
+    discard, restore = MagicMock(), MagicMock()
+    finished.run(canceled=True, result=True, restore_history_fn=restore, discard_history_fn=discard)
+    discard.assert_called_once_with()
+    restore.assert_not_called()
+
+
+def test_a_completed_task_keeps_its_history(finished):
+    discard = MagicMock()
+    finished.run(canceled=False, discard_history_fn=discard)
+    discard.assert_not_called()
+
+
+def test_a_failing_discard_does_not_break_finished(finished):
+    finished.run(canceled=True, discard_history_fn=MagicMock(side_effect=OSError("locked")))
+    finished.apply.assert_not_called()
