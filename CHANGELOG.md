@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent, project update: the fields of the active layer are compared as a set of names, so a new order is no change, and a reading of them that failed once (no field) says nothing and keeps the names the model was told, instead of "none" and then the whole list at the next request.
 - Agent, project update: a renamed layer is said with its whole new name (each side of `old -> new` is cut alone: the old one at 60 characters, the new one at 100), and when more layers were renamed than the line names (5) the whole state of the project is sent again instead of "and 15 more".
 - Agent: `turn_off_agent_options` is documented as it behaves: like the other changes of the project it runs alone from the standard level, is asked at the careful level and refused at the advisor level (the catalog said "without a question"); a test now covers the four levels.
 - Agent, `layer_statistics`: with `group_by`, the groups are ranked by the sum of the field or of the measure (`area`, `length`) asked, and by their number of features only without one; the answer says which in `ranked_by`. They were always ranked by feature count, so "which commune has the largest built area?" could miss the answer when it was not among the 10 communes with the most buildings, and only `truncated` hinted at it.

@@ -186,7 +186,6 @@ def test_fields_added_or_removed_on_the_active_layer_are_said():
     before = _state(active_fields=["nom", "pop"])
     assert project_changes(before, _state(active_fields=["nom", "pop", "dept"])) == [
         "- fields of the active layer are now: nom, pop, dept"]
-    assert project_changes(before, _state(active_fields=[])) == ["- fields of the active layer are now: none"]
 
 
 def test_the_update_after_a_rename_and_a_new_crs_says_both():
@@ -225,3 +224,21 @@ def test_more_renames_than_the_line_names_send_the_whole_state_again():
                                                                                                 MAX_NAMES + 3)],
                          [], VIEW, before)
     assert few.startswith(CHANGES_HEADER) and few.count(" -> new") == MAX_NAMES
+
+
+def test_a_new_order_of_the_fields_is_not_a_change_and_a_failed_reading_is_not_no_field():
+    """Review 2026-11-18: "fields ... are now: y, x" for a reorder; "none" and then the whole list again after one
+    reading of the fields that failed."""
+    before = _state(active_fields=["x", "y"])
+    assert project_changes(before, _state(active_fields=["y", "x"])) == []
+    assert project_changes(before, _state(active_fields=[])) == []
+    # the state kept after the failed reading still holds the fields the model was told
+    kept = project_state(_rows(), [], {**VIEW, "active_fields": []}, previous=before)
+    assert project_changes(kept, _state(active_fields=["x", "y"])) == []
+    assert project_changes(kept, _state(active_fields=["x", "y", "z"])) == [
+        "- fields of the active layer are now: x, y, z"]
+    # another active layer is no reading to forget: its own fields come with it
+    other = project_state(_rows(), [], {**VIEW, "active_layer_id": "r", "active_layer_name": "routes",
+                                        "active_fields": []}, previous=_state(active_layer_id="c",
+                                                                                 active_fields=["x"]))
+    assert other["active_field_names"] == frozenset()

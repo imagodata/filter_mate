@@ -87,8 +87,12 @@ def _layer_line(row: Mapping[str, Any], project_crs: str) -> str:
 
 
 def project_state(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapping[str, Any]] = (),
-                  view: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
-    """What two requests are compared on: the layers with their filter and visibility, the selections, the view."""
+                  view: Optional[Mapping[str, Any]] = None,
+                  previous: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
+    """What two requests are compared on: the layers with their filter and visibility, the selections, the view.
+
+    ``previous``: the state before. A reading of the fields of the active layer that failed once (no field at all)
+    keeps the fields of ``previous`` when the active layer is the same: the model was told them already."""
     view = view or {}
     rows: Dict[str, Dict[str, Any]] = {}
     for row in layers:
@@ -100,8 +104,13 @@ def project_state(layers: Iterable[Mapping[str, Any]], selections: Iterable[Mapp
                                                                      int(item.get("selected_count") or 0))
                 for item in selections if isinstance(item, Mapping)}
     project_crs = str(view.get("project_crs") or "")
-    return {"layers": rows, "selections": selected, "active": str(view.get("active_layer_name") or ""),
-            "active_id": str(view.get("active_layer_id") or ""), "active_fields": _fields_text(view),
+    state = {"layers": rows, "selections": selected, "active": str(view.get("active_layer_name") or ""),
+             "active_id": str(view.get("active_layer_id") or ""), "active_fields": _fields_text(view),
+             "active_field_names": frozenset(str(name) for name in (view.get("active_fields") or ()) if str(name))}
+    if previous and not state["active_field_names"] and _same_layer(previous, state):
+        state["active_fields"] = previous.get("active_fields", "")
+        state["active_field_names"] = previous.get("active_field_names", frozenset())
+    return {**state,
             "crs": project_crs, "canvas_crs": str(view.get("canvas_crs") or project_crs),
             "extent": _extent(view.get("extent")) if view.get("available") else None}
 
@@ -173,8 +182,9 @@ def _view_changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> List[s
             lines.append("- no active layer now")
     elif not _same_layer(before, after):
         lines.append(f"- active layer is now: {_cut(after['active'], 100)}" + (f" (fields: {fields})" if fields else ""))
-    elif fields != (before.get("active_fields") or ""):
-        lines.append(f"- fields of the active layer are now: {fields or 'none'}")
+    elif after.get("active_field_names") and after["active_field_names"] != before.get("active_field_names"):
+        # The names as a set (their order is not a change), and none read is a reading that failed, not no field.
+        lines.append(f"- fields of the active layer are now: {fields}")
     extent = after.get("extent")
     if _moved(before.get("extent"), extent):
         where = f" ({canvas})" if canvas and canvas != crs else ""

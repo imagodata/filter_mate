@@ -2393,7 +2393,7 @@ class AgentChatController(QObject):
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""
         read = self._read_project()
-        self._seen = None if read is None else project_state(*read)
+        self._seen = None if read is None else project_state(*read, previous=self._seen)
 
     def _on_stop(self) -> None:
         abort_active(CHAT_WAITS)  # a connector or a platform the chat waits for, not a call of another application
