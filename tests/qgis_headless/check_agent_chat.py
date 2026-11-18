@@ -503,6 +503,16 @@ def check_checkpoint(layer):
           (layer.subsetString(), skipped))
     layer.setSubsetString("")
     check("the commit outside a turn is harmless", list(TurnCheckpoint().commit()) == [])
+    from filter_mate.core.agent.messages import ToolCallPart
+    malformed = TurnCheckpoint()
+    try:
+        malformed.begin(ToolCallPart("m1", "set_layer_options", {"layers": 5}))
+        began = True
+    except Exception as exc:  # noqa: BLE001
+        began = repr(exc)
+    check("a call with a malformed argument still begins its undo point (the tool answers its mistake)",
+          began is True, began)
+    malformed.discard()
     layer.setSubsetString('"pop" = 100')
     checkpoint.begin()
     layer.setSubsetString('"pop" > 1000')

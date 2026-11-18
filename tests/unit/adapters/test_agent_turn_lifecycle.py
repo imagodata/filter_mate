@@ -123,6 +123,24 @@ def test_a_turn_discarded_with_its_project_is_never_recorded(checkpoint_module):
     assert not history.can_undo(checkpoint_module.HISTORY_KEY)
 
 
+def test_a_recorder_that_fails_on_a_call_does_not_refuse_it(monkeypatch, checkpoint_module):
+    """2026-11-18: a call with a malformed argument (``layers`` a number) made the recorder of the turn raise in
+    begin(), and the tool was refused as 'undo point failed' instead of answering its mistake."""
+    class Failing(Effects):
+        def before_call(self, call, step=0):
+            raise TypeError("'int' object is not iterable")
+
+    holder, history = checkpoint_module._test_holder, checkpoint_module._test_service.history
+    layer = Layer("roads")
+    holder.project = Project([layer])
+    monkeypatch.setattr(checkpoint_module, "EffectsRecorder", Failing)
+    checkpoint = checkpoint_module.TurnCheckpoint()
+    checkpoint.begin(types.SimpleNamespace(name="set_layer_options", arguments={"layers": 5}))  # does not raise
+    layer.subset = "x > 1"  # the filters of the turn are still kept
+    assert list(checkpoint.commit()) == ["roads"]
+    assert history.can_undo(checkpoint_module.HISTORY_KEY)
+
+
 def test_a_turn_kept_open_is_recorded(checkpoint_module):
     holder, history = checkpoint_module._test_holder, checkpoint_module._test_service.history
     layer = Layer("roads")
