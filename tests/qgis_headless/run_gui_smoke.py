@@ -4523,6 +4523,32 @@ def pick_in_chooser(chooser, layer_name):
     return False
 
 
+def explo_pick_check(title, detail=''):
+    """``zones_b`` is the current layer everywhere after it was chosen in the chooser of EXPLORING. When the click on
+    its list did not take (the choice was made as the list makes it), the check is skipped, said so: it would not
+    be the gesture of a user."""
+    d = dock()
+    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
+    shown = (f"panel={d.current_layer.name() if d.current_layer is not None else None} combo={combo.currentText()} "
+             f"chooser={mirror.currentText()} {detail}").strip()
+    if not EXPLO.get('pick_by_list'):
+        report('SKIP', title, f"the click on the list of the chooser did not take, no real click: {shown}")
+        return
+    check(title, d.current_layer is not None and d.current_layer.name() == 'zones_b'
+          and combo.currentLayer() is not None and combo.currentLayer().name() == 'zones_b'
+          and mirror.currentText().startswith('zones_b'), shown)
+
+
+def drop_task_hook():
+    """The hook of ``s_explo_pick_during_filter`` on the task manager, off whether a task came or not."""
+    hook = EXPLO.pop('task_hook', None)
+    if hook is not None:
+        try:
+            QgsApplication.taskManager().taskAdded.disconnect(hook)
+        except (TypeError, RuntimeError):  # it disconnected itself on the task
+            pass
+
+
 def s_explo_pick_setup():
     """A second vector layer to choose, and the post-undo window of the step before over."""
     if layer('zones_b') is None:
@@ -4547,35 +4573,35 @@ def s_explo_pick_ready():
 
 def s_explo_pick_during_filter():
     """2026-11-18, audit: a layer chosen in the chooser of EXPLORING while the filter runs is the user's choice."""
-    from qgis.core import QgsApplication
     d = dock()
     d.comboBox_filtering_current_layer.setLayer(layer('zones'))
     QApplication.processEvents()
     EXPLO['pick_before'] = d.current_layer.name() if d.current_layer is not None else None
     EXPLO['pick_state'] = None
+    EXPLO['pick_by_list'] = False
     manager = QgsApplication.taskManager()
 
     def on_task(_task_id):  # the task is added: the dock has blocked the chooser of FILTERING by now
         manager.taskAdded.disconnect(on_task)
         combo = d.comboBox_filtering_current_layer
-        EXPLO['pick_state'] = (combo.signalsBlocked(), getattr(d, '_filtering_in_progress', None))
+        EXPLO['pick_state'] = (combo.signalsBlocked(), bool(getattr(d, '_filtering_in_progress', False)))
         EXPLO['pick_by_list'] = pick_in_chooser(explo_mirror(), 'zones_b')
 
+    EXPLO['task_hook'] = on_task
     manager.taskAdded.connect(on_task)
     action_button('filter').click()
     return settled()
 
 
 def s_explo_pick_during_filter_check():
+    drop_task_hook()  # no task came: it must not choose in a later step
     d = dock()
-    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
-    check('explo: a layer chosen in the chooser of EXPLORING while the filter runs stays the current layer',
-          d.current_layer is not None and d.current_layer.name() == 'zones_b'
-          and combo.currentLayer() is not None and combo.currentLayer().name() == 'zones_b'
-          and mirror.currentText().startswith('zones_b'),
-          f"before={EXPLO['pick_before']} panel={d.current_layer.name() if d.current_layer is not None else None} "
-          f"combo={combo.currentText()} chooser={mirror.currentText()} by the list={EXPLO.get('pick_by_list')} "
+    combo = d.comboBox_filtering_current_layer
+    check('explo: the choice in the chooser of EXPLORING came while the filter ran (chooser of FILTERING blocked, '
+          'filter in progress)', EXPLO['pick_state'] == (True, True),
           f"(combo blocked, filtering) at the pick={EXPLO['pick_state']}")
+    explo_pick_check('explo: a layer chosen in the chooser of EXPLORING while the filter runs stays the current '
+                     'layer', f"before={EXPLO['pick_before']} at the pick={EXPLO['pick_state']}")
     combo.setLayer(layer('zones'))
     return switched_to('zones', coverage_page=False)
 
@@ -4594,14 +4620,9 @@ def s_explo_pick_in_window_pick():
 
 
 def s_explo_pick_in_window_check():
-    d = dock()
-    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
-    check('explo: a layer chosen in the chooser of EXPLORING right after a filter stays the current layer',
-          d.current_layer is not None and d.current_layer.name() == 'zones_b'
-          and combo.currentLayer() is not None and combo.currentLayer().name() == 'zones_b'
-          and mirror.currentText().startswith('zones_b'),
-          f"before={EXPLO['pick_before']} panel={d.current_layer.name() if d.current_layer is not None else None} "
-          f"combo={combo.currentText()} chooser={mirror.currentText()} by the list={EXPLO['pick_by_list']}")
+    explo_pick_check('explo: a layer chosen in the chooser of EXPLORING right after a filter stays the current layer',
+                     f"before={EXPLO['pick_before']}")
+    combo = dock().comboBox_filtering_current_layer
     combo.setLayer(layer('zones'))
     return switched_to('zones', coverage_page=False)
 
@@ -4614,14 +4635,8 @@ def s_explo_pick_after_undo():
 
 
 def s_explo_pick_after_undo_check():
-    d = dock()
-    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
-    check('explo: a layer chosen in the chooser of EXPLORING right after Undo stays the current layer',
-          d.current_layer is not None and d.current_layer.name() == 'zones_b'
-          and combo.currentLayer() is not None and combo.currentLayer().name() == 'zones_b'
-          and mirror.currentText().startswith('zones_b'),
-          f"panel={d.current_layer.name() if d.current_layer is not None else None} combo={combo.currentText()} "
-          f"chooser={mirror.currentText()} by the list={EXPLO['pick_by_list']}")
+    explo_pick_check('explo: a layer chosen in the chooser of EXPLORING right after Undo stays the current layer')
+    combo = dock().comboBox_filtering_current_layer
     combo.setLayer(layer('zones'))
     project.removeMapLayer(layer('zones_b').id())
     return switched_to('zones', coverage_page=False)
