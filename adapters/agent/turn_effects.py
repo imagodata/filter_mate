@@ -748,7 +748,7 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
     project = QgsProject.instance()
     done: List[str] = []
     left: List[str] = []
-    leaving = {effect[1] for effect in effects if takes_away(effect, undo)}
+    leaving = {effect[1] for effect in effects if takes_away(effect, undo) and effect[1] not in keep}
     for effect in (reversed(effects) if undo else effects):
         kind, layer_id = effect[0], effect[1]
         if presence is not None and (kind in ("added", "removed")) != presence:
