@@ -929,10 +929,13 @@ class AgentChatController(QObject):
             self._say(_tr("The conversation goes on with {}; it is not told what came before.").format(provider.label))
         elif wanted.enabled_sources != values.enabled_sources:
             self._restart_engine()  # other tools: another conversation with the model, under the same thread
-        if wanted.mcp_enabled != values.mcp_enabled:
+        server_switched = wanted.mcp_enabled != values.mcp_enabled
+        if server_switched or wanted.enabled_sources != values.enabled_sources:
+            # A source unticked must leave the tools the server offers to other applications at once, as it does
+            # when the settings box is saved.
             self._sync_mcp()
             mcp = getattr(self, "_mcp", None)
-            if wanted.mcp_enabled and mcp is not None and getattr(mcp, "error", ""):
+            if server_switched and wanted.mcp_enabled and mcp is not None and getattr(mcp, "error", ""):
                 save_settings(replace(wanted, mcp_enabled=False))  # it did not start: the box says so
         self._refresh_ready()
         return ""

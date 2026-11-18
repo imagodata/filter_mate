@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: unticking a source from the quick menu or by the agent now updates the MCP server at once; the source stayed usable by other applications until the settings were saved.
 - Agent: going back from the advisor, careful or autonomous level to the standard one in the middle of a conversation is now told to the model, which kept describing the steps instead of acting.
 - Agent: Stop, or a refusal of the model, before any step that changed something takes the request out of the conversation; the change of the project, the notes or the protected layers it carried is now sent again with the next request, instead of 'Project unchanged'.
 - Metadata: a shorter description; the about opens on what people search (several layers filtered at once, definition queries); tags chosen for the plugin list search; a short changelog; category Vector (Plugins is not a value plugins.qgis.org knows); a stray line that read as a key removed.
