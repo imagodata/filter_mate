@@ -170,12 +170,13 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
             filled = bool(numpy.isfinite(values).any())
             total = float(numpy.nansum(values, dtype='float64')) if filled else 0.0
             maximum = float(numpy.nanmax(values)) if filled else 0.0
-            if count_bounds is not None:
+            exact = count_bounds is not None
+            if exact and factor > 1:  # at the pixels of the source, the layer is already the people of the bounds
                 total = _sum_pixels(gdal, url, count_bounds, size / factor, ended)
             if total <= 0 and anyone:
                 raise ValueError("the population grid holds no people in this area (sea, or nobody lives there)")
             answer = {'width': dataset.RasterXSize, 'height': dataset.RasterYSize, 'total': total,
-                      'maximum': maximum, 'covered': share}
+                      'maximum': maximum, 'covered': share, 'exact': exact}
             dataset.FlushCache()
             return answer
         finally:
@@ -205,8 +206,7 @@ def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs:
     # The pixels written are blocks of the grid of the source around the area: their sum is that of a larger
     # rectangle. The total is the people of the area asked, summed on the pixels of the source, when they fit in one
     # call; else it is that of the layer, and the answer gives the surface it covers.
-    exact = factor > 1 and exact_total_fits(source, bbox)
-    counted = tuple(snapped(source, bbox, 1)) if exact else None
+    counted = tuple(snapped(source, bbox, 1)) if exact_total_fits(source, bbox) else None
     latitude = (bbox[1] + bbox[3]) / 2.0
     shown = resolution_label(source, factor, latitude)
     root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data')
@@ -235,14 +235,15 @@ def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs:
     finally:
         if folder and not kept:
             shutil.rmtree(folder, ignore_errors=True)
+    summed = counted if read['exact'] else bounds
     return {'layer_id': layer.id(), 'name': layer.name(), 'platform': platform, 'crs_authid': CRS,
             'resolution': shown, 'width': read['width'], 'height': read['height'],
             'total': int(round(read['total'])), 'maximum': round(read['maximum'], 1),
             'size': megabytes(os.path.getsize(path)) if os.path.isfile(path) else '',
-            'summed_bounds': [round(value, 6) for value in (counted or bounds)],
-            'summed_km2': round(area_km2(counted or bounds), 2), 'asked_km2': round(area_km2(bbox), 2),
+            'summed_bounds': [round(value, 6) for value in summed],
+            'summed_km2': round(area_km2(summed), 2), 'asked_km2': round(area_km2(bbox), 2),
             'attribution': source.attribution,
-            'note': '; '.join(note for note in (coarser, extent_note(source, bbox, bounds, factor, exact),
+            'note': '; '.join(note for note in (coarser, extent_note(source, bbox, bounds, factor, counted if read['exact'] else None),
                                                 _outside(read), _NOTE) if note)}
 
 

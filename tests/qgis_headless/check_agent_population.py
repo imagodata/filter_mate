@@ -238,16 +238,17 @@ def check_population(project, work):
         cut = "POLYGON((4.8105 45.7305, 4.8205 45.7305, 4.8205 45.7405, 4.8105 45.7405, 4.8105 45.7305))"
         cut_bounds = population.snapped(real, (4.8105, 45.7305, 4.8205, 45.7405), 1)
         expected = round((cut_bounds[2] - cut_bounds[0]) / real.step) * round((cut_bounds[3] - cut_bounds[1]) / real.step)
-        for resolution in (100, 1000, 10000):
+        for resolution in (30, 100, 1000, 10000):
             exact = adapter.add_population(extent_wkt=cut, crs="EPSG:4326", resolution=resolution)
             shown = gdal.Open(project.mapLayer(exact["layer_id"]).source())
             held = float(numpy.nansum(shown.GetRasterBand(1).ReadAsArray()))
             shown = None
-            wide = resolution > 100
+            wide = resolution > 100  # blocks of more than 3 pixels: the layer is a good deal wider than the area
             check(f"population: a rectangle in a town, at {resolution} m: the total is the people of the area asked",
                   exact["total"] == expected and exact["asked_km2"] < 1.5 and exact["summed_km2"] < 1.5
                   and (held > expected * 1.5 if wide else held >= expected)
-                  and (not wide or "whatever the resolution" in exact["note"]), (exact, expected, held))
+                  and (not wide or "whatever the resolution" in exact["note"]) and "finer" not in exact["note"]
+                  and "inside the area" not in exact["note"], (exact, expected, held))
             project.removeMapLayer(exact["layer_id"])
         fits = adapter.exact_total_fits
         adapter.exact_total_fits = lambda *_arguments: False  # an area too large to be summed on the pixels of the source

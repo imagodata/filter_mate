@@ -158,14 +158,25 @@ def test_the_pixels_of_the_source_inside_the_area_are_counted_when_they_fit_in_o
 def test_a_layer_wider_than_the_area_asked_says_what_the_total_covers():
     for resolution in (1000, 10000):
         factor, bounds, _w, _h, _note = grid_for(META, DISTRICT, resolution)
-        exact = extent_note(META, DISTRICT, bounds, factor, True)
-        assert "inside the area asked (3.46 km2)" in exact and "whatever the resolution" in exact
-        assert "the sum of the layer is larger than total" in exact
-        rough = extent_note(META, DISTRICT, bounds, factor, False)
-        assert "sum of the whole layer" in rough and "times" in rough and "not the population of the area" in rough
+        counted = snapped(META, DISTRICT, 1)
+        exact = extent_note(META, DISTRICT, bounds, factor, counted)
+        # What is summed is said as it is: the whole pixels of 30 m the area touches, a little more than the area.
+        assert "whole pixels of the source (30 m) that the area touches" in exact and "whatever the resolution" in exact
+        assert "the sum of the layer is larger than total" in exact and "inside the area" not in exact
+        rough = extent_note(META, DISTRICT, bounds, factor, None)
+        assert "sum of the whole layer" in rough and "times" in rough and "not of the area asked" in rough
+        # No advice that cannot be followed: there is no finer resolution than the source's, and a smaller area
+        # widens the gap.
+        assert "finer" not in rough and "smaller" not in rough
     factor, bounds, _w, _h, _note = grid_for(META, DISTRICT, 10000)
-    assert "139." in extent_note(META, DISTRICT, bounds, factor, False)  # the surface summed, measured: 139 km2
-    # A layer that is no wider than a tenth more than the area says nothing: blocks of 3 pixels around a region.
+    assert "139." in extent_note(META, DISTRICT, bounds, factor, None)  # the surface summed, measured: 139 km2
+    # At 100 m the pixels counted are the pixels of the layer less a block: said once, without the layer's gap.
+    small = (4.83, 45.75, 4.83257, 45.7518)  # 200 m by 200 m: 0.04 km2
+    factor, bounds, _w, _h, _note = grid_for(META, small, 100)
+    said = extent_note(META, small, bounds, factor, snapped(META, small, 1))
+    assert "that the area touches" in said and "0.04 km2 asked" in said
+    # A layer that is no wider than a tenth more than the area says nothing.
     factor, bounds, _w, _h, _note = grid_for(META, LYON, None)
-    assert extent_note(META, LYON, bounds, factor, True) == ""
-    assert extent_note(META, LYON, LYON, 1, False) == ""
+    assert extent_note(META, LYON, bounds, factor, snapped(META, LYON, 1)) == ""
+    assert extent_note(META, LYON, LYON, 1, None) == ""
+    assert extent_note(META, LYON, snapped(META, LYON, 1), 1, snapped(META, LYON, 1)) == ""
