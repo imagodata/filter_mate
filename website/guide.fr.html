@@ -82,6 +82,7 @@
         Ce guide passe en revue chaque partie du panneau FilterMate, avec des captures d'écran prises dans
         QGIS 4.2 (interface en anglais). Lisez-le de haut en bas la première fois, puis utilisez le sommaire comme référence.
         Tout ce qui est montré ici fonctionne à l'identique sur QGIS 3.x (Qt5) et QGIS 4.x (Qt6).
+        Les captures montrent le panneau de la prochaine version, où les lignes de FILTERING et d'EXPORTING sont regroupées en haut de leur section ; dans la 5.1.1, les mêmes lignes sont réparties sur sa hauteur.
     </p>
 </header>
 
@@ -731,7 +732,7 @@ processing.run("filtermate:batch_filter", {
     <ul>
         <li><strong>Classes</strong> ASPRS et LiDAR HD avec des préréglages (sol, végétation, bâtiments, sursol, eau, sans bruit).</li>
         <li><strong>Plages</strong> Z (au millimètre), intensité, retour ; <strong>hauteur au-dessus d'un MNT</strong> calculée avec PDAL.</li>
-        <li>Conditions enchaînées par AND / OR sur tout attribut, classification comprise : <code>Classification = 6</code> avec une hauteur au-dessus du MNT d’au moins 9 m garde les toits hauts (histoire 10).</li>
+        <li>Conditions enchaînées par AND / OR sur tout attribut, classification comprise : <code>Classification = 6</code> avec une hauteur au-dessus du MNT d’au moins 7 m garde les toits hauts (histoire 10).</li>
         <li>Option « appliquer aux autres dalles du jeu » pour les données livrées en dalles (LiDAR HD).</li>
         <li>Sur le rail : le bouton Identifier relève une <strong>classe</strong>, la <strong>pipette de valeur</strong> écrit une condition autour de la valeur relevée sur l'attribut choisi (Ctrl+clic ajoute un OU), et l'outil <strong>zone</strong> dessine un rectangle, un polygone, une forme à main levée ou un cercle qui découpe l'emprise de la source.</li>
         <li>Le <strong>détecteur d'objets</strong> du rail sélectionne l'objet sous le clic (l'amas de points de sa classe : un bâtiment, un arbre) ou, par un clic droit sur le bouton, tous les objets du nuage qui lui ressemblent : surface dans des ratios choisis de celle des objets cliqués et, avec <em>même forme</em> (cochée par défaut), compacité dans les mêmes ratios, pour qu'une haie de la surface d'un arbre ne passe pas pour un arbre.</li>
@@ -798,8 +799,8 @@ processing.run("filtermate:batch_filter", {
         Les chiffres complets et la méthode : <a href="https://github.com/imagodata/filter_mate/blob/main/docs/SEGMENTATION.md" target="_blank" rel="noopener">docs/SEGMENTATION.md</a> (en anglais).
     </p>
     <figure class="video-figure">
-        <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="Regarder l’exemple de hauteur du bâti"><img src="video/heights.webp" alt="Points LiDAR de bâtiment à plus de 9 m au-dessus du terrain et les bâtiments auxquels ils appartiennent" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
-        <figcaption>Source nuage de points : les points de bâtiment à plus de 9 m au-dessus du MNT (calculé avec PDAL) gardent les bâtiments les plus hauts.</figcaption>
+        <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="Regarder l’exemple de hauteur du bâti"><img src="video/heights.webp" alt="Points LiDAR de bâtiment à plus de 7 m au-dessus du terrain et les bâtiments auxquels ils appartiennent" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
+        <figcaption>Source nuage de points : les points de bâtiment à plus de 7 m au-dessus du MNT (calculé avec PDAL) gardent les bâtiments les plus hauts.</figcaption>
     </figure>
     <h3>Ce que deviennent les cibles</h3>
     <div class="table-wrap">

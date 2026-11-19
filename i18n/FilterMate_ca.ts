@@ -3592,6 +3592,16 @@ No = Reemplaçar tots els existents</translation>
         <translation>Gestionar preferits...</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Filtre ràpid ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="207"/>
+        <source>See all ({0})...</source>
+        <translation>Mostra-ho tot ({0})...</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Exportar...</translation>
@@ -6181,7 +6191,7 @@ Entitats: {2:,}</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>Mode per lots</translation>
     </message>
 </context>

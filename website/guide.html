@@ -82,6 +82,7 @@
         This guide walks through every part of the FilterMate panel with screenshots taken in
         QGIS 4.2. Read it top to bottom the first time, then use the table of contents as a reference.
         Everything shown here works the same on QGIS 3.x (Qt5) and QGIS 4.x (Qt6).
+        The screenshots show the panel of the next release, where the rows of FILTERING and EXPORTING are packed at the top of their section; in 5.1.1 the same rows are spread over its height.
     </p>
 </header>
 
@@ -732,7 +733,7 @@ processing.run("filtermate:batch_filter", {
     <ul>
         <li>ASPRS and LiDAR HD <strong>classes</strong> with presets (ground, vegetation, buildings, above ground, water, without noise).</li>
         <li>Z (to the millimetre), intensity and return <strong>ranges</strong>; <strong>height above a DTM</strong> computed with PDAL.</li>
-        <li>Conditions chained with AND / OR on any attribute, the classification included: <code>Classification = 6</code> with a height above the DTM of at least 9 m keeps the tall roofs (story 10).</li>
+        <li>Conditions chained with AND / OR on any attribute, the classification included: <code>Classification = 6</code> with a height above the DTM of at least 7 m keeps the tall roofs (story 10).</li>
         <li>"Apply to the other tiles of the dataset" for data delivered in tiles (LiDAR HD).</li>
         <li>On the rail: the Identify button picks a <strong>class</strong>, the <strong>value pipette</strong> writes a condition around the picked value of the chosen attribute (Ctrl+click adds an OR), and the <strong>zone</strong> tool draws a rectangle, polygon, freehand shape or circle that cuts the footprint of the source.</li>
         <li>The <strong>object detector</strong> of the rail selects the object under the click (the cluster of points of its class: a building, a tree) or, with a right click on the button, every object of the cloud like it: area within chosen ratios of the clicked objects and, with <em>same shape</em> (on by default), compactness within the same ratios, so a hedge of the area of a tree is not taken for a tree.</li>
@@ -799,8 +800,8 @@ processing.run("filtermate:batch_filter", {
         Full figures and the method: <a href="https://github.com/imagodata/filter_mate/blob/main/docs/SEGMENTATION.md" target="_blank" rel="noopener">docs/SEGMENTATION.md</a>.
     </p>
     <figure class="video-figure">
-        <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="Watch the building height example"><img src="video/heights.webp" alt="LiDAR building points more than 9 m above the terrain and the buildings they belong to" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
-        <figcaption>Point cloud source: building points more than 9 m above the DTM (computed with PDAL) keep the taller buildings.</figcaption>
+        <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="Watch the building height example"><img src="video/heights.webp" alt="LiDAR building points more than 7 m above the terrain and the buildings they belong to" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+        <figcaption>Point cloud source: building points more than 7 m above the DTM (computed with PDAL) keep the taller buildings.</figcaption>
     </figure>
     <h3>What happens to the targets</h3>
     <div class="table-wrap">

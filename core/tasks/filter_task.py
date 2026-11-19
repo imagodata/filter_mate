@@ -114,7 +114,9 @@ from .source_geometry_preparer import SourceGeometryPreparer
 from .subset_management_handler import SubsetManagementHandler
 from .filtering_orchestrator import FilteringOrchestrator
 from .finished_handler import FinishedHandler
-from .history_snapshot import restore_history, take_history_snapshot
+from .history_snapshot import (
+    discard_history_rows, restore_history, retry_pending_discards, take_history_snapshot,
+)
 from .materialized_view_handler import MaterializedViewHandler
 from .expression_facade_handler import ExpressionFacadeHandler
 from .spatial_query_handler import SpatialQueryHandler
@@ -133,7 +135,9 @@ from .dispatchers.action_dispatcher import (
 )
 
 # EPIC-1 Phase E4-S9: Centralized history repository
-from ...adapters.repositories.history_repository import HistoryRepository
+from ...adapters.repositories.history_repository import (
+    HistoryRepository, note_history_insert, recording_history_inserts,
+)
 
 # EPIC-1 E13: Use BackendServices facade for all adapter imports
 # This maintains hexagonal architecture by routing through core/ports
@@ -1216,26 +1220,30 @@ class FilterEngineTask(QgsTask):
         if self.task_action in ('filter', 'unfilter', 'reset'):
             self._history_snapshot = take_history_snapshot(
                 self.db_file_path, self.project_uuid, self._history_layer_ids(task_params))
+        # 2026-11-18: the ids of the history rows this run() inserts, deleted again by finished()
+        # when the task was canceled (its subsets are never applied; see _discard_canceled_history).
+        self._history_inserted_ids = []
 
         try:
             # PHASE 14.7: Delegate to TaskRunOrchestrator service
             from ..services.task_run_orchestrator import execute_task_run
 
             # Execute main orchestration
-            result = execute_task_run(
-                task_action=self.task_action,
-                task_parameters=self.task_parameters,
-                layers_count=self.layers_count,
-                source_layer=getattr(self, 'source_layer', None),
-                initialize_source_layer_callback=self._initialize_source_layer,
-                configure_metric_crs_callback=self._configure_metric_crs,
-                organize_layers_to_filter_callback=self._organize_layers_to_filter,
-                log_backend_info_callback=self._log_backend_info,
-                execute_task_action_callback=self._execute_task_action,
-                get_contextual_performance_warning_callback=self._get_contextual_performance_warning,
-                is_canceled_callback=self.isCanceled,
-                set_progress_callback=self.setProgress
-            )
+            with recording_history_inserts(self._history_inserted_ids):
+                result = execute_task_run(
+                    task_action=self.task_action,
+                    task_parameters=self.task_parameters,
+                    layers_count=self.layers_count,
+                    source_layer=getattr(self, 'source_layer', None),
+                    initialize_source_layer_callback=self._initialize_source_layer,
+                    configure_metric_crs_callback=self._configure_metric_crs,
+                    organize_layers_to_filter_callback=self._organize_layers_to_filter,
+                    log_backend_info_callback=self._log_backend_info,
+                    execute_task_action_callback=self._execute_task_action,
+                    get_contextual_performance_warning_callback=self._get_contextual_performance_warning,
+                    is_canceled_callback=self.isCanceled,
+                    set_progress_callback=self.setProgress
+                )
 
             # Apply orchestration modules to task instance
             if result.success and hasattr(result, 'context'):
@@ -1526,7 +1534,7 @@ class FilterEngineTask(QgsTask):
             layers=self.layers,
             layers_count=self.layers_count,
             task_parameters=self.task_parameters,
-            execute_geometric_filtering_callback=self.execute_geometric_filtering,
+            execute_geometric_filtering_callback=self._execute_geometric_filtering_recorded,
             try_v3_multi_step_filter_callback=self._try_v3_multi_step_filter,
             is_canceled_callback=self.isCanceled,
             set_progress_callback=self.setProgress,
@@ -1537,6 +1545,18 @@ class FilterEngineTask(QgsTask):
         if result.get('failed_layer_names'):
             self._failed_layer_names = result['failed_layer_names']
         return result.get('success', True)
+
+    def _execute_geometric_filtering_recorded(self, *args, **kwargs):
+        """execute_geometric_filtering, its history rows recorded in this task's list in any thread.
+
+        2026-11-18: the parallel filtering runs it in worker threads, where the recording that
+        run() set up for its own thread does not reach (see _discard_canceled_history).
+        """
+        ids = getattr(self, '_history_inserted_ids', None)
+        if ids is None:
+            return self.execute_geometric_filtering(*args, **kwargs)
+        with recording_history_inserts(ids):
+            return self.execute_geometric_filtering(*args, **kwargs)
 
     def _log_filtering_summary(self, successful_filters: int, failed_filters: int, failed_layer_names=None):
         """Log summary of filtering results. Delegates to FilteringOrchestrator."""
@@ -2143,6 +2163,8 @@ class FilterEngineTask(QgsTask):
             self._pending_subset_requests = [
                 request for request in getattr(self, '_pending_subset_requests', [])
                 if request[0] is not self.source_layer]
+            # 2026-11-19: nor the history row run() inserted for it (a PostgreSQL source), see finished()
+            self._source_refused = True
         return result.get('success', False)
 
     def execute_unfiltering(self) -> bool:
@@ -2476,14 +2498,18 @@ class FilterEngineTask(QgsTask):
         # Use prepared statement if available (best performance)
         if self._ps_manager:
             try:
-                return self._ps_manager.insert_subset_history(
-                    history_id=str(uuid.uuid4()),
+                history_id = str(uuid.uuid4())
+                inserted = self._ps_manager.insert_subset_history(
+                    history_id=history_id,
                     project_uuid=self.project_uuid,
                     layer_id=layer.id(),
                     source_layer_id=self.source_layer.id(),
                     seq_order=seq_order,
                     subset_string=sql_subset_string
                 )
+                if inserted:
+                    note_history_insert(history_id)  # taken back if the task is canceled (2026-11-18)
+                return inserted
             except (RuntimeError, OSError, AttributeError) as e:
                 logger.warning(f"Prepared statement failed, falling back to repository: {e}")
 
@@ -3098,6 +3124,45 @@ class FilterEngineTask(QgsTask):
         if restored:
             logger.info(f"Filter history put back for {len(restored)} refused layer(s)")
 
+    def _discard_canceled_history(self) -> None:
+        """finished() of a canceled task: delete the history rows its run() inserted (2026-11-18).
+
+        Its subsets are never applied: its entries left the next unfilter on a filter never set.
+        Only its own rows, by the ids recorded when they were written: the task that replaced it
+        may have written its own since, and the snapshot of that task may hold these rows.
+        """
+        ids = getattr(self, '_history_inserted_ids', None)
+        if ids:
+            removed = discard_history_rows(self.db_file_path, self.project_uuid, ids)
+            logger.info(f"Canceled task: {removed} of its {len(ids)} filter history row(s) deleted")
+
+    def _discard_refused_source_history(self) -> None:
+        """finished() of a task whose source was refused: delete the history row run() inserted for it.
+
+        The source subset left the queue (see execute_filtering) but a PostgreSQL source had its entry
+        written already: the next filter numbered its own after it. Only the rows of the source layer: the
+        targets processed before the refusal keep their filters, so their entries.
+        """
+        ids = getattr(self, '_history_inserted_ids', None)
+        try:
+            source_id = self.source_layer.id()
+        except (RuntimeError, AttributeError):
+            return
+        if ids:
+            removed = discard_history_rows(self.db_file_path, self.project_uuid, ids, layer_ids=[source_id])
+            logger.info(f"Source refused: {removed} filter history row(s) of the source deleted")
+
+    def _discard_own_history_of(self, layer_ids: List[str]) -> None:
+        """A deferred subset (over 1 MB) refused after finished(): delete the rows this task wrote for it.
+
+        Not restore_history: the snapshot dates from before run(), and a task started since may have
+        written its own row for the layer (a second click), which a restore would delete with the rest.
+        """
+        ids = getattr(self, '_history_inserted_ids', None)
+        if ids and layer_ids:
+            removed = discard_history_rows(self.db_file_path, self.project_uuid, ids, layer_ids=layer_ids)
+            logger.info(f"Deferred filter refused: {removed} filter history row(s) of this task deleted")
+
     def _cleanup_canceled_task_views(self) -> None:
         """finished() of a canceled task: its views are queued for dropping (see _drop_deferred_views).
 
@@ -3206,6 +3271,13 @@ class FilterEngineTask(QgsTask):
             except Exception as exc:
                 logger.debug(f"Empty-target report failed: {exc}")
         message_category = MESSAGE_TASKS_CATEGORIES[self.task_action]
+        # 2026-11-19: rows a locked history file kept at an earlier finished() (never waited for)
+        try:
+            retry_pending_discards()
+            if getattr(self, '_source_refused', False) and not self.isCanceled():
+                self._discard_refused_source_history()
+        except Exception as exc:  # catch-all safety net: the history must not break finished()
+            logger.warning(f"Filter history rows not deleted: {exc}")
 
         cleared_warnings, cleared_pending, cleared_ogr = self._finished_handler.handle_finished(
             result=result,
@@ -3231,6 +3303,9 @@ class FilterEngineTask(QgsTask):
             cleanup_safe_intersect_fn=self._cleanup_safe_intersect_layers,
             cleanup_canceled_mv_fn=self._cleanup_canceled_task_views,
             restore_history_fn=self._restore_refused_history,
+            restore_deferred_history_fn=self._discard_own_history_of,
+            discard_history_fn=self._discard_canceled_history,
+            close_connections_fn=self._close_main_thread_connections,
         )
         # 2026-10-17: the views of canceled tasks nothing reads, then the connection a view
         # cleanup opened on the main thread: closed now

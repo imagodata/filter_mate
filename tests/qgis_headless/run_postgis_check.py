@@ -14,8 +14,8 @@ Docker network:
 
 Checks (2026-10-17 review of the thread / lifecycle fixes): a PostgreSQL filter whose source selection
 is large enough for a materialized view; an unfilter canceled by a filter launched at once; a second
-click on Filter. After each: no target left empty or unreadable, no materialized view that no subset
-reads, no connection "idle in transaction (aborted)" or left open by a task, no subset set from a
+click on Filter (2026-11-18: and no history entry of the canceled task). After each: no target left empty
+or unreadable, no materialized view that no subset reads, no connection "idle in transaction (aborted)" or left open by a task, no subset set from a
 worker thread, no Python error or critical message. ``FM_PG_DEBUG=1`` prints the views of the canceled
 task and the stack of every subset change of the target.
 """
@@ -269,6 +269,17 @@ def run_task(name):
     dock().launchTaskEvent(False, name)
 
 
+def history_counts():
+    """Number of filter history rows of zones and pts in the plugin's database (2026-11-18)."""
+    import sqlite3
+    conn = sqlite3.connect(app().db_file_path)
+    try:
+        return {name: conn.execute('SELECT COUNT(*) FROM fm_subset_history WHERE fk_project = ? AND layer_id = ?',
+                                   (app().project_uuid, layer(name).id())).fetchone()[0] for name in ('zones', 'pts')}
+    finally:
+        conn.close()
+
+
 def mark_views():
     STATE['views_before'] = matviews()
 
@@ -276,11 +287,16 @@ def mark_views():
 def s_filter():
     watch_subset_threads()
     mark_views()
+    STATE['history_before_filter'] = history_counts()
     run_task('filter')
     return settled()
 
 
 def s_filter_check():
+    # the rows one filter adds to the history of each layer
+    STATE['history_one_filter'] = {name: count - STATE['history_before_filter'][name]
+                                   for name, count in history_counts().items()}
+    print(f"   history rows added by one filter: {STATE['history_one_filter']}", flush=True)
     STATE['views_after_filter'] = sorted(matviews())
     print(f"   views after the filter: {STATE['views_after_filter']}", flush=True)
     state_check('PostgreSQL filter', expect_filtered=True)
@@ -294,6 +310,7 @@ def s_unfilter_canceled_by_a_filter():
 
 
 def s_unfilter_canceled_check():
+    print(f"   history after the unfilter canceled by a filter: {history_counts()}", flush=True)
     state_check('unfilter canceled by a filter', expect_filtered=True)
 
 
@@ -315,6 +332,7 @@ def watch_subset_threads():
 
 def s_double_click():
     mark_views()
+    STATE['history_before_double'] = history_counts()
     run_task('filter')
     first = app().appTasks.get('filter')
     STATE['first'] = first
@@ -345,6 +363,13 @@ def s_double_click_check():
         STATE['views_before'] = STATE['views_before'] | (matviews() - set(
             view for view in matviews() if view in layer('pts').subsetString() + layer('zones').subsetString()))
     state_check('second click on Filter', expect_filtered=True)
+    # 2026-11-18: a first task canceled by the second click leaves no history entry (its run() may have
+    # written one: its finished() takes it back); one that completed first keeps its own.
+    before, now, one = STATE['history_before_double'], history_counts(), STATE['history_one_filter']
+    filters = 1 if STATE['first_canceled'] else 2
+    check('second click on Filter: the history holds no entry of the canceled task',
+          now == {name: count + filters * one[name] for name, count in before.items()},
+          f"history before={before} after={now} one filter adds {one} first canceled={STATE['first_canceled']}")
 
 
 def s_reset():
