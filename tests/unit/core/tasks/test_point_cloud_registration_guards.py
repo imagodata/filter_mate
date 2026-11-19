@@ -262,6 +262,11 @@ def _load_task_module():
         sys.modules.pop(qualname, None)
         for name in stubs:
             sys.modules.pop(name, None)
+    if not isinstance(getattr(module, "QgsVectorLayer", None), type):
+        # Collected after a file that puts plain MagicMock() modules in sys.modules["qgis.core"] (some tests of
+        # ui/controllers do, at import): the name is then an instance, and isinstance() needs a class, as the
+        # conftest gives. The result of these tests must not depend on the order of the paths given to pytest.
+        module.QgsVectorLayer = MagicMock
     return module
 
 

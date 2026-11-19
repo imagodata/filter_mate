@@ -2086,6 +2086,18 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             self._fonts_by_theme[dark] = fonts
         return fonts
 
+    @staticmethod
+    def _row_state(item) -> str:
+        """The key of font_by_state for a row: checked or not, and whether the filter of its layer hides its feature."""
+        state = 'checked' if item.checkState() == Qt.CheckState.Checked else 'unChecked'
+        return state if item.data(4) == "True" else state + 'Filtered'
+
+    def _style_row(self, item, fonts=None) -> None:
+        """The font (bold when checked) and the colour of a row, from its state."""
+        font, colour = (fonts or self.font_by_state)[self._row_state(item)]
+        item.setData(6, font)
+        item.setData(9, QBrush(colour))
+
     def refresh_row_colours(self) -> int:
         """After a change of theme: the rows already listed take the colours of the new one. The rows coloured again
         (none when the theme is the one they were drawn in: this is called by every path that touches the style)."""
@@ -2097,10 +2109,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             try:
                 for row in range(list_widget.count()):
                     item = list_widget.item(row)
-                    state = 'checked' if item.checkState() == Qt.CheckState.Checked else 'unChecked'
-                    if item.data(4) != "True":
-                        state += 'Filtered'
-                    item.setData(9, QBrush(fonts[state][1]))
+                    item.setData(9, QBrush(fonts[self._row_state(item)][1]))
                     done += 1
             except RuntimeError:  # the list went away with its layer
                 continue
@@ -2489,15 +2498,16 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 return
             self._populate_features_sync(list_widget.getDisplayExpression(), preserve_checked=True, force_full=True)
             list_widget = self.list_widgets[self.layer.id()]
+        fonts = None  # read when a first row changes
         for i in range(list_widget.count()):
             item = list_widget.item(i)
             if item:
-                if x == 'Select All':
+                if x == 'Select All' \
+                        or (x == 'Select All (subset)' and item.data(4) == "True") \
+                        or (x == 'Select All (non subset)' and item.data(4) == "False"):
                     item.setCheckState(Qt.CheckState.Checked)
-                elif x == 'Select All (subset)' and item.data(4) == "True":
-                    item.setCheckState(Qt.CheckState.Checked)
-                elif x == 'Select All (non subset)' and item.data(4) == "False":
-                    item.setCheckState(Qt.CheckState.Checked)
+                    fonts = fonts or self.font_by_state
+                    self._style_row(item, fonts)  # bold, as a row ticked by hand
 
         self._emit_checked_items_update()
 
@@ -2511,15 +2521,16 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         if slot is not None:
             slot.cancel()
         list_widget = self.list_widgets[self.layer.id()]
+        fonts = None  # read when a first row changes
         for i in range(list_widget.count()):
             item = list_widget.item(i)
             if item:
-                if x == 'De-select All':
+                if x == 'De-select All' \
+                        or (x == 'De-select All (subset)' and item.data(4) == "True") \
+                        or (x == 'De-select All (non subset)' and item.data(4) == "False"):
                     item.setCheckState(Qt.CheckState.Unchecked)
-                elif x == 'De-select All (subset)' and item.data(4) == "True":
-                    item.setCheckState(Qt.CheckState.Unchecked)
-                elif x == 'De-select All (non subset)' and item.data(4) == "False":
-                    item.setCheckState(Qt.CheckState.Unchecked)
+                    fonts = fonts or self.font_by_state
+                    self._style_row(item, fonts)  # no longer bold
 
         # Clear selected_features_list in the wrapper
         list_widget.setSelectedFeaturesList([])

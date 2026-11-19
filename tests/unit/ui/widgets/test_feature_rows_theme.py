@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
-WANTED = {'_dark_rows', 'font_by_state', 'refresh_row_colours'}
+WANTED = {'_dark_rows', 'font_by_state', 'refresh_row_colours', '_row_state', '_style_row', 'select_all', 'deselect_all'}
 
 
 class _Font:
@@ -38,6 +38,8 @@ def rows_class():
         'QFont': _Font,
         'QBrush': lambda colour: ('brush', colour),
         'Qt': SimpleNamespace(CheckState=SimpleNamespace(Checked=2, Unchecked=0)),
+        'is_layer_valid': lambda layer: True,
+        'logger': SimpleNamespace(info=lambda *args: None),
     }
     exec(compile(module, str(path), 'exec'), namespace)
     return namespace['Rows']
@@ -186,3 +188,83 @@ def test_the_palette_answer_is_kept_too(rows_class):
     for _ in range(100):   # thousands of rows must not walk up the parents each
         assert picker.font_by_state['checked'][1] == rows_class.ROW_COLOURS[True][0]
     assert len(asked) == 1
+
+
+class _Row:
+    """A row of the list: its check state, and what setData wrote in it."""
+
+    def __init__(self, checked, in_subset):
+        self.state = 2 if checked else 0
+        self.store = {4: 'True' if in_subset else 'False'}
+
+    def checkState(self):
+        return self.state
+
+    def setCheckState(self, state):
+        self.state = state
+
+    def data(self, role):
+        return self.store.get(role)
+
+    def setData(self, role, value):
+        self.store[role] = value
+
+
+def _selecting_picker(rows_class, rows):
+    class Picker(rows_class):
+        def __init__(self):
+            self._fonts_by_theme = {}
+            self.layer = SimpleNamespace(id=lambda: 'layer')
+            self.list_widgets = {'layer': SimpleNamespace(
+                count=lambda: len(rows), item=lambda row: rows[row], isTruncated=lambda: False,
+                getSearchText=lambda: '', setSelectedFeaturesList=lambda fids: None)}
+            self.emitted = []
+
+        def _dark_rows(self):
+            return False
+
+        def _emit_checked_items_update(self, force_emit=False):
+            self.emitted.append(force_emit)
+    return Picker()
+
+
+@pytest.mark.unit
+def test_select_all_makes_the_ticked_rows_bold(rows_class):
+    rows = [_Row(False, True), _Row(False, False), _Row(True, True)]
+    picker = _selecting_picker(rows_class, rows)
+    picker.select_all('Select All')
+    assert [row.state for row in rows] == [2, 2, 2]
+    assert [row.store[6].weight for row in rows[:2]] == ['bold', 'bold']     # they were not bold before
+    assert rows[0].store[9] == ('brush', '#000000') and rows[1].store[9] == ('brush', '#0000FF')
+    assert 6 not in rows[2].store or rows[2].store[6].weight == 'bold'
+    assert picker.emitted == [False]
+
+
+@pytest.mark.unit
+def test_select_all_of_the_subset_leaves_the_other_rows_alone(rows_class):
+    rows = [_Row(False, True), _Row(False, False)]
+    picker = _selecting_picker(rows_class, rows)
+    picker.select_all('Select All (subset)')
+    assert [row.state for row in rows] == [2, 0]
+    assert rows[0].store[6].weight == 'bold' and 6 not in rows[1].store
+    picker.select_all('Select All (non subset)')
+    assert rows[1].state == 2 and rows[1].store[6].weight == 'bold'
+
+
+@pytest.mark.unit
+def test_deselect_all_takes_the_bold_away(rows_class):
+    rows = [_Row(True, True), _Row(True, False)]
+    picker = _selecting_picker(rows_class, rows)
+    picker.deselect_all('De-select All')
+    assert [row.state for row in rows] == [0, 0]
+    assert [row.store[6].weight for row in rows] == ['medium', 'medium']
+    assert rows[1].store[9] == ('brush', '#0000FF')
+    assert picker.emitted == [True]
+
+
+@pytest.mark.unit
+def test_the_state_of_a_row_names_its_look(rows_class):
+    assert rows_class._row_state(_Row(True, True)) == 'checked'
+    assert rows_class._row_state(_Row(False, True)) == 'unChecked'
+    assert rows_class._row_state(_Row(True, False)) == 'checkedFiltered'
+    assert rows_class._row_state(_Row(False, False)) == 'unCheckedFiltered'
