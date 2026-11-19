@@ -558,9 +558,11 @@ def size_dock():
     iface.mainWindow().resizeDocks([d], [DOCK_WIDTH], Qt.Orientation.Horizontal)
 
 
-def rows_need(pages=('FILTERING',)):
+def rows_need(pages=('FILTERING',), show=False):
     """The height the lower stack of the dock needs to show the rows of ``pages`` (FILTERING, EXPORTING) without a
-    scroll bar: its rail, the tallest of them, their margins (as fit_stacks of scripts/guide_screenshots.py)."""
+    scroll bar: its rail, the tallest of them, their margins (as fit_stacks of scripts/guide_screenshots.py).
+    ``show``: each page is opened to be measured, then the first one again (hidden, EXPORTING asked 56 px more than
+    its rows take once shown)."""
     d = dock()
     sections = getattr(d, '_fm_sections', None)
     if sections is None:
@@ -568,11 +570,19 @@ def rows_need(pages=('FILTERING',)):
     tallest = 0
     for name in pages:
         page = getattr(d, name)
+        if show:
+            d.toolBox_tabTools.setCurrentWidget(page)
+            QApplication.processEvents()
+            if page.layout() is not None:
+                page.layout().activate()
         tallest = max(tallest, page.sizeHint().height(), page.minimumSizeHint().height())
+    if show and pages:
+        d.toolBox_tabTools.setCurrentWidget(getattr(d, pages[0]))
+        QApplication.processEvents()
     return sections.bottom_rail.height() + tallest + 22
 
 
-def dock_void(pages=None):
+def dock_void(pages=None, need=None):
     """The empty band of the dock: what its lower stack holds beyond the rows of ``pages`` (None: of the section it
     shows, FILTERING or EXPORTING). The rows are packed at the top of their section (SECTION_HEIGHT = fit), so a
     window taller than the dock needs shows that band in every frame."""
@@ -580,34 +590,40 @@ def dock_void(pages=None):
     if pages is None:
         pages = [name for name in ('FILTERING', 'EXPORTING') if d.toolBox_tabTools.currentWidget() is getattr(d, name)]
     sizes = d.splitter_main.sizes()
-    need = rows_need(pages) if pages else 0
+    if need is None:
+        need = rows_need(pages) if pages else 0
     return sizes[1] - need if need and len(sizes) > 1 else 0
 
 
 def fit_window(pages=('FILTERING',)):
     """Unrecorded: the window loses the height of the empty band of the dock, and the width that keeps it 16:9; the
     lower stack is then as tall as the rows of ``pages`` and EXPLORING keeps its height. The dock in one piece, no
-    empty band, and a larger interface in the frame."""
+    empty band, and a larger interface in the frame. The dock is told that share of its two stacks, as a drag of
+    their handle does: it comes back to it after AGENT was opened. Nothing moves when there is no band to lose."""
     def _s():
         if not FIT or not pages:
             return
         mw, d = iface.mainWindow(), dock()
-        void, need = dock_void(pages), rows_need(pages)
+        need = rows_need(pages, show=True)
+        void = dock_void(pages, need)
         height = max(MIN_WINDOW_HEIGHT, mw.height() - max(0, void))
         height -= height % 9
-        if height < mw.height():
+        if void > 0 and height < mw.height():
             mw.resize(height * 16 // 9, height)
 
         def stacks():
             total = sum(d.splitter_main.sizes())
-            if 0 < need < total:
+            if void > 0 and 0 < need < total:
                 d.splitter_main.setSizes([total - need, need])
+                sections = getattr(d, '_fm_sections', None)
+                if sections is not None and hasattr(sections, '_share'):
+                    sections._share = (total - need) / total
             mw.resizeDocks([d], [DOCK_WIDTH], Qt.Orientation.Horizontal)
             if STATE.get('boot_extent') is not None:
                 set_extent(STATE['boot_extent'])
             QTimer.singleShot(500, lambda: log(
                 f'window fitted: {mw.width()}x{mw.height()} (empty band was {void}), stacks '
-                f'{d.splitter_main.sizes()}, rows need {need}, band left {dock_void(pages)}'))
+                f'{d.splitter_main.sizes()}, rows need {need}, band left {dock_void(pages, need)}'))
         QTimer.singleShot(600, stacks)
     return _s
 
@@ -1832,13 +1848,15 @@ def setup5(layer_names, hidden=(), margin=1.03):
         bb = QgsRectangle(*FM5_EXTENT)
         bb.scale(margin)
         STATE['scene_rect'] = QgsRectangle(bb)
+        STATE['boot_extent'] = QgsRectangle(bb)
         set_extent(bb)
         canvas.setRenderFlag(True)
     return _s
 
 
-def boot5(layers, hidden=()):
-    return [(1000, setup5(layers, hidden)), (3000, open_plugin), (8000, size_dock), (1500, wait_idle())]
+def boot5(layers, hidden=(), fit=('FILTERING',)):
+    return [(1000, setup5(layers, hidden)), (3000, open_plugin), (8000, size_dock), (1500, wait_idle()),
+            (500, fit_window(fit)), (2500, wait_idle())]
 
 
 def coverage():
@@ -2177,7 +2195,7 @@ SURVEY_ZIP = os.path.join(EXPORT_DIR, os.environ.get('FM5_SURVEY_ZIP', 'fenouill
 
 # survey (story 12): the tallest building of the square (17.4 m; the church at Estavar) and 50 m around clip the DTM
 # and the LiDAR, then both are exported.
-SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + FM5_QUIET_BUILDINGS + fm5_scene() \
+SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment'], fit=('FILTERING', 'EXPORTING')) + FM5_QUIET_BUILDINGS + fm5_scene() \
     + pick_layer('batiment') + [
     (1500, cam(EXPLORE_ZONE, dur=1.4, pad=30)),
 ] + typed_custom(os.environ.get('FM5_SURVEY_EXPR', '"hauteur" >= 17'), per_char=70) + settle() + show_map(2000) + [
@@ -2854,11 +2872,13 @@ BUFFER2 = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2)
 ] + typed_buffer(100) + run_filter(fast=10.0) + [
     (0, cam('full', dur=1.1)),
     note('100 m', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1500), still('s3-04'),
-    caption('5 · Undo, Redo: back and forth between the two'), (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
+    caption('5 · Undo, Redo: back and forth between the two'), (0, quiet_message_bar),
+    (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + act('pushButton_action_undo_filter', click_undo, lead=700, after=400) + settle(4.0) + [(0, refocus)] + settle() + [
     (0, cam('full', dur=1.1)), note('undo', S3_FLOOD_TARGETS), result('300 m again', ()), hold(1500), still('s3-05'),
     (0, cam(ACTION_ZONE, dur=1.1, pad=40)),
 ] + act('pushButton_action_redo_filter', click_redo, lead=700, after=400) + settle(4.0) + [(0, refocus)] + settle() + [
+    (0, quiet_message_bar),
     note('redo', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1400),
 ] + ending(S3_FLOOD_TARGETS)
 

@@ -371,14 +371,15 @@ def render(clip):
     duration = clock.duration
     n_out = int(duration * FPS)
     entry = (size[0] * 0.55, size[1] * 0.75)
-    # poster: a 'poster' mark, else the whole window once the closing wide shot has settled, before the fade back
-    # into the first frame. (It was the frame just before that shot: whatever the camera was on, the action bar
-    # alone or half a panel, which made a poor thumbnail.) FM_POSTER=before keeps that earlier frame.
+    # poster: a 'poster' mark, else the whole window once the closing wide shot has settled. (It was the frame
+    # just before that shot: whatever the camera was on, the action bar alone or half a panel, which made a poor
+    # thumbnail.) Composed apart from the frames of the video, where the end of that shot already fades back into
+    # the first frame. FM_POSTER=before keeps the earlier frame.
     cam_events = [e for e in events if e['kind'] == 'camera']
     cams = [clock.out(e['t']) for e in cam_events]
     if len(cams) > 1 and os.environ.get('FM_POSTER') != 'before':
         wide = cams[-1] + float(cam_events[-1].get('dur', 1.4)) + 0.2
-        fallback = max(min(wide, duration - LOOP - 0.1), 0.0)
+        fallback = max(min(wide, duration - 0.05), 0.0)
     else:
         fallback = cams[-1] - 0.3 if len(cams) > 1 else duration * 0.7
     poster_t = next((clock.out(e['t']) for e in events if e['kind'] == 'mark' and e.get('name') == 'poster'),
@@ -453,7 +454,7 @@ def render(clip):
         return frame.convert('RGB')
 
     first = compose(0.0)
-    poster = None
+    poster = compose(poster_t)
     sheet_every = max(duration / 16, 0.5)
     thumbs = []
     for n in range(n_out):
@@ -461,8 +462,6 @@ def render(clip):
         frame = first if n == 0 else compose(to)
         if to > duration - LOOP:
             frame = Image.blend(frame, first, ease((to - (duration - LOOP)) / LOOP))
-        if poster is None and to >= poster_t:
-            poster = frame.copy()
         if len(thumbs) < 16 and to >= len(thumbs) * sheet_every:
             thumbs.append((to, frame.resize((400, 225), Image.Resampling.BILINEAR)))
         enc.stdin.write(frame.tobytes())
@@ -471,7 +470,7 @@ def render(clip):
 
     # the Pillow of QGIS has no WebP encoder: let ffmpeg convert the poster
     png = os.path.join(site, f'{clip}-poster.png')
-    (poster or first).save(png)
+    poster.save(png)
     subprocess.run([FFMPEG, '-y', '-loglevel', 'error', '-i', png, '-c:v', 'libwebp', '-quality', '70',
                     os.path.join(site, f'{clip}.webp')], check=True)
     os.remove(png)
