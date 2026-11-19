@@ -605,3 +605,18 @@ def test_path_3a_reuses_no_where_clause_but_of_a_single_source_exists(monkeypatc
 
     assert builder._prepare_source_filter("PostgreSQL") == "<FIDS [4, 7]>"
     assert [request.expression for request in requests] == [None]
+
+
+def test_the_copy_of_the_source_is_made_by_the_one_factory_of_copies(monkeypatch):
+    """No second way to open a copy without the subset: a PostgreSQL URI keeps ``checkPrimaryKeyUnicity`` in
+    ``unfiltered_copy``, which QGIS 3.22 drops when it reads a URI back (review of 2026-11-18)."""
+    refusal = _importable_refusal(monkeypatch)
+    layer, _ = _source_layer([])
+    copy, asked = object(), []
+    monkeypatch.setattr(refusal, "unfiltered_copy", lambda source: asked.append(source) or copy)
+    builder = ExpressionBuilder(task_parameters={}, source_layer=layer, current_predicates={})
+
+    assert builder._unfiltered_source() is copy
+    assert asked == [layer]
+    monkeypatch.setattr(refusal, "unfiltered_copy", lambda source: None)
+    assert builder._unfiltered_source() is None  # the selection is then read through the layer

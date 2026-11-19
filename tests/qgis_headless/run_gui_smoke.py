@@ -19,6 +19,7 @@ import importlib
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -5574,6 +5575,118 @@ ROWS_STEPS = [s_rows_setup, s_rows_fit_check, s_rows_exporting_check, s_rows_sho
               s_rows_hidden_change, s_rows_fit_again_check, s_rows_panel_check, s_rows_end]
 
 
+# --- a source filtered again by an expression its SQL cannot write (FM_ONLY=refilter) ---------------------------------
+# 2026-11-18: the first filter of the GeoPackage by bounds_width($geometry) > 60 listed the keys QGIS kept; a second
+# one replacing it read its features through that first filter, wrote no list and fell to the former conversion
+# (bounds_width("geom") > 40, refused by SQLite: "previous filter kept"; $area as a planar ST_Area). Widths: east_a,
+# straddle and west_a 100 m, east_b and west_b 50 m.
+REFILTERS = [
+    ('bounds_width($geometry) > 60', None),
+    ('bounds_width($geometry) > 40', None),  # replaced: the five, not the three of the subset it replaces
+    ('$area > 5000', None),  # west_b: 5,000 m2 on the plane, more on the ellipsoid; QGIS keeps it, ST_Area did not
+    # ORed: east_a and west_b, kept by the old subset too, are listed with east_b (the selection of the targets)
+    ('bounds_width($geometry) < 60 OR x_min($geometry) > 700650', 'OR'),
+]
+REFILTER_BUTTONS = ('pushButton_checkable_filtering_layers_to_filter', 'pushButton_checkable_filtering_geometric_predicates',
+                    'pushButton_checkable_filtering_current_layer_combine_operator')
+
+
+def refilter_reference(text):
+    """The names QGIS keeps for ``text`` on every feature of zones, in the variables of the layer."""
+    from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils
+    whole = QgsVectorLayer(M['zones'] + '|layername=zones', 'zones reference', 'ogr')
+    expression = QgsExpression(text)
+    context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer('zones')))
+    expression.prepare(context)
+    kept = []
+    for feature in whole.getFeatures():
+        context.setFeature(feature)
+        if expression.evaluate(context) in (True, 1):
+            kept.append(feature['name'])
+    return sorted(kept)
+
+
+def listed_fids(subset):
+    return {int(value) for values in re.findall(r'"fid" IN \(([\d, ]+)\)', subset) for value in values.split(',')}
+
+
+def s_refilter_setup():
+    d = dock()
+    STATE['refilter_before'] = {
+        'current': d.comboBox_filtering_current_layer.currentLayer(), 'subset': layer('zones').subsetString(),
+        'buttons': {name: getattr(d, name).isChecked() for name in REFILTER_BUTTONS},
+        'operator': d.comboBox_filtering_source_layer_combine_operator.currentIndex(),
+        'single': d.mGroupBox_exploring_single_selection.isChecked(),
+        'expression': d.mFieldExpressionWidget_exploring_custom_selection.expression()}
+    return pick_vector('zones')
+
+
+def s_refilter_source_only():
+    """After the switch: the dock has put back the FILTERING settings of zones, a filter of the source alone now."""
+    d = dock()
+    layer('zones').setSubsetString('')
+    for name in REFILTER_BUTTONS:
+        getattr(d, name).setChecked(False)
+
+
+def _refilter_steps(text, operator):
+    def select():
+        d = dock()
+        d.pushButton_checkable_filtering_current_layer_combine_operator.setChecked(operator is not None)
+        if operator is not None:
+            d.comboBox_filtering_source_layer_combine_operator.setCurrentIndex({'AND': 0, 'AND NOT': 1, 'OR': 2}[operator])
+        d.mGroupBox_exploring_custom_selection.setChecked(True)
+        d.mFieldExpressionWidget_exploring_custom_selection.setExpression(text)
+        return waits(2.0, tasks_idle)
+
+    def run():
+        iface.messageBar().clearWidgets()
+        zones = layer('zones')
+        STATE['refilter_old'] = (zones.subsetString(), names(zones))
+        run_task('filter')
+        return waits(3.0, tasks_idle)
+
+    def verify():
+        zones, (old, shown) = layer('zones'), STATE['refilter_old']
+        subset, expected = zones.subsetString(), refilter_reference(text)
+        if operator == 'OR':
+            # the new part is also the selection the targets follow: every zone the expression keeps
+            fids = {feature['name']: feature.id() for feature in QgsVectorLayer(
+                M['zones'] + '|layername=zones', 'zones fids', 'ogr').getFeatures()}
+            new_part = subset[len(f'( {old} ) OR ( '):] if subset.startswith(f'( {old} ) OR ( ') else ''
+            listed = listed_fids(new_part) == {fids[name] for name in expected}
+            expected = sorted(set(expected) | set(shown))
+        else:
+            listed = subset.startswith('"fid" IS NOT NULL AND "fid" IN (')
+        refused = [message for message in message_bar_texts() if 'previous filter kept' in message]
+        check(f"refilter {operator or 'replace'}: {text} keeps what QGIS keeps, as a list of keys",
+              names(zones) == expected and listed and not refused,
+              f"expected={expected} got={names(zones)} subset={subset[:160]!r} refused={refused}")
+
+    for step, kind in ((select, 'select'), (run, 'filter'), (verify, 'check')):
+        step.__name__ = f"s_refilter_{kind}_{REFILTERS.index((text, operator)) + 1}"
+    return [select, run, verify]
+
+
+def s_refilter_done():
+    d, before = dock(), STATE['refilter_before']
+    layer('zones').setSubsetString(before['subset'])
+    d.comboBox_filtering_source_layer_combine_operator.setCurrentIndex(before['operator'])
+    for name, checked in before['buttons'].items():
+        getattr(d, name).setChecked(checked)
+    d.mFieldExpressionWidget_exploring_custom_selection.setExpression(before['expression'])
+    if before['single']:
+        d.mGroupBox_exploring_single_selection.setChecked(True)
+    if before['current'] is not None:
+        d.comboBox_filtering_current_layer.setLayer(before['current'])
+    return settled()
+
+
+REFILTER_STEPS = ([s_refilter_setup, s_refilter_source_only]
+                  + [step for text, operator in REFILTERS for step in _refilter_steps(text, operator)]
+                  + [s_refilter_done])
+
+
 # --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------
 
 
@@ -5716,7 +5829,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
          *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, *EXPLO_STEPS,
-         *SWITCH_STEPS, *ROWS_STEPS, s_finish]
+         *SWITCH_STEPS, *ROWS_STEPS, *REFILTER_STEPS, s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
@@ -5751,6 +5864,8 @@ if os.environ.get('FM_ONLY') == 'layout_shots':  # the window in each layout, as
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SHOT_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'rows':  # the rows of FILTERING / EXPORTING packed or spread, and their key buttons
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *ROWS_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'refilter':  # a source filtered again by an expression its SQL cannot write
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *REFILTER_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 

@@ -1,0 +1,131 @@
+# -*- coding: utf-8 -*-
+"""Where the keys of a hybrid source subset are read, by combination (``AttributeFilterExecutor._native_subset``).
+
+2026-11-18: a GeoPackage filtered by ``bounds_width($geometry) > 1`` got a list of keys; filtered again by
+``> 2`` (the new subset replacing the first), the features were read through the first subset, so no list was
+written and the former conversion's ``bounds_width("geom") > 2`` was refused by SQLite. Keys are now read on the
+whole layer whenever the new subset is not ANDed with the subset the layer has (replace, OR, AND with another
+one), still never under AND NOT. Under OR the list holds every key the expression keeps (review of 2026-11-18: it is
+also the selection the targets are filtered by; one without the keys of the old subset made it narrower).
+A chain of ORs adds one list per filter and the provider's ``setSubsetString`` is quadratic in the keys of the
+whole subset (99,000 keys 47 s, two lists of 99,000 322 s): the keys the old subset lists, counted by its commas,
+are given to ``subset_for_layer`` as ``listed_keys`` and count with the new list (HYBRID_MAX_KEYS in all).
+Methods extracted with ast (the module needs the plugin package).
+"""
+import ast
+import logging
+import sys
+import types
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Optional
+
+import pytest
+
+pytestmark = pytest.mark.unit
+
+_PATH = Path(__file__).resolve().parents[4] / "core" / "tasks" / "executors" / "attribute_filter_executor.py"
+_PACKAGE = "fm_second_filter_keys_test"
+_METHODS = ("_native_subset", "_keys_may_be_evaluated", "_keys_read_on_whole_layer", "_keys_listed_under_or",
+            "_current_subset")
+
+
+def _namespace():
+    tree = ast.parse(_PATH.read_text(encoding="utf-8"))
+    cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "AttributeFilterExecutor")
+    nodes = [item for item in cls.body if isinstance(item, ast.FunctionDef) and item.name in _METHODS]
+    namespace = {"__name__": _PACKAGE + ".core.tasks.executors.attribute_filter_executor",
+                 "__package__": _PACKAGE + ".core.tasks.executors",
+                 "logger": logging.getLogger("fm.test.second_filter_keys"), "Optional": Optional}
+    exec(compile(ast.Module(body=nodes, type_ignores=[]), str(_PATH), "exec"), namespace)
+    return namespace
+
+
+NS = _namespace()
+OLD = '"fid" IS NOT NULL AND "fid" IN (1, 2, 3, 4, 5)'
+
+
+class _Layer:
+    def __init__(self, subset):
+        self._subset = subset
+
+    def subsetString(self):
+        if self._subset is RuntimeError:
+            raise RuntimeError("wrapped C/C++ object has been deleted")
+        return self._subset
+
+
+def _executor(current, old, operator):
+    executor = SimpleNamespace(layer=_Layer(current), primary_key="fid", old_subset=old, combine_operator=operator,
+                               is_canceled=lambda: False)
+    for name in _METHODS:
+        setattr(executor, name, types.MethodType(NS[name], executor))
+    return executor
+
+
+@pytest.fixture
+def calls(monkeypatch):
+    """subset_for_layer as the executor imports it, recording its arguments."""
+    recorded = []
+    names = [_PACKAGE, _PACKAGE + ".adapters", _PACKAGE + ".adapters.qgis"]
+    for name in names:
+        package = types.ModuleType(name)
+        package.__path__ = []
+        monkeypatch.setitem(sys.modules, name, package)
+    translation = types.ModuleType(_PACKAGE + ".adapters.qgis.native_filter_translation")
+    translation.subset_for_layer = lambda layer, expression, **options: recorded.append(options) or "subset"
+    monkeypatch.setitem(sys.modules, translation.__name__, translation)
+    return recorded
+
+
+@pytest.mark.parametrize("current, old, operator, evaluate, whole_layer", [
+    ("", None, None, True, False),          # the first filter: the layer is the whole layer
+    ("", None, "OR", True, False),
+    (OLD, OLD, "AND", True, False),         # ANDed with the subset the layer has: through it (unchanged)
+    (OLD, OLD, None, True, True),           # replaced: the second filter of the defect
+    (OLD, OLD, "OR", True, True),           # ORed: every key, those the old subset keeps too
+    (OLD, '"pop" > 2', "OR", True, True),   # ORed with another subset than the layer's
+    (OLD, '"pop" > 2', "AND", True, True),  # ANDed with another subset than the layer's
+    (OLD, None, "AND", True, True),         # no old subset: the new expression alone
+    (OLD, OLD, "AND NOT", False, True),     # never a list under NOT (FALSE and NULL differ)
+    ("", None, "AND NOT", False, False),
+    (RuntimeError, OLD, None, False, False),  # a deleted layer
+])
+def test_where_the_keys_are_read(calls, current, old, operator, evaluate, whole_layer):
+    executor = _executor(current, old, operator)
+
+    assert executor._native_subset(' bounds_width($geometry) > 2') == "subset"
+    assert len(calls) == 1
+    options = calls[0]
+    assert (options["evaluate"], options["whole_layer"]) == (evaluate, whole_layer)
+    assert "shown_kept" not in options  # no list without the keys of the old subset
+    assert options["negated"] == ("NOT" in (operator or ""))
+    assert options["key_name"] == "fid"
+    assert options["is_canceled"] is executor.is_canceled  # the reading of the whole layer sees a cancel
+
+
+@pytest.mark.parametrize("old, operator, listed", [
+    (OLD, "OR", 4),                         # 5 keys, 4 commas: a list of n keys has n - 1
+    (OLD + " OR " + OLD, "or", 8),
+    (OLD, " OR ", 4),
+    (OLD, "AND", 0),                        # an AND with the same subset keeps the smaller list: not counted
+    (OLD, None, 0),                         # replaced: the old subset is gone
+    (OLD, "AND NOT", 0),
+    (None, "OR", 0),                        # nothing to be ORed with
+    ("", "OR", 0),
+    ('"name" = \'a,b\'', "OR", 1),          # a comma of a text counts too: a list is refused sooner, never later
+])
+def test_under_or_the_keys_the_old_subset_lists_are_counted(calls, old, operator, listed):
+    executor = _executor(OLD, old, operator)
+
+    assert executor._keys_listed_under_or() == listed
+    assert executor._native_subset("bounds_width($geometry) > 2") == "subset"
+    assert calls[0]["listed_keys"] == listed
+
+
+def test_the_task_gives_the_executor_its_cancellation():
+    source = (_PATH.parents[2] / "tasks" / "filter_task.py").read_text(encoding="utf-8")
+    start = source.index("def _get_attribute_executor(self):")
+    body = source[start:source.index("def _get_spatial_executor(self):")]
+
+    assert "is_canceled=self.isCanceled" in body

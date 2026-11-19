@@ -3,15 +3,15 @@
 Reads the expression tree and the field types in QGIS, the writing itself is
 ``filtermate_core.filter.native_dialect`` (pure). The translation reads no
 feature. A hybrid subset (:func:`subset_for_layer` with ``evaluate``) reads the
-layer's features to let QGIS evaluate what is not translated; the layer is
-never modified.
+layer's features, or those of a copy of it without its subset, to let QGIS
+evaluate what is not translated; the layer is never modified.
 """
 import logging
 
 try:
     from ...core.filter.server_dialect import TranslationStatus, Unsupported
     from ...filtermate_core.filter.native_dialect import (
-        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
+        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, HYBRID_MAX_KEYS, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
         NativeGeometry, NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native,
         uses_geometry,
     )
@@ -19,7 +19,7 @@ try:
 except ImportError:  # plugin root on sys.path in pure unit tests
     from core.filter.server_dialect import TranslationStatus, Unsupported
     from filtermate_core.filter.native_dialect import (
-        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
+        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, HYBRID_MAX_KEYS, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
         NativeGeometry, NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native,
         uses_geometry,
     )
@@ -35,10 +35,26 @@ MAX_EXPRESSION_LENGTH = 65536
 # and in a C database (QGIS 4.2.3 and 3.44.15).
 APPLIED_DIALECTS = (SQLITE, OGR_SQL, POSTGRESQL)
 
-# A hybrid subset evaluates every feature of the layer in QGIS (Python loop, no
-# cancellation): beyond this count, or when the count is unknown, the former
-# conversion is kept.
+# A hybrid subset evaluates every feature of the layer in QGIS (Python loop, stopped between two blocks of
+# features when the task is canceled): beyond this count, or when the count is unknown, the former conversion
+# is kept.
 HYBRID_MAX_FEATURES = 1_000_000
+
+# Features read between two looks at the cancellation of the task (as its other long readings, filter_task)
+CANCEL_CHECK_INTERVAL = 100
+
+# Functions of QGIS that read the feature id (or the selection, made of feature ids)
+_FEATURE_ID_FUNCTIONS = frozenset(('$id', 'is_selected', 'num_selected', 'get_feature_by_id', 'feature_id',
+                                   '$currentfeature'))
+# Variables of QGIS that give the feature id (``@id``, and ``@feature``: ``$id`` of ``attribute(@feature, ...)``)
+_FEATURE_ID_VARIABLES = frozenset(('id', 'feature'))
+# Functions that read a layer, possibly the layer of the context (``@layer``), through its subset: on the layer
+# itself, not on the copy the keys are read on (``get_feature(@layer, 'id', 5)``, ``layer_property(@layer,
+# 'feature_count')``, ``overlay_*(@layer, ...)``, ``eval()`` of a text that may hold any of these).
+_LAYER_READING_FUNCTIONS = frozenset((
+    'get_feature', 'get_feature_by_id', 'layer_property', 'eval', 'eval_template', 'overlay_intersects',
+    'overlay_contains', 'overlay_crosses', 'overlay_disjoint', 'overlay_equals', 'overlay_touches',
+    'overlay_within', 'overlay_nearest'))
 
 # OGR storages whose attribute filter is run by SQLite, and by the OGR SQL engine.
 # Any other storage (a database or a service opened through OGR) is not translated.
@@ -287,7 +303,8 @@ def native_subset(layer, expression):
     return subset_for_layer(layer, expression)
 
 
-def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=False):
+def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=False, whole_layer=False,
+                     is_canceled=None, listed_keys=0):
     """The subset of ``layer`` for ``expression`` in its source's own language.
 
     Args:
@@ -295,9 +312,19 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
         expression: QGIS attribute predicate.
         key_name: Unique key field of the layer (a field of its source).
         evaluate: Whether a part left untranslated may be evaluated by QGIS
-            and replaced by a list of keys. Only when the subset is neither
-            negated (FALSE and NULL differ under NOT) nor read through another
-            filter than the one it will be combined with by AND.
+            and replaced by a list of keys. Never when the subset is negated
+            (FALSE and NULL differ under NOT).
+        whole_layer: Whether those features are read on the whole layer, not
+            through its current subset: the new subset is not ANDed with that
+            subset (it replaces it, or is ORed with it). Read on a copy of the
+            layer without its subset (``_hybrid_subset``).
+        is_canceled: The task's ``isCanceled``: a hybrid subset reads every
+            feature of the layer, the reading stops when the task is canceled
+            (no list then; the task applies nothing).
+        listed_keys: Keys already listed in the subset this one is ORed
+            with. They count with the new list against ``HYBRID_MAX_KEYS``:
+            beyond it no list is written (the provider's ``setSubsetString``
+            is quadratic in the keys of the whole subset).
         negated: Whether the subset will be written under NOT (AND NOT). OGR
             SQL gives FALSE to TRUE AND NULL: a translation holding AND, OR or
             NOT is then left to the former conversion, and so are texts (only
@@ -338,7 +365,8 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
     if not evaluate:
         return None
     try:
-        subset = _hybrid_subset(layer, expression, result, native_sql, key_name)
+        subset = _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer, is_canceled,
+                               listed_keys)
     except Unsupported as exc:
         logger.info('No hybrid subset for %s: %s', layer.name(), exc)
         return None
@@ -373,13 +401,30 @@ def _is_true(value):
     raise Unsupported('A condition gave a value that is not a boolean')
 
 
-def _hybrid_subset(layer, expression, result, native_sql, key_name):
+def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=False, is_canceled=None,
+                   listed_keys=0):
     """Let QGIS evaluate the expression on each feature, then list keys (``native_dialect.hybrid_sql``).
 
     Every feature is read and evaluated locally: the provider's own compiled
     filter is not used, it may differ from QGIS (QGIS compiles = on reals
     without the tolerance it applies locally). The key is read on every
     feature: unique and never NULL, or no list.
+
+    2026-11-18: ``whole_layer`` reads the features of a layer that has a subset
+    on a copy without it (source_refusal.unfiltered_copy, made and dropped in
+    this thread, the task's), in the context of the layer itself: its
+    variables, its CRS for ``$area``. A second filter that replaced the first
+    one wrote no list (the features were read through the first subset), and
+    the former conversion wrote ``bounds_width("geom") > 2``, which SQLite
+    refuses, or ``ST_Area("geom") > 100``, planar where the first filter
+    measured on the ellipsoid. A copy that cannot be opened, or that lacks a
+    field the expression reads (joined, virtual), gives no list: never keys
+    read through the subset the new one replaces. The fields are checked on
+    the source's before the copy is opened (and counted), and again on the copy.
+
+    ``listed_keys`` (a subset ORed with the new one, with the keys it lists):
+    no list when they and the new list exceed ``HYBRID_MAX_KEYS``, checked
+    before any feature is read when they alone reach it.
     """
     from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
     from .source_capability_probe import feature_count_or_none
@@ -390,11 +435,7 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name):
         raise Unsupported('The expression is not a condition')
     if layer.isEditable():
         raise Unsupported('The layer is being edited: its subset cannot change')
-    count = feature_count_or_none(layer)
-    if count is None or count < 0 or count > HYBRID_MAX_FEATURES:
-        raise Unsupported('{} features: unknown, or more than the {} evaluated in QGIS'.format(
-            count, HYBRID_MAX_FEATURES))
-    fields = layer.dataProvider().fields()
+    fields = layer.dataProvider().fields()  # the source's fields: the copy's too
     index = fields.indexFromName(key_name) if key_name else -1
     if index < 0:
         raise Unsupported('No key field of the source: {}'.format(key_name))
@@ -417,16 +458,37 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name):
                     sorted(native.referencedColumns()), sorted(result.native_columns))
         native, native_sql = None, ''
 
+    if listed_keys >= HYBRID_MAX_KEYS:
+        raise Unsupported('{} keys already listed in the subset this one is ORed with'.format(listed_keys))
+    names = set(whole.referencedColumns()) | (set(native.referencedColumns()) if native else set())
+
+    # The copy is opened once the key and the expression are known to serve (review of 2026-11-18: without a key it
+    # was opened and counted for nothing, a whole count(*) on PostgreSQL; a joined or virtual field, the same)
+    source = layer
+    if whole_layer and (layer.subsetString() or '').strip():
+        _check_expression_for_copy(whole, dialect, layer)
+        _check_fields_of_source(layer, fields, names)
+        source = _unfiltered_copy(layer)
+        if source is None:
+            raise Unsupported('The layer cannot be read without its current subset')
+    count = feature_count_or_none(source)
+    if count is None or count < 0 or count > HYBRID_MAX_FEATURES:
+        raise Unsupported('{} features: unknown, or more than the {} evaluated in QGIS'.format(
+            count, HYBRID_MAX_FEATURES))
+
     request = QgsFeatureRequest()
     if not any(parsed.needsGeometry() for parsed in filter(None, (whole, native))):
         request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
-    names = set(whole.referencedColumns()) | (set(native.referencedColumns()) if native else set())
+    if source is not layer:
+        _check_copy_reads_like_layer(layer, source, names, whole)
     if QgsFeatureRequest.ALL_ATTRIBUTES not in names:
         names.add(key_name)
-        request.setSubsetOfAttributes(sorted(names), layer.fields())
+        request.setSubsetOfAttributes(sorted(names), source.fields())
 
     passing, failing, seen = [], ([] if native is not None else None), set()
-    for feature in layer.getFeatures(request):
+    for number, feature in enumerate(source.getFeatures(request)):
+        if is_canceled is not None and number % CANCEL_CHECK_INTERVAL == 0 and is_canceled():
+            raise Unsupported('The task was canceled after {} features'.format(number))
         value = feature[key_name]
         if is_null_value(value) or value in seen:
             raise Unsupported('The key {} is NULL or repeated'.format(key_name))
@@ -446,10 +508,114 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name):
             passing.append(value)
         elif failing is not None and in_native:
             failing.append(value)
-    subset = hybrid_sql(native_sql, passing, failing, key, numeric, dialect)
-    logger.info('Hybrid subset for %s: %d kept, %s excluded by QGIS from the native part (%s)', layer.name(),
-                len(passing), 'no native part' if failing is None else len(failing), result.reason)
+    subset = hybrid_sql(native_sql, passing, failing, key, numeric, dialect, already_listed=listed_keys)
+    logger.info('Hybrid subset for %s: %d kept, %s excluded by QGIS from the native part (%s)%s', layer.name(),
+                len(passing), 'no native part' if failing is None else len(failing), result.reason,
+                ', read without its subset' if source is not layer else '')
     return subset
+
+
+def _unfiltered_copy(layer):
+    """source_refusal.unfiltered_copy (a module of the backends, imported where it is read)."""
+    try:
+        from ..backends.source_refusal import unfiltered_copy
+    except ImportError:  # plugin root on sys.path in pure unit tests
+        from adapters.backends.source_refusal import unfiltered_copy
+    return unfiltered_copy(layer)
+
+
+def _check_expression_for_copy(whole, dialect, layer):
+    """Refuse, before the copy is opened, an expression its features would not give the layer's answer to.
+
+    The feature id of a PostgreSQL layer is a number its provider gives each
+    feature (the key itself only for one integer column): it may be another
+    one in the copy, so nothing that reads it (``$id``, ``@id``,
+    ``feature_id()``, ``$currentfeature``, ``@feature``, ``is_selected()``,
+    ``get_feature_by_id``...) is evaluated there. The same for a SQLite or
+    GeoPackage layer whose identifier is not a column of its table (a view
+    without a first integer column: ids 0, 1, 2... that change under a filter,
+    ``primaryKeyAttributes()`` empty); with an identifier that is the key
+    column, the copy gives the same ids and ``is_selected()`` reads the
+    selection of the layer of the context, the layer itself (measured,
+    check_native_translation.selected_path). An aggregate (``mean("pop")``)
+    is computed by QGIS on the layer of the context, through its subset,
+    while the keys would come from the whole layer: the first filter
+    aggregates the whole layer, so no list mixes the two. Likewise a function
+    that reads a layer, possibly the layer of the context (``get_feature``,
+    ``overlay_*``, ``layer_property``, ``eval``), whatever the source (reviews
+    of 2026-11-18). The functions are those of the expression tree: a field
+    named ``mean`` or a text ``'is_selected'`` is none.
+    """
+    from qgis.core import QgsExpression
+    functions = set(whole.referencedFunctions())
+    index_of = QgsExpression.functionIndex
+    all_functions = QgsExpression.Functions()
+    aggregates = sorted(name for name in functions if index_of(name) >= 0
+                        and 'Aggregates' in all_functions[index_of(name)].groups())
+    if aggregates:
+        raise Unsupported('An aggregate is read through the subset of the layer: {}'.format(', '.join(aggregates)))
+    reading = sorted(functions & _LAYER_READING_FUNCTIONS)
+    if reading:
+        raise Unsupported('A function reads a layer through its subset: {}'.format(', '.join(reading)))
+    if (functions & _FEATURE_ID_FUNCTIONS or whole.referencedVariables() & _FEATURE_ID_VARIABLES) and \
+            not _feature_ids_follow_the_key(layer, dialect):
+        raise Unsupported('The feature id of this layer is not its key: another number in a copy')
+
+
+def _feature_ids_follow_the_key(layer, dialect):
+    """Whether the feature id of ``layer`` is a column of its table, so the same on a copy without its subset.
+
+    Never for PostgreSQL (its provider numbers the features, whatever the key). SQLite and GeoPackage: when the
+    layer has a primary key column, the id is that column; without one the ids count the rows in the order read.
+    """
+    if dialect != SQLITE:
+        return False
+    try:
+        return len(layer.primaryKeyAttributes()) > 0
+    except Exception as exc:  # nosec B110 - a provider that does not say: the id is not known to be a column
+        logger.debug('Primary key of %s not read: %s', layer.name(), exc)
+        return False
+
+
+def _check_fields_of_source(layer, source_fields, names):
+    """Refuse, before the copy is opened and counted, a field the source does not give as the layer does.
+
+    A joined or virtual field is not a field of the source: the copy has no such field. Each name must be at the
+    same index among the layer's fields as among the source's (the expression is prepared in the layer's context).
+    """
+    from qgis.core import QgsFeatureRequest
+    layer_fields = layer.fields()
+    if QgsFeatureRequest.ALL_ATTRIBUTES in names:
+        if list(layer_fields.names()) != list(source_fields.names()):
+            raise Unsupported('The layer has fields its source has not (joined, virtual)')
+        return
+    for name in names:
+        index = layer_fields.indexFromName(name)
+        if index < 0 or source_fields.indexFromName(name) != index:
+            raise Unsupported('The field {} is not a field of the source, as of the layer'.format(name))
+
+
+def _check_copy_reads_like_layer(layer, copy, names, whole):
+    """Refuse a copy without subset whose features the expression would not read as the layer's.
+
+    The expression is prepared in the context of the layer: each field is read
+    at its index among the layer's fields, which the copy's must give back
+    (a joined or virtual field is not in the copy). Its geometry must be of
+    the layer's type (a URI read back without its geometry column would give
+    none).
+    """
+    from qgis.core import QgsFeatureRequest
+    if whole.needsGeometry() and copy.wkbType() != layer.wkbType():
+        raise Unsupported('The source gives another geometry than the layer: {}'.format(copy.wkbType()))
+    layer_fields, copy_fields = layer.fields(), copy.fields()
+    if QgsFeatureRequest.ALL_ATTRIBUTES in names:
+        if list(layer_fields.names()) != list(copy_fields.names()):
+            raise Unsupported('The layer has fields its source has not (joined, virtual)')
+    else:
+        for name in names:
+            index = layer_fields.indexFromName(name)
+            if index < 0 or copy_fields.indexFromName(name) != index:
+                raise Unsupported('The field {} is not read in the source as in the layer'.format(name))
 
 
 __all__ = ['constant_variables', 'field_types', 'native_dialect_for_layer', 'native_geometry', 'native_subset',

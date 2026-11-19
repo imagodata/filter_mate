@@ -18,8 +18,12 @@ every feature.
 
 The requests that read the features an expression keeps, in the variables of
 a layer, are built here too (with_layer_context): by these preparations, the
-PostgreSQL source selection, EXPLORING and the public API.
+PostgreSQL source selection, EXPLORING and the public API; and the copy of a
+layer without its subset these readings use (unfiltered_copy).
 """
+import logging
+
+logger = logging.getLogger('FilterMate.Adapters.Backends.SourceRefusal')
 
 # task_parameters key: the context of the source layer, read on the main thread
 # when the filter task is created (FilterEngineTask.__init__).
@@ -97,6 +101,63 @@ def with_layer_context(request, layer, context=None):
     else:
         request.setExpressionContext(layer_context(layer))
     return request
+
+
+def unfiltered_copy(layer):
+    """A second layer on the data source of ``layer``, without its subset; None when it cannot be opened.
+
+    The subset is removed from the URI (as OGRExpressionBuilder._unfiltered_target
+    does). The layer of the project is never touched: its subset stays on the
+    map, and nothing is left without a filter when the reading fails. The copy
+    is made in the thread that reads it, out of the project, and is never kept
+    (a layer made in a worker must not outlive it); it has none of the layer's
+    variables (with_layer_context). No default style is read and no CRS is
+    asked for: only its features are read. A memory layer opened again is a
+    new, empty one: None.
+
+    Read by the SpatiaLite source preparation (spatialite/filter_executor) and,
+    since 2026-11-18, by the hybrid subsets of a filter that replaces the
+    subset or is ORed with it (native_filter_translation._hybrid_subset).
+    """
+    try:
+        from qgis.core import QgsProviderRegistry, QgsVectorLayer
+        provider = layer.providerType()
+        if provider == 'memory':
+            return None
+        registry = QgsProviderRegistry.instance()
+        parts = dict(registry.decodeUri(provider, layer.source()))
+        for key in ('subset', 'sql', 'filter'):
+            parts.pop(key, None)
+        uri = registry.encodeUri(provider, parts) if parts else layer.source()
+        if provider == 'postgres':
+            uri = _with_key_check_of(layer.source(), uri)
+        options = QgsVectorLayer.LayerOptions(False, False)
+        options.skipCrsValidation = True
+        clone = QgsVectorLayer(uri, f"{layer.name()} (unfiltered)", provider, options)
+        if clone.isValid() and clone.subsetString():
+            clone.setSubsetString('')
+        if clone.isValid() and not clone.subsetString():
+            return clone
+    except Exception as exc:  # nosec B110 - read through the layer instead, or not at all
+        logger.debug(f"Unfiltered reading of {layer.name()} unavailable: {exc}")
+    logger.warning(f"{layer.name()} cannot be read without its current filter")
+    return None
+
+
+def _with_key_check_of(source, uri):
+    """``uri`` with the ``checkPrimaryKeyUnicity`` of the PostgreSQL URI ``source``.
+
+    QGIS 3.22 drops it when it reads the URI back (3.44 keeps it): on a view
+    whose layer says ``checkPrimaryKeyUnicity='0'``, each copy would count the
+    distinct keys of the whole view again (review of 2026-11-18).
+    """
+    from qgis.core import QgsDataSourceUri
+    name = 'checkPrimaryKeyUnicity'
+    original, copy = QgsDataSourceUri(source), QgsDataSourceUri(uri)
+    if not original.hasParam(name) or copy.hasParam(name):
+        return uri
+    copy.setParam(name, original.param(name))
+    return copy.uri(False)  # an authcfg stays a reference, never expanded
 
 
 def selection_request(expression, layer, context=None):
