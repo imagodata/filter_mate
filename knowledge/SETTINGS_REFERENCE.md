@@ -25,6 +25,25 @@
 | `SECTION_HEADERS` | rail | rail, stacked | How the panel lists its sections: 'rail' (one row of chips per stack: a click on a chip opens its section, a chip is dragged to another place), 'stacked' (the name of each section on its own line, one above the other) |
 | `SECTION_HEIGHT` | fit | fit, fill | Height of the rows of FILTERING and EXPORTING: 'fit' (each row at its own height, one gap apart, at the top of the section; the room left stays under them, and a short section scrolls), 'fill' (the rows spread over the whole height of the section) |
 | `PANEL_SIZING` | auto | auto, manual | Height of the panels of the sections taken out of the dock, and of the dock: 'auto' (sized again when a section leaves, comes back or changes panel, when a panel is moved or opens another section: FILTERING and EXPORTING at the height of their rows, the room left to EXPLORING, AGENT, CONFIGURATION or the other panels of QGIS), 'manual' (the heights QGIS and the user set stay) |
+
+## Settings > Interface > EXPLORING tools
+
+`APP.DOCKWIDGET.EXPLORING_TOOLS`
+
+The tool buttons of the EXPLORING rail, for each kind of layer: the names of the buttons to hide, separated by commas (empty: all of them are shown). A tool hidden is not on the rail and is put down; a mode (sync, follow, link, preview) is turned off when its button is hidden, and no other way turns it on again meanwhile; the '...' button (more) is always shown. Right-click the rail to choose them with check boxes
+
+| Setting | Default | Allowed | Description |
+|---|---|---|---|
+| `vector_hidden` | (empty) | names among zoom, sync, identify, follow, zone, link, reset | Buttons hidden on the rail of a vector layer: zoom, sync (keep the map selection and the widgets in sync), identify, follow (auto-zoom), zone, link (single and multiple selections), reset |
+| `raster_hidden` | (empty) | names among zoom, preview, pipette, detector, similar, link, reset | Buttons hidden on the rail of a raster layer: zoom, preview, pipette, detector (clicked object), similar (similar objects), link (range to the style), reset |
+| `point_cloud_hidden` | (empty) | names among zoom, preview, identify, object, value_pipette, zone, reset | Buttons hidden on the rail of a point cloud: zoom, preview, identify (class pipette), object (object detector), value_pipette, zone, reset |
+
+## Settings > Interface
+
+`APP.DOCKWIDGET`
+
+| Setting | Default | Allowed | Description |
+|---|---|---|---|
 | `ACTION_BAR_VERTICAL_ALIGNMENT` | top | top, bottom | Vertical alignment of action buttons when action bar is in vertical mode (left/right): 'top' (buttons at top), 'bottom' (buttons at bottom). Use the splitter handle to adjust position. |
 
 ## Settings > Interface > Appearance

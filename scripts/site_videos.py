@@ -64,7 +64,11 @@ EXPORT_DIR = os.path.join(ROOT, 'export_out')
 LOG = os.path.join(OUT, 'capture.log')
 FPS = 15
 WINDOW = (1760, 990)  # 16:9 client area, 2640x1485 frames at 150 % scaling
-DOCK_WIDTH = 440  # the FilterMate 5 dock as in the guide screenshots
+# The dock at the least width its normal profile allows (ui/config: min_width 380): the map gets the rest.
+DOCK_WIDTH = int(os.environ.get('FM_DOCK_WIDTH', '380'))
+# The window no taller than the dock needs (fit_window): FM_FIT=0 keeps the 1760 x 990 of the first takes.
+FIT = os.environ.get('FM_FIT', '1') != '0'
+MIN_WINDOW_HEIGHT = 720
 STATE = {}
 
 STYLE = {  # layer name: (color, line/stroke width or point size, fill opacity)
@@ -510,6 +514,7 @@ def setup(layer_names, focus_layer, focus_expr, scale=1.25, dense_scale=120000):
         else:
             bb = layer(focus_layer).getFeature(fids[0]).geometry().boundingBox()
             bb.scale(scale)
+        STATE['boot_extent'] = QgsRectangle(bb)
         set_extent(bb)
         canvas.setRenderFlag(True)
     return _s
@@ -551,6 +556,86 @@ def size_dock():
     d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
     d.setMinimumWidth(0)
     iface.mainWindow().resizeDocks([d], [DOCK_WIDTH], Qt.Orientation.Horizontal)
+
+
+def rows_need(pages=('FILTERING',), show=False):
+    """The height the lower stack of the dock needs to show the rows of ``pages`` (FILTERING, EXPORTING) without a
+    scroll bar: its rail, the tallest of them, their margins (as fit_stacks of scripts/guide_screenshots.py).
+    ``show``: each page is opened to be measured, then the first one again (hidden, EXPORTING asked 56 px more than
+    its rows take once shown)."""
+    d = dock()
+    sections = getattr(d, '_fm_sections', None)
+    if sections is None:
+        return 0
+    tallest = 0
+    for name in pages:
+        page = getattr(d, name)
+        if show:
+            d.toolBox_tabTools.setCurrentWidget(page)
+            QApplication.processEvents()
+            if page.layout() is not None:
+                page.layout().activate()
+        tallest = max(tallest, page.sizeHint().height(), page.minimumSizeHint().height())
+    if show and pages:
+        d.toolBox_tabTools.setCurrentWidget(getattr(d, pages[0]))
+        QApplication.processEvents()
+    return sections.bottom_rail.height() + tallest + 22
+
+
+def dock_void(pages=None, need=None):
+    """The empty band of the dock: what its lower stack holds beyond the rows of ``pages`` (None: of the section it
+    shows, FILTERING or EXPORTING). The rows are packed at the top of their section (SECTION_HEIGHT = fit), so a
+    window taller than the dock needs shows that band in every frame."""
+    d = dock()
+    if pages is None:
+        pages = [name for name in ('FILTERING', 'EXPORTING') if d.toolBox_tabTools.currentWidget() is getattr(d, name)]
+    sizes = d.splitter_main.sizes()
+    if need is None:
+        need = rows_need(pages) if pages else 0
+    return sizes[1] - need if need and len(sizes) > 1 else 0
+
+
+def fit_stacks(pages=('FILTERING',), need=None):
+    """The lower stack of the dock as tall as the rows of ``pages``, EXPLORING the rest; the dock is told that
+    share, as a drag of the handle between them does (it comes back to it after AGENT was opened)."""
+    d = dock()
+    if need is None:
+        need = rows_need(pages)
+    total = sum(d.splitter_main.sizes())
+    if 0 < need < total:
+        d.splitter_main.setSizes([total - need, need])
+        sections = getattr(d, '_fm_sections', None)
+        if sections is not None and hasattr(sections, '_share'):
+            sections._share = (total - need) / total
+
+
+def fit_window(pages=('FILTERING',)):
+    """Unrecorded: the window loses the height of the empty band of the dock, and the width that keeps it 16:9; the
+    lower stack is then as tall as the rows of ``pages`` and EXPLORING keeps its height. The dock in one piece, no
+    empty band, and a larger interface in the frame. The dock is told that share of its two stacks, as a drag of
+    their handle does: it comes back to it after AGENT was opened. Nothing moves when there is no band to lose."""
+    def _s():
+        if not FIT or not pages:
+            return
+        mw, d = iface.mainWindow(), dock()
+        need = rows_need(pages, show=True)
+        void = dock_void(pages, need)
+        height = max(MIN_WINDOW_HEIGHT, mw.height() - max(0, void))
+        height -= height % 9
+        if void > 0 and height < mw.height():
+            mw.resize(height * 16 // 9, height)
+
+        def stacks():
+            if void > 0:
+                fit_stacks(pages, need)
+            mw.resizeDocks([d], [DOCK_WIDTH], Qt.Orientation.Horizontal)
+            if STATE.get('boot_extent') is not None:
+                set_extent(STATE['boot_extent'])
+            QTimer.singleShot(500, lambda: log(
+                f'window fitted: {mw.width()}x{mw.height()} (empty band was {void}), stacks '
+                f'{d.splitter_main.sizes()}, rows need {need}, band left {dock_void(pages, need)}'))
+        QTimer.singleShot(600, stacks)
+    return _s
 
 
 def source(name):
@@ -1036,6 +1121,13 @@ def rec_start():
 def stop_recording():
     faulthandler.cancel_dump_traceback_later()
     REC.stop()
+    try:  # read before a take is published: a dock in one piece, with no empty band
+        mw = iface.mainWindow()
+        panels = getattr(dock(), '_fm_panels', None)
+        log(f'layout at the end: window {mw.width()}x{mw.height()}, dock {dock().width()}x{dock().height()}, '
+            f'empty band {dock_void()}, sections apart {panels.detached() if panels is not None else ()}')
+    except Exception:
+        log(traceback.format_exc())
 
 
 def restore_ui():
@@ -1101,9 +1193,11 @@ def scope(scope_layer, target_names=None):
     ]
 
 
-def boot(layers, focus_layer, focus_expr, scale=1.25, dense_scale=120000):
+def boot(layers, focus_layer, focus_expr, scale=1.25, dense_scale=120000, fit=('FILTERING',)):
+    """``fit``: the sections of the lower stack the take opens; the window is fitted to the tallest (fit_window)."""
     return [(1000, setup(layers, focus_layer, focus_expr, scale, dense_scale)),
-            (3000, open_plugin), (8000, size_dock), (1500, wait_idle())]
+            (3000, open_plugin), (8000, size_dock), (1500, wait_idle()),
+            (500, fit_window(fit)), (2500, wait_idle())]
 
 
 # ------------------------------------------------------------------ clips
@@ -1111,6 +1205,7 @@ S1_LAYERS = ['commune', 'zone_de_vegetation', 'surface_hydrographique', 'zone_d_
              'cimetiere', 'equipement_de_transport', 'batiment', 'haie', 'troncon_hydrographique',
              'troncon_de_route', 'construction_lineaire', 'erp']
 S1_TARGETS = [n for n in S1_LAYERS if n != 'commune']
+
 
 def noop():
     return None
@@ -1612,10 +1707,29 @@ def toolbox_search():
 
 
 def show_toolbox():
-    d = toolbox_dock()
+    """Unrecorded: the Processing toolbox under the Layers panel, left of the map. (Above the dock of FilterMate it
+    took half of the dock's column: the dock was squeezed to 360 px by 600 and the window could not be fitted.)
+    The two share the height the Layers panel had: given more, they made the window 45 px taller than its 16:9."""
+    mw, d = iface.mainWindow(), toolbox_dock()
+    size = (mw.width(), mw.height())
+    layers = mw.findChild(QDockWidget, 'Layers')
+    column = layers.height() if layers is not None else 0
     d.show()
-    d.raise_()
-    iface.mainWindow().resizeDocks([d], [360], Qt.Orientation.Horizontal)
+    if layers is not None:
+        mw.splitDockWidget(layers, d, Qt.Orientation.Vertical)
+        mw.resizeDocks([layers, d], [190, max(column - 196, 240)], Qt.Orientation.Vertical)
+        mw.resizeDocks([layers], [330], Qt.Orientation.Horizontal)
+    mw.resizeDocks([dock()], [DOCK_WIDTH], Qt.Orientation.Horizontal)
+
+    def settle():
+        if (mw.width(), mw.height()) != size:
+            mw.resize(*size)
+        # the window grew and came back: the stacks of the dock moved by 19 px on the way
+        QTimer.singleShot(250, fit_stacks)
+        QTimer.singleShot(600, lambda: log(
+            f'toolbox {rect_of(d)}, dock {rect_of(dock())}, map {rect_of(iface.mapCanvas())}, '
+            f'window {mw.width()}x{mw.height()} (fitted {size[0]}x{size[1]}), stacks {dock().splitter_main.sizes()}'))
+    QTimer.singleShot(600, settle)
 
 
 def s8_dialog():
@@ -1624,7 +1738,7 @@ def s8_dialog():
         'INPUT_LAYERS': [layer(n) for n in S8_TARGETS], 'EXPRESSION': CHANGED_EXPR})
     dlg.resize(860, 640)
     mw = iface.mainWindow()
-    dlg.move(mw.mapToGlobal(QPoint(420, 160)))
+    dlg.move(mw.mapToGlobal(QPoint(345, 130)))
     dlg.show()
     STATE['proc'] = dlg
     REC.windows.append(dlg)
@@ -1650,8 +1764,8 @@ def s8_run():
 # Toulouse framed tight and dense layers shown up to 1:200 000: at 1.6 x the commune the
 # canvas was at 1:147 000 and the filtered buildings and roads were not drawn at all.
 PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, dense_scale=200000) \
-    + recorded_scene(1.0) + [
-    (0, show_toolbox), (600, cam(lambda: rect_of(toolbox_dock()), dur=1.4, pad=20)),
+    + [(0, show_toolbox), (2500, wait_idle())] + recorded_scene(1.0) + [
+    (600, cam(lambda: rect_of(toolbox_dock()), dur=1.4, pad=20)),
 ] + act(toolbox_search) + type_into(toolbox_search, 'filtermate', per_char=120) + [
     hold(1200), still('s8-01'), (0, s8_dialog), (400, cam(lambda: rect_of(STATE['proc']), dur=1.4, pad=30)), hold(2800),
     still('s8-02'),
@@ -1763,13 +1877,15 @@ def setup5(layer_names, hidden=(), margin=1.03):
         bb = QgsRectangle(*FM5_EXTENT)
         bb.scale(margin)
         STATE['scene_rect'] = QgsRectangle(bb)
+        STATE['boot_extent'] = QgsRectangle(bb)
         set_extent(bb)
         canvas.setRenderFlag(True)
     return _s
 
 
-def boot5(layers, hidden=()):
-    return [(1000, setup5(layers, hidden)), (3000, open_plugin), (8000, size_dock), (1500, wait_idle())]
+def boot5(layers, hidden=(), fit=('FILTERING',)):
+    return [(1000, setup5(layers, hidden)), (3000, open_plugin), (8000, size_dock), (1500, wait_idle()),
+            (500, fit_window(fit)), (2500, wait_idle())]
 
 
 def coverage():
@@ -2108,7 +2224,7 @@ SURVEY_ZIP = os.path.join(EXPORT_DIR, os.environ.get('FM5_SURVEY_ZIP', 'fenouill
 
 # survey (story 12): the tallest building of the square (17.4 m; the church at Estavar) and 50 m around clip the DTM
 # and the LiDAR, then both are exported.
-SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + FM5_QUIET_BUILDINGS + fm5_scene() \
+SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment'], fit=('FILTERING', 'EXPORTING')) + FM5_QUIET_BUILDINGS + fm5_scene() \
     + pick_layer('batiment') + [
     (1500, cam(EXPLORE_ZONE, dur=1.4, pad=30)),
 ] + typed_custom(os.environ.get('FM5_SURVEY_EXPR', '"hauteur" >= 17'), per_char=70) + settle() + show_map(2000) + [
@@ -2134,6 +2250,7 @@ SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + FM5_QUIET_
     + act('pushButton_action_export', export_with_recap) + [hold(1500)] \
     + settle(4.0) + [(0, wait_long()), result('One ZIP: the terrain model (GeoTIFF) and the point cloud (LAZ)')] \
     + show_map(3000) + ending()
+
 
 # ------------------------------------------------------------------ FilterMate 5.1: the dock, its panels, its settings
 # The sections of the dock (rail of chips by default) leave it for panels of QGIS, share a panel, come back; the
@@ -2319,6 +2436,7 @@ def chooser_pick(name, keep=1300):
 
 
 EXPLO_LAYERS = PANELS_LAYERS
+
 
 def pick_where(name, expr):
     """The single selection picker of EXPLORING set on the feature of ``name`` matching ``expr``."""
@@ -2508,23 +2626,6 @@ def card_button(label):
     return None
 
 
-def maybe_tick(label):
-    """Tick ``label`` on the card in view, when it is one of its choices (the steps of the setup vary)."""
-    def aim():
-        b = card_button(label)
-        if b is not None and not b.isChecked():
-            r = rect_of(b)
-            REC.event('point', x=r.x() + 10, y=r.center().y())
-
-    def tick():
-        b = card_button(label)
-        if b is not None and not b.isChecked():
-            r = rect_of(b)
-            REC.event('click', x=r.x() + 10, y=r.center().y())
-            b.setChecked(True)
-    return [(500, aim), (750, tick)]
-
-
 def card_in_view():
     card = wizard_card()
     if card is not None:
@@ -2550,11 +2651,61 @@ def card_answer():
     return [(0, card_in_view), hold(300), (400, aim), (550, answer), hold(600)]
 
 
-def setup_card(layout=False):
-    """One card of the setup, answered as it comes; ``layout``: the step that asks where the sections go, answered
-    in panels of QGIS with the buttons under each section."""
-    ticks = maybe_tick('In panels of QGIS') + maybe_tick('Under each section') if layout else []
-    return [(0, card_in_view)] + ticks + card_answer()
+def card_untick(label):
+    """Untick ``label`` on the card in view, when it is one of its choices and it is ticked."""
+    def aim():
+        b = card_button(label)
+        if b is not None and b.isChecked():
+            r = rect_of(b)
+            REC.event('point', x=r.x() + 10, y=r.center().y())
+
+    def untick():
+        b = card_button(label)
+        log(f'untick {label}: {b is not None and b.isChecked()}')
+        if b is not None and b.isChecked():
+            r = rect_of(b)
+            REC.event('click', x=r.x() + 10, y=r.center().y())
+            b.setChecked(False)
+    return [(700, aim), (900, untick), hold(900)]
+
+
+def setup_card(untick=()):
+    """One card of the setup, answered as it comes (its choices are ticked as the settings are: the sections all in
+    the FilterMate panel, the default); ``untick``: choices unticked first."""
+    steps = [(0, card_in_view)]
+    for label in untick:
+        steps += card_untick(label)
+    return steps + card_answer()
+
+
+SETUP_CARDS = (
+    # (a choice only that card has, the caption shown with it, the choices unticked on it)
+    ('EXPORTING', '2 · Sections and data: no EXPORTING, vector layers only',
+     ('EXPORTING', 'Rasters (images, DEMs)', 'Point clouds (LiDAR)')),
+    ('Light', '3 · Look and layout: as they are, in one panel', ()),
+    ('Zone', '4 · The tools of EXPLORING: two buttons less', ('Zone', 'Link the single and multiple selections')),
+)
+
+
+def setup_cards():
+    """Every card of the setup that is waiting, answered one after the other, however many steps the setup has (it
+    gained one in November 2026, and will again): a step that finds a card puts the steps that answer it, and itself
+    once more, right after it in the clip; it ends when the cards are over. A card of SETUP_CARDS gets its caption
+    and its choices unticked; the others are answered as they are."""
+    def step():
+        card = wizard_card()
+        if card is None:
+            return None
+        items, untick = [], ()
+        for marker, text, labels in SETUP_CARDS:
+            if card_button(marker) is not None:
+                items, untick = [caption(text)], labels
+                break
+        items += setup_card(untick=untick) + [(0, setup_cards())]
+        at = RUN['at'] + 1
+        STEPS[at:at] = items
+        return None
+    return step
 
 
 def settings_card():
@@ -2571,62 +2722,47 @@ def apply_card():
         + act(lambda: settings_card().apply_button, run)
 
 
-# setup: "Set up FilterMate, no model needed" in AGENT: cards of choices, the step of the layout answered "in panels
-# of QGIS, the buttons under each section", Apply: the sections leave the dock, their buttons with them.
+def shown_sections():
+    """Log what the setup left in the dock: its sections, and the buttons of the rail of EXPLORING."""
+    sections = dock()._fm_sections
+    log('FILTERING / EXPORTING shown: ' + ', '.join(key for key in ('filtering', 'exporting')
+                                                    if sections.section_shown(key)))
+    try:
+        from filter_mate.ui.controllers.exploring_tool_choice import BUTTONS
+        shown = []
+        for name, button in BUTTONS['vector'].items():  # some are attributes of the dock, others only its children
+            widget = getattr(dock(), button, None) or dock().findChild(QWidget, button)
+            if widget is not None and not widget.isHidden():
+                shown.append(name)
+        log('rail of EXPLORING: ' + ', '.join(shown))
+    except Exception:
+        log(traceback.format_exc())
+
+
+# setup: "Set up FilterMate, no model needed" in AGENT: cards of choices. The first one asks which sections and data
+# are used: EXPORTING, rasters and point clouds are unticked. The card of the tools of EXPLORING loses two buttons.
+# The others are answered as they are (the sections all in the FilterMate panel), Apply: the dock, still in one
+# piece, keeps what is used; EXPORTING and its Export button are gone, the rail of EXPLORING is shorter.
 SETUP = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + [
     (0, lambda: agent_chat().new_conversation())] + staged(1.15) + [
-    title('A setup with no AI model'), caption('1 · Open AGENT'),
+    title('Only the tools you use'), caption('1 · Open AGENT, then Set up FilterMate: no AI model needed'),
     hold(1000), (0, cam('dock', dur=1.4, pad=12)), hold(500),
-] + agent_open_visible() + [hold(900), (0, cam(agent_panel, dur=1.3, pad=12)), hold(500),
-                            caption('2 · Set up FilterMate: cards of choices, no model needed')] \
+] + agent_open_visible() + [hold(900), (0, cam(agent_panel, dur=1.3, pad=12)), hold(500)] \
     + act(lambda: agent_panel().setup_button, lambda: agent_panel().setup_button.click()) + [hold(1000)] \
-    + setup_card() + setup_card() + [caption('3 · The layout: sections in panels, buttons under each')] \
-    + setup_card(layout=True) + setup_card() + setup_card() + [
-    hold(400), caption('4 · Apply: the sections leave the dock, their buttons with them'),
+    + [(0, setup_cards())] + [
+    hold(400), caption('5 · Apply: the panel keeps what you use'),
     (0, cam(agent_panel, dur=1.0, pad=12)),
-] + apply_card() + [hold(1200), (0, cam('full', dur=1.5)), hold(3600),
-                    (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
+] + apply_card() + [hold(1400), (0, shown_sections)] + chip_click('filtering') + [
+    hold(900), (0, cam('dock', dur=1.3, pad=12)), hold(2800), (0, cam('full', dur=1.5)), hold(2600),
+    (0, stop_recording), (500, quit_when_idle)]
 
 
-# ------------------------------------------------------------------ second cut of the stories: the dock laid out
-# What the plain takes leave out. The sections apart: EXPLORING left of the map, FILTERING right of it, so the map
-# stays in the picture while the widgets are used. The side buttons of EXPLORING: identify, zoom, selecting,
-# tracking, and the browser of the picker to walk through a result. And the English text of the edit: the question
-# of the take (title), one line per step (caption), the count it ends on (result), drawn by site_video_render.py.
-def explo():
-    return panel_of('exploring')
-
-
-def lay_out(left='exploring', width=400, height=600, right=410, under=True):
-    """Unrecorded: the section ``left`` in its own panel, left of the map; the dock keeps the other sections, right
-    of the map. ``under``: the panel sits under the layer tree, ``height`` tall (a denser panel, a wider map); else
-    it stands between the tree and the map."""
-    def _s():
-        panels, window = section_panels(), iface.mainWindow()
-        if panels.panel(left) is None and not panels.detach(left, remember=False):
-            log(f'{left} could not leave the dock: {panels.groups()}')
-            return
-        panel = panels.panel(left)
-        layers = window.findChild(QDockWidget, 'Layers')
-        panel.setFloating(False)
-        if under:
-            window.splitDockWidget(layers, panel, Qt.Orientation.Vertical)
-            window.resizeDocks([layers], [width], Qt.Orientation.Horizontal)
-            total = layers.height() + panel.height()
-            window.resizeDocks([layers, panel], [max(total - height, 160), height], Qt.Orientation.Vertical)
-        else:
-            window.splitDockWidget(layers, panel, Qt.Orientation.Horizontal)
-            window.resizeDocks([layers, panel], [196, width], Qt.Orientation.Horizontal)
-        dock().setMinimumWidth(0)
-        window.resizeDocks([dock()], [right], Qt.Orientation.Horizontal)
-        if left != 'filtering':
-            dock().toolBox_tabTools.setCurrentWidget(dock().FILTERING)
-        QTimer.singleShot(800, lambda: log(
-            f'laid out: {panels.groups()}, {left} {rect_of(panel)}, dock {rect_of(dock())}, '
-            f'map {rect_of(iface.mapCanvas())}'))
-    return _s
-
-
+# ------------------------------------------------------------------ second cut of the stories
+# What the plain takes leave out: the side buttons of EXPLORING (identify, selecting, tracking), the browser of the
+# picker to walk through a result, Undo and Redo, and the English text of the edit: the question of the take (title),
+# one line per step (caption), the count it ends on (result), drawn by site_video_render.py. The dock stays in one
+# piece, as a new install shows it. (A first version set a section apart in its own panel beside the map: the panel
+# and the dock were both half empty, 19 November 2026.)
 def single_group():
     """Single selection opened by the check box of its group, as a click there does."""
     d = dock()
@@ -2663,23 +2799,16 @@ def back_to_scene():
     refocus()
 
 
-def ending2(verify=None):
-    """ending() with a longer last look. The sections stay apart: merging them back just before quitting aborted
-    QGIS (pure virtual call), and site_videos_headless.sh forgets the panels of the profile before each take."""
-    steps = [(0, cam('full', dur=1.6)), (2600, stop_recording)]
-    if verify:
-        steps.append((0, lambda: counts(verify)))
-    return steps + [(500, quit_when_idle)]
+MULTI_ZONE = ['mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection']
 
-
-# noise, second cut (story 2): EXPLORING left of the map, FILTERING right. The main roads of Muret picked by an
-# expression in the chooser of EXPLORING and flashed (identify), the buffer by road class, Filter.
-NOISE2 = boot(S2_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_NOISE}\'', 1.2) + scope('commune') + [
-    (500, lay_out()), (1500, wait_idle()),
-] + recorded_scene(1.2) + [
+# noise, second cut (story 2): the main roads of Muret picked by an expression and flashed (identify), the buffer by
+# road class, Filter.
+NOISE2 = boot(S2_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_NOISE}\'', 1.2) + scope('commune') \
+    + recorded_scene(1.2) + [
     still('s2-00'), title('Which buildings are near the main roads?'), hold(500),
-    caption('1 · Pick the main roads'), (0, cam(explo, dur=1.2, pad=14)), hold(300),
-] + chooser_pick('troncon_de_route', keep=900) + typed_custom('"importance" IN (\'1\', \'2\')', per_char=24) \
+    caption('1 · Pick the main roads'),
+] + pick_layer('troncon_de_route') + [(900, cam(EXPLORE_ZONE, dur=1.2, pad=30))] \
+    + typed_custom('"importance" IN (\'1\', \'2\')', per_char=24) \
     + settle() + [(0, cam('full', dur=1.1)), hold(200)] + identify() + [
     note_expr('major roads', 'troncon_de_route', '"importance" IN (\'1\', \'2\')'),
     hold(1200), still('s2-01'),
@@ -2694,16 +2823,16 @@ NOISE2 = boot(S2_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_NOISE}\'', 1.2) 
 ] + run_filter() + [
     result('{batiment:,} buildings · {erp:,} public buildings', ['batiment', 'erp']),
     hold(1800), still('s2-04'), (0, zoom_focus(0.5)),
-] + settle() + show_map(2600, 1.05) + [still('s2-05')] + ending2(['batiment', 'erp', 'troncon_de_route'])
+] + settle() + show_map(2600, 1.05) + [still('s2-05')] + ending(['batiment', 'erp', 'troncon_de_route'])
 
-# bridges, second cut (story 4): the same two panels. The permanent watercourses of Toulouse Métropole flashed, the
-# roads and structures that cross them kept; then the structures walked one by one, tracking on: the map follows.
+# bridges, second cut (story 4): the permanent watercourses of Toulouse Métropole flashed, the roads and structures
+# that cross them kept; then the structures walked one by one, tracking on: the map follows.
 BRIDGES2 = boot(S4_LAYERS, 'epci', '"nom_officiel" = \'Toulouse Métropole\'', 1.1, dense_scale=400000) \
-    + scope('epci') + [(500, lay_out()), (1500, wait_idle())] + recorded_scene(1.1) + [
+    + scope('epci') + recorded_scene(1.1) + [
     still('s4-00'), title('Which crossings to inspect?'), hold(500),
-    caption('1 · Pick the permanent watercourses'), (0, cam(explo, dur=1.2, pad=14)), hold(300),
-] + chooser_pick('troncon_hydrographique', keep=900) + typed_custom('"persistance" = \'Permanent\'', per_char=24) \
-    + settle() + [
+    caption('1 · Pick the permanent watercourses'),
+] + pick_layer('troncon_hydrographique') + [(900, cam(EXPLORE_ZONE, dur=1.2, pad=30))] \
+    + typed_custom('"persistance" = \'Permanent\'', per_char=24) + settle() + [
     note('scope', ['troncon_de_route', 'troncon_hydrographique', 'construction_lineaire', 'commune']),
     note_expr('permanent', 'troncon_hydrographique', '"persistance" = \'Permanent\''),
     still('s4-01'), (0, cam('full', dur=1.1)), hold(200),
@@ -2717,8 +2846,8 @@ BRIDGES2 = boot(S4_LAYERS, 'epci', '"nom_officiel" = \'Toulouse Métropole\'', 1
     result('{troncon_de_route:,} road sections · {construction_lineaire:,} structures',
            ['troncon_de_route', 'construction_lineaire']),
     hold(1800), still('s4-04'),
-    caption('4 · Walk through them, the map follows'), (0, cam(explo, dur=1.2, pad=14)),
-] + chooser_pick('construction_lineaire', keep=900) \
+    caption('4 · Walk through them, the map follows'),
+] + pick_layer('construction_lineaire') + [(900, cam(EXPLORE_ZONE, dur=1.2, pad=30))] \
     + act(gb_check('mGroupBox_exploring_single_selection'), single_group, lead=600, after=400) \
     + act('pushButton_checkable_exploring_tracking', enable('pushButton_checkable_exploring_tracking'),
           lead=600, after=400) + [
@@ -2726,11 +2855,7 @@ BRIDGES2 = boot(S4_LAYERS, 'epci', '"nom_officiel" = \'Toulouse Métropole\'', 1
 ] + walk(3, each=1300) + [still('s4-05'), (0, back_to_scene)] + settle() + [
     result('{troncon_de_route:,} road sections · {construction_lineaire:,} structures',
            ['troncon_de_route', 'construction_lineaire']), hold(2200),
-] + ending2(['troncon_de_route', 'construction_lineaire'])
-
-
-def expo():
-    return panel_of('exporting')
+] + ending(['troncon_de_route', 'construction_lineaire'])
 
 
 def clean_export_dir():
@@ -2753,14 +2878,19 @@ def exported():
     log(f'exported {[(n, os.path.getsize(os.path.join(EXPORT_DIR, n))) for n in names]}')
 
 
-# export, second cut (story 1): EXPORTING in its own panel left of the map, with its Export button; the dock keeps
-# EXPLORING and FILTERING, right. The six buttons of EXPORTING, one after the other, then Export.
-EXPORT2 = boot(S1_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_EXPORT}\'', 1.3) + scope('commune') + [
-    (0, clean_export_dir), (500, lay_out('exporting')), (1500, wait_idle()),
-] + recorded_scene(1.3) + [
+def open_exporting():
+    dock().toolBox_tabTools.setCurrentWidget(dock().EXPORTING)
+
+
+# export, second cut (story 1): EXPORTING opened by its chip in the dock; its six buttons, one after the other, then
+# Export. The window is fitted to EXPORTING too, which has one row more than FILTERING.
+EXPORT2 = boot(S1_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_EXPORT}\'', 1.3, fit=('FILTERING', 'EXPORTING')) \
+    + scope('commune') + [(0, clean_export_dir)] + recorded_scene(1.3) + [
     note('scope', S1_TARGETS),
     title('One commune, one file to hand over'), hold(500),
-    caption('1 · Choose the layers'), (0, cam(expo, dur=1.2, pad=14)), hold(300),
+    caption('1 · Open EXPORTING, choose the layers'), (0, cam('dock', dur=1.2, pad=10)),
+] + act(toolbox_button('export'), open_exporting, lead=700, after=500) + [
+    (300, cam(EXPORT_ZONE, dur=1.2, pad=40)),
 ] + act('pushButton_checkable_exporting_layers', enable('pushButton_checkable_exporting_layers'), lead=600, after=400) \
     + combo_check('checkableComboBoxLayer_exporting_layers', S1_TARGETS, per_item=150, close_after=500) + [
     (200, export_layers_changed), caption('2 · Projection, styles, format'),
@@ -2781,14 +2911,7 @@ EXPORT2 = boot(S1_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_EXPORT}\'', 1.3
     + settle(3.0) + [
     (300, speed(4.0)), (300, zip_written), (300, speed(1.0)),
     (0, exported), result(f'{len(S1_TARGETS)} layers · one GeoPackage, styles kept · zipped'), hold(3200),
-] + ending2()
-
-def bar_in_sections():
-    """Unrecorded: no bar for all, each section shows its own buttons (ACTION_BAR_POSITION = sections)."""
-    manager = getattr(dock(), '_action_bar_manager', None)
-    if manager is not None:
-        manager.set_position('sections')
-    log(f'action bar in sections: {manager is not None}')
+] + ending()
 
 
 def click_redo():
@@ -2797,14 +2920,13 @@ def click_redo():
 
 S3_RESULT = '{batiment:,} buildings · {erp:,} public buildings · {troncon_de_route:,} road sections'
 
-# buffer, second cut (story 3): EXPLORING left of the map, FILTERING right with its own buttons under it (no bar for
-# all). The water of Grenade, 300 m then 100 m around it, then Undo and Redo walk the two steps.
-BUFFER2 = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2) + scope('commune') + [
-    (300, bar_in_sections), (500, lay_out()), (1500, wait_idle()),
-] + recorded_scene(1.2) + [
+# buffer, second cut (story 3): the water of Grenade, 300 m then 100 m around it, then Undo and Redo walk the two
+# steps.
+BUFFER2 = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2) + scope('commune') \
+    + recorded_scene(1.2) + [
     still('s3-00'), title('What stands near the river?'), hold(300),
-    caption('1 · Pick all the water surfaces'), (0, cam(explo, dur=1.0, pad=14)), hold(200),
-] + chooser_pick('surface_hydrographique', keep=700) \
+    caption('1 · Pick all the water surfaces'),
+] + pick_layer('surface_hydrographique') + [(700, cam(MULTI_ZONE, dur=1.0, pad=30))] \
     + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode, lead=500, after=300) + [hold(500)] \
     + select_all_multi_menu(keep=1000) + settle() + [
     hold(300), still('s3-01'),
@@ -2819,13 +2941,15 @@ BUFFER2 = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2)
 ] + typed_buffer(100) + run_filter(fast=10.0) + [
     (0, cam('full', dur=1.1)),
     note('100 m', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1500), still('s3-04'),
-    caption('5 · Undo, Redo: back and forth between the two'), (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
+    caption('5 · Undo, Redo: back and forth between the two'), (0, quiet_message_bar),
+    (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + act('pushButton_action_undo_filter', click_undo, lead=700, after=400) + settle(4.0) + [(0, refocus)] + settle() + [
     (0, cam('full', dur=1.1)), note('undo', S3_FLOOD_TARGETS), result('300 m again', ()), hold(1500), still('s3-05'),
     (0, cam(ACTION_ZONE, dur=1.1, pad=40)),
 ] + act('pushButton_action_redo_filter', click_redo, lead=700, after=400) + settle(4.0) + [(0, refocus)] + settle() + [
+    (0, quiet_message_bar),
     note('redo', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1400),
-] + ending2(S3_FLOOD_TARGETS)
+] + ending(S3_FLOOD_TARGETS)
 
 
 def settled_counts(names, quiet=6):
@@ -2842,11 +2966,11 @@ def settled_counts(names, quiet=6):
     return _s
 
 
-def texted(steps, question, inserts, layout=None):
+def texted(steps, question, inserts):
     """The steps of a take with its text. ``question`` (the title) comes right after the recording starts, then each
     (anchor, step or list of steps) of ``inserts``, where the anchor is 'start' (the recording starts), the name of a
     step image ('s6-02': right after it; ('s6-04', 2): two steps before it), 'filtered' or 'filtered1' (the first,
-    the second filter of the scene is over). ``layout``: steps run before the recording (a section set apart)."""
+    the second filter of the scene is over)."""
     out = list(steps)
 
     def place(anchor):
@@ -2861,11 +2985,6 @@ def texted(steps, question, inserts, layout=None):
             raise KeyError(f'no {anchor} in the scene')
         return hits[0] - before if before else hits[0] + 1
 
-    if layout:
-        i = place('start') - 1
-        if i >= 3 and getattr(out[i - 3][1], '__name__', '') == 'remember':
-            i -= 3   # before the framing of recorded_scene(): the map is framed in its final size
-        out[i:i] = list(layout)
     for anchor, new in [('start', title(question))] + list(inserts):
         i = place(anchor)
         if anchor == 'start':   # after what the title, or an earlier line, put there
@@ -2890,7 +3009,7 @@ BRUSH = texted(BRUSH, 'Where to clear brush around homes?', [
     ('s5-03', caption('4 · Filter again')),
     ('filtered1', result('{zone_de_vegetation:,} woods · {haie:,} hedges within 50 m of a home',
                          ['zone_de_vegetation', 'haie'])),
-], layout=[(500, lay_out('filtering')), (1500, wait_idle())])
+])
 HAMLETS = texted(HAMLETS, 'Which hamlets are far from a paved road?', [
     ('start', caption('1 · Pick the paved roads')),
     ('s6-02', caption('2 · Target the places: none within 200 m')),
@@ -2946,9 +3065,11 @@ CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'la
          'explore': EXPLORE, 'buffer': BUFFER2, 'noise': NOISE2, 'bridges': BRIDGES2, 'brush': BRUSH,
          'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT2, 'processing': PROCESSING,
          'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY,
-         # the first cut of the four stories told again with the dock laid out (the teaser was edited from them)
+         # the first cut of the four stories told again with the buttons of EXPLORING, Undo / Redo and the walk
+         # through a result (the teaser was edited from them)
          'noise_plain': NOISE, 'buffer_plain': BUFFER, 'bridges_plain': BRIDGES, 'export_plain': EXPORT}
 STEPS = CLIPS[CLIP]
+RUN = {'at': 0}  # the index of the step that runs: a step may put steps after itself (setup_cards)
 
 
 def run_steps(i=0, tries=0):
@@ -2961,6 +3082,7 @@ def run_steps(i=0, tries=0):
         if tries == 0:
             log(f'--- step {i} {getattr(fn, "__name__", fn)}')
         again = False
+        RUN['at'] = i
         try:
             again = fn() is True
         except Exception:

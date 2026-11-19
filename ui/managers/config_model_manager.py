@@ -606,6 +606,9 @@ class ConfigModelManager:
         apply_options = getattr(self.dockwidget, 'apply_section_options', None)
         if callable(apply_options):
             apply_options()
+        apply_tools = getattr(self.dockwidget, 'apply_exploring_tools', None)
+        if callable(apply_tools):
+            apply_tools()  # the tools of the EXPLORING rail, as the configuration put back says
         panels = getattr(self.dockwidget, '_fm_panels', None)
         if panels is not None:  # the dock and the panels of its sections sized again from what they show now
             try:

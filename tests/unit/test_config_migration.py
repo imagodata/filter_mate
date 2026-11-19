@@ -817,3 +817,34 @@ class TestPanelSizing:
         config_helpers._migrate_config(user, default)
         node = user["APP"]["DOCKWIDGET"]["PANEL_SIZING"]
         assert node["value"] == "manual" and node["choices"] == ["auto", "manual"] and node["description"] != "old"
+
+
+class TestExploringTools:
+    """APP.DOCKWIDGET.EXPLORING_TOOLS (the buttons of the EXPLORING rail hidden per kind of layer): empty by default,
+    so a configuration from before it, and a button added later, show every button with no migration."""
+
+    PATHS = ("vector_hidden", "raster_hidden", "point_cloud_hidden")
+
+    @staticmethod
+    def _default():
+        return json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+
+    def test_the_defaults_hide_nothing(self):
+        section = self._default()["APP"]["DOCKWIDGET"]["EXPLORING_TOOLS"]
+        assert [section[name]["value"] for name in self.PATHS] == ["", "", ""]
+
+    def test_a_configuration_without_the_section_gets_it_empty(self, config_helpers):
+        default = self._default()
+        user = {"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fill"}}}}
+        assert config_helpers._migrate_config(user, default)
+        section = user["APP"]["DOCKWIDGET"]["EXPLORING_TOOLS"]
+        assert all(section[name]["value"] == "" and section[name]["names"] for name in self.PATHS)
+        assert user["APP"]["DOCKWIDGET"]["SECTION_HEIGHT"]["value"] == "fill"
+        assert config_helpers._migrate_config(user, default) is False  # idempotent
+
+    def test_the_choice_of_a_user_is_kept_and_its_names_follow_the_template(self, config_helpers):
+        default = self._default()
+        user = {"APP": {"DOCKWIDGET": {"EXPLORING_TOOLS": {"vector_hidden": {"value": "zoom", "names": ["zoom"]}}}}}
+        config_helpers._migrate_config(user, default)
+        node = user["APP"]["DOCKWIDGET"]["EXPLORING_TOOLS"]["vector_hidden"]
+        assert node["value"] == "zoom" and node["names"] == default["APP"]["DOCKWIDGET"]["EXPLORING_TOOLS"]["vector_hidden"]["names"]

@@ -58,7 +58,8 @@ def test_sections_turned_off_skip_their_step(values):
     answers.record(wizard.FEATURES, {"sections": ["agent"], "data": [], "size": ["keep"]})
     assert wizard.next_step([wizard.FEATURES], values, answers) == wizard.LOOK
     assert wizard.next_step([wizard.FEATURES, wizard.LOOK], values, answers) == wizard.LAYOUT
-    assert wizard.next_step([wizard.FEATURES, wizard.LOOK, wizard.LAYOUT], values, answers) is None
+    assert wizard.next_step([wizard.FEATURES, wizard.LOOK, wizard.LAYOUT], values, answers) == wizard.EXPLORING
+    assert wizard.next_step([wizard.FEATURES, wizard.LOOK, wizard.LAYOUT, wizard.EXPLORING], values, answers) is None
     asked = {change["path"]: change["value"] for change in wizard.changes(values, answers)}
     assert asked == {wizard.FILTERING_ON: False, wizard.EXPORTING_ON: False, wizard.RASTER_ON: False,
                      wizard.POINT_CLOUD_ON: False}
@@ -274,3 +275,104 @@ def test_the_sizing_of_the_panels_is_applied_at_once_and_not_asked_by_the_setup(
     rows = plan(settings, [{"path": path, "value": "manual"}], by_user=True)
     assert rows and rows[0]["effect"] == EFFECT_NOW
     assert path not in {question_path for question_path in vars(wizard).values() if isinstance(question_path, str)}
+
+
+# --- the tools of the EXPLORING rail, one question per kind of layer ---------------------------------------------------
+
+TOOLS = wizard.TOOL_SETTINGS
+
+
+def _tools_step(values, data, answers=None):
+    answers = answers or wizard.Answers()
+    answers.record(wizard.FEATURES, {"sections": ["filtering", "exporting", "agent"], "data": data, "size": ["keep"]})
+    return answers, wizard.step_questions(wizard.EXPLORING, values, wizard.ProjectFacts(), answers)
+
+
+def test_the_tools_step_comes_after_the_layout_and_before_the_sections_it_precedes_in_the_panel():
+    assert wizard.STEPS.index(wizard.EXPLORING) == wizard.STEPS.index(wizard.LAYOUT) + 1
+    assert wizard.STEPS.index(wizard.EXPLORING) < wizard.STEPS.index(wizard.FILTERING)
+
+
+def test_the_settings_of_the_tools_are_read_by_the_setup(values):
+    assert set(TOOLS.values()) <= set(wizard.PATHS) and set(TOOLS.values()) <= set(values)
+
+
+def test_vector_layers_are_always_asked_the_other_kinds_when_their_data_is_ticked(values):
+    _answers, questions = _tools_step(values, ["rasters", "point_clouds"])
+    assert [ask.key for ask in questions] == ["tools_vector", "tools_raster", "tools_point_cloud"]
+    assert [ask.key for ask in _tools_step(values, ["rasters"])[1]] == ["tools_vector", "tools_raster"]
+    assert [ask.key for ask in _tools_step(values, ["point_clouds"])[1]] == ["tools_vector", "tools_point_cloud"]
+    assert [ask.key for ask in _tools_step(values, [])[1]] == ["tools_vector"]  # turned off in FEATURES: not asked
+
+
+def test_a_kind_of_data_left_as_it_is_is_asked_as_the_settings_say(values):
+    values = dict(values, **{wizard.RASTER_ON: False, wizard.POINT_CLOUD_ON: True})
+    questions = wizard.step_questions(wizard.EXPLORING, values, wizard.ProjectFacts(), wizard.Answers())
+    assert [ask.key for ask in questions] == ["tools_vector", "tools_point_cloud"]
+
+
+def test_the_choices_are_the_buttons_that_can_be_hidden_all_ticked_by_default(values):
+    for ask in _tools_step(values, ["rasters", "point_clouds"])[1]:
+        kind = ask.key[len("tools_"):]
+        assert ask.multi and "more" not in [choice.key for choice in ask.choices]
+        assert [choice.key for choice in ask.choices] == [name for name in wizard.exploring_tools.tools_of(kind)
+                                                         if name != "more"]
+        assert all(choice.selected for choice in ask.choices)
+
+
+def test_the_buttons_shown_now_are_ticked(values):
+    values = dict(values, **{TOOLS["vector"]: "identify, follow", TOOLS["raster"]: "similar"})
+    _answers, questions = _tools_step(values, ["rasters"])
+    assert [c.key for c in questions[0].choices if not c.selected] == ["identify", "follow"]
+    assert [c.key for c in questions[1].choices if not c.selected] == ["similar"]
+
+
+@pytest.mark.parametrize("written", ["", None, 3, "foo", "identify,follow", "Follow ; identify", "more, zoom2", ["zoom"]],
+                         ids=repr)
+def test_answering_as_ticked_changes_nothing_whatever_the_setting_holds(values, written):
+    """Hand-written order, case, a name that no button has: the buttons hidden are the same, nothing is written."""
+    values = {**values, **{path: written for path in TOOLS.values()}}
+    answers = _answer_as_ticked(values)
+    assert wizard.changes(values, answers) == []
+
+
+def test_unticking_a_tool_writes_the_setting_of_its_kind_only(values):
+    answers, _questions = _tools_step(values, ["rasters", "point_clouds"])
+    answers.record(wizard.EXPLORING, {"tools_vector": ["zoom", "sync", "follow", "zone", "link", "reset"],
+                                      "tools_raster": [c.key for c in _tools_step(values, ["rasters"])[1][1].choices],
+                                      "tools_point_cloud": [c.key for c in _tools_step(values, ["point_clouds"])[1][1].choices]})
+    asked = {change["path"]: change["value"] for change in wizard.changes(values, answers)
+             if change["path"] in TOOLS.values()}
+    assert asked == {TOOLS["vector"]: "identify"}
+
+
+def test_unticking_everything_hides_every_button_but_the_locked_one(values):
+    answers, _questions = _tools_step(values, [])
+    answers.record(wizard.EXPLORING, {"tools_vector": []})
+    asked = {change["path"]: change["value"] for change in wizard.changes(values, answers)}
+    assert asked[TOOLS["vector"]] == "zoom, sync, identify, follow, zone, link, reset"
+
+
+def test_ticking_a_tool_again_empties_the_setting(values):
+    values = dict(values, **{TOOLS["vector"]: "zoom, reset"})
+    answers, _questions = _tools_step(values, [])
+    answers.record(wizard.EXPLORING, {"tools_vector": ["zoom", "sync", "identify", "follow", "zone", "link", "reset"]})
+    assert [c for c in wizard.changes(values, answers) if c["path"] in TOOLS.values()] == [
+        {"path": TOOLS["vector"], "value": ""}]
+
+
+def test_a_kind_not_asked_changes_nothing_even_when_hidden_tools_are_set(values):
+    """Rasters turned off in FEATURES: their question is not asked, what the setting holds stays."""
+    values = dict(values, **{TOOLS["raster"]: "zoom"})
+    answers, questions = _tools_step(values, [])
+    answers.record(wizard.EXPLORING, {ask.key: [c.key for c in ask.choices] for ask in questions})
+    assert [change for change in wizard.changes(values, answers) if change["path"] == TOOLS["raster"]] == []
+
+
+def test_the_answers_are_checked_as_the_agent_checks_a_setting(settings, values):
+    answers, _questions = _tools_step(values, ["rasters", "point_clouds"])
+    answers.record(wizard.EXPLORING, {"tools_vector": ["zoom"], "tools_raster": ["zoom"], "tools_point_cloud": []})
+    rows = plan(settings, wizard.changes(values, answers), by_user=True)
+    by_path = {row["path"]: row for row in rows}
+    assert by_path[TOOLS["raster"]]["after"] == "preview, pipette, detector, similar, link, reset"
+    assert all(by_path[path]["effect"] == "now" for path in TOOLS.values())

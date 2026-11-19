@@ -40,6 +40,8 @@ def _headers() -> Dict[str, str]:
             "profile": _tr("Panel"), "language": _tr("Language"), "panels": _tr("Layout"),
             "headers": _tr("Headers"), "height": _tr("Rows"),
             "action_bar": _tr("Buttons"),
+            "tools_vector": _tr("Vector tools"), "tools_raster": _tr("Raster tools"),
+            "tools_point_cloud": _tr("Cloud tools"),
             "after": _tr("Filtering"), "targets": _tr("Targets"), "groups": _tr("Groups"),
             "raster_format": _tr("Rasters"), "point_cloud_format": _tr("Clouds")}
 
@@ -56,6 +58,10 @@ def _questions() -> Dict[str, str]:
         "headers": _tr("How the panel lists its sections"),
         "height": _tr("How the rows of FILTERING and EXPORTING use the height"),
         "action_bar": _tr("Where the action buttons go (Filter, Export...)"),
+        "tools_vector": _tr("Buttons of the EXPLORING rail for vector layers (right-click the rail to change them "
+                            "later)"),
+        "tools_raster": _tr("Buttons of the EXPLORING rail for rasters"),
+        "tools_point_cloud": _tr("Buttons of the EXPLORING rail for point clouds"),
         "after": _tr("When you filter"),
         "targets": _tr("A vector layer also filters these layers (cut to its features)"),
         "groups": _tr("When you export to a file, keep the groups of the layer tree"),
@@ -71,7 +77,11 @@ def _labels(facts: wizard.ProjectFacts, stacked: bool = False) -> Dict[str, Dict
     def in_project(count: int) -> str:
         return _tr("{} in this project").format(count) if count else ""
 
+    from .exploring_tool_choice import labels as tool_labels
+    from ...core.domain.exploring_tools import KINDS
+
     return {
+        **{wizard.tools_key(kind): {name: (text, "") for name, text in tool_labels(kind).items()} for kind in KINDS},
         "sections": {
             "filtering": ("FILTERING", _tr("Filter layers by the features selected in EXPLORING. Off: the "
                                                 "source layer is chosen at the top of EXPLORING.")),

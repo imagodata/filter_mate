@@ -185,6 +185,7 @@ _METADATA_KEYS = frozenset({
     "min",
     "max",
     "applies_to",
+    "names",
     "_hidden",
     "_display_name",
 })
