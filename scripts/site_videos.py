@@ -614,18 +614,20 @@ def fit_stacks(pages=('FILTERING',), need=None):
             sections._share = (total - need) / total
 
 
-def fit_window(pages=('FILTERING',)):
+def fit_window(pages=('FILTERING',), spare=0):
     """Unrecorded: the window loses the height of the empty band of the dock, and the width that keeps it 16:9; the
     lower stack is then as tall as the rows of ``pages`` and EXPLORING keeps its height. The dock in one piece, no
     empty band, and a larger interface in the frame. The dock is told that share of its two stacks, as a drag of
-    their handle does: it comes back to it after AGENT was opened. Nothing moves when there is no band to lose."""
+    their handle does: it comes back to it after AGENT was opened. Nothing moves when there is no band to lose.
+    ``spare``: pixels of that band the window keeps, given to EXPLORING (a take that sets a section apart needs the
+    height of one more title bar and rail)."""
     def _s():
         if not FIT or not pages:
             return
         mw, d = iface.mainWindow(), dock()
         need = rows_need(pages, show=True)
         void = dock_void(pages, need)
-        height = max(MIN_WINDOW_HEIGHT, mw.height() - max(0, void))
+        height = max(MIN_WINDOW_HEIGHT, mw.height() - max(0, void - spare))
         height -= height % 9
         if void > 0 and height < mw.height():
             mw.resize(height * 16 // 9, height)
@@ -1198,11 +1200,12 @@ def scope(scope_layer, target_names=None):
     ]
 
 
-def boot(layers, focus_layer, focus_expr, scale=1.25, dense_scale=120000, fit=('FILTERING',)):
-    """``fit``: the sections of the lower stack the take opens; the window is fitted to the tallest (fit_window)."""
+def boot(layers, focus_layer, focus_expr, scale=1.25, dense_scale=120000, fit=('FILTERING',), spare=0):
+    """``fit``: the sections of the lower stack the take opens; the window is fitted to the tallest (fit_window,
+    which keeps ``spare`` pixels more)."""
     return [(1000, setup(layers, focus_layer, focus_expr, scale, dense_scale)),
             (3000, open_plugin), (8000, size_dock), (1500, wait_idle()),
-            (500, fit_window(fit)), (2500, wait_idle())]
+            (500, fit_window(fit, spare)), (2500, wait_idle())]
 
 
 # ------------------------------------------------------------------ clips
@@ -2325,43 +2328,48 @@ def chip_click(key, holder=None):
     return act(target, lambda: target().click())
 
 
-def share_column(key, part=0.58):
-    """The panel of ``key`` and the dock share the column: the panel gets ``part`` of the height."""
-    def _s():
-        panel, d = panel_of(key), dock()
-        if panel is None or panel.isFloating():
-            return
-        total = panel.height() + d.height()
-        first, second = (panel, d) if panel.y() < d.y() else (d, panel)
-        sizes = [int(total * part), total - int(total * part)] if first is panel else \
-            [total - int(total * part), int(total * part)]
-        iface.mainWindow().resizeDocks([first, second], sizes, Qt.Orientation.Vertical)
-    return _s
-
-
-def beside_map(key):
-    """The panel of ``key`` dragged by its title next to the map, left of it (a QGIS gesture: the cursor glides from
-    the title to the edge of the map, the panel lands there)."""
+def under_layers(key):
+    """The panel of ``key`` dragged by its title under the Layers panel, left of the map (a QGIS gesture: the cursor
+    glides from the title to the bottom of the Layers panel, the panel lands there). FilterMate then gives it the
+    height of its rows, and the Layers panel the rest."""
     def title():
-        panel = panel_of(key)
-        r = rect_of(panel)
+        r = rect_of(panel_of(key))
         return QRect(r.x() + 20, r.y(), 140, 22)
 
-    def edge():
-        r = rect_of(iface.mapCanvas())
-        return QRect(r.x() + 30, r.y() + r.height() // 3, 1, 1)
+    def spot():
+        r = rect_of(iface.mainWindow().findChild(QDockWidget, 'Layers'))
+        return QRect(r.x() + r.width() // 2, r.bottom() - 40, 1, 1)
 
     def drop():
         window = iface.mainWindow()
         layers = window.findChild(QDockWidget, 'Layers')
-        panel = panel_of(key)
-        window.splitDockWidget(layers, panel, Qt.Orientation.Horizontal)
-        window.resizeDocks([layers, panel], [250, DOCK_WIDTH - 20], Qt.Orientation.Horizontal)
-        log(f'{key} beside the map: {rect_of(panel)}')
+        STATE['layers_width'] = layers.width()
+        window.splitDockWidget(layers, panel_of(key), Qt.Orientation.Vertical)
+        QTimer.singleShot(1500, lambda: log(
+            f'{key} under the Layers panel: {rect_of(panel_of(key))}, layers {rect_of(layers)}'))
 
-    return [(600, point(title)), (700, lambda: REC.event('click', **dict(zip(('x', 'y'), (title().center().x(),
-                                                                                       title().center().y())))))] + [
-        (900, point(edge)), (500, drop)]
+    return [(600, point(title)), (700, lambda: REC.event('click', x=title().center().x(), y=title().center().y())),
+            (900, point(spot)), (500, drop)]
+
+
+def layers_width_back():
+    """The Layers panel at the width it had before a panel of FilterMate shared its column."""
+    width = STATE.pop('layers_width', None)
+    if width:
+        window = iface.mainWindow()
+        window.resizeDocks([window.findChild(QDockWidget, 'Layers')], [width], Qt.Orientation.Horizontal)
+
+
+def panels_log(label):
+    """Log where the dock and the panels are, and the band under the rows of each rigid section shown."""
+    def _s():
+        lines = [f'dock {rect_of(dock())}']
+        for key in ('agent', 'exploring', 'filtering', 'exporting', 'configuration'):
+            panel = panel_of(key)
+            if panel is not None and f'{key} ' not in ' '.join(lines):
+                lines.append(f'{key} {rect_of(panel)}')
+        log(f'{label}: ' + ', '.join(lines) + f', groups {section_panels().groups()}')
+    return _s
 
 
 def merge_all():
@@ -2388,26 +2396,51 @@ def staged(scale, target_names=('batiment', 'troncon_de_route'), predicate='inte
         (0, cam('full', dur=0, drift=1.03))]
 
 
+def staged_then(scale, *steps):
+    """staged(), with ``steps`` run just before the recording starts."""
+    base = staged(scale)
+    return base[:-2] + list(steps) + base[-2:]
+
+
+def tick_communes(names):
+    """Unrecorded: communes ticked in the multiple selection list."""
+    def _s():
+        w, lw = multi_widget()
+        for name in names:
+            items = lw.findItems(name, Qt.MatchFlag.MatchStartsWith)
+            if items:
+                items[0].setCheckState(Qt.CheckState.Checked)
+        w._emit_checked_items_update()
+    return _s
+
+
 PANELS_LAYERS = ['commune', 'zone_de_vegetation', 'surface_hydrographique', 'batiment', 'troncon_de_route']
 
-# panels: FILTERING leaves the dock by the menu of its chip, EXPORTING joins its panel, a chip of the panel opens its
-# section, the panel goes next to the map, then every section merges back into the dock.
-PANELS = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + staged(1.15) + [
-    title('The sections become QGIS panels'), caption('1 · FILTERING leaves the dock for its own panel'),
-    hold(1400),
-    (0, cam('dock', dur=1.4, pad=12)), hold(800),
+# panels: FILTERING leaves the dock by the menu of its chip and takes the height of its rows under it, EXPORTING
+# joins its panel, which follows the section it shows; the panel goes under the Layers panel, where it fits too;
+# then every section merges back into the dock. EXPLORING is in multiple selection: its list takes the height the
+# dock gives it, whatever is set apart (with a single selection that height stayed empty under its groups). The
+# window is not fitted: a section in its own panel needs the height of one more title bar and of its buttons.
+PANELS = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15, fit=None) + staged_then(
+    1.15, (300, multi_mode), (2500, wait_idle()), (300, tick_communes(['Muret', 'Seysses', 'Eaunes'])),
+    (800, wait_idle()), (300, fit_stacks), (900, wait_idle())) + [
+    title('The sections become QGIS panels'), caption('1 · FILTERING leaves the dock: a panel as tall as its rows'),
+    hold(1400), (0, cam('dock', dur=1.4, pad=12)), hold(800),
 ] + section_menu('filtering', 'detach') + [
-    hold(300), (0, share_column('filtering')), hold(600), (0, cam('full', dur=1.4)), hold(1800),
-    caption('2 · EXPORTING joins that panel'), (0, cam('dock', dur=1.3, pad=12)),
-] + section_menu('exporting', 'group_filtering') + [
-    hold(400), (0, cam(lambda: panel_of('filtering'), dur=1.3, pad=12)), hold(1600),
-] + chip_click('filtering', lambda: panel_of('filtering')) + [hold(1400), (0, cam('full', dur=1.4)),
-                                                                       caption('3 · Drag the panel next to the map'),
-                                                                       hold(600)] \
-    + beside_map('filtering') + [hold(2400), caption('4 · Merge everything back into the dock'),
-                                 (0, cam(lambda: panel_of('filtering'), dur=1.3, pad=12)), hold(600)] \
-    + section_menu('filtering', 'attach_all', holder=lambda: panel_of('filtering')) + [
-    hold(500), (0, cam('full', dur=1.4)), hold(2600), (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
+    hold(900), (0, panels_log('filtering apart')), (0, cam('full', dur=1.4)), hold(2000),
+    caption('2 · EXPORTING joins it: the panel follows the section it shows'),
+    (0, cam(lambda: [dock(), panel_of('filtering')], dur=1.3, pad=12)),
+] + section_menu('exporting', 'group_filtering') + [hold(1500), (0, panels_log('exporting joined'))] \
+    + chip_click('filtering', lambda: panel_of('filtering')) + [
+    hold(1300), (0, cam('full', dur=1.4)), caption('3 · Dragged under the Layers panel, it fits there too'),
+    hold(600)] \
+    + under_layers('filtering') + [hold(2800), (0, panels_log('under layers')),
+                                   caption('4 · Merge everything back into the dock'),
+                                   (0, cam(lambda: panel_of('filtering'), dur=1.3, pad=12)), hold(600)] \
+    + section_menu('filtering', 'attach_all', holder=lambda: panel_of('filtering'))[:-1] + [
+    # back to the whole window as the entry is clicked: the place the panel leaves is an empty part of the Layers panel
+    hold(1700), (0, cam('full', dur=1.0)), hold(500), (0, layers_width_back), hold(900)] + chip_click('filtering') + [
+    (500, fit_stacks), hold(2600), (0, stop_recording), (0, merge_all), (500, quit_when_idle)]
 
 
 def explo_chooser():
@@ -2457,12 +2490,12 @@ def pick_where(name, expr):
 # exploring-panel: EXPLORING in its own panel, with its chooser of the current layer: the buildings chosen there
 # (their page follows), the communes chosen again, Portet-sur-Garonne picked with tracking on: the map follows; then
 # EXPLORING back into the dock.
-EXPLORING_PANEL = boot(EXPLO_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.0) + staged(1.0) + [
+EXPLORING_PANEL = boot(EXPLO_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.0, spare=60) + staged(1.0) + [
     (0, lambda: iface.mapCanvas().setSelectionColor(QColor(255, 216, 61, 120))),
     title('EXPLORING in its own panel'), caption('1 · EXPLORING leaves the dock'),
     hold(1200), (0, cam('dock', dur=1.4, pad=12)), hold(700),
 ] + section_menu('exploring', 'detach') + [
-    hold(300), (0, share_column('exploring', 0.55)), hold(500), (0, cam('full', dur=1.4)), hold(1600),
+    hold(900), (0, panels_log('exploring apart')), (0, cam('full', dur=1.4)), hold(1600),
     caption('2 · Its own layer chooser: buildings, then communes'),
     (0, cam(lambda: panel_of('exploring'), dur=1.3, pad=12)), hold(500),
 ] + chooser_pick('batiment') + [hold(2200)] + chooser_pick('commune') + [
