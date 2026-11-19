@@ -595,6 +595,20 @@ def dock_void(pages=None, need=None):
     return sizes[1] - need if need and len(sizes) > 1 else 0
 
 
+def fit_stacks(pages=('FILTERING',), need=None):
+    """The lower stack of the dock as tall as the rows of ``pages``, EXPLORING the rest; the dock is told that
+    share, as a drag of the handle between them does (it comes back to it after AGENT was opened)."""
+    d = dock()
+    if need is None:
+        need = rows_need(pages)
+    total = sum(d.splitter_main.sizes())
+    if 0 < need < total:
+        d.splitter_main.setSizes([total - need, need])
+        sections = getattr(d, '_fm_sections', None)
+        if sections is not None and hasattr(sections, '_share'):
+            sections._share = (total - need) / total
+
+
 def fit_window(pages=('FILTERING',)):
     """Unrecorded: the window loses the height of the empty band of the dock, and the width that keeps it 16:9; the
     lower stack is then as tall as the rows of ``pages`` and EXPLORING keeps its height. The dock in one piece, no
@@ -612,12 +626,8 @@ def fit_window(pages=('FILTERING',)):
             mw.resize(height * 16 // 9, height)
 
         def stacks():
-            total = sum(d.splitter_main.sizes())
-            if void > 0 and 0 < need < total:
-                d.splitter_main.setSizes([total - need, need])
-                sections = getattr(d, '_fm_sections', None)
-                if sections is not None and hasattr(sections, '_share'):
-                    sections._share = (total - need) / total
+            if void > 0:
+                fit_stacks(pages, need)
             mw.resizeDocks([d], [DOCK_WIDTH], Qt.Orientation.Horizontal)
             if STATE.get('boot_extent') is not None:
                 set_extent(STATE['boot_extent'])
@@ -1714,9 +1724,11 @@ def show_toolbox():
     def settle():
         if (mw.width(), mw.height()) != size:
             mw.resize(*size)
-        QTimer.singleShot(400, lambda: log(
+        # the window grew and came back: the stacks of the dock moved by 19 px on the way
+        QTimer.singleShot(250, fit_stacks)
+        QTimer.singleShot(600, lambda: log(
             f'toolbox {rect_of(d)}, dock {rect_of(dock())}, map {rect_of(iface.mapCanvas())}, '
-            f'window {mw.width()}x{mw.height()} (fitted {size[0]}x{size[1]})'))
+            f'window {mw.width()}x{mw.height()} (fitted {size[0]}x{size[1]}), stacks {dock().splitter_main.sizes()}'))
     QTimer.singleShot(600, settle)
 
 
@@ -1752,7 +1764,7 @@ def s8_run():
 # Toulouse framed tight and dense layers shown up to 1:200 000: at 1.6 x the commune the
 # canvas was at 1:147 000 and the filtered buildings and roads were not drawn at all.
 PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, dense_scale=200000) \
-    + [(0, show_toolbox), (1500, wait_idle())] + recorded_scene(1.0) + [
+    + [(0, show_toolbox), (2500, wait_idle())] + recorded_scene(1.0) + [
     (600, cam(lambda: rect_of(toolbox_dock()), dur=1.4, pad=20)),
 ] + act(toolbox_search) + type_into(toolbox_search, 'filtermate', per_char=120) + [
     hold(1200), still('s8-01'), (0, s8_dialog), (400, cam(lambda: rect_of(STATE['proc']), dur=1.4, pad=30)), hold(2800),
