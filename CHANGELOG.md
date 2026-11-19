@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Dock: EXPLORING and the section under it stretch the same. The two stacks of the panel now have one size policy and one stretch factor (the upper one was `Preferred` with a factor of 1, the lower one `Expanding` with 0 when the dock opens), and each one gets its minimum plus half of the room left, where the upper one got the share of the display profile (35 % in the compact one). In a 834 px dock EXPLORING goes from 204 to 310 px: the three groups of a vector layer show whole (102 px were scrolled), a raster or a point cloud scrolls 225 px instead of 331. FILTERING and EXPORTING still end on the buttons, their rows at the top with `SECTION_HEIGHT` = `fit` (146 px left under the rows of FILTERING instead of 252), spread with `fill`. The handle stays where the user leaves it, to the pixel: left at 186 px, it came back at 174 px with the next section opened (the room was counted with the margins of the splitter); each stack still goes down to its minimum. A display profile applied while nothing is open below no longer leaves the section opened next in a stack 150 px high that the handle could not enlarge.
+
 ## [5.1.2] - 2026-11-19
 
 The fixes and changes merged since 5.1.1. The panel: FILTERING and EXPORTING compact, the tool buttons of the
