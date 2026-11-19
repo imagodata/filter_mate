@@ -3592,9 +3592,14 @@ Ne = Zamenjaj vse obstoječe</translation>
         <translation>Upravljaj priljubljene...</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="183"/>
         <source>Quick filter ({0})</source>
         <translation>Hitri filter ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="207"/>
+        <source>See all ({0})...</source>
+        <translation>Prikaži vse ({0})...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>

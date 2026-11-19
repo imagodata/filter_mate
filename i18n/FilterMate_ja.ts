@@ -3592,9 +3592,14 @@ No = Replace all existing</source>
         <translation>お気に入りを管理...</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="183"/>
         <source>Quick filter ({0})</source>
         <translation>クイックフィルター ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="207"/>
+        <source>See all ({0})...</source>
+        <translation>すべて表示 ({0})...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>

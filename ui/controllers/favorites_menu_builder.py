@@ -204,7 +204,7 @@ class FavoritesMenuBuilder:
             action.setToolTip(tooltip)
 
         if len(favorites) > 8:
-            more_action = menu.addAction(f"  ➤ Voir tous ({len(favorites)})...")
+            more_action = menu.addAction("  ➤ " + controller.tr("See all ({0})...").format(len(favorites)))
             more_action.setData(ACTION_SHOW_ALL)
 
         menu.addSeparator()
@@ -275,7 +275,7 @@ class FavoritesMenuBuilder:
                 action.setData((ACTION_APPLY_GLOBAL, gfav.id))
             if len(global_favorites) > 5:
                 more_action = global_menu.addAction(
-                    f"  ➤ Voir tous ({len(global_favorites)})..."
+                    "  ➤ " + controller.tr("See all ({0})...").format(len(global_favorites))
                 )
                 more_action.setData(ACTION_SHOW_GLOBAL)
         else:

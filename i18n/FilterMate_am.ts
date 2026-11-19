@@ -3592,9 +3592,14 @@ No = Replace all existing</source>
         <translation>ተወዳጆችን አስተዳድር...</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="183"/>
         <source>Quick filter ({0})</source>
         <translation>ፈጣን ማጣሪያ ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="207"/>
+        <source>See all ({0})...</source>
+        <translation>ሁሉንም ይመልከቱ ({0})...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>

@@ -3592,9 +3592,14 @@ Hayır = Tüm mevcut olanları değiştir</translation>
         <translation>Favorileri yönet...</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="183"/>
         <source>Quick filter ({0})</source>
         <translation>Hızlı filtre ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="207"/>
+        <source>See all ({0})...</source>
+        <translation>Tümünü gör ({0})...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>

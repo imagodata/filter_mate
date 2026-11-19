@@ -153,3 +153,36 @@ def test_the_theme_is_read_once_until_it_changes(rows_class, monkeypatch):
     picker.refresh_row_colours()   # a change of theme
     assert picker.font_by_state['checked'][1] == '#000000'
     assert len(asked) == 2
+
+
+@pytest.mark.unit
+def test_a_refresh_with_the_same_theme_touches_no_row(rows_class):
+    items = [_item(True, True), _item(False, False)]
+    lightness = [30]
+    picker = rows_class()
+    picker._fonts_by_theme = {}
+    picker.list_widgets = {'layer': _list(items)}
+    picker.backgroundRole = lambda: 'window'
+    picker.palette = lambda: SimpleNamespace(color=lambda role: SimpleNamespace(lightness=lambda: lightness[0]))
+    assert picker.refresh_row_colours() == 2          # first time: the rows take the dark colours
+    assert items[0].store[9] == ('brush', rows_class.ROW_COLOURS[True][0])
+    items[0].store[9] = 'untouched'
+    assert picker.refresh_row_colours() == 0          # called again by another path, same theme
+    assert items[0].store[9] == 'untouched'
+    lightness[0] = 240
+    assert picker.refresh_row_colours() == 2          # the theme changed
+    assert items[0].store[9] == ('brush', '#000000')
+    assert items[1].store[9] == ('brush', '#0000FF')
+
+
+@pytest.mark.unit
+def test_the_palette_answer_is_kept_too(rows_class):
+    asked = []
+    picker = rows_class()
+    picker._fonts_by_theme = {}
+    picker.backgroundRole = lambda: 'window'
+    picker.palette = lambda: SimpleNamespace(
+        color=lambda role: SimpleNamespace(lightness=lambda: asked.append(1) or 30))
+    for _ in range(100):   # thousands of rows must not walk up the parents each
+        assert picker.font_by_state['checked'][1] == rows_class.ROW_COLOURS[True][0]
+    assert len(asked) == 1

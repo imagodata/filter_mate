@@ -2046,7 +2046,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         submit_query(self, '_lookup_query', layer, self.tr("Loading selected values…"), compute, deliver)
 
     # Text of a row, and of a row whose feature the filter of the layer hides: (light theme, dark theme).
-    ROW_COLOURS = {False: ('#000000', '#0000FF'), True: ('#F2F2F2', '#8AB4F8')}
+    ROW_COLOURS = {False: ('#000000', '#0000FF'), True: ('#E8E8E8', '#8AB4F8')}
     _dark = None  # the theme read once (a list is filled row by row), forgotten by refresh_row_colours()
 
     def _dark_rows(self) -> bool:
@@ -2059,15 +2059,15 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             dark = stylesheet_is_dark(self)
         except Exception:  # styles not importable (tests without the package)
             dark = None
-        known = dark is not None
-        if not known:
+        if dark is None:  # no stylesheet above yet, or none at all: the palette says it
             try:
                 dark = self.palette().color(self.backgroundRole()).lightness() < 128
             except Exception:
                 dark = False
-        if known:  # before the stylesheet is applied the palette is only a guess: asked again next time
-            self._dark = bool(dark)
-        return bool(dark)
+        # Kept in every case (a list of thousands of rows would walk up the parents for each of them): every path
+        # that applies a stylesheet ends in refresh_row_colours(), which asks again.
+        self._dark = bool(dark)
+        return self._dark
 
     @property
     def font_by_state(self):
@@ -2087,8 +2087,11 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         return fonts
 
     def refresh_row_colours(self) -> int:
-        """After a change of theme: the rows already listed take the colours of the new one. The rows repainted."""
-        self._dark = None
+        """After a change of theme: the rows already listed take the colours of the new one. The rows coloured again
+        (none when the theme is the one they were drawn in: this is called by every path that touches the style)."""
+        before, self._dark = self._dark, None
+        if self._dark_rows() == before:  # asked again, same theme: the rows already have its colours
+            return 0
         fonts, done = self.font_by_state, 0
         for list_widget in list(self.list_widgets.values()):
             try:
