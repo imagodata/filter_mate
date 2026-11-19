@@ -18,6 +18,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple
 
+from ..domain import exploring_tools
+
 OPTIONS = "APP.OPTIONS."
 FILTERING_ON = OPTIONS + "FILTERING.enabled"
 EXPORTING_ON = OPTIONS + "EXPORTING.enabled"
@@ -42,8 +44,16 @@ RASTER_FORMAT = OPTIONS + "CROSS_FILTER.raster_export_format"
 POINT_CLOUD_FORMAT = OPTIONS + "CROSS_FILTER.point_cloud_export_format"
 
 # Steps, in the order they come; FILTERING and EXPORTING only when the section is kept.
-FEATURES, LOOK, LAYOUT, FILTERING, EXPORTING = "features", "look", "layout", "filtering", "exporting"
-STEPS = (FEATURES, LOOK, LAYOUT, FILTERING, EXPORTING)
+FEATURES, LOOK, LAYOUT, EXPLORING, FILTERING, EXPORTING = ("features", "look", "layout", "exploring", "filtering",
+                                                            "exporting")
+STEPS = (FEATURES, LOOK, LAYOUT, EXPLORING, FILTERING, EXPORTING)
+
+# The tools the rail of EXPLORING shows for each kind of layer: one question per kind (vector layers always, rasters
+# and point clouds when the data is ticked), a choice per button that can be hidden, the shown ones ticked. The
+# setting holds the hidden ones (core/domain/exploring_tools.py).
+TOOL_KINDS = exploring_tools.KINDS
+TOOL_SETTINGS = dict(exploring_tools.SETTING_PATHS)
+TOOLS_DATA = {exploring_tools.RASTER: "rasters", exploring_tools.POINT_CLOUD: "point_clouds"}
 
 # Several choices, each one a setting on or off.
 SECTION_SWITCHES = {"filtering": FILTERING_ON, "exporting": EXPORTING_ON, "agent": AGENT_ON}
@@ -91,7 +101,7 @@ WEB_VALUES = {"large": {WFS_TIMEOUT: 120, REMOTE_TIMEOUT: 180}, "other": {WFS_TI
 # Every setting the setup may change: the values it reads first.
 PATHS = tuple(sorted({*SECTION_SWITCHES.values(), *DATA_SWITCHES.values(), *AFTER_FILTER_SWITCHES.values(),
                       *TARGET_SWITCHES.values(), *GROUP_SWITCHES.values(), THEME, UI_PROFILE, LANGUAGE, ACTION_BAR,
-                      SECTION_HEADERS, SECTION_HEIGHT,
+                      SECTION_HEADERS, SECTION_HEIGHT, *TOOL_SETTINGS.values(),
                       RASTER_FORMAT, POINT_CLOUD_FORMAT, *_MEDIUM, *WEB_VALUES["large"],
                       *POSTGRES_VALUES["large"]}))
 
@@ -198,6 +208,18 @@ def _one_of(key: str, keys: Sequence[str], current: Any) -> Ask:
     return Ask(key, tuple(Choice(name, name == current) for name in listed))
 
 
+def tools_key(kind: str) -> str:
+    """The key of the question about the tools shown for ``kind`` (``tools_vector``, ``tools_point_cloud``)."""
+    return f"tools_{kind}"
+
+
+def _tools(kind: str, values: Mapping[str, Any]) -> Ask:
+    """The buttons of the rail of ``kind`` that can be hidden, ticked when the setting shows them now."""
+    shown = set(exploring_tools.shown_for(kind, values.get(TOOL_SETTINGS[kind])))
+    names = [name for name in exploring_tools.tools_of(kind) if name not in exploring_tools.LOCKED]
+    return Ask(tools_key(kind), tuple(Choice(name, name in shown) for name in names), multi=True)
+
+
 def kept_sections(values: Mapping[str, Any], answers: Answers) -> Set[str]:
     """The sections kept: as answered, or as they are before the first step is answered."""
     chosen = answers.get(FEATURES, "sections")
@@ -230,6 +252,9 @@ def step_questions(step: str, values: Mapping[str, Any], facts: ProjectFacts, an
         if isinstance(values.get(SECTION_HEIGHT), str):  # nor one from before the height of the rows
             questions.append(_one_of("height", HEIGHTS, values.get(SECTION_HEIGHT)))
         return questions + [_one_of("action_bar", ACTION_BARS, values.get(ACTION_BAR))]
+    if step == EXPLORING:
+        data = kept_data(values, answers)  # a kind of data turned off in FEATURES has no rail to ask about
+        return [_tools(kind, values) for kind in TOOL_KINDS if kind not in TOOLS_DATA or TOOLS_DATA[kind] in data]
     if step == FILTERING:
         questions = [_switches("after", AFTER_FILTER_SWITCHES, values)]
         data = kept_data(values, answers)
@@ -291,6 +316,10 @@ def changes(values: Mapping[str, Any], answers: Answers) -> List[Dict[str, Any]]
     one(LAYOUT, "headers", SECTION_HEADERS)
     one(LAYOUT, "height", SECTION_HEIGHT)
     one(LAYOUT, "action_bar", ACTION_BAR)
+    for kind, path in TOOL_SETTINGS.items():
+        chosen = answers.get(EXPLORING, tools_key(kind))
+        if chosen is not None:  # an empty answer hides every button that can be
+            wanted[path] = exploring_tools.setting_from_shown(kind, chosen)
     switches(FILTERING, "after", AFTER_FILTER_SWITCHES)
     data = answers.get(FEATURES, "data")
     switches(FILTERING, "targets", {name: path for name, path in TARGET_SWITCHES.items()
@@ -298,9 +327,23 @@ def changes(values: Mapping[str, Any], answers: Answers) -> List[Dict[str, Any]]
     switches(EXPORTING, "groups", GROUP_SWITCHES)
     one(EXPORTING, "raster_format", RASTER_FORMAT)
     one(EXPORTING, "point_cloud_format", POINT_CLOUD_FORMAT)
-    return [{"path": path, "value": value} for path, value in wanted.items()
-            if not (read_switch(path, values.get(path, ABSENT)) is value if path in SWITCHES else
-                    _same(values.get(path), value))]
+    return [{"path": path, "value": value} for path, value in wanted.items() if not _unchanged(values, path, value)]
+
+
+_TOOL_KIND_OF = {path: kind for kind, path in TOOL_SETTINGS.items()}
+
+
+def _unchanged(values: Mapping[str, Any], path: str, value: Any) -> bool:
+    """Whether the setting ``path`` already reads as ``value``: a switch as the plugin reads it, the tools of a rail
+    by the buttons they hide (``"identify,zoom"`` and ``"zoom, identify"`` hide the same ones, and a name no button
+    has hides none), the others by their value."""
+    if path in SWITCHES:
+        return read_switch(path, values.get(path, ABSENT)) is value
+    kind = _TOOL_KIND_OF.get(path)
+    if kind is not None:
+        now = exploring_tools.format_hidden(kind, exploring_tools.hidden_for(kind, values.get(path)))
+        return now == value
+    return _same(values.get(path), value)
 
 
 def layout_wanted(facts: ProjectFacts, answers: Answers) -> Optional[str]:

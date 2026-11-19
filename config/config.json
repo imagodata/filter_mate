@@ -151,6 +151,49 @@
         ],
         "description": "Height of the rows of FILTERING and EXPORTING: 'fit' (each row at its own height, one gap apart, at the top of the section; the room left stays under them, and a short section scrolls), 'fill' (the rows spread over the whole height of the section)"
       },
+      "EXPLORING_TOOLS": {
+        "_display_name": "EXPLORING tools",
+        "description": "The tool buttons of the EXPLORING rail, for each kind of layer: the names of the buttons to hide, separated by commas (empty: all of them are shown). A tool hidden is not on the rail and is put down; a mode (sync, follow, link, preview) is turned off when its button is hidden, and no other way turns it on again meanwhile; the '...' button (more) is always shown. Right-click the rail to choose them with check boxes",
+        "vector_hidden": {
+          "value": "",
+          "names": [
+            "zoom",
+            "sync",
+            "identify",
+            "follow",
+            "zone",
+            "link",
+            "reset"
+          ],
+          "description": "Buttons hidden on the rail of a vector layer: zoom, sync (keep the map selection and the widgets in sync), identify, follow (auto-zoom), zone, link (single and multiple selections), reset"
+        },
+        "raster_hidden": {
+          "value": "",
+          "names": [
+            "zoom",
+            "preview",
+            "pipette",
+            "detector",
+            "similar",
+            "link",
+            "reset"
+          ],
+          "description": "Buttons hidden on the rail of a raster layer: zoom, preview, pipette, detector (clicked object), similar (similar objects), link (range to the style), reset"
+        },
+        "point_cloud_hidden": {
+          "value": "",
+          "names": [
+            "zoom",
+            "preview",
+            "identify",
+            "object",
+            "value_pipette",
+            "zone",
+            "reset"
+          ],
+          "description": "Buttons hidden on the rail of a point cloud: zoom, preview, identify (class pipette), object (object detector), value_pipette, zone, reset"
+        }
+      },
       "ACTION_BAR_VERTICAL_ALIGNMENT": {
         "value": "top",
         "choices": [

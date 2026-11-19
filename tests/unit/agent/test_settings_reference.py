@@ -259,3 +259,48 @@ def test_the_timeouts_are_bounded_as_their_descriptions_say(default, path, maxim
     for wrong in (0, maximum + 1):
         with pytest.raises(ValueError):
             checked_value(timeout, wrong)
+
+
+# --- the buttons of the EXPLORING rail (names among those of the setting) ---------------------------------------------
+
+TOOLS_PATH = "APP.DOCKWIDGET.EXPLORING_TOOLS.{}_hidden"
+
+
+@pytest.mark.parametrize("kind", ["vector", "raster", "point_cloud"])
+def test_the_tools_of_the_rail_are_settings_the_panel_applies_at_once(default, kind):
+    rows = read_settings(None, default)
+    row = _row(rows, TOOLS_PATH.format(kind))
+    assert row.names and row.value == "" and "more" not in row.names
+    assert plan(rows, [{"path": row.path, "value": row.names[0]}])[0]["effect"] == EFFECT_NOW
+    assert row.row()["names"] == list(row.names)
+
+
+def test_names_are_checked_and_written_in_the_order_of_the_setting(default):
+    row = _row(read_settings(None, default), TOOLS_PATH.format("vector"))
+    assert checked_value(row, "") == ""
+    assert checked_value(row, " Reset ; ZOOM,zoom ") == "zoom, reset"
+    assert checked_value(row, "follow") == "follow"
+
+
+@pytest.mark.parametrize("value", ["more", "zoom, more", "pipette", "nothing", 3, None, ["zoom"], True, "x" * 600])
+def test_a_name_the_rail_cannot_hide_is_refused_with_the_names_it_takes(default, value):
+    row = _row(read_settings(None, default), TOOLS_PATH.format("vector"))
+    with pytest.raises(ValueError, match="takes"):
+        checked_value(row, value)
+    with pytest.raises(ValueError, match="Nothing changed"):
+        plan(read_settings(None, default), [{"path": row.path, "value": value}])
+
+
+def test_the_tools_of_one_kind_do_not_take_the_names_of_another(default):
+    rows = read_settings(None, default)
+    assert checked_value(_row(rows, TOOLS_PATH.format("raster")), "pipette") == "pipette"
+    with pytest.raises(ValueError):
+        checked_value(_row(rows, TOOLS_PATH.format("point_cloud")), "pipette")
+
+
+def test_a_plan_shows_the_text_before_and_after(default):
+    current = copy.deepcopy(default)
+    current["APP"]["DOCKWIDGET"]["EXPLORING_TOOLS"]["raster_hidden"]["value"] = "zoom"
+    rows = read_settings(current, default)
+    planned = plan(rows, [{"path": TOOLS_PATH.format("raster"), "value": "detector, zoom"}])
+    assert (planned[0]["before"], planned[0]["after"]) == ("zoom", "zoom, detector")

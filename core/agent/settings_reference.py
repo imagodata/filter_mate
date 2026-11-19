@@ -26,7 +26,8 @@ PRIVATE = frozenset({"APP.USER_IDENTITY", "APP.OPTIONS.CROSS_FILTER.cache_dir", 
 PRIVATE_SET, PRIVATE_EMPTY = "(set, kept on this machine)", "(empty)"
 MAX_LISTED = 60
 DEFAULT_LISTED = 25
-_META_KEYS = frozenset({"value", "description", "choices", "min", "max", "_hidden", "_display_name", "applies_to"})
+_META_KEYS = frozenset({"value", "description", "choices", "min", "max", "_hidden", "_display_name", "applies_to",
+                        "names"})
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,7 @@ class Setting:
     minimum: Optional[float] = None
     maximum: Optional[float] = None
     applies_to: str = ""
+    names: Optional[Tuple[str, ...]] = None  # a text of names, each one of these (``"zoom, identify"``)
 
     @property
     def section(self) -> str:
@@ -63,6 +65,8 @@ class Setting:
             row["default"] = self._shown(self.default)
         if self.choices is not None:
             row["choices"] = list(self.choices)
+        if self.names is not None:
+            row["names"] = list(self.names)
         if self.minimum is not None:
             row["min"] = self.minimum
         if self.maximum is not None:
@@ -115,13 +119,14 @@ def read_settings(current: Optional[Dict[str, Any]], default: Optional[Dict[str,
             path = keys + [key]
             if "value" in child:
                 found, value = _current(current or {}, path)
-                choices = child.get("choices")
+                choices, names = child.get("choices"), child.get("names")
                 rows.append(Setting(
                     path=".".join(path), value=value if found else child["value"], default=child["value"],
                     description=str(child.get("description", "")), where=" > ".join(titles + [key]),
                     section_note=note, choices=tuple(choices) if isinstance(choices, list) else None,
                     minimum=_number(child.get("min")), maximum=_number(child.get("max")),
-                    applies_to=str(child.get("applies_to", ""))))
+                    applies_to=str(child.get("applies_to", "")),
+                    names=tuple(str(n) for n in names) if isinstance(names, list) else None))
             elif not set(child) <= _META_KEYS:
                 title = str(child.get("_display_name") or key)
                 walk(child, path, titles + [title], str(child.get("description", "")) or note)
@@ -242,6 +247,8 @@ LIVE = frozenset({
     "APP.OPTIONS.CROSS_FILTER.vector_source_point_cloud_targets",
     "APP.OPTIONS.UI_RESPONSIVENESS.expression_debounce_ms", "APP.DOCKWIDGET.LANGUAGE",
     "APP.OPTIONS.FILTERING.enabled", "APP.OPTIONS.EXPORTING.enabled",
+    "APP.DOCKWIDGET.EXPLORING_TOOLS.vector_hidden", "APP.DOCKWIDGET.EXPLORING_TOOLS.raster_hidden",
+    "APP.DOCKWIDGET.EXPLORING_TOOLS.point_cloud_hidden",
 })
 # Read once, when the panel is built (the AGENT section goes after restarting QGIS).
 ON_RESTART = frozenset({"APP.DOCKWIDGET.DOCK_POSITION", "APP.OPTIONS.AGENT.enabled"})
@@ -280,6 +287,16 @@ def checked_value(setting: Setting, value: Any) -> Any:
                     return choice
         raise ValueError(f"{setting.path} takes one of {json.dumps(list(setting.choices), ensure_ascii=False)}, "
                          f"not {json.dumps(value, ensure_ascii=False)}")
+    if setting.names is not None:  # text naming some of a list (the buttons of the EXPLORING rail to hide)
+        if not isinstance(value, str) or len(value) > MAX_TEXT:
+            raise ValueError(f"{setting.path} takes names separated by commas, or nothing")
+        words = [w for w in ("_".join(part.lower().replace("-", " ").split()) for part in
+                             value.replace(";", ",").replace("\n", ",").split(",")) if w]
+        wrong = [w for w in dict.fromkeys(words) if w not in setting.names]
+        if wrong:
+            raise ValueError(f"{setting.path} takes names among {json.dumps(list(setting.names))}, not "
+                             f"{json.dumps(wrong)}")
+        return ", ".join(name for name in setting.names if name in words)
     default = setting.default
     if isinstance(default, bool):
         if not isinstance(value, bool):
@@ -416,6 +433,8 @@ def reference_markdown(settings: Iterable[Setting], with_values: bool = False) -
         allowed = ""
         if item.choices is not None:
             allowed = ", ".join(_cell(choice) for choice in item.choices)
+        elif item.names is not None:
+            allowed = "names among " + ", ".join(_cell(name) for name in item.names)
         elif item.minimum is not None or item.maximum is not None:
             allowed = f"{_cell(item.minimum) if item.minimum is not None else ''}–" \
                       f"{_cell(item.maximum) if item.maximum is not None else ''}"
