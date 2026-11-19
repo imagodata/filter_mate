@@ -220,7 +220,9 @@ def _unrunnable_subset(layer, subset_expression):
             table = found.GetName() if found is not None else ''
         if not table:
             return None
-        statement = 'EXPLAIN SELECT 1 FROM "{}" m WHERE {}'.format(table.replace('"', '""'), subset_expression)
+        # The table is a quoted identifier; the expression is the subset of the layer itself, only explained, never run.
+        statement = 'EXPLAIN SELECT 1 FROM "{}" m WHERE {}'.format(  # nosec B608 - see above
+            table.replace('"', '""'), subset_expression)
         gdal.ErrorReset()
         try:
             rows = dataset.ExecuteSQL(statement)
