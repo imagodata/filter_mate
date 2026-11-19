@@ -247,7 +247,7 @@ def _pdal_pipeline(layer, fmt: str, crs):
     stages = pdal_cli.read_stages(source)
     layer_crs = layer.crs()
     layer_srs = pdal_cli.srs_for(layer_crs) if layer_crs.isValid() else ''
-    writer = {"type": "writers.copc" if fmt == 'COPC' else "writers.las", "forward": "all", "extra_dims": "all"}
+    writer = pdal_cli.copc_writer() if fmt == 'COPC' else {"type": "writers.las", "forward": "all", "extra_dims": "all"}
     if fmt != 'COPC':  # 'true' = LASzip or LazPerf, whichever this PDAL has
         writer["compression"] = 'true' if fmt == 'LAZ' else 'false'
     if crs is not None and crs.isValid() and crs != layer_crs:
@@ -393,7 +393,7 @@ class PointCloudExportJob:
             copc = os.path.join(os.path.dirname(self.target), 'output.copc.laz')
             ok, message = pdal_cli.run_pipeline([
                 {"type": "readers.las", "filename": self.target},
-                {"type": "writers.copc", "filename": copc, "forward": "all", "extra_dims": "all"},
+                pdal_cli.copc_writer(filename=copc),
             ], is_canceled=feedback.isCanceled if feedback is not None else None)
             _remove(self.target)
             if not ok or (feedback is not None and feedback.isCanceled()):

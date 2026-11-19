@@ -718,9 +718,9 @@ def check_one_by_one(name, texts, per_item=160, uncheck_others=True):
     return [(0, uncheck)] + [(per_item, check_nth(k)) for k in range(n)]
 
 
-def combo_check(name, texts, per_item=380, close_after=700):
+def combo_check(name, texts, per_item=380, close_after=700, lead=900, after=900):
     """Open a checkable combo, tick the wanted items one by one, close it."""
-    return (act(name, open_combo(name)) + check_one_by_one(name, texts, per_item)
+    return (act(name, open_combo(name), lead=lead, after=after) + check_one_by_one(name, texts, per_item)
             + [(close_after, hide_popup)])
 
 
@@ -1239,17 +1239,17 @@ TARGETS = 'checkableComboBoxLayer_filtering_layers_to_filter'
 PREDICATES = 'comboBox_filtering_geometric_predicates'
 
 
-def targets(names, per_item=300, close_after=700):
+def targets(names, per_item=300, close_after=700, lead=900, after=900):
     return (act('pushButton_checkable_filtering_layers_to_filter',
-                enable('pushButton_checkable_filtering_layers_to_filter'))
-            + combo_check(TARGETS, names, per_item=per_item, close_after=close_after)
+                enable('pushButton_checkable_filtering_layers_to_filter'), lead=lead, after=after)
+            + combo_check(TARGETS, names, per_item=per_item, close_after=close_after, lead=lead, after=after)
             + [(200, refresh_targets)])
 
 
-def predicates(names, per_item=380, close_after=700):
+def predicates(names, per_item=380, close_after=700, lead=900, after=900):
     return (act('pushButton_checkable_filtering_geometric_predicates',
-                enable('pushButton_checkable_filtering_geometric_predicates'))
-            + combo_check(PREDICATES, names, per_item=per_item, close_after=close_after))
+                enable('pushButton_checkable_filtering_geometric_predicates'), lead=lead, after=after)
+            + combo_check(PREDICATES, names, per_item=per_item, close_after=close_after, lead=lead, after=after))
 
 
 def and_targets():
@@ -2844,15 +2844,16 @@ BUFFER2 = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2)
     + select_all_multi_menu(keep=1300) + settle() + [
     hold(300), still('s3-01'),
     caption('2 · Target buildings and roads, 300 m around'), (0, cam(FILTER_ZONE, dur=1.2, pad=40)),
-] + targets(S3_FLOOD_TARGETS, per_item=220, close_after=500) + predicates(['intersect'], per_item=260, close_after=500) \
-    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0), lead=600, after=400) + typed_buffer(300) + [
+] + targets(S3_FLOOD_TARGETS, per_item=170, close_after=400, lead=500, after=350) \
+    + predicates(['intersect'], per_item=220, close_after=400, lead=500, after=350) \
+    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0), lead=500, after=300) + typed_buffer(300) + [
     hold(300), still('s3-02'), caption('3 · Filter'), (200, cam('full', dur=1.1)),
-] + run_filter() + [
-    note('300 m', S3_FLOOD_TARGETS), result('300 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1800), still('s3-03'),
+] + run_filter(fast=10.0) + [
+    note('300 m', S3_FLOOD_TARGETS), result('300 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1500), still('s3-03'),
     caption('4 · Try 100 m'), (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + typed_buffer(100) + run_filter() + [
+] + typed_buffer(100) + run_filter(fast=10.0) + [
     (0, cam('full', dur=1.1)),
-    note('100 m', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1800), still('s3-04'),
+    note('100 m', S3_FLOOD_TARGETS), result('100 m: ' + S3_RESULT, S3_FLOOD_TARGETS), hold(1500), still('s3-04'),
     caption('5 · Undo, Redo: back and forth between the two'), (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + act('pushButton_action_undo_filter', click_undo, lead=700, after=400) + settle(4.0) + [(0, refocus)] + settle() + [
     (0, cam('full', dur=1.1)), note('undo', S3_FLOOD_TARGETS), result('300 m again', ()), hold(1500), still('s3-05'),

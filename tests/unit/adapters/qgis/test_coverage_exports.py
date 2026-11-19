@@ -333,14 +333,15 @@ class TestPointCloudExportByPdalTool:
     @pytest.mark.parametrize("fmt, name, writer", [
         ('LAZ', 'cloud.laz', {'type': 'writers.las', 'compression': 'true'}),
         ('LAS', 'cloud.las', {'type': 'writers.las', 'compression': 'false'}),
-        ('COPC', 'cloud.copc.laz', {'type': 'writers.copc'}),
+        ('COPC', 'cloud.copc.laz', {'type': 'writers.copc', 'fixed_seed': True}),
     ])
     def test_the_pdal_tool_writes_the_las_qgis_cannot(self, pdal_tool, tmp_path, fmt, name, writer):
         result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / name), fmt).run()
         assert result.success, result.message
         assert os.listdir(tmp_path) == [name]
         [stages] = pdal_tool
-        assert stages[0] == {'type': 'readers.copc', 'filename': '/data/cloud.copc.laz'}
+        # One thread: the points reach the writer in the same order at every export (pdal_cli.read_stages).
+        assert stages[0] == {'type': 'readers.copc', 'filename': '/data/cloud.copc.laz', 'threads': 1}
         assert {key: stages[-1][key] for key in writer} == writer
         assert stages[-1]['forward'] == 'all' and stages[-1]['extra_dims'] == 'all'
         assert stages[-1]['a_srs'] == 'EPSG:2154'  # the CRS of the layer, as the exporter wrote it
