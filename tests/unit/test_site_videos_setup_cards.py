@@ -18,15 +18,19 @@ SOURCE = Path(__file__).resolve().parents[2] / "scripts" / "site_videos.py"
 
 def _setup_cards():
     tree = ast.parse(SOURCE.read_text(encoding="utf-8"))
-    node = next(item for item in tree.body if isinstance(item, ast.FunctionDef) and item.name == "setup_cards")
+    nodes = [item for item in tree.body
+             if (isinstance(item, ast.FunctionDef) and item.name == "setup_cards")
+             or (isinstance(item, ast.Assign) and any(getattr(target, "id", None) == "SETUP_CARDS"
+                                                      for target in item.targets))]
     namespace = {}
-    exec(compile(ast.Module([node], []), str(SOURCE), "exec"), namespace)  # noqa: S102 - the source of the repository
+    exec(compile(ast.Module(nodes, []), str(SOURCE), "exec"), namespace)  # noqa: S102 - the source of the repository
+    namespace.setdefault("SETUP_CARDS", ())
     return namespace
 
 
 def _run(cards):
     """Play the clip as run_steps does: the step at ``RUN['at']`` runs, the steps it inserts follow it."""
-    state = SimpleNamespace(cards=list(cards), answered=[], captions=[])
+    state = SimpleNamespace(cards=list(cards), answered=[], captions=[], unticked=[])
     namespace = _setup_cards()
     before, after = (lambda: None), (lambda: None)
     steps = [(0, before), (0, namespace["setup_cards"]()), (0, after)]
@@ -37,8 +41,9 @@ def _run(cards):
             state.cards.pop(0)
         return (0, run)
 
-    def setup_card(layout=False):
+    def setup_card(untick=()):
         card = state.cards[0] if state.cards else None
+        state.unticked.append(tuple(untick))
         return [answer(card)] if card is not None else []
 
     namespace.update(
@@ -62,7 +67,11 @@ def test_every_card_of_the_setup_is_answered_whatever_their_number(count):
     assert steps[0][1] is state.edges[0] and steps[-1][1] is state.edges[1]  # what follows the cards still follows them
 
 
-def test_the_caption_of_the_layout_comes_with_the_card_that_asks_it_only():
-    state, _steps = _run([("features",), ("look",), ("layout", "In panels of QGIS"), ("exploring",), ("exporting",)])
-    assert state.captions == ["3 · The layout: sections in panels, buttons under each"]
-    assert len(state.answered) == 5
+def test_a_card_of_setup_cards_gets_its_caption_and_its_unticks_the_others_none():
+    marked = _setup_cards()["SETUP_CARDS"]
+    assert marked, "SETUP_CARDS lists the cards the take explains"
+    marker, text, labels = marked[0]
+    state, _steps = _run([("features", marker), ("look",), ("other",)])
+    assert state.captions == [text]
+    assert state.unticked == [tuple(labels), (), ()]
+    assert len(state.answered) == 3
