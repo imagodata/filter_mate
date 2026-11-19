@@ -3587,6 +3587,11 @@ No = Replace all existing</translation>
         <translation>Manage favorites...</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Quick filter ({0})</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Export...</translation>
@@ -6176,8 +6181,8 @@ Features: {2:,}</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
-        <translation>Mode batch</translation>
+        <source>Batch mode</source>
+        <translation>Batch mode</translation>
     </message>
 </context>
 <context>

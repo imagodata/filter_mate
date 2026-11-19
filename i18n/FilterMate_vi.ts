@@ -3592,6 +3592,11 @@ Khong = Thay the tat ca hien co</translation>
         <translation>Quan ly yeu thich...</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Bo loc nhanh ({0})</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Xuat...</translation>
@@ -6181,7 +6186,7 @@ Loại: {1}
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>Che do hang loat</translation>
     </message>
 </context>

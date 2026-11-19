@@ -180,7 +180,7 @@ class FavoritesMenuBuilder:
         if not favorites:
             return
 
-        header = menu.addAction(f"⚡ Filtrage Rapide ({len(favorites)})")
+        header = menu.addAction("⚡ " + controller.tr("Quick filter ({0})").format(len(favorites)))
         header.setEnabled(False)
         font = header.font()
         font.setBold(True)

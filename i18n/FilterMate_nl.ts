@@ -3592,6 +3592,11 @@ Nee = Alle bestaande vervangen</translation>
         <translation>Favorieten beheren...</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Snelfilter ({0})</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Exporteren...</translation>
@@ -6181,7 +6186,7 @@ Objecten: {2:,}</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>Batchmodus</translation>
     </message>
 </context>

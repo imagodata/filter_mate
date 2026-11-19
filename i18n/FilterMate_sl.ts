@@ -3592,6 +3592,11 @@ Ne = Zamenjaj vse obstoječe</translation>
         <translation>Upravljaj priljubljene...</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Hitri filter ({0})</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Izvozi...</translation>
@@ -6181,7 +6186,7 @@ Objektov: {2:,}</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>Paketni način</translation>
     </message>
 </context>

@@ -3356,7 +3356,7 @@
                       <item>
                        <widget class="QCheckBox" name="checkBox_batch_exporting_output_folder">
                         <property name="text">
-                         <string>Mode batch</string>
+                         <string>Batch mode</string>
                         </property>
                        </widget>
                       </item>
@@ -3415,7 +3415,7 @@
                       <item>
                        <widget class="QCheckBox" name="checkBox_batch_exporting_zip">
                         <property name="text">
-                         <string>Mode batch</string>
+                         <string>Batch mode</string>
                         </property>
                        </widget>
                       </item>

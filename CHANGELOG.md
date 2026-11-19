@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Panel: the rows of the multiple selection list take the colours of the theme (they were black, and blue for a feature the filter of its layer hides, whatever the theme: a dark list could not be read), also when the theme changes while the list is shown. Two labels were French in every language: the two `Mode batch` boxes of EXPORTING are `Batch mode`, and the header `Filtrage Rapide` of the favorites menu is `Quick filter`, both translated in the 34 catalogs.
 - Agent, `layer_statistics`: the description of the tool names `ranked_by` among what it returns (and loses "now" and "vector", which the arguments already say, to keep the instructions under their weight limit).
 - Agent, compaction: a result taken out to save room is matched to its call by identifier when that identifier is the only one of its turn, and by position otherwise (a message of results with one missing no longer names the wrong tool).
 - Agent: the note about the sources not ticked sends the model to `show_settings_link` only when it can be called: not when the user turned that tool off in the Tools tab (`use_tools` cannot add it either), and with the families on it says the tool is added by `use_tools` right after its name, where "it" could be read as the sources.

@@ -3592,6 +3592,11 @@ No = Replace all existing</source>
         <translation>즐겨찾기 관리...</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>빠른 필터 ({0})</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>내보내기...</translation>
@@ -6181,7 +6186,7 @@ Features: {2:,}</source>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>일괄 처리 모드</translation>
     </message>
 </context>

@@ -3592,6 +3592,11 @@ Tidak = Ganti semua yang sedia ada</translation>
         <translation>Urus kegemaran...</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Penapis pantas ({0})</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Eksport...</translation>
@@ -6181,7 +6186,7 @@ Fitur: {2:,}</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>Mod kelompok</translation>
     </message>
 </context>

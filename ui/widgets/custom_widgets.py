@@ -1002,21 +1002,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self.context_menu.addAction(self.action_uncheck_all_non_subset)
         self.context_menu.addAction(self.action_uncheck_all_subset)
 
-        # Font colors for different states
-        try:
-            from ...config.config import ENV_VARS
-            font_colors = ENV_VARS.get('FONTS', {}).get('colors', ['#000000', '#808080', '#0000FF'])
-            if len(font_colors) < 3:
-                font_colors = ['#000000', '#808080', '#0000FF']
-        except (ImportError, AttributeError, KeyError):
-            font_colors = ['#000000', '#808080', '#0000FF']
-
-        self.font_by_state = {
-            'unChecked': (QFont("Segoe UI", 8, QFont.Weight.Medium), QColor(font_colors[0])),
-            'checked': (QFont("Segoe UI", 8, QFont.Weight.Bold), QColor(font_colors[0])),
-            'unCheckedFiltered': (QFont("Segoe UI", 8, QFont.Weight.Medium), QColor(font_colors[2])),
-            'checkedFiltered': (QFont("Segoe UI", 8, QFont.Weight.Bold), QColor(font_colors[2]))
-        }
+        # The fonts and colours of the rows, per theme of the panel (font_by_state).
+        self._fonts_by_theme = {}
 
         self.list_widgets = {}
         self.tasks = {}
@@ -2057,6 +2044,64 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 deliver(rows)
             return
         submit_query(self, '_lookup_query', layer, self.tr("Loading selected values…"), compute, deliver)
+
+    # Text of a row, and of a row whose feature the filter of the layer hides: (light theme, dark theme).
+    ROW_COLOURS = {False: ('#000000', '#0000FF'), True: ('#F2F2F2', '#8AB4F8')}
+    _dark = None  # the theme read once (a list is filled row by row), forgotten by refresh_row_colours()
+
+    def _dark_rows(self) -> bool:
+        """The theme the panel draws its lists in: the stylesheet applied above this widget, else its palette.
+        Kept until the next change of theme: reading it walks up the parents and their stylesheets."""
+        if self._dark is not None:
+            return self._dark
+        try:
+            from ..styles.mockup_design import stylesheet_is_dark
+            dark = stylesheet_is_dark(self)
+        except Exception:  # styles not importable (tests without the package)
+            dark = None
+        known = dark is not None
+        if not known:
+            try:
+                dark = self.palette().color(self.backgroundRole()).lightness() < 128
+            except Exception:
+                dark = False
+        if known:  # before the stylesheet is applied the palette is only a guess: asked again next time
+            self._dark = bool(dark)
+        return bool(dark)
+
+    @property
+    def font_by_state(self):
+        """Font and colour of a row by its state. The colours follow the theme of the panel: they were black and
+        blue whatever the theme, and a dark list could not be read."""
+        dark = self._dark_rows()
+        fonts = self._fonts_by_theme.get(dark)
+        if fonts is None:
+            text, hidden = (QColor(colour) for colour in self.ROW_COLOURS[dark])
+            fonts = {
+                'unChecked': (QFont("Segoe UI", 8, QFont.Weight.Medium), text),
+                'checked': (QFont("Segoe UI", 8, QFont.Weight.Bold), text),
+                'unCheckedFiltered': (QFont("Segoe UI", 8, QFont.Weight.Medium), hidden),
+                'checkedFiltered': (QFont("Segoe UI", 8, QFont.Weight.Bold), hidden),
+            }
+            self._fonts_by_theme[dark] = fonts
+        return fonts
+
+    def refresh_row_colours(self) -> int:
+        """After a change of theme: the rows already listed take the colours of the new one. The rows repainted."""
+        self._dark = None
+        fonts, done = self.font_by_state, 0
+        for list_widget in list(self.list_widgets.values()):
+            try:
+                for row in range(list_widget.count()):
+                    item = list_widget.item(row)
+                    state = 'checked' if item.checkState() == Qt.CheckState.Checked else 'unChecked'
+                    if item.data(4) != "True":
+                        state += 'Filtered'
+                    item.setData(9, QBrush(fonts[state][1]))
+                    done += 1
+            except RuntimeError:  # the list went away with its layer
+                continue
+        return done
 
     def _add_row_item(self, list_widget, display_value, fid, checked):
         """Append one checkable row to the list widget."""
