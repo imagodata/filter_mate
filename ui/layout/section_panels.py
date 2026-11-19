@@ -22,6 +22,11 @@
   dock. Closing a panel brings its sections back to the dock, folded.
 * What is apart, and with what, is kept in ``FilterMate/panels/detached`` (``agent,filtering+exporting``) and
   restored when the dock is built.
+* Each change of what the dock and the panels show (a section out, back, in another panel, turned on or off,
+  another one opened, a panel moved) sizes them again in their column of the window (``column_heights``): FILTERING
+  and EXPORTING, their rows at their own height, at the height they need; the room left to EXPLORING, AGENT and
+  CONFIGURATION, else to the other panels of QGIS there. Not a separator dragged, nor QGIS starting: the sizes the
+  user and QGIS set stay until such a change (``APP.DOCKWIDGET.PANEL_SIZING`` = ``manual``: always).
 """
 from __future__ import annotations
 
