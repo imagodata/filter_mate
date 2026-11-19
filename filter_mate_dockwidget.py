@@ -2215,6 +2215,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self._ensure_layer_signals_connected(self.current_layer)
         self.widgetsInitialized.emit(); self._setup_keyboard_shortcuts()
         self.apply_section_options()
+        self.apply_exploring_tools()  # the tools of the EXPLORING rail, with no layer shown yet too
         if self._pending_layers_update:
             self._pending_layers_update = False; pl, pr, weak_self = self.PROJECT_LAYERS, self.PROJECT, weakref.ref(self)
             QTimer.singleShot(100, lambda: weak_self() and weak_self().get_project_layers_from_app(pl, pr))
@@ -2227,6 +2228,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         except Exception as e:
             logger.warning(f"Sections not applied: {e}")
             return []
+
+    def apply_exploring_tools(self):
+        """The tool buttons of the EXPLORING rail as APP.DOCKWIDGET.EXPLORING_TOOLS says (ui/controllers/coverage_dock_extras.py)."""
+        integration = getattr(self, '_controller_integration', None)
+        coverage = getattr(integration, 'coverage_controller', None) if integration is not None else None
+        if coverage is not None:
+            try:
+                coverage.apply_tool_choice()
+            except Exception as e:
+                logger.warning(f"EXPLORING tools not applied: {e}")
 
     def _connect_initial_widget_signals(self):
         """

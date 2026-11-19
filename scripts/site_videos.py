@@ -2557,6 +2557,24 @@ def setup_card(layout=False):
     return [(0, card_in_view)] + ticks + card_answer()
 
 
+def setup_cards():
+    """Every card of the setup that is waiting, answered one after the other, however many steps the setup has (it
+    gained one in November 2026, and will again): a step that finds a card puts the steps that answer it, and itself
+    once more, right after it in the clip; it ends when the cards are over. The step that asks where the sections go
+    gets its caption and its ticks (``maybe_tick``: only the choices that card has)."""
+    def step():
+        card = wizard_card()
+        if card is None:
+            return None
+        layout = card_button('In panels of QGIS') is not None
+        items = [caption('3 · The layout: sections in panels, buttons under each')] if layout else []
+        items += setup_card(layout=layout) + [(0, setup_cards())]
+        at = RUN['at'] + 1
+        STEPS[at:at] = items
+        return None
+    return step
+
+
 def settings_card():
     return agent_chat()._settings_cards[-1]
 
@@ -2580,8 +2598,7 @@ SETUP = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + [
 ] + agent_open_visible() + [hold(900), (0, cam(agent_panel, dur=1.3, pad=12)), hold(500),
                             caption('2 · Set up FilterMate: cards of choices, no model needed')] \
     + act(lambda: agent_panel().setup_button, lambda: agent_panel().setup_button.click()) + [hold(1000)] \
-    + setup_card() + setup_card() + [caption('3 · The layout: sections in panels, buttons under each')] \
-    + setup_card(layout=True) + setup_card() + setup_card() + [
+    + [(0, setup_cards())] + [
     hold(400), caption('4 · Apply: the sections leave the dock, their buttons with them'),
     (0, cam(agent_panel, dur=1.0, pad=12)),
 ] + apply_card() + [hold(1200), (0, cam('full', dur=1.5)), hold(3600),
@@ -2949,6 +2966,7 @@ CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'la
          # the first cut of the four stories told again with the dock laid out (the teaser was edited from them)
          'noise_plain': NOISE, 'buffer_plain': BUFFER, 'bridges_plain': BRIDGES, 'export_plain': EXPORT}
 STEPS = CLIPS[CLIP]
+RUN = {'at': 0}  # the index of the step that runs: a step may put steps after itself (setup_cards)
 
 
 def run_steps(i=0, tries=0):
@@ -2961,6 +2979,7 @@ def run_steps(i=0, tries=0):
         if tries == 0:
             log(f'--- step {i} {getattr(fn, "__name__", fn)}')
         again = False
+        RUN['at'] = i
         try:
             again = fn() is True
         except Exception:
