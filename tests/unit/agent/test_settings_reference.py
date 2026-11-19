@@ -33,6 +33,7 @@ def test_every_visible_leaf_of_app_is_a_setting(default):
     # hidden leaves are internal: links, the SQLite path, flags
     assert "APP.OPTIONS.APP_SQLITE_PATH" not in paths
     assert "APP.OPTIONS.AGENT.shown_by_default" not in paths
+    assert "APP.DOCKWIDGET.SECTION_HEIGHT" in paths and "APP.DOCKWIDGET.SECTION_HEIGHT_FILL_BY_DEFAULT" not in paths
     assert len(paths) == len(rows) > 80
 
 

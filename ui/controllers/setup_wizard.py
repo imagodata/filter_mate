@@ -124,9 +124,10 @@ def _labels(facts: wizard.ProjectFacts, stacked: bool = False) -> Dict[str, Dict
             "stacked": (_tr("Headers, one above the other"), _tr("The name of each section on its own line.")),
         },
         "height": {
-            "fit": (_tr("Packed at the top"), _tr("The default: each row at its own height, the room left under "
-                                                  "them.")),
             "fill": (_tr("Spread over the height"), _tr("The rows share the whole height of the section.")),
+            # No line under this one: the only one translated said "The default: each row at its own height,
+            # the room left under them", and the default is fill again (19 November 2026).
+            "fit": (_tr("Packed at the top"), ""),
         },
         "action_bar": {"bottom": (_tr("Bottom"), ""), "top": (_tr("Top"), ""), "left": (_tr("Left"), ""),
                        "right": (_tr("Right"), ""),
