@@ -285,6 +285,7 @@ class CoverageDockExtras(QObject):
         self._strip = None
         self._strip_host = None
         self._strip_kind = 'vector'
+        self._rail_kind = 'vector'  # the kind whose rail is shown: the tools the user hid are those of this kind
         self._strip_timer = None
         self._strip_panels: List[Any] = []  # panels whose signals refresh the strip (by object, not id())
         # (layer id, EXPLORING group) -> features of the last EXPLORING selection (custom selection count)
@@ -473,6 +474,16 @@ class CoverageDockExtras(QObject):
                 button.customContextMenuRequested.connect(
                     self._on_pc_object_context_menu if name == PC_OBJECT_BUTTON
                     else lambda position, n=name: self._on_pc_zone_context_menu(position, n))
+        self._guarded(self._connect_rail_menu, anchor)
+
+    def _connect_rail_menu(self, anchor: Any) -> None:
+        """Right-click on the rail (a button without a menu of its own passes the click on): the tools it shows."""
+        from qgis.PyQt.QtCore import Qt
+        rail = getattr(self.dockwidget, 'widget_exploring_keys', None) or anchor.parentWidget()
+        if rail is None:
+            return
+        rail.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        rail.customContextMenuRequested.connect(lambda position, r=rail: self._show_tool_choice_menu(r, position))
 
     def refresh_icons(self) -> None:
         """The theme changed (IconManager.refresh_all_icons): the tool icons are drawn again, once Qt has given
@@ -547,6 +558,8 @@ class CoverageDockExtras(QObject):
         visible = set(tools_for(kind_value))
         for name, button in self._tools.items():
             button.setVisible(name in visible)
+        self._rail_kind = kind_value
+        self._guarded(self.apply_tool_choice)
         if kind_value == 'point_cloud':
             self._tools_enabled_by_action()
             self._guarded(self._class_pipette_enabled, layer)
@@ -614,6 +627,8 @@ class CoverageDockExtras(QObject):
             button = self._tools.get(name)
             if button is not None:
                 self._guarded(button.setVisible, True)
+        self._rail_kind = 'vector'
+        self._guarded(self.apply_tool_choice)
         self._guarded(self._refresh_icons)
         self._guarded(self._set_kind_icons, 'vector')
         self._guarded(self.sync_vector_tools, getattr(self.dockwidget, 'current_exploring_groupbox', None))
@@ -927,6 +942,94 @@ class CoverageDockExtras(QObject):
                 except RuntimeError:
                     pass
         self._hidden_vector_buttons = {}
+
+    # === The tools the user shows on the rail (APP.DOCKWIDGET.EXPLORING_TOOLS) ===
+
+    def hidden_tools(self, kind_value: Optional[str] = None) -> frozenset:
+        """Names (core/domain/exploring_tools.py) of the buttons the user hid on the rail of a layer kind (the one
+        shown by default); nothing when the configuration has no such setting."""
+        from ...core.domain.exploring_tools import hidden_in_config
+        return hidden_in_config(getattr(self.dockwidget, 'CONFIG_DATA', None), kind_value or self._rail_kind)
+
+    def _tool_button(self, name: str) -> Any:
+        return self._tools.get(name) or getattr(self.dockwidget, name, None)
+
+    def apply_tool_choice(self) -> None:
+        """The rail of the kind shown, as the user chose it: the buttons they hid are hidden, the others shown.
+
+        Called when a layer is shown (after the kind's own buttons were set) and when the setting changes, so the
+        rail is laid out again at once (the spreader of mockup_layout follows every show / hide: no gap is left).
+        A tool put on the map is put down before its button goes (a tool with no button to see would stay on the
+        map); a mode of the layer (sync, follow, link, preview) keeps its state, which the setting says.
+        """
+        from .exploring_tool_choice import BUTTONS, MAP_TOOLS
+        kind = self._rail_kind
+        hidden = self.hidden_tools(kind)
+        for key, name in BUTTONS.get(kind, {}).items():
+            button = self._tool_button(name)
+            if button is None:
+                continue
+            if key in hidden:
+                if key in MAP_TOOLS:
+                    self._guarded(self._put_tool_down, kind, key, button)
+                self._guarded(button.setVisible, False)
+            else:
+                self._guarded(button.setVisible, True)
+
+    def _put_tool_down(self, kind: str, key: str, button: Any) -> None:
+        """The tool of a button about to be hidden leaves the map."""
+        controller = self._controller
+        if kind == 'point_cloud' and key == 'identify':  # the class pipette: its button is not a toggle
+            if controller._tool_on_map(controller._class_tool) and controller._pc_pick_mode == 'class':
+                controller._on_class_pick_toggled(False)
+        elif button.isCheckable() and button.isChecked():
+            button.setChecked(False)  # runs the toggled slot: the tool leaves the map
+
+    def _hidden_button_names(self) -> frozenset:
+        """Object names of the buttons of the rail shown the user hid."""
+        from .exploring_tool_choice import BUTTONS
+        table = BUTTONS.get(self._rail_kind, {})
+        return frozenset(table[key] for key in self.hidden_tools() if key in table)
+
+    def _show_tool_choice_menu(self, rail: Any, position: Any) -> None:
+        """Right-click on the rail: the tools it can show for this kind of layer, one check box each."""
+        from qgis.PyQt.QtWidgets import QMenu
+        from ...core.domain import exploring_tools as choice
+        from .exploring_tool_choice import labels, menu_title
+        kind = self._rail_kind
+        hidden = self.hidden_tools(kind)
+        words = labels(kind)
+        menu = QMenu(rail)
+        menu.addSection(menu_title())
+        for key in choice.tools_of(kind):
+            action = menu.addAction(words.get(key, key))
+            action.setCheckable(True)
+            action.setChecked(key not in hidden)
+            if key in choice.LOCKED:
+                action.setEnabled(False)  # always on: it keeps the rail from being empty
+            else:
+                action.triggered.connect(lambda checked=False, k=key: self.set_tool_shown(kind, k, bool(checked)))
+        menu.exec(rail.mapToGlobal(position))
+
+    def set_tool_shown(self, kind: str, key: str, shown: bool) -> bool:
+        """Show or hide a button of the rail of ``kind`` by writing the setting as the configuration tree does (saved,
+        the rail laid out again by the handler of the change). False when the panel could not apply it."""
+        from ...core.domain import exploring_tools as choice
+        hidden = set(self.hidden_tools(kind))
+        if shown:
+            hidden.discard(key)
+        else:
+            hidden.add(key)
+        manager = getattr(self.dockwidget, '_config_model_manager', None)
+        apply_settings = getattr(manager, 'apply_settings', None)
+        if apply_settings is None:
+            return False
+        try:
+            apply_settings({choice.SETTING_PATHS[kind]: choice.format_hidden(kind, hidden)})
+        except RuntimeError as exc:
+            logger.warning(f"[FM5] tools of the rail not changed: {exc}")
+            return False
+        return True
 
     # === Point cloud: class pipette ===
 
@@ -1317,8 +1420,11 @@ class CoverageDockExtras(QObject):
         if button is None:
             return
         menu = QMenu(button)
-        menu.addMenu(self._object_target_menu(menu))
-        menu.addMenu(self._zone_shape_menu(menu))
+        hidden = self.hidden_tools('point_cloud')
+        if 'object' not in hidden:  # the detector put on by its target would have no button to show it down
+            menu.addMenu(self._object_target_menu(menu))
+        if 'zone' not in hidden:
+            menu.addMenu(self._zone_shape_menu(menu))
         menu.addSeparator()
         for text, names, slot in ((self.tr("Elevation profile"), ACTION_ELEVATION_PROFILE, self._open_elevation_profile),
                                   (self.tr("3D view"), ACTION_NEW_3D_VIEW, self._open_3d_view)):
@@ -1353,6 +1459,11 @@ class CoverageDockExtras(QObject):
         """
         # The segmentation has no button of its own: no pipette of the rail shows down for it.
         wanted = None if target == 'segment' else self.PIPETTE_BUTTONS.get(target, self.PIPETTE_BUTTONS['similar'])
+        if wanted is not None and self._rail_kind == 'raster':
+            # The button of the target is hidden: the tool shows down on one the user kept (R4), if any.
+            gone = self._hidden_button_names()
+            wanted = wanted if wanted not in gone else next(
+                (name for name in self.PIPETTE_BUTTONS.values() if name not in gone), wanted)
         for name in self.PIPETTE_BUTTONS.values():
             button = self._tools.get(name)
             if button is None:

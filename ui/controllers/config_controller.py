@@ -201,6 +201,7 @@ class ConfigController(BaseController):
             self._apply_layer_kinds_change(layer_kinds_before, changes_summary)
             self._apply_target_options_change(target_options_before, changes_summary)
             self._apply_sections_change(items_keys_values_path, changes_summary)
+            self._apply_exploring_tools_change(items_keys_values_path, changes_summary)
 
             if changes_summary:
                 logger.info(f"Applied live: {', '.join(changes_summary)}")
@@ -224,6 +225,19 @@ class ConfigController(BaseController):
             changed = apply_options()
             if changed:
                 changes_summary.append(f"sections ({', '.join(changed)})")
+
+    # === The tools of the EXPLORING rail ===
+
+    def _apply_exploring_tools_change(self, path, changes_summary: List[str]) -> None:
+        """APP.DOCKWIDGET.EXPLORING_TOOLS edited (the tree, the agent, the setup, the menu of the rail): the rail of the
+        layer shown is laid out again at once. The tree shows translated names, so the section is told by the
+        name of the setting (``*_hidden``)."""
+        if not any(isinstance(part, str) and part.endswith('_hidden') for part in path or ()):
+            return
+        apply_tools = getattr(self.dockwidget, 'apply_exploring_tools', None)
+        if callable(apply_tools):
+            apply_tools()
+            changes_summary.append("EXPLORING tools")
 
     # === Layer kinds (raster / point cloud) ===
 

@@ -786,3 +786,262 @@ def test_removed_raster_gives_the_strip_back_to_the_vector_colours(strip_env):
     dock._layer_id, dock._strip_kind = "r1", "raster"
     dock.forget_layers(["r1"])
     assert dock._strip_kind == "vector"
+
+
+# --- The tools the user shows on the rail (APP.DOCKWIDGET.EXPLORING_TOOLS) --------------------------------------------
+
+
+class RailButton:
+    """A button of the rail: shown or hidden, checkable or not, running its slot like Qt."""
+
+    def __init__(self, checkable=True, slot=lambda checked: None):
+        self.visible, self.checkable, self.checked, self.slot, self.blocked = True, checkable, False, slot, False
+
+    def blockSignals(self, block):
+        self.blocked = block
+
+    def setVisible(self, visible):
+        self.visible = bool(visible)
+
+    def isCheckable(self):
+        return self.checkable
+
+    def isChecked(self):
+        return self.checked
+
+    def setChecked(self, checked):
+        if checked != self.checked:
+            self.checked = checked
+            if not self.blocked:
+                self.slot(checked)
+
+
+def _config(**hidden):
+    return {"APP": {"DOCKWIDGET": {"EXPLORING_TOOLS": {f"{kind}_hidden": {"value": text} for kind, text in hidden.items()}}}}
+
+
+@pytest.fixture
+def rail(dock_extras):
+    """The rail of the dock as the three kinds of layer show it: every button of the table, on the dock or in the
+    tools of the additions, all shown."""
+    from fm_cov_extras_test.ui.controllers.exploring_tool_choice import BUTTONS
+    dock = dock_extras.dock
+    dock.dockwidget.CONFIG_DATA = _config()
+    names = {name for table in BUTTONS.values() for name in table.values()}
+    buttons = {name: RailButton() for name in sorted(names)}
+    shared = {name for name in names if name in (
+        "pushButton_exploring_zoom", "pushButton_checkable_exploring_selecting", "pushButton_exploring_identify",
+        "pushButton_checkable_exploring_tracking", "pushButton_checkable_exploring_linking_widgets",
+        "pushButton_exploring_reset_layer_properties")}
+    for name in shared:
+        setattr(dock.dockwidget, name, buttons[name])
+    dock._tools = {name: button for name, button in buttons.items() if name not in shared}
+    return types.SimpleNamespace(dock=dock, buttons=buttons, table=BUTTONS, controller=dock_extras.controller)
+
+
+def _hidden_keys(rail, kind):
+    return {key for key, name in rail.table[kind].items() if not rail.buttons[name].visible}
+
+
+class TestToolChoiceTable:
+    def test_the_table_has_the_names_of_the_core_for_every_kind(self):
+        from fm_cov_extras_test.core.domain import exploring_tools
+        from fm_cov_extras_test.ui.controllers.exploring_tool_choice import BUTTONS
+        assert set(BUTTONS) == set(exploring_tools.KINDS)
+        for kind in exploring_tools.KINDS:
+            assert tuple(BUTTONS[kind]) == exploring_tools.tools_of(kind)
+
+    def test_the_buttons_of_a_kind_are_those_its_rail_shows(self):
+        """The rail of a kind: the shared dock buttons it keeps and the tools of RAIL_TOOLS, nothing else."""
+        from fm_cov_extras_test.ui.controllers.exploring_tool_choice import BUTTONS
+        shared = {"pushButton_exploring_zoom", "pushButton_checkable_exploring_selecting", "pushButton_exploring_reset_layer_properties"}
+        for kind, names in (("vector", {"pushButton_exploring_identify", *extras.VECTOR_ONLY_BUTTONS}),
+                            ("raster", set()), ("point_cloud", {"pushButton_exploring_identify"})):
+            assert set(BUTTONS[kind].values()) == shared | names | set(extras.tools_for(kind))
+
+    def test_the_object_names_are_those_of_the_additions(self):
+        from fm_cov_extras_test.ui.controllers.exploring_tool_choice import BUTTONS
+        assert BUTTONS["vector"]["zone"] == extras.VECTOR_ZONE_BUTTON
+        assert BUTTONS["point_cloud"]["object"] == extras.PC_OBJECT_BUTTON
+        assert BUTTONS["vector"]["link"] == extras.VECTOR_LINK_BUTTON
+        assert BUTTONS["vector"]["sync"] == extras.VECTOR_SELECT_BUTTON
+
+    def test_every_name_has_a_label(self, monkeypatch):
+        from fm_cov_extras_test.core.domain import exploring_tools
+        from fm_cov_extras_test.ui.controllers import exploring_tool_choice
+        from fm_cov_extras_test.ui.controllers.exploring_tool_choice import labels
+        monkeypatch.setattr(exploring_tool_choice, "QCoreApplication",
+                            types.SimpleNamespace(translate=lambda context, text: text))
+        for kind in exploring_tools.KINDS:
+            words = labels(kind)
+            assert set(words) == set(exploring_tools.tools_of(kind))
+            assert len(set(words.values())) == len(words)  # a card tells its choices apart by their label
+
+
+class TestApplyToolChoice:
+    def test_nothing_hidden_by_default_shows_every_button(self, rail):
+        for kind in ("vector", "raster", "point_cloud"):
+            rail.dock._rail_kind = kind
+            rail.dock.apply_tool_choice()
+            assert _hidden_keys(rail, kind) == set()
+
+    @pytest.mark.parametrize("kind, text, hidden", [
+        ("vector", "zoom, identify", {"zoom", "identify"}),
+        ("raster", "pipette; similar", {"pipette", "similar"}),
+        ("point_cloud", "Value-Pipette, object", {"value_pipette", "object"}),
+    ])
+    def test_the_buttons_of_the_setting_are_hidden_and_the_others_stay(self, rail, kind, text, hidden):
+        rail.dock.dockwidget.CONFIG_DATA = _config(**{kind: text})
+        rail.dock._rail_kind = kind
+        rail.dock.apply_tool_choice()
+        assert _hidden_keys(rail, kind) == hidden
+
+    def test_the_more_button_is_never_hidden(self, rail):
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="more, zoom")
+        rail.dock._rail_kind = "vector"
+        rail.dock.apply_tool_choice()
+        assert _hidden_keys(rail, "vector") == {"zoom"}
+
+    def test_a_setting_that_cannot_be_read_hides_nothing(self, rail):
+        for config in ({}, None, {"APP": 3}, _config(vector=7), _config(vector=["zoom"]), _config(vector="nothing, here")):
+            rail.dock.dockwidget.CONFIG_DATA = config
+            rail.dock._rail_kind = "vector"
+            rail.dock.apply_tool_choice()
+            assert _hidden_keys(rail, "vector") == ({"zoom"} if config == _config(vector=["zoom"]) else set())
+
+    def test_the_setting_changing_shows_a_button_again(self, rail):
+        rail.dock._rail_kind = "vector"
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="zoom, follow")
+        rail.dock.apply_tool_choice()
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="follow")
+        rail.dock.apply_tool_choice()
+        assert _hidden_keys(rail, "vector") == {"follow"}
+
+    def test_the_choice_of_one_kind_does_not_touch_the_buttons_of_another(self, rail):
+        """Zoom hidden for vector layers is shown on a raster: the shared button follows the kind shown."""
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="zoom")
+        rail.dock._rail_kind = "vector"
+        rail.dock.apply_tool_choice()
+        assert not rail.buttons["pushButton_exploring_zoom"].visible
+        rail.dock._rail_kind = "raster"
+        rail.dock.apply_tool_choice()
+        assert rail.buttons["pushButton_exploring_zoom"].visible
+        assert rail.buttons["pushButton_checkable_exploring_raster_pipette"].visible
+
+    def test_showing_a_layer_applies_the_choice_after_the_kind_buttons(self, rail, monkeypatch):
+        monkeypatch.setattr(extras.CoverageDockExtras, "ensure_strip", lambda self: None)
+        monkeypatch.setattr(extras.CoverageDockExtras, "_update_card", lambda self, layer, kind: None)
+        monkeypatch.setattr(extras.CoverageDockExtras, "_watch_strip_panels", lambda self: None)
+        monkeypatch.setattr(extras.CoverageDockExtras, "schedule_strip", lambda self: None)
+        monkeypatch.setattr(extras.CoverageDockExtras, "_watch_panel", lambda self: None)
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="zone")
+        rail.dock.show_vector(None)
+        assert rail.dock._rail_kind == "vector" and _hidden_keys(rail, "vector") == {"zone"}
+
+
+class TestToolsPutDown:
+    def test_a_map_tool_is_released_before_its_button_goes(self, rail):
+        released = []
+        pipette = rail.buttons["pushButton_checkable_exploring_raster_pipette"]
+        pipette.slot = released.append
+        pipette.checked = True
+        rail.dock.dockwidget.CONFIG_DATA = _config(raster="pipette")
+        rail.dock._rail_kind = "raster"
+        rail.dock.apply_tool_choice()
+        assert released == [False] and not pipette.visible
+
+    def test_a_mode_keeps_its_state_when_its_button_goes(self, rail):
+        released = []
+        preview = rail.buttons["pushButton_checkable_exploring_selecting"]
+        preview.slot = released.append
+        preview.checked = True
+        rail.dock.dockwidget.CONFIG_DATA = _config(raster="preview")
+        rail.dock._rail_kind = "raster"
+        rail.dock.apply_tool_choice()
+        assert released == [] and preview.checked and not preview.visible
+
+    def test_the_class_pipette_of_a_point_cloud_leaves_the_map(self, rail):
+        calls = []
+        controller = rail.controller
+        controller._tool_on_map = lambda tool: True
+        controller._class_tool = object()
+        controller._pc_pick_mode = "class"
+        controller._on_class_pick_toggled = lambda enabled, mode="class": calls.append(enabled)
+        rail.buttons["pushButton_exploring_identify"].checkable = False
+        rail.dock.dockwidget.CONFIG_DATA = _config(point_cloud="identify")
+        rail.dock._rail_kind = "point_cloud"
+        rail.dock.apply_tool_choice()
+        assert calls == [False]
+
+    def test_the_value_pipette_on_the_map_is_not_taken_off_by_hiding_the_class_pipette(self, rail):
+        calls = []
+        controller = rail.controller
+        controller._tool_on_map = lambda tool: True
+        controller._class_tool = object()
+        controller._pc_pick_mode = "value"
+        controller._on_class_pick_toggled = lambda enabled, mode="class": calls.append(enabled)
+        rail.dock.dockwidget.CONFIG_DATA = _config(point_cloud="identify")
+        rail.dock._rail_kind = "point_cloud"
+        rail.dock.apply_tool_choice()
+        assert calls == []
+
+
+class TestPipetteTargetsWithHiddenButtons:
+    def test_the_target_of_a_hidden_button_shows_down_on_a_button_that_is_kept(self, rail):
+        rail.dock.dockwidget.CONFIG_DATA = _config(raster="detector")
+        rail.dock._rail_kind = "raster"
+        rail.dock.set_pipette_checked(True, "object")
+        down = {key for key, name in rail.table["raster"].items() if rail.buttons[name].checked}
+        assert down == {"pipette"}
+
+    def test_with_the_three_hidden_the_target_keeps_its_own_button(self, rail):
+        rail.dock.dockwidget.CONFIG_DATA = _config(raster="pipette, detector, similar")
+        rail.dock._rail_kind = "raster"
+        rail.dock.set_pipette_checked(True, "similar_objects")
+        assert rail.buttons["pushButton_checkable_exploring_raster_similar"].checked
+
+    def test_nothing_hidden_changes_nothing(self, rail):
+        rail.dock._rail_kind = "raster"
+        rail.dock.set_pipette_checked(True, "object")
+        assert rail.buttons["pushButton_checkable_exploring_raster_detector"].checked
+        assert not rail.buttons["pushButton_checkable_exploring_raster_pipette"].checked
+
+
+class TestSetToolShown:
+    def _manager(self, rail, fail=False):
+        applied = []
+
+        def apply_settings(values):
+            if fail:
+                raise RuntimeError("the panel is not ready")
+            applied.append(values)
+            for path, text in values.items():
+                kind = path.rsplit(".", 1)[-1][: -len("_hidden")]
+                rail.dock.dockwidget.CONFIG_DATA = _config(**{kind: text})
+
+        rail.dock.dockwidget._config_model_manager = types.SimpleNamespace(apply_settings=apply_settings)
+        return applied
+
+    def test_hiding_a_button_writes_the_setting_of_its_kind(self, rail):
+        applied = self._manager(rail)
+        rail.dock._rail_kind = "raster"
+        assert rail.dock.set_tool_shown("raster", "similar", False)
+        assert applied == [{"APP.DOCKWIDGET.EXPLORING_TOOLS.raster_hidden": "similar"}]
+
+    def test_the_names_are_kept_in_the_order_of_the_rail(self, rail):
+        applied = self._manager(rail)
+        rail.dock.set_tool_shown("vector", "reset", False)
+        rail.dock.set_tool_shown("vector", "zoom", False)
+        assert applied[-1] == {"APP.DOCKWIDGET.EXPLORING_TOOLS.vector_hidden": "zoom, reset"}
+
+    def test_showing_a_button_takes_it_out_of_the_setting(self, rail):
+        applied = self._manager(rail)
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="zoom, reset")
+        rail.dock.set_tool_shown("vector", "zoom", True)
+        assert applied == [{"APP.DOCKWIDGET.EXPLORING_TOOLS.vector_hidden": "reset"}]
+
+    def test_a_panel_that_cannot_apply_it_is_told_to_the_caller(self, rail):
+        self._manager(rail, fail=True)
+        assert rail.dock.set_tool_shown("vector", "zoom", False) is False
+        rail.dock.dockwidget._config_model_manager = None
+        assert rail.dock.set_tool_shown("vector", "zoom", False) is False

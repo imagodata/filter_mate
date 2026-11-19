@@ -737,6 +737,10 @@ class CoverageModeController(BaseController):
         """The EXPLORING selection may have changed: the strip above FILTERING follows."""
         self._extras_call('schedule_strip')
 
+    def apply_tool_choice(self) -> None:
+        """The tools the user shows on the EXPLORING rail changed (APP.DOCKWIDGET.EXPLORING_TOOLS): the rail follows."""
+        self._extras_call('apply_tool_choice')
+
     def sync_vector_tools(self, groupbox: Optional[str]) -> None:
         """The vector EXPLORING group changed: the rail tools tied to the groups follow (R1)."""
         self._extras_call('sync_vector_tools', groupbox)

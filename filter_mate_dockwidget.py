@@ -2228,6 +2228,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.warning(f"Sections not applied: {e}")
             return []
 
+    def apply_exploring_tools(self):
+        """The tool buttons of the EXPLORING rail as APP.DOCKWIDGET.EXPLORING_TOOLS says (ui/controllers/coverage_dock_extras.py)."""
+        integration = getattr(self, '_controller_integration', None)
+        coverage = getattr(integration, 'coverage_controller', None) if integration is not None else None
+        if coverage is not None:
+            try:
+                coverage.apply_tool_choice()
+            except Exception as e:
+                logger.warning(f"EXPLORING tools not applied: {e}")
+
     def _connect_initial_widget_signals(self):
         """
         FIX 2026-01-14: Connect critical widget signals after configuration.
