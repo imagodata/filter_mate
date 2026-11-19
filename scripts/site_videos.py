@@ -2729,8 +2729,12 @@ def shown_sections():
                                                     if sections.section_shown(key)))
     try:
         from filter_mate.ui.controllers.exploring_tool_choice import BUTTONS
-        log('rail of EXPLORING: ' + ', '.join(name for name, button in BUTTONS['vector'].items()
-                                              if not getattr(dock(), button).isHidden()))
+        shown = []
+        for name, button in BUTTONS['vector'].items():  # some are attributes of the dock, others only its children
+            widget = getattr(dock(), button, None) or dock().findChild(QWidget, button)
+            if widget is not None and not widget.isHidden():
+                shown.append(name)
+        log('rail of EXPLORING: ' + ', '.join(shown))
     except Exception:
         log(traceback.format_exc())
 
