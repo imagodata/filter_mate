@@ -282,9 +282,7 @@ def upper_height(room: int, share: float, upper_need: Optional[int] = None, lowe
 
 def content_need(content: Any, width: int) -> int:
     """Height at which a scroll area shows the whole of ``content`` without scrolling it, ``width`` wide: its
-    hint, or its height for that width when its layout has one (wrapped labels), as QScrollArea reads it. With
-    the scroll bar of EXPLORING shown its content has a right margin (mockup_layout._ScrollBarMargin), the layer
-    card wraps and asks 16 px more: the room given, the bar goes, and the need is read again without them."""
+    hint, or its height for that width when its layout has one (wrapped labels), as QScrollArea reads it."""
     need = max(content.sizeHint().height(), content.minimumSizeHint().height())
     layout = content.layout()
     if layout.hasHeightForWidth() if layout is not None else content.sizePolicy().hasHeightForWidth():
@@ -407,9 +405,12 @@ class DockSections(QObject):
         self._follow_pending, self._follow_rounds = False, 0
         area = getattr(dock, "scrollArea_frame_exploring", None)
         self._exploring_content = area.widget() if area is not None else None
-        for content in (self._exploring_content, *(getattr(dock, name, None) for name in SECTION_PAGES.values())):
-            if content is not None:
-                content.installEventFilter(self)  # what it asks changed: the room follows (_follow_content)
+        # What a stack asks changed, by what scrolls in it (the content of EXPLORING, the rows) or by what it shows
+        # around (the strip of the selection, the buttons of a section): the room follows (_follow_content).
+        for watched in (self._exploring_content, *(getattr(dock, name, None) for name in SECTION_PAGES.values()),
+                        self.top, self._splitter.widget(1)):
+            if watched is not None:
+                watched.installEventFilter(self)
         self.bottom_rail = make_rail(self._toolbox.parentWidget(),
                                      accepts=lambda key: key in BOTTOM_KEYS and key in self.detached, dark=self._dark)
         self.bottom_rail.setObjectName("widget_section_rail_bottom")
@@ -1079,7 +1080,15 @@ class DockSections(QObject):
                 self._chrome[index] = stack.height() - viewport.height()
         if self._chrome[index] is None:
             return None
-        return self._chrome[index] + content_need(content, viewport.width())
+        # As narrow as beside its scroll bar, whether the bar shows or not: with it the content keeps a margin
+        # (mockup_layout._ScrollBarMargin), the layer card wraps and asks 16 px more. Read at the width it has, the
+        # need changed with the bar, hence with the height of the stack: the handle moved twice to hide the bar,
+        # and whatever else sized the stacks was undone.
+        from .mockup_layout import scroll_bar_margin
+        margin = content.layout().contentsMargins().right() if content.layout() is not None else 0
+        width = (area.maximumViewportSize().width() - area.verticalScrollBar().sizeHint().width()
+                 - max(0, scroll_bar_margin(True) - margin))
+        return self._chrome[index] + content_need(content, width)
 
     def _follow_content(self) -> None:
         """What a stack shows changed (another kind of layer, a group of EXPLORING opened, a row of FILTERING
@@ -1134,7 +1143,7 @@ class DockSections(QObject):
                 except RuntimeError:
                     pass
         elif kind in (QEvent.Type.LayoutRequest, QEvent.Type.Resize, QEvent.Type.Show):
-            self._follow_content()  # the content of EXPLORING, or the rows of FILTERING / EXPORTING
+            self._follow_content()  # a stack, the content of EXPLORING or the rows of FILTERING / EXPORTING
         return False
 
     def _bottom_headers_height(self, bottom: QWidget) -> int:

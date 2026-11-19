@@ -5680,7 +5680,8 @@ def _room_measure(kind, section):
 
     def after():
         if layer(kind) is None:
-            report('SKIP', f"room: {kind}", f"QGIS {Qgis.QGIS_VERSION} has no layer of this kind")
+            if section == 'filtering':  # told once per kind
+                report('SKIP', f"room: {kind} current", f"QGIS {Qgis.QGIS_VERSION} has no layer of this kind")
             return None
         d = dock()
         sections = d._fm_sections
