@@ -122,3 +122,24 @@ class TestUnloadLeavesNothingBehind:
         app.dockwidget.release_qgis_connections.assert_called_once_with()
         app.cleanup.assert_called_once_with()
         assert plugin.app is None
+
+    def test_the_sections_apart_come_back_before_the_controllers_are_torn_down(self):
+        """2026-11-18: a page put back in the tool box makes the dock update its buttons (select_tabTools_index) and
+        emit undoRedoStateRequested; it ran on a dock whose controllers were gone."""
+        plugin = _plugin(["unload"])
+        app = plugin.app = MagicMock()
+        calls = []
+        app.dockwidget._controller_integration.teardown.side_effect = lambda: calls.append("teardown")
+        app.dockwidget._fm_panels.shutdown.side_effect = lambda: calls.append("panels.shutdown")
+        picker = app.dockwidget.mFeaturePickerWidget_exploring_single_selection
+        picker.setLayer.side_effect = lambda layer: calls.append(f"picker.setLayer({layer})")
+        combo = app.dockwidget.comboBox_filtering_current_layer
+        combo.blockSignals.side_effect = lambda blocked: calls.append(f"combo.blockSignals({blocked})")
+        app.dockwidget.release_qgis_connections.side_effect = lambda: calls.append("release")
+        plugin.iface.removeDockWidget.side_effect = lambda dock: calls.append("removeDockWidget")
+
+        plugin.unload()
+
+        # the pickers let go of their layer before EXPLORING comes back and shows its page (a gather would start)
+        assert calls[:4] == ["combo.blockSignals(True)", "picker.setLayer(None)", "panels.shutdown", "teardown"]
+        assert calls.index("release") < calls.index("removeDockWidget")

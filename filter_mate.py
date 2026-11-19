@@ -1512,6 +1512,30 @@ class FilterMate:
         # never send the dock a closeEvent (and closing it only hides it).
         if self.app and self.app.dockwidget:
             self.app.dockwidget.shutdown_agent_panel(unloading=True)
+            # The feature picker lets go of its layer and the layer combo box stops signalling first (again below,
+            # at its place in the order): putting EXPLORING back makes its page visible, and a picker that still
+            # has a layer may start a gather that ends after the unload (the crash of 2026-09-14).
+            try:
+                dock = self.app.dockwidget
+                combo = getattr(dock, 'comboBox_filtering_current_layer', None)
+                if combo is not None:
+                    combo.blockSignals(True)
+                    combo.setLayer(None)
+                picker = getattr(dock, 'mFeaturePickerWidget_exploring_single_selection', None)
+                if picker is not None:
+                    picker.setLayer(None)
+            except Exception as e:
+                logger.debug(f"FilterMate: layer choosers not cleared before the sections come back: {e}")
+            # The sections shown in their own QGIS panel go back to the dock, and their panels go with it. Before
+            # the controllers are torn down (2026-11-18): putting a page back changes the open one in the tool box,
+            # which makes the dock update its buttons and emit undoRedoStateRequested; that ran on a dock whose
+            # controllers were gone. The panels' own deletion (deleteLater) takes the event loop, after the unload.
+            try:
+                panels = getattr(self.app.dockwidget, '_fm_panels', None)
+                if panels is not None:
+                    panels.shutdown()
+            except Exception as e:
+                logger.debug(f"FilterMate: section panels not removed: {e}")
             try:
                 integration = getattr(self.app.dockwidget, '_controller_integration', None)
                 if integration is not None:
@@ -1589,13 +1613,6 @@ class FilterMate:
         # cleared and crashed QGIS (access violation in
         # QgsFeaturePickerModelBase::endUpdate).
         if self.app and self.app.dockwidget:
-            # The sections shown in their own QGIS panel go back to the dock, and their panels go with it.
-            try:
-                panels = getattr(self.app.dockwidget, '_fm_panels', None)
-                if panels is not None:
-                    panels.shutdown()
-            except Exception as e:
-                logger.debug(f"FilterMate: section panels not removed: {e}")
             try:
                 self.iface.removeDockWidget(self.app.dockwidget)
             except Exception as e:
