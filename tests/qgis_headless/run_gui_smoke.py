@@ -5427,13 +5427,14 @@ def rows_aligned(section):
 
 
 def rows_packed(section):
-    """``fit``: the rows one gap apart, the page held to them: inside a taller viewport, or scrolled in a shorter one."""
+    """``fit``: the rows one gap apart, the page held to them: inside a viewport as tall or taller (a panel sized to its
+    rows, PANEL_SIZING), or scrolled in a shorter one."""
     _deltas, gaps, _cut, page, area = row_report(section)
     gap = mockup_module().ROW_GAP
     if len(gaps) < 3 or not all(abs(value - gap) <= 1 for value in gaps) or area is None:
         return False
     held = abs(page.height() - page.sizeHint().height()) <= 1
-    return held and (page.height() < area.viewport().height() or area.verticalScrollBar().maximum() > 0)
+    return held and (page.height() <= area.viewport().height() or area.verticalScrollBar().maximum() > 0)
 
 
 def right_margin_follows_bar(section):
@@ -5707,6 +5708,20 @@ def s_sizing_filtering_below():
     panels.detach('filtering')
     sizing_check('FILTERING below the dock')
     grab_window('sizing_01_filtering_below')
+    # The user makes it shorter: nothing is resized (a separator dragged is no change of structure), the rows scroll.
+    d, window, panel = dock(), iface.mainWindow(), panels.panel('filtering')
+    total = d.height() + panel.height()
+    window.resizeDocks([d, panel], [total - 150, 150], Qt.Orientation.Vertical)
+    pump(900)
+    short = panel.height()
+    check('sizing: a panel the user made shorter stays so, its rows scroll', short < 200 and sizing_empty(panel) < 0
+          and right_margin_follows_bar('filtering'), f"{short} px, {sizing_empty(panel)} px under the rows")
+    panels.resize_soon()  # as a change of a setting does: sized again, its scroll bar gone with its margin
+    pump(900)
+    check('sizing: sized again, the panel holds its rows and its right margin follows the scroll bar it lost',
+          -2 <= sizing_empty(panel) <= SIZING_SLACK and right_margin_follows_bar('filtering'),
+          f"{panel.height()} px, {sizing_empty(panel)} px under the rows, margin "
+          f"{d.horizontalLayout_filtering_main.contentsMargins().right()}")
     return None
 
 

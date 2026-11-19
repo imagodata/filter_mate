@@ -1225,13 +1225,16 @@ class _ScrollBarMargin(QObject if QObject is not None else object):
 
     Checked after each resize of the content (a scroll bar that comes or goes resizes the viewport, hence the
     content of a resizable scroll area) and when the content changes parent (a section into a panel of QGIS, and
-    back to the tool box), a turn of the loop later: Qt shows the bar after it has resized the content.
+    back to the tool box), a turn of the loop later: Qt shows the bar after it has resized the content. And when
+    the bar itself shows or hides: a panel of QGIS grown to the height of its rows (PANEL_SIZING) hid its bar and
+    kept the margin of 6 px, its content not resized again (bench, 19 November 2026).
     """
 
     def __init__(self, content: Any, layout: Any, margins) -> None:
         super().__init__(content)
         self._content, self._layout, self._margins = content, layout, tuple(margins)
         self._pending = False
+        self._bar = None  # the scroll bar watched: that of the scroll area holding the content now
         content.installEventFilter(self)
 
     def set_margins(self, margins) -> None:
@@ -1241,7 +1244,8 @@ class _ScrollBarMargin(QObject if QObject is not None else object):
 
     def eventFilter(self, watched, event):  # noqa: N802 - Qt override
         try:
-            if event.type() in (QEvent.Type.Resize, QEvent.Type.Show, QEvent.Type.ParentChange):
+            if event.type() in (QEvent.Type.Resize, QEvent.Type.Show, QEvent.Type.ParentChange) \
+                    or (watched is self._bar and event.type() == QEvent.Type.Hide):
                 self._schedule()
         except RuntimeError:
             pass
@@ -1260,7 +1264,16 @@ class _ScrollBarMargin(QObject if QObject is not None else object):
         area = viewport.parentWidget() if viewport is not None else None
         if not isinstance(area, QAbstractScrollArea) or area.viewport() is not viewport:
             return False
-        return area.verticalScrollBar().isVisibleTo(area)
+        bar = area.verticalScrollBar()
+        if bar is not self._bar:  # its Show and Hide are followed too
+            if self._bar is not None:
+                try:
+                    self._bar.removeEventFilter(self)
+                except RuntimeError:  # the bar went with its scroll area
+                    pass
+            bar.installEventFilter(self)
+            self._bar = bar
+        return bar.isVisibleTo(area)
 
     def apply(self) -> None:
         self._pending = False
