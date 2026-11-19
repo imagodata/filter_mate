@@ -16,11 +16,41 @@ Created: January 2026
 """
 
 import logging
+import threading
 import uuid
-from typing import Optional, Tuple, List
+from contextlib import contextmanager
+from typing import Iterator, Optional, Tuple, List
 from dataclasses import dataclass
 
 logger = logging.getLogger('FilterMate.Adapters.Repositories.History')
+
+# 2026-11-18: the ids of the history rows a filter task inserts while it runs, per thread (its run() and the
+# workers of its parallel filtering). A task canceled by a second click takes back exactly these rows
+# (core/tasks/history_snapshot.discard_history_rows), never those of the task that replaced it.
+_recorded_inserts = threading.local()
+
+
+@contextmanager
+def recording_history_inserts(ids: List[str]) -> Iterator[List[str]]:
+    """Inside the block, the id of each history row this thread inserts is appended to ``ids``."""
+    previous = getattr(_recorded_inserts, 'ids', None)
+    _recorded_inserts.ids = ids
+    try:
+        yield ids
+    finally:
+        _recorded_inserts.ids = previous
+
+
+def recorded_history_inserts() -> Optional[List[str]]:
+    """The list the inserts of this thread are recorded in; None outside recording_history_inserts()."""
+    return getattr(_recorded_inserts, 'ids', None)
+
+
+def note_history_insert(entry_id: Optional[str]) -> None:
+    """Record the id of a history row just inserted by this thread (see recording_history_inserts)."""
+    ids = getattr(_recorded_inserts, 'ids', None)
+    if ids is not None and entry_id:
+        ids.append(entry_id)
 
 
 @dataclass
@@ -118,6 +148,7 @@ class HistoryRepository:
                            '{source_layer_id}', {seq_order}, '{safe_subset}');"""  # nosec B608 - values escaped above, ids are UUIDs, local SQLite file
             )
             self._conn.commit()
+            note_history_insert(entry_id)
             logger.debug(f"Inserted history entry {entry_id} for layer {layer_id}")
             return entry_id
 

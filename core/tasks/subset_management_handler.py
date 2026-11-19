@@ -27,7 +27,7 @@ from ...infrastructure.constants import (
     PROVIDER_POSTGRES, PROVIDER_SPATIALITE, PROVIDER_OGR
 )
 from ...infrastructure.utils import detect_layer_provider_type
-from ...adapters.repositories.history_repository import HistoryRepository
+from ...adapters.repositories.history_repository import HistoryRepository, note_history_insert
 
 # Setup logger
 logger = setup_logger(
@@ -274,14 +274,18 @@ class SubsetManagementHandler:
         # Use prepared statement if available (best performance)
         if ps_manager:
             try:
-                return ps_manager.insert_subset_history(
-                    history_id=str(uuid.uuid4()),
+                history_id = str(uuid.uuid4())
+                inserted = ps_manager.insert_subset_history(
+                    history_id=history_id,
                     project_uuid=project_uuid,
                     layer_id=layer.id(),
                     source_layer_id=source_layer.id(),
                     seq_order=seq_order,
                     subset_string=sql_subset_string
                 )
+                if inserted:
+                    note_history_insert(history_id)  # taken back if the task is canceled (2026-11-18)
+                return inserted
             except (RuntimeError, OSError, AttributeError) as e:
                 logger.warning(f"Prepared statement failed, falling back to repository: {e}")
 

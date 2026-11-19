@@ -85,23 +85,28 @@ def finished(monkeypatch):
     monkeypatch.setattr(module, "QgsProject", MagicMock(instance=MagicMock(return_value=project)))
     monkeypatch.setattr(module, "QCoreApplication",
                         types.SimpleNamespace(translate=lambda context, text: text), raising=False)
+    # 2026-11-18: a sibling suite may leave the MagicMock class itself as qgis.core's QgsMessageLog / Qgis
+    monkeypatch.setattr(module, "QgsMessageLog", MagicMock())
+    monkeypatch.setattr(module, "Qgis", MagicMock())
 
     def run(canceled, result=True, exception=None, task_action="filter", pending=None, task_parameters=None,
-            restore_history_fn=None):
+            restore_history_fn=None, discard_history_fn=None, warning_messages=None, close_connections_fn=None,
+            restore_deferred_history_fn=None):
         handler.handle_finished(
             result=result, task_action=task_action, message_category="FilterLayers",
-            is_canceled_fn=lambda: canceled, warning_messages=[],
+            is_canceled_fn=lambda: canceled, warning_messages=warning_messages or [],
             pending_subset_requests=pending if pending is not None else [(MagicMock(), '"id" > 3')],
             safe_set_subset_fn=MagicMock(), is_complex_filter_fn=MagicMock(), single_canvas_refresh_fn=MagicMock(),
             cleanup_mv_fn=cleanup_mv, ogr_source_geom=None, exception=exception, task_message=None,
             source_layer=MagicMock(), task_parameters=task_parameters or {}, failed_layer_names=[], layers_count=1,
             task_description="Filtering data", restore_selection_fn=MagicMock(), task_bridge=None,
             cleanup_safe_intersect_fn=MagicMock(), cleanup_canceled_mv_fn=cleanup_canceled,
-            restore_history_fn=restore_history_fn,
+            restore_history_fn=restore_history_fn, discard_history_fn=discard_history_fn,
+            restore_deferred_history_fn=restore_deferred_history_fn, close_connections_fn=close_connections_fn,
         )
 
     return types.SimpleNamespace(run=run, apply=apply, iface=iface, handler=handler, cleanup_mv=cleanup_mv,
-                                 cleanup_canceled=cleanup_canceled, project=project)
+                                 cleanup_canceled=cleanup_canceled, project=project, module=module)
 
 
 def test_a_completed_task_applies_its_subsets(finished, monkeypatch):
@@ -215,7 +220,7 @@ def test_filters_applied_everywhere_still_say_success(finished):
 
 
 def _refuse(finished, refused=(("cables_id", "Cables", "lost"),), applied=0):
-    def apply(requests, fn, failures=None, refusals=None):
+    def apply(requests, fn, failures=None, refusals=None, **kwargs):
         for layer_id, name, reason in refused:
             failures.append(f"{name}: {reason}")
             refusals.append((layer_id, name, reason))
@@ -270,3 +275,155 @@ def test_views_kept_when_a_filter_is_refused(finished, action):
 def test_views_dropped_when_every_filter_is_removed(finished, action):
     finished.run(canceled=False, task_action=action)
     finished.cleanup_mv.assert_called_once()
+
+
+def test_a_canceled_task_takes_back_the_history_its_run_wrote(finished):
+    """2026-11-18: canceled by a second click after its run() inserted its entry: the entry stayed,
+    and the next unfilter applied a filter that was never set."""
+    discard, restore = MagicMock(), MagicMock()
+    finished.run(canceled=True, result=True, restore_history_fn=restore, discard_history_fn=discard)
+    discard.assert_called_once_with()
+    restore.assert_not_called()
+
+
+def test_a_completed_task_keeps_its_history(finished):
+    discard = MagicMock()
+    finished.run(canceled=False, discard_history_fn=discard)
+    discard.assert_not_called()
+
+
+def test_a_failing_discard_does_not_break_finished(finished):
+    finished.run(canceled=True, discard_history_fn=MagicMock(side_effect=OSError("locked")))
+    finished.apply.assert_not_called()
+
+
+def test_the_warnings_of_the_run_come_after_the_subsets_without_the_refused_layers(finished, monkeypatch):
+    """2026-11-18: "Cables: Cut by the extent of the source…" was shown, then the same filter refused."""
+    order = []
+    display = MagicMock(side_effect=lambda messages: order.append(("warnings", list(messages))))
+    monkeypatch.setattr(finished.module, "tch_display_warnings", display)
+    _refuse(finished)
+    refuse = finished.apply.side_effect
+    finished.apply.side_effect = lambda *args, **kwargs: (order.append(("apply",)), refuse(*args, **kwargs))[1]
+    finished.run(canceled=False, warning_messages=["Cables: Cut by the extent of the source", "Conduites: Cut by the extent"])
+    assert order == [("apply",), ("warnings", ["Conduites: Cut by the extent"])]
+
+
+def test_no_warning_left_nothing_is_shown(finished, monkeypatch):
+    display = MagicMock()
+    monkeypatch.setattr(finished.module, "tch_display_warnings", display)
+    _refuse(finished)
+    finished.run(canceled=False, warning_messages=["Cables: Cut by the extent of the source"])
+    display.assert_not_called()
+
+
+def _defer(finished, layer_id="parcels_id"):
+    """The apply loop leaves one subset over 1 MB to its timer; the test plays the timer."""
+    held = {}
+
+    def apply(requests, fn, failures=None, refusals=None, deferred=None, on_deferred_done=None):
+        deferred.append(layer_id)
+        held["done"] = on_deferred_done
+        return 0
+    finished.apply.side_effect = apply
+    return held
+
+
+def test_a_deferred_filter_counts_as_applied_until_it_is_set(finished):
+    """2026-11-18: a filter over 1 MB (the long list of keys of a PostgreSQL source) is set by a timer after
+    finished(); with nothing else applied, "nothing was applied" came before it was set."""
+    held = _defer(finished)
+    params = {"task": {}}
+    finished.run(canceled=False, task_action="filter", task_parameters=params)
+    assert params["_apply_applied"] == 1
+    held["done"]([])
+    finished.cleanup_mv.assert_not_called()   # a filter never drops the views its layers read
+
+
+def test_a_deferred_subset_refused_deletes_the_rows_of_its_task_not_the_whole_snapshot(finished):
+    """2026-11-19: the timer put back the snapshot of the task, which deleted the row of a task started since
+    ([F0, FA, FB] -> [F0]): the deferred refusal now gets the ids of the layers only, for their own rows."""
+    held = _defer(finished)
+    restore, restore_deferred = MagicMock(), MagicMock()
+    finished.run(canceled=False, task_action="filter", restore_history_fn=restore,
+                 restore_deferred_history_fn=restore_deferred)
+    restore_deferred.assert_not_called()
+    held["done"]([("parcels_id", "Parcels", "connection lost"), ("", "Gone", "deleted")])
+    restore_deferred.assert_called_once_with(["parcels_id"])
+    restore.assert_not_called()
+    finished.cleanup_mv.assert_not_called()
+
+
+def test_a_failing_deferred_deletion_does_not_raise_from_the_timer(finished):
+    held = _defer(finished)
+    finished.run(canceled=False, task_action="filter",
+                 restore_deferred_history_fn=MagicMock(side_effect=OSError("locked")))
+    held["done"]([("parcels_id", "Parcels", "lost")])
+
+
+def test_the_views_of_a_reset_wait_for_a_deferred_subset_when_there_is_one(finished):
+    """Not reachable today (a reset and an unfilter queue empty subsets only); kept harmless."""
+    held = _defer(finished)
+    close = MagicMock()
+    finished.run(canceled=False, task_action="reset", close_connections_fn=close)
+    finished.cleanup_mv.assert_not_called()
+    held["done"]([])
+    finished.cleanup_mv.assert_called_once_with()
+    close.assert_called_once_with()
+
+
+def test_a_deferred_filter_keeps_its_views(finished):
+    held = _defer(finished)
+    finished.run(canceled=False, task_action="filter")
+    held["done"]([])
+    finished.cleanup_mv.assert_not_called()
+
+
+def _named(name, layer_id):
+    layer = MagicMock()
+    layer.name.return_value, layer.id.return_value = name, layer_id
+    return layer
+
+
+def _warned(finished, monkeypatch, warnings, layers, refused, canceled=False):
+    display = MagicMock()
+    monkeypatch.setattr(finished.module, "tch_display_warnings", display)
+    _refuse(finished, refused=refused)
+    finished.run(canceled=canceled, warning_messages=warnings,
+                 pending=[(layer, '"id" > 3') for layer in layers])
+    return display
+
+
+def test_two_layers_of_one_name_keep_the_warning_when_only_one_is_refused(finished, monkeypatch):
+    """2026-11-19: the prefix "Cables: " hid the warning of the filtered one."""
+    layers = [_named("Cables", "cables_1"), _named("Cables", "cables_2")]
+    display = _warned(finished, monkeypatch, ["Cables: Cut by the extent"], layers, (("cables_1", "Cables", "lost"),))
+    display.assert_called_once_with(["Cables: Cut by the extent"])
+
+
+def test_two_layers_of_one_name_both_refused_lose_the_warning(finished, monkeypatch):
+    layers = [_named("Cables", "cables_1"), _named("Cables", "cables_2")]
+    display = _warned(finished, monkeypatch, ["Cables: Cut by the extent"], layers,
+                      (("cables_1", "Cables", "lost"), ("cables_2", "Cables", "lost")))
+    display.assert_not_called()
+
+
+def test_a_name_holding_a_colon_is_not_taken_for_the_refused_layer_before_it(finished, monkeypatch):
+    """"A: B" filtered, "A" refused: "A: B: Cut by the extent" is the warning of "A: B"."""
+    layers = [_named("A", "a"), _named("A: B", "ab")]
+    display = _warned(finished, monkeypatch, ["A: B: Cut by the extent"], layers, (("a", "A", "lost"),))
+    display.assert_called_once_with(["A: B: Cut by the extent"])
+
+
+def test_the_warning_of_a_refused_layer_with_a_colon_in_its_name_is_left_out(finished, monkeypatch):
+    layers = [_named("A: B", "ab"), _named("C", "c")]
+    display = _warned(finished, monkeypatch, ["A: B: Cut by the extent", "C: Read up to its budget"], layers,
+                      (("ab", "A: B", "lost"),))
+    display.assert_called_once_with(["C: Read up to its budget"])
+
+
+def test_a_canceled_task_shows_no_warning(finished, monkeypatch):
+    """2026-11-19: its filters are never set, a newer task reports."""
+    display = _warned(finished, monkeypatch, ["Cables: Cut by the extent"], [_named("Cables", "cables")], (),
+                      canceled=True)
+    display.assert_not_called()
