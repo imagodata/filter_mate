@@ -3592,6 +3592,16 @@ Nei = Erstatt alle eksisterende</translation>
         <translation>Behandle favoritter...</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Hurtigfilter ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="207"/>
+        <source>See all ({0})...</source>
+        <translation>Se alle ({0})...</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Eksporter...</translation>
@@ -6181,7 +6191,7 @@ Objekter: {2:,}</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>Batchmodus</translation>
     </message>
 </context>

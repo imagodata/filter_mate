@@ -3592,6 +3592,16 @@ Yo'q = Barcha mavjudlarni almashtirish</translation>
         <translation>Sevimlilarni boshqarish...</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Tezkor filtr ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="207"/>
+        <source>See all ({0})...</source>
+        <translation>Hammasini ko'rish ({0})...</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Eksport...</translation>
@@ -6181,7 +6191,7 @@ Obyektlar: {2:,}</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>Paketli rejim</translation>
     </message>
 </context>

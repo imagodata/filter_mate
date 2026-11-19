@@ -64,6 +64,45 @@ def _deleted(layer: Any) -> bool:
         return True
 
 
+def _layer_id_and_name(layer: Any) -> Tuple[str, str]:
+    """(id, name) of a layer, ('', '') once its C++ object is gone."""
+    try:
+        return layer.id(), layer.name()
+    except (RuntimeError, AttributeError):
+        return '', ''
+
+
+def _warnings_to_show(warning_messages: List[str], layers: List[Any],
+                      refusals: List[Tuple[str, str, str]]) -> List[str]:
+    """The warnings of the run, without those of the layers whose filter was refused (2026-11-19).
+
+    A warning reads "<layer name>: <text>". It is left out only when every layer of the task it can
+    name is refused: two layers sharing a name, one filtered, keep it (the prefix cannot tell them
+    apart), and so does a name holding ": " (``A: B`` filtered, ``A`` refused: "A: B: ..." is not
+    the warning of ``A``).
+    """
+    if not refusals:
+        return list(warning_messages)
+    refused_ids = {layer_id for layer_id, _name, _reason in refusals if layer_id}
+    # (name, refused): the layers that were given a subset, and the refused ones not among them (deleted)
+    candidates = []
+    seen_ids = set()
+    for layer in layers:
+        layer_id, name = _layer_id_and_name(layer)
+        if layer_id and layer_id not in seen_ids:
+            seen_ids.add(layer_id)
+            candidates.append((name, layer_id in refused_ids))
+    candidates += [(name, True) for layer_id, name, _reason in refusals if layer_id not in seen_ids]
+    shown = []
+    for message in warning_messages:
+        text = str(message)
+        named = [refused for name, refused in candidates if name and text.startswith(f"{name}: ")]
+        if named and all(named):
+            continue
+        shown.append(message)
+    return shown
+
+
 class FinishedHandler:
     """Handles task completion logic for FilterEngineTask.
 
@@ -113,12 +152,15 @@ class FinishedHandler:
         cleanup_safe_intersect_fn: Callable[[], None],
         cleanup_canceled_mv_fn: Optional[Callable[[], None]] = None,
         restore_history_fn: Optional[Callable[[List[str]], None]] = None,
+        discard_history_fn: Optional[Callable[[], None]] = None,
+        restore_deferred_history_fn: Optional[Callable[[List[str]], None]] = None,
+        close_connections_fn: Optional[Callable[[], None]] = None,
     ) -> Tuple[List[str], List, Optional[Any]]:
         """Handle task completion with cleanup and user notifications.
 
         Called by QGIS task manager when task completes. Performs:
-        1. Display warning messages collected during task execution
-        2. Apply pending subset string requests on main Qt thread
+        1. Apply pending subset string requests on main Qt thread
+        2. Display warning messages collected during task execution (not those of refused layers)
         3. Cleanup PostgreSQL materialized views (for reset/unfilter only)
         4. Cleanup memory layers
         5. Show success/error message in QGIS message bar
@@ -151,16 +193,19 @@ class FinishedHandler:
                 created that nothing uses (instead of cleanup_mv_fn).
             restore_history_fn: Puts back the filter history of the layers whose
                 filter the provider refused, as it was before the task (2026-11-16).
+            discard_history_fn: For a canceled task: deletes the history rows its run()
+                inserted, its subsets being dropped (2026-11-18).
+            restore_deferred_history_fn: Called with the ids of the layers whose deferred subset
+                (over 1 MB, set after finished()) was refused: deletes the rows this task wrote for
+                them (2026-11-19: not the whole snapshot, a task started since may have written its own).
+            close_connections_fn: Closes the connections opened on the main thread, after
+                the view cleanup that waits for the deferred subsets (2026-11-18).
 
         Returns:
             Tuple of (cleared_warnings, cleared_pending_requests, cleared_ogr_source_geom)
             so the caller can update its own state.
         """
         from qgis.utils import iface
-
-        # E6: Delegate warning display to task_completion_handler
-        if warning_messages:
-            tch_display_warnings(warning_messages)
 
         # 2026-10-17: a canceled task applies nothing, even when its run()
         # completed: canceled by a newer task (a second click on Filter),
@@ -171,6 +216,13 @@ class FinishedHandler:
                 logger.info(f"Task was canceled - its {len(pending_subset_requests)} pending subset "
                             "request(s) are dropped")
             pending_subset_requests = []
+            # 2026-11-18: and the history entries its run() wrote for them (only its own rows: the
+            # newer task may have written its entries already).
+            if discard_history_fn is not None:
+                try:
+                    discard_history_fn()
+                except Exception as e:  # catch-all safety net: the history must not break finished()
+                    logger.warning(f"Filter history of the canceled task not taken back: {e}")
 
         # 2026-10-17: a target removed from the project during the task is left out (the
         # task depends on its source layer only); the other targets get their subsets.
@@ -184,29 +236,67 @@ class FinishedHandler:
         # Apply pending subset strings on main thread
         apply_failures: List[str] = []
         refusals: List[Tuple[str, str, str]] = []
+        deferred: List[str] = []
         applied_count = 0
-        if pending_subset_requests:
-            applied_count = apply_pending_subset_requests(
-                pending_subset_requests,
-                safe_set_subset_fn,
-                failures=apply_failures,
-                refusals=refusals,
-            )
-            logger.info(f"Applied {applied_count} pending subset requests")
+
+        def restore_refused_history(refused: List[Tuple[str, str, str]]) -> None:
             # 2026-11-16: run() already wrote the history of the refused layers (entry
             # added, last one or all deleted) while they keep their previous filter.
-            refused_layer_ids = [layer_id for layer_id, _name, _reason in refusals if layer_id]
+            refused_layer_ids = [layer_id for layer_id, _name, _reason in refused if layer_id]
             if refused_layer_ids and restore_history_fn is not None:
                 try:
                     restore_history_fn(refused_layer_ids)
                 except Exception as e:  # catch-all safety net: the history must not break finished()
                     logger.warning(f"Filter history of the refused layers not put back: {e}")
 
+        def deferred_done(deferred_refusals: List[Tuple[str, str, str]]) -> None:
+            # 2026-11-18: the subsets over 1 MB, set after finished() by a timer: their refusals put
+            # back the history too, and the views of a reset / unfilter are dropped only now, when
+            # nothing was refused (they were dropped before these layers left them).
+            # (2026-11-19: only the rows this task wrote, a newer task may have written its own since)
+            if restore_deferred_history_fn is not None:
+                deferred_ids = [layer_id for layer_id, _name, _reason in deferred_refusals if layer_id]
+                if deferred_ids:
+                    try:
+                        restore_deferred_history_fn(deferred_ids)
+                    except Exception as e:  # catch-all safety net: a timer slot must not raise
+                        logger.warning(f"Filter history of the refused deferred layers not taken back: {e}")
+            if task_action in ('reset', 'unfilter'):
+                if refusals or deferred_refusals:
+                    logger.info(f"Views kept: the filter of {len(refusals) + len(deferred_refusals)} "
+                                "layer(s) was refused")
+                else:
+                    cleanup_mv_fn()
+                    if close_connections_fn is not None:
+                        close_connections_fn()
+
+        if pending_subset_requests:
+            applied_count = apply_pending_subset_requests(
+                pending_subset_requests,
+                safe_set_subset_fn,
+                failures=apply_failures,
+                refusals=refusals,
+                deferred=deferred,
+                on_deferred_done=deferred_done,
+            )
+            logger.info(f"Applied {applied_count} pending subset requests")
+            restore_refused_history(refusals)
+
             # E6: Delegated canvas refresh to task_completion_handler
             schedule_canvas_refresh(
                 is_complex_filter_fn,
                 single_canvas_refresh_fn
             )
+
+        # E6: Delegate warning display to task_completion_handler. 2026-11-18: once the subsets are
+        # applied, without those of the refused layers ("X: Cut by the extent of the source…" came
+        # right before "Filter not applied, previous filter kept: X: …").
+        # 2026-11-19: not for a canceled task, which sets nothing (a newer task reports).
+        if warning_messages and not is_canceled_fn():
+            shown = _warnings_to_show(warning_messages, [layer for layer, _expression in pending_subset_requests],
+                                      refusals)
+            if shown:
+                tch_display_warnings(shown)
 
         # Only cleanup MVs on reset/unfilter actions, NOT on filter
         # When filtering, materialized views are referenced by the layer's subsetString.
@@ -224,6 +314,8 @@ class FinishedHandler:
         elif task_action in ('reset', 'unfilter'):
             if refusals:
                 logger.info(f"Views kept: the filter of {len(refusals)} layer(s) was refused")
+            elif deferred:
+                logger.info(f"Views kept until the deferred filter of {len(deferred)} layer(s) is set")
             else:
                 cleanup_mv_fn()
 
@@ -235,7 +327,8 @@ class FinishedHandler:
         # (FilterResultHandler): no "Successfully removed filters" after them.
         if isinstance(task_parameters, dict):
             task_parameters['_apply_failures'] = list(apply_failures)
-            task_parameters['_apply_applied'] = applied_count
+            # 2026-11-18: a deferred subset counts as applied here (one refused later says so itself)
+            task_parameters['_apply_applied'] = applied_count + len(deferred)
 
         # Handle result messages
         self._handle_result_messages(

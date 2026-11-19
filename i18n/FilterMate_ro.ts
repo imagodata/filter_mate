@@ -3592,6 +3592,16 @@ Nu = Înlocuire toate existentele</translation>
         <translation>Gestionare favorite...</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Filtru rapid ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="207"/>
+        <source>See all ({0})...</source>
+        <translation>Vezi toate ({0})...</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Export...</translation>
@@ -6181,7 +6191,7 @@ Entități: {2:,}</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>Mod lot</translation>
     </message>
 </context>

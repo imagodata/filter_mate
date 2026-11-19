@@ -438,3 +438,166 @@ class TestRefusedFilterReason:
         failures = []
         apply_pending_subset_requests([(layer, '')], refuse, failures=failures)
         assert failures == [f"Cables: {self.reasons.NO_REASON}"]
+
+
+@pytest.mark.unit
+class TestFailureAfterTheSubsetIsSet:
+    """2026-11-18: a reload() or a repaint that raised after setSubsetString succeeded counted the layer as
+    refused: its history went back to before run() while it carried the new filter, and the message said
+    "previous filter kept"."""
+
+    @pytest.fixture(autouse=True)
+    def _providers(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_POSTGRES", "postgres", raising=False)
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_SPATIALITE", "spatialite", raising=False)
+
+    def test_a_repaint_that_raises_after_the_set_is_no_refusal(self):
+        layer = _make_layer("cables", "dbname='/data/x.sqlite' table=\"cables\"", provider="spatialite")
+        layer.triggerRepaint.side_effect = RuntimeError("wrapped C/C++ object has been deleted")
+        failures, refused = [], []
+        applied = apply_pending_subset_requests([(layer, '"id" > 3')], MagicMock(return_value=True),
+                                                failures=failures, refusals=refused)
+        assert (applied, failures, refused) == (1, [], [])
+
+    def test_a_repaint_that_raises_on_a_filter_already_set_is_no_refusal(self):
+        layer = _make_layer("cables", "dbname='bd' table=\"cables\"", provider="postgres")
+        layer.subsetString.return_value = '"id" > 3'
+        layer.triggerRepaint.side_effect = RuntimeError("gone")
+        failures, refused = [], []
+        assert apply_pending_subset_requests([(layer, '"id" > 3')], MagicMock(return_value=True),
+                                             failures=failures, refusals=refused) == 1
+        assert (failures, refused) == ([], [])
+
+    def test_a_set_that_raises_is_still_a_refusal(self):
+        layer = _make_layer("cables", "dbname='bd' table=\"cables\"", provider="postgres")
+        failures, refused = [], []
+        applied = apply_pending_subset_requests([(layer, '"id" > 3')], MagicMock(side_effect=RuntimeError("boom")),
+                                                failures=failures, refusals=refused)
+        assert applied == 0
+        assert refused == [("cables_id", "cables", "boom")]
+
+
+@pytest.mark.unit
+class TestDeferredLargeSubsets:
+    """2026-11-18: a subset over 1 MB is set by a timer after finished(); its refusal was never reported to the
+    caller (no history put back, the views of an unfilter dropped before it was set)."""
+
+    @pytest.fixture(autouse=True)
+    def _timer(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        self.timers = []
+        monkeypatch.setattr(_tch, "QTimer", types.SimpleNamespace(
+            singleShot=lambda delay, slot: self.timers.append(slot)))
+        monkeypatch.setattr(_tch, "QCoreApplication",
+                            types.SimpleNamespace(translate=lambda context, text: text), raising=False)
+
+    def _large(self):
+        return "fid IN (" + ",".join(str(i) for i in range(200_000)) + ")"
+
+    def test_the_deferred_layers_are_named_and_their_end_reported(self):
+        layer = _make_layer("parcels", "/data/x.gpkg|layername=parcels", provider="ogr")
+        deferred, ends = [], []
+        applied = apply_pending_subset_requests([(layer, self._large())], MagicMock(return_value=True),
+                                                failures=[], refusals=[], deferred=deferred,
+                                                on_deferred_done=ends.append)
+        assert (applied, deferred, ends) == (0, ["parcels_id"], [])
+        self.timers.pop()()
+        assert ends == [[]]
+
+    def test_a_deferred_refusal_is_reported_with_its_reason(self):
+        layer = _make_layer("parcels", "/data/x.gpkg|layername=parcels", provider="ogr")
+        error = MagicMock()
+        error.message.return_value = "too long"
+        layer.error.return_value = error
+        ends = []
+        apply_pending_subset_requests([(layer, self._large())], MagicMock(return_value=False),
+                                      deferred=[], on_deferred_done=ends.append)
+        self.timers.pop()()
+        assert ends == [[("parcels_id", "parcels", "too long")]]
+
+
+@pytest.mark.unit
+class TestInvalidLayer:
+    """2026-11-18: a layer invalid when its subset was to be set was skipped in silence: with every layer in
+    that case, "Filter task : Layer(s) filtered" came while nothing was set, and the history kept the entry."""
+
+    REASON = "The selected layer is invalid or its source cannot be found."   # no "Operation cancelled."
+
+    @pytest.fixture(autouse=True)
+    def _env(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        monkeypatch.setattr(_tch, "is_valid_layer", lambda layer: layer is not None and layer.isValid())
+        self.timers = []
+        monkeypatch.setattr(_tch, "QTimer", types.SimpleNamespace(
+            singleShot=lambda delay, slot: self.timers.append(slot)))
+        monkeypatch.setattr(_tch, "QCoreApplication",
+                            types.SimpleNamespace(translate=lambda context, text: text), raising=False)
+
+    def test_an_invalid_layer_is_a_refusal(self):
+        layer = _make_layer("cables", "/data/x.gpkg|layername=cables", provider="ogr")
+        layer.isValid.return_value = False
+        safe_set, failures, refused = MagicMock(return_value=True), [], []
+        applied = apply_pending_subset_requests([(layer, '"id" > 3')], safe_set, failures=failures, refusals=refused)
+        assert applied == 0
+        safe_set.assert_not_called()
+        assert refused == [("cables_id", "cables", self.REASON)]
+        assert failures == [f"cables: {self.REASON}"]
+
+    def test_a_layer_invalid_when_its_deferred_subset_comes_is_a_refusal(self):
+        layer = _make_layer("parcels", "/data/x.gpkg|layername=parcels", provider="ogr")
+        ends = []
+        apply_pending_subset_requests([(layer, "fid IN (" + "1," * 600_000 + "1)")], MagicMock(return_value=True),
+                                      deferred=[], on_deferred_done=ends.append)
+        layer.isValid.return_value = False
+        self.timers.pop()()
+        assert ends == [[("parcels_id", "parcels", self.REASON)]]
+
+
+@pytest.mark.unit
+class TestDeferredSlotNeverBreaks:
+    """2026-11-19: an error of another type than the three caught skipped the other deferred layers and on_done
+    (the history of the refused ones never put back); a layer removed before the timer was a refusal with no id
+    and no message."""
+
+    @pytest.fixture(autouse=True)
+    def _env(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        self.timers = []
+        monkeypatch.setattr(_tch, "QTimer", types.SimpleNamespace(
+            singleShot=lambda delay, slot: self.timers.append(slot)))
+        monkeypatch.setattr(_tch, "QCoreApplication",
+                            types.SimpleNamespace(translate=lambda context, text: text), raising=False)
+
+    @staticmethod
+    def _large():
+        return "fid IN (" + "1," * 600_000 + "1)"
+
+    def test_an_error_of_another_type_is_a_refusal_and_the_others_go_on(self):
+        broken = _make_layer("broken", "/data/x.gpkg|layername=broken", provider="ogr")
+        fine = _make_layer("fine", "/data/x.gpkg|layername=fine", provider="ogr")
+        calls = []
+
+        def safe_set(layer, expression):
+            calls.append(layer.name())
+            if layer is broken:
+                raise TypeError("not a string")
+            return True
+        ends = []
+        apply_pending_subset_requests([(broken, self._large()), (fine, self._large())], safe_set,
+                                      deferred=[], on_deferred_done=ends.append)
+        self.timers.pop()()
+        assert calls == ["broken", "fine"]
+        assert ends == [[("broken_id", "broken", "not a string")]]
+
+    def test_a_layer_removed_before_the_timer_is_no_refusal(self):
+        gone = _make_layer("gone", "/data/x.gpkg|layername=gone", provider="ogr")
+        fine = _make_layer("fine", "/data/x.gpkg|layername=fine", provider="ogr")
+        safe_set = MagicMock(return_value=True)
+        ends = []
+        apply_pending_subset_requests([(gone, self._large()), (fine, self._large())], safe_set,
+                                      deferred=[], on_deferred_done=ends.append)
+        gone.id.side_effect = RuntimeError("wrapped C/C++ object of type QgsVectorLayer has been deleted")
+        self.timers.pop()()
+        assert [call.args[0] for call in safe_set.call_args_list] == [fine]
+        assert ends == [[]]
