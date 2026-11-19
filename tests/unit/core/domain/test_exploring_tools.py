@@ -99,3 +99,32 @@ class TestReadingAConfiguration:
     def test_the_defaults_hide_nothing(self):
         for kind in tools.KINDS:
             assert tools.hidden_in_config(DEFAULT, kind) == frozenset()
+
+
+class TestSeparatorsOfTheTree:
+    """The configuration tree takes any text: the obvious ways of writing a list are read, not ignored."""
+
+    @pytest.mark.parametrize("text", ["zoom identify", "zoom|identify", "zoom | identify", "zoom,identify", "zoom;identify",
+                                      "zoom\nidentify", '["zoom", "identify"]', "['zoom','identify']", "[zoom, identify]",
+                                      "  ZOOM ,  Identify  ", "zoom,, identify,", "zoom\tidentify", "(zoom) identify"])
+    def test_every_obvious_separator(self, text):
+        assert tools.hidden_for("vector", text) == {"zoom", "identify"}
+
+    def test_a_name_written_with_a_blank_is_one_name(self):
+        assert tools.hidden_for("point_cloud", "value pipette, zoom") == {"value_pipette", "zoom"}
+        assert tools.hidden_for("point_cloud", "value pipette zoom") == {"value_pipette", "zoom"}
+        assert tools.hidden_for("point_cloud", "value-pipette|zoom identify") == {"value_pipette", "zoom", "identify"}
+
+    def test_what_cannot_be_read_is_said_once_in_the_log(self, caplog):
+        tools._reported.clear()
+        with caplog.at_level("WARNING", logger=tools.logger.name):
+            assert tools.hidden_for("vector", "zoom/identify, follow") == {"follow"}
+            assert tools.hidden_for("vector", "zoom/identify") == frozenset()
+        said = [record.getMessage() for record in caplog.records]
+        assert len(said) == 1 and "'zoom/identify'" in said[0] and "vector" in said[0] and "zoom" in said[0]
+
+    def test_a_good_setting_says_nothing(self, caplog):
+        tools._reported.clear()
+        with caplog.at_level("WARNING", logger=tools.logger.name):
+            tools.hidden_for("raster", "zoom, more, pipette")
+        assert caplog.records == []
