@@ -1697,10 +1697,18 @@ def toolbox_search():
 
 
 def show_toolbox():
-    d = toolbox_dock()
+    """Unrecorded: the Processing toolbox under the Layers panel, left of the map. (Above the dock of FilterMate it
+    took half of the dock's column: the dock was squeezed to 360 px by 600 and the window could not be fitted.)"""
+    mw, d = iface.mainWindow(), toolbox_dock()
+    layers = mw.findChild(QDockWidget, 'Layers')
     d.show()
-    d.raise_()
-    iface.mainWindow().resizeDocks([d], [360], Qt.Orientation.Horizontal)
+    if layers is not None:
+        mw.splitDockWidget(layers, d, Qt.Orientation.Vertical)
+        total = layers.height() + d.height()
+        mw.resizeDocks([layers, d], [190, max(total - 190, 240)], Qt.Orientation.Vertical)
+        mw.resizeDocks([layers], [330], Qt.Orientation.Horizontal)
+    mw.resizeDocks([dock()], [DOCK_WIDTH], Qt.Orientation.Horizontal)
+    QTimer.singleShot(800, lambda: log(f'toolbox {rect_of(d)}, dock {rect_of(dock())}, map {rect_of(iface.mapCanvas())}'))
 
 
 def s8_dialog():
@@ -1709,7 +1717,7 @@ def s8_dialog():
         'INPUT_LAYERS': [layer(n) for n in S8_TARGETS], 'EXPRESSION': CHANGED_EXPR})
     dlg.resize(860, 640)
     mw = iface.mainWindow()
-    dlg.move(mw.mapToGlobal(QPoint(420, 160)))
+    dlg.move(mw.mapToGlobal(QPoint(345, 130)))
     dlg.show()
     STATE['proc'] = dlg
     REC.windows.append(dlg)
@@ -1734,9 +1742,9 @@ def s8_run():
 # processing (story 8): the batch filter of the Processing toolbox, department-wide.
 # Toulouse framed tight and dense layers shown up to 1:200 000: at 1.6 x the commune the
 # canvas was at 1:147 000 and the filtered buildings and roads were not drawn at all.
-PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, dense_scale=200000, fit=None) \
-    + recorded_scene(1.0) + [
-    (0, show_toolbox), (600, cam(lambda: rect_of(toolbox_dock()), dur=1.4, pad=20)),
+PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, dense_scale=200000) \
+    + [(0, show_toolbox), (1500, wait_idle())] + recorded_scene(1.0) + [
+    (600, cam(lambda: rect_of(toolbox_dock()), dur=1.4, pad=20)),
 ] + act(toolbox_search) + type_into(toolbox_search, 'filtermate', per_char=120) + [
     hold(1200), still('s8-01'), (0, s8_dialog), (400, cam(lambda: rect_of(STATE['proc']), dur=1.4, pad=30)), hold(2800),
     still('s8-02'),
