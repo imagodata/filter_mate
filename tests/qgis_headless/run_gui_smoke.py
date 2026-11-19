@@ -769,8 +769,8 @@ def s_setup_wizard_check():
     config = d.CONFIG_DATA['APP']['OPTIONS'].get('FILTERING', {}).get('enabled', {})
     value = config.get('value') if isinstance(config, dict) else config
     combo, auto = d.comboBox_filtering_current_layer, d.pushButton_checkable_filtering_auto_current_layer
-    check('setup with no model: cards without Other, four steps (FILTERING skipped), the change shown then applied',
-          STATE['wizard_started'] is True and STATE['wizard_no_other'] and STATE['wizard_steps'] == 4
+    check('setup with no model: cards without Other, five steps (FILTERING skipped), the change shown then applied',
+          STATE['wizard_started'] is True and STATE['wizard_no_other'] and STATE['wizard_steps'] == 5
           and len(STATE['wizard_rows']) == 1 and STATE['wizard_card'].done and value is False,
           f"started={STATE['wizard_started']} steps={STATE['wizard_steps']} rows={STATE['wizard_rows']} value={value!r}")
     check('FILTERING off: its header and buttons hidden, the source layer chooser at the top of EXPLORING',
@@ -3555,7 +3555,7 @@ def s_setup_layout_check():
     panels, manager = d._fm_panels, d._action_bar_manager
     check('setup: the layout is a step of its own, the sections asked with the buttons',
           WELCOME['started'] is True and ['Layout', 'Headers', 'Rows', 'Buttons'] in WELCOME['asked']
-          and len(WELCOME['asked']) == 5,
+          and len(WELCOME['asked']) == 6,
           str(WELCOME['asked']))
     check('setup: the sections and the buttons on the card of the changes, nothing moved before Apply',
           len(WELCOME['rows']) == 2 and any('in panels of QGIS' in row for row in WELCOME['rows'])
@@ -5574,6 +5574,235 @@ ROWS_STEPS = [s_rows_setup, s_rows_fit_check, s_rows_exporting_check, s_rows_sho
               s_rows_hidden_change, s_rows_fit_again_check, s_rows_panel_check, s_rows_end]
 
 
+# --- the tools of the EXPLORING rail, chosen for each kind of layer (APP.DOCKWIDGET.EXPLORING_TOOLS, FM_ONLY=tools) -----
+
+TOOLS = {}
+TOOLS_HIDDEN = {'vector': 'zoom, follow', 'raster': 'pipette, preview', 'point_cloud': 'identify, value_pipette'}
+TOOLS_PATH = 'APP.DOCKWIDGET.EXPLORING_TOOLS.{}_hidden'
+
+
+def tools_module():
+    return importlib.import_module(f'{PACKAGE}.core.domain.exploring_tools')
+
+
+def tools_buttons():
+    return importlib.import_module(f'{PACKAGE}.ui.controllers.exploring_tool_choice').BUTTONS
+
+
+def tools_rail(kind):
+    """The rail as the user sees it for ``kind``: the names of the buttons shown (top to bottom), a problem if any."""
+    d = dock()
+    rail = d.widget_exploring_keys
+    names = {name: key for key, name in tools_buttons()[kind].items()}
+    shown = sorted((button for button in rail.findChildren(QPushButton) if button.isVisibleTo(rail)),
+                   key=lambda button: button.y())
+    keys = [names.get(button.objectName(), button.objectName()) for button in shown]
+    problems = []
+    if any(button.objectName() not in names for button in shown):
+        problems.append('a button of another kind is shown')
+    if not all(upper.geometry().bottom() < lower.geometry().top() for upper, lower in zip(shown, shown[1:])):
+        problems.append('buttons overlap')
+    if rail_scroll_maximum() == 0 and not all(0 <= button.geometry().top() and button.geometry().bottom() < rail.height()
+                                              for button in shown):
+        problems.append('a button is cut')
+    gaps = [lower.geometry().top() - upper.geometry().bottom() for upper, lower in zip(shown, shown[1:])]
+    if gaps and max(gaps) - min(gaps) > 2:
+        problems.append(f'uneven gaps {gaps}')
+    return keys, problems
+
+
+def tools_expected(kind, hidden=None):
+    module = tools_module()
+    return list(module.shown_for(kind, TOOLS_HIDDEN[kind] if hidden is None else hidden))
+
+
+def tools_rail_is(kind, hidden=None):
+    keys, problems = tools_rail(kind)
+    return keys == tools_expected(kind, hidden) and not problems
+
+
+def tools_check(kind, label, hidden=None):
+    ok = settles(lambda: tools_rail_is(kind, hidden), 3.0)
+    keys, problems = tools_rail(kind)
+    check(f'tools: the {label} rail shows its buttons but those hidden, in place, none cut', ok,
+          f"shown={keys} expected={tools_expected(kind, hidden)} {problems}")
+
+
+def tools_pick(name, coverage_page):
+    dock().comboBox_filtering_current_layer.setLayer(layer(name))
+    return switched_to(name, coverage_page)
+
+
+def s_tools_begin():
+    d = dock()
+    leave_welcome()
+    d._fm_sections.open_top('exploring')
+    current = d.comboBox_filtering_current_layer.currentLayer()
+    TOOLS.update(layer=current.name() if current else 'zones', saved={kind: config_value(TOOLS_PATH.format(kind))
+                                                                        for kind in TOOLS_HIDDEN})
+    check('tools: nothing is hidden by default, every kind keeps all of its buttons',
+          all(value == '' for value in TOOLS['saved'].values()), str(TOOLS['saved']))
+    apply_settings({TOOLS_PATH.format(kind): text for kind, text in TOOLS_HIDDEN.items()})
+    return tools_pick('zones', coverage_page=False)
+
+
+def s_tools_vector_check():
+    tools_check('vector', 'vector')
+    grab('tools_vector')
+    keys, _problems = tools_rail('vector')
+    check('tools: a tool hidden for vector layers stays on the raster rail and the other way round',
+          'zoom' not in keys and 'follow' not in keys and 'more' in keys, str(keys))
+    return tools_pick('dem', coverage_page=True)
+
+
+def s_tools_raster_check():
+    tools_check('raster', 'raster')
+    grab('tools_raster')
+    zoom = dock().pushButton_exploring_zoom
+    check('tools: zoom hidden for vector layers is shown on a raster (one choice per kind)',
+          zoom.isVisibleTo(dock().widget_exploring_keys))
+    if not has_point_clouds():
+        report('SKIP', 'tools: the point cloud rail', f"QGIS {Qgis.QGIS_VERSION} < 3.26 (FilterMate gate)")
+        return tools_pick('zones', coverage_page=False)
+    return tools_pick('cloud', coverage_page=True)
+
+
+def s_tools_cloud_check():
+    if has_point_clouds():
+        tools_check('point_cloud', 'point cloud')
+        grab('tools_point_cloud')
+    return tools_pick('zones', coverage_page=False)
+
+
+def s_tools_live():
+    """The setting changed while a layer is shown: the rail follows at once, with no restart."""
+    tools_check('vector', 'vector (back on the layer)')
+    apply_settings({TOOLS_PATH.format('vector'): 'identify'})
+    tools_check('vector', 'vector, setting changed live', 'identify')
+    d = dock()
+    check('tools: a button hidden then shown again is back in its place', d.pushButton_exploring_zoom.isVisibleTo(d.widget_exploring_keys)
+          and not d.pushButton_exploring_identify.isVisibleTo(d.widget_exploring_keys), '')
+    # a tool on the map is put down when its button goes
+    extras = coverage()._extras
+    link = d.pushButton_checkable_exploring_linking_widgets
+    zone = extras._tools['pushButton_checkable_exploring_vector_zone']
+    zone.setChecked(True)
+    pump(100)
+    on = zone.isChecked()
+    apply_settings({TOOLS_PATH.format('vector'): 'zone'})
+    pump(150)
+    check('tools: a tool put on the map is put down before its button goes', on and not zone.isChecked()
+          and not zone.isVisibleTo(d.widget_exploring_keys) and not extras.zone_tool_on(),
+          f"on={on} checked={zone.isChecked()} tool on map={extras.zone_tool_on()}")
+    # a mode keeps its state
+    link.setChecked(True)
+    apply_settings({TOOLS_PATH.format('vector'): 'link'})
+    pump(150)
+    kept = link.isChecked() and not link.isVisibleTo(d.widget_exploring_keys)
+    link.setChecked(False)
+    check('tools: a mode (link) keeps its state while its button is hidden', kept, '')
+    return waits(0.3)
+
+
+def s_tools_menu():
+    """The right-click menu of the rail: one check box per button, "more" always on, a box writes the setting."""
+    d = dock()
+    seen = []
+    original = QMenu.exec
+    QMenu.exec = lambda self, *args: seen.append(self) or None
+    try:
+        from qgis.PyQt.QtGui import QContextMenuEvent
+        apply_settings({TOOLS_PATH.format('vector'): 'follow'})
+        pump(150)
+        button = d.pushButton_exploring_reset_layer_properties  # no menu of its own: the click goes on to the rail
+        point = QPoint(button.width() // 2, button.height() // 2)
+        QApplication.sendEvent(button, QContextMenuEvent(QContextMenuEvent.Reason.Mouse, point, button.mapToGlobal(point)))
+        pump(100)
+    finally:
+        QMenu.exec = original
+    menu = seen[-1] if seen else None
+    actions = [action for action in menu.actions() if not action.isSeparator() and action.isCheckable()] if menu else []
+    module = tools_module()
+    wanted = [(key, key not in module.hidden_for('vector', 'follow')) for key in module.tools_of('vector')]
+    check('tools: a right-click on a button of the rail lists its tools, one check box each, "more" always on',
+          len(actions) == len(wanted) and [action.isChecked() for action in actions] == [on for _key, on in wanted]
+          and not actions[-2].isEnabled() and all(action.isEnabled() for action in actions if action is not actions[-2]),
+          f"menu={bool(menu)} actions={[(a.text(), a.isChecked(), a.isEnabled()) for a in actions]}")
+    if len(actions) == len(wanted):
+        actions[0].trigger()  # zoom unticked
+        pump(300)
+        check('tools: a box of the menu writes the setting and the rail follows at once',
+              config_value(TOOLS_PATH.format('vector')) == 'zoom, follow' and tools_rail_is('vector', 'zoom, follow'),
+              f"setting={config_value(TOOLS_PATH.format('vector'))!r} rail={tools_rail('vector')}")
+    return waits(0.3)
+
+
+def s_tools_wizard():
+    """The setup asks the tools of each kind, ticked as they are; answering as ticked changes nothing; a tool unticked
+    is a change, applied at once, and the link puts it back."""
+    apply_settings({TOOLS_PATH.format(kind): '' for kind in TOOLS_HIDDEN})
+    chat = agent_chat()
+    chat.start_setup()
+    TOOLS['asked'] = []
+    steps = 0
+    while _wizard_card() is not None and steps < 6:
+        card = _wizard_card()
+        labels = [label for buttons, _other, _field in card._groups for _button, label in buttons]
+        if [chip.text() for chip in card._chips][:1] == ['Vector tools']:
+            TOOLS['asked'] = labels
+            TOOLS['chips'] = [chip.text() for chip in card._chips]
+            _answer_card(untick=('Identify the selected features', 'Value pipette'))
+        else:
+            _answer_card()
+        steps += 1
+    TOOLS['card'] = chat._settings_cards[-1] if chat._settings_cards else None
+    return waits(0.2)
+
+
+def s_tools_wizard_apply():
+    card = TOOLS['card']
+    TOOLS['rows'] = [row.text() for row in card.rows] if card is not None else []
+    if card is not None:
+        card.apply_button.click()
+    return waits(0.6)
+
+
+def s_tools_wizard_check():
+    check('tools: the setup asked every button that can be hidden, none of "more", one question per kind of data',
+          TOOLS.get('chips') == ['Vector tools', 'Raster tools', 'Cloud tools'] and 'Zoom to the selected features' in TOOLS['asked'] and 'Value pipette' in TOOLS['asked']
+          and 'More tools (always shown)' not in TOOLS['asked'], str(TOOLS['asked']))
+    check('tools: the setup changed the two settings unticked, no other',
+          len(TOOLS['rows']) == 2 and config_value(TOOLS_PATH.format('vector')) == 'identify'
+          and config_value(TOOLS_PATH.format('point_cloud')) == 'value_pipette'
+          and config_value(TOOLS_PATH.format('raster')) == '', f"rows={TOOLS['rows']}")
+    dock()._fm_sections.open_top('exploring')  # the setup opened AGENT, which folds EXPLORING (and its rail)
+    pump(400)
+    tools_check('vector', 'vector, after the setup', 'identify')
+    TOOLS['reverted'] = agent_chat()._wizard.revert()
+    return waits(0.6)
+
+
+def s_tools_end():
+    dock()._fm_sections.open_top('exploring')
+    pump(400)
+    check('tools: the link of the setup puts the tools back, the rail follows',
+          TOOLS['reverted'] is True and all(config_value(TOOLS_PATH.format(kind)) == '' for kind in TOOLS_HIDDEN)
+          and settles(lambda: tools_rail_is('vector', '')), str(tools_rail('vector')))
+    # a setting hand-written with a name no button has hides nothing and breaks nothing
+    apply_settings({TOOLS_PATH.format('vector'): ''})
+    for kind, text in TOOLS['saved'].items():
+        apply_settings({TOOLS_PATH.format(kind): text})
+    agent_chat().new_conversation()
+    d = dock()
+    d._fm_sections.open_top('exploring')
+    d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
+    return tools_pick(TOOLS['layer'], coverage_page=(TOOLS['layer'] in ('dem', 'cloud')))
+
+
+TOOLS_STEPS = [s_tools_begin, s_tools_vector_check, s_tools_raster_check, s_tools_cloud_check, s_tools_live, s_tools_menu,
+               s_tools_wizard, s_tools_wizard_apply, s_tools_wizard_check, s_tools_end]
+
+
 # --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------
 
 
@@ -5702,7 +5931,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_vector_source, s_vector_select, s_vector_filter, s_undo_pick_race, s_undo_pick_race_check,
          s_raster_source, s_raster_select, s_raster_filter, s_raster_check, s_raster_settled,
          s_point_cloud_source, s_point_cloud_select, s_point_cloud_filter, s_point_cloud_check, s_point_cloud_settled,
-         s_back_to_vector, s_close_dock, s_reopen_dock, s_reopen_pick_raster, s_reopen_raster_check,
+         s_back_to_vector, *TOOLS_STEPS, s_close_dock, s_reopen_dock, s_reopen_pick_raster, s_reopen_raster_check,
          s_reopen_vector_check,
          s_rasters_off, s_rasters_off_check, s_rasters_on_check,
          s_replay_select, s_replay_filter, s_replay_save_and_clear, s_replay_read, s_replay_check,
@@ -5751,6 +5980,8 @@ if os.environ.get('FM_ONLY') == 'layout_shots':  # the window in each layout, as
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SHOT_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'rows':  # the rows of FILTERING / EXPORTING packed or spread, and their key buttons
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *ROWS_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'tools':  # the tools of the EXPLORING rail chosen per kind of layer, and the setup
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *TOOLS_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 
