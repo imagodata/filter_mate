@@ -5877,7 +5877,7 @@ def sizing_restart(float_dock):
     if float_dock:
         d.setFloating(True)
         pump(300)
-        d.resize(max(d.width(), 420), 640)
+        d.resize(max(d.width(), 420), 400)  # lower than a floating panel starts: kept as QGIS kept it
         d.move(500, 120)
     else:
         total = d.height() + panel.height()
@@ -5932,12 +5932,17 @@ def s_sizing_open_chip_again():
     panels.detach('filtering')
     panels.group('exporting', 'filtering')
     panel = panels.panel('filtering')
+    window.splitDockWidget(d, panel, Qt.Orientation.Vertical)  # below the dock, whatever place was kept for it
     panel.rail.chip('filtering').click()
     pump(900)
+    if panel.isFloating() or len(sizing_column(panel)) < 2:
+        report('SKIP', 'sizing: a click on the chip already open', f"the panel is not below the dock: {sizing_state()}")
+        return None
     total = d.height() + panel.height()
     window.resizeDocks([d, panel], [total - panel.height() - 120, panel.height() + 120], Qt.Orientation.Vertical)
     pump(900)
     before = sizing_heights()
+    check('sizing: the panel enlarged by hand is taller than its rows', sizing_empty(panel) > 60, sizing_state())
     panel.rail.chip('filtering').click()  # already open
     pump(900)
     after_panel = sizing_heights()

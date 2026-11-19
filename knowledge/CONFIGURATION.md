@@ -119,13 +119,17 @@ config.json
 - **Key:** `APP.DOCKWIDGET.PANEL_SIZING`
 - **Default:** `auto`
 - **Choices:** `auto`, `manual`
-- `auto`: with sections taken out of the dock, the dock and the panels are sized again when a section leaves, comes
-  back, changes panel or is turned on or off, when a panel is moved, when another section is opened, and when
-  `SECTION_HEIGHT` or `ACTION_BAR_POSITION` changes. FILTERING and EXPORTING (rows at their own height) get the
-  height they need; the room left in their column goes to EXPLORING, AGENT and CONFIGURATION, else to the other
-  panels of QGIS there. A floating panel takes the height of its rows, or a comfortable one within the screen
+- `auto`: with sections taken out of the dock, the panels a change concerns are sized again with their columns: a
+  section that leaves, comes back or changes panel, a panel moved, another section opened in it (by the user, the
+  agent or a script); every one when a section is turned on or off, when `SECTION_HEIGHT`, `ACTION_BAR_POSITION` or
+  `UI_PROFILE` changes, when the configuration is read again, and when `PANEL_SIZING` goes back to `auto`.
+  FILTERING and EXPORTING (rows at their own height) get the height they need; the room left in their column goes
+  to EXPLORING, AGENT and CONFIGURATION, else to the other panels of QGIS there, which give up height before the
+  rows are cut. A column narrower than the rows is made wider (never narrower). A floating panel takes the height
+  of its rows, or a comfortable one within the screen
 - `manual`: the heights QGIS and the user set stay (the behaviour of 5.1.1)
-- Nothing is resized when a separator is dragged, nor when QGIS starts (the places and sizes it kept are taken);
+- Nothing is resized when a separator is dragged, on a click on the section already open, while a mouse button is
+  down, nor when QGIS starts (the places and sizes it kept are taken, a floating dock included);
   the handle between the two stacks of the dock stays where the user left it. A rigid panel alone in its column
   keeps the height Qt gives it; in a group of tabs, a panel shares the height of the other tabs
 

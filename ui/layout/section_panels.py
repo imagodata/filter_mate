@@ -22,11 +22,13 @@
   dock. Closing a panel brings its sections back to the dock, folded.
 * What is apart, and with what, is kept in ``FilterMate/panels/detached`` (``agent,filtering+exporting``) and
   restored when the dock is built.
-* Each change of what the dock and the panels show (a section out, back, in another panel, turned on or off,
-  another one opened, a panel moved) sizes them again in their column of the window (``column_heights``): FILTERING
-  and EXPORTING, their rows at their own height, at the height they need; the room left to EXPLORING, AGENT and
-  CONFIGURATION, else to the other panels of QGIS there. Not a separator dragged, nor QGIS starting: the sizes the
-  user and QGIS set stay until such a change (``APP.DOCKWIDGET.PANEL_SIZING`` = ``manual``: always).
+* A change of what the dock or a panel shows (a section out, back, in another panel, another one opened, the panel
+  moved) sizes it again in its column of the window (``column_heights``), with the column it left: FILTERING and
+  EXPORTING, their rows at their own height, at the height they need; the room left to EXPLORING, AGENT and
+  CONFIGURATION, else to the other panels of QGIS there; a column too narrow for the rows made wider. A setting
+  that changes them all (a section turned on or off, the height of the rows, the buttons, the profile) sizes every
+  column. Not a separator dragged, a click on what is open already, a mouse button held down, nor QGIS starting: the
+  sizes the user and QGIS set stay until such a change (``APP.DOCKWIDGET.PANEL_SIZING`` = ``manual``: always).
 """
 from __future__ import annotations
 
@@ -1441,18 +1443,18 @@ class SectionPanels:
         buttons, the display profile, the configuration read again, PANEL_SIZING back to auto)."""
         self._resize_soon()
 
-    def _resize_soon(self, seeds: Any = None, late: bool = False) -> None:
+    def _resize_soon(self, seeds: Any = None, late: bool = False, unless_still: bool = False) -> None:
         """A pass of ``_resize_now`` on the next turn of the loop of Qt, after the layout of what changed: one for
         any number of changes. ``seeds``: the docks whose columns are sized again (and those of them that float),
         every column of FilterMate with None. ``late``: once a panel dropped with the mouse is plugged
-        (``FUSION_SETTLE_MS``), and not when nothing moved since the last pass. Nothing before the start is over
+        (``FUSION_SETTLE_MS``); ``unless_still``: not then when nothing moved since the last pass. Nothing before the start is over
         (``hold``), nor while the panels of the last time are restored: QGIS gives them the places and sizes it
         kept."""
         if self._closing or not self._armed or self._restoring:
             return
         from qgis.PyQt.QtCore import QTimer
         if late:
-            QTimer.singleShot(FUSION_SETTLE_MS, lambda: self._late(seeds))
+            QTimer.singleShot(FUSION_SETTLE_MS, lambda: self._late(seeds, unless_still))
             return
         if seeds is None:
             self._resize_all = True
@@ -1462,9 +1464,9 @@ class SectionPanels:
             self._resize_pending = True
             QTimer.singleShot(0, self._resize_now)
 
-    def _late(self, seeds: Any) -> None:
+    def _late(self, seeds: Any, unless_still: bool) -> None:
         try:
-            if self._after_pass is not None and self._snapshot() == self._after_pass:
+            if unless_still and self._after_pass is not None and self._snapshot() == self._after_pass:
                 return  # the pass of the change itself saw the docks as they are now
         except RuntimeError:  # the dock went away
             return
@@ -1776,7 +1778,7 @@ class SectionPanels:
         it joined, once a drop with the mouse is plugged."""
         if not self._armed or self._restoring or self._closing:
             return
-        self._resize_soon([holder] + list(self._columns.get(holder, [])), late=True)
+        self._resize_soon([holder] + list(self._columns.get(holder, [])), late=True, unless_still=True)
 
     def _open_state(self, holder: Any) -> Any:
         if holder is self._dock:
