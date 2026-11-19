@@ -229,3 +229,67 @@ def test_a_canceled_task_leaves_the_rows_of_other_tasks(hs, db):
     assert hs.discard_history_rows(db, "p", []) == 0
     assert hs.discard_history_rows(db, "p", ["unknown"]) == 0
     assert len(_rows(db, "cables")) == 2
+
+
+# 2026-11-19: the deletion runs on the main thread, where the file may be locked for writing by the run() of
+# the next task: it waited 5.1 s and the row stayed. A short wait now, and the row is deleted at a later finished().
+
+def _locked(path):
+    """A connection holding the write lock, as the run() of the next task does while it inserts."""
+    conn = sqlite3.connect(path, timeout=0.1, isolation_level=None)
+    conn.execute("BEGIN IMMEDIATE")
+    return conn
+
+
+def test_a_locked_file_does_not_block_the_interface(hs, db):
+    import time
+    locker = _locked(db)
+    try:
+        started = time.monotonic()
+        assert hs.discard_history_rows(db, "p", ["a2"]) == 0
+        assert time.monotonic() - started < 2.0   # 5.1 s before
+    finally:
+        locker.rollback()
+        locker.close()
+    assert [row[0] for row in _rows(db, "cables")] == ["a1", "a2"]
+
+
+def test_what_a_locked_file_kept_is_deleted_at_the_next_finished(hs, db):
+    locker = _locked(db)
+    try:
+        hs.discard_history_rows(db, "p", ["a2"])
+        assert hs.retry_pending_discards() == 0   # still locked: kept for later
+    finally:
+        locker.rollback()
+        locker.close()
+    assert hs.retry_pending_discards() == 1
+    assert [row[0] for row in _rows(db, "cables")] == ["a1"]
+    assert hs.retry_pending_discards() == 0       # nothing left to retry
+
+
+def test_a_pending_row_is_not_written_back_by_a_refused_task_meanwhile(hs, db):
+    snapshot = hs.take_history_snapshot(db, "p", ["cables"])
+    locker = _locked(db)
+    try:
+        hs.discard_history_rows(db, "p", ["a2"])
+    finally:
+        locker.rollback()
+        locker.close()
+    hs.restore_history(db, "p", snapshot, ["cables"])   # the snapshot still holds a2
+    hs.retry_pending_discards()
+    assert [row[0] for row in _rows(db, "cables")] == ["a1"]
+
+
+def test_only_the_rows_of_the_given_layers_are_deleted(hs, db):
+    assert hs.discard_history_rows(db, "p", ["a2", "b1"], layer_ids=["conduits"]) == 1
+    assert [row[0] for row in _rows(db, "cables")] == ["a1", "a2"]
+    assert _rows(db, "conduits") == []
+    assert hs.discard_history_rows(db, "p", ["a2"], layer_ids=[]) == 0
+
+
+def test_a_row_of_another_layer_is_not_forgotten_for_the_restore(hs, db):
+    """The ids of the layers left out are not remembered as deleted: a refused task puts them back."""
+    snapshot = hs.take_history_snapshot(db, "p", ["cables"])
+    hs.discard_history_rows(db, "p", ["a2", "b1"], layer_ids=["conduits"])
+    hs.restore_history(db, "p", snapshot, ["cables"])
+    assert [row[0] for row in _rows(db, "cables")] == ["a1", "a2"]
