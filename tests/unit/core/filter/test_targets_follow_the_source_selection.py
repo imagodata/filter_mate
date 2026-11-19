@@ -32,7 +32,7 @@ OLD = '"src"."dep" = \'31\''
 
 @pytest.fixture
 def facade_module():
-    from tests.unit.core.tasks import conftest as tasks_conftest
+    from ..tasks import conftest as tasks_conftest   # relative: pytest names the conftest after the checkout
     saved = tasks_conftest._install()
     name = "filter_mate.core.tasks.expression_facade_handler"
     spec = importlib.util.spec_from_file_location(name, _TASKS_DIR / "expression_facade_handler.py")
