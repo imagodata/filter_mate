@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Dock: the layout of 5.1.1 is back. The rows of FILTERING and EXPORTING spread over the height of their section again by default (`SECTION_HEIGHT` = `fill`; `fit`, the rows packed at the top, was the default of 5.1.2 and stays a choice in the setup, in CONFIGURATION and for the agent). A configuration that holds `fit` from 5.1.2 is put back to `fill` once; a `fit` chosen afterwards is kept. The change of 19 November that gave each of the two stacks its minimum and half of the room left is withdrawn: they share the dock as in 5.1.1, measured in QGIS 3.22, 3.44 and 4.3 (the same heights to the pixel when the dock opens with a vector layer, a raster or a point cloud, when the handle is dragged and when the window gets shorter or taller; the rows within 3 px, the margin their aligned buttons take since 5.1.2). Two defects of 5.1.1 are fixed without changing that: a handle left by the user came back 8 to 9 px higher when the next section opened, and a display profile applied while nothing was open below left the section opened next in a stack 150 px high that the handle could not enlarge. With the rows spread, the 6 px kept beside a scroll bar no longer stay once the bar is gone.
+
 ## [5.1.2] - 2026-11-19
 
 The fixes and changes merged since 5.1.1. The panel: FILTERING and EXPORTING compact, the tool buttons of the
