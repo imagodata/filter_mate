@@ -583,12 +583,17 @@ def rows_need(pages=('FILTERING',), show=False):
 
 
 def dock_void(pages=None, need=None):
-    """The empty band of the dock: what its lower stack holds beyond the rows of ``pages`` (None: of the section it
-    shows, FILTERING or EXPORTING). The rows are packed at the top of their section (SECTION_HEIGHT = fit), so a
-    window taller than the dock needs shows that band in every frame."""
+    """The empty band of the dock: what its lower stack holds beyond the rows of ``pages``. The rows are packed at
+    the top of their section (SECTION_HEIGHT = fit), so a window taller than the dock needs shows that band in every
+    frame. ``pages`` None: the band under the rows of the section the dock shows, read on that section (its viewport
+    against what its rows ask), which also holds with the headers stacked; 0 for CONFIGURATION, whose tree takes
+    the height it is given."""
     d = dock()
     if pages is None:
-        pages = [name for name in ('FILTERING', 'EXPORTING') if d.toolBox_tabTools.currentWidget() is getattr(d, name)]
+        page = d.toolBox_tabTools.currentWidget()
+        if page is None or page not in (d.FILTERING, d.EXPORTING) or page.parentWidget() is None:
+            return 0
+        return page.parentWidget().height() - max(page.sizeHint().height(), page.minimumSizeHint().height())
     sizes = d.splitter_main.sizes()
     if need is None:
         need = rows_need(pages) if pages else 0
@@ -2580,21 +2585,52 @@ def header_click(key):
 HEADERS = ('APP', 'DOCKWIDGET', 'SECTION_HEADERS')
 BAR = ('APP', 'DOCKWIDGET', 'ACTION_BAR_POSITION')
 
+
+def open_configuration():
+    dock().toolBox_tabTools.setCurrentWidget(dock().CONFIGURATION)
+
+
+def trim_stacks():
+    """The lower stack of the dock gives EXPLORING the band its open section leaves under its rows, or takes back
+    what its rows lack. Read on the section itself (its viewport against what its rows ask), so it holds with the
+    headers stacked and the buttons under each section, where rows_need() counts a rail."""
+    d = dock()
+    page = d.toolBox_tabTools.currentWidget()
+    if page is None or page is d.CONFIGURATION or page.parentWidget() is None:
+        return
+    band = page.parentWidget().height() - max(page.sizeHint().height(), page.minimumSizeHint().height())
+    sizes = d.splitter_main.sizes()
+    if len(sizes) == 2 and band and sizes[1] - band > 0 and sizes[0] + band > 0:
+        d.splitter_main.setSizes([sizes[0] + band, sizes[1] - band])
+        sections = getattr(d, '_fm_sections', None)
+        if sections is not None and hasattr(sections, '_share'):
+            sections._share = (sizes[0] + band) / sum(sizes)
+    log(f'stacks trimmed by {band}: {d.splitter_main.sizes()}')
+
+
+def staged_in_configuration(scale):
+    """staged(), with CONFIGURATION opened just before the recording starts."""
+    steps = staged(scale)
+    return steps[:-2] + [(300, open_configuration), (900, wait_idle())] + steps[-2:]
+
+
 # layout: CONFIGURATION, two settings typed in its search and chosen in the tree, applied at once: the headers stacked
 # instead of the rails, the buttons under each section instead of one bar; then FILTERING and EXPORTING opened.
-LAYOUT = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + staged(1.15) + [
-    title('The dock, laid out your way'), caption('1 · Open CONFIGURATION'),
+# The window is not fitted: the dock with its headers stacked needs the 120 px a fitted window takes away, and the
+# take starts in CONFIGURATION, whose tree takes that height (with FILTERING open it was an empty band).
+LAYOUT = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15, fit=None) + staged_in_configuration(1.15) + [
+    title('The dock, laid out your way'), caption('1 · CONFIGURATION: every setting, found by its name'),
     hold(1200), (0, cam('dock', dur=1.4, pad=12)), hold(1200),
-] + act(toolbox_button('config'), lambda: dock().toolBox_tabTools.setCurrentWidget(dock().CONFIGURATION)) + [
-    hold(700), (0, cam(lambda: dock().config_view_container, dur=1.2, pad=16)), hold(500),
+    (0, cam(lambda: dock().config_view_container, dur=1.2, pad=16)), hold(500),
 ] + [caption('2 · Section headers: stacked instead of the rail')] + config_find('SECTION_HEADERS') + [hold(700)] + config_choose(HEADERS, 'stacked') + [
     hold(900), (0, cam('dock', dur=1.2, pad=12)), hold(2200),
     (0, cam(lambda: dock().config_view_container, dur=1.2, pad=16)), hold(400),
 ] + [caption('3 · Action buttons: under each section')] + config_find('ACTION_BAR_POSITION') + [hold(700)] + config_choose(BAR, 'sections') + [
     hold(900), (0, cam(lambda: [dock().toolBox_tabTools, dock().pushButton_action_filter], dur=1.2, pad=16)), hold(400)] \
     + [caption('4 · Applied at once: each section has its own buttons')] \
-    + header_click('filtering') + [hold(2200)] + header_click('exporting') + [hold(2200)] \
-    + header_click('filtering') + [hold(800), (0, cam('full', dur=1.4)), hold(2400),
+    + header_click('filtering') + [(350, trim_stacks), hold(2200)] \
+    + header_click('exporting') + [(350, trim_stacks), hold(2200)] \
+    + header_click('filtering') + [(350, trim_stacks), hold(800), (0, cam('full', dur=1.4)), hold(2400),
                                    (0, stop_recording), (500, quit_when_idle)]
 
 
