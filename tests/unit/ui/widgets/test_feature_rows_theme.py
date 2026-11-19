@@ -125,7 +125,6 @@ def test_without_a_stylesheet_the_palette_says_the_theme(rows_class):
 
 @pytest.mark.unit
 def test_the_theme_is_read_once_until_it_changes(rows_class, monkeypatch):
-    import sys
     import types
     asked = []
 
