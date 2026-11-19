@@ -397,6 +397,45 @@ def test_a_field_named_like_a_function_is_no_function(translation, monkeypatch, 
     assert translation.copies == ["zones"]
 
 
+def test_under_or_the_keys_already_listed_count_with_the_new_list(translation, monkeypatch):
+    """Three keys are listed here: one list reaches HYBRID_MAX_KEYS, a chain of ORs may not go beyond."""
+    _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
+    limit = translation.HYBRID_MAX_KEYS
+
+    assert _hybrid(translation, _filtered_layer(), whole_layer=True, listed_keys=limit - 3) == (
+        '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)')
+    with pytest.raises(translation.Unsupported, match="listed already"):
+        _hybrid(translation, _filtered_layer(), whole_layer=True, listed_keys=limit - 2)
+
+
+def test_keys_already_listed_up_to_the_limit_read_no_feature(translation, monkeypatch):
+    copy = _Layer("zones (unfiltered)", ROWS)
+    _with_copy(translation, monkeypatch, copy)
+
+    with pytest.raises(translation.Unsupported, match="already listed"):
+        _hybrid(translation, _filtered_layer(), whole_layer=True, listed_keys=translation.HYBRID_MAX_KEYS)
+    assert translation.copies == [] and translation.probe.counted == [] and copy.reads == []
+
+
+def test_the_list_counted_is_the_one_written(translation, monkeypatch):
+    """Native part: the keys it drops are listed instead of the ones it keeps when they are fewer (two here)."""
+    layer = _Layer("zones", ROWS)
+    copy = _Layer("zones (unfiltered)", ROWS)
+    _with_copy(translation, monkeypatch, copy)
+    result = types.SimpleNamespace(predicate=True, native_expression="native_part", native_exact=True,
+                                   native_columns=frozenset({"pop"}), reason="left to QGIS")
+    limit = translation.HYBRID_MAX_KEYS
+    for listed, ok in ((limit - 1, False), (limit - 2, True)):
+        call = lambda: translation._hybrid_subset(_Layer("zones", ROWS, subset='"fid" > 0'), "big", result,
+                                                  '"pop" >= 0', "fid", whole_layer=True, listed_keys=listed)
+        if ok:
+            assert 'NOT ("fid" IN (1, 4))' in call()
+        else:
+            with pytest.raises(translation.Unsupported):
+                call()
+    assert layer.reads == []
+
+
 def test_under_or_every_key_the_expression_keeps_is_listed(translation, monkeypatch):
     """The list is also the selection the targets are filtered by: never without the keys the old subset keeps."""
     layer = _Layer("zones", ROWS, subset='"fid" IN (2, 3)', shown={2, 3})

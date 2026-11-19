@@ -11,7 +11,7 @@ import logging
 try:
     from ...core.filter.server_dialect import TranslationStatus, Unsupported
     from ...filtermate_core.filter.native_dialect import (
-        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
+        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, HYBRID_MAX_KEYS, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
         NativeGeometry, NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native,
         uses_geometry,
     )
@@ -19,7 +19,7 @@ try:
 except ImportError:  # plugin root on sys.path in pure unit tests
     from core.filter.server_dialect import TranslationStatus, Unsupported
     from filtermate_core.filter.native_dialect import (
-        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
+        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, HYBRID_MAX_KEYS, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
         NativeGeometry, NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native,
         uses_geometry,
     )
@@ -304,7 +304,7 @@ def native_subset(layer, expression):
 
 
 def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=False, whole_layer=False,
-                     is_canceled=None):
+                     is_canceled=None, listed_keys=0):
     """The subset of ``layer`` for ``expression`` in its source's own language.
 
     Args:
@@ -321,6 +321,10 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
         is_canceled: The task's ``isCanceled``: a hybrid subset reads every
             feature of the layer, the reading stops when the task is canceled
             (no list then; the task applies nothing).
+        listed_keys: Keys already listed in the subset this one is ORed
+            with. They count with the new list against ``HYBRID_MAX_KEYS``:
+            beyond it no list is written (the provider's ``setSubsetString``
+            is quadratic in the keys of the whole subset).
         negated: Whether the subset will be written under NOT (AND NOT). OGR
             SQL gives FALSE to TRUE AND NULL: a translation holding AND, OR or
             NOT is then left to the former conversion, and so are texts (only
@@ -361,7 +365,8 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
     if not evaluate:
         return None
     try:
-        subset = _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer, is_canceled)
+        subset = _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer, is_canceled,
+                               listed_keys)
     except Unsupported as exc:
         logger.info('No hybrid subset for %s: %s', layer.name(), exc)
         return None
@@ -396,7 +401,8 @@ def _is_true(value):
     raise Unsupported('A condition gave a value that is not a boolean')
 
 
-def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=False, is_canceled=None):
+def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=False, is_canceled=None,
+                   listed_keys=0):
     """Let QGIS evaluate the expression on each feature, then list keys (``native_dialect.hybrid_sql``).
 
     Every feature is read and evaluated locally: the provider's own compiled
@@ -415,6 +421,10 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
     field the expression reads (joined, virtual), gives no list: never keys
     read through the subset the new one replaces. The fields are checked on
     the source's before the copy is opened (and counted), and again on the copy.
+
+    ``listed_keys`` (a subset ORed with the new one, with the keys it lists):
+    no list when they and the new list exceed ``HYBRID_MAX_KEYS``, checked
+    before any feature is read when they alone reach it.
     """
     from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
     from .source_capability_probe import feature_count_or_none
@@ -448,6 +458,8 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
                     sorted(native.referencedColumns()), sorted(result.native_columns))
         native, native_sql = None, ''
 
+    if listed_keys >= HYBRID_MAX_KEYS:
+        raise Unsupported('{} keys already listed in the subset this one is ORed with'.format(listed_keys))
     names = set(whole.referencedColumns()) | (set(native.referencedColumns()) if native else set())
 
     # The copy is opened once the key and the expression are known to serve (review of 2026-11-18: without a key it
@@ -496,7 +508,7 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
             passing.append(value)
         elif failing is not None and in_native:
             failing.append(value)
-    subset = hybrid_sql(native_sql, passing, failing, key, numeric, dialect)
+    subset = hybrid_sql(native_sql, passing, failing, key, numeric, dialect, already_listed=listed_keys)
     logger.info('Hybrid subset for %s: %d kept, %s excluded by QGIS from the native part (%s)%s', layer.name(),
                 len(passing), 'no native part' if failing is None else len(failing), result.reason,
                 ', read without its subset' if source is not layer else '')

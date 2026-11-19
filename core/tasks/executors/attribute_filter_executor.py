@@ -475,7 +475,8 @@ class AttributeFilterExecutor:
                                       evaluate=self._keys_may_be_evaluated(),
                                       negated='NOT' in (self.combine_operator or '').upper(),
                                       whole_layer=self._keys_read_on_whole_layer(),
-                                      is_canceled=self.is_canceled)
+                                      is_canceled=self.is_canceled,
+                                      listed_keys=self._keys_listed_under_or())
         except Exception as e:  # catch-all: the former conversion stays the fallback
             logger.debug(f"Native translation not available: {e}")
             return None
@@ -513,13 +514,31 @@ class AttributeFilterExecutor:
         old subset keeps: it is the selection the targets are filtered by
         (ExpressionFacadeHandler._source_selection, the EXISTS of PostgreSQL),
         which a list without them made narrower (review of 2026-11-18). A
-        chain of ORs adds one list per filter, each within HYBRID_MAX_KEYS.
+        chain of ORs adds one list per filter: the keys already listed count
+        with the new list (``_keys_listed_under_or``).
         """
         current = self._current_subset()
         if not current:
             return False
         operator = (self.combine_operator or '').strip().upper()
         return not (operator == 'AND' and current == (self.old_subset or '').strip())
+
+    def _keys_listed_under_or(self) -> int:
+        """Keys the subset the new one is ORed with already lists, 0 under any other operator.
+
+        Under OR each filter adds its whole list to the old subset, and the
+        provider's ``setSubsetString`` is quadratic in the keys of the whole
+        subset (measured on a GeoPackage: 10,000 keys 0.4 s, 30,000 4.1 s,
+        99,000 47 s, two lists of 99,000 322 s on the main thread). The old
+        subset is not read again from its source: its commas count them (a
+        list of n keys has n - 1; a comma of a native part or of a text key
+        counts too, which only refuses a list sooner, to the former
+        conversion). ``subset_for_layer`` writes no list when they and the
+        new one exceed ``HYBRID_MAX_KEYS``, the size one list may reach.
+        """
+        if (self.combine_operator or '').strip().upper() != 'OR':
+            return 0
+        return (self.old_subset or '').count(',')
 
     def _current_subset(self) -> Optional[str]:
         """The layer's subset, stripped; None when the layer cannot be read (deleted)."""

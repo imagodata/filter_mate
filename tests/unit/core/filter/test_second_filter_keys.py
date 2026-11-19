@@ -7,6 +7,9 @@ written and the former conversion's ``bounds_width("geom") > 2`` was refused by 
 whole layer whenever the new subset is not ANDed with the subset the layer has (replace, OR, AND with another
 one), still never under AND NOT. Under OR the list holds every key the expression keeps (review of 2026-11-18: it is
 also the selection the targets are filtered by; one without the keys of the old subset made it narrower).
+A chain of ORs adds one list per filter and the provider's ``setSubsetString`` is quadratic in the keys of the
+whole subset (99,000 keys 47 s, two lists of 99,000 322 s): the keys the old subset lists, counted by its commas,
+are given to ``subset_for_layer`` as ``listed_keys`` and count with the new list (HYBRID_MAX_KEYS in all).
 Methods extracted with ast (the module needs the plugin package).
 """
 import ast
@@ -23,7 +26,8 @@ pytestmark = pytest.mark.unit
 
 _PATH = Path(__file__).resolve().parents[4] / "core" / "tasks" / "executors" / "attribute_filter_executor.py"
 _PACKAGE = "fm_second_filter_keys_test"
-_METHODS = ("_native_subset", "_keys_may_be_evaluated", "_keys_read_on_whole_layer", "_current_subset")
+_METHODS = ("_native_subset", "_keys_may_be_evaluated", "_keys_read_on_whole_layer", "_keys_listed_under_or",
+            "_current_subset")
 
 
 def _namespace():
@@ -98,6 +102,25 @@ def test_where_the_keys_are_read(calls, current, old, operator, evaluate, whole_
     assert options["negated"] == ("NOT" in (operator or ""))
     assert options["key_name"] == "fid"
     assert options["is_canceled"] is executor.is_canceled  # the reading of the whole layer sees a cancel
+
+
+@pytest.mark.parametrize("old, operator, listed", [
+    (OLD, "OR", 4),                         # 5 keys, 4 commas: a list of n keys has n - 1
+    (OLD + " OR " + OLD, "or", 8),
+    (OLD, " OR ", 4),
+    (OLD, "AND", 0),                        # an AND with the same subset keeps the smaller list: not counted
+    (OLD, None, 0),                         # replaced: the old subset is gone
+    (OLD, "AND NOT", 0),
+    (None, "OR", 0),                        # nothing to be ORed with
+    ("", "OR", 0),
+    ('"name" = \'a,b\'', "OR", 1),          # a comma of a text counts too: a list is refused sooner, never later
+])
+def test_under_or_the_keys_the_old_subset_lists_are_counted(calls, old, operator, listed):
+    executor = _executor(OLD, old, operator)
+
+    assert executor._keys_listed_under_or() == listed
+    assert executor._native_subset("bounds_width($geometry) > 2") == "subset"
+    assert calls[0]["listed_keys"] == listed
 
 
 def test_the_task_gives_the_executor_its_cancellation():
