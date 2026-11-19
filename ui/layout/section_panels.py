@@ -201,15 +201,15 @@ def _spread(amount: int, weights: Sequence[float], minimums: Sequence[int]) -> L
     return heights
 
 
-def column_heights(docks: Sequence[Tuple[str, int, int, Optional[int]]], room: int) -> List[int]:
+def column_heights(docks: Sequence[Tuple[str, int, int, int]], room: int) -> List[int]:
     """The heights of the docks of a column of the window of QGIS, top to bottom, that share ``room``. Each dock is
     ``(kind, minimum, need, weight)``:
 
     * ``RIGID``: a panel of FilterMate that has nothing to do with more height than it ``need``s (FILTERING or
       EXPORTING, their rows at their own height): it gets that height.
     * ``ELASTIC``: a panel of FilterMate that uses any height (EXPLORING, AGENT, CONFIGURATION): what the rigid ones
-      leave goes to these, in proportion to their ``weight`` (the height they have: the share the user left them).
-      A weight of None (a panel that was not elastic before) is the mean of the others: an equal share.
+      leave goes to these, in proportion to their ``weight`` (the height they have: the share the user, or the first
+      place of the panel, left them).
     * ``OTHER``: a panel of QGIS (Layers, Browser...), or a group of tabs: it keeps its height (its ``weight``) when
       an elastic one takes the rest; it takes it, the others of its kind in proportion to their heights, otherwise.
 
@@ -229,10 +229,7 @@ def column_heights(docks: Sequence[Tuple[str, int, int, Optional[int]]], room: i
             heights[i] = height
         return heights
     if elastic:
-        known = [docks[i][3] for i in elastic if docks[i][3] is not None]
-        mean = sum(known) / len(known) if known else 1.0
-        receivers, weights = elastic, [float(docks[i][3]) if docks[i][3] is not None else mean for i in elastic]
-        kept = rigid + others
+        receivers, weights, kept = elastic, [float(docks[i][3] or 0) for i in elastic], rigid + others
         for i in others:
             wanted[i] = max(minimums[i], int(docks[i][3] or 0))
     else:
@@ -1212,7 +1209,7 @@ class SectionPanels:
         from qgis.PyQt.QtCore import QPoint, Qt
         dock = self._dock
         window.addDockWidget(target, panel)
-        manual = not self._auto()  # else the heights are those of the next pass (resize_soon), from what each shows
+        manual = not self._auto()  # else EXPLORING gets what the next pass (resize_soon) leaves it
         if docked and not window.tabifiedDockWidgets(dock):
             room = dock.height()
             wanted = 0 if STAYS in panel.members else self._height_below(panel)
@@ -1227,9 +1224,10 @@ class SectionPanels:
                 if manual and room - share >= PANEL_MIN_HEIGHT:
                     window.resizeDocks([panel, dock], [share, room - share], Qt.Orientation.Vertical)
             elif wanted:  # the room of the dock shared: the section at its own height, the dock keeps the larger part
+                # (In auto too: an elastic panel, AGENT, keeps this share afterwards, rather than half of the room.)
                 window.splitDockWidget(dock, panel, Qt.Orientation.Vertical)
-                if manual:
-                    window.resizeDocks([dock, panel], [room - wanted, wanted], Qt.Orientation.Vertical)
+                height = min(wanted, max(PANEL_MIN_HEIGHT, room - self._minimum(dock)))  # wanted alone in manual
+                window.resizeDocks([dock, panel], [room - height, height], Qt.Orientation.Vertical)
             else:
                 window.splitDockWidget(dock, panel, Qt.Orientation.Horizontal)
         if self._restoring:
@@ -1286,7 +1284,14 @@ class SectionPanels:
         if contents is not None and contents.layout() is not None:
             contents.layout().activate()  # the minimum of the dock without the section that just left it
         room = dock.height()
-        spare = room - max(dock.minimumHeight(), dock.minimumSizeHint().height())
+        spare = room - self._minimum(dock)
+        window = self._main_window()
+        if self._auto() and window is not None:
+            # The pass that follows shares the whole column: what every dock of it has above its minimum (EXPLORING
+            # above the dock held to FILTERING) can go to the panel. The dock alone put it beside the dock.
+            column = self._column(window, dock) or [dock]
+            room = sum(other.height() for other in column)
+            spare = sum(other.height() - self._minimum(other) for other in column)
         return panel_height(panel.widget().sizeHint().height() + TITLE_ROOM, room, spare)
 
     def relax_dock(self, profile_applied: bool = False) -> None:
@@ -1424,12 +1429,12 @@ class SectionPanels:
 
     def _area_docks(self, window: Any, area: Any) -> List[Any]:
         """The docks of QGIS in ``area`` of the window, on screen or behind a tab."""
-        from qgis.PyQt.QtCore import Qt
         from qgis.PyQt.QtWidgets import QDockWidget
         docks = []
-        for dock in window.findChildren(QDockWidget, "", Qt.FindChildOption.FindDirectChildrenOnly):
+        # Not FindDirectChildrenOnly: given that way, PyQt found no dock at all (QGIS stable, 19 November 2026).
+        for dock in window.findChildren(QDockWidget):
             try:
-                if dock.isVisible() and not dock.isFloating() and dock.height() > 0 \
+                if dock.parentWidget() is window and dock.isVisible() and not dock.isFloating() and dock.height() > 0 \
                         and window.dockWidgetArea(dock) == area:
                     docks.append(dock)
             except RuntimeError:  # a dock going away
@@ -1453,31 +1458,46 @@ class SectionPanels:
         """The height of the bar of the tabs ``dock`` shares, 0 without one: Qt sizes the group with it."""
         if not self._tab_mates(window, dock):
             return 0
-        from qgis.PyQt.QtCore import Qt
         from qgis.PyQt.QtWidgets import QTabBar
         rect = dock.geometry()
-        for bar in window.findChildren(QTabBar, "", Qt.FindChildOption.FindDirectChildrenOnly):
+        for bar in window.findChildren(QTabBar):
             area = bar.geometry()
-            if bar.isVisible() and min(area.right(), rect.right()) - max(area.left(), rect.left()) > 0 \
+            if bar.parentWidget() is window and bar.isVisible() and min(area.right(), rect.right()) - max(area.left(), rect.left()) > 0 \
                     and (abs(area.top() - rect.bottom()) <= 12 or abs(area.bottom() - rect.top()) <= 12):
                 return area.height()
         return 0
 
     def _size_column(self, window: Any, column: List[Any], seen: Dict[Any, str]) -> None:
         """``column`` shared again (``column_heights``). A group of tabs is a panel of QGIS, even with a panel of
-        FilterMate in front: its height is that of the other tabs too."""
+        FilterMate in front: its height is that of the other tabs too. Docks side by side are one row of the
+        column: elastic when one of them is, rigid at the need of the tallest one otherwise (the others keep room
+        under their rows: they cannot be shorter than the row), a panel of QGIS when one is."""
         from qgis.PyQt.QtCore import Qt
+        area = self._area_docks(window, window.dockWidgetArea(column[0]))
         docks, slots = [], []
         for dock in column:
             tab = self._tab_room(window, dock)
             slot = dock.height() + tab
-            if not tab and (dock is self._dock or dock in self._panels):
-                kind, need, minimum = self._measure(dock)
-                seen[dock] = kind
-                weight = slot if kind != ELASTIC or dock in self._elastic else None
-                docks.append((kind, minimum, need, weight))
-            else:
-                docks.append((OTHER, self._minimum(dock) + tab, 0, slot))
+            # The docks beside it share its height: one row of the column, sized for all of them.
+            # (Same top and height, another left: a tab of its group has the same place, a dock across several rows
+            # another height.)
+            row = [dock] + [other for other in area if other not in column and abs(other.y() - dock.y()) <= 2
+                            and abs(other.height() - dock.height()) <= 2 and abs(other.x() - dock.x()) > 2]
+            kinds = []
+            for one in row:
+                if (one is dock and tab) or not (one is self._dock or one in self._panels) or self._tab_room(window, one):
+                    kinds.append((OTHER, self._minimum(one), 0))
+                    continue
+                kind, need, minimum = self._measure(one)
+                seen[one] = kind
+                kinds.append((kind, minimum, need))
+            minimum = max(entry[1] for entry in kinds) + tab
+            if any(entry[0] == OTHER for entry in kinds):
+                docks.append((OTHER, minimum, 0, slot))
+            elif any(entry[0] == ELASTIC for entry in kinds):
+                docks.append((ELASTIC, minimum, 0, slot))
+            else:  # rigid side by side: the row for the one that needs the most, none cut
+                docks.append((RIGID, minimum, max(entry[2] for entry in kinds), slot))
             slots.append(slot)
         heights = column_heights(docks, sum(slots))
         if any(abs(height - slot) > 1 for height, slot in zip(heights, slots)):
@@ -1566,7 +1586,10 @@ class SectionPanels:
         if not self._auto():
             return
         if pressed:
-            self._press_signature = self._signature()
+            try:
+                self._press_signature = self._signature()
+            except Exception:  # never in the way of a click (a dock going away raises RuntimeError)
+                self._press_signature = None
             return
         before, self._press_signature = self._press_signature, None
         if before is None:
@@ -1577,8 +1600,8 @@ class SectionPanels:
             try:
                 if not self._closing and self._signature() != before:
                     self._resize_soon()
-            except RuntimeError:  # the dock went away
-                pass
+            except Exception:  # the dock went away (RuntimeError): nothing to size
+                logger.debug("The panels were not compared after a drop", exc_info=True)
         QTimer.singleShot(FUSION_SETTLE_MS, compare)  # once the drop is plugged
 
     def _on_dock_opened(self) -> None:

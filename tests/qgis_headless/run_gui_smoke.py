@@ -5574,6 +5574,332 @@ ROWS_STEPS = [s_rows_setup, s_rows_fit_check, s_rows_exporting_check, s_rows_sho
               s_rows_hidden_change, s_rows_fit_again_check, s_rows_panel_check, s_rows_end]
 
 
+# --- the heights of the dock and of the panels of its sections (APP.DOCKWIDGET.PANEL_SIZING, 19 November 2026) -----
+# "No widgets laid out badly with a lot of empty space; a smart resizing when the widgets of FilterMate are separated."
+# A rigid holder (FILTERING or EXPORTING open and nothing else, rows at their own height) is measured by the room left
+# empty under its rows, in the scroll area that holds them: no more than a few pixels when a neighbour in its column can
+# take the rest, and its rows not cut. No dock of QGIS below its minimum.
+
+SIZING = {'rows': []}
+SIZING_SLACK = 12  # px under the rows: the margins of the scroll area and rounding, never a row (34 px and more)
+
+
+def sizing_holders():
+    """The dock and the panels of FilterMate on screen, with a name for the report."""
+    d = dock()
+    holders = [('dock', d)] + [('+'.join(panel.members), panel) for panel in d._fm_panels._panels if panel.members]
+    return [(name, holder) for name, holder in holders if holder.isVisible()]
+
+
+def sizing_rigid_page(holder):
+    """The page of FILTERING or EXPORTING when it is all ``holder`` opens (their rows at their own height), else None."""
+    d = dock()
+    if d.property('fm_section_height') == 'fill':
+        return None
+    if holder is d:
+        sections = d._fm_sections
+        if any(sections._open_in_stack(key) for key in sections._pages):
+            return None
+        key = sections.bottom_key()
+        if key in d._fm_panels.detached():
+            return None
+    else:
+        key = holder.current()
+    page = getattr(d, key.upper(), None) if key in ('filtering', 'exporting') else None
+    return page if page is not None and page.isVisible() else None
+
+
+def sizing_empty(holder):
+    """The height left empty under the rows of ``holder``, in their scroll area; None when it is not rigid."""
+    page = sizing_rigid_page(holder)
+    if page is None:
+        return None
+    viewport = page.parentWidget()
+    return viewport.height() - page.height()
+
+
+def sizing_column(holder):
+    """The docks of QGIS stacked with ``holder`` (its width overlapping theirs), on screen; [] when it floats."""
+    window = iface.mainWindow()
+    if holder.isFloating():
+        return []
+    area = window.dockWidgetArea(holder)
+    left, width = holder.x(), holder.width()
+    return [w for w in window.findChildren(QDockWidget) if w.parentWidget() is window
+            if w.isVisible() and not w.isFloating() and window.dockWidgetArea(w) == area
+            and 2 * (min(w.x() + w.width(), left + width) - max(w.x(), left)) > min(w.width(), width)
+            and not (w is not holder and abs(w.y() - holder.y()) <= 2)]  # not a tab of the same group
+
+
+def sizing_below_minimum():
+    """The docks of QGIS on screen lower than their minimum."""
+    window = iface.mainWindow()
+    return [(w.objectName(), w.height(), max(w.minimumHeight(), w.minimumSizeHint().height()))
+            for w in window.findChildren(QDockWidget) if w.parentWidget() is window
+            if w.isVisible() and w.height() < max(w.minimumHeight(), w.minimumSizeHint().height()) - 1]
+
+
+def sizing_state():
+    """Each holder: its name, height, kind and the room under its rows; and where it is."""
+    rows = []
+    for name, holder in sizing_holders():
+        empty = sizing_empty(holder)
+        place = 'floating' if holder.isFloating() else f"column of {len(sizing_column(holder))}"
+        rows.append(f"{name}: {holder.height()} px {'rigid, ' + str(empty) + ' px under the rows' if empty is not None else 'elastic'}"
+                    f" ({place})")
+    return '; '.join(rows)
+
+
+def sizing_check(scenario, wanted_rigid=1):
+    """Every rigid holder holds its rows with no room left under them (when a neighbour can take it), none cut; no
+    dock below its minimum. ``wanted_rigid``: how many rigid holders the scenario shows (a check that measures nothing
+    would pass)."""
+    pump(900)  # the pass, and the late one of a drop
+    rigid = [(name, holder, sizing_empty(holder)) for name, holder in sizing_holders() if sizing_empty(holder) is not None]
+    for name, holder, empty in rigid:
+        alone = not holder.isFloating() and len(sizing_column(holder)) < 2
+        # Rigid docks side by side share one height: the one whose rows need the most sets it.
+        beside = [other_empty for _other, other, other_empty in rigid if other is not holder and not other.isFloating()
+                  and not holder.isFloating() and abs(other.y() - holder.y()) <= 2 and abs(other.height() - holder.height()) <= 2]
+        note = 'alone' if alone else (f"beside one with {min(beside)} px" if beside else '')
+        SIZING['rows'].append((scenario, name, holder.height(), empty, note))
+        if alone:
+            report('SKIP', f"sizing: {scenario}: {name} alone in its column", f"{empty} px under its rows: Qt gives it all")
+            continue
+        if beside and min(beside) < empty:
+            check(f"sizing: {scenario}: {name}, beside a taller section, not cut", empty >= -2,
+                  f"{empty} px under its rows, {min(beside)} beside | {sizing_state()}")
+            continue
+        check(f"sizing: {scenario}: {name} at the height of its rows", -2 <= empty <= SIZING_SLACK,
+              f"{empty} px under its rows | {sizing_state()}")
+    check(f"sizing: {scenario}: the holders measured", len(rigid) >= wanted_rigid, sizing_state())
+    low = sizing_below_minimum()
+    check(f"sizing: {scenario}: no dock below its minimum", not low, str(low))
+
+
+def sizing_reset():
+    d = dock()
+    d._fm_panels.attach_all()
+    QSettings().remove(DETACHED_KEY)
+    d._fm_sections.open_top('exploring')
+    open_section(d.FILTERING)
+    pump(300)
+
+
+def s_sizing_setup():
+    d = dock()
+    leave_welcome()
+    SIZING['state'] = iface.mainWindow().saveState()
+    try:
+        SIZING['auto'] = config_value('APP.DOCKWIDGET.PANEL_SIZING') is not None
+    except KeyError:  # a version before the setting (the pictures before it)
+        SIZING['auto'] = False
+    if SIZING['auto'] and config_value('APP.DOCKWIDGET.PANEL_SIZING') != 'auto':
+        apply_settings({'APP.DOCKWIDGET.PANEL_SIZING': 'auto'})
+    sizing_reset()
+    settles(lambda: d.toolBox_tabTools.currentWidget() is d.FILTERING)
+    grab_window('sizing_00_dock')
+    return None
+
+
+def s_sizing_filtering_below():
+    panels = dock()._fm_panels
+    panels.detach('filtering')
+    sizing_check('FILTERING below the dock')
+    grab_window('sizing_01_filtering_below')
+    return None
+
+
+def s_sizing_exploring():
+    d = dock()
+    sizing_reset()
+    d._fm_panels.detach('exploring')
+    sizing_check('EXPLORING out, the dock keeps FILTERING')
+    panel = d._fm_panels.panel('exploring')
+    check('sizing: EXPLORING above the dock takes the rest of its column', panel is not None and panel_place(panel) == 'above'
+          and panel.height() > d.height(), sizing_state())
+    grab_window('sizing_02_exploring_above')
+    return None
+
+
+def s_sizing_every_section():
+    d = dock()
+    sizing_reset()
+    d._fm_panels.detach_all()
+    sizing_check('every section out')
+    grab_window('sizing_03_every_section_out')
+    return None
+
+
+def s_sizing_grouped():
+    d = dock()
+    panels = d._fm_panels
+    sizing_reset()
+    panels.detach('filtering')
+    panels.group('exporting', 'filtering')
+    panel = panels.panel('filtering')
+    if not check('sizing: FILTERING and EXPORTING grouped in one panel', panel is not None
+                 and panel.members == ['filtering', 'exporting'], str(panels.groups())):
+        return None
+    panel.rail.chip('filtering').click()
+    sizing_check('FILTERING + EXPORTING grouped, FILTERING open')
+    grab_window('sizing_04_grouped_filtering')
+    before = panel.height()
+    panel.rail.chip('exporting').click()  # the user opens EXPORTING in the panel: six rows instead of five
+    sizing_check('FILTERING + EXPORTING grouped, EXPORTING opened')
+    check('sizing: the panel follows the rows of EXPORTING', panel.height() != before, f"{before} -> {panel.height()}")
+    grab_window('sizing_05_grouped_exporting')
+    panel.rail.chip('filtering').click()
+    sizing_check('FILTERING + EXPORTING grouped, FILTERING opened again')
+    return None
+
+
+def s_sizing_under_layers():
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    layers = window.findChild(QDockWidget, 'Layers')
+    panel = panels.panel('filtering')
+    if layers is None or not layers.isVisible() or panel is None:
+        report('SKIP', 'sizing: a panel moved under the Layers panel', f"layers={layers} panel={panel}")
+        return None
+    window.splitDockWidget(layers, panel, Qt.Orientation.Vertical)  # as a drop with the mouse under it
+    pump(100)
+    if panel in window.tabifiedDockWidgets(layers) or panel.isFloating() or window.dockWidgetArea(panel) != window.dockWidgetArea(layers):
+        report('SKIP', 'sizing: a panel moved under the Layers panel', 'it became a tab or floats: not a column')
+        return None
+    sizing_check('FILTERING + EXPORTING moved under the Layers panel')
+    grab_window('sizing_06_under_layers')
+    return None
+
+
+def s_sizing_back_to_dock():
+    d = dock()
+    panels = d._fm_panels
+    sizing_reset()
+    panels.detach('exploring')
+    panels.detach('filtering')  # the dock opens EXPORTING: it keeps it alone
+    sizing_check('EXPLORING and FILTERING out, the dock keeps EXPORTING', wanted_rigid=2)
+    panels.attach('filtering')  # back, folded: the dock still shows EXPORTING
+    sizing_check('FILTERING given back to the dock')
+    grab_window('sizing_07_filtering_back')
+    return None
+
+
+def s_sizing_beside():
+    """The panel of FILTERING put beside the dock that keeps EXPORTING: one row for both, at the height of the six
+    rows of EXPORTING, FILTERING not cut."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    sizing_reset()
+    panels.detach('exploring')
+    panels.detach('filtering')
+    panel = panels.panel('filtering')
+    window.splitDockWidget(d, panel, Qt.Orientation.Horizontal)  # as a drop with the mouse beside it
+    pump(100)
+    if panel.isFloating() or panel in window.tabifiedDockWidgets(d) or abs(panel.y() - d.y()) > 2:
+        report('SKIP', 'sizing: FILTERING beside the dock', f"floating={panel.isFloating()} y={panel.y()} dock={d.y()}")
+        return None
+    sizing_check('FILTERING beside the dock that keeps EXPORTING', wanted_rigid=2)
+    grab_window('sizing_08_beside')
+    return None
+
+
+def s_sizing_floating():
+    d = dock()
+    panels = d._fm_panels
+    sizing_reset()
+    panels.detach('filtering')
+    panel = panels.panel('filtering')
+    panel.setFloating(True)
+    sizing_check('FILTERING floating')
+    grab_window('sizing_09_floating')
+    grab_widget(panel, 'sizing_09_floating_panel')
+    panel.setFloating(False)
+    pump(300)
+    return None
+
+
+def s_sizing_manual():
+    d = dock()
+    panels = d._fm_panels
+    if not SIZING['auto']:
+        report('SKIP', 'sizing: PANEL_SIZING = manual', 'no such setting in this version')
+        return None
+    sizing_reset()
+    apply_settings({'APP.DOCKWIDGET.PANEL_SIZING': 'manual'})
+    panels.detach('filtering')
+    panels.group('exporting', 'filtering')
+    panel = panels.panel('filtering')
+    panel.rail.chip('filtering').click()
+    QApplication.processEvents()
+    before = [(name, holder.height()) for name, holder in sizing_holders()]
+    panel.rail.chip('exporting').click()
+    pump(900)
+    after = [(name, holder.height()) for name, holder in sizing_holders()]
+    check('sizing: PANEL_SIZING = manual, nothing is resized when another section opens', before == after,
+          f"{before} -> {after}")
+    grab_window('sizing_05b_manual')
+    panel.rail.chip('filtering').click()
+    apply_settings({'APP.DOCKWIDGET.PANEL_SIZING': 'auto'})  # applied at once: sized again
+    sizing_check('PANEL_SIZING back to auto')
+    return None
+
+
+def s_sizing_probe():
+    """FM_STEPS=s_sizing_probe: the numbers behind the pass, printed (not a check)."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    sizing_reset()
+    panels.detach('filtering')
+    pump(900)
+    every = window.findChildren(QDockWidget)
+    direct = window.findChildren(QDockWidget, '', Qt.FindChildOption.FindDirectChildrenOnly)
+    print(f"   probe | docks {len(every)} direct {len(direct)} | visible "
+          f"{[(w.objectName(), w.geometry().getRect(), window.dockWidgetArea(w)) for w in every if w.isVisible()]}", flush=True)
+    for name, holder in sizing_holders():
+        page = sizing_rigid_page(holder)
+        info = ''
+        if page is not None:
+            viewport = page.parentWidget()
+            info = (f"viewport {viewport.height()} page {page.height()} hint {page.sizeHint().height()} "
+                    f"minhint {page.minimumSizeHint().height()} min {page.minimumHeight()} max {page.maximumHeight()} "
+                    f"policy {page.sizePolicy().verticalPolicy()}")
+        try:
+            measure = panels._measure(holder)
+            column = [w.objectName() for w in panels._column(window, holder)]
+        except Exception as exc:
+            measure, column = repr(exc), []
+        print(f"   probe | {name} h {holder.height()} min {holder.minimumHeight()}/{holder.minimumSizeHint().height()} "
+              f"parent {holder.parent().objectName() if holder.parent() else None} measure {measure} column {column} {info}",
+              flush=True)
+    return None
+
+
+def s_sizing_end():
+    d = dock()
+    sizing_reset()
+    window = iface.mainWindow()
+    window.restoreState(SIZING['state'])
+    d.show()
+    d.raise_()
+    open_section(d.FILTERING)
+    QApplication.processEvents()
+    for scenario, name, height, empty, note in SIZING['rows']:
+        print(f"   sizing | {scenario:<55} | {name:<28} | {height:>4} px | {empty:>4} px under the rows {note}", flush=True)
+    check('sizing: left as found', d._fm_panels.detached() == () and d.toolBox_tabTools.currentWidget() is d.FILTERING
+          and d.isVisible(), str(d._fm_panels.detached()))
+    return settled()
+
+
+# The manual step before those that leave places kept for the panel of FILTERING elsewhere (under Layers, beside).
+SIZING_STEPS = [s_section_setup, s_vector_source, s_sizing_setup, s_sizing_filtering_below, s_sizing_exploring,
+                s_sizing_every_section, s_sizing_grouped, s_sizing_manual, s_sizing_under_layers, s_sizing_back_to_dock,
+                s_sizing_beside, s_sizing_floating, s_sizing_end]
+
+
 # --- the window in each layout, for the eye (FM_ONLY=layout_shots with FM_GRAB_DIR) ---------------------------------
 
 
@@ -5716,7 +6042,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
          *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, *EXPLO_STEPS,
-         *SWITCH_STEPS, *ROWS_STEPS, s_finish]
+         *SWITCH_STEPS, *ROWS_STEPS, *SIZING_STEPS, s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
@@ -5751,6 +6077,8 @@ if os.environ.get('FM_ONLY') == 'layout_shots':  # the window in each layout, as
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SHOT_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'rows':  # the rows of FILTERING / EXPORTING packed or spread, and their key buttons
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *ROWS_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'sizing':  # the heights of the dock and of the panels of its sections
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *SIZING_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 

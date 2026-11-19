@@ -293,7 +293,7 @@ def test_a_rigid_panel_gets_its_need_and_the_dock_the_rest():
 
 def test_exploring_above_the_dock_takes_what_filtering_leaves():
     # no fixed share for EXPLORING: the dock that keeps FILTERING gets its need, EXPLORING the rest
-    assert panels.column_heights([(ELASTIC, 200, 0, None), (RIGID, 150, 320, 900)], 900) == [580, 320]
+    assert panels.column_heights([(ELASTIC, 200, 0, 450), (RIGID, 150, 320, 450)], 900) == [580, 320]
 
 
 def test_the_panels_of_qgis_keep_their_height_when_an_elastic_panel_takes_the_rest():
@@ -313,10 +313,8 @@ def test_elastic_panels_keep_the_share_the_user_left_them():
     assert heights == [200, 400, 400]
 
 
-def test_an_elastic_panel_new_or_rigid_before_gets_an_equal_share():
-    # CONFIGURATION opened in the panel that showed FILTERING: no longer held to 260 px
-    assert panels.column_heights([(ELASTIC, 100, 0, 740), (ELASTIC, 100, 0, None)], 1000) == [500, 500]
-    assert panels.column_heights([(ELASTIC, 100, 0, None), (ELASTIC, 100, 0, None)], 901) == [451, 450]
+def test_elastic_panels_without_height_share_equally():
+    assert panels.column_heights([(ELASTIC, 0, 0, 0), (ELASTIC, 0, 0, 0)], 901) == [451, 450]
 
 
 def test_no_dock_goes_below_its_minimum():
@@ -339,7 +337,7 @@ def test_rigid_panels_alone_share_their_column_by_their_need():
 
 def test_the_heights_always_add_up_to_the_room():
     for room in range(500, 1300, 37):
-        for docks in ([(ELASTIC, 120, 0, 333), (RIGID, 90, 271, 10), (OTHER, 80, 0, 177), (ELASTIC, 60, 0, None)],
+        for docks in ([(ELASTIC, 120, 0, 333), (RIGID, 90, 271, 10), (OTHER, 80, 0, 177), (ELASTIC, 60, 0, 90)],
                       [(OTHER, 80, 0, 1), (OTHER, 80, 0, 2), (RIGID, 90, 301, 400)],
                       [(RIGID, 90, 301, 400), (RIGID, 50, 123, 1)]):
             assert sum(panels.column_heights(docks, room)) == room
