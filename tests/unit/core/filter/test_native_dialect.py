@@ -615,6 +615,17 @@ def test_hybrid_refuses_null_keys_and_too_long_lists():
         hybrid_sql('', list(range(HYBRID_MAX_KEYS + 1)), None, '"id"', True)
 
 
+def test_hybrid_counts_the_keys_already_listed_in_the_subset_it_is_ored_with():
+    """One list may reach HYBRID_MAX_KEYS, a chain of ORs may not: the provider is quadratic in all of them."""
+    assert hybrid_sql('', [1, 2, 3], None, '"id"', True, already_listed=HYBRID_MAX_KEYS - 3).endswith('IN (1, 2, 3)')
+    with pytest.raises(Unsupported):
+        hybrid_sql('', [1, 2, 3], None, '"id"', True, already_listed=HYBRID_MAX_KEYS - 2)
+    # the list written is the one counted: the shorter of the two, or none at all
+    assert hybrid_sql('"pop" > 2', [1, 2, 3, 4], [5], '"id"', True, already_listed=HYBRID_MAX_KEYS - 1).endswith(
+        'NOT ("id" IN (5))')
+    assert hybrid_sql('"pop" > 2', [1], [], '"id"', True, already_listed=HYBRID_MAX_KEYS) == '"pop" > 2'
+
+
 def test_hybrid_subset_keeps_what_the_expression_keeps(table):
     # "pop" > 2 AND <something QGIS alone evaluates, here: an id parity>
     translation = translate_native(binary('>', col('pop'), lit(2)), SQLITE, TYPES)

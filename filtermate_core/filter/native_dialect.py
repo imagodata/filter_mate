@@ -960,7 +960,8 @@ def key_reference(name: str) -> str:
     return '"' + name + '"'
 
 
-def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, dialect: str = SQLITE) -> str:
+def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, dialect: str = SQLITE,
+               already_listed: int = 0) -> str:
     """Subset of a PARTIAL / NONE translation from the keys QGIS evaluated (SQLite, PostgreSQL).
 
     The subset keeps the same features as the expression (a TRUE / not TRUE
@@ -980,6 +981,10 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, diale
             PostgreSQL one as it is (a deterministic collation compares bytes,
             and a COLLATE would refuse a uuid key and leave its index unused).
         dialect: ``sqlite`` or ``postgresql``.
+        already_listed: Keys the new subset will be ORed with, already listed
+            in the subset it is combined with: they count with the new list
+            against ``HYBRID_MAX_KEYS`` (the provider's ``setSubsetString`` is
+            quadratic in the number of keys of the whole subset, not of one list).
 
     Returns:
         The native part alone when nothing else excludes a feature, else the
@@ -989,8 +994,9 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, diale
     from .pk_formatter import SQL, format_key_literal
 
     def listed(values) -> str:
-        if len(values) > HYBRID_MAX_KEYS:
-            raise Unsupported('{} keys, more than the {} listed in a subset'.format(len(values), HYBRID_MAX_KEYS))
+        if len(values) + already_listed > HYBRID_MAX_KEYS:
+            raise Unsupported('{} keys ({} listed already), more than the {} listed in a subset'.format(
+                len(values), already_listed, HYBRID_MAX_KEYS))
         literals = []
         for value in values:
             if is_null_value(value):

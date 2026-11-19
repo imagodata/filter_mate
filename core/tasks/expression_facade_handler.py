@@ -439,8 +439,16 @@ class ExpressionFacadeHandler:
             expression: SQL filter expression to apply.
 
         Returns:
-            bool: True if expression was queued successfully.
+            bool: True if expression was queued successfully; False for a
+            task that was canceled (nothing is queued, no history is written:
+            finished() drops the requests of a canceled task).
         """
+        # A canceled task goes no further: the reading of a hybrid subset that was interrupted gave the former
+        # conversion, which would be combined and recorded (PostgreSQL: the subset history) for nothing
+        if self.task.isCanceled() is True:
+            logger.info("Task canceled: the source filter is not queued")
+            return False
+
         # The selection of the source filter combine_with_old_subset just built;
         # None for any other filter (a key list): its selection is not known here
         pending, self._pending_source_selection = self._pending_source_selection, None

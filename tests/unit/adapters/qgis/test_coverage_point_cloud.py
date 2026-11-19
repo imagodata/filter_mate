@@ -282,6 +282,8 @@ class TestPdalClipStages:
         reader, writer = pipelines[0]
         assert reader['type'] == 'readers.copc' and reader['polygon'].upper().startswith(('POLYGON', 'MULTIPOLYGON'))
         assert writer['type'] == 'writers.copc'
+        # The clip is read again at a level of detail: the same one at every run (pdal_cli.copc_writer).
+        assert reader['threads'] == 1 and writer['fixed_seed'] is True
 
     def test_las_is_clipped_by_filters_crop(self, engine, pdal, tmp_path):
         _, pipelines = pdal

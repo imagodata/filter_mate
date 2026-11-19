@@ -195,14 +195,29 @@
         Ouvrir AGENT replie EXPLORING et FILTERING ; ouvrir FILTERING ramène EXPLORING. AGENT est affiché par défaut et se masque dans l'onglet
         <a href="#configuration">Configuration</a>.
     </p>
-    <h3 id="panels">Le rail des sections, et les sections en panneaux de QGIS <small>(5.1.1)</small></h3>
+    <h3 id="panels">Un seul panneau : les sections qui vous servent, disposées à votre façon <small>(5.1.1)</small></h3>
     <p>
-        Chaque pile liste ses sections dans un rail de pastilles : AGENT et EXPLORING en haut, FILTERING, EXPORTING et CONFIGURATION au-dessus de la pile du bas.
+        Une installation neuve montre FilterMate en un seul panneau, avec toutes ses sections. Chaque pile liste ses sections dans un rail de pastilles : AGENT et EXPLORING en haut, FILTERING, EXPORTING et CONFIGURATION au-dessus de la pile du bas.
         La section ouverte montre son nom, les autres leur icône. Cliquez sur une pastille pour ouvrir sa section ; faites-la glisser le long de son rail pour mettre les sections dans un autre ordre, qui est retenu.
         Si vous préférez le nom de chaque section sur sa propre ligne, comme avant, choisissez <em>Des en-têtes, les uns au-dessus des autres</em> dans la configuration (<code>SECTION_HEADERS = stacked</code> dans l'onglet Configuration) : ce qui suit se fait alors sur un en-tête plutôt que sur une pastille.
     </p>
     <p>
-        Par défaut, toutes les sections restent dans le panneau FilterMate. Une section peut le quitter : faites un clic droit sur sa pastille, puis <em>Ouvrir &hellip; dans son propre panneau</em>, ou faites glisser la pastille hors du panneau.
+        <strong>Seulement les sections qui vous servent.</strong> Rien n'oblige à garder toutes les sections. <em>Configurer FilterMate</em> (<a href="#agent">section 14</a>) demande d'abord quelles sections vous utilisez et sur quelles données vous travaillez ;
+        chaque réponse est aussi un réglage de l'onglet <a href="#configuration">Configuration</a> (<code>FILTERING</code>, <code>EXPORTING</code>, <code>AGENT</code>, <code>RASTER</code> et <code>POINT_CLOUD</code>, chacun avec <code>enabled</code>).
+        Une section désactivée quitte le panneau avec sa pastille et ses boutons : Filter et Unfilter partent avec FILTERING, Export avec EXPORTING, tandis qu'Undo et Redo restent.
+        EXPLORING est toujours là : sans FILTERING, la liste des couches passe en haut d'EXPLORING, et le panneau sert à parcourir les entités d'une couche, à les sélectionner et à zoomer dessus.
+        Les rasters ou les nuages de points désactivés quittent les listes de couches du panneau. AGENT désactivé disparaît au redémarrage de QGIS.
+    </p>
+    <p>
+        <strong>Le même panneau, disposé autrement.</strong> Les boutons peuvent se montrer sous chaque section, à la place d'une barre pour toutes (<em>Sous chaque section</em> dans la configuration, <code>ACTION_BAR_POSITION = sections</code>),
+        et les en-têtes les uns au-dessus des autres peuvent remplacer les rails (<code>SECTION_HEADERS = stacked</code>).
+    </p>
+    <figure class="medium">
+        <img src="img/guide/panels-section-buttons.png" alt="FILTERING ouvert avec Filter, Undo, Redo, Compare et Unfilter dessous ; EXPORTING ouvert avec Export dessous" loading="lazy" width="1252" height="564">
+        <figcaption>Les boutons sous chaque section : FILTERING montre ses boutons de filtre, EXPORTING son bouton Export.</figcaption>
+    </figure>
+    <p>
+        <strong>Des sections en panneaux de QGIS, quand un seul panneau ne vous convient pas.</strong> Une section peut quitter le panneau FilterMate : faites un clic droit sur sa pastille, puis <em>Ouvrir &hellip; dans son propre panneau</em>, ou faites glisser la pastille hors du panneau.
         Elle devient un panneau de QGIS, que vous déplacez à côté de la carte, mettez en onglet avec le panneau Couches ou faites flotter sur un autre écran. <em>Sortir toutes les sections de FilterMate</em> les déplace toutes d'un coup : AGENT dans son propre panneau, FILTERING, EXPORTING et CONFIGURATION ensemble dans un autre, EXPLORING restant dans le panneau FilterMate.
         La dernière section du panneau FilterMate y reste toujours.
     </p>
@@ -229,13 +244,8 @@
     </figure>
     <p>
         Une section dans son propre panneau emporte ses boutons, et ils agissent quoi que montre le panneau FilterMate : vous filtrez depuis le panneau FILTERING pendant qu'EXPLORING seul est ouvert.
-        Les boutons peuvent aussi se montrer sous chaque section (<em>Sous chaque section</em> dans la configuration), et FILTERING ou EXPORTING se désactivent quand vous ne vous en servez pas : la couche source se choisit alors en haut d'EXPLORING.
         <em>Comment fonctionne FilterMate</em>, sur l'accueil d'AGENT, dans son menu <strong>&#8943;</strong> et dans <em>Vecteur &gt; FilterMate</em>, reprend tout cela dans le panneau, avec des liens qui le font.
     </p>
-    <figure class="medium">
-        <img src="img/guide/panels-section-buttons.png" alt="FILTERING ouvert avec Filter, Undo, Redo, Compare et Unfilter dessous ; EXPORTING ouvert avec Export dessous" loading="lazy" width="1252" height="564">
-        <figcaption>Les boutons sous chaque section : FILTERING montre ses boutons de filtre, EXPORTING son bouton Export.</figcaption>
-    </figure>
     <div class="fig-row">
         <figure class="narrow">
             <img src="img/guide/panels-exploring.png" alt="EXPLORING dans son propre panneau au-dessus du panneau FilterMate, avec une liste de couches en haut" loading="lazy" width="620" height="1074">

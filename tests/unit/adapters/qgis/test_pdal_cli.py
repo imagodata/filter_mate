@@ -49,6 +49,25 @@ def test_old_remote_reader_refused_without_disclosing_url(fake_pdal):
     assert 'secret' not in str(error.value)
 
 
+@pytest.mark.parametrize('source, threads', [
+    ('/data/cloud.copc.laz', 1), ('/data/ept/ept.json', 1),
+    ('/data/cloud.laz', None),  # readers.las hands its chunks over in file order
+    ('https://example.test/cloud.copc.laz', None),  # one HTTP request at a time would be slow
+])
+def test_a_local_octree_is_read_by_one_thread(fake_pdal, source, threads):
+    """2026-11-19: readers.copc handed its chunks over in the order its threads finished them, and
+    writers.copc samples the levels of detail from that order: two runs wrote two clouds."""
+    stages = pdal_cli.read_stages(source, (0, 0, 10, 10))
+    assert stages[0].get('threads') == threads
+
+
+def test_copc_writer_draws_the_same_levels_of_detail():
+    writer = pdal_cli.copc_writer(filename='/out/c.copc.laz', a_srs='EPSG:2154')
+    assert writer == {'type': 'writers.copc', 'forward': 'all', 'extra_dims': 'all', 'fixed_seed': True,
+                      'filename': '/out/c.copc.laz', 'a_srs': 'EPSG:2154'}
+    assert pdal_cli.copc_writer() is not pdal_cli.copc_writer()  # a new stage each time, never shared
+
+
 @pytest.mark.parametrize('bounds', [(0, 0, float('nan'), 1), (1, 0, 0, 1), (0, 0, 0, 1)])
 def test_invalid_bounds_refused(fake_pdal, bounds):
     with pytest.raises(ValueError, match='extent'):

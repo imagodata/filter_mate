@@ -130,7 +130,7 @@ class HeightAboveGroundTask(QgsTask):
         self.output = cache.new_path(f"{self.layer_name}_hag", '.copc.laz')
         stages += [
             {"type": "filters.hag_dem", "raster": self.dem_path},
-            {"type": "writers.copc", "filename": self.output, "forward": "all", "extra_dims": "all", "a_srs": self.crs},
+            pdal_cli.copc_writer(filename=self.output, a_srs=self.crs),
         ]
         ok, self.message = pdal_cli.run_pipeline(stages, is_canceled=self.isCanceled)
         logger.info(f"⏱ [FM5] height above ground for '{self.layer_name}': ok={ok} {time.perf_counter() - started:.1f}s {self.message}")
