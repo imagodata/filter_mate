@@ -90,7 +90,8 @@ def finished(monkeypatch):
     monkeypatch.setattr(module, "Qgis", MagicMock())
 
     def run(canceled, result=True, exception=None, task_action="filter", pending=None, task_parameters=None,
-            restore_history_fn=None, discard_history_fn=None, warning_messages=None, close_connections_fn=None):
+            restore_history_fn=None, discard_history_fn=None, warning_messages=None, close_connections_fn=None,
+            restore_deferred_history_fn=None):
         handler.handle_finished(
             result=result, task_action=task_action, message_category="FilterLayers",
             is_canceled_fn=lambda: canceled, warning_messages=warning_messages or [],
@@ -101,7 +102,7 @@ def finished(monkeypatch):
             task_description="Filtering data", restore_selection_fn=MagicMock(), task_bridge=None,
             cleanup_safe_intersect_fn=MagicMock(), cleanup_canceled_mv_fn=cleanup_canceled,
             restore_history_fn=restore_history_fn, discard_history_fn=discard_history_fn,
-            close_connections_fn=close_connections_fn,
+            restore_deferred_history_fn=restore_deferred_history_fn, close_connections_fn=close_connections_fn,
         )
 
     return types.SimpleNamespace(run=run, apply=apply, iface=iface, handler=handler, cleanup_mv=cleanup_mv,
@@ -328,29 +329,47 @@ def _defer(finished, layer_id="parcels_id"):
     return held
 
 
-@pytest.mark.parametrize("action", ["unfilter", "reset"])
-def test_the_views_wait_for_the_deferred_subsets(finished, action):
-    """2026-11-18: an unfilter putting back a subset over 1 MB (a long key list) on PostgreSQL dropped the views
-    the layer still read, 100 ms before its new subset was set."""
+def test_a_deferred_filter_counts_as_applied_until_it_is_set(finished):
+    """2026-11-18: a filter over 1 MB (the long list of keys of a PostgreSQL source) is set by a timer after
+    finished(); with nothing else applied, "nothing was applied" came before it was set."""
+    held = _defer(finished)
+    params = {"task": {}}
+    finished.run(canceled=False, task_action="filter", task_parameters=params)
+    assert params["_apply_applied"] == 1
+    held["done"]([])
+    finished.cleanup_mv.assert_not_called()   # a filter never drops the views its layers read
+
+
+def test_a_deferred_subset_refused_deletes_the_rows_of_its_task_not_the_whole_snapshot(finished):
+    """2026-11-19: the timer put back the snapshot of the task, which deleted the row of a task started since
+    ([F0, FA, FB] -> [F0]): the deferred refusal now gets the ids of the layers only, for their own rows."""
+    held = _defer(finished)
+    restore, restore_deferred = MagicMock(), MagicMock()
+    finished.run(canceled=False, task_action="filter", restore_history_fn=restore,
+                 restore_deferred_history_fn=restore_deferred)
+    restore_deferred.assert_not_called()
+    held["done"]([("parcels_id", "Parcels", "connection lost"), ("", "Gone", "deleted")])
+    restore_deferred.assert_called_once_with(["parcels_id"])
+    restore.assert_not_called()
+    finished.cleanup_mv.assert_not_called()
+
+
+def test_a_failing_deferred_deletion_does_not_raise_from_the_timer(finished):
+    held = _defer(finished)
+    finished.run(canceled=False, task_action="filter",
+                 restore_deferred_history_fn=MagicMock(side_effect=OSError("locked")))
+    held["done"]([("parcels_id", "Parcels", "lost")])
+
+
+def test_the_views_of_a_reset_wait_for_a_deferred_subset_when_there_is_one(finished):
+    """Not reachable today (a reset and an unfilter queue empty subsets only); kept harmless."""
     held = _defer(finished)
     close = MagicMock()
-    params = {"task": {}}
-    finished.run(canceled=False, task_action=action, task_parameters=params, close_connections_fn=close)
+    finished.run(canceled=False, task_action="reset", close_connections_fn=close)
     finished.cleanup_mv.assert_not_called()
-    assert params["_apply_applied"] == 1  # counted as applied: no "nothing applied" before it is set
     held["done"]([])
     finished.cleanup_mv.assert_called_once_with()
     close.assert_called_once_with()
-
-
-def test_a_deferred_subset_refused_puts_its_history_back_and_keeps_the_views(finished):
-    held = _defer(finished)
-    restore = MagicMock()
-    finished.run(canceled=False, task_action="unfilter", restore_history_fn=restore)
-    restore.assert_not_called()
-    held["done"]([("parcels_id", "Parcels", "connection lost")])
-    restore.assert_called_once_with(["parcels_id"])
-    finished.cleanup_mv.assert_not_called()
 
 
 def test_a_deferred_filter_keeps_its_views(finished):
@@ -358,3 +377,4 @@ def test_a_deferred_filter_keeps_its_views(finished):
     finished.run(canceled=False, task_action="filter")
     held["done"]([])
     finished.cleanup_mv.assert_not_called()
+

@@ -11,6 +11,7 @@ import importlib.util
 import sqlite3
 import threading
 import types
+import typing
 import uuid
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -20,7 +21,8 @@ import pytest
 pytestmark = pytest.mark.unit
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[4]
-_METHODS = ("_insert_subset_history", "_execute_geometric_filtering_recorded", "_discard_canceled_history")
+_METHODS = ("_insert_subset_history", "_execute_geometric_filtering_recorded", "_discard_canceled_history",
+            "_discard_refused_source_history", "_discard_own_history_of")
 
 
 def _load(name, relative):
@@ -46,7 +48,7 @@ def env(tmp_path):
     methods = [node for node in cls.body if isinstance(node, ast.FunctionDef) and node.name in _METHODS]
     assert len(methods) == len(_METHODS)
     holder = ast.ClassDef(name="_Task", bases=[], keywords=[], body=methods, decorator_list=[])
-    namespace = {"uuid": uuid, "logger": MagicMock(), "HistoryRepository": repo.HistoryRepository,
+    namespace = {"uuid": uuid, "List": typing.List, "logger": MagicMock(), "HistoryRepository": repo.HistoryRepository,
                  "create_prepared_statements": lambda conn, provider_type: None,  # the repository path
                  "note_history_insert": repo.note_history_insert,
                  "recording_history_inserts": repo.recording_history_inserts,
@@ -76,7 +78,7 @@ def env(tmp_path):
             return [row[0] for row in conn.execute(
                 "SELECT subset_string FROM fm_subset_history WHERE layer_id = 'cables' ORDER BY seq_order")]
 
-    return types.SimpleNamespace(task=task, subsets=subsets, db=db)
+    return types.SimpleNamespace(task=task, subsets=subsets, db=db, record=repo.recording_history_inserts)
 
 
 def _in_worker(fn, *args):
@@ -125,3 +127,56 @@ def test_outside_run_nothing_is_recorded(env):
     assert task._execute_geometric_filtering_recorded("spatialite", _CABLES, {"subset": "F1"})
     task._discard_canceled_history()
     assert env.subsets() == ["F0", "F1"]
+
+
+# 2026-11-19: a source refused (SourceSelectionError) leaves the queue, and now its history row too, the rows of
+# the targets staying; a deferred subset refused after finished() deletes this task's rows only.
+
+def _insert(env, task, layer_id, subset):
+    layer = types.SimpleNamespace(id=lambda: layer_id)
+    conn = sqlite3.connect(env.db)
+    try:
+        with env.record(task._history_inserted_ids):   # as run() records its inserts
+            task._insert_subset_history(conn.cursor(), conn, layer, subset, 2)
+    finally:
+        conn.close()
+
+
+def _all(env):
+    with sqlite3.connect(env.db) as conn:
+        return sorted(conn.execute("SELECT layer_id, subset_string FROM fm_subset_history").fetchall())
+
+
+def test_a_refused_source_loses_the_row_run_wrote_for_it_not_those_of_the_targets(env):
+    task = env.task()
+    task.source_layer = types.SimpleNamespace(id=lambda: "zones")
+    _insert(env, task, "zones", "SRC")      # a PostgreSQL source: its row is written before the refusal
+    _insert(env, task, "cables", "TARGET")
+    task._discard_refused_source_history()
+    assert _all(env) == [("cables", "F0"), ("cables", "TARGET")]
+
+
+def test_a_refused_source_does_not_touch_the_rows_of_an_older_task(env):
+    older = env.task()
+    older.source_layer = types.SimpleNamespace(id=lambda: "zones")
+    _insert(env, older, "zones", "OLDER")
+    task = env.task()
+    _insert(env, task, "zones", "SRC")
+    task._discard_refused_source_history()
+    assert _all(env) == [("cables", "F0"), ("zones", "OLDER")]
+
+
+def test_a_deferred_refusal_deletes_this_tasks_row_and_keeps_the_newer_one(env):
+    """[F0, FA, FB] -> [F0] before: the timer of A put back A's snapshot over the row B wrote since."""
+    task_a, task_b = env.task(), env.task()
+    _insert(env, task_a, "cables", "FA")
+    _insert(env, task_b, "cables", "FB")           # B started after A's finished(), before A's timer
+    task_a._discard_own_history_of(["cables"])
+    assert _all(env) == [("cables", "F0"), ("cables", "FB")]
+
+
+def test_a_deferred_refusal_of_another_layer_leaves_the_row(env):
+    task = env.task()
+    _insert(env, task, "cables", "FA")
+    task._discard_own_history_of(["conduits"])
+    assert _all(env) == [("cables", "F0"), ("cables", "FA")]

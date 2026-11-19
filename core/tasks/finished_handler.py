@@ -114,6 +114,7 @@ class FinishedHandler:
         cleanup_canceled_mv_fn: Optional[Callable[[], None]] = None,
         restore_history_fn: Optional[Callable[[List[str]], None]] = None,
         discard_history_fn: Optional[Callable[[], None]] = None,
+        restore_deferred_history_fn: Optional[Callable[[List[str]], None]] = None,
         close_connections_fn: Optional[Callable[[], None]] = None,
     ) -> Tuple[List[str], List, Optional[Any]]:
         """Handle task completion with cleanup and user notifications.
@@ -155,6 +156,9 @@ class FinishedHandler:
                 filter the provider refused, as it was before the task (2026-11-16).
             discard_history_fn: For a canceled task: deletes the history rows its run()
                 inserted, its subsets being dropped (2026-11-18).
+            restore_deferred_history_fn: Called with the ids of the layers whose deferred subset
+                (over 1 MB, set after finished()) was refused: deletes the rows this task wrote for
+                them (2026-11-19: not the whole snapshot, a task started since may have written its own).
             close_connections_fn: Closes the connections opened on the main thread, after
                 the view cleanup that waits for the deferred subsets (2026-11-18).
 
@@ -210,7 +214,14 @@ class FinishedHandler:
             # 2026-11-18: the subsets over 1 MB, set after finished() by a timer: their refusals put
             # back the history too, and the views of a reset / unfilter are dropped only now, when
             # nothing was refused (they were dropped before these layers left them).
-            restore_refused_history(deferred_refusals)
+            # (2026-11-19: only the rows this task wrote, a newer task may have written its own since)
+            if restore_deferred_history_fn is not None:
+                deferred_ids = [layer_id for layer_id, _name, _reason in deferred_refusals if layer_id]
+                if deferred_ids:
+                    try:
+                        restore_deferred_history_fn(deferred_ids)
+                    except Exception as e:  # catch-all safety net: a timer slot must not raise
+                        logger.warning(f"Filter history of the refused deferred layers not taken back: {e}")
             if task_action in ('reset', 'unfilter'):
                 if refusals or deferred_refusals:
                     logger.info(f"Views kept: the filter of {len(refusals) + len(deferred_refusals)} "
