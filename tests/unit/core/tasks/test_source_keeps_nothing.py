@@ -470,3 +470,4 @@ def test_a_refused_source_keeps_its_previous_filter():
     assert execute_filtering(task) is False
     assert task._pending_subset_requests == [(other, "kept")]
     assert task.message == "keeps no feature: nothing was filtered."
+    assert task._source_refused is True   # 2026-11-19: finished() deletes the history row run() wrote for it
