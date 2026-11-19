@@ -749,8 +749,9 @@ def s_setup_wizard():
     card = _wizard_card()
     STATE['wizard_no_other'] = card is not None and not any(
         other is not None for _buttons, other, _field in card._groups)
-    STATE['wizard_steps'] = 0
-    while _wizard_card() is not None and STATE['wizard_steps'] < 6:
+    STATE['wizard_steps'], STATE['wizard_asked'] = 0, []
+    while _wizard_card() is not None and STATE['wizard_steps'] < 30:  # every card, however many steps the setup has
+        STATE['wizard_asked'].append([chip.text() for chip in _wizard_card()._chips])
         _answer_card(untick=('FILTERING',) if STATE['wizard_steps'] == 0 else ())
         STATE['wizard_steps'] += 1
     STATE['wizard_card'] = chat._settings_cards[-1] if chat._settings_cards else None
@@ -770,8 +771,10 @@ def s_setup_wizard_check():
     config = d.CONFIG_DATA['APP']['OPTIONS'].get('FILTERING', {}).get('enabled', {})
     value = config.get('value') if isinstance(config, dict) else config
     combo, auto = d.comboBox_filtering_current_layer, d.pushButton_checkable_filtering_auto_current_layer
-    check('setup with no model: cards without Other, five steps (FILTERING skipped), the change shown then applied',
-          STATE['wizard_started'] is True and STATE['wizard_no_other'] and STATE['wizard_steps'] == 5
+    check('setup with no model: cards without Other, every step answered (FILTERING skipped), the change shown then applied',
+          STATE['wizard_started'] is True and STATE['wizard_no_other']
+          and not any('Filtering' in chips for chips in STATE['wizard_asked']) and len(STATE['wizard_asked']) >= 4
+          and any('Vector tools' in chips for chips in STATE['wizard_asked']) and _wizard_card() is None
           and len(STATE['wizard_rows']) == 1 and STATE['wizard_card'].done and value is False,
           f"started={STATE['wizard_started']} steps={STATE['wizard_steps']} rows={STATE['wizard_rows']} value={value!r}")
     check('FILTERING off: its header and buttons hidden, the source layer chooser at the top of EXPLORING',
@@ -3530,7 +3533,7 @@ def s_setup_layout():
     WELCOME['position'] = d._action_bar_manager.get_position()
     WELCOME['started'] = chat.start_setup()
     asked = []
-    while _wizard_card() is not None and len(asked) < 8:
+    while _wizard_card() is not None and len(asked) < 30:  # every card, however many steps the setup has
         card = _wizard_card()
         asked.append([chip.text() for chip in card._chips])
         if asked[-1] == ['Layout', 'Headers', 'Buttons']:
@@ -3556,7 +3559,7 @@ def s_setup_layout_check():
     panels, manager = d._fm_panels, d._action_bar_manager
     check('setup: the layout is a step of its own, the sections asked with the buttons',
           WELCOME['started'] is True and ['Layout', 'Headers', 'Rows', 'Buttons'] in WELCOME['asked']
-          and len(WELCOME['asked']) == 6,
+          and any(chips[:1] == ['Vector tools'] for chips in WELCOME['asked']) and _wizard_card() is None,
           str(WELCOME['asked']))
     check('setup: the sections and the buttons on the card of the changes, nothing moved before Apply',
           len(WELCOME['rows']) == 2 and any('in panels of QGIS' in row for row in WELCOME['rows'])
@@ -5803,7 +5806,7 @@ def s_tools_wizard():
     chat.start_setup()
     TOOLS['asked'] = []
     steps = 0
-    while _wizard_card() is not None and steps < 6:
+    while _wizard_card() is not None and steps < 30:
         card = _wizard_card()
         labels = [label for buttons, _other, _field in card._groups for _button, label in buttons]
         if [chip.text() for chip in card._chips][:1] == ['Vector tools']:
