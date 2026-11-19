@@ -271,6 +271,113 @@ def test_a_panel_larger_than_the_screen_shows_its_title():
     assert panels.floating_corner((100, 100), (800, 900), (0, 0, 639, 479)) == (0, 0)
 
 
+# --- the heights of a column (APP.DOCKWIDGET.PANEL_SIZING = auto) ------------------------------
+
+RIGID, ELASTIC, OTHER = panels.RIGID, panels.ELASTIC, panels.OTHER
+
+
+def test_panel_sizing_reads_the_setting():
+    assert panels.panel_sizing({"APP": {"DOCKWIDGET": {"PANEL_SIZING": {"value": "manual"}}}}) == "manual"
+    assert panels.panel_sizing({"APP": {"DOCKWIDGET": {"PANEL_SIZING": {"value": " Manual "}}}}) == "manual"
+    assert panels.panel_sizing({"APP": {"DOCKWIDGET": {"PANEL_SIZING": "manual"}}}) == "manual"  # a bare value
+    assert panels.panel_sizing({"APP": {"DOCKWIDGET": {"PANEL_SIZING": {"value": "auto"}}}}) == "auto"
+    for config in ({}, None, {"APP": {"DOCKWIDGET": {}}}, {"APP": {"DOCKWIDGET": {"PANEL_SIZING": {"value": 3}}}},
+                   {"APP": {"DOCKWIDGET": {"PANEL_SIZING": {"value": "tight"}}}}):
+        assert panels.panel_sizing(config) == "auto"  # the default, and anything else
+
+
+def test_a_rigid_panel_gets_its_need_and_the_dock_the_rest():
+    # FILTERING out under the dock: 1000 px for both, the rows need 260
+    assert panels.column_heights([(ELASTIC, 300, 0, 700), (RIGID, 120, 260, 300)], 1000) == [740, 260]
+
+
+def test_exploring_above_the_dock_takes_what_filtering_leaves():
+    # no fixed share for EXPLORING: the dock that keeps FILTERING gets its need, EXPLORING the rest
+    assert panels.column_heights([(ELASTIC, 200, 0, None), (RIGID, 150, 320, 900)], 900) == [580, 320]
+
+
+def test_the_panels_of_qgis_keep_their_height_when_an_elastic_panel_takes_the_rest():
+    heights = panels.column_heights([(OTHER, 100, 0, 300), (ELASTIC, 200, 0, 400), (RIGID, 100, 250, 300)], 1000)
+    assert heights == [300, 450, 250]
+
+
+def test_without_an_elastic_panel_the_panels_of_qgis_share_the_rest_in_their_proportions():
+    # FILTERING moved under Layers and Browser: they keep their proportions (1:3) and take what it does not need
+    heights = panels.column_heights([(OTHER, 100, 0, 200), (OTHER, 100, 0, 600), (RIGID, 120, 260, 200)], 1000)
+    assert heights == [185, 555, 260] and sum(heights) == 1000
+
+
+def test_elastic_panels_keep_the_share_the_user_left_them():
+    # the open section of a panel changes: the delta goes to the elastic ones, in the proportions they had
+    heights = panels.column_heights([(ELASTIC, 100, 0, 300), (RIGID, 100, 400, 260), (ELASTIC, 100, 0, 600)], 1000)
+    assert heights == [200, 400, 400]
+
+
+def test_an_elastic_panel_new_or_rigid_before_gets_an_equal_share():
+    # CONFIGURATION opened in the panel that showed FILTERING: no longer held to 260 px
+    assert panels.column_heights([(ELASTIC, 100, 0, 740), (ELASTIC, 100, 0, None)], 1000) == [500, 500]
+    assert panels.column_heights([(ELASTIC, 100, 0, None), (ELASTIC, 100, 0, None)], 901) == [451, 450]
+
+
+def test_no_dock_goes_below_its_minimum():
+    heights = panels.column_heights([(ELASTIC, 300, 0, 100), (RIGID, 100, 200, 600), (ELASTIC, 50, 0, 900)], 700)
+    assert heights[0] >= 300 and heights[1] == 200 and heights[2] >= 50 and sum(heights) == 700
+    assert panels.column_heights([(RIGID, 300, 100, 200), (ELASTIC, 200, 0, 800)], 1000)[0] == 300  # need < minimum
+
+
+def test_short_room_takes_height_from_the_rigid_panels_down_to_their_minimum():
+    heights = panels.column_heights([(ELASTIC, 300, 0, 300), (RIGID, 100, 400, 300)], 600)
+    assert heights == [300, 300]
+    assert panels.column_heights([(ELASTIC, 300, 0, 300), (RIGID, 200, 400, 300)], 400) == [300, 200]  # Qt clamps
+
+
+def test_rigid_panels_alone_share_their_column_by_their_need():
+    # nothing can take the room: a rigid one alone keeps it all (its rows stay at the top)
+    assert panels.column_heights([(RIGID, 100, 260, 900)], 900) == [900]
+    assert panels.column_heights([(RIGID, 100, 200, 450), (RIGID, 100, 400, 450)], 900) == [300, 600]
+
+
+def test_the_heights_always_add_up_to_the_room():
+    for room in range(500, 1300, 37):
+        for docks in ([(ELASTIC, 120, 0, 333), (RIGID, 90, 271, 10), (OTHER, 80, 0, 177), (ELASTIC, 60, 0, None)],
+                      [(OTHER, 80, 0, 1), (OTHER, 80, 0, 2), (RIGID, 90, 301, 400)],
+                      [(RIGID, 90, 301, 400), (RIGID, 50, 123, 1)]):
+            assert sum(panels.column_heights(docks, room)) == room
+
+
+def test_the_column_of_a_dock_is_what_is_stacked_with_it():
+    # a right area: the dock over a panel, a panel beside both, then one across the whole width
+    rects = [(1200, 0, 400, 500), (1200, 504, 400, 300), (900, 0, 296, 804), (900, 808, 700, 192)]
+    assert panels.column_of(0, rects) == [0, 1, 3]
+    assert panels.column_of(1, rects) == [0, 1, 3]
+    assert panels.column_of(2, rects) == [2, 3]  # the one across both widths is in each column
+
+
+def test_of_two_docks_side_by_side_the_column_keeps_the_one_above_it():
+    # a dock across two columns: in each, only one of the two side by side below it
+    rects = [(0, 0, 600, 400), (0, 404, 300, 400), (304, 404, 296, 400)]
+    assert panels.column_of(0, rects) in ([0, 1], [0, 2])
+    assert panels.column_of(1, rects) == [0, 1] and panels.column_of(2, rects) == [0, 2]
+
+
+def test_the_tabs_of_a_group_are_one_dock_of_the_column():
+    rects = [(0, 0, 300, 400), (0, 0, 300, 400), (0, 404, 300, 300)]  # two tabs share the same place
+    assert len(panels.column_of(0, rects)) == 2 and panels.column_of(0, rects)[-1] == 2
+
+
+def test_a_floating_panel_takes_the_height_of_its_rows():
+    assert panels.floating_height(RIGID, 100, 280, 460, 900, True, 1000) == 280
+    assert panels.floating_height(RIGID, 300, 280, 460, 900, False, 1000) == 300  # never below its minimum
+
+
+def test_a_floating_elastic_panel_is_comfortable_within_the_screen():
+    assert panels.floating_height(ELASTIC, 100, 0, 280, 380, True, 1000) == panels.FLOATING_SIZE[1]
+    assert panels.floating_height(ELASTIC, 100, 0, 460, 700, True, 1000) == 700
+    assert panels.floating_height(ELASTIC, 100, 0, 460, 1400, True, 900) == 900
+    assert panels.floating_height(ELASTIC, 100, 0, 333, 900, False, 1000) == 333  # sized by the user: kept
+    assert panels.floating_height(ELASTIC, 100, 0, 1333, 900, False, 1000) == 1000
+
+
 # --- the dock itself, when QGIS starts ---------------------------------------------
 
 def test_the_dock_goes_to_its_position_when_no_section_was_apart():

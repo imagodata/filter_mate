@@ -30,6 +30,7 @@ config.json
 │   │   ├── ACTION_BAR_POSITION
 │   │   ├── SECTION_HEADERS
 │   │   ├── SECTION_HEIGHT
+│   │   ├── PANEL_SIZING
 │   │   ├── ACTION_BAR_VERTICAL_ALIGNMENT
 │   │   ├── PushButton/ (ICONS, ICONS_SIZES)
 │   │   └── COLORS/ (ACTIVE_THEME, THEMES)
@@ -113,6 +114,20 @@ config.json
 - `fill`: the rows spread over the whole height of the section (the layout of 5.0 to 5.1.1)
 - Applied at once; in the dock, in a panel of QGIS and with the headers stacked alike. A configuration written
   before the setting gets `fit`. The size of the widgets themselves is `UI_PROFILE`
+
+### Panel Sizing
+- **Key:** `APP.DOCKWIDGET.PANEL_SIZING`
+- **Default:** `auto`
+- **Choices:** `auto`, `manual`
+- `auto`: with sections taken out of the dock, the dock and the panels are sized again when a section leaves, comes
+  back, changes panel or is turned on or off, when a panel is moved, when another section is opened, and when
+  `SECTION_HEIGHT` or `ACTION_BAR_POSITION` changes. FILTERING and EXPORTING (rows at their own height) get the
+  height they need; the room left in their column goes to EXPLORING, AGENT and CONFIGURATION, else to the other
+  panels of QGIS there. A floating panel takes the height of its rows, or a comfortable one within the screen
+- `manual`: the heights QGIS and the user set stay (the behaviour of 5.1.1)
+- Nothing is resized when a separator is dragged, nor when QGIS starts (the places and sizes it kept are taken);
+  the handle between the two stacks of the dock stays where the user left it. A rigid panel alone in its column
+  keeps the height Qt gives it; in a group of tabs, a panel shares the height of the other tabs
 
 ### Action Bar Vertical Alignment
 - **Key:** `APP.DOCKWIDGET.ACTION_BAR_VERTICAL_ALIGNMENT`

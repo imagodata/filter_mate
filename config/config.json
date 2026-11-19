@@ -151,6 +151,14 @@
         ],
         "description": "Height of the rows of FILTERING and EXPORTING: 'fit' (each row at its own height, one gap apart, at the top of the section; the room left stays under them, and a short section scrolls), 'fill' (the rows spread over the whole height of the section)"
       },
+      "PANEL_SIZING": {
+        "value": "auto",
+        "choices": [
+          "auto",
+          "manual"
+        ],
+        "description": "Height of the panels of the sections taken out of the dock, and of the dock: 'auto' (sized again when a section leaves, comes back or changes panel, when a panel is moved or opens another section: FILTERING and EXPORTING at the height of their rows, the room left to EXPLORING, AGENT, CONFIGURATION or the other panels of QGIS), 'manual' (the heights QGIS and the user set stay)"
+      },
       "ACTION_BAR_VERTICAL_ALIGNMENT": {
         "value": "top",
         "choices": [

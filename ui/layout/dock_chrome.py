@@ -324,6 +324,7 @@ class DockSections(QObject):
         self.on_menu = None  # called with (key, place on the screen) on a right click on the chip of a section
         self.on_dropped = None  # called with (key, index) when the chip of a section apart is dropped on a rail
         self.on_dropped_out = None  # called with (key, place on the screen) when a chip is dropped out of every rail
+        self.on_user_open = None  # called when the user opened or folded a section by its chip or its header
         from ..widgets.section_rail import make_rail
         self.top_rail = make_rail(self.top, accepts=lambda key: key in TOP_KEYS and key in self.detached,
                                   dark=self._dark)
@@ -554,10 +555,17 @@ class DockSections(QObject):
         if self._open_in_stack(key):
             if self._may_fold_top():
                 self._open_top(None)
+                self._told_open()
             else:
                 self._headers[key].setChecked(True)
             return
         self.open_top(key)
+        self._told_open()
+
+    def _told_open(self) -> None:
+        """The user opened or folded a section of the dock: the panels around it may size the dock again."""
+        if self.on_user_open is not None:
+            self.on_user_open()
 
     def _bottom_headers(self) -> list:
         """The headers QToolBox gives its pages, the one of "nothing open" left out."""
@@ -601,6 +609,7 @@ class DockSections(QObject):
                     self._toolbox.setCurrentWidget(self._nothing)
                 elif index == self._current_before_press:
                     self._refresh_headers()
+                self._told_open()
                 return
 
     def bottom_key(self) -> Optional[str]:
@@ -740,6 +749,7 @@ class DockSections(QObject):
             self.open_top(key)
         elif self._may_fold_top():
             self._open_top(None)
+        self._told_open()
 
     # --- the bottom stack ------------------------------------------------------------
 
@@ -753,6 +763,7 @@ class DockSections(QObject):
         self._toolbox.setCurrentWidget(self._nothing if fold else page)
         if not fold:
             self.bottom_rail.set_current(self.bottom_key())  # the click on the open chip unchecked it
+        self._told_open()
 
     def _on_bottom_changed(self, _index: int) -> None:
         current = self._toolbox.currentWidget()
@@ -1051,11 +1062,11 @@ def apply_section_options(dock: Any) -> list:
     """Show or hide FILTERING and EXPORTING as the configuration says, and list the sections by rails or by headers
     stacked (``APP.DOCKWIDGET.SECTION_HEADERS``), and lay out the rows of FILTERING and EXPORTING
     (``APP.DOCKWIDGET.SECTION_HEIGHT``); the keys of the sections whose state changed, ``headers`` when the way they
-    are listed did, ``height`` when the rows were laid out another way."""
+    are listed did, ``height`` when the rows were laid out another way, ``sizing`` when ``PANEL_SIZING`` changed."""
     sections = getattr(dock, "_fm_sections", None)
     config_data = getattr(dock, "CONFIG_DATA", None) or {}
     if sections is None:
-        return _apply_section_height(dock, config_data, [])
+        return _apply_panel_sizing(dock, config_data, _apply_section_height(dock, config_data, []))
     changed = []
     for key in SECTION_PAGES:
         wanted = section_enabled(config_data, key)
@@ -1076,7 +1087,21 @@ def apply_section_options(dock: Any) -> list:
                 manager.sync_sections()
     except RuntimeError:  # the dock went away
         pass
-    return _apply_section_height(dock, config_data, changed)
+    return _apply_panel_sizing(dock, config_data, _apply_section_height(dock, config_data, changed))
+
+
+def _apply_panel_sizing(dock: Any, config_data: Any, changed: list) -> list:
+    """``changed`` with ``sizing`` added when ``APP.DOCKWIDGET.PANEL_SIZING`` changed since the last call (the
+    panels are sized again at once when it is back to ``auto``: the caller asks for it, see config_controller.py)."""
+    try:
+        from .section_panels import panel_sizing
+        mode = panel_sizing(config_data)
+        if dock.property("fm_panel_sizing") not in (None, mode):
+            changed.append("sizing")
+        dock.setProperty("fm_panel_sizing", mode)
+    except Exception as exc:  # the dock went away (RuntimeError): no other change is lost
+        logger.debug(f"Panel sizing not followed: {exc}")
+    return changed
 
 
 def _apply_section_height(dock: Any, config_data: Any, changed: list) -> list:

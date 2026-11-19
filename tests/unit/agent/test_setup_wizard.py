@@ -266,3 +266,11 @@ def test_the_height_of_the_rows_is_applied_at_once(settings):
     assert wizard.SECTION_HEIGHT in LIVE
     rows = plan(settings, [{"path": wizard.SECTION_HEIGHT, "value": "fill"}], by_user=True)
     assert rows and rows[0]["effect"] == EFFECT_NOW
+
+
+def test_the_sizing_of_the_panels_is_applied_at_once_and_not_asked_by_the_setup(settings):
+    from core.agent.settings_reference import EFFECT_NOW
+    path = "APP.DOCKWIDGET.PANEL_SIZING"
+    rows = plan(settings, [{"path": path, "value": "manual"}], by_user=True)
+    assert rows and rows[0]["effect"] == EFFECT_NOW
+    assert path not in {question_path for question_path in vars(wizard).values() if isinstance(question_path, str)}
