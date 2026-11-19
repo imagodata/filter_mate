@@ -286,6 +286,7 @@ class CoverageDockExtras(QObject):
         self._strip_host = None
         self._strip_kind = 'vector'
         self._rail_kind = 'vector'  # the kind whose rail is shown: the tools the user hid are those of this kind
+        self._rail_menu_rail = None  # the rail whose right-click menu is connected
         self._strip_timer = None
         self._strip_panels: List[Any] = []  # panels whose signals refresh the strip (by object, not id())
         # (layer id, EXPLORING group) -> features of the last EXPLORING selection (custom selection count)
@@ -327,6 +328,7 @@ class CoverageDockExtras(QObject):
         self.ensure_strip()
         if not self._tools:
             self._build_tools()
+        self._guarded(self._connect_rail_menu)
 
     def ensure_card(self) -> None:
         """Layer card at the top of EXPLORING, above the groups of every layer kind (mockup)."""
@@ -476,14 +478,37 @@ class CoverageDockExtras(QObject):
                     else lambda position, n=name: self._on_pc_zone_context_menu(position, n))
         self._guarded(self._connect_rail_menu, anchor)
 
-    def _connect_rail_menu(self, anchor: Any) -> None:
-        """Right-click on the rail (a button without a menu of its own passes the click on): the tools it shows."""
+    def _connect_rail_menu(self, anchor: Any = None) -> None:
+        """Right-click on the rail (a button without a menu of its own passes the click on): the tools it shows.
+        Connected once, as soon as the rail exists (a project with no layer shows the rail too)."""
+        if self._rail_menu_rail is not None:
+            return
         from qgis.PyQt.QtCore import Qt
-        rail = getattr(self.dockwidget, 'widget_exploring_keys', None) or anchor.parentWidget()
+        rail = getattr(self.dockwidget, 'widget_exploring_keys', None) or (
+            anchor.parentWidget() if anchor is not None else None)
         if rail is None:
             return
         rail.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        rail.customContextMenuRequested.connect(lambda position, r=rail: self._show_tool_choice_menu(r, position))
+        rail.customContextMenuRequested.connect(self._on_rail_menu_requested)
+        self._rail_menu_rail = rail
+
+    def _on_rail_menu_requested(self, position: Any) -> None:
+        if self._rail_menu_rail is not None:
+            self._show_tool_choice_menu(self._rail_menu_rail, position)
+
+    def _disconnect_rail_menu(self) -> None:
+        rail, self._rail_menu_rail = self._rail_menu_rail, None
+        if rail is None:
+            return
+        from qgis.PyQt.QtCore import Qt
+        try:
+            rail.customContextMenuRequested.disconnect(self._on_rail_menu_requested)
+        except (TypeError, RuntimeError):
+            pass  # already gone with the dock
+        try:
+            rail.setContextMenuPolicy(Qt.ContextMenuPolicy.DefaultContextMenu)
+        except RuntimeError:
+            pass
 
     def refresh_icons(self) -> None:
         """The theme changed (IconManager.refresh_all_icons): the tool icons are drawn again, once Qt has given
@@ -707,6 +732,7 @@ class CoverageDockExtras(QObject):
 
     def teardown(self) -> None:
         self.leave()
+        self._guarded(self._disconnect_rail_menu)
         self._guarded(self._unlink_all_styles)  # plugin unloaded: every layer gets its own style back
         self._guarded(self._restore_vector_buttons)
         self._guarded(self._release_zone_tool)
@@ -964,6 +990,7 @@ class CoverageDockExtras(QObject):
         another way while its button is hidden (the zone, the "more" menu).
         """
         from .exploring_tool_choice import BUTTONS, MAP_TOOLS, MODES
+        self._guarded(self._connect_rail_menu)
         kind = self._rail_kind
         hidden = self.hidden_tools(kind)
         for key, name in BUTTONS.get(kind, {}).items():
@@ -1001,7 +1028,9 @@ class CoverageDockExtras(QObject):
         hidden = self.hidden_tools(kind)
         words = labels(kind)
         menu = QMenu(rail)
-        menu.addSection(menu_title())
+        title = menu.addAction(menu_title())  # a section title is not drawn by the native styles of Windows and macOS
+        title.setEnabled(False)
+        menu.addSeparator()
         for key in choice.tools_of(kind):
             action = menu.addAction(words.get(key, key))
             action.setCheckable(True)
@@ -1010,7 +1039,10 @@ class CoverageDockExtras(QObject):
                 action.setEnabled(False)  # always on: it keeps the rail from being empty
             else:
                 action.triggered.connect(lambda checked=False, k=key: self.set_tool_shown(kind, k, bool(checked)))
-        menu.exec(rail.mapToGlobal(position))
+        try:
+            menu.exec(rail.mapToGlobal(position))
+        finally:
+            menu.deleteLater()  # a child of the rail: one menu per right-click would pile up on it
 
     def set_tool_shown(self, kind: str, key: str, shown: bool) -> bool:
         """Show or hide a button of the rail of ``kind`` by writing the setting as the configuration tree does (saved,

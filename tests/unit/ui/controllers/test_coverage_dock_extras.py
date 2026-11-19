@@ -1119,3 +1119,108 @@ class TestReleasingAPipetteKeepsTheTarget:
         getattr(rail.dock, handler)(True)
         getattr(rail.dock, handler)(False)
         assert picks == [(True, target), (False, None)]
+
+
+class FakeRail:
+    def __init__(self):
+        self.customContextMenuRequested = FakeSignal()
+        self.policy = None
+
+    def setContextMenuPolicy(self, policy):
+        self.policy = policy
+
+    def mapToGlobal(self, position):
+        return position
+
+
+class TestTheRailBeforeAnyLayer:
+    """A project with no layer at the start: the setting applies and the right-click menu is there."""
+
+    def test_the_setting_applies_with_no_layer_shown_and_no_tool_built(self, rail):
+        rail.dock._tools = {}  # the buttons of the kinds are built by the first layer shown
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="zoom, identify")
+        rail.dock.apply_tool_choice()
+        assert not rail.buttons["pushButton_exploring_zoom"].visible
+        assert not rail.buttons["pushButton_exploring_identify"].visible
+        assert rail.buttons["pushButton_checkable_exploring_selecting"].visible
+
+    def test_the_menu_is_connected_as_soon_as_the_rail_exists_and_once(self, rail):
+        fake = FakeRail()
+        rail.dock.dockwidget.widget_exploring_keys = fake
+        rail.dock._tools = {}
+        rail.dock.apply_tool_choice()
+        rail.dock.apply_tool_choice()
+        assert len(fake.customContextMenuRequested.slots) == 1 and fake.policy is not None
+
+    def test_teardown_disconnects_the_menu(self, rail):
+        fake = FakeRail()
+        rail.dock.dockwidget.widget_exploring_keys = fake
+        rail.dock._tools = {}
+        rail.dock.apply_tool_choice()
+        assert fake.customContextMenuRequested.slots
+        rail.dock.teardown()
+        assert fake.customContextMenuRequested.slots == [] and rail.dock._rail_menu_rail is None
+        rail.dock._tools = {}
+        rail.dock.apply_tool_choice()  # a rail rebuilt is connected again
+        assert len(fake.customContextMenuRequested.slots) == 1
+
+    def test_the_dock_applies_the_tools_when_it_is_built(self):
+        source = (_ROOT / "filter_mate_dockwidget.py").read_text(encoding="utf-8")
+        init = source[source.index("self.widgetsInitialized.emit(); self._setup_keyboard_shortcuts()"):]
+        assert init.index("self.apply_exploring_tools()") < init.index("if self._pending_layers_update:")
+
+
+class TestTheMenuOfTheRail:
+    @pytest.fixture
+    def menus(self, monkeypatch):
+        made = []
+
+        class Menu:
+            failing = False
+
+            def __init__(self, parent=None):
+                self.actions, self.exec_calls, self.deleted = [], [], False
+                made.append(self)
+
+            def addAction(self, text):
+                action = types.SimpleNamespace(text=text, enabled=True, checkable=False, checked=False,
+                                               triggered=FakeSignal())
+                action.setEnabled = lambda on: setattr(action, "enabled", on)
+                action.setCheckable = lambda on: setattr(action, "checkable", on)
+                action.setChecked = lambda on: setattr(action, "checked", on)
+                self.actions.append(action)
+                return action
+
+            def addSeparator(self):
+                self.actions.append("-")
+
+            def exec(self, position):
+                self.exec_calls.append(position)
+                if Menu.failing:
+                    raise RuntimeError("menu failed")
+
+            def deleteLater(self):
+                self.deleted = True
+
+        Menu.made = made
+        monkeypatch.setattr(sys.modules["qgis.PyQt.QtWidgets"], "QMenu", Menu, raising=False)
+        return Menu
+
+    def test_the_title_is_a_disabled_action_not_a_section(self, rail, menus):
+        rail.dock._show_tool_choice_menu(FakeRail(), (1, 2))
+        first = menus.made[0].actions
+        assert first[0].enabled is False and not first[0].checkable and first[1] == "-"
+
+    def test_the_menu_is_destroyed_after_it_ran_even_when_it_failed(self, rail, menus):
+        rail.dock._show_tool_choice_menu(FakeRail(), (1, 2))
+        assert menus.made[0].exec_calls == [(1, 2)] and menus.made[0].deleted
+        menus.failing = True
+        with pytest.raises(RuntimeError):
+            rail.dock._show_tool_choice_menu(FakeRail(), (1, 2))
+        assert menus.made[1].deleted
+
+    def test_the_locked_button_is_a_checked_disabled_box(self, rail, menus):
+        rail.dock._show_tool_choice_menu(FakeRail(), (0, 0))
+        boxes = [a for a in menus.made[0].actions if a != "-" and a.checkable]
+        locked = [a for a in boxes if not a.enabled]
+        assert len(boxes) == 8 and len(locked) == 1 and locked[0].checked

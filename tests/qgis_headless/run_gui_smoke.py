@@ -317,6 +317,14 @@ def s_open_plugin():
             config['APP']['DOCKWIDGET']['SECTION_HEADERS']['value'] = os.environ['FM_HEADERS']
             with open(path, 'w', encoding='utf-8') as stream:
                 json.dump(config, stream, indent=2)
+    if os.environ.get('FM_TOOLS_HIDDEN'):  # the dock opens with these buttons of the vector rail hidden, as saved before
+        for name in ('config.default.json', 'config.json'):
+            path = os.path.join(plugins, PACKAGE, 'config', name)
+            with open(path, encoding='utf-8') as stream:
+                config = json.load(stream)
+            config['APP']['DOCKWIDGET']['EXPLORING_TOOLS']['vector_hidden']['value'] = os.environ['FM_TOOLS_HIDDEN']
+            with open(path, 'w', encoding='utf-8') as stream:
+                json.dump(config, stream, indent=2)
     if os.environ.get('FM_DETACHED'):  # and with these sections in their own panel, as left the last time
         settings.setValue('FilterMate/panels/detached', os.environ['FM_DETACHED'])
     sys.path.insert(0, plugins)
@@ -5803,35 +5811,54 @@ def s_tools_layer_modes_back():
 
 
 def s_tools_menu():
-    """The right-click menu of the rail: one check box per button, "more" always on, a box writes the setting."""
+    """The right-click menu of the rail: one check box per button, "more" always on, a box writes the setting; the menu
+    is destroyed once it ran."""
+    from qgis.PyQt import sip
+    from qgis.PyQt.QtGui import QContextMenuEvent
     d = dock()
-    seen = []
-    original = QMenu.exec
-    QMenu.exec = lambda self, *args: seen.append(self) or None
-    try:
-        from qgis.PyQt.QtGui import QContextMenuEvent
-        apply_settings({TOOLS_PATH.format('vector'): 'follow'})
-        pump(150)
+    seen, snapshots = [], []
+
+    def fake_exec(menu, *args):
+        seen.append(menu)
+        snapshots.append([(a.text(), a.isCheckable(), a.isChecked(), a.isEnabled()) for a in menu.actions()
+                          if not a.isSeparator()])
+        if TOOLS.get('trigger') is not None:
+            [a for a in menu.actions() if a.isCheckable()][TOOLS['trigger']].trigger()  # a box ticked or unticked
+
+    def right_click():
         button = d.pushButton_exploring_reset_layer_properties  # no menu of its own: the click goes on to the rail
         point = QPoint(button.width() // 2, button.height() // 2)
         QApplication.sendEvent(button, QContextMenuEvent(QContextMenuEvent.Reason.Mouse, point, button.mapToGlobal(point)))
-        pump(100)
-    finally:
-        QMenu.exec = original
-    menu = seen[-1] if seen else None
-    actions = [action for action in menu.actions() if not action.isSeparator() and action.isCheckable()] if menu else []
-    module = tools_module()
-    wanted = [(key, key not in module.hidden_for('vector', 'follow')) for key in module.tools_of('vector')]
-    check('tools: a right-click on a button of the rail lists its tools, one check box each, "more" always on',
-          len(actions) == len(wanted) and [action.isChecked() for action in actions] == [on for _key, on in wanted]
-          and not actions[-2].isEnabled() and all(action.isEnabled() for action in actions if action is not actions[-2]),
-          f"menu={bool(menu)} actions={[(a.text(), a.isChecked(), a.isEnabled()) for a in actions]}")
-    if len(actions) == len(wanted):
-        actions[0].trigger()  # zoom unticked
+        pump(300)
+
+    original = QMenu.exec
+    QMenu.exec = fake_exec
+    try:
+        TOOLS['trigger'] = None
+        apply_settings({TOOLS_PATH.format('vector'): 'follow'})
+        pump(150)
+        right_click()
+        shown = snapshots[-1] if snapshots else []
+        title, boxes = shown[:1], [row for row in shown if row[1]]
+        module = tools_module()
+        wanted = [key not in module.hidden_for('vector', 'follow') for key in module.tools_of('vector')]
+        locked = [row for row in boxes if not row[3]]
+        check('tools: a right-click on a button of the rail lists its tools, one check box each, "more" always on',
+              len(boxes) == len(wanted) and [row[2] for row in boxes] == wanted and len(locked) == 1
+              and locked[0][0].startswith('More tools') and all(row[3] for row in boxes if row not in locked),
+              f"menu={bool(seen)} actions={shown}")
+        check('tools: the title of the menu is a disabled entry (a section is not drawn by the native styles)',
+              title and title[0][0] == 'Tools shown for this type of layer' and not title[0][1] and not title[0][3], str(title))
+        check('tools: the menu is destroyed once it ran', bool(seen) and sip.isdeleted(seen[-1]), f"seen={len(seen)}")
+        TOOLS['trigger'] = 0  # zoom unticked
+        right_click()
         pump(300)
         check('tools: a box of the menu writes the setting and the rail follows at once',
               config_value(TOOLS_PATH.format('vector')) == 'zoom, follow' and tools_rail_is('vector', 'zoom, follow'),
               f"setting={config_value(TOOLS_PATH.format('vector'))!r} rail={tools_rail('vector')}")
+    finally:
+        QMenu.exec = original
+        TOOLS['trigger'] = None
     return waits(0.3)
 
 
@@ -5895,6 +5922,18 @@ def s_tools_end():
     d._fm_sections.open_top('exploring')
     d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
     return tools_pick(TOOLS['layer'], coverage_page=(TOOLS['layer'] in ('dem', 'cloud')))
+
+
+def s_tools_startup_check():
+    """The dock opened with buttons hidden in its configuration (FM_TOOLS_HIDDEN): the rail is as the setting says
+    from the start, and its right-click menu is connected."""
+    d = dock()
+    wanted = os.environ.get('FM_TOOLS_HIDDEN', '')
+    extras = coverage()._extras
+    check('tools: a dock opened with buttons hidden shows its rail as the setting says, and its menu is connected',
+          settles(lambda: tools_rail_is('vector', wanted), 3.0) and extras is not None
+          and extras._rail_menu_rail is d.widget_exploring_keys, f"rail={tools_rail('vector')} wanted={wanted!r}")
+    return waits(0.2)
 
 
 TOOLS_STEPS = [s_tools_begin, s_tools_vector_check, s_tools_raster_check, s_tools_cloud_check, s_tools_groups_begin, s_tools_groups_raster,
@@ -6196,6 +6235,8 @@ if os.environ.get('FM_ONLY') == 'tools':  # the tools of the EXPLORING rail chos
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *TOOLS_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'refilter':  # a source filtered again by an expression its SQL cannot write
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *REFILTER_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'tools_startup':  # the dock opened with buttons of the vector rail hidden (FM_TOOLS_HIDDEN)
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, s_tools_startup_check, s_finish]
 if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 
