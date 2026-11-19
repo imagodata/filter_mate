@@ -357,7 +357,8 @@ HYBRID_CASES = [
     'with_variable(\'seuil\', 9, "pop" > @seuil)',          # @seuil is 9 there, not the project's 5
     '"ratio" > 1e-30 AND regexp_match("nom", \'^R\') > 0',     # dump() writes 1e-30 as 0: no native part
 ]
-# (old subset, combine operator, expression): hybrid with AND only, the former path otherwise
+# (old subset, combine operator, expression): never a list of keys under AND NOT; since 2026-11-18 one read on
+# the whole layer when the new subset replaces the old one or is ORed with it (through the layer under AND)
 COMBINED_CASES = [
     (None, 'AND NOT', 'regexp_match("nom", \'o\') > 0'),     # NOT ( new ): never a list of keys
     (None, 'AND NOT', '"pop" > 5 AND "ratio" < 2'),
@@ -366,6 +367,14 @@ COMBINED_CASES = [
     ('"pop" > 2', 'OR', 'regexp_match("nom", \'o\') > 0'),
     ('"pop" > 2', 'AND NOT', 'regexp_match("nom", \'o\') > 0'),
     ('"pop" > 2', None, 'regexp_match("nom", \'o\') > 0'),
+    ('"id" IN (1, 2, 3)', None, '"pop" > 5 AND regexp_match("nom", \'^R\') > 0'),  # the old subset keeps none
+    ('"id" IN (1, 2, 3)', 'OR', '"pop" > 5 AND regexp_match("nom", \'^R\') > 0'),
+]
+# A second filter on a layer the first one filtered by a list of keys, as the dock runs them (2026-11-18:
+# replaced, it was the former conversion's, which SQLite refuses for a function of QGIS)
+REFILTER_PAIRS = [
+    ('regexp_match("nom", \'^R\') > 0', 'regexp_match("nom", \'o\') > 0'),
+    ('length("nom") >= 4', 'length("nom") = 5'),
 ]
 
 
@@ -386,7 +395,11 @@ def run_executor(layer, provider_type, text, old=None, operator=None):
     accepted = bool(combined) and executor.apply_filter(combined)
     got = keys(layer) if accepted else None
     layer.setSubsetString('')
+    LAST_RUN.update(executor=executor, processed=processed, combined=combined)
     return processed in executor.native_origins, combined, got
+
+
+LAST_RUN = {}  # the executor, its subset and the combined one of the last run_executor
 
 
 def hybrid_path(label, layer, provider_type):
@@ -405,11 +418,88 @@ def hybrid_path(label, layer, provider_type):
         layer.setSubsetString('')
         expected = combined_reference(layer, old, operator, text)
         written, subset, got = run_executor(layer, provider_type, text, old, operator)
-        status = ('PASS' if got == expected else 'FAIL') if written else 'OLD'
-        if operator != 'AND' and written and ' IN (' in (subset or ''):
-            status = 'FAIL'  # a list of keys read through the old subset, or negated: never written
+        negated = 'NOT' in (operator or '')
+        status = ('PASS' if got == expected else 'FAIL') if written else (
+            'FAIL' if provider_type in HYBRID_PROVIDERS and not negated else 'OLD')
+        if negated and written and ' IN (' in (subset or ''):
+            status = 'FAIL'  # a list of keys under NOT: never written
         report(status, f"{label} combined {operator}: {old} / {text}",
                f"subset={subset!r:.160} expected={expected} got={got}")
+    refilter_path(label, layer, provider_type, REFILTER_PAIRS)
+    selected_path(label, layer, provider_type)
+
+
+HYBRID_PROVIDERS = ('spatialite', 'postgresql')  # the plugin's provider types of the SQLite and PostgreSQL sources
+
+
+def selected_path(label, layer, provider_type):
+    """is_selected() in a second filter that replaces a list, read on the copy of the layer without its subset.
+
+    The copy has no selection: is_selected() reads the one of the layer of the
+    context (the layer itself) at the id of each feature of the copy. A
+    GeoPackage numbers its features in the file (the same ids in the copy): a
+    list, the features QGIS keeps, also those outside the first subset. A copy
+    of a PostgreSQL layer may number them another way: no list (review of
+    2026-11-18). Ids 2 and 5 selected, outside the first list (1, 3, 11).
+    """
+    first, text = 'regexp_match("nom", \'^R\') > 0', 'is_selected() OR "pop" > 9'
+    written, old, _ = run_executor(layer, provider_type, first)
+    if not written or ' IN (' not in (old or ''):
+        report('OLD', f"{label} selected: {first}", f"first subset={old!r:.160}")
+        return
+    from filter_mate.core.tasks.executors.attribute_filter_executor import AttributeFilterExecutor
+    layer.setSubsetString(old)
+    layer.selectByIds([2, 5])  # the feature ids are the ids here (GeoPackage fid, PostgreSQL integer key)
+    key = 'id' if provider_type == 'postgresql' else 'fid'
+    executor = AttributeFilterExecutor(layer=layer, provider_type=provider_type, primary_key=key, old_subset=old,
+                                       combine_operator=None)
+    processed, _ = executor.process_qgis_expression(text)
+    written = processed in executor.native_origins
+    accepted = bool(processed) and executor.apply_filter(processed)
+    got = keys(layer) if accepted else None
+    layer.removeSelection()
+    layer.setSubsetString('')
+    expected = sorted({2, 5} | {row[0] for row in ROWS if row[1] is not None and row[1] > 9})
+    if provider_type == 'postgresql':
+        status = 'FAIL' if written else 'PASS'
+    else:
+        status = 'PASS' if written and got == expected else 'FAIL'
+    report(status, f"{label} selected replace: {first} -> {text}",
+           f"subset={processed!r:.160} expected={expected} got={got} written={written}")
+
+
+def refilter_path(label, layer, provider_type, pairs, errors_drop=False):
+    """A second filter on a layer whose first filter listed keys: replaced, ORed and ANDed with that list.
+
+    2026-11-18: replaced or ORed, the keys were not read (the features came
+    through the first subset) and the former conversion wrote the second one.
+    Where the first is a list, the second must be one too (the same function
+    on the same features: QGIS evaluates it there) and keep what QGIS keeps.
+    The selection the targets are filtered by (ExpressionFacadeHandler.
+    _source_selection: the new subset itself under OR and replace) must keep
+    what the second expression keeps on the whole layer, also the features the
+    first list keeps (review of 2026-11-18: a list without them under OR).
+    """
+    from filter_mate.core.tasks.expression_facade_handler import ExpressionFacadeHandler
+    for first, second in pairs:
+        written, old, _ = run_executor(layer, provider_type, first)
+        if not written or ' IN (' not in (old or ''):
+            report('OLD', f"{label} refilter: {first}", f"first subset={old!r:.160}")
+            continue
+        for operator in (None, 'OR', 'AND'):
+            expected = combined_reference(layer, old, operator, second, errors_drop)
+            written, subset, got = run_executor(layer, provider_type, second, old, operator)
+            status = ('PASS' if got == expected else 'FAIL') if written else 'FAIL'
+            selection = ExpressionFacadeHandler._source_selection(
+                LAST_RUN['executor'], LAST_RUN['processed'], LAST_RUN['combined'])
+            layer.setSubsetString(selection or '')
+            selected = keys(layer) if selection else None
+            layer.setSubsetString('')
+            wanted = (expected if operator == 'AND' else reference(layer, second, errors_drop))
+            if selected != wanted:
+                status = 'FAIL'  # the targets would follow another selection than the second filter's
+            report(status, f"{label} refilter {operator}: {first} -> {second}",
+                   f"subset={subset!r:.200} expected={expected} got={got} selection={selected} wanted={wanted}")
 
 
 def combined_reference(layer, old, operator, text, errors_drop=False):
@@ -609,6 +699,13 @@ GEOM_COMBINED_CASES = [
     ('"pop" > 2', 'OR', f'x_min($geometry) > {X} AND "pop" < 5', BOUNDS),
     ('"pop" > 2', 'AND', f'x_min($geometry) > {X}', BOUNDS),
 ]
+# The defect of 2026-11-18 as found in the dock (refilter_path): functions of the geometry no source runs
+GEOM_REFILTER_PAIRS = [
+    ('bounds_width($geometry) > 1', 'bounds_width($geometry) > 100'),
+    ('num_points($geometry) > 1', 'num_points($geometry) > 3'),
+    ('$area > 1', '$area > 1000'),
+    ('$length > 1', '$length > 500'),
+]
 POINTS = [
     (1, 1, 'POINT (700123.456789 6600234.5678)'), (2, 2, 'POINT (700500 6600500)'),
     (3, 3, 'POINT (700777.125 6600111.875)'), (4, 4, 'POINT (700499.99999999994 6600500.0000000001)'),
@@ -749,6 +846,7 @@ def geometry_path(label, layer, provider_type, tags):
         status = ('PASS' if got == expected else 'FAIL') if written else ('FAIL' if must else 'OLD')
         report(status, f"{label} combined {operator}: {old} / {text}",
                f"subset={subset!r:.240} expected={expected} got={got}")
+    refilter_path(label, layer, provider_type, GEOM_REFILTER_PAIRS, errors_drop=True)
 
 
 def set_variables(layers):
