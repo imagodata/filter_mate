@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Point clouds: a filter whose source is a cloud rewritten by PDAL (height above ground, clip, COPC export) gives the same result at every run. `writers.copc` drew the levels of detail at random from points in the order the threads of `readers.copc` finished, and the footprint is read at a level of detail: the same filter kept 82 to 85 road sections. The writer now has a fixed seed and a local COPC / EPT is read by one thread (about 15 % slower on 17 M points).
 - Agent, `layer_statistics`: the description of the tool names `ranked_by` among what it returns (and loses "now" and "vector", which the arguments already say, to keep the instructions under their weight limit).
 - Agent, compaction: a result taken out to save room is matched to its call by identifier when that identifier is the only one of its turn, and by position otherwise (a message of results with one missing no longer names the wrong tool).
 - Agent: the note about the sources not ticked sends the model to `show_settings_link` only when it can be called: not when the user turned that tool off in the Tools tab (`use_tools` cannot add it either), and with the families on it says the tool is added by `use_tools` right after its name, where "it" could be read as the sources.

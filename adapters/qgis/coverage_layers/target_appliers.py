@@ -1209,8 +1209,7 @@ class PointCloudTargetJob(TargetJob):
             return
         if polygon is None:
             stages.append({"type": "filters.head", "count": 0})
-        stages.append({"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all",
-                       "a_srs": pdal_cli.srs_for(self.crs)})
+        stages.append(pdal_cli.copc_writer(filename=path, a_srs=pdal_cli.srs_for(self.crs)))
         ok, message = pdal_cli.run_pipeline(stages, is_canceled=is_canceled)
         if not ok:
             self.outcome.message = f"pdal: {message}"

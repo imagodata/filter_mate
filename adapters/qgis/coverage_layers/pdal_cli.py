@@ -208,6 +208,12 @@ def read_stages(source: str, bounds=None, polygon: Optional[str] = None) -> list
     require an explicit useful extent and PDAL 2.4+, never a whole download.
     EPT polygon support is probed on the installed tool; older builds keep
     filters.crop inside reader bounds. COPC accepts polygon since PDAL 2.4.
+
+    A local COPC / EPT is read by one thread: with several, the chunks
+    reach the pipeline in the order the threads finish them, and
+    writers.copc samples its levels of detail from that order (see
+    :func:`copc_writer`). A remote one keeps its parallel requests: one at
+    a time would wait for each HTTP reply in turn.
     """
     remote = is_remote_source(source)
     reader_type = reader_for(source)
@@ -220,6 +226,8 @@ def read_stages(source: str, bounds=None, polygon: Optional[str] = None) -> list
         if bounds is None:
             raise ValueError(_message('A useful extent is required for a remote point cloud'))
     reader = {'type': reader_type, 'filename': source}
+    if not remote and reader_type in ('readers.copc', 'readers.ept'):
+        reader['threads'] = 1  # every PDAL ("requests" from 2.3); readers.las keeps the order of its chunks
     stages = [reader]
     if bounds is not None:
         xmin, ymin, xmax, ymax = map(float, bounds)
@@ -236,6 +244,23 @@ def read_stages(source: str, bounds=None, polygon: Optional[str] = None) -> list
         else:
             stages.append({'type': 'filters.crop', 'polygon': polygon})
     return stages
+
+
+def copc_writer(**options) -> dict:
+    """A ``writers.copc`` stage writing the same file content from the same points, ``options`` added.
+
+    writers.copc fills each coarse node of the octree with a sample of the
+    points of its children, shuffled with a new random seed at every run.
+    QGIS reads a cloud at the level of detail of the resolution asked
+    (point_cloud_footprint): a filter whose source was a cloud rewritten by
+    PDAL (height above ground) read other points at every run and kept 82 to
+    85 road sections from one run to the next (2026-11-19). ``fixed_seed`` (PDAL 2.4+)
+    draws the same sample from points that come in the same order
+    (:func:`read_stages`).
+    """
+    stage = {"type": "writers.copc", "forward": "all", "extra_dims": "all", "fixed_seed": True}
+    stage.update(options)
+    return stage
 
 
 # Authorities PROJ resolves by code; any other CRS (USER:..., none) is written as WKT.
