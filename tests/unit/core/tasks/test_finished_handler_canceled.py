@@ -378,3 +378,52 @@ def test_a_deferred_filter_keeps_its_views(finished):
     held["done"]([])
     finished.cleanup_mv.assert_not_called()
 
+
+def _named(name, layer_id):
+    layer = MagicMock()
+    layer.name.return_value, layer.id.return_value = name, layer_id
+    return layer
+
+
+def _warned(finished, monkeypatch, warnings, layers, refused, canceled=False):
+    display = MagicMock()
+    monkeypatch.setattr(finished.module, "tch_display_warnings", display)
+    _refuse(finished, refused=refused)
+    finished.run(canceled=canceled, warning_messages=warnings,
+                 pending=[(layer, '"id" > 3') for layer in layers])
+    return display
+
+
+def test_two_layers_of_one_name_keep_the_warning_when_only_one_is_refused(finished, monkeypatch):
+    """2026-11-19: the prefix "Cables: " hid the warning of the filtered one."""
+    layers = [_named("Cables", "cables_1"), _named("Cables", "cables_2")]
+    display = _warned(finished, monkeypatch, ["Cables: Cut by the extent"], layers, (("cables_1", "Cables", "lost"),))
+    display.assert_called_once_with(["Cables: Cut by the extent"])
+
+
+def test_two_layers_of_one_name_both_refused_lose_the_warning(finished, monkeypatch):
+    layers = [_named("Cables", "cables_1"), _named("Cables", "cables_2")]
+    display = _warned(finished, monkeypatch, ["Cables: Cut by the extent"], layers,
+                      (("cables_1", "Cables", "lost"), ("cables_2", "Cables", "lost")))
+    display.assert_not_called()
+
+
+def test_a_name_holding_a_colon_is_not_taken_for_the_refused_layer_before_it(finished, monkeypatch):
+    """"A: B" filtered, "A" refused: "A: B: Cut by the extent" is the warning of "A: B"."""
+    layers = [_named("A", "a"), _named("A: B", "ab")]
+    display = _warned(finished, monkeypatch, ["A: B: Cut by the extent"], layers, (("a", "A", "lost"),))
+    display.assert_called_once_with(["A: B: Cut by the extent"])
+
+
+def test_the_warning_of_a_refused_layer_with_a_colon_in_its_name_is_left_out(finished, monkeypatch):
+    layers = [_named("A: B", "ab"), _named("C", "c")]
+    display = _warned(finished, monkeypatch, ["A: B: Cut by the extent", "C: Read up to its budget"], layers,
+                      (("ab", "A: B", "lost"),))
+    display.assert_called_once_with(["C: Read up to its budget"])
+
+
+def test_a_canceled_task_shows_no_warning(finished, monkeypatch):
+    """2026-11-19: its filters are never set, a newer task reports."""
+    display = _warned(finished, monkeypatch, ["Cables: Cut by the extent"], [_named("Cables", "cables")], (),
+                      canceled=True)
+    display.assert_not_called()

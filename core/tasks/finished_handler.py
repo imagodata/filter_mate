@@ -64,6 +64,45 @@ def _deleted(layer: Any) -> bool:
         return True
 
 
+def _layer_id_and_name(layer: Any) -> Tuple[str, str]:
+    """(id, name) of a layer, ('', '') once its C++ object is gone."""
+    try:
+        return layer.id(), layer.name()
+    except (RuntimeError, AttributeError):
+        return '', ''
+
+
+def _warnings_to_show(warning_messages: List[str], layers: List[Any],
+                      refusals: List[Tuple[str, str, str]]) -> List[str]:
+    """The warnings of the run, without those of the layers whose filter was refused (2026-11-19).
+
+    A warning reads "<layer name>: <text>". It is left out only when every layer of the task it can
+    name is refused: two layers sharing a name, one filtered, keep it (the prefix cannot tell them
+    apart), and so does a name holding ": " (``A: B`` filtered, ``A`` refused: "A: B: ..." is not
+    the warning of ``A``).
+    """
+    if not refusals:
+        return list(warning_messages)
+    refused_ids = {layer_id for layer_id, _name, _reason in refusals if layer_id}
+    # (name, refused): the layers that were given a subset, and the refused ones not among them (deleted)
+    candidates = []
+    seen_ids = set()
+    for layer in layers:
+        layer_id, name = _layer_id_and_name(layer)
+        if layer_id and layer_id not in seen_ids:
+            seen_ids.add(layer_id)
+            candidates.append((name, layer_id in refused_ids))
+    candidates += [(name, True) for layer_id, name, _reason in refusals if layer_id not in seen_ids]
+    shown = []
+    for message in warning_messages:
+        text = str(message)
+        named = [refused for name, refused in candidates if name and text.startswith(f"{name}: ")]
+        if named and all(named):
+            continue
+        shown.append(message)
+    return shown
+
+
 class FinishedHandler:
     """Handles task completion logic for FilterEngineTask.
 
@@ -252,10 +291,10 @@ class FinishedHandler:
         # E6: Delegate warning display to task_completion_handler. 2026-11-18: once the subsets are
         # applied, without those of the refused layers ("X: Cut by the extent of the source…" came
         # right before "Filter not applied, previous filter kept: X: …").
-        if warning_messages:
-            refused_prefixes = tuple(f"{name}: " for _layer_id, name, _reason in refusals)
-            shown = [message for message in warning_messages
-                     if not (refused_prefixes and str(message).startswith(refused_prefixes))]
+        # 2026-11-19: not for a canceled task, which sets nothing (a newer task reports).
+        if warning_messages and not is_canceled_fn():
+            shown = _warnings_to_show(warning_messages, [layer for layer, _expression in pending_subset_requests],
+                                      refusals)
             if shown:
                 tch_display_warnings(shown)
 
