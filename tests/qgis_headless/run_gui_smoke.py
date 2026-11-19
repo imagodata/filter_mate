@@ -5679,6 +5679,9 @@ def sizing_check(scenario, wanted_rigid=1):
         if alone:
             report('SKIP', f"sizing: {scenario}: {name} alone in its column", f"{empty} px under its rows: Qt gives it all")
             continue
+        if not holder.isFloating() and [w for w in iface.mainWindow().tabifiedDockWidgets(holder) if w.isVisible()]:
+            report('SKIP', f"sizing: {scenario}: {name} in a group of tabs", f"{empty} px under its rows: the height of the group")
+            continue
         if beside and min(beside) < empty:
             check(f"sizing: {scenario}: {name}, beside a taller section, not cut", empty >= -2,
                   f"{empty} px under its rows, {min(beside)} beside | {sizing_state()}")
@@ -5965,16 +5968,19 @@ def s_sizing_elsewhere():
         report('SKIP', 'sizing: a change elsewhere', 'no AGENT or no Layers panel')
         return None
     sizing_reset()
+    # Each panel put where it goes at once: a place kept for it by an earlier step may be a tab, and the panels of
+    # FilterMate tabbed together merge a turn of the loop later.
     panels.detach('filtering')
+    window.splitDockWidget(layers, panels.panel('filtering'), Qt.Orientation.Vertical)
     panels.detach('exporting')
-    filtering, exporting = panels.panel('filtering'), panels.panel('exporting')
-    window.splitDockWidget(layers, filtering, Qt.Orientation.Vertical)
+    panels.panel('exporting').setFloating(True)
     pump(900)
-    if filtering.isFloating() or filtering in window.tabifiedDockWidgets(layers):
-        report('SKIP', 'sizing: a change elsewhere', 'FILTERING became a tab under Layers')
+    filtering, exporting = panels.panel('filtering'), panels.panel('exporting')
+    if filtering is None or exporting is None or filtering is exporting or filtering.isFloating() \
+            or window.tabifiedDockWidgets(filtering):
+        report('SKIP', 'sizing: a change elsewhere', f"the panels are not where they were put: {panels.groups()}")
         return None
     window.resizeDocks([layers, filtering], [layers.height() - 100, filtering.height() + 100], Qt.Orientation.Vertical)
-    exporting.setFloating(True)
     pump(900)
     exporting.resize(exporting.width(), exporting.height() + 150)
     pump(900)
@@ -6004,13 +6010,14 @@ def s_sizing_short_screen():
         return None
     sizing_reset()
     panels.detach('exploring')
+    window.splitDockWidget(layers, panels.panel('exploring'), Qt.Orientation.Vertical)  # at once (see above)
     panels.detach('filtering')
-    exploring, filtering = panels.panel('exploring'), panels.panel('filtering')
-    window.splitDockWidget(layers, exploring, Qt.Orientation.Vertical)
-    window.splitDockWidget(exploring, filtering, Qt.Orientation.Vertical)
+    window.splitDockWidget(panels.panel('exploring'), panels.panel('filtering'), Qt.Orientation.Vertical)
     pump(900)
-    column = sizing_column(filtering)
-    if filtering.isFloating() or exploring.isFloating() or len(column) < 3:
+    exploring, filtering = panels.panel('exploring'), panels.panel('filtering')
+    column = sizing_column(filtering) if filtering is not None else []
+    if exploring is None or filtering is exploring or filtering.isFloating() or exploring.isFloating() \
+            or len(column) < 3 or window.tabifiedDockWidgets(filtering):
         report('SKIP', 'sizing: a short window', f"column of {len(column)}")
         return None
     SIZING['window'] = (window.isMaximized(), window.geometry())
@@ -6040,6 +6047,7 @@ def s_sizing_opened_by_code():
     panels = d._fm_panels
     sizing_reset()
     panels.detach('filtering')
+    iface.mainWindow().splitDockWidget(d, panels.panel('filtering'), Qt.Orientation.Vertical)  # at once, below the dock
     panels.group('exporting', 'filtering')
     panels.panel('filtering').open('filtering')
     pump(900)
