@@ -556,12 +556,18 @@ NATIVE_REFILTERS = [
 
 
 def without_task_features(enabled):
-    """The next filter tasks get no features, only the expression of the selection."""
+    """The next filter tasks get no features, only the expression of the selection.
+
+    Their backup ids go too: left in place, the task read the selection of the dock again from them, through the
+    subset the source still has while it runs (64 of the 88 features of the OR step, measured 2026-11-19), and the
+    step checked that path instead of the one it names.
+    """
     from filter_mate.core.tasks.filter_task import FilterEngineTask
     original = STATE.setdefault('task_init', FilterEngineTask.__init__)
 
     def init(self, description, task_action, task_parameters, *args, **kwargs):
         task_parameters.get('task', {})['features'] = []
+        task_parameters.get('task', {})['feature_fids'] = []
         original(self, description, task_action, task_parameters, *args, **kwargs)
     FilterEngineTask.__init__ = init if enabled else original
 
