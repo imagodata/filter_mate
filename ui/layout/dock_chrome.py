@@ -12,10 +12,6 @@
 * The lower stack with nothing open shrinks to its headers, so the upper one takes the room.
 * Between them, the splitter handle goes from one stack held to its headers and its smallest open section to the
   other: no cap on either stack (EXPLORING stopped at 700 px, the tool box at 650 px).
-* The two stacks stretch the same: one size policy and one stretch factor for both, and each one gets its minimum
-  plus half of the room the two minimums leave (:func:`even_height`), until the user drags the handle: it then
-  stays where it is left. The share of the display profile (35 % above in the compact one) held EXPLORING to
-  162 px, scrolling 331 px of a raster, over a lower stack with 252 px empty under its rows.
 """
 from __future__ import annotations
 
@@ -25,7 +21,7 @@ from typing import Any, Optional
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt
 from qgis.PyQt.QtGui import QColor, QPainter, QPen, QPolygonF
 from qgis.PyQt.QtWidgets import (
-    QAbstractButton, QComboBox, QDockWidget, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget,
+    QAbstractButton, QComboBox, QDockWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
 )
 
 logger = logging.getLogger("FilterMate")
@@ -223,14 +219,22 @@ def _saved_order(key: str) -> Any:
         return ""
 
 
-def _saved_share() -> Optional[float]:
-    """The share the user left the handle at, None when it was never dragged."""
+def _default_share() -> float:
+    try:
+        from ..config import UIConfig
+        return float((UIConfig.get_config("splitter") or {}).get("initial_exploring_ratio", 0.5))
+    except Exception:
+        return 0.5
+
+
+def _saved_share() -> float:
+    """The share the user left the handle at, else the one of the display profile."""
     try:
         from qgis.PyQt.QtCore import QSettings
         value = float(QSettings().value(SHARE_KEY, -1.0))
     except (TypeError, ValueError):
         value = -1.0
-    return value if 0.05 <= value <= 0.95 else None
+    return value if 0.05 <= value <= 0.95 else _default_share()
 
 
 def _save_share(share: float) -> None:
@@ -239,25 +243,6 @@ def _save_share(share: float) -> None:
         QSettings().setValue(SHARE_KEY, round(share, 4))
     except Exception:  # nosec B110 - not worth a message: the share is only a convenience
         pass
-
-
-def stack_least(stack: Any) -> int:
-    """The height the splitter never takes ``stack`` under, as Qt reads it for a widget that may shrink: its minimum
-    height when it has one, else the smallest height its layout says."""
-    least = stack.minimumHeight()
-    return least if least > 0 else stack.minimumSizeHint().height()
-
-
-def even_height(room: int, upper_least: int, lower_least: int) -> int:
-    """Height of the upper stack out of the ``room`` the two stacks share, when they stretch the same: its minimum,
-    plus half of what the two minimums leave (the odd pixel goes below). In a room shorter than the two minimums,
-    the part its minimum is of them: Qt then holds each stack to its own."""
-    spare = room - upper_least - lower_least
-    if spare >= 0:
-        top = upper_least + spare // 2
-    else:
-        top = int(round(room * upper_least / float(upper_least + lower_least)))
-    return max(1, min(room - 1, top))  # never 0: a collapsible stack would fold
 
 
 class SectionHeader(QPushButton):
@@ -309,10 +294,14 @@ class DockSections(QObject):
         self._top_layout.setContentsMargins(0, 0, 0, 0)
         self._top_layout.setSpacing(STACK_GAP)
         sizes = self._splitter.sizes()
+        # Preferred, not the Minimum of EXPLORING: with Minimum the splitter cannot take the stack below its size
+        # hint (396 px of a 905 px splitter on 1920x1200), only down to its minimum (its headers and EXPLORING's).
+        policy = exploring.sizePolicy()
+        policy.setVerticalPolicy(QSizePolicy.Policy.Preferred)
+        self.top.setSizePolicy(policy)
         # No cap on the lower stack either (the .ui held the tool box at 650 px: a taller zone stayed empty).
         self._toolbox.setMaximumHeight(QWIDGETSIZE_MAX)
         self._splitter.replaceWidget(index, self.top)
-        self._stretch_alike()
         if len(sizes) == self._splitter.count() and sum(sizes) > 0:
             self._splitter.setSizes(sizes)  # the manager sized the splitter for EXPLORING: the stack takes its place
         # A rail per stack lists the sections (ui/widgets/section_rail.py): one row of chips, dragged to put the
@@ -361,7 +350,7 @@ class DockSections(QObject):
         self._reopen = set()
         self._shown = {}
         self._source_row, self._source_origins = None, []
-        self._bottom_limits = self._bottom_held = None  # of the lower stack with nothing open: its own, its rail's
+        self._bottom_limits = None
         self._share = _saved_share()
         self.bottom_rail = make_rail(self._toolbox.parentWidget(),
                                      accepts=lambda key: key in BOTTOM_KEYS and key in self.detached, dark=self._dark)
@@ -872,21 +861,10 @@ class DockSections(QObject):
 
     # --- room ------------------------------------------------------------------------
 
-    def _stretch_alike(self) -> None:
-        """One size policy and one stretch factor for the two stacks: the upper one takes those of the lower one,
-        which the managers of the dock set with each display profile (Expanding; the upper stack was Preferred, with
-        a factor of 1 beside a lower one at 0 when the dock opens). A policy that shrinks, not the Minimum of
-        EXPLORING: with Minimum the splitter cannot take a stack below its size hint (396 px of a 905 px splitter
-        on 1920x1200), only down to its minimum (its headers and EXPLORING's)."""
-        lower = self._splitter.widget(1) if self._splitter.count() > 1 else None
-        if lower is not None and lower is not self.top and self.top.sizePolicy() != lower.sizePolicy():
-            self.top.setSizePolicy(lower.sizePolicy())
-
     def _fit(self) -> None:
         """A stack with nothing open keeps its rail only, and the other one takes the room. The lower stack with no
         chip left (its sections are turned off, or in their own panels) goes altogether."""
         try:
-            self._stretch_alike()
             top_open = any(self._open_in_stack(key) for key in self._pages)
             self.top.setVisible(any(key not in self.detached for key in self._pages))  # AGENT and EXPLORING apart
             self.top.setMaximumHeight(QWIDGETSIZE_MAX if top_open else self._headers_height())
@@ -898,14 +876,13 @@ class DockSections(QObject):
                     if self._bottom_limits is None:  # what the dimension managers set: given back when a section opens
                         self._bottom_limits = (bottom.minimumHeight(), bottom.maximumHeight())
                     height = self._bottom_headers_height(bottom)
-                    self._bottom_held = (min(self._bottom_limits[0], height), height)
                     # The minimum first: Qt keeps the larger of the two, and the rail would be spread over it.
-                    bottom.setMinimumHeight(self._bottom_held[0])
+                    bottom.setMinimumHeight(min(self._bottom_limits[0], height))
                     bottom.setMaximumHeight(height)
                 elif self._bottom_limits is not None:
                     bottom.setMaximumHeight(self._bottom_limits[1])
                     bottom.setMinimumHeight(self._bottom_limits[0])
-                    self._bottom_limits = self._bottom_held = None
+                    self._bottom_limits = None
                 self._hold_toolbox(nothing)
                 sizes = self._splitter.sizes()
                 total = self._room()
@@ -923,20 +900,9 @@ class DockSections(QObject):
     def dimensions_applied(self) -> None:
         """A display profile, or a theme, just gave the dock its dimensions again: the limits kept for the lower
         stack while nothing is open in it are those of before, and the stack is no longer held to its rail (a band
-        of 150 to 240 px stayed empty under it, and the older limits came back with the next section opened).
-
-        Only a limit a manager set again replaces the one kept: the splitter manager sets the minimum alone, after
-        the dimensions. The maximum the stack was still held to, its rail, was then kept as its own: the next
-        section opened in a stack 150 px high that the handle could not enlarge (a maximum of 42 px under a
-        minimum of 150), its rows scrolled."""
+        of 150 to 240 px stayed empty under it, and the older limits came back with the next section opened)."""
         try:
-            bottom = self._splitter.widget(1) if self._splitter.count() > 1 else None
-            if self._bottom_limits is not None and self._bottom_held is not None and bottom is not None:
-                least, most = bottom.minimumHeight(), bottom.maximumHeight()
-                self._bottom_limits = (self._bottom_limits[0] if least == self._bottom_held[0] else least,
-                                       self._bottom_limits[1] if most == self._bottom_held[1] else most)
-            else:
-                self._bottom_limits = None
+            self._bottom_limits = None
             self._toolbox_minimum = None
             self.refresh_rails()
         except RuntimeError:  # the dock went away
@@ -986,22 +952,12 @@ class DockSections(QObject):
                 and self._toolbox.currentWidget() is not self._nothing)
 
     def _share_room(self) -> None:
-        """Both stacks open: the handle where the user left it (``self._share`` of the room); until it is dragged
-        the two stacks stretch the same, each one its minimum plus half of the room left (:func:`even_height`). Qt
-        keeps each one above its minimum.
-
-        The room is the one the splitter has for the two stacks, to the pixel: ``_room`` counts its margins (16 px
-        more than the stacks get), which Qt took back from one stack or from both: a handle left at 186 px came
-        back at 174 px with the next section opened."""
-        if self._splitter.count() != 2:
-            return
-        room = self._splitter.contentsRect().height() - self._splitter.handle(1).sizeHint().height()
-        if room > 1:
-            if self._share is None:
-                top = even_height(room, stack_least(self.top), stack_least(self._splitter.widget(1)))
-            else:
-                top = max(1, min(room - 1, int(round(room * self._share))))
-            self._splitter.setSizes([top, room - top])
+        """Both stacks open: the top one gets ``self._share`` of the room (Qt keeps each one above its minimum)."""
+        sizes = self._splitter.sizes()
+        total = self._room()
+        if len(sizes) == 2 and total > 0:
+            top = int(round(total * self._share))
+            self._splitter.setSizes([top, total - top])
 
     def _on_handle_moved(self, _pos: int, _index: int) -> None:
         """The user dragged the handle: that share is kept, in this session and the next ones."""
