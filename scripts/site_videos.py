@@ -2837,11 +2837,11 @@ S3_RESULT = '{batiment:,} buildings · {erp:,} public buildings · {troncon_de_r
 # steps.
 BUFFER2 = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2) + scope('commune') \
     + recorded_scene(1.2) + [
-    still('s3-00'), title('What stands near the river?'), hold(500),
+    still('s3-00'), title('What stands near the river?'), hold(300),
     caption('1 · Pick all the water surfaces'),
-] + pick_layer('surface_hydrographique') + [(900, cam(MULTI_ZONE, dur=1.2, pad=30))] \
-    + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode, lead=600, after=400) + [hold(900)] \
-    + select_all_multi_menu(keep=1300) + settle() + [
+] + pick_layer('surface_hydrographique') + [(700, cam(MULTI_ZONE, dur=1.0, pad=30))] \
+    + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode, lead=500, after=300) + [hold(500)] \
+    + select_all_multi_menu(keep=1000) + settle() + [
     hold(300), still('s3-01'),
     caption('2 · Target buildings and roads, 300 m around'), (0, cam(FILTER_ZONE, dur=1.2, pad=40)),
 ] + targets(S3_FLOOD_TARGETS, per_item=170, close_after=400, lead=500, after=350) \
