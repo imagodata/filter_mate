@@ -28,7 +28,7 @@ from qgis.core import (  # noqa: E402
     QgsVectorFileWriter,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer  # noqa: E402
+from qgis.PyQt.QtCore import QCoreApplication, QSettings, Qt, QTimer  # noqa: E402
 from qgis.PyQt.QtTest import QTest  # noqa: E402
 from qgis.PyQt.QtWidgets import QFrame, QLabel, QPushButton, QToolBox, QWidget  # noqa: E402
 
@@ -838,8 +838,25 @@ def check_chat(provider, layer, authcfg, work):
     check("set up: the line takes a request", panel.input.isEnabled() and panel.send_button.isEnabled())
     check("says where requests go", "test-model" in panel.destination.text() and panel.destination.isVisible(), panel.destination.text())
     panel.example_buttons[1].click()
-    check("an example fills the line", panel.input.text() == panel.example_buttons[1].text())
+    check("an example fills the line", panel.input.text() == panel.example_buttons[1].request())
     panel.input.clear()
+    shown = [button.request() for button in panel.example_buttons]
+    panel.clear_thread()  # as for a project closed then read: the set was on screen for an instant only
+    check("a set not seen yet stays", [button.request() for button in panel.example_buttons] == shown)
+    check("a set on screen a moment counts as seen", wait(lambda: panel._examples_seen, 3)
+          and str(QSettings().value("filter_mate/agent/last_examples", "")) == ",".join(panel.example_keys))
+    panel.clear_thread()
+    again = [button.request() for button in panel.example_buttons]
+    check("a new conversation offers other examples", len(again) == 4 and all(again) and not set(again) & set(shown),
+          f"{shown} -> {again}")
+    narrow = panel.minimumSizeHint().width()
+    kept = panel.example_buttons[0].request()
+    panel.example_buttons[0].set_request("a request longer than any dock is wide " * 6)
+    cut = panel.example_buttons[0].text()
+    check("a long example is cut, the dock keeps its width",
+          panel.minimumSizeHint().width() <= narrow and len(cut) < len(panel.example_buttons[0].request()),
+          f"{narrow} -> {panel.minimumSizeHint().width()}, {cut!r}")
+    panel.example_buttons[0].set_request(kept)
     settings(consent=False)
     chat._refresh_ready()
     provider.reset()

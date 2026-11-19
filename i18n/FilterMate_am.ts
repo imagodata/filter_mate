@@ -2016,6 +2016,166 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>ከ data.gouv.fr ማዘጋጃ ቤቶችን አክል</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="106"/>
+        <source>Describe the fields of the active layer</source>
+        <translation>የንቁ ንብርብሩን መስኮች ግለጽ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="109"/>
+        <source>Keep only the features visible on the map</source>
+        <translation>በካርታው ላይ የሚታዩትን ባህሪያት ብቻ አቆይ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="110"/>
+        <source>Color the active layer by its main field</source>
+        <translation>ንቁውን ንብርብር በዋናው መስኩ መሠረት ቀለም ቀባ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="111"/>
+        <source>Label the active layer with its names</source>
+        <translation>ንቁውን ንብርብር በስሞቹ መለያ ስጥ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="112"/>
+        <source>Export the filtered layers to a GeoPackage</source>
+        <translation>የተጣሩትን ንብርብሮች ወደ GeoPackage ላክ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="113"/>
+        <source>Make a relief map of this area with contours</source>
+        <translation>ለዚህ አካባቢ የኮንቱር መስመሮች ያለው የመሬት አቀማመጥ ካርታ አዘጋጅ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="114"/>
+        <source>Add the elevation of the map view</source>
+        <translation>የካርታ እይታውን ከፍታ አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="115"/>
+        <source>How many people live in the selected area?</source>
+        <translation>በተመረጠው አካባቢ ስንት ሰዎች ይኖራሉ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="116"/>
+        <source>Add a population grid of the map view</source>
+        <translation>የካርታ እይታውን የሕዝብ ብዛት ፍርግርግ አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="117"/>
+        <source>Add the cafés here from OpenStreetMap</source>
+        <translation>እዚህ ያሉትን ካፌዎች ከ OpenStreetMap አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="118"/>
+        <source>Add the cycle paths of the map view</source>
+        <translation>የካርታ እይታውን የብስክሌት መንገዶች አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="119"/>
+        <source>Add the trees and hedges of this area</source>
+        <translation>የዚህን አካባቢ ዛፎችና የአጥር ቁጥቋጦዎች አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="120"/>
+        <source>Put a dark basemap under my layers</source>
+        <translation>ከንብርብሮቼ በታች ጥቁር መሠረት ካርታ አስቀምጥ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="121"/>
+        <source>Find a cloud-free Sentinel-2 image here</source>
+        <translation>እዚህ ከደመና ነፃ የሆነ የ Sentinel-2 ምስል ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="122"/>
+        <source>Zoom to Central Park in New York</source>
+        <translation>በኒው ዮርክ ወደሚገኘው ሴንትራል ፓርክ አጉላ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="123"/>
+        <source>Search Opendatasoft for public toilets</source>
+        <translation>በ Opendatasoft ውስጥ የሕዝብ መጸዳጃ ቤቶችን ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="124"/>
+        <source>Find unemployment by region on Eurostat</source>
+        <translation>በ Eurostat ላይ የሥራ አጥነትን በክልል ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="126"/>
+        <source>Find bike-share stations on data.gouv.fr</source>
+        <translation>በ data.gouv.fr ላይ የብስክሌት መጋራት ጣቢያዎችን ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="127"/>
+        <source>Add the IGN buildings of the map view</source>
+        <translation>የካርታ እይታውን የ IGN ሕንፃዎች አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="128"/>
+        <source>Add the 1950s aerial photos of this area</source>
+        <translation>የዚህን አካባቢ የ1950ዎቹ የአየር ላይ ፎቶዎች አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="129"/>
+        <source>Add the flood zones of this area</source>
+        <translation>የዚህን አካባቢ የጎርፍ ቀጠናዎች አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="130"/>
+        <source>Add the clay shrink-swell hazard map</source>
+        <translation>የሸክላ አፈር መኮማተርና መስፋፋት አደጋ ካርታን አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="131"/>
+        <source>Zoom to the town hall of Toulouse</source>
+        <translation>ወደ ቱሉዝ ከተማ አዳራሽ አጉላ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="132"/>
+        <source>Find flood risk data on data.gov.uk</source>
+        <translation>በ data.gov.uk ላይ የጎርፍ አደጋ መረጃን ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="133"/>
+        <source>Find park data on open.canada.ca</source>
+        <translation>በ open.canada.ca ላይ የፓርክ መረጃን ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="134"/>
+        <source>Find bushfire data on data.gov.au</source>
+        <translation>በ data.gov.au ላይ የሰደድ እሳት መረጃን ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="135"/>
+        <source>Search GovData for charging stations</source>
+        <translation>በ GovData ውስጥ የኃይል መሙያ ጣቢያዎችን ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="136"/>
+        <source>Search dati.gov.it for school buildings</source>
+        <translation>በ dati.gov.it ውስጥ የትምህርት ቤት ሕንፃዎችን ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="137"/>
+        <source>Search data.overheid.nl for bike parking</source>
+        <translation>በ data.overheid.nl ውስጥ የብስክሌት ማቆሚያዎችን ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="138"/>
+        <source>Search G-Spatial for evacuation shelters</source>
+        <translation>በ G-Spatial ውስጥ የመልቀቂያ መጠለያዎችን ፈልግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="139"/>
+        <source>Add the municipalities of Brazil from IBGE</source>
+        <translation>የብራዚልን ማዘጋጃ ቤቶች ከ IBGE አክል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="140"/>
+        <source>Add the municipalities of Poland from PRG</source>
+        <translation>የፖላንድን ማዘጋጃ ቤቶች ከ PRG አክል</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="195"/>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Ask for a filter…</source>
