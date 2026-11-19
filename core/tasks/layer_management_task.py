@@ -235,6 +235,8 @@ class LayersManagementEngineTask(QgsTask):
         # Ids this task registered (add_layers) or unregistered (remove_layers): the completion
         # merges them into the current PROJECT_LAYERS, which may have changed meanwhile.
         self.changed_layer_ids = []
+        # What manage_project_layers did with each layer it was given (names), for the log: see _layers_report.
+        self._layers_done = self._new_layers_done()
         self.layer_properties = None
         self.layer_all_properties_flag = False
         self.outputs = {}
@@ -396,6 +398,41 @@ class LayersManagementEngineTask(QgsTask):
             self._layer_properties_count = self._config_layers_options().get("LAYER_PROPERTIES_COUNT", 0)
         return self._layer_properties_count
 
+    @staticmethod
+    def _new_layers_done():
+        return {'registered': [], 'known': [], 'other_type': [], 'dropped': [], 'removed': [], 'unknown': []}
+
+    @staticmethod
+    def _layer_label(layer):
+        """A layer's name for the log (an id string stands for itself)."""
+        try:
+            return layer if isinstance(layer, str) else layer.name()
+        except (AttributeError, RuntimeError):
+            return '?'
+
+    def _layers_report(self):
+        """What the task did, for the log: layers received against layers registered or removed, and what was left
+        aside (not a filterable type, no geometry, not registered). Names are listed for the layers left aside."""
+        done = getattr(self, '_layers_done', None) or self._new_layers_done()
+        received = len(self.layers or [])
+
+        def named(key):
+            names = done[key]
+            shown = ', '.join(repr(name) for name in names[:5])
+            return f"{len(names)} ({shown}{', ...' if len(names) > 5 else ''})"
+
+        if self.task_action == 'remove_layers':
+            text = f"{len(done['removed'])} of {received} layer(s) removed"
+            if done['unknown']:
+                text += f", {len(done['unknown'])} not registered"
+            return text
+        text = f"{len(done['registered'])} of {received} layer(s) registered"
+        for key, why in (('known', 'already registered'), ('other_type', 'not a filterable type'),
+                         ('dropped', 'left out (no geometry, or its properties could not be built)')):
+            if done[key]:
+                text += f"; {why}: {named(key) if key != 'known' else len(done[key])}"
+        return text
+
     def manage_project_layers(self):
         """
         Manage addition/removal of layers to/from project tracking.
@@ -412,19 +449,26 @@ class LayersManagementEngineTask(QgsTask):
 
         filterable_types = get_filterable_layer_types() or (QgsVectorLayer,)
         total = len(self.layers)
+        self._layers_done = done = self._new_layers_done()
         for i, layer in enumerate(self.layers):
             if total > 0:
                 self.setProgress((i / total) * 100)
             if self.task_action == 'add_layers':
-                if isinstance(layer, filterable_types):
-                    if layer.id() not in self.project_layers.keys():
-                        result = self.add_project_layer(layer)
-                        if layer.id() in self.project_layers:
-                            self.changed_layer_ids.append(layer.id())
-                        # FIX: Don't stop on False - just skip non-spatial layers
-                        # add_project_layer returns False for non-spatial layers, which is OK
-                        if self.isCanceled():
-                            return False
+                if not isinstance(layer, filterable_types):
+                    done['other_type'].append(self._layer_label(layer))
+                elif layer.id() in self.project_layers.keys():
+                    done['known'].append(self._layer_label(layer))
+                else:
+                    result = self.add_project_layer(layer)
+                    if layer.id() in self.project_layers:
+                        self.changed_layer_ids.append(layer.id())
+                        done['registered'].append(self._layer_label(layer))
+                    else:
+                        done['dropped'].append(self._layer_label(layer))
+                    # FIX: Don't stop on False - just skip non-spatial layers
+                    # add_project_layer returns False for non-spatial layers, which is OK
+                    if self.isCanceled():
+                        return False
             elif self.task_action == 'remove_layers':
                 # Ids (QGIS layersWillBeRemoved) or layer objects of any type (a raster / point cloud
                 # kind switched off: no longer a filterable type). Until 5.0 no id ever matched the
@@ -438,6 +482,9 @@ class LayersManagementEngineTask(QgsTask):
                     result = self.remove_project_layer(layer_id)
                     if self.isCanceled() or result is False:
                         return False
+                    done['removed'].append(self._layer_label(layer))
+                else:
+                    done['unknown'].append(self._layer_label(layer))
 
         # Sort layers once after all operations (performance optimization)
         self.project_layers = dict(OrderedDict(sorted(
@@ -448,7 +495,8 @@ class LayersManagementEngineTask(QgsTask):
             )
         )))
 
-        logger.info(f"manage_project_layers completed successfully: {len(self.project_layers)} layers in project_layers")
+        logger.info(f"manage_project_layers completed successfully: {self._layers_report()}; "
+                    f"{len(self.project_layers)} layers in project_layers")
         return True
 
     def _load_existing_layer_properties(self, layer):
@@ -2185,10 +2233,8 @@ class LayersManagementEngineTask(QgsTask):
                         logger.warning("resultingLayers signal emission failed (receiver may be deleted)")
 
                 if message_category == 'ManageLayers':
-                    if self.task_action == 'add_layers':
-                        result_action = f'{len(self.layers)} layer(s) added'
-                    elif self.task_action == 'remove_layers':
-                        result_action = f'{len(list(self.project_layers.keys())) - len(self.layers)} layer(s) removed'
+                    if self.task_action in ('add_layers', 'remove_layers'):
+                        result_action = self._layers_report()
                     # Message bar notification removed - internal operation, too verbose for UX
                     logger.info(f'Layers list has been updated: {result_action}')
                 elif message_category == 'ManageLayersProperties':

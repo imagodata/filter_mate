@@ -25,7 +25,7 @@ def _method():
     tree = ast.parse(_DOCK.read_text(encoding="utf-8"))
     cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "FilterMateDockWidget")
     method = next(node for node in cls.body if isinstance(node, ast.FunctionDef) and node.name == "_defer_layer_change")
-    namespace = {"weakref": weakref}
+    namespace = {"weakref": weakref, "logger": MagicMock()}
     exec(compile(ast.Module(body=[method], type_ignores=[]), str(_DOCK), "exec"), namespace)
     return namespace["_defer_layer_change"]
 
@@ -109,3 +109,39 @@ def test_a_pick_before_the_deferral_does_not_cancel_it(dock):
     dock._defer_layer_change(dock.layers["zones"])
     _replay(dock)
     dock.current_layer_changed.assert_called_once_with(dock.layers["zones"], manual_change=False)
+
+
+def test_a_request_already_served_by_a_full_change_to_the_layer_is_not_replayed(dock):
+    """The project opening: add_layers' result showed the layer while the panel was busy with the same request."""
+    dock._defer_layer_change(dock.layers["dem"])
+    dock._last_layer_change = ("dem", time.perf_counter(), False)  # a full change to dem ran after the deferral
+    _replay(dock)
+    dock.current_layer_changed.assert_not_called()
+
+
+def test_a_manual_request_is_not_served_by_an_automatic_change(dock):
+    dock._defer_layer_change(dock.layers["dem"], True)
+    dock._last_layer_change = ("dem", time.perf_counter(), False)
+    _replay(dock)
+    dock.current_layer_changed.assert_called_once_with(dock.layers["dem"], manual_change=True)
+
+
+def test_a_manual_change_serves_an_automatic_request(dock):
+    dock._defer_layer_change(dock.layers["dem"])
+    dock._last_layer_change = ("dem", time.perf_counter(), True)
+    _replay(dock)
+    dock.current_layer_changed.assert_not_called()
+
+
+def test_a_change_to_another_layer_does_not_serve_the_request(dock):
+    dock._defer_layer_change(dock.layers["dem"])
+    dock._last_layer_change = ("zones", time.perf_counter(), True)
+    _replay(dock)
+    dock.current_layer_changed.assert_called_once_with(dock.layers["dem"], manual_change=False)
+
+
+def test_a_change_older_than_the_request_does_not_serve_it(dock):
+    dock._last_layer_change = ("dem", time.perf_counter() - 5, True)
+    dock._defer_layer_change(dock.layers["dem"])
+    _replay(dock)
+    dock.current_layer_changed.assert_called_once_with(dock.layers["dem"], manual_change=False)

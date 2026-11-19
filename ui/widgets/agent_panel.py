@@ -272,8 +272,8 @@ class AgentPanel(QFrame):
     # The options of the agent from the menu "⋯" (2026-11-16): the controller fills them when the menu opens.
     options_requested = pyqtSignal()
     source_toggled = pyqtSignal(str, bool)
-    provider_chosen = pyqtSignal(int)
-    provider_forgotten = pyqtSignal(int)
+    provider_chosen = pyqtSignal(str)  # the ``ident`` of the provider: the list may have changed since the menu opened
+    provider_forgotten = pyqtSignal(str)
     mcp_toggled = pyqtSignal(bool)
     settings_tab_requested = pyqtSignal(str)
     resend_requested = pyqtSignal(str)
@@ -785,7 +785,7 @@ class AgentPanel(QFrame):
 
     def fill_options(self, groups, providers, mcp_on: bool) -> None:
         """The menu of the options: ``groups`` ``[(title, [(source id, name, ticked)])]``, ``providers`` ``[(label,
-        current)]``, the MCP server of the plugin on or not."""
+        current, ident)]``, the MCP server of the plugin on or not."""
         for submenu in self._option_menus:  # clear() leaves the submenus alive: they would pile up
             submenu.deleteLater()
         self._option_menus = []
@@ -805,21 +805,21 @@ class AgentPanel(QFrame):
             lambda: self.settings_tab_requested.emit("sources"))
         self.models_menu.clear()
         others = []
-        for index, (label, current) in enumerate(providers):
+        for label, current, ident in providers:
             action = self.models_menu.addAction(label.replace("&", "&&"))
             action.setCheckable(True)
             action.setChecked(bool(current))
             if current:  # chosen again: it stays the one in use
                 action.triggered.connect(lambda checked, action=action: action.setChecked(True))
             else:
-                action.triggered.connect(lambda checked, index=index: self.provider_chosen.emit(index))
-                others.append((index, label))
+                action.triggered.connect(lambda checked, ident=ident: self.provider_chosen.emit(ident))
+                others.append((ident, label))
         if others:
             forget = self.models_menu.addMenu(_tr("Remove from the list"))
             self._option_menus.append(forget)
-            for index, label in others:
+            for ident, label in others:
                 forget.addAction(label.replace("&", "&&")).triggered.connect(
-                    lambda checked=False, index=index: self.provider_forgotten.emit(index))
+                    lambda checked=False, ident=ident: self.provider_forgotten.emit(ident))
         self.models_menu.addSeparator()
         self.models_menu.addAction(_tr("Other provider or model…")).triggered.connect(
             lambda: self.settings_tab_requested.emit("provider"))

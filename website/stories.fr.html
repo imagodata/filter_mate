@@ -86,6 +86,7 @@
         en réglages FilterMate, étape par étape. Les douze premiers récits montrent les enregistrements QGIS et leurs résultats chiffrés,
         en Haute-Garonne puis sur un kilomètre carré au nord de Toulouse. Quatre recettes illustrées complètent les neuf combinaisons de types de couches, avec les données
         à préparer, les réglages et le résultat attendu.
+        Dans les enregistrements des histoires 1 à 5, les sections de FilterMate sont disposées en panneaux autour de la carte ; les étapes sont les mêmes dans le panneau par défaut.
     </p>
     <div class="cards story-index">
         <a class="card story-card" href="#s1"><span class="story-card-media"><img src="video/export.webp" alt="Saint-Gaudens filtrée et prête à être exportée" loading="lazy" width="1280" height="720"><b aria-hidden="true">01</b></span><div class="story-card-copy"><span class="badge">Bureau d'études</span><h4>Le dossier communal en trois minutes</h4><p>Cadrer 12 couches départementales et livrer un GeoPackage stylé.</p><span class="story-outcome">12 couches · <strong>12 380 bâtiments</strong></span></div></a>
@@ -327,7 +328,7 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <li><strong>Cross.</strong> Cibles <em>troncon_de_route</em> et <em>construction_lineaire</em>, prédicat Cross seul, ligne Buffer désactivée. Filter.
             <figure><img src="img/stories/s4-03.webp" alt="Étape 4 : le prédicat Cross est le seul coché, la ligne Buffer est éteinte" loading="lazy" width="1600" height="900"><figcaption>Étape 4. Un seul prédicat, pas de tampon.</figcaption></figure>
             <figure><img src="img/stories/s4-04.webp" alt="Étape 4 bis : seuls les tronçons de route et ouvrages qui franchissent un cours d'eau restent" loading="lazy" width="1600" height="900"><figcaption>Résultat à l'échelle de la métropole : les franchissements dessinent le réseau hydrographique.</figcaption></figure>
-            <figure><img src="img/stories/s4-05.webp" alt="Zoom sur le nord de Toulouse : ponts sur la Garonne et l'Hers" loading="lazy" width="1600" height="900"><figcaption>Zoom sur le nord de Toulouse : chaque segment restant est un pont ou une traversée.</figcaption></figure>
+            <figure><img src="img/stories/s4-05.webp" alt="Un ouvrage au-dessus d’un cours d’eau, cadré par Tracking après un clic sur la flèche suivante du sélecteur" loading="lazy" width="1600" height="900"><figcaption>Parcourir le résultat : EXPLORING sur les ouvrages, Tracking activé, flèche suivante du sélecteur. La carte va sur chaque franchissement, l’un après l’autre.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
@@ -558,7 +559,7 @@ processing.run("filtermate:batch_filter", {
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p><strong>121 bâtiments</strong> sur 918 ont au moins la moitié de leur emprise sous des points de toit à plus de 7 m. La BD TOPO en déclare 80 de 7 m ou plus : les écarts sont à vérifier sur place.</p>
+    <p><strong>121 bâtiments</strong> sur 918 ont au moins la moitié de leur emprise sous des points de toit à plus de 7 m. La BD TOPO en déclare 80 de 7 m ou plus : les écarts sont à vérifier sur place. D’une exécution à l’autre, le compte est de 120 ou 121.</p>
     <div class="callout"><strong>Terrain naturel.</strong> Le MNT est interpolé des points sol ; sur un terrain en pente, la hauteur mesurée côté aval est plus forte.</div>
 </section>
 <!-- 11 ------------------------------------------------------------------ -->
@@ -590,7 +591,7 @@ processing.run("filtermate:batch_filter", {
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p><strong>83 tronçons</strong> sur 376 ont des arbres de plus de 8 m à moins de 3 m : la liste de départ de la campagne, à hiérarchiser sur le terrain.</p>
+    <p><strong>83 tronçons</strong> sur 376 ont des arbres de plus de 8 m à moins de 3 m : la liste de départ de la campagne, à hiérarchiser sur le terrain. D’une exécution à l’autre, le compte varie entre 82 et 85 : l’enregistrement en montre 85.</p>
 </section>
 <!-- 12 ------------------------------------------------------------------ -->
 <section id="s12">

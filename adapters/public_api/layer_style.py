@@ -190,8 +190,11 @@ def _graduated(layer, field: str, ramp, classes: int, method: str):
     return renderer, made
 
 
-def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[float], cut: Optional[float] = None):
+def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[float], cut: Optional[float] = None,
+                share_values: bool = True):
     """``(minimum, maximum)`` given, or read from the statistics of the band (not for a web service).
+
+    ``share_values`` False: a refusal does not tell the range read from the band (a value of the raster).
 
     ``cut``: percent of the values left out at each end for a bound that is not given (2: from the 2nd to the
     98th percentile), so that a few extreme pixels do not flatten the colors of all the others.
@@ -232,6 +235,11 @@ def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[fl
     if low >= high:
         if minimum is None and maximum is None:
             raise ValueError(f"band {band} of '{layer.name()}' has no range of values to stretch")
+        if not share_values:
+            # Which bound is out, and by how much, would tell the range of the band a bit at a time.
+            raise ValueError(f"the range given cannot be applied to band {band} of '{layer.name()}'. The user shares no "
+                             "values, so the range read from the band is not told: give both minimum and maximum, or "
+                             "neither")
         raise ValueError(f"minimum ({low:g}) must be below maximum ({high:g}); band {band} of '{layer.name()}' "
                          f"ranges from {stats.minimumValue:g} to {stats.maximumValue:g}")
     return low, high
@@ -274,12 +282,23 @@ def _smooth_zoom(layer) -> None:
         logger.debug("raster resampling not set", exc_info=True)  # drawn as squares, as before
 
 
+def _told_range(low: float, high: float, minimum: Optional[float], maximum: Optional[float],
+                share_values: bool) -> Dict[str, Any]:
+    """The bounds of a stretch a model is told. The user who shares no values (the setting "Allow attribute values to
+    be sent") is not told what was read from the band, the extremes or the percentiles of its pixels: only a bound the
+    model gave itself comes back."""
+    if share_values:
+        return {'minimum': low, 'maximum': high}
+    return {'minimum': low if minimum is not None else None, 'maximum': high if maximum is not None else None}
+
+
 def _raster_renderer(layer, mode: str, band: int, ramp_name: str, invert: bool, minimum, maximum,
-                     cut: Optional[float] = None, discrete: bool = False, classes: int = 5):
+                     cut: Optional[float] = None, discrete: bool = False, classes: int = 5,
+                     share_values: bool = True):
     from qgis.core import (
         QgsColorRampShader, QgsContrastEnhancement, QgsSingleBandGrayRenderer, QgsSingleBandPseudoColorRenderer,
     )
-    low, high = _band_range(layer, band, minimum, maximum, cut)
+    low, high = _band_range(layer, band, minimum, maximum, cut, share_values)
     provider = layer.dataProvider()
     if mode == 'gray':
         renderer = QgsSingleBandGrayRenderer(provider, band)
@@ -410,8 +429,11 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
                     rules: Optional[List[Dict[str, Any]]] = None, width: Optional[float] = None, blend: str = '',
                     cut: Optional[float] = None, discrete: bool = False, azimuth: float = 315.0,
                     altitude: float = 45.0, z_factor: Optional[float] = None,
-                    multidirectional: bool = False) -> Dict[str, Any]:
+                    multidirectional: bool = False, share_values: bool = True) -> Dict[str, Any]:
     """Draw a layer anew; what was made, without the values of its classes.
+
+    ``share_values`` False: the range read from a raster (extremes, percentiles) is not told, nor in a refusal, as
+    ``contour_lines`` does not tell its heights.
 
     Raises:
         ValueError: An unknown layer, mode, field, color, ramp or blending, a field with too many values, a raster
@@ -468,9 +490,12 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
             answer.update({'band': band, 'azimuth': float(azimuth), 'altitude': float(altitude), 'z_factor': factor})
         else:
             renderer, ramp_used, low, high = _raster_renderer(found, mode, band, ramp, invert, minimum, maximum,
-                                                              cut, bool(discrete), classes)
+                                                              cut, bool(discrete), classes, bool(share_values))
             found.setRenderer(renderer)
-            answer.update({'band': band, 'minimum': low, 'maximum': high})
+            answer.update({'band': band, **_told_range(low, high, minimum, maximum, bool(share_values))})
+            if not share_values and (minimum is None or maximum is None):
+                answer['note'] = ("minimum and maximum are not told: the user shares no values. The style is applied "
+                                  "with the range read from the band, so there is no need to call again for it")
             if ramp_used:
                 answer['ramp'] = ramp_used
             if discrete and mode == 'pseudocolor':

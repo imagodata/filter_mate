@@ -416,3 +416,59 @@ def test_undo_redo_and_compare_keep_the_bar_while_the_agent_walks_its_steps():
 
 def test_a_button_of_no_section_always_acts():
     assert bars.one_bar_serves(["pushButton_action_of_an_extension"], open_key=None)
+
+
+# --- the dock closed: its panels are not offered by View > Panels (2026-11-18) ---------------------------------
+
+class _FakePanel:
+    def __init__(self):
+        self.visible = True
+        self.action = types.SimpleNamespace(enabled=True, setEnabled=lambda value: setattr(self.action, "enabled", value))
+
+    def hide(self):
+        self.visible = False
+
+    def show(self):
+        self.visible = True
+
+    def toggleViewAction(self):  # noqa: N802 - Qt name
+        return self.action
+
+
+def _closing_panels(count=2):
+    holder = panels.SectionPanels.__new__(panels.SectionPanels)
+    holder._hidden_with_dock = False
+    holder._dock = object()
+    holder._panels = [_FakePanel() for _ in range(count)]
+    return holder
+
+
+def test_closing_the_dock_hides_its_panels_and_turns_their_entries_off():
+    holder = _closing_panels()
+    holder._on_dock_closed()
+    assert all(not panel.visible and not panel.action.enabled for panel in holder._panels)
+    assert holder._hidden_with_dock
+
+
+def test_showing_the_dock_again_turns_the_entries_back_on_and_shows_the_panels():
+    from qgis.PyQt.QtCore import QEvent
+    holder = _closing_panels()
+    holder._on_dock_closed()
+    event = types.SimpleNamespace(type=lambda: QEvent.Type.Show)
+
+    assert holder._on_event(holder._dock, event) is False
+
+    assert all(panel.visible and panel.action.enabled for panel in holder._panels)
+    assert not holder._hidden_with_dock
+
+
+def test_a_panel_that_went_away_does_not_stop_the_others_from_being_turned_off():
+    holder = _closing_panels(3)
+
+    def gone():
+        raise RuntimeError("wrapped C/C++ object has been deleted")
+
+    holder._panels[0].hide = gone
+    holder._panels[1].toggleViewAction = gone
+    holder._on_dock_closed()
+    assert not holder._panels[2].visible and not holder._panels[2].action.enabled

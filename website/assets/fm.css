@@ -380,8 +380,16 @@ figure { margin: 18px 0 26px; }
 figure img { border: 1px solid var(--rule); background: var(--bg-2); width: 100%; height: auto; }
 figure.narrow img { max-width: min(440px, 100%); width: auto; }
 figure.tiny img { max-width: min(280px, 100%); width: auto; }
-.screenshot-zoom { display: block; position: relative; max-width: 100%; padding: 0; border: 0; background: none; color: inherit; cursor: zoom-in; }
-.screenshot-zoom img { margin: 0; }
+figure.medium img { max-width: min(620px, 100%); width: auto; }
+/* The button around a screenshot is as wide as the picture shown, so its hint stays in the corner of the picture. */
+.screenshot-zoom { display: block; position: relative; width: 100%; max-width: 100%; padding: 0; border: 0; background: none; color: inherit; cursor: zoom-in; }
+figure.narrow .screenshot-zoom, figure.medium .screenshot-zoom, figure.tiny .screenshot-zoom { width: fit-content; }
+figure.narrow .screenshot-zoom { max-width: min(440px, 100%); }
+figure.medium .screenshot-zoom { max-width: min(620px, 100%); }
+figure.tiny .screenshot-zoom { max-width: min(280px, 100%); }
+.screenshot-zoom img { display: block; margin: 0; }
+figure.narrow .screenshot-zoom img, figure.medium .screenshot-zoom img, figure.tiny .screenshot-zoom img { max-width: 100%; }
+.screenshot-zoom.thin .zoom-hint { display: none; }   /* a strip of the panel: the hint would cover it */
 .zoom-hint { position: absolute; right: 6px; bottom: 6px; padding: 3px 9px; font: 500 .8rem/1.5 var(--body); color: var(--on-ink); background: var(--ink); border: 1px solid var(--on-ink-2); border-radius: 3px; }
 .image-viewer { width: min(96vw, 1700px); max-width: 96vw; max-height: 94svh; padding: 12px; color: var(--text); background: var(--bg); border: 1px solid var(--rule); }
 .image-viewer::backdrop { background: rgba(10, 16, 20, .9); }
@@ -397,6 +405,13 @@ body:has(dialog[open]) { overflow: hidden; }
 figcaption { margin-top: 8px; font-size: 0.92rem; color: var(--text-2); max-width: 72ch; }
 .fig-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; align-items: start; }
 .fig-row figure { margin: 0; }
+.fig-row { margin: 18px 0 26px; }
+/* A screenshot of the panel beside what explains it (a table, strips of the panel). */
+.fig-aside { display: grid; grid-template-columns: minmax(200px, 300px) minmax(0, 1fr); gap: 28px; align-items: start; margin: 18px 0 26px; }
+.fig-aside > figure { margin: 0; }
+.fig-aside > div > :first-child { margin-top: 0; }
+.fig-aside > div > figure:last-child { margin-bottom: 0; }
+@media (max-width: 760px) { .fig-aside { grid-template-columns: 1fr; } }
 
 .callout {
     margin: 22px 0; padding: 14px 18px;

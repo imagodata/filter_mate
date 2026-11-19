@@ -31,8 +31,18 @@ from .rest_client import FilterMateAPIError, FilterMateClient, quote_segment
 from .settings import ConfigError, parse_settings
 
 SERVER_NAME = "filtermate"
-# add_layer may follow redirects (4 x 20 s), download for 180 s, then open the copy: wait for all of it.
-ADD_LAYER_TIMEOUT = 330.0
+# How long a call that adds a layer may last before the client gives up, from the longest of the plugin's own limits
+# (tests/api/test_mcp_add_layer_timeout.py reads them in the code):
+#   30 s    the REST API waits that long for the main thread of QGIS to start the call (main_thread.py)
+#   + 90 s  add_osm_features: Overpass has that long to answer (osm_features.REQUEST_TIMEOUT_MS)
+#   + 240 s then the answer is converted, at most that long (terrain.READ_TIMEOUT_S, shared by elevation, population,
+#           contours and OpenStreetMap; elevation asks its tiles for 20 s first, add_layer follows 4 redirects of
+#           20 s and downloads for 180 s: both shorter)
+#   + 60 s  what comes after the last limit: the reading that was told to stop ends its step, the layers are opened,
+#           styled and added, the answer written
+# 30 + 90 + 240 + 60 = 420. A client that gives up before the plugin does shows a timeout while the layers arrive,
+# and a second call adds them again (330 s, the sum of the two limits alone, left no room for that).
+ADD_LAYER_TIMEOUT = 420.0
 
 INSTRUCTIONS = """\
 Drives FilterMate, the QGIS filtering plugin, through its local REST API. QGIS must be running with the API started.
@@ -242,13 +252,14 @@ def build_server(client: FilterMateClient) -> Any:
         measure: Annotated[Literal["", "length", "area"], Field(description=(
             "Of the geometries instead of a field: m (perimeter of polygons) or m2"))] = "",
         selected_only: bool = False,
-        limit: Annotated[int, Field(ge=1, le=100, description="Groups, the largest first")] = 10,
+        limit: Annotated[int, Field(ge=1, le=100, description=(
+            "Top groups, by sum (else count)"))] = 10,
     ) -> Dict[str, Any]:
-        """Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group,
-        on what it shows now or its selection: "how many", "what total", what a filter kept.
+        """Count, sum, mean, minimum, maximum of a field or of the geometries of a layer, in all or by group,
+        on what it shows or its selection: "how many", "what total", what a filter kept.
 
-        Returns feature_count, statistics, unit, groups, groups_total, truncated. Refused on web services and above
-        500000 features: filter or select first.
+        Returns feature_count, statistics, unit, groups, groups_total, truncated, ranked_by. Refused on web services
+        and above 500000 features: filter or select first.
         """
         return await call("POST", "/layers/statistics", _body(
             layer=layer, field=field, group_by=group_by, measure=measure, selected_only=selected_only, limit=limit))
@@ -571,8 +582,8 @@ def build_server(client: FilterMateClient) -> Any:
         """Change how a layer is drawn: one symbol, categories, classes, rules, a raster ramp or a shaded relief,
         its opacity and blending. Replaces the style; a field of more than 100 values cannot be categorized.
 
-        Returns mode, field, classes (how many), ramp, method; for a raster, band, minimum and maximum. Undoing the
-        turn of the chat brings the previous style back.
+        Returns mode, field, classes (how many), ramp, method; for a raster, band, minimum and maximum or a note. Undoing the turn of the
+        chat brings the previous style back.
         """
         return await call("POST", "/layers/style", _body(
             layer=layer, mode=mode, field=field, color=color, ramp=ramp, classes=classes, method=method,
@@ -972,7 +983,8 @@ def build_server(client: FilterMateClient) -> Any:
         resolution: Annotated[Optional[float], Field(ge=10, le=5000, description=(
             "Pixel size in metres (default 30, coarser for a large area)"))] = None,
         target_crs: Annotated[str, Field(max_length=64, description=(
-            "A CRS in metres to write in (default: the project's when in metres, else the UTM zone)"))] = "",
+            "A CRS in metres to write in (default: the project's when its projection keeps angles, as UTM, Lambert "
+            "conformal or a stereographic does, else the UTM zone)"))] = "",
         name: Annotated[str, Field(max_length=200, description="Name of the layer in the project")] = "",
     ) -> Dict[str, Any]:
         """Add the elevation of an area to the project as a raster layer (a digital elevation model), read from an

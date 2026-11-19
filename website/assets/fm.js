@@ -403,6 +403,8 @@
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'screenshot-zoom';
+            // a strip of the panel (title bar, action bar): the hint would cover it, the pointer says enough
+            if (Number(img.getAttribute('height')) > 0 && Number(img.getAttribute('height')) < 120) button.classList.add('thin');
             button.setAttribute('aria-label', (french ? 'Agrandir : ' : 'Enlarge: ') + img.alt);
             img.replaceWith(button);
             button.append(img);
