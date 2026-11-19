@@ -522,7 +522,7 @@ class TestInvalidLayer:
     """2026-11-18: a layer invalid when its subset was to be set was skipped in silence: with every layer in
     that case, "Filter task : Layer(s) filtered" came while nothing was set, and the history kept the entry."""
 
-    REASON = "Layer is invalid or its source cannot be found. Operation cancelled."
+    REASON = "The selected layer is invalid or its source cannot be found."   # no "Operation cancelled."
 
     @pytest.fixture(autouse=True)
     def _env(self, monkeypatch):
@@ -552,3 +552,52 @@ class TestInvalidLayer:
         layer.isValid.return_value = False
         self.timers.pop()()
         assert ends == [[("parcels_id", "parcels", self.REASON)]]
+
+
+@pytest.mark.unit
+class TestDeferredSlotNeverBreaks:
+    """2026-11-19: an error of another type than the three caught skipped the other deferred layers and on_done
+    (the history of the refused ones never put back); a layer removed before the timer was a refusal with no id
+    and no message."""
+
+    @pytest.fixture(autouse=True)
+    def _env(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        self.timers = []
+        monkeypatch.setattr(_tch, "QTimer", types.SimpleNamespace(
+            singleShot=lambda delay, slot: self.timers.append(slot)))
+        monkeypatch.setattr(_tch, "QCoreApplication",
+                            types.SimpleNamespace(translate=lambda context, text: text), raising=False)
+
+    @staticmethod
+    def _large():
+        return "fid IN (" + "1," * 600_000 + "1)"
+
+    def test_an_error_of_another_type_is_a_refusal_and_the_others_go_on(self):
+        broken = _make_layer("broken", "/data/x.gpkg|layername=broken", provider="ogr")
+        fine = _make_layer("fine", "/data/x.gpkg|layername=fine", provider="ogr")
+        calls = []
+
+        def safe_set(layer, expression):
+            calls.append(layer.name())
+            if layer is broken:
+                raise TypeError("not a string")
+            return True
+        ends = []
+        apply_pending_subset_requests([(broken, self._large()), (fine, self._large())], safe_set,
+                                      deferred=[], on_deferred_done=ends.append)
+        self.timers.pop()()
+        assert calls == ["broken", "fine"]
+        assert ends == [[("broken_id", "broken", "not a string")]]
+
+    def test_a_layer_removed_before_the_timer_is_no_refusal(self):
+        gone = _make_layer("gone", "/data/x.gpkg|layername=gone", provider="ogr")
+        fine = _make_layer("fine", "/data/x.gpkg|layername=fine", provider="ogr")
+        safe_set = MagicMock(return_value=True)
+        ends = []
+        apply_pending_subset_requests([(gone, self._large()), (fine, self._large())], safe_set,
+                                      deferred=[], on_deferred_done=ends.append)
+        gone.id.side_effect = RuntimeError("wrapped C/C++ object of type QgsVectorLayer has been deleted")
+        self.timers.pop()()
+        assert [call.args[0] for call in safe_set.call_args_list] == [fine]
+        assert ends == [[]]

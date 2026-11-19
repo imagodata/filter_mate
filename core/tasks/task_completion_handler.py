@@ -252,10 +252,22 @@ def _note_refused(refusals: Optional[List[Tuple[str, str, str]]], layer: Any, re
     refusals.append((layer_id, name, reason))
 
 
+def _layer_gone(layer: Any) -> bool:
+    """True once the C++ object of the layer is deleted."""
+    try:
+        layer.id()
+        return False
+    except RuntimeError:
+        return True
+
+
 def _invalid_layer_reason() -> str:
     """The reason of a filter not set on an invalid layer (a message already translated, reused)."""
+    # 2026-11-19: the sentence of the dock (translated in the 34 catalogs) that only says the layer is
+    # invalid; the one of FilterApplicationService ended with "Operation cancelled." while the other
+    # layers were filtered.
     return QCoreApplication.translate(
-        "FilterApplicationService", "Layer is invalid or its source cannot be found. Operation cancelled.")
+        "FilterMateDockWidget", "The selected layer is invalid or its source cannot be found.")
 
 
 def _note_invalid_layer(failures: Optional[List[str]], refusals: Optional[List[Tuple[str, str, str]]],
@@ -646,6 +658,12 @@ def _schedule_deferred_filter_application(
         refused: List[Tuple[str, str, str]] = []
         for lyr, expr in large_expressions:
             in_place = False
+            # 2026-11-19: a layer removed from the project since finished() is no refusal (nothing to keep
+            # or to put back, and neither id nor name to say): left out, as finished() leaves out the
+            # targets removed during the task.
+            if lyr is not None and _layer_gone(lyr):
+                logger.info("Deferred filter dropped: its layer was removed from the project")
+                continue
             try:
                 if lyr and is_valid_layer(lyr):
                     watch = _subset_failure_watch(lyr)
@@ -675,7 +693,7 @@ def _schedule_deferred_filter_application(
                         )
                     except (RuntimeError, AttributeError):
                         pass
-            except (RuntimeError, AttributeError, ValueError) as e:
+            except Exception as e:  # catch-all safety net: a timer slot must reach on_done whatever one layer raises
                 logger.error(f"Error applying deferred filter: {e}")
                 if not in_place:
                     _note_refused(refused, lyr, str(e))
