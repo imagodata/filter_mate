@@ -12,7 +12,7 @@ import math
 import re
 from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # nosec B405 - a DOCTYPE or an entity is refused before parsing (verify_vrt)
 
 from .osm import area_km2
 
@@ -203,7 +203,7 @@ def verify_vrt(vrt_xml: str, folder: str) -> VerifiedVrt:
     if re.search(r"<!\s*(DOCTYPE|ENTITY)", vrt_xml, re.IGNORECASE):  # entities: a text that grows when it is parsed
         raise ValueError(_UNREADABLE)
     try:
-        root = ElementTree.fromstring(vrt_xml)
+        root = ElementTree.fromstring(vrt_xml)  # nosec B314 - no DOCTYPE nor entity left, checked just above
     except ElementTree.ParseError:
         raise ValueError(_UNREADABLE) from None
     if root.tag != "VRTDataset" or len(root.findall("GeoTransform")) != 1:

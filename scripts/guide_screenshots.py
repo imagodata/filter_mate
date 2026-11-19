@@ -586,6 +586,34 @@ def s_grab_stacked():
     return settled(1.5)
 
 
+# -- only the sections that are used: EXPORTING turned off, then FILTERING too (EXPLORING alone)
+def s_sections_off():
+    """EXPORTING turned off: its chip and its Export button leave the panel, which stays in one piece."""
+    apply({'APP.OPTIONS.EXPORTING.enabled': False})
+    d = dock()
+    d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
+    QTimer.singleShot(1200, fit_stacks)
+    return settled(2.5)
+
+
+def s_grab_sections_off():
+    """Then FILTERING off too: EXPLORING chooses its layer itself. It is shown with the multiple selection
+    (s_exploring_multiple, s_exploring_multiple_pick), whose list takes the height the panel has: a single
+    selection would leave the panel half empty."""
+    save(dock(), 'panels-sections-off')
+    apply({'APP.OPTIONS.FILTERING.enabled': False})
+    return settled(2.5)
+
+
+def s_grab_exploring_alone():
+    d = dock()
+    log(f'sections shown: filtering {sections().section_shown("filtering")}, exporting {sections().section_shown("exporting")}')
+    save(d, 'panels-exploring-alone')
+    apply({'APP.OPTIONS.FILTERING.enabled': True, 'APP.OPTIONS.EXPORTING.enabled': True})
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+    return settled(2.5)
+
+
 def s_cleanup_favorite():
     d = dock()
     svc = getattr(d, '_favorites_service', None)
@@ -624,6 +652,7 @@ STEPS = [
     s_chip_menu, s_grab_chip_menu, s_detach_filtering, s_group_exporting, s_beside_map, s_grab_beside_map,
     s_attach_all, s_detach_exploring, s_exploring_share, s_grab_exploring_panel,
     s_section_buttons, s_grab_section_buttons_filtering, s_grab_section_buttons, s_stacked, s_grab_stacked,
+    s_sections_off, s_grab_sections_off, s_exploring_multiple, s_exploring_multiple_pick, s_grab_exploring_alone,
     s_cleanup_favorite, s_quit,
 ]
 
