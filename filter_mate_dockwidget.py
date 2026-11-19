@@ -2829,8 +2829,19 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             show_info("FilterMate", self.tr("Theme adapted: {0}").format(self.tr("Dark mode") if new_theme == 'dark' else self.tr("Light mode")))
         except Exception as e: logger.error(f"Error applying theme change: {e}")
 
+    def _refresh_feature_rows_theme(self):
+        """The rows of the multiple selection list in the colours of the plugin theme (black rows on a dark list)."""
+        picker = getattr(self, 'checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection', None)
+        if picker is None or not hasattr(picker, 'refresh_row_colours'):
+            return
+        try:
+            picker.refresh_row_colours()
+        except Exception as e:  # widget deleted (plugin reload)
+            logger.debug(f"Feature rows theme not refreshed: {e}")
+
     def _refresh_config_view_theme(self):
         """CONFIGURATION JSON view in the plugin theme (it may differ from the QGIS one)."""
+        self._refresh_feature_rows_theme()  # every change of theme comes through here
         view = getattr(self, 'config_view', None)
         if view is None or not hasattr(view, 'refresh_theme_stylesheet'):
             return

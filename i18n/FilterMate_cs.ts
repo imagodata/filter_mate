@@ -3592,6 +3592,16 @@ Ne = Nahradit všechny stávající</translation>
         <translation>Spravovat oblíbené...</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="183"/>
+        <source>Quick filter ({0})</source>
+        <translation>Rychlý filtr ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="207"/>
+        <source>See all ({0})...</source>
+        <translation>Zobrazit vše ({0})...</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
         <translation>Export...</translation>
@@ -6169,7 +6179,7 @@ Prvky: {2:,}</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
-        <source>Mode batch</source>
+        <source>Batch mode</source>
         <translation>Dávkový režim</translation>
     </message>
 </context>
