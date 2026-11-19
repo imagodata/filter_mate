@@ -28,7 +28,7 @@ chrome = _load("dock_chrome")
 
 # A 834 px dock in the compact profile (QGIS LTR, 1600 x 1000): 733 px for the two stacks, 35 % above by default.
 ROOM, SHARE = 733, 0.35
-VECTOR, RASTER = 332, 577  # the upper stack with the whole of EXPLORING shown: three groups, a raster
+VECTOR, RASTER = 348, 577  # the upper stack with the whole of EXPLORING shown: three groups, a raster
 FILTERING, EXPORTING = 235, 259  # the lower stack with all its rows: rail, gap and 193 or 217 px of rows
 
 
