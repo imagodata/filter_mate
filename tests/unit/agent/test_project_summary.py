@@ -100,9 +100,9 @@ def test_what_changed_since_the_last_answer():
     assert project_changes(before, project_state(rows, selections, view)) == [
         "- layers added: bati", "- filter changed: communes", "- filter removed: routes", "- now shown: ortho",
         "- selection changed: communes (7 selected)", "- selection cleared: routes", "- active layer is now: routes",
-        "- the map view moved"]
+        "- the map view moved: visible extent xmin ymin xmax ymax = 569000 6270000 590000 6280000"]
     text = project_summary(rows, selections, view, before=before)
-    assert text.splitlines()[-9] == CHANGES_HEADER and text.endswith("- the map view moved")
+    assert text.splitlines()[-9] == CHANGES_HEADER and text.endswith("6270000 590000 6280000")
 
 
 def test_nothing_changed_nothing_said():
@@ -140,5 +140,142 @@ def test_another_active_layer_comes_with_its_fields():
     before = project_state(_rows(), [], {**VIEW, "active_fields": ["nom"]})
     after = project_state(_rows(), [], {**VIEW, "active_layer_name": "routes", "active_fields": ["type", "nom"]})
     assert project_changes(before, after) == ["- active layer is now: routes (fields: type, nom)"]
-    same = project_state(_rows(), [], {**VIEW, "active_fields": ["nom", "pop"]})
-    assert project_changes(before, same) == []  # the same layer: its fields are not sent again
+    same = project_state(_rows(), [], {**VIEW, "active_fields": ["nom"]})
+    assert project_changes(before, same) == []  # the same layer, the same fields: nothing to say
+
+
+# The audit of 2026-11-18: what the full state showed and the update did not say, so the model went on with the
+# first state it had read (a name, a CRS, coordinates, a field that is no more).
+def _state(rows=None, **view):
+    return project_state(rows if rows is not None else _rows(), [], {**VIEW, **view})
+
+
+def test_a_renamed_layer_is_said_by_its_old_and_new_name():
+    renamed = _rows(c={"name": "villages"})
+    assert project_changes(_state(), _state(renamed)) == ["- layers renamed: communes -> villages"]
+    # the active layer renamed is one layer: said once, not as another active layer
+    before = _state(active_layer_id="c")
+    after = _state(renamed, active_layer_id="c", active_layer_name="villages")
+    assert project_changes(before, after) == ["- layers renamed: communes -> villages"]
+
+
+def test_a_new_project_crs_is_said_and_so_is_a_canvas_in_another_crs():
+    assert project_changes(_state(), _state(project_crs="EPSG:4326", canvas_crs="EPSG:4326")) == [
+        "- project CRS is now: EPSG:4326"]
+    assert project_changes(_state(), _state(canvas_crs="EPSG:3857")) == ["- map canvas CRS is now: EPSG:3857"]
+    assert project_changes(_state(), _state()) == []
+    # no CRS read at one end: nothing to compare
+    assert not any("CRS" in line for line in project_changes(project_state(_rows(), [], {}), _state()))
+
+
+def test_the_new_view_comes_with_its_coordinates():
+    lines = project_changes(_state(), _state(extent=[1.0, 43.0, 2.5, 44.25], project_crs="EPSG:4326",
+                                             canvas_crs="EPSG:4326"))
+    assert lines == ["- project CRS is now: EPSG:4326",
+                     "- the map view moved: visible extent xmin ymin xmax ymax = 1.00000 43.00000 2.50000 44.25000"]
+    other = project_changes(_state(), _state(extent=[0.0, 0.0, 10.0, 10.0], canvas_crs="EPSG:4326"))
+    assert other[-1].startswith("- the map view moved: visible extent (EPSG:4326) xmin")
+
+
+def test_an_active_layer_cleared_is_said():
+    assert project_changes(_state(), _state(active_layer_name="")) == ["- no active layer now"]
+    assert project_changes(_state(active_layer_name=""), _state(active_layer_name="")) == []
+
+
+def test_fields_added_or_removed_on_the_active_layer_are_said():
+    before = _state(active_fields=["nom", "pop"])
+    assert project_changes(before, _state(active_fields=["nom", "pop", "dept"])) == [
+        "- fields of the active layer are now: nom, pop, dept"]
+
+
+def test_the_update_after_a_rename_and_a_new_crs_says_both():
+    """The scenario of the audit: roads renamed streets, the project passed to EPSG:4326, parcels added."""
+    from core.agent.project_summary import project_update
+    before = project_state([{"layer_id": "a", "name": "roads"}], [], {**VIEW})
+    rows = [{"layer_id": "a", "name": "streets"}, {"layer_id": "b", "name": "parcels"}]
+    text = project_update(rows, [], {**VIEW, "project_crs": "EPSG:4326", "canvas_crs": "EPSG:4326"}, before)
+    assert text.splitlines() == [CHANGES_HEADER, "- layers added: parcels", "- layers renamed: roads -> streets",
+                                 "- project CRS is now: EPSG:4326"]
+
+
+def test_a_rename_keeps_its_new_name_whole_on_each_side():
+    """Review 2026-11-18: the entry went through the cut of 100 characters of the names: two names of 60 characters
+    lost the end of the new one, and an old name of 100 lost the new one altogether."""
+    from core.agent.project_summary import project_update
+    old, new = "BD TOPO batiments Toulouse Metropole filtre par commune 2024 v3", "Batiments de Toulouse Metropole " \
+        "renommes pour la carte"
+    before = project_state([{"layer_id": "a", "name": old}], [], VIEW)
+    text = project_update([{"layer_id": "a", "name": new}], [], VIEW, before)
+    assert f"-> {new}" in text and old[:60] in text
+    huge = "O" * 100
+    before = project_state([{"layer_id": "a", "name": huge}], [], VIEW)
+    line = project_changes(before, project_state([{"layer_id": "a", "name": "Streets"}], [], VIEW))
+    assert line == [f"- layers renamed: {'O' * 60}… -> Streets"]
+
+
+def test_more_renames_than_the_line_names_send_the_whole_state_again():
+    from core.agent.project_summary import MAX_NAMES, project_update
+    before = project_state([{"layer_id": str(n), "name": f"old{n}"} for n in range(MAX_NAMES + 3)], [], VIEW)
+    rows = [{"layer_id": str(n), "name": f"new{n}", "layer_kind": "vector"} for n in range(MAX_NAMES + 3)]
+    text = project_update(rows, [], VIEW, before)
+    assert text.splitlines()[0] == HEADER and CHANGES_HEADER not in text
+    assert all(f"- new{n} (" in text for n in range(MAX_NAMES + 3))
+    few = project_update(rows[:MAX_NAMES] + [{"layer_id": str(n), "name": f"old{n}"} for n in range(MAX_NAMES,
+                                                                                                MAX_NAMES + 3)],
+                         [], VIEW, before)
+    assert few.startswith(CHANGES_HEADER) and few.count(" -> new") == MAX_NAMES
+
+
+def test_a_new_order_of_the_fields_is_not_a_change_and_a_failed_reading_is_not_no_field():
+    """Review 2026-11-18: "fields ... are now: y, x" for a reorder; "none" and then the whole list again after one
+    reading of the fields that failed."""
+    before = _state(active_fields=["x", "y"])
+    assert project_changes(before, _state(active_fields=["y", "x"])) == []
+    assert project_changes(before, _state(active_fields=[])) == []
+    # the state kept after the failed reading still holds the fields the model was told
+    kept = project_state(_rows(), [], {**VIEW, "active_fields": []}, previous=before)
+    assert project_changes(kept, _state(active_fields=["x", "y"])) == []
+    assert project_changes(kept, _state(active_fields=["x", "y", "z"])) == [
+        "- fields of the active layer are now: x, y, z"]
+    # another active layer is no reading to forget: its own fields come with it
+    other = project_state(_rows(), [], {**VIEW, "active_layer_id": "r", "active_layer_name": "routes",
+                                        "active_fields": []}, previous=_state(active_layer_id="c",
+                                                                                 active_fields=["x"]))
+    assert other["active_field_names"] == frozenset()
+
+
+def test_the_view_lines_come_before_the_cap():
+    """Review 2026-11-18: added last, the CRS, the active layer and the view were cut silently by the cap when nine
+    other changes came first."""
+    from core.agent.project_summary import MAX_CHANGES
+
+    def row(name, **kind):
+        return {"layer_id": name, "name": name, "active_filter_expression": "", "visible": True, **kind}
+    before_rows = [row("kept", active_filter_expression="a = 1"), row("old"), row("gone"), row("shown", visible=False),
+                   row("hidden"), row("cleared"), row("selected")]
+    after_rows = [row("kept", active_filter_expression="a = 2"), row("new"), row("shown"), row("hidden", visible=False),
+                  row("cleared"), row("selected"), row("renamed", layer_id="old")]
+    # 9 kinds of change on the layers: added, removed, renamed, filter changed, filter removed, shown, hidden,
+    # selection changed, selection cleared
+    before_rows[1]["active_filter_expression"] = "b = 1"
+    after_rows[1]["active_filter_expression"] = ""
+    before = project_state(before_rows, [{"layer_id": "cleared", "name": "cleared", "selected_count": 1},
+                                         {"layer_id": "selected", "name": "selected", "selected_count": 1}], VIEW)
+    view = {**VIEW, "project_crs": "EPSG:4326", "canvas_crs": "EPSG:3857", "extent": [0.0, 0.0, 9.0, 9.0],
+            "active_layer_name": "", "active_fields": []}
+    after = project_state(after_rows, [{"layer_id": "selected", "name": "selected", "selected_count": 4}], view)
+    lines = project_changes(before, after)
+    assert len(lines) <= MAX_CHANGES
+    assert "- project CRS is now: EPSG:4326" in lines and "- no active layer now" in lines
+    assert any(line.startswith("- map canvas CRS") for line in lines)
+    assert any(line.startswith("- the map view moved") for line in lines)
+    assert any(line.startswith("- and ") and "more changes" in line for line in lines)
+
+
+def test_a_crs_without_identifier_is_said_by_its_description():
+    custom = "Custom Lambert (EPSG:0)"
+    assert project_changes(_state(), _state(project_crs=custom, canvas_crs=custom)) == [f"- project CRS is now: {custom}"]
+    assert project_changes(_state(project_crs=custom, canvas_crs=custom),
+                           _state(project_crs=custom, canvas_crs=custom)) == []
+    assert f"Map: CRS {custom}" in project_summary(_rows(), [], {**VIEW, "project_crs": custom, "canvas_crs": custom})
+    assert len(project_state(_rows(), [], {**VIEW, "project_crs": "x" * 500})["crs"]) <= 81

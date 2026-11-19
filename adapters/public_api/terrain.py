@@ -235,9 +235,19 @@ def _area_in_degrees(extent_wkt: str, crs: str) -> List[float]:
     return bbox
 
 
+def _projection_method(crs) -> str:
+    """The method of projection of ``crs`` as PROJ names it ("utm", "lcc", "eqearth"), "" when QGIS does not say. The
+    same in QGIS 3.22 (from 3.20) and 4, whatever the authority of the CRS."""
+    try:
+        return str(crs.operation().id() or '')
+    except (AttributeError, RuntimeError):
+        return ''
+
+
 def _grid_crs(target_crs: str, bbox: Sequence[float]):
-    """The CRS the elevation is written in: the one asked, the one of the project when it is in metres, keeps
-    distances and is made for this area, else the UTM zone of the area.
+    """The CRS the elevation is written in: the one asked, the one of the project when it is in metres, its projection
+    keeps the angles (UTM, transverse Mercator, Lambert conformal conic, stereographic: not Web Mercator, Equal Earth,
+    Plate Carree...) and it is made for this area, else the UTM zone of the area.
 
     Raises:
         ValueError: A CRS asked that QGIS does not know, or that is not in metres.
@@ -256,7 +266,7 @@ def _grid_crs(target_crs: str, bbox: Sequence[float]):
                              "for the UTM zone of the area")
         return asked
     project = QgsProject.instance().crs()
-    if metric_grid(project.authid(), not project.isGeographic(), in_metres(project)):
+    if metric_grid(_projection_method(project), not project.isGeographic(), in_metres(project)):
         # A national grid far from its country stretches the ground (Lambert-93 over Japan): only where it is made for.
         made_for = project.bounds()
         if made_for.isNull() or made_for.isEmpty() or made_for.contains(QgsRectangle(bbox[0], bbox[1], bbox[2], bbox[3])):
@@ -632,6 +642,20 @@ def _contour_style(layer, with_index: bool) -> None:
     layer.setRenderer(QgsRuleBasedRenderer(root))
 
 
+def _discard_gpkg(path: str) -> None:
+    """Remove a GeoPackage a call did not keep, with the files SQLite writes beside it and the folder made for it when
+    nothing else is in it."""
+    for suffix in ('', '-wal', '-shm', '-journal'):
+        try:
+            os.remove(path + suffix)
+        except OSError:
+            pass
+    try:
+        os.rmdir(os.path.dirname(path))  # the folder QGIS made for this file: only when it is empty
+    except OSError:
+        pass
+
+
 def contour_lines(layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
                   name: str = '', min_length: Optional[float] = None, share_values: bool = True) -> Dict[str, Any]:
     """Draw the contour lines of a raster of the project (an elevation model) as a new line layer.
@@ -672,29 +696,39 @@ def contour_lines(layer: str, interval: float, index_interval: Optional[float] =
                          f"{MAX_CONTOUR_PIXELS // 1_000_000} million contours are drawn from: bring in a smaller "
                          "area (add_elevation) or a coarser raster")
     source = found.dataProvider().dataSourceUri()
+    # The loop of events turns while the raster is read, and the user may remove the layer meanwhile: its object is
+    # then destroyed and any call on it raises a RuntimeError. What is needed of it later is taken now (a CRS is a copy).
+    source_name, source_crs = found.name(), found.crs()
     path = QgsProcessingUtils.generateTempFilename('contours.gpkg')
-    with running('contour_lines'):
-        made = _in_background('contour_lines', lambda ended: _contours(
-            source, band, path, interval, index_interval, min_length, bool(share_values), ended))
-    if not made['count']:
-        between = f" between {made['lowest']:g} and {made['highest']:g}" if share_values else ''
-        only_specks = (f" but {made['left_out']} closed ones too short to be kept (min_length 0 keeps them)"
-                       if made['left_out'] else '')
-        raise ValueError(f"no contour every {interval:g}{between}{only_specks}: ask for a smaller interval")
-    title = (name or '').strip()[:200] or f"Contours {interval:g}"
-    options = QgsVectorLayer.LayerOptions()
-    options.skipCrsValidation = True  # a raster with no CRS makes lines with none: QGIS would ask for one in a dialog
-    contours = QgsVectorLayer(path + '|layername=contours', title, 'ogr', options)
-    if not contours.isValid():
-        del contours
-        raise ValueError("the contours were drawn but QGIS cannot open the layer written")
-    if not contours.crs().isValid() and found.crs().isValid():
-        contours.setCrs(found.crs())
-    _contour_style(contours, index_interval is not None)
-    project = QgsProject.instance()
-    project.addMapLayer(contours, False)
-    project.layerTreeRoot().insertLayer(0, contours)  # on top, wherever the layer tree would put a new layer
-    return {'layer_id': contours.id(), 'name': contours.name(), 'source_layer': found.name(),
+    contours = None
+    kept = False
+    try:
+        with running('contour_lines'):
+            made = _in_background('contour_lines', lambda ended: _contours(
+                source, band, path, interval, index_interval, min_length, bool(share_values), ended))
+        if not made['count']:
+            between = f" between {made['lowest']:g} and {made['highest']:g}" if share_values else ''
+            only_specks = (f" but {made['left_out']} closed ones too short to be kept (min_length 0 keeps them)"
+                           if made['left_out'] else '')
+            raise ValueError(f"no contour every {interval:g}{between}{only_specks}: ask for a smaller interval")
+        title = (name or '').strip()[:200] or f"Contours {interval:g}"
+        options = QgsVectorLayer.LayerOptions()
+        options.skipCrsValidation = True  # a raster with no CRS makes lines with none: QGIS would ask for one in a dialog
+        contours = QgsVectorLayer(path + '|layername=contours', title, 'ogr', options)
+        if not contours.isValid():
+            raise ValueError("the contours were drawn but QGIS cannot open the layer written")
+        if not contours.crs().isValid() and source_crs.isValid():
+            contours.setCrs(source_crs)
+        _contour_style(contours, index_interval is not None)
+        project = QgsProject.instance()
+        project.addMapLayer(contours, False)
+        project.layerTreeRoot().insertLayer(0, contours)  # on top, wherever the layer tree would put a new layer
+        kept = True
+    finally:
+        if not kept:
+            contours = None  # closes the file before it is removed
+            _discard_gpkg(path)
+    return {'layer_id': contours.id(), 'name': contours.name(), 'source_layer': source_name,
             'crs_authid': contours.crs().authid(), 'feature_count': made['count'], 'interval': interval,
             'index_interval': index_interval, 'index_count': made['index_count'], 'left_out': made['left_out'],
             'minimum': made['minimum'] if share_values else None,

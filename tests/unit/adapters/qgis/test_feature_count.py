@@ -147,8 +147,10 @@ def test_a_filtered_geopackage_is_counted_by_reading_it(counts, gpkg, fake_gdal)
 
 
 def test_featurecount_is_kept_without_a_subset_and_off_geopackage(counts, gpkg, fake_gdal):
-    # A table of 100 000 features or more without gpkg_ogr_contents: MAX(fid) - MIN(fid) + 1, as before.
-    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=batiment", count=1_173_829)) == 1_173_829
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=batiment", count=930)) == 930
+    # From 100 000 features QGIS may answer MAX(fid) - MIN(fid) + 1: the table is counted (test_feature_count_whole_table),
+    # and a file that cannot be read gives no number rather than that one.
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=batiment", count=1_173_829)) is None
     assert counts.exact_feature_count(_Layer("/data/communes.shp", '"x" = 1', 12, storage="ESRI Shapefile")) == 12
     assert counts.exact_feature_count(_Layer("dbname='gis' table=\"commune\"", '"x" = 1', 7, "postgres")) == 7
     assert counts.exact_feature_count(_Layer("/data/communes.shp", count=-1, storage="ESRI Shapefile")) is None

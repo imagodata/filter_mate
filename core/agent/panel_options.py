@@ -56,6 +56,7 @@ class LayerFacts:
     layer_id: str
     name: str
     vector: bool
+    listed_target: bool = False  # a raster or point cloud the panel lists as a target of a vector layer
 
 
 def resolve_layer(reference: str, layers: Sequence[LayerFacts]) -> Optional[LayerFacts]:
@@ -81,8 +82,10 @@ def _layer_ids(key: str, references: Any, layers: Sequence[LayerFacts], problems
                             else f"{key}: no layer {reference}")
         elif not_this is not None and layer.layer_id == not_this.layer_id:
             problems.append(f"{key}: not the layer itself")
-        elif vector_only and not layer.vector:
-            problems.append(f"{key}: {layer.name} is not a vector layer")
+        elif vector_only and not (layer.vector or layer.listed_target):
+            problems.append(f"{key}: {layer.name} is not a target the panel lists for a vector layer (a vector layer, "
+                            "or a raster or point cloud while FilterMate's options for raster and point cloud targets "
+                            "are on)")
         elif layer.layer_id not in ids:
             ids.append(layer.layer_id)
     return ids

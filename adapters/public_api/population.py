@@ -12,13 +12,14 @@ from __future__ import annotations
 import os
 import shutil
 import tempfile
-from typing import Any, Callable, Dict, Optional, Sequence
+import uuid
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
 from ...core.agent.elevation import quiet_message
 from ...core.agent.open_data import KIND_POPULATION, megabytes, resolve_platform
 from ...core.agent.population import (
-    MAX_VRT_BYTES, NOT_COVERED, PopulationSource, area_problem, covered_rects, covered_share, exact_total_fits,
-    extent_note, grid_for, grid_url, known, on_the_grid, resolution_label, snapped, vrt_geotransform,
+    MAX_VRT_BYTES, NOT_COVERED, PopulationSource, area_problem, covered_share, exact_total_fits,
+    extent_note, grid_for, grid_url, known, on_the_grid, resolution_label, snapped, verify_vrt, vrt_geotransform,
 )
 from ...core.agent.osm import area_km2
 from .operations import running
@@ -68,24 +69,35 @@ def _vrt_text(gdal, url: str) -> str:
     return data.decode('utf-8', 'replace')
 
 
-def _grid_problem(gdal, url: str, source: PopulationSource, bounds: Sequence[float]) -> float:
-    """The share of ``bounds`` the files of the grid fill, once its pixels are those this module counts on.
+def _verified_grid(gdal, url: str, source: PopulationSource, bounds: Sequence[float]) -> Tuple[str, float]:
+    """The VRT of the grid, checked and written in memory: ``(path, share)``, the share of ``bounds`` its files fill.
+
+    What is checked is what is read afterwards: GDAL opens the copy in memory, whose sources are named by the folder of
+    the server, never the VRT of the server a second time (a server could answer otherwise to the second request).
+    The caller removes the file (``gdal.Unlink``).
 
     Raises:
         ValueError: No answer, a grid whose pixels moved (every total would be wrong without a word), or a VRT that
             names a file that is not its own.
     """
     text = _vrt_text(gdal, url)
-    left, step, _skew, top, _skew2, minus = vrt_geotransform(text)
+    verified = verify_vrt(text, '/vsicurl/' + url.rpartition('/')[0])
+    left, step, _skew, top, _skew2, minus = vrt_geotransform(verified.text)
     if not on_the_grid(source, left, top, step, minus):
         raise ValueError("the population grid has changed its pixels on its server: FilterMate must be updated to "
                          "read it")
-    return covered_share(covered_rects(text), (left, top), step, bounds)
+    share = covered_share(verified.rects, (left, top), step, bounds)
+    path = f'/vsimem/filtermate_population_{uuid.uuid4().hex}.vrt'
+    gdal.FileFromMemBuffer(path, verified.text.encode('utf-8'))  # returns nothing in GDAL 3.4, 0 in 3.12
+    if gdal.VSIStatL(path) is None:
+        raise ValueError("the population grid could not be read from its server: no room to hold it")
+    return path, share
 
 
-def _sum_pixels(gdal, url: str, bounds: Sequence[float], step: float, ended: Callable[[], str]) -> float:
-    """The people of ``bounds`` (whole pixels of the source, ``step`` degrees), summed on those pixels as they are, by
-    strips so that a large area is not held at once. Worker thread.
+def _sum_pixels(gdal, grid: str, bounds: Sequence[float], step: float, ended: Callable[[], str]) -> float:
+    """The people of ``bounds`` (whole pixels of the source, ``step`` degrees), read from ``grid`` (the VRT checked
+    by ``_verified_grid``), summed on those pixels as they are, by strips so that a large area is not held at once.
+    Worker thread.
 
     Raises:
         ValueError: Stopped, too long, or a strip that cannot be read.
@@ -100,7 +112,7 @@ def _sum_pixels(gdal, url: str, bounds: Sequence[float], step: float, ended: Cal
         last = min(height, first + rows)
         strip = (west, north - last * step, east, north - first * step)
         dataset, failure = _attempt(gdal, lambda strip=strip: gdal.Warp(
-            '', '/vsicurl/' + url, format='MEM', xRes=step, yRes=step, outputBounds=strip, resampleAlg='near',
+            '', grid, format='MEM', xRes=step, yRes=step, outputBounds=strip, resampleAlg='near',
             overviewLevel='NONE', outputType=gdal.GDT_Float32, dstNodata=float('nan'),
             callback=lambda _done, _message, _data: 0 if ended() else 1))
         reason = ended()
@@ -134,6 +146,7 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
     import numpy
     with _Gdal(tiles=True, extensions='.tif,.vrt') as gdal:
         dataset = None
+        grid = '/vsicurl/' + url  # a source of the list is read from the copy checked in memory instead
         try:
             if int(gdal.VersionInfo()) < _MIN_GDAL:
                 raise ValueError(f"the population needs GDAL 3.1 or later to sum pixels; this QGIS has GDAL "
@@ -141,7 +154,7 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
             share = 1.0
             if source is not None:
                 try:
-                    share = _grid_problem(gdal, url, source, bounds)
+                    grid, share = _verified_grid(gdal, url, source, bounds)
                 except RuntimeError as exc:  # GDAL raises once another plugin turned its exceptions on
                     raise ValueError("the population grid could not be read from its server: "
                                      + quiet_message(str(exc))) from None
@@ -151,7 +164,7 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
                 if share <= 0:
                     raise ValueError(NOT_COVERED)
             dataset, failure = _attempt(gdal, lambda: gdal.Warp(
-                path, '/vsicurl/' + url, format='GTiff', xRes=size, yRes=size, outputBounds=tuple(bounds),
+                path, grid, format='GTiff', xRes=size, yRes=size, outputBounds=tuple(bounds),
                 # The pixels of the source as they are: its overviews are averages, never sums.
                 resampleAlg='sum' if factor > 1 else 'near', overviewLevel='NONE', outputType=gdal.GDT_Float32,
                 dstNodata=float('nan'), creationOptions=['COMPRESS=DEFLATE', 'PREDICTOR=3', 'TILED=YES'],
@@ -173,7 +186,7 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
             exact = count_bounds is not None
             if exact and factor > 1:  # at the pixels of the source, the layer is already the people of the bounds
                 try:
-                    total = _sum_pixels(gdal, url, count_bounds, size / factor, ended)
+                    total = _sum_pixels(gdal, grid, count_bounds, size / factor, ended)
                 except ValueError:
                     # The layer is written: a second reading that fails or lasts too long leaves its own sum as the
                     # total, said as such, rather than losing it. A Stop is a Stop.
@@ -188,6 +201,8 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
             return answer
         finally:
             dataset = None  # closes the file before QGIS opens it, or before it is removed
+            if grid.startswith('/vsimem/'):
+                gdal.Unlink(grid)
 
 
 def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs: str = '',

@@ -9,7 +9,7 @@ from core.agent.osm import area_km2
 from core.agent.population import (
     DEFAULT_RESOLUTION, MAX_AREA_KM2, MAX_PIXELS, SOURCES, area_problem, covered_rects, covered_share, exact_total_fits,
     extent_note, grid_for, grid_url, known, native_pixels, on_the_grid, pixel_metres, resolution_label, snapped,
-    vrt_geotransform,
+    verify_vrt, vrt_geotransform,
 )
 from core.agent.sources import BUILT_IN, describe_enabled
 
@@ -73,10 +73,14 @@ def test_a_resolution_that_is_no_size_is_refused(resolution):
         grid_for(META, LYON, resolution)
 
 
+_WRAP = ('<VRTDataset rasterXSize="10" rasterYSize="10"><GeoTransform>0, 1, 0, 0, 0, -1</GeoTransform>'
+         '<VRTRasterBand dataType="Float64" band="1">{}</VRTRasterBand></VRTDataset>')
+
+
 def _vrt(*files):
-    return "".join(f'<ComplexSource><SourceFilename relativeToVRT="{relative}">{name}</SourceFilename>'
-                   f'<DstRect xOff="{x}" yOff="{y}" xSize="{w}" ySize="{h}" /></ComplexSource>'
-                   for relative, name, (x, y, w, h) in files)
+    return _WRAP.format("".join(f'<ComplexSource><SourceFilename relativeToVRT="{relative}">{name}</SourceFilename>'
+                                f'<DstRect xOff="{x}" yOff="{y}" xSize="{w}" ySize="{h}" /></ComplexSource>'
+                                for relative, name, (x, y, w, h) in files))
 
 
 def test_where_the_grid_has_data_is_read_from_its_vrt():
@@ -123,6 +127,61 @@ def test_a_grid_whose_pixels_moved_is_not_the_grid():
 def test_a_vrt_that_names_a_file_that_is_not_its_own_is_refused(files):
     with pytest.raises(ValueError, match="refused|cannot be read"):
         covered_rects(_vrt(*files))
+
+
+def _source(name_element):
+    return (f'<ComplexSource>{name_element}<SourceBand>1</SourceBand><DstRect xOff="0" yOff="0" xSize="1" ySize="1" />'
+            '</ComplexSource>')
+
+
+@pytest.mark.parametrize("element", [
+    # Attributes or names GDAL reads, and a pattern over the text does not (2026-11-18, executed by the review).
+    '<SourceFilename relativeToVRT="0" shared="0">/etc/passwd.tif</SourceFilename>',
+    '<SourceFilename relativetoVRT="0">/vsicurl/http://169.254.169.254/latest/a.tif</SourceFilename>',
+    '<SourceFilename relativetovrt="1">a.tif</SourceFilename>',
+    '<SourceFilename>a.tif</SourceFilename>',
+    '<SourceFilename relativeToVRT="1" other="x">a.tif</SourceFilename>',
+    '<SourceFilename relativeToVRT="1" shared="yes">a.tif</SourceFilename>',
+    '<sourcefilename relativeToVRT="0">/etc/passwd.tif</sourcefilename>',
+    '<SourceFilename relativeToVRT="1">./a.tif</SourceFilename>',
+    '<SourceFilename relativeToVRT="1">a/../../b.tif</SourceFilename>',
+    '<SourceFilename relativeToVRT="1"><x/>a.tif</SourceFilename>',
+])
+def test_a_vrt_cannot_name_a_file_in_a_way_a_pattern_misses(element):
+    with pytest.raises(ValueError, match="refused|cannot be read"):
+        verify_vrt(_WRAP.format(_source(element)), "/vsicurl/https://x.org/g")
+
+
+@pytest.mark.parametrize("text", [
+    # A file named out of a source, a derived or warped band, a doctype, a second geotransform, no XML.
+    _WRAP.format(_source('<SourceFilename relativeToVRT="1">a.tif</SourceFilename>')
+                 + '<SourceFilename relativeToVRT="0">/etc/passwd.tif</SourceFilename>'),
+    _WRAP.replace('<VRTRasterBand ', '<VRTRasterBand subClass="VRTDerivedRasterBand" ').format(
+        _source('<SourceFilename relativeToVRT="1">a.tif</SourceFilename>')),
+    _WRAP.format('<KernelFilteredSource><SourceFilename relativeToVRT="0">/etc/passwd</SourceFilename>'
+                 '</KernelFilteredSource>'),
+    '<!DOCTYPE a [<!ENTITY b "bbbbbbbbbb">]>' + _WRAP.format(_source('<SourceFilename relativeToVRT="1">a.tif</SourceFilename>')),
+    _WRAP.format(_source('<SourceFilename relativeToVRT="1">a.tif</SourceFilename>')).replace(
+        "<VRTRasterBand", "<GeoTransform>1,1,0,1,0,-1</GeoTransform><VRTRasterBand"),
+    # The file of the review: a second source with no rectangle, so that a count of files and rectangles agrees.
+    _WRAP.format(_source('<SourceFilename relativeToVRT="1">a.tif</SourceFilename>')
+                 + '<ComplexSource><SourceFilename relativetoVRT="0">/vsicurl/http://169.254.169.254/x.tif'
+                   '</SourceFilename></ComplexSource>'),
+    "not xml", "<Other/>",
+])
+def test_a_vrt_with_anything_else_than_a_list_of_geotiffs_is_refused(text):
+    with pytest.raises(ValueError, match="refused|cannot be read"):
+        verify_vrt(text, "/vsicurl/https://x.org/g")
+
+
+def test_what_is_read_is_the_vrt_that_was_checked():
+    """The files are named by the folder of the server, so the copy read from memory needs nothing else of it."""
+    named = _source('<SourceFilename relativeToVRT="1" shared="0">v1.5/a.tif</SourceFilename>')
+    checked = verify_vrt(_WRAP.format(named + named.replace("v1.5/a", "b")), "/vsicurl/https://x.org/g")
+    assert checked.rects == ((0, 0, 1, 1), (0, 0, 1, 1))
+    assert '>/vsicurl/https://x.org/g/v1.5/a.tif<' in checked.text and '>/vsicurl/https://x.org/g/b.tif<' in checked.text
+    assert checked.text.count('relativeToVRT="0"') == 2 and 'relativeToVRT="1"' not in checked.text
+    assert vrt_geotransform(checked.text)[:2] == (0.0, 1.0)
 
 
 def test_an_area_is_bounded():

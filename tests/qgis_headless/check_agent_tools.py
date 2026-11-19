@@ -232,6 +232,8 @@ def check_reading(introspection, project, gpkg, work):
     groups = {row["value"]: row for row in by_zone["groups"]}
     check("a field summed by group", (groups["a"]["sum"], groups["a"]["mean"], groups["b"]["sum"]) == (40.0, 20.0, 5.0),
           by_zone)
+    check("the groups are ranked by the measure, the features without one",
+          area["ranked_by"] == "sum" and by_zone["ranked_by"] == "sum" and many["ranked_by"] == "feature_count", area)
     json.dumps(area)
 
     sample = introspection.sample_features("communes", limit=2)
@@ -1105,6 +1107,48 @@ def check_panel_options(project, gpkg, shp, work):
         done, left = apply_effects(effects, undo=True)
         check("panels: undo leaves what the user changed since", stored["exploring"]["single_selection_expression"]
               == '"pop"' and "communes" in left, (done, left))
+        # A layer the turn added, whose options it then set: undone the way the checkpoint does (the layers that go away
+        # leave once the filters are restored, before the rest), the layer leaves with its options and nothing is "left".
+        added_turn = EffectsRecorder()
+        added_turn.before_call(ToolCallPart("n1", "run_algorithm", {}))
+        extra = QgsVectorLayer("Point?crs=EPSG:2154&field=id:integer", "extra", "memory")
+        project.addMapLayer(extra)
+        extra_id = extra.id()
+        added_turn.after_call()
+        dock.PROJECT_LAYERS[extra_id] = props()  # FilterMate has read the layer
+        extra_options = [{"layer": "extra", "exploring": {"is_tracking": True}}]
+        added_turn.before_call(ToolCallPart("n2", "set_layer_options", {"layers": extra_options}))
+        panel_options.set_layer_options(dock, extra_options)
+        added_turn.after_call()
+        added_effects = added_turn.finish()
+        check("panels: the turn that added a layer and set its options keeps both",
+              sorted(effect[0] for effect in added_effects) == ["added", "layer_options"], added_effects)
+        gone, not_gone = apply_effects(added_effects, undo=True, presence=True, coming=False)
+        more, not_more = apply_effects(added_effects, undo=True, presence=False, edits=False)
+        check("panels: undoing it removes the layer and leaves no option 'as is'",
+              project.mapLayer(extra_id) is None and "extra" in gone and not not_gone and not not_more,
+              (gone, not_gone, more, not_more))
+        dock.PROJECT_LAYERS.pop(extra_id, None)
+        if gdal is not None:  # a raster the panel lists among the targets is given back as layer_options names it
+            from filter_mate.config.config import ENV_VARS
+            raster_option = ENV_VARS.setdefault("CONFIG_DATA", {}).setdefault("APP", {}).setdefault(
+                "OPTIONS", {}).setdefault("RASTER", {})  # the option of the dock, off when unset
+            raster_was = raster_option.get("enabled")
+            raster_option["enabled"] = {"value": True}
+            raster_path = os.path.join(work, "mnt_panel.tif")
+            make_raster(raster_path)
+            dem = QgsRasterLayer(raster_path, "mnt")
+            project.addMapLayer(dem)
+            dock.PROJECT_LAYERS[gpkg.id()]["filtering"]["layers_to_filter"] = [shp.id(), dem.id()]
+            named = panel_options.layer_options(dock, "communes")["filtering"]["layers_to_filter"]
+            echoed = refused(panel_options.set_layer_options, dock,
+                             [{"layer": "communes", "filtering": {"layers_to_filter": named}}])
+            check("panels: the list of targets read, raster included, is accepted back",
+                  named == ["routes", "mnt"] and echoed == "", (named, echoed))
+            check("panels: the raster target is kept",
+                  dock.PROJECT_LAYERS[gpkg.id()]["filtering"]["layers_to_filter"] == [shp.id(), dem.id()])
+            project.removeMapLayer(dem.id())
+            raster_option.pop("enabled", None) if raster_was is None else raster_option.update(enabled=raster_was)
     finally:
         if before is None:
             utils.plugins.pop(PLUGIN_PACKAGE, None)

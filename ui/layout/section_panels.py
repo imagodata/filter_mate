@@ -1054,6 +1054,7 @@ class SectionPanels:
             self._place_new(panel, window, target, docked)
         if self._hidden_with_dock:
             panel.hide()  # the dock is closed: its panels come back with it
+            self._offer(panel, False)
 
     def _place_new(self, panel: Any, window: Any, target: Any, docked: bool) -> None:
         """A first place for ``panel``: below the dock or beside it, above it with EXPLORING (what it selects
@@ -1344,6 +1345,7 @@ class SectionPanels:
             elif kind == QEvent.Type.Show and self._hidden_with_dock:
                 self._hidden_with_dock = False
                 for panel in self._panels:
+                    self._offer(panel, True)
                     panel.show()
             elif kind in (QEvent.Type.DragEnter, QEvent.Type.DragMove, QEvent.Type.Drop):
                 key = self._dragged_section(event)
@@ -1368,13 +1370,24 @@ class SectionPanels:
     def _on_dock_closed(self) -> None:
         """The dock is closed: the panels of its sections go with it, and come back when it is shown again. They
         are hidden, not closed: a panel the user closes brings its sections back. A panel made while the dock is
-        closed (a section turned on again) waits for it too."""
+        closed (a section turned on again) waits for it too. Their entries of View > Panels are off meanwhile: a
+        panel shown with the dock closed would work on a dock whose layer chooser was emptied, whose agent stopped
+        and whose map tools were given back (closeEvent); the classic dock could not be used in that state."""
         self._hidden_with_dock = True
         for panel in self._panels:
             try:
                 panel.hide()
             except RuntimeError:
-                pass
+                continue
+            self._offer(panel, False)
+
+    @staticmethod
+    def _offer(panel: Any, offered: bool) -> None:
+        """The entry of ``panel`` in View > Panels can be used (the dock is open) or not."""
+        try:
+            panel.toggleViewAction().setEnabled(offered)
+        except RuntimeError:  # the panel went away
+            pass
 
     def _on_dock_destroyed(self, *_args: Any) -> None:
         """The dock went without the plugin unloading it: its panels would stay in QGIS with nothing behind them."""

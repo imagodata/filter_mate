@@ -85,6 +85,7 @@ def dock():
 @pytest.fixture(autouse=True)
 def qgis_reads(monkeypatch):
     monkeypatch.setattr(panel_options, "_is_vector", lambda layer: layer.vector)
+    monkeypatch.setattr(panel_options, "_is_listed_target", lambda layer: False)
     monkeypatch.setattr(panel_options, "_expression_problem",
                         lambda layer, text: "unknown field nmo" if "nmo" in text else "")
     monkeypatch.setattr(panel_options, "_crs_problem", lambda value: "")
@@ -139,6 +140,25 @@ def test_a_layer_the_panel_has_not_read(dock, project):
     del dock.PROJECT_LAYERS[ROUTES.id()]
     with pytest.raises(ValueError, match="FilterMate has not read routes yet"):
         panel_options.layer_options(dock, "routes", project=project)
+
+
+def test_a_raster_target_the_panel_lists_is_accepted_and_kept(dock, project, monkeypatch):
+    """layer_options names the raster the panel keeps among the targets; giving the list back must not refuse it."""
+    monkeypatch.setattr(panel_options, "_is_listed_target", lambda layer: layer is MNT)
+    dock.PROJECT_LAYERS[COMMUNES.id()]["filtering"]["layers_to_filter"] = [ROUTES.id(), MNT.id()]
+    seen = panel_options.layer_options(dock, "communes", project=project)["filtering"]["layers_to_filter"]
+    assert seen == ["routes", "mnt"]
+    answer = panel_options.set_layer_options(
+        dock, [{"layer": "communes", "filtering": {"layers_to_filter": seen}}], project=project)
+    assert dock.PROJECT_LAYERS[COMMUNES.id()]["filtering"]["layers_to_filter"] == [ROUTES.id(), MNT.id()]
+    assert answer["changed"][0]["filtering"]["layers_to_filter"] == ["routes", "mnt"]
+
+
+def test_a_raster_the_panel_does_not_list_is_still_refused(dock, project):
+    with pytest.raises(ValueError, match="communes: layers_to_filter: mnt is not a target the panel lists"):
+        panel_options.set_layer_options(
+            dock, [{"layer": "communes", "filtering": {"layers_to_filter": ["routes", "mnt"]}}], project=project)
+    assert dock.PROJECT_LAYERS[COMMUNES.id()]["filtering"]["layers_to_filter"] == []
 
 
 def test_layer_options_name_the_layers_to_filter(dock, project):

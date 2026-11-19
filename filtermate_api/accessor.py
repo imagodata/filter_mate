@@ -227,6 +227,8 @@ class LayerStatistics:
     groups_total: int = 0
     # More groups exist than ``groups`` holds.
     truncated: bool = False
+    # What the groups are ranked by: "sum" (of the numbers of a field or of a measure), else "feature_count".
+    ranked_by: str = ""
 
 
 @dataclass(frozen=True)
@@ -318,6 +320,8 @@ class StyleResult:
     azimuth: Optional[float] = None
     altitude: Optional[float] = None
     z_factor: Optional[float] = None
+    # What the model must know about the answer (a range left out because the user shares no values).
+    note: str = ""
 
 
 @dataclass(frozen=True)

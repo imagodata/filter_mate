@@ -14,7 +14,7 @@ from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 
 from ...adapters.agent.qt_transport import QtTransport
 from ...adapters.agent.settings import (
-    AgentSettings, KeyStoreError, delete_key, load_settings, provider_config, read_key, save_settings, store_key,
+    AgentSettings, KeyStoreError, delete_key, delete_own_key, load_settings, provider_config, read_key, save_settings, store_key,
     target_of, current_provider, read_providers, write_providers,
 )
 from ...adapters.agent import transcript_store
@@ -72,15 +72,14 @@ from ...core.agent.request_context import (
 )
 from ...core.agent.messages import request_usage
 from ...core.agent.session import (
-    REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget,
+    REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget, tools_weight,
 )
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
-from ...core.agent.tool_schema import for_model
 from ...core.agent.tool_catalog import (
     ADD_NOTE, ADD_TABLE, ASK_USER, CREATE_WIDGET, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
-    TURN_OFF_OPTIONS, TURN_ON_OPTIONS,
+    TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...core.domain.layer_kind import LayerKind
@@ -571,7 +570,8 @@ class AgentChatController(QObject):
         # application is making (its layers compared with the next project's, an Undo would remove them all).
         self._checkpoint.discard()
         self._turn_cards, self._auto_pin = [], None  # the map read for the pin was the closed project's
-        self._pending_options = []  # asked about the project that went away
+        # What the agent queued was asked in the project that went away; a click of the user in the menu was not.
+        self._pending_options = [change for change in self._pending_options if not change.by_agent]
         self._mcp.forget_change()
         self._replay_stop = True  # a recipe stops before its next step
         if self._replaying:
@@ -959,7 +959,8 @@ class AgentChatController(QObject):
         providers, current = self._menu_providers(values)
         mcp = getattr(self, "_mcp", None)
         listening = bool(getattr(mcp, "listening", values.mcp_enabled)) if mcp is not None else values.mcp_enabled
-        self.panel.fill_options(groups, [(entry.label, entry.same(current)) for entry in providers], listening)
+        self.panel.fill_options(groups, [(entry.label, entry.same(current), entry.ident) for entry in providers],
+                                listening)
 
     def _click_option(self, change) -> None:
         """A click in the menu: applied at once, or when the request or the recipe under way ends (its tools stay
@@ -977,17 +978,37 @@ class AgentChatController(QObject):
         from ...core.agent.agent_options import Change
         self._click_option(Change(sources_on=(source_id,)) if on else Change(sources_off=(source_id,)))
 
-    def _on_provider_chosen(self, index: int) -> None:
+    def _on_provider_chosen(self, ident: str) -> None:
+        """A provider of the menu: the entry the action carries, found in the list as it is now (it may have changed
+        since the menu opened: the current provider came or left its head)."""
         from ...core.agent.agent_options import Change
-        providers, _current = self._menu_providers(load_settings())
-        if 0 <= index < len(providers):
-            self._click_option(Change(provider=providers[index]))
+        providers, current = self._menu_providers(load_settings())
+        entry = next((entry for entry in providers if entry.ident == ident), None)
+        if entry is not None and not entry.same(current):  # already the one in use: no new conversation for it
+            self._click_option(Change(provider=entry))
 
-    def _on_provider_forgotten(self, index: int) -> None:
-        from ...core.agent.agent_options import forget
-        providers, _current = self._menu_providers(load_settings())
-        if 0 <= index < len(providers):
-            write_providers(forget(providers, providers[index]))
+    def _on_provider_forgotten(self, ident: str) -> None:
+        """"Remove from the list": the entry the action carries, never the one in use. Its key leaves the
+        authentication database of QGIS only when it is this entry's alone (``key_to_delete``)."""
+        from ...core.agent.agent_options import forget, key_to_delete
+        values = load_settings()
+        providers, current = self._menu_providers(values)
+        entry = next((entry for entry in providers if entry.ident == ident), None)
+        if entry is None or entry.same(current):
+            return
+        remaining = forget(read_providers(), entry)  # the list as stored: the provider in use is not added to it
+        write_providers(remaining)
+        in_use = [values.authcfg] + [change.provider.authcfg for change in self._pending_options
+                                     if change.provider is not None]
+        authcfg = key_to_delete(entry, remaining, in_use, target_of(entry.preset, entry.base_url))
+        if authcfg:
+            try:
+                gone = delete_own_key(authcfg)
+            except KeyStoreError:
+                logger.warning("Agent: the key of a provider left out of the list was kept", exc_info=True)
+            else:  # the id of the configuration is no secret
+                logger.info("Agent: authentication configuration %s %s", authcfg,
+                            "deleted with its provider" if gone else "kept (not made by FilterMate, or not deleted)")
 
     def _on_mcp_toggled(self, on: bool) -> None:
         from ...core.agent.agent_options import Change
@@ -1016,7 +1037,7 @@ class AgentChatController(QObject):
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
         if change != Change():
-            self._pending_options.append(change)
+            self._pending_options.append(replace(change, by_agent=True))
         return dict(answer, applies="after this request")
 
     def _turn_on_options_tool(self, arguments) -> dict:
@@ -1033,7 +1054,7 @@ class AgentChatController(QObject):
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
         if change != Change():
-            self._pending_options.append(change)
+            self._pending_options.append(replace(change, by_agent=True))
         return dict(answer, applies="in a new conversation" if change.provider is not None else "after this request")
 
     def _turn_on_question(self, change) -> str:
@@ -1986,9 +2007,10 @@ class AgentChatController(QObject):
             values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered, index)
         # Lot 3: the history a provider gets before the compaction, after what the instructions and tools take.
         # Measured on the form of the schemas the providers send (lot 2, core/agent/tool_schema.py).
-        fixed = len(prompt) + len(json.dumps([[tool.name, tool.description, for_model(tool.input_schema)]
-                                              for tool in tools], ensure_ascii=False))
-        limits = AgentLimits(max_history_chars=history_budget(PRESETS[values.preset][0], fixed))
+        # The tools a skill or use_tools offers later are taken off it by the session (``shrinks_with_tools``).
+        kind = PRESETS[values.preset][0]
+        limits = AgentLimits(max_history_chars=history_budget(kind, len(prompt) + tools_weight(tools)),
+                             shrinks_with_tools=kind == "ollama")
         session = AgentSession(provider, tools, prompt, limits, core=CORE if index else ())
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
@@ -2057,7 +2079,8 @@ class AgentChatController(QObject):
         nothing ticked, and a tool turned off in the Tools tab is missing with its source ticked."""
         return chat_instructions(active, send_values=values.send_values,
                                  filtering=AgentChatController.local_filtering(values),
-                                 configured_basemaps=configured_basemaps, offered=offered, available=available)
+                                 configured_basemaps=configured_basemaps, offered=offered, available=available,
+                                 settings_link=values.rules.get(SHOW_SETTINGS_LINK) != RULE_NEVER)
 
     @staticmethod
     def local_filtering(values: AgentSettings) -> bool:
@@ -2315,7 +2338,7 @@ class AgentChatController(QObject):
         from ...adapters.public_api.introspection import tree_places
         from ...adapters.public_api.operations import layer_kind
         from ...adapters.qgis.coverage_layers.snapshots import registry
-        from ...adapters.qgis.feature_count import COUNT_BUDGET, exact_feature_count
+        from ...adapters.qgis.feature_count import COUNT_BUDGET, exact_feature_count, table_seconds
         from ...adapters.qgis.source_capability_probe import counts_cheaply
         places, derived = tree_places() or {}, registry()
         rows = []
@@ -2326,7 +2349,9 @@ class AgentChatController(QObject):
                 if kind not in (LayerKind.VECTOR, LayerKind.RASTER, LayerKind.POINT_CLOUD) or not layer.isValid():
                     continue
                 if kind is LayerKind.VECTOR:
+                    tables = table_seconds()
                     count = exact_feature_count(layer, deadline - time.monotonic()) if counts_cheaply(layer) else None
+                    deadline += table_seconds() - tables  # a whole table counted has a budget of its own
                 else:
                     count = layer.pointCount() if kind is LayerKind.POINT_CLOUD else None
                 subset = (layer.subsetString() or "") if hasattr(layer, "subsetString") else ""
@@ -2393,7 +2418,7 @@ class AgentChatController(QObject):
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""
         read = self._read_project()
-        self._seen = None if read is None else project_state(*read)
+        self._seen = None if read is None else project_state(*read, previous=self._seen)
 
     def _on_stop(self) -> None:
         abort_active(CHAT_WAITS)  # a connector or a platform the chat waits for, not a call of another application

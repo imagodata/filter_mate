@@ -21,7 +21,15 @@ MAX_RESOLUTION = 5000.0
 MAX_CONTOUR_PIXELS = 25_000_000
 MAX_LEVELS = 500
 _METRES_PER_DEGREE = 111_320.0
-_WEB_MERCATOR = ("EPSG:3857", "EPSG:900913", "EPSG:3785")
+# The methods of projection (the PROJ name QGIS gives: ``QgsCoordinateReferenceSystem.operation().id()``) that keep the
+# angles, so that a slope read on the grid is the slope of the ground, to the scale of the projection (near 1 where the
+# CRS is made for): transverse Mercator and UTM, Lambert conformal conic, stereographic (polar, oblique), the Swiss
+# oblique Mercator, the Krovak of the Czech national grid, Hotine oblique Mercator (Malaysia), Laborde (Madagascar) and
+# the New Zealand map grid. (UPS is named stere by PROJ; no CRS probed was named lcca.) Not Mercator, Web Mercator
+# included (its scale grows as 1 / cos(latitude)), nor an equal-area, equidistant or compromise projection (Equal Earth, Plate Carree, Mollweide,
+# Lambert azimuthal equal area): their scale differs along the two axes, or from one place to the next.
+CONFORMAL_METHODS = frozenset(("utm", "tmerc", "etmerc", "lcc", "stere", "sterea", "somerc", "krovak", "omerc", "labrd",
+                               "nzmg"))
 
 
 @dataclass(frozen=True)
@@ -134,13 +142,15 @@ def gdal_srs(authid: str, wkt: Callable[[], str]) -> str:
     return authid if _GDAL_AUTHORITIES.fullmatch(authid) else wkt()
 
 
-def metric_grid(authid: str, projected: bool, metres: bool) -> bool:
-    """Whether elevation is warped on the CRS of the project: one in metres that keeps distances.
+def metric_grid(method: str, projected: bool, metres: bool) -> bool:
+    """Whether elevation is warped on the CRS of the project: one in metres whose projection keeps the angles.
 
-    Not Web Mercator: its metres are those of the equator (1.43 times too long at 45 degrees), which flattens every
-    slope computed from the grid.
+    ``method``: its projection as PROJ names it ("utm", "lcc"; "" when QGIS does not say). Not Web Mercator: its metres
+    are those of the equator (1.43 times too long at 45 degrees), nor Equal Earth, Plate Carree, Mollweide or an
+    equal-area projection, whose metres differ along the two axes: they flatten or steepen every slope computed from
+    the grid (``CONFORMAL_METHODS``).
     """
-    return bool(projected and metres and (authid or "").upper() not in _WEB_MERCATOR)
+    return bool(projected and metres and (method or "").strip().lower() in CONFORMAL_METHODS)
 
 
 def ground_size(bbox: Sequence[float]) -> Tuple[float, float]:

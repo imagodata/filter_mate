@@ -1529,6 +1529,9 @@ def s_close_dock():
     check('back to a vector layer: vector groups again', dock().mGroupBox_exploring_single_selection.isVisible())
     STATE['coverage_before_close'] = coverage()
     dock().close()  # the X of the dock title bar: run() shows the same dock again
+    module = sys.modules[f'{PACKAGE}.filter_mate_dockwidget']
+    check('closing the dock takes it off the registry of the feature picker guard',
+          module._active_dockwidget is None, repr(module._active_dockwidget))
     since = time.time()
     return lambda: not dock().isVisible() and time.time() - since > 1
 
@@ -1542,6 +1545,10 @@ def s_reopen_pick_raster():
     """closeEvent used to tear the controllers down: a raster picked in the reopened dock left the vector
     layer current, without its EXPLORING page."""
     integration = dock()._controller_integration
+    module = sys.modules[f'{PACKAGE}.filter_mate_dockwidget']
+    # 2026-11-18, audit: the guard of QgsFeaturePickerWidget (sql_utils.feature_picker_guard) finds no dock otherwise
+    check('the dock shown again is the active dock again: the feature picker guard finds it',
+          module._active_dockwidget is dock(), repr(module._active_dockwidget))
     check('closing the dock keeps its controllers', dock().isVisible() and integration.registry is not None
           and coverage() is STATE['coverage_before_close'] and coverage_connected(),
           f"registry={integration.registry!r} coverage={coverage()!r}")
@@ -4496,8 +4503,158 @@ def s_explo_off():
     return waits(0.3)
 
 
+def pick_in_chooser(chooser, layer_name):
+    """Choose ``layer_name`` in the list of a chooser of the current layer as a user does: open its list, click the
+    row. True when the list took the click; otherwise the choice is made as the list makes it (``activated``)."""
+    from qgis.PyQt.QtTest import QTest
+    source = dock().comboBox_filtering_current_layer
+    row = next(r for r in range(source.count()) if source.layer(r) is not None and source.layer(r).name() == layer_name)
+    before = chooser.currentIndex()
+    chooser.showPopup()
+    QApplication.processEvents()
+    view = chooser.view()
+    QTest.mouseClick(view.viewport(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier,
+                     view.visualRect(view.model().index(row, 0)).center())
+    QApplication.processEvents()
+    if chooser.currentIndex() == row or chooser.currentIndex() != before:
+        return True
+    chooser.hidePopup()
+    chooser.setCurrentIndex(row)
+    chooser.activated.emit(row)
+    return False
+
+
+def explo_pick_check(title, detail=''):
+    """``zones_b`` is the current layer everywhere after it was chosen in the chooser of EXPLORING. When the click on
+    its list did not take (the choice was made as the list makes it), the check is skipped, said so: it would not
+    be the gesture of a user."""
+    d = dock()
+    combo, mirror = d.comboBox_filtering_current_layer, explo_mirror()
+    shown = (f"panel={d.current_layer.name() if d.current_layer is not None else None} combo={combo.currentText()} "
+             f"chooser={mirror.currentText()} {detail}").strip()
+    if not EXPLO.get('pick_by_list'):
+        report('SKIP', title, f"the click on the list of the chooser did not take, no real click: {shown}")
+        return
+    check(title, d.current_layer is not None and d.current_layer.name() == 'zones_b'
+          and combo.currentLayer() is not None and combo.currentLayer().name() == 'zones_b'
+          and mirror.currentText().startswith('zones_b'), shown)
+
+
+def drop_task_hook():
+    """The hook of ``s_explo_pick_during_filter`` on the task manager, off whether a task came or not."""
+    hook = EXPLO.pop('task_hook', None)
+    if hook is not None:
+        try:
+            QgsApplication.taskManager().taskAdded.disconnect(hook)
+        except (TypeError, RuntimeError):  # it disconnected itself on the task
+            pass
+
+
+def s_explo_pick_setup():
+    """A second vector layer to choose, and the post-undo window of the step before over."""
+    if layer('zones_b') is None:
+        project.addMapLayer(QgsVectorLayer(M['zones'] + '|layername=zones', 'zones_b', 'ogr'))
+    since = time.time()
+    return lambda: registered('zones', 'zones_b') and tasks_idle() and time.time() - since > 2.5
+
+
+def s_explo_pick_ready():
+    """What a filter needs, as a user leaves it (a layer added or chosen again resets the targets): a feature of
+    zones picked, dem as the target."""
+    d = dock()
+    d.comboBox_filtering_current_layer.setLayer(layer('zones'))
+    east_a = next(feature for feature in layer('zones').getFeatures() if feature['name'] == 'east_a')
+    d.mFeaturePickerWidget_exploring_single_selection.setFeature(east_a.id())
+    set_targets(['dem'])
+    set_predicates(['Intersect'])
+    ready = targets_ready(['dem'])
+    since = time.time()
+    return lambda: bool(dock().get_current_features()[0]) and ready() and time.time() - since > 2.0
+
+
+def s_explo_pick_during_filter():
+    """2026-11-18, audit: a layer chosen in the chooser of EXPLORING while the filter runs is the user's choice."""
+    d = dock()
+    d.comboBox_filtering_current_layer.setLayer(layer('zones'))
+    QApplication.processEvents()
+    EXPLO['pick_before'] = d.current_layer.name() if d.current_layer is not None else None
+    EXPLO['pick_state'] = None
+    EXPLO['pick_by_list'] = False
+    manager = QgsApplication.taskManager()
+
+    def on_task(_task_id):  # the task is added: the dock has blocked the chooser of FILTERING by now
+        manager.taskAdded.disconnect(on_task)
+        combo = d.comboBox_filtering_current_layer
+        EXPLO['pick_state'] = (combo.signalsBlocked(), bool(getattr(d, '_filtering_in_progress', False)))
+        EXPLO['pick_by_list'] = pick_in_chooser(explo_mirror(), 'zones_b')
+
+    EXPLO['task_hook'] = on_task
+    manager.taskAdded.connect(on_task)
+    action_button('filter').click()
+    return settled()
+
+
+def s_explo_pick_during_filter_check():
+    drop_task_hook()  # no task came: it must not choose in a later step
+    d = dock()
+    combo = d.comboBox_filtering_current_layer
+    check('explo: the choice in the chooser of EXPLORING came while the filter ran (chooser of FILTERING blocked, '
+          'filter in progress)', EXPLO['pick_state'] == (True, True),
+          f"(combo blocked, filtering) at the pick={EXPLO['pick_state']}")
+    explo_pick_check('explo: a layer chosen in the chooser of EXPLORING while the filter runs stays the current '
+                     'layer', f"before={EXPLO['pick_before']} at the pick={EXPLO['pick_state']}")
+    combo.setLayer(layer('zones'))
+    return switched_to('zones', coverage_page=False)
+
+
+def s_explo_pick_in_window():
+    """The same, in the second and a half that follows a filter that is over."""
+    d = dock()
+    EXPLO['pick_before'] = d.current_layer.name() if d.current_layer is not None else None
+    action_button('filter').click()
+    return lambda: callable(getattr(d, '_end_post_filter_window', None)) and tasks_idle()
+
+
+def s_explo_pick_in_window_pick():
+    EXPLO['pick_by_list'] = pick_in_chooser(explo_mirror(), 'zones_b')
+    return settled()
+
+
+def s_explo_pick_in_window_check():
+    explo_pick_check('explo: a layer chosen in the chooser of EXPLORING right after a filter stays the current layer',
+                     f"before={EXPLO['pick_before']}")
+    combo = dock().comboBox_filtering_current_layer
+    combo.setLayer(layer('zones'))
+    return switched_to('zones', coverage_page=False)
+
+
+def s_explo_pick_after_undo():
+    """The same after Undo: the window that follows it put the source layer back over the choice."""
+    action_button('undo_filter').click()
+    EXPLO['pick_by_list'] = pick_in_chooser(explo_mirror(), 'zones_b')  # its window of checks is open for 2 s
+    return settled()
+
+
+def s_explo_pick_after_undo_check():
+    explo_pick_check('explo: a layer chosen in the chooser of EXPLORING right after Undo stays the current layer')
+    combo = dock().comboBox_filtering_current_layer
+    combo.setLayer(layer('zones'))
+    project.removeMapLayer(layer('zones_b').id())
+    return switched_to('zones', coverage_page=False)
+
+
+def s_explo_pick_undo_rest():
+    """The two filters of the steps above are undone: the next steps find the raster target as it was."""
+    action_button('undo_filter').click()
+    return lambda: not layer('dem').source().endswith('.vrt') and tasks_idle()
+
+
 EXPLO_STEPS = [s_section_setup, s_vector_source, s_explo_detach, s_explo_check, s_explo_layer_check, s_explo_select,
-               s_explo_filter, s_explo_filter_check, s_explo_all, s_explo_restart, s_explo_off]
+               s_explo_filter, s_explo_filter_check, s_explo_pick_setup, s_explo_pick_ready, s_explo_pick_during_filter,
+               s_explo_pick_during_filter_check, s_explo_pick_ready, s_explo_pick_in_window, s_explo_pick_in_window_pick,
+               s_explo_pick_in_window_check, s_explo_pick_ready, s_explo_pick_after_undo,
+               s_explo_pick_after_undo_check, s_explo_pick_undo_rest, s_explo_all,
+               s_explo_restart, s_explo_off]
 
 
 # --- the drags with a real pointer (FM_ONLY=mouse) ---------------------------------------------------------------
