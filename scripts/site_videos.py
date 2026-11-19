@@ -1698,17 +1698,26 @@ def toolbox_search():
 
 def show_toolbox():
     """Unrecorded: the Processing toolbox under the Layers panel, left of the map. (Above the dock of FilterMate it
-    took half of the dock's column: the dock was squeezed to 360 px by 600 and the window could not be fitted.)"""
+    took half of the dock's column: the dock was squeezed to 360 px by 600 and the window could not be fitted.)
+    The two share the height the Layers panel had: given more, they made the window 45 px taller than its 16:9."""
     mw, d = iface.mainWindow(), toolbox_dock()
+    size = (mw.width(), mw.height())
     layers = mw.findChild(QDockWidget, 'Layers')
+    column = layers.height() if layers is not None else 0
     d.show()
     if layers is not None:
         mw.splitDockWidget(layers, d, Qt.Orientation.Vertical)
-        total = layers.height() + d.height()
-        mw.resizeDocks([layers, d], [190, max(total - 190, 240)], Qt.Orientation.Vertical)
+        mw.resizeDocks([layers, d], [190, max(column - 196, 240)], Qt.Orientation.Vertical)
         mw.resizeDocks([layers], [330], Qt.Orientation.Horizontal)
     mw.resizeDocks([dock()], [DOCK_WIDTH], Qt.Orientation.Horizontal)
-    QTimer.singleShot(800, lambda: log(f'toolbox {rect_of(d)}, dock {rect_of(dock())}, map {rect_of(iface.mapCanvas())}'))
+
+    def settle():
+        if (mw.width(), mw.height()) != size:
+            mw.resize(*size)
+        QTimer.singleShot(400, lambda: log(
+            f'toolbox {rect_of(d)}, dock {rect_of(dock())}, map {rect_of(iface.mapCanvas())}, '
+            f'window {mw.width()}x{mw.height()} (fitted {size[0]}x{size[1]})'))
+    QTimer.singleShot(600, settle)
 
 
 def s8_dialog():
