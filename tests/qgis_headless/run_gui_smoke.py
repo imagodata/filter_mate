@@ -32,7 +32,7 @@ from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, Qgs
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QMimeData, QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QDragEnterEvent, QDropEvent, QMouseEvent, QWheelEvent
 from qgis.PyQt.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDockWidget, QLabel, QLineEdit, QMenu,
-                                 QPushButton, QScrollArea, QToolButton, QWidget)
+                                 QPushButton, QScrollArea, QSizePolicy, QToolButton, QWidget)
 try:
     from qgis.PyQt.QtGui import QShortcut
 except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
@@ -5037,8 +5037,8 @@ def switch_problems():
         if lower.height() > rail + 6:
             found.append(f"nothing is open below and the lower stack is {lower.height()} px high for {rail} px of "
                          f"{'headers' if sections.stacked else 'rail'}")
-    if room_waste():  # neither stack holds room the other one lacks (the steps of FM_ONLY=room)
-        found.append(room_waste())
+    if room_uneven():  # the two stacks stretch the same (the steps of FM_ONLY=room)
+        found.append(room_uneven())
     watcher = getattr(d, '_theme_watcher', None)
     if watcher is not None and d._on_qgis_theme_changed not in watcher._callbacks:
         found.append('the dock no longer follows the theme of QGIS')
@@ -5051,7 +5051,7 @@ def switch_problems():
                 splitter = d.splitter_main
                 found.append(f"{key} is open in the dock, {pages[key].height()} px high (dock {d.height()}, upper stack "
                              f"{sections.top.height()} max {sections.top.maximumHeight()}, splitter {splitter.sizes()} "
-                             f"of {splitter.height()}, share {sections._share:.2f}, lower shown "
+                             f"of {splitter.height()}, share {sections._share}, lower shown "
                              f"{splitter.widget(1).isVisibleTo(d)} min {splitter.widget(1).minimumHeight()} "
                              f"max {splitter.widget(1).maximumHeight()}, bar {d._action_bar_manager.get_position()})")
     return found
@@ -5588,20 +5588,35 @@ ROWS_STEPS = [s_rows_setup, s_rows_fit_check, s_rows_exporting_check, s_rows_sho
               s_rows_hidden_change, s_rows_fit_again_check, s_rows_panel_check, s_rows_end]
 
 
-# --- the room between the two stacks: neither holds room the other one lacks (FM_ONLY=room) --------------------------
+# --- the room between the two stacks: they stretch the same (FM_ONLY=room) -------------------------------------------
 #
-# 19 November 2026: with the rows of FILTERING packed at the top (``fit``), the lower stack kept the share of the
-# display profile (two thirds of a 834 px dock): 252 px stayed empty under its rows while EXPLORING, 162 px high,
-# scrolled 331 px of a raster. Now the handle goes where neither stack holds room the other one lacks, until the user
-# drags it; the lower stack still ends on the buttons, its rows at its top; ``fill`` keeps the share of 5.1.1.
+# 19 November 2026: the lower stack got the share of the display profile (65 % in the compact one, of a 834 px dock):
+# EXPLORING, 162 px high, scrolled 331 px of a raster over 252 px left empty under the rows of FILTERING. Now the two
+# stacks have one size policy and one stretch factor, and each one gets its minimum plus half of the room left, until
+# the user drags the handle; the lower stack still ends on the buttons, its rows at its top.
 
 ROOM = {}
+ROOM_KEY = 'FilterMate/splitter_top_share'  # where the user left the handle (dock_chrome.py)
+
+
+def stack_policies():
+    """Per stack, upper then lower: ``(vertical size policy, stretch factor, minimum)``. The minimum as Qt reads it
+    for a stack that may shrink: its minimum height when it has one, else the smallest its layout says."""
+    splitter = dock().main_splitter
+    names = ('Fixed', 'Minimum', 'Maximum', 'Preferred', 'Expanding', 'MinimumExpanding', 'Ignored')
+    found = []
+    for stack in (splitter.widget(0), splitter.widget(1)):
+        policy = stack.sizePolicy().verticalPolicy()
+        name = next((name for name in names if policy == getattr(QSizePolicy.Policy, name)), str(policy))
+        found.append((name, stack.sizePolicy().verticalStretch(),
+                      stack.minimumHeight() or stack.minimumSizeHint().height()))
+    return found
 
 
 def room_report():
-    """What each stack has and what its content asks, in pixels. ``cut``: what EXPLORING scrolls; ``band``: the room
-    left under the rows, in the scroll area of the open section; ``holder_end``: between that scroll area and the
-    end of the lower stack; ``under``: between the lower stack and the buttons (or the bottom of the dock)."""
+    """What each stack has, in pixels. ``cut``: what EXPLORING scrolls; ``band``: the room left under the rows, in the
+    scroll area of the open section; ``holder_end``: between that scroll area and the end of the lower stack;
+    ``under``: between the lower stack and the buttons (or the bottom of the dock)."""
     d = dock()
     sections, splitter = d._fm_sections, d.splitter_main
     area = d.scrollArea_frame_exploring
@@ -5614,10 +5629,9 @@ def room_report():
     lower_end = lower.mapTo(d, QPoint(0, lower.height())).y()
     below = bar.mapTo(d, QPoint(0, 0)).y() if bar.isVisibleTo(d) and bar.width() > bar.height() else d.height()
     return {
-        'dock': d.height(), 'sizes': splitter.sizes(), 'exploring': d.frame_exploring.height(),
-        'view': area.viewport().height(), 'asked': area.widget().sizeHint().height(),
-        'cut': area.verticalScrollBar().maximum(), 'section': key, 'lower': lower.height(),
-        'toolbox': d.toolBox_tabTools.height(), 'holder': holder.height() if holder is not None else None,
+        'dock': d.height(), 'sizes': splitter.sizes(), 'stacks': stack_policies(),
+        'exploring': d.frame_exploring.height(), 'view': area.viewport().height(),
+        'asked': area.widget().sizeHint().height(), 'cut': area.verticalScrollBar().maximum(), 'section': key,
         'page': page.height() if page is not None else None,
         'rows': page.sizeHint().height() if page is not None else None,
         'band': viewport.height() - page.height() if page is not None else None,
@@ -5627,34 +5641,36 @@ def room_report():
 
 
 def room_text():
-    sections = dock()._fm_sections
     return (' '.join(f"{key}={value}" for key, value in room_report().items())
-            + f" share={sections._share:.4f} left at={getattr(sections, '_fit_share', None)}")
+            + f" left at={dock()._fm_sections._share}")
 
 
-def room_waste():
-    """EXPLORING scrolls while room stays empty under the rows of the section open below it, both in the dock, the
-    rows fitting and the handle left nowhere by the user: what is wasted, None when nothing is."""
+def room_uneven():
+    """The two stacks open in the dock, the handle left nowhere by the user: what keeps them from stretching the
+    same (another size policy or stretch factor, a room that is not shared evenly beyond their minimums); None when
+    nothing does."""
     d = dock()
-    sections = d._fm_sections
-    key = sections.bottom_key()
-    if (key not in ('filtering', 'exporting') or d.property('fm_section_height') != 'fit'
-            or getattr(sections, '_fit_share', None) is not None or not sections._open_in_stack('exploring')
-            or not d.isVisible() or d.visibleRegion().isEmpty()):
+    sections, splitter = d._fm_sections, d.main_splitter
+    if (not d.isVisible() or d.visibleRegion().isEmpty() or not sections._both_open()
+            or sections._share is not None):
         return None
-    found = room_report()
-    if found['cut'] > 2 and found['band'] > mockup_module().ROW_GAP + 2:
-        return f"EXPLORING scrolls {found['cut']} px while {found['band']} px stay empty under the rows of {key}"
+    (upper_policy, upper_stretch, upper_least), (lower_policy, lower_stretch, lower_least) = stack_policies()
+    if (upper_policy, upper_stretch) != (lower_policy, lower_stretch):
+        return f"the upper stack is {upper_policy} / {upper_stretch}, the lower one {lower_policy} / {lower_stretch}"
+    sizes = splitter.sizes()
+    spare = sum(sizes) - upper_least - lower_least
+    wanted = upper_least + spare // 2
+    if spare >= 0 and abs(sizes[0] - wanted) > 1:
+        return (f"the stacks are {sizes} high for minimums of {upper_least} and {lower_least}: {wanted} px above "
+                f"would share the room evenly")
     return None
 
 
 def room_still():
-    """The handle is where it stays: nothing is waiting to move it, and it did not move in 200 ms."""
-    sections, splitter = dock()._fm_sections, dock().main_splitter
-    before = splitter.sizes()
+    """The handle is where it stays: it did not move in 200 ms."""
+    before = dock().main_splitter.sizes()
     pump(200)
-    return (not getattr(sections, '_follow_pending', False) and getattr(sections, '_follow_rounds', 0) == 0
-            and splitter.sizes() == before)
+    return dock().main_splitter.sizes() == before
 
 
 def drag_handle(by):
@@ -5694,22 +5710,23 @@ def _room_measure(kind, section):
             if section == 'filtering':  # told once per kind
                 report('SKIP', f"room: {kind} current", f"QGIS {Qgis.QGIS_VERSION} has no layer of this kind")
             return None
-        d = dock()
-        sections = d._fm_sections
-        settles(lambda: room_waste() is None and room_still())
+        settles(lambda: room_uneven() is None and room_still())
         found = ROOM[(kind, section)] = room_report()
         print(f"   room: {kind} {room_text()}", flush=True)
         grab(f"room_{kind}_{section}")
+        upper, lower = found['stacks']
         total = sum(found['sizes'])
-        check(f"room: {kind} current, {section} open: neither stack holds room the other one lacks",
-              room_waste() is None and (found['cut'] <= 2 or found['band'] <= mockup_module().ROW_GAP), room_text())
-        check(f"room: {kind} current, {section} open: EXPLORING is higher than its share of 5.1.1",
-              found['sizes'][0] > round(total * sections._share), f"{round(total * sections._share)} px then, {room_text()}")
-        # rows_packed wants room under the rows or a scroll bar: with none of the two, the rows fill their stack.
+        check(f"room: {kind} current, {section} open: one size policy and one stretch factor for the two stacks",
+              upper[:2] == lower[:2], room_text())
+        check(f"room: {kind} current, {section} open: each stack has its minimum and half of the room left",
+              room_uneven() is None and abs((found['sizes'][0] - upper[2]) - (found['sizes'][1] - lower[2])) <= 1,
+              room_text())
+        compact = importlib.import_module(f'{PACKAGE}.ui.config').UIConfig.get_profile().name == 'COMPACT'
+        check(f"room: {kind} current, {section} open: EXPLORING is no longer held to the 35 % of the compact profile",
+              not compact or found['sizes'][0] > round(total * 0.35), f"{round(total * 0.35)} px then, {room_text()}")
         check(f"room: {kind} current, {section} open: the lower stack ends on the buttons, its rows at its top",
-              found['holder_end'] == 0 and 0 <= found['under'] <= 8 and rows_aligned(section)
-              and (rows_packed(section) or found['band'] == 0), f"{room_text()} | {rows_text(section)}")
-        check(f"room: {kind} current, {section} open: the handle stays where it is", room_still(), room_text())
+              found['holder_end'] == 0 and 0 <= found['under'] <= 8 and rows_aligned(section) and rows_packed(section),
+              f"{room_text()} | {rows_text(section)}")
         return None
     step.__name__, after.__name__ = f's_room_{kind}_{section}', f's_room_{kind}_{section}_check'
     return [step, after]
@@ -5718,26 +5735,22 @@ def _room_measure(kind, section):
 def s_room_setup():
     leave_welcome()
     ROOM['height'] = config_value('APP.DOCKWIDGET.SECTION_HEIGHT')
-    ROOM['left at'] = QSettings().value(ROOM_KEY)
+    ROOM['left at'] = (dock()._fm_sections._share, QSettings().value(ROOM_KEY))
+    print(f"   room: when the dock opens {room_text()}", flush=True)
     return waits(0.6)
 
 
-ROOM_KEY = 'FilterMate/splitter_top_share_fit'  # where the handle was left while the rows fit (dock_chrome.py)
-
-
 def s_room_agent():
-    """AGENT above EXPORTING: its thread uses all the room it gets, the rows below keep theirs."""
+    """AGENT above EXPORTING: the two stacks stretch the same whatever is open in them."""
     d = dock()
     sections = d._fm_sections
     if 'agent' not in sections._headers:
         return None
     open_section(d.EXPORTING)
     sections.open_top('agent')
-    settles(lambda: room_report()['band'] <= mockup_module().ROW_GAP and room_still())
-    found = room_report()
-    check('room: AGENT above EXPORTING takes all the room the rows leave', sections._open_in_stack('agent')
-          and 0 <= found['band'] <= mockup_module().ROW_GAP and sections._pages['agent'].height() > 200,
-          f"AGENT {sections._pages['agent'].height()} px, {room_text()}")
+    check('room: AGENT above EXPORTING, each stack has its minimum and half of the room left',
+          sections._open_in_stack('agent') and settles(lambda: room_uneven() is None and room_still())
+          and sections._pages['agent'].height() > 150, f"AGENT {sections._pages['agent'].height()} px, {room_text()}")
     sections.open_top('exploring')
     open_section(d.FILTERING)
     return waits(0.4)
@@ -5751,19 +5764,33 @@ def s_room_theme():
 
 
 def s_room_theme_check():
-    check('room: after a change of theme neither stack holds room the other one lacks',
-          settles(lambda: room_waste() is None and room_still()), room_text())
+    check('room: after a change of theme the two stacks stretch the same',
+          settles(lambda: room_uneven() is None and room_still()), f"{room_uneven()} {room_text()}")
     apply_settings({'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': ROOM['theme']})
     pump(300)
     ROOM['profile'] = config_value('APP.DOCKWIDGET.UI_PROFILE')
-    ui_config = importlib.import_module(f'{PACKAGE}.ui.config').UIConfig
-    apply_settings({'APP.DOCKWIDGET.UI_PROFILE': 'normal' if ui_config.get_profile().name == 'COMPACT' else 'compact'})
-    return waits(0.8)
+    ROOM['profiles'] = []
+    return None
 
 
-def s_room_profile_check():
-    check('room: after a change of display profile neither stack holds room the other one lacks',
-          settles(lambda: room_waste() is None and room_still()), room_text())
+def _room_profile(value):
+    """Two steps: the display profile ``value``, then the stacks under it."""
+    def step():
+        apply_settings({'APP.DOCKWIDGET.UI_PROFILE': value})
+        return waits(0.8)
+
+    def after():
+        upper, lower = stack_policies()
+        ROOM['profiles'].append((value, upper, lower))
+        check(f"room: display profile {value}, one size policy and one stretch factor, the room shared evenly",
+              settles(lambda: room_uneven() is None and room_still()) and upper[:2] == lower[:2],
+              f"{room_uneven()} {room_text()}")
+        return None
+    step.__name__, after.__name__ = f's_room_profile_{value}', f's_room_profile_{value}_check'
+    return [step, after]
+
+
+def s_room_profile_back():
     apply_settings({'APP.DOCKWIDGET.UI_PROFILE': ROOM['profile']})
     return waits(0.8)
 
@@ -5774,19 +5801,17 @@ def s_room_drag():
     sections = d._fm_sections
     d.comboBox_filtering_current_layer.setLayer(layer('dem'))
     open_section(d.FILTERING)
-    settles(lambda: coverage().active_layer is layer('dem') and room_waste() is None and room_still(), 6.0)
+    settles(lambda: coverage().active_layer is layer('dem') and room_uneven() is None and room_still(), 6.0)
     before = d.main_splitter.sizes()
-    kept = QSettings().value('FilterMate/splitter_top_share')
-    drag_handle(-120)
+    drag_handle(-60)
     ROOM['dragged'] = d.main_splitter.sizes()
     share = ROOM['dragged'][0] / sum(ROOM['dragged'])
-    check('room: a real drag moves the handle, 120 px up', ROOM['dragged'][0] == before[0] - 120
+    check('room: a real drag moves the handle, 60 px up', ROOM['dragged'][0] == before[0] - 60
           and sum(ROOM['dragged']) == sum(before), f"{before} -> {ROOM['dragged']}")
-    check('room: where the handle is left while the rows fit is kept apart from the share of 5.1.1',
-          sections._fit_share is not None and abs(sections._fit_share - share) < 0.001
-          and abs(float(QSettings().value(ROOM_KEY, -1.0)) - share) < 0.001
-          and QSettings().value('FilterMate/splitter_top_share') == kept,
-          f"left at {sections._fit_share} saved {QSettings().value(ROOM_KEY)} share of 5.1.1 {kept}")
+    check('room: where the handle is left is kept, in this session and the next ones',
+          sections._share is not None and abs(sections._share - share) < 0.001
+          and abs(float(QSettings().value(ROOM_KEY, -1.0)) - share) < 0.001,
+          f"left at {sections._share} saved {QSettings().value(ROOM_KEY)}")
     d.comboBox_filtering_current_layer.setLayer(layer('zones'))
     return switched_to('zones', coverage_page=False)
 
@@ -5800,62 +5825,79 @@ def s_room_drag_check():
     open_section(d.EXPORTING)
     pump(200)
     open_section(d.FILTERING)
-    sections.dimensions_applied()  # as a theme or a display profile does
-    check('room: and with another section opened below, the dimensions applied again',
+    # 5.1.1: left at 186 px, the handle came back at 174 px with the next section opened (the room was counted with
+    # the margins of the splitter).
+    check('room: and with another section opened below, to the pixel',
           settles(lambda: d.main_splitter.sizes() == ROOM['dragged']) and room_still(),
           f"{ROOM['dragged']} -> {room_text()}")
+    sections.dimensions_applied()  # as a theme or a display profile does
+    check('room: and with the dimensions of the dock applied again',
+          settles(lambda: d.main_splitter.sizes() == ROOM['dragged']) and room_still(),
+          f"{ROOM['dragged']} -> {room_text()}")
+    return None
+
+
+def s_room_least():
+    """The handle takes each stack down to its minimum: a stack whose vertical policy does not shrink (the Minimum of
+    EXPLORING) stopped at its size hint, 396 px of a 905 px splitter."""
+    d = dock()
+    splitter = d.main_splitter
+    (_policy, _stretch, upper_least), (_policy, _stretch, lower_least) = stack_policies()
+    drag_handle(upper_least - splitter.sizes()[0])
+    at_least = splitter.sizes()
+    drag_handle(-10)  # further up: held (a collapsible stack folds only past half of its minimum)
+    check('room: the handle takes the upper stack down to its minimum, no further',
+          at_least[0] == upper_least and splitter.sizes()[0] == upper_least,
+          f"{at_least} then {splitter.sizes()} for a minimum of {upper_least}, {room_text()}")
+    drag_handle(splitter.sizes()[1] - lower_least)
+    at_least = splitter.sizes()
+    drag_handle(10)
+    check('room: the handle takes the lower stack down to its minimum, no further',
+          at_least[1] == lower_least and splitter.sizes()[1] == lower_least,
+          f"{at_least} then {splitter.sizes()} for a minimum of {lower_least}, {room_text()}")
+    # As found: the handle where it was left before these steps (nowhere, in the bench).
+    sections = d._fm_sections
+    sections._share, saved = ROOM['left at']
+    if saved is None:
+        QSettings().remove(ROOM_KEY)
+    else:
+        QSettings().setValue(ROOM_KEY, saved)
+    sections.dimensions_applied()
     apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fill'})
     return waits(0.6)
 
 
 def s_room_fill_check():
-    """``fill``: the rows spread over the lower stack, which gets the share of 5.1.1: neither what the stacks show
-    nor the handle left while the rows fitted moves it."""
+    """``fill``: the rows spread over the lower stack as in 5.1.1; the two stacks stretch the same there too."""
     d = dock()
-    sections = d._fm_sections
-
-    def as_before():
-        sizes = d.main_splitter.sizes()
-        return abs(sizes[0] - int(round(sum(sizes) * sections._share))) <= 1
-    check('room: SECTION_HEIGHT = fill, the stacks get the share of 5.1.1', d.property('fm_section_height') == 'fill'
-          and settles(as_before) and room_still(), room_text())
-    d.comboBox_filtering_current_layer.setLayer(layer('dem'))
-    settles(lambda: coverage().active_layer is layer('dem'), 6.0)
-    pump(400)
-    check('room: fill, the share stays with a raster current (EXPLORING asks more)', as_before() and room_still(),
-          room_text())
+    check('room: SECTION_HEIGHT = fill, the two stacks stretch the same', d.property('fm_section_height') == 'fill'
+          and settles(lambda: room_uneven() is None and room_still()), f"{room_uneven()} {room_text()}")
     gaps = row_report('filtering')[1]
     check('room: fill, the rows spread down to the end of the lower stack',
           min(gaps or [0]) > mockup_module().ROW_GAP + 4 and room_report()['band'] == 0, rows_text('filtering'))
-    grab('room_dem_filtering_fill')
-    # As found: the handle left nowhere, the rows as they were.
-    sections._fit_share = None
-    if ROOM['left at'] is None:
-        QSettings().remove(ROOM_KEY)
-    else:
-        QSettings().setValue(ROOM_KEY, ROOM['left at'])
+    grab('room_zones_filtering_fill')
     apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fit'})
     return waits(0.6)
 
 
 def s_room_end():
     d = dock()
-    found = room_report()
-    wanted = ROOM.get(('dem', 'filtering'))
-    check('room: fit again with the handle left nowhere, the room follows what the stacks show as before',
-          settles(lambda: room_waste() is None and room_still()) and wanted is not None
-          and d.main_splitter.sizes() == wanted['sizes'], f"{wanted and wanted['sizes']} -> {room_text()} {found['sizes']}")
+    wanted = ROOM.get(('zones', 'filtering'))
+    check('room: fit again, the handle left nowhere: the stacks as they were when these steps began',
+          settles(lambda: room_uneven() is None and room_still()) and wanted is not None
+          and d.main_splitter.sizes() == wanted['sizes'], f"{wanted and wanted['sizes']} -> {room_text()}")
+    print(f"   room: stacks per display profile {ROOM['profiles']}", flush=True)
     if config_value('APP.DOCKWIDGET.SECTION_HEIGHT') != ROOM['height']:
         apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': ROOM['height']})
-    d.comboBox_filtering_current_layer.setLayer(layer('zones'))
-    return switched_to('zones', coverage_page=False)
+    return waits(0.4)
 
 
-ROOM_STEPS = [s_section_setup, s_room_setup,
+ROOM_STEPS = [s_section_setup, s_vector_source, s_room_setup,
               *[step for kind in ('zones', 'dem', 'cloud') for section in ('filtering', 'exporting')
                 for step in _room_measure(kind, section)],
-              s_room_agent, s_room_theme, s_room_theme_check, s_room_profile_check, s_room_drag, s_room_drag_check,
-              s_room_fill_check, s_room_end]
+              s_room_agent, s_room_theme, s_room_theme_check,
+              *[step for value in ('normal', 'hidpi', 'compact') for step in _room_profile(value)],
+              s_room_profile_back, s_room_drag, s_room_drag_check, s_room_least, s_room_fill_check, s_room_end]
 
 
 # --- the tools of the EXPLORING rail, chosen for each kind of layer (APP.DOCKWIDGET.EXPLORING_TOOLS, FM_ONLY=tools) -----
@@ -6503,7 +6545,7 @@ if os.environ.get('FM_ONLY') == 'layout_shots':  # the window in each layout, as
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SHOT_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'rows':  # the rows of FILTERING / EXPORTING packed or spread, and their key buttons
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *ROWS_STEPS, s_finish]
-if os.environ.get('FM_ONLY') == 'room':  # the room between the two stacks: neither holds what the other one lacks
+if os.environ.get('FM_ONLY') == 'room':  # the room between the two stacks: they stretch the same, the handle stays
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *ROOM_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'tools':  # the tools of the EXPLORING rail chosen per kind of layer, and the setup
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *TOOLS_STEPS, s_finish]

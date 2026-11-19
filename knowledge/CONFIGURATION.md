@@ -111,9 +111,6 @@ config.json
 - `fit`: the rows of FILTERING and EXPORTING keep their own height, one gap (6 px) apart, at the top of the section;
   the room left stays under them, the rail band ends with the last row, a section shorter than its rows scrolls
 - `fill`: the rows spread over the whole height of the section (the layout of 5.0 to 5.1.1)
-- With `fit`, the handle between EXPLORING and the section below goes where neither holds room the other one lacks
-  (EXPLORING takes what the rows leave when it scrolls; the room left otherwise stays under the rows), until it is
-  dragged: it then stays where it is left. With `fill` the two share the room as in 5.1.1
 - Applied at once; in the dock, in a panel of QGIS and with the headers stacked alike. A configuration written
   before the setting gets `fit`. The size of the widgets themselves is `UI_PROFILE`
 
