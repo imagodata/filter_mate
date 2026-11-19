@@ -3116,6 +3116,24 @@ class TestHiddenToolsAreNotArmed:
         controller._on_color_pick_toggled(False)
         assert controller._color_pick is False
 
+    def test_putting_the_pipette_off_keeps_the_target_of_the_panel(self, ctrl_module, layers, monkeypatch):
+        """Detector hidden, target 'object' shown down on the lent pipette button: its release changes no target."""
+        controller = self._controller(ctrl_module, layers, monkeypatch, "raster", {"detector"})
+        panel = controller._raster_panel
+        panel.pick_target.return_value = "object"
+        controller._raster_capability = lambda layer: types.SimpleNamespace(has_raw_values=True)
+        controller._color_pick = True
+        controller._on_color_pick_toggled(False, None)  # what the pipette button of the rail sends when put off
+        panel.set_pick_target.assert_not_called()
+        controller._extras.set_pipette_checked.assert_called_with(False, "object")
+        assert controller._color_pick is False
+
+    def test_putting_a_tool_on_still_chooses_its_target(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch, "raster", set())
+        controller._raster_capability = lambda layer: types.SimpleNamespace(has_raw_values=True)
+        controller._on_color_pick_toggled(True, "similar")
+        controller._raster_panel.set_pick_target.assert_called_with("similar")
+
     # --- point cloud: the class and value pipettes, the detector ------------------------------------------------------
 
     @pytest.mark.parametrize("group, hidden, mode", [("classes", {"identify"}, "class"), ("ranges", {"value_pipette"}, "value")])

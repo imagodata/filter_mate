@@ -1102,3 +1102,20 @@ class TestNothingTurnsAHiddenModeOn:
         rail.dock.dockwidget.CONFIG_DATA = _config(vector="sync")
         vector.dock._select_with_qgis(("selectRectangle",), mode=True)
         assert not vector.sync.checked and vector.triggered == [("selectRectangle",)]  # the QGIS tool still runs
+
+
+class TestReleasingAPipetteKeepsTheTarget:
+    """The button of the target is hidden, the pipette shows down on a lent one: its release changes no target."""
+
+    @pytest.fixture
+    def picks(self, rail):
+        calls = []
+        rail.controller._on_color_pick_toggled = lambda enabled, target=None: calls.append((enabled, target))
+        return calls
+
+    @pytest.mark.parametrize("handler, target", [("_on_pipette_toggled", "similar"), ("_on_detector_toggled", "object"),
+                                                 ("_on_similar_toggled", "similar_objects")])
+    def test_putting_a_tool_on_chooses_its_target_and_putting_it_off_none(self, rail, picks, handler, target):
+        getattr(rail.dock, handler)(True)
+        getattr(rail.dock, handler)(False)
+        assert picks == [(True, target), (False, None)]

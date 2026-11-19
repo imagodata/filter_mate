@@ -1436,14 +1436,16 @@ class CoverageDockExtras(QObject):
 
     # === Raster: colour pipette ===
 
+    # Putting a pipette off does not choose a target: the button that shows the tool down may be one lent by another
+    # target (the button of that target is hidden), and its release must not change what the panel picks.
     def _on_pipette_toggled(self, checked: bool) -> None:
-        self._controller._on_color_pick_toggled(checked, 'similar')
+        self._controller._on_color_pick_toggled(checked, 'similar' if checked else None)
 
     def _on_detector_toggled(self, checked: bool) -> None:
-        self._controller._on_color_pick_toggled(checked, 'object')
+        self._controller._on_color_pick_toggled(checked, 'object' if checked else None)
 
     def _on_similar_toggled(self, checked: bool) -> None:
-        self._controller._on_color_pick_toggled(checked, 'similar_objects')
+        self._controller._on_color_pick_toggled(checked, 'similar_objects' if checked else None)
 
     PIPETTE_BUTTONS = {
         'similar': 'pushButton_checkable_exploring_raster_pipette',
