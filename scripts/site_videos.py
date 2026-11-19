@@ -2678,6 +2678,36 @@ def setup_card(untick=()):
     return steps + card_answer()
 
 
+SETUP_CARDS = (
+    # (a choice only that card has, the caption shown with it, the choices unticked on it)
+    ('EXPORTING', '2 · Sections and data: no EXPORTING, vector layers only',
+     ('EXPORTING', 'Rasters (images, DEMs)', 'Point clouds (LiDAR)')),
+    ('Light', '3 · Look and layout: as they are, in one panel', ()),
+    ('Zone', '4 · The tools of EXPLORING: two buttons less', ('Zone', 'Link the single and multiple selections')),
+)
+
+
+def setup_cards():
+    """Every card of the setup that is waiting, answered one after the other, however many steps the setup has (it
+    gained one in November 2026, and will again): a step that finds a card puts the steps that answer it, and itself
+    once more, right after it in the clip; it ends when the cards are over. A card of SETUP_CARDS gets its caption
+    and its choices unticked; the others are answered as they are."""
+    def step():
+        card = wizard_card()
+        if card is None:
+            return None
+        items, untick = [], ()
+        for marker, text, labels in SETUP_CARDS:
+            if card_button(marker) is not None:
+                items, untick = [caption(text)], labels
+                break
+        items += setup_card(untick=untick) + [(0, setup_cards())]
+        at = RUN['at'] + 1
+        STEPS[at:at] = items
+        return None
+    return step
+
+
 def settings_card():
     return agent_chat()._settings_cards[-1]
 
@@ -2693,24 +2723,30 @@ def apply_card():
 
 
 def shown_sections():
+    """Log what the setup left in the dock: its sections, and the buttons of the rail of EXPLORING."""
     sections = dock()._fm_sections
     log('FILTERING / EXPORTING shown: ' + ', '.join(key for key in ('filtering', 'exporting')
                                                     if sections.section_shown(key)))
+    try:
+        from filter_mate.ui.controllers.exploring_tool_choice import BUTTONS
+        log('rail of EXPLORING: ' + ', '.join(name for name, button in BUTTONS['vector'].items()
+                                              if not getattr(dock(), button).isHidden()))
+    except Exception:
+        log(traceback.format_exc())
 
 
-# setup: "Set up FilterMate, no model needed" in AGENT: cards of choices. The first one asks which sections are used:
-# EXPORTING is unticked. The others are answered as they are (the sections all in the FilterMate panel), Apply: the
-# dock, still in one piece, keeps what is used; EXPORTING and its Export button are gone.
+# setup: "Set up FilterMate, no model needed" in AGENT: cards of choices. The first one asks which sections and data
+# are used: EXPORTING, rasters and point clouds are unticked. The card of the tools of EXPLORING loses two buttons.
+# The others are answered as they are (the sections all in the FilterMate panel), Apply: the dock, still in one
+# piece, keeps what is used; EXPORTING and its Export button are gone, the rail of EXPLORING is shorter.
 SETUP = boot(PANELS_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.15) + [
     (0, lambda: agent_chat().new_conversation())] + staged(1.15) + [
     title('Only the tools you use'), caption('1 · Open AGENT, then Set up FilterMate: no AI model needed'),
     hold(1000), (0, cam('dock', dur=1.4, pad=12)), hold(500),
 ] + agent_open_visible() + [hold(900), (0, cam(agent_panel, dur=1.3, pad=12)), hold(500)] \
-    + act(lambda: agent_panel().setup_button, lambda: agent_panel().setup_button.click()) + [
-    hold(1000), caption('2 · Which sections do you use? Here, no EXPORTING')] \
-    + setup_card(untick=('EXPORTING',)) + [caption('3 · The other cards as they are: one panel, the default')] \
-    + setup_card() + setup_card() + setup_card() + setup_card() + [
-    hold(400), caption('4 · Apply: the panel keeps what you use'),
+    + act(lambda: agent_panel().setup_button, lambda: agent_panel().setup_button.click()) + [hold(1000)] \
+    + [(0, setup_cards())] + [
+    hold(400), caption('5 · Apply: the panel keeps what you use'),
     (0, cam(agent_panel, dur=1.0, pad=12)),
 ] + apply_card() + [hold(1400), (0, shown_sections)] + chip_click('filtering') + [
     hold(900), (0, cam('dock', dur=1.3, pad=12)), hold(2800), (0, cam('full', dur=1.5)), hold(2600),
@@ -3029,6 +3065,7 @@ CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'la
          # through a result (the teaser was edited from them)
          'noise_plain': NOISE, 'buffer_plain': BUFFER, 'bridges_plain': BRIDGES, 'export_plain': EXPORT}
 STEPS = CLIPS[CLIP]
+RUN = {'at': 0}  # the index of the step that runs: a step may put steps after itself (setup_cards)
 
 
 def run_steps(i=0, tries=0):
@@ -3041,6 +3078,7 @@ def run_steps(i=0, tries=0):
         if tries == 0:
             log(f'--- step {i} {getattr(fn, "__name__", fn)}')
         again = False
+        RUN['at'] = i
         try:
             again = fn() is True
         except Exception:

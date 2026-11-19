@@ -3415,6 +3415,114 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
     </message>
 </context>
 <context>
+    <name>ExploringTools</name>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="68"/>
+        <source>Zoom to the selected pixels</source>
+        <translation>Przybliż do zaznaczonych pikseli</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="69"/>
+        <source>Preview: hide the pixels outside the selection</source>
+        <translation>Podgląd: ukryj piksele spoza zaznaczenia</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="70"/>
+        <source>Pipette: select the pixels like the one clicked</source>
+        <translation>Próbnik: zaznacz piksele takie jak kliknięty</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="71"/>
+        <source>Object detector</source>
+        <translation>Detektor obiektów</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="72"/>
+        <source>Similar objects</source>
+        <translation>Podobne obiekty</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="73"/>
+        <source>Link the range to the style</source>
+        <translation>Powiąż zakres ze stylem</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="74"/>
+        <source>More tools (always shown)</source>
+        <translation>Więcej narzędzi (zawsze widoczne)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="75"/>
+        <source>Reset the raster selection</source>
+        <translation>Resetuj zaznaczenie rastra</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="79"/>
+        <source>Zoom to the layer</source>
+        <translation>Przybliż do warstwy</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="80"/>
+        <source>Live preview: show only the points kept</source>
+        <translation>Podgląd na żywo: pokaż tylko zachowane punkty</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="81"/>
+        <source>Class pipette</source>
+        <translation>Próbnik klasy</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="83"/>
+        <source>Value pipette</source>
+        <translation>Próbnik wartości</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="84"/>
+        <source>Zone</source>
+        <translation>Strefa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="86"/>
+        <source>Reset the point cloud criteria</source>
+        <translation>Resetuj kryteria chmury punktów</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="89"/>
+        <source>Zoom to the selected features</source>
+        <translation>Przybliż do wybranych obiektów</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="90"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>Synchronizuj zaznaczenie na mapie z widżetami</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="91"/>
+        <source>Identify the selected features</source>
+        <translation>Identyfikuj wybrane obiekty</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="92"/>
+        <source>Follow the features on the map</source>
+        <translation>Śledź obiekty na mapie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="94"/>
+        <source>Link the single and multiple selections</source>
+        <translation>Połącz wybór pojedynczy i wielokrotny</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="96"/>
+        <source>Reset the layer properties</source>
+        <translation>Resetuj właściwości warstwy</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="101"/>
+        <source>Tools shown for this type of layer</source>
+        <translation>Narzędzia wyświetlane dla tego typu warstwy</translation>
+    </message>
+</context>
+<context>
     <name>ExportDialogManager</name>
     <message>
         <location filename="../ui/managers/export_dialog_manager.py" line="92"/>
@@ -11296,6 +11404,21 @@ onnxruntime pochodzi z PyPI przez pip, model z huggingface.co/{1}, każdy plik j
         <translation>Przyciski</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Vector tools</source>
+        <translation>Narzędzia wektorowe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Raster tools</source>
+        <translation>Narzędzia rastrowe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Cloud tools</source>
+        <translation>Narzędzia chmury punktów</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>Filtrowanie</translation>
@@ -11354,6 +11477,21 @@ onnxruntime pochodzi z PyPI przez pip, model z huggingface.co/{1}, każdy plik j
         <location filename="../ui/controllers/setup_wizard.py" line="48"/>
         <source>Where the action buttons go (Filter, Export...)</source>
         <translation>Gdzie umieścić przyciski akcji (Filtruj, Eksportuj...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for vector layers (right-click the rail to change them later)</source>
+        <translation>Przyciski paska EXPLORING dla warstw wektorowych (kliknij pasek prawym przyciskiem, aby zmienić je później)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for rasters</source>
+        <translation>Przyciski paska EXPLORING dla rastrów</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for point clouds</source>
+        <translation>Przyciski paska EXPLORING dla chmur punktów</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>

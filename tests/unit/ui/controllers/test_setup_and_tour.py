@@ -215,6 +215,7 @@ def world(monkeypatch):
     _module(monkeypatch, ".adapters.agent.settings",
             load_settings=lambda: types.SimpleNamespace(ready=state.ready))
     state.tour = _load(monkeypatch, "ui.controllers.welcome_tour", "ui/controllers/welcome_tour.py")
+    _load(monkeypatch, "ui.controllers.exploring_tool_choice", "ui/controllers/exploring_tool_choice.py")
     state.setup = _load(monkeypatch, "ui.controllers.setup_wizard", "ui/controllers/setup_wizard.py")
     state.wizard = importlib.import_module(f"{_PKG}.core.agent.setup_wizard")
     return state
@@ -571,6 +572,59 @@ def test_the_headers_stacked_are_a_setting_of_the_setup(world, chat):
     assert world.applied == [{world.wizard.SECTION_HEADERS: "stacked"}]
     assert chat.wizard.revert() is True
     assert world.applied[-1] == {world.wizard.SECTION_HEADERS: "rail"}
+
+
+# --- the setup: the tools of the EXPLORING rail ------------------------------------------------------------------------
+
+
+def _tools_card(chat):
+    return next(questions for questions in chat.panel.questions if questions[0].header == "Vector tools")
+
+
+def test_the_tools_are_asked_one_card_a_kind_with_the_buttons_shown_ticked(world, chat):
+    chat.wizard = world.setup.SetupWizard(chat)
+    chat.wizard.start()
+    for _step in range(3):  # features, look, layout: the tools come next
+        _answer(world, chat)
+    questions = chat.panel.questions[-1]
+    assert [question.header for question in questions] == ["Vector tools", "Raster tools", "Cloud tools"]
+    assert all(question.multi_select for question in questions)
+    vector = questions[0]
+    assert [option.label for option in vector.options] == [
+        "Zoom to the selected features", "Keep the map selection and the widgets in sync",
+        "Identify the selected features", "Follow the features on the map", "Zone",
+        "Link the single and multiple selections", "Reset the layer properties"]
+    assert all(option.selected for question in questions for option in question.options)
+    assert "right-click" in vector.question.lower()
+
+
+def test_a_kind_of_data_turned_off_is_not_asked(world, chat):
+    chat.wizard = world.setup.SetupWizard(chat)
+    chat.wizard.start()
+    _answer(world, chat, untick=("Rasters (images, DEMs)", "Point clouds (LiDAR)"))
+    for _step in range(2):
+        _answer(world, chat)
+    assert [question.header for question in chat.panel.questions[-1]] == ["Vector tools"]
+
+
+def test_answering_the_tools_as_ticked_changes_nothing(world, chat):
+    world.config.setdefault("APP", {}).setdefault("DOCKWIDGET", {})["EXPLORING_TOOLS"] = {
+        "vector_hidden": {"value": "reset,  Zoom"}, "raster_hidden": {"value": "nothing"}}
+    # a setting hand-written in another order, with a name no button has: the same buttons, nothing to write
+    card = _run(world, chat)
+    assert card is None and world.applied == []
+
+
+def test_unticking_a_tool_is_a_change_and_the_link_puts_it_back(world, chat):
+    card = _run(world, chat, untick=("Identify the selected features", "Value pipette"))
+    assert len(card.lines) == 2
+    assert world.wizard.TOOL_SETTINGS["vector"] in card.lines[0] and "→ identify" in card.lines[0]
+    assert world.wizard.TOOL_SETTINGS["point_cloud"] in card.lines[1] and "→ value_pipette" in card.lines[1]
+    card.apply_requested.emit()
+    assert world.applied == [{world.wizard.TOOL_SETTINGS["vector"]: "identify",
+                              world.wizard.TOOL_SETTINGS["point_cloud"]: "value_pipette"}]
+    assert chat.wizard.revert() is True
+    assert world.applied[-1] == {world.wizard.TOOL_SETTINGS["vector"]: "", world.wizard.TOOL_SETTINGS["point_cloud"]: ""}
 
 
 def test_with_the_headers_stacked_the_tour_speaks_of_headers(world, chat):

@@ -3415,6 +3415,114 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
     </message>
 </context>
 <context>
+    <name>ExploringTools</name>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="68"/>
+        <source>Zoom to the selected pixels</source>
+        <translation>Seçilen piksellere yakınlaştır</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="69"/>
+        <source>Preview: hide the pixels outside the selection</source>
+        <translation>Önizleme: seçimin dışındaki pikselleri gizle</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="70"/>
+        <source>Pipette: select the pixels like the one clicked</source>
+        <translation>Pipet: tıklanan piksele benzeyen pikselleri seç</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="71"/>
+        <source>Object detector</source>
+        <translation>Nesne algılayıcı</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="72"/>
+        <source>Similar objects</source>
+        <translation>Benzer nesneler</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="73"/>
+        <source>Link the range to the style</source>
+        <translation>Aralığı stile bağla</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="74"/>
+        <source>More tools (always shown)</source>
+        <translation>Daha fazla araç (her zaman gösterilir)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="75"/>
+        <source>Reset the raster selection</source>
+        <translation>Raster seçimini sıfırla</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="79"/>
+        <source>Zoom to the layer</source>
+        <translation>Katmana yakınlaştır</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="80"/>
+        <source>Live preview: show only the points kept</source>
+        <translation>Canlı önizleme: yalnızca tutulan noktaları göster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="81"/>
+        <source>Class pipette</source>
+        <translation>Sınıf pipeti</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="83"/>
+        <source>Value pipette</source>
+        <translation>Değer pipeti</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="84"/>
+        <source>Zone</source>
+        <translation>Bölge</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="86"/>
+        <source>Reset the point cloud criteria</source>
+        <translation>Nokta bulutu ölçütlerini sıfırla</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="89"/>
+        <source>Zoom to the selected features</source>
+        <translation>Seçili nesnelere yakınlaştır</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="90"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>Harita seçimini ve pencere öğelerini eşzamanlı tut</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="91"/>
+        <source>Identify the selected features</source>
+        <translation>Seçili nesneleri sorgula</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="92"/>
+        <source>Follow the features on the map</source>
+        <translation>Nesneleri haritada izle</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="94"/>
+        <source>Link the single and multiple selections</source>
+        <translation>Tekli ve çoklu seçimleri bağla</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="96"/>
+        <source>Reset the layer properties</source>
+        <translation>Katman özelliklerini sıfırla</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="101"/>
+        <source>Tools shown for this type of layer</source>
+        <translation>Bu katman türü için gösterilen araçlar</translation>
+    </message>
+</context>
+<context>
     <name>ExportDialogManager</name>
     <message>
         <location filename="../ui/managers/export_dialog_manager.py" line="92"/>
@@ -11296,6 +11404,21 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <translation>Düğmeler</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Vector tools</source>
+        <translation>Vektör araçları</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Raster tools</source>
+        <translation>Raster araçları</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Cloud tools</source>
+        <translation>Nokta bulutu araçları</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>Filtreleme</translation>
@@ -11354,6 +11477,21 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <location filename="../ui/controllers/setup_wizard.py" line="48"/>
         <source>Where the action buttons go (Filter, Export...)</source>
         <translation>Eylem düğmelerinin yeri (Filtrele, Dışa Aktar...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for vector layers (right-click the rail to change them later)</source>
+        <translation>Vektör katmanları için EXPLORING şeridinin düğmeleri (daha sonra değiştirmek için şeride sağ tıklayın)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for rasters</source>
+        <translation>Rasterlar için EXPLORING şeridinin düğmeleri</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for point clouds</source>
+        <translation>Nokta bulutları için EXPLORING şeridinin düğmeleri</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>

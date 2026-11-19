@@ -3415,6 +3415,114 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
     </message>
 </context>
 <context>
+    <name>ExploringTools</name>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="68"/>
+        <source>Zoom to the selected pixels</source>
+        <translation>Zoom la pixelii selectați</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="69"/>
+        <source>Preview: hide the pixels outside the selection</source>
+        <translation>Previzualizare: ascunde pixelii din afara selecției</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="70"/>
+        <source>Pipette: select the pixels like the one clicked</source>
+        <translation>Selector: selectează pixelii ca cel pe care s-a făcut clic</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="71"/>
+        <source>Object detector</source>
+        <translation>Detector de obiecte</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="72"/>
+        <source>Similar objects</source>
+        <translation>Obiecte similare</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="73"/>
+        <source>Link the range to the style</source>
+        <translation>Leagă intervalul de stil</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="74"/>
+        <source>More tools (always shown)</source>
+        <translation>Mai multe instrumente (afișate mereu)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="75"/>
+        <source>Reset the raster selection</source>
+        <translation>Resetează selecția raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="79"/>
+        <source>Zoom to the layer</source>
+        <translation>Zoom la strat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="80"/>
+        <source>Live preview: show only the points kept</source>
+        <translation>Previzualizare în direct: arată doar punctele păstrate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="81"/>
+        <source>Class pipette</source>
+        <translation>Selector de clasă</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="83"/>
+        <source>Value pipette</source>
+        <translation>Selector de valoare</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="84"/>
+        <source>Zone</source>
+        <translation>Zonă</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="86"/>
+        <source>Reset the point cloud criteria</source>
+        <translation>Resetează criteriile norului de puncte</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="89"/>
+        <source>Zoom to the selected features</source>
+        <translation>Zoom la entitățile selectate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="90"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>Păstrează sincronizate selecția de pe hartă și widgeturile</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="91"/>
+        <source>Identify the selected features</source>
+        <translation>Identifică entitățile selectate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="92"/>
+        <source>Follow the features on the map</source>
+        <translation>Urmărește entitățile pe hartă</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="94"/>
+        <source>Link the single and multiple selections</source>
+        <translation>Leagă selecțiile unică și multiplă</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="96"/>
+        <source>Reset the layer properties</source>
+        <translation>Resetează proprietățile stratului</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="101"/>
+        <source>Tools shown for this type of layer</source>
+        <translation>Instrumente afișate pentru acest tip de strat</translation>
+    </message>
+</context>
+<context>
     <name>ExportDialogManager</name>
     <message>
         <location filename="../ui/managers/export_dialog_manager.py" line="92"/>
@@ -11296,6 +11404,21 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Butoane</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Vector tools</source>
+        <translation>Instrumente vectoriale</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Raster tools</source>
+        <translation>Instrumente raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Cloud tools</source>
+        <translation>Instrumente pentru nor de puncte</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>Filtrare</translation>
@@ -11354,6 +11477,21 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../ui/controllers/setup_wizard.py" line="48"/>
         <source>Where the action buttons go (Filter, Export...)</source>
         <translation>Unde se află butoanele de acțiune (Filtrează, Exportă...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for vector layers (right-click the rail to change them later)</source>
+        <translation>Butoanele barei EXPLORING pentru straturile vectoriale (clic dreapta pe bară pentru a le schimba mai târziu)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for rasters</source>
+        <translation>Butoanele barei EXPLORING pentru rastere</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for point clouds</source>
+        <translation>Butoanele barei EXPLORING pentru nori de puncte</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>

@@ -606,6 +606,9 @@ class ConfigModelManager:
         apply_options = getattr(self.dockwidget, 'apply_section_options', None)
         if callable(apply_options):
             apply_options()
+        apply_tools = getattr(self.dockwidget, 'apply_exploring_tools', None)
+        if callable(apply_tools):
+            apply_tools()  # the tools of the EXPLORING rail, as the configuration put back says
 
     def _realign_target_options(self, before):
         """The configuration read from disk changed which rasters / point clouds a vector source

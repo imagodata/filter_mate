@@ -3415,6 +3415,114 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
 </context>
 <context>
+    <name>ExploringTools</name>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="68"/>
+        <source>Zoom to the selected pixels</source>
+        <translation>የተመረጡትን ፒክሰሎች አጉላ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="69"/>
+        <source>Preview: hide the pixels outside the selection</source>
+        <translation>ቅድመ እይታ፦ ከምርጫው ውጭ ያሉ ፒክሰሎችን ደብቅ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="70"/>
+        <source>Pipette: select the pixels like the one clicked</source>
+        <translation>መራጭ፦ ከተጫነው ጋር የሚመሳሰሉ ፒክሰሎችን ምረጥ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="71"/>
+        <source>Object detector</source>
+        <translation>የነገር ጠቋሚ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="72"/>
+        <source>Similar objects</source>
+        <translation>ተመሳሳይ ነገሮች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="73"/>
+        <source>Link the range to the style</source>
+        <translation>ክልሉን ከስታይሉ ጋር አገናኝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="74"/>
+        <source>More tools (always shown)</source>
+        <translation>ተጨማሪ መሣሪያዎች (ሁልጊዜ ይታያሉ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="75"/>
+        <source>Reset the raster selection</source>
+        <translation>የራስተር ምርጫን ዳግም አስጀምር</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="79"/>
+        <source>Zoom to the layer</source>
+        <translation>ወደ ንብርብሩ አጉላ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="80"/>
+        <source>Live preview: show only the points kept</source>
+        <translation>የቀጥታ ቅድመ እይታ፦ የተቀመጡትን ነጥቦች ብቻ አሳይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="81"/>
+        <source>Class pipette</source>
+        <translation>የክፍል መራጭ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="83"/>
+        <source>Value pipette</source>
+        <translation>የእሴት መራጭ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="84"/>
+        <source>Zone</source>
+        <translation>ዞን</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="86"/>
+        <source>Reset the point cloud criteria</source>
+        <translation>የነጥብ ደመና መስፈርቶችን ዳግም አስጀምር</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="89"/>
+        <source>Zoom to the selected features</source>
+        <translation>ወደ የተመረጡት ገጽታዎች አጉላ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="90"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>የካርታ ምርጫውን እና ንዑስ ክፍሎችን እኩል አድርግ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="91"/>
+        <source>Identify the selected features</source>
+        <translation>የተመረጡትን ገጽታዎች ለይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="92"/>
+        <source>Follow the features on the map</source>
+        <translation>ገጽታዎቹን በካርታው ላይ ተከተል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="94"/>
+        <source>Link the single and multiple selections</source>
+        <translation>ነጠላ እና ብዙ ምርጫዎችን አገናኝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="96"/>
+        <source>Reset the layer properties</source>
+        <translation>የንብርብር ባህሪያትን ዳግም አስጀምር</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="101"/>
+        <source>Tools shown for this type of layer</source>
+        <translation>ለዚህ የንብርብር ዓይነት የሚታዩ መሣሪያዎች</translation>
+    </message>
+</context>
+<context>
     <name>ExportDialogManager</name>
     <message>
         <location filename="../ui/managers/export_dialog_manager.py" line="92"/>
@@ -11296,6 +11404,21 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <translation>አዝራሮች</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Vector tools</source>
+        <translation>የቬክተር መሣሪያዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Raster tools</source>
+        <translation>የራስተር መሣሪያዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Cloud tools</source>
+        <translation>የነጥብ ደመና መሣሪያዎች</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>ማጣራት</translation>
@@ -11354,6 +11477,21 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <location filename="../ui/controllers/setup_wizard.py" line="48"/>
         <source>Where the action buttons go (Filter, Export...)</source>
         <translation>የድርጊት አዝራሮች የሚቀመጡበት (አጣራ፣ ላክ...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for vector layers (right-click the rail to change them later)</source>
+        <translation>ለቬክተር ንብርብሮች የEXPLORING ረድፍ አዝራሮች (በኋላ ለመቀየር በረድፉ ላይ በቀኝ ጠቅ ያድርጉ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for rasters</source>
+        <translation>ለራስተሮች የEXPLORING ረድፍ አዝራሮች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for point clouds</source>
+        <translation>ለነጥብ ደመናዎች የEXPLORING ረድፍ አዝራሮች</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>

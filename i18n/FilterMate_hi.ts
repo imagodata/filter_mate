@@ -3415,6 +3415,114 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
 </context>
 <context>
+    <name>ExploringTools</name>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="68"/>
+        <source>Zoom to the selected pixels</source>
+        <translation>चयनित पिक्सेल पर ज़ूम करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="69"/>
+        <source>Preview: hide the pixels outside the selection</source>
+        <translation>पूर्वावलोकन: चयन के बाहर के पिक्सेल छिपाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="70"/>
+        <source>Pipette: select the pixels like the one clicked</source>
+        <translation>पिपेट: क्लिक किए गए पिक्सेल जैसे पिक्सेल चुनें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="71"/>
+        <source>Object detector</source>
+        <translation>ऑब्जेक्ट डिटेक्टर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="72"/>
+        <source>Similar objects</source>
+        <translation>समान ऑब्जेक्ट</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="73"/>
+        <source>Link the range to the style</source>
+        <translation>रेंज को स्टाइल से जोड़ें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="74"/>
+        <source>More tools (always shown)</source>
+        <translation>और टूल (हमेशा दिखाए गए)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="75"/>
+        <source>Reset the raster selection</source>
+        <translation>रास्टर चयन रीसेट करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="79"/>
+        <source>Zoom to the layer</source>
+        <translation>परत पर ज़ूम करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="80"/>
+        <source>Live preview: show only the points kept</source>
+        <translation>लाइव पूर्वावलोकन: केवल रखे गए पॉइंट दिखाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="81"/>
+        <source>Class pipette</source>
+        <translation>क्लास पिपेट</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="83"/>
+        <source>Value pipette</source>
+        <translation>मान पिपेट</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="84"/>
+        <source>Zone</source>
+        <translation>क्षेत्र</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="86"/>
+        <source>Reset the point cloud criteria</source>
+        <translation>पॉइंट क्लाउड मानदंड रीसेट करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="89"/>
+        <source>Zoom to the selected features</source>
+        <translation>चयनित फ़ीचर पर ज़ूम करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="90"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>मानचित्र चयन और विजेट को समन्वित रखें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="91"/>
+        <source>Identify the selected features</source>
+        <translation>चयनित फ़ीचर पहचानें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="92"/>
+        <source>Follow the features on the map</source>
+        <translation>मानचित्र पर फ़ीचर का अनुसरण करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="94"/>
+        <source>Link the single and multiple selections</source>
+        <translation>एकल और बहु चयन को लिंक करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="96"/>
+        <source>Reset the layer properties</source>
+        <translation>परत के गुण रीसेट करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_tool_choice.py" line="101"/>
+        <source>Tools shown for this type of layer</source>
+        <translation>इस प्रकार की परत के लिए दिखाए गए टूल</translation>
+    </message>
+</context>
+<context>
     <name>ExportDialogManager</name>
     <message>
         <location filename="../ui/managers/export_dialog_manager.py" line="92"/>
@@ -11296,6 +11404,21 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>बटन</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Vector tools</source>
+        <translation>वेक्टर टूल</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="43"/>
+        <source>Raster tools</source>
+        <translation>रास्टर टूल</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Cloud tools</source>
+        <translation>पॉइंट क्लाउड टूल</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>फ़िल्टरिंग</translation>
@@ -11354,6 +11477,21 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../ui/controllers/setup_wizard.py" line="48"/>
         <source>Where the action buttons go (Filter, Export...)</source>
         <translation>कार्रवाई बटन कहाँ रहें (फ़िल्टर, निर्यात करें...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for vector layers (right-click the rail to change them later)</source>
+        <translation>वेक्टर परतों के लिए EXPLORING पट्टी के बटन (बाद में बदलने के लिए पट्टी पर राइट-क्लिक करें)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for rasters</source>
+        <translation>रास्टर के लिए EXPLORING पट्टी के बटन</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/setup_wizard.py" line="61"/>
+        <source>Buttons of the EXPLORING rail for point clouds</source>
+        <translation>पॉइंट क्लाउड के लिए EXPLORING पट्टी के बटन</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>
