@@ -6058,6 +6058,131 @@ def s_sizing_opened_by_code():
     return None
 
 
+def s_sizing_closed_by_cross():
+    """EXPLORING above FILTERING under Layers, the dock elsewhere: FILTERING closed by the cross of its panel, its
+    room goes to EXPLORING, Layers keeps its height."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    layers = window.findChild(QDockWidget, 'Layers')
+    if layers is None or not layers.isVisible():
+        report('SKIP', 'sizing: a panel closed by its cross', 'no Layers panel')
+        return None
+    sizing_reset()
+    panels.detach('exploring')
+    window.splitDockWidget(layers, panels.panel('exploring'), Qt.Orientation.Vertical)  # at once (see above)
+    panels.detach('filtering')
+    window.splitDockWidget(panels.panel('exploring'), panels.panel('filtering'), Qt.Orientation.Vertical)
+    pump(1200)
+    exploring, filtering = panels.panel('exploring'), panels.panel('filtering')
+    if exploring is None or filtering is None or exploring is filtering or window.tabifiedDockWidgets(filtering) \
+            or window.tabifiedDockWidgets(exploring) or filtering.isFloating() or exploring.isFloating():
+        report('SKIP', 'sizing: a panel closed by its cross', f"not one column: {sizing_state()}")
+        return None
+    before = (layers.height(), exploring.height(), filtering.height())
+    filtering.close()  # its cross
+    pump(1200)
+    after = (layers.height(), exploring.height())
+    check('sizing: FILTERING closed by its cross, EXPLORING above it takes its room, Layers keeps its height',
+          panels.panel('filtering') is None and abs(after[0] - before[0]) <= 4
+          and after[1] >= before[1] + before[2] - 20, f"Layers, EXPLORING, FILTERING {before} -> {after}")
+    grab_window('sizing_14_closed_by_cross')
+    return None
+
+
+def s_sizing_width_given_back():
+    """FILTERING put beside the dock, both made wide enough for their rows; given back to the dock, the dock gets the
+    width it had. Ten times: it never grows."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    sizing_reset()
+    pump(600)
+    start = d.width()
+    widths = []
+    for _round in range(10):
+        panels.detach('filtering')
+        panel = panels.panel('filtering')
+        window.splitDockWidget(d, panel, Qt.Orientation.Horizontal)  # as a drop with the mouse beside it
+        pump(1200)
+        beside = (d.width(), panel.width(), abs(panel.y() - d.y()) <= 2 and not panel.isFloating())
+        panels.attach('filtering')
+        pump(1200)
+        widths.append((beside, d.width()))
+        if _round == 0:
+            check('sizing: FILTERING beside the dock then given back, the dock has its width again',
+                  beside[2] and abs(d.width() - start) <= 6, f"start {start}, beside {beside}, after {d.width()}")
+    check('sizing: ten times beside the dock and back, the dock never grows', abs(widths[-1][1] - start) <= 6
+          and max(width for _beside, width in widths) <= start + 6, f"start {start}: {widths}")
+    grab_window('sizing_15_width_given_back')
+    return None
+
+
+def s_sizing_behind_a_tab():
+    """FILTERING behind the tab of Layers: Qt calls it visible and moves it out of the window. A pass measures it
+    not, widens nothing for it: the group of tabs keeps its width and its height."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    layers = window.findChild(QDockWidget, 'Layers')
+    if layers is None or not layers.isVisible():
+        report('SKIP', 'sizing: a panel behind a tab', 'no Layers panel')
+        return None
+    sizing_reset()
+    panels.detach('filtering')
+    panel = panels.panel('filtering')
+    drop_as_tab(layers, panel)
+    layers.raise_()
+    pump(1200)
+    if panel not in window.tabifiedDockWidgets(layers):
+        report('SKIP', 'sizing: a panel behind a tab', 'not tabbed')
+        return None
+    before = (layers.width(), layers.height(), panel.geometry().getRect())
+    panels.resize_soon()  # a change of a setting: every column
+    pump(1200)
+    after = (layers.width(), layers.height(), panel.geometry().getRect())
+    check('sizing: FILTERING behind the tab of Layers, the group keeps its width and height', after[:2] == before[:2],
+          f"{before} -> {after}")
+    grab_window('sizing_16_behind_a_tab')
+    return None
+
+
+def s_sizing_whole_dock():
+    """The dock in one piece, 300 px wide, narrower than the rows of FILTERING: a setting that sizes every panel
+    again changes neither its size nor its place; floating, neither."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    sizing_reset()
+    width = max(300, d.minimumSizeHint().width(), d.minimumWidth())
+    window.resizeDocks([d], [width], Qt.Orientation.Horizontal)
+    pump(900)
+    before = d.geometry().getRect()
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fill'})
+    pump(900)
+    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fit'})
+    pump(900)
+    panels.resize_soon()  # what a change of UI_PROFILE asks for, once the profile has given its own sizes
+    pump(1200)
+    after = d.geometry().getRect()
+    check('sizing: the dock in one piece keeps its size and place when the settings change', after == before,
+          f"{before} -> {after} (rows need {d.FILTERING.minimumSizeHint().width()} px)")
+    d.setFloating(True)  # floated, then sized again by every pass: none
+    pump(600)
+    d.resize(width, 520)
+    d.move(1600 - width - 4, 300)
+    pump(900)
+    floating = d.geometry().getRect()
+    panels.resize_soon()
+    pump(1200)
+    check('sizing: the dock in one piece, floating, keeps its size and place too', d.geometry().getRect() == floating,
+          f"{floating} -> {d.geometry().getRect()}")
+    grab_window('sizing_17_whole_dock')
+    d.setFloating(False)
+    pump(600)
+    return None
+
+
 def s_sizing_floating():
     d = dock()
     panels = d._fm_panels
@@ -6150,7 +6275,8 @@ def s_sizing_end():
 SIZING_STEPS = [s_section_setup, s_vector_source, s_sizing_setup, s_sizing_filtering_below, s_sizing_exploring,
                 s_sizing_every_section, s_sizing_grouped, s_sizing_manual, s_sizing_under_layers, s_sizing_back_to_dock,
                 s_sizing_beside, s_sizing_floating, s_sizing_open_chip_again, s_sizing_elsewhere, s_sizing_opened_by_code,
-                s_sizing_short_screen, s_sizing_restart_docked, s_sizing_restart_floating, s_sizing_end]
+                s_sizing_short_screen, s_sizing_closed_by_cross, s_sizing_width_given_back, s_sizing_behind_a_tab,
+                s_sizing_whole_dock, s_sizing_restart_docked, s_sizing_restart_floating, s_sizing_end]
 
 
 # --- the room between the two stacks: they stretch the same (FM_ONLY=room) -------------------------------------------
