@@ -121,6 +121,17 @@ class TestTask:
         task = hag_task.HeightAboveGroundTask(Layer('cloud', L93_NGF, '/d/c.copc.laz'), Layer('dem', L93, '/d/dem.tif'))
         assert task.run() is True and len(pipelines) == 1
 
+    def test_the_enriched_cloud_is_the_same_at_every_run(self, pipelines):
+        """2026-11-19: the same filter on the height above ground kept 82 to 85 road sections, the levels of
+        detail of the rewritten cloud being drawn at random from points in thread order."""
+        task = hag_task.HeightAboveGroundTask(Layer('cloud', L93, '/d/c.copc.laz'), Layer('dem', L93, '/d/dem.tif'))
+        assert task.run() is True
+        reader, writer = pipelines[0][0], pipelines[0][-1]
+        assert reader['type'] == 'readers.copc' and reader['threads'] == 1
+        assert writer['type'] == 'writers.copc' and writer['fixed_seed'] is True
+        assert writer['filename'] == task.output and writer['a_srs'] == 'EPSG:2154'
+        assert writer['forward'] == 'all' and writer['extra_dims'] == 'all'
+
     def test_user_crs_written_as_wkt(self, pipelines):
         crs = fk.FakeCrs('USER:100002', wkt='PROJCS["local"]')
         task = hag_task.HeightAboveGroundTask(Layer('cloud', crs, '/d/c.copc.laz'), Layer('dem', crs, '/d/dem.tif'))
