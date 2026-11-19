@@ -12,16 +12,21 @@
 * The lower stack with nothing open shrinks to its headers, so the upper one takes the room.
 * Between them, the splitter handle goes from one stack held to its headers and its smallest open section to the
   other: no cap on either stack (EXPLORING stopped at 700 px, the tool box at 650 px).
+* The handle stays where the user leaves it. Until then, while the rows of FILTERING / EXPORTING keep their own
+  height (``APP.DOCKWIDGET.SECTION_HEIGHT`` = ``fit``), neither stack holds room the other one lacks
+  (:func:`upper_height`): the lower one kept 252 px empty under its rows while EXPLORING, 162 px high, scrolled
+  331 px of a raster. The lower stack still ends on the buttons, and its rows stay at its top.
 """
 from __future__ import annotations
 
 import logging
 from typing import Any, Optional
 
-from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt
+from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPoint, QPointF, QRectF, QSize, Qt, QTimer
 from qgis.PyQt.QtGui import QColor, QPainter, QPen, QPolygonF
 from qgis.PyQt.QtWidgets import (
-    QAbstractButton, QComboBox, QDockWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
+    QAbstractButton, QAbstractScrollArea, QComboBox, QDockWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy,
+    QVBoxLayout, QWidget,
 )
 
 logger = logging.getLogger("FilterMate")
@@ -192,6 +197,8 @@ class SourceTag(QObject):
 QWIDGETSIZE_MAX = 16777215
 STACK_GAP = 8
 SHARE_KEY = "FilterMate/splitter_top_share"  # share of the splitter the upper stack gets when both are open
+FIT_SHARE_KEY = "FilterMate/splitter_top_share_fit"  # the one the handle is left at while the rows below fit
+FOLLOW_ROUNDS = 6  # passes in a row that may move the handle after the content of a stack changed
 TOP_KEYS = ("agent", "exploring")  # the sections of the upper stack, in their usual order
 BOTTOM_KEYS = ("filtering", "exporting", "configuration")  # those of the lower stack (the pages of the tool box)
 TOP_ORDER_KEY = "FilterMate/sections/top_order"  # the order the chips of each rail were dragged into
@@ -227,22 +234,62 @@ def _default_share() -> float:
         return 0.5
 
 
-def _saved_share() -> float:
-    """The share the user left the handle at, else the one of the display profile."""
+def _chosen_share(key: str) -> Optional[float]:
+    """The share the user left the handle at, None when it was never dragged."""
     try:
         from qgis.PyQt.QtCore import QSettings
-        value = float(QSettings().value(SHARE_KEY, -1.0))
+        value = float(QSettings().value(key, -1.0))
     except (TypeError, ValueError):
         value = -1.0
-    return value if 0.05 <= value <= 0.95 else _default_share()
+    return value if 0.05 <= value <= 0.95 else None
 
 
-def _save_share(share: float) -> None:
+def _saved_share() -> float:
+    """The share the user left the handle at, else the one of the display profile."""
+    share = _chosen_share(SHARE_KEY)
+    return _default_share() if share is None else share
+
+
+def _save_share(share: float, key: str = SHARE_KEY) -> None:
     try:
         from qgis.PyQt.QtCore import QSettings
-        QSettings().setValue(SHARE_KEY, round(share, 4))
+        QSettings().setValue(key, round(share, 4))
     except Exception:  # nosec B110 - not worth a message: the share is only a convenience
         pass
+
+
+def upper_height(room: int, share: float, upper_need: Optional[int] = None, lower_need: Optional[int] = None) -> int:
+    """Height of the upper stack out of the ``room`` the two stacks share.
+
+    ``share`` of the room, as in 5.1.1, when the lower stack has no height of its own (``lower_need`` None: rows
+    spread over it, a tree, or a handle the user left somewhere). Otherwise that share, moved as little as it
+    takes for neither stack to hold room the other one lacks. ``lower_need``: the height at which the lower stack
+    shows all its rows; ``upper_need``: the one at which the upper stack shows all its content, None when it uses
+    all the room it gets (the thread of AGENT).
+
+    * Both needs fit in the room: each stack gets its need at least, and the share says which one keeps the rest.
+    * They do not: a stack that would get more than its need gives the difference to the other one; with both
+      short of room the share stays, and each one scrolls as in 5.1.1.
+    """
+    wanted = int(round(room * share))
+    if lower_need is None:
+        return wanted
+    rows_fit = room - lower_need  # the upper stack higher than this: the rows below no longer fit
+    all_shown = room if upper_need is None else upper_need  # higher than this: it has more than it shows
+    low, high = min(rows_fit, all_shown), max(rows_fit, all_shown)
+    return max(1, min(room - 1, max(low, min(high, wanted))))  # never 0: a collapsible stack would fold
+
+
+def content_need(content: Any, width: int) -> int:
+    """Height at which a scroll area shows the whole of ``content`` without scrolling it, ``width`` wide: its
+    hint, or its height for that width when its layout has one (wrapped labels), as QScrollArea reads it. With
+    the scroll bar of EXPLORING shown its content has a right margin (mockup_layout._ScrollBarMargin), the layer
+    card wraps and asks 16 px more: the room given, the bar goes, and the need is read again without them."""
+    need = max(content.sizeHint().height(), content.minimumSizeHint().height())
+    layout = content.layout()
+    if layout.hasHeightForWidth() if layout is not None else content.sizePolicy().hasHeightForWidth():
+        need = max(need, content.heightForWidth(width))
+    return need
 
 
 class SectionHeader(QPushButton):
@@ -352,6 +399,17 @@ class DockSections(QObject):
         self._source_row, self._source_origins = None, []
         self._bottom_limits = None
         self._share = _saved_share()
+        # While the rows below fit (APP.DOCKWIDGET.SECTION_HEIGHT = fit): the share the handle was left at in that
+        # layout, kept apart; None until the user drags it: the room then follows what the two stacks show (_needs).
+        self._fit_share = _chosen_share(FIT_SHARE_KEY)
+        self._chrome = [None, None]  # per stack, what it shows around what scrolls in it, as last measured
+        self._needs_applied = None
+        self._follow_pending, self._follow_rounds = False, 0
+        area = getattr(dock, "scrollArea_frame_exploring", None)
+        self._exploring_content = area.widget() if area is not None else None
+        for content in (self._exploring_content, *(getattr(dock, name, None) for name in SECTION_PAGES.values())):
+            if content is not None:
+                content.installEventFilter(self)  # what it asks changed: the room follows (_follow_content)
         self.bottom_rail = make_rail(self._toolbox.parentWidget(),
                                      accepts=lambda key: key in BOTTOM_KEYS and key in self.detached, dark=self._dark)
         self.bottom_rail.setObjectName("widget_section_rail_bottom")
@@ -908,6 +966,11 @@ class DockSections(QObject):
         except RuntimeError:  # the dock went away
             pass
 
+    def rows_laid_out(self) -> None:
+        """The rows of FILTERING and EXPORTING were laid out another way (``APP.DOCKWIDGET.SECTION_HEIGHT``): the
+        stacks share the room as that way says, by what they show (``fit``) or by the share of 5.1.1 (``fill``)."""
+        self._fit()
+
     def _hold_toolbox(self, nothing: bool) -> None:
         """With nothing open the tool box takes no room: its headers are gone (the rail above it lists the
         sections), and its minimum, sized for them, would keep an empty band under the rail. With the headers
@@ -952,33 +1015,126 @@ class DockSections(QObject):
                 and self._toolbox.currentWidget() is not self._nothing)
 
     def _share_room(self) -> None:
-        """Both stacks open: the top one gets ``self._share`` of the room (Qt keeps each one above its minimum)."""
+        """Both stacks open: the top one gets its share of the room, the one the handle was left at; while the user
+        left it nowhere and the rows below fit, what the two stacks show decides (``_needs``, :func:`upper_height`).
+        Qt keeps each one above its minimum."""
         sizes = self._splitter.sizes()
         total = self._room()
         if len(sizes) == 2 and total > 0:
-            top = int(round(total * self._share))
+            fit = self._rows_fit()
+            left_at = self._fit_share if fit else None
+            needs = self._needs() if fit and left_at is None else None
+            self._needs_applied = needs
+            exact = self._splitter.contentsRect().height() - self._splitter.handle(1).sizeHint().height()
+            if (needs is not None or left_at is not None) and exact > 1:
+                # To the pixel: ``_room`` counts the margins of the splitter (16 px more than the stacks get), and Qt
+                # takes the difference back from one stack or from both: the rows were cut by 6 px after a change
+                # of display profile, and a handle left at 186 px came back at 174 px with the next section opened.
+                total = exact
+            top = upper_height(total, self._share if left_at is None else left_at, *(needs or (None, None)))
             self._splitter.setSizes([top, total - top])
+            if fit and left_at is None:
+                self._follow_content()  # once Qt has laid the stacks out: what they show is measured on them
+
+    def _rows_fit(self) -> bool:
+        """``APP.DOCKWIDGET.SECTION_HEIGHT`` is ``fit``, as the rows of FILTERING and EXPORTING were last laid out."""
+        from .mockup_layout import SECTION_FIT
+        return self._dock.property("fm_section_height") == SECTION_FIT
+
+    def _needs(self) -> Optional[tuple]:
+        """``(upper, lower)``: the height at which each stack shows the whole of its open section, FILTERING or
+        EXPORTING open below with rows that fit. The upper one is None with AGENT open: its thread uses all the
+        room it gets. None when the lower stack has no height of its own (CONFIGURATION), and until the stacks were
+        on screen once."""
+        if self.bottom_key() not in SECTION_PAGES:
+            return None
+        lower = self._need(1, self._splitter.widget(1), self._toolbox.currentWidget())
+        if lower is None:
+            return None
+        if not self._open_in_stack("exploring"):
+            return None, lower
+        upper = self._need(0, self.top, self._exploring_content)
+        return None if upper is None else (upper, lower)
+
+    def _need(self, index: int, stack: QWidget, content: Optional[QWidget]) -> Optional[int]:
+        """The height at which ``stack`` shows the whole of ``content``, which scrolls in it: what the content asks
+        (:func:`content_need`) and what the stack shows around its scroll area (rail or headers, gaps, the strip
+        of the selection), read on the stack as Qt laid it out. As last read while the stack is not on screen, or
+        too short for what it holds (its scroll area then hangs out of it); None when it was never read."""
+        viewport = content.parentWidget() if content is not None else None
+        area = viewport.parentWidget() if viewport is not None else None
+        if not isinstance(area, QAbstractScrollArea) or not stack.isAncestorOf(area):
+            return None
+        if content.isVisible():
+            holder = area.parentWidget()
+            chain = []
+            while holder is not None and holder is not stack.parentWidget():
+                chain.append(holder)
+                holder = holder.parentWidget()
+            for holder in reversed(chain):  # a section just opened: Qt lays it out a turn of its loop later
+                if holder.layout() is not None:
+                    holder.layout().activate()
+            top = viewport.mapTo(stack, QPoint(0, 0)).y()
+            if viewport.height() > 0 and top >= 0 and top + viewport.height() <= stack.height():
+                self._chrome[index] = stack.height() - viewport.height()
+        if self._chrome[index] is None:
+            return None
+        return self._chrome[index] + content_need(content, viewport.width())
+
+    def _follow_content(self) -> None:
+        """What a stack shows changed (another kind of layer, a group of EXPLORING opened, a row of FILTERING
+        shown), or was not on screen yet when the room was shared: shared again, a turn of the loop of Qt later,
+        when what the stacks need is no longer what it was shared for. Nothing while the user left the handle
+        somewhere, nor when the needs are the same: whatever sized the stacks since stays."""
+        if self._fit_share is None and not self._follow_pending:
+            self._follow_pending = True
+            QTimer.singleShot(0, self._followed)
+
+    def _followed(self) -> None:
+        self._follow_pending = False
+        try:
+            if self._fit_share is not None or not self._rows_fit() or not self._both_open():
+                return
+            needs = self._needs()
+            if needs is None or needs == self._needs_applied:
+                self._follow_rounds = 0
+            elif self._follow_rounds < FOLLOW_ROUNDS:  # still moving after that many: left until the next resize
+                self._follow_rounds += 1
+                self._share_room()
+        except RuntimeError:  # the dock went away
+            pass
 
     def _on_handle_moved(self, _pos: int, _index: int) -> None:
-        """The user dragged the handle: that share is kept, in this session and the next ones."""
+        """The user dragged the handle: that share is kept, in this session and the next ones. The one left while
+        the rows below fit is kept apart: the share of 5.1.1 comes back with its layout (``fill``)."""
         try:
             sizes = self._splitter.sizes()
             if len(sizes) != 2 or sum(sizes) <= 0 or not self._both_open():
                 return
-            self._share = sizes[0] / sum(sizes)
-            _save_share(self._share)
+            share = sizes[0] / sum(sizes)
+            if self._rows_fit():
+                self._fit_share = share
+                _save_share(share, FIT_SHARE_KEY)
+            else:
+                self._share = share
+                _save_share(share)
         except RuntimeError:
             pass
 
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:  # noqa: N802 - Qt name
         # A taller or shorter dock keeps the share (QSplitter gave the difference to the upper stack: at startup,
         # on 1920x1200, FILTERING was held to its minimum and scrolled).
-        if watched is self._splitter and event.type() == QEvent.Type.Resize:
-            try:
-                if self._both_open():
-                    self._share_room()
-            except RuntimeError:
-                pass
+        kind = event.type()
+        if watched is self._splitter:
+            if kind == QEvent.Type.Resize:
+                try:
+                    self._follow_rounds = 0
+                    if self._both_open():
+                        self._share_room()
+                except RuntimeError:
+                    pass
+        elif kind in (QEvent.Type.LayoutRequest, QEvent.Type.Resize, QEvent.Type.Show):
+            self._follow_content()  # the content of EXPLORING, or the rows of FILTERING / EXPORTING
         return False
 
     def _bottom_headers_height(self, bottom: QWidget) -> int:
@@ -1087,6 +1243,9 @@ def _apply_section_height(dock: Any, config_data: Any, changed: list) -> list:
         mode = section_height(config_data)
         if dock.property("fm_section_height") != mode and lay_out_rows(dock, mode):
             changed.append("height")
+            sections = getattr(dock, "_fm_sections", None)
+            if sections is not None:
+                sections.rows_laid_out()
     except Exception as exc:  # the dock went away (RuntimeError), or a form without the rows
         logger.warning(f"Rows of the sections not laid out: {exc}")
     return changed
