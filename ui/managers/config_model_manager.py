@@ -606,6 +606,12 @@ class ConfigModelManager:
         apply_options = getattr(self.dockwidget, 'apply_section_options', None)
         if callable(apply_options):
             apply_options()
+        panels = getattr(self.dockwidget, '_fm_panels', None)
+        if panels is not None:  # the dock and the panels of its sections sized again from what they show now
+            try:
+                panels.resize_soon()
+            except Exception as exc:  # the dock went away
+                logger.debug(f"Section panels not sized after the configuration was put back: {exc}")
 
     def _realign_target_options(self, before):
         """The configuration read from disk changed which rasters / point clouds a vector source

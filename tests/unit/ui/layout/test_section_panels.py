@@ -329,6 +329,18 @@ def test_short_room_takes_height_from_the_rigid_panels_down_to_their_minimum():
     assert panels.column_heights([(ELASTIC, 300, 0, 300), (RIGID, 200, 400, 300)], 400) == [300, 200]  # Qt clamps
 
 
+def test_short_room_the_panels_of_qgis_give_up_height_before_the_rows_are_cut():
+    # review of 19 November 2026: FILTERING asked 300 and got 233, Layers kept 467 for a minimum of 100
+    assert panels.column_heights([(OTHER, 100, 0, 600), (ELASTIC, 300, 0, 100), (RIGID, 120, 300, 300)], 1000) \
+        == [400, 300, 300]
+    # two panels of QGIS keep their proportions down to their minimum; the rows are cut only after
+    heights = panels.column_heights([(OTHER, 100, 0, 400), (OTHER, 100, 0, 200), (ELASTIC, 300, 0, 100),
+                                     (RIGID, 120, 300, 300)], 900)
+    assert heights[3] == 300 and heights[2] == 300 and heights[0] + heights[1] == 300 and heights[0] > heights[1]
+    heights = panels.column_heights([(OTHER, 100, 0, 600), (ELASTIC, 300, 0, 100), (RIGID, 120, 300, 300)], 600)
+    assert heights == [100, 300, 200]  # Layers at its minimum first, then the rows give up the rest
+
+
 def test_rigid_panels_alone_share_their_column_by_their_need():
     # nothing can take the room: a rigid one alone keeps it all (its rows stay at the top)
     assert panels.column_heights([(RIGID, 100, 260, 900)], 900) == [900]
@@ -374,6 +386,17 @@ def test_a_floating_elastic_panel_is_comfortable_within_the_screen():
     assert panels.floating_height(ELASTIC, 100, 0, 460, 1400, True, 900) == 900
     assert panels.floating_height(ELASTIC, 100, 0, 333, 900, False, 1000) == 333  # sized by the user: kept
     assert panels.floating_height(ELASTIC, 100, 0, 1333, 900, False, 1000) == 1000
+
+
+def test_a_floating_panel_never_exceeds_the_screen_even_for_its_minimum():
+    assert panels.floating_height(RIGID, 900, 280, 460, 900, False, 700) == 700
+    assert panels.floating_height(ELASTIC, 900, 0, 460, 900, True, 700) == 700
+
+
+def test_a_floating_panel_without_a_known_screen_does_not_grow_without_bound():
+    assert panels.floating_height(ELASTIC, 100, 0, 300, 5000, True, 0) == panels.FLOATING_SIZE[1]
+    assert panels.floating_height(ELASTIC, 100, 0, 800, 5000, True, 0) == 800
+    assert panels.floating_height(RIGID, 100, 280, 600, 0, False, 0) == 280
 
 
 # --- the dock itself, when QGIS starts ---------------------------------------------

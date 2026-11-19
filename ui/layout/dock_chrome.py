@@ -324,7 +324,7 @@ class DockSections(QObject):
         self.on_menu = None  # called with (key, place on the screen) on a right click on the chip of a section
         self.on_dropped = None  # called with (key, index) when the chip of a section apart is dropped on a rail
         self.on_dropped_out = None  # called with (key, place on the screen) when a chip is dropped out of every rail
-        self.on_user_open = None  # called when the user opened or folded a section by its chip or its header
+        self.on_opened = None  # called when what the stacks show open may have changed (whoever changed it)
         from ..widgets.section_rail import make_rail
         self.top_rail = make_rail(self.top, accepts=lambda key: key in TOP_KEYS and key in self.detached,
                                   dark=self._dark)
@@ -555,17 +555,16 @@ class DockSections(QObject):
         if self._open_in_stack(key):
             if self._may_fold_top():
                 self._open_top(None)
-                self._told_open()
             else:
                 self._headers[key].setChecked(True)
             return
         self.open_top(key)
-        self._told_open()
 
     def _told_open(self) -> None:
-        """The user opened or folded a section of the dock: the panels around it may size the dock again."""
-        if self.on_user_open is not None:
-            self.on_user_open()
+        """Another section may be open, or none: the panels compare it with what was (a click on the open chip
+        changes nothing) and size the dock again when it changed."""
+        if self.on_opened is not None:
+            self.on_opened()
 
     def _bottom_headers(self) -> list:
         """The headers QToolBox gives its pages, the one of "nothing open" left out."""
@@ -609,7 +608,6 @@ class DockSections(QObject):
                     self._toolbox.setCurrentWidget(self._nothing)
                 elif index == self._current_before_press:
                     self._refresh_headers()
-                self._told_open()
                 return
 
     def bottom_key(self) -> Optional[str]:
@@ -739,6 +737,7 @@ class DockSections(QObject):
                 request.emit()
             except (RuntimeError, TypeError):
                 pass
+        self._told_open()
 
     def _on_top_chip(self, key: str) -> None:
         """A click on the chip of a folded section opens it; on the open one, it leaves it open: one section
@@ -749,7 +748,6 @@ class DockSections(QObject):
             self.open_top(key)
         elif self._may_fold_top():
             self._open_top(None)
-        self._told_open()
 
     # --- the bottom stack ------------------------------------------------------------
 
@@ -763,7 +761,6 @@ class DockSections(QObject):
         self._toolbox.setCurrentWidget(self._nothing if fold else page)
         if not fold:
             self.bottom_rail.set_current(self.bottom_key())  # the click on the open chip unchecked it
-        self._told_open()
 
     def _on_bottom_changed(self, _index: int) -> None:
         current = self._toolbox.currentWidget()
@@ -776,6 +773,7 @@ class DockSections(QObject):
             self._open_top("exploring")
         self.bottom_rail.set_current(self.bottom_key())
         self._fit()
+        self._told_open()
 
     # --- sections turned off (APP.OPTIONS.FILTERING / EXPORTING .enabled) -----------
 

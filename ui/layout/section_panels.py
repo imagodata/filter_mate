@@ -150,6 +150,9 @@ PANEL_MIN_HEIGHT = 180
 EXPLORING_SHARE = 0.45  # of the room the dock had, for EXPLORING placed above it the first time
 PANEL_MAX_SHARE = 0.55  # of the room the dock had: it keeps EXPLORING, which needs the larger part
 TITLE_ROOM = 30  # the title bar of the panel, above its contents
+STARTUP_SETTLE_MS = 1500  # after the panels of the last time are restored, before any pass (SectionPanels.hold)
+PRESS_FORGET_MS = 10000  # a press on a dock whose release never came is forgotten after this
+_UNSEEN = object()  # what a panel showed open before it was ever looked at
 FLOATING_SIZE = (360, 460)  # a panel made by a chip dropped out of every panel
 
 
@@ -219,8 +222,8 @@ def column_heights(docks: Sequence[Tuple[str, int, int, int]], room: int) -> Lis
       an elastic one takes the rest; it takes it, the others of its kind in proportion to their heights, otherwise.
 
     Rigid panels alone in their column share it in proportion to their need: nothing else can take the room. None
-    is given less than its ``minimum``; when the room is short, the rigid ones and the panels of QGIS give up height
-    down to theirs, the elastic ones first."""
+    is given less than its ``minimum``; when the room is short, the elastic ones give up height down to theirs
+    first, then the panels of QGIS, the rigid ones last (their rows would be cut)."""
     count = len(docks)
     kinds = [dock[0] for dock in docks]
     minimums = [max(0, int(dock[1])) for dock in docks]
@@ -244,9 +247,20 @@ def column_heights(docks: Sequence[Tuple[str, int, int, int]], room: int) -> Lis
     if sum(wanted[i] for i in kept) <= held:
         for i in kept:
             heights[i] = wanted[i]
-    else:
-        for i, height in zip(kept, _spread(max(0, held), [wanted[i] for i in kept], [minimums[i] for i in kept])):
+    else:  # short: the panels of QGIS give up height first, down to their minimum; the rigid ones last
+        yielding = [i for i in kept if kinds[i] == OTHER]
+        rows = [i for i in kept if kinds[i] == RIGID]
+        others_room = max(sum(minimums[i] for i in yielding), held - sum(wanted[i] for i in rows))
+        for i, height in zip(yielding, _spread(others_room, [wanted[i] for i in yielding],
+                                               [minimums[i] for i in yielding])):
             heights[i] = height
+        rows_room = max(0, held - sum(heights[i] for i in yielding))
+        if sum(wanted[i] for i in rows) <= rows_room:
+            for i in rows:
+                heights[i] = wanted[i]
+        else:
+            for i, height in zip(rows, _spread(rows_room, [wanted[i] for i in rows], [minimums[i] for i in rows])):
+                heights[i] = height
     rest = room - sum(heights[i] for i in kept)
     for i, height in zip(receivers, _spread(rest, weights, [minimums[i] for i in receivers])):
         heights[i] = height
@@ -275,16 +289,17 @@ def column_of(index: int, rects: Sequence[Tuple[int, int, int, int]]) -> List[in
 def floating_height(kind: str, minimum: int, need: int, current: int, hint: int, fresh: bool, available: int) -> int:
     """The height of a floating panel: what its section needs when it is rigid; elastic, the height it has when it
     was elastic already (the user may have sized it), else a comfortable one, no less than ``FLOATING_SIZE`` and what
-    its contents ask for (``hint``). Never more than the screen has (``available``), nor less than its minimum."""
+    its contents ask for (``hint``). No less than its minimum, and never more than the screen has (``available``),
+    the minimum included; with no screen known (0), no more than it has or ``FLOATING_SIZE`` (what its rows need,
+    rigid)."""
     if kind == RIGID:
         height = need
     elif fresh:
         height = max(current, FLOATING_SIZE[1], hint)
     else:
         height = current
-    if available > 0:
-        height = min(height, available)
-    return max(minimum, height)
+    limit = available if available > 0 else max(current, FLOATING_SIZE[1], need if kind == RIGID else 0)
+    return max(0, min(max(minimum, height), limit))
 
 
 def floating_corner(corner: Tuple[int, int], size: Tuple[int, int], area: Tuple[int, int, int, int]) -> Tuple[int, int]:
@@ -368,6 +383,18 @@ def _area_number(area: Any) -> int:
     return int(getattr(area, "value", area))
 
 
+def _mouse_down() -> bool:
+    """A button of the mouse is down: a dock, a panel or a chip may be dragged (Qt 5 gives an int, Qt 6 a flag)."""
+    from qgis.PyQt.QtWidgets import QApplication
+    buttons = QApplication.mouseButtons()
+    return int(getattr(buttons, "value", buttons)) != 0
+
+
+def _scroll_area_class() -> Any:
+    from qgis.PyQt.QtWidgets import QScrollArea
+    return QScrollArea
+
+
 def _list_panel(window: Any, dock: Any) -> None:
     """``dock`` in the menu of the panels of QGIS, where ``iface.addDockWidget`` puts the docks it adds."""
     try:
@@ -384,6 +411,9 @@ def place_dock(dock: Any, iface: Any, area: Any) -> bool:
     """``dock`` in the main window of QGIS: where QGIS remembers it when sections were in panels the last time
     (``restore_dock_first``), else in ``area`` as ever. True when its place was restored."""
     restored = False
+    panels = getattr(dock, "_fm_panels", None)
+    if panels is not None:
+        panels.hold()  # placed, then the panels restored: no size of QGIS is changed meanwhile
     try:
         from qgis.PyQt.QtCore import QSettings
         settings = QSettings()
@@ -431,6 +461,7 @@ def _panel_class():
     class SectionPanel(Base):
         closed_by_user = pyqtSignal(object)  # this panel
         section_dropped = pyqtSignal(str, object)  # the chip of a section dropped on this panel, out of its rail
+        opened = pyqtSignal(object)  # this panel: another of its sections is open (whoever opened it)
 
         def __init__(self, parent: Any, accepts: Any, dark: Any) -> None:
             super().__init__("", parent)
@@ -514,11 +545,14 @@ def _panel_class():
             """The section ``key`` shown, the others folded; the rail is there with several sections."""
             if key not in self._boxes:
                 key = self.members[0] if self.members else None
+            changed = key != self._current
             self._current = key
             for name, box in self._boxes.items():
                 box.setVisible(name == key)
             self.rail.set_current(key)
             self.rail.setVisible(len(self.members) > 1)
+            if changed:
+                self.opened.emit(self)
 
         def current(self) -> Optional[str]:
             return self._current
@@ -595,11 +629,19 @@ class SectionPanels:
         self._fusing = False
         self._fusion_pending = False
         self._restoring = False  # the places and sizes QGIS kept are taken as they are
+        # No pass before the dock is placed, its panels restored and the window settled (hold, restore, _try_arm):
+        # what QGIS put back when it started is taken as it is.
+        self._armed = False
+        self._arming = False
         self._resize_pending = False
-        self._resize_all = False  # every panel of FilterMate and its column is sized at the next pass (resize_soon)
-        self._resize_only: List[Any] = []  # else these only (a panel placed while the others are restored)
-        self._elastic: set = set()  # the dock and the panels that were elastic at the last pass
-        self._press_signature: Any = None  # where the panels were when a mouse button was pressed on one of them
+        self._resize_all = False  # every column of FilterMate is sized at the next pass (a setting changed)
+        self._resize_seeds: List[Any] = []  # else the columns of these docks, and these if they float
+        self._rigid: set = set()  # the dock and the panels that were rigid at the last pass
+        self._opened: Dict[Any, Any] = {}  # what each one showed open when last looked at (_note_open)
+        self._columns: Dict[Any, List[Any]] = {}  # the column each one was in, the last time it was looked at
+        self._after_pass: Any = None  # the docks as the last pass left them (a late pass with nothing moved: none)
+        self._press: Any = None  # where the panels were when a mouse button was pressed on one of them
+        self._press_token = 0
         self._panel_class = _panel_class()
         owner = self
 
@@ -619,7 +661,7 @@ class SectionPanels:
             sections.on_menu = self._on_chip_menu  # a right click on the chip of a section, in a rail of the dock
             sections.on_dropped = lambda key, _index: self.attach(key)  # a chip of a panel dropped on a rail of the dock
             sections.on_dropped_out = self._on_dropped_out  # a chip of the dock dropped out of every rail and panel
-            sections.on_user_open = self._on_dock_opened  # the user opened another section in the dock
+            sections.on_opened = lambda: self._note_open(dock)  # another section open in the dock, or none
         contents = getattr(dock, CONTENTS_NAME, None)
         if contents is not None:
             contents.installEventFilter(self._watch)  # its style sheet changes with the theme
@@ -632,7 +674,7 @@ class SectionPanels:
         for signal in ("topLevelChanged", "dockLocationChanged", "visibilityChanged"):
             getattr(dock, signal).connect(lambda *_args: self._moved(dock))
         for signal in ("topLevelChanged", "dockLocationChanged"):  # floated, docked, put in another area
-            getattr(dock, signal).connect(lambda *_args: self._resize_soon(late=True))
+            getattr(dock, signal).connect(lambda *_args: self._on_located(dock))
         dock.destroyed.connect(self._on_dock_destroyed)
 
     # --- what is apart ------------------------------------------------------------
@@ -716,7 +758,7 @@ class SectionPanels:
             panel.kept_name = named if named != key else None
             panel.retitle()
             self._unpin(key, panel)
-            self._after_change()  # first: the dock folds what left, and says how much room it can spare
+            self._after_change(self._dock, panel)  # first: the dock folds what left, and says how much room it can spare
             self._place(panel, window, place)
             if remember:
                 self._remember()
@@ -750,7 +792,7 @@ class SectionPanels:
             self._unpin(key, panel)
             if source is not None:
                 self._settle_panel(source)
-            self._after_change()
+            self._after_change(self._dock if source is None else source, panel)
             if front:
                 self.raise_panel(key)
             if remember:
@@ -922,7 +964,7 @@ class SectionPanels:
             panel.retitle()
             self._unpin(key, panel)
             self._settle_panel(source)
-            self._after_change()
+            self._after_change(source, panel)
             self._place(panel, window, place)
             if remember:
                 self._remember()
@@ -965,7 +1007,7 @@ class SectionPanels:
         except RuntimeError:  # the panel went away: the other sections still have to come back (attach_all)
             logger.debug("The panel of %s was gone when it was settled", key, exc_info=True)
         try:
-            self._after_change()
+            self._after_change(panel, self._dock)
         except RuntimeError:
             pass
         except Exception:  # the plugin unloads, its controllers are gone: the other panels still have to go
@@ -1002,6 +1044,7 @@ class SectionPanels:
             return self._restore(restored)
         finally:
             self._restoring = False
+            self._arm_soon()  # the start is over once the window has settled
 
     def _restore(self, restored: List[str]) -> List[str]:
         for group in _saved():
@@ -1134,8 +1177,8 @@ class SectionPanels:
         for signal in ("topLevelChanged", "dockLocationChanged", "visibilityChanged"):
             getattr(panel, signal).connect(lambda *_args, mover=panel: self._moved(mover))
         for signal in ("topLevelChanged", "dockLocationChanged"):  # floated, docked, put in another area
-            getattr(panel, signal).connect(lambda *_args: self._resize_soon(late=True))
-        panel.rail.chosen.connect(lambda _key: self._resize_soon())  # another of its sections opened
+            getattr(panel, signal).connect(lambda *_args, mover=panel: self._on_located(mover))
+        panel.opened.connect(self._note_open)  # another of its sections open: by its rail, the agent, a script
         panel.installEventFilter(self._watch)  # dropped with the mouse within its area: no signal says so
         # Its tab selected: Qt shows nothing again (the page behind a tab was never hidden), so the page is told.
         panel.visibilityChanged.connect(lambda visible, host=panel: self._on_panel_visible(host, visible))
@@ -1161,6 +1204,15 @@ class SectionPanels:
             self._forget(panel)
 
     def _forget(self, panel: Any) -> None:
+        try:  # the docks it shared its column with take its room: sized again
+            window = self._main_window()
+            if window is not None and self._armed and not self._closing and not panel.isFloating():
+                self._resize_soon([dock for dock in self._column(window, panel) if dock is not panel])
+        except RuntimeError:  # the panel went away
+            pass
+        self._opened.pop(panel, None)
+        self._columns.pop(panel, None)
+        self._rigid.discard(panel)
         if panel in self._panels:
             self._panels.remove(panel)
         rails = getattr(self._dock, "_fm_rails", None)
@@ -1231,12 +1283,11 @@ class SectionPanels:
             elif wanted:  # the room of the dock shared: the section at its own height, the dock keeps the larger part
                 # (In auto too: an elastic panel, AGENT, keeps this share afterwards, rather than half of the room.)
                 window.splitDockWidget(dock, panel, Qt.Orientation.Vertical)
-                height = min(wanted, max(PANEL_MIN_HEIGHT, room - self._minimum(dock)))  # wanted alone in manual
-                window.resizeDocks([dock, panel], [room - height, height], Qt.Orientation.Vertical)
+                height = min(wanted, room - self._minimum(dock))  # wanted alone in manual
+                if height >= PANEL_MIN_HEIGHT:  # else the pass takes the room from EXPLORING above the dock
+                    window.resizeDocks([dock, panel], [room - height, height], Qt.Orientation.Vertical)
             else:
                 window.splitDockWidget(dock, panel, Qt.Orientation.Horizontal)
-        if self._restoring:
-            self._resize_soon(panel)  # a panel QGIS kept no place for: its column, not those QGIS restored
         panel.show()
         if not self._tabbed_with_ours(panel, window):
             return
@@ -1292,9 +1343,11 @@ class SectionPanels:
         spare = room - self._minimum(dock)
         window = self._main_window()
         if self._auto() and window is not None:
-            # The pass that follows shares the whole column: what every dock of it has above its minimum (EXPLORING
-            # above the dock held to FILTERING) can go to the panel. The dock alone put it beside the dock.
-            column = self._column(window, dock) or [dock]
+            # The pass that follows shares the column: what the dock and the panels of FilterMate in it have above
+            # their minimum (EXPLORING above the dock held to FILTERING) can go to the panel. Not what the panels of
+            # QGIS have: the dock would give it, below its minimum, before the pass gives it back. Beside then.
+            column = [other for other in self._column(window, dock) or [dock]
+                      if other is not panel and (other is dock or other in self._panels)]
             room = sum(other.height() for other in column)
             spare = sum(other.height() - self._minimum(other) for other in column)
         return panel_height(panel.widget().sizeHint().height() + TITLE_ROOM, room, spare)
@@ -1348,45 +1401,88 @@ class SectionPanels:
     def _auto(self) -> bool:
         return panel_sizing(getattr(self._dock, "CONFIG_DATA", None)) == PANEL_SIZING_AUTO
 
+    def hold(self) -> None:
+        """The dock is being placed in the window of QGIS (``place_dock``): no pass until its panels are restored and
+        the window settled (``restore``, ``_try_arm``). Placing it says it moved; QGIS puts back sizes of its own."""
+        self._armed = False
+
+    def _arm_soon(self) -> None:
+        if self._armed or self._arming or self._closing:
+            return
+        from qgis.PyQt.QtCore import QTimer
+        self._arming = True
+        QTimer.singleShot(STARTUP_SETTLE_MS, self._try_arm)
+
+    def _try_arm(self) -> None:
+        """The start is over: the dock is placed, its panels are restored, the window settled, no dialog (a message
+        of the new version) holds the loop, no button of the mouse is down. What each one shows and where it is
+        from now on is what a change is compared with."""
+        from qgis.PyQt.QtCore import QTimer
+        from qgis.PyQt.QtWidgets import QApplication
+        if self._closing:
+            self._arming = False
+            return
+        if QApplication.activeModalWidget() is not None or _mouse_down():
+            QTimer.singleShot(STARTUP_SETTLE_MS // 3, self._try_arm)
+            return
+        self._arming = False
+        self._armed = True
+        try:
+            for holder in self._containers():
+                self._opened[holder] = self._open_state(holder)
+            self._remember_columns()
+            self._after_pass = self._snapshot()
+        except RuntimeError:  # the dock went away
+            pass
+
     def resize_soon(self) -> None:
-        """The dock and the panels sized again, once the layout of what changed is applied: a setting changed what
-        they show (a section turned on or off, the height of the rows, the place of the buttons)."""
+        """The dock and the panels sized again, every column of them, once the layout of what changed is applied: a
+        setting changed what they all show (a section turned on or off, the height of the rows, the place of the
+        buttons, the display profile, the configuration read again, PANEL_SIZING back to auto)."""
         self._resize_soon()
 
-    def _resize_soon(self, only: Any = None, late: bool = False) -> None:
+    def _resize_soon(self, seeds: Any = None, late: bool = False) -> None:
         """A pass of ``_resize_now`` on the next turn of the loop of Qt, after the layout of what changed: one for
-        any number of changes. ``only``: that panel and its column, else every one. ``late``: once a panel dropped
-        with the mouse is plugged (``FUSION_SETTLE_MS``). Not while the panels of the last time are restored: QGIS
-        gives them the places and sizes it kept (but a panel it kept none for is placed, and sized)."""
-        if self._closing or (only is None and self._restoring):
+        any number of changes. ``seeds``: the docks whose columns are sized again (and those of them that float),
+        every column of FilterMate with None. ``late``: once a panel dropped with the mouse is plugged
+        (``FUSION_SETTLE_MS``), and not when nothing moved since the last pass. Nothing before the start is over
+        (``hold``), nor while the panels of the last time are restored: QGIS gives them the places and sizes it
+        kept."""
+        if self._closing or not self._armed or self._restoring:
             return
         from qgis.PyQt.QtCore import QTimer
         if late:
-            QTimer.singleShot(FUSION_SETTLE_MS, lambda: self._resize_soon(only))
+            QTimer.singleShot(FUSION_SETTLE_MS, lambda: self._late(seeds))
             return
-        if only is None:
+        if seeds is None:
             self._resize_all = True
-        elif only not in self._resize_only:
-            self._resize_only.append(only)
+        else:
+            self._resize_seeds.extend(seed for seed in seeds if seed is not None and seed not in self._resize_seeds)
         if not self._resize_pending:
             self._resize_pending = True
             QTimer.singleShot(0, self._resize_now)
 
+    def _late(self, seeds: Any) -> None:
+        try:
+            if self._after_pass is not None and self._snapshot() == self._after_pass:
+                return  # the pass of the change itself saw the docks as they are now
+        except RuntimeError:  # the dock went away
+            return
+        self._resize_soon(seeds)
+
     def _resize_now(self) -> None:
-        """Each column of the window that holds the dock or a panel of FilterMate shared again (``column_heights``):
-        a rigid one (FILTERING or EXPORTING open, their rows at their own height) at the height it needs, the rest to
-        the elastic ones of FilterMate, else to the other panels of QGIS. A floating one at its own height
-        (``floating_height``). Nothing with ``APP.DOCKWIDGET.PANEL_SIZING`` = ``manual``."""
+        """The columns of the window asked for shared again (``column_heights``): a rigid one (FILTERING or
+        EXPORTING open, their rows at their own height) at the height it needs, the rest to the elastic ones of
+        FilterMate, else to the other panels of QGIS; a column narrower than what a section asks for made wider. A
+        floating one at its own height (``floating_height``). Nothing with ``APP.DOCKWIDGET.PANEL_SIZING`` =
+        ``manual``, nor while a button of the mouse is down (a panel dragged by its title, a chip): again after."""
         self._resize_pending = False
-        everything, only = self._resize_all, self._resize_only
-        self._resize_all, self._resize_only = False, []
+        everything, seeds = self._resize_all, self._resize_seeds
+        self._resize_all, self._resize_seeds = False, []
         if self._closing or not self._auto():
             return
-        if self._drag_running():  # a chip is being dragged: the panels may change once it is dropped
-            if everything:
-                self._resize_soon(late=True)
-            for panel in only:
-                self._resize_soon(panel, late=True)
+        if self._drag_running() or _mouse_down():
+            self._resize_soon(None if everything else seeds, late=True)
             return
         window = self._main_window()
         if window is None:
@@ -1394,27 +1490,36 @@ class SectionPanels:
         try:
             self._settle_layouts(window)
             holders = self._containers()
-            targets = holders if everything else [holder for holder in only if holder in holders]
-            done: List[Any] = []
-            seen: Dict[Any, str] = {}
-            for holder in targets:
-                if holder.isFloating():
-                    self._size_floating(holder, seen)
+        except RuntimeError:  # the dock went away
+            return
+        done: List[Any] = []
+        seen: Dict[Any, str] = {}
+        for seed in (holders if everything else seeds):
+            try:
+                if not seed.isVisible():
+                    continue  # closed, gone, or the panel of a section that came back
+                if seed.isFloating():
+                    if seed in holders:
+                        self._size_floating(seed, seen)
                     continue
-                column = self._column(window, holder)
+                column = self._column(window, seed)
                 if column and not any(column == other for other in done):
                     done.append(column)
                     self._size_column(window, column, seen)
-            for holder, kind in seen.items():
-                if kind == ELASTIC:
-                    self._elastic.add(holder)
-                else:
-                    self._elastic.discard(holder)
-            self._elastic = {holder for holder in self._elastic if holder is self._dock or holder in self._panels}
-        except RuntimeError:  # the dock or a panel went away
+            except RuntimeError:  # a dock or a panel went away: the other columns are still sized
+                continue
+            except Exception:
+                logger.exception("A column of the panels of FilterMate could not be sized")
+        for holder, kind in seen.items():
+            if kind == RIGID:
+                self._rigid.add(holder)
+            else:
+                self._rigid.discard(holder)
+        try:
+            self._remember_columns()
+            self._after_pass = self._snapshot()
+        except RuntimeError:
             pass
-        except Exception:
-            logger.exception("The panels of FilterMate could not be sized")
 
     @staticmethod
     def _settle_layouts(window: Any) -> None:
@@ -1454,6 +1559,23 @@ class SectionPanels:
         rects = [(dock.x(), dock.y(), dock.width(), dock.height()) for dock in docks]
         return [docks[index] for index in column_of(docks.index(holder), rects)]
 
+    def _remember_columns(self) -> None:
+        """The column of each one now: a panel moved later sizes again the one it left too."""
+        window = self._main_window()
+        if window is None:
+            return
+        self._columns = {holder: ([] if holder.isFloating() else self._column(window, holder))
+                         for holder in self._containers()}
+
+    def _snapshot(self) -> Any:
+        """The docks of the window, where they are and how large: a late pass with nothing changed is not needed."""
+        from qgis.PyQt.QtWidgets import QDockWidget
+        window = self._main_window()
+        if window is None:
+            return None
+        return tuple((dock.objectName(), dock.isFloating(), dock.geometry().getRect())
+                     for dock in window.findChildren(QDockWidget) if dock.parentWidget() is window and dock.isVisible())
+
     @staticmethod
     def _tab_mates(window: Any, dock: Any) -> List[Any]:
         """The docks ``dock`` shares its tabs with, on screen or not (Qt 5 keeps hidden docks in a group of tabs)."""
@@ -1476,10 +1598,11 @@ class SectionPanels:
         """``column`` shared again (``column_heights``). A group of tabs is a panel of QGIS, even with a panel of
         FilterMate in front: its height is that of the other tabs too. Docks side by side are one row of the
         column: elastic when one of them is, rigid at the need of the tallest one otherwise (the others keep room
-        under their rows: they cannot be shorter than the row), a panel of QGIS when one is."""
+        under their rows: they cannot be shorter than the row), a panel of QGIS when one is. Then the column is made
+        as wide as the rows of the sections it holds need, when it is narrower (never narrower than it is)."""
         from qgis.PyQt.QtCore import Qt
         area = self._area_docks(window, window.dockWidgetArea(column[0]))
-        docks, slots = [], []
+        docks, slots, wide = [], [], []
         for dock in column:
             tab = self._tab_room(window, dock)
             slot = dock.height() + tab
@@ -1496,6 +1619,8 @@ class SectionPanels:
                 kind, need, minimum = self._measure(one)
                 seen[one] = kind
                 kinds.append((kind, minimum, need))
+                if one is dock:
+                    wide.append(dock)
             minimum = max(entry[1] for entry in kinds) + tab
             if any(entry[0] == OTHER for entry in kinds):
                 docks.append((OTHER, minimum, 0, slot))
@@ -1507,20 +1632,29 @@ class SectionPanels:
         heights = column_heights(docks, sum(slots))
         if any(abs(height - slot) > 1 for height, slot in zip(heights, slots)):
             window.resizeDocks(column, heights, Qt.Orientation.Vertical)
+        narrow = [(dock, self._width_need(dock)) for dock in wide]
+        narrow = [(dock, width) for dock, width in narrow if width > dock.width() + 1]
+        if narrow:
+            window.resizeDocks([dock for dock, _width in narrow], [width for _dock, width in narrow],
+                               Qt.Orientation.Horizontal)
 
     def _size_floating(self, holder: Any, seen: Dict[Any, str]) -> None:
-        """A floating panel (or the dock) at the height of what it shows (``floating_height``), whole on its screen."""
+        """A floating panel (or the dock) at the height of what it shows (``floating_height``), never narrower than
+        its rows, whole on its screen."""
         from qgis.PyQt.QtGui import QGuiApplication
         kind, need, minimum = self._measure(holder)
         seen[holder] = kind
         screen = QGuiApplication.screenAt(holder.geometry().center()) or QGuiApplication.primaryScreen()
         frame = holder.frameGeometry().height() - holder.height()  # the title bar the window manager adds
         available = screen.availableGeometry().height() - frame if screen is not None else 0
+        # Fresh: elastic now and rigid at the last pass (CONFIGURATION opened where FILTERING was). Not a dock QGIS
+        # restored floating, never seen rigid: its height is the one QGIS kept.
         height = floating_height(kind, minimum, need, holder.height(), holder.sizeHint().height(),
-                                 holder not in self._elastic, available)
-        if abs(height - holder.height()) > 1:
-            holder.resize(holder.width(), height)
-            corner = self._on_screen(holder.pos(), holder.width(), height, holder.geometry().center())
+                                 holder in self._rigid, available)
+        width = max(holder.width(), self._width_need(holder))
+        if abs(height - holder.height()) > 1 or width != holder.width():
+            holder.resize(width, height)
+            corner = self._on_screen(holder.pos(), width, height, holder.geometry().center())
             if corner != holder.pos():
                 holder.move(corner)
 
@@ -1539,6 +1673,19 @@ class SectionPanels:
             return ELASTIC, 0, minimum
         return RIGID, holder.height() - self._room_under(page), minimum
 
+    def _open_page(self, holder: Any) -> Any:
+        """The page of the section of the lower stack open in ``holder`` (FILTERING, EXPORTING, CONFIGURATION),
+        None when none is."""
+        if holder is self._dock:
+            sections = self._sections()
+            key = sections.bottom_key() if sections is not None else None
+            if key in self._home:
+                return None
+        else:
+            key = holder.current()
+        page = self._page(key) if key in BOTTOM else None
+        return page if page is not None and page.isVisible() else None
+
     def _rigid_page(self, holder: Any) -> Any:
         """The page of FILTERING or EXPORTING, when it is all ``holder`` opens; None otherwise."""
         from .mockup_layout import ROW_SECTIONS, SECTION_FILL
@@ -1548,72 +1695,110 @@ class SectionPanels:
             sections = self._sections()
             if sections is None or any(sections._open_in_stack(key) for key in sections._pages):
                 return None  # AGENT or EXPLORING open above
-            key = sections.bottom_key()
-            if key in self._home:
-                return None
-        else:
-            key = holder.current()
-        page = self._page(key) if key in ROW_SECTIONS else None
-        return page if page is not None and page.isVisible() else None
+        page = self._open_page(holder)
+        return page if page is not None and any(page is self._page(key) for key in ROW_SECTIONS) else None
+
+    def _width_need(self, holder: Any) -> int:
+        """How wide ``holder`` has to be for the rows of its open section, in their scroll area, not to be cut on
+        the right: its width, and what the page asks for more than its viewport has."""
+        page = self._open_page(holder)
+        viewport = page.parentWidget() if page is not None else None
+        if viewport is None or not isinstance(viewport.parentWidget(), _scroll_area_class()):
+            return holder.width()
+        return holder.width() + max(0, page.minimumSizeHint().width() - viewport.width())
 
     @staticmethod
     def _room_under(page: Any) -> int:
         """The height left empty under ``page`` in the scroll area that holds it (the tool box, or the column of a
         panel); less than 0 when the page is cut and scrolls."""
-        from qgis.PyQt.QtWidgets import QScrollArea
         viewport = page.parentWidget()
         area = viewport.parentWidget() if viewport is not None else None
-        if not isinstance(area, QScrollArea) or area.widget() is not page:
+        if not isinstance(area, _scroll_area_class()) or area.widget() is not page:
             return 0
         return viewport.height() - page.sizeHint().height()
 
-    def _signature(self) -> Any:
-        """Where the dock and the panels are: floating, or in which area and column, with which tabs. The same
+    def _places(self) -> Dict[Any, Any]:
+        """Where the dock and each panel are: floating, or in which area and column, with which tabs. The same
         after a tab is selected or a separator dragged; another after a panel is dropped elsewhere."""
         window = self._main_window()
+        places: Dict[Any, Any] = {}
         if window is None:
-            return None
-        rows = []
+            return places
         for holder in self._containers():
             if holder.isFloating():
-                rows.append((holder.objectName(), "floating"))
+                places[holder] = ("floating", ())
                 continue
-            column = self._column(window, holder)
-            mates = sorted(mate.objectName() for mate in self._tab_mates(window, holder))
-            rows.append((holder.objectName(), _area_number(window.dockWidgetArea(holder)),
-                         tuple(dock.objectName() for dock in column), tuple(mates)))
-        return tuple(rows)
+            column = tuple(self._column(window, holder))
+            mates = tuple(sorted(mate.objectName() for mate in self._tab_mates(window, holder)))
+            places[holder] = ((_area_number(window.dockWidgetArea(holder)), column, mates), column)
+        return places
 
     def _on_mouse(self, pressed: bool) -> None:
         """A dock dropped with the mouse within its area (as a tab, or above another one) says nothing: where the
-        panels are is compared from the press to the end of the drop. A click, or a separator dragged, changes
-        nothing of it: the sizes the user set stay."""
-        if not self._auto():
-            return
-        if pressed:
-            try:
-                self._press_signature = self._signature()
-            except Exception:  # never in the way of a click (a dock going away raises RuntimeError)
-                self._press_signature = None
-            return
-        before, self._press_signature = self._press_signature, None
-        if before is None:
+        panels are is compared from the press to the end of the drop, and those that moved are sized again with
+        the columns they left and joined. A click, or a separator dragged, changes nothing of it: the sizes the user
+        set stay. A press whose release never came is forgotten after a while."""
+        if not self._auto() or not self._armed:
             return
         from qgis.PyQt.QtCore import QTimer
+        if pressed:
+            try:
+                self._press = self._places()
+            except Exception:  # never in the way of a click (a dock going away raises RuntimeError)
+                self._press = None
+            self._press_token += 1
+            token = self._press_token
+            QTimer.singleShot(PRESS_FORGET_MS, lambda: self._forget_press(token))
+            return
+        before, self._press = self._press, None
+        if not before:
+            return
 
         def compare() -> None:
             try:
-                if not self._closing and self._signature() != before:
-                    self._resize_soon()
+                if self._closing:
+                    return
+                after = self._places()
+                moved = [holder for holder in after if before.get(holder, (None,))[0] != after[holder][0]]
+                seeds = moved + [dock for holder in moved for dock in before.get(holder, (None, ()))[1]]
+                if seeds:
+                    self._resize_soon(seeds)
             except Exception:  # the dock went away (RuntimeError): nothing to size
                 logger.debug("The panels were not compared after a drop", exc_info=True)
         QTimer.singleShot(FUSION_SETTLE_MS, compare)  # once the drop is plugged
 
-    def _on_dock_opened(self) -> None:
-        """The user opened another section in the dock: with sections apart, what it needs may have changed (the
-        dock in one piece is left as the user sized it)."""
-        if self._home:
-            self._resize_soon()
+    def _forget_press(self, token: int) -> None:
+        if token == self._press_token:
+            self._press = None
+
+    def _on_located(self, holder: Any) -> None:
+        """``holder`` floated, docked or put in another area: it is sized again with the column it left and the one
+        it joined, once a drop with the mouse is plugged."""
+        if not self._armed or self._restoring or self._closing:
+            return
+        self._resize_soon([holder] + list(self._columns.get(holder, [])), late=True)
+
+    def _open_state(self, holder: Any) -> Any:
+        if holder is self._dock:
+            sections = self._sections()
+            if sections is None:
+                return None
+            return (tuple(key for key in sections._pages if sections._open_in_stack(key)), sections.bottom_key())
+        return holder.current()
+
+    def _note_open(self, holder: Any) -> None:
+        """What ``holder`` shows open may have changed (a chip, a header, the agent, a script): sized again with its
+        column when it did. A click on what was open already changes nothing, nor does the dock in one piece
+        (nothing in it is rigid)."""
+        try:
+            state = self._open_state(holder)
+        except RuntimeError:  # the dock or the panel went away
+            return
+        before = self._opened.get(holder, _UNSEEN)
+        self._opened[holder] = state
+        if before is _UNSEEN or before == state or (holder is self._dock and not self._home):
+            return
+        self._resize_soon([holder])
 
     # --- merged when put together ---------------------------------------------------
 
@@ -1673,9 +1858,10 @@ class SectionPanels:
 
     # --- the dock around ----------------------------------------------------------
 
-    def _after_change(self) -> None:
+    def _after_change(self, *touched: Any) -> None:
         """The buttons follow their section, the stacks of the dock take the room of what left or make room for
-        what came back."""
+        what came back. ``touched``: the dock and the panels a section left or joined, sized again with their
+        columns (every column without them: a move that failed half way)."""
         dock = self._dock
         manager = getattr(dock, "_action_bar_manager", None)
         if manager is not None:
@@ -1693,7 +1879,7 @@ class SectionPanels:
         if sections is not None:
             sections.refresh_rails()  # the chip of a section apart leaves its rail; with none left below, the
             # upper stack takes the dock
-        self._resize_soon()  # the dock and the panels at the height of what they show now
+        self._resize_soon(list(touched) if touched else None)  # at the height of what they show now
 
     def _present(self) -> List[str]:
         """The sections this dock has, in it or apart: not AGENT, FILTERING or EXPORTING when they are turned off."""

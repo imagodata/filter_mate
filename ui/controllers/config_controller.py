@@ -558,6 +558,7 @@ class ConfigController(BaseController):
                 refit = getattr(self.dockwidget, '_refit_sections_after_dimensions', None)
                 if callable(refit):
                     refit()
+                self._resize_section_panels()  # rows, headers and buttons at the heights of the new profile
 
                 profile_display = UIConfig.get_profile_name().upper()
                 logger.info(f"UI profile changed to {profile_display} mode")

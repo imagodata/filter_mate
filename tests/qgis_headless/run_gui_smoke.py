@@ -5677,6 +5677,30 @@ def sizing_check(scenario, wanted_rigid=1):
     check(f"sizing: {scenario}: the holders measured", len(rigid) >= wanted_rigid, sizing_state())
     low = sizing_below_minimum()
     check(f"sizing: {scenario}: no dock below its minimum", not low, str(low))
+    cut = sizing_cut_in_width()
+    check(f"sizing: {scenario}: no row cut on the right", not cut, str(cut))
+
+
+def sizing_cut_in_width():
+    """The holders whose open section of the lower stack asks for more width than its scroll area shows."""
+    d = dock()
+    cut = []
+    for name, holder in sizing_holders():
+        key = holder.current() if holder is not d else d._fm_sections.bottom_key()
+        if key not in ('filtering', 'exporting', 'configuration') or (holder is d and key in d._fm_panels.detached()):
+            continue
+        page = getattr(d, key.upper())
+        if not page.isVisible():
+            continue
+        viewport = page.parentWidget()
+        if page.minimumSizeHint().width() > viewport.width() + 1:
+            cut.append((name, key, page.minimumSizeHint().width(), viewport.width()))
+    return cut
+
+
+def sizing_armed():
+    """The start is over for the panels (a version before that state has none: always)."""
+    return getattr(dock()._fm_panels, '_armed', True)
 
 
 def sizing_reset():
@@ -5700,6 +5724,7 @@ def s_sizing_setup():
         apply_settings({'APP.DOCKWIDGET.PANEL_SIZING': 'auto'})
     sizing_reset()
     settles(lambda: d.toolBox_tabTools.currentWidget() is d.FILTERING)
+    check('sizing: the panels size themselves once the start is over', settles(sizing_armed, 8))
     grab_window('sizing_00_dock')
     return None
 
@@ -5822,6 +5847,191 @@ def s_sizing_beside():
     return None
 
 
+def sizing_heights():
+    return [(name, holder.isFloating(), holder.width(), holder.height()) for name, holder in sizing_holders()]
+
+
+def sizing_restart(float_dock):
+    """As QGIS starting again: the dock placed, then the panels of the last time restored, at the sizes QGIS kept.
+    Those sizes are the user's, chosen here: nothing may change them, now or a while later."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    module = importlib.import_module(f'{PACKAGE}.ui.layout.section_panels')
+    sizing_reset()
+    area = window.dockWidgetArea(d)
+    panels.detach('filtering')
+    pump(900)
+    panel = panels.panel('filtering')
+    if float_dock:
+        d.setFloating(True)
+        pump(300)
+        d.resize(max(d.width(), 420), 640)
+        d.move(500, 120)
+    else:
+        total = d.height() + panel.height()
+        window.resizeDocks([d, panel], [total - 420, 420], Qt.Orientation.Vertical)  # taller than its rows
+    pump(900)
+    before = sizing_heights()
+    state = window.saveState()  # QGIS saves its window when it closes
+    panels.attach_all(remember=False)  # the plugin unloads: its panels go, what was apart stays saved
+    if d.isFloating():
+        d.setFloating(False)
+    iface.removeDockWidget(d)
+    QApplication.processEvents()
+    window.restoreState(state)  # QGIS starts again
+    QSettings().setValue(module.DOCK_AREA_KEY, module._area_number(area))
+    module.place_dock(d, iface, area)  # the plugin opens its dock: Qt says it moved
+    d.show()
+    pump(200)  # a dialog of the new version may hold the start here
+    panels.restore()  # then the panels of the last time
+    pump(1000)
+    soon = sizing_heights()
+    pump(2500)  # and once the start is over
+    later = sizing_heights()
+    close = all(abs(a[2] - b[2]) <= 2 and abs(a[3] - b[3]) <= 2 and a[:2] == b[:2]
+                for a, b in zip(before, later)) and len(before) == len(later)
+    kind = 'floating' if float_dock else 'docked'
+    check(f"sizing: QGIS starting again, the dock {kind}: the sizes it kept stay, 1 s and 3.5 s later",
+          close and [row[:2] for row in soon] == [row[:2] for row in before]
+          and all(abs(a[3] - b[3]) <= 2 for a, b in zip(before, soon)), f"{before} -> {soon} -> {later}")
+    grab_window(f"sizing_11_restart_{kind}")
+    settles(sizing_armed, 8)
+    if d.isFloating():
+        d.setFloating(False)
+    QSettings().remove(module.DOCK_AREA_KEY)
+
+
+def s_sizing_restart_docked():
+    sizing_restart(False)
+    return None
+
+
+def s_sizing_restart_floating():
+    sizing_restart(True)
+    return None
+
+
+def s_sizing_open_chip_again():
+    """A click on the chip already open, in a panel or in the dock, changes nothing: the size set by hand stays."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    sizing_reset()
+    panels.detach('filtering')
+    panels.group('exporting', 'filtering')
+    panel = panels.panel('filtering')
+    panel.rail.chip('filtering').click()
+    pump(900)
+    total = d.height() + panel.height()
+    window.resizeDocks([d, panel], [total - panel.height() - 120, panel.height() + 120], Qt.Orientation.Vertical)
+    pump(900)
+    before = sizing_heights()
+    panel.rail.chip('filtering').click()  # already open
+    pump(900)
+    after_panel = sizing_heights()
+    d._fm_sections.top_rail.chip('exploring').click()  # already open in the dock
+    pump(900)
+    after_dock = sizing_heights()
+    check('sizing: a click on the chip already open changes no size (panel, then dock)',
+          before == after_panel == after_dock, f"{before} -> {after_panel} -> {after_dock}")
+    return None
+
+
+def s_sizing_elsewhere():
+    """A rigid panel enlarged by hand in another column, and one floating, stay as they are when the structure
+    changes elsewhere (AGENT opened in the dock)."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    layers = window.findChild(QDockWidget, 'Layers')
+    if 'agent' not in d._fm_sections._headers or layers is None or not layers.isVisible():
+        report('SKIP', 'sizing: a change elsewhere', 'no AGENT or no Layers panel')
+        return None
+    sizing_reset()
+    panels.detach('filtering')
+    panels.detach('exporting')
+    filtering, exporting = panels.panel('filtering'), panels.panel('exporting')
+    window.splitDockWidget(layers, filtering, Qt.Orientation.Vertical)
+    pump(900)
+    if filtering.isFloating() or filtering in window.tabifiedDockWidgets(layers):
+        report('SKIP', 'sizing: a change elsewhere', 'FILTERING became a tab under Layers')
+        return None
+    window.resizeDocks([layers, filtering], [layers.height() - 100, filtering.height() + 100], Qt.Orientation.Vertical)
+    exporting.setFloating(True)
+    pump(900)
+    exporting.resize(exporting.width(), exporting.height() + 150)
+    pump(900)
+    before = sizing_heights()
+    d._fm_sections.top_rail.chip('agent').click()  # the user opens AGENT in the dock
+    pump(900)
+    after = sizing_heights()
+    kept = [row for row in before if row[0] != 'dock']
+    check('sizing: a change in the dock leaves a panel sized by hand in another column, and a floating one, as they are',
+          kept == [row for row in after if row[0] != 'dock'], f"{before} -> {after}")
+    grab_window('sizing_12_elsewhere')
+    d._fm_sections.top_rail.chip('exploring').click()
+    exporting.setFloating(False)
+    pump(300)
+    return None
+
+
+def s_sizing_short_screen():
+    """A short window: Layers and Browser above EXPLORING held to its minimum, FILTERING under them. The panels of
+    QGIS give up height before the rows of FILTERING are cut."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    layers = window.findChild(QDockWidget, 'Layers')
+    if layers is None or not layers.isVisible():
+        report('SKIP', 'sizing: a short window', 'no Layers panel')
+        return None
+    sizing_reset()
+    panels.detach('exploring')
+    panels.detach('filtering')
+    exploring, filtering = panels.panel('exploring'), panels.panel('filtering')
+    window.splitDockWidget(layers, exploring, Qt.Orientation.Vertical)
+    window.splitDockWidget(exploring, filtering, Qt.Orientation.Vertical)
+    pump(900)
+    column = sizing_column(filtering)
+    if filtering.isFloating() or exploring.isFloating() or len(column) < 3:
+        report('SKIP', 'sizing: a short window', f"column of {len(column)}")
+        return None
+    SIZING['window'] = (window.isMaximized(), window.geometry())
+    need = filtering.height() - sizing_empty(filtering)
+    floor = sum(max(w.minimumHeight(), w.minimumSizeHint().height()) for w in column if w is not filtering)
+    room = sum(w.height() for w in column)
+    wanted = floor + need + 30  # room enough when Layers and Browser give up theirs, not when they keep it
+    window.showNormal()
+    pump(300)
+    window.resize(window.width(), window.height() - (room - wanted))
+    pump(900)
+    panels.resize_soon()  # a change of a setting: every column
+    sizing_check('a short window, Layers above EXPLORING at its minimum')
+    grab_window('sizing_13_short_window')
+    maximized, geometry = SIZING['window']
+    if maximized:
+        window.showMaximized()
+    else:
+        window.setGeometry(geometry)
+    pump(600)
+    return None
+
+
+def s_sizing_opened_by_code():
+    """EXPORTING opened by the agent or a script in a panel that showed FILTERING: its six rows fit."""
+    d = dock()
+    panels = d._fm_panels
+    sizing_reset()
+    panels.detach('filtering')
+    panels.group('exporting', 'filtering')
+    panels.panel('filtering').open('filtering')
+    pump(900)
+    panels.raise_panel('exporting')  # what the agent does
+    sizing_check('EXPORTING opened by the code in the panel it shares with FILTERING')
+    return None
+
+
 def s_sizing_floating():
     d = dock()
     panels = d._fm_panels
@@ -5913,7 +6123,8 @@ def s_sizing_end():
 # The manual step before those that leave places kept for the panel of FILTERING elsewhere (under Layers, beside).
 SIZING_STEPS = [s_section_setup, s_vector_source, s_sizing_setup, s_sizing_filtering_below, s_sizing_exploring,
                 s_sizing_every_section, s_sizing_grouped, s_sizing_manual, s_sizing_under_layers, s_sizing_back_to_dock,
-                s_sizing_beside, s_sizing_floating, s_sizing_end]
+                s_sizing_beside, s_sizing_floating, s_sizing_open_chip_again, s_sizing_elsewhere, s_sizing_opened_by_code,
+                s_sizing_short_screen, s_sizing_restart_docked, s_sizing_restart_floating, s_sizing_end]
 
 
 # --- a source filtered again by an expression its SQL cannot write (FM_ONLY=refilter) ---------------------------------
