@@ -35,16 +35,26 @@ MAX_EXPRESSION_LENGTH = 65536
 # and in a C database (QGIS 4.2.3 and 3.44.15).
 APPLIED_DIALECTS = (SQLITE, OGR_SQL, POSTGRESQL)
 
-# A hybrid subset evaluates every feature of the layer in QGIS (Python loop, no
-# cancellation): beyond this count, or when the count is unknown, the former
-# conversion is kept.
+# A hybrid subset evaluates every feature of the layer in QGIS (Python loop, stopped between two blocks of
+# features when the task is canceled): beyond this count, or when the count is unknown, the former conversion
+# is kept.
 HYBRID_MAX_FEATURES = 1_000_000
 
 # Features read between two looks at the cancellation of the task (as its other long readings, filter_task)
 CANCEL_CHECK_INTERVAL = 100
 
 # Functions of QGIS that read the feature id (or the selection, made of feature ids)
-_FEATURE_ID_FUNCTIONS = frozenset(('$id', 'is_selected', 'num_selected', 'get_feature_by_id'))
+_FEATURE_ID_FUNCTIONS = frozenset(('$id', 'is_selected', 'num_selected', 'get_feature_by_id', 'feature_id',
+                                   '$currentfeature'))
+# Variables of QGIS that give the feature id (``@id``, and ``@feature``: ``$id`` of ``attribute(@feature, ...)``)
+_FEATURE_ID_VARIABLES = frozenset(('id', 'feature'))
+# Functions that read a layer, possibly the layer of the context (``@layer``), through its subset: on the layer
+# itself, not on the copy the keys are read on (``get_feature(@layer, 'id', 5)``, ``layer_property(@layer,
+# 'feature_count')``, ``overlay_*(@layer, ...)``, ``eval()`` of a text that may hold any of these).
+_LAYER_READING_FUNCTIONS = frozenset((
+    'get_feature', 'get_feature_by_id', 'layer_property', 'eval', 'eval_template', 'overlay_intersects',
+    'overlay_contains', 'overlay_crosses', 'overlay_disjoint', 'overlay_equals', 'overlay_touches',
+    'overlay_within', 'overlay_nearest'))
 
 # OGR storages whose attribute filter is run by SQLite, and by the OGR SQL engine.
 # Any other storage (a database or a service opened through OGR) is not translated.
@@ -403,7 +413,8 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
     refuses, or ``ST_Area("geom") > 100``, planar where the first filter
     measured on the ellipsoid. A copy that cannot be opened, or that lacks a
     field the expression reads (joined, virtual), gives no list: never keys
-    read through the subset the new one replaces.
+    read through the subset the new one replaces. The fields are checked on
+    the source's before the copy is opened (and counted), and again on the copy.
     """
     from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
     from .source_capability_probe import feature_count_or_none
@@ -437,11 +448,14 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
                     sorted(native.referencedColumns()), sorted(result.native_columns))
         native, native_sql = None, ''
 
+    names = set(whole.referencedColumns()) | (set(native.referencedColumns()) if native else set())
+
     # The copy is opened once the key and the expression are known to serve (review of 2026-11-18: without a key it
-    # was opened and counted for nothing, a whole count(*) on PostgreSQL)
+    # was opened and counted for nothing, a whole count(*) on PostgreSQL; a joined or virtual field, the same)
     source = layer
     if whole_layer and (layer.subsetString() or '').strip():
-        _check_expression_for_copy(whole, dialect)
+        _check_expression_for_copy(whole, dialect, layer)
+        _check_fields_of_source(layer, fields, names)
         source = _unfiltered_copy(layer)
         if source is None:
             raise Unsupported('The layer cannot be read without its current subset')
@@ -453,7 +467,6 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
     request = QgsFeatureRequest()
     if not any(parsed.needsGeometry() for parsed in filter(None, (whole, native))):
         request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
-    names = set(whole.referencedColumns()) | (set(native.referencedColumns()) if native else set())
     if source is not layer:
         _check_copy_reads_like_layer(layer, source, names, whole)
     if QgsFeatureRequest.ALL_ATTRIBUTES not in names:
@@ -499,30 +512,75 @@ def _unfiltered_copy(layer):
     return unfiltered_copy(layer)
 
 
-def _check_expression_for_copy(whole, dialect):
+def _check_expression_for_copy(whole, dialect, layer):
     """Refuse, before the copy is opened, an expression its features would not give the layer's answer to.
 
     The feature id of a PostgreSQL layer is a number its provider gives each
     feature (the key itself only for one integer column): it may be another
     one in the copy, so nothing that reads it (``$id``, ``@id``,
-    ``is_selected()``, ``get_feature_by_id``...) is evaluated there. A
-    GeoPackage or SQLite file gives the same ids to the copy: ``is_selected()``
-    reads the selection of the layer of the context, the layer itself
-    (measured, check_native_translation.selected_path). An aggregate
-    (``mean("pop")``) is computed by QGIS on the layer of the context, through
-    its subset, while the keys would come from the whole layer: the first
-    filter aggregates the whole layer, so no list mixes the two (review of
-    2026-11-18).
+    ``feature_id()``, ``$currentfeature``, ``@feature``, ``is_selected()``,
+    ``get_feature_by_id``...) is evaluated there. The same for a SQLite or
+    GeoPackage layer whose identifier is not a column of its table (a view
+    without a first integer column: ids 0, 1, 2... that change under a filter,
+    ``primaryKeyAttributes()`` empty); with an identifier that is the key
+    column, the copy gives the same ids and ``is_selected()`` reads the
+    selection of the layer of the context, the layer itself (measured,
+    check_native_translation.selected_path). An aggregate (``mean("pop")``)
+    is computed by QGIS on the layer of the context, through its subset,
+    while the keys would come from the whole layer: the first filter
+    aggregates the whole layer, so no list mixes the two. Likewise a function
+    that reads a layer, possibly the layer of the context (``get_feature``,
+    ``overlay_*``, ``layer_property``, ``eval``), whatever the source (reviews
+    of 2026-11-18). The functions are those of the expression tree: a field
+    named ``mean`` or a text ``'is_selected'`` is none.
     """
     from qgis.core import QgsExpression
-    functions = QgsExpression.Functions()
-    aggregates = sorted(name for name in whole.referencedFunctions() if QgsExpression.functionIndex(name) >= 0
-                        and 'Aggregates' in functions[QgsExpression.functionIndex(name)].groups())
+    functions = set(whole.referencedFunctions())
+    index_of = QgsExpression.functionIndex
+    all_functions = QgsExpression.Functions()
+    aggregates = sorted(name for name in functions if index_of(name) >= 0
+                        and 'Aggregates' in all_functions[index_of(name)].groups())
     if aggregates:
         raise Unsupported('An aggregate is read through the subset of the layer: {}'.format(', '.join(aggregates)))
-    if dialect == POSTGRESQL and (set(whole.referencedFunctions()) & _FEATURE_ID_FUNCTIONS
-                                  or 'id' in whole.referencedVariables()):
-        raise Unsupported('The feature id of a PostgreSQL layer is not its key: another number in a copy')
+    reading = sorted(functions & _LAYER_READING_FUNCTIONS)
+    if reading:
+        raise Unsupported('A function reads a layer through its subset: {}'.format(', '.join(reading)))
+    if (functions & _FEATURE_ID_FUNCTIONS or whole.referencedVariables() & _FEATURE_ID_VARIABLES) and \
+            not _feature_ids_follow_the_key(layer, dialect):
+        raise Unsupported('The feature id of this layer is not its key: another number in a copy')
+
+
+def _feature_ids_follow_the_key(layer, dialect):
+    """Whether the feature id of ``layer`` is a column of its table, so the same on a copy without its subset.
+
+    Never for PostgreSQL (its provider numbers the features, whatever the key). SQLite and GeoPackage: when the
+    layer has a primary key column, the id is that column; without one the ids count the rows in the order read.
+    """
+    if dialect != SQLITE:
+        return False
+    try:
+        return len(layer.primaryKeyAttributes()) > 0
+    except Exception as exc:  # nosec B110 - a provider that does not say: the id is not known to be a column
+        logger.debug('Primary key of %s not read: %s', layer.name(), exc)
+        return False
+
+
+def _check_fields_of_source(layer, source_fields, names):
+    """Refuse, before the copy is opened and counted, a field the source does not give as the layer does.
+
+    A joined or virtual field is not a field of the source: the copy has no such field. Each name must be at the
+    same index among the layer's fields as among the source's (the expression is prepared in the layer's context).
+    """
+    from qgis.core import QgsFeatureRequest
+    layer_fields = layer.fields()
+    if QgsFeatureRequest.ALL_ATTRIBUTES in names:
+        if list(layer_fields.names()) != list(source_fields.names()):
+            raise Unsupported('The layer has fields its source has not (joined, virtual)')
+        return
+    for name in names:
+        index = layer_fields.indexFromName(name)
+        if index < 0 or source_fields.indexFromName(name) != index:
+            raise Unsupported('The field {} is not a field of the source, as of the layer'.format(name))
 
 
 def _check_copy_reads_like_layer(layer, copy, names, whole):

@@ -32,13 +32,26 @@ EXPRESSIONS = {
     "selected_count": (set(), {"num_selected"}, set(), lambda feature: feature["fid"] > 2),
     "by_feature_id": (set(), {"get_feature_by_id", "attribute"}, set(), lambda feature: feature["fid"] > 2),
     "at_id": (set(), {"var"}, {"id"}, lambda feature: feature["fid"] > 2),
+    "native_part": ({"pop"}, set(), set(), lambda feature: feature["pop"] >= 0),
     "above_mean": ({"pop"}, {"mean"}, set(), lambda feature: feature["pop"] > 4),
+    # a field named like a function reads no function: columns only
+    "field_named_like_functions": ({"is_selected", "mean", "eval", "get_feature"}, set(), set(),
+                                   lambda feature: feature["pop"] > 2),
+    "get_feature": ({"pop"}, {"get_feature", "attribute"}, set(), lambda feature: feature["pop"] > 4),
+    "overlay": (set(), {"overlay_intersects"}, set(), lambda feature: feature["pop"] > 4),
+    "layer_count": ({"pop"}, {"layer_property"}, set(), lambda feature: feature["pop"] > 4),
+    "evaluated": ({"pop"}, {"eval"}, set(), lambda feature: feature["pop"] > 4),
+    "feature_id_function": (set(), {"feature_id"}, set(), lambda feature: feature["fid"] > 2),
+    "current_feature": (set(), {"$currentfeature", "attribute"}, set(), lambda feature: feature["fid"] > 2),
+    "feature_variable": (set(), {"var", "attribute"}, {"feature"}, lambda feature: feature["fid"] > 2),
     "relation_sum": ({"pop"}, {"relation_aggregate", "abs"}, set(), lambda feature: feature["pop"] > 4),
 }
 # QGIS function -> its groups (QgsExpression.Functions()[i].groups())
 GROUPS = {"mean": ["Aggregates"], "relation_aggregate": ["Aggregates"], "abs": ["Math"], "is_selected": ["Record"],
           "num_selected": ["Record"], "get_feature_by_id": ["Record"], "attribute": ["Record"], "var": ["General"],
-          "$id": ["Record"]}
+          "$id": ["Record"], "get_feature": ["Record"], "overlay_intersects": ["GeometryGroup"],
+          "layer_property": ["Map Layers"], "eval": ["General"], "feature_id": ["Record"],
+          "$currentfeature": ["Record"]}
 
 
 class _Fields:
@@ -58,8 +71,10 @@ class _Fields:
 class _Layer:
     """A layer of rows {fid, pop}: ``shown`` are the fids its subset keeps."""
 
-    def __init__(self, name, rows, subset="", shown=None, fields=("fid", "pop"), editable=False, wkb=3):
+    def __init__(self, name, rows, subset="", shown=None, fields=("fid", "pop"), editable=False, wkb=3,
+                 primary_key=(0,)):
         self._name, self._rows, self._subset, self._editable, self._wkb = name, rows, subset, editable, wkb
+        self._primary_key = primary_key
         self._shown = set(shown) if shown is not None else {row["fid"] for row in rows}
         self._fields = _Fields(fields)
         self.reads = []
@@ -75,6 +90,11 @@ class _Layer:
 
     def wkbType(self):
         return self._wkb
+
+    def primaryKeyAttributes(self):
+        if self._primary_key is RuntimeError:
+            raise RuntimeError("no primary key information")
+        return list(self._primary_key)
 
     def fields(self):
         return self._fields
@@ -277,6 +297,7 @@ def test_a_field_the_copy_lacks_gives_no_list(translation, monkeypatch, text, fi
     with pytest.raises(translation.Unsupported):
         _hybrid(translation, layer, text, whole_layer=True)
     assert copy.reads == [] and layer.reads == []
+    assert translation.copies == [] and translation.probe.counted == []  # not opened, not counted (review 2)
 
 
 def test_every_attribute_is_read_on_a_copy_with_the_same_fields(translation, monkeypatch):
@@ -311,7 +332,11 @@ def test_an_aggregate_is_never_mixed_with_keys_of_the_whole_layer(translation, m
         '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)')
 
 
-@pytest.mark.parametrize("text", ["by_id", "selected", "selected_count", "by_feature_id", "at_id"])
+FEATURE_ID_READERS = ["by_id", "selected", "selected_count", "by_feature_id", "at_id", "feature_id_function",
+                      "current_feature", "feature_variable"]
+
+
+@pytest.mark.parametrize("text", FEATURE_ID_READERS)
 def test_the_feature_id_of_a_postgresql_copy_is_never_read(translation, monkeypatch, text):
     translation.dialect = translation.POSTGRESQL
     _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
@@ -324,12 +349,52 @@ def test_the_feature_id_of_a_postgresql_copy_is_never_read(translation, monkeypa
     assert _hybrid(translation, layer, "by_id") == '"fid" IS NOT NULL AND "fid" IN (3, 4, 5)'
 
 
-@pytest.mark.parametrize("text", ["by_id", "selected"])
+@pytest.mark.parametrize("text", FEATURE_ID_READERS)
+def test_the_feature_id_of_a_layer_without_a_key_column_is_never_read_on_a_copy(translation, monkeypatch, text):
+    """A view without a first integer column: ids 0, 1, 2... that change under a filter (primaryKeyAttributes empty)."""
+    _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
+
+    for primary_key in ((), RuntimeError):  # none, or a provider that does not say
+        with pytest.raises(translation.Unsupported):
+            _hybrid(translation, _filtered_layer(primary_key=primary_key), text, whole_layer=True)
+    assert translation.copies == []
+    # what does not read the id is read on the copy as before
+    assert _hybrid(translation, _filtered_layer(primary_key=()), "big", whole_layer=True) == (
+        '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)')
+
+
+@pytest.mark.parametrize("text", [text for text in FEATURE_ID_READERS if text != "by_feature_id"])
 def test_the_feature_id_of_a_geopackage_copy_is_its_fid(translation, monkeypatch, text):
+    """The identifier is a column of the table (primaryKeyAttributes): the copy gives the same ids."""
     _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
 
     assert _hybrid(translation, _filtered_layer(), text, whole_layer=True) == (
         '"fid" IS NOT NULL AND "fid" IN (3, 4, 5)')
+
+
+@pytest.mark.parametrize("dialect", ["sqlite", "postgresql"])
+@pytest.mark.parametrize("text", ["get_feature", "overlay", "layer_count", "evaluated", "by_feature_id"])
+def test_a_function_reading_a_layer_is_never_evaluated_on_a_copy(translation, monkeypatch, dialect, text):
+    """``get_feature(@layer, ...)``, ``overlay_*``, ``layer_property`` and ``eval`` read the layer through its subset."""
+    translation.dialect = dialect
+    _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS))
+
+    with pytest.raises(translation.Unsupported, match="reads a layer|feature id"):
+        _hybrid(translation, _filtered_layer(), text, whole_layer=True)
+    assert translation.copies == [] and translation.probe.counted == []
+    if text != "by_feature_id":  # through the layer itself (AND with its subset), nothing differs from the first filter
+        assert _hybrid(translation, _filtered_layer(), text) == '"fid" IS NOT NULL AND "fid" IN (2)'
+
+
+@pytest.mark.parametrize("dialect", ["sqlite", "postgresql"])
+def test_a_field_named_like_a_function_is_no_function(translation, monkeypatch, dialect):
+    translation.dialect = dialect
+    names = ("fid", "pop", "is_selected", "mean", "eval", "get_feature")
+    _with_copy(translation, monkeypatch, _Layer("zones (unfiltered)", ROWS, fields=names))
+
+    assert _hybrid(translation, _filtered_layer(fields=names),
+                   "field_named_like_functions", whole_layer=True) == '"fid" IS NOT NULL AND "fid" IN (2, 3, 5)'
+    assert translation.copies == ["zones"]
 
 
 def test_under_or_every_key_the_expression_keeps_is_listed(translation, monkeypatch):
