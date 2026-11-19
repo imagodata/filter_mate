@@ -29,25 +29,34 @@ from unittest.mock import MagicMock
 import pytest
 
 
-# Snapshot of `sys.modules` keys this conftest mutates, so we can restore the
-# original state after the directory's tests finish. Without this, the
-# ``core``/``core.tasks`` aliases the conftest installs leak into sibling
-# directories' tests and break their imports — that was the root cause of
-# issue #42 (test-order pollution).
-_MUTATED_KEYS = (
-    'core',
-    'core.tasks',
-    'core.tasks.cleanup_handler',
-    'core.tasks.export_handler',
-    'core.tasks.geometry_handler',
-    'core.tasks.initialization_handler',
-    'core.tasks.source_geometry_preparer',
-    'core.tasks.subset_management_handler',
-    'core.tasks.expression_evaluation_task',
-    'core.tasks.v3_bridge_handler',
-    'core.tasks.task_completion_handler',
-)
-_PRE_SETUP_SNAPSHOT: dict = {}
+# 2026-11-18: what this conftest puts in ``sys.modules`` (the ``core`` / ``core.tasks`` aliases, the
+# ``filter_mate`` package and its mocked sub-modules, the handler modules) is in place only while this
+# directory's test modules are imported (collection) and while its tests run; the entries as they were
+# are put back after each. Installed at import time and restored only at the end of the session (#42),
+# they leaked into the tests collected and run after this directory: ``core`` pointed at an empty
+# package, and ``tests/unit/core/tasks`` run before ``tests/unit/infrastructure/database`` failed 40
+# tests there on "No module named 'core.domain'".
+_INSTALLED: dict = {}
+
+
+def _ours(key):
+    """A ``sys.modules`` key of the namespaces this conftest stands in for."""
+    return key in ('core', 'filter_mate') or key.startswith(('core.', 'filter_mate.'))
+
+
+def _install():
+    """Put this conftest's modules in place; returns the entries they replace, to restore()."""
+    saved = {key: module for key, module in sys.modules.items() if _ours(key)}
+    sys.modules.update(_INSTALLED)
+    return saved
+
+
+def _restore(saved):
+    """Put back the entries of these namespaces as they were before _install()."""
+    for key in [key for key in sys.modules if _ours(key) and key not in saved]:
+        del sys.modules[key]
+    sys.modules.update(saved)
+
 
 # Strong references to the canonical handler modules loaded by
 # ``_setup_handler_mocks``. Sibling test directories can re-trigger Python's
@@ -77,12 +86,6 @@ def _setup_handler_mocks():
     if getattr(_setup_handler_mocks, '_done', False):
         return
     _setup_handler_mocks._done = True
-
-    # Snapshot pre-existing entries for the keys we're about to mutate so a
-    # session-end fixture can restore them. Captures None for keys not yet
-    # in sys.modules (i.e. "delete on teardown").
-    for key in _MUTATED_KEYS:
-        _PRE_SETUP_SNAPSHOT[key] = sys.modules.get(key)
 
     # Logger and ENV mocks
     mock_logger = MagicMock()
@@ -212,9 +215,10 @@ def _setup_handler_mocks():
         f'{ROOT}.core.tasks.builders.subset_string_builder': MagicMock(),
     }
 
+    # 2026-11-18: always ours (they are put back after this directory): an entry left by a module
+    # collected before, a stub of history_repository without note_history_insert, failed the handler.
     for mod_name, mock_obj in fm_modules.items():
-        if mod_name not in sys.modules:
-            sys.modules[mod_name] = mock_obj
+        sys.modules[mod_name] = mock_obj
 
     # ---------------------------------------------------------------
     # Load handler modules using importlib with proper __package__
@@ -281,7 +285,27 @@ def _setup_handler_mocks():
 # Run at import time so that test files in this directory can use
 # ``from core.tasks.X import Y`` inside setup methods. The setup is guarded
 # by `_setup_handler_mocks._done` so repeat invocations are no-ops.
+# 2026-11-18: the tree the handlers were loaded in is recorded, then the previous entries are put
+# back at once (see _INSTALLED).
+_before_setup = {key: module for key, module in sys.modules.items() if _ours(key)}
 _setup_handler_mocks()
+_INSTALLED.update({key: module for key, module in sys.modules.items() if _ours(key)})  # the handlers' whole tree
+_restore(_before_setup)
+del _before_setup
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_make_collect_report(collector):
+    """Import this directory's test modules with the conftest's modules in place (2026-11-18).
+
+    Called for the collectors of this directory only (conftest hooks follow the node's path).
+    """
+    saved = _install() if isinstance(collector, pytest.Module) else None
+    try:
+        yield
+    finally:
+        if saved is not None:
+            _restore(saved)
 
 
 def _reassert_handler_aliases():
@@ -331,26 +355,17 @@ def _reassert_handler_aliases():
                     setattr(canonical, attr_name, attr_value)
 
 
+@pytest.fixture(scope='package', autouse=True)
+def _handler_modules_in_place():
+    """The conftest's modules in place while this directory's tests run, then put back (2026-11-18)."""
+    saved = _install()
+    yield
+    _restore(saved)
+
+
 @pytest.fixture(autouse=True)
 def _refresh_handler_aliases():
     """Run before each test in this directory to defend against alias
     corruption by sibling test directories (#42)."""
     _reassert_handler_aliases()
     yield
-
-
-@pytest.fixture(scope='session', autouse=True)
-def _restore_core_aliases_after_tasks_tests():
-    """Restore the snapshot of ``sys.modules`` keys this conftest mutated.
-
-    Runs once at session end. Removes the leak documented in
-    ``_setup_handler_mocks()``.
-    """
-    yield
-    if not _PRE_SETUP_SNAPSHOT:
-        return
-    for key, original in _PRE_SETUP_SNAPSHOT.items():
-        if original is None:
-            sys.modules.pop(key, None)
-        else:
-            sys.modules[key] = original

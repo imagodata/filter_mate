@@ -252,6 +252,38 @@ def _note_refused(refusals: Optional[List[Tuple[str, str, str]]], layer: Any, re
     refusals.append((layer_id, name, reason))
 
 
+def _layer_gone(layer: Any) -> bool:
+    """True once the C++ object of the layer is deleted."""
+    try:
+        layer.id()
+        return False
+    except RuntimeError:
+        return True
+
+
+def _invalid_layer_reason() -> str:
+    """The reason of a filter not set on an invalid layer (a message already translated, reused)."""
+    # 2026-11-19: the sentence of the dock (translated in the 34 catalogs) that only says the layer is
+    # invalid; the one of FilterApplicationService ended with "Operation cancelled." while the other
+    # layers were filtered.
+    return QCoreApplication.translate(
+        "FilterMateDockWidget", "The selected layer is invalid or its source cannot be found.")
+
+
+def _note_invalid_layer(failures: Optional[List[str]], refusals: Optional[List[Tuple[str, str, str]]],
+                        layer: Any) -> None:
+    """A layer invalid when its subset was to be set: a refusal, logged."""
+    reason = _invalid_layer_reason()
+    try:
+        name = layer.name() if layer is not None else 'Unknown'
+    except (RuntimeError, AttributeError):
+        name = 'Unknown'
+    logger.warning(f"  ✗ Filter not set, layer invalid: {name}")
+    if failures is not None:
+        failures.append(f"{name}: {reason}")
+    _note_refused(refusals, layer, reason)
+
+
 def _subset_failure_watch(layer: Any):
     """A SubsetFailureWatch for the layer (see adapters/qgis/subset_failure_reason.py)."""
     try:
@@ -267,6 +299,8 @@ def apply_pending_subset_requests(
     safe_set_subset_fn: Callable[[Any, str], bool],  # Callable[[QgsVectorLayer, str], bool]
     failures: Optional[List[str]] = None,
     refusals: Optional[List[Tuple[str, str, str]]] = None,
+    deferred: Optional[List[str]] = None,
+    on_deferred_done: Optional[Callable[[List[Tuple[str, str, str]]], None]] = None,
 ) -> int:
     """
     Apply pending subset string requests on main thread.
@@ -283,6 +317,10 @@ def apply_pending_subset_requests(
         refusals: When given, receives (layer id, layer name, reason) per refused
             filter (2026-11-16: its filter history is put back, the warning groups
             the layers by reason)
+        deferred: When given, receives the id of each layer whose subset (over 1 MB)
+            is set later, out of this call (2026-11-18)
+        on_deferred_done: Called once those subsets are set, with the (layer id, layer
+            name, reason) of those refused (2026-11-18)
 
     Returns:
         int: Number of successfully applied filters
@@ -368,6 +406,9 @@ def apply_pending_subset_requests(
     for layer, expression in pending_requests:
         layer_started = _perf_time.perf_counter()
         phase_details = ''
+        # 2026-11-18: the subset is on the layer (set now or already there): what fails after it
+        # (reload, repaint) is no refusal (its history was put back, "previous filter kept" said).
+        in_place = False
         try:
 
             if not layer or not is_valid_layer(layer):
@@ -375,6 +416,9 @@ def apply_pending_subset_requests(
                     f"finished() ✗ Layer invalid: {layer.name() if layer else 'None'}",
                     "FilterMate", Qgis.MessageLevel.Warning
                 )
+                # 2026-11-18: noted as refused (its filter is not set, its history goes back): skipped
+                # in silence, a task whose layers were all invalid said "Layer(s) filtered".
+                _note_invalid_layer(failures, refusals, layer)
                 continue
 
             # PERF 2026-09-12: the fixed 0.2-0.5 s pause between layers of the
@@ -396,6 +440,7 @@ def apply_pending_subset_requests(
 
             # Check if filter already applied
             if current_subset.strip() == expression_str.strip():
+                in_place = True
                 # Filter already applied. PERF 2026-09-12: same rules as a new
                 # filter below - no reload() on PostgreSQL/OGR (a reload reopens
                 # a GeoPackage and forces a full recount), reload kept on
@@ -448,6 +493,7 @@ def apply_pending_subset_requests(
                         import time as _time
                         _time.sleep(0.3)
                         success = safe_set_subset_fn(layer, expression_str)
+                    in_place = bool(success)
 
                     extent_fallback = _extent_fallback()
                     if success and extent_fallback is not None:
@@ -458,7 +504,7 @@ def apply_pending_subset_requests(
                         # that case is set instead, and said: the layer is filtered, not left whole with an error.
                         by_extent = extent_fallback.take(layer.id(), expression_str)
                         if by_extent and safe_set_subset_fn(layer, by_extent):
-                            success = True
+                            success = in_place = True
                             expression_str = by_extent
                             _say_cut_by_extent(layer, by_extent)
 
@@ -544,15 +590,21 @@ def apply_pending_subset_requests(
 
         except Exception as e:  # catch-all safety net: subset application must not crash finished()
             import traceback
-            logger.error(f"  ✗ Error applying subset string: {e}")
-            logger.error(f"    → Traceback: {traceback.format_exc()}")
-            QgsMessageLog.logMessage(
-                f"finished() ✗ Exception: {layer.name() if layer else 'Unknown'} - {str(e)}",
-                "FilterMate", Qgis.MessageLevel.Critical
-            )
-            if failures is not None:
-                failures.append(f"{layer.name() if layer else 'Unknown'}: {e}")
-            _note_refused(refusals, layer, str(e))
+            if in_place:
+                # Counted where the branch ends, which the exception skipped
+                logger.warning(f"  ⚠️ Subset set, but the refresh after it failed: {e}")
+                logger.debug(f"    → Traceback: {traceback.format_exc()}")
+                applied_count += 1
+            else:
+                logger.error(f"  ✗ Error applying subset string: {e}")
+                logger.error(f"    → Traceback: {traceback.format_exc()}")
+                QgsMessageLog.logMessage(
+                    f"finished() ✗ Exception: {layer.name() if layer else 'Unknown'} - {str(e)}",
+                    "FilterMate", Qgis.MessageLevel.Critical
+                )
+                if failures is not None:
+                    failures.append(f"{layer.name() if layer else 'Unknown'}: {e}")
+                _note_refused(refusals, layer, str(e))
 
         # Track last-touched DB path so the next iteration knows whether the
         # lock-error retry applies (same shared SQLite file).
@@ -572,7 +624,13 @@ def apply_pending_subset_requests(
     # Handle large expressions with deferred application
     if large_expressions:
         logger.info(f"  📦 Applying {len(large_expressions)} large expressions with deferred processing")
-        _schedule_deferred_filter_application(large_expressions, safe_set_subset_fn)
+        if deferred is not None:
+            for lyr, _expr in large_expressions:
+                try:
+                    deferred.append(lyr.id())
+                except (RuntimeError, AttributeError):
+                    deferred.append('')
+        _schedule_deferred_filter_application(large_expressions, safe_set_subset_fn, on_done=on_deferred_done)
 
     perf_mark_end("apply_subsets", f"{applied_count} layer(s) on the main thread")
     return applied_count
@@ -580,7 +638,8 @@ def apply_pending_subset_requests(
 
 def _schedule_deferred_filter_application(
     large_expressions: List[Tuple[Any, str]],  # List[Tuple[QgsVectorLayer, str]]
-    safe_set_subset_fn: Callable[[Any, str], bool]  # Callable[[QgsVectorLayer, str], bool]
+    safe_set_subset_fn: Callable[[Any, str], bool],  # Callable[[QgsVectorLayer, str], bool]
+    on_done: Optional[Callable[[List[Tuple[str, str, str]]], None]] = None,
 ) -> None:
     """
     Schedule deferred application of large filter expressions.
@@ -590,39 +649,66 @@ def _schedule_deferred_filter_application(
     Args:
         large_expressions: List of (layer, expression) tuples with large expressions
         safe_set_subset_fn: Function to safely set subset string
+        on_done: Called at the end with the (layer id, layer name, reason) of the
+            refused filters (2026-11-18: their history is put back, the views they
+            read kept, as for the filters set in the loop)
     """
     def apply_deferred_filters():
         """Apply large filter expressions with UI breathing room."""
+        refused: List[Tuple[str, str, str]] = []
         for lyr, expr in large_expressions:
+            in_place = False
+            # 2026-11-19: a layer removed from the project since finished() is no refusal (nothing to keep
+            # or to put back, and neither id nor name to say): left out, as finished() leaves out the
+            # targets removed during the task.
+            if lyr is not None and _layer_gone(lyr):
+                logger.info("Deferred filter dropped: its layer was removed from the project")
+                continue
             try:
                 if lyr and is_valid_layer(lyr):
-                    success = safe_set_subset_fn(lyr, expr)
-                    if success:
-                        lyr.triggerRepaint()
-                        QgsMessageLog.logMessage(
-                            f"finished() ✓ Deferred: {lyr.name()} → (count pending)",
-                            "FilterMate", Qgis.MessageLevel.Info
+                    watch = _subset_failure_watch(lyr)
+                    with watch:
+                        success = safe_set_subset_fn(lyr, expr)
+                    in_place = bool(success)
+                    reason = '' if success else watch.reason()
+                else:
+                    # 2026-11-18: invalid by now: refused, as in the loop (it was skipped in silence)
+                    success, reason = False, _invalid_layer_reason()
+                if success:
+                    lyr.triggerRepaint()
+                    QgsMessageLog.logMessage(
+                        f"finished() ✓ Deferred: {lyr.name()} → (count pending)",
+                        "FilterMate", Qgis.MessageLevel.Info
+                    )
+                else:
+                    logger.error(f"Failed to apply deferred filter to {lyr.name()}")
+                    _note_refused(refused, lyr, reason)
+                    # 2026-10-17: deferred after the task messages: say it here
+                    try:
+                        iface.messageBar().pushWarning(
+                            "FilterMate",
+                            QCoreApplication.translate(
+                                "TaskCompletionHandler", "The filter of {0} could not be applied; it keeps its previous filter."
+                            ).format(lyr.name())
                         )
-                    else:
-                        logger.error(f"Failed to apply deferred filter to {lyr.name()}")
-                        # 2026-10-17: deferred after the task messages: say it here
-                        try:
-                            iface.messageBar().pushWarning(
-                                "FilterMate",
-                                QCoreApplication.translate(
-                                    "TaskCompletionHandler", "The filter of {0} could not be applied; it keeps its previous filter."
-                                ).format(lyr.name())
-                            )
-                        except (RuntimeError, AttributeError):
-                            pass
-            except (RuntimeError, AttributeError, ValueError) as e:
+                    except (RuntimeError, AttributeError):
+                        pass
+            except Exception as e:  # catch-all safety net: a timer slot must reach on_done whatever one layer raises
                 logger.error(f"Error applying deferred filter: {e}")
+                if not in_place:
+                    _note_refused(refused, lyr, str(e))
 
         # Final canvas refresh
         try:
             iface.mapCanvas().refresh()
         except (RuntimeError, AttributeError):
             pass
+
+        if on_done is not None:
+            try:
+                on_done(refused)
+            except Exception as e:  # catch-all safety net: a timer slot must not raise
+                logger.warning(f"End of the deferred filters not handled: {e}")
 
     # Defer to allow UI to breathe
     QTimer.singleShot(100, apply_deferred_filters)
