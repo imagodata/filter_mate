@@ -2026,6 +2026,166 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Ajoute les communes depuis data.gouv.fr</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="106"/>
+        <source>Describe the fields of the active layer</source>
+        <translation>Décrire les champs de la couche active</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="109"/>
+        <source>Keep only the features visible on the map</source>
+        <translation>Garder les entités visibles sur la carte</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="110"/>
+        <source>Color the active layer by its main field</source>
+        <translation>Colorer la couche active selon son champ principal</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="111"/>
+        <source>Label the active layer with its names</source>
+        <translation>Étiqueter la couche active avec ses noms</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="112"/>
+        <source>Export the filtered layers to a GeoPackage</source>
+        <translation>Exporter les couches filtrées en GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="113"/>
+        <source>Make a relief map of this area with contours</source>
+        <translation>Faire une carte du relief ici, avec les courbes</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="114"/>
+        <source>Add the elevation of the map view</source>
+        <translation>Ajouter l'altitude de la vue de la carte</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="115"/>
+        <source>How many people live in the selected area?</source>
+        <translation>Combien d'habitants dans la zone sélectionnée ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="116"/>
+        <source>Add a population grid of the map view</source>
+        <translation>Ajouter une grille de population de la vue</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="117"/>
+        <source>Add the cafés here from OpenStreetMap</source>
+        <translation>Ajouter les cafés d'ici depuis OpenStreetMap</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="118"/>
+        <source>Add the cycle paths of the map view</source>
+        <translation>Ajouter les pistes cyclables de la vue</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="119"/>
+        <source>Add the trees and hedges of this area</source>
+        <translation>Ajouter les arbres et les haies de cette zone</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="120"/>
+        <source>Put a dark basemap under my layers</source>
+        <translation>Mettre un fond de carte sombre sous mes couches</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="121"/>
+        <source>Find a cloud-free Sentinel-2 image here</source>
+        <translation>Trouver une image Sentinel-2 sans nuages ici</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="122"/>
+        <source>Zoom to Central Park in New York</source>
+        <translation>Zoomer sur Central Park à New York</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="123"/>
+        <source>Search Opendatasoft for public toilets</source>
+        <translation>Chercher les toilettes publiques sur Opendatasoft</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="124"/>
+        <source>Find unemployment by region on Eurostat</source>
+        <translation>Trouver le chômage par région sur Eurostat</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="126"/>
+        <source>Find bike-share stations on data.gouv.fr</source>
+        <translation>Trouver les stations de vélos sur data.gouv.fr</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="127"/>
+        <source>Add the IGN buildings of the map view</source>
+        <translation>Ajouter les bâtiments IGN de la vue</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="128"/>
+        <source>Add the 1950s aerial photos of this area</source>
+        <translation>Ajouter les photos aériennes des années 1950 ici</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="129"/>
+        <source>Add the flood zones of this area</source>
+        <translation>Ajouter les zones inondables d'ici</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="130"/>
+        <source>Add the clay shrink-swell hazard map</source>
+        <translation>Ajouter l'aléa retrait-gonflement des argiles</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="131"/>
+        <source>Zoom to the town hall of Toulouse</source>
+        <translation>Zoomer sur la mairie de Toulouse</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="132"/>
+        <source>Find flood risk data on data.gov.uk</source>
+        <translation>Trouver le risque d'inondation sur data.gov.uk</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="133"/>
+        <source>Find park data on open.canada.ca</source>
+        <translation>Trouver les données des parcs sur open.canada.ca</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="134"/>
+        <source>Find bushfire data on data.gov.au</source>
+        <translation>Trouver les feux de brousse sur data.gov.au</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="135"/>
+        <source>Search GovData for charging stations</source>
+        <translation>Chercher les bornes de recharge sur GovData</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="136"/>
+        <source>Search dati.gov.it for school buildings</source>
+        <translation>Chercher les écoles sur dati.gov.it</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="137"/>
+        <source>Search data.overheid.nl for bike parking</source>
+        <translation>Chercher les parkings vélo sur data.overheid.nl</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="138"/>
+        <source>Search G-Spatial for evacuation shelters</source>
+        <translation>Chercher les abris d'évacuation sur G-Spatial</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="139"/>
+        <source>Add the municipalities of Brazil from IBGE</source>
+        <translation>Ajouter les communes du Brésil depuis l'IBGE</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="140"/>
+        <source>Add the municipalities of Poland from PRG</source>
+        <translation>Ajouter les communes de Pologne depuis PRG</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="195"/>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Ask for a filter…</source>

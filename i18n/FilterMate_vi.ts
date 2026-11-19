@@ -2016,6 +2016,166 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Thêm các xã từ data.gouv.fr</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="106"/>
+        <source>Describe the fields of the active layer</source>
+        <translation>Mô tả các trường của lớp hiện tại</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="109"/>
+        <source>Keep only the features visible on the map</source>
+        <translation>Chỉ giữ lại các đối tượng hiển thị trên bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="110"/>
+        <source>Color the active layer by its main field</source>
+        <translation>Tô màu lớp hiện tại theo trường chính</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="111"/>
+        <source>Label the active layer with its names</source>
+        <translation>Gắn nhãn lớp hiện tại bằng tên</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="112"/>
+        <source>Export the filtered layers to a GeoPackage</source>
+        <translation>Xuất các lớp đã lọc sang GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="113"/>
+        <source>Make a relief map of this area with contours</source>
+        <translation>Tạo bản đồ địa hình khu vực này kèm đường đồng mức</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="114"/>
+        <source>Add the elevation of the map view</source>
+        <translation>Thêm độ cao của chế độ xem bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="115"/>
+        <source>How many people live in the selected area?</source>
+        <translation>Có bao nhiêu người sống trong khu vực đã chọn?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="116"/>
+        <source>Add a population grid of the map view</source>
+        <translation>Thêm lưới dân số của chế độ xem bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="117"/>
+        <source>Add the cafés here from OpenStreetMap</source>
+        <translation>Thêm các quán cà phê ở đây từ OpenStreetMap</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="118"/>
+        <source>Add the cycle paths of the map view</source>
+        <translation>Thêm các đường dành cho xe đạp trong chế độ xem bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="119"/>
+        <source>Add the trees and hedges of this area</source>
+        <translation>Thêm cây và hàng rào cây của khu vực này</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="120"/>
+        <source>Put a dark basemap under my layers</source>
+        <translation>Đặt bản đồ nền tối bên dưới các lớp của tôi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="121"/>
+        <source>Find a cloud-free Sentinel-2 image here</source>
+        <translation>Tìm ảnh Sentinel-2 không có mây ở đây</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="122"/>
+        <source>Zoom to Central Park in New York</source>
+        <translation>Phóng tới Central Park ở New York</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="123"/>
+        <source>Search Opendatasoft for public toilets</source>
+        <translation>Tìm kiếm nhà vệ sinh công cộng trên Opendatasoft</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="124"/>
+        <source>Find unemployment by region on Eurostat</source>
+        <translation>Tìm tỷ lệ thất nghiệp theo vùng trên Eurostat</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="126"/>
+        <source>Find bike-share stations on data.gouv.fr</source>
+        <translation>Tìm các trạm xe đạp chia sẻ trên data.gouv.fr</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="127"/>
+        <source>Add the IGN buildings of the map view</source>
+        <translation>Thêm các tòa nhà IGN trong chế độ xem bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="128"/>
+        <source>Add the 1950s aerial photos of this area</source>
+        <translation>Thêm ảnh chụp từ trên không thập niên 1950 của khu vực này</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="129"/>
+        <source>Add the flood zones of this area</source>
+        <translation>Thêm các vùng ngập lụt của khu vực này</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="130"/>
+        <source>Add the clay shrink-swell hazard map</source>
+        <translation>Thêm bản đồ nguy cơ co ngót và trương nở của đất sét</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="131"/>
+        <source>Zoom to the town hall of Toulouse</source>
+        <translation>Phóng tới tòa thị chính Toulouse</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="132"/>
+        <source>Find flood risk data on data.gov.uk</source>
+        <translation>Tìm dữ liệu rủi ro lũ lụt trên data.gov.uk</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="133"/>
+        <source>Find park data on open.canada.ca</source>
+        <translation>Tìm dữ liệu công viên trên open.canada.ca</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="134"/>
+        <source>Find bushfire data on data.gov.au</source>
+        <translation>Tìm dữ liệu cháy rừng trên data.gov.au</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="135"/>
+        <source>Search GovData for charging stations</source>
+        <translation>Tìm kiếm trạm sạc trên GovData</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="136"/>
+        <source>Search dati.gov.it for school buildings</source>
+        <translation>Tìm kiếm các tòa nhà trường học trên dati.gov.it</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="137"/>
+        <source>Search data.overheid.nl for bike parking</source>
+        <translation>Tìm kiếm bãi đỗ xe đạp trên data.overheid.nl</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="138"/>
+        <source>Search G-Spatial for evacuation shelters</source>
+        <translation>Tìm kiếm điểm sơ tán trên G-Spatial</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="139"/>
+        <source>Add the municipalities of Brazil from IBGE</source>
+        <translation>Thêm các đô thị của Brazil từ IBGE</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="140"/>
+        <source>Add the municipalities of Poland from PRG</source>
+        <translation>Thêm các đô thị của Ba Lan từ PRG</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="195"/>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Ask for a filter…</source>
