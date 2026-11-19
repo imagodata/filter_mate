@@ -11,7 +11,9 @@ import html
 import time
 from typing import List, Sequence, Tuple
 
-from qgis.PyQt.QtCore import QByteArray, QCoreApplication, QEvent, QSize, Qt, QTimer, QUrl, pyqtSignal
+from qgis.PyQt.QtCore import (
+    QByteArray, QCoreApplication, QEvent, QLocale, QSettings, QSize, Qt, QTimer, QUrl, pyqtSignal,
+)
 from qgis.PyQt.QtGui import QColor, QFont, QTextOption
 from qgis.PyQt.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
@@ -23,6 +25,7 @@ from qgis.PyQt.QtWidgets import (
 
 from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
+from ...core.agent.example_prompts import SHOWN as EXAMPLES_SHOWN, pick as pick_examples
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import (
     KIND_CKAN, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_WFS, KIND_WMS,
@@ -69,6 +72,8 @@ PULL_PERMILLE = 1000  # the progress bar of a download counts in thousandths: a 
 
 
 MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
+_LAST_EXAMPLES = "filter_mate/agent/last_examples"  # the keys of the requests seen last on the welcome
+EXAMPLES_SEEN_MS = 1500  # on screen this long, a set of requests counts as seen
 
 
 def _tr(text: str) -> str:
@@ -95,10 +100,104 @@ def preset_label(name: str) -> str:
     return translated.get(name) or PRESET_LABELS.get(name, name)
 
 
-def examples() -> Tuple[str, ...]:
-    """The requests offered on an empty conversation (mockup: Ready board), in the language of QGIS."""
-    return (_tr("Which layers are in this project?"), _tr("Keep the buildings taller than 15 m"),
-            _tr("Filter the roads inside the selected feature"), _tr("Add the municipalities from data.gouv.fr"))
+def example_text(key: str) -> str:
+    """A request of the welcome (core/agent/example_prompts.py), in the language of QGIS; "" for an unknown key."""
+    texts = {
+        "layers": _tr("Which layers are in this project?"),
+        "fields": _tr("Describe the fields of the active layer"),
+        "tall_buildings": _tr("Keep the buildings taller than 15 m"),
+        "roads_inside": _tr("Filter the roads inside the selected feature"),
+        "visible": _tr("Keep only the features visible on the map"),
+        "color_by": _tr("Color the active layer by its main field"),
+        "labels": _tr("Label the active layer with its names"),
+        "export_gpkg": _tr("Export the filtered layers to a GeoPackage"),
+        "relief": _tr("Make a relief map of this area with contours"),
+        "elevation_view": _tr("Add the elevation of the map view"),
+        "people_selected": _tr("How many people live in the selected area?"),
+        "population_grid": _tr("Add a population grid of the map view"),
+        "osm_cafes": _tr("Add the cafés here from OpenStreetMap"),
+        "osm_cycle": _tr("Add the cycle paths of the map view"),
+        "osm_trees": _tr("Add the trees and hedges of this area"),
+        "dark_basemap": _tr("Put a dark basemap under my layers"),
+        "sentinel": _tr("Find a cloud-free Sentinel-2 image here"),
+        "zoom_park": _tr("Zoom to Central Park in New York"),
+        "ods_toilets": _tr("Search Opendatasoft for public toilets"),
+        "eurostat": _tr("Find unemployment by region on Eurostat"),
+        "fr_communes": _tr("Add the municipalities from data.gouv.fr"),
+        "fr_bikes": _tr("Find bike-share stations on data.gouv.fr"),
+        "fr_buildings": _tr("Add the IGN buildings of the map view"),
+        "fr_photos_1950": _tr("Add the 1950s aerial photos of this area"),
+        "fr_flood": _tr("Add the flood zones of this area"),
+        "fr_clay": _tr("Add the clay shrink-swell hazard map"),
+        "fr_town_hall": _tr("Zoom to the town hall of Toulouse"),
+        "gb_flood": _tr("Find flood risk data on data.gov.uk"),
+        "ca_parks": _tr("Find park data on open.canada.ca"),
+        "au_bushfire": _tr("Find bushfire data on data.gov.au"),
+        "de_charging": _tr("Search GovData for charging stations"),
+        "it_schools": _tr("Search dati.gov.it for school buildings"),
+        "nl_bike_parking": _tr("Search data.overheid.nl for bike parking"),
+        "jp_shelters": _tr("Search G-Spatial for evacuation shelters"),
+        "br_municipalities": _tr("Add the municipalities of Brazil from IBGE"),
+        "pl_municipalities": _tr("Add the municipalities of Poland from PRG"),
+    }
+    return texts.get(key, "")
+
+
+def qgis_locale() -> str:
+    """The locale of QGIS (``fr_FR``, ``en_GB``), else of the system: it chooses the requests about a country."""
+    return str(QSettings().value("locale/userLocale", "") or "") or QLocale().name()
+
+
+def examples(previous: Sequence[str] = ()) -> Tuple[Tuple[str, str], ...]:
+    """``(key, text)`` of the requests offered on an empty conversation (mockup: Ready board), drawn again each time,
+    none of ``previous`` when the catalog allows it."""
+    return tuple((key, example_text(key)) for key in pick_examples(qgis_locale(), previous))
+
+
+class _WelcomePage(QWidget):
+    """The welcome of AGENT, which says when it comes on screen: its requests then count as seen."""
+
+    shown = pyqtSignal()
+
+    def showEvent(self, event) -> None:  # noqa: N802 - Qt name
+        super().showEvent(event)
+        self.shown.emit()
+
+
+class ExampleButton(QPushButton):
+    """A request of the welcome on one line, cut with … to the width of the dock (a translation can be longer than
+    the panel is wide, and a button wide as its text would widen the dock); the whole request in its tooltip, and
+    in the input line when clicked."""
+
+    _PADDING = 24  # the 10 px of the style sheet on each side, its border, and a margin
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self._request = ""
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+
+    def request(self) -> str:
+        return self._request
+
+    def set_request(self, text: str) -> None:
+        self._request = text
+        self.setToolTip(plain_tooltip(text))
+        self.setAccessibleName(text)  # the whole request, not the cut one
+        self._elide()
+
+    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt name
+        super().resizeEvent(event)
+        self._elide()
+
+    def changeEvent(self, event) -> None:  # noqa: N802 - Qt name
+        super().changeEvent(event)
+        if event.type() == QEvent.Type.FontChange:  # the style sheet of the theme sets the font after the text
+            self._elide()
+
+    def _elide(self) -> None:
+        room = max(self.width() - self._PADDING, 10)
+        # "&" doubled: a button reads it as the mark of a shortcut and hides it.
+        self.setText(self.fontMetrics().elidedText(self._request, Qt.TextElideMode.ElideRight, room).replace("&", "&&"))
 
 
 class AgentInput(QLineEdit):
@@ -624,7 +723,8 @@ class AgentPanel(QFrame):
             self.resend_requested.emit(str(items[0].data(_TURN_ROLE) or ""))
 
     def _build_welcome(self) -> QWidget:
-        page = QWidget(self)
+        page = _WelcomePage(self)
+        page.shown.connect(self._examples_on_screen)
         self.welcome_icon = QLabel(page)
         self.welcome_icon.setObjectName("label_agent_welcome_icon")
         self.welcome_icon.setFixedSize(WELCOME_ICON_SIZE, WELCOME_ICON_SIZE)
@@ -668,12 +768,15 @@ class AgentPanel(QFrame):
         layout.addSpacing(4)
         layout.addWidget(self.try_label)
         self.example_buttons = []
-        for text in examples():
-            button = QPushButton(text, page)
+        self.example_keys = ()
+        self._examples_seen = False
+        for _index in range(EXAMPLES_SHOWN):
+            button = ExampleButton(page)
             button.setObjectName("pushButton_agent_example")
-            button.clicked.connect(lambda _checked=False, value=text: self.use_example(value))
+            button.clicked.connect(lambda _checked=False, shown=button: self.use_example(shown.request()))
             layout.addWidget(button)
             self.example_buttons.append(button)
+        self.shuffle_examples()
         layout.addWidget(self.tour_button, 0, Qt.AlignmentFlag.AlignLeft)  # under what the welcome offers, either way
         layout.addStretch(1)
         self.set_ready(False)
@@ -900,11 +1003,53 @@ class AgentPanel(QFrame):
             self.send_button.setEnabled(ready or self._working)
         if hasattr(self, "try_label"):
             self.try_label.setVisible(ready)
-        for button in self.example_buttons if hasattr(self, "example_buttons") else ():
-            button.setVisible(ready)
+        if hasattr(self, "example_buttons"):
+            self._show_examples()
+            if ready:
+                self._examples_on_screen()  # the welcome may be there: its requests come in sight
         if hasattr(self, "destination"):
             self.destination.setText(_tr("Sent to: {}").format(destination) if ready and destination else "")
             self.destination.setVisible(bool(ready and destination))
+
+    def shuffle_examples(self) -> None:
+        """Other requests on the welcome, none of the set seen last (kept across sessions of QGIS).
+
+        A set nobody saw stays: the thread is cleared twice when QGIS starts or a project opens (the project closed,
+        then the one read), and a conversation restored hides the welcome. Drawing then would count as seen a set
+        that never was, and bring back the one seen before."""
+        if self.example_keys and not self._examples_seen:
+            return
+        value = QSettings().value(_LAST_EXAMPLES, "")
+        previous = list(value) if isinstance(value, (list, tuple)) else str(value or "").split(",")
+        drawn = examples([str(key) for key in previous])
+        self.example_keys = tuple(key for key, _text in drawn)
+        self._examples_seen = False
+        for index, button in enumerate(self.example_buttons):
+            if index < len(drawn):
+                button.set_request(drawn[index][1])
+            button.setProperty("fm_example_drawn", index < len(drawn))
+        self._show_examples()
+
+    def _examples_on_screen(self) -> None:
+        """The welcome may be on screen: its requests count as seen if they are still there in a moment. A set shown
+        for an instant (the thread cleared for the project closed, then for the one read) is not."""
+        if not self._examples_seen and self.example_keys:
+            keys = self.example_keys
+            QTimer.singleShot(EXAMPLES_SEEN_MS, lambda: self._examples_still_there(keys))
+
+    def _examples_still_there(self, keys) -> None:
+        try:
+            there = (keys == self.example_keys and self._ready and self.isVisible()
+                     and self.stack.currentIndex() == _WELCOME_PAGE)
+        except RuntimeError:  # the panel is gone with its dock
+            return
+        if there and not self._examples_seen:
+            self._examples_seen = True
+            QSettings().setValue(_LAST_EXAMPLES, ",".join(keys))
+
+    def _show_examples(self) -> None:
+        for button in self.example_buttons:
+            button.setVisible(bool(self._ready and button.property("fm_example_drawn")))
 
     def use_example(self, text: str) -> None:
         self.input.setText(text)
@@ -964,7 +1109,11 @@ class AgentPanel(QFrame):
         self.set_can_undo(False)
         self._in_answer = False
         self.set_status("")
+        if hasattr(self, "example_buttons"):
+            self.shuffle_examples()  # a new conversation offers other requests
         self.stack.setCurrentIndex(_WELCOME_PAGE)
+        if hasattr(self, "example_buttons"):
+            self._examples_on_screen()  # the welcome may have been on screen already: no show event then
 
     def end_answer(self) -> None:
         """What comes next starts on its own line."""
