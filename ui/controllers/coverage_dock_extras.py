@@ -960,9 +960,10 @@ class CoverageDockExtras(QObject):
         Called when a layer is shown (after the kind's own buttons were set) and when the setting changes, so the
         rail is laid out again at once (the spreader of mockup_layout follows every show / hide: no gap is left).
         A tool put on the map is put down before its button goes (a tool with no button to see would stay on the
-        map); a mode of the layer (sync, follow, link, preview) keeps its state, which the setting says.
+        map), and so is a mode of the layer (sync, follow, link, preview): turned off, and not turned on again by
+        another way while its button is hidden (the zone, the "more" menu).
         """
-        from .exploring_tool_choice import BUTTONS, MAP_TOOLS
+        from .exploring_tool_choice import BUTTONS, MAP_TOOLS, MODES
         kind = self._rail_kind
         hidden = self.hidden_tools(kind)
         for key, name in BUTTONS.get(kind, {}).items():
@@ -970,14 +971,14 @@ class CoverageDockExtras(QObject):
             if button is None:
                 continue
             if key in hidden:
-                if key in MAP_TOOLS:
+                if key in MAP_TOOLS or key in MODES:
                     self._guarded(self._put_tool_down, kind, key, button)
                 self._guarded(button.setVisible, False)
             else:
                 self._guarded(button.setVisible, True)
 
     def _put_tool_down(self, kind: str, key: str, button: Any) -> None:
-        """The tool of a button about to be hidden leaves the map."""
+        """The tool, or the mode, of a button about to be hidden is put down."""
         controller = self._controller
         if kind == 'point_cloud' and key == 'identify':  # the class pipette: its button is not a toggle
             if controller._tool_on_map(controller._class_tool) and controller._pc_pick_mode == 'class':
@@ -1298,7 +1299,7 @@ class CoverageDockExtras(QObject):
             ids = [feature.id() for feature in layer.getFeatures(request)
                    if feature.hasGeometry() and engine.intersects(feature.geometry().constGet())]
             select = getattr(dw, VECTOR_SELECT_BUTTON, None)
-            if select is not None and not select.isChecked():
+            if select is not None and not select.isChecked() and 'sync' not in self.hidden_tools('vector'):
                 select.setChecked(True)  # R2: the selection reaches the widgets; no map tool is forced
             layer.selectByIds(ids)
         except Exception as exc:
@@ -1382,7 +1383,7 @@ class CoverageDockExtras(QObject):
         if iface is not None and layer is not None:
             self._guarded(iface.setActiveLayer, layer)
         select = getattr(dw, VECTOR_SELECT_BUTTON, None)
-        if mode and select is not None and not select.isChecked():
+        if mode and select is not None and not select.isChecked() and 'sync' not in self.hidden_tools('vector'):
             select.setChecked(True)  # runs the dock handler: selection synced, rectangle tool on
         action.trigger()
 

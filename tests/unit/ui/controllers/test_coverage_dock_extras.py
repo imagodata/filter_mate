@@ -11,6 +11,7 @@ import importlib
 import pathlib
 import sys
 import types
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -950,15 +951,30 @@ class TestToolsPutDown:
         rail.dock.apply_tool_choice()
         assert released == [False] and not pipette.visible
 
-    def test_a_mode_keeps_its_state_when_its_button_goes(self, rail):
+    @pytest.mark.parametrize("kind, key, name", [
+        ("raster", "preview", "pushButton_checkable_exploring_selecting"),
+        ("point_cloud", "preview", "pushButton_checkable_exploring_selecting"),
+        ("vector", "sync", "pushButton_checkable_exploring_selecting"),
+        ("vector", "follow", "pushButton_checkable_exploring_tracking"),
+        ("vector", "link", "pushButton_checkable_exploring_linking_widgets"),
+        ("raster", "link", "pushButton_checkable_exploring_raster_link")])
+    def test_a_mode_is_turned_off_when_its_button_goes(self, rail, kind, key, name):
         released = []
+        button = rail.buttons[name]
+        button.slot = released.append
+        button.checked = True
+        rail.dock.dockwidget.CONFIG_DATA = _config(**{kind: key})
+        rail.dock._rail_kind = kind
+        rail.dock.apply_tool_choice()
+        assert released == [False] and not button.checked and not button.visible
+
+    def test_a_mode_whose_button_is_kept_is_left_on(self, rail):
         preview = rail.buttons["pushButton_checkable_exploring_selecting"]
-        preview.slot = released.append
         preview.checked = True
-        rail.dock.dockwidget.CONFIG_DATA = _config(raster="preview")
+        rail.dock.dockwidget.CONFIG_DATA = _config(raster="zoom")
         rail.dock._rail_kind = "raster"
         rail.dock.apply_tool_choice()
-        assert released == [] and preview.checked and not preview.visible
+        assert preview.checked and preview.visible
 
     def test_the_class_pipette_of_a_point_cloud_leaves_the_map(self, rail):
         calls = []
@@ -1045,3 +1061,44 @@ class TestSetToolShown:
         assert rail.dock.set_tool_shown("vector", "zoom", False) is False
         rail.dock.dockwidget._config_model_manager = None
         assert rail.dock.set_tool_shown("vector", "zoom", False) is False
+
+
+class TestNothingTurnsAHiddenModeOn:
+    """Sync hidden: the zone of a vector layer and "Select on the map" of the "more" menu no longer turn it on."""
+
+    @pytest.fixture
+    def vector(self, rail, monkeypatch):
+        core = sys.modules["qgis.core"]
+        monkeypatch.setattr(core, "QgsGeometry", MagicMock(), raising=False)
+        monkeypatch.setattr(core, "QgsFeatureRequest", MagicMock(), raising=False)
+        dock = rail.dock
+        dock.tr = lambda text, *_args: text
+        sync = rail.buttons["pushButton_checkable_exploring_selecting"]
+        layer = types.SimpleNamespace(getFeatures=lambda request: [], selectByIds=lambda ids: layer.selected.append(ids),
+                                      selected=[], crs=lambda: None)
+        dock.dockwidget.current_layer = layer
+        dock._rail_kind = "vector"
+        dock._shape_in_layer_crs = lambda geometry, layer: types.SimpleNamespace(
+            constGet=lambda: None, boundingBox=lambda: None)
+        triggered = []
+        dock._main_window_action = lambda names: types.SimpleNamespace(trigger=lambda: triggered.append(names))
+        rail.controller._iface = lambda: None
+        return types.SimpleNamespace(dock=dock, sync=sync, layer=layer, triggered=triggered)
+
+    def test_the_zone_turns_the_sync_on_while_its_button_is_shown(self, rail, vector):
+        vector.dock._on_vector_zone_drawn(object())
+        assert vector.sync.checked and vector.layer.selected == [[]]
+
+    def test_the_zone_leaves_the_sync_off_while_its_button_is_hidden(self, rail, vector):
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="sync")
+        vector.dock._on_vector_zone_drawn(object())
+        assert not vector.sync.checked and vector.layer.selected == [[]]  # the features are still selected
+
+    def test_the_more_menu_turns_the_sync_on_while_its_button_is_shown(self, rail, vector):
+        vector.dock._select_with_qgis(("selectRectangle",), mode=True)
+        assert vector.sync.checked and vector.triggered == [("selectRectangle",)]
+
+    def test_the_more_menu_leaves_the_sync_off_while_its_button_is_hidden(self, rail, vector):
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="sync")
+        vector.dock._select_with_qgis(("selectRectangle",), mode=True)
+        assert not vector.sync.checked and vector.triggered == [("selectRectangle",)]  # the QGIS tool still runs

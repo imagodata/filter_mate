@@ -52,9 +52,11 @@ BUTTONS: Dict[str, Dict[str, str]] = {
     },
 }
 
-# The buttons that start a tool on the map, which is put down when its button goes: the others (sync, follow, link,
-# preview) are modes of the layer, which keep their state while their button is hidden.
+# The buttons that start a tool on the map, and those that turn a mode of the layer on: when the button goes, the tool
+# is put down and the mode is turned off (a tool or a mode on with no button to show it, nor to put it off, is a
+# state nobody can see or change), and nothing turns it on again while the button is hidden.
 MAP_TOOLS = frozenset({'identify', 'pipette', 'detector', 'similar', 'object', 'value_pipette', 'zone'})
+MODES = frozenset({'sync', 'follow', 'link', 'preview'})
 
 
 def _tr(text: str) -> str:
