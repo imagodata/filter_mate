@@ -3064,3 +3064,110 @@ class TestPointCloudSourceFollowsTheSelection:
         layer = FakeLayer("p1", "pc", subset="Classification = 2")
         self._run(ctrl_module, monkeypatch, layer, "AND NOT", criteria="")
         assert jobs.created[0]["selection"] == "Classification = 2"
+
+
+class TestHiddenToolsAreNotArmed:
+    """A tool whose rail button the user hid is not put on the map by another way (a group chosen, a tool restored
+    with its layer): it would have no button to show it down, nor to put it off. The group stays selectable."""
+
+    def _controller(self, ctrl_module, layers, monkeypatch, kind, hidden):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._kind = ctrl_module_kind(ctrl_module, kind)
+        controller._active_layer = layers["r1" if kind == "raster" else "p1"]
+        controller._raster_panel = MagicMock()
+        controller._raster_panel.pick_target.return_value = "similar"
+        controller._pc_panel = MagicMock()
+        controller._extras = MagicMock()
+        rail_kind = "point_cloud" if kind == "pc" else kind
+        controller._extras.hidden_tools.side_effect = lambda k: frozenset(hidden) if k == rail_kind else frozenset()
+        controller._extras.zone_tool_on.return_value = False
+        monkeypatch.setattr(controller, "_iface", lambda: None)
+        return controller
+
+    # --- raster: the PIPETTE group, the state of the layer -----------------------------------------------------------
+
+    def test_the_pipette_group_chosen_arms_nothing_when_the_three_buttons_are_hidden(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch, "raster", {"pipette", "detector", "similar"})
+        controller._on_raster_mode_chosen("pipette")
+        assert controller._color_pick is False
+        controller._raster_panel.show_pipette_active.assert_not_called()
+        controller._extras.set_pipette_checked.assert_not_called()
+
+    def test_the_pipette_group_chosen_arms_the_tool_while_one_button_is_kept(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch, "raster", {"pipette", "similar"})
+        controller._on_raster_mode_chosen("pipette")
+        assert controller._color_pick is True
+        controller._raster_panel.show_pipette_active.assert_called_with(True)
+
+    def test_the_pipette_restored_with_its_layer_stays_off_when_its_buttons_are_hidden(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch, "raster", {"pipette", "detector", "similar"})
+        controller._restore_tool({"pipette_on": True, "pipette_target": "object"})
+        assert controller._color_pick is False
+        controller._raster_panel.show_pipette_active.assert_not_called()
+
+    def test_the_pipette_restored_with_its_layer_comes_back_when_a_button_is_kept(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch, "raster", {"pipette"})
+        controller._restore_tool({"pipette_on": True, "pipette_target": "object"})
+        assert controller._color_pick is True
+
+    def test_a_pipette_put_off_is_never_refused(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch, "raster", {"pipette", "detector", "similar"})
+        controller._color_pick = True
+        controller._on_color_pick_toggled(False)
+        assert controller._color_pick is False
+
+    # --- point cloud: the class and value pipettes, the detector ------------------------------------------------------
+
+    @pytest.mark.parametrize("group, hidden, mode", [("classes", {"identify"}, "class"), ("ranges", {"value_pipette"}, "value")])
+    def test_a_group_chosen_arms_its_pipette_only_when_its_button_is_shown(self, ctrl_module, layers, monkeypatch, group,
+                                                                           hidden, mode):
+        iface = MagicMock()
+        controller = self._controller(ctrl_module, layers, monkeypatch, "pc", set())
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        controller._extras.hidden_tools.side_effect = lambda k: frozenset(hidden) if k == "point_cloud" else frozenset()
+        controller._on_point_cloud_group_chosen(group)
+        assert controller._class_tool is None  # nothing was put on the map
+        controller._extras.hidden_tools.side_effect = lambda k: frozenset()
+        with pytest.raises(ImportError):  # shown: the picker is made (the tool class is not in this private package)
+            controller._on_point_cloud_group_chosen(group)
+
+    def test_the_detector_hidden_is_not_armed_by_the_target_menu_either(self, ctrl_module, layers, monkeypatch):
+        iface = MagicMock()
+        controller = self._controller(ctrl_module, layers, monkeypatch, "pc", {"object"})
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        controller._extras.hidden_tools.side_effect = lambda k: frozenset({"object"})
+        controller._pc_panel.set_object_target.return_value = False
+        controller._on_point_cloud_object_target("similar_objects")
+        assert controller._class_tool is None
+
+    @pytest.mark.parametrize("saved, hidden", [("class", {"identify"}), ("value", {"value_pipette"}),
+                                               ("object", {"object"}), ("similar", {"object"})])
+    def test_the_pipette_restored_with_its_layer_stays_off_when_its_button_is_hidden(self, ctrl_module, layers, monkeypatch,
+                                                                                    saved, hidden):
+        iface = MagicMock()
+        controller = self._controller(ctrl_module, layers, monkeypatch, "pc", hidden)
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        controller._extras.hidden_tools.side_effect = lambda k: frozenset(hidden)
+        controller._restore_tool({"class_pipette_on": True, "pc_tool": saved})
+        assert controller._class_tool is None
+
+    def test_the_picker_is_released_whatever_is_hidden(self, ctrl_module, layers, monkeypatch):
+        iface = MagicMock()
+        controller = self._controller(ctrl_module, layers, monkeypatch, "pc", {"identify", "object", "value_pipette"})
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        controller._on_class_pick_toggled(False)  # no tool: nothing to release, and no refusal either
+
+    def test_without_extras_nothing_is_hidden(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch, "pc", set())
+        controller._extras = None
+        assert controller._tool_hidden("identify", "point_cloud") is False
+        assert controller._pipette_hidden() is False
+
+    def test_the_preview_message_is_only_asked_when_the_preview_button_is_there(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch, "pc", {"preview"})
+        assert controller._tool_hidden("preview", "point_cloud") is True
+        assert controller._tool_hidden("preview", "raster") is False
+
+
+def ctrl_module_kind(ctrl_module, name):
+    return ctrl_module._test_kinds[name]

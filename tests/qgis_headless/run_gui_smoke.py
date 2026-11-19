@@ -5675,6 +5675,63 @@ def s_tools_cloud_check():
     return tools_pick('zones', coverage_page=False)
 
 
+def tools_on_map():
+    """The map tool of QGIS is one of the pickers of FilterMate (the pixel picker of a raster, the picker of a cloud)."""
+    ctrl = coverage()
+    tool = iface.mapCanvas().mapTool()
+    return tool is not None and tool in (ctrl._pixel_tool, ctrl._class_tool)
+
+
+def s_tools_groups_begin():
+    """A tool whose button is hidden is not put on the map by choosing its group (the group stays the active one)."""
+    apply_settings({TOOLS_PATH.format('raster'): 'pipette, detector, similar',
+                    TOOLS_PATH.format('point_cloud'): 'identify, value_pipette, object'})
+    return tools_pick('dem', coverage_page=True)
+
+
+def s_tools_groups_raster():
+    ctrl = coverage()
+    iface.mapCanvas().unsetMapTool(iface.mapCanvas().mapTool()) if iface.mapCanvas().mapTool() else None
+    ctrl._on_raster_mode_chosen('pipette')  # the click on the PIPETTE group
+    pump(200)
+    armed = ctrl._color_pick or tools_on_map()
+    check('tools: the PIPETTE group chosen puts no tool on the map when its three buttons are hidden',
+          not armed and ctrl._raster_panel.isVisible(), f"color_pick={ctrl._color_pick} on map={tools_on_map()}")
+    apply_settings({TOOLS_PATH.format('raster'): 'pipette, detector'})  # one button kept: the tool is armed, on a button
+    ctrl._on_raster_mode_chosen('pipette')
+    pump(200)
+    shown = [button for button in dock().widget_exploring_keys.findChildren(QPushButton)
+             if button.isVisibleTo(dock().widget_exploring_keys) and button.isChecked()]
+    check('tools: with one pipette button kept the group arms the tool, shown down on that button',
+          ctrl._color_pick and tools_on_map() and [b.objectName() for b in shown] ==
+          ['pushButton_checkable_exploring_raster_similar'], f"checked={[b.objectName() for b in shown]}")
+    ctrl._on_color_pick_toggled(False)
+    pump(100)
+    apply_settings({TOOLS_PATH.format('raster'): ''})
+    if not has_point_clouds():
+        return tools_pick('zones', coverage_page=False)
+    return tools_pick('cloud', coverage_page=True)
+
+
+def s_tools_groups_cloud():
+    if has_point_clouds():
+        ctrl = coverage()
+        for group in ('classes', 'ranges'):
+            ctrl._on_point_cloud_group_chosen(group)
+            pump(200)
+            check(f'tools: the {group} group chosen puts no picker on the map when its pipette button is hidden',
+                  not tools_on_map(), f"on map={tools_on_map()}")
+        apply_settings({TOOLS_PATH.format('point_cloud'): 'value_pipette, object'})
+        ctrl._on_point_cloud_group_chosen('classes')
+        pump(200)
+        check('tools: the classes group arms the class pipette again once its button is shown', tools_on_map()
+              and dock().pushButton_exploring_identify.isVisibleTo(dock().widget_exploring_keys), f"on map={tools_on_map()}")
+        ctrl._on_class_pick_toggled(False)
+        pump(100)
+        apply_settings({TOOLS_PATH.format('point_cloud'): ''})
+    return tools_pick('zones', coverage_page=False)
+
+
 def s_tools_live():
     """The setting changed while a layer is shown: the rail follows at once, with no restart."""
     tools_check('vector', 'vector (back on the layer)')
@@ -5800,7 +5857,8 @@ def s_tools_end():
     return tools_pick(TOOLS['layer'], coverage_page=(TOOLS['layer'] in ('dem', 'cloud')))
 
 
-TOOLS_STEPS = [s_tools_begin, s_tools_vector_check, s_tools_raster_check, s_tools_cloud_check, s_tools_live, s_tools_menu,
+TOOLS_STEPS = [s_tools_begin, s_tools_vector_check, s_tools_raster_check, s_tools_cloud_check, s_tools_groups_begin, s_tools_groups_raster,
+               s_tools_groups_cloud, s_tools_live, s_tools_menu,
                s_tools_wizard, s_tools_wizard_apply, s_tools_wizard_check, s_tools_end]
 
 

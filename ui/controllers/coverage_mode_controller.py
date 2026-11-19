@@ -1001,6 +1001,26 @@ class CoverageModeController(BaseController):
             except Exception as exc:
                 logger.debug(f"[FM5] panel state not restored: {exc}")
 
+    # The buttons of the rail the user hid (APP.DOCKWIDGET.EXPLORING_TOOLS): a tool whose button is hidden is never put
+    # on the map by another way (a group chosen, a tool restored with its layer, a menu): it would have no button to
+    # show it down, nor to put it off. The group itself stays selectable.
+    PC_TOOL_KEYS = {'class': 'identify', 'value': 'value_pipette', 'object': 'object', 'similar': 'object'}
+
+    def _tool_hidden(self, key: str, kind: str) -> bool:
+        """Whether the button named ``key`` of the rail of ``kind`` is hidden by the user's setting."""
+        extras = self._extras
+        if extras is None:
+            return False
+        try:
+            return key in extras.hidden_tools(kind)
+        except Exception as exc:
+            logger.debug(f"[FM5] tools of the rail not read: {exc}")
+            return False
+
+    def _pipette_hidden(self) -> bool:
+        """The three tools of the PIPETTE group of a raster have no button left on the rail."""
+        return all(self._tool_hidden(key, 'raster') for key in ('pipette', 'detector', 'similar'))
+
     def _restore_tool(self, state: Any) -> None:
         """R3: the pipette / detector or the class pipette that was on the map when the layer was left comes back."""
         from ...core.domain.layer_kind import LayerKind
@@ -2192,6 +2212,8 @@ class CoverageModeController(BaseController):
             enabled: Whether the tool goes on the map.
             target: ``'similar'`` (the pipette) or ``'object'`` (the detector); None keeps the target of the panel.
         """
+        if enabled and self._pipette_hidden():
+            return  # no button of the family to show the tool down, or to put it off
         panel = self._raster_panel
         target = 'object' if target == 'segment' else target  # the former SAM target, from an older project
         chosen = target if target is not None else (panel.pick_target() if panel is not None and hasattr(panel, 'pick_target') else None)
@@ -2454,6 +2476,8 @@ class CoverageModeController(BaseController):
         if not enabled:
             self._deactivate_class_tool()
             return
+        if self._tool_hidden(self.PC_TOOL_KEYS.get(mode, 'identify'), 'point_cloud'):
+            return  # its button is hidden: the tool is not armed (the group stays the active one)
         self._pc_pick_mode = mode if mode in PC_PICK_MODES else 'class'
         canvas = iface.mapCanvas()
         if self._class_tool is not None and canvas.mapTool() is self._class_tool:
@@ -2564,7 +2588,8 @@ class CoverageModeController(BaseController):
         from ...adapters.qgis.point_cloud_layer_adapter import class_at
         code = class_at(layer, iface.mapCanvas(), point)
         selecting = getattr(self.dockwidget, 'pushButton_checkable_exploring_selecting', None)
-        previewed = selecting is not None and selecting.isChecked()
+        # The message asks to turn the preview off: only when its button is there to do it.
+        previewed = selecting is not None and selecting.isChecked() and not self._tool_hidden('preview', 'point_cloud')
         hidden = self.tr("only the points drawn on the map can be picked: turn the preview off to pick a class it hides")
         if code is None:
             message = self.tr("No classified point under the click")
