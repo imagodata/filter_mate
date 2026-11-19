@@ -192,7 +192,10 @@ def _count_rows(path: str, table: str, index: int, budget: float) -> Any:
             try:
                 if _has_count(database, table):
                     return _HAS_CONTENTS
-                row = database.execute('SELECT COUNT(*) FROM "%s"' % table.replace('"', '""')).fetchone()
+                # A table name cannot be a bound parameter: it is quoted, its own quotes doubled.
+                row = database.execute(
+                    'SELECT COUNT(*) FROM "%s"' % table.replace('"', '""')  # nosec B608 - quoted identifier
+                ).fetchone()
             finally:
                 timer.cancel()
                 timer.join()  # before the connection is closed: an interrupt of a closed one raises
