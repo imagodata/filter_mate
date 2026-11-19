@@ -97,8 +97,8 @@
         <a class="card story-card" href="#s7"><span class="story-card-media"><img src="video/favorites.webp" alt="A saved filter replayed from the favorites menu" loading="lazy" width="1280" height="720"><b aria-hidden="true">07</b></span><div class="story-card-copy"><span class="badge">Team</span><h4>The query library</h4><p>Save, describe, replay and share a complete filter.</p><span class="story-outcome">Same result · <strong>one click</strong></span></div></a>
         <a class="card story-card" href="#s8"><span class="story-card-media"><img src="video/processing.webp" alt="Batch filtering from the QGIS Processing toolbox" loading="lazy" width="1280" height="720"><b aria-hidden="true">08</b></span><div class="story-card-copy"><span class="badge">GIS administration</span><h4>Objects modified since a date</h4><p>Apply one date expression to four layers from Processing.</p><span class="story-outcome"><strong>4 layers</strong> · 1.6 million objects</span></div></a>
         <a class="card story-card" href="#s9"><span class="story-card-media"><img src="video/slope.webp" alt="Parcels on steep slopes" loading="lazy" width="1280" height="720"><b aria-hidden="true">09</b></span><div class="story-card-copy"><span class="badge">Planning</span><h4>Parcels on steep slopes</h4><p>The slope computed from the DTM, a range on the histogram, a minimum coverage.</p><span class="story-outcome"><strong>34 parcels</strong> · slope ≥ 15 %</span></div></a>
-        <a class="card story-card" href="#s10"><span class="story-card-media"><img src="video/heights.webp" alt="Building heights" loading="lazy" width="1280" height="720"><b aria-hidden="true">10</b></span><div class="story-card-copy"><span class="badge">Permits</span><h4>Building heights</h4><p>Building class and height above the DTM, computed by PDAL.</p><span class="story-outcome"><strong>121 buildings</strong> above 7 m</span></div></a>
-        <a class="card story-card" href="#s11"><span class="story-card-media"><img src="video/pruning.webp" alt="Roads to prune" loading="lazy" width="1280" height="720"><b aria-hidden="true">11</b></span><div class="story-card-copy"><span class="badge">Roads</span><h4>Roads to prune</h4><p>High vegetation taller than 8 m, within 3 m of the roads.</p><span class="story-outcome"><strong>83 segments</strong> out of 376</span></div></a>
+        <a class="card story-card" href="#s10"><span class="story-card-media"><img src="video/heights.webp" alt="Building heights" loading="lazy" width="1280" height="720"><b aria-hidden="true">10</b></span><div class="story-card-copy"><span class="badge">Permits</span><h4>Building heights</h4><p>Building class and height above the DTM, computed by PDAL.</p><span class="story-outcome"><strong>119 buildings</strong> above 7 m</span></div></a>
+        <a class="card story-card" href="#s11"><span class="story-card-media"><img src="video/pruning.webp" alt="Roads to prune" loading="lazy" width="1280" height="720"><b aria-hidden="true">11</b></span><div class="story-card-copy"><span class="badge">Roads</span><h4>Roads to prune</h4><p>High vegetation taller than 8 m, within 3 m of the roads.</p><span class="story-outcome"><strong>82 segments</strong> out of 376</span></div></a>
         <a class="card story-card" href="#s12"><span class="story-card-media"><img src="video/survey.webp" alt="The survey package around a building" loading="lazy" width="1280" height="720"><b aria-hidden="true">12</b></span><div class="story-card-copy"><span class="badge">Energy</span><h4>The survey package around a building</h4><p>A vector clips a DTM and a cloud, then everything goes into a ZIP.</p><span class="story-outcome">GeoTIFF + LAZ · <strong>ZIP</strong></span></div></a>
         <a class="card story-card" href="#s13"><span class="story-card-media"><img src="img/combinations/ndvi-en.svg" alt="Schematic: a vegetation mask from a colour infrared orthophoto retains the corresponding pixels in an RGB orthophoto" loading="lazy" width="1280" height="720"><b aria-hidden="true">13</b></span><div class="story-card-copy"><span class="badge">Parks</span><h4>Vegetation on an RGB orthophoto</h4><p>The NDVI from an infrared image becomes a mask for another image.</p><span class="story-outcome">Raster → raster · <strong>NDVI &gt; 0.3</strong></span></div></a>
         <a class="card story-card" href="#s14"><span class="story-card-media"><img src="img/combinations/roofs-en.svg" alt="Schematic: rooftops picked on an orthophoto clip the LiDAR point cloud" loading="lazy" width="1280" height="720"><b aria-hidden="true">14</b></span><div class="story-card-copy"><span class="badge">Buildings</span><h4>LiDAR points beneath rooftops</h4><p>An object picked on the orthophoto isolates the points beneath its footprint.</p><span class="story-outcome">Raster → LiDAR · <strong>object pipette</strong></span></div></a>
@@ -542,7 +542,7 @@ processing.run("filtermate:batch_filter", {
         <div><h4>The need</h4><p>The planning rules cap building heights. The permit office of Fenouillet wants the buildings of the square that rise more than <strong>7 m</strong> above natural ground, measured rather than declared.</p></div>
         <div><h4>The FilterMate translation</h4><p>With the <strong>point cloud</strong> as the current layer, ATTRIBUTES gets a <code>Classification = 6</code> (building) condition and a <strong>height above the DTM ≥ 7 m</strong>, computed by PDAL at the first filter. The footprint of the kept points is the source geometry; a 50 % coverage leaves out the terraced neighbours.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd>LiDAR HD point cloud (COPC)</dd></div><div><dt>Selection</dt><dd><code>Classification = 6</code> and height ≥ 7 m</dd></div><div><dt>Targets</dt><dd><code>batiment</code></dd></div><div><dt>Relation</dt><dd>Intersect, coverage ≥ 50 %</dd></div><div><dt>Result</dt><dd><strong>121</strong> buildings out of 918</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd>LiDAR HD point cloud (COPC)</dd></div><div><dt>Selection</dt><dd><code>Classification = 6</code> and height ≥ 7 m</dd></div><div><dt>Targets</dt><dd><code>batiment</code></dd></div><div><dt>Relation</dt><dd>Intersect, coverage ≥ 50 %</dd></div><div><dt>Result</dt><dd><strong>119</strong> buildings out of 918</dd></div></dl>
     <ol class="steps">
         <li><strong>The building points.</strong> Click <em>lhd</em>, tick ATTRIBUTES, <strong>+ Condition</strong>, then Classification = 6. The eye button isolates them on the map.
             <figure><img src="img/stories/s10-01.webp" alt="Step 1: Classification = 6 condition in ATTRIBUTES" loading="lazy" width="1600" height="900"><figcaption>Step 1. Classes are conditions too: they combine with the height.</figcaption></figure>
@@ -554,11 +554,11 @@ processing.run("filtermate:batch_filter", {
             <figure><img src="img/stories/s10-03.webp" alt="Step 3: batiment target, 50 % minimum coverage" loading="lazy" width="1600" height="900"><figcaption>Step 3.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong> PDAL computes the height of the 17.3 million points at the first filter, then the filter is instant.
-            <figure><img src="img/stories/s10-04.webp" alt="Step 4: the buildings above 7 m" loading="lazy" width="1600" height="900"><figcaption>Step 4. 121 buildings.</figcaption></figure>
+            <figure><img src="img/stories/s10-04.webp" alt="Step 4: the buildings above 7 m" loading="lazy" width="1600" height="900"><figcaption>Step 4. 119 buildings.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
-    <p><strong>121 buildings</strong> out of 918 have at least half of their footprint under roof points more than 7 m high. BD TOPO lists 80 at 7 m or more: check the differences on site. From one run to the next the count is 120 or 121.</p>
+    <p><strong>119 buildings</strong> out of 918 have at least half of their footprint under roof points more than 7 m high. BD TOPO lists 80 at 7 m or more: check the differences on site.</p>
     <div class="callout"><strong>Natural ground.</strong> The DTM is interpolated from the ground points; on a slope the height measured downhill is larger.</div>
 </section>
 <!-- 11 ------------------------------------------------------------------ -->
@@ -574,7 +574,7 @@ processing.run("filtermate:batch_filter", {
         <div><h4>The need</h4><p>The local road service plans its pruning campaign: which segments are lined with trees taller than <strong>8 m</strong> within <strong>3 m</strong> of the road?</p></div>
         <div><h4>The FilterMate translation</h4><p>Same move as story 10: <code>Classification = 5</code> (high vegetation) and height ≥ 8 m. This time the targets are <strong>lines</strong>: <em>troncon_de_route</em>, with a 3 m buffer around the tree footprint.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd>LiDAR HD point cloud</dd></div><div><dt>Selection</dt><dd><code>Classification = 5</code> and height ≥ 8 m</dd></div><div><dt>Targets</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Relation</dt><dd>Intersect, 3 m buffer</dd></div><div><dt>Result</dt><dd><strong>83</strong> segments out of 376</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd>LiDAR HD point cloud</dd></div><div><dt>Selection</dt><dd><code>Classification = 5</code> and height ≥ 8 m</dd></div><div><dt>Targets</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Relation</dt><dd>Intersect, 3 m buffer</dd></div><div><dt>Result</dt><dd><strong>82</strong> segments out of 376</dd></div></dl>
     <ol class="steps">
         <li><strong>The high vegetation.</strong> ATTRIBUTES, + Condition, Classification = 5, then the eye to see it.
             <figure><img src="img/stories/s11-01.webp" alt="Step 1: Classification = 5 condition" loading="lazy" width="1600" height="900"><figcaption>Step 1.</figcaption></figure>
@@ -586,11 +586,11 @@ processing.run("filtermate:batch_filter", {
             <figure><img src="img/stories/s11-03.webp" alt="Step 3: troncon_de_route target with a 3 m buffer" loading="lazy" width="1600" height="900"><figcaption>Step 3.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s11-04.webp" alt="Step 4: the segments lined with tall trees" loading="lazy" width="1600" height="900"><figcaption>Step 4. 83 segments.</figcaption></figure>
+            <figure><img src="img/stories/s11-04.webp" alt="Step 4: the segments lined with tall trees" loading="lazy" width="1600" height="900"><figcaption>Step 4. 82 segments.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
-    <p><strong>83 segments</strong> out of 376 have trees taller than 8 m within 3 m: the starting list of the campaign, to rank on site. From one run to the next the count moves between 82 and 85: the light recording shows 85, the dark one 83.</p>
+    <p><strong>82 segments</strong> out of 376 have trees taller than 8 m within 3 m: the starting list of the campaign, to rank on site.</p>
 </section>
 <!-- 12 ------------------------------------------------------------------ -->
 <section id="s12">

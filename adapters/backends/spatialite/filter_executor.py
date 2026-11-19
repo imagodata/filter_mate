@@ -497,27 +497,10 @@ def _source_filter_expression(context: SpatialiteSourceContext) -> str:
 def _unfiltered_copy(layer):
     """A second layer on the data source of ``layer`` without its subset; None when it cannot be opened.
 
-    Same way as OGRExpressionBuilder._unfiltered_target (the subset removed from the URI).
+    source_refusal.unfiltered_copy, shared since 2026-11-18 with the hybrid subsets of the source filter.
     """
-    try:
-        from qgis.core import QgsProviderRegistry, QgsVectorLayer
-        provider = layer.providerType()
-        if provider == 'memory':
-            return None
-        registry = QgsProviderRegistry.instance()
-        parts = dict(registry.decodeUri(provider, layer.source()))
-        for key in ('subset', 'sql', 'filter'):
-            parts.pop(key, None)
-        uri = registry.encodeUri(provider, parts) if parts else layer.source()
-        clone = QgsVectorLayer(uri, f"{layer.name()} (unfiltered)", provider)
-        if clone.isValid() and clone.subsetString():
-            clone.setSubsetString('')
-        if clone.isValid() and not clone.subsetString():
-            return clone
-    except Exception as exc:  # nosec B110 - read through the layer instead
-        logger.debug(f"[Spatialite] Unfiltered reading of {layer.name()} unavailable: {exc}")
-    logger.warning(f"[Spatialite] {layer.name()} cannot be read without its current filter")
-    return None
+    from ..source_refusal import unfiltered_copy
+    return unfiltered_copy(layer)
 
 
 def _features_matching(layer, expression: str, source_layer=None, task_parameters=None) -> List:

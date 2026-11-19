@@ -15,7 +15,7 @@ Location: core/tasks/executors/attribute_filter_executor.py
 """
 
 import logging
-from typing import Optional, Tuple, List, Any
+from typing import Optional, Tuple, List, Any, Callable
 
 from qgis.core import (
     QgsExpression,
@@ -79,7 +79,8 @@ class AttributeFilterExecutor:
         old_subset: Optional[str] = None,
         combine_operator: str = 'AND',
         task_bridge: Optional[Any] = None,
-        geometry_field: Optional[str] = None
+        geometry_field: Optional[str] = None,
+        is_canceled: Optional[Callable[[], bool]] = None
     ):
         """
         Initialize AttributeFilterExecutor.
@@ -95,6 +96,8 @@ class AttributeFilterExecutor:
             geometry_field: Geometry column of the layer (read from its URI
                 when omitted); $geometry and length() of the geometry are
                 written against it
+            is_canceled: The task's isCanceled, seen by the reading of every
+                feature a hybrid subset makes
         """
         self.layer = layer
         self.provider_type = provider_type
@@ -104,6 +107,7 @@ class AttributeFilterExecutor:
         self.combine_operator = combine_operator
         self.task_bridge = task_bridge
         self.geometry_field = geometry_field
+        self.is_canceled = is_canceled
         # Native SQL written by process_qgis_expression -> the QGIS expression it
         # came from: the source-geometry fallbacks evaluate an expression in QGIS,
         # which cannot read GLOB, CAST or COLLATE.
@@ -469,7 +473,10 @@ class AttributeFilterExecutor:
             from ....adapters.qgis.native_filter_translation import subset_for_layer
             native = subset_for_layer(self.layer, expression, key_name=self.primary_key,
                                       evaluate=self._keys_may_be_evaluated(),
-                                      negated='NOT' in (self.combine_operator or '').upper())
+                                      negated='NOT' in (self.combine_operator or '').upper(),
+                                      whole_layer=self._keys_read_on_whole_layer(),
+                                      is_canceled=self.is_canceled,
+                                      listed_keys=self._keys_listed_under_or())
         except Exception as e:  # catch-all: the former conversion stays the fallback
             logger.debug(f"Native translation not available: {e}")
             return None
@@ -479,27 +486,66 @@ class AttributeFilterExecutor:
         return native
 
     def _keys_may_be_evaluated(self) -> bool:
-        """Whether keys QGIS keeps now, through the layer, may stand for the expression in the new subset.
+        """Whether keys QGIS keeps now may stand for the expression in the new subset.
 
         A list of keys keeps the same features as the expression but is never
         NULL: under the NOT of an 'AND NOT' combination the rows where the
         expression is NULL would come back. That NOT is written with an old
         subset and, since 2026-11-12, without one too (``NOT (new)``,
-        ExpressionFacadeHandler.combine_with_old_subset). And the features are
-        read through the layer's current subset: right when the new subset is
-        ANDed with that same subset, wrong when it replaces it or is ORed with it.
+        ExpressionFacadeHandler.combine_with_old_subset).
         """
-        operator = (self.combine_operator or '').upper()
-        old = (self.old_subset or '').strip()
-        if 'NOT' in operator:
+        if 'NOT' in (self.combine_operator or '').upper():
             return False
-        try:
-            current = (self.layer.subsetString() or '').strip()
-        except (RuntimeError, AttributeError):
-            return False
+        return self._current_subset() is not None
+
+    def _keys_read_on_whole_layer(self) -> bool:
+        """Whether those features are read on the whole layer rather than through its current subset.
+
+        Through the subset is right when the new subset is ANDed with that same
+        subset, wrong when it replaces it or is ORed with it (or ANDed with
+        another one). 2026-11-18: these cases wrote no list, and the second
+        filter of a GeoPackage by ``bounds_width($geometry) > 2`` became the
+        former conversion's ``bounds_width("geom") > 2``, refused by SQLite,
+        where the first one listed keys; ``$area > 100`` was measured planar
+        by ``ST_Area`` the second time. They are now read as the first filter
+        reads them, on the whole layer (a copy of it without its subset).
+
+        Under OR the list holds every key the expression keeps, also those the
+        old subset keeps: it is the selection the targets are filtered by
+        (ExpressionFacadeHandler._source_selection, the EXISTS of PostgreSQL),
+        which a list without them made narrower (review of 2026-11-18). A
+        chain of ORs adds one list per filter: the keys already listed count
+        with the new list (``_keys_listed_under_or``).
+        """
+        current = self._current_subset()
         if not current:
-            return True
-        return bool(old) and operator == 'AND' and current == old
+            return False
+        operator = (self.combine_operator or '').strip().upper()
+        return not (operator == 'AND' and current == (self.old_subset or '').strip())
+
+    def _keys_listed_under_or(self) -> int:
+        """Keys the subset the new one is ORed with already lists, 0 under any other operator.
+
+        Under OR each filter adds its whole list to the old subset, and the
+        provider's ``setSubsetString`` is quadratic in the keys of the whole
+        subset (measured on a GeoPackage: 10,000 keys 0.4 s, 30,000 4.1 s,
+        99,000 47 s, two lists of 99,000 322 s on the main thread). The old
+        subset is not read again from its source: its commas count them (a
+        list of n keys has n - 1; a comma of a native part or of a text key
+        counts too, which only refuses a list sooner, to the former
+        conversion). ``subset_for_layer`` writes no list when they and the
+        new one exceed ``HYBRID_MAX_KEYS``, the size one list may reach.
+        """
+        if (self.combine_operator or '').strip().upper() != 'OR':
+            return 0
+        return (self.old_subset or '').count(',')
+
+    def _current_subset(self) -> Optional[str]:
+        """The layer's subset, stripped; None when the layer cannot be read (deleted)."""
+        try:
+            return (self.layer.subsetString() or '').strip()
+        except (RuntimeError, AttributeError):
+            return None
 
     def _convert_to_postgis(self, expression: str) -> str:
         """

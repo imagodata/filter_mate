@@ -1222,28 +1222,16 @@ class ExpressionBuilder:
     def _unfiltered_source(self) -> Optional[QgsVectorLayer]:
         """A second layer on the data source of the source layer, without its subset; None when it cannot be opened.
 
-        Same way as the SpatiaLite source preparation (spatialite/filter_executor._unfiltered_copy).
+        adapters.backends.source_refusal.unfiltered_copy, the one place that makes such copies (a PostgreSQL URI
+        keeps its ``checkPrimaryKeyUnicity`` there, which QGIS 3.22 drops when it reads a URI back).
         Opened for each reading, in the task thread, never kept: a layer made in
         the worker must not outlive it.
         """
-        layer = self.source_layer
         try:
-            from qgis.core import QgsProviderRegistry
-            provider = layer.providerType()
-            registry = QgsProviderRegistry.instance()
-            parts = dict(registry.decodeUri(provider, layer.source()))
-            for key in ('subset', 'sql', 'filter'):
-                parts.pop(key, None)
-            uri = registry.encodeUri(provider, parts) if parts else layer.source()
-            copy = QgsVectorLayer(uri, f"{layer.name()} (unfiltered)", provider)
-            if copy.isValid() and copy.subsetString():
-                copy.setSubsetString('')
-            if copy.isValid() and not copy.subsetString():
-                return copy
-        except Exception as exc:  # nosec B110 - read through the layer instead
-            logger.debug(f"   Unfiltered reading of {layer.name()} unavailable: {exc}")
-        logger.warning(f"   ⚠️ {layer.name()} cannot be read without its current filter")
-        return None
+            from ...adapters.backends.source_refusal import unfiltered_copy
+        except ImportError:  # plugin root on sys.path in pure unit tests
+            from adapters.backends.source_refusal import unfiltered_copy
+        return unfiltered_copy(self.source_layer)
 
     def check_source_selection(self) -> None:
         """Refuse, before any target, a selection that keeps no source feature or cannot be read.

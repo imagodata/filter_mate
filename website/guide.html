@@ -196,14 +196,29 @@
         Opening AGENT folds EXPLORING and FILTERING; opening FILTERING brings EXPLORING back. AGENT is shown by default and can be hidden in the
         <a href="#configuration">Configuration</a> tab.
     </p>
-    <h3 id="panels">The rail of sections, and sections as panels of QGIS <small>(5.1.1)</small></h3>
+    <h3 id="panels">One panel: the sections you use, laid out your way <small>(5.1.1)</small></h3>
     <p>
-        Each stack lists its sections in a rail of chips: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION above the lower stack.
+        A new install shows FilterMate as one panel, with every section in it. Each stack lists its sections in a rail of chips: AGENT and EXPLORING at the top, FILTERING, EXPORTING and CONFIGURATION above the lower stack.
         The open section shows its name, the others their icon. Click a chip to open its section; drag it along its rail to put the sections in another order, which is kept.
         If you prefer the name of each section on its own line, as before, choose <em>Headers, one above the other</em> in the setup (<code>SECTION_HEADERS = stacked</code> in the Configuration tab): what follows is then done on a header instead of a chip.
     </p>
     <p>
-        By default every section stays in the FilterMate panel. A section can leave it: right-click its chip, then <em>Open &hellip; in its own panel</em>, or drag the chip out of the panel.
+        <strong>Only the sections you use.</strong> You do not have to keep every section. <em>Set up FilterMate</em> (<a href="#agent">section 14</a>) first asks which sections you use and which data you work with;
+        each answer is also a setting of the <a href="#configuration">Configuration</a> tab (<code>FILTERING</code>, <code>EXPORTING</code>, <code>AGENT</code>, <code>RASTER</code> and <code>POINT_CLOUD</code>, each with <code>enabled</code>).
+        A section turned off leaves the panel with its chip and its buttons: Filter and Unfilter go with FILTERING, Export with EXPORTING, while Undo and Redo stay.
+        EXPLORING is always there: with FILTERING off, the list of layers goes to its top, and the panel is a browser of the features of a layer, which you pick, select and zoom to.
+        Rasters or point clouds turned off leave the lists of layers of the panel. AGENT turned off goes when QGIS is restarted.
+    </p>
+    <p>
+        <strong>The same panel, laid out another way.</strong> The buttons can be shown under each section, in place of one bar for all (<em>Under each section</em> in the setup, <code>ACTION_BAR_POSITION = sections</code>),
+        and the headers one above the other can replace the rails (<code>SECTION_HEADERS = stacked</code>).
+    </p>
+    <figure class="medium">
+        <img src="img/guide/panels-section-buttons.png" alt="FILTERING open with Filter, Undo, Redo, Compare and Unfilter under it; EXPORTING open with Export under it" loading="lazy" width="1252" height="564">
+        <figcaption>Buttons under each section: FILTERING shows its filter buttons, EXPORTING its Export button.</figcaption>
+    </figure>
+    <p>
+        <strong>Sections in panels of QGIS, when one panel is not what you want.</strong> A section can leave the FilterMate panel: right-click its chip, then <em>Open &hellip; in its own panel</em>, or drag the chip out of the panel.
         It becomes a panel of QGIS, which you drag beside the map, tab with the Layers panel or float on another screen. <em>Take every section out of FilterMate</em> moves them all at once: AGENT in its own panel, FILTERING, EXPORTING and CONFIGURATION together in another one, EXPLORING staying in the FilterMate panel.
         The last section of the FilterMate panel always stays in it.
     </p>
@@ -230,13 +245,8 @@
     </figure>
     <p>
         A section in its own panel takes its buttons with it, and they act whatever the FilterMate panel shows: you filter from the FILTERING panel while EXPLORING alone is open.
-        The buttons can also be shown under each section (<em>Under each section</em> in the setup), and FILTERING or EXPORTING can be turned off when you do not use them: the source layer is then chosen at the top of EXPLORING.
         <em>How FilterMate works</em>, on the welcome of AGENT, in its <strong>&#8943;</strong> menu and in <em>Vector &gt; FilterMate</em>, tells all this in the panel, with links that do it.
     </p>
-    <figure class="medium">
-        <img src="img/guide/panels-section-buttons.png" alt="FILTERING open with Filter, Undo, Redo, Compare and Unfilter under it; EXPORTING open with Export under it" loading="lazy" width="1252" height="564">
-        <figcaption>Buttons under each section: FILTERING shows its filter buttons, EXPORTING its Export button.</figcaption>
-    </figure>
     <div class="fig-row">
         <figure class="narrow">
             <img src="img/guide/panels-exploring.png" alt="EXPLORING in its own panel above the FilterMate panel, with a list of layers at its top" loading="lazy" width="620" height="1074">
