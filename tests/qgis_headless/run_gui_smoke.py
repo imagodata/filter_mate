@@ -5795,6 +5795,34 @@ def s_room_profile_back():
     return waits(0.8)
 
 
+def s_room_folded():
+    """A display profile applied while nothing is open below: the splitter manager sets the minimum of the lower stack
+    again, after the dimensions, and the maximum the stack was held to (its rail) was kept as its own. The next
+    section opened in a stack 150 px high, a maximum of 42 px under its minimum (found by the walk, seed 2)."""
+    open_section(None)
+    pump(200)
+    ui_config = importlib.import_module(f'{PACKAGE}.ui.config').UIConfig
+    apply_settings({'APP.DOCKWIDGET.UI_PROFILE': 'normal' if ui_config.get_profile().name == 'COMPACT' else 'compact'})
+    return waits(0.8)
+
+
+def s_room_folded_back():
+    apply_settings({'APP.DOCKWIDGET.UI_PROFILE': ROOM['profile']})
+    return waits(0.8)
+
+
+def s_room_folded_check():
+    d = dock()
+    lower = d.main_splitter.widget(1)
+    open_section(d.FILTERING)
+    check('room: a display profile applied with nothing open below, FILTERING opens in a stack that has its room',
+          settles(lambda: room_uneven() is None and room_still()) and lower.maximumHeight() > lower.minimumHeight()
+          and lower.height() > lower.minimumHeight(),
+          f"lower stack {lower.height()} px, minimum {lower.minimumHeight()}, maximum {lower.maximumHeight()}, "
+          f"{room_text()}")
+    return None
+
+
 def s_room_drag():
     """The user drags the handle: where it is left is kept, whatever the stacks show afterwards."""
     d = dock()
@@ -5897,7 +5925,8 @@ ROOM_STEPS = [s_section_setup, s_vector_source, s_room_setup,
                 for step in _room_measure(kind, section)],
               s_room_agent, s_room_theme, s_room_theme_check,
               *[step for value in ('normal', 'hidpi', 'compact') for step in _room_profile(value)],
-              s_room_profile_back, s_room_drag, s_room_drag_check, s_room_least, s_room_fill_check, s_room_end]
+              s_room_profile_back, s_room_folded, s_room_folded_back, s_room_folded_check,
+              s_room_drag, s_room_drag_check, s_room_least, s_room_fill_check, s_room_end]
 
 
 # --- the tools of the EXPLORING rail, chosen for each kind of layer (APP.DOCKWIDGET.EXPLORING_TOOLS, FM_ONLY=tools) -----

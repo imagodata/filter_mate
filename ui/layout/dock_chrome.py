@@ -361,7 +361,7 @@ class DockSections(QObject):
         self._reopen = set()
         self._shown = {}
         self._source_row, self._source_origins = None, []
-        self._bottom_limits = None
+        self._bottom_limits = self._bottom_held = None  # of the lower stack with nothing open: its own, its rail's
         self._share = _saved_share()
         self.bottom_rail = make_rail(self._toolbox.parentWidget(),
                                      accepts=lambda key: key in BOTTOM_KEYS and key in self.detached, dark=self._dark)
@@ -898,13 +898,14 @@ class DockSections(QObject):
                     if self._bottom_limits is None:  # what the dimension managers set: given back when a section opens
                         self._bottom_limits = (bottom.minimumHeight(), bottom.maximumHeight())
                     height = self._bottom_headers_height(bottom)
+                    self._bottom_held = (min(self._bottom_limits[0], height), height)
                     # The minimum first: Qt keeps the larger of the two, and the rail would be spread over it.
-                    bottom.setMinimumHeight(min(self._bottom_limits[0], height))
+                    bottom.setMinimumHeight(self._bottom_held[0])
                     bottom.setMaximumHeight(height)
                 elif self._bottom_limits is not None:
                     bottom.setMaximumHeight(self._bottom_limits[1])
                     bottom.setMinimumHeight(self._bottom_limits[0])
-                    self._bottom_limits = None
+                    self._bottom_limits = self._bottom_held = None
                 self._hold_toolbox(nothing)
                 sizes = self._splitter.sizes()
                 total = self._room()
@@ -922,9 +923,20 @@ class DockSections(QObject):
     def dimensions_applied(self) -> None:
         """A display profile, or a theme, just gave the dock its dimensions again: the limits kept for the lower
         stack while nothing is open in it are those of before, and the stack is no longer held to its rail (a band
-        of 150 to 240 px stayed empty under it, and the older limits came back with the next section opened)."""
+        of 150 to 240 px stayed empty under it, and the older limits came back with the next section opened).
+
+        Only a limit a manager set again replaces the one kept: the splitter manager sets the minimum alone, after
+        the dimensions. The maximum the stack was still held to, its rail, was then kept as its own: the next
+        section opened in a stack 150 px high that the handle could not enlarge (a maximum of 42 px under a
+        minimum of 150), its rows scrolled."""
         try:
-            self._bottom_limits = None
+            bottom = self._splitter.widget(1) if self._splitter.count() > 1 else None
+            if self._bottom_limits is not None and self._bottom_held is not None and bottom is not None:
+                least, most = bottom.minimumHeight(), bottom.maximumHeight()
+                self._bottom_limits = (self._bottom_limits[0] if least == self._bottom_held[0] else least,
+                                       self._bottom_limits[1] if most == self._bottom_held[1] else most)
+            else:
+                self._bottom_limits = None
             self._toolbox_minimum = None
             self.refresh_rails()
         except RuntimeError:  # the dock went away
