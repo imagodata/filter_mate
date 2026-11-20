@@ -48,8 +48,9 @@ LOG = os.path.join(OUT, 'shots.log')
 GPKG = os.environ.get('FM_GUIDE_GPKG') or r'C:\Users\Simon\Documents\31.gpkg'
 EXPORT_DIR = os.environ.get('FM_GUIDE_EXPORT_DIR') or '/home/me/Documents/export'  # only typed in the field
 DOCK_WIDTH = 413  # logical pixels: 620 px wide images at the 1.5 scale
-# The rows of FILTERING and EXPORTING are packed at the top of their section: a window no taller than the panel needs,
-# and a lower stack no taller than its rows (fit_stacks), so the pictures of the panel hold no empty band.
+# A window no taller than the panel needs, and a lower stack no taller than the rows of FILTERING and EXPORTING
+# (fit_stacks): the pictures of the panel hold no empty band, neither under the rows (SECTION_HEIGHT = fit) nor between
+# them (fill, the default).
 WINDOW_HEIGHT = int(os.environ.get('FM_GUIDE_HEIGHT', '880'))
 STEP_TIMEOUT = 60.0
 STATE = {}
