@@ -755,6 +755,7 @@ class SectionPanels:
         window = self._main_window()
         if window is None:
             return False
+        self._note_areas(window)  # their widths before the panel is placed (beside the dock, Qt widens the area)
         try:
             panel = self._new_panel(window)
             page = self._out_of_dock(key)
@@ -786,6 +787,7 @@ class SectionPanels:
         if not self.can_take(key, panel):
             return False
         source = self._home.get(key)
+        self._note_areas(self._main_window())
         try:
             if source is None:
                 page = self._out_of_dock(key)
@@ -963,6 +965,7 @@ class SectionPanels:
         window = self._main_window()
         if source is None or len(source.members) < 2 or window is None:
             return False
+        self._note_areas(window)
         try:
             panel = self._new_panel(window)
             self._unhost(key)
@@ -1740,6 +1743,15 @@ class SectionPanels:
         self._area_seen = {_area_number(area): self._area_width(window, area) for area in self._areas()
                            if self._ours_in(window, area)}
 
+    def _note_areas(self, window: Any) -> None:
+        """The widths of the areas now, before a change: a width the user set since the last pass is the one a
+        panel put beside the dock is compared with, and given back."""
+        try:  # not with a pass to come: the change before this one may have widened an area already
+            if window is not None and self._armed and self._auto() and not self._resize_pending:
+                self._remember_areas(window)
+        except RuntimeError:  # the dock went away
+            pass
+
     def _note_beside(self, window: Any) -> None:
         """A panel put beside the dock, or beside another panel of FilterMate: Qt gives it its own width, the area
         grows over the map. Its width before is kept, given back when the panel leaves (``_give_back_widths``). A
@@ -1887,6 +1899,7 @@ class SectionPanels:
         if pressed:
             try:
                 self._press = self._places()
+                self._note_areas(self._main_window())  # their widths before a drop beside a dock
             except Exception:  # never in the way of a click (a dock going away raises RuntimeError)
                 self._press = None
             self._press_token += 1
