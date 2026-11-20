@@ -543,6 +543,11 @@ L'executem?</translation>
         <translation>Obre la configuració de l'agent: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Obre la pàgina d'opinions: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Aquest paràmetre no es mostra a l'arbre de configuració.</translation>
@@ -2016,6 +2021,166 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Afegeix els municipis des de data.gouv.fr</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="106"/>
+        <source>Describe the fields of the active layer</source>
+        <translation>Descriu els camps de la capa activa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="109"/>
+        <source>Keep only the features visible on the map</source>
+        <translation>Conserva només les entitats visibles al mapa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="110"/>
+        <source>Color the active layer by its main field</source>
+        <translation>Acoloreix la capa activa segons el seu camp principal</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="111"/>
+        <source>Label the active layer with its names</source>
+        <translation>Etiqueta la capa activa amb els seus noms</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="112"/>
+        <source>Export the filtered layers to a GeoPackage</source>
+        <translation>Exporta les capes filtrades a un GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="113"/>
+        <source>Make a relief map of this area with contours</source>
+        <translation>Fes un mapa de relleu d'aquesta zona amb corbes de nivell</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="114"/>
+        <source>Add the elevation of the map view</source>
+        <translation>Afegeix l'elevació de la vista del mapa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="115"/>
+        <source>How many people live in the selected area?</source>
+        <translation>Quantes persones viuen a la zona seleccionada?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="116"/>
+        <source>Add a population grid of the map view</source>
+        <translation>Afegeix una quadrícula de població de la vista del mapa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="117"/>
+        <source>Add the cafés here from OpenStreetMap</source>
+        <translation>Afegeix les cafeteries d'aquí des d'OpenStreetMap</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="118"/>
+        <source>Add the cycle paths of the map view</source>
+        <translation>Afegeix els carrils bici de la vista del mapa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="119"/>
+        <source>Add the trees and hedges of this area</source>
+        <translation>Afegeix els arbres i les bardisses d'aquesta zona</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="120"/>
+        <source>Put a dark basemap under my layers</source>
+        <translation>Posa un mapa base fosc sota les meves capes</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="121"/>
+        <source>Find a cloud-free Sentinel-2 image here</source>
+        <translation>Cerca aquí una imatge de Sentinel-2 sense núvols</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="122"/>
+        <source>Zoom to Central Park in New York</source>
+        <translation>Fes zoom a Central Park, a Nova York</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="123"/>
+        <source>Search Opendatasoft for public toilets</source>
+        <translation>Cerca lavabos públics a Opendatasoft</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="124"/>
+        <source>Find unemployment by region on Eurostat</source>
+        <translation>Cerca l'atur per regió a Eurostat</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="126"/>
+        <source>Find bike-share stations on data.gouv.fr</source>
+        <translation>Cerca estacions de bicicletes compartides a data.gouv.fr</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="127"/>
+        <source>Add the IGN buildings of the map view</source>
+        <translation>Afegeix els edificis de l'IGN de la vista del mapa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="128"/>
+        <source>Add the 1950s aerial photos of this area</source>
+        <translation>Afegeix les fotos aèries dels anys 1950 d'aquesta zona</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="129"/>
+        <source>Add the flood zones of this area</source>
+        <translation>Afegeix les zones inundables d'aquesta zona</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="130"/>
+        <source>Add the clay shrink-swell hazard map</source>
+        <translation>Afegeix el mapa de perill d'argiles expansives</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="131"/>
+        <source>Zoom to the town hall of Toulouse</source>
+        <translation>Fes zoom a l'ajuntament de Tolosa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="132"/>
+        <source>Find flood risk data on data.gov.uk</source>
+        <translation>Cerca dades de risc d'inundació a data.gov.uk</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="133"/>
+        <source>Find park data on open.canada.ca</source>
+        <translation>Cerca dades de parcs a open.canada.ca</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="134"/>
+        <source>Find bushfire data on data.gov.au</source>
+        <translation>Cerca dades d'incendis forestals a data.gov.au</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="135"/>
+        <source>Search GovData for charging stations</source>
+        <translation>Cerca punts de càrrega a GovData</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="136"/>
+        <source>Search dati.gov.it for school buildings</source>
+        <translation>Cerca edificis escolars a dati.gov.it</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="137"/>
+        <source>Search data.overheid.nl for bike parking</source>
+        <translation>Cerca aparcaments de bicicletes a data.overheid.nl</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="138"/>
+        <source>Search G-Spatial for evacuation shelters</source>
+        <translation>Cerca refugis d'evacuació a G-Spatial</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="139"/>
+        <source>Add the municipalities of Brazil from IBGE</source>
+        <translation>Afegeix els municipis del Brasil des d'IBGE</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="140"/>
+        <source>Add the municipalities of Poland from PRG</source>
+        <translation>Afegeix els municipis de Polònia des de PRG</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="195"/>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Ask for a filter…</source>
@@ -2045,6 +2210,16 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Com funciona FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Opinions</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Fes de provador de les novetats</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

@@ -188,15 +188,15 @@ def test_expanded_list_group_takes_the_free_height():
 
 
 @pytest.mark.parametrize("config, expected", [
-    ({}, "fit"),  # a configuration written before the setting
-    (None, "fit"),
-    ({"APP": {"DOCKWIDGET": {}}}, "fit"),
-    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fill"}}}}, "fill"),
-    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": " Fill "}}}}, "fill"),
-    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": "fill"}}}, "fill"),  # a bare value
+    ({}, "fill"),  # a configuration written before the setting: the rows as 5.1.1 laid them out
+    (None, "fill"),
+    ({"APP": {"DOCKWIDGET": {}}}, "fill"),
     ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fit"}}}}, "fit"),
-    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "tall"}}}}, "fit"),  # anything else: the default
-    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": 3}}}}, "fit"),
+    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": " Fit "}}}}, "fit"),
+    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": "fit"}}}, "fit"),  # a bare value
+    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fill"}}}}, "fill"),
+    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "tall"}}}}, "fill"),  # anything else: the default
+    ({"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": 3}}}}, "fill"),
 ])
 def test_section_height_reads_the_setting(config, expected):
     assert layout.section_height(config) == expected
@@ -308,7 +308,8 @@ def dock(monkeypatch):
         setProperty=properties.__setitem__, property=properties.get)
 
 
-def test_rows_fit_by_default_one_gap_apart_page_held_to_its_rows(dock):
+def test_rows_fit_one_gap_apart_page_held_to_its_rows(dock):
+    dock.CONFIG_DATA = {"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fit"}}}}
     assert layout.lay_out_rows(dock)
     filtering, exporting = dock.verticalLayout_filtering_values, dock.verticalLayout_exporting_values
     assert filtering.entries() == ['source', 'layers', 'operators', 'predicates', 'buffer']
@@ -320,9 +321,8 @@ def test_rows_fit_by_default_one_gap_apart_page_held_to_its_rows(dock):
     assert dock._fm_aligner_filtering.resets == dock._fm_aligner_exporting.resets == 1  # the buttons follow
 
 
-def test_rows_fill_one_stretch_between_two_rows_and_back(dock):
-    dock.CONFIG_DATA = {"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fill"}}}}
-    layout.lay_out_rows(dock)
+def test_rows_fill_by_default_one_stretch_between_two_rows_and_back(dock):
+    layout.lay_out_rows(dock)  # no setting: the default, the rows spread as until 5.1.1
     filtering = dock.verticalLayout_filtering_values
     assert filtering.entries() == ['source', 'stretch', 'layers', 'stretch', 'operators', 'stretch', 'predicates',
                                    'stretch', 'buffer']

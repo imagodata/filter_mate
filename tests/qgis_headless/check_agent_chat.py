@@ -28,7 +28,7 @@ from qgis.core import (  # noqa: E402
     QgsVectorFileWriter,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer  # noqa: E402
+from qgis.PyQt.QtCore import QCoreApplication, QSettings, Qt, QTimer  # noqa: E402
 from qgis.PyQt.QtTest import QTest  # noqa: E402
 from qgis.PyQt.QtWidgets import QFrame, QLabel, QPushButton, QToolBox, QWidget  # noqa: E402
 
@@ -838,8 +838,54 @@ def check_chat(provider, layer, authcfg, work):
     check("set up: the line takes a request", panel.input.isEnabled() and panel.send_button.isEnabled())
     check("says where requests go", "test-model" in panel.destination.text() and panel.destination.isVisible(), panel.destination.text())
     panel.example_buttons[1].click()
-    check("an example fills the line", panel.input.text() == panel.example_buttons[1].text())
+    check("an example fills the line", panel.input.text() == panel.example_buttons[1].request())
     panel.input.clear()
+    shown = [button.request() for button in panel.example_buttons]
+    panel.clear_thread()  # as for a project closed then read: the set was on screen for an instant only
+    check("a set not seen yet stays", [button.request() for button in panel.example_buttons] == shown)
+    check("a set on screen a moment counts as seen", wait(lambda: panel._examples_seen, 3)
+          and str(QSettings().value("filter_mate/agent/last_examples", "")) == ",".join(panel.example_keys))
+    panel.clear_thread()
+    again = [button.request() for button in panel.example_buttons]
+    check("a new conversation offers other examples", len(again) == 4 and all(again) and not set(again) & set(shown),
+          f"{shown} -> {again}")
+    narrow = panel.minimumSizeHint().width()
+    kept = panel.example_buttons[0].request()
+    panel.example_buttons[0].set_request("a request longer than any dock is wide " * 6)
+    cut = panel.example_buttons[0].text()
+    check("a long example is cut, the dock keeps its width",
+          panel.minimumSizeHint().width() <= narrow and len(cut) < len(panel.example_buttons[0].request()),
+          f"{narrow} -> {panel.minimumSizeHint().width()}, {cut!r}")
+    panel.example_buttons[0].set_request(kept)
+    # The feedback forms of the site: the menu, the welcome and the tool open them, the plugin sends nothing itself.
+    from filter_mate.core.agent.tool_executor import ToolFailure
+    from filter_mate.infrastructure import feedback_forms
+    opened = []
+    real_open = feedback_forms.open_form
+    feedback_forms.open_form = lambda form, ref: opened.append((form, ref))
+    try:
+        entries = [action.text() for action in panel.feedback_menu.actions()]
+        check("the menu lists the four forms", len(entries) == 4 and all(entries), entries)
+        panel.feedback_menu.actions()[1].trigger()
+        check("a form of the menu opens its page", opened[-1:] == [("feature", "agent-menu")], opened)
+        check("the welcome offers to test the new features", panel.testers_button.isVisible())
+        panel.testers_button.click()
+        check("the welcome link opens the testers form", opened[-1:] == [("testers", "agent-welcome")], opened)
+        before = len(chat._links)
+        shown = chat._settings_link_tool({"target": "feedback", "form": "services"})
+        check("the tool puts a link to a form in the thread", len(chat._links) == before + 1 and shown.get("shown"),
+              shown)
+        chat._links[-1]()
+        check("its link opens the form", opened[-1:] == [("services", "agent-chat")], opened)
+        try:
+            chat._settings_link_tool({"target": "feedback", "form": "review"})
+            refused = False
+        except ToolFailure:
+            refused = True
+        check("an unknown form is refused", refused)
+    finally:
+        feedback_forms.open_form = real_open
+    panel.clear_thread()
     settings(consent=False)
     chat._refresh_ready()
     provider.reset()

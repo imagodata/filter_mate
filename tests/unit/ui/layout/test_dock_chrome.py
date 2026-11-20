@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""The room the two stacks of the dock share: the plain rules of ui/layout/dock_chrome.py (what Qt does with them is
-checked in a real QGIS, tests/qgis_headless, FM_ONLY=room)."""
+"""The room the two stacks of the dock share: the two defects of 5.1.1 that ui/layout/dock_chrome.py fixes without
+changing what 5.1.1 shows otherwise (what Qt does with it is checked in a real QGIS, tests/qgis_headless,
+FM_ONLY=like511)."""
 import importlib
-import itertools
 import pathlib
 import sys
 import types
@@ -25,57 +25,31 @@ def _load(module):
 
 
 chrome = _load("dock_chrome")
-
-# A 834 px dock in the compact profile (QGIS LTR, 1600 x 1000): 733 px for the two stacks. The upper one cannot go
-# under 122 px (rail, gap, 80 px of EXPLORING), the lower one under 150 px.
-ROOM, UPPER, LOWER = 733, 122, 150
+MAX = chrome.QWIDGETSIZE_MAX
+RAIL = 34
 
 
-# --- the two stacks stretch the same ---------------------------------------------------------------------------------
+class _Stack:
+    """A child of the splitter, with the limits the managers of the dock and the stacks give it."""
 
-def test_each_stack_gets_its_minimum_and_half_of_the_room_left():
-    # 19 November 2026: 35 % of the room above (246 px), EXPLORING scrolled under a lower stack half empty.
-    top = chrome.even_height(ROOM, UPPER, LOWER)
-    assert top == 352
-    assert top - UPPER == 230 and (ROOM - top) - LOWER == 231  # the odd pixel goes below
+    def __init__(self, minimum=0, maximum=MAX):
+        self.minimum, self.maximum, self.visible = minimum, maximum, True
 
+    def minimumHeight(self):  # noqa: N802 - Qt name
+        return self.minimum
 
-def test_equal_minimums_share_the_room_in_two():
-    assert chrome.even_height(800, 100, 100) == 400
-    assert chrome.even_height(801, 100, 100) == 400
+    def setMinimumHeight(self, value):  # noqa: N802
+        self.minimum = value
 
+    def maximumHeight(self):  # noqa: N802
+        return self.maximum
 
-def test_a_stack_with_a_larger_minimum_is_larger_by_the_difference():
-    assert chrome.even_height(900, 162, 200) == 431  # the normal profile: 162 + 269 above, 200 + 269 below
-    assert chrome.even_height(900, 300, 100) == 550
+    def setMaximumHeight(self, value):  # noqa: N802
+        self.maximum = value
 
+    def setVisible(self, visible):  # noqa: N802
+        self.visible = visible
 
-def test_a_room_with_nothing_left_gives_each_stack_its_minimum():
-    assert chrome.even_height(UPPER + LOWER, UPPER, LOWER) == UPPER
-
-
-def test_a_room_shorter_than_the_minimums_is_shared_as_they_are():
-    assert chrome.even_height(136, UPPER, LOWER) == 61  # 122 / 272 of the room
-    assert chrome.even_height(100, 50, 150) == 25
-
-
-def test_no_stack_is_given_nothing():
-    # 0 folds a collapsible stack (the compact profile) instead of holding it to its minimum.
-    assert chrome.even_height(10, 0, 400) == 1
-    assert chrome.even_height(10, 400, 0) == 9
-    assert chrome.even_height(600, 0, 0) == 300
-
-
-def test_the_two_stacks_get_the_same_room_beyond_their_minimum():
-    leasts = (0, 80, 122, 150, 200, 240)
-    for room, upper, lower in itertools.product((300, 500, 733, 734, 1200), leasts, leasts):
-        top = chrome.even_height(room, upper, lower)
-        assert 1 <= top <= room - 1
-        if room >= upper + lower:
-            assert 0 <= ((room - top) - lower) - (top - upper) <= 1, (room, upper, lower, top)
-
-
-# --- the minimum of a stack ------------------------------------------------------------------------------------------
 
 class _Size:
     def __init__(self, height):
@@ -85,22 +59,148 @@ class _Size:
         return self._height
 
 
-class _Stack:
-    def __init__(self, minimum, hint):
-        self._minimum, self._hint = minimum, hint
+class _Splitter:
+    """757 px high: 733 px for the two stacks, 8 px of handle and 16 px of margins (QGIS LTR, 1600 x 1000)."""
 
-    def minimumHeight(self):  # noqa: N802 - Qt name
-        return self._minimum
+    def __init__(self, stacks, sizes, height=757):
+        self.stacks, self._sizes, self._height, self.set = stacks, list(sizes), height, []
 
-    def minimumSizeHint(self):  # noqa: N802 - Qt name
-        return _Size(self._hint)
+    def count(self):
+        return len(self.stacks)
+
+    def widget(self, index):
+        return self.stacks[index]
+
+    def sizes(self):
+        return list(self._sizes)
+
+    def setSizes(self, sizes):  # noqa: N802
+        self.set.append(list(sizes))
+
+    def height(self):
+        return self._height
+
+    def handleWidth(self):  # noqa: N802
+        return 8
 
 
-def test_a_stack_with_a_minimum_height_cannot_go_under_it():
-    # Qt reads the minimum height first, even under what the layout says (the tool box frame: 150 px).
-    assert chrome.stack_least(_Stack(150, 260)) == 150
-    assert chrome.stack_least(_Stack(150, 90)) == 150
+def _sections(share=0.35, sizes=(246, 487)):
+    """EXPLORING open above FILTERING, the lower stack with the minimum of the compact profile."""
+    nothing, filtering = object(), object()
+    top, bottom = _Stack(), _Stack(minimum=150)
+    toolbox = types.SimpleNamespace(current=filtering, currentWidget=lambda: toolbox.current)
+    sections = types.SimpleNamespace(
+        top=top, detached=set(), _pages={"exploring": object()}, _share=share, _left=None,
+        _bottom_limits=None, _bottom_held=None, _toolbox_minimum=None,
+        _splitter=_Splitter([top, bottom], sizes), _toolbox=toolbox, _nothing=nothing, filtering=filtering,
+        bottom_rail=types.SimpleNamespace(shown_sections=lambda: ["filtering", "exporting"]),
+        _open_in_stack=lambda key: True, _headers_height=lambda: RAIL, _bottom_headers_height=lambda bottom: RAIL,
+        _hold_toolbox=lambda nothing: None)
+    for name in ("_fit", "_room", "_share_room", "_both_open", "_on_handle_moved", "dimensions_applied", "eventFilter"):
+        setattr(sections, name, types.MethodType(getattr(chrome.DockSections, name), sections))
+    sections.refresh_rails = sections._fit
+    return sections
 
 
-def test_a_stack_without_one_cannot_go_under_what_its_layout_says():
-    assert chrome.stack_least(_Stack(0, 122)) == 122
+def _resized(sections, height, old_height):
+    """The splitter of ``sections`` told of its new height, as Qt does before it resizes its stacks."""
+    sections._splitter._height = height
+    event = types.SimpleNamespace(type=lambda: chrome.QEvent.Type.Resize, size=lambda: _Size(height),
+                                  oldSize=lambda: _Size(old_height))
+    sections.eventFilter(sections._splitter, event)
+
+
+# --- a display profile applied while nothing is open below -----------------------------------------------------------
+
+def test_the_limits_of_the_managers_come_back_with_the_next_section():
+    sections = _sections()
+    bottom = sections._splitter.widget(1)
+    sections._toolbox.current = sections._nothing
+    sections._fit()
+    assert (bottom.minimum, bottom.maximum) == (RAIL, RAIL)  # held to its rail
+    sections._toolbox.current = sections.filtering
+    sections._fit()
+    assert (bottom.minimum, bottom.maximum) == (150, MAX)  # as 5.1.1: the minimum of the profile, no maximum
+
+
+def test_a_display_profile_applied_with_nothing_open_does_not_keep_the_rail_as_a_maximum():
+    # 5.1.1: the limits kept were dropped at each pass of the managers, and read again on the stack. The splitter
+    # manager sets the minimum alone, after the dimensions: the maximum read was then the rail the stack was held
+    # to, and FILTERING opened in a stack 150 px high that the handle could not enlarge.
+    sections = _sections()
+    bottom = sections._splitter.widget(1)
+    sections._toolbox.current = sections._nothing
+    sections._fit()
+    bottom.minimum, bottom.maximum = 200, MAX  # the dimensions of the normal profile
+    sections.dimensions_applied()
+    bottom.minimum = 200  # then its splitter settings: the minimum alone
+    sections.dimensions_applied()
+    assert (bottom.minimum, bottom.maximum) == (RAIL, RAIL)  # still held to its rail: no band under it
+    bottom.minimum, bottom.maximum = 150, MAX  # the compact profile again
+    sections.dimensions_applied()
+    bottom.minimum = 150
+    sections.dimensions_applied()
+    sections._toolbox.current = sections.filtering
+    sections._fit()
+    assert (bottom.minimum, bottom.maximum) == (150, MAX)
+
+
+def test_the_dimensions_applied_with_a_section_open_keep_what_the_managers_set():
+    sections = _sections()
+    bottom = sections._splitter.widget(1)
+    bottom.minimum = 200
+    sections.dimensions_applied()
+    assert (bottom.minimum, bottom.maximum) == (200, MAX)
+
+
+# --- the handle where the user left it -------------------------------------------------------------------------------
+
+def test_never_dragged_the_share_is_taken_as_5_1_1_takes_it():
+    # Of a room that counts the margins of the splitter (749 px for 733): Qt takes them back from the upper stack,
+    # and the dock opens with 246 px above 487 in the compact profile, as 5.1.1 does.
+    sections = _sections(share=0.35)
+    sections._share_room()
+    assert sections._splitter.set == [[262, 487]]
+
+
+def test_a_handle_left_by_the_user_comes_back_to_the_pixel(monkeypatch):
+    # 5.1.1: left at 319 px, the handle came back at 310 px with the next section opened.
+    monkeypatch.setattr(chrome, "_save_share", lambda share: None)
+    sections = _sections(sizes=(319, 414))
+    sections._on_handle_moved(319, 1)
+    sections._fit()  # another section opened below
+    assert sections._splitter.set == [[319, 414]]
+    sections._splitter._sizes = [699, RAIL]  # the lower stack folded to its rail, then opened again
+    sections._fit()
+    assert sections._splitter.set[-1] == [319, 414]
+
+
+def test_a_dock_of_another_height_takes_the_share_alone_as_5_1_1(monkeypatch):
+    monkeypatch.setattr(chrome, "_save_share", lambda share: None)
+    sections = _sections(sizes=(366, 367))
+    sections._on_handle_moved(366, 1)
+    _resized(sections, 957, 757)  # 200 px taller
+    assert sections._left is None and sections._splitter.set == [[474, 475]]  # 949 px shared, Qt does the rest
+    sections._splitter._sizes = [458, 475]
+    _resized(sections, 757, 957)
+    sections._fit()
+    assert sections._splitter.set[-1] == [466, 467]  # the share of what the stacks had, not the heights left before
+
+
+def test_a_wider_dock_keeps_the_heights_left(monkeypatch):
+    monkeypatch.setattr(chrome, "_save_share", lambda share: None)
+    sections = _sections(sizes=(319, 414))
+    sections._on_handle_moved(319, 1)
+    _resized(sections, 757, 757)
+    assert sections._splitter.set == [[319, 414]]
+
+
+def test_a_share_set_by_something_else_than_a_drag_rules(monkeypatch):
+    # The scripts of the site set the share themselves (scripts/site_videos.py): the heights of an older drag
+    # are not given back over it.
+    monkeypatch.setattr(chrome, "_save_share", lambda share: None)
+    sections = _sections(sizes=(319, 414))
+    sections._on_handle_moved(319, 1)
+    sections._share = 0.5
+    sections._share_room()
+    assert sections._splitter.set == [[374, 375]]

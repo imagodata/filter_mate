@@ -543,6 +543,11 @@ Run it?</source>
         <translation>에이전트 설정 열기: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>피드백 페이지 열기: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>이 설정은 구성 트리에 표시되지 않습니다.</translation>
@@ -2016,6 +2021,166 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>data.gouv.fr에서 지방자치단체 추가</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="106"/>
+        <source>Describe the fields of the active layer</source>
+        <translation>활성 레이어의 필드 설명</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="109"/>
+        <source>Keep only the features visible on the map</source>
+        <translation>지도에 보이는 피처만 남기기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="110"/>
+        <source>Color the active layer by its main field</source>
+        <translation>활성 레이어를 주요 필드 기준으로 색칠</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="111"/>
+        <source>Label the active layer with its names</source>
+        <translation>활성 레이어에 이름으로 레이블 달기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="112"/>
+        <source>Export the filtered layers to a GeoPackage</source>
+        <translation>필터링된 레이어를 GeoPackage로 내보내기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="113"/>
+        <source>Make a relief map of this area with contours</source>
+        <translation>이 지역의 등고선이 있는 지형도 만들기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="114"/>
+        <source>Add the elevation of the map view</source>
+        <translation>지도 보기의 고도 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="115"/>
+        <source>How many people live in the selected area?</source>
+        <translation>선택한 지역에는 몇 명이 살고 있나요?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="116"/>
+        <source>Add a population grid of the map view</source>
+        <translation>지도 보기의 인구 격자 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="117"/>
+        <source>Add the cafés here from OpenStreetMap</source>
+        <translation>OpenStreetMap에서 여기 카페 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="118"/>
+        <source>Add the cycle paths of the map view</source>
+        <translation>지도 보기의 자전거 도로 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="119"/>
+        <source>Add the trees and hedges of this area</source>
+        <translation>이 지역의 나무와 산울타리 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="120"/>
+        <source>Put a dark basemap under my layers</source>
+        <translation>내 레이어 아래에 어두운 배경 지도 깔기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="121"/>
+        <source>Find a cloud-free Sentinel-2 image here</source>
+        <translation>여기서 구름 없는 Sentinel-2 이미지 찾기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="122"/>
+        <source>Zoom to Central Park in New York</source>
+        <translation>뉴욕 센트럴파크로 확대</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="123"/>
+        <source>Search Opendatasoft for public toilets</source>
+        <translation>Opendatasoft에서 공중화장실 검색</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="124"/>
+        <source>Find unemployment by region on Eurostat</source>
+        <translation>Eurostat에서 지역별 실업률 찾기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="126"/>
+        <source>Find bike-share stations on data.gouv.fr</source>
+        <translation>data.gouv.fr에서 공유 자전거 정류장 찾기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="127"/>
+        <source>Add the IGN buildings of the map view</source>
+        <translation>지도 보기의 IGN 건물 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="128"/>
+        <source>Add the 1950s aerial photos of this area</source>
+        <translation>이 지역의 1950년대 항공 사진 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="129"/>
+        <source>Add the flood zones of this area</source>
+        <translation>이 지역의 홍수 구역 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="130"/>
+        <source>Add the clay shrink-swell hazard map</source>
+        <translation>점토 수축·팽창 위험 지도 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="131"/>
+        <source>Zoom to the town hall of Toulouse</source>
+        <translation>툴루즈 시청으로 확대</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="132"/>
+        <source>Find flood risk data on data.gov.uk</source>
+        <translation>data.gov.uk에서 홍수 위험 데이터 찾기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="133"/>
+        <source>Find park data on open.canada.ca</source>
+        <translation>open.canada.ca에서 공원 데이터 찾기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="134"/>
+        <source>Find bushfire data on data.gov.au</source>
+        <translation>data.gov.au에서 산불 데이터 찾기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="135"/>
+        <source>Search GovData for charging stations</source>
+        <translation>GovData에서 충전소 검색</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="136"/>
+        <source>Search dati.gov.it for school buildings</source>
+        <translation>dati.gov.it에서 학교 건물 검색</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="137"/>
+        <source>Search data.overheid.nl for bike parking</source>
+        <translation>data.overheid.nl에서 자전거 주차장 검색</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="138"/>
+        <source>Search G-Spatial for evacuation shelters</source>
+        <translation>G-Spatial에서 대피소 검색</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="139"/>
+        <source>Add the municipalities of Brazil from IBGE</source>
+        <translation>IBGE에서 브라질의 지방자치단체 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="140"/>
+        <source>Add the municipalities of Poland from PRG</source>
+        <translation>PRG에서 폴란드의 지방자치단체 추가</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="195"/>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Ask for a filter…</source>
@@ -2045,6 +2210,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>FilterMate 사용법</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>피드백</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>새 기능 테스터 되기</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
