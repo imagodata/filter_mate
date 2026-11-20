@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: the requests offered on the welcome follow the state of QGIS and the project. With no layer open they are only ways to bring data in (elevation, OpenStreetMap, population, a basemap to start the map, Sentinel-2, places, open data); with layers, one or two are about them, chosen from the kind of the active layer (vector: fields, statistics, colors, labels, export, a buffer zone; raster: slope, shaded relief, contour lines, a color ramp, statistics; point cloud: ground points, export to LAZ), the selection (zoom to it, its attributes, what lies within 500 m, the other layers filtered by it) and the filters (which layers are filtered, zoom to what is kept, clear them all, export them), and the others bring data in. Each request carries out with a tool of the agent that the catalog names. The set is drawn again when a project opens, a layer comes or goes, the selection, a filter or the active layer changes (once the changes stop; never a feature count read), not while the state stays as drawn for. The welcome of a connected model has a link "Reconfigure FilterMate…" that starts the setup cards, under the requests (without a model the existing "Set up FilterMate, no model needed" button does it).
+
 ## [5.1.2] - 2026-11-20
 
 The fixes and changes merged since 5.1.1. The panel: the buttons of FILTERING and EXPORTING in front of their rows,
