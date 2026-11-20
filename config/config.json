@@ -162,7 +162,7 @@
           "auto",
           "manual"
         ],
-        "description": "Height of the panels of the sections taken out of the dock, and of the dock: 'auto' (sized again when a section leaves, comes back or changes panel, when a panel is moved or opens another section: FILTERING and EXPORTING at the height of their rows, the room left to EXPLORING, AGENT, CONFIGURATION or the other panels of QGIS), 'manual' (the heights QGIS and the user set stay)"
+        "description": "Height of the panels of the sections taken out of the dock, and of the dock: 'auto' (sized again when a section leaves, comes back or changes panel, when a panel is moved or opens another section: FILTERING and EXPORTING at the height their rows need, spread or not (SECTION_HEIGHT), the room left to EXPLORING, AGENT, CONFIGURATION or the other panels of QGIS; the dock in one piece is never resized), 'manual' (the heights QGIS and the user set stay)"
       },
       "EXPLORING_TOOLS": {
         "_display_name": "EXPLORING tools",
