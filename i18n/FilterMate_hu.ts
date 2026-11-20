@@ -543,6 +543,11 @@ Futtatja?</translation>
         <translation>Az ügynök beállításainak megnyitása: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Visszajelzési oldal megnyitása: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Ez a beállítás nem jelenik meg a konfigurációs fában.</translation>
@@ -2205,6 +2210,16 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Hogyan működik a FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Visszajelzés</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Legyen az újdonságok tesztelője</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

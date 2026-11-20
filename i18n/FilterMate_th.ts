@@ -543,6 +543,11 @@ Run it?</source>
         <translation>เปิดการตั้งค่าเอเจนต์: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>เปิดหน้าความคิดเห็น: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>การตั้งค่านี้ไม่แสดงในแผนผังการกำหนดค่า</translation>
@@ -2205,6 +2210,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>FilterMate ทำงานอย่างไร</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>ความคิดเห็น</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>มาเป็นผู้ทดสอบฟีเจอร์ใหม่</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

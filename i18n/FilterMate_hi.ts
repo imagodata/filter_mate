@@ -543,6 +543,11 @@ Run it?</source>
         <translation>एजेंट सेटिंग्स खोलें: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>प्रतिक्रिया पृष्ठ खोलें: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>यह सेटिंग कॉन्फ़िगरेशन ट्री में नहीं दिखाई जाती।</translation>
@@ -2205,6 +2210,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>FilterMate कैसे काम करता है</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>प्रतिक्रिया</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>नई सुविधाओं के परीक्षक बनें</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

@@ -543,6 +543,11 @@ Executar?</translation>
         <translation>Abrir definições do agente: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Abrir a página de opinião: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Esta definição não é mostrada na árvore de configuração.</translation>
@@ -2205,6 +2210,16 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Como funciona o FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Opinião</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Seja testador das novidades</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

@@ -543,6 +543,11 @@ Jo zaženem?</translation>
         <translation>Odpri nastavitve agenta: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Odpri stran za povratne informacije: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Ta nastavitev ni prikazana v drevesu konfiguracije.</translation>
@@ -2205,6 +2210,16 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Kako deluje FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Povratne informacije</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Postanite preizkuševalec novosti</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

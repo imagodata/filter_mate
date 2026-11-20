@@ -2531,6 +2531,15 @@
  "show_settings_link": {
   "additionalProperties": false,
   "properties": {
+   "form": {
+    "enum": [
+     "usage",
+     "feature",
+     "testers",
+     "services"
+    ],
+    "type": "string"
+   },
    "path": {
     "maxLength": 200,
     "type": "string"
@@ -2542,7 +2551,8 @@
      "autonomy",
      "tools",
      "other_applications",
-     "setting"
+     "setting",
+     "feedback"
     ],
     "type": "string"
    }

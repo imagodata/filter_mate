@@ -857,6 +857,35 @@ def check_chat(provider, layer, authcfg, work):
           panel.minimumSizeHint().width() <= narrow and len(cut) < len(panel.example_buttons[0].request()),
           f"{narrow} -> {panel.minimumSizeHint().width()}, {cut!r}")
     panel.example_buttons[0].set_request(kept)
+    # The feedback forms of the site: the menu, the welcome and the tool open them, the plugin sends nothing itself.
+    from filter_mate.core.agent.tool_executor import ToolFailure
+    from filter_mate.infrastructure import feedback_forms
+    opened = []
+    real_open = feedback_forms.open_form
+    feedback_forms.open_form = lambda form, ref: opened.append((form, ref))
+    try:
+        entries = [action.text() for action in panel.feedback_menu.actions()]
+        check("the menu lists the four forms", len(entries) == 4 and all(entries), entries)
+        panel.feedback_menu.actions()[1].trigger()
+        check("a form of the menu opens its page", opened[-1:] == [("feature", "agent-menu")], opened)
+        check("the welcome offers to test the new features", panel.testers_button.isVisible())
+        panel.testers_button.click()
+        check("the welcome link opens the testers form", opened[-1:] == [("testers", "agent-welcome")], opened)
+        before = len(chat._links)
+        shown = chat._settings_link_tool({"target": "feedback", "form": "services"})
+        check("the tool puts a link to a form in the thread", len(chat._links) == before + 1 and shown.get("shown"),
+              shown)
+        chat._links[-1]()
+        check("its link opens the form", opened[-1:] == [("services", "agent-chat")], opened)
+        try:
+            chat._settings_link_tool({"target": "feedback", "form": "review"})
+            refused = False
+        except ToolFailure:
+            refused = True
+        check("an unknown form is refused", refused)
+    finally:
+        feedback_forms.open_form = real_open
+    panel.clear_thread()
     settings(consent=False)
     chat._refresh_ready()
     provider.reset()

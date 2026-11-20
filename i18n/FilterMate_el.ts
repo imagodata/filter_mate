@@ -543,6 +543,11 @@ Run it?</source>
         <translation>Άνοιγμα ρυθμίσεων πράκτορα: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Άνοιγμα της σελίδας σχολίων: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Αυτή η ρύθμιση δεν εμφανίζεται στο δέντρο διαμόρφωσης.</translation>
@@ -2205,6 +2210,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Πώς λειτουργεί το FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Σχόλια</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Γίνετε δοκιμαστής των νέων λειτουργιών</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

@@ -543,6 +543,11 @@ Eseguirlo?</translation>
         <translation>Apri le impostazioni dell'agente: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Apri la pagina dei feedback: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Questa impostazione non è visibile nell'albero di configurazione.</translation>
@@ -2205,6 +2210,16 @@ Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Come funziona FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Feedback</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Diventa tester delle novità</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
