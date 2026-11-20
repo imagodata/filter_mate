@@ -583,11 +583,11 @@ def rows_need(pages=('FILTERING',), show=False):
 
 
 def dock_void(pages=None, need=None):
-    """The empty band of the dock: what its lower stack holds beyond the rows of ``pages``. The rows are packed at
-    the top of their section (SECTION_HEIGHT = fit), so a window taller than the dock needs shows that band in every
-    frame. ``pages`` None: the band under the rows of the section the dock shows, read on that section (its viewport
-    against what its rows ask), which also holds with the headers stacked; 0 for CONFIGURATION, whose tree takes
-    the height it is given."""
+    """The empty band of the dock: what its lower stack holds beyond the rows of ``pages``. A window taller than the
+    dock needs shows it in every frame: under the rows when they are packed at the top of their section
+    (SECTION_HEIGHT = fit), between them when they spread over its height (fill, the default). ``pages`` None: the
+    band of the section the dock shows, read on that section (its viewport against what its rows ask), which also
+    holds with the headers stacked; 0 for CONFIGURATION, whose tree takes the height it is given."""
     d = dock()
     if pages is None:
         page = d.toolBox_tabTools.currentWidget()
