@@ -225,7 +225,9 @@ class ConfigController(BaseController):
             changed = apply_options()
             if changed:
                 changes_summary.append(f"sections ({', '.join(changed)})")
-                self._resize_section_panels()
+                if [what for what in changed if what != 'height']:
+                    # Not for SECTION_HEIGHT alone: the rows need the same height spread or not, the sizes stay.
+                    self._resize_section_panels()
 
     def _resize_section_panels(self) -> None:
         """What the dock and the panels of its sections show changed: they are sized again

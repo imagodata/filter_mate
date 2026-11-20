@@ -5626,10 +5626,8 @@ def sizing_holders():
 
 
 def sizing_rigid_page(holder):
-    """The page of FILTERING or EXPORTING when it is all ``holder`` opens (their rows at their own height), else None."""
+    """The page of FILTERING or EXPORTING when it is all ``holder`` opens (rows spread or not), else None."""
     d = dock()
-    if d.property('fm_section_height') == 'fill':
-        return None
     if holder is d:
         sections = d._fm_sections
         if any(sections._open_in_stack(key) for key in sections._pages):
@@ -5644,12 +5642,13 @@ def sizing_rigid_page(holder):
 
 
 def sizing_empty(holder):
-    """The height left empty under the rows of ``holder``, in their scroll area; None when it is not rigid."""
+    """What the scroll area of the rows of ``holder`` has more than they need at their own height: left empty under
+    them (fit), or spread between them (fill); None when it is not rigid."""
     page = sizing_rigid_page(holder)
     if page is None:
         return None
     viewport = page.parentWidget()
-    return viewport.height() - page.height()
+    return viewport.height() - page.sizeHint().height()
 
 
 def sizing_column(holder):
@@ -5764,6 +5763,21 @@ def s_sizing_setup():
     sizing_reset()
     settles(lambda: d.toolBox_tabTools.currentWidget() is d.FILTERING)
     SIZING['dock_width'] = d.width()
+    SIZING['height'] = config_value('APP.DOCKWIDGET.SECTION_HEIGHT')
+    if SIZING['auto']:  # the rows need the same height spread or not: one need in both modes
+        hints = {}
+        for mode in ('fit', 'fill'):
+            apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': mode})
+            pump(600)
+            hints[mode] = (d.FILTERING.sizeHint().height(), d.EXPORTING.sizeHint().height())
+        check('sizing: the rows of FILTERING and EXPORTING need the same height spread (fill) or not (fit)',
+              hints['fit'] == hints['fill'], str(hints))
+    mode = os.environ.get('FM_SIZING_MODE') or SIZING['height']
+    if mode != config_value('APP.DOCKWIDGET.SECTION_HEIGHT'):
+        apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': mode})
+        pump(600)
+    SIZING['mode'] = config_value('APP.DOCKWIDGET.SECTION_HEIGHT')
+    print(f"   sizing | rows: {SIZING['mode']}", flush=True)
     check('sizing: the panels size themselves once the start is over', settles(sizing_armed, 8))
     grab_window('sizing_00_dock')
     return None
@@ -6190,10 +6204,9 @@ def s_sizing_whole_dock():
     before = d.geometry().getRect()
     print(f"   sizing | the dock in one piece, compact: {before}, rows cut on the right: {sizing_cut_in_width()}, "
           f"rows need {d.FILTERING.minimumSizeHint().width()} px", flush=True)
-    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fill'})
-    pump(900)
-    apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fit'})
-    pump(900)
+    for mode in ('fit' if SIZING['mode'] == 'fill' else 'fill', SIZING['mode']):  # there and back
+        apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': mode})
+        pump(900)
     panels.resize_soon()  # what a change of UI_PROFILE asks for, once the profile has given its own sizes
     pump(1200)
     after = d.geometry().getRect()
@@ -6291,11 +6304,44 @@ def s_sizing_probe():
     return None
 
 
+def s_sizing_alone():
+    """FILTERING alone in its column, beside the dock that keeps EXPLORING (elastic): nothing can take the rest, the
+    panel keeps the whole column. Rows spread (fill): no band under the last one; one gap apart (fit): at the top."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    sizing_reset()
+    panels.detach('filtering')
+    panel = panels.panel('filtering')
+    window.splitDockWidget(d, panel, Qt.Orientation.Horizontal)  # at once: beside the dock, a column of its own
+    pump(1200)
+    if panel.isFloating() or window.tabifiedDockWidgets(panel) or abs(panel.y() - d.y()) > 2:
+        report('SKIP', 'sizing: FILTERING alone in its column', sizing_state())
+        return None
+    page = d.FILTERING
+    viewport = page.parentWidget()
+    last = max(widget.mapTo(page, QPoint(0, widget.height())).y()
+               for widget in (getattr(d, name) for _key, name in mockup_module().FILTERING_PAIRS) if widget.isVisible())
+    band = page.height() - last
+    if SIZING['mode'] == 'fill':
+        check('sizing: FILTERING alone in its column (fill): the whole column, its rows spread, no band under them',
+              abs(panel.height() - d.height()) <= 2 and abs(viewport.height() - page.height()) <= 2 and band <= 16,
+              f"panel {panel.height()} dock {d.height()} viewport {viewport.height()} page {page.height()} band {band}")
+    else:
+        check('sizing: FILTERING alone in its column (fit): the whole column, its rows at the top',
+              abs(panel.height() - d.height()) <= 2 and page.height() == page.sizeHint().height(),
+              f"panel {panel.height()} dock {d.height()} page {page.height()}/{page.sizeHint().height()}")
+    grab_window('sizing_18_alone')
+    return None
+
+
 def s_sizing_end():
     d = dock()
     sizing_reset()
     window = iface.mainWindow()
     window.restoreState(SIZING['state'])
+    if SIZING.get('height') and config_value('APP.DOCKWIDGET.SECTION_HEIGHT') != SIZING['height']:
+        apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': SIZING['height']})
     d.show()
     d.raise_()
     open_section(d.FILTERING)
@@ -6312,7 +6358,7 @@ SIZING_STEPS = [s_section_setup, s_vector_source, s_sizing_setup, s_sizing_filte
                 s_sizing_every_section, s_sizing_grouped, s_sizing_manual, s_sizing_under_layers, s_sizing_back_to_dock,
                 s_sizing_beside, s_sizing_floating, s_sizing_open_chip_again, s_sizing_elsewhere, s_sizing_opened_by_code,
                 s_sizing_short_screen, s_sizing_closed_by_cross, s_sizing_width_given_back, s_sizing_behind_a_tab,
-                s_sizing_whole_dock, s_sizing_restart_docked, s_sizing_restart_floating, s_sizing_end]
+                s_sizing_whole_dock, s_sizing_alone, s_sizing_restart_docked, s_sizing_restart_floating, s_sizing_end]
 
 
 # --- the two stacks and the rows as 5.1.1 laid them out (FM_ONLY=like511) ---------------------------------------------

@@ -1819,9 +1819,9 @@ class SectionPanels:
 
     def _measure(self, holder: Any) -> Tuple[str, int, int]:
         """``(kind, need, minimum)`` of the dock or of a panel. Rigid with FILTERING or EXPORTING open and nothing
-        else, their rows at their own height (``APP.DOCKWIDGET.SECTION_HEIGHT`` = ``fit``): it needs its height but
-        the room left under the rows, in the scroll area that holds them (more when they are cut and scroll).
-        Elastic otherwise: EXPLORING, AGENT and CONFIGURATION use any height, and so do the rows spread (``fill``)."""
+        else: it needs its height but what its scroll area has more than the rows need at their own height (more
+        when they are cut and scroll), whether they are spread over the section (``SECTION_HEIGHT`` = ``fill``) or
+        one gap apart (``fit``). Elastic otherwise: EXPLORING, AGENT and CONFIGURATION use any height."""
         minimum = self._minimum(holder)
         page = self._rigid_page(holder)
         if page is None:
@@ -1842,10 +1842,10 @@ class SectionPanels:
         return page if page is not None and page.isVisible() else None
 
     def _rigid_page(self, holder: Any) -> Any:
-        """The page of FILTERING or EXPORTING, when it is all ``holder`` opens; None otherwise."""
-        from .mockup_layout import ROW_SECTIONS, SECTION_FILL
-        if self._dock.property("fm_section_height") == SECTION_FILL:
-            return None
+        """The page of FILTERING or EXPORTING, when it is all ``holder`` opens; None otherwise. Its rows spread
+        (``SECTION_HEIGHT`` = ``fill``, the default) or not, it is rigid: rows spread over a tall column are the same
+        empty space as a band under them."""
+        from .mockup_layout import ROW_SECTIONS
         if holder is self._dock:
             sections = self._sections()
             if sections is None or any(sections._open_in_stack(key) for key in sections._pages):
@@ -1864,13 +1864,15 @@ class SectionPanels:
 
     @staticmethod
     def _room_under(page: Any) -> int:
-        """The height left empty under ``page`` in the scroll area that holds it (the tool box, or the column of a
-        panel); less than 0 when the page is cut and scrolls."""
+        """The height its scroll area (the tool box, or the column of a panel) has more than the rows of ``page``
+        need at their own height (``rows_height``): left empty under them, or spread between them; less than 0 when
+        the rows are cut and scroll."""
+        from .mockup_layout import rows_height
         viewport = page.parentWidget()
         area = viewport.parentWidget() if viewport is not None else None
         if not isinstance(area, _scroll_area_class()) or area.widget() is not page:
             return 0
-        return viewport.height() - page.sizeHint().height()
+        return viewport.height() - rows_height(page)
 
     def _places(self) -> Dict[Any, Any]:
         """Where the dock and each panel are: floating, or in which area and column, with which tabs. The same
