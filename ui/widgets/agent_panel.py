@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import html
 import time
-from typing import List, Sequence, Tuple
+from typing import Callable, List, Optional, Sequence, Tuple
 
 from qgis.PyQt.QtCore import (
     QByteArray, QCoreApplication, QEvent, QLocale, QSettings, QSize, Qt, QTimer, QUrl, pyqtSignal,
@@ -25,7 +25,7 @@ from qgis.PyQt.QtWidgets import (
 
 from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
-from ...core.agent.example_prompts import SHOWN as EXAMPLES_SHOWN, pick as pick_examples
+from ...core.agent.example_prompts import Facts, SHOWN as EXAMPLES_SHOWN, pick as pick_examples
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import (
     KIND_CKAN, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_WFS, KIND_WMS,
@@ -77,6 +77,7 @@ FEEDBACK_ENTRIES = (("usage", "Give your opinion"), ("feature", "Suggest a featu
                     ("testers", "Test the experimental features"), ("services", "Training and services"))
 _LAST_EXAMPLES = "filter_mate/agent/last_examples"  # the keys of the requests seen last on the welcome
 EXAMPLES_SEEN_MS = 1500  # on screen this long, a set of requests counts as seen
+FACTS_SETTLE_MS = 300  # a burst of changes of the project (layers loading) is read once, after it
 
 
 def _tr(text: str) -> str:
@@ -108,12 +109,38 @@ def example_text(key: str) -> str:
     texts = {
         "layers": _tr("Which layers are in this project?"),
         "fields": _tr("Describe the fields of the active layer"),
+        "lidar_describe": _tr("What does the point cloud contain?"),
         "tall_buildings": _tr("Keep the buildings taller than 15 m"),
         "roads_inside": _tr("Filter the roads inside the selected feature"),
+        "sel_other_layers": _tr("Filter the other layers by the selection"),
+        "sel_radius": _tr("Keep what lies within 500 m of the selection"),
+        "cross_near": _tr("Keep what lies within 100 m of another layer"),
+        "zoom_selection": _tr("Zoom to the selected features"),
+        "zoom_filtered": _tr("Zoom to the features the filter keeps"),
+        "sel_attributes": _tr("Show the attributes of the selected features"),
+        "sel_stats": _tr("Count the selected features by category"),
+        "stats_active": _tr("Count the active layer's features by type"),
+        "filter_state": _tr("Which layers are filtered, and what is kept?"),
+        "clear_all": _tr("Clear all the filters"),
         "visible": _tr("Keep only the features visible on the map"),
         "color_by": _tr("Color the active layer by its main field"),
+        "raster_ramp": _tr("Color the active raster with a ramp"),
         "labels": _tr("Label the active layer with its names"),
         "export_gpkg": _tr("Export the filtered layers to a GeoPackage"),
+        "export_active": _tr("Export the active layer to GeoJSON"),
+        "export_remote": _tr("Save the online layers to a GeoPackage"),
+        "lidar_export": _tr("Export the LiDAR points kept to LAZ"),
+        "slope": _tr("Map the slope of the active raster"),
+        "hillshade": _tr("Add a shaded relief from the active raster"),
+        "contours": _tr("Draw contour lines from the active raster"),
+        "raster_stats": _tr("Give the min, max and mean of the raster"),
+        "slope_filter": _tr("Keep the features on slopes over 15 %"),
+        "zonal": _tr("Add the mean of the raster to each polygon"),
+        "lidar_ground": _tr("Keep only the ground points of the cloud"),
+        "lidar_inside": _tr("Keep the LiDAR points inside the selection"),
+        "join": _tr("Join two layers by a common field"),
+        "buffer_zone": _tr("Draw a 100 m zone around the active layer"),
+        "layout": _tr("Make a print layout of this map"),
         "relief": _tr("Make a relief map of this area with contours"),
         "elevation_view": _tr("Add the elevation of the map view"),
         "people_selected": _tr("How many people live in the selected area?"),
@@ -122,6 +149,7 @@ def example_text(key: str) -> str:
         "osm_cycle": _tr("Add the cycle paths of the map view"),
         "osm_trees": _tr("Add the trees and hedges of this area"),
         "dark_basemap": _tr("Put a dark basemap under my layers"),
+        "add_basemap": _tr("Add a basemap to start the map"),
         "sentinel": _tr("Find a cloud-free Sentinel-2 image here"),
         "zoom_park": _tr("Zoom to Central Park in New York"),
         "ods_toilets": _tr("Search Opendatasoft for public toilets"),
@@ -151,10 +179,11 @@ def qgis_locale() -> str:
     return str(QSettings().value("locale/userLocale", "") or "") or QLocale().name()
 
 
-def examples(previous: Sequence[str] = ()) -> Tuple[Tuple[str, str], ...]:
+def examples(previous: Sequence[str] = (), facts: Optional[Facts] = None) -> Tuple[Tuple[str, str], ...]:
     """``(key, text)`` of the requests offered on an empty conversation (mockup: Ready board), drawn again each time,
-    none of ``previous`` when the catalog allows it."""
-    return tuple((key, example_text(key)) for key in pick_examples(qgis_locale(), previous))
+    all true of ``facts`` (the project now; unknown: only those that suppose nothing), none of ``previous`` when the
+    catalog allows it."""
+    return tuple((key, example_text(key)) for key in pick_examples(qgis_locale(), previous, facts=facts))
 
 
 class _WelcomePage(QWidget):
@@ -395,6 +424,14 @@ class AgentPanel(QFrame):
         self._can_compare = False  # the dock has Compare and the history of the project
         self._in_answer = False
         self._ready = False
+        # The state of QGIS and the project, read on the main thread by the controller (a ``Facts``); the requests of
+        # the welcome follow it. None (a panel alone): unknown, and only requests that suppose nothing are offered.
+        self.facts_provider: Optional[Callable[[], Facts]] = None
+        self._examples_signature: Tuple[str, ...] = ()  # of the facts the requests on the welcome were drawn for
+        self._facts_timer = QTimer(self)
+        self._facts_timer.setSingleShot(True)
+        self._facts_timer.setInterval(FACTS_SETTLE_MS)
+        self._facts_timer.timeout.connect(self.refresh_examples)
         self.setStyleSheet(
             # Its own sheet wins over the rules of the accordion, which size every tool button as a section tab.
             f"QToolButton {{ min-width: {BUTTON_SIZE}px; max-width: {BUTTON_SIZE}px; min-height: {BUTTON_SIZE}px; "
@@ -764,6 +801,11 @@ class AgentPanel(QFrame):
         self.tour_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.tour_button.clicked.connect(self.tour_requested)
         # AGENT is experimental: who uses it may want to try what comes next (the testers form of the site).
+        # With a model the buttons above are hidden: the setup stays within reach, as a link under the requests.
+        self.reconfigure_button = QPushButton(_tr("Reconfigure FilterMate…"), page)
+        self.reconfigure_button.setObjectName("pushButton_agent_reconfigure")
+        self.reconfigure_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.reconfigure_button.clicked.connect(self.setup_requested)
         self.testers_button = QPushButton(_tr("Become a tester of the new features"), page)
         self.testers_button.setObjectName("pushButton_agent_testers")
         self.testers_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -792,6 +834,7 @@ class AgentPanel(QFrame):
             layout.addWidget(button)
             self.example_buttons.append(button)
         self.shuffle_examples()
+        layout.addWidget(self.reconfigure_button, 0, Qt.AlignmentFlag.AlignLeft)  # under what the welcome offers
         layout.addWidget(self.tour_button, 0, Qt.AlignmentFlag.AlignLeft)  # under what the welcome offers, either way
         layout.addWidget(self.testers_button, 0, Qt.AlignmentFlag.AlignLeft)
         layout.addStretch(1)
@@ -851,10 +894,11 @@ class AgentPanel(QFrame):
             f"QPushButton#pushButton_agent_setup {{ padding: 8px 16px; border: 1px solid {palette['fm_group_border']};"
             f" border-radius: 6px; background: {palette['fm_group']}; color: {palette['fm_text']}; }}"
             f"QPushButton#pushButton_agent_setup:hover {{ border-color: {palette['fm_active_border']}; }}"
-            f"QPushButton#pushButton_agent_tour, QPushButton#pushButton_agent_testers {{ padding: 4px 0; font-size: 12px;"
+            f"QPushButton#pushButton_agent_tour, QPushButton#pushButton_agent_testers,"
+            f" QPushButton#pushButton_agent_reconfigure {{ padding: 4px 0; font-size: 12px;"
             f" font-weight: 500; border: none; background: transparent; color: {palette['fm_accent']}; text-align: left; }}"
-            f"QPushButton#pushButton_agent_tour:hover, QPushButton#pushButton_agent_testers:hover"
-            f" {{ text-decoration: underline; }}"
+            f"QPushButton#pushButton_agent_tour:hover, QPushButton#pushButton_agent_testers:hover,"
+            f" QPushButton#pushButton_agent_reconfigure:hover {{ text-decoration: underline; }}"
             f"QLabel#label_agent_welcome_note {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
             f" {palette['fm_group_border']}; padding: 0 0 0 10px; }}"
             f"QFrame#frame_agent_history {{ background: {palette['fm_list']}; border: 1px solid"
@@ -1013,6 +1057,7 @@ class AgentPanel(QFrame):
         self.welcome_note.setVisible(not ready)
         self.configure_button.setVisible(not ready)
         self.setup_button.setVisible(not ready)
+        self.reconfigure_button.setVisible(ready)  # without a model, the button above does the same
         # Nothing can be asked before a provider is set up (mockup: Welcome board); the menu still opens the settings.
         if hasattr(self, "send_button"):
             self.input.setEnabled(ready)
@@ -1028,18 +1073,32 @@ class AgentPanel(QFrame):
             self.destination.setText(_tr("Sent to: {}").format(destination) if ready and destination else "")
             self.destination.setVisible(bool(ready and destination))
 
-    def shuffle_examples(self) -> None:
-        """Other requests on the welcome, none of the set seen last (kept across sessions of QGIS).
+    def _read_facts(self) -> Facts:
+        """The state of QGIS and the project now; unknown when there is no reader or it fails (a layer destroyed, a
+        project closing): the requests are then the neutral ones."""
+        if self.facts_provider is None:
+            return Facts.unknown()
+        try:
+            facts = self.facts_provider()
+        except Exception:  # nothing may come out of a reading: the welcome must still draw
+            return Facts.unknown()
+        return facts if isinstance(facts, Facts) else Facts.unknown()
 
-        A set nobody saw stays: the thread is cleared twice when QGIS starts or a project opens (the project closed,
-        then the one read), and a conversation restored hides the welcome. Drawing then would count as seen a set
-        that never was, and bring back the one seen before."""
-        if self.example_keys and not self._examples_seen:
+    def shuffle_examples(self) -> None:
+        """Other requests on the welcome, true of the project now, none of the set seen last (kept across sessions of
+        QGIS).
+
+        A set nobody saw stays while the project stays as it was drawn for: the thread is cleared twice when QGIS
+        starts or a project opens (the project closed, then the one read), and a conversation restored hides the
+        welcome. Drawing then would count as seen a set that never was, and bring back the one seen before."""
+        facts = self._read_facts()
+        if self.example_keys and not self._examples_seen and facts.signature() == self._examples_signature:
             return
         value = QSettings().value(_LAST_EXAMPLES, "")
         previous = list(value) if isinstance(value, (list, tuple)) else str(value or "").split(",")
-        drawn = examples([str(key) for key in previous])
+        drawn = examples([str(key) for key in previous], facts)
         self.example_keys = tuple(key for key, _text in drawn)
+        self._examples_signature = facts.signature()
         self._examples_seen = False
         for index, button in enumerate(self.example_buttons):
             if index < len(drawn):
@@ -1047,9 +1106,26 @@ class AgentPanel(QFrame):
             button.setProperty("fm_example_drawn", index < len(drawn))
         self._show_examples()
 
+    def facts_changed(self) -> None:
+        """The project changed (a layer, the selection, a filter, the active layer): the requests are read again once
+        the changes stop, so a burst of them (a project loading) is one reading."""
+        self._facts_timer.start()
+
+    def refresh_examples(self) -> None:
+        """Draw the requests again when what they depend on changed since they were drawn; not otherwise, so a set the
+        user is reading stays while the project stays as it is."""
+        if not hasattr(self, "example_buttons") or self._read_facts().signature() == self._examples_signature:
+            return
+        self.shuffle_examples()
+        if self._ready and self.isVisible() and self.stack.currentIndex() == _WELCOME_PAGE:
+            self._examples_on_screen()
+
     def _examples_on_screen(self) -> None:
-        """The welcome may be on screen: its requests count as seen if they are still there in a moment. A set shown
-        for an instant (the thread cleared for the project closed, then for the one read) is not."""
+        """The welcome may be on screen: its requests are drawn again if the project changed since (a signal can be
+        missed, or come while the panel was hidden), and count as seen if they are still there in a moment. A set
+        shown for an instant (the thread cleared for the project closed, then for the one read) is not."""
+        if self._read_facts().signature() != self._examples_signature:
+            self.shuffle_examples()
         if not self._examples_seen and self.example_keys:
             keys = self.example_keys
             QTimer.singleShot(EXAMPLES_SEEN_MS, lambda: self._examples_still_there(keys))

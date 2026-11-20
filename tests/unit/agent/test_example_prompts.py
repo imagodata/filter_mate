@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""The requests of the welcome of AGENT: drawn at random over the sources, never the same set twice in a row."""
+"""The requests of the welcome of AGENT: drawn at random over the sources and the state of the project, never the same
+set twice in a row, and never one that is not true of the project now."""
+import itertools
+import json
 import random
 import re
 from pathlib import Path
@@ -9,6 +12,10 @@ import pytest
 from core.agent import example_prompts as ex
 
 PANEL = Path(__file__).resolve().parents[3] / "ui" / "widgets" / "agent_panel.py"
+TOOLS = {tool["name"] for tool in json.loads(
+    (Path(__file__).resolve().parents[3] / "core" / "agent" / "tool_catalog.json").read_text(encoding="utf-8"))["tools"]}
+NEEDS = {"layers", "no_layers", "data", "several", "vector", "many_vectors", "raster", "point_cloud", "active_vector",
+         "active_raster", "active_point_cloud", "selection", "filter", "remote"}
 
 
 def _by_key():
@@ -40,18 +47,187 @@ def test_a_country_request_is_offered_only_in_its_country():
     assert "fr_flood" not in {example.key for example in ex.eligible("de_DE")}
 
 
+def facts(**given):
+    """Facts the way the controller reads them, from the counts alone."""
+    values = dict(known=True, layers=0, tiles=0, vectors=0, rasters=0, point_clouds=0, active="", selected=0,
+                  filtered=0, remote=0)
+    values.update(given)
+    values["layers"] = max(values["layers"], values["tiles"] + values["vectors"] + values["rasters"]
+                           + values["point_clouds"])
+    return ex.Facts(**values)
+
+
+def _states():
+    """Every combination of what the requests care about, as a project can be."""
+    for vectors, rasters, clouds, tiles, active, selected, filtered, remote in itertools.product(
+            (0, 1, 2), (0, 1), (0, 1), (0, 1), ("", "vector", "raster", "point_cloud", "other"), (0, 3), (0, 1), (0, 1)):
+        if (active == "vector" and not vectors) or (active == "raster" and not rasters) \
+                or (active == "point_cloud" and not clouds) or (selected and not vectors) or (remote and not vectors) \
+                or (filtered and not (vectors or clouds)):
+            continue
+        yield facts(vectors=vectors, rasters=rasters, point_clouds=clouds, tiles=tiles, active=active,
+                    selected=selected, filtered=filtered, remote=remote)
+
+
+def test_every_key_has_a_known_need_and_a_tool_that_carries_it_out():
+    for example in ex.CATALOG:
+        assert example.tools, example.key
+        assert set(example.tools) <= TOOLS, (example.key, set(example.tools) - TOOLS)
+        assert set(example.needs) <= NEEDS, example.key
+        assert example.group in (ex.PROJECT, ex.DATA)
+        # The requests about the project suppose a layer; those that bring data in can come on an empty map.
+        if example.group == ex.PROJECT:
+            assert example.needs, example.key
+            assert "no_layers" not in example.needs
+
+
 @pytest.mark.parametrize("locale", ["fr_FR", "en_US", "en_GB", "ja_JP", "pt_BR", "zz"])
-def test_a_set_is_one_project_request_and_data_of_other_kinds(locale):
+def test_no_layer_offers_only_ways_to_bring_data_in(locale):
     catalog = _by_key()
+    empty = facts()
     for seed in range(200):
-        keys = ex.pick(locale, rng=random.Random(seed))
+        keys = ex.pick(locale, facts=empty, rng=random.Random(seed))
         assert len(keys) == ex.SHOWN == len(set(keys))
         picked = [catalog[key] for key in keys]
-        assert [example.group for example in picked].count(ex.PROJECT) == 1
+        assert all(example.group == ex.DATA for example in picked)
+        assert not any({"layers", "data", "vector", "raster", "selection", "filter"} & set(example.needs)
+                       for example in picked)
         kinds = [example.kind for example in picked]
         assert len(set(kinds)) == len(kinds)
-        here = ex.regions(locale)
-        assert all(not example.regions or set(example.regions) & here for example in picked)
+
+
+def test_a_basemap_is_offered_on_an_empty_map_and_a_dark_one_under_layers():
+    seen_empty = {key for seed in range(300) for key in ex.pick("en_US", facts=facts(), rng=random.Random(seed))}
+    assert "add_basemap" in seen_empty and "dark_basemap" not in seen_empty
+    drawn = {key for seed in range(300)
+             for key in ex.pick("en_US", facts=facts(vectors=1, active="vector"), rng=random.Random(seed))}
+    assert "dark_basemap" in drawn and "add_basemap" not in drawn
+
+
+def test_a_project_with_only_a_basemap_is_still_a_project_without_data():
+    catalog = _by_key()
+    for seed in range(100):
+        keys = ex.pick("en_US", facts=facts(tiles=1), rng=random.Random(seed))
+        assert all(catalog[key].group == ex.DATA for key in keys)
+
+
+@pytest.mark.parametrize("locale", ["fr_FR", "en_US", "en_GB", "ja_JP", "pt_BR", "zz"])
+def test_with_layers_one_or_two_requests_about_them_and_data_of_other_kinds(locale):
+    catalog = _by_key()
+    for state in (facts(vectors=1, active="vector"), facts(vectors=2, rasters=1, active="raster"),
+                  facts(point_clouds=1, active="point_cloud"), facts(vectors=1, selected=2, active="vector")):
+        counts = set()
+        for seed in range(200):
+            keys = ex.pick(locale, facts=state, rng=random.Random(seed))
+            assert len(keys) == ex.SHOWN == len(set(keys))
+            picked = [catalog[key] for key in keys]
+            counts.add([example.group for example in picked].count(ex.PROJECT))
+            kinds = [example.kind for example in picked]
+            assert len(set(kinds)) == len(kinds)
+            here = ex.regions(locale)
+            assert all(not example.regions or set(example.regions) & here for example in picked)
+        assert counts <= {1, 2} and counts, counts
+        if state.selected:  # the state moved: a second request about it
+            assert counts == {2}
+
+
+def test_every_request_is_true_of_the_state_whatever_the_state_and_the_seed():
+    catalog = _by_key()
+    for state in _states():
+        tokens = state.tokens()
+        for seed in range(6):
+            keys = ex.pick("fr_FR", facts=state, rng=random.Random(seed))
+            assert len(keys) == ex.SHOWN == len(set(keys)), (state, keys)
+            for key in keys:
+                assert set(catalog[key].needs) <= tokens, (key, state)
+            kinds = [catalog[key].kind for key in keys]
+            assert len(set(kinds)) == len(kinds), (state, keys)
+
+
+def test_unknown_facts_offer_only_requests_that_suppose_nothing():
+    catalog = _by_key()
+    for seed in range(100):
+        for unknown in (ex.Facts.unknown(), ex.Facts(), None):
+            keys = ex.pick("en_US", facts=unknown, rng=random.Random(seed))
+            assert len(keys) == ex.SHOWN and not any(catalog[key].needs for key in keys)
+        assert ex.pick("en_US", rng=random.Random(seed)) == ex.pick("en_US", facts=None, rng=random.Random(seed))
+    assert ex.Facts.unknown().tokens() == frozenset()
+    assert ex.Facts(layers=3, vectors=3, selected=2).tokens() == frozenset()  # not known: not trusted
+
+
+def test_a_raster_active_gives_raster_requests_and_none_about_a_vector_layer_alone():
+    catalog = _by_key()
+    state = facts(rasters=1, active="raster")
+    for seed in range(200):
+        keys = ex.pick("en_US", facts=state, rng=random.Random(seed))
+        needs = [set(catalog[key].needs) for key in keys]
+        assert any("active_raster" in need for need in needs), keys
+        assert not any({"vector", "active_vector", "many_vectors", "selection", "remote"} & need for need in needs)
+
+
+def test_a_raster_next_to_vectors_still_has_a_raster_request_first():
+    state = facts(rasters=1, vectors=2, active="raster")
+    catalog = _by_key()
+    for seed in range(200):
+        needs = [set(catalog[key].needs) for key in ex.pick("en_US", facts=state, rng=random.Random(seed))]
+        assert any({"active_raster", "raster"} & need for need in needs)
+        assert not any("active_vector" in need for need in needs)
+
+
+def test_a_selection_brings_selection_requests():
+    catalog = _by_key()
+    state = facts(vectors=2, active="vector", selected=4)
+    shown = set()
+    for seed in range(200):
+        keys = ex.pick("en_US", facts=state, rng=random.Random(seed))
+        assert any("selection" in catalog[key].needs and catalog[key].group == ex.PROJECT for key in keys), keys
+        shown.update(keys)
+    assert {"zoom_selection", "sel_radius", "sel_other_layers", "roads_inside", "people_selected"} <= shown
+    no_selection = {key for seed in range(200)
+                    for key in ex.pick("en_US", facts=facts(vectors=2, active="vector"), rng=random.Random(seed))}
+    assert not no_selection & {"zoom_selection", "sel_radius", "sel_other_layers", "roads_inside", "people_selected"}
+
+
+def test_a_filter_brings_filter_requests():
+    catalog = _by_key()
+    state = facts(vectors=1, active="vector", filtered=1)
+    shown = set()
+    for seed in range(200):
+        keys = ex.pick("en_US", facts=state, rng=random.Random(seed))
+        assert any("filter" in catalog[key].needs for key in keys), keys
+        shown.update(keys)
+    assert {"filter_state", "clear_all", "export_gpkg", "zoom_filtered"} <= shown
+    plain = {key for seed in range(200)
+             for key in ex.pick("en_US", facts=facts(vectors=1, active="vector"), rng=random.Random(seed))}
+    assert not plain & {"filter_state", "clear_all", "export_gpkg", "zoom_filtered"}
+
+
+def test_a_point_cloud_gets_its_own_requests():
+    catalog = _by_key()
+    for seed in range(100):
+        keys = ex.pick("en_US", facts=facts(point_clouds=1, active="point_cloud"), rng=random.Random(seed))
+        assert any({"point_cloud", "active_point_cloud"} & set(catalog[key].needs) for key in keys)
+
+
+def test_a_server_layer_brings_its_request_and_a_file_does_not():
+    state = facts(vectors=1, active="vector", remote=1)
+    assert any("export_remote" in ex.pick("en_US", facts=state, rng=random.Random(seed)) for seed in range(300))
+    assert not any("export_remote" in ex.pick("en_US", facts=facts(vectors=1, active="vector"),
+                                              rng=random.Random(seed)) for seed in range(300))
+
+
+def test_the_signature_follows_what_the_requests_depend_on_and_nothing_finer():
+    assert facts(vectors=1, selected=1, active="vector").signature() == facts(
+        vectors=1, selected=40, active="vector").signature()
+    assert facts(vectors=3).signature() == facts(vectors=7).signature()
+    base = facts(vectors=1, active="vector")
+    for other in (facts(), facts(vectors=1), facts(vectors=1, active="vector", selected=1),
+                  facts(vectors=1, active="vector", filtered=1), facts(vectors=2, active="vector"),
+                  facts(vectors=1, rasters=1, active="vector"), facts(vectors=1, active="vector", remote=1),
+                  facts(tiles=1), ex.Facts.unknown()):
+        assert other.signature() != base.signature()
+    assert facts(vectors=1, tiles=1).tokens() >= {"layers", "data", "vector"}
+    assert "data" not in facts(tiles=2).tokens() and "layers" in facts(tiles=2).tokens()
 
 
 @pytest.mark.parametrize("locale", ["fr_FR", "en_GB", "en_CA", "en_AU", "de_DE", "it_IT", "nl_NL", "ja_JP", "pt_BR",
@@ -89,3 +265,23 @@ def test_sets_vary():
 def test_unknown_previous_keys_are_ignored():
     keys = ex.pick("en", ["", "gone", "layers"], rng=random.Random(1))
     assert "layers" not in keys and len(keys) == ex.SHOWN
+
+
+@pytest.mark.parametrize("state", [facts(), facts(vectors=1, active="vector"), facts(rasters=1, active="raster"),
+                                   facts(vectors=2, selected=2, active="vector", filtered=1)])
+def test_the_next_set_keeps_clear_of_the_one_before_in_every_state(state):
+    rng = random.Random(11)
+    previous = ex.pick("en_US", facts=state, rng=rng)
+    for _ in range(100):
+        keys = ex.pick("en_US", previous, facts=state, rng=rng)
+        assert not set(keys) & set(previous)
+        assert len(keys) == ex.SHOWN
+        previous = keys
+
+
+def test_a_country_keeps_its_place_in_every_state():
+    catalog = _by_key()
+    for state in (facts(), facts(vectors=1, active="vector"), facts(rasters=1, active="raster", vectors=1)):
+        for seed in range(100):
+            keys = ex.pick("fr_FR", facts=state, rng=random.Random(seed))
+            assert any(catalog[key].regions for key in keys)
