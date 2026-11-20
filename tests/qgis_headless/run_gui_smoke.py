@@ -5754,6 +5754,8 @@ def s_sizing_setup():
     d = dock()
     leave_welcome()
     SIZING['state'] = iface.mainWindow().saveState()
+    # The handle between the two stacks, kept for the next session: given back at the end (like511 reads it).
+    SIZING['share'] = (d._fm_sections._share, QSettings().value('FilterMate/splitter_top_share'), d.main_splitter.sizes())
     try:
         SIZING['auto'] = config_value('APP.DOCKWIDGET.PANEL_SIZING') is not None
     except KeyError:  # a version before the setting (the pictures before it)
@@ -6340,12 +6342,19 @@ def s_sizing_end():
     sizing_reset()
     window = iface.mainWindow()
     window.restoreState(SIZING['state'])
+    share, saved, sizes = SIZING['share']
+    d._fm_sections._share = share
+    if saved is None:
+        QSettings().remove('FilterMate/splitter_top_share')
+    else:
+        QSettings().setValue('FilterMate/splitter_top_share', saved)
     if SIZING.get('height') and config_value('APP.DOCKWIDGET.SECTION_HEIGHT') != SIZING['height']:
         apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': SIZING['height']})
     d.show()
     d.raise_()
     open_section(d.FILTERING)
     QApplication.processEvents()
+    d.main_splitter.setSizes(sizes)
     for scenario, name, height, empty, note in SIZING['rows']:
         print(f"   sizing | {scenario:<55} | {name:<28} | {height:>4} px | {empty:>4} px under the rows {note}", flush=True)
     check('sizing: left as found', d._fm_panels.detached() == () and d.toolBox_tabTools.currentWidget() is d.FILTERING
@@ -7286,7 +7295,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
          *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, *EXPLO_STEPS,
-         *SWITCH_STEPS, *ROWS_STEPS, *SIZING_STEPS, *LIKE_STEPS, *REFILTER_STEPS, s_finish]
+         *SWITCH_STEPS, *ROWS_STEPS, *LIKE_STEPS, *REFILTER_STEPS, *SIZING_STEPS, s_finish]
 
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
