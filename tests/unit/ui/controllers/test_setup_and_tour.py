@@ -278,7 +278,9 @@ def test_the_layout_is_asked_with_the_buttons_ticked_as_it_is(world, chat):
     layout = chat.panel.questions[-1]
     assert [question.header for question in layout] == ["Layout", "Headers", "Rows", "Buttons"]
     assert [option.label for option in layout[1].options if option.selected] == ["A rail of chips"]
-    assert [option.label for option in layout[2].options if option.selected] == ["Packed at the top"]
+    assert [option.label for option in layout[2].options if option.selected] == ["Spread over the height"]
+    assert [(option.label, option.description) for option in layout[2].options] == [
+        ("Spread over the height", "The rows share the whole height of the section."), ("Packed at the top", "")]
     assert [option.label for option in layout[0].options if option.selected] == ["All in the FilterMate panel"]
     assert len(layout[0].options) == 2  # nothing apart: "As they are now" is not a choice
 
