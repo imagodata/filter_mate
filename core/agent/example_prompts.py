@@ -102,7 +102,7 @@ def pick(locale: str, previous: Iterable[str] = (), count: int = SHOWN,
     One is about the project, the others bring data in, each of another kind; none was in ``previous`` (the set shown
     before) when enough are left without them. A request about the data of the country of the locale always takes one
     of the places, even one shown in the set before when it is the only one of its country."""
-    rng = rng or random.Random()
+    rng = rng or random.Random()  # nosec B311 - which requests are shown, nothing secret
     seen = set(previous)
     offered = eligible(locale)
     fresh = [example for example in offered if example.key not in seen]
