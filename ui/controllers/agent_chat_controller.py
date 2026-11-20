@@ -251,6 +251,7 @@ class AgentChatController(QObject):
         self.panel.settings_tab_requested.connect(lambda tab: self.open_settings(tab=tab))
         self.panel.setup_requested.connect(self.start_setup)
         self.panel.tour_requested.connect(self.show_tour)
+        self.panel.feedback_requested.connect(self._open_feedback)
         self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
@@ -784,6 +785,15 @@ class AgentChatController(QObject):
             label = _tr("Show in the configuration: {}").format(one_line(row["where"], 120))
             path = row["path"]
             self._links.append(lambda: self._reveal_setting(path))
+        elif target == "feedback":
+            from ...core.agent.tool_catalog import FEEDBACK_FORMS
+            from ..widgets.agent_panel import FEEDBACK_ENTRIES
+            form = str(arguments.get("form") or "")
+            if form not in FEEDBACK_FORMS:
+                raise ToolFailure(f"form must be one of {', '.join(FEEDBACK_FORMS)}.")
+            words = dict(FEEDBACK_ENTRIES)[form]  # the entry of Vector > FilterMate, already translated
+            label = _tr("Open the feedback page: {}").format(QCoreApplication.translate("FilterMate", words))
+            self._links.append(lambda: self._open_feedback(form, "agent-chat"))
         elif target in SETTINGS_TABS:
             panel_words = {"provider": "Provider", "sources": "Sources", "autonomy": "Autonomy", "tools": "Tools",
                            "other_applications": "Other applications"}  # the titles of the tabs, already translated
@@ -795,6 +805,12 @@ class AgentChatController(QObject):
         click = self._links[-1]
         self.panel.add_link(label, click)
         return {"shown": label}
+
+    @staticmethod
+    def _open_feedback(form: str, ref: str) -> None:
+        """A form of the feedback page of the site, in the browser: nothing is sent by the plugin itself."""
+        from ...infrastructure import feedback_forms
+        feedback_forms.open_form(form, ref)
 
     def _reveal_setting(self, path: str) -> None:
         manager = getattr(self._parent_widget, '_config_model_manager', None)

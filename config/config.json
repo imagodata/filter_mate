@@ -144,12 +144,17 @@
         "description": "How the panel lists its sections: 'rail' (one row of chips per stack: a click on a chip opens its section, a chip is dragged to another place), 'stacked' (the name of each section on its own line, one above the other)"
       },
       "SECTION_HEIGHT": {
-        "value": "fit",
+        "value": "fill",
         "choices": [
-          "fit",
-          "fill"
+          "fill",
+          "fit"
         ],
-        "description": "Height of the rows of FILTERING and EXPORTING: 'fit' (each row at its own height, one gap apart, at the top of the section; the room left stays under them, and a short section scrolls), 'fill' (the rows spread over the whole height of the section)"
+        "description": "Height of the rows of FILTERING and EXPORTING: 'fill' (the rows spread over the whole height of the section, as until 5.1.1), 'fit' (each row at its own height, one gap apart, at the top of the section; the room left stays under them, and a short section scrolls)"
+      },
+      "SECTION_HEIGHT_FILL_BY_DEFAULT": {
+        "value": true,
+        "_hidden": true,
+        "description": "Marks a configuration whose SECTION_HEIGHT was put back to 'fill' once, when 'fill' became the default again (a 'fit' chosen afterwards is kept)"
       },
       "PANEL_SIZING": {
         "value": "auto",

@@ -282,6 +282,26 @@ def _migrate_config(config_data, default_data):
             user_agent["enabled"] = True
             dirty = True
 
+    # 0c) The rows of FILTERING and EXPORTING spread over the height of their section by default again
+    # (SECTION_HEIGHT = fill, as until 5.1.1). 'fit' was the default from 18 to 19 November 2026 (5.1.2), and
+    # the merge below wrote it into every configuration loaded meanwhile, chosen or not: it is put back to
+    # 'fill' once. The merge then adds the marker, so a 'fit' the user chooses afterwards is kept.
+    def _dockwidget(data):
+        app_section = data.get("APP") if isinstance(data, dict) else None
+        return app_section.get("DOCKWIDGET") if isinstance(app_section, dict) else None
+
+    user_dock, default_dock = _dockwidget(config_data), _dockwidget(default_data)
+    if (isinstance(user_dock, dict) and isinstance(default_dock, dict)
+            and "SECTION_HEIGHT_FILL_BY_DEFAULT" in default_dock
+            and "SECTION_HEIGHT_FILL_BY_DEFAULT" not in user_dock):
+        height = user_dock.get("SECTION_HEIGHT")
+        if isinstance(height, dict) and str(height.get("value")).strip().lower() == "fit":
+            height["value"] = "fill"
+            dirty = True
+        elif isinstance(height, str) and height.strip().lower() == "fit":
+            user_dock["SECTION_HEIGHT"] = "fill"
+            dirty = True
+
     # 1) Merge new keys from default into user config (recursive, non-destructive)
     if _merge_missing_keys(config_data, default_data):
         dirty = True

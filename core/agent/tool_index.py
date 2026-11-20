@@ -82,7 +82,7 @@ SUMMARIES = {
     "diagnose_performance": "Why FilterMate is slow, from its timings",
     "export_settings_profile": "Save the changed settings as a profile",
     "apply_settings_profile": "Apply a profile of settings",
-    "show_settings_link": "A button to a setting the user changes",
+    "show_settings_link": "A button to a setting or feedback form",
     "agent_options": "Provider, sources, connectors, MCP server",
     "turn_off_agent_options": "Untick sources or connectors, stop the MCP server",
     "turn_on_agent_options": "Tick sources or connectors, MCP server, provider",

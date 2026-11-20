@@ -250,15 +250,15 @@ def test_answering_without_touching_changes_nothing_when_config_json_holds_no_sw
 # --- how the rows of FILTERING / EXPORTING use the height: packed at the top (the default) or spread ---------------
 
 
-def test_the_rows_fit_by_default_and_fill_is_a_choice(values):
+def test_the_rows_fill_by_default_and_fit_is_a_choice(values):
     height = [ask for ask in wizard.step_questions(wizard.LAYOUT, values, wizard.ProjectFacts(), wizard.Answers())
               if ask.key == "height"][0]
-    assert [choice.key for choice in height.choices] == ["fit", "fill"] and not height.multi
-    assert [choice.key for choice in height.choices if choice.selected] == ["fit"]
+    assert [choice.key for choice in height.choices] == ["fill", "fit"] and not height.multi
+    assert [choice.key for choice in height.choices if choice.selected] == ["fill"]  # as until 5.1.1
     answers = wizard.Answers()
-    answers.record(wizard.LAYOUT, {"height": ["fill"], "action_bar": ["bottom"]})
-    assert wizard.changes(values, answers) == [{"path": wizard.SECTION_HEIGHT, "value": "fill"}]
     answers.record(wizard.LAYOUT, {"height": ["fit"], "action_bar": ["bottom"]})
+    assert wizard.changes(values, answers) == [{"path": wizard.SECTION_HEIGHT, "value": "fit"}]
+    answers.record(wizard.LAYOUT, {"height": ["fill"], "action_bar": ["bottom"]})
     assert wizard.changes(values, answers) == []  # the default: nothing changes
 
 

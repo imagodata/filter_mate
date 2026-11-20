@@ -606,14 +606,14 @@ ROW_SECTIONS = ('filtering', 'exporting')  # the sections laid out in rows, a ke
 
 
 def section_height(config_data: Any) -> str:
-    """``APP.DOCKWIDGET.SECTION_HEIGHT``: ``fill`` when it says so, ``fit`` otherwise (the default, and a
-    configuration written before the setting, which has none)."""
+    """``APP.DOCKWIDGET.SECTION_HEIGHT``: ``fit`` when it says so, ``fill`` otherwise (the default, as the rows
+    were laid out until 5.1.1, and a configuration written before the setting, which has none)."""
     try:
         node = config_data['APP']['DOCKWIDGET']['SECTION_HEIGHT']
     except (KeyError, TypeError):
-        return SECTION_FIT
+        return SECTION_FILL
     value = node.get('value') if isinstance(node, dict) else node
-    return SECTION_FILL if isinstance(value, str) and value.strip().lower() == SECTION_FILL else SECTION_FIT
+    return SECTION_FIT if isinstance(value, str) and value.strip().lower() == SECTION_FIT else SECTION_FILL
 
 
 def row_items(row_count: int, mode: str) -> list:
@@ -631,11 +631,13 @@ def lay_out_rows(dw: Any, mode: Any = None) -> bool:
     """FILTERING and EXPORTING rows as ``APP.DOCKWIDGET.SECTION_HEIGHT`` says (``mode``, read from the
     configuration of the dock when None); True when a section was laid out.
 
-    * ``fit`` (default): each row at its own height, one gap (``ROW_GAP``) apart. The page takes the height of
-      its rows: it is held to it in the scroll area that holds it (tool box or panel of QGIS, a ``Fixed``
-      vertical policy: neither stretched nor squeezed), so the room left stays under the section, the rail band ends with the last row, and a host
-      shorter than the rows scrolls instead of squeezing them.
-    * ``fill``: one stretch between two rows, the rows spread over the height of the section (5.0 to 5.1).
+    * ``fill`` (default): one stretch between two rows, the rows spread over the height of the section, as from
+      5.0 to 5.1.1 (``fit`` was the default from 18 to 19 November 2026, in 5.1.2: the user asked for the layout
+      of 5.1.1 back).
+    * ``fit``: each row at its own height, one gap (``ROW_GAP``) apart. The page takes the height of its rows:
+      it is held to it in the scroll area that holds it (tool box or panel of QGIS, a ``Fixed`` vertical policy:
+      neither stretched nor squeezed), so the room left stays under the section, the rail band ends with the
+      last row, and a host shorter than the rows scrolls instead of squeezing them.
 
     Run when the dock is built, after the dimension managers (they resize the spacers of these columns) and
     when the setting changes; every spacer of the columns is rebuilt, so it can run any number of times.
@@ -1225,9 +1227,7 @@ class _ScrollBarMargin(QObject if QObject is not None else object):
 
     Checked after each resize of the content (a scroll bar that comes or goes resizes the viewport, hence the
     content of a resizable scroll area) and when the content changes parent (a section into a panel of QGIS, and
-    back to the tool box), a turn of the loop later: Qt shows the bar after it has resized the content. And when
-    the bar itself shows or hides: a panel of QGIS grown to the height of its rows (PANEL_SIZING) hid its bar and
-    kept the margin of 6 px, its content not resized again (bench, 19 November 2026).
+    back to the tool box), a turn of the loop later: Qt shows the bar after it has resized the content.
     """
 
     def __init__(self, content: Any, layout: Any, margins) -> None:
@@ -1258,7 +1258,11 @@ class _ScrollBarMargin(QObject if QObject is not None else object):
             QTimer.singleShot(0, self.apply)
 
     def bar_shown(self) -> bool:
-        """The vertical scroll bar of the scroll area holding the content shows (the area itself may be hidden)."""
+        """The vertical scroll bar of the scroll area holding the content shows (the area itself may be hidden).
+        That bar is watched from then on (``eventFilter``): a content that takes the height of its viewport, as
+        the pages of FILTERING and EXPORTING with their rows spread (the default), has its size before Qt hides
+        the bar, and no resize tells of the bar gone (a section given its height back in one step kept the 6 px
+        beside a bar that was no longer there)."""
         from qgis.PyQt.QtWidgets import QAbstractScrollArea
         viewport = self._content.parentWidget()
         area = viewport.parentWidget() if viewport is not None else None

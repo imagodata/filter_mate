@@ -765,30 +765,65 @@ class TestAgentOnByDefault:
 
 
 class TestSectionHeight:
-    """APP.DOCKWIDGET.SECTION_HEIGHT (the rows of FILTERING / EXPORTING packed at the top or spread): a
-    configuration written before the setting gets it with the default, a choice already made is kept."""
+    """APP.DOCKWIDGET.SECTION_HEIGHT (the rows of FILTERING / EXPORTING spread, or packed at the top). ``fill`` is
+    the default, as the rows were laid out until 5.1.1. ``fit`` was the default from 18 to 19 November 2026 and
+    was written into the configurations loaded meanwhile: it is put back to ``fill`` once, marked by
+    SECTION_HEIGHT_FILL_BY_DEFAULT, and a ``fit`` chosen afterwards is kept."""
+
+    MARKER = "SECTION_HEIGHT_FILL_BY_DEFAULT"
 
     @staticmethod
     def _default():
         return json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
 
-    def test_the_defaults_fit(self):
-        node = self._default()["APP"]["DOCKWIDGET"]["SECTION_HEIGHT"]
-        assert node["value"] == "fit" and node["choices"] == ["fit", "fill"]
+    def test_the_defaults_fill(self):
+        dockwidget = self._default()["APP"]["DOCKWIDGET"]
+        node = dockwidget["SECTION_HEIGHT"]
+        assert node["value"] == "fill" and node["choices"] == ["fill", "fit"]
+        assert dockwidget[self.MARKER]["value"] is True and dockwidget[self.MARKER]["_hidden"] is True
 
-    def test_a_configuration_without_it_gets_fit(self, config_helpers):
+    def test_a_configuration_without_it_gets_fill(self, config_helpers):
         default = self._default()
         user = {"APP": {"DOCKWIDGET": {"SECTION_HEADERS": {"value": "stacked", "choices": ["rail", "stacked"]}}}}
         assert config_helpers._migrate_config(user, default)
         dockwidget = user["APP"]["DOCKWIDGET"]
-        assert dockwidget["SECTION_HEIGHT"]["value"] == "fit" and dockwidget["SECTION_HEADERS"]["value"] == "stacked"
+        assert dockwidget["SECTION_HEIGHT"]["value"] == "fill" and dockwidget["SECTION_HEADERS"]["value"] == "stacked"
+        assert self.MARKER in dockwidget
+
+    @pytest.mark.parametrize("height", [{"value": "fit", "choices": ["fit", "fill"], "description": "old"},
+                                        {"value": " Fit "}, "fit"])
+    def test_a_fit_written_while_it_was_the_default_is_put_back_to_fill_once(self, config_helpers, height):
+        default = self._default()
+        user = {"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": height, "SECTION_HEADERS": {"value": "stacked"}}}}
+        assert config_helpers._migrate_config(user, default)
+        dockwidget = user["APP"]["DOCKWIDGET"]
+        node = dockwidget["SECTION_HEIGHT"]
+        assert (node["value"] if isinstance(node, dict) else node) == "fill"
+        assert self.MARKER in dockwidget and dockwidget["SECTION_HEADERS"]["value"] == "stacked"
+        if isinstance(node, dict):
+            assert node["choices"] == ["fill", "fit"] and node["description"] != "old"
+
+    def test_a_fit_chosen_afterwards_is_kept(self, config_helpers):
+        default = self._default()
+        user = {"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fit"}}}}
+        config_helpers._migrate_config(user, default)  # put back to fill, marked
+        user["APP"]["DOCKWIDGET"]["SECTION_HEIGHT"]["value"] = "fit"  # the setup, CONFIGURATION or the agent
+        assert config_helpers._migrate_config(user, default) is False
+        assert user["APP"]["DOCKWIDGET"]["SECTION_HEIGHT"]["value"] == "fit"
 
     def test_fill_is_kept(self, config_helpers):
         default = self._default()
         user = {"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fill", "description": "old"}}}}
         config_helpers._migrate_config(user, default)
         node = user["APP"]["DOCKWIDGET"]["SECTION_HEIGHT"]
-        assert node["value"] == "fill" and node["choices"] == ["fit", "fill"] and node["description"] != "old"
+        assert node["value"] == "fill" and node["choices"] == ["fill", "fit"] and node["description"] != "old"
+
+    def test_a_template_without_the_marker_never_puts_fit_back(self, config_helpers):
+        default = self._default()
+        del default["APP"]["DOCKWIDGET"][self.MARKER]
+        user = {"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fit"}}}}
+        config_helpers._migrate_config(user, default)
+        assert user["APP"]["DOCKWIDGET"]["SECTION_HEIGHT"]["value"] == "fit"
 
 
 class TestPanelSizing:

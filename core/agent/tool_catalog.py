@@ -80,6 +80,8 @@ LIST_TABLES = "list_database_tables"
 ADD_TABLE = "add_database_table"
 # The tabs of the settings dialog of the agent a link may open (ui/widgets/agent_panel.AgentSettingsDialog).
 SETTINGS_TABS = ("provider", "sources", "autonomy", "tools", "other_applications")
+# The forms of the feedback page of the site a link may open (infrastructure/feedback_forms.py).
+FEEDBACK_FORMS = ("usage", "feature", "testers", "services")
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
     # The PostgreSQL connections of QGIS the user ticked. Of the chat alone: another application (REST, MCP) holds
@@ -229,11 +231,14 @@ CHAT_ONLY = (
                      "tool; other_applications: the MCP server), or a setting of FilterMate in the configuration "
                      "tree (target setting, with its path). Use it with your answer when the user should change "
                      "something you may not (the settings of the agent, APP.OPTIONS.AGENT, a name or a path), or "
-                     "asks where a setting is. It changes nothing; the user clicks when they want. Returns shown."),
+                     "asks where a setting is; target feedback: a form of the site, usage (an opinion, a problem), "
+                     "feature (an idea), testers (try what comes next), services (training, support), when the user "
+                     "wants to say so. It changes nothing; the user clicks it. Returns shown."),
         input_schema={"type": "object", "properties": {
-            "target": {"type": "string", "enum": list(SETTINGS_TABS) + ["setting"]},
+            "target": {"type": "string", "enum": list(SETTINGS_TABS) + ["setting", "feedback"]},
             "path": {"type": "string", "maxLength": 200,
-                     "description": "For target setting: the path of the setting (from describe_settings)"}},
+                     "description": "For target setting: the path of the setting (from describe_settings)"},
+            "form": {"type": "string", "enum": list(FEEDBACK_FORMS), "description": "Target feedback"}},
             "required": ["target"], "additionalProperties": False},
         read_only=True, chat_only=True),
     ToolSpec(

@@ -107,13 +107,16 @@ config.json
 
 ### Section Height
 - **Key:** `APP.DOCKWIDGET.SECTION_HEIGHT`
-- **Default:** `fit`
-- **Choices:** `fit`, `fill`
-- `fit`: the rows of FILTERING and EXPORTING keep their own height, one gap (6 px) apart, at the top of the section;
-  the room left stays under them, the rail band ends with the last row, a section shorter than its rows scrolls
-- `fill`: the rows spread over the whole height of the section (the layout of 5.0 to 5.1.1)
+- **Default:** `fill`
+- **Choices:** `fill`, `fit`
+- `fill`: the rows of FILTERING and EXPORTING spread over the whole height of the section (the layout of 5.0 to
+  5.1.1)
+- `fit`: the rows keep their own height, one gap (6 px) apart, at the top of the section; the room left stays under
+  them, the rail band ends with the last row, a section shorter than its rows scrolls
 - Applied at once; in the dock, in a panel of QGIS and with the headers stacked alike. A configuration written
-  before the setting gets `fit`. The size of the widgets themselves is `UI_PROFILE`
+  before the setting gets `fill`. `fit` was the default from 18 to 19 November 2026 (5.1.2): a configuration that
+  holds it from then is put back to `fill` once (the hidden `SECTION_HEIGHT_FILL_BY_DEFAULT` marks it), a `fit`
+  chosen afterwards is kept. The size of the widgets themselves is `UI_PROFILE`
 
 ### Panel Sizing
 - **Key:** `APP.DOCKWIDGET.PANEL_SIZING`

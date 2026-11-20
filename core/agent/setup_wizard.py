@@ -67,7 +67,7 @@ PROFILES = ("auto", "compact", "normal", "hidpi")
 LANGUAGES = ("auto", "en", "fr")
 ACTION_BARS = ("bottom", "top", "left", "right", "sections")  # sections: each section shows its own buttons
 HEADERS = ("rail", "stacked")  # a rail of chips per stack (the default), or the headers one above the other
-HEIGHTS = ("fit", "fill")  # the rows of FILTERING / EXPORTING one gap apart at the top (the default), or spread
+HEIGHTS = ("fill", "fit")  # the rows of FILTERING / EXPORTING spread (the default), or one gap apart at the top
 # Where the sections are: in the FilterMate panel, in panels of QGIS, or some of them apart (as they are now).
 IN_DOCK, IN_PANELS, AS_NOW = "dock", "panels", "as_now"
 LAYOUTS = (IN_DOCK, IN_PANELS)
