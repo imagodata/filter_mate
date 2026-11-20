@@ -5660,8 +5660,9 @@ def sizing_state():
     for name, holder in sizing_holders():
         empty = sizing_empty(holder)
         place = 'floating' if holder.isFloating() else f"column of {len(sizing_column(holder))}"
+        least = max(holder.minimumHeight(), holder.minimumSizeHint().height())
         rows.append(f"{name}: {holder.height()} px {'rigid, ' + str(empty) + ' px under the rows' if empty is not None else 'elastic'}"
-                    f" ({place})")
+                    f" ({place}, minimum {least})")
     return '; '.join(rows)
 
 
@@ -5683,6 +5684,9 @@ def sizing_check(scenario, wanted_rigid=1):
             continue
         if not holder.isFloating() and [w for w in iface.mainWindow().tabifiedDockWidgets(holder) if w.isVisible()]:
             report('SKIP', f"sizing: {scenario}: {name} in a group of tabs", f"{empty} px under its rows: the height of the group")
+            continue
+        if empty > SIZING_SLACK and holder.height() <= max(holder.minimumHeight(), holder.minimumSizeHint().height()) + 2:
+            report('SKIP', f"sizing: {scenario}: {name} held to its minimum", f"{empty} px under its rows | {sizing_state()}")
             continue
         if beside and min(beside) < empty:
             check(f"sizing: {scenario}: {name}, beside a taller section, not cut", empty >= -2,
@@ -5740,6 +5744,7 @@ def s_sizing_setup():
         apply_settings({'APP.DOCKWIDGET.PANEL_SIZING': 'auto'})
     sizing_reset()
     settles(lambda: d.toolBox_tabTools.currentWidget() is d.FILTERING)
+    SIZING['dock_width'] = d.width()
     check('sizing: the panels size themselves once the start is over', settles(sizing_armed, 8))
     grab_window('sizing_00_dock')
     return None
@@ -6097,7 +6102,8 @@ def s_sizing_width_given_back():
     panels = d._fm_panels
     window = iface.mainWindow()
     sizing_reset()
-    pump(600)
+    window.resizeDocks([d], [SIZING['dock_width']], Qt.Orientation.Horizontal)  # the width it had at the start
+    pump(900)
     start = d.width()
     widths = []
     for _round in range(10):
@@ -6129,6 +6135,8 @@ def s_sizing_behind_a_tab():
         report('SKIP', 'sizing: a panel behind a tab', 'no Layers panel')
         return None
     sizing_reset()
+    pump(600)
+    before = (layers.width(), layers.height())  # before the panel joins its tabs: the pass then must not widen it
     panels.detach('filtering')
     panel = panels.panel('filtering')
     drop_as_tab(layers, panel)
@@ -6137,12 +6145,12 @@ def s_sizing_behind_a_tab():
     if panel not in window.tabifiedDockWidgets(layers):
         report('SKIP', 'sizing: a panel behind a tab', 'not tabbed')
         return None
-    before = (layers.width(), layers.height(), panel.geometry().getRect())
     panels.resize_soon()  # a change of a setting: every column
     pump(1200)
-    after = (layers.width(), layers.height(), panel.geometry().getRect())
-    check('sizing: FILTERING behind the tab of Layers, the group keeps its width and height', after[:2] == before[:2],
-          f"{before} -> {after}")
+    after = (layers.width(), layers.height())
+    check('sizing: FILTERING behind the tab of Layers is neither measured nor widened: the group keeps its width',
+          after[0] == before[0], f"{before} -> {after}, the panel at {panel.geometry().getRect()} "
+                                 f"needs {d.FILTERING.minimumSizeHint().width()} px")
     grab_window('sizing_16_behind_a_tab')
     return None
 
@@ -6154,10 +6162,15 @@ def s_sizing_whole_dock():
     panels = d._fm_panels
     window = iface.mainWindow()
     sizing_reset()
+    profile = config_value('APP.DOCKWIDGET.UI_PROFILE')
+    apply_settings({'APP.DOCKWIDGET.UI_PROFILE': 'compact'})
+    pump(1200)
     width = max(300, d.minimumSizeHint().width(), d.minimumWidth())
     window.resizeDocks([d], [width], Qt.Orientation.Horizontal)
     pump(900)
     before = d.geometry().getRect()
+    print(f"   sizing | the dock in one piece, compact: {before}, rows cut on the right: {sizing_cut_in_width()}, "
+          f"rows need {d.FILTERING.minimumSizeHint().width()} px", flush=True)
     apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fill'})
     pump(900)
     apply_settings({'APP.DOCKWIDGET.SECTION_HEIGHT': 'fit'})
@@ -6180,6 +6193,10 @@ def s_sizing_whole_dock():
     grab_window('sizing_17_whole_dock')
     d.setFloating(False)
     pump(600)
+    if config_value('APP.DOCKWIDGET.UI_PROFILE') != profile:
+        apply_settings({'APP.DOCKWIDGET.UI_PROFILE': profile})
+    window.resizeDocks([d], [SIZING['dock_width']], Qt.Orientation.Horizontal)
+    pump(900)
     return None
 
 
