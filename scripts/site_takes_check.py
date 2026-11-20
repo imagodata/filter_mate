@@ -43,14 +43,17 @@ for clip in clips:
         bad += 1
         continue
     theme_ok = m['theme'] == ('dark' if clip.endswith('-dark') else 'light')
-    end = re.findall(r'layout at the end: window (\d+)x(\d+), dock (\d+)x(\d+), empty band (-?\d+), sections apart \((.*?)\)', text)
+    end = re.findall(r'layout at the end: window (\d+)x(\d+), dock (\d+)x(\d+), empty band (-?\d+), '
+                     r'sections apart \((.*?)\)(?:, rows (\w+|\?))?', text)
     if not end:
         notes.append('no layout line')
     else:
-        w, h, dw, dh, band, apart = end[-1]
+        w, h, dw, dh, band, apart, rows = end[-1]
         if int(dw) != 380:
             notes.append(f'dock {dw} px')
-        if int(band) > 16:
+        # SECTION_HEIGHT = fit leaves the band under the last row; fill (the default since #583) spreads it
+        # between the rows, a few pixels more in each gap: 32 px over the rows of FILTERING or EXPORTING.
+        if int(band) > (32 if rows == 'fill' else 16):
             notes.append(f'empty band {band} px')
         if apart.strip():
             notes.append(f'sections apart {apart}')

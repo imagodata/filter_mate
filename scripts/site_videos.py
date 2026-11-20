@@ -1132,7 +1132,8 @@ def stop_recording():
         mw = iface.mainWindow()
         panels = getattr(dock(), '_fm_panels', None)
         log(f'layout at the end: window {mw.width()}x{mw.height()}, dock {dock().width()}x{dock().height()}, '
-            f'empty band {dock_void()}, sections apart {panels.detached() if panels is not None else ()}')
+            f'empty band {dock_void()}, sections apart {panels.detached() if panels is not None else ()}, '
+            f'rows {dock().property("fm_section_height") or "?"}')
     except Exception:
         log(traceback.format_exc())
 
