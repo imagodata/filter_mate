@@ -72,11 +72,11 @@ tags=filter,spatial filter,multi-layer,subset,definition query,query,selection,b
 # that key only names other QGIS plugins.
 python_dependencies=onnxruntime
 
-changelog=v5.1.2 (2026-11-19):
-    - Panel: FILTERING and EXPORTING compact; the tool buttons of the EXPLORING rail chosen for each kind of layer; the multiple selection list readable in a dark theme.
+changelog=v5.1.2 (2026-11-20):
+    - Panel: the buttons of FILTERING and EXPORTING in front of their rows, which can be packed at the top; the tool buttons of the EXPLORING rail chosen for each kind of layer; the multiple selection list readable in a dark theme.
     - Filtering: a GeoPackage filter its source cannot run is refused and the previous one stays; a canceled or refused filter leaves no trace in the history; a point cloud rewritten by PDAL filters the same way at every run.
-    - AGENT: shorter requests under Ollama; exact totals for population and elevation; OpenStreetMap shapes as mapped; menus that act on what was clicked.
-    - Feedback: entries in Vector > FilterMate to give your opinion, suggest a feature or test the experimental features.
+    - AGENT: other example requests over its sources at each new conversation; shorter requests under Ollama; exact totals for population and elevation; OpenStreetMap shapes as mapped; menus that act on what was clicked.
+    - Feedback: entries in Vector > FilterMate and in the AGENT menu to give your opinion, suggest a feature or test the experimental features.
     v5.1.1 (2026-11-17):
     - Dock: the sections listed in a rail of chips; any section, EXPLORING included, can leave the dock for a panel of QGIS, alone or grouped, and comes back where you left it; buttons under each section; FILTERING and EXPORTING can be turned off; Compare shows the map before and after a filter on each side of a line; the history of the project is one panel, to go back to before any step.
     - AGENT: the free quota is removed, the agent works with your own API key or a local Ollama model and its settings guide both; Set up FilterMate and How FilterMate works need no model; new sources to tick (elevation and contour lines worldwide, OpenStreetMap features, population, natural risks of France, web basemaps, WMS and WMTS, the tables of a PostgreSQL connection, a geocoder); labels by expression or along lines, styles by rules, blending modes; your own skills; shorter requests (29 percent cheaper over ten requests) and lighter tools for a local model.
