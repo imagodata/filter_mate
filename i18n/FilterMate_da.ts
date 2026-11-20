@@ -543,6 +543,11 @@ Kør den?</translation>
         <translation>Åbn agentindstillinger: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Åbn feedbacksiden: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Denne indstilling vises ikke i konfigurationstræet.</translation>
@@ -2205,6 +2210,16 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Sådan fungerer FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Feedback</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Bliv tester af de nye funktioner</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

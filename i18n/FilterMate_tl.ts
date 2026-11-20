@@ -543,6 +543,11 @@ Patakbuhin?</translation>
         <translation>Buksan ang mga setting ng agent: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Buksan ang pahina ng puna: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Hindi ipinapakita ang setting na ito sa configuration tree.</translation>
@@ -2205,6 +2210,16 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Paano gumagana ang FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Puna</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Maging tester ng mga bagong feature</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

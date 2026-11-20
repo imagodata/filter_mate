@@ -671,6 +671,11 @@ L'exécuter ?</translation>
         <translation>Ouvrir les réglages de l'agent : {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Ouvrir la page des avis : {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Ce paramètre n'apparaît pas dans l'arbre de configuration.</translation>
@@ -2215,6 +2220,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Comment fonctionne FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Vos retours</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Devenir testeur des nouveautés</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

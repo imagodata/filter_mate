@@ -543,6 +543,11 @@ Ishga tushirilsinmi?</translation>
         <translation>Agent sozlamalarini ochish: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Fikr-mulohaza sahifasini ochish: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Bu sozlama konfiguratsiya daraxtida ko'rsatilmaydi.</translation>
@@ -2205,6 +2210,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>FilterMate qanday ishlaydi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Fikr-mulohaza</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Yangi imkoniyatlarni sinovchisi bo'ling</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

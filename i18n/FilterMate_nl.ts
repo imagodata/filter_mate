@@ -543,6 +543,11 @@ Uitvoeren?</translation>
         <translation>Agentinstellingen openen: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Feedbackpagina openen: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Deze instelling wordt niet getoond in de configuratieboom.</translation>
@@ -2205,6 +2210,16 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Hoe FilterMate werkt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Feedback</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Word tester van de nieuwe functies</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

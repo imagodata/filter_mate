@@ -543,6 +543,11 @@ L'executem?</translation>
         <translation>Obre la configuració de l'agent: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Obre la pàgina d'opinions: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Aquest paràmetre no es mostra a l'arbre de configuració.</translation>
@@ -2205,6 +2210,16 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Com funciona FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Opinions</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Fes de provador de les novetats</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

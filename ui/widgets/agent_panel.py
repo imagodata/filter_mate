@@ -72,6 +72,9 @@ PULL_PERMILLE = 1000  # the progress bar of a download counts in thousandths: a 
 
 
 MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
+# The entries of the feedback menu: the form, and its words in Vector > FilterMate (context FilterMate, translated).
+FEEDBACK_ENTRIES = (("usage", "Give your opinion"), ("feature", "Suggest a feature"),
+                    ("testers", "Test the experimental features"), ("services", "Training and services"))
 _LAST_EXAMPLES = "filter_mate/agent/last_examples"  # the keys of the requests seen last on the welcome
 EXAMPLES_SEEN_MS = 1500  # on screen this long, a set of requests counts as seen
 
@@ -364,6 +367,7 @@ class AgentPanel(QFrame):
     settings_requested = pyqtSignal()
     setup_requested = pyqtSignal()
     tour_requested = pyqtSignal()  # how FilterMate works, told in the thread (ui/controllers/welcome_tour.py)
+    feedback_requested = pyqtSignal(str, str)  # a form of the feedback page of the site, and where it was clicked
     shown = pyqtSignal()  # the panel comes in view: its section opens, or the dock shows it
     new_conversation_requested = pyqtSignal()
     redo_requested = pyqtSignal()
@@ -482,6 +486,12 @@ class AgentPanel(QFrame):
         self.setup_action.triggered.connect(self.setup_requested)
         self.tour_action = menu.addAction(_tr("How FilterMate works"))
         self.tour_action.triggered.connect(self.tour_requested)
+        # The forms of the feedback page of the site, as in Vector > FilterMate (infrastructure/feedback_forms.py).
+        self.feedback_menu = menu.addMenu(_tr("Feedback"))
+        self.feedback_menu.setObjectName("menu_agent_feedback")
+        for form, words in FEEDBACK_ENTRIES:
+            action = self.feedback_menu.addAction(QCoreApplication.translate("FilterMate", words))
+            action.triggered.connect(lambda _checked=False, chosen=form: self.feedback_requested.emit(chosen, "agent-menu"))
         # Sources, model and the MCP server of the plugin, turned on or off without opening the settings.
         menu.addSeparator()
         self.sources_menu = menu.addMenu(_tr("Sources"))
@@ -753,6 +763,11 @@ class AgentPanel(QFrame):
         self.tour_button.setObjectName("pushButton_agent_tour")
         self.tour_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.tour_button.clicked.connect(self.tour_requested)
+        # AGENT is experimental: who uses it may want to try what comes next (the testers form of the site).
+        self.testers_button = QPushButton(_tr("Become a tester of the new features"), page)
+        self.testers_button.setObjectName("pushButton_agent_testers")
+        self.testers_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.testers_button.clicked.connect(lambda: self.feedback_requested.emit("testers", "agent-welcome"))
         self.try_label = QLabel(_tr("TRY"), page)
         self.try_label.setObjectName("label_agent_try")
         page.setObjectName("widget_agent_welcome")
@@ -778,6 +793,7 @@ class AgentPanel(QFrame):
             self.example_buttons.append(button)
         self.shuffle_examples()
         layout.addWidget(self.tour_button, 0, Qt.AlignmentFlag.AlignLeft)  # under what the welcome offers, either way
+        layout.addWidget(self.testers_button, 0, Qt.AlignmentFlag.AlignLeft)
         layout.addStretch(1)
         self.set_ready(False)
         return page
@@ -835,9 +851,10 @@ class AgentPanel(QFrame):
             f"QPushButton#pushButton_agent_setup {{ padding: 8px 16px; border: 1px solid {palette['fm_group_border']};"
             f" border-radius: 6px; background: {palette['fm_group']}; color: {palette['fm_text']}; }}"
             f"QPushButton#pushButton_agent_setup:hover {{ border-color: {palette['fm_active_border']}; }}"
-            f"QPushButton#pushButton_agent_tour {{ padding: 4px 0; font-size: 12px; font-weight: 500; border: none;"
-            f" background: transparent; color: {palette['fm_accent']}; text-align: left; }}"
-            f"QPushButton#pushButton_agent_tour:hover {{ text-decoration: underline; }}"
+            f"QPushButton#pushButton_agent_tour, QPushButton#pushButton_agent_testers {{ padding: 4px 0; font-size: 12px;"
+            f" font-weight: 500; border: none; background: transparent; color: {palette['fm_accent']}; text-align: left; }}"
+            f"QPushButton#pushButton_agent_tour:hover, QPushButton#pushButton_agent_testers:hover"
+            f" {{ text-decoration: underline; }}"
             f"QLabel#label_agent_welcome_note {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
             f" {palette['fm_group_border']}; padding: 0 0 0 10px; }}"
             f"QFrame#frame_agent_history {{ background: {palette['fm_list']}; border: 1px solid"

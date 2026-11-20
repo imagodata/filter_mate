@@ -396,6 +396,11 @@ Run it?</translation>
         <translation>Open Agent settings: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Open the feedback page: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>This setting is not shown in the configuration tree.</translation>
@@ -2185,6 +2190,16 @@ Do you agree to all of them? No runs none of them.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>How FilterMate works</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Feedback</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Become a tester of the new features</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>

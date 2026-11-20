@@ -543,6 +543,11 @@ Ajetaanko?</translation>
         <translation>Avaa agentin asetukset: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="795"/>
+        <source>Open the feedback page: {}</source>
+        <translation>Avaa palautesivu: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
         <source>This setting is not shown in the configuration tree.</source>
         <translation>Tätä asetusta ei näytetä määrityspuussa.</translation>
@@ -2205,6 +2210,16 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="384"/>
         <source>How FilterMate works</source>
         <translation>Miten FilterMate toimii</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="490"/>
+        <source>Feedback</source>
+        <translation>Palaute</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="767"/>
+        <source>Become a tester of the new features</source>
+        <translation>Ryhdy uusien ominaisuuksien testaajaksi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="566"/>
