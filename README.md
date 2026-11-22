@@ -123,7 +123,13 @@ Manual install: download a zip from [GitHub Releases](https://github.com/imagoda
 The same dock, unchanged, in a window of its own (a map, a layer panel, the QGIS libraries as the engine):
 
 ```bash
-pipx install "git+https://github.com/imagodata/filter_mate"   # or pip install, in any Python 3.9+
+# macOS, Linux
+curl -LsSf https://raw.githubusercontent.com/imagodata/filter_mate/main/standalone/install.sh | sh
+# Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/imagodata/filter_mate/main/standalone/install.ps1 | iex"
+# or, with pip or pipx already there, in any Python 3.9+
+pipx install "git+https://github.com/imagodata/filter_mate"
+
 filtermate parcels.gpkg dem.tif
 ```
 
