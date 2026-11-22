@@ -43,6 +43,8 @@ SERVER_NAME = "filtermate"
 # 30 + 90 + 240 + 60 = 420. A client that gives up before the plugin does shows a timeout while the layers arrive,
 # and a second call adds them again (330 s, the sum of the two limits alone, left no room for that).
 ADD_LAYER_TIMEOUT = 420.0
+# A local copy reads its service for STREAM_COPY.timeout_seconds at most (600 s by default), then writes its file.
+LOCAL_COPY_TIMEOUT = 720.0
 
 INSTRUCTIONS = """\
 Drives FilterMate, the QGIS filtering plugin, through its local REST API. QGIS must be running with the API started.
@@ -895,23 +897,23 @@ def build_server(client: FilterMateClient) -> Any:
     async def set_exploring(
         layer: Annotated[str, Field(max_length=1000, description=(
             "Layer to show in EXPLORING, id or name; default: the one it shows"))] = "",
-        tools: Annotated[Optional[Dict[str, bool]], Field(description=(
-            "Buttons of the rail turned on (true) or off (false), by name"))] = None,
+        tools: Annotated[Optional[Dict[str, bool]], Field(description="Buttons of the rail on (true) or off (false)")] = None,
         press: Annotated[Optional[List[str]], Field(max_length=4, description="Buttons pressed once")] = None,
-        show: Annotated[bool, Field(description=(
-            "true opens EXPLORING in front, in place of the chat when they share the panel: only when the user asks "
-            "to see it"))] = False,
+        show: Annotated[bool, Field(description="Open EXPLORING in front: only when the user asks to see it")] = False,
+        raster: Annotated[Optional[Dict[str, Any]], Field(description=(
+            "band, quantity (value, slope_degrees, slope_percent, aspect, hillshade, roughness), minimum, maximum "
+            "(null: no bound)"))] = None,
+        point_cloud: Annotated[Optional[Dict[str, Any]], Field(description=(
+            "classes [codes], or ranges [{attribute, minimum, maximum}]"))] = None,
     ) -> Dict[str, Any]:
-        """Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, turn the buttons of its
-        rail on or off, press those that run once. vector: sync (its lists follow the selection of the map), follow
-        (the map goes to what is chosen), zone (a shape drawn selects), link; press zoom, identify. raster: preview
-        (hide the pixels outside the selection), pipette (pixels like the one clicked), detector (the object
-        clicked), similar (objects like it), link (the style follows the range); press zoom. point_cloud: preview,
-        identify (class pipette), object, value_pipette, zone; press zoom. One tool on the map at a time: it waits
-        for the user's click, so say what to click. A button the user hid, or greyed for the layer, is refused: say
-        so. Undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press, hidden, unavailable),
-        changed, pressed."""
-        return await call("POST", "/panels/exploring", _body(layer=layer, tools=tools, press=press, show=show))
+        """Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, set what its panel keeps (the
+        range of a raster on its histogram, the classes or ranges of a point cloud), turn the buttons of its rail on or
+        off, press zoom or identify. The names of the buttons of each kind of layer: skill panels. One tool on the map
+        at a time: it waits for the user's click, so say what to click. A button the user hid, or greyed, is refused:
+        say so. In FilterMate's chat, undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press,
+        hidden, unavailable), changed, pressed, values."""
+        return await call("POST", "/panels/exploring", _body(layer=layer, tools=tools, press=press, show=show,
+                                                             raster=raster, point_cloud=point_cloud))
 
     @mcp.tool(annotations=ToolAnnotations(title="Export options of the panel", readOnlyHint=True,
                                           openWorldHint=False))
@@ -1144,6 +1146,29 @@ def build_server(client: FilterMateClient) -> Any:
         layer cannot show at once (an elevation as colors and as a hillshade). Returns its summary.
         """
         return await call("POST", "/layers/duplicate", _body(layer=layer, name=name))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Copy a web service layer locally", readOnlyHint=False,
+                                          destructiveHint=False, idempotentHint=False, openWorldHint=True))
+    async def local_copy(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description=(
+            "Layer id or name of a web service: WFS, OGC API Features, WMS, WMTS or XYZ tiles"))],
+        action: Annotated[Literal["copy", "back", "again"], Field(description=(
+            "copy: read the service over the area into a file the layer then reads; back: the layer reads its "
+            "service again (the file stays); again: copy the area of its copy anew, the old file replaced"))] = "copy",
+        extent_wkt: Annotated[str, Field(max_length=100_000, description=(
+            "The area as WKT (the extent_wkt of find_place or map_context). Empty: the visible map"))] = "",
+        crs: Annotated[str, Field(max_length=64, description=(
+            "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty"))] = "",
+    ) -> Dict[str, Any]:
+        """Copy a web service layer over an area to a file next to the project (GeoPackage for features, GeoTIFF for
+        a web map), and the layer reads it with its style and filter: faster, and without the network.
+
+        A web map is copied as a still image at the finest level the budget affords. Returns reads, file,
+        feature_count or resolution, complete and notes. OpenStreetMap and Google tiles are refused. The chat of
+        FilterMate asks the user first.
+        """
+        return await call("POST", "/layers/local-copy", _body(layer=layer, action=action, extent_wkt=extent_wkt,
+                                                               crs=crs), timeout=LOCAL_COPY_TIMEOUT)
 
     @mcp.tool(annotations=ToolAnnotations(title="Search satellite imagery", readOnlyHint=True, openWorldHint=True))
     async def search_imagery(

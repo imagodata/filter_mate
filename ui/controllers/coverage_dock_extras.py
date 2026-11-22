@@ -61,6 +61,9 @@ ICON_SIMILAR = ('<path d="M4 9c0-2.5 2-4 4.5-4S13 6.5 13 9s-2 4.5-4.5 4.5S4 11.5
 ICON_PC_ZONE = '<rect x="3" y="5" width="18" height="14" rx="1" stroke-dasharray="2.5 2"/><path d="M8 19V5"/><path d="M3 10h18"/>'
 # More tools: three dots.
 ICON_MORE = '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>'
+# 2026-11-22: the local copy of a web service layer (a tray the stream goes down into).
+ICON_STREAM_COPY = '<path d="M12 3v11M7.5 9.5L12 14l4.5-4.5"/><path d="M4 15v4.5h16V15"/>'
+STREAM_COPY_BUTTON = 'pushButton_exploring_stream_copy'
 
 # QGIS main window actions run by the point cloud tools, first name found wins
 # (the 3D action is ``mActionNew3DMapCanvas`` in QGIS 4.2, ``mActionNew3DMapView`` in older builds).
@@ -476,7 +479,64 @@ class CoverageDockExtras(QObject):
                 button.customContextMenuRequested.connect(
                     self._on_pc_object_context_menu if name == PC_OBJECT_BUTTON
                     else lambda position, n=name: self._on_pc_zone_context_menu(position, n))
+        self._guarded(self._build_stream_copy_button, anchor, layout, index + len(specs))
         self._guarded(self._connect_rail_menu, anchor)
+
+    def _build_stream_copy_button(self, anchor: Any, layout: Any, position: int) -> None:
+        """The local copy button (2026-11-22): on the rail of a web service layer or of its copy only, whatever the
+        kind, and not one of the tools the user chooses (``RAIL_TOOLS``): it acts on the source of the layer."""
+        from qgis.PyQt.QtWidgets import QPushButton
+        button = QPushButton(anchor.parentWidget())
+        button.setObjectName(STREAM_COPY_BUTTON)
+        tip = self.tr("Local copy: keep what this web service shows over the visible map in a file of this computer")
+        button.setToolTip(tip)
+        button.setAccessibleName(self.tr("Local copy"))
+        button.setSizePolicy(anchor.sizePolicy())
+        button.setMinimumSize(anchor.minimumSize())
+        button.setMaximumSize(anchor.maximumSize())
+        button.setIconSize(anchor.iconSize())
+        button.setCursor(anchor.cursor())
+        button.setFlat(anchor.isFlat())
+        button.setVisible(False)
+        button.clicked.connect(self._on_stream_copy)
+        layout.insertWidget(position, button, 0, layout.itemAt(layout.indexOf(anchor)).alignment())
+        self._tools[STREAM_COPY_BUTTON] = button
+
+    def _stream_copy_layer(self) -> Any:
+        layer_id = getattr(self, '_stream_layer_id', None)
+        if not layer_id:
+            return None
+        try:
+            from qgis.core import QgsProject
+            return QgsProject.instance().mapLayer(layer_id)
+        except Exception:
+            return None
+
+    def _show_stream_copy(self, layer: Any) -> None:
+        """Show the local copy button for ``layer`` when it is a web service or its copy, with what it would do."""
+        self._stream_layer_id = self._safe_id(layer)
+        button = self._tools.get(STREAM_COPY_BUTTON)
+        if button is None:
+            return
+        from .stream_copy_actions import get as stream_copy_actions
+        actions = stream_copy_actions()
+        if actions is not None:
+            actions.on_change(self._on_stream_copy_changed)  # once: on_change keeps one of each
+        state = actions.state_of(layer) if actions is not None and layer is not None else ''
+        button.setVisible(bool(state))
+        if state:
+            button.setToolTip(actions.tooltip_for(layer))
+            button.setProperty('stream_copy_state', state)
+
+    def _on_stream_copy(self, *_args) -> None:
+        from .stream_copy_actions import get as stream_copy_actions
+        actions, layer = stream_copy_actions(), self._stream_copy_layer()
+        if actions is not None and layer is not None:
+            actions.trigger(layer)
+
+    def _on_stream_copy_changed(self, layer_id: str) -> None:
+        if layer_id and layer_id == getattr(self, '_stream_layer_id', None):
+            self._guarded(self._show_stream_copy, self._stream_copy_layer())
 
     def _connect_rail_menu(self, anchor: Any = None) -> None:
         """Right-click on the rail (a button without a menu of its own passes the click on): the tools it shows.
@@ -557,6 +617,7 @@ class CoverageDockExtras(QObject):
             'pushButton_exploring_vector_more': ICON_MORE,
             'pushButton_exploring_point_cloud_profile': ICON_PROFILE,
             'pushButton_exploring_point_cloud_3d': ICON_3D,
+            STREAM_COPY_BUTTON: ICON_STREAM_COPY,
         }
         for name, button in self._tools.items():
             button.ensurePolished()  # the palette of a style sheet set since the button was last painted
@@ -585,6 +646,7 @@ class CoverageDockExtras(QObject):
             button.setVisible(name in visible)
         self._rail_kind = kind_value
         self._guarded(self.apply_tool_choice)
+        self._guarded(self._show_stream_copy, layer)
         if kind_value == 'point_cloud':
             self._tools_enabled_by_action()
             self._guarded(self._class_pipette_enabled, layer)
@@ -654,6 +716,7 @@ class CoverageDockExtras(QObject):
                 self._guarded(button.setVisible, True)
         self._rail_kind = 'vector'
         self._guarded(self.apply_tool_choice)
+        self._guarded(self._show_stream_copy, layer)
         self._guarded(self._refresh_icons)
         self._guarded(self._set_kind_icons, 'vector')
         self._guarded(self.sync_vector_tools, getattr(self.dockwidget, 'current_exploring_groupbox', None))

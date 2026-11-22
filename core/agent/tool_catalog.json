@@ -2356,7 +2356,7 @@
   {
    "name": "set_exploring",
    "title": "Drive the EXPLORING panel",
-   "description": "Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, turn the buttons of its rail on or off, press those that run once. vector: sync (its lists follow the selection of the map), follow (the map goes to what is chosen), zone (a shape drawn selects), link; press zoom, identify. raster: preview (hide the pixels outside the selection), pipette (pixels like the one clicked), detector (the object clicked), similar (objects like it), link (the style follows the range); press zoom. point_cloud: preview, identify (class pipette), object, value_pipette, zone; press zoom. One tool on the map at a time: it waits for the user's click, so say what to click. A button the user hid, or greyed for the layer, is refused: say so. Undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press, hidden, unavailable), changed, pressed.",
+   "description": "Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, set what its panel keeps (the range of a raster on its histogram, the classes or ranges of a point cloud), turn the buttons of its rail on or off, press zoom or identify. The names of the buttons of each kind of layer: skill panels. One tool on the map at a time: it waits for the user's click, so say what to click. A button the user hid, or greyed, is refused: say so. In FilterMate's chat, undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press, hidden, unavailable), changed, pressed, values.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,
@@ -2382,7 +2382,7 @@
        }
       ],
       "default": null,
-      "description": "Buttons of the rail turned on (true) or off (false), by name"
+      "description": "Buttons of the rail on (true) or off (false)"
      },
      "press": {
       "anyOf": [
@@ -2402,8 +2402,34 @@
      },
      "show": {
       "default": false,
-      "description": "true opens EXPLORING in front, in place of the chat when they share the panel: only when the user asks to see it",
+      "description": "Open EXPLORING in front: only when the user asks to see it",
       "type": "boolean"
+     },
+     "raster": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "band, quantity (value, slope_degrees, slope_percent, aspect, hillshade, roughness), minimum, maximum (null: no bound)"
+     },
+     "point_cloud": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "classes [codes], or ranges [{attribute, minimum, maximum}]"
      }
     },
     "type": "object"
@@ -2941,6 +2967,51 @@
       "default": "",
       "description": "Name of the new layer",
       "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "local_copy",
+   "title": "Copy a web service layer locally",
+   "description": "Copy a web service layer over an area to a file next to the project (GeoPackage for features, GeoTIFF for a web map), and the layer reads it with its style and filter: faster, and without the network. A web map is copied as a still image at the finest level the budget affords. Returns reads, file, feature_count or resolution, complete and notes. OpenStreetMap and Google tiles are refused. The chat of FilterMate asks the user first.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Layer id or name of a web service: WFS, OGC API Features, WMS, WMTS or XYZ tiles",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "action": {
+      "default": "copy",
+      "description": "copy: read the service over the area into a file the layer then reads; back: the layer reads its service again (the file stays); again: copy the area of its copy anew, the old file replaced",
+      "enum": [
+       "copy",
+       "back",
+       "again"
+      ],
+      "type": "string"
+     },
+     "extent_wkt": {
+      "default": "",
+      "description": "The area as WKT (the extent_wkt of find_place or map_context). Empty: the visible map",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "crs": {
+      "default": "",
+      "description": "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty",
+      "maxLength": 64,
       "type": "string"
      }
     },

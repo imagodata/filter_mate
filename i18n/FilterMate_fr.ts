@@ -595,6 +595,42 @@ Acceptez-vous ?</translation>
         <translation>Couche ajoutée : {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>Copier de nouveau : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>L'agent veut copier de nouveau la couche {} : la même zone au même détail, relue depuis son service web ; la nouvelle copie remplace la précédente. Êtes-vous d'accord ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
+        <source>Back to the service: {}</source>
+        <translation>Retour au service : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2707"/>
+        <source>Local copy: {}</source>
+        <translation>Copie locale : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3036"/>
+        <source>The agent wants the layer {} to read its web service again (its local copy stays on disk). Do you agree?</source>
+        <translation>L'agent veut que la couche {} lise de nouveau son service web (sa copie locale reste sur le disque). Êtes-vous d'accord ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3046"/>
+        <source>The agent wants to copy the layer {} locally, and the layer then reads the copy:
+{}
+
+The service is read in the background: the copy can be cancelled. Do you agree?</source>
+        <translation>L'agent veut copier la couche {} en local ; la couche lira ensuite la copie :
+{}
+
+Le service est lu en arrière-plan : la copie peut être annulée. Êtes-vous d'accord ?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
         <source>Table added: {}</source>
         <translation>Table ajoutée : {}</translation>
@@ -7440,6 +7476,349 @@ Résolu depuis : {1}</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateStandalone</name>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="47"/>
+        <source>{0}: attributes</source>
+        <translation>{0} : attributs</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="49"/>
+        <source>{0} features</source>
+        <translation>{0} entités</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="51"/>
+        <source>, {0} selected</source>
+        <translation>, {0} sélectionnées</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="53"/>
+        <source> (filtered)</source>
+        <translation> (filtrée)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="49"/>
+        <source>Choose a vector layer in the layer panel first.</source>
+        <translation>Choisissez d'abord une couche vecteur dans le panneau des couches.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="209"/>
+        <source>Nothing here.</source>
+        <translation>Rien ici.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="90"/>
+        <source>{0} could not be opened: {1}</source>
+        <translation>{0} n'a pas pu être ouvert : {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="118"/>
+        <source>{0} could not be opened.</source>
+        <translation>{0} n'a pas pu être ouvert.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="188"/>
+        <source>The OpenStreetMap tiles could not be reached.</source>
+        <translation>Les tuiles OpenStreetMap sont injoignables.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="275"/>
+        <source>Add layers</source>
+        <translation>Ajouter des couches</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="314"/>
+        <source>This source is not available here: {0}</source>
+        <translation>Cette source n'est pas disponible ici : {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="316"/>
+        <source>This source is not available here.</source>
+        <translation>Cette source n'est pas disponible ici.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="343"/>
+        <source>Layers of {0}</source>
+        <translation>Couches de {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="176"/>
+        <source>Layers</source>
+        <translation>Couches</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="195"/>
+        <source>&amp;New project</source>
+        <translation>&amp;Nouveau projet</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="196"/>
+        <source>&amp;Open project...</source>
+        <translation>&amp;Ouvrir un projet...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="197"/>
+        <source>&amp;Save project</source>
+        <translation>&amp;Enregistrer le projet</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="198"/>
+        <source>Save project &amp;as...</source>
+        <translation>Enregistrer le projet &amp;sous...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="200"/>
+        <source>&amp;Add layers...</source>
+        <translation>&amp;Ajouter des couches...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="201"/>
+        <source>Add &amp;files...</source>
+        <translation>Ajouter des &amp;fichiers...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="202"/>
+        <source>Add the OpenStreetMap &amp;basemap</source>
+        <translation>Ajouter le &amp;fond de carte OpenStreetMap</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="203"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Quitter</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="205"/>
+        <source>Pan</source>
+        <translation>Se déplacer</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="206"/>
+        <source>Zoom in</source>
+        <translation>Zoom avant</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="207"/>
+        <source>Zoom out</source>
+        <translation>Zoom arrière</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="208"/>
+        <source>Zoom to everything</source>
+        <translation>Zoomer sur tout</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="209"/>
+        <source>Zoom to the layer</source>
+        <translation>Zoomer sur la couche</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="210"/>
+        <source>Zoom to the selection</source>
+        <translation>Zoomer sur la sélection</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Enregistrer les modifications des couches</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>Enregistrer les modifications de {0} couches ?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>Les modifications de {0} n'ont pas pu être enregistrées : {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} existe déjà. Le remplacer ?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>{0} tâches sont encore en cours. Les arrêter et quitter ?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="211"/>
+        <source>Refresh</source>
+        <translation>Actualiser</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="212"/>
+        <source>Select features</source>
+        <translation>Sélectionner des entités</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="213"/>
+        <source>Select features: click or drag (Shift adds, Ctrl removes)</source>
+        <translation>Sélectionner des entités : cliquer ou tracer un rectangle (Maj ajoute, Ctrl retire)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="214"/>
+        <source>Select by polygon</source>
+        <translation>Sélectionner par polygone</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="215"/>
+        <source>Select by polygon: left clicks draw, a right click ends</source>
+        <translation>Sélectionner par polygone : clics gauches pour dessiner, clic droit pour terminer</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="216"/>
+        <source>Deselect all</source>
+        <translation>Tout désélectionner</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="217"/>
+        <source>Identify</source>
+        <translation>Identifier</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="218"/>
+        <source>Open the attribute table</source>
+        <translation>Ouvrir la table attributaire</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="219"/>
+        <source>Layer properties...</source>
+        <translation>Propriétés de la couche...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>About FilterMate</source>
+        <translation>À propos de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="235"/>
+        <source>Project</source>
+        <translation>Projet</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="237"/>
+        <source>Map</source>
+        <translation>Carte</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="240"/>
+        <source>Plugins</source>
+        <translation>Extensions</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="259"/>
+        <source>Log messages</source>
+        <translation>Journal des messages</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="279"/>
+        <source>&amp;Project</source>
+        <translation>&amp;Projet</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="284"/>
+        <source>&amp;Layer</source>
+        <translation>&amp;Couche</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="289"/>
+        <source>&amp;View</source>
+        <translation>&amp;Vue</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="295"/>
+        <source>Panels</source>
+        <translation>Panneaux</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="298"/>
+        <source>Browser</source>
+        <translation>Explorateur</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="303"/>
+        <source>Toolbars</source>
+        <translation>Barres d'outils</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="308"/>
+        <source>&amp;Help</source>
+        <translation>&amp;Aide</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="325"/>
+        <source>Coordinate reference system of the map</source>
+        <translation>Système de coordonnées de la carte</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="442"/>
+        <source>Save the changes to the project?</source>
+        <translation>Enregistrer les modifications du projet ?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="462"/>
+        <source>Open a project</source>
+        <translation>Ouvrir un projet</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="469"/>
+        <source>{0} does not exist.</source>
+        <translation>{0} n'existe pas.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="479"/>
+        <source>The project could not be read: {0}</source>
+        <translation>Le projet n'a pas pu être lu : {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="494"/>
+        <source>Save the project</source>
+        <translation>Enregistrer le projet</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="500"/>
+        <source>The project could not be saved: {0}</source>
+        <translation>Le projet n'a pas pu être enregistré : {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="507"/>
+        <source>Add files</source>
+        <translation>Ajouter des fichiers</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="559"/>
+        <source>P&amp;lugins</source>
+        <translation>E&amp;xtensions</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="625"/>
+        <source>This kind of layer has no properties window here.</source>
+        <translation>Ce type de couche n'a pas de fenêtre de propriétés ici.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="629"/>
+        <source>The properties could not be opened: {0}</source>
+        <translation>Les propriétés n'ont pas pu s'ouvrir : {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="655"/>
+        <source>The browser could not be opened: {0}</source>
+        <translation>L'explorateur n'a pas pu s'ouvrir : {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="666"/>
+        <source>Standalone application: the FilterMate dock on the QGIS libraries.</source>
+        <translation>Application autonome : le panneau FilterMate sur les bibliothèques de QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="681"/>
+        <source>No CRS</source>
+        <translation>Aucun SCR</translation>
+    </message>
+</context>
+<context>
     <name>FilterResultHandler</name>
     <message>
         <location filename="../adapters/filter_result_handler.py" line="347"/>
@@ -12858,6 +13237,315 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Incompatibilité de type dans le filtre : {warning_detail}...</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopy</name>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="623"/>
+        <source> (incomplete)</source>
+        <translation> (incomplète)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="221"/>
+        <source>Copy of the features of the visible map, {0} at most.
+
+Folder: {1}</source>
+        <translation>Copie des entités de la carte visible, {0} au plus.
+
+Dossier : {1}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="216"/>
+        <source>Copy of the visible map: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests to the service, {5:.0f} MB at most on disk.
+
+Folder: {6}</source>
+        <translation>Copie de la carte visible : {0} x {1} pixels, {2:.3g} {3} par pixel, {4} requêtes au service, {5:.0f} Mo au plus sur le disque.
+
+Dossier : {6}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="355"/>
+        <source>FilterMate: local copy of {0}</source>
+        <translation>FilterMate : copie locale de {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="609"/>
+        <source>Its filter could not be put back on the service: filter it again.</source>
+        <translation>Son filtre n'a pas pu être remis sur le service : filtrez-la de nouveau.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="579"/>
+        <source>Its filter could not be put on the copy (the GeoPackage reads another language): filter it again.</source>
+        <translation>Son filtre n'a pas pu être posé sur la copie (le GeoPackage lit un autre langage) : filtrez-la de nouveau.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="622"/>
+        <source>Local copy of {0}: still image</source>
+        <translation>Copie locale du {0} : image fixe</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="620"/>
+        <source>Local copy of {0}: {1} features</source>
+        <translation>Copie locale du {0} : {1} entités</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="329"/>
+        <source>No folder can be written for the copy: neither next to the project nor in the QGIS profile.</source>
+        <translation>Aucun dossier ne peut être écrit pour la copie : ni à côté du projet, ni dans le profil QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="263"/>
+        <source>Only a layer of a web service (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, XYZ tiles) can be copied.</source>
+        <translation>Seule une couche d'un service web (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, tuiles XYZ) peut être copiée.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="701"/>
+        <source>The local copy of {0} was not found: these layers read their web service. Their copy is looked for again the next time the project is opened.</source>
+        <translation>La copie locale de {0} est introuvable : ces couches lisent leur service web. Leur copie sera cherchée de nouveau à la prochaine ouverture du projet.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="605"/>
+        <source>The service could not be opened: the layer still reads its copy.</source>
+        <translation>Le service n'a pas pu être ouvert : la couche lit toujours sa copie.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="481"/>
+        <source>The service was read for {0:.0f} s, the most allowed: the copy holds {1} features and is not complete.</source>
+        <translation>Le service a été lu pendant {0:.0f} s, le maximum permis : la copie contient {1} entités et n'est pas complète.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="268"/>
+        <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
+        <translation>Les conditions de {0} interdisent de garder ses tuiles : cette couche n'est pas copiée. Un autre fond de carte peut l'être (IGN, Carto, OpenTopoMap...).</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="292"/>
+        <source>The visible map cannot be expressed in the coordinates of this layer.</source>
+        <translation>La carte visible ne peut pas être exprimée dans les coordonnées de cette couche.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="288"/>
+        <source>The visible map could not be read.</source>
+        <translation>La carte visible n'a pas pu être lue.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="478"/>
+        <source>The visible map holds more than {0} features: only the first {0} were copied. Zoom in, or raise STREAM_COPY &gt; max_features.</source>
+        <translation>La carte visible contient plus de {0} entités : seules les {0} premières ont été copiées. Zoomez, ou augmentez STREAM_COPY &gt; max_features.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="312"/>
+        <source>The visible map is outside what this service draws.</source>
+        <translation>La carte visible est en dehors de ce que dessine ce service.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="258"/>
+        <source>This layer already reads its local copy: go back to the service first, or copy it again.</source>
+        <translation>Cette couche lit déjà sa copie locale : revenez d'abord au service, ou copiez-la de nouveau.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="272"/>
+        <source>This layer cannot be read from its service now.</source>
+        <translation>Cette couche ne peut pas être lue depuis son service pour le moment.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="596"/>
+        <source>This layer does not read a local copy.</source>
+        <translation>Cette couche ne lit pas de copie locale.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="279"/>
+        <source>This layer is being edited: save or discard the edits, then copy it.</source>
+        <translation>Cette couche est en cours d'édition : enregistrez ou annulez les modifications, puis copiez-la.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="601"/>
+        <source>This layer is being edited: save or discard the edits, then go back to its service.</source>
+        <translation>Cette couche est en cours d'édition : enregistrez ou annulez les modifications, puis revenez à son service.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="276"/>
+        <source>This layer is filtered by another layer: unfilter it, then copy it.</source>
+        <translation>Cette couche est filtrée par une autre couche : défiltrez-la, puis copiez-la.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="599"/>
+        <source>This layer is filtered by another layer: unfilter it, then go back to its service.</source>
+        <translation>Cette couche est filtrée par une autre couche : défiltrez-la, puis revenez à son service.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="319"/>
+        <source>This version of QGIS cannot check what a service answers while it is read: update QGIS to 3.26 or later to copy it.</source>
+        <translation>Cette version de QGIS ne peut pas vérifier ce que répond un service pendant sa lecture : passez à QGIS 3.26 ou plus récent pour le copier.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="227"/>
+        <source>map units</source>
+        <translation>unités de carte</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="451"/>
+        <source>the GeoPackage could not be written: {0}</source>
+        <translation>le GeoPackage n'a pas pu être écrit : {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="568"/>
+        <source>the copy could not be opened: the layer still reads its service</source>
+        <translation>la copie n'a pas pu être ouverte : la couche lit toujours son service</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="391"/>
+        <source>the copy failed ({0})</source>
+        <translation>la copie a échoué ({0})</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="471"/>
+        <source>the copy was canceled</source>
+        <translation>la copie a été annulée</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="413"/>
+        <source>the service could not be opened</source>
+        <translation>le service n'a pas pu être ouvert</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="475"/>
+        <source>the service could not be read to the end: nothing was kept</source>
+        <translation>le service n'a pas pu être lu jusqu'au bout : rien n'a été gardé</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="473"/>
+        <source>the service gave no feature over the visible map: nothing was copied</source>
+        <translation>le service n'a donné aucune entité sur la carte visible : rien n'a été copié</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="560"/>
+        <source>{0} is being edited: it stays on its service. Save or discard the edits, then copy it again.</source>
+        <translation>{0} est en cours d'édition : elle reste sur son service. Enregistrez ou annulez les modifications, puis copiez-la de nouveau.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="421"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} requête(s) au service sont restées sans réponse : l'image peut avoir des trous.</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopyActions</name>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Back to the service</source>
+        <translation>Revenir au service</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Cancel</source>
+        <translation>Annuler</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Copy</source>
+        <translation>Copier</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Copy again</source>
+        <translation>Copier de nouveau</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="173"/>
+        <source>Copying {0} over the visible map… (cancel it from the button or the task bar)</source>
+        <translation>Copie de {0} sur la carte visible… (annulez-la depuis le bouton ou la barre des tâches)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="355"/>
+        <source>FilterMate: cancel the local copy</source>
+        <translation>FilterMate : annuler la copie locale</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="356"/>
+        <source>FilterMate: local copy (back to the service, copy again)</source>
+        <translation>FilterMate : copie locale (revenir au service, copier de nouveau)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="307"/>
+        <source>FilterMate: local copy of the visible map</source>
+        <translation>FilterMate : copie locale de la carte visible</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="198"/>
+        <source>It reads its previous copy.</source>
+        <translation>Elle lit sa copie précédente.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Local copy of {0}</source>
+        <translation>Copie locale de {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="115"/>
+        <source>Local copy under way: click to cancel it</source>
+        <translation>Copie locale en cours : cliquez pour l'annuler</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="121"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer, and read the layer from it (faster, and without network)</source>
+        <translation>Copie locale : garder ce que ce service web montre sur la carte visible dans un fichier de cet ordinateur, et lire la couche depuis ce fichier (plus rapide, et sans réseau)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="139"/>
+        <source>Only a layer of a web service (WFS, WMS, WMTS, XYZ tiles...) can be copied.</source>
+        <translation>Seule une couche d'un service web (WFS, WMS, WMTS, tuiles XYZ...) peut être copiée.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="270"/>
+        <source>The copy covers the area of the map when it was made. Copy again reads the same area anew.</source>
+        <translation>La copie couvre la zone de la carte au moment où elle a été faite. Copier de nouveau relit la même zone.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="167"/>
+        <source>canceled</source>
+        <translation>annulée</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="191"/>
+        <source>{0} changed during its copy (a filter of another layer, another source): the copy is not used. Copy it again.</source>
+        <translation>{0} a changé pendant sa copie (un filtre d'une autre couche, une autre source) : la copie n'est pas utilisée. Copiez-la de nouveau.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="157"/>
+        <source>{0} is being copied already.</source>
+        <translation>{0} est déjà en cours de copie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="215"/>
+        <source>{0} now reads its local copy ({1}).</source>
+        <translation>{0} lit maintenant sa copie locale ({1}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="246"/>
+        <source>{0} reads its service again. Its copy is still in the folder of the copies.</source>
+        <translation>{0} lit de nouveau son service. Sa copie reste dans le dossier des copies.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="197"/>
+        <source>{0} was not copied: {1}.</source>
+        <translation>{0} n'a pas été copiée : {1}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="202"/>
+        <source>{0} was removed during its copy: the file is kept in {1}.</source>
+        <translation>{0} a été retirée pendant sa copie : le fichier est gardé dans {1}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
+        <source>{0}. Click to go back to the service or to copy the visible map again</source>
+        <translation>{0}. Cliquez pour revenir au service ou copier de nouveau la carte visible</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. FilterMate lit ce fichier à la place du service web : cliquez sur le bouton de copie d'EXPLORING, ou sur le menu de la couche, pour revenir au service.</translation>
     </message>
 </context>
 <context>

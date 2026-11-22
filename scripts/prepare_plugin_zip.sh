@@ -80,6 +80,7 @@ rsync -a --quiet ${FILES_FROM[@]+"${FILES_FROM[@]}"} \
     --exclude='.pml.json' \
     --exclude='.pml' \
     --exclude='.gitignore' \
+    --exclude='.dockerignore' \
     --exclude='.gitattributes' \
     --exclude='.DS_Store' \
     --exclude='Thumbs.db' \
@@ -139,6 +140,9 @@ rsync -a --quiet ${FILES_FROM[@]+"${FILES_FROM[@]}"} \
     --exclude='i18n/*.ts' \
     --exclude='i18n/*.pro' \
     --exclude='CLAUDE.md' \
+    --exclude='/standalone' \
+    --exclude='/standalone/**' \
+    --exclude='/pyproject.toml' \
     --exclude='BACKLOG*.md' \
     "$PLUGIN_DIR/" "$BUILD_DIR/$PLUGIN_NAME/"
 

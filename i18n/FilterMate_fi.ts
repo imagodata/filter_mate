@@ -461,6 +461,42 @@ Oletteko samaa mieltä?</translation>
         <translation>Taso lisätty: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>Kopioi uudelleen: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>Agentti haluaa kopioida tason {} uudelleen: saman alueen samalla tarkkuudella, luettuna uudestaan sen verkkopalvelusta; uusi kopio korvaa edellisen. Hyväksytkö?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
+        <source>Back to the service: {}</source>
+        <translation>Takaisin palveluun: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2707"/>
+        <source>Local copy: {}</source>
+        <translation>Paikallinen kopio: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3036"/>
+        <source>The agent wants the layer {} to read its web service again (its local copy stays on disk). Do you agree?</source>
+        <translation>Agentti haluaa, että taso {} lukee taas verkkopalveluaan (sen paikallinen kopio jää levylle). Hyväksytkö?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3046"/>
+        <source>The agent wants to copy the layer {} locally, and the layer then reads the copy:
+{}
+
+The service is read in the background: the copy can be cancelled. Do you agree?</source>
+        <translation>Agentti haluaa kopioida tason {} paikallisesti, ja taso lukee sen jälkeen kopiota:
+{}
+
+Palvelua luetaan taustalla: kopioinnin voi peruuttaa. Hyväksytkö?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
         <source>Table added: {}</source>
         <translation>Taulu lisätty: {}</translation>
@@ -7430,6 +7466,349 @@ Selvitetty lähteestä: {1}</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateStandalone</name>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="47"/>
+        <source>{0}: attributes</source>
+        <translation>{0}: attribuutit</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="49"/>
+        <source>{0} features</source>
+        <translation>{0} kohdetta</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="51"/>
+        <source>, {0} selected</source>
+        <translation>, {0} valittu</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="53"/>
+        <source> (filtered)</source>
+        <translation> (suodatettu)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="49"/>
+        <source>Choose a vector layer in the layer panel first.</source>
+        <translation>Valitse ensin vektoritaso tasopaneelista.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="209"/>
+        <source>Nothing here.</source>
+        <translation>Täällä ei ole mitään.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="90"/>
+        <source>{0} could not be opened: {1}</source>
+        <translation>{0} ei auennut: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="118"/>
+        <source>{0} could not be opened.</source>
+        <translation>{0} ei auennut.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="188"/>
+        <source>The OpenStreetMap tiles could not be reached.</source>
+        <translation>OpenStreetMap-tiiliin ei saatu yhteyttä.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="275"/>
+        <source>Add layers</source>
+        <translation>Lisää tasoja</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="314"/>
+        <source>This source is not available here: {0}</source>
+        <translation>Tämä lähde ei ole käytettävissä täällä: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="316"/>
+        <source>This source is not available here.</source>
+        <translation>Tämä lähde ei ole käytettävissä täällä.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="343"/>
+        <source>Layers of {0}</source>
+        <translation>{0}: tasot</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="176"/>
+        <source>Layers</source>
+        <translation>Tasot</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="195"/>
+        <source>&amp;New project</source>
+        <translation>&amp;Uusi projekti</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="196"/>
+        <source>&amp;Open project...</source>
+        <translation>&amp;Avaa projekti...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="197"/>
+        <source>&amp;Save project</source>
+        <translation>&amp;Tallenna projekti</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="198"/>
+        <source>Save project &amp;as...</source>
+        <translation>Tallenna projekti &amp;nimellä...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="200"/>
+        <source>&amp;Add layers...</source>
+        <translation>L&amp;isää tasoja...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="201"/>
+        <source>Add &amp;files...</source>
+        <translation>Lisää tie&amp;dostoja...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="202"/>
+        <source>Add the OpenStreetMap &amp;basemap</source>
+        <translation>Lisää OpenStreetMap-tau&amp;stakartta</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="203"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Lopeta</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="205"/>
+        <source>Pan</source>
+        <translation>Panoroi</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="206"/>
+        <source>Zoom in</source>
+        <translation>Lähennä</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="207"/>
+        <source>Zoom out</source>
+        <translation>Loitonna</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="208"/>
+        <source>Zoom to everything</source>
+        <translation>Zoomaa kaikkeen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="209"/>
+        <source>Zoom to the layer</source>
+        <translation>Zoomaa tasoon</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="210"/>
+        <source>Zoom to the selection</source>
+        <translation>Zoomaa valintaan</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Tallenna tasojen muokkaukset</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>Tallennetaanko tasojen muokkaukset ({0})?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>Tason {0} muokkauksia ei voitu tallentaa: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} on jo olemassa. Korvataanko se?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>Tehtäviä on yhä käynnissä ({0}). Pysäytetäänkö ne ja lopetetaan?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="211"/>
+        <source>Refresh</source>
+        <translation>Päivitä</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="212"/>
+        <source>Select features</source>
+        <translation>Valitse kohteita</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="213"/>
+        <source>Select features: click or drag (Shift adds, Ctrl removes)</source>
+        <translation>Valitse kohteita: napsauta tai vedä (Vaihto lisää, Ctrl poistaa)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="214"/>
+        <source>Select by polygon</source>
+        <translation>Valitse monikulmiolla</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="215"/>
+        <source>Select by polygon: left clicks draw, a right click ends</source>
+        <translation>Valitse monikulmiolla: vasemmat napsautukset piirtävät, oikea napsautus lopettaa</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="216"/>
+        <source>Deselect all</source>
+        <translation>Poista kaikki valinnat</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="217"/>
+        <source>Identify</source>
+        <translation>Tunnista</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="218"/>
+        <source>Open the attribute table</source>
+        <translation>Avaa attribuuttitaulukko</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="219"/>
+        <source>Layer properties...</source>
+        <translation>Tason ominaisuudet...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>About FilterMate</source>
+        <translation>Tietoja FilterMatesta</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="235"/>
+        <source>Project</source>
+        <translation>Projekti</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="237"/>
+        <source>Map</source>
+        <translation>Kartta</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="240"/>
+        <source>Plugins</source>
+        <translation>Laajennukset</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="259"/>
+        <source>Log messages</source>
+        <translation>Lokiviestit</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="279"/>
+        <source>&amp;Project</source>
+        <translation>&amp;Projekti</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="284"/>
+        <source>&amp;Layer</source>
+        <translation>&amp;Taso</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="289"/>
+        <source>&amp;View</source>
+        <translation>&amp;Näytä</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="295"/>
+        <source>Panels</source>
+        <translation>Paneelit</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="298"/>
+        <source>Browser</source>
+        <translation>Selain</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="303"/>
+        <source>Toolbars</source>
+        <translation>Työkalurivit</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="308"/>
+        <source>&amp;Help</source>
+        <translation>&amp;Ohje</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="325"/>
+        <source>Coordinate reference system of the map</source>
+        <translation>Kartan koordinaattijärjestelmä</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="442"/>
+        <source>Save the changes to the project?</source>
+        <translation>Tallennetaanko projektin muutokset?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="462"/>
+        <source>Open a project</source>
+        <translation>Avaa projekti</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="469"/>
+        <source>{0} does not exist.</source>
+        <translation>{0} ei ole olemassa.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="479"/>
+        <source>The project could not be read: {0}</source>
+        <translation>Projektia ei voitu lukea: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="494"/>
+        <source>Save the project</source>
+        <translation>Tallenna projekti</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="500"/>
+        <source>The project could not be saved: {0}</source>
+        <translation>Projektia ei voitu tallentaa: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="507"/>
+        <source>Add files</source>
+        <translation>Lisää tiedostoja</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="559"/>
+        <source>P&amp;lugins</source>
+        <translation>&amp;Laajennukset</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="625"/>
+        <source>This kind of layer has no properties window here.</source>
+        <translation>Tämäntyyppisellä tasolla ei ole täällä ominaisuusikkunaa.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="629"/>
+        <source>The properties could not be opened: {0}</source>
+        <translation>Ominaisuuksia ei voitu avata: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="655"/>
+        <source>The browser could not be opened: {0}</source>
+        <translation>Selainta ei voitu avata: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="666"/>
+        <source>Standalone application: the FilterMate dock on the QGIS libraries.</source>
+        <translation>Itsenäinen sovellus: FilterMate-paneeli QGIS-kirjastojen päällä.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="681"/>
+        <source>No CRS</source>
+        <translation>Ei koordinaattijärjestelmää</translation>
+    </message>
+</context>
+<context>
     <name>FilterResultHandler</name>
     <message>
         <location filename="../adapters/filter_result_handler.py" line="347"/>
@@ -12734,6 +13113,315 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Tyyppivirhe suodattimessa: {warning_detail}...</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopy</name>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="623"/>
+        <source> (incomplete)</source>
+        <translation> (epätäydellinen)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="221"/>
+        <source>Copy of the features of the visible map, {0} at most.
+
+Folder: {1}</source>
+        <translation>Näkyvän kartan kohteiden kopio, enintään {0}.
+
+Kansio: {1}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="216"/>
+        <source>Copy of the visible map: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests to the service, {5:.0f} MB at most on disk.
+
+Folder: {6}</source>
+        <translation>Näkyvän kartan kopio: {0} x {1} pikseliä, {2:.3g} {3} / pikseli, {4} pyyntöä palveluun, enintään {5:.0f} Mt levyllä.
+
+Kansio: {6}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="355"/>
+        <source>FilterMate: local copy of {0}</source>
+        <translation>FilterMate: tason {0} paikallinen kopio</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="609"/>
+        <source>Its filter could not be put back on the service: filter it again.</source>
+        <translation>Tason suodatinta ei voitu palauttaa palveluun: suodata taso uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="579"/>
+        <source>Its filter could not be put on the copy (the GeoPackage reads another language): filter it again.</source>
+        <translation>Tason suodatinta ei voitu asettaa kopioon (GeoPackage lukee eri kieltä): suodata taso uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="622"/>
+        <source>Local copy of {0}: still image</source>
+        <translation>Tason {0} paikallinen kopio: staattinen kuva</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="620"/>
+        <source>Local copy of {0}: {1} features</source>
+        <translation>Tason {0} paikallinen kopio: {1} kohdetta</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="329"/>
+        <source>No folder can be written for the copy: neither next to the project nor in the QGIS profile.</source>
+        <translation>Kopiolle ei löydy kirjoitettavaa kansiota: ei projektin vierestä eikä QGIS-profiilista.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="263"/>
+        <source>Only a layer of a web service (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, XYZ tiles) can be copied.</source>
+        <translation>Vain verkkopalvelun tason (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, XYZ-ruudut) voi kopioida.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="701"/>
+        <source>The local copy of {0} was not found: these layers read their web service. Their copy is looked for again the next time the project is opened.</source>
+        <translation>Tason {0} paikallista kopiota ei löytynyt: nämä tasot lukevat verkkopalveluaan. Niiden kopiota etsitään uudelleen, kun projekti avataan seuraavan kerran.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="605"/>
+        <source>The service could not be opened: the layer still reads its copy.</source>
+        <translation>Palvelua ei voitu avata: taso lukee edelleen kopiotaan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="481"/>
+        <source>The service was read for {0:.0f} s, the most allowed: the copy holds {1} features and is not complete.</source>
+        <translation>Palvelua luettiin {0:.0f} s, pisin sallittu aika: kopiossa on {1} kohdetta, eikä se ole täydellinen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="268"/>
+        <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
+        <translation>Palvelun {0} ehdot kieltävät sen ruutujen säilyttämisen: tätä tasoa ei kopioida. Jokin toinen taustakartta voidaan kopioida (IGN, Carto, OpenTopoMap...).</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="292"/>
+        <source>The visible map cannot be expressed in the coordinates of this layer.</source>
+        <translation>Näkyvää karttaa ei voi esittää tämän tason koordinaateissa.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="288"/>
+        <source>The visible map could not be read.</source>
+        <translation>Näkyvää karttaa ei voitu lukea.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="478"/>
+        <source>The visible map holds more than {0} features: only the first {0} were copied. Zoom in, or raise STREAM_COPY &gt; max_features.</source>
+        <translation>Näkyvässä kartassa on yli {0} kohdetta: vain ensimmäiset {0} kopioitiin. Zoomaa lähemmäs tai suurenna asetusta STREAM_COPY &gt; max_features.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="312"/>
+        <source>The visible map is outside what this service draws.</source>
+        <translation>Näkyvä kartta on sen alueen ulkopuolella, jonka tämä palvelu piirtää.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="258"/>
+        <source>This layer already reads its local copy: go back to the service first, or copy it again.</source>
+        <translation>Tämä taso lukee jo paikallista kopiotaan: palaa ensin palveluun tai kopioi se uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="272"/>
+        <source>This layer cannot be read from its service now.</source>
+        <translation>Tätä tasoa ei voi nyt lukea sen palvelusta.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="596"/>
+        <source>This layer does not read a local copy.</source>
+        <translation>Tämä taso ei lue paikallista kopiota.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="279"/>
+        <source>This layer is being edited: save or discard the edits, then copy it.</source>
+        <translation>Tätä tasoa muokataan: tallenna tai hylkää muokkaukset ja kopioi sitten taso.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="601"/>
+        <source>This layer is being edited: save or discard the edits, then go back to its service.</source>
+        <translation>Tätä tasoa muokataan: tallenna tai hylkää muokkaukset ja palaa sitten sen palveluun.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="276"/>
+        <source>This layer is filtered by another layer: unfilter it, then copy it.</source>
+        <translation>Toinen taso suodattaa tätä tasoa: poista suodatus ja kopioi sitten taso.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="599"/>
+        <source>This layer is filtered by another layer: unfilter it, then go back to its service.</source>
+        <translation>Toinen taso suodattaa tätä tasoa: poista suodatus ja palaa sitten sen palveluun.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="319"/>
+        <source>This version of QGIS cannot check what a service answers while it is read: update QGIS to 3.26 or later to copy it.</source>
+        <translation>Tämä QGIS-versio ei voi tarkistaa, mitä palvelu vastaa lukemisen aikana: päivitä QGIS versioon 3.26 tai uudempaan kopioidaksesi sen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="227"/>
+        <source>map units</source>
+        <translation>karttayksikköä</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="451"/>
+        <source>the GeoPackage could not be written: {0}</source>
+        <translation>GeoPackagea ei voitu kirjoittaa: {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="568"/>
+        <source>the copy could not be opened: the layer still reads its service</source>
+        <translation>kopiota ei voitu avata: taso lukee edelleen palveluaan</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="391"/>
+        <source>the copy failed ({0})</source>
+        <translation>kopiointi epäonnistui ({0})</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="471"/>
+        <source>the copy was canceled</source>
+        <translation>kopiointi peruttiin</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="413"/>
+        <source>the service could not be opened</source>
+        <translation>palvelua ei voitu avata</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="475"/>
+        <source>the service could not be read to the end: nothing was kept</source>
+        <translation>palvelua ei voitu lukea loppuun: mitään ei säilytetty</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="473"/>
+        <source>the service gave no feature over the visible map: nothing was copied</source>
+        <translation>palvelu ei antanut yhtään kohdetta näkyvän kartan alueelta: mitään ei kopioitu</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="560"/>
+        <source>{0} is being edited: it stays on its service. Save or discard the edits, then copy it again.</source>
+        <translation>Tasoa {0} muokataan: se pysyy palvelussaan. Tallenna tai hylkää muokkaukset ja kopioi se sitten uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="421"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} palvelun pyyntöä jäi ilman vastausta: kuvassa voi olla aukkoja.</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopyActions</name>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Back to the service</source>
+        <translation>Takaisin palveluun</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Cancel</source>
+        <translation>Peruuta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Copy</source>
+        <translation>Kopioi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Copy again</source>
+        <translation>Kopioi uudelleen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="173"/>
+        <source>Copying {0} over the visible map… (cancel it from the button or the task bar)</source>
+        <translation>Kopioidaan tasoa {0} näkyvän kartan alueelta… (peruuta painikkeesta tai tehtäväpalkista)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="355"/>
+        <source>FilterMate: cancel the local copy</source>
+        <translation>FilterMate: peruuta paikallinen kopiointi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="356"/>
+        <source>FilterMate: local copy (back to the service, copy again)</source>
+        <translation>FilterMate: paikallinen kopio (takaisin palveluun, kopioi uudelleen)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="307"/>
+        <source>FilterMate: local copy of the visible map</source>
+        <translation>FilterMate: näkyvän kartan paikallinen kopio</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="198"/>
+        <source>It reads its previous copy.</source>
+        <translation>Se lukee edellistä kopiotaan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Local copy of {0}</source>
+        <translation>Tason {0} paikallinen kopio</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="115"/>
+        <source>Local copy under way: click to cancel it</source>
+        <translation>Paikallinen kopiointi käynnissä: peruuta napsauttamalla</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="121"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer, and read the layer from it (faster, and without network)</source>
+        <translation>Paikallinen kopio: säilytä tämän verkkopalvelun näkyvän kartan alueelta näyttämä sisältö tämän tietokoneen tiedostossa ja lue taso siitä (nopeampi, eikä vaadi verkkoa)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="139"/>
+        <source>Only a layer of a web service (WFS, WMS, WMTS, XYZ tiles...) can be copied.</source>
+        <translation>Vain verkkopalvelun tason (WFS, WMS, WMTS, XYZ-ruudut...) voi kopioida.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="270"/>
+        <source>The copy covers the area of the map when it was made. Copy again reads the same area anew.</source>
+        <translation>Kopio kattaa kartan alueen sellaisena kuin se oli kopiota tehtäessä. Kopioi uudelleen lukee saman alueen uudestaan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="167"/>
+        <source>canceled</source>
+        <translation>peruttu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="191"/>
+        <source>{0} changed during its copy (a filter of another layer, another source): the copy is not used. Copy it again.</source>
+        <translation>{0} muuttui kopioinnin aikana (toisen tason suodatin, toinen lähde): kopiota ei käytetä. Kopioi se uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="157"/>
+        <source>{0} is being copied already.</source>
+        <translation>Tasoa {0} kopioidaan jo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="215"/>
+        <source>{0} now reads its local copy ({1}).</source>
+        <translation>{0} lukee nyt paikallista kopiotaan ({1}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="246"/>
+        <source>{0} reads its service again. Its copy is still in the folder of the copies.</source>
+        <translation>{0} lukee taas palveluaan. Sen kopio on yhä kopioiden kansiossa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="197"/>
+        <source>{0} was not copied: {1}.</source>
+        <translation>Tasoa {0} ei kopioitu: {1}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="202"/>
+        <source>{0} was removed during its copy: the file is kept in {1}.</source>
+        <translation>Taso {0} poistettiin kopioinnin aikana: tiedosto säilytetään kansiossa {1}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
+        <source>{0}. Click to go back to the service or to copy the visible map again</source>
+        <translation>{0}. Napsauta palataksesi palveluun tai kopioidaksesi näkyvän kartan uudelleen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. FilterMate lukee tätä tiedostoa verkkopalvelun sijaan: palaa palveluun napsauttamalla EXPLORINGin kopiointipainiketta tai tason valikkoa.</translation>
     </message>
 </context>
 <context>

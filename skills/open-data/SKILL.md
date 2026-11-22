@@ -6,7 +6,7 @@ metadata:
   version: 5
   plugin_min: 5.1.1
   audience: chat, mcp
-  tools: search_open_data, add_layer, add_service_layer, search_imagery, add_basemap, add_elevation, add_population, add_osm_features, find_place, remove_layers, list_layers
+  tools: search_open_data, add_layer, add_service_layer, search_imagery, add_basemap, add_elevation, add_population, add_osm_features, find_place, remove_layers, list_layers, local_copy
   risk: change
   trust: builtin
 ---
@@ -73,7 +73,7 @@ one. Prefer few clouds when the user does not say.
 add_basemap puts a basemap the user enabled under every layer: osm_tiles for a street map, carto_light for a neutral
 background, carto_light_nolabels under layers that have their own labels, carto_dark under bright symbols,
 google_satellite for photographs anywhere, ign_plan or ign_ortho in France, opentopomap for relief. A basemap is an
-image: it has no values to filter, read nor export. A filter between layers can still cut it to an area: it is
+image: it has no values to filter nor read (local_copy keeps it next to the project). A filter between layers can still cut it to an area: it is
 then a still image at one resolution (the warning of the filter says which), and clearing the filter gives the
 live service back. When none is enabled, say that one can be ticked in the settings of the agent, Sources tab.
 
@@ -97,6 +97,15 @@ region. Say that the numbers are estimates, not a census. It is drawn as a pseud
 cut 2).
 When no population source is enabled, say that it can be ticked in the settings of the agent, Sources tab, under
 Satellite imagery.
+
+## Local copy of a web service layer
+
+local_copy copies a WFS, WMS, WMTS or XYZ layer over the visible map (or the extent_wkt of find_place) to a file next
+to the project; the layer then reads it, with its style and filter: faster, and without the network. A web map
+becomes a still image (zooming in shows no more detail). Use it when the user asks to work offline, to keep the data
+of a day, or when a service is slow; action back makes the layer read its service again (its file stays), action
+again copies the same area anew and replaces the previous file. OpenStreetMap and Google
+tiles are refused: their terms forbid keeping them. Say when the copy is not complete (notes).
 
 ## Removing layers
 

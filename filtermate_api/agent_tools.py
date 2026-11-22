@@ -541,6 +541,10 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def duplicate_layer(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.duplicate_layer(args["layer"], name=args["name"]))
 
+    def local_copy(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.local_copy(args["layer"], action=args["action"], extent_wkt=args["extent_wkt"],
+                                          crs=args["crs"]))
+
     def export_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         try:
             folder = resolve_export_folder(prepare_export_root(export_root), args["subfolder"])
@@ -565,7 +569,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
 
     def set_exploring(args: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.set_exploring(layer=args.get("layer") or "", tools=args.get("tools"),
-                                      press=args.get("press"), show=bool(args.get("show")))
+                                      press=args.get("press"), show=bool(args.get("show")),
+                                      raster=args.get("raster"), point_cloud=args.get("point_cloud"))
 
     def export_options(_: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.export_options()
@@ -591,6 +596,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
         "add_service_layer": add_service_layer, "add_basemap": add_basemap, "find_place": find_place, "search_imagery": search_imagery,
         "add_elevation": add_elevation, "contour_lines": contour_lines, "duplicate_layer": duplicate_layer,
+        "local_copy": local_copy,
         "add_population": add_population,
         "add_osm_features": add_osm_features,
         "segment_objects": segment_objects, "similar_objects": similar_objects,

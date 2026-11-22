@@ -33,6 +33,7 @@ from .accessor import (
     ContourResult,
     CrossFilterResult,
     ElevationResult,
+    LocalCopyResult,
     OsmResult,
     PopulationResult,
     Favorite,
@@ -638,9 +639,11 @@ class QGISFilterMateAccessor:
                              changes={"layers": layers})
 
     def set_exploring(self, layer: str = "", tools: Optional[Dict[str, bool]] = None,
-                      press: Optional[List[str]] = None, show: bool = False) -> Dict[str, Any]:
+                      press: Optional[List[str]] = None, show: bool = False,
+                      raster: Optional[Dict[str, Any]] = None,
+                      point_cloud: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return self._control("set_exploring", self._panel(), layer=layer, tools=tools, press=press, show=show,
-                             module="adapters.public_api.exploring_drive")
+                             raster=raster, point_cloud=point_cloud, module="adapters.public_api.exploring_drive")
 
     def export_options(self) -> Dict[str, Any]:
         return self._control("export_options", self._panel(), module=self._PANELS)
@@ -730,6 +733,10 @@ class QGISFilterMateAccessor:
 
     def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:
         return LayerSummary(**self._control("duplicate_layer", layer, name=name, changes={"layer": layer}))
+
+    def local_copy(self, layer: str, action: str = "copy", extent_wkt: str = "", crs: str = "") -> LocalCopyResult:
+        return LocalCopyResult(**self._control("local_copy", layer, action=action, extent_wkt=extent_wkt, crs=crs,
+                                               module="adapters.public_api.stream_copy", changes={"layer": layer}))
 
     def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
                    extra_domains: Optional[str] = None) -> PlacesResult:
