@@ -2807,6 +2807,17 @@ class AgentChatController(QObject):
             self._answer = []
 
     @staticmethod
+    def _shown_layer(reference) -> str:
+        """The name of the layer a call names. The model often names a layer by its id: the card shows its name
+        (2026-11-22: "Style of Relief__MNS_Copernicus__ada11928_5545_..." beside "Style of Milieux naturels")."""
+        text = str(reference or "")
+        try:
+            layer = QgsProject.instance().mapLayer(text) if text else None
+        except RuntimeError:
+            layer = None
+        return layer.name() if layer is not None and layer.name() else text
+
+    @staticmethod
     def _layer_names(call: ToolCallPart) -> Tuple[str, ...]:
         """The layers a call is about, as its card names them (in bold)."""
         args = call.arguments if isinstance(call.arguments, dict) else {}
@@ -2815,7 +2826,8 @@ class AgentChatController(QObject):
             values = args.get(key)
             for value in values if isinstance(values, list) else ():
                 names.append(value.get("layer") if isinstance(value, dict) else value)  # set_layer_options
-        return tuple(dict.fromkeys(str(name) for name in names if isinstance(name, str) and name.strip()))
+        return tuple(dict.fromkeys(AgentChatController._shown_layer(name) for name in names
+                                   if isinstance(name, str) and name.strip()))
 
     @staticmethod
     def _names(values) -> str:
@@ -2830,7 +2842,7 @@ class AgentChatController(QObject):
         if gate is not None:
             source = self._connector_source(gate.name)
             return _tr("Connector: {}").format(one_line(shown_title(source) if source is not None else gate.name, 100))
-        layer = str(args.get("layer") or args.get("layer_name") or "")
+        layer = self._shown_layer(args.get("layer") or args.get("layer_name") or "")
         return {
             "list_layers": lambda: _tr("Reading the layers"),
             "describe_layer": lambda: _tr("Reading the fields of {}").format(layer),
@@ -3623,6 +3635,9 @@ class AgentChatController(QObject):
             return
         if outcome.status == OUTCOME_STOPPED:
             self._say("")
+            if outcome.reason == REASON_TURN_LIMIT:
+                self._offer_to_go_on()
+                return
             self.panel.show_error(*self._stop_words(outcome.reason, kept))
             return
         self._say(self._usage_words())  # the cards of the turn say what changed (mockup)
@@ -3661,13 +3676,26 @@ class AgentChatController(QObject):
         return _tr("This request: {} tokens read ({} from the cache), {} written").format(
             *(f"{count:,}".replace(",", "\u202f") for count in spent))
 
+    def _offer_to_go_on(self) -> None:
+        """The request reached its number of steps (``AgentLimits.max_model_turns``): a pause, not a failure. What
+        was done stays; one click sends the request to go on, with the whole conversation behind it (2026-11-22: shown
+        as an error in red, it read as a bug, and the user had to type what was left)."""
+        self.panel.add_note(_tr("The agent paused after many steps, before the end of the request. What it changed "
+                                "stays and can be undone."))
+        clicked = []
+
+        def go_on() -> None:
+            if clicked or self.chat_busy():
+                return
+            clicked.append(True)
+            self._on_send(_tr("Go on with what is left of the request."))
+
+        self.panel.add_link(_tr("Continue"), go_on)
+
     @staticmethod
     def _stop_words(reason: str, kept: int = 0) -> Tuple[str, str]:
         """Why the agent stopped before its answer, and what the user can do, in plain words; ``kept``, the steps
-        done before a refusal, which stay."""
-        if reason == REASON_TURN_LIMIT:
-            return (_tr("The request took too many steps: the agent stopped."),
-                    _tr("What it changed stays and can be undone. Ask for less at once, or say what is left."))
+        done before a refusal, which stay. The limit of steps is no stop of this kind (``_offer_to_go_on``)."""
         if reason == REASON_TRUNCATED:
             return (_tr("The answer of the model was cut: it was too long."),
                     _tr("What it changed stays and can be undone. Ask again, in smaller steps."))

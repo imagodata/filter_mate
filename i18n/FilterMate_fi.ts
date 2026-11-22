@@ -1278,6 +1278,21 @@ Sen työkalut näkevät projektistasi vain sen, minkä agentti niille lähettä�
         <translation>Mallin vastaus katkesi: se oli liian pitkä.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>Agentti pysähtyi tauolle monen vaiheen jälkeen, ennen pyynnön loppua. Sen tekemät muutokset jäävät ja ne voi kumota.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Jatka sillä, mitä pyynnöstä on jäljellä.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Jatka</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Malli kieltäytyi tästä pyynnöstä.</translation>
