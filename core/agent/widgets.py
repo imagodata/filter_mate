@@ -3,7 +3,7 @@
 
 Plain Python. A widget is a dict, kept as JSON in the project, drawn by FilterMate with widgets it knows:
 
-- ``range``: two bounds on a numeric field; moving them filters the layer;
+- ``range``: two bounds on a numeric field, over a histogram of that field; moving them filters the layer;
 - ``values``: the values of a field, each ticked or not; ticking filters the layer;
 - ``stat``: a number computed on the layer as it is filtered now (count, sum, mean, minimum, maximum);
 - ``chart``: bars of the layer as filtered now: the features of each value of a field (the most frequent ones), or
@@ -16,10 +16,12 @@ functions (QGIS's), never from text a model wrote: a model only chooses the kind
 """
 from __future__ import annotations
 
+import bisect
 import json
 import math
+from array import array
 from decimal import ROUND_HALF_UP, Context, Decimal
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Callable, Dict, Iterable, List, NamedTuple, Optional, Sequence, Tuple
 
 RANGE, VALUES, STAT, CHART = "range", "values", "stat", "chart"
 KINDS = (RANGE, VALUES, STAT, CHART)
@@ -29,6 +31,7 @@ CATEGORIES, HISTOGRAM = "categories", "histogram"
 CHART_MODES = (CATEGORIES, HISTOGRAM)
 MAX_BARS = 8  # the most frequent values; the others are summed in one bar
 HISTOGRAM_BINS = 10
+RANGE_BINS = 24  # the bars over the bounds of a range widget, under its handles
 AGGREGATES = ("count", "sum", "mean", "min", "max")
 MAX_WIDGETS = 12
 MAX_VALUES = 50
@@ -298,6 +301,96 @@ def histogram_bars(values: Iterable[Any], bins: int = HISTOGRAM_BINS) -> List[Di
     # An edge is a weighted mean of low and high: it never goes beyond them.
     edges = [low * (1 - index / bins) + high * (index / bins) for index in range(bins + 1)]
     return [{"low": edges[index], "high": edges[index + 1], "count": count} for index, count in enumerate(counts)]
+
+
+def range_edges(minimum: float, maximum: float, bins: int = RANGE_BINS) -> List[float]:
+    """The ``bins + 1`` edges of equal intervals from ``minimum`` to ``maximum``, never decreasing; the first and the
+    last are the two bounds themselves."""
+    # A weighted mean of the bounds, as in histogram_bars: no width that rounds to 0 or overflows.
+    edges = [minimum * (1 - index / bins) + maximum * (index / bins) for index in range(bins + 1)]
+    edges[0], edges[-1] = minimum, maximum
+    for index in range(1, bins + 1):
+        edges[index] = max(edges[index], edges[index - 1])
+    return edges
+
+
+class RangeReading(NamedTuple):
+    """The field of a range widget read from its layer: its numbers within the bounds of the widget, sorted, 8 bytes
+    each; and the features left out: a value outside the bounds (or not a finite number), none (NULL)."""
+
+    values: array
+    outside: int
+    empty: int
+
+
+def read_range(values: Iterable[Any], minimum: float, maximum: float) -> RangeReading:
+    """The values of the field of a range widget, read from its layer, as RangeReading keeps them."""
+    numbers, outside, empty = [], 0, 0
+    for value in values:
+        if value is None:
+            empty += 1
+            continue
+        number = _number(value)
+        if number is not None and minimum <= number <= maximum:
+            numbers.append(number)
+        else:
+            outside += 1
+    numbers.sort()
+    return RangeReading(array("d", numbers), outside, empty)
+
+
+def range_counts(values: Sequence[float], minimum: float, maximum: float, bins: int = RANGE_BINS, start: int = 0,
+                 end: Optional[int] = None) -> List[int]:
+    """The features of each of ``bins`` equal intervals of the FIXED bounds ``[minimum, maximum]`` (those of a range
+    widget, not those of the values read) among ``values[start:end]``, sorted numbers within the bounds: an interval
+    holds its low edge, the last one its high edge too."""
+    end = len(values) if end is None else end
+    edges = range_edges(minimum, maximum, bins)
+    firsts = [bisect.bisect_left(values, edge, start, end) for edge in edges[:-1]] + [end]
+    return [firsts[index + 1] - firsts[index] for index in range(bins)]
+
+
+def range_histogram(values: Iterable[Any], minimum: float, maximum: float, bins: int = RANGE_BINS) -> List[int]:
+    """range_counts of any values: a value outside the bounds, not a number or not finite is left out."""
+    return range_counts(read_range(values, minimum, maximum).values, minimum, maximum, bins)
+
+
+def wide_open(widget: Dict[str, Any]) -> Dict[str, Any]:
+    """A range widget with its bounds at the ends of its field: it lets every feature through."""
+    return dict(widget, low=widget["minimum"], high=widget["maximum"])
+
+
+def _written(widget: Dict[str, Any], key: str) -> float:
+    """A bound of a range widget as its condition writes it."""
+    return float(int(round(widget[key]))) if widget.get("integer") else float(widget[key])
+
+
+def kept_span(values: Sequence[float], widget: Dict[str, Any]) -> Tuple[int, int]:
+    """Where the sorted numbers ``values`` the condition of a range widget keeps start and end: the bounds of the
+    filter it writes (>= and <=, none at an end, whole numbers for an integer field)."""
+    start, end = 0, len(values)
+    if widget["low"] > widget["minimum"]:
+        start = bisect.bisect_left(values, _written(widget, "low"))
+    if widget["high"] < widget["maximum"]:
+        end = bisect.bisect_right(values, _written(widget, "high"))
+    return start, max(start, end)
+
+
+def range_reading_holds(opened: Sequence[float], now: Sequence[float], widget: Dict[str, Any]) -> bool:
+    """Whether ``opened``, the numbers of a range widget read while it was wide open, still describe its layer read
+    ``now`` within its bounds: what its condition keeps of them falls in each bar as what is read now. False after an
+    edit of a feature shown, or another filter: then they no longer tell the bars outside the bounds."""
+    minimum, maximum = widget["minimum"], widget["maximum"]
+    return (range_counts(opened, minimum, maximum, RANGE_BINS, *kept_span(opened, widget))
+            == range_counts(now, minimum, maximum, RANGE_BINS))
+
+
+def unknown_bins(widget: Dict[str, Any], bins: int = RANGE_BINS) -> List[bool]:
+    """The bars of a range widget its layer filtered by itself cannot tell: those not whole within its bounds."""
+    edges = range_edges(widget["minimum"], widget["maximum"], bins)
+    low = _written(widget, "low") if widget["low"] > widget["minimum"] else -math.inf
+    high = _written(widget, "high") if widget["high"] < widget["maximum"] else math.inf
+    return [not (low <= edges[index] and edges[index + 1] <= high) for index in range(bins)]
 
 
 def without(widgets: Sequence[Dict[str, Any]], widget_id: str) -> List[Dict[str, Any]]:

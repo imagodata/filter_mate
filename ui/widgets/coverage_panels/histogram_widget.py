@@ -243,6 +243,7 @@ class RangeHistogramWidget(QWidget):
         """
         super().__init__(parent)
         self._counts: List[int] = []
+        self._unknown: List[bool] = []
         self._minimum = 0.0
         self._maximum = 0.0
         self._low: Bound = None
@@ -276,6 +277,11 @@ class RangeHistogramWidget(QWidget):
                 *clamp_range(self._low, self._high, self._minimum, self._maximum),
                 self._minimum, self._maximum)
         self._update_accessible_description()
+        self.update()
+
+    def set_unknown(self, unknown: Sequence[bool]) -> None:
+        """Hatch the bins whose count is not known (True), e.g. read through a filter that hid them; [] for none."""
+        self._unknown = [bool(flag) for flag in unknown or ()]
         self.update()
 
     def set_range(self, low: Bound, high: Bound) -> None:
@@ -355,6 +361,14 @@ class RangeHistogramWidget(QWidget):
             inside = bins_in_range(len(self._counts), self._minimum, self._maximum, self._low, self._high)
             bar_width = rect.width() / len(self._counts)
             gap = _BAR_GAP if bar_width > 3 * _BAR_GAP else 0.0
+            if len(self._unknown) == len(self._counts):
+                hatch = QColor(palette.color(QPalette.ColorRole.WindowText))
+                hatch.setAlpha(90)  # the text colour, faint: seen on a light and on a dark base
+                for index, unknown in enumerate(self._unknown):
+                    if unknown:
+                        painter.fillRect(QRectF(rect.left() + index * bar_width, rect.top(),
+                                                max(1.0, bar_width - gap), rect.height()),
+                                         QBrush(hatch, Qt.BrushStyle.BDiagPattern))
             for index, bar_height in enumerate(heights):
                 if bar_height <= 0:
                     continue

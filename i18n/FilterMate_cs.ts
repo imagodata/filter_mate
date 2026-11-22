@@ -2695,6 +2695,16 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <translation>(prázdné)</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} mimo rozsah</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} bez hodnoty</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
         <source>All</source>
         <translation>Vše</translation>

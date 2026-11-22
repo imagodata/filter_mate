@@ -83,7 +83,10 @@ from ...core.agent.tool_catalog import (
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
     TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
-from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
+from ...core.agent.widgets import (
+    CHART, RANGE, SHOWING, STAT, WidgetError, range_counts, range_reading_holds, replaced as widget_replaced,
+    summary as widget_summary, unknown_bins, wide_open, without,
+)
 from ...core.domain.layer_kind import LayerKind
 from ...adapters.agent import agent_widgets
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure, connector_gate
@@ -265,6 +268,11 @@ class AgentChatController(QObject):
         self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
+        self._opened = {}  # range widget id -> (what it was read for, its field read wide open): see _range_bars
+        self._readings = {}  # (layer id, field, bounds, subset, changes) -> its field read then: see _range_bars
+        self._layer_changes = {}  # layer id -> changes of its features or source seen
+        self._change_slots = {}  # layer id -> the slot its signals of changes call
+        self._stats_waiting = False  # a refresh asked while the section was not in view
         self._stat_timer = QTimer(self)
         self._stat_timer.setSingleShot(True)
         self._stat_timer.setInterval(300)
@@ -419,8 +427,8 @@ class AgentChatController(QObject):
 
     def _unfollow_layers(self) -> None:
         self._stat_timer.stop()
-        for layer in self._stat_layers.values():
-            self._follow(layer, False)
+        for layer_id, layer in self._stat_layers.items():
+            self._follow(layer_id, layer, False)
         self._stat_layers = {}
         self._follow_sources([])
         self._live_timer.stop()
@@ -812,6 +820,8 @@ class AgentChatController(QObject):
         the panel is shown behind another tab (as QGIS restores it): nobody saw the offer yet."""
         if self._setup_card is not None and self._agent_shown():
             self._keep_setup_offered()
+        if self._stats_waiting:  # the widgets were not read while out of view
+            self._stat_timer.start()
 
     def _keep_setup_offered(self) -> None:
         """The offer was seen or answered, or the setup started: not offered again for this version."""
@@ -1974,7 +1984,8 @@ class AgentChatController(QObject):
     # --- widgets ----------------------------------------------------------------
 
     def _refresh_widgets(self) -> None:
-        """Draw the widgets of the project, and follow the layers their numbers are computed on."""
+        """Draw the widgets of the project, and follow the layers their numbers are computed on. Their numbers and bars
+        are read at the next turn of the stat timer: a range may read up to MAX_STAT_FEATURES features."""
         try:
             widgets = agent_widgets.read_widgets()
         except Exception:  # the panel works without them
@@ -1986,44 +1997,120 @@ class AgentChatController(QObject):
             layer = agent_widgets.widget_layer(widget)
             if layer is None:
                 self.panel.widgets_strip.set_error(widget["id"], _tr("Its layer is no longer in the project."))
-            elif widget["kind"] in SHOWING:
+            elif widget["kind"] in SHOWING + (RANGE,):  # a range shows the bars of its field
                 wanted[layer.id()] = layer
         for layer_id in set(self._stat_layers) - set(wanted):
-            self._follow(self._stat_layers.pop(layer_id), False)
+            self._follow(layer_id, self._stat_layers.pop(layer_id), False)
         for layer_id, layer in wanted.items():
             if layer_id not in self._stat_layers:
                 self._stat_layers[layer_id] = layer
-                self._follow(layer, True)
-        self._refresh_stats()
+                self._follow(layer_id, layer, True)
+        # What was read of a layer no longer followed would not know of its changes.
+        self._readings = {key: reading for key, reading in self._readings.items() if key[0] in self._stat_layers}
+        ids = {widget["id"] for widget in widgets}
+        self._opened = {key: kept for key, kept in self._opened.items() if key in ids and kept[0][0] in self._stat_layers}
+        self._stat_timer.start()
 
-    def _follow(self, layer, on: bool) -> None:
-        for signal in ("subsetStringChanged", "featureAdded", "featuresDeleted", "attributeValueChanged",
-                       "afterRollBack", "afterCommitChanges"):
+    # The changes of the features of a layer, or of its source: what was read of it is stale. Not dataChanged: QGIS
+    # emits it at each new subset string too (3.22 to 4.3), and a range moved would forget what it read wide open.
+    CHANGES = ("featureAdded", "featuresDeleted", "attributeValueChanged", "afterRollBack", "afterCommitChanges",
+               "dataSourceChanged")
+
+    def _follow(self, layer_id: str, layer, on: bool) -> None:
+        if on:
+            self._change_slots[layer_id] = lambda *_args: self._on_layer_changed(layer_id)
+        changed = self._change_slots.get(layer_id) if on else self._change_slots.pop(layer_id, None)
+        for signal in ("subsetStringChanged",) + self.CHANGES:
             emitter = getattr(layer, signal, None)
-            if emitter is None:
+            slot = self._stat_timer.start if signal == "subsetStringChanged" else changed
+            if emitter is None or slot is None:
                 continue
             try:
-                (emitter.connect if on else emitter.disconnect)(self._stat_timer.start)
+                (emitter.connect if on else emitter.disconnect)(slot)
             except (RuntimeError, TypeError):  # a layer deleted meanwhile, or never connected
                 pass
 
+    def _on_layer_changed(self, layer_id: str) -> None:
+        self._layer_changes[layer_id] = self._layer_changes.get(layer_id, 0) + 1
+        self._stat_timer.start()
+
+    def _widgets_in_view(self) -> bool:
+        return self.panel.isVisible() and self._agent_shown()
+
     def _refresh_stats(self) -> None:
+        if not self._widgets_in_view():  # read when the section comes in view (_on_panel_shown)
+            self._stats_waiting = True
+            return
+        self._stats_waiting = False
         started = time.monotonic()
         try:
             widgets = agent_widgets.read_widgets()
         except Exception:
             return
+        used = set()
         for widget in widgets:
             if widget["kind"] == STAT:
                 value = agent_widgets.stat_value(widget)
                 self.panel.widgets_strip.set_value(widget["id"], number_text(value))
             elif widget["kind"] == CHART:
                 self.panel.widgets_strip.set_bars(widget["id"], agent_widgets.chart_bars(widget))
+            elif widget["kind"] == RANGE:
+                self.panel.widgets_strip.set_bars(widget["id"], self._range_bars(widget, widgets, used))
+        self._readings = {key: reading for key, reading in self._readings.items() if key in used}
         # Read on this thread, up to MAX_STAT_FEATURES features a widget: the next refresh waits three times as long as
         # this one took (10 s at most), so a big layer being edited is not read again 300 ms after each change. One
         # delay for all the widgets; a timer already counting is left alone (setInterval would start it again).
         if not self._stat_timer.isActive():
             self._stat_timer.setInterval(min(10_000, max(300, int((time.monotonic() - started) * 3000))))
+
+    def _range_bars(self, widget, widgets, used):
+        """The bars of a range widget: its field on its layer filtered by everything but itself, so that the bars
+        outside its bounds stay, greyed, to widen it again; None when they cannot be read.
+
+        Its layer filtered by itself holds nothing outside its bounds, and it is never filtered otherwise nor copied
+        to be read. So the numbers read while the range is wide open, with the layer filtered as its widgets say, are
+        kept here (not in the project, 8 bytes each), for the same layer, field, bounds, filter of the layer with the
+        range wide open and changes of its features or source seen (else forgotten at once). While the range is
+        narrower, their bars are shown as long as what its condition keeps of them falls in each bar as the features
+        read now (range_reading_holds); else they are forgotten, and the features read now are shown, the bars not
+        whole within the bounds hatched as unknown, until the range is wide open again. Left unseen: what changes the
+        data of the layer without a signal of this layer (another layer of the same source, a program writing to it).
+
+        A reading is kept for its layer, field, bounds, filter and changes: a refresh with nothing changed reads
+        nothing. ``used`` collects the readings this refresh needs.
+        """
+        layer = agent_widgets.widget_layer(widget)
+        if layer is None:
+            return None
+        changes = self._layer_changes.get(widget["layer_id"], 0)
+        subset = layer.subsetString() or ""
+        read_key = (widget["layer_id"], widget["field"], widget["minimum"], widget["maximum"], subset, changes)
+        if read_key not in self._readings:
+            self._readings[read_key] = agent_widgets.range_reading(widget)
+        used.add(read_key)
+        now = self._readings[read_key]
+        if now is None:
+            return None
+        key = read_key[:4] + (agent_widgets.opened_filter(widgets, widget), changes)
+        kept = self._opened.get(widget["id"])
+        if kept is not None and kept[0] != key:
+            del self._opened[widget["id"]]
+            kept = None
+        if widget == wide_open(widget):
+            if subset == key[4]:  # not a filter the user set over the widgets meanwhile
+                self._opened[widget["id"]] = (key, now)
+            return self._range_shown(widget, now)
+        if kept is not None:
+            if range_reading_holds(kept[1].values, now.values, widget):
+                return self._range_shown(widget, kept[1])
+            del self._opened[widget["id"]]  # edited since: read again once wide open
+        return self._range_shown(widget, now, unknown_bins(widget))
+
+    @staticmethod
+    def _range_shown(widget, reading, unknown=None) -> dict:
+        """What the card of a range draws: its bars, those it cannot tell, the features left out of them."""
+        return {"counts": range_counts(reading.values, widget["minimum"], widget["maximum"]),
+                "unknown": unknown or [], "outside": reading.outside, "empty": reading.empty}
 
     def _on_widget_changed(self, widget) -> None:
         """The user moved a bound or ticked a value: kept in the project, and its layer filtered."""
