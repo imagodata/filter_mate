@@ -6,7 +6,7 @@ metadata:
   version: 3
   plugin_min: 5.1.0
   audience: chat, mcp
-  tools: layer_options, set_layer_options, set_exploring, export_options, set_export_options, list_layers, describe_layer, field_values, export_layers, ask_user
+  tools: layer_options, set_layer_options, set_exploring, export_options, set_export_options, list_layers, describe_layer, field_values, cross_filter, export_layers, ask_user
   risk: change
   trust: builtin
 ---
