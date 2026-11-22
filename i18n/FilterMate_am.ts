@@ -190,6 +190,11 @@ Do you agree?</source>
         <translation>ቅንብሮቹን ለመክፈት ጥያቄውን ያቁሙ ወይም እስኪያልቅ ይጠብቁ።</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
+        <source>The memory could not be saved: {}</source>
+        <translation>ትውስታው ሊቀመጥ አልቻለም፦ {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>የሚቀለበስ ምንም የለም።</translation>
@@ -1676,6 +1681,66 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>ሌሎች መተግበሪያዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1587"/>
+        <source>Memory</source>
+        <translation>ትውስታ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1737"/>
+        <source>Keep notes from one project to the next</source>
+        <translation>ማስታወሻዎችን ከአንድ ፕሮጀክት ወደ ቀጣዩ አቆይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the QGIS profile). They are sent to your provider with a request: those for every project always, those of a layer when a layer of the same source is in the open project. Double-click a note to correct it.</source>
+        <translation>እዚህ የሚጽፏቸው ማስታወሻዎች በዚህ ኮምፒውተር ላይ ባለ ፋይል ውስጥ ይቆያሉ (agent_memory.json፣ በQGIS መገለጫ የFilterMate አቃፊ ውስጥ)። ከጥያቄ ጋር ወደ አቅራቢዎ ይላካሉ፦ የሁሉም ፕሮጀክቶች ማስታወሻዎች ሁልጊዜ፣ የአንድ ንብርብር ማስታወሻዎች ደግሞ ተመሳሳይ ምንጭ ያለው ንብርብር በተከፈተው ፕሮጀክት ውስጥ ሲኖር። ማስታወሻን ለማረም ሁለቴ ጠቅ ያድርጉበት።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Every project</source>
+        <translation>ሁሉም ፕሮጀክቶች</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1768"/>
+        <source>A note, in one sentence</source>
+        <translation>ማስታወሻ፣ በአንድ አረፍተ ነገር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1779"/>
+        <source>Forget everything</source>
+        <translation>ሁሉንም እርሳ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1781"/>
+        <source>Open the file</source>
+        <translation>ፋይሉን ክፈት</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1855"/>
+        <source>This list is full: remove a note first.</source>
+        <translation>ይህ ዝርዝር ሞልቷል፦ መጀመሪያ አንድ ማስታወሻ ያስወግዱ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1863"/>
+        <source>The memory file cannot be read ({}). Correct it or remove it: nothing is written to it meanwhile.</source>
+        <translation>የትውስታ ፋይሉ ሊነበብ አይችልም ({})። ያርሙት ወይም ያስወግዱት፦ እስከዚያው ምንም አይጻፍበትም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1872"/>
+        <source>Sent with this project: {} of {} notes.</source>
+        <translation>ከዚህ ፕሮጀክት ጋር የተላኩ ማስታወሻዎች፦ {} ከ{}።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1874"/>
+        <source>{} not sent: they hold attribute values, which you do not share.</source>
+        <translation>{} አልተላኩም፦ እርስዎ የማያጋሯቸውን የባህሪ እሴቶች ይዘዋል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1920"/>
+        <source>Forget every note kept from one project to the next?</source>
+        <translation>ከአንድ ፕሮጀክት ወደ ቀጣዩ የቆዩ ማስታወሻዎች ሁሉ ይረሱ?</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="872"/>

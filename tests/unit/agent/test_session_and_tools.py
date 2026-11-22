@@ -429,6 +429,56 @@ class TestBench:
         cases = bench.load_cases()
         assert len(cases) >= 30 and len({case["id"] for case in cases}) == len(cases)
 
+    # --- the memory kept from one project to the next: a case without and with its note ----------------------------
+
+    def test_a_case_with_a_note_has_a_twin_without_it(self, bench):
+        cases = {case["id"]: case for case in bench.load_cases()}
+        twins = [name for name in cases if name.endswith(bench.MEMORY_TWIN)]
+        assert len(twins) >= 4
+        for name in twins:
+            with_note, without = cases[name], cases[name[:-len(bench.MEMORY_TWIN)]]
+            assert with_note["memory"] and "memory" not in without
+            assert (with_note["prompt"], with_note["expect"]) == (without["prompt"], without["expect"])
+
+    def test_a_note_goes_with_the_request_of_its_case_only(self, bench):
+        from core.agent.memory import HEADER
+
+        class Recording(bench.ScriptedTransport):
+            bodies = []
+
+            def send(self, request, session):
+                self.bodies.append(request.body if isinstance(request.body, str) else request.body.decode("utf-8"))
+                return super().send(request, session)
+
+        cases = {case["id"]: case for case in bench.load_cases()}
+        for name, carried in (("vocab_rd", False), ("vocab_rd_memory", True), ("vocab_housing_memory", True)):
+            Recording.bodies = []
+            result = bench.run_case(cases[name], self.provider(bench), Recording(bench.expected_script(cases[name])))
+            first = json.loads(Recording.bodies[0])["messages"][0]["content"]
+            said = json.dumps(first, ensure_ascii=False)
+            assert result["passed"] and result["model_calls"] == len(Recording.bodies) == 2  # the call, then the answer
+            assert (HEADER[:40] in said) is carried, name
+        assert "RD veut dire route départementale" in bench.case_memory(cases["vocab_rd_memory"],
+                                                                         bench.SimulatedProject())
+        housing = bench.case_memory(cases["vocab_housing_memory"], bench.SimulatedProject())
+        assert "For the layer batiments:" in housing  # a note of a source, under the name of its layer
+        assert bench.case_memory(cases["vocab_rd"], bench.SimulatedProject()) == ""
+
+    def test_pairs_say_what_a_note_saves(self, bench):
+        def run(name, passed, calls):
+            return {"id": name, "passed": passed, "model_calls": calls}
+        results = [run("vocab_rd", True, 4), run("vocab_rd", False, 6), run("vocab_rd", True, 5),
+                   run("vocab_rd_memory", True, 2), run("vocab_rd_memory", True, 3),
+                   run("attr_dept", True, 2), run("orphan_memory", True, 2)]
+        assert bench.memory_pairs(results) == [{"id": "vocab_rd", "passed_without": 2, "runs_without": 3,
+                                                "passed_with": 2, "runs_with": 2, "calls_without": 5.0,
+                                                "calls_with": 2.5, "passed_calls_without": 4.5,
+                                                "passed_calls_with": 2.5}]
+        assert bench.memory_pairs([run("attr_dept", True, 2)]) == []
+        # a case that never passed without its note has no median over its passes: the note is not credited for it
+        never = bench.memory_pairs([run("vocab_x", False, 14), run("vocab_x_memory", True, 3)])[0]
+        assert (never["calls_without"], never["passed_calls_without"], never["passed_calls_with"]) == (14.0, None, 3.0)
+
     def test_perfect_model_passes_every_case(self, bench):
         for case in bench.load_cases():
             result = bench.run_case(case, self.provider(bench), bench.ScriptedTransport(bench.expected_script(case)))

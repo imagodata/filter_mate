@@ -657,6 +657,75 @@ def check_families(chat, provider, settings, ask):
     settings()
 
 
+def check_memory(chat, provider, settings, ask, layer):
+    """The notes kept from one project to the next (core/agent/memory.py) with a real profile and real layers: the file
+    is in the profile, a note of a source comes with any layer of that source, and a conversation carries them once."""
+    from filter_mate.adapters.agent.memory_store import change_memory, memory_path, read_memory, source_signature
+    from filter_mate.core.agent.memory import ADD, HEADER, SCOPE_SOURCE, SCOPE_USER
+
+    def said(index=0):
+        """What the last message of the request ``index`` holds: the request of the user and its context."""
+        return json.dumps(provider.requests[index]["body"]["messages"][-1], ensure_ascii=False)
+
+    def hello():
+        settings()  # a new conversation: its first request carries the whole context
+        provider.reset((200, {}, text_turn("Bonjour.")), (200, {}, text_turn("Encore.")), (200, {}, text_turn("Oui.")))
+        return ask("bonjour")
+
+    path = memory_path()
+    in_bench = (path is not None and path.name == "agent_memory.json" and path.parent.name == "FilterMate"
+                and str(path).startswith(HOME))
+    check("memory: its file is in the profile, next to the skills", in_bench, path)
+    if not in_bench:  # never a file of a real profile: what follows writes and removes it
+        return
+    signature = source_signature(layer)
+    check("memory: a GeoPackage layer has the signature of the favorites", signature.startswith("ogr::"), signature)
+    scratch = QgsVectorLayer("Point?crs=EPSG:2154", "scratch", "memory")
+    check("memory: a layer held in memory has none", source_signature(scratch) == "")
+    if path.exists():
+        path.unlink()
+    hello()
+    check("memory: nothing kept, nothing sent", HEADER[:40] not in said(), said()[-300:])
+    change_memory([(ADD, SCOPE_USER, "", "", "RD = route départementale"),
+                   (ADD, SCOPE_SOURCE, signature, layer.name(), "pop compte les habitants")])
+    check("memory: the notes are written in the profile", path.exists() and len(read_memory().notes) == 2)
+    check("memory: the layer is in the project", QgsProject.instance().mapLayer(layer.id()) is not None)
+    hello()
+    first = said()
+    check("memory: a conversation starts with the notes for every project",
+          HEADER[:40] in first and "RD = route départementale" in first, first[-700:])
+    check("memory: and those of the source of a layer of the project, under its name",
+          f"For the layer {layer.name()}:" in first and "pop compte les habitants" in first, first[-700:])
+    ask("encore")
+    check("memory: they are sent once", HEADER[:40] not in said(1), said(1)[-300:])
+    # Another layer on the same data, as another project would hold it: another id, the same source.
+    again = QgsVectorLayer(layer.source(), "communes_bis", "ogr")
+    QgsProject.instance().addMapLayer(again)
+    ask("et maintenant ?")
+    parts = json.loads(said(2)).get("content")  # the request, then its context
+    texts = [part.get("text", "") for part in parts if isinstance(part, dict)] if isinstance(parts, list) else [str(parts)]
+    titles = [line for text in texts for line in text.splitlines() if line.startswith("For the layers ")]
+    check("memory: a second layer of the same source is named with the first, and the notes are sent again",
+          len(titles) == 1 and layer.name() in titles[0] and "communes_bis" in titles[0], said(2)[-700:])
+    QgsProject.instance().removeMapLayer(again.id())
+    settings(memory=False)
+    provider.reset((200, {}, text_turn("Bonjour.")))
+    ask("bonjour")
+    check("memory: off, nothing is sent and the file stays", HEADER[:40] not in said() and path.exists(), said()[-300:])
+    path.write_text("{ not json", encoding="utf-8")
+    hello()
+    check("memory: a file that cannot be read, and the request goes without it", HEADER[:40] not in said())
+    check("memory: that file is left as it is", path.read_text(encoding="utf-8") == "{ not json")
+    try:
+        change_memory([(ADD, SCOPE_USER, "", "", "a")])
+        refused = False
+    except ValueError:
+        refused = True
+    check("memory: and nothing is written to it", refused and path.read_text(encoding="utf-8") == "{ not json")
+    path.unlink()
+    settings()
+
+
 def check_agent_options(chat, provider, settings, ask):
     """The agent turns its sources off without a question, once the request ends; turning one on is asked (2026-11-16)."""
     from qgis.PyQt.QtCore import QCoreApplication
@@ -1258,6 +1327,7 @@ def check_chat(provider, layer, authcfg, work):
     # Here and not after the first filter: settings() starts a new conversation, and the checks above build on one.
     check_families(chat, provider, settings, ask)
     check_agent_options(chat, provider, settings, ask)
+    check_memory(chat, provider, settings, ask, layer)
 
     offered = [tool.name for tool in chat.tools_and_handlers(load_settings())[0]]
     check("view_map is offered with a key of the user and shared values", "view_map" in offered, offered)
