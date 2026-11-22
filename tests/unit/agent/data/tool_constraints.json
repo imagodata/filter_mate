@@ -443,6 +443,38 @@
   ],
   "type": "object"
  },
+ "apply_style_preset": {
+  "properties": {
+   "all_scales": {
+    "default": false,
+    "type": "boolean"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "preset": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "variant": {
+    "default": "",
+    "enum": [
+     "",
+     "gris",
+     "sombre"
+    ],
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "preset"
+  ],
+  "type": "object"
+ },
  "ask_user": {
   "additionalProperties": false,
   "properties": {
@@ -2110,6 +2142,16 @@
      "diverging",
      "status"
     ],
+    "type": "string"
+   }
+  },
+  "type": "object"
+ },
+ "list_style_presets": {
+  "properties": {
+   "layer": {
+    "default": "",
+    "maxLength": 1000,
     "type": "string"
    }
   },

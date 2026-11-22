@@ -3,10 +3,10 @@ name: cartography
 title: Make the map look right
 description: styles, labels, a simple print layout, the map CRS, the layer tree, map themes, bookmarks
 metadata:
-  version: 5
+  version: 6
   plugin_min: 5.1.0
   audience: chat, mcp
-  tools: set_layer_style, set_labels, describe_layer, field_values, layer_statistics, create_layout, export_layout, set_project_crs, group_layers, rename_layer, map_theme, bookmark, zoom_to, map_context, view_map, add_basemap, duplicate_layer
+  tools: set_layer_style, set_labels, list_style_presets, apply_style_preset, describe_layer, field_values, layer_statistics, create_layout, export_layout, set_project_crs, group_layers, rename_layer, map_theme, bookmark, zoom_to, map_context, view_map, add_basemap, duplicate_layer
   risk: change
   trust: builtin
 ---
@@ -28,6 +28,17 @@ All of this changes how the project shows, never its data, and is undone with th
 - One layer is drawn one way. duplicate_layer adds a second layer on the same data, just above, for what needs two:
   a road with a wider line under it, an elevation as colors and as a relief.
 - After a style the user will judge by eye, look with view_map when it is offered.
+
+## Official styles
+
+- A layer of the BD TOPO of IGN (batiment, troncon_de_route, commune...) or of OpenStreetMap (a column highway,
+  building, landuse...) can be drawn as its producer draws it. When the user asks for that, or for a map that looks official: call
+  list_style_presets with the layer first; it lists the presets whose table fits it (by its name or its fields).
+- apply_style_preset with one of them: rules, symbols, labels and scale ranges of the producer. It is refused when
+  the layer lacks a field the style reads: say which, never imitate it with set_layer_style.
+- variant gris for a discreet background under other data, sombre over a dark basemap.
+- The producer draws a class only from a scale (drawn_from): nothing shows further out. Say so; all_scales draws it
+  at every scale. Credit the attribution on a layout.
 
 ## Which map for which data
 

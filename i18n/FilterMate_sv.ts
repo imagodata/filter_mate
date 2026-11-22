@@ -647,6 +647,16 @@ Köra den?</translation>
         <translation>Etiketter för {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>Söker en officiell stil</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>Officiell stil för {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>De äldsta förfrågningarna i den här konversationen är nu sammanfattade på några rader för att hålla den kort.</translation>

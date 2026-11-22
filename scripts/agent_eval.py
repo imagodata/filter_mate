@@ -153,6 +153,27 @@ class SimulatedProject:
         kept.append(row)
         return {"action": "add", "relation": row}
 
+    def _style_presets(self, args: Dict[str, Any], apply: bool = False) -> Dict[str, Any]:
+        """The official styles of the plugin (its manifest), fitted to a simulated layer as the plugin fits them."""
+        from agent.style_presets import fitting
+        with open(ROOT / "resources" / "styles" / "manifest.json", encoding="utf-8") as stream:
+            presets = json.load(stream)["presets"]
+        if not args.get("layer"):
+            return {"presets": [{"preset": key, "title": value["title"], "tables": sorted(value["tables"])}
+                                for key, value in presets.items()]}
+        name, layer = self._layer(args["layer"])
+        geometry = {"MultiPolygon": "polygon", "MultiLineString": "line", "Point": "point"}.get(
+            layer.get("geometry", ""), "")
+        rows = fitting(presets, [name], list(layer.get("fields", {})), geometry)
+        if not apply:
+            return {"layer_name": name, "presets": [{"preset": key, "table": table} for key, table in rows]}
+        wanted = [row for row in rows if row[0] == args["preset"] or row[0].endswith("/" + args["preset"])]
+        if not wanted:
+            raise ToolFailure(f"no table of {args['preset']} fits '{name}' (by its name, its geometry and its "
+                              "fields): list_style_presets with the layer says which presets do")
+        return {"layer_name": name, "preset": wanted[0][0], "table": wanted[0][1],
+                "variant": args.get("variant") or "none", "rules": 8, "labels": 0, "attribution": "IGN, BD TOPO®"}
+
     def _add_field(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """A field added to the simulated layer, so that the reads after it see it (filled when a formula is given)."""
         name, layer = self._layer(args["layer"])
@@ -656,6 +677,8 @@ class SimulatedProject:
             "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
             "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
             "set_layer_style": set_layer_style, "set_labels": set_labels,
+            "list_style_presets": self._style_presets,
+            "apply_style_preset": lambda args: self._style_presets(args, apply=True),
             "preview_filter": preview_filter, "apply_filter": apply_filter, "cross_filter": relation,
             "geometry_filter": relation, "point_cloud_filter": point_cloud_filter, "clear_filters": clear_filters,
             "export_layers": export_layers, "map_context": map_context, "zoom_to": zoom_to,

@@ -9,8 +9,9 @@ from __future__ import annotations
 from typing import Sequence
 
 MAX_SUMMARY = 60
-MAX_INDEX = 5000  # every tool of the chat (the worst case): 4,322 on 2026-11-16 (lot 2), 3,100 for the default settings;
-# 4,866 on 2026-11-22 after the layouts, projections, cartograms, forms and styles of the agent
+# Every tool of the chat (the worst case): 4,322 on 2026-11-16 (lot 2), 3,100 for the default settings; on 2026-11-22
+# the layouts, projections, cartograms, forms, styles and official styles of the agent brought it near 5,000.
+MAX_INDEX = 5100
 INDEX_TITLE = ("\n\nTools you can add with use_tools. Before saying a thing cannot be done, look here; add in one call "
                "every tool the request needs:")
 
@@ -49,6 +50,8 @@ SUMMARIES = {
     # styles and layouts
     "set_layer_style": "Style a layer: colors, classes, heatmap, sizes, relief",
     "set_labels": "Label features, or remove labels",
+    "list_style_presets": "IGN/OSM styles fitting a layer",
+    "apply_style_preset": "Draw a layer in an IGN/OSM style",
     "create_layout": "A print layout",
     "export_layout": "A print layout to PDF or PNG",
     # data and analysis

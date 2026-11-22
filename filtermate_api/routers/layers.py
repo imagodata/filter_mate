@@ -162,6 +162,34 @@ def set_layer_style(payload: StyleRequest, request: Request) -> StyleResult:
     return _accessor(request).set_layer_style(payload.layer, payload.mode, **options)
 
 
+class StylePresetsRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field("", max_length=_MAX_NAME, description="Those that fit it; empty: every preset")
+
+
+@router.post("/style/presets")
+def list_style_presets(payload: StylePresetsRequest, request: Request) -> Dict[str, Any]:
+    """The official styles of data producers (BD TOPO of IGN, OpenStreetMap), or those that fit a layer."""
+    return _accessor(request).list_style_presets(payload.layer)
+
+
+class StylePresetRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
+    preset: str = Field(..., min_length=1, max_length=200, description="ign/bdtopo/classique; /table to force one")
+    variant: Literal["", "gris", "sombre"] = ""
+    all_scales: bool = Field(False, description="Drawn at every scale, the zoom levels of the producer dropped")
+
+
+@router.post("/style/preset")
+def apply_style_preset(payload: StylePresetRequest, request: Request) -> Dict[str, Any]:
+    """Draw a vector layer in an official style: its rules, symbols, labels and scale ranges."""
+    return _accessor(request).apply_style_preset(payload.layer, payload.preset, variant=payload.variant,
+                                                 all_scales=payload.all_scales)
+
+
 class LabelsRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 

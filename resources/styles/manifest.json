@@ -1,0 +1,1713 @@
+{
+ "generated": "2026-11-22",
+ "presets": {
+  "ign/bdtopo/bati": {
+   "attribution": "IGN, BD TOPO® (style of the Géoplateforme)",
+   "dataset": "bdtopo",
+   "family": "ign",
+   "generated": "2026-11-22",
+   "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+   "skipped": 0,
+   "source": "https://data.geopf.fr/annexes/ressources/vectorTiles/styles/BDTOPO/bati.json",
+   "style": "bati",
+   "tables": {
+    "aerodrome": {
+     "fields": [
+      "altitude",
+      "categorie",
+      "code_iata",
+      "code_icao",
+      "fictif",
+      "usage"
+     ],
+     "file": "ign/bdtopo/bati/aerodrome.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "nature"
+     ],
+     "rules": 4,
+     "scale": 96516
+    },
+    "arrondissement": {
+     "fields": [
+      "code_insee_de_l_arrondissement",
+      "code_insee_de_la_region",
+      "code_insee_du_departement",
+      "liens_vers_autorite_administrative",
+      "nom_officiel",
+      "numero_de_l_arrondissement"
+     ],
+     "file": "ign/bdtopo/bati/arrondissement.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 386065
+    },
+    "batiment": {
+     "fields": [
+      "altitude_maximale_sol",
+      "altitude_maximale_toit",
+      "altitude_minimale_sol",
+      "altitude_minimale_toit",
+      "appariement_fichiers_fonciers",
+      "construction_legere",
+      "hauteur",
+      "identifiants_rnb",
+      "materiaux_de_la_toiture",
+      "materiaux_des_murs",
+      "nombre_d_etages",
+      "nombre_de_logements",
+      "origine_du_batiment",
+      "usage_1",
+      "usage_2"
+     ],
+     "file": "ign/bdtopo/bati/batiment.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "usage_1"
+     ],
+     "rules": 16,
+     "scale": 48258
+    },
+    "cimetiere": {
+     "fields": [],
+     "file": "ign/bdtopo/bati/cimetiere.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    },
+    "commune": {
+     "fields": [
+      "capitale_d_etat",
+      "chef_lieu_d_arrondissement",
+      "chef_lieu_de_collectivite_terr",
+      "chef_lieu_de_departement",
+      "chef_lieu_de_region",
+      "code_insee",
+      "code_insee_de_l_arrondissement",
+      "code_insee_de_la_collectivite_terr",
+      "code_insee_de_la_region",
+      "code_insee_du_canton",
+      "code_insee_du_departement",
+      "code_postal",
+      "code_siren",
+      "codes_siren_des_epci",
+      "date_du_recensement",
+      "lien_vers_chef_lieu",
+      "liens_vers_autorite_administrative",
+      "nom_officiel",
+      "organisme_recenseur",
+      "population",
+      "superficie_cadastrale"
+     ],
+     "file": "ign/bdtopo/bati/commune.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 386065
+    },
+    "construction_lineaire": {
+     "fields": [],
+     "file": "ign/bdtopo/bati/construction_lineaire.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 48258
+    },
+    "construction_ponctuelle": {
+     "fields": [
+      "hauteur"
+     ],
+     "file": "ign/bdtopo/bati/construction_ponctuelle.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 48258
+    },
+    "construction_surfacique": {
+     "fields": [],
+     "file": "ign/bdtopo/bati/construction_surfacique.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    },
+    "departement": {
+     "fields": [
+      "code_insee",
+      "code_insee_de_la_region",
+      "code_siren",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/bati/departement.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 197665430
+    },
+    "epci": {
+     "fields": [
+      "code_siren",
+      "codes_insee_des_communes_membres",
+      "codes_insee_des_departements_membres",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/bati/epci.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 3088522
+    },
+    "equipement_de_transport": {
+     "fields": [
+      "adresse_postale",
+      "commune",
+      "fictif",
+      "id_ban_odonyme",
+      "identifiant_voie_ban",
+      "insee_commune",
+      "nom_commercial",
+      "numero"
+     ],
+     "file": "ign/bdtopo/bati/equipement_de_transport.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "nature"
+     ],
+     "rules": 19,
+     "scale": 24129
+    },
+    "erp": {
+     "fields": [
+      "activite_principale",
+      "activites_secondaires",
+      "adresse_designation_de_l_entree",
+      "adresse_indice_de_repetition",
+      "adresse_nom_1",
+      "adresse_nom_2",
+      "adresse_numero",
+      "capacite_d_accueil_du_public",
+      "capacite_d_hebergement",
+      "categorie",
+      "code_postal",
+      "id_reference",
+      "insee_commune",
+      "libelle",
+      "liens_vers_batiment",
+      "liens_vers_enceinte",
+      "numero_siret",
+      "origine_de_la_geometrie",
+      "ouvert",
+      "public",
+      "type_de_localisation",
+      "type_principal",
+      "types_secondaires",
+      "validation_ign"
+     ],
+     "file": "ign/bdtopo/bati/erp.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 1508
+    },
+    "ligne_electrique": {
+     "fields": [
+      "gestionnaire",
+      "siren_gestionnaire",
+      "voltage"
+     ],
+     "file": "ign/bdtopo/bati/ligne_electrique.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 193033
+    },
+    "ligne_orographique": {
+     "fields": [],
+     "file": "ign/bdtopo/bati/ligne_orographique.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 48258
+    },
+    "piste_d_aerodrome": {
+     "fields": [
+      "fonction"
+     ],
+     "file": "ign/bdtopo/bati/piste_d_aerodrome.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    },
+    "pylone": {
+     "fields": [
+      "hauteur",
+      "numero"
+     ],
+     "file": "ign/bdtopo/bati/pylone.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 48258
+    },
+    "region": {
+     "fields": [
+      "code_insee",
+      "code_siren",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/bati/region.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 0
+    },
+    "reservoir": {
+     "fields": [
+      "altitude_maximale_sol",
+      "altitude_maximale_toit",
+      "altitude_minimale_sol",
+      "altitude_minimale_toit",
+      "hauteur",
+      "origine_du_batiment",
+      "volume"
+     ],
+     "file": "ign/bdtopo/bati/reservoir.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    },
+    "terrain_de_sport": {
+     "fields": [],
+     "file": "ign/bdtopo/bati/terrain_de_sport.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    }
+   },
+   "title": "BD TOPO bati (IGN)",
+   "variants": [
+    "gris",
+    "sombre"
+   ],
+   "warnings": 0
+  },
+  "ign/bdtopo/classique": {
+   "attribution": "IGN, BD TOPO® (style of the Géoplateforme)",
+   "dataset": "bdtopo",
+   "family": "ign",
+   "generated": "2026-11-22",
+   "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+   "skipped": 1,
+   "source": "https://data.geopf.fr/annexes/ressources/vectorTiles/styles/BDTOPO/classique.json",
+   "style": "classique",
+   "tables": {
+    "aerodrome": {
+     "fields": [
+      "altitude",
+      "categorie",
+      "code_iata",
+      "code_icao",
+      "fictif",
+      "usage"
+     ],
+     "file": "ign/bdtopo/classique/aerodrome.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "nature"
+     ],
+     "rules": 4,
+     "scale": 96516
+    },
+    "arrondissement": {
+     "fields": [
+      "code_insee_de_l_arrondissement",
+      "code_insee_de_la_region",
+      "code_insee_du_departement",
+      "liens_vers_autorite_administrative",
+      "nom_officiel",
+      "numero_de_l_arrondissement"
+     ],
+     "file": "ign/bdtopo/classique/arrondissement.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 386065
+    },
+    "bassin_versant_topographique": {
+     "fields": [
+      "bassin_fluvial",
+      "code_bdcarthage",
+      "code_du_bassin_hydrographique",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "libelle_du_bassin_hydrographique",
+      "liens_vers_cours_d_eau_principal",
+      "mode_d_obtention_des_coordonnees",
+      "origine",
+      "statut"
+     ],
+     "file": "ign/bdtopo/classique/bassin_versant_topographique.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 0
+    },
+    "batiment": {
+     "fields": [
+      "altitude_maximale_sol",
+      "altitude_maximale_toit",
+      "altitude_minimale_sol",
+      "altitude_minimale_toit",
+      "appariement_fichiers_fonciers",
+      "construction_legere",
+      "hauteur",
+      "identifiants_rnb",
+      "materiaux_de_la_toiture",
+      "materiaux_des_murs",
+      "nombre_d_etages",
+      "nombre_de_logements",
+      "origine_du_batiment",
+      "usage_1",
+      "usage_2"
+     ],
+     "file": "ign/bdtopo/classique/batiment.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "usage_1"
+     ],
+     "rules": 16,
+     "scale": 48258
+    },
+    "cimetiere": {
+     "fields": [],
+     "file": "ign/bdtopo/classique/cimetiere.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    },
+    "commune": {
+     "fields": [
+      "capitale_d_etat",
+      "chef_lieu_d_arrondissement",
+      "chef_lieu_de_collectivite_terr",
+      "chef_lieu_de_departement",
+      "chef_lieu_de_region",
+      "code_insee",
+      "code_insee_de_l_arrondissement",
+      "code_insee_de_la_collectivite_terr",
+      "code_insee_de_la_region",
+      "code_insee_du_canton",
+      "code_insee_du_departement",
+      "code_postal",
+      "code_siren",
+      "codes_siren_des_epci",
+      "date_du_recensement",
+      "lien_vers_chef_lieu",
+      "liens_vers_autorite_administrative",
+      "nom_officiel",
+      "organisme_recenseur",
+      "population",
+      "superficie_cadastrale"
+     ],
+     "file": "ign/bdtopo/classique/commune.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 386065
+    },
+    "construction_lineaire": {
+     "fields": [],
+     "file": "ign/bdtopo/classique/construction_lineaire.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 48258
+    },
+    "construction_ponctuelle": {
+     "fields": [
+      "hauteur"
+     ],
+     "file": "ign/bdtopo/classique/construction_ponctuelle.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 48258
+    },
+    "construction_surfacique": {
+     "fields": [],
+     "file": "ign/bdtopo/classique/construction_surfacique.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    },
+    "cours_d_eau": {
+     "fields": [
+      "caractere_permanent",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "influence_de_la_maree",
+      "statut"
+     ],
+     "file": "ign/bdtopo/classique/cours_d_eau.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 96516
+    },
+    "departement": {
+     "fields": [
+      "code_insee",
+      "code_insee_de_la_region",
+      "code_siren",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/classique/departement.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 197665430
+    },
+    "detail_hydrographique": {
+     "fields": [
+      "id_ban_odonyme",
+      "identifiant_voie_ban",
+      "insee_commune",
+      "persistance"
+     ],
+     "file": "ign/bdtopo/classique/detail_hydrographique.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 24129
+    },
+    "epci": {
+     "fields": [
+      "code_siren",
+      "codes_insee_des_communes_membres",
+      "codes_insee_des_departements_membres",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/classique/epci.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 3088522
+    },
+    "equipement_de_transport": {
+     "fields": [
+      "adresse_postale",
+      "commune",
+      "fictif",
+      "id_ban_odonyme",
+      "identifiant_voie_ban",
+      "insee_commune",
+      "nom_commercial",
+      "numero"
+     ],
+     "file": "ign/bdtopo/classique/equipement_de_transport.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "nature"
+     ],
+     "rules": 19,
+     "scale": 24129
+    },
+    "erp": {
+     "fields": [
+      "activite_principale",
+      "activites_secondaires",
+      "adresse_designation_de_l_entree",
+      "adresse_indice_de_repetition",
+      "adresse_nom_1",
+      "adresse_nom_2",
+      "adresse_numero",
+      "capacite_d_accueil_du_public",
+      "capacite_d_hebergement",
+      "categorie",
+      "code_postal",
+      "id_reference",
+      "insee_commune",
+      "libelle",
+      "liens_vers_batiment",
+      "liens_vers_enceinte",
+      "numero_siret",
+      "origine_de_la_geometrie",
+      "ouvert",
+      "public",
+      "type_de_localisation",
+      "type_principal",
+      "types_secondaires",
+      "validation_ign"
+     ],
+     "file": "ign/bdtopo/classique/erp.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 1508
+    },
+    "foret_publique": {
+     "fields": [],
+     "file": "ign/bdtopo/classique/foret_publique.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "toponyme"
+     ],
+     "rules": 2,
+     "scale": 48258
+    },
+    "haie": {
+     "fields": [
+      "hauteur",
+      "largeur"
+     ],
+     "file": "ign/bdtopo/classique/haie.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 12065
+    },
+    "ligne_electrique": {
+     "fields": [
+      "gestionnaire",
+      "siren_gestionnaire",
+      "voltage"
+     ],
+     "file": "ign/bdtopo/classique/ligne_electrique.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 193033
+    },
+    "ligne_orographique": {
+     "fields": [],
+     "file": "ign/bdtopo/classique/ligne_orographique.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 48258
+    },
+    "noeud_hydrographique": {
+     "fields": [
+      "categorie",
+      "code_du_pays",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "liens_vers_cours_d_eau_amont",
+      "liens_vers_cours_d_eau_aval",
+      "mode_d_obtention_de_l_altitude",
+      "mode_d_obtention_des_coordonnees",
+      "statut"
+     ],
+     "file": "ign/bdtopo/classique/noeud_hydrographique.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 24129
+    },
+    "parc_ou_reserve": {
+     "fields": [
+      "fictif"
+     ],
+     "file": "ign/bdtopo/classique/parc_ou_reserve.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "toponyme"
+     ],
+     "rules": 2,
+     "scale": 24129
+    },
+    "piste_d_aerodrome": {
+     "fields": [
+      "fonction"
+     ],
+     "file": "ign/bdtopo/classique/piste_d_aerodrome.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    },
+    "pylone": {
+     "fields": [
+      "hauteur",
+      "numero"
+     ],
+     "file": "ign/bdtopo/classique/pylone.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 48258
+    },
+    "region": {
+     "fields": [
+      "code_insee",
+      "code_siren",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/classique/region.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 0
+    },
+    "reservoir": {
+     "fields": [
+      "altitude_maximale_sol",
+      "altitude_maximale_toit",
+      "altitude_minimale_sol",
+      "altitude_minimale_toit",
+      "hauteur",
+      "origine_du_batiment",
+      "volume"
+     ],
+     "file": "ign/bdtopo/classique/reservoir.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    },
+    "surface_hydrographique": {
+     "fields": [
+      "code_du_pays",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "cpx_toponyme_d_entite_de_transition",
+      "cpx_toponyme_de_cours_d_eau",
+      "cpx_toponyme_de_plan_d_eau",
+      "lien_vers_entite_de_transition",
+      "liens_vers_cours_d_eau",
+      "liens_vers_plan_d_eau",
+      "mode_d_obtention_de_l_altitude",
+      "mode_d_obtention_des_coordonnees",
+      "origine",
+      "persistance",
+      "position_par_rapport_au_sol",
+      "salinite",
+      "statut"
+     ],
+     "file": "ign/bdtopo/classique/surface_hydrographique.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 0
+    },
+    "terrain_de_sport": {
+     "fields": [],
+     "file": "ign/bdtopo/classique/terrain_de_sport.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    },
+    "troncon_de_route": {
+     "fields": [
+      "acces_pieton",
+      "acces_vehicule_leger",
+      "aire_de_retournement_dfci",
+      "alias_droit",
+      "alias_gauche",
+      "amenagement_cyclable_droit",
+      "amenagement_cyclable_gauche",
+      "borne_debut_droite",
+      "borne_debut_gauche",
+      "borne_fin_droite",
+      "borne_fin_gauche",
+      "categorie_dfci",
+      "cpx_classement_administratif",
+      "cpx_gestionnaire",
+      "cpx_nature_itineraire_autre",
+      "cpx_numero",
+      "cpx_numero_route_europeenne",
+      "cpx_toponyme_itineraire_autre",
+      "cpx_toponyme_itineraire_cyclable",
+      "cpx_toponyme_route_nommee",
+      "cpx_toponyme_voie_verte",
+      "date_de_mise_en_service",
+      "delestage",
+      "fictif",
+      "gabarit_dfci",
+      "id_ban_odonyme_droite",
+      "id_ban_odonyme_gauche",
+      "identifiant_voie_ban_droite",
+      "identifiant_voie_ban_gauche",
+      "impasse_dfci",
+      "insee_commune_droite",
+      "insee_commune_gauche",
+      "itineraire_vert",
+      "largeur_de_chaussee",
+      "liens_vers_itineraire_autre",
+      "liens_vers_route_nommee",
+      "lieux_dits_ban_droite",
+      "lieux_dits_ban_gauche",
+      "matieres_dangereuses_interdites",
+      "nature_de_la_restriction",
+      "nature_detaillee_dfci",
+      "nom_collaboratif_droite",
+      "nom_collaboratif_gauche",
+      "nom_voie_ban_droite",
+      "nom_voie_ban_gauche",
+      "nombre_de_voies",
+      "ouvrage_d_art_limitant_dfci",
+      "pente_maximale_dfci",
+      "periode_de_fermeture",
+      "piste_dfci",
+      "piste_dfci_debroussaillee",
+      "piste_dfci_fosses",
+      "position_par_rapport_au_sol",
+      "prive",
+      "reserve_aux_bus",
+      "restriction_de_hauteur",
+      "restriction_de_largeur",
+      "restriction_de_longueur",
+      "restriction_de_poids_par_essieu",
+      "restriction_de_poids_total",
+      "sens_amenagement_cyclable_droit",
+      "sens_amenagement_cyclable_gauche",
+      "sens_de_circulation",
+      "sens_de_circulation_dfci",
+      "source_voie_ban_droite",
+      "source_voie_ban_gauche",
+      "tout_terrain_dfci",
+      "urbain",
+      "vitesse_collaborative",
+      "vitesse_moyenne_dfci",
+      "vitesse_moyenne_vl",
+      "zone_de_croisement_dfci"
+     ],
+     "file": "ign/bdtopo/classique/troncon_de_route.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [
+      "nature"
+     ],
+     "rules": 13,
+     "scale": 96516
+    },
+    "troncon_de_voie_ferree": {
+     "fields": [
+      "cpx_toponyme",
+      "electrifie",
+      "largeur",
+      "liens_vers_voie_ferree_nommee",
+      "nombre_de_voies",
+      "position_par_rapport_au_sol",
+      "usage",
+      "vitesse_maximale"
+     ],
+     "file": "ign/bdtopo/classique/troncon_de_voie_ferree.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 96516
+    },
+    "troncon_hydrographique": {
+     "fields": [
+      "classe_de_largeur",
+      "code_du_cours_d_eau_bdcarthage",
+      "code_du_pays",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "cpx_toponyme_d_entite_de_transition",
+      "cpx_toponyme_de_cours_d_eau",
+      "fictif",
+      "fosse",
+      "identifiant_police_de_l_eau",
+      "inventaire_police_de_l_eau",
+      "lien_vers_entite_de_transition",
+      "lien_vers_noeud_hydrographique_fin",
+      "lien_vers_noeud_hydrographique_ini",
+      "liens_vers_cours_d_eau",
+      "liens_vers_surface_hydrographique",
+      "mode_d_obtention_de_l_altitude",
+      "mode_d_obtention_des_coordonnees",
+      "navigabilite",
+      "numero_d_ordre",
+      "origine",
+      "perimetre_d_utilisation_ou_origine",
+      "persistance",
+      "position_par_rapport_au_sol",
+      "reseau_principal_coulant",
+      "salinite",
+      "sens_de_l_ecoulement",
+      "statut",
+      "strategie_de_classement",
+      "trace_connu",
+      "type_de_bras"
+     ],
+     "file": "ign/bdtopo/classique/troncon_hydrographique.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 96516
+    },
+    "zone_d_activite_ou_d_interet": {
+     "fields": [
+      "adresse_postale",
+      "categorie",
+      "commune",
+      "fictif",
+      "id_ban_odonyme",
+      "identifiant_voie_ban",
+      "insee_commune",
+      "nom_commercial"
+     ],
+     "file": "ign/bdtopo/classique/zone_d_activite_ou_d_interet.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "categorie",
+      "importance",
+      "toponyme"
+     ],
+     "rules": 9,
+     "scale": 0
+    },
+    "zone_d_estran": {
+     "fields": [],
+     "file": "ign/bdtopo/classique/zone_d_estran.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 6177045
+    },
+    "zone_de_vegetation": {
+     "fields": [],
+     "file": "ign/bdtopo/classique/zone_de_vegetation.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 48258
+    }
+   },
+   "title": "BD TOPO classique (IGN)",
+   "variants": [
+    "gris",
+    "sombre"
+   ],
+   "warnings": 0
+  },
+  "ign/bdtopo/hydrographie": {
+   "attribution": "IGN, BD TOPO® (style of the Géoplateforme)",
+   "dataset": "bdtopo",
+   "family": "ign",
+   "generated": "2026-11-22",
+   "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+   "skipped": 2,
+   "source": "https://data.geopf.fr/annexes/ressources/vectorTiles/styles/BDTOPO/hydrographie.json",
+   "style": "hydrographie",
+   "tables": {
+    "arrondissement": {
+     "fields": [
+      "code_insee_de_l_arrondissement",
+      "code_insee_de_la_region",
+      "code_insee_du_departement",
+      "liens_vers_autorite_administrative",
+      "nom_officiel",
+      "numero_de_l_arrondissement"
+     ],
+     "file": "ign/bdtopo/hydrographie/arrondissement.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 386065
+    },
+    "bassin_versant_topographique": {
+     "fields": [
+      "bassin_fluvial",
+      "code_bdcarthage",
+      "code_du_bassin_hydrographique",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "libelle_du_bassin_hydrographique",
+      "liens_vers_cours_d_eau_principal",
+      "mode_d_obtention_des_coordonnees",
+      "origine",
+      "statut"
+     ],
+     "file": "ign/bdtopo/hydrographie/bassin_versant_topographique.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 0
+    },
+    "commune": {
+     "fields": [
+      "capitale_d_etat",
+      "chef_lieu_d_arrondissement",
+      "chef_lieu_de_collectivite_terr",
+      "chef_lieu_de_departement",
+      "chef_lieu_de_region",
+      "code_insee",
+      "code_insee_de_l_arrondissement",
+      "code_insee_de_la_collectivite_terr",
+      "code_insee_de_la_region",
+      "code_insee_du_canton",
+      "code_insee_du_departement",
+      "code_postal",
+      "code_siren",
+      "codes_siren_des_epci",
+      "date_du_recensement",
+      "lien_vers_chef_lieu",
+      "liens_vers_autorite_administrative",
+      "nom_officiel",
+      "organisme_recenseur",
+      "population",
+      "superficie_cadastrale"
+     ],
+     "file": "ign/bdtopo/hydrographie/commune.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 386065
+    },
+    "cours_d_eau": {
+     "fields": [
+      "caractere_permanent",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "influence_de_la_maree",
+      "statut"
+     ],
+     "file": "ign/bdtopo/hydrographie/cours_d_eau.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 24129
+    },
+    "departement": {
+     "fields": [
+      "code_insee",
+      "code_insee_de_la_region",
+      "code_siren",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/hydrographie/departement.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 197665430
+    },
+    "detail_hydrographique": {
+     "fields": [
+      "id_ban_odonyme",
+      "identifiant_voie_ban",
+      "insee_commune",
+      "persistance"
+     ],
+     "file": "ign/bdtopo/hydrographie/detail_hydrographique.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 24129
+    },
+    "epci": {
+     "fields": [
+      "code_siren",
+      "codes_insee_des_communes_membres",
+      "codes_insee_des_departements_membres",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/hydrographie/epci.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 3088522
+    },
+    "equipement_de_transport": {
+     "fields": [
+      "adresse_postale",
+      "commune",
+      "fictif",
+      "id_ban_odonyme",
+      "identifiant_voie_ban",
+      "insee_commune",
+      "nom_commercial",
+      "numero"
+     ],
+     "file": "ign/bdtopo/hydrographie/equipement_de_transport.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "nature"
+     ],
+     "rules": 2,
+     "scale": 24129
+    },
+    "noeud_hydrographique": {
+     "fields": [
+      "categorie",
+      "code_du_pays",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "liens_vers_cours_d_eau_amont",
+      "liens_vers_cours_d_eau_aval",
+      "mode_d_obtention_de_l_altitude",
+      "mode_d_obtention_des_coordonnees",
+      "statut"
+     ],
+     "file": "ign/bdtopo/hydrographie/noeud_hydrographique.qml",
+     "geometry": "point",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 24129
+    },
+    "region": {
+     "fields": [
+      "code_insee",
+      "code_siren",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/hydrographie/region.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 0
+    },
+    "reservoir": {
+     "fields": [
+      "altitude_maximale_sol",
+      "altitude_maximale_toit",
+      "altitude_minimale_sol",
+      "altitude_minimale_toit",
+      "hauteur",
+      "origine_du_batiment",
+      "volume"
+     ],
+     "file": "ign/bdtopo/hydrographie/reservoir.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 24129
+    },
+    "surface_hydrographique": {
+     "fields": [
+      "code_du_pays",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "cpx_toponyme_d_entite_de_transition",
+      "cpx_toponyme_de_cours_d_eau",
+      "cpx_toponyme_de_plan_d_eau",
+      "lien_vers_entite_de_transition",
+      "liens_vers_cours_d_eau",
+      "liens_vers_plan_d_eau",
+      "mode_d_obtention_de_l_altitude",
+      "mode_d_obtention_des_coordonnees",
+      "origine",
+      "persistance",
+      "position_par_rapport_au_sol",
+      "salinite",
+      "statut"
+     ],
+     "file": "ign/bdtopo/hydrographie/surface_hydrographique.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 0
+    },
+    "troncon_de_route": {
+     "fields": [
+      "acces_pieton",
+      "acces_vehicule_leger",
+      "aire_de_retournement_dfci",
+      "alias_droit",
+      "alias_gauche",
+      "amenagement_cyclable_droit",
+      "amenagement_cyclable_gauche",
+      "borne_debut_droite",
+      "borne_debut_gauche",
+      "borne_fin_droite",
+      "borne_fin_gauche",
+      "categorie_dfci",
+      "cpx_classement_administratif",
+      "cpx_gestionnaire",
+      "cpx_nature_itineraire_autre",
+      "cpx_numero",
+      "cpx_numero_route_europeenne",
+      "cpx_toponyme_itineraire_autre",
+      "cpx_toponyme_itineraire_cyclable",
+      "cpx_toponyme_route_nommee",
+      "cpx_toponyme_voie_verte",
+      "date_de_mise_en_service",
+      "delestage",
+      "fictif",
+      "gabarit_dfci",
+      "id_ban_odonyme_droite",
+      "id_ban_odonyme_gauche",
+      "identifiant_voie_ban_droite",
+      "identifiant_voie_ban_gauche",
+      "impasse_dfci",
+      "insee_commune_droite",
+      "insee_commune_gauche",
+      "itineraire_vert",
+      "largeur_de_chaussee",
+      "liens_vers_itineraire_autre",
+      "liens_vers_route_nommee",
+      "lieux_dits_ban_droite",
+      "lieux_dits_ban_gauche",
+      "matieres_dangereuses_interdites",
+      "nature_de_la_restriction",
+      "nature_detaillee_dfci",
+      "nom_collaboratif_droite",
+      "nom_collaboratif_gauche",
+      "nom_voie_ban_droite",
+      "nom_voie_ban_gauche",
+      "nombre_de_voies",
+      "ouvrage_d_art_limitant_dfci",
+      "pente_maximale_dfci",
+      "periode_de_fermeture",
+      "piste_dfci",
+      "piste_dfci_debroussaillee",
+      "piste_dfci_fosses",
+      "position_par_rapport_au_sol",
+      "prive",
+      "reserve_aux_bus",
+      "restriction_de_hauteur",
+      "restriction_de_largeur",
+      "restriction_de_longueur",
+      "restriction_de_poids_par_essieu",
+      "restriction_de_poids_total",
+      "sens_amenagement_cyclable_droit",
+      "sens_amenagement_cyclable_gauche",
+      "sens_de_circulation",
+      "sens_de_circulation_dfci",
+      "source_voie_ban_droite",
+      "source_voie_ban_gauche",
+      "tout_terrain_dfci",
+      "urbain",
+      "vitesse_collaborative",
+      "vitesse_moyenne_dfci",
+      "vitesse_moyenne_vl",
+      "zone_de_croisement_dfci"
+     ],
+     "file": "ign/bdtopo/hydrographie/troncon_de_route.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [
+      "nature"
+     ],
+     "rules": 1,
+     "scale": 24129
+    },
+    "troncon_hydrographique": {
+     "fields": [
+      "classe_de_largeur",
+      "code_du_cours_d_eau_bdcarthage",
+      "code_du_pays",
+      "code_hydrographique",
+      "commentaire_sur_l_objet_hydro",
+      "cpx_toponyme_d_entite_de_transition",
+      "cpx_toponyme_de_cours_d_eau",
+      "fictif",
+      "fosse",
+      "identifiant_police_de_l_eau",
+      "inventaire_police_de_l_eau",
+      "lien_vers_entite_de_transition",
+      "lien_vers_noeud_hydrographique_fin",
+      "lien_vers_noeud_hydrographique_ini",
+      "liens_vers_cours_d_eau",
+      "liens_vers_surface_hydrographique",
+      "mode_d_obtention_de_l_altitude",
+      "mode_d_obtention_des_coordonnees",
+      "navigabilite",
+      "numero_d_ordre",
+      "origine",
+      "perimetre_d_utilisation_ou_origine",
+      "persistance",
+      "position_par_rapport_au_sol",
+      "reseau_principal_coulant",
+      "salinite",
+      "sens_de_l_ecoulement",
+      "statut",
+      "strategie_de_classement",
+      "trace_connu",
+      "type_de_bras"
+     ],
+     "file": "ign/bdtopo/hydrographie/troncon_hydrographique.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [],
+     "rules": 1,
+     "scale": 24129
+    },
+    "zone_d_estran": {
+     "fields": [],
+     "file": "ign/bdtopo/hydrographie/zone_d_estran.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [],
+     "rules": 2,
+     "scale": 6177045
+    }
+   },
+   "title": "BD TOPO hydrographie (IGN)",
+   "variants": [
+    "gris",
+    "sombre"
+   ],
+   "warnings": 0
+  },
+  "ign/bdtopo/routier": {
+   "attribution": "IGN, BD TOPO® (style of the Géoplateforme)",
+   "dataset": "bdtopo",
+   "family": "ign",
+   "generated": "2026-11-22",
+   "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)",
+   "skipped": 0,
+   "source": "https://data.geopf.fr/annexes/ressources/vectorTiles/styles/BDTOPO/routier.json",
+   "style": "routier",
+   "tables": {
+    "arrondissement": {
+     "fields": [
+      "code_insee_de_l_arrondissement",
+      "code_insee_de_la_region",
+      "code_insee_du_departement",
+      "liens_vers_autorite_administrative",
+      "nom_officiel",
+      "numero_de_l_arrondissement"
+     ],
+     "file": "ign/bdtopo/routier/arrondissement.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 386065
+    },
+    "commune": {
+     "fields": [
+      "capitale_d_etat",
+      "chef_lieu_d_arrondissement",
+      "chef_lieu_de_collectivite_terr",
+      "chef_lieu_de_departement",
+      "chef_lieu_de_region",
+      "code_insee",
+      "code_insee_de_l_arrondissement",
+      "code_insee_de_la_collectivite_terr",
+      "code_insee_de_la_region",
+      "code_insee_du_canton",
+      "code_insee_du_departement",
+      "code_postal",
+      "code_siren",
+      "codes_siren_des_epci",
+      "date_du_recensement",
+      "lien_vers_chef_lieu",
+      "liens_vers_autorite_administrative",
+      "nom_officiel",
+      "organisme_recenseur",
+      "population",
+      "superficie_cadastrale"
+     ],
+     "file": "ign/bdtopo/routier/commune.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 386065
+    },
+    "departement": {
+     "fields": [
+      "code_insee",
+      "code_insee_de_la_region",
+      "code_siren",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/routier/departement.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 197665430
+    },
+    "epci": {
+     "fields": [
+      "code_siren",
+      "codes_insee_des_communes_membres",
+      "codes_insee_des_departements_membres",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/routier/epci.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 3088522
+    },
+    "equipement_de_transport": {
+     "fields": [
+      "adresse_postale",
+      "commune",
+      "fictif",
+      "id_ban_odonyme",
+      "identifiant_voie_ban",
+      "insee_commune",
+      "nom_commercial",
+      "numero"
+     ],
+     "file": "ign/bdtopo/routier/equipement_de_transport.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "nature"
+     ],
+     "rules": 8,
+     "scale": 24129
+    },
+    "region": {
+     "fields": [
+      "code_insee",
+      "code_siren",
+      "liens_vers_autorite_administrative",
+      "nom_officiel"
+     ],
+     "file": "ign/bdtopo/routier/region.qml",
+     "geometry": "polygon",
+     "labels": 1,
+     "required": [
+      "nom_officiel"
+     ],
+     "rules": 1,
+     "scale": 0
+    },
+    "troncon_de_route": {
+     "fields": [
+      "acces_pieton",
+      "acces_vehicule_leger",
+      "aire_de_retournement_dfci",
+      "alias_droit",
+      "alias_gauche",
+      "amenagement_cyclable_droit",
+      "amenagement_cyclable_gauche",
+      "borne_debut_droite",
+      "borne_debut_gauche",
+      "borne_fin_droite",
+      "borne_fin_gauche",
+      "categorie_dfci",
+      "cpx_classement_administratif",
+      "cpx_gestionnaire",
+      "cpx_nature_itineraire_autre",
+      "cpx_numero",
+      "cpx_numero_route_europeenne",
+      "cpx_toponyme_itineraire_autre",
+      "cpx_toponyme_itineraire_cyclable",
+      "cpx_toponyme_route_nommee",
+      "cpx_toponyme_voie_verte",
+      "date_de_mise_en_service",
+      "delestage",
+      "fictif",
+      "gabarit_dfci",
+      "id_ban_odonyme_droite",
+      "id_ban_odonyme_gauche",
+      "identifiant_voie_ban_droite",
+      "identifiant_voie_ban_gauche",
+      "impasse_dfci",
+      "insee_commune_droite",
+      "insee_commune_gauche",
+      "itineraire_vert",
+      "largeur_de_chaussee",
+      "liens_vers_itineraire_autre",
+      "liens_vers_route_nommee",
+      "lieux_dits_ban_droite",
+      "lieux_dits_ban_gauche",
+      "matieres_dangereuses_interdites",
+      "nature_de_la_restriction",
+      "nature_detaillee_dfci",
+      "nom_collaboratif_droite",
+      "nom_collaboratif_gauche",
+      "nom_voie_ban_droite",
+      "nom_voie_ban_gauche",
+      "nombre_de_voies",
+      "ouvrage_d_art_limitant_dfci",
+      "pente_maximale_dfci",
+      "periode_de_fermeture",
+      "piste_dfci",
+      "piste_dfci_debroussaillee",
+      "piste_dfci_fosses",
+      "position_par_rapport_au_sol",
+      "prive",
+      "reserve_aux_bus",
+      "restriction_de_hauteur",
+      "restriction_de_largeur",
+      "restriction_de_longueur",
+      "restriction_de_poids_par_essieu",
+      "restriction_de_poids_total",
+      "sens_amenagement_cyclable_droit",
+      "sens_amenagement_cyclable_gauche",
+      "sens_de_circulation",
+      "sens_de_circulation_dfci",
+      "source_voie_ban_droite",
+      "source_voie_ban_gauche",
+      "tout_terrain_dfci",
+      "urbain",
+      "vitesse_collaborative",
+      "vitesse_moyenne_dfci",
+      "vitesse_moyenne_vl",
+      "zone_de_croisement_dfci"
+     ],
+     "file": "ign/bdtopo/routier/troncon_de_route.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [
+      "nature"
+     ],
+     "rules": 12,
+     "scale": 96516
+    }
+   },
+   "title": "BD TOPO routier (IGN)",
+   "variants": [
+    "gris",
+    "sombre"
+   ],
+   "warnings": 0
+  },
+  "osm/colorful": {
+   "attribution": "© OpenStreetMap contributors; style VersaTiles Colorful",
+   "dataset": "openstreetmap",
+   "family": "osm",
+   "generated": "2026-11-22",
+   "licence": "Style: CC0 (VersaTiles); data: ODbL",
+   "skipped": 215,
+   "source": "https://vector.openstreetmap.org/styles/shortbread/colorful.json",
+   "style": "colorful",
+   "tables": {
+    "boundaries": {
+     "by_name": false,
+     "fields": [
+      "admin_level"
+     ],
+     "file": "osm/colorful/boundaries.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "admin_level"
+     ],
+     "rules": 4,
+     "scale": 0
+    },
+    "buildings": {
+     "by_name": false,
+     "fields": [
+      "building"
+     ],
+     "file": "osm/colorful/buildings.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "building"
+     ],
+     "rules": 2,
+     "scale": 0
+    },
+    "landuse": {
+     "by_name": false,
+     "fields": [
+      "landuse"
+     ],
+     "file": "osm/colorful/landuse.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "landuse"
+     ],
+     "rules": 11,
+     "scale": 0
+    },
+    "leisure": {
+     "by_name": false,
+     "fields": [
+      "leisure"
+     ],
+     "file": "osm/colorful/leisure.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "leisure"
+     ],
+     "rules": 3,
+     "scale": 0
+    },
+    "natural": {
+     "by_name": false,
+     "fields": [
+      "natural"
+     ],
+     "file": "osm/colorful/natural.qml",
+     "geometry": "polygon",
+     "labels": 0,
+     "required": [
+      "natural"
+     ],
+     "rules": 8,
+     "scale": 0
+    },
+    "railways": {
+     "by_name": false,
+     "fields": [
+      "railway"
+     ],
+     "file": "osm/colorful/railways.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [
+      "railway"
+     ],
+     "rules": 14,
+     "scale": 0
+    },
+    "roads": {
+     "by_name": false,
+     "fields": [
+      "highway"
+     ],
+     "file": "osm/colorful/roads.qml",
+     "geometry": "line",
+     "labels": 9,
+     "required": [
+      "highway",
+      "name"
+     ],
+     "rules": 44,
+     "scale": 0
+    },
+    "waterways": {
+     "by_name": false,
+     "fields": [
+      "waterway"
+     ],
+     "file": "osm/colorful/waterways.qml",
+     "geometry": "line",
+     "labels": 0,
+     "required": [
+      "waterway"
+     ],
+     "rules": 4,
+     "scale": 0
+    }
+   },
+   "title": "OpenStreetMap, VersaTiles colorful",
+   "variants": [
+    "gris",
+    "sombre"
+   ],
+   "warnings": 0
+  }
+ },
+ "qgis": "4.3.0-Master",
+ "version": 1,
+ "zoom": "a zoom level z is shown from 1:559082264/2^(z-0.5) to 1:559082264/2^(z+0.5)"
+}

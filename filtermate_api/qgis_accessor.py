@@ -609,6 +609,14 @@ class QGISFilterMateAccessor:
                                          prefix=prefix, module="adapters.public_api.fields_joins",
                                          changes={"layer": layer}))
 
+    def list_style_presets(self, layer: str = "") -> Dict[str, Any]:
+        return self._control("list_style_presets", layer, module="adapters.public_api.style_presets")
+
+    def apply_style_preset(self, layer: str, preset: str, variant: str = "",
+                           all_scales: bool = False) -> Dict[str, Any]:
+        return self._control("apply_style_preset", layer, preset, variant=variant, all_scales=all_scales,
+                             module="adapters.public_api.style_presets", changes={"layer": layer})
+
     def set_form(self, layer: str, fields: List[Dict[str, Any]]) -> Dict[str, Any]:
         return self._control("set_form", layer, fields, module="adapters.public_api.forms", changes={"layer": layer})
 

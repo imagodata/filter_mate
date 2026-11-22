@@ -54,7 +54,8 @@ RULES = (RULE_ASK, RULE_ALLOW, RULE_NEVER)
 CHANGED_LAYERS = {
     "apply_filter": ("layer_name",), "cross_filter": ("target_layers",), "geometry_filter": ("target_layers",),
     "point_cloud_filter": ("layers",), "clear_filters": ("layers",), "set_layer_style": ("layer",),
-    "set_labels": ("layer",), "design_style": ("layer",), "update_features": ("layer",), "delete_features": ("layer",),
+    "set_labels": ("layer",), "design_style": ("layer",), "apply_style_preset": ("layer",),
+    "update_features": ("layer",), "delete_features": ("layer",),
     "add_features": ("layer",), "add_field": ("layer",), "join_layers": ("layer",), "rename_layer": ("layer",),
     "remove_layers": ("layers",),
     # A copy is a second layer on the same source, and no protected one: what is edited in it is written in the

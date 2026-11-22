@@ -647,6 +647,16 @@ Run it?</source>
         <translation>{}의 레이블</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>공식 스타일 찾는 중</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>{}의 공식 스타일</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>이 대화의 가장 오래된 요청은 짧게 유지하기 위해 이제 몇 줄로 요약되었습니다.</translation>

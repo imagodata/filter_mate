@@ -94,6 +94,7 @@ WRITES = [
     ("add_features", lambda a: a.add_features("cadastre", features=[{"wkt": "POINT(0 0)"}])),
     ("add_field", lambda a: a.add_field("cadastre", "densite")),
     ("join_layers", lambda a: a.join_layers("cadastre", "routes", "a", "a")),
+    ("apply_style_preset", lambda a: a.apply_style_preset("cadastre", "ign/bdtopo/classique")),
     ("set_form", lambda a: a.set_form("cadastre", [{"field": "a", "alias": "A"}])),
     ("relations add, the parent", lambda a: a.relations("add", parent_layer="cadastre", parent_field="a",
                                                         child_layer="routes", child_field="a")),

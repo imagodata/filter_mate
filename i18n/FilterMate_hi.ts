@@ -647,6 +647,16 @@ Run it?</source>
         <translation>{} के लेबल</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>आधिकारिक शैली खोजी जा रही है</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>{} की आधिकारिक शैली</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>इस बातचीत के सबसे पुराने अनुरोध अब कुछ पंक्तियों में सारांशित हैं, ताकि यह छोटी रहे।</translation>

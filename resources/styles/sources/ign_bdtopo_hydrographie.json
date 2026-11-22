@@ -1,0 +1,342 @@
+{
+    "version": 8,
+    "name": "BDTOPO_Hydro",
+    "glyphs":"https://data.geopf.fr/annexes/ressources/vectorTiles/fonts/{fontstack}/{range}.pbf",
+    "metadata": {"maputnik:renderer": "ol"},
+    "sources": {
+        "bdtopo": {
+          "type": "vector",
+          "tiles": [
+          "https://data.geopf.fr/tms/1.0.0/BDTOPO/{z}/{x}/{y}.pbf"
+          ],
+          "url":"https://data.geopf.fr/tms/1.0.0/BDTOPO/metadata.json"
+        }
+    },
+    "transition": {
+        "duration": 300,
+        "delay": 0
+    },
+    "layers": [
+      {
+        "id": "surface_hydrographique_surf",
+        "type": "fill",
+        "source": "bdtopo",
+        "source-layer": "surface_hydrographique",
+        "paint": {"fill-color": "#c1e9f3"}
+    },
+    {
+        "id": "surface_hydrographique_limites",
+        "type": "line",
+        "source": "bdtopo",
+        "source-layer": "surface_hydrographique",
+        "paint": {"line-color": "#4961ff"},
+        "minzoom": 15
+    },
+    {
+        "id": "troncon_hydrographique",
+        "type": "line",
+        "source": "bdtopo",
+        "source-layer": "troncon_hydrographique",
+        "paint": {"line-color": "#a4d7ff"},
+        "minzoom": 15
+    },
+    {
+      "id": "cours_d_eau",
+      "type": "line",
+      "source": "bdtopo",
+      "source-layer": "cours_d_eau",
+      "paint": {
+        "line-color": "#0066cc",
+        "line-dasharray": [6, 2],
+        "line-width": 1.5
+      },
+      "minzoom": 15,
+      "layout": {"visibility": "visible"}
+    },
+    {
+        "id": "noeud_hydrographique",
+        "type": "circle",
+        "source": "bdtopo",
+        "source-layer": "noeud_hydrographique",
+        "paint": {
+          "circle-color": "#a4d7ff",
+          "circle-stroke-color": "#000000",
+          "circle-opacity": 1,
+          "circle-stroke-width": 1,
+          "circle-radius": 3
+        },
+        "minzoom": 15
+      },
+      {
+        "id": "detail_hydrographique",
+        "type": "circle",
+        "source": "bdtopo",
+        "source-layer": "detail_hydrographique",
+        "paint": {
+          "circle-color": "#a4d7ff",
+          "circle-stroke-color": "#007fff",
+          "circle-opacity": 1,
+          "circle-stroke-width": 1,
+          "circle-radius": 5
+        },
+        "minzoom": 15
+      },
+      {
+        "id": "plan_d_eau_limites",
+        "type": "line",
+        "source": "bdtopo",
+        "source-layer": "plan_d_eau",
+        "paint": {
+          "line-color": "#1f78b4",
+          "line-width": 3
+        },
+        "layout": {"visibility": "none"},
+        "minzoom": 15
+      },
+      {
+        "id": "reservoir_surf",
+        "type": "fill",
+        "source": "bdtopo",
+        "source-layer": "reservoir",
+        "paint": {"fill-color": "#1bbfd1"},
+        "minzoom": 15
+      },
+      {
+        "id": "reservoir_limites",
+        "type": "line",
+        "source": "bdtopo",
+        "source-layer": "reservoir",
+        "paint": {"line-color": "#666666"},
+        "minzoom": 15
+      },
+      {
+        "id": "bassin_versant_topographique_limites",
+        "type": "line",
+        "source": "bdtopo",
+        "source-layer": "bassin_versant_topographique",
+        "paint": {
+          "line-color": "#1745fc",
+          "line-opacity": 0.35
+        }
+      },
+      {
+        "id": "bac_ou_liaison_maritime",
+        "type": "line",
+        "source": "bdtopo",
+        "source-layer": "troncon_de_route",
+        "minzoom": 15,
+        "filter": [
+          "all",
+          [
+            "==",
+            "nature",
+            "Bac ou liaison maritime"
+          ]
+        ],
+        "paint": {
+          "line-color": "#ff00ff",
+          "line-width": 1
+        }
+      },
+      {
+        "id": "gare_maritime",
+        "type": "fill",
+        "source": "bdtopo",
+        "source-layer": "equipement_de_transport",
+        "minzoom": 15,
+        "filter": [
+          "==",
+          "nature",
+          "Gare maritime"
+        ],
+        "paint": {
+          "fill-color": "#233fdd"
+        }
+      },
+      {
+        "id": "port",
+        "type": "fill",
+        "source": "bdtopo",
+        "source-layer": "equipement_de_transport",
+        "minzoom": 15,
+        "filter": [
+          "==",
+          "nature",
+          "Port"
+        ],
+        "paint": {
+          "fill-color": "#367ada"
+        }
+      },
+      {
+        "id": "zone_d_estran_surf",
+        "type": "fill",
+        "source": "bdtopo",
+        "source-layer": "zone_d_estran",
+        "paint": {"fill-color": "#759eef"},
+        "minzoom": 7,
+        "layout": {"visibility": "visible"}
+      },
+      {
+        "id": "zone_d_estran_limites",
+        "type": "line",
+        "source": "bdtopo",
+        "source-layer": "zone_d_estran",
+        "paint": {"line-color": "#000000"},
+        "minzoom": 7,
+        "layout": {"visibility": "visible"}
+      },
+          {
+            "id": "limite_terre_mer",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "limite_terre_mer",
+            "paint": {
+              "line-color": "#5e8eba",
+              "line-width": 0.75
+            },
+            "layout": {"visibility": "none"}
+          }
+          ,
+    {
+      "id": "region_limites",
+      "type": "line",
+      "paint": {
+        "line-color": "rgba(0, 0, 0, 1)",
+        "line-width": 2
+      },
+      "source": "bdtopo",
+      "source-layer": "region",
+      "layout": {"line-join": "bevel"}
+    },
+    {
+      "id": "departement_limites",
+      "type": "line",
+      "source": "bdtopo",
+      "source-layer": "departement",
+      "minzoom": 2,
+      "maxzoom": 12,
+      "paint": {
+        "line-width": 0.75,
+        "line-color": "#000000"
+      }
+    },
+    {
+      "id": "epci_limites",
+      "type": "line",
+      "source": "bdtopo",
+      "source-layer": "epci",
+      "paint": {
+        "line-width": 1.8,
+        "line-color": "#1f78b4"
+      },
+      "minzoom": 8,
+      "maxzoom": 15
+    },
+    {
+      "id": "arrondissement_limites",
+      "type": "line",
+      "source": "bdtopo",
+      "source-layer": "arrondissement",
+      "paint": {
+        "line-color": "#666666",
+        "line-dasharray": [18, 6],
+        "line-width": 0.75
+      },
+      "minzoom": 11,
+      "layout": {"line-join": "bevel"}
+    },
+    {
+      "id": "commune_limites",
+      "type": "line",
+      "source": "bdtopo",
+      "source-layer": "commune",
+      "paint": {
+        "line-color": "#999999",
+        "line-dasharray": [2, 4, 6, 4],
+        "line-width": 0.75
+      },
+      "minzoom": 11,
+      "layout": {"line-join": "bevel"}
+    },{
+      "id": "region_labels",
+      "type": "symbol",
+      "source": "bdtopo",
+      "source-layer": "region",
+      "layout": {
+        "text-field": "{nom_officiel}",
+        "text-size": 20,
+        "text-font": ["Open Sans Regular"]
+      },
+      "minzoom": 1,
+      "maxzoom": 7
+    },
+    {
+      "id": "departement_labels",
+      "type": "symbol",
+      "source": "bdtopo",
+      "source-layer": "departement",
+      "layout": {
+        "text-field": "{nom_officiel}",
+        "text-font": ["Open Sans Regular"],
+        "text-size": 20
+      },
+      "maxzoom": 10,
+      "minzoom": 7
+    },
+    {
+      "id": "epci_labels",
+      "type": "symbol",
+      "source": "bdtopo",
+      "source-layer": "epci",
+      "layout": {
+        "text-field": "{nom_officiel}",
+        "text-font": ["Open Sans Bold Italic"],
+        "text-size": 16,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false,
+        "icon-text-fit": "none"
+      },
+      "paint": {
+        "text-color": "#1f78b4",
+        "text-halo-color": "rgba(255, 255, 255, 1)",
+        "text-halo-width": 5
+      },
+      "minzoom": 8,
+      "maxzoom": 15
+    },
+    {
+      "id": "arrondissement_labels",
+      "type": "symbol",
+      "source": "bdtopo",
+      "source-layer": "arrondissement",
+      "minzoom": 13,
+      "layout": {
+        "text-field": "{nom_officiel}",
+        "text-font": ["Open Sans Italic"]
+      },
+      "paint": {
+        "text-color": "rgba(0, 0, 0, 1)",
+        "text-halo-width": 1,
+        "text-halo-color": "rgba(255, 255, 255, 1)"
+      }
+    },
+    {
+      "id": "commune_labels",
+      "type": "symbol",
+      "source": "bdtopo",
+      "source-layer": "commune",
+      "minzoom": 12,
+      "layout": {
+        "text-field": "{nom_officiel}",
+        "text-font": ["Open Sans Regular"]
+      },
+      "paint": {
+        "text-color": "rgba(0, 0, 0, 1)",
+        "text-halo-width": 5,
+        "text-halo-color": "rgba(255, 255, 255, 1)"
+      }
+    }
+
+    ]
+}

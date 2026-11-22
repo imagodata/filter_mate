@@ -797,6 +797,15 @@ class FilterMateAccessor(Protocol):
         """Join ``join_layer`` to ``layer`` by a field; raises FilterRejected."""
         ...
 
+    def list_style_presets(self, layer: str = "") -> Dict[str, Any]:
+        """The official styles of data producers, or those that fit ``layer``; raises FilterRejected."""
+        ...
+
+    def apply_style_preset(self, layer: str, preset: str, variant: str = "",
+                           all_scales: bool = False) -> Dict[str, Any]:
+        """Draw ``layer`` in an official style; raises FilterRejected when it does not fit."""
+        ...
+
     def set_form(self, layer: str, fields: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Set how fields show in the attribute form of ``layer``, all or none; raises FilterRejected."""
         ...
@@ -1214,6 +1223,32 @@ class InMemoryAccessor:
         named = fields or [join_field]
         return JoinAdded(layer_name=found.name, join_layer=other.name,
                          fields_added=[f"{other.name + '_' if prefix is None else prefix}{name}" for name in named])
+
+    # The presets of the fake, and the layers each fits, by their name.
+    _STYLE_PRESETS = {"ign/bdtopo/classique": ("batiment", "communes"), "osm/colorful": ("routes",)}
+
+    def list_style_presets(self, layer: str = "") -> Dict[str, Any]:
+        if not layer:
+            return {"presets": [{"preset": key, "tables": list(tables)} for key, tables in self._STYLE_PRESETS.items()]}
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        return {"layer_name": found.name, "presets": [
+            {"preset": key, "table": found.name} for key, tables in self._STYLE_PRESETS.items()
+            if found.name in tables]}
+
+    def apply_style_preset(self, layer: str, preset: str, variant: str = "",
+                           all_scales: bool = False) -> Dict[str, Any]:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        tables = self._STYLE_PRESETS.get(preset)
+        if tables is None:
+            raise FilterRejected(f"{preset!r} names no preset; they are: {', '.join(self._STYLE_PRESETS)}")
+        if found.name not in tables:
+            raise FilterRejected(f"no table of {preset} fits {found.name!r}")
+        return {"layer_name": found.name, "preset": preset, "table": found.name, "variant": variant or "none",
+                "rules": 3, "labels": 0, "attribution": "IGN, BD TOPO®"}
 
     def set_form(self, layer: str, fields: List[Dict[str, Any]]) -> Dict[str, Any]:
         found = self._find(layer)

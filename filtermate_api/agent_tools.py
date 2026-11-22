@@ -467,6 +467,13 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
             answer.pop("formula_error", None)
         return answer
 
+    def list_style_presets(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.list_style_presets(args.get("layer") or "")
+
+    def apply_style_preset(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.apply_style_preset(args["layer"], args["preset"], variant=args.get("variant") or "",
+                                           all_scales=bool(args.get("all_scales")))
+
     def set_form(args: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.set_form(args["layer"], [dict(entry) for entry in args["fields"]])
 
@@ -624,6 +631,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
         "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
         "set_layer_style": set_layer_style, "set_labels": set_labels,
+        "list_style_presets": list_style_presets, "apply_style_preset": apply_style_preset,
         "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
         "create_layout": create_layout, "export_layout": export_layout, "set_project_crs": set_project_crs,
         "suggest_crs": suggest_crs, "design_style": design_style, "list_palettes": list_palettes, "make_cartogram": make_cartogram,

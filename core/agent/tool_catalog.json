@@ -1665,6 +1665,71 @@
    }
   },
   {
+   "name": "list_style_presets",
+   "title": "Official styles for a layer",
+   "description": "Official styles of data producers made for QGIS: the BD TOPO of IGN (classique, routier, bati, hydrographie; a style per table) and OpenStreetMap (layers of add_osm_features). With a layer, those whose table fits it by its name or fields, best first. Returns presets [{preset, table, title, rules, labels, drawn_from}] and variants. It changes nothing.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "default": "",
+      "description": "Those that fit it; empty: all",
+      "maxLength": 1000,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
+   "name": "apply_style_preset",
+   "title": "Apply an official style",
+   "description": "Draw a vector layer as its producer draws it (rules, symbols, labels, scale ranges); replaces its style. Refused when the layer lacks the fields the style reads. Returns layer_name, preset, table, rules, labels, drawn_from and attribution, to credit. Undoing the turn of the chat brings the previous style back.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "preset": {
+      "description": "From list_style_presets, such as ign/bdtopo/classique; add /table to force one",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "variant": {
+      "default": "",
+      "description": "gris: a discreet grey background; sombre: for a dark background",
+      "enum": [
+       "",
+       "gris",
+       "sombre"
+      ],
+      "type": "string"
+     },
+     "all_scales": {
+      "default": false,
+      "description": "Drawn at every scale, not only where the producer does",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layer",
+     "preset"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "update_features",
    "title": "Edit attributes of features",
    "description": "Change attribute values of features, in the edit buffer of the layer: nothing is saved. The layer goes into editing mode; the user reviews the changes and saves them (Save Layer Edits) or discards them. Choose the features with expression and/or selected_only. Keys, joined and virtual fields are not changed; a value that does not fit its field is refused. Returns changed (features), editing and unsaved. In the chat of FilterMate, undoing the turn takes the changes back while they are not saved.",
