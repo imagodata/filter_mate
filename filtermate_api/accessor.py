@@ -726,6 +726,10 @@ class FilterMateAccessor(Protocol):
         """Turn the atlas of a layout on or off; raises FilterRejected when refused."""
         ...
 
+    def edit_layout(self, layout: str, changes: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Change the items of a layout, all or none; raises FilterRejected when refused."""
+        ...
+
     def set_project_crs(self, crs: str) -> ProjectCrs:
         """Set the CRS of the project and of the map; raises FilterRejected on an unknown CRS."""
         ...
@@ -1111,6 +1115,14 @@ class InMemoryAccessor:
             raise FilterRejected(f"layer {options.get('coverage_layer', '')!r} not found")
         return {"layout": layout, "atlas": True, "coverage_layer": found.name, "pages": 3, "maps": ["map1"],
                 "map_mode": options.get("map_mode", "auto")}
+
+    def edit_layout(self, layout: str, changes: List[Dict[str, Any]]) -> Dict[str, Any]:
+        done = []
+        for index, change in enumerate(changes, 1):
+            if change.get("do") in ("move", "remove", "set_text") and change.get("ref") != "map1":
+                raise FilterRejected(f"change {index} ({change.get('do')}): no item {change.get('ref')!r}")
+            done.append({"do": change.get("do"), "ref": change.get("ref") or f"item{index}"})
+        return {"layout": layout, "done": done, "items": 1 + len(done), "pages": 1}
 
     def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
                   formula: str = "") -> FieldAdded:

@@ -385,6 +385,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def create_layout(args: Dict[str, Any]) -> Dict[str, Any]:
         options = {key: args[key] for key in ("title", "page", "orientation", "extent_layer", "legend", "scale_bar",
                                               "north_arrow")}
+        if args.get("template"):
+            options["template"] = args["template"]
         options.update({key: args.get(key) for key in ("layers", "extent")})
         return asdict(accessor.create_layout(args["name"], **options))
 
@@ -403,6 +405,9 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         answer["path"] = os.path.relpath(answer["path"], str(folder))  # the paths of this machine are not sent
         # What a single file of one page does not need to say.
         return {key: value for key, value in answer.items() if value or key not in ("files", "pages", "atlas")}
+
+    def edit_layout(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.edit_layout(args["layout"], [dict(change) for change in args["changes"]])
 
     def describe_layout(args: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.describe_layout(args.get("name") or "")
@@ -581,7 +586,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "set_layer_style": set_layer_style, "set_labels": set_labels,
         "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
         "create_layout": create_layout, "export_layout": export_layout, "set_project_crs": set_project_crs,
-        "describe_layout": describe_layout, "set_atlas": set_atlas,
+        "describe_layout": describe_layout, "set_atlas": set_atlas, "edit_layout": edit_layout,
         "add_field": add_field, "join_layers": join_layers, "group_layers": group_layers, "rename_layer": rename_layer, "map_theme": map_theme,
         "bookmark": bookmark,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
