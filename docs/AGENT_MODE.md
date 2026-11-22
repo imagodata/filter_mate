@@ -234,6 +234,17 @@ Rules worth keeping:
   default, a subset of its fields); nothing is written. In the chat, the REST API (`POST /layers/fields`,
   `/layers/join`) and both MCP servers. The turn keeps the undo stack index (the field) and each join it added:
   undoing it removes them. `add_field` is of the class *edit buffer*, `join_layers` of the class *project*.
+- **Forms and relations** (`adapters/public_api/forms.py`): `set_form` sets, field by field and all or none (50
+  entries), how a vector layer shows in its attribute form: an alias, a widget (`value_map`, `value_relation`,
+  `range`, `date`, `checkbox`, `text`, `hidden`, `relation_reference`, or `default` for the choice of QGIS), the
+  constraints not null, unique and an expression with its text (soft unless `enforce`), a default value
+  expression (and on update), read only. Every entry is checked first: an unknown field, a widget unsuited to the
+  type of its field, an option of another widget, a lookup layer or field missing, an expression that does not parse
+  or names a field the layer lacks, a constraint the source itself sets. `relations` lists, adds (a child layer
+  linked to a parent by a field, association or composition) or removes (by id or name) a relation of the project.
+  Nothing is written to the data; REST `POST /layers/form` and `/project/relations`. The turn keeps the form of the
+  layer as the XML of its style categories Fields and Forms, and each relation added or removed. Both of the class
+  *project*; a relation is refused when one of its two layers is protected. Skill `forms`.
 - **Layer tree and map themes** (`adapters/public_api/layer_tree.py`): `group_layers` puts layers in a group, made
   where missing (`Base/Roads` for a group in a group, five levels at most; empty for the top), first or last of it,
   each one kept checked or not; `rename_layer` renames a layer; `map_theme` lists, saves (the layers shown now and

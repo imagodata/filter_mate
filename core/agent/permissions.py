@@ -64,6 +64,10 @@ CHANGED_LAYERS = {
     "local_copy": ("layer",),
     # The options of the layers in FilterMate's panels: [{"layer": ..., "exploring": ..., "filtering": ...}].
     "set_layer_options": ("layers",),
+    # The form of a layer (its lookup layers are only read), and the two layers a relation links: the form of each
+    # changes, and a composition deletes the children with their parent. A relation removed names neither: its
+    # layers are checked where it is found (QGISFilterMateAccessor.relations).
+    "set_form": ("layer",), "relations": ("parent_layer", "child_layer"),
 }
 # Without any layer named, these act on every layer.
 ALL_WHEN_NONE = frozenset({"clear_filters"})
@@ -169,6 +173,8 @@ def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
     """The layer references a call changes; None when it changes every layer (a clear without layers)."""
     if name == "rename_layer" and arguments.get("group"):
         return []  # a group of the tree, not a layer
+    if name == "relations" and arguments.get("action") == "list":
+        return []
     references: List[str] = []  # "" too: it resolves to the first layer whose name is empty
     for key in CHANGED_LAYERS.get(name, ()):
         value = arguments.get(key)

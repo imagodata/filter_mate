@@ -115,6 +115,7 @@ class SimulatedProject:
         # The options of FilterMate's panels: by layer name ({"exploring": {...}, "filtering": {...}}), and the export.
         self.panels: Dict[str, Dict[str, Dict[str, Any]]] = {}
         self.export_panel: Dict[str, Any] = {"datatype_to_export": "GPKG", "layers_to_export": []}
+        self.relations: List[Dict[str, Any]] = []  # the relations of the project the model adds
 
     def _get_setting(self, args):
         try:
@@ -133,6 +134,24 @@ class SimulatedProject:
         return {"changed": [{key: row[key] for key in ("path", "before", "after", "effect")}
                             for row in rows if row["before"] != row["after"]],
                 "unchanged": [row["path"] for row in rows if row["before"] == row["after"]]}
+
+    def _relations(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        """The relations of the simulated project: none at first, those the model adds."""
+        kept = self.relations
+        if args["action"] == "list":
+            return {"action": "list", "relations": kept}
+        if args["action"] == "remove":
+            found = [row for row in kept if args.get("name") in (row["id"], row["name"])]
+            if not found:
+                raise ToolFailure(f"no relation {args.get('name')!r} in the project")
+            kept.remove(found[0])
+            return {"action": "remove", "removed": found[0], "relations": len(kept)}
+        parent, child = self._layer(args.get("parent_layer", ""))[0], self._layer(args.get("child_layer", ""))[0]
+        row = {"id": f"{child}_{parent}", "name": args.get("name") or f"{child} of {parent}", "parent": parent,
+               "child": child, "fields": [{"parent": args.get("parent_field"), "child": args.get("child_field")}],
+               "strength": args.get("strength", "association")}
+        kept.append(row)
+        return {"action": "add", "relation": row}
 
     def _add_field(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """A field added to the simulated layer, so that the reads after it see it (filled when a formula is given)."""
@@ -667,6 +686,11 @@ class SimulatedProject:
                                          "join_layer": self._layer(args["join_layer"])[0],
                                          "fields_added": [f"{self._layer(args['join_layer'])[0]}_{name}" for name in
                                                           (args.get("fields") or [args["join_field"]])]},
+            "set_form": lambda args: {
+                "layer_name": self._layer(args["layer"])[0], "note": "nothing is written",
+                "fields": [{"field": entry.get("field"), "changed": sorted(set(entry) - {"field"})}
+                           for entry in args["fields"]]},
+            "relations": self._relations,
             "group_layers": lambda args: {"group": args.get("group", ""), "groups_made": [args.get("group", "")],
                                           "moved": [self._layer(name)[0] for name in args["layers"]], "not_found": []},
             "rename_layer": lambda args: {"layer_id": self._layer(args["layer"])[1]["id"], "name": args["name"],

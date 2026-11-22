@@ -13,7 +13,10 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
   ``("join", layer_id, spec, "removed", name)``: a join QGIS took away from a layer when the turn removed the layer it
   joined (undone, it comes back once that layer is back);
 * ``("relation", "", xml, "", name)``: a relation of the project QGIS took away when the turn removed one of its
-  layers, as XML (undone, it comes back once both layers are back);
+  layers, or the turn removed (relations), as XML (undone, it comes back once both layers are back);
+  ``("relation", "", xml, "added", name)``: a relation the turn added (undone, it goes; applied again, it comes back);
+* ``("form", layer_id, before, after, name)``: the attribute form of a vector layer (aliases, widgets, constraints,
+  default values, fields read only: set_form), as the XML of its style categories Fields and Forms;
 * ``("tree", "", before, after)``: where each layer is in the layer tree and the groups, checked or not (JSON);
 * ``("layer_name", layer_id, before, after)``: the name of a layer;
 * ``("bookmarks", "", before, after)``: the spatial bookmarks of the project, as XML;
@@ -50,7 +53,8 @@ style it has on) is theirs: undo and redo put back only what is still as the tur
 (``_CHECKED``). Not checked: what is read as a whole collection (the tree, the bookmarks, the themes: a group ticked
 or a theme of the user's elsewhere would keep the agent's from being undone, and QGIS writes the themes back in
 another order), a selection (a filter empties it by itself), the style of a raster (its XML follows the filter), the
-widgets and notes (the agent's own). The edits, recipes and settings check in their own way.
+widgets and notes (the agent's own), the form of a layer (a field the turn added in the edit buffer, then taken back
+with its edits, changes its XML too). The edits, recipes and settings check in their own way.
 """
 from __future__ import annotations
 
@@ -79,6 +83,8 @@ SETTINGS_TOOLS = ("change_settings", "apply_settings_profile")
 PANEL_TOOLS = ("set_layer_options",)
 EXPORT_PANEL_TOOLS = ("set_export_options",)
 EXPLORING_TOOLS = ("set_exploring",)
+FORM_TOOLS = ("set_form",)
+RELATION_TOOLS = ("relations",)
 
 
 def _exploring_label() -> str:
@@ -278,22 +284,30 @@ def _style_categories():
     return category.Symbology | category.Labeling | category.Rendering
 
 
-def _style(layer: Any) -> Optional[str]:
-    """The style of ``layer`` as XML; None when it cannot be read."""
+def _form_categories():
+    """Aliases, widgets, constraints, default values (Fields) and the form itself (Forms): what set_form changes."""
+    from qgis.core import QgsMapLayer
+    category = getattr(QgsMapLayer, "StyleCategory", QgsMapLayer)
+    return category.Fields | category.Forms
+
+
+def _style(layer: Any, categories: Any = None) -> Optional[str]:
+    """The style of ``layer`` as XML (the categories the style tools change by default); None when it cannot be
+    read."""
     document = QDomDocument("qgis")
     try:
-        error = layer.exportNamedStyle(document, QgsReadWriteContext(), _style_categories())
+        error = layer.exportNamedStyle(document, QgsReadWriteContext(), categories or _style_categories())
     except (RuntimeError, TypeError):
         logger.debug("Agent undo: style not read", exc_info=True)
         return None
     return None if error else document.toString()
 
 
-def _set_style(layer: Any, xml: str) -> bool:
+def _set_style(layer: Any, xml: str, categories: Any = None) -> bool:
     document = QDomDocument("qgis")
     if not document.setContent(xml):
         return False
-    result = layer.importNamedStyle(document, _style_categories())
+    result = layer.importNamedStyle(document, categories or _style_categories())
     loaded = result[0] if isinstance(result, tuple) else bool(result)
     if loaded:
         layer.triggerRepaint()
@@ -337,6 +351,12 @@ def _relation_of(project: QgsProject, xml: str) -> Any:
     return QgsRelation.createFromXml(node, QgsReadWriteContext(), QgsRelationContext(project))
 
 
+def _relations_xml(project: QgsProject) -> Dict[str, Tuple[str, str]]:
+    """The relations of the project: {id: (XML, name)}."""
+    return {relation_id: (_relation_xml(relation), relation.name())
+            for relation_id, relation in project.relationManager().relations().items()}
+
+
 def _visible(project: QgsProject, layer_id: str) -> Optional[bool]:
     node = project.layerTreeRoot().findLayer(layer_id)
     return None if node is None else bool(node.itemVisibilityChecked())
@@ -366,6 +386,12 @@ class EffectsRecorder:
         # the relations of the project that cite it (by relation id: removed id, XML, name).
         self._unjoined: List[Tuple[str, str, Dict[str, Any], str]] = []
         self._relations: Dict[str, Tuple[str, str, str]] = {}
+        # The ids of the relations of the project at the first call of the turn: a relation the turn added and QGIS
+        # took away with a layer it removed was not there before, and does not come back with an undo.
+        self._relation_ids: Optional[Set[str]] = None
+        # The relations before the first call of the tool relations: {id: (XML, name)}.
+        self._relations_before: Optional[Dict[str, Tuple[str, str]]] = None
+        self._forms: Dict[str, str] = {}  # {layer id: the XML of its form before the turn changed it}
         self._selection: Dict[str, Tuple[int, ...]] = {}
         self._visibility: Dict[str, bool] = {}
         self._styles: Dict[str, str] = {}
@@ -400,6 +426,7 @@ class EffectsRecorder:
         project = QgsProject.instance()
         if self._ids_before is None:
             self._ids_before = set(project.mapLayers())
+            self._relation_ids = set(project.relationManager().relations())
         if self._call_ids is not None:
             self._unclosed = True
         self._call_ids = set(project.mapLayers())
@@ -493,6 +520,15 @@ class EffectsRecorder:
                 style = _style(layer) if layer is not None and layer.id() not in self._styles else None
                 if style is not None:
                     self._styles[layer.id()] = style
+            elif name in FORM_TOOLS:
+                layer = _resolve(project, arguments.get("layer"))
+                form = _style(layer, _form_categories()) \
+                    if isinstance(layer, QgsVectorLayer) and layer.id() not in self._forms else None
+                if form is not None:
+                    self._forms[layer.id()] = form
+            elif name in RELATION_TOOLS:
+                if self._relations_before is None and arguments.get("action") in ("add", "remove"):
+                    self._relations_before = _relations_xml(project)
             elif name in PANEL_TOOLS:
                 from ..public_api.panel_options import layer_state, running_dock
                 dock = running_dock()
@@ -575,9 +611,15 @@ class EffectsRecorder:
             if removed_id not in now and isinstance(owner, QgsVectorLayer) and not any(
                     join.joinLayerId() == removed_id for join in owner.vectorJoins()):
                 effects.append(("join", owner_id, spec, "removed", owner_name))
-        relations = project.relationManager().relations() if self._relations else {}
+        relations = project.relationManager().relations() \
+            if self._relations or self._relations_before is not None else {}
         for relation_id, (removed_id, xml, name) in self._relations.items():
-            if removed_id not in now and relation_id not in relations:
+            # A relation the turn added (relations) and took away with a layer: nothing to bring back.
+            if removed_id not in now and relation_id not in relations and relation_id in (self._relation_ids or ()):
+                effects.append(("relation", "", xml, "", name))
+        # The relations the turn removed: undone, they come back after their layers.
+        for relation_id, (xml, name) in (self._relations_before or {}).items():
+            if relation_id not in relations and relation_id not in self._relations:
                 effects.append(("relation", "", xml, "", name))
         for layer_id, (definition, place, provider, name) in self._removed.items():
             if layer_id not in now:
@@ -588,6 +630,11 @@ class EffectsRecorder:
                 # A layer kept in memory: its definition would bring it back empty.
                 definition = "" if layer.providerType() == "memory" else _definition(layer)
                 effects.append(("added", layer_id, definition, _place(project, layer_id), layer.name()))
+        # The relations the turn added, after the layers they link: applied again, the layers come back first.
+        linked = set(relations) - set(self._relations_before) if self._relations_before is not None else set()
+        for relation_id in sorted(linked):
+            effects.append(("relation", "", _relation_xml(relations[relation_id]), "added",
+                            relations[relation_id].name()))
         exploring: List[Dict[str, Any]] = []
         if self._exploring_windows:
             from ..public_api.exploring_drive import journal_since, net
@@ -710,6 +757,11 @@ class EffectsRecorder:
             after = _style(layer) if layer is not None else None
             if after is not None and after != before:
                 effects.append(("style", layer_id, before, after, layer.name()))
+        for layer_id, before in self._forms.items():
+            layer = project.mapLayer(layer_id)
+            after = _style(layer, _form_categories()) if isinstance(layer, QgsVectorLayer) else None
+            if after is not None and after != before:
+                effects.append(("form", layer_id, before, after, layer.name()))
         if self._panel_layers or self._export_panel is not None:
             import json
             from ..public_api.panel_options import export_state, layer_state, running_dock
@@ -806,7 +858,7 @@ def _where(project: QgsProject, effect: Tuple[Any, ...], undo: bool) -> str:
 
 # What changes a layer itself (protected layers are left as they are); a selection or visibility only shows it.
 _LAYER_CHANGES = frozenset({"added", "removed", "style", "join", "layer_name", "current_style", "edits",
-                            "layer_options"})
+                            "layer_options", "form"})
 
 
 def takes_away(effect: Tuple[Any, ...], undo: bool) -> bool:
@@ -950,7 +1002,9 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                 document = QDomDocument()
                 document.setContent(effect[2])
                 relation_id = document.documentElement().firstChildElement("relation").attribute("id")
-                if not undo:  # removed again with its layer: QGIS takes it away by itself
+                # One the turn added goes with an undo; one it removed, or QGIS took away with a layer the turn
+                # removed, goes when the turn is applied again (QGIS takes it away with its layer by itself).
+                if (effect[3] == "added") == undo:
                     if relation_id in manager.relations():
                         manager.removeRelation(relation_id)
                     done.append(effect[4])
@@ -1037,6 +1091,13 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                 from .project_notes_store import write_notes
                 write_notes(list(effect[2] if undo else effect[3]), project)
                 done.append(_notes_label())
+            elif kind == "form":
+                layer = project.mapLayer(layer_id)
+                if isinstance(layer, QgsVectorLayer) and _set_style(layer, effect[2] if undo else effect[3],
+                                                                    _form_categories()):
+                    done.append(layer.name())
+                else:
+                    left.append(layer.name() if layer is not None else effect[4])
             elif kind == "style":
                 layer = project.mapLayer(layer_id)
                 if layer is not None and _set_style(layer, effect[2] if undo else effect[3]):

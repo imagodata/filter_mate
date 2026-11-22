@@ -56,6 +56,8 @@ SUMMARIES = {
     "run_algorithm": "Run a Processing algorithm (buffer, clip...)",
     "add_field": "Add a field filled by an expression",
     "join_layers": "Join fields of a layer by a common field",
+    "set_form": "Attribute form of a layer",
+    "relations": "Parent/child relations",
     "update_features": "Change attribute values (edit buffer)",
     "delete_features": "Delete features (edit buffer)",
     "add_features": "Add features from WKT (edit buffer)",
@@ -107,10 +109,10 @@ SUMMARIES = {
     "describe_layout": "Read a layout",
     "set_atlas": "Atlas of a layout",
     "suggest_crs": "Projections suited to the data",
-    "make_cartogram": "A layer whose areas show a number",
+    "make_cartogram": "Areas that show a number",
     "edit_layout": "Change a layout",
     "add_chart_to_layout": "A chart in a layout",
-    "run_chart_code": "Draw a chart with your d3 code (expert)",
+    "run_chart_code": "A chart drawn by your d3 code",
     "run_pyqgis": "Run Python in QGIS, approved by the user (expert)",
 }
 
