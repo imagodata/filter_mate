@@ -826,6 +826,34 @@ class TestSectionHeight:
         assert user["APP"]["DOCKWIDGET"]["SECTION_HEIGHT"]["value"] == "fit"
 
 
+class TestPanelSizing:
+    """APP.DOCKWIDGET.PANEL_SIZING (the dock and the panels of its sections sized again from what they show, or
+    left as QGIS and the user set them): a configuration written before the setting gets ``auto``, ``manual`` is
+    kept."""
+
+    @staticmethod
+    def _default():
+        return json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+
+    def test_the_defaults_resize(self):
+        node = self._default()["APP"]["DOCKWIDGET"]["PANEL_SIZING"]
+        assert node["value"] == "auto" and node["choices"] == ["auto", "manual"]
+
+    def test_a_configuration_without_it_gets_auto(self, config_helpers):
+        default = self._default()
+        user = {"APP": {"DOCKWIDGET": {"SECTION_HEIGHT": {"value": "fill", "choices": ["fit", "fill"]}}}}
+        assert config_helpers._migrate_config(user, default)
+        dockwidget = user["APP"]["DOCKWIDGET"]
+        assert dockwidget["PANEL_SIZING"]["value"] == "auto" and dockwidget["SECTION_HEIGHT"]["value"] == "fill"
+
+    def test_manual_is_kept(self, config_helpers):
+        default = self._default()
+        user = {"APP": {"DOCKWIDGET": {"PANEL_SIZING": {"value": "manual", "description": "old"}}}}
+        config_helpers._migrate_config(user, default)
+        node = user["APP"]["DOCKWIDGET"]["PANEL_SIZING"]
+        assert node["value"] == "manual" and node["choices"] == ["auto", "manual"] and node["description"] != "old"
+
+
 class TestExploringTools:
     """APP.DOCKWIDGET.EXPLORING_TOOLS (the buttons of the EXPLORING rail hidden per kind of layer): empty by default,
     so a configuration from before it, and a button added later, show every button with no migration."""

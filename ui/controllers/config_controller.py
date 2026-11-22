@@ -225,6 +225,19 @@ class ConfigController(BaseController):
             changed = apply_options()
             if changed:
                 changes_summary.append(f"sections ({', '.join(changed)})")
+                if [what for what in changed if what != 'height']:
+                    # Not for SECTION_HEIGHT alone: the rows need the same height spread or not, the sizes stay.
+                    self._resize_section_panels()
+
+    def _resize_section_panels(self) -> None:
+        """What the dock and the panels of its sections show changed: they are sized again
+        (APP.DOCKWIDGET.PANEL_SIZING, ui/layout/section_panels.py)."""
+        panels = getattr(self.dockwidget, '_fm_panels', None)
+        if panels is not None:
+            try:
+                panels.resize_soon()
+            except Exception as e:  # the dock went away: nothing to size
+                logger.debug(f"Section panels not sized: {e}")
 
     # === The tools of the EXPLORING rail ===
 
@@ -561,6 +574,7 @@ class ConfigController(BaseController):
                 refit = getattr(self.dockwidget, '_refit_sections_after_dimensions', None)
                 if callable(refit):
                     refit()
+                self._resize_section_panels()  # rows, headers and buttons at the heights of the new profile
 
                 profile_display = UIConfig.get_profile_name().upper()
                 logger.info(f"UI profile changed to {profile_display} mode")
@@ -616,6 +630,7 @@ class ConfigController(BaseController):
                     logger.info(f"ACTION_BAR_POSITION changed to: {new_value}")
                     if hasattr(self.dockwidget, '_action_bar_manager'):
                         self.dockwidget._action_bar_manager.set_position(new_value)
+                        self._resize_section_panels()  # the buttons under each section, or back in one bar
                     changes_summary.append(f"Action bar: {new_value}")
                 elif is_alignment_change:
                     logger.info(f"ACTION_BAR_VERTICAL_ALIGNMENT changed to: {new_value}")
