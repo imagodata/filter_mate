@@ -2152,13 +2152,13 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Zapisz warstwy online w GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Zapisz warstwy zdalne w GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Eksportuj zachowane punkty LiDAR do LAZ</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Eksportuj punkty LiDAR do LAZ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

@@ -2152,13 +2152,13 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Ulož online vrstvy do GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Ulož vzdálené vrstvy do GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Exportuj ponechané body LiDAR do LAZ</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Exportuj body LiDAR do LAZ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

@@ -2152,13 +2152,13 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Çevrimiçi katmanları GeoPackage'e kaydet</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Uzak katmanları GeoPackage'e kaydet</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Tutulan LiDAR noktalarını LAZ olarak dışa aktar</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>LiDAR noktalarını LAZ olarak dışa aktar</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

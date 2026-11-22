@@ -2152,13 +2152,13 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Tallenna verkkotasot GeoPackageen</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Tallenna etätasot GeoPackageen</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Vie säilytetyt LiDAR-pisteet LAZ-muotoon</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Vie LiDAR-pisteet LAZ-muotoon</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

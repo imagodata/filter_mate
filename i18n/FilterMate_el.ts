@@ -2152,13 +2152,13 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Αποθήκευσε τα διαδικτυακά επίπεδα σε GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Αποθήκευσε τα απομακρυσμένα επίπεδα σε GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Εξήγαγε σε LAZ τα σημεία LiDAR που κρατήθηκαν</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Εξήγαγε σε LAZ τα σημεία LiDAR</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

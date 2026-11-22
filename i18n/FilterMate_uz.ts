@@ -2152,13 +2152,13 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Onlayn qatlamlarni GeoPackage ga saqlash</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Masofaviy qatlamlarni GeoPackage ga saqlash</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Saqlangan LiDAR nuqtalarini LAZ ga eksport qilish</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>LiDAR nuqtalarini LAZ ga eksport qilish</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

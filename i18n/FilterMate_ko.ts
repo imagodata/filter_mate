@@ -2152,13 +2152,13 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>온라인 레이어를 GeoPackage에 저장</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>원격 레이어를 GeoPackage에 저장</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>유지된 LiDAR 포인트를 LAZ로 내보내기</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>LiDAR 포인트를 LAZ로 내보내기</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

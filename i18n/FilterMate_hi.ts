@@ -2152,13 +2152,13 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>ऑनलाइन लेयर को GeoPackage में सहेजें</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>दूरस्थ लेयर को GeoPackage में सहेजें</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>रखे गए LiDAR पॉइंट को LAZ में निर्यात करें</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>LiDAR पॉइंट को LAZ में निर्यात करें</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

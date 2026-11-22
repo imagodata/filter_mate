@@ -2152,13 +2152,13 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Sla de onlinelagen op in een GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Sla de externe lagen op in een GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Exporteer de behouden LiDAR-punten naar LAZ</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Exporteer de LiDAR-punten naar LAZ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

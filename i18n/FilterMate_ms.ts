@@ -2152,13 +2152,13 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Simpan lapisan dalam talian ke GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Simpan lapisan jauh ke GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Eksport titik LiDAR yang dikekalkan ke LAZ</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Eksport titik LiDAR ke LAZ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>
