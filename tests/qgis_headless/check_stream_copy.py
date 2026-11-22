@@ -227,6 +227,10 @@ def check_agent_tool(port):
           and second.path != first.path and not os.path.exists(first.path)
           and abs(second.resolution - first.resolution) <= first.resolution * 0.02
           and tuple(round(v) for v in second.extent) == tuple(round(v) for v in first.extent), renewed)
+    from filter_mate.ui.controllers.agent_chat_controller import AgentChatController
+    question = AgentChatController._local_copy_question({"layer": "Tuiles agent", "action": "again"})
+    check("agent tool: the question of again says what the previous copy was and its size",
+          "Local copy of" in question and " MB" in question, question)
     back = tool.local_copy("Tuiles agent", action="back")
     check("agent tool: back to the service", back.get("reads") == "service" and tiles.providerType() == "wms", back)
     try:

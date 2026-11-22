@@ -1305,6 +1305,13 @@ class AgentPanel(QFrame):
         self._in_answer = False
         return card
 
+    def add_chart(self, title: str, svg: str, caption: str, on_save=None, on_layout=None):
+        """A chart the agent drew (returned), with buttons to save it or put it in a print layout."""
+        self._show_conversation()
+        card = self.thread.add_chart(title, svg, caption, on_save, on_layout)
+        self._in_answer = False
+        return card
+
     def show_error(self, title: str, detail: str = "", offer_settings: bool = False) -> None:
         """A request that failed, as a card in the thread (mockup: Error board)."""
         self._show_conversation()

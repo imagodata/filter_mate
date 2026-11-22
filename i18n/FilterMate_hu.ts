@@ -53,6 +53,99 @@
         <translation>Visszavonva: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Az ügynök egy diagramot akar rajzolni ezzel a d3 kóddal, a(z) {} diagram adatai alapján. A QGIS egy rejtett weboldalán fut, amely nem olvassa az Ön egyetlen fájlját sem; egy weboldal azonban továbbra is elérheti a hálózatot.
+
+Mire: {}
+
+Futtatja?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>A(z) {} diagram d3 kóddal rajzolva (szakértő)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart: {}</source>
+        <translation>Diagram: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2807"/>
+        <source>Chart {} saved as {}</source>
+        <translation>A(z) {} diagram mentve {} néven</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2809"/>
+        <source>Chart {} put in the layout {}</source>
+        <translation>A(z) {} diagram elhelyezve a(z) {} elrendezésben</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2990"/>
+        <source>{} · {} features as filtered when drawn</source>
+        <translation>{} · {} elem, a rajzoláskori szűréssel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2993"/>
+        <source>Data given by the agent</source>
+        <translation>Az ügynök által megadott adatok</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2995"/>
+        <source>d3 code written by the agent (expert)</source>
+        <translation>Az ügynök által írt d3 kód (szakértő)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart</source>
+        <translation>Diagram</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>PNG image (*.png)</source>
+        <translation>PNG kép (*.png)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>JPEG image (*.jpg *.jpeg)</source>
+        <translation>JPEG kép (*.jpg *.jpeg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3016"/>
+        <source>SVG drawing (*.svg)</source>
+        <translation>SVG rajz (*.svg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3018"/>
+        <source>Save the chart</source>
+        <translation>Diagram mentése</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3027"/>
+        <source>The chart could not be saved: {}</source>
+        <translation>A diagramot nem sikerült menteni: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3030"/>
+        <source>Chart saved: {}</source>
+        <translation>Diagram mentve: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3039"/>
+        <source>No print layout in the project: ask the agent for one</source>
+        <translation>Nincs nyomtatási elrendezés a projektben: kérj egyet az ügynöktől</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3053"/>
+        <source>Chart put in the layout {}</source>
+        <translation>A diagram elhelyezve a(z) {} elrendezésben</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Undo of the last request</source>
         <translation>Az utolsó kérés visszavonása</translation>
@@ -1395,6 +1488,41 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>A rétegek az utolsó kérés e lépése előtti állapotukban</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Others</source>
+        <translation>Egyéb</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>(empty)</source>
+        <translation>(üres)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Features</source>
+        <translation>Elemek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="601"/>
+        <source>Save the chart as {}</source>
+        <translation>Diagram mentése {} formátumban</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="606"/>
+        <source>Add to a layout</source>
+        <translation>Hozzáadás elrendezéshez</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="608"/>
+        <source>Put the chart in a print layout of the project; it is drawn again when the filter of its layer changes</source>
+        <translation>Helyezd a diagramot a projekt egy nyomtatási elrendezésébe; újrarajzolódik, ha a rétegének szűrője megváltozik</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="773"/>
+        <source>Chart</source>
+        <translation>Diagram</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="283"/>

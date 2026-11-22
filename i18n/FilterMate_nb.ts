@@ -53,6 +53,99 @@
         <translation>Angret: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Agenten vil tegne et diagram med denne d3-koden, over dataene i diagrammet {}. Den kjører på en skjult nettside i QGIS som ikke leser noen av filene dine; en nettside kan likevel nå nettverket.
+
+Hva for: {}
+
+Kjøre den?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Diagram {} tegnet med d3-kode (ekspert)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart: {}</source>
+        <translation>Diagram: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2807"/>
+        <source>Chart {} saved as {}</source>
+        <translation>Diagram {} lagret som {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2809"/>
+        <source>Chart {} put in the layout {}</source>
+        <translation>Diagram {} plassert i oppsettet {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2990"/>
+        <source>{} · {} features as filtered when drawn</source>
+        <translation>{} · {} objekter filtrert som da det ble tegnet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2993"/>
+        <source>Data given by the agent</source>
+        <translation>Data gitt av agenten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2995"/>
+        <source>d3 code written by the agent (expert)</source>
+        <translation>d3-kode skrevet av agenten (ekspert)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart</source>
+        <translation>Diagram</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>PNG image (*.png)</source>
+        <translation>PNG-bilde (*.png)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>JPEG image (*.jpg *.jpeg)</source>
+        <translation>JPEG-bilde (*.jpg *.jpeg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3016"/>
+        <source>SVG drawing (*.svg)</source>
+        <translation>SVG-tegning (*.svg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3018"/>
+        <source>Save the chart</source>
+        <translation>Lagre diagrammet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3027"/>
+        <source>The chart could not be saved: {}</source>
+        <translation>Diagrammet kunne ikke lagres: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3030"/>
+        <source>Chart saved: {}</source>
+        <translation>Diagram lagret: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3039"/>
+        <source>No print layout in the project: ask the agent for one</source>
+        <translation>Ingen utskriftsoppsett i prosjektet: be agenten lage ett</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3053"/>
+        <source>Chart put in the layout {}</source>
+        <translation>Diagram plassert i oppsettet {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Undo of the last request</source>
         <translation>Angring av den siste forespørselen</translation>
@@ -1395,6 +1488,41 @@ Godtar du alle? Nei utfører ingen av dem.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>Lagene slik de var før dette trinnet i den siste forespørselen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Others</source>
+        <translation>Andre</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>(empty)</source>
+        <translation>(tom)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Features</source>
+        <translation>Objekter</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="601"/>
+        <source>Save the chart as {}</source>
+        <translation>Lagre diagrammet som {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="606"/>
+        <source>Add to a layout</source>
+        <translation>Legg til i et oppsett</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="608"/>
+        <source>Put the chart in a print layout of the project; it is drawn again when the filter of its layer changes</source>
+        <translation>Plasser diagrammet i et utskriftsoppsett i prosjektet; det tegnes på nytt når filteret til laget endres</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="773"/>
+        <source>Chart</source>
+        <translation>Diagram</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="283"/>

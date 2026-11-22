@@ -82,7 +82,7 @@ VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "
                         "bookmark"})
 BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
-CODE_TOOLS = frozenset({"run_pyqgis"})
+CODE_TOOLS = frozenset({"run_pyqgis", "run_chart_code"})
 # What the user asks of the agent about its own work: its history, its notes and its recipes. And the questions it
 # asks them (ask_user): an answer changes nothing and authorizes nothing. They run at every level.
 AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_note", "save_recipe", "remove_recipe",
@@ -98,7 +98,7 @@ SETTINGS_TOOLS = frozenset({"change_settings", "apply_settings_profile", "turn_o
 # before and after (a card, applied by the user). Each is asked alone, in its own words, as code is.
 ASKED_ALONE = CODE_TOOLS | SETTINGS_TOOLS | frozenset({
     "add_layer", "add_service_layer", "add_basemap", "add_elevation", "add_population", "add_osm_features",
-    "add_database_table", "delete_features", "export_layout", "local_copy"})
+    "add_database_table", "delete_features", "export_layout", "local_copy", "export_chart"})
 
 
 # How many actions one question lists. A yes is for what the question shows: past this number the actions are

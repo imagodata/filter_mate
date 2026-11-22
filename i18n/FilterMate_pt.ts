@@ -53,6 +53,99 @@
         <translation>Anulado: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>O agente quer desenhar um gráfico com este código d3, sobre os dados do gráfico {}. Corre numa página web oculta do QGIS que não lê nenhum ficheiro seu; uma página web pode, ainda assim, aceder à rede.
+
+Para quê: {}
+
+Executar?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Gráfico {} desenhado com código d3 (especialista)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart: {}</source>
+        <translation>Gráfico: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2807"/>
+        <source>Chart {} saved as {}</source>
+        <translation>Gráfico {} guardado como {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2809"/>
+        <source>Chart {} put in the layout {}</source>
+        <translation>Gráfico {} colocado no layout {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2990"/>
+        <source>{} · {} features as filtered when drawn</source>
+        <translation>{} · {} elementos filtrados como no momento do desenho</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2993"/>
+        <source>Data given by the agent</source>
+        <translation>Dados fornecidos pelo agente</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2995"/>
+        <source>d3 code written by the agent (expert)</source>
+        <translation>Código d3 escrito pelo agente (especialista)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart</source>
+        <translation>Gráfico</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>PNG image (*.png)</source>
+        <translation>Imagem PNG (*.png)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>JPEG image (*.jpg *.jpeg)</source>
+        <translation>Imagem JPEG (*.jpg *.jpeg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3016"/>
+        <source>SVG drawing (*.svg)</source>
+        <translation>Desenho SVG (*.svg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3018"/>
+        <source>Save the chart</source>
+        <translation>Guardar o gráfico</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3027"/>
+        <source>The chart could not be saved: {}</source>
+        <translation>Não foi possível guardar o gráfico: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3030"/>
+        <source>Chart saved: {}</source>
+        <translation>Gráfico guardado: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3039"/>
+        <source>No print layout in the project: ask the agent for one</source>
+        <translation>Não há nenhum layout de impressão no projeto: peça um ao agente</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3053"/>
+        <source>Chart put in the layout {}</source>
+        <translation>Gráfico colocado no layout {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Undo of the last request</source>
         <translation>Anulação do último pedido</translation>
@@ -1395,6 +1488,41 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>As camadas como estavam antes deste passo do último pedido</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Others</source>
+        <translation>Outros</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>(empty)</source>
+        <translation>(vazio)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Features</source>
+        <translation>Elementos</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="601"/>
+        <source>Save the chart as {}</source>
+        <translation>Guardar o gráfico como {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="606"/>
+        <source>Add to a layout</source>
+        <translation>Adicionar a um layout</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="608"/>
+        <source>Put the chart in a print layout of the project; it is drawn again when the filter of its layer changes</source>
+        <translation>Colocar o gráfico num layout de impressão do projeto; é redesenhado quando o filtro da respetiva camada muda</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="773"/>
+        <source>Chart</source>
+        <translation>Gráfico</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="283"/>

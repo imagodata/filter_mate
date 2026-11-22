@@ -53,6 +53,99 @@
         <translation>Αναιρέθηκε: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Ο πράκτορας θέλει να σχεδιάσει ένα διάγραμμα με αυτόν τον κώδικα d3, πάνω στα δεδομένα του διαγράμματος {}. Εκτελείται σε μια κρυφή ιστοσελίδα του QGIS που δεν διαβάζει κανένα αρχείο σας· μια ιστοσελίδα μπορεί πάντως να φτάσει στο δίκτυο.
+
+Για ποιο σκοπό: {}
+
+Να εκτελεστεί;</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Το διάγραμμα {} σχεδιάστηκε με κώδικα d3 (για ειδικούς)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart: {}</source>
+        <translation>Διάγραμμα: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2807"/>
+        <source>Chart {} saved as {}</source>
+        <translation>Το διάγραμμα {} αποθηκεύτηκε ως {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2809"/>
+        <source>Chart {} put in the layout {}</source>
+        <translation>Το διάγραμμα {} τοποθετήθηκε στη διάταξη {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2990"/>
+        <source>{} · {} features as filtered when drawn</source>
+        <translation>{} · {} οντότητες, φιλτραρισμένες όπως κατά τη σχεδίαση</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2993"/>
+        <source>Data given by the agent</source>
+        <translation>Δεδομένα που έδωσε ο πράκτορας</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2995"/>
+        <source>d3 code written by the agent (expert)</source>
+        <translation>Κώδικας d3 γραμμένος από τον πράκτορα (για ειδικούς)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart</source>
+        <translation>Διάγραμμα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>PNG image (*.png)</source>
+        <translation>Εικόνα PNG (*.png)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>JPEG image (*.jpg *.jpeg)</source>
+        <translation>Εικόνα JPEG (*.jpg *.jpeg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3016"/>
+        <source>SVG drawing (*.svg)</source>
+        <translation>Σχέδιο SVG (*.svg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3018"/>
+        <source>Save the chart</source>
+        <translation>Αποθήκευση του διαγράμματος</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3027"/>
+        <source>The chart could not be saved: {}</source>
+        <translation>Το διάγραμμα δεν μπόρεσε να αποθηκευτεί: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3030"/>
+        <source>Chart saved: {}</source>
+        <translation>Το διάγραμμα αποθηκεύτηκε: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3039"/>
+        <source>No print layout in the project: ask the agent for one</source>
+        <translation>Δεν υπάρχει διάταξη εκτύπωσης στο έργο: ζήτησε μία από τον πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3053"/>
+        <source>Chart put in the layout {}</source>
+        <translation>Το διάγραμμα τοποθετήθηκε στη διάταξη {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Undo of the last request</source>
         <translation>Αναίρεση του τελευταίου αιτήματος</translation>
@@ -1395,6 +1488,41 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>Τα επίπεδα όπως ήταν πριν από αυτό το βήμα του τελευταίου αιτήματος</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Others</source>
+        <translation>Άλλα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>(empty)</source>
+        <translation>(κενό)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Features</source>
+        <translation>Οντότητες</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="601"/>
+        <source>Save the chart as {}</source>
+        <translation>Αποθήκευση του διαγράμματος ως {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="606"/>
+        <source>Add to a layout</source>
+        <translation>Προσθήκη σε διάταξη</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="608"/>
+        <source>Put the chart in a print layout of the project; it is drawn again when the filter of its layer changes</source>
+        <translation>Τοποθέτηση του διαγράμματος σε διάταξη εκτύπωσης του έργου· ξανασχεδιάζεται όταν αλλάζει το φίλτρο του επιπέδου του</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="773"/>
+        <source>Chart</source>
+        <translation>Διάγραμμα</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="283"/>

@@ -102,6 +102,10 @@ SUMMARIES = {
     "remove_recipe": "Forget a recipe",
     "create_widget": "A control in the AGENT panel to explore a layer",
     "remove_widget": "Remove a widget",
+    "show_chart": "A d3 chart in the chat",
+    "export_chart": "A chart as PNG, JPG or SVG",
+    "add_chart_to_layout": "A chart in a print layout",
+    "run_chart_code": "Draw a chart with your d3 code (expert)",
     "run_pyqgis": "Run Python in QGIS, approved by the user (expert)",
 }
 

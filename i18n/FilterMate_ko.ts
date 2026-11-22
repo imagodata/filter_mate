@@ -53,6 +53,99 @@
         <translation>실행 취소됨: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>에이전트가 이 d3 코드로 차트 {}의 데이터를 바탕으로 차트를 그리려고 합니다. QGIS의 숨겨진 웹 페이지에서 실행되며 사용자의 파일은 읽지 않지만, 웹 페이지는 여전히 네트워크에 접근할 수 있습니다.
+
+목적: {}
+
+실행할까요?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>차트 {}을(를) d3 코드로 그렸습니다 (전문가)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart: {}</source>
+        <translation>차트: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2807"/>
+        <source>Chart {} saved as {}</source>
+        <translation>차트 {}을(를) {}(으)로 저장했습니다</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2809"/>
+        <source>Chart {} put in the layout {}</source>
+        <translation>차트 {}을(를) 레이아웃 {}에 배치했습니다</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2990"/>
+        <source>{} · {} features as filtered when drawn</source>
+        <translation>{} · {}개 객체, 그릴 때와 같이 필터링됨</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2993"/>
+        <source>Data given by the agent</source>
+        <translation>에이전트가 제공한 데이터</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2995"/>
+        <source>d3 code written by the agent (expert)</source>
+        <translation>에이전트가 작성한 d3 코드 (전문가)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Chart</source>
+        <translation>차트</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>PNG image (*.png)</source>
+        <translation>PNG 이미지 (*.png)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3015"/>
+        <source>JPEG image (*.jpg *.jpeg)</source>
+        <translation>JPEG 이미지 (*.jpg *.jpeg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3016"/>
+        <source>SVG drawing (*.svg)</source>
+        <translation>SVG 그림 (*.svg)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3018"/>
+        <source>Save the chart</source>
+        <translation>차트 저장</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3027"/>
+        <source>The chart could not be saved: {}</source>
+        <translation>차트를 저장할 수 없습니다: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3030"/>
+        <source>Chart saved: {}</source>
+        <translation>차트 저장됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3039"/>
+        <source>No print layout in the project: ask the agent for one</source>
+        <translation>프로젝트에 인쇄 레이아웃이 없습니다: 에이전트에게 요청하세요</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3053"/>
+        <source>Chart put in the layout {}</source>
+        <translation>차트를 레이아웃 {}에 배치했습니다</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Undo of the last request</source>
         <translation>마지막 요청 실행 취소</translation>
@@ -1395,6 +1488,41 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>마지막 요청의 이 단계 이전의 레이어 상태</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Others</source>
+        <translation>기타</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>(empty)</source>
+        <translation>(비어 있음)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_charts.py" line="38"/>
+        <source>Features</source>
+        <translation>객체</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="601"/>
+        <source>Save the chart as {}</source>
+        <translation>차트를 {}(으)로 저장</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="606"/>
+        <source>Add to a layout</source>
+        <translation>레이아웃에 추가</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="608"/>
+        <source>Put the chart in a print layout of the project; it is drawn again when the filter of its layer changes</source>
+        <translation>차트를 프로젝트의 인쇄 레이아웃에 배치합니다. 레이어의 필터가 바뀌면 다시 그려집니다</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="773"/>
+        <source>Chart</source>
+        <translation>차트</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="283"/>
