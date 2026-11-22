@@ -451,6 +451,13 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
             answer.pop("formula_error", None)
         return answer
 
+    def set_form(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.set_form(args["layer"], [dict(entry) for entry in args["fields"]])
+
+    def relations(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.relations(args["action"], **{key: args[key] for key in (
+            "name", "parent_layer", "parent_field", "child_layer", "child_field", "strength") if key in args})
+
     def join_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.join_layers(args["layer"], args["join_layer"], args["target_field"], args["join_field"],
                                            fields=args.get("fields"), prefix=args.get("prefix")))
@@ -596,7 +603,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "create_layout": create_layout, "export_layout": export_layout, "set_project_crs": set_project_crs,
         "suggest_crs": suggest_crs,
         "describe_layout": describe_layout, "set_atlas": set_atlas, "edit_layout": edit_layout,
-        "add_field": add_field, "join_layers": join_layers, "group_layers": group_layers, "rename_layer": rename_layer, "map_theme": map_theme,
+        "add_field": add_field, "join_layers": join_layers, "set_form": set_form, "relations": relations,
+        "group_layers": group_layers, "rename_layer": rename_layer, "map_theme": map_theme,
         "bookmark": bookmark,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,

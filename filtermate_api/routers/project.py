@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -389,6 +389,73 @@ def join_layers(payload: JoinBody, request: Request) -> JoinAdded:
                                               payload.join_field, fields=payload.fields, prefix=payload.prefix)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class FormValueBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    value: str = Field(..., min_length=1, max_length=1000)
+    label: str = Field(default="", max_length=200)
+
+
+class FormFieldBody(BaseModel):
+    """How one field shows in the form; what is left out stays as it is ("" removes an alias, expression, default)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    field: str = Field(..., min_length=1, max_length=200)
+    alias: Optional[str] = Field(default=None, max_length=200)
+    widget: Optional[Literal["value_map", "value_relation", "range", "date", "checkbox", "text", "hidden",
+                             "relation_reference", "default"]] = None
+    values: Optional[List[Union[str, FormValueBody]]] = Field(default=None, max_length=500)
+    layer: str = Field(default="", max_length=_MAX_NAME)
+    key: str = Field(default="", max_length=200)
+    value: str = Field(default="", max_length=200)
+    min: Optional[float] = None
+    max: Optional[float] = None
+    step: Optional[float] = None
+    format: str = Field(default="", max_length=200)
+    multiline: Optional[bool] = None
+    not_null: Optional[bool] = None
+    unique: Optional[bool] = None
+    expression: Optional[str] = Field(default=None, max_length=2000)
+    constraint_text: str = Field(default="", max_length=200)
+    enforce: Optional[bool] = None
+    default: Optional[str] = Field(default=None, max_length=2000)
+    default_on_update: Optional[bool] = None
+    editable: Optional[bool] = None
+
+
+class FormBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: LayerName
+    fields: List[FormFieldBody] = Field(..., min_length=1, max_length=50)
+
+
+@router.post("/layers/form")
+def set_form(payload: FormBody, request: Request) -> Dict[str, Any]:
+    """Set how fields show in the attribute form of a layer, all or none; nothing is written to the data."""
+    return _accessor(request).set_form(payload.layer, [entry.model_dump(exclude_defaults=True)
+                                                       for entry in payload.fields])
+
+
+class RelationsBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    action: Literal["list", "add", "remove"]
+    name: str = Field(default="", max_length=200, description="add: its name; remove: its id or name")
+    parent_layer: str = Field(default="", max_length=_MAX_NAME)
+    parent_field: str = Field(default="", max_length=200)
+    child_layer: str = Field(default="", max_length=_MAX_NAME)
+    child_field: str = Field(default="", max_length=200)
+    strength: Literal["association", "composition"] = "association"
+
+
+@router.post("/project/relations")
+def relations(payload: RelationsBody, request: Request) -> Dict[str, Any]:
+    """List, add or remove a relation of the project: a child layer linked to a parent layer by a field."""
+    return _accessor(request).relations(payload.action, **payload.model_dump(exclude={"action"}))
 
 
 class GroupBody(BaseModel):

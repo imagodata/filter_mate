@@ -1466,6 +1466,16 @@ Bạn có đồng ý không?</translation>
         <translation>Đã nối {} vào {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2869"/>
+        <source>Form of {}</source>
+        <translation>Biểu mẫu của {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2870"/>
+        <source>Relations: {} {}</source>
+        <translation>Quan hệ: {} {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
         <source>Bookmark: {} {}</source>
         <translation>Dấu trang: {} {}</translation>

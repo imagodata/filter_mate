@@ -13,7 +13,7 @@ import asyncio
 import json
 import os
 import sys
-from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence
+from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence, Union
 from urllib.parse import urlencode
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -152,6 +152,45 @@ class OsmTag(BaseModel):
     key: str = Field(..., min_length=1, max_length=60, pattern=r"^[A-Za-z][A-Za-z0-9_:.-]*$",
                      description="As OpenStreetMap writes it: amenity, building, highway, shop, landuse, addr:street")
     value: str = Field(default="", max_length=80, description="hospital, primary...; empty: any value of the key")
+
+
+FormWidget = Literal["value_map", "value_relation", "range", "date", "checkbox", "text", "hidden",
+                     "relation_reference", "default"]
+
+
+class FormValue(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    value: str = Field(..., min_length=1, max_length=1000)
+    label: str = Field(default="", max_length=200)
+
+
+class FormField(BaseModel):
+    # How one field shows in the attribute form of its layer; what is left out stays as it is (no docstring: it would
+    # weigh on every request that offers set_form).
+    model_config = ConfigDict(extra="forbid")
+
+    field: str = Field(..., min_length=1, max_length=200)
+    alias: Optional[str] = Field(default=None, max_length=200)
+    widget: Optional[FormWidget] = Field(default=None, description="default: QGIS chooses")
+    values: Optional[List[Union[str, FormValue]]] = Field(default=None, max_length=500, description="value_map")
+    layer: str = Field(default="", max_length=1000, description="value_relation: lookup layer")
+    key: str = Field(default="", max_length=200, description="value_relation: field stored")
+    value: str = Field(default="", max_length=200, description="value_relation: field shown")
+    min: Optional[float] = None
+    max: Optional[float] = None
+    step: Optional[float] = None
+    format: str = Field(default="", max_length=200, description="date: shown as dd/MM/yyyy")
+    multiline: Optional[bool] = None
+    not_null: Optional[bool] = None
+    unique: Optional[bool] = None
+    expression: Optional[str] = Field(default=None, max_length=2000, description="Constraint, a QGIS condition")
+    constraint_text: str = Field(default="", max_length=200)
+    enforce: Optional[bool] = Field(default=None, description="Constraints refuse to save; default: they warn")
+    default: Optional[str] = Field(default=None, max_length=2000, description=(
+        "Expression: now(), @user_account_name, $area, 'text'"))
+    default_on_update: Optional[bool] = None
+    editable: Optional[bool] = Field(default=None, description="false: read only")
 
 
 class PointCloudCriteria(BaseModel):
@@ -855,6 +894,38 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/layers/join", _body(layer=layer, join_layer=join_layer, target_field=target_field,
                                                         join_field=join_field, fields=fields, prefix=prefix))
+
+    @mcp.tool(annotations=_write("Set the form of a layer", idempotent=True))
+    async def set_form(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        fields: Annotated[List[FormField], Field(min_length=1, max_length=50)],
+    ) -> Dict[str, Any]:
+        """Set how fields show in the attribute form of a layer, all or none; only what an entry gives changes, ""
+        removes. Nothing is written to the data. Returns layer_name and fields. In the chat of FilterMate, undoing
+        the turn puts the form back.
+        """
+        return await call("POST", "/layers/form", _body(
+            layer=layer, fields=[entry.model_dump(exclude_defaults=True) for entry in fields]))
+
+    @mcp.tool(annotations=_write("Relations of the project", idempotent=False))
+    async def relations(
+        action: Annotated[Literal["list", "add", "remove"], Field(description=(
+            "add: each child feature points to a parent feature by a field"))],
+        name: Annotated[str, Field(max_length=200, description="add: its name; remove: its id or name")] = "",
+        parent_layer: Annotated[str, Field(max_length=1000, description="add, such as communes")] = "",
+        parent_field: Annotated[str, Field(max_length=200, description="add: its key, such as insee")] = "",
+        child_layer: Annotated[str, Field(max_length=1000, description="add, such as buildings")] = "",
+        child_field: Annotated[str, Field(max_length=200, description="add: holds the parent's key")] = "",
+        strength: Annotated[Literal["association", "composition"], Field(description=(
+            "composition: children deleted with their parent"))] = "association",
+    ) -> Dict[str, Any]:
+        """The relations of the project: list, add or remove. The form of a parent lists its children. Nothing is
+        written to the data. Returns relations [{id, name, parent, child, fields, strength}], or the relation added
+        or removed. In the chat of FilterMate, undoing the turn takes it back.
+        """
+        return await call("POST", "/project/relations", _body(
+            action=action, name=name, parent_layer=parent_layer, parent_field=parent_field, child_layer=child_layer,
+            child_field=child_field, strength=strength))
 
     @mcp.tool(annotations=_write("Put layers in a group", idempotent=True))
     async def group_layers(

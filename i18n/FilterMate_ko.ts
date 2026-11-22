@@ -1466,6 +1466,16 @@ Do you agree?</source>
         <translation>{}을(를) {}에 결합함</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2869"/>
+        <source>Form of {}</source>
+        <translation>{} 양식</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2870"/>
+        <source>Relations: {} {}</source>
+        <translation>관계: {} {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
         <source>Bookmark: {} {}</source>
         <translation>북마크: {} {}</translation>

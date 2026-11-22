@@ -1466,6 +1466,16 @@ Do you agree?</source>
         <translation>{} को {} से जोड़ा गया</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2869"/>
+        <source>Form of {}</source>
+        <translation>{} का फ़ॉर्म</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2870"/>
+        <source>Relations: {} {}</source>
+        <translation>संबंध: {} {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
         <source>Bookmark: {} {}</source>
         <translation>बुकमार्क: {} {}</translation>

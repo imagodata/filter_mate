@@ -1966,6 +1966,7 @@
      "configuration",
      "dashboards",
      "editing",
+     "forms",
      "layouts",
      "open-data",
      "panels",
@@ -2163,6 +2164,55 @@
   "required": [
    "layer_name",
    "expression"
+  ],
+  "type": "object"
+ },
+ "relations": {
+  "properties": {
+   "action": {
+    "enum": [
+     "list",
+     "add",
+     "remove"
+    ],
+    "type": "string"
+   },
+   "child_field": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "child_layer": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "parent_field": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "parent_layer": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "strength": {
+    "default": "association",
+    "enum": [
+     "association",
+     "composition"
+    ],
+    "type": "string"
+   }
+  },
+  "required": [
+   "action"
   ],
   "type": "object"
  },
@@ -2706,6 +2756,259 @@
   },
   "required": [
    "changes"
+  ],
+  "type": "object"
+ },
+ "set_form": {
+  "properties": {
+   "fields": {
+    "items": {
+     "additionalProperties": false,
+     "properties": {
+      "alias": {
+       "anyOf": [
+        {
+         "maxLength": 200,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "constraint_text": {
+       "default": "",
+       "maxLength": 200,
+       "type": "string"
+      },
+      "default": {
+       "anyOf": [
+        {
+         "maxLength": 2000,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "default_on_update": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "editable": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "enforce": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "expression": {
+       "anyOf": [
+        {
+         "maxLength": 2000,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "field": {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      },
+      "format": {
+       "default": "",
+       "maxLength": 200,
+       "type": "string"
+      },
+      "key": {
+       "default": "",
+       "maxLength": 200,
+       "type": "string"
+      },
+      "layer": {
+       "default": "",
+       "maxLength": 1000,
+       "type": "string"
+      },
+      "max": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "min": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "multiline": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "not_null": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "step": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "unique": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "value": {
+       "default": "",
+       "maxLength": 200,
+       "type": "string"
+      },
+      "values": {
+       "anyOf": [
+        {
+         "items": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "label": {
+              "default": "",
+              "maxLength": 200,
+              "type": "string"
+             },
+             "value": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+             }
+            },
+            "required": [
+             "value"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "maxItems": 500,
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "widget": {
+       "anyOf": [
+        {
+         "enum": [
+          "value_map",
+          "value_relation",
+          "range",
+          "date",
+          "checkbox",
+          "text",
+          "hidden",
+          "relation_reference",
+          "default"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      }
+     },
+     "required": [
+      "field"
+     ],
+     "type": "object"
+    },
+    "maxItems": 50,
+    "minItems": 1,
+    "type": "array"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "fields"
   ],
   "type": "object"
  },

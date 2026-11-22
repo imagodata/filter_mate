@@ -56,6 +56,8 @@ SUMMARIES = {
     "run_algorithm": "Run a Processing algorithm (buffer, clip...)",
     "add_field": "Add a field filled by an expression",
     "join_layers": "Join fields of a layer by a common field",
+    "set_form": "Attribute form of a layer",
+    "relations": "Parent/child relations",
     "update_features": "Change attribute values (edit buffer)",
     "delete_features": "Delete features (edit buffer)",
     "add_features": "Add features from WKT (edit buffer)",

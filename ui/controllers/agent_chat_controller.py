@@ -2866,6 +2866,8 @@ class AgentChatController(QObject):
             REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
             "add_field": lambda: _tr("Field {} added to {} (not saved)").format(args.get("name", ""), layer),
             "join_layers": lambda: _tr("{} joined to {}").format(args.get("join_layer", ""), layer),
+            "set_form": lambda: _tr("Form of {}").format(layer),
+            "relations": lambda: _tr("Relations: {} {}").format(args.get("action", ""), args.get("name", "")).strip(),
             "group_layers": lambda: _tr("Layers put in {}").format(args.get("group") or _tr("the top of the tree")),
             "rename_layer": lambda: _tr("{} renamed {}").format(layer, args.get("name", "")),
             "bookmark": lambda: _tr("Bookmark: {} {}").format(args.get("action", ""), args.get("name", "")).strip(),

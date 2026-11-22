@@ -1466,6 +1466,16 @@ Do you agree?</source>
         <translation>Το {} συνδέθηκε με το {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2869"/>
+        <source>Form of {}</source>
+        <translation>Φόρμα του {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2870"/>
+        <source>Relations: {} {}</source>
+        <translation>Σχέσεις: {} {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
         <source>Bookmark: {} {}</source>
         <translation>Σελιδοδείκτης: {} {}</translation>

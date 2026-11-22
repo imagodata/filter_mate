@@ -1466,6 +1466,16 @@ Apakah Anda setuju?</translation>
         <translation>{} digabungkan ke {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2869"/>
+        <source>Form of {}</source>
+        <translation>Formulir {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2870"/>
+        <source>Relations: {} {}</source>
+        <translation>Relasi: {} {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
         <source>Bookmark: {} {}</source>
         <translation>Markah: {} {}</translation>

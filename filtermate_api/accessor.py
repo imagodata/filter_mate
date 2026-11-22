@@ -769,6 +769,14 @@ class FilterMateAccessor(Protocol):
         """Join ``join_layer`` to ``layer`` by a field; raises FilterRejected."""
         ...
 
+    def set_form(self, layer: str, fields: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Set how fields show in the attribute form of ``layer``, all or none; raises FilterRejected."""
+        ...
+
+    def relations(self, action: str, **options: Any) -> Dict[str, Any]:
+        """List, add or remove a relation of the project; raises FilterRejected."""
+        ...
+
     def group_layers(self, layers: List[str], group: str = "", at_top: bool = True,
                      above: str = "") -> LayerTreeChange:
         """Put layers in a group of the layer tree, made where missing, or just above a layer; raises FilterRejected
@@ -1172,6 +1180,36 @@ class InMemoryAccessor:
         named = fields or [join_field]
         return JoinAdded(layer_name=found.name, join_layer=other.name,
                          fields_added=[f"{other.name + '_' if prefix is None else prefix}{name}" for name in named])
+
+    def set_form(self, layer: str, fields: List[Dict[str, Any]]) -> Dict[str, Any]:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        names = [entry.get("field") for entry in fields]
+        if len(set(names)) < len(names):
+            raise FilterRejected("a field is given twice. Nothing was changed")
+        return {"layer_name": found.name, "fields": [{"field": name, "changed": ["form"]} for name in names],
+                "note": "The form of the layer: nothing is written to the data."}
+
+    def relations(self, action: str, **options: Any) -> Dict[str, Any]:
+        kept = getattr(self, "_relations", [])
+        if action == "list":
+            return {"action": "list", "relations": list(kept)}
+        if action == "remove":
+            found = [row for row in kept if options.get("name") in (row["id"], row["name"])]
+            if not found:
+                raise FilterRejected(f"no relation {options.get('name')!r} in the project")
+            self._relations = [row for row in kept if row is not found[0]]
+            return {"action": "remove", "removed": found[0], "relations": len(self._relations)}
+        parent, child = self._find(options.get("parent_layer", "")), self._find(options.get("child_layer", ""))
+        if parent is None or child is None:
+            raise FilterRejected("give parent_layer and child_layer, layers of the project")
+        row = {"id": f"{child.layer_id}_{parent.layer_id}", "parent": parent.name, "child": child.name,
+               "name": options.get("name") or f"{child.name} of {parent.name}",
+               "fields": [{"parent": options.get("parent_field", ""), "child": options.get("child_field", "")}],
+               "strength": options.get("strength", "association")}
+        self._relations = kept + [row]
+        return {"action": "add", "relation": row}
 
     def bookmark(self, action: str, name: str = "", extent_wkt: str = "", crs: str = "") -> Bookmarks:
         marks = getattr(self, "_bookmarks", [])
