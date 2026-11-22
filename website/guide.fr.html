@@ -341,6 +341,11 @@
     <p>
         Chaque couche mémorise ses propres réglages d'exploration dans le projet : changer de couche puis y revenir restaure votre sélection.
     </p>
+    <p>À partir de la prochaine version, un clic droit sur la colonne choisit les boutons qu'elle montre : <em>More</em> reste toujours, la colonne n'est donc jamais vide. Le choix se garde pour chaque type de couche, et <em>Configurer FilterMate</em> le demande aussi.</p>
+    <figure class="narrow">
+        <img src="img/guide/exploring-tools-menu.png" alt="Le menu de la colonne d'EXPLORING : une case pour chaque bouton, More tools grisé" loading="lazy" width="552" height="874">
+        <figcaption>Clic droit sur la colonne : une case pour chaque bouton de ce type de couche. Une couche vecteur, un raster et un nuage de points gardent chacun leur choix.</figcaption>
+    </figure>
 </section>
 
 <!-- 5 ------------------------------------------------------------------ -->
@@ -373,6 +378,10 @@
         <tr><td><strong>Buffer type</strong></td><td>Style et segments</td><td>Style d'extrémité (<em>Round</em>, <em>Flat</em>, <em>Square</em>) et nombre de segments par quart de cercle (5 par défaut). Moins de segments accélère le calcul sur des géométries très complexes.</td></tr>
     </table>
     </div>
+    <figure class="narrow">
+        <img src="img/guide/filtering-rows.png" alt="Les six lignes de l'onglet Filtrage avec leurs boutons de colonne allumés : couche source, couches à filtrer, opérateurs de combinaison, prédicats, valeur et type de tampon" loading="lazy" width="552" height="417">
+        <figcaption>Les six lignes, chacune allumée par son bouton de la colonne : couche source, couches à filtrer, opérateurs de combinaison, prédicats, valeur et type de tampon.</figcaption>
+    </figure>
 
     <h3>Les huit prédicats</h3>
     <div class="table-wrap">
@@ -388,6 +397,10 @@
         <tr><td><strong>Disjoint</strong></td><td>elle n'a aucun point commun avec la source.</td><td>Tout ce qui est <em>hors</em> d'une zone. Avec un tampon, pour des anneaux d'exclusion.</td></tr>
     </table>
     </div>
+    <figure class="narrow">
+        <img src="img/guide/filtering-predicates.png" alt="La liste des prédicats déroulée, Intersect, Contain et Are within cochés" loading="lazy" width="552" height="537">
+        <figcaption>La liste des huit prédicats, trois cochés : une cible est gardée dès qu'elle en remplit un.</figcaption>
+    </figure>
 
     <h3>Tampons</h3>
     <ul>
@@ -396,6 +409,14 @@
         <li><strong>Tampon par expression</strong> : la distance est évaluée pour chaque entité source, une distance réglementaire peut donc venir d'un attribut.</li>
         <li>Les distances sont toujours en <strong>mètres</strong>. Les couches en CRS géographique (degrés) sont reprojetées à la volée.</li>
     </ul>
+    <figure class="narrow">
+        <img src="img/guide/filtering-buffers.png" alt="La ligne du tampon avec la liste du style de bout ouverte : Round, Flat, Square" loading="lazy" width="552" height="500">
+        <figcaption>Le style de bout du tampon : Round, Flat ou Square, et le nombre de segments à côté.</figcaption>
+    </figure>
+    <figure class="narrow">
+        <img src="img/guide/filtering-buffer-expression.png" alt="Le menu de la petite flèche à côté de la valeur du tampon, avec une expression qui donne la distance" loading="lazy" width="552" height="480">
+        <figcaption>La petite flèche à côté de la valeur passe la distance à une expression, évaluée pour chaque entité source ; la case de la valeur est alors grisée.</figcaption>
+    </figure>
 
     <h3>Centroïdes</h3>
     <p>
@@ -403,6 +424,10 @@
         Avec des polygones très détaillés, une cascade peut devenir plusieurs fois plus rapide, au prix de l'exactitude sur les bordures. FilterMate
         garde l'index spatial utilisable dans les deux cas.
     </p>
+    <figure class="narrow">
+        <img src="img/guide/filtering-centroids.png" alt="La case centroïde à côté de la couche source, et la liste des couches cibles avec la bascule centroïde allumée sur l'une" loading="lazy" width="552" height="417">
+        <figcaption>La case à côté de la couche source, et dans la liste des cibles la bascule à droite de chaque couche : les couches testées par leurs centroïdes.</figcaption>
+    </figure>
 </section>
 
 <!-- 6 ------------------------------------------------------------------ -->
@@ -583,6 +608,10 @@ AND ST_Intersects("geom",
     <div class="callout tip">
         <strong>Gros exports</strong> Au-delà de quelques milliers d'entités, les couches sont écrites par morceaux : la mémoire reste stable et la barre de progression est fiable. Annuler nettoie les fichiers partiels.
     </div>
+    <figure class="medium">
+        <img src="img/guide/export-gpkg-recap.png" alt="La boîte de récapitulatif avant un export GeoPackage : les couches dans leurs groupes, et la case pour garder la structure en groupes" loading="lazy" width="810" height="495">
+        <figcaption>Le récapitulatif avant l'export : les couches dans les groupes du projet, et la case qui garde les groupes dans le fichier.</figcaption>
+    </figure>
 </section>
 
 <!-- 10 ----------------------------------------------------------------- -->
@@ -750,6 +779,14 @@ processing.run("filtermate:batch_filter", {
         <li><strong>Plage de valeurs</strong> : faites glisser les poignées de l'histogramme, sur une bande ou sur toutes les bandes de couleur à la fois ; la grandeur peut être la valeur elle-même ou, depuis un MNT, la <strong>pente</strong> (degrés ou %), l'<strong>exposition</strong>, l'<strong>ombrage</strong> ou la <strong>rugosité</strong>. Le bouton Sélectionner (ou la case d'aperçu) masque les autres pixels sur la carte.</li>
         <li>Une <strong>expression</strong> de la calculatrice raster, avec un menu Insérer pour les références de bandes et les préréglages spectraux permis par les rôles : NDVI végétation, NDVI sol nu, NDWI eau, ExG végétation.</li>
     </ul>
+    <figure class="narrow">
+        <img src="img/guide/fm5_raster_bands.png" alt="Les cartes BANDS et PIPETTE d'une orthophoto : trois bandes de couleur, et la pipette réglée sur les pixels semblables avec une tolérance" loading="lazy" width="528" height="538">
+        <figcaption>Une orthophoto : une ligne par bande avec son rôle de couleur, et la pipette avec ses trois cibles et sa tolérance.</figcaption>
+    </figure>
+    <figure class="narrow">
+        <img src="img/guide/fm5_raster_expression.png" alt="La carte RASTER EXPRESSION avec l'expression du vert en excès et le menu Insert : bandes, indices spectraux, plage courante" loading="lazy" width="528" height="425">
+        <figcaption>La calculatrice raster : le menu Insert écrit une référence de bande ou un préréglage spectral ; un pixel est gardé là où l'expression n'est pas 0.</figcaption>
+    </figure>
     <h3>Nuage de points</h3>
     <ul>
         <li><strong>Classes</strong> ASPRS et LiDAR HD avec des préréglages (sol, végétation, bâtiments, sursol, eau, sans bruit).</li>
@@ -759,6 +796,14 @@ processing.run("filtermate:batch_filter", {
         <li>Sur le rail : le bouton Identifier relève une <strong>classe</strong>, la <strong>pipette de valeur</strong> écrit une condition autour de la valeur relevée sur l'attribut choisi (Ctrl+clic ajoute un OU), et l'outil <strong>zone</strong> dessine un rectangle, un polygone, une forme à main levée ou un cercle qui découpe l'emprise de la source.</li>
         <li>Le <strong>détecteur d'objets</strong> du rail sélectionne l'objet sous le clic (l'amas de points de sa classe : un bâtiment, un arbre) ou, par un clic droit sur le bouton, tous les objets du nuage qui lui ressemblent : surface dans des ratios choisis de celle des objets cliqués et, avec <em>même forme</em> (cochée par défaut), compacité dans les mêmes ratios, pour qu'une haie de la surface d'un arbre ne passe pas pour un arbre.</li>
     </ul>
+    <figure class="narrow">
+        <img src="img/guide/fm5_pointcloud_classes.png" alt="La carte CLASSES d'un nuage LiDAR HD avec les classes de végétation et de bâtiment cochées" loading="lazy" width="528" height="401">
+        <figcaption>Les classes du nuage, avec leurs couleurs : celles qui sont cochées sont gardées.</figcaption>
+    </figure>
+    <figure class="narrow">
+        <img src="img/guide/fm5_pointcloud_conditions.png" alt="La carte ATTRIBUTES avec une plage d'intensité, et la carte HEIGHT / DTM à 7 m au-dessus du MNT" loading="lazy" width="528" height="589">
+        <figcaption>Une plage d'attribut, avec + Condition pour en enchaîner d'autres, et la hauteur au-dessus d'un MNT, toujours combinée avec le groupe actif.</figcaption>
+    </figure>
     <h3 id="sam">Objets tracés par SAM <small>(5.1, expérimental)</small></h3>
     <p>
         Les deux cibles d'objets de la pipette peuvent utiliser SAM 2.1 tiny, un modèle de segmentation qui tourne sur votre ordinateur, sur le processeur. <em>Clicked object</em> trace l'objet sous le clic.
@@ -966,6 +1011,14 @@ processing.run("filtermate:batch_filter", {
         <img src="img/guide/agent-chat-fr.png" alt="AGENT ouvert au-dessus de la section EXPLORING repliée : deux demandes, chacune avec une carte de filtre qui donne les entités gardées" loading="lazy" width="360" height="720">
         <figcaption>Deux demandes et leurs cartes : chaque filtre nomme ses couches et donne les entités gardées ; <em>Annuler</em> sur la dernière carte la reprend. AGENT partage la pile du haut avec EXPLORING, replié ici.</figcaption>
     </figure>
+    <figure class="narrow">
+        <img src="img/guide/agent-welcome-fr.png" alt="L'accueil d'AGENT avec un modèle local choisi : quatre demandes à essayer, tirées au hasard" loading="lazy" width="590" height="1074">
+        <figcaption>L'accueil : quatre demandes à essayer, une sur vos couches et les autres chacune d'une autre source. Un clic met la demande dans la ligne de saisie. Chaque nouvelle discussion en tire d'autres.</figcaption>
+    </figure>
+    <figure class="narrow">
+        <img src="img/guide/agent-menu-fr.png" alt="Le menu du bouton ⋯ d'AGENT, avec ses entrées Feedback ouvertes à côté" loading="lazy" width="710" height="600">
+        <figcaption>Le menu ⋯ : l'historique, les recettes, une nouvelle discussion, les sources et le modèle ; Feedback ouvre les formulaires du site, et l'accueil porte un lien pour devenir testeur des nouveautés.</figcaption>
+    </figure>
 
     <h3>Il demande quand le choix vous revient <small>(5.1.1)</small></h3>
     <p>
@@ -997,6 +1050,10 @@ processing.run("filtermate:batch_filter", {
         Une équipe peut écrire ses propres consignes pour l'agent (comment nommer les couches, quelles sources utiliser, les étapes d'une livraison) sous forme de skill : un dossier contenant un <code>SKILL.md</code>, dans <code>FilterMate/skills</code> de votre profil QGIS ou dans <code>filtermate_skills</code> à côté d'un projet.
         Avant que l'agent en suive un pour la première fois, vous le lisez en entier et l'autorisez, et la question revient quand il change. Un skill ne donne aucun droit à l'agent : chaque changement reste demandé comme le veulent vos réglages.
     </p>
+    <figure class="medium">
+        <img src="img/guide/agent-skill-fr.png" alt="La boîte qui demande avant que l'agent suive un skill : son texte en entier, et Yes ou No" loading="lazy" width="720" height="340">
+        <figcaption>Avant que l'agent suive un skill pour la première fois : il est montré en entier, et No est la réponse par défaut.</figcaption>
+    </figure>
 
     <h3>Les filtres s'appliquent aussitôt, chaque étape s'annule</h3>
     <ul>
@@ -1018,6 +1075,10 @@ processing.run("filtermate:batch_filter", {
         <li>Une couche n'est ajoutée qu'à partir d'un fichier de données simple, d'une adresse https publique ou d'un service listé par une source que vous avez cochée. L'agent ne peut pas donner à QGIS une chaîne de fournisseur de son cru, ni un chemin <code>PG:</code> ou <code>/vsi</code>.</li>
         <li>Un banc de 39 demandes en français et en anglais, sur un projet simulé, a donné 39/39 avec Claude Haiku 5.5 le 10 novembre 2026.</li>
     </ul>
+    <figure class="medium">
+        <img src="img/guide/agent-autonomy-fr.png" alt="L'onglet Autonomy des réglages d'AGENT : Advisor, Careful, Standard, Autonomous, et la case Expert" loading="lazy" width="766" height="440">
+        <figcaption>L'onglet Autonomy : jusqu'où l'agent va seul. Standard demande avant ce qui ne peut pas s'annuler.</figcaption>
+    </figure>
 
     <h3>Les sources, cochées une à une</h3>
     <p>Dans l'onglet <em>Sources</em> des réglages, rien n'est coché au départ. Dans le tchat, seul ce qui est coché peut servir.</p>
@@ -1032,6 +1093,10 @@ processing.run("filtermate:batch_filter", {
         Tout autre fichier est d'abord copié dans le dossier <code>filtermate/open_data</code> de votre profil QGIS, dans la limite de 512 Mo et de 3 minutes, sans figer l'interface ; une archive qui s'étendrait au-delà de 2 Go est refusée.
         Chaque échec dit sa cause : le statut du serveur, une page web, un fichier trop gros, trop lent ou coupé, une archive sans couche.
     </p>
+    <figure class="medium">
+        <img src="img/guide/agent-sources-fr.png" alt="L'onglet Sources des réglages d'AGENT : portails de données ouvertes, imagerie et fonds de carte, avec data.gouv.fr, le WFS de l'IGN et Earth Search cochés" loading="lazy" width="766" height="660">
+        <figcaption>L'onglet Sources : rien n'est coché au départ ; ici data.gouv.fr, le WFS de l'IGN et les scènes Sentinel-2 d'Earth Search le sont.</figcaption>
+    </figure>
 
     <h3>Ce qui part au modèle</h3>
     <p>À chaque demande, le fournisseur que vous avez choisi reçoit votre phrase, les noms de vos couches et de leurs champs, les résultats des outils qu'il appelle, et l'état du projet :</p>
@@ -1057,6 +1122,10 @@ processing.run("filtermate:batch_filter", {
         <li>Aucun paquet Python n'est nécessaire. Le serveur stdio décrit dans <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener">docs/AUTOMATION.md</a> reste disponible.</li>
     </ul>
     <p>Notes pour les développeurs : <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AGENT_MODE.md" target="_blank" rel="noopener">docs/AGENT_MODE.md</a> (en anglais).</p>
+    <figure class="medium">
+        <img src="img/guide/agent-mcp-fr.png" alt="L'onglet Other applications : le serveur MCP activé, son port et son adresse, et les boutons qui copient la configuration" loading="lazy" width="766" height="270">
+        <figcaption>L'onglet Other applications : le serveur est éteint tant qu'on ne le coche pas ; les boutons copient la configuration avec le jeton d'accès.</figcaption>
+    </figure>
 </section>
 
 <!-- 15 ----------------------------------------------------------------- -->

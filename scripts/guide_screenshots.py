@@ -47,7 +47,7 @@ os.makedirs(OUT, exist_ok=True)
 LOG = os.path.join(OUT, 'shots.log')
 GPKG = os.environ.get('FM_GUIDE_GPKG') or r'C:\Users\Simon\Documents\31.gpkg'
 EXPORT_DIR = os.environ.get('FM_GUIDE_EXPORT_DIR') or '/home/me/Documents/export'  # only typed in the field
-DOCK_WIDTH = 413  # logical pixels: 620 px wide images at the 1.5 scale
+DOCK_WIDTH = int(os.environ.get('FM_GUIDE_DOCK_WIDTH', '413'))  # logical pixels: 620 px wide images at the 1.5 scale
 # A window no taller than the panel needs, and a lower stack no taller than the rows of FILTERING and EXPORTING
 # (fit_stacks): the pictures of the panel hold no empty band, neither under the rows (SECTION_HEIGHT = fit) nor between
 # them (fill, the default).
@@ -615,6 +615,267 @@ def s_grab_exploring_alone():
     return settled(2.5)
 
 
+# -- the sub-sections of the guide that had no picture (20 November 2026): the rows of FILTERING, the predicates, the
+# buffers, the centroids. Each step puts back what it changed (s_new_rows_back), the images that follow do not know them.
+def popup_rect(widget, popup):
+    """The rect of ``popup`` (a menu or the list of a drop-down) in the coordinates of ``widget``."""
+    return QRect(popup.mapToGlobal(QPoint(0, 0)) - widget.mapToGlobal(QPoint(0, 0)), popup.size())
+
+
+def save_with_popup(name, popup, rect):
+    """The dock with ``popup`` painted where it shows, cut to ``rect`` united with the popup (a list drops under the
+    rows, over the buttons and out of the dock)."""
+    save_composed(name, dock(), [popup], rect)
+
+
+def s_new_rows():
+    """FILTERING with its six rows on: the rail buttons are all lit, what each one switches is the row beside it."""
+    d = dock()
+    d.toolBox_tabTools.setCurrentWidget(d.FILTERING)
+    for name in ('auto_current_layer', 'layers_to_filter', 'current_layer_combine_operator', 'geometric_predicates',
+                 'buffer_value', 'buffer_type'):
+        button = getattr(d, 'pushButton_checkable_filtering_' + name, None)
+        log(f'{name}: {button is not None}')
+        if button is not None:
+            button.setChecked(True)
+    check_combo_items(d.checkableComboBoxLayer_filtering_layers_to_filter, ['batiment', 'haie'])
+    d.checkableComboBoxLayer_filtering_layers_to_filter.checkedItemsChangedEvent()
+    check_combo_items(d.comboBox_filtering_geometric_predicates, ['intersect'])
+    d.mQgsDoubleSpinBox_filtering_buffer_value.setValue(50)
+    QTimer.singleShot(1200, fit_stacks)
+    return settled(2.5)
+
+
+def s_grab_new_rows():
+    save(dock(), 'filtering-rows', rect=lower_rect())
+
+
+def s_new_predicates():
+    """The list of the predicates dropped down, three ticked: the eight of the table."""
+    combo = dock().comboBox_filtering_geometric_predicates
+    check_combo_items(combo, ['contain', 'within'])
+    combo.showPopup()
+    return waits(1.2)
+
+
+def s_grab_new_predicates():
+    combo = dock().comboBox_filtering_geometric_predicates
+    popup = combo.view().window()
+    log(f'predicates: {combo.model().rowCount()} rows, popup {popup.size()}')
+    save_with_popup('filtering-predicates', popup, lower_rect())
+    combo.hidePopup()
+    for i in range(combo.model().rowCount()):
+        item = combo.model().item(i)
+        item.setCheckState(Qt.CheckState.Checked if 'intersect' in item.text().lower() else Qt.CheckState.Unchecked)
+
+
+def s_new_buffers():
+    """The end-cap style dropped down: Round, Flat, Square."""
+    dock().comboBox_filtering_buffer_type.showPopup()
+    return waits(1.2)
+
+
+def s_grab_new_buffers():
+    combo = dock().comboBox_filtering_buffer_type
+    save_with_popup('filtering-buffers', combo.view().window(), lower_rect())
+    combo.hidePopup()
+
+
+def s_new_buffer_expression():
+    """The distance given by an expression, per source feature: the button beside the value, its menu open."""
+    from qgis.core import QgsProperty
+    d = dock()
+    button = d.mPropertyOverrideButton_filtering_buffer_value_property
+    button.setToProperty(QgsProperty.fromExpression('"largeur_de_chaussee" * 2'))
+    button.setActive(True)
+    button.changed.emit()
+    QApplication.processEvents()
+    menu = button.menu()
+    menu.popup(QPoint(0, 0))
+    QApplication.processEvents()
+    menu.move(button.mapToGlobal(QPoint(button.width(), button.height())) - QPoint(menu.width(), menu.height()))
+    STATE['buffer_menu'] = menu
+    return waits(1.2)
+
+
+def s_grab_new_buffer_expression():
+    from qgis.core import QgsProperty
+    d = dock()
+    menu = STATE['buffer_menu']
+    save_with_popup('filtering-buffer-expression', menu, lower_rect())
+    menu.hide()
+    button = d.mPropertyOverrideButton_filtering_buffer_value_property
+    button.setToProperty(QgsProperty())
+    button.setActive(False)
+    button.changed.emit()
+
+
+def s_new_centroids():
+    """The centroid of the source (the box beside its layer) and of one target (its toggle in the list)."""
+    d = dock()
+    d.checkBox_filtering_use_centroids_source_layer.setChecked(True)
+    targets = d.checkableComboBoxLayer_filtering_layers_to_filter
+    ids = [targets._item_layer_id(item) for item in targets._items()
+           if item.data(Qt.ItemDataRole.UserRole) and 'batiment' in item.text()]
+    log(f'centroid toggles: eligible {len(targets.centroid_eligible_ids())}, batiment {len(ids)}')
+    targets.set_centroid_layer_ids(ids)
+    targets.showPopup()
+    return waits(1.2)
+
+
+def s_grab_new_centroids():
+    targets = dock().checkableComboBoxLayer_filtering_layers_to_filter
+    save_with_popup('filtering-centroids', targets.view().window(), lower_rect())
+    targets.hidePopup()
+
+
+def s_new_rows_back():
+    d = dock()
+    d.checkBox_filtering_use_centroids_source_layer.setChecked(False)
+    d.checkableComboBoxLayer_filtering_layers_to_filter.set_centroid_layer_ids([])
+    for name in ('current_layer_combine_operator', 'buffer_type'):
+        button = getattr(d, 'pushButton_checkable_filtering_' + name, None)
+        if button is not None:
+            button.setChecked(False)
+    return settled(1.5)
+
+
+# -- AGENT without a model: the welcome with its requests drawn at random (#582), the menu of its ⋯ button with the
+# Feedback entries (#584)
+def save_composed(name, base, popups, rect):
+    """``base`` rendered with its ``popups`` (menus, top-level windows) painted where they show, on a canvas that
+    reaches out of ``base`` when a popup does; cut to ``rect`` (the coordinates of ``base``) united with the popups."""
+    from qgis.PyQt.QtGui import QPixmap
+    pm = base.grab()
+    ratio = pm.devicePixelRatio() or 1.0
+    box = QRect(rect)
+    for popup in popups:
+        box = box.united(popup_rect(base, popup))
+    canvas = QPixmap(round(box.width() * ratio), round(box.height() * ratio))
+    canvas.setDevicePixelRatio(ratio)
+    canvas.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(canvas)
+    painter.drawPixmap(QPoint(-box.x(), -box.y()), pm)
+    for popup in popups:
+        at = popup_rect(base, popup).topLeft()
+        painter.drawPixmap(QPoint(at.x() - box.x(), at.y() - box.y()), popup.grab())
+    painter.end()
+    save_pixmap(canvas, name)
+
+
+def agent_panel_controller():
+    d = dock()
+    if getattr(d, '_agent_chat', None) is None:
+        log('agent panel installed by the script')
+        d.install_agent_panel(plugins['filter_mate'])
+    return d._agent_chat
+
+
+def agent_panel():
+    return agent_panel_controller().panel
+
+
+def s_new_agent():
+    """AGENT with a local model chosen (nothing is sent: it is never asked), as a user who set it up sees it: the
+    welcome shows the requests drawn at random."""
+    from qgis.core import QgsSettings
+    from filter_mate.adapters.agent.settings import AgentSettings, save_settings
+    chat = agent_panel_controller()
+    QgsSettings().setValue('FilterMate/agent/setup_offered_version', chat.plugin_version())
+    save_settings(AgentSettings(preset='ollama', model='qwen3.5:4b', consent=True, consent_target='http://localhost:11434',
+                                local_filtering_only=True, tool_families=False))
+    chat._settings_dialog = lambda: False
+    chat.open_settings = lambda: False
+    chat._refresh_ready()
+    chat.new_conversation()
+    sections().open_top('agent')
+    return settled(2.5)
+
+
+def s_grab_new_agent_welcome():
+    d = dock()
+    log(f'agent examples: {[b.request() for b in agent_panel().example_buttons]}')
+    save(d, 'agent-welcome')
+
+
+def s_new_agent_menu():
+    """The menu of the ⋯ button, popped up over the thread, with the Feedback entries beside it."""
+    panel = agent_panel()
+    button = panel.more_button
+    menu = button.menu()
+    menu.popup(QPoint(0, 0))
+    QApplication.processEvents()
+    bottom_right = button.mapToGlobal(QPoint(button.width(), button.height()))
+    menu.move(bottom_right - QPoint(menu.width(), menu.height()))
+    QApplication.processEvents()
+    sub = panel.feedback_menu
+    sub.popup(QPoint(0, 0))
+    QApplication.processEvents()
+    entry = menu.actionGeometry(sub.menuAction())
+    sub.move(menu.mapToGlobal(QPoint(0, entry.top())) - QPoint(sub.width(), 0))
+    STATE['agent_menus'] = (menu, sub)
+    return waits(1.2)
+
+
+def s_grab_new_agent_menu():
+    menu, sub = STATE['agent_menus']
+    d = dock()
+    save_composed('agent-menu', d, [menu, sub], QRect(0, round(d.height() * 0.30), d.width(), round(d.height() * 0.45)))
+    sub.hide()
+    menu.hide()
+    sections().open_top('exploring')
+    return settled(2.0)
+
+
+# -- the choice of the buttons of the EXPLORING rail (right-click on the rail, #575) and the recap that comes before an
+# export in a GeoPackage (the layers in their groups, kept in the file)
+def s_new_tools_menu():
+    """The menu of the rail of a vector layer: one check box for each button, the ones that stay always shown dimmed."""
+    d = dock()
+    sections().open_top('exploring')
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+    rail = getattr(d, 'widget_exploring_keys', None)
+    log(f'rail of EXPLORING: {rail}')
+    if rail is None:
+        return None
+    STATE['tools_menu'] = None
+
+    def grab():
+        popup = QApplication.activePopupWidget()
+        log(f'tools menu: {popup}')
+        if popup is not None:
+            save_composed('exploring-tools-menu', d, [popup], exploring_rect())
+            popup.close()
+    QTimer.singleShot(1500, grab)
+    rail.customContextMenuRequested.emit(QPoint(6, 6))  # exec(): the timer above runs in its loop
+    return settled(1.5)
+
+
+def s_new_recap():
+    """The dialog that lists what a GeoPackage export will hold, with the groups of the project."""
+    from filter_mate.ui.dialogs.export_group_recap_dialog import ExportGroupRecapDialog
+    ids = {name: layer(name).id() for name in ('batiment', 'haie', 'troncon_de_route', 'commune')}
+    hierarchy = {'groups': [
+        {'name': 'Planning office', 'layers': [], 'groups': [
+            {'name': 'Buildings', 'layers': [ids['batiment']], 'groups': []},
+            {'name': 'Roads and hedges', 'layers': [ids['troncon_de_route'], ids['haie']], 'groups': []}]}],
+        'ungrouped': [ids['commune']]}
+    dialog = ExportGroupRecapDialog(hierarchy, 4, os.path.join(EXPORT_DIR, 'saint_gaudens.gpkg'), 'GPKG',
+                                    preserve_default=True)
+    dialog.setModal(False)
+    dialog.resize(540, 330)  # its minimum: the list of the groups is short
+    dialog.show()
+    STATE['recap'] = dialog
+    return waits(1.5)
+
+
+def s_grab_new_recap():
+    dialog = STATE.pop('recap', None)
+    if dialog is not None:
+        save(dialog, 'export-gpkg-recap')
+        dialog.close()
+
+
 def s_cleanup_favorite():
     d = dock()
     svc = getattr(d, '_favorites_service', None)
@@ -649,7 +910,13 @@ STEPS = [
     s_exploring_custom, s_grab_exploring_custom, s_back_to_single,
     s_filtering_tab, s_grab_filtering,
     s_run_filter, s_grab_filtered, s_add_favorite, s_favorites_menu, s_favorites_manager, s_unfilter,
-    s_export_tab, s_grab_export, s_config_tab, s_grab_config, s_processing, s_grab_processing,
+    s_export_tab, s_grab_export, s_config_tab, s_grab_config,
+    s_new_rows, s_grab_new_rows, s_new_predicates, s_grab_new_predicates, s_new_buffers, s_grab_new_buffers,
+    s_new_buffer_expression, s_grab_new_buffer_expression,
+    s_new_centroids, s_grab_new_centroids, s_new_rows_back,
+    s_new_agent, s_grab_new_agent_welcome, s_new_agent_menu, s_grab_new_agent_menu,
+    s_new_tools_menu, s_new_recap, s_grab_new_recap,
+    s_processing, s_grab_processing,
     s_chip_menu, s_grab_chip_menu, s_detach_filtering, s_group_exporting, s_beside_map, s_grab_beside_map,
     s_attach_all, s_detach_exploring, s_exploring_share, s_grab_exploring_panel,
     s_section_buttons, s_grab_section_buttons_filtering, s_grab_section_buttons, s_stacked, s_grab_stacked,
