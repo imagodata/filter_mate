@@ -19,6 +19,11 @@ import logging
 from typing import Dict, List, Any, Optional, Tuple, Callable
 from dataclasses import dataclass, field
 
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
+
 logger = logging.getLogger('FilterMate.Core.Services.LayerOrganizer')
 
 
@@ -214,7 +219,7 @@ class LayerOrganizer:
         # Even if stored value is non-empty, it may be incorrect (e.g., "geom" when actual is "geometry")
         # This was causing PostgreSQL EXISTS filters to fail silently
         stored_geom_field = layer_props.get("layer_geometry_field")
-        is_memory_layer = layer.providerType() == 'memory'
+        is_memory_layer = provider_key_of(layer) == 'memory'
 
         detected_geom = None
         try:
@@ -227,7 +232,7 @@ class LayerOrganizer:
             else:
                 # Directly use QgsDataSourceUri (most reliable for PostgreSQL/file-based layers)
                 from qgis.core import QgsDataSourceUri
-                uri = QgsDataSourceUri(layer.source())
+                uri = QgsDataSourceUri(source_of(layer))
                 detected_geom = uri.geometryColumn()
                 if detected_geom:
                     logger.debug(f"  ✓ Detected geometry column for {layer_name}: '{detected_geom}'")
@@ -319,7 +324,7 @@ class LayerOrganizer:
             if is_sip_deleted(layer):
                 logger.debug("    Skipping sip-deleted layer")
                 continue
-            if layer.id() == layer_id:
+            if id_of(layer) == layer_id:
                 if is_valid(layer):
                     return layer
                 else:
@@ -333,8 +338,8 @@ class LayerOrganizer:
         if layer_by_id:
             if is_valid(layer_by_id):
                 try:
-                    logger.info(f"    Found layer by ID (name: '{layer_by_id.name()}')")
-                    layer_props["layer_name"] = layer_by_id.name()
+                    logger.info(f"    Found layer by ID (name: '{name_of(layer_by_id)}')")
+                    layer_props["layer_name"] = name_of(layer_by_id)
                     return layer_by_id
                 except RuntimeError:
                     logger.warning(f"    Layer {layer_id} became invalid during access")
@@ -374,7 +379,7 @@ class LayerOrganizer:
 
         if result.layers_count > 0:
             layer_summary = [
-                (layer.name(), provider)
+                (name_of(layer), provider)
                 for provider, layers_list in result.layers_by_provider.items()
                 for layer, props in layers_list
             ]

@@ -23,6 +23,11 @@ import functools
 import logging
 from typing import Any, Optional, Tuple
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger(__name__)
 
 
@@ -222,7 +227,7 @@ def is_unsupported_raster(layer: Any) -> bool:
     if not _is_raster_instance(layer):
         return False
     try:
-        return layer.providerType().lower() not in ANALYSIS_RASTER_PROVIDERS + RENDERED_RASTER_PROVIDERS
+        return provider_key_of(layer).lower() not in ANALYSIS_RASTER_PROVIDERS + RENDERED_RASTER_PROVIDERS
     except (TypeError, RuntimeError, AttributeError):
         return False
 
@@ -236,7 +241,7 @@ def is_non_analysis_raster(layer: Any) -> bool:
     if not _is_raster_instance(layer):
         return False
     try:
-        return layer.providerType().lower() not in ANALYSIS_RASTER_PROVIDERS or _renders_an_image(layer)
+        return provider_key_of(layer).lower() not in ANALYSIS_RASTER_PROVIDERS or _renders_an_image(layer)
     except (TypeError, RuntimeError, AttributeError):
         return False
 
@@ -246,7 +251,7 @@ def is_captured_target_raster(layer: Any) -> bool:
     if not _is_raster_instance(layer):
         return False
     try:
-        return layer.providerType().lower() in CAPTURED_TARGET_PROVIDERS
+        return provider_key_of(layer).lower() in CAPTURED_TARGET_PROVIDERS
     except (TypeError, RuntimeError, AttributeError):
         return False
 

@@ -20,6 +20,11 @@ import re
 import logging
 from typing import List, Optional, Tuple, Any
 
+try:
+    from ...filtermate_core.domain.layer_facts import name_of, source_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import name_of, source_of
+
 logger = logging.getLogger("FilterMate")
 
 
@@ -122,10 +127,10 @@ def get_source_table_name(layer, param_source_table: Optional[str] = None) -> Op
 
     try:
         from qgis.core import QgsDataSourceUri
-        uri = QgsDataSourceUri(layer.source())
+        uri = QgsDataSourceUri(source_of(layer))
         return uri.table()
     except Exception:
-        return layer.name() if hasattr(layer, 'name') else None
+        return name_of(layer) if hasattr(layer, 'name') else None
 
 
 def extract_feature_ids(

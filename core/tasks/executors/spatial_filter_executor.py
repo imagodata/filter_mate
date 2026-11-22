@@ -39,6 +39,11 @@ from ....infrastructure.utils import (
 # Import geometry cache
 from ..cache.geometry_cache import GeometryCache
 
+try:
+    from ....filtermate_core.domain.layer_facts import id_of, name_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of
+
 logger = logging.getLogger('FilterMate.Tasks.SpatialFilterExecutor')
 
 
@@ -112,7 +117,7 @@ class SpatialFilterExecutor:
 
         logger.debug(
             "SpatialFilterExecutor initialized: "
-            f"layer={source_layer.name()}, "
+            f"layer={name_of(source_layer)}, "
             f"provider={self.source_provider_type}"
         )
 
@@ -153,7 +158,7 @@ class SpatialFilterExecutor:
             logger.info("=" * 60)
             logger.info("🚀 V3 TASKBRIDGE: Attempting spatial filter")
             logger.info("=" * 60)
-            logger.info(f"   Layer: '{layer.name()}'")
+            logger.info(f"   Layer: '{name_of(layer)}'")
             logger.info(f"   Predicates: {predicates}")
 
             bridge_result = self.task_bridge.execute_spatial_filter(
@@ -263,7 +268,7 @@ class SpatialFilterExecutor:
             return None, "Backend registry not available"
 
         # Build cache key components
-        layer_id = self.source_layer.id() if self.source_layer else None
+        layer_id = id_of(self.source_layer) if self.source_layer else None
         subset_string = self.source_layer.subsetString() if self.source_layer else None
         target_crs = layer_info.get('crs_authid', 'EPSG:4326')
 
@@ -446,10 +451,10 @@ class SpatialFilterExecutor:
                 )
 
                 if success:
-                    logger.info(f"✅ Legacy spatial filter succeeded for {layer.name()}")
+                    logger.info(f"✅ Legacy spatial filter succeeded for {name_of(layer)}")
                     return True, []
                 else:
-                    logger.warning(f"⚠️ Legacy spatial filter returned False for {layer.name()}")
+                    logger.warning(f"⚠️ Legacy spatial filter returned False for {name_of(layer)}")
                     return False, []
 
             except Exception as e:  # catch-all safety net: spatial filter must return tuple
@@ -467,7 +472,7 @@ class SpatialFilterExecutor:
 
             logger.warning(
                 f"Cannot perform legacy spatial filter - missing: {', '.join(missing)}. "
-                f"Layer: {layer.name()}"
+                f"Layer: {name_of(layer)}"
             )
             return False, []
 
@@ -507,7 +512,7 @@ class SpatialFilterExecutor:
                 current += 1
 
                 if progress_callback:
-                    progress_callback(current, total_count, layer.name())
+                    progress_callback(current, total_count, name_of(layer))
 
                 # Use layer-specific predicates if available
                 layer_predicates = layer_props.get('predicates', predicates)
@@ -523,9 +528,9 @@ class SpatialFilterExecutor:
 
                 if success:
                     success_count += 1
-                    logger.info(f"  [{current}/{total_count}] ✓ {layer.name()}")
+                    logger.info(f"  [{current}/{total_count}] ✓ {name_of(layer)}")
                 else:
-                    logger.warning(f"  [{current}/{total_count}] ✗ {layer.name()}")
+                    logger.warning(f"  [{current}/{total_count}] ✗ {name_of(layer)}")
 
         logger.info(f"Batch spatial filter complete: {success_count}/{total_count} succeeded")
         return success_count, total_count

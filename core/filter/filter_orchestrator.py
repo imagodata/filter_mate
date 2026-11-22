@@ -40,6 +40,11 @@ from ...infrastructure.constants import (
     QGIS_PROVIDER_POSTGRES,
 )
 
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of
+
 _backend_services = get_backend_services()
 BackendFactory = _backend_services.get_backend_factory()
 
@@ -171,7 +176,7 @@ class FilterOrchestrator:
             is_postgresql_fallback = layer_props.get("_postgresql_fallback", False)
 
             # DIAGNOSTIC LOGS 2026-01-15: Trace predicates et backend selection
-            logger.debug(f"🔍 orchestrate_geometric_filter: {layer.name()}")
+            logger.debug(f"🔍 orchestrate_geometric_filter: {name_of(layer)}")
             logger.debug(f"   effective_provider_type: {effective_provider_type}")
             logger.debug(f"   is_postgresql_fallback: {is_postgresql_fallback}")
             logger.debug(f"   source_geometries keys: {list(source_geometries.keys())}")
@@ -182,7 +187,7 @@ class FilterOrchestrator:
 
             # Validation robuste des prédicats
             if not current_predicates:
-                logger.error("❌ No predicates available for layer: {}".format(layer.name()))
+                logger.error("❌ No predicates available for layer: {}".format(name_of(layer)))
                 logger.error("   Check TaskRunOrchestrator._initialize_current_predicates()")
                 logger.error("   Callback returned empty predicates - aborting geometric filtering.")
                 return False
@@ -190,9 +195,9 @@ class FilterOrchestrator:
             logger.debug(f"✓ Predicates loaded dynamically: {list(current_predicates.keys())}")
 
             if is_postgresql_fallback:
-                logger.debug(f"Executing geometric filtering for {layer.name()} (PostgreSQL → OGR fallback)")
+                logger.debug(f"Executing geometric filtering for {name_of(layer)} (PostgreSQL → OGR fallback)")
             else:
-                logger.debug(f"Executing geometric filtering for {layer.name()} ({effective_provider_type})")
+                logger.debug(f"Executing geometric filtering for {name_of(layer)} ({effective_provider_type})")
 
             # Check for forced backend
             backend, backend_name, geometry_provider = self._select_backend(
@@ -221,13 +226,13 @@ class FilterOrchestrator:
             if not source_geom:
                 logger.error(
                     f"❌ Failed to get source geometry for provider '{geometry_provider}' "
-                    f"(backend: {backend_name}, layer: {layer.name()})"
+                    f"(backend: {backend_name}, layer: {name_of(layer)})"
                 )
                 logger.error(f"   Available providers: {[k for k, v in source_geometries.items() if v]}")
                 logger.error("   💡 Check if prepare_*_source_geom() was called for this provider type")
                 # FIX v4.1.2: Log to QGIS message panel for visibility
                 QgsMessageLog.logMessage(
-                    f"FilterMate: No source geometry for {geometry_provider} backend (layer: {layer.name()})",
+                    f"FilterMate: No source geometry for {geometry_provider} backend (layer: {name_of(layer)})",
                     "FilterMate", Qgis.MessageLevel.Critical
                 )
                 return False
@@ -247,7 +252,7 @@ class FilterOrchestrator:
             logger.debug("=" * 80)
             logger.debug("   Calling expression_builder.build_backend_expression()...")
             logger.debug(f"   Backend: {backend_name}")
-            logger.debug(f"   Layer: {layer.name()}")
+            logger.debug(f"   Layer: {name_of(layer)}")
             logger.debug(f"   Source geom type: {type(source_geom).__name__}")
 
             expression = expression_builder.build_backend_expression(
@@ -291,7 +296,7 @@ class FilterOrchestrator:
             logger.debug("🎯 STEP 7: BACKEND EXECUTION")
             logger.debug("=" * 80)
             logger.debug(f"   Backend: {backend_name.upper()}")
-            logger.debug(f"   Layer: {layer.name()}")
+            logger.debug(f"   Layer: {name_of(layer)}")
             logger.debug(f"   Expression length: {len(expression)} chars")
             logger.debug(f"   Old subset: {bool(old_subset)}")
             logger.debug(f"   Combine operator: {combine_operator}")
@@ -305,9 +310,9 @@ class FilterOrchestrator:
 
             logger.debug(f"   → apply_filter() result: {result}")
             if not result:
-                logger.warning(f"   ❌ Backend {backend_name.upper()} FAILED for {layer.name()}")
+                logger.warning(f"   ❌ Backend {backend_name.upper()} FAILED for {name_of(layer)}")
             else:
-                logger.debug(f"   ✓ Backend {backend_name.upper()} succeeded for {layer.name()}")
+                logger.debug(f"   ✓ Backend {backend_name.upper()} succeeded for {name_of(layer)}")
 
             logger.debug("=" * 80)
 
@@ -337,17 +342,17 @@ class FilterOrchestrator:
             else:
                 self._log_filter_failure(layer, backend_name)
                 error_detail = getattr(backend, 'last_error', None) or f"Backend {backend_name} returned failure"
-                raise BackendError(f"{layer.name()}: {error_detail}")
+                raise BackendError(f"{name_of(layer)}: {error_detail}")
 
         except BackendError:
             raise
         except Exception as e:
             QgsMessageLog.logMessage(
-                f"orchestrate_geometric_filter EXCEPTION for {layer.name()}: {e}",
+                f"orchestrate_geometric_filter EXCEPTION for {name_of(layer)}: {e}",
                 "FilterMate", Qgis.MessageLevel.Critical
             )
-            logger.error(f"Error in orchestrate_geometric_filter for {layer.name()}: {e}", exc_info=True)
-            raise BackendError(f"{layer.name()}: {e}") from e
+            logger.error(f"Error in orchestrate_geometric_filter for {name_of(layer)}: {e}", exc_info=True)
+            raise BackendError(f"{name_of(layer)}: {e}") from e
 
     # =====================================================================
     # PRIVATE HELPER METHODS
@@ -364,8 +369,8 @@ class FilterOrchestrator:
             bool: True if layer is valid, False otherwise
         """
         try:
-            layer.id()
-            layer_name = layer.name()
+            id_of(layer)
+            layer_name = name_of(layer)
 
             if not layer.isValid():
                 logger.error(f"Layer {layer_name} is not valid - skipping filtering")
@@ -400,17 +405,17 @@ class FilterOrchestrator:
         """
         # Check if backend is forced for this layer
         forced_backends = self.task_parameters.get('forced_backends', {})
-        forced_backend = forced_backends.get(layer.id())
+        forced_backend = forced_backends.get(id_of(layer))
 
         if forced_backend:
-            logger.debug(f"  ⚡ Using FORCED backend '{forced_backend}' for layer '{layer.name()}'")
+            logger.debug(f"  ⚡ Using FORCED backend '{forced_backend}' for layer '{name_of(layer)}'")
             effective_provider_type = forced_backend
 
         # Get backend from factory
         backend = BackendFactory.get_backend(effective_provider_type, layer, self.task_parameters)
         backend_name = backend.get_backend_name().lower()
 
-        logger.debug(f"_select_backend: {layer.name()} → backend={backend_name.upper()}")
+        logger.debug(f"_select_backend: {name_of(layer)} → backend={backend_name.upper()}")
 
         # Log if forced backend differs from actual backend
         if forced_backend and backend_name != forced_backend:
@@ -424,7 +429,7 @@ class FilterOrchestrator:
         # Store actual backend for UI indicator
         if 'actual_backends' not in self.task_parameters:
             self.task_parameters['actual_backends'] = {}
-        self.task_parameters['actual_backends'][layer.id()] = backend_name
+        self.task_parameters['actual_backends'][id_of(layer)] = backend_name
 
         # Determine geometry provider based on backend type
         if backend_name == PROVIDER_SPATIALITE:
@@ -465,13 +470,13 @@ class FilterOrchestrator:
             return
 
         # If we reach here, it's a CORRUPTED expression with __source
-        logger.warning(f"🧹 CLEANING corrupted subset on {layer.name()} BEFORE filtering")
+        logger.warning(f"🧹 CLEANING corrupted subset on {name_of(layer)} BEFORE filtering")
         logger.warning(f"  → Corrupted subset found: '{current_subset[:100]}'...")
         logger.warning("  → Clearing it to prevent SQL errors (NOT a valid EXISTS expression)")
 
         # Queue subset clear for main thread application
         self.subset_queue_callback(layer, "")
-        logger.debug(f"  ✓ Queued subset clear for {layer.name()} - ready for fresh filter")
+        logger.debug(f"  ✓ Queued subset clear for {name_of(layer)} - ready for fresh filter")
 
     @staticmethod
     def _is_corrupted_subset(subset: Optional[str]) -> bool:
@@ -525,7 +530,7 @@ class FilterOrchestrator:
         # OR, and finished() applied "" then (corrupted) OR (new), which the
         # provider refuses. It is never kept: the layer counts as unfiltered.
         if self._is_corrupted_subset(old_subset):
-            logger.debug(f"  → Corrupted subset on {layer.name()} queued for clearing: not combined")
+            logger.debug(f"  → Corrupted subset on {name_of(layer)} queued for clearing: not combined")
             old_subset = None
 
         # Store combine operator in task params for cache validation
@@ -595,7 +600,7 @@ class FilterOrchestrator:
 
         # Apply strategy
         if is_geometric_filter:
-            logger.debug(f"🔄 Existing subset on {layer.name()} contains GEOMETRIC filter")
+            logger.debug(f"🔄 Existing subset on {name_of(layer)} contains GEOMETRIC filter")
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
             if combines:
                 logger.debug(f"  → Strategy: COMBINED with {combine_operator}")
@@ -604,7 +609,7 @@ class FilterOrchestrator:
             return None, (combine_operator if and_not else None)
 
         elif is_fid_only_filter:
-            logger.debug(f"🔄 Existing subset on {layer.name()} is FID filter from PREVIOUS spatial step")
+            logger.debug(f"🔄 Existing subset on {name_of(layer)} is FID filter from PREVIOUS spatial step")
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
             if and_not or combines:
                 logger.debug(f"  → Strategy: COMBINED with {combine_operator}")
@@ -613,14 +618,14 @@ class FilterOrchestrator:
             return old_subset, None  # combine_operator=None tells backend not to combine
 
         elif is_style_expression:
-            logger.debug(f"🔄 Existing subset on {layer.name()} contains STYLE expression - will be REPLACED")
+            logger.debug(f"🔄 Existing subset on {name_of(layer)} contains STYLE expression - will be REPLACED")
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
             logger.debug("  → Reason: Style expressions cause type mismatch errors")
             return None, (combine_operator if and_not else None)
 
         else:
             # Simple attribute filter - combine with new geometric filter
-            logger.debug(f"✅ Existing subset on {layer.name()} is ATTRIBUTE filter - will be COMBINED")
+            logger.debug(f"✅ Existing subset on {name_of(layer)} is ATTRIBUTE filter - will be COMBINED")
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
             logger.debug("  → Reason: Preserving user's attribute filter with geometric filter")
             return old_subset, combine_operator
@@ -629,7 +634,7 @@ class FilterOrchestrator:
     def _provider_type(layer) -> str:
         """``layer.providerType()``, '' when it cannot be read."""
         try:
-            provider = layer.providerType()
+            provider = provider_key_of(layer)
         except Exception:  # nosec B110 - deleted layer / mock: no provider
             return ''
         return provider if isinstance(provider, str) else ''
@@ -715,13 +720,13 @@ class FilterOrchestrator:
         """
         if backend_name not in ('spatialite', 'postgresql'):
             raise BackendError(
-                f"{layer.name()}: {backend_name} expression building failed (no fallback for this backend)"
+                f"{name_of(layer)}: {backend_name} expression building failed (no fallback for this backend)"
             )
 
         if requested:
-            logger.info(f"{layer.name()}: {backend_name} hands the layer to the OGR backend (QGIS processing, exact)")
+            logger.info(f"{name_of(layer)}: {backend_name} hands the layer to the OGR backend (QGIS processing, exact)")
         else:
-            logger.warning(f"⚠️ {backend_name.upper()} expression building failed for {layer.name()}")
+            logger.warning(f"⚠️ {backend_name.upper()} expression building failed for {name_of(layer)}")
             logger.warning("  → Attempting OGR fallback (QGIS processing)...")
 
         try:
@@ -731,7 +736,7 @@ class FilterOrchestrator:
             if not ogr_source_geom:
                 logger.error("  ✗ OGR source geometry not available")
                 raise BackendError(
-                    f"{layer.name()}: {backend_name} expression failed, OGR fallback unavailable (no source geometry)"
+                    f"{name_of(layer)}: {backend_name} expression failed, OGR fallback unavailable (no source geometry)"
                 )
 
             ogr_expression = expression_builder.build_backend_expression(
@@ -743,7 +748,7 @@ class FilterOrchestrator:
             if not ogr_expression:
                 logger.error("  ✗ Could not build OGR expression for fallback")
                 raise BackendError(
-                    f"{layer.name()}: {backend_name} expression failed, OGR fallback could not build expression"
+                    f"{name_of(layer)}: {backend_name} expression failed, OGR fallback could not build expression"
                 )
 
             logger.debug(f"  → OGR expression built: {ogr_expression[:100]}...")
@@ -757,14 +762,14 @@ class FilterOrchestrator:
             self._collect_backend_warnings(ogr_backend)
 
             if result:
-                logger.debug(f"✓ OGR fallback SUCCEEDED for {layer.name()}")
-                self.task_parameters['actual_backends'][layer.id()] = 'ogr'
+                logger.debug(f"✓ OGR fallback SUCCEEDED for {name_of(layer)}")
+                self.task_parameters['actual_backends'][id_of(layer)] = 'ogr'
                 return True
             else:
                 ogr_error = getattr(ogr_backend, 'last_error', None) or "OGR fallback returned failure"
-                logger.error(f"✗ OGR fallback also FAILED for {layer.name()}: {ogr_error}")
+                logger.error(f"✗ OGR fallback also FAILED for {name_of(layer)}: {ogr_error}")
                 raise BackendError(
-                    f"{layer.name()}: {backend_name} expression failed, OGR fallback also failed: {ogr_error}"
+                    f"{name_of(layer)}: {backend_name} expression failed, OGR fallback also failed: {ogr_error}"
                 )
 
         except BackendError:
@@ -772,7 +777,7 @@ class FilterOrchestrator:
         except Exception as e:
             logger.error(f"✗ OGR fallback exception: {e}", exc_info=True)
             raise BackendError(
-                f"{layer.name()}: {backend_name} expression failed, OGR fallback exception: {e}"
+                f"{name_of(layer)}: {backend_name} expression failed, OGR fallback exception: {e}"
             ) from e
 
     def _handle_backend_failure(
@@ -806,7 +811,7 @@ class FilterOrchestrator:
             bool: True if fallback succeeded, False otherwise
         """
         forced_backends = self.task_parameters.get('forced_backends', {})
-        was_forced = layer.id() in forced_backends
+        was_forced = id_of(layer) in forced_backends
 
         # Check if this is large PostgreSQL table (skip fallback)
         feature_count = layer.featureCount()
@@ -815,28 +820,28 @@ class FilterOrchestrator:
 
         is_large_pg_table = (
             backend_name == PROVIDER_POSTGRES and
-            layer.providerType() == QGIS_PROVIDER_POSTGRES and
+            provider_key_of(layer) == QGIS_PROVIDER_POSTGRES and
             feature_count > 100000
         )
 
         if is_large_pg_table:
-            logger.error(f"⚠️ PostgreSQL query FAILED for large table {layer.name()} ({feature_count:,} features)")
+            logger.error(f"⚠️ PostgreSQL query FAILED for large table {name_of(layer)} ({feature_count:,} features)")
             logger.error("  → OGR fallback is NOT available for tables > 100k features")
             logger.error("  → Solutions: Reduce source count, increase timeout, add spatial index")
             QgsMessageLog.logMessage(
-                f"⚠️ {layer.name()}: PostgreSQL timeout on {feature_count:,} features",
+                f"⚠️ {name_of(layer)}: PostgreSQL timeout on {feature_count:,} features",
                 "FilterMate", Qgis.MessageLevel.Critical
             )
             raise BackendError(
-                f"{layer.name()}: PostgreSQL failed on large table ({feature_count:,} features), "
+                f"{name_of(layer)}: PostgreSQL failed on large table ({feature_count:,} features), "
                 f"OGR fallback disabled for tables > 100k features"
             )
 
         # Log reason for fallback
         if was_forced:
-            logger.warning(f"⚠️ {backend_name.upper()} backend FAILED for forced layer {layer.name()}")
+            logger.warning(f"⚠️ {backend_name.upper()} backend FAILED for forced layer {name_of(layer)}")
         elif backend_name == PROVIDER_POSTGRES:
-            logger.warning(f"⚠️ PostgreSQL backend FAILED for {layer.name()}")
+            logger.warning(f"⚠️ PostgreSQL backend FAILED for {name_of(layer)}")
             logger.warning("  → Query may have timed out or connection failed")
             # FIX v4.9.0: Capture the actual PostgreSQL provider error before it is lost
             try:
@@ -846,17 +851,17 @@ class FilterOrchestrator:
                     if pg_err:
                         logger.error(f"  → PostgreSQL provider error: {pg_err}")
                         QgsMessageLog.logMessage(
-                            f"FilterMate PostgreSQL error ({layer.name()}): {pg_err[:200]}",
+                            f"FilterMate PostgreSQL error ({name_of(layer)}): {pg_err[:200]}",
                             "FilterMate", Qgis.MessageLevel.Critical
                         )
             except Exception as _err_diag:
                 logger.debug(f"  → Could not read provider error: {_err_diag}")
         else:
-            logger.warning(f"⚠️ {backend_name.upper()} backend FAILED for {layer.name()}")
+            logger.warning(f"⚠️ {backend_name.upper()} backend FAILED for {name_of(layer)}")
 
         logger.warning("  → Attempting OGR fallback...")
         QgsMessageLog.logMessage(
-            f"🔄 {layer.name()}: Attempting OGR fallback...",
+            f"🔄 {name_of(layer)}: Attempting OGR fallback...",
             "FilterMate", Qgis.MessageLevel.Info
         )
 
@@ -866,9 +871,9 @@ class FilterOrchestrator:
             # PostgreSQL provider leaves its internal connection in an aborted-transaction
             # state.  Calling reload() forces the provider to start a fresh connection,
             # so the subsequent setSubsetString() call in the OGR fallback can succeed.
-            if layer.providerType() == QGIS_PROVIDER_POSTGRES:
+            if provider_key_of(layer) == QGIS_PROVIDER_POSTGRES:
                 try:
-                    logger.debug(f"🔄 Reloading PostgreSQL layer '{layer.name()}' to reset connection state...")
+                    logger.debug(f"🔄 Reloading PostgreSQL layer '{name_of(layer)}' to reset connection state...")
                     layer.dataProvider().reloadData()
                     logger.debug("  ✓ Layer connection reset")
                 except Exception as _reload_err:
@@ -881,7 +886,7 @@ class FilterOrchestrator:
             if not ogr_source_geom:
                 logger.error("  ✗ OGR source geometry not available for fallback")
                 raise BackendError(
-                    f"{layer.name()}: {backend_name} failed, OGR fallback unavailable (no source geometry)"
+                    f"{name_of(layer)}: {backend_name} failed, OGR fallback unavailable (no source geometry)"
                 )
 
             # Build OGR expression
@@ -894,7 +899,7 @@ class FilterOrchestrator:
             if not ogr_expression:
                 logger.error("  ✗ Could not build OGR expression for fallback")
                 raise BackendError(
-                    f"{layer.name()}: {backend_name} failed, OGR fallback could not build expression"
+                    f"{name_of(layer)}: {backend_name} failed, OGR fallback could not build expression"
                 )
 
             logger.debug(f"  → OGR expression built: {ogr_expression[:100]}...")
@@ -906,22 +911,22 @@ class FilterOrchestrator:
             self._collect_backend_warnings(ogr_backend)
 
             if result:
-                logger.debug(f"✓ OGR fallback SUCCEEDED for {layer.name()}")
+                logger.debug(f"✓ OGR fallback SUCCEEDED for {name_of(layer)}")
                 QgsMessageLog.logMessage(
-                    f"✓ OGR fallback SUCCEEDED for {layer.name()}",
+                    f"✓ OGR fallback SUCCEEDED for {name_of(layer)}",
                     "FilterMate", Qgis.MessageLevel.Info
                 )
-                self.task_parameters['actual_backends'][layer.id()] = 'ogr'
+                self.task_parameters['actual_backends'][id_of(layer)] = 'ogr'
                 return True
             else:
                 ogr_error = getattr(ogr_backend, 'last_error', None) or "OGR fallback returned failure"
-                logger.error(f"✗ OGR fallback also FAILED for {layer.name()}: {ogr_error}")
+                logger.error(f"✗ OGR fallback also FAILED for {name_of(layer)}: {ogr_error}")
                 QgsMessageLog.logMessage(
-                    f"⚠️ OGR fallback FAILED for {layer.name()}: {ogr_error}",
+                    f"⚠️ OGR fallback FAILED for {name_of(layer)}: {ogr_error}",
                     "FilterMate", Qgis.MessageLevel.Warning
                 )
                 raise BackendError(
-                    f"{layer.name()}: {backend_name} failed, OGR fallback also failed: {ogr_error}"
+                    f"{name_of(layer)}: {backend_name} failed, OGR fallback also failed: {ogr_error}"
                 )
 
         except BackendError:
@@ -929,11 +934,11 @@ class FilterOrchestrator:
         except Exception as e:
             logger.error(f"✗ OGR fallback exception: {e}", exc_info=True)
             QgsMessageLog.logMessage(
-                f"⚠️ OGR fallback exception for {layer.name()}: {str(e)[:100]}",
+                f"⚠️ OGR fallback exception for {name_of(layer)}: {str(e)[:100]}",
                 "FilterMate", Qgis.MessageLevel.Warning
             )
             raise BackendError(
-                f"{layer.name()}: {backend_name} failed, OGR fallback exception: {e}"
+                f"{name_of(layer)}: {backend_name} failed, OGR fallback exception: {e}"
             ) from e
 
     def _collect_backend_warnings(self, backend: Any) -> None:
@@ -973,28 +978,28 @@ class FilterOrchestrator:
         # ("1,173,829 features after filter"). The completion handler reports
         # the real counts once the subsets are applied. No triggerRepaint()
         # from the worker either: the canvas is refreshed once at the end.
-        logger.debug(f"✓ orchestrate_geometric_filter: {layer.name()} → backend returned SUCCESS")
+        logger.debug(f"✓ orchestrate_geometric_filter: {name_of(layer)} → backend returned SUCCESS")
         logger.debug(f"  - Subset string applied: {final_expression[:200] if final_expression else '(empty)'}")
         logger.debug(f"  - Layer is valid: {layer.isValid()}")
-        logger.debug(f"  - Provider: {layer.providerType()}")
+        logger.debug(f"  - Provider: {provider_key_of(layer)}")
         logger.debug(f"  - CRS: {layer.crs().authid()}")
 
         # Warn if no features after filtering. Only meaningful when the subset
         # is already applied: 2026-10-17, a task queues it for the main thread on
         # every backend (the layer still holds the previous one here); a LIMIT 1
         # probe stops at the first match instead of counting everything.
-        if self.subset_queue_callback is None and layer.providerType() == QGIS_PROVIDER_POSTGRES \
+        if self.subset_queue_callback is None and provider_key_of(layer) == QGIS_PROVIDER_POSTGRES \
                 and final_expression and not self._has_any_feature(layer):
             # 2026-09-14: one INFO line here; the task reports every empty
             # target in a single WARNING (7 identical warnings per cascade with
             # the centroid option were noise, the empty result is legitimate).
-            self.empty_target_layers.append(layer.name())
+            self.empty_target_layers.append(name_of(layer))
             logger.info(
-                f"{layer.name()} has no feature after filtering "
+                f"{name_of(layer)} has no feature after filtering "
                 f"(provider {backend_name}, expression length {len(final_expression)})"
             )
 
-        logger.debug(f"✓ Successfully filtered {layer.name()} (counts are reported once the subsets are applied)")
+        logger.debug(f"✓ Successfully filtered {name_of(layer)} (counts are reported once the subsets are applied)")
 
     def report_empty_target_layers(self) -> None:
         """Log once, on the main thread, the target layers left empty by the filter."""
@@ -1025,7 +1030,7 @@ class FilterOrchestrator:
                 return True
             return False
         except Exception as e:
-            logger.debug(f"_has_any_feature probe failed for {layer.name()}: {e}")
+            logger.debug(f"_has_any_feature probe failed for {name_of(layer)}: {e}")
             return True
 
     def _log_filter_failure(self, layer: QgsVectorLayer, backend_name: str) -> None:
@@ -1036,10 +1041,10 @@ class FilterOrchestrator:
             layer: Layer that failed to filter
             backend_name: Backend that failed
         """
-        logger.error(f"✗ Backend returned FAILURE for {layer.name()}")
+        logger.error(f"✗ Backend returned FAILURE for {name_of(layer)}")
         logger.error("  - Check backend logs for details")
 
         QgsMessageLog.logMessage(
-            f"orchestrate_geometric_filter ✗ {layer.name()} → backend returned FAILURE",
+            f"orchestrate_geometric_filter ✗ {name_of(layer)} → backend returned FAILURE",
             "FilterMate", Qgis.MessageLevel.Warning
         )

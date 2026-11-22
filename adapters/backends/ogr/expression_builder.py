@@ -254,6 +254,11 @@ except ImportError:
     _HAS_PROCESSING_FEEDBACK = False
     QgsProcessingFeedback = object  # Fallback for type hints
 
+try:
+    from ....filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 class CancellableFeedback(QgsProcessingFeedback if _HAS_PROCESSING_FEEDBACK else object):
     """
@@ -407,7 +412,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         if layer is None:
             return False
 
-        provider = layer.providerType()
+        provider = provider_key_of(layer)
 
         # Don't handle PostgreSQL or Spatialite
         if provider in ('postgres', 'spatialite'):
@@ -845,7 +850,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
             return layer  # (old) AND (keys): reading through old gives the same keys, faster
         try:
             from qgis.core import QgsProviderRegistry, QgsVectorLayer
-            provider = layer.providerType()
+            provider = provider_key_of(layer)
             if provider != 'memory':
                 registry = QgsProviderRegistry.instance()
                 parts = dict(registry.decodeUri(provider, layer.source()))
@@ -867,7 +872,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         except Exception as exc:  # nosec B110 - falls back to the layer itself below
             self.log_debug(f"  - Unfiltered reading of {layer.name()} unavailable: {exc}")
         self.log_warning(
-            f"  ⚠️ {layer.name()} ({layer.providerType()}) cannot be read without its current filter: "
+            f"  ⚠️ {layer.name()} ({provider_key_of(layer)}) cannot be read without its current filter: "
             "the new filter is computed inside it"
         )
         return layer
@@ -884,7 +889,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         _key_list_refusal).
         """
         try:
-            provider = layer.providerType()
+            provider = provider_key_of(layer)
         except Exception:
             return False
         if provider in ('memory', 'delimitedtext'):
@@ -1024,7 +1029,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         # pseudo key '$id' is OGR's FID column, written fid. The FID of a
         # Shapefile / CSV is its row number: renumbered when the file is edited.
         try:
-            provider = layer.providerType()
+            provider = provider_key_of(layer)
         except Exception:
             provider = ''
         if feature_id_key:

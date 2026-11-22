@@ -324,6 +324,7 @@ class DockSections(QObject):
         self.on_menu = None  # called with (key, place on the screen) on a right click on the chip of a section
         self.on_dropped = None  # called with (key, index) when the chip of a section apart is dropped on a rail
         self.on_dropped_out = None  # called with (key, place on the screen) when a chip is dropped out of every rail
+        self.on_opened = None  # called when what the stacks show open may have changed (whoever changed it)
         from ..widgets.section_rail import make_rail
         self.top_rail = make_rail(self.top, accepts=lambda key: key in TOP_KEYS and key in self.detached,
                                   dark=self._dark)
@@ -560,6 +561,12 @@ class DockSections(QObject):
             return
         self.open_top(key)
 
+    def _told_open(self) -> None:
+        """Another section may be open, or none: the panels compare it with what was (a click on the open chip
+        changes nothing) and size the dock again when it changed."""
+        if self.on_opened is not None:
+            self.on_opened()
+
     def _bottom_headers(self) -> list:
         """The headers QToolBox gives its pages, the one of "nothing open" left out."""
         return [button for button in self._toolbox.findChildren(QAbstractButton)
@@ -731,6 +738,7 @@ class DockSections(QObject):
                 request.emit()
             except (RuntimeError, TypeError):
                 pass
+        self._told_open()
 
     def _on_top_chip(self, key: str) -> None:
         """A click on the chip of a folded section opens it; on the open one, it leaves it open: one section
@@ -766,6 +774,7 @@ class DockSections(QObject):
             self._open_top("exploring")
         self.bottom_rail.set_current(self.bottom_key())
         self._fit()
+        self._told_open()
 
     # --- sections turned off (APP.OPTIONS.FILTERING / EXPORTING .enabled) -----------
 
@@ -1074,11 +1083,11 @@ def apply_section_options(dock: Any) -> list:
     """Show or hide FILTERING and EXPORTING as the configuration says, and list the sections by rails or by headers
     stacked (``APP.DOCKWIDGET.SECTION_HEADERS``), and lay out the rows of FILTERING and EXPORTING
     (``APP.DOCKWIDGET.SECTION_HEIGHT``); the keys of the sections whose state changed, ``headers`` when the way they
-    are listed did, ``height`` when the rows were laid out another way."""
+    are listed did, ``height`` when the rows were laid out another way, ``sizing`` when ``PANEL_SIZING`` changed."""
     sections = getattr(dock, "_fm_sections", None)
     config_data = getattr(dock, "CONFIG_DATA", None) or {}
     if sections is None:
-        return _apply_section_height(dock, config_data, [])
+        return _apply_panel_sizing(dock, config_data, _apply_section_height(dock, config_data, []))
     changed = []
     for key in SECTION_PAGES:
         wanted = section_enabled(config_data, key)
@@ -1099,7 +1108,24 @@ def apply_section_options(dock: Any) -> list:
                 manager.sync_sections()
     except RuntimeError:  # the dock went away
         pass
-    return _apply_section_height(dock, config_data, changed)
+    return _apply_panel_sizing(dock, config_data, _apply_section_height(dock, config_data, changed))
+
+
+def _apply_panel_sizing(dock: Any, config_data: Any, changed: list) -> list:
+    """``changed`` with ``sizing`` added when ``APP.DOCKWIDGET.PANEL_SIZING`` changed since the last call (the
+    panels are sized again at once when it is back to ``auto``: the caller asks for it, see config_controller.py)."""
+    try:
+        from .section_panels import panel_sizing
+        mode = panel_sizing(config_data)
+        if dock.property("fm_panel_sizing") not in (None, mode):
+            changed.append("sizing")
+            panels = getattr(dock, "_fm_panels", None)
+            if panels is not None:  # heights and widths noted under the other mode are not used
+                panels.forget_sizes()
+        dock.setProperty("fm_panel_sizing", mode)
+    except Exception as exc:  # the dock went away (RuntimeError): no other change is lost
+        logger.debug(f"Panel sizing not followed: {exc}")
+    return changed
 
 
 def _apply_section_height(dock: Any, config_data: Any, changed: list) -> list:

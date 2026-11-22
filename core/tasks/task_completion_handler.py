@@ -10,7 +10,7 @@ from typing import List, Tuple, Optional, Any, Callable
 
 from qgis.core import QgsMessageLog, Qgis, QgsProject
 from qgis.utils import iface
-from qgis.PyQt.QtCore import QCoreApplication, QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QThread, QTimer
 
 from ...core.ports.qgis_port import get_qgis_factory
 from ...infrastructure.signal_utils import SignalBlocker
@@ -774,14 +774,26 @@ def schedule_canvas_refresh(
             pass
 
 
+def _lives_in_another_thread(layer: Any) -> bool:
+    """True for a layer made by a worker: it lives in the worker's thread, not in the one that asks."""
+    try:
+        return layer.thread() != QThread.currentThread()
+    except (RuntimeError, AttributeError, TypeError):
+        return False
+
+
 def cleanup_memory_layer(ogr_source_geom: Optional[Any]) -> None:  # Optional[QgsVectorLayer]
     """
     Cleanup memory layer added to project to prevent garbage collection issues.
 
+    The source the worker prepared (a memory copy) lives in the worker's thread and is added to
+    no project since 2026-10-17: there is nothing to remove, and it is not read from here
+    (2026-11-20: QGIS 4.3 reported its providerType() called from the main thread, in finished()).
+
     Args:
         ogr_source_geom: The OGR source geometry layer to cleanup
     """
-    if ogr_source_geom is None:
+    if ogr_source_geom is None or _lives_in_another_thread(ogr_source_geom):
         return
 
     try:

@@ -44,6 +44,11 @@ import time
 
 from ..logging import get_logger
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = get_logger(__name__)
 
 
@@ -184,11 +189,11 @@ class ParallelFilterExecutor:
         for layer, layer_props in layers:
             provider_type = layer_props.get('_effective_provider_type', 'ogr')
             if hasattr(layer, 'providerType'):
-                if layer.providerType() == 'postgres':
+                if provider_key_of(layer) == 'postgres':
                     provider_type = 'postgresql'
-                elif layer.providerType() == 'spatialite':
+                elif provider_key_of(layer) == 'spatialite':
                     provider_type = 'spatialite'
-                elif layer.providerType() == 'ogr':
+                elif provider_key_of(layer) == 'ogr':
                     provider_type = 'ogr'
 
             provider_types.add(provider_type)
@@ -255,11 +260,11 @@ class ParallelFilterExecutor:
                 # Determine provider type from layer or props
                 provider_type = layer_props.get('_effective_provider_type', 'ogr')
                 if hasattr(layer, 'providerType'):
-                    if layer.providerType() == 'postgres':
+                    if provider_key_of(layer) == 'postgres':
                         provider_type = 'postgresql'
-                    elif layer.providerType() == 'spatialite':
+                    elif provider_key_of(layer) == 'spatialite':
                         provider_type = 'spatialite'
-                    elif layer.providerType() == 'ogr':
+                    elif provider_key_of(layer) == 'ogr':
                         provider_type = 'ogr'
 
                 # Submit job
