@@ -926,7 +926,7 @@ def check_welcome_follows_project(chat, panel, layer, work):
     layer.selectByIds([layer.allFeatureIds()[0]])
     check("welcome: a selection is counted without reading features", chat._read_welcome_facts().selected == 1)
     check("welcome: a selection brings a request about it",
-          wait(lambda: any("selection" in catalog[key].needs for key in panel.example_keys), settle), panel.example_keys)
+          wait(lambda: any({"selection", "local_selection"} & set(catalog[key].needs) for key in panel.example_keys), settle), panel.example_keys)
     # A filter.
     layer.removeSelection()
     layer.setSubsetString('"pop" > 1000')
