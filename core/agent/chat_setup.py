@@ -11,7 +11,9 @@ from typing import Optional, Sequence
 from .open_data import NO_DATA_KINDS
 from .sources import Source, describe_enabled
 from .system_prompt import SYSTEM_PROMPT, platforms_note
-from .tool_catalog import ADD_TABLE, FILTERING_NOTE, LIST_TABLES, LOAD_SKILL, RUN_PYTHON, SHOW_SETTINGS_LINK, VIEW_MAP
+from .tool_catalog import (
+    ADD_TABLE, FILTERING_NOTE, LIST_TABLES, LOAD_SKILL, RUN_CHART_CODE, RUN_PYTHON, SHOW_SETTINGS_LINK, VIEW_MAP,
+)
 from .tool_index import index_block
 
 OPEN_DATA_TOOL = "search_open_data"
@@ -77,7 +79,7 @@ VALUES_TOOLS = ("field_values", "layer_statistics", "sample_features", "identify
 # Lot 4 of the token diet (the cache): the tools whose presence or description depends on a setting come after the
 # others, so that two conversations of other settings start alike as long as possible (a ticked source, the values
 # not shared, the expert mode no longer move the tools that follow). load_skill lists the skills the settings allow.
-SETTING_TOOLS = SOURCE_TOOLS | PROJECT_TOOLS | {RUN_PYTHON, VIEW_MAP, LOAD_SKILL} | set(VALUES_TOOLS)
+SETTING_TOOLS = SOURCE_TOOLS | PROJECT_TOOLS | {RUN_PYTHON, RUN_CHART_CODE, VIEW_MAP, LOAD_SKILL} | set(VALUES_TOOLS)
 
 
 def stable_order(tools: Sequence) -> list:

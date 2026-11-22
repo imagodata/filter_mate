@@ -250,7 +250,9 @@ CHAT_ONLY = (
                         "description": "What the code draws, in one sentence the user reads before saying yes"},
             "code": {"type": "string", "minLength": 1, "maxLength": 20000}},
             "required": ["chart_id", "purpose", "code"], "additionalProperties": False},
-        destructive=True, chat_only=True),
+        # Read only: it changes nothing in the project (no undo point, 2026-11-22 second review); destructive: asked
+        # at every run, as code is (permissions.CODE_TOOLS).
+        read_only=True, destructive=True, chat_only=True),
     ToolSpec(
         name=EXPORT_CHART, title="Save a chart as an image",
         description=("Write a chart of this conversation (chart_id from show_chart) as PNG, JPG or SVG in a sub-folder "

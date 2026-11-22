@@ -8,6 +8,7 @@ when the filter of that layer changes; never one drawn by code, and never code a
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import time
@@ -28,7 +29,7 @@ logger = logging.getLogger("FilterMate.agent")
 
 SYNC_DELAY_MS = 600  # a filter set on several layers at once draws each chart once
 MAX_REDRAWN = 12  # charts of layouts drawn again after one change of filters
-REDRAW_BUDGET_S = 8.0  # and for so long at most: QGIS waits meanwhile
+REDRAW_BUDGET_S = 4.0  # and for so long at most in one round: QGIS waits meanwhile; the others in the next round
 MISSING = ("Charts need QtWebEngine, which this QGIS does not have (QGIS 4 has it): for bars or a histogram that "
            "follow the filters, create_widget kind chart.")
 RESERVED = {"CON", "PRN", "AUX", "NUL"} | {f"COM{number}" for number in range(1, 10)} | {
@@ -94,8 +95,9 @@ def file_stem(text: str) -> str:
 
 
 def _plain_errors(errors: List[str]) -> List[str]:
-    """Errors of a page told without their words: a script may throw the values of the data."""
-    return [error.split(":", 1)[0][:60] for error in errors]
+    """Errors of a page told without their words, to a user who does not share values: a script may write the values
+    of the data in an error (2026-11-22, second review: the words before a colon still held them)."""
+    return [f"{len(errors)} error(s) in the page; their words are not sent, the values of the data are not shared"]
 
 
 class AgentCharts(QObject):
@@ -107,7 +109,7 @@ class AgentCharts(QObject):
         self._charts: Dict[str, Chart] = {}
         self._next = 1
         self.pending: Optional[Chart] = None  # drawn by show_chart or run_chart_code, shown as a card at its end
-        self._layers_due: set = set()
+        self._items_due: List[Tuple[str, str]] = []  # (layout name, uuid) of charts of layouts to draw again
         self._redrawing = False
         self._timer = QTimer(self)
         self._timer.setSingleShot(True)
@@ -158,13 +160,16 @@ class AgentCharts(QObject):
         code = arguments.get("code") or ""
         if not isinstance(code, str) or not code.strip():
             raise ToolFailure("code is the body of function(d3, svg, data, width, height, palette)")
-        theme = "dark" if self._is_dark() else "light"
+        # Drawn light whatever the theme: a chart of code is never drawn again without asking, and it goes to paper.
+        theme = "light"
         try:
             svg, data, meta, errors = draw(source.request, theme, source.data, source.meta, code)
-            picture = chart_renderer.image(svg, 1.0, "#ffffff" if theme == "light" else "#1a1a19") \
-                if share_values else None
+            picture = chart_renderer.image(svg, 1.0, "#ffffff") if share_values else None
         except (ChartError, chart_renderer.ChartRenderError) as exc:
             raise ToolFailure(str(exc)) from None
+        finally:
+            # A page the code ran in may have opened a connection (WebRTC from a frame of its own): it goes with it.
+            chart_renderer.drop_page()
         chart = self._keep(source.request, svg, theme, dict(meta, drawn_from=source.chart_id), data, code)
         answer = summary(chart, data, False)
         answer["drawn_from"] = source.chart_id
@@ -290,48 +295,63 @@ class AgentCharts(QObject):
         for layer_id in list(self._watched):
             self._unwatch(layer_id)
         self._timer.stop()
+        self._items_due = []
 
     def _filter_changed(self, layer_id: str) -> None:
-        self._layers_due.add(layer_id)
+        try:
+            items = [(item.layout().name(), item.uuid()) for item, _ in layout_charts.chart_items(layer_id)]
+        except Exception:  # a project closing
+            logger.debug("Charts of a layer not listed", exc_info=True)
+            return
+        self._items_due += [item for item in items if item not in self._items_due]
         self._timer.start()
 
     def _redraw_due(self) -> None:
-        if self._redrawing or chart_renderer.busy():  # another chart is drawn: these wait for the next turn
+        """Draw again the charts of layouts whose layer changed, a few at a time: what one round does not reach
+        waits for the next one, after QGIS has had its events (2026-11-22, second review: the rest stayed stale)."""
+        if self._redrawing or chart_renderer.busy():  # another chart is drawn: these wait for the next round
             self._timer.start()
             return
-        due, self._layers_due = self._layers_due, set()
         if not chart_renderer.available():
+            self._items_due = []
             return
         self._redrawing = True
         started, drawn = time.monotonic(), 0
         try:
-            for layer_id in due:
-                for item, arguments in list(layout_charts.chart_items(layer_id)):
-                    if drawn >= MAX_REDRAWN or time.monotonic() - started > REDRAW_BUDGET_S:
-                        logger.info("Charts of the layouts: %d drawn again, the others keep their last drawing", drawn)
-                        return
-                    if "code" in arguments:  # a project made elsewhere: its code is never run
+            while self._items_due:
+                if drawn >= MAX_REDRAWN or time.monotonic() - started > REDRAW_BUDGET_S:
+                    self._timer.start()
+                    return
+                layout_name, uuid = self._items_due.pop(0)
+                item = layout_charts.find_item(layout_name, uuid)
+                if item is None:
+                    continue
+                try:
+                    arguments = json.loads(str(item.customProperty(layout_charts.PROPERTY) or "null"))
+                    if not isinstance(arguments, dict) or "code" in arguments:  # code a project holds: never run
                         continue
-                    try:
-                        svg, _, _, _ = draw(parse_request(arguments), "light")
-                        layout_charts.set_chart_svg(item, svg)
-                        drawn += 1
-                    except chart_renderer.ChartBusy:
-                        self._layers_due.add(layer_id)
-                        self._timer.start()
+                    svg, _, _, _ = draw(parse_request(arguments), "light")
+                    layout_charts.set_chart_svg(item, svg)
+                    drawn += 1
+                except chart_renderer.ChartBusy:
+                    self._items_due.insert(0, (layout_name, uuid))
+                    self._timer.start()
+                    return
+                except (ChartError, chart_renderer.ChartRenderError, ValueError) as exc:
+                    # Nothing left to draw (a filter that keeps nothing), a page that did not end: the last drawing
+                    # stays; a page that did not end ends the round, the others wait for the next one.
+                    logger.info("A chart of a layout was not drawn again: %s", exc)
+                    if "in time" in str(exc):
+                        if self._items_due:
+                            self._timer.start()
                         return
-                    except (ChartError, chart_renderer.ChartRenderError) as exc:
-                        # Nothing left to draw (a filter that keeps nothing), a page that did not end: the last
-                        # drawing stays, and a page that did not end stops this round.
-                        logger.info("A chart of a layout was not drawn again: %s", exc)
-                        if "in time" in str(exc):
-                            return
-                    except Exception:  # an item deleted meanwhile, a project closing
-                        logger.warning("A chart of a layout was not drawn again", exc_info=True)
+                except Exception:  # an item deleted meanwhile, a project closing
+                    logger.warning("A chart of a layout was not drawn again", exc_info=True)
         finally:
             self._redrawing = False
 
     def redraw_layer(self, layer_id: str) -> None:
         """Draw the charts of ``layer_id`` again now (tests)."""
-        self._layers_due.add(layer_id)
+        self._filter_changed(layer_id)
+        self._timer.stop()
         self._redraw_due()

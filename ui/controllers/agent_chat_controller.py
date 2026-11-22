@@ -691,6 +691,7 @@ class AgentChatController(QObject):
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
         self.panel.hold_examples()
+        self._charts.forget()  # the charts of a project closed, and their data, go with it
         abort_active(CHAT_WAITS)  # a tool of the chat waiting (Processing, a download) ends: its project is gone
         # The turn under way, ended below, must not be recorded against the closed project, nor the change another
         # application is making (its layers compared with the next project's, an Undo would remove them all).

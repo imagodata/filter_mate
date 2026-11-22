@@ -108,3 +108,27 @@ def test_an_svg_with_a_dtd_or_not_an_svg_is_refused():
     for text in ('<!DOCTYPE svg [<!ENTITY a "aaaa">]>' + SVG + "&a;</svg>", "<html/>", "not xml", ""):
         with pytest.raises(ChartError):
             charts.sanitize_svg(text)
+
+
+def test_the_svg_is_walked_without_recursion_and_bounded():
+    deep = SVG + "<g>" * 3000 + "</g>" * 3000 + "</svg>"
+    with pytest.raises(ChartError, match="deep"):
+        charts.sanitize_svg(deep)
+    for size in ('width="1" height="10000000"', 'width="nan" height="10"', 'width="-5" height="10"'):
+        with pytest.raises(ChartError):
+            charts.sanitize_svg(f'<svg xmlns="http://www.w3.org/2000/svg" {size}></svg>')
+
+
+def test_every_url_of_a_value_must_point_inside():
+    svg = (SVG + '<rect fill="url(#a) url(file:///etc/x)"/><rect fill="URL( file:///x )"/>'
+           '<rect fill="url(  #ok )"/><rect fill="url(\'#q\')"/></svg>')
+    clean = charts.sanitize_svg(svg)
+    assert "file:" not in clean and clean.count("fill=") == 2
+
+
+def test_cleaning_leaves_elementtree_as_it_was():
+    import xml.etree.ElementTree as ElementTree
+    before = dict(ElementTree._namespace_map)
+    charts.sanitize_svg(SVG + '<text x="1">a</text></svg>')
+    assert dict(ElementTree._namespace_map) == before
+    assert charts.sanitize_svg(SVG + "<rect/></svg>").startswith('<svg xmlns="http://www.w3.org/2000/svg"')

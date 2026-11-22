@@ -138,6 +138,11 @@ def main():
           getattr(drawn, "answer", drawn))
     hidden = code_run(code, share=False)
     check("code: no image for a user who does not share values", not hasattr(hidden, "images"), hidden)
+    quiet = code_run("console.error(data.map(d => d.label + ' ' + d.value).join(' ')); svg.append('rect')"
+                     ".attr('width', 5).attr('height', 5);", share=False)
+    check("code: no word of its errors for a user who does not share values",
+          "A 3" not in str(quiet) and quiet.get("errors"), quiet)
+    check("code: drawn light, whatever the theme of the dock", "#1a1a19" not in charts.pending.svg)
     told = code_run("svg.append('rect').attr('x', nope.y);")
     check("code: an error of the script is told with what it drew",
           any("nope" in error for error in told.answer.get("errors", [])), told.answer)
@@ -192,7 +197,9 @@ def main():
             pass
     server.shutdown()
     check("code: reaches no web server", not hits, hits)
-    check("code: RTCPeerConnection is gone from the page (no STUN packet)", not packets, len(packets))
+    check("code: RTCPeerConnection is gone from the top frame of the page (no STUN packet)", not packets,
+          len(packets))
+    check("code: its page is dropped after the run (what it opened goes with it)", chart_renderer._page is None)
 
     started = time.time()
     said = failure(lambda: code_run("while (true) {}"))
