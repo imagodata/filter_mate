@@ -15,6 +15,7 @@ import shutil
 import tempfile
 import zipfile
 from contextlib import contextmanager
+import math
 from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent.basemaps import DEFAULT_ZMAX, default_title, is_image, known, sample_tiles, template_problem, xyz_uri
@@ -164,10 +165,34 @@ def set_project_crs(crs: str) -> Dict[str, Any]:
             'note': 'The map follows the CRS of the project; layers in other CRS are reprojected on the fly.'}
 
 
+MAX_FEATURES_READ = 20_000  # per layer, for the longitudes of its features; beyond, its extent
+
+
+def longitude_span(intervals: List[Tuple[float, float]]) -> Tuple[float, float]:
+    """West and east of longitude intervals (-180..180, west <= east each) on the circle: the complement of the
+    largest gap between them; west > east when the data cross the antimeridian (Fiji, the Pacific)."""
+    merged: List[List[float]] = []
+    for west, east in sorted(intervals):
+        if merged and west <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], east)
+        else:
+            merged.append([west, east])
+    if not merged:
+        raise ValueError('no extent')
+    # The gap across the antimeridian, then those between the intervals: the largest is where the data are not.
+    best_gap, west, east = merged[0][0] + 360.0 - merged[-1][1], merged[0][0], merged[-1][1]
+    for before, after in zip(merged, merged[1:]):
+        gap = after[0] - before[1]
+        if gap > best_gap:
+            best_gap, west, east = gap, after[0], before[1]
+    return west, east
+
+
 def _bounds_in_degrees(layers: Optional[List[str]] = None) -> Tuple[List[float], str]:
     """``[west, south, east, north]`` in WGS 84 of ``layers`` (default: the layers shown, then the map view) and
-    what they come from."""
-    from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject, QgsRectangle
+    what they come from; west > east when the data cross the antimeridian (2026-11-22, review: Fiji got the world)."""
+    from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsFeatureRequest, QgsProject,
+                           QgsVectorLayer)
     project = QgsProject.instance()
     wgs84 = QgsCoordinateReferenceSystem('EPSG:4326')
     chosen = []
@@ -181,18 +206,33 @@ def _bounds_in_degrees(layers: Optional[List[str]] = None) -> Tuple[List[float],
         chosen = [node.layer() for node in project.layerTreeRoot().findLayers()
                   if node.isVisible() and node.layer() is not None and node.layer().crs().isValid()]
         origin = 'layers shown'
-    box = QgsRectangle()
-    box.setMinimal()
+    intervals: List[Tuple[float, float]] = []
+    south, north = 90.0, -90.0
+
+    def add(box) -> None:
+        nonlocal south, north
+        if box.isNull() or not all(math.isfinite(value) for value in (box.xMinimum(), box.xMaximum(),
+                                                                       box.yMinimum(), box.yMaximum())):
+            return
+        intervals.append((max(-180.0, box.xMinimum()), min(180.0, box.xMaximum())))
+        south, north = min(south, box.yMinimum()), max(north, box.yMaximum())
+
     for layer in chosen:
-        extent = layer.extent()
-        if extent.isNull() or not layer.crs().isValid():
+        if layer.extent().isNull() or not layer.crs().isValid():
             continue
         try:
             transform = QgsCoordinateTransform(layer.crs(), wgs84, project)
-            box.combineExtentWith(transform.transformBoundingBox(extent))
-        except Exception:  # nosec B112 - a layer that cannot be transformed counts for nothing
+            if isinstance(layer, QgsVectorLayer) and 0 <= layer.featureCount() <= MAX_FEATURES_READ:
+                request = QgsFeatureRequest().setNoAttributes().setLimit(MAX_FEATURES_READ)
+                for feature in layer.getFeatures(request):
+                    if feature.hasGeometry():  # part by part: a multipart across the antimeridian spans -180..180
+                        for part in feature.geometry().constParts():
+                            add(transform.transformBoundingBox(part.boundingBox()))
+            else:
+                add(transform.transformBoundingBox(layer.extent()))
+        except Exception:  # nosec B112 - a layer or a feature that cannot be transformed counts for nothing
             continue
-    if box.isNull() or not chosen:  # nothing with an extent: the view
+    if not intervals:  # nothing with an extent: the view
         try:
             from qgis.utils import iface
             canvas = iface.mapCanvas() if iface is not None else None
@@ -201,11 +241,12 @@ def _bounds_in_degrees(layers: Optional[List[str]] = None) -> Tuple[List[float],
         if canvas is None:
             raise ValueError('no layer with an extent and no map view: give layers')
         transform = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), wgs84, project)
-        box = transform.transformBoundingBox(canvas.extent())
+        add(transform.transformBoundingBox(canvas.extent()))
         origin = 'map view'
-    clamp = lambda value, low, high: max(low, min(high, value))  # noqa: E731
-    return ([round(clamp(box.xMinimum(), -180, 180), 4), round(clamp(box.yMinimum(), -90, 90), 4),
-             round(clamp(box.xMaximum(), -180, 180), 4), round(clamp(box.yMaximum(), -90, 90), 4)], origin)
+        if not intervals:
+            raise ValueError('the map view has no extent in degrees')
+    west, east = longitude_span(intervals)
+    return ([round(west, 4), round(max(-90.0, south), 4), round(east, 4), round(min(90.0, north), 4)], origin)
 
 
 def suggest_crs(layers: Optional[List[str]] = None, purpose: str = 'general') -> Dict[str, Any]:

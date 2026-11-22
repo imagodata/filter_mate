@@ -104,6 +104,37 @@ def main():
     check("degrees: compared in an equal-area projection made for the layer", "projection" in degrees and
           "+proj=aea" in project.mapLayer(degrees["layer_id"]).crs().toProj() or
           "+proj=laea" in project.mapLayer(degrees["layer_id"]).crs().toProj(), degrees)
+    # --- 2026-11-22 review: points, the world, a fid of text, a cartogram of a cartogram
+    points = QgsVectorLayer("Point?crs=EPSG:2154&field=fid:string&field=n:double", "puits", "memory")
+    made_points = []
+    for index in range(20):
+        feature = QgsFeature(points.fields())
+        feature.setGeometry(QgsGeometry.fromWkt(f"POINT({600000 + (index % 5) * 1000} {6300000 + index // 5 * 1000})"))
+        feature.setAttributes([f"p{index}", float(index + 1)])
+        made_points.append(feature)
+    points.dataProvider().addFeatures(made_points)
+    points.updateExtents()
+    project.addMapLayer(points)
+    circles = project.mapLayer(cartograms.make_cartogram("puits", "n", kind="dorling")["layer_id"])
+    largest = max(feature.geometry().area() for feature in circles.getFeatures())
+    check("dorling of points: circles of a size seen at the scale of the points (a fid of text dropped)",
+          largest > 10000.0, largest)
+    again = cartograms.make_cartogram(circles.id(), "n", kind="noncontiguous")
+    check("a cartogram of a cartogram: a value field of its own", again["value_field"] == "cartogram_value_2", again)
+    world = QgsVectorLayer("Polygon?crs=EPSG:4326&field=n:double", "monde", "memory")
+    cells = []
+    for column in range(-180, 180, 60):
+        for row in range(-60, 60, 30):
+            feature = QgsFeature(world.fields())
+            feature.setGeometry(QgsGeometry.fromRect(QgsRectangle(column, row, column + 60, row + 30)))
+            feature.setAttributes([float(abs(column) + abs(row) + 1)])
+            cells.append(feature)
+    world.dataProvider().addFeatures(cells)
+    world.updateExtents()
+    project.addMapLayer(world)
+    planet = cartograms.make_cartogram("monde", "n", iterations=3)
+    check("the world: in Equal Earth, every number finite", "Equal Earth" in planet.get("projection", "") and
+          planet["error_after"] == planet["error_after"], planet)
     for call, label in ((lambda: cartograms.make_cartogram("nope", "population"), "an unknown layer"),
                         (lambda: cartograms.make_cartogram("communes", "nom"), "a text field"),
                         (lambda: cartograms.make_cartogram("communes", "population", kind="bubble"), "a kind"),

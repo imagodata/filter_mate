@@ -34,21 +34,29 @@ def _rings(geometry) -> List[List[Any]]:
 
 
 def _working_crs(layer):
-    """A projected CRS to compare areas in: the layer's, or an equal-area projection made for its extent."""
-    from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject
+    """A projected CRS to compare areas in: the layer's, or an equal-area projection made for its extent (across
+    the antimeridian too), Equal Earth for the world (an azimuthal one of the whole Earth has a singular point)."""
+    from qgis.core import QgsCoordinateReferenceSystem
     from ...core.agent.projections import custom
+    from .project_control import _bounds_in_degrees
     crs = layer.crs()
     if crs.isValid() and not crs.isGeographic():
         return crs, ""
-    wgs84 = QgsCoordinateReferenceSystem("EPSG:4326")
-    box = QgsCoordinateTransform(crs, wgs84, QgsProject.instance()).transformBoundingBox(layer.extent())
-    bounds = (max(-180.0, box.xMinimum()), max(-89.0, box.yMinimum()), min(180.0, box.xMaximum()),
-              min(89.0, box.yMaximum()))
-    text, name, _ = custom(bounds, "equal-area")
+    bounds, _ = _bounds_in_degrees([layer.id()])
+    west, south, east, north = bounds
+    width = east - west if east >= west else east + 360.0 - west
+    if width > 100.0 or north - south > 60.0:
+        return QgsCoordinateReferenceSystem("EPSG:8857"), "Equal Earth"
+    text, name, _ = custom((west, max(-89.0, south), east, min(89.0, north)), "equal-area")
     made = QgsCoordinateReferenceSystem(text)
     if not made.isValid():
         raise CartogramError("no projected CRS could be made for this layer: set_project_crs, then try again")
     return made, name
+
+
+def numpy_finite(ring) -> bool:
+    import numpy as np
+    return bool(np.isfinite(ring).all())
 
 
 def _read(layer, field: str, polygons: bool) -> Tuple[List[Dict[str, Any]], List[Any], Any, str]:
@@ -70,7 +78,10 @@ def _read(layer, field: str, polygons: bool) -> Tuple[List[Dict[str, Any]], List
             continue
         if QgsWkbTypes.isCurvedType(geometry.wkbType()):
             geometry = QgsGeometry(geometry.constGet().segmentize())
-        geometry.transform(transform)
+        try:
+            geometry.transform(transform)
+        except Exception:  # QgsCsException: a feature beyond what the projection draws
+            continue
         value = feature.attribute(index)
         value = None if value is None or (hasattr(value, "isNull") and value.isNull()) else value
         kind = QgsWkbTypes.geometryType(geometry.wkbType())
@@ -84,13 +95,28 @@ def _read(layer, field: str, polygons: bool) -> Tuple[List[Dict[str, Any]], List
             point = geometry.centroid().asPoint()
             parts = [[np.array([(point.x(), point.y()), (point.x() + 1e-3, point.y()),
                                 (point.x() + 1e-3, point.y() + 1e-3), (point.x(), point.y())])]]
-        if not parts:
+        if not parts or not all(numpy_finite(ring) for polygon in parts for ring in polygon):
             continue
         features.append({"parts": parts, "value": float(value) if isinstance(value, (int, float)) else None})
         sources.append(feature)
     if not features:
         raise CartogramError(f"'{layer.name()}' as filtered now has no feature to draw")
     return features, sources, crs, made_for
+
+
+def polygons_of(layer) -> bool:
+    from qgis.core import QgsWkbTypes
+    polygon_type = getattr(QgsWkbTypes, "PolygonGeometry", None) or QgsWkbTypes.GeometryType.PolygonGeometry
+    return layer.geometryType() == polygon_type
+
+
+def _points_area(features) -> float:
+    """The area of the box of points, a tenth wider: what circles of points share (a point has no area)."""
+    import numpy as np
+    centres = np.vstack([ring[0] for feature in features for ring in feature["parts"][0][:1]])
+    width = float(np.ptp(centres[:, 0])) or 1.0
+    height = float(np.ptp(centres[:, 1])) or 1.0
+    return width * height * 1.21
 
 
 def make_cartogram(layer: str, field: str, kind: str = "contiguous", iterations: int = DEFAULT_ITERATIONS,
@@ -119,12 +145,24 @@ def make_cartogram(layer: str, field: str, kind: str = "contiguous", iterations:
             shaped = noncontiguous(features)
         else:
             squares = kind == "demers"
+            basis = _points_area(features) if not polygons_of(source) else None
             shaped = [dict(feature, parts=[[symbol_ring(x, y, size, squares)]])
-                      for feature, (x, y, size) in zip(features, symbols(features, squares=squares))]
+                      for feature, (x, y, size) in zip(features, symbols(features, squares=squares,
+                                                                         total_area=basis))]
     except CartogramError as exc:
         raise ValueError(str(exc)) from None
-    fields = QgsFields(source.fields())
-    fields.append(QgsField(VALUE_FIELD, QVariant.Double))
+    # The fields of the layer but its fid (the key of the GeoPackage written: a text fid failed), and a value field
+    # of its own name (a cartogram of a cartogram kept the old values).
+    fields = QgsFields()
+    kept = []
+    for index, field_def in enumerate(source.fields()):
+        if field_def.name().lower() != "fid":
+            fields.append(field_def)
+            kept.append(index)
+    value_name, number = VALUE_FIELD, 2
+    while fields.lookupField(value_name) >= 0:
+        value_name, number = f"{VALUE_FIELD}_{number}", number + 1
+    fields.append(QgsField(value_name, QVariant.Double))
     path = QgsProcessingUtils.generateTempFilename("cartogram.gpkg")
     options = QgsVectorFileWriter.SaveVectorOptions()
     options.driverName = "GPKG"
@@ -139,7 +177,8 @@ def make_cartogram(layer: str, field: str, kind: str = "contiguous", iterations:
                     for polygon in feature["parts"]]
         made = QgsFeature(fields)
         made.setGeometry(QgsGeometry.fromMultiPolygonXY(polygons))
-        made.setAttributes(list(original.attributes()) + [feature["value"]])
+        values = original.attributes()
+        made.setAttributes([values[index] for index in kept] + [feature["value"]])
         writer.addFeature(made)
     del writer  # closes the file
     title = (name or f"{source.name()} - cartogram ({field})").strip()[:200]
@@ -151,7 +190,8 @@ def make_cartogram(layer: str, field: str, kind: str = "contiguous", iterations:
     project.layerTreeRoot().insertLayer(0, result)
     answer: Dict[str, Any] = {"layer": result.name(), "layer_id": result.id(), "kind": kind,
                               "features": len(shaped), "field": field,
-                              "crs": crs.authid() or crs.description()}
+                              "crs": crs.authid() or crs.description() or made_for or "made for the layer",
+                              "value_field": value_name}
     if made_for:
         answer["projection"] = f"{made_for} (the layer is in degrees; areas are compared in it)"
     if before is not None:

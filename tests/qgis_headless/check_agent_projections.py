@@ -84,6 +84,17 @@ def main():
     check("refuses an unknown layer and purpose", refused(lambda: project_control.suggest_crs(["nope"])) and
           refused(lambda: project_control.suggest_crs(purpose="beauty")))
 
+    memory_layer("fidji", "EPSG:4326", [
+        "POLYGON((177 -19, 180 -19, 180 -16, 177 -16, 177 -19))",
+        "POLYGON((-180 -19, -178 -19, -178 -16, -180 -16, -180 -19))"])
+    islands = project_control.suggest_crs(["fidji"], purpose="areas")
+    west, _, east, _ = islands["bounds_wgs84"]
+    check("antimeridian: Fiji is a region across it, not the world", west > east and west >= 176.9 and
+          east <= -177.9 and islands["scale"] != "world", islands["bounds_wgs84"])
+    check("antimeridian: a projection made for it is centred near 180", any(
+        "+lon_0=179" in row["crs"] or "+lon_0=-179" in row["crs"] or "+lon_0=180" in row["crs"] or
+        "+lon_0=-180" in row["crs"] for row in islands["suggestions"]), islands["suggestions"])
+
     recorder = EffectsRecorder()
     recorder.before_call(ToolCallPart("p1", "set_project_crs", {"crs": made}))
     answer = project_control.set_project_crs(made)

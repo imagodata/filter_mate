@@ -407,7 +407,8 @@ class EffectsRecorder:
         self._edits: Dict[str, Tuple[int, bool]] = {}  # index of the undo stack, and not being edited then
         self._layouts: Optional[Set[str]] = None
         self._chart_items: Optional[Dict[str, Set[str]]] = None  # {layout: uuids of its charts} before the turn
-        self._layout_states: Dict[str, str] = {}  # {layout name: its XML before the turn changed it}
+        self._layout_states: Dict[str, str] = {}  # {layout name: its XML before the turn first touched it}
+        self._state_layouts: Set[str] = set()  # the layouts a tool of LAYOUT_STATE_TOOLS changed
         self._crs: Optional[str] = None
         # (call of the turn, path, value before that call), in order: a setting changed twice has two records.
         self._settings_calls: List[Tuple[int, str, Any]] = []
@@ -461,11 +462,12 @@ class EffectsRecorder:
                     self._layouts = _layout_names(project)
             elif name in LAYOUT_STATE_TOOLS:
                 layout_name = str(arguments.get("layout") or "")
-                layout = project.layoutManager().layoutByName(layout_name)
-                if layout is not None and layout_name not in self._layout_states:
-                    from ..public_api.layouts import layout_xml
-                    self._layout_states[layout_name] = layout_xml(layout)
+                self._keep_layout_state(project, layout_name)
+                self._state_layouts.add(layout_name)
             elif name in CHART_LAYOUT_TOOLS:
+                # The layout as it was before a chart came: a set_atlas or an edit_layout after it in the same turn
+                # puts back this one, which has no chart yet (2026-11-22, review: the chart came back on undo).
+                self._keep_layout_state(project, str(arguments.get("layout") or ""))
                 if self._chart_items is None:
                     from ..public_api.charts import layout_chart_uuids
                     self._chart_items = layout_chart_uuids()
@@ -565,6 +567,16 @@ class EffectsRecorder:
                         self._visibility[layer.id()] = visible
         except RuntimeError:  # a layer went away meanwhile: nothing to keep for it
             logger.debug("Agent undo: a layer could not be read before a step", exc_info=True)
+
+    def _keep_layout_state(self, project: QgsProject, layout_name: str) -> None:
+        layout = project.layoutManager().layoutByName(layout_name)
+        if layout is None or layout_name in self._layout_states:
+            return
+        from ..public_api.layouts import layout_xml
+        try:
+            self._layout_states[layout_name] = layout_xml(layout)
+        except Exception:  # noqa: BLE001 - a report, a layout that cannot be written: the tool refuses it anyway
+            logger.debug("Agent undo: layout %s not kept", layout_name, exc_info=True)
 
     def after_call(self) -> None:
         """The call under way ended: the layers that came during it are those the turn added."""
@@ -688,14 +700,18 @@ class EffectsRecorder:
             made = (_layout_names(project) - self._layouts) if self._layouts is not None else set()
             for name, before in sorted(self._layout_states.items()):
                 layout = project.layoutManager().layoutByName(name)
-                if layout is None or name in made:  # removed since, or made by the turn: its own effect says it
+                # Removed since, made by the turn (its own effect says it), or only given charts (layout_item).
+                if layout is None or name in made or name not in self._state_layouts:
                     continue
                 after = layout_xml(layout)
                 if after != before:
                     effects.append(("layout_state", "", before, after, name))
         if self._chart_items is not None:
             from ..public_api.charts import find_item, item_xml, layout_chart_uuids
+            replaced = {effect[4] for effect in effects if effect[0] == "layout_state"}
             for layout_name, uuids in sorted(layout_chart_uuids().items()):
+                if layout_name in replaced:  # its state before the chart came is put back as a whole
+                    continue
                 for uuid in sorted(uuids - self._chart_items.get(layout_name, set())):
                     item = find_item(layout_name, uuid)
                     if item is not None:
