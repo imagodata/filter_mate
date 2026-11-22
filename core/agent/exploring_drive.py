@@ -12,7 +12,7 @@ change of a call is checked here before any is made.
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from ..domain.exploring_tools import POINT_CLOUD, RASTER, SETTING_PATHS, VECTOR, tools_of
 
@@ -141,7 +141,12 @@ def check_request(kind: str, tools: Any, press: Any, states: Mapping[str, str],
 # A filter that compares a field with a number is a value the user may want to move: the chat adds this note to the
 # answer of apply_filter, once per layer and conversation, so that the model offers the panel or a widget instead of
 # setting them up unasked (2026-11-22, asked by the user: "skill proposition user ce comportement").
-_THRESHOLD = re.compile(r"(?:<=|>=|(?<![<>!])<(?![>=])|(?<![<>=!-])>(?!=))\s*-?\d|\bBETWEEN\s+-?\d", re.IGNORECASE)
+# A field in double quotes compared with a number, on either side, or BETWEEN two numbers: not a function of a field
+# (length("nom") > 0), nor text that holds a sign ('a<5').
+_OPERATOR = r"(?:<=|>=|<(?![>=])|(?<![-=!<])>(?!=))"
+_NUMBER = r"[-+]?(?:\d|\.\d)"
+_THRESHOLD = re.compile(rf'"[^"]+"\s*{_OPERATOR}\s*{_NUMBER}|(?<![\w"\'.]){_NUMBER}[\d.]*\s*{_OPERATOR}\s*"[^"]+"'
+                        rf'|"[^"]+"\s+(?:NOT\s+)?BETWEEN\s+{_NUMBER}', re.IGNORECASE)
 TUNING_OFFER = ("A threshold the user may want to tune: end your answer with one line offering it, a slider over the "
                 "histogram of the field (load_skill dashboards) or EXPLORING set up for them (load_skill panels). "
                 "Change nothing until they say yes.")
@@ -150,3 +155,101 @@ TUNING_OFFER = ("A threshold the user may want to tune: end your answer with one
 def tuning_offer(expression: Any) -> str:
     """The note for the answer of a filter whose expression compares a field with a number; "" for any other."""
     return TUNING_OFFER if isinstance(expression, str) and _THRESHOLD.search(expression) else ""
+
+
+# --- The values of EXPLORING: the range of a raster, the classes or ranges of a point cloud ---------------------------
+# What the panel shows of a raster and of a point cloud, set as the user sets it there: the agent prepares the panel,
+# the user then moves it (the histogram of the raster has two handles), and the preview of the rail shows it.
+QUANTITIES = ("value", "slope_degrees", "slope_percent", "aspect", "hillshade", "roughness")
+RASTER_KEYS = ("band", "quantity", "minimum", "maximum")
+MAX_RANGES = 6
+
+
+def _bound(key: str, value: Any, problems: List[str]) -> Optional[float]:
+    """A bound of a range: a finite number, or None for "no bound on that side"."""
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value != value or value in (
+            float("inf"), float("-inf")):
+        problems.append(f"{key}: a number, or null for no bound")
+        return None
+    return float(value)
+
+
+def check_raster_values(values: Any, bands: Sequence[int], rendered: bool = False) -> Tuple[Dict[str, Any], List[str]]:
+    """``({key: value}, problems)`` for the range of a raster in EXPLORING: ``band`` (one of ``bands``), ``quantity``
+    (the pixel value, or a terrain derivative of the band read as a DTM), ``minimum`` and ``maximum`` (null: no bound).
+    A key left out keeps what the panel holds."""
+    if not isinstance(values, dict) or not values:
+        return {}, ["raster: an object with band, quantity, minimum or maximum"]
+    if rendered:
+        return {}, ["raster: this raster gives colours only (a web service or a rendered image): no range, use the "
+                    "pipette"]
+    problems: List[str] = []
+    clean: Dict[str, Any] = {}
+    for key, value in values.items():
+        if key not in RASTER_KEYS:
+            problems.append(f"raster.{key}: not a value of the raster panel ({', '.join(RASTER_KEYS)})")
+        elif key == "band":
+            if isinstance(value, bool) or not isinstance(value, int) or value not in bands:
+                problems.append(f"raster.band: one of {', '.join(str(band) for band in bands) or 'none'}")
+            else:
+                clean[key] = value
+        elif key == "quantity":
+            if value not in QUANTITIES:
+                problems.append(f"raster.quantity: one of {', '.join(QUANTITIES)}")
+            else:
+                clean[key] = value
+        else:
+            clean[key] = _bound(f"raster.{key}", value, problems)
+    low, high = clean.get("minimum"), clean.get("maximum")
+    if low is not None and high is not None and low > high:
+        problems.append("raster: minimum above maximum")
+    return ({} if problems else clean), problems
+
+
+def check_point_cloud_values(values: Any, classes: Sequence[int],
+                             attributes: Sequence[str]) -> Tuple[Dict[str, Any], List[str]]:
+    """``({"classes": [...]} or {"ranges": [...]}, problems)`` for a point cloud in EXPLORING: classes among those the
+    cloud holds, or ranges ``{attribute, minimum, maximum}`` on its attributes. One of the two: the panel keeps one
+    group active."""
+    if not isinstance(values, dict) or not values:
+        return {}, ["point_cloud: an object with classes or ranges"]
+    unknown = [key for key in values if key not in ("classes", "ranges")]
+    if unknown:
+        return {}, [f"point_cloud.{key}: not a value of the point cloud panel (classes, ranges)" for key in unknown]
+    if "classes" in values and "ranges" in values:
+        return {}, ["point_cloud: classes or ranges, not both (the panel keeps one group active)"]
+    problems: List[str] = []
+    if "classes" in values:
+        codes = values["classes"]
+        if not isinstance(codes, list) or not codes or not all(
+                isinstance(code, int) and not isinstance(code, bool) for code in codes):
+            return {}, ["point_cloud.classes: a list of class codes"]
+        missing = sorted({code for code in codes if code not in classes})
+        if missing:
+            problems.append(f"point_cloud.classes: {', '.join(map(str, missing))} not in this point cloud (it holds "
+                            f"{', '.join(map(str, classes)) or 'no class'})")
+        return ({} if problems else {"classes": sorted(set(codes))}), problems
+    ranges = values["ranges"]
+    if not isinstance(ranges, list) or not ranges or len(ranges) > MAX_RANGES:
+        return {}, [f"point_cloud.ranges: a list of 1 to {MAX_RANGES} {{attribute, minimum, maximum}}"]
+    clean: List[Dict[str, Any]] = []
+    for item in ranges:
+        if not isinstance(item, dict) or set(item) - {"attribute", "minimum", "maximum"}:
+            problems.append("point_cloud.ranges: each one {attribute, minimum, maximum}")
+            continue
+        name = item.get("attribute")
+        if name not in attributes:
+            problems.append(f"point_cloud.ranges: {name} is not an attribute of this point cloud "
+                            f"({', '.join(attributes)})")
+            continue
+        low = _bound(f"point_cloud.ranges.{name}.minimum", item.get("minimum"), problems)
+        high = _bound(f"point_cloud.ranges.{name}.maximum", item.get("maximum"), problems)
+        if low is None and high is None:
+            problems.append(f"point_cloud.ranges: {name} needs a minimum or a maximum")
+        elif low is not None and high is not None and low > high:
+            problems.append(f"point_cloud.ranges: {name}, minimum above maximum")
+        else:
+            clean.append({"attribute": name, "minimum": low, "maximum": high})
+    return ({} if problems else {"ranges": clean}), problems

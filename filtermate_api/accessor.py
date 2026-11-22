@@ -795,9 +795,12 @@ class FilterMateAccessor(Protocol):
         ...
 
     def set_exploring(self, layer: str = "", tools: Optional[Dict[str, bool]] = None,
-                      press: Optional[List[str]] = None, show: bool = False) -> Dict[str, Any]:
-        """Drive FilterMate's EXPLORING panel as the user does: the layer it shows, the buttons of its rail turned on
-        or off (``tools``) or pressed (``press``), the panel opened in front (``show``); FilterRejected for what the
+                      press: Optional[List[str]] = None, show: bool = False,
+                      raster: Optional[Dict[str, Any]] = None,
+                      point_cloud: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Drive FilterMate's EXPLORING panel as the user does: the layer it shows, the range of a raster
+        (``raster``) or the classes or ranges of a point cloud (``point_cloud``), the buttons of its rail turned on or
+        off (``tools``) or pressed (``press``), the panel opened in front (``show``); FilterRejected for what the
         panel refuses."""
         ...
 
@@ -1242,7 +1245,9 @@ class InMemoryAccessor:
                 "shown_in_panel": False}
 
     def set_exploring(self, layer: str = "", tools: Optional[Dict[str, bool]] = None,
-                      press: Optional[List[str]] = None, show: bool = False) -> Dict[str, Any]:
+                      press: Optional[List[str]] = None, show: bool = False,
+                      raster: Optional[Dict[str, Any]] = None,
+                      point_cloud: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         found = self._find(layer) if layer else self._find(self.exploring_panel.get("layer_id", ""))
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found" if layer else "EXPLORING shows no layer: name one (layer).")
@@ -1256,7 +1261,8 @@ class InMemoryAccessor:
             held[name] = bool(value)
         return {"layer_name": found.name, "layer_id": found.layer_id, "kind": found.layer_kind, "in_view": bool(show),
                 "tools": {name: "on" if value else "off" for name, value in held.items()},
-                "changed": changed, "pressed": list(press or [])}
+                "changed": changed + (["values"] if raster or point_cloud else []), "pressed": list(press or []),
+                **({"values": dict(raster or point_cloud)} if raster or point_cloud else {})}
 
     def export_options(self) -> Dict[str, Any]:
         return dict(self.export_panel, saved=True)

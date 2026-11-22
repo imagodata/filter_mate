@@ -853,23 +853,23 @@ def build_server(client: FilterMateClient) -> Any:
     async def set_exploring(
         layer: Annotated[str, Field(max_length=1000, description=(
             "Layer to show in EXPLORING, id or name; default: the one it shows"))] = "",
-        tools: Annotated[Optional[Dict[str, bool]], Field(description=(
-            "Buttons of the rail turned on (true) or off (false), by name"))] = None,
-        press: Annotated[Optional[List[str]], Field(max_length=4, description="Buttons pressed once")] = None,
-        show: Annotated[bool, Field(description=(
-            "true opens EXPLORING in front, in place of the chat when they share the panel: only when the user asks "
-            "to see it"))] = False,
+        tools: Annotated[Dict[str, bool], Field(description="Buttons of the rail on (true) or off (false)")] = {},
+        press: Annotated[List[str], Field(max_length=4, description="Buttons pressed once")] = [],
+        show: Annotated[bool, Field(description="Open EXPLORING in front: only when the user asks to see it")] = False,
+        raster: Annotated[Dict[str, Any], Field(description=(
+            "band, quantity (value, slope_degrees, slope_percent, aspect, hillshade, roughness), minimum, maximum "
+            "(null: no bound)"))] = {},
+        point_cloud: Annotated[Dict[str, Any], Field(description=(
+            "classes [codes], or ranges [{attribute, minimum, maximum}]"))] = {},
     ) -> Dict[str, Any]:
-        """Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, turn the buttons of its
-        rail on or off, press those that run once. vector: sync (its lists follow the selection of the map), follow
-        (the map goes to what is chosen), zone (a shape drawn selects), link; press zoom, identify. raster: preview
-        (hide the pixels outside the selection), pipette (pixels like the one clicked), detector (the object
-        clicked), similar (objects like it), link (the style follows the range); press zoom. point_cloud: preview,
-        identify (class pipette), object, value_pipette, zone; press zoom. One tool on the map at a time: it waits
-        for the user's click, so say what to click. A button the user hid, or greyed for the layer, is refused: say
-        so. Undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press, hidden, unavailable),
-        changed, pressed."""
-        return await call("POST", "/panels/exploring", _body(layer=layer, tools=tools, press=press, show=show))
+        """Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, set what its panel keeps (the
+        range of a raster on its histogram, the classes or ranges of a point cloud), turn the buttons of its rail on or
+        off, press zoom or identify. The names of the buttons of each kind of layer: skill panels. One tool on the map
+        at a time: it waits for the user's click, so say what to click. A button the user hid, or greyed, is refused:
+        say so. In FilterMate's chat, undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press,
+        hidden, unavailable), changed, pressed, values."""
+        return await call("POST", "/panels/exploring", _body(layer=layer, tools=tools, press=press, show=show,
+                                                             raster=raster, point_cloud=point_cloud))
 
     @mcp.tool(annotations=ToolAnnotations(title="Export options of the panel", readOnlyHint=True,
                                           openWorldHint=False))

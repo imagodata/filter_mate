@@ -108,6 +108,8 @@ class ExploringBody(BaseModel):
                                    description="Buttons of the rail turned on (true) or off (false), by name")
     press: List[str] = Field(default_factory=list, max_length=4, description="Buttons of the rail pressed once")
     show: bool = Field(default=False, description="Open EXPLORING in front of the user")
+    raster: Optional[Dict[str, Any]] = Field(default=None, description="band, quantity, minimum, maximum of a raster")
+    point_cloud: Optional[Dict[str, Any]] = Field(default=None, description="classes, or ranges, of a point cloud")
 
 
 class ExportOptionsBody(BaseModel):
@@ -140,7 +142,8 @@ def set_panel_layers(payload: LayerOptionsBody, request: Request) -> Dict[str, A
 def drive_exploring(payload: ExploringBody, request: Request) -> Dict[str, Any]:
     """Drive FilterMate's EXPLORING panel as the user does: its layer, the buttons of its rail."""
     return _panels(lambda: _accessor(request).set_exploring(
-        layer=payload.layer, tools=payload.tools, press=payload.press, show=payload.show))
+        layer=payload.layer, tools=payload.tools, press=payload.press, show=payload.show, raster=payload.raster,
+        point_cloud=payload.point_cloud))
 
 
 @router.get("/panels/export")

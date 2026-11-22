@@ -549,7 +549,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
 
     def set_exploring(args: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.set_exploring(layer=args.get("layer") or "", tools=args.get("tools"),
-                                      press=args.get("press"), show=bool(args.get("show")))
+                                      press=args.get("press"), show=bool(args.get("show")),
+                                      raster=args.get("raster"), point_cloud=args.get("point_cloud"))
 
     def export_options(_: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.export_options()

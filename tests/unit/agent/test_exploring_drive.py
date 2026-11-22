@@ -116,3 +116,39 @@ def test_a_threshold_is_offered_to_tune(expression):
 def test_no_threshold_no_offer(expression):
     from core.agent.exploring_drive import tuning_offer
     assert tuning_offer(expression) == ""
+
+
+# --- the values of the panel of a raster and of a point cloud ---------------------------------------------------------
+
+def test_a_raster_range_is_checked():
+    from core.agent.exploring_drive import check_raster_values
+    assert check_raster_values({"minimum": 1200, "maximum": None}, [1]) == ({"minimum": 1200.0, "maximum": None}, [])
+    assert check_raster_values({"band": 2, "quantity": "slope_degrees"}, [1, 2])[0] == {"band": 2,
+                                                                                          "quantity": "slope_degrees"}
+    for values, words in (({"band": 3}, "one of 1, 2"), ({"quantity": "ndvi"}, "one of value"),
+                          ({"minimum": 5, "maximum": 1}, "minimum above maximum"), ({"minimum": "5"}, "a number"),
+                          ({"minimum": float("nan")}, "a number"), ({"colour": 1}, "not a value"), ({}, "an object")):
+        clean, problems = check_raster_values(values, [1, 2])
+        assert clean == {} and any(words in problem for problem in problems), (values, problems)
+
+
+def test_a_rendered_raster_has_no_range():
+    from core.agent.exploring_drive import check_raster_values
+    clean, problems = check_raster_values({"minimum": 1}, [1, 2, 3], rendered=True)
+    assert clean == {} and "pipette" in problems[0]
+
+
+def test_point_cloud_classes_or_ranges_are_checked():
+    from core.agent.exploring_drive import check_point_cloud_values
+    holds, attributes = [1, 2, 6], ["Z", "Intensity"]
+    assert check_point_cloud_values({"classes": [6, 2, 6]}, holds, attributes) == ({"classes": [2, 6]}, [])
+    clean, _ = check_point_cloud_values({"ranges": [{"attribute": "Z", "minimum": 100}]}, holds, attributes)
+    assert clean == {"ranges": [{"attribute": "Z", "minimum": 100.0, "maximum": None}]}
+    for values, words in (({"classes": [9]}, "9 not in this point cloud"), ({"classes": []}, "a list of class codes"),
+                          ({"classes": [2], "ranges": []}, "not both"),
+                          ({"ranges": [{"attribute": "Red", "minimum": 1}]}, "not an attribute"),
+                          ({"ranges": [{"attribute": "Z"}]}, "needs a minimum or a maximum"),
+                          ({"ranges": [{"attribute": "Z", "minimum": 9, "maximum": 1}]}, "minimum above maximum"),
+                          ({"z": 1}, "not a value")):
+        clean, problems = check_point_cloud_values(values, holds, attributes)
+        assert clean == {} and any(words in problem for problem in problems), (values, problems)
