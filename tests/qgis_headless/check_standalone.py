@@ -65,6 +65,14 @@ def layer(name):
 
 def main():
     QSettings().setValue("qgis/digitizing/validate_geometries", 0)  # FilterMate asks about it otherwise
+    if not os.path.isfile(os.path.join(FIXTURES, "manifest.json")):
+        # Made here when missing, with the GDAL of this QGIS: a machine with nothing but the runtime (CI, a Mac).
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "make_fixtures", os.path.join(os.path.dirname(os.path.abspath(__file__)), "make_fixtures.py"))
+        fixtures = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fixtures)
+        fixtures.make_all(FIXTURES)
     with open(os.path.join(FIXTURES, "manifest.json"), encoding="utf-8") as stream:
         manifest = json.load(stream)
     window = iface.mainWindow()
