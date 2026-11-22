@@ -60,6 +60,37 @@
       ]
     },
     {
+      "id": "layout_overview_map",
+      "prompt": "Ajoute une carte de situation en haut à droite de la mise en page Carte des communes.",
+      "expect": [
+        [
+          {
+            "tool": "edit_layout",
+            "args": {
+              "layout": "Carte des communes"
+            },
+            "call_args": {
+              "layout": "Carte des communes",
+              "changes": [
+                {
+                  "do": "add_map",
+                  "overview_of": "map1",
+                  "x": 217,
+                  "y": 24,
+                  "width": 70,
+                  "height": 50
+                }
+              ]
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_pyqgis",
+        "create_layout"
+      ]
+    },
+    {
       "id": "layout_no_export_unasked",
       "trap": true,
       "prompt": "Prépare-moi une mise en page A3 portrait des cours d'eau, je l'exporterai plus tard.",

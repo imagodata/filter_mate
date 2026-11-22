@@ -3,10 +3,10 @@ name: layouts
 title: Print layouts and atlases
 description: print layouts, atlases (a page per feature) and their export
 metadata:
-  version: 1
+  version: 2
   plugin_min: 5.1.2
   audience: chat
-  tools: create_layout, describe_layout, set_atlas, export_layout, add_chart_to_layout, show_chart, map_context, zoom_to, apply_filter, preview_filter, describe_layer, field_values, set_layer_style, set_labels
+  tools: create_layout, describe_layout, edit_layout, set_atlas, export_layout, add_chart_to_layout, show_chart, map_context, zoom_to, apply_filter, preview_filter, describe_layer, field_values, set_layer_style, set_labels
   risk: change
   trust: builtin
 ---
@@ -22,12 +22,21 @@ it what is asked, and exports it when asked. Everything is undone with the turn.
    zoom_to). A layout shows the layers as they are filtered when it is drawn.
 2. create_layout makes the page: a map, its title in the user's words, a legend, a scale bar and a north arrow,
    A4 landscape unless asked (A3, A5, Letter; portrait). extent_layer frames a layer; layers fixes those shown.
+   template starts from a template of the profile instead (describe_layout lists them): its texts stay as they are.
 3. describe_layout reads a layout: its pages and items, each with a ref, its place and size in millimetres from
    the top left of its page, the scale and layers of a map. Without a name it lists the layouts and the templates.
    Read it before changing a layout someone else made.
-4. A chart on the page: show_chart, then add_chart_to_layout with its chart_id and a place (x, y, width in mm).
+4. edit_layout changes a layout in one call, all or nothing (20 changes at most), each change a do:
+   - add_text (text, font_size; [% "nom" %] shows a field of the atlas feature, [% @atlas_pagename %] its name);
+   - add_map with extent_layer, or overview_of a map (a map of situation that frames where the other one is);
+   - add_legend, add_scale_bar, add_north_arrow (of map, the largest by default), add_shape (a frame);
+   - add_table: an attribute table of layer, columns, max_rows (30 by default); the rows of each atlas page when
+     layer is the coverage layer;
+   - add_page; move (x, y, width, height, page), remove, set_text, set_map (layers, extent_layer, scale) by ref.
+   Places are in mm from the top left of a page: read describe_layout first and leave the map room.
+5. A chart on the page: show_chart, then add_chart_to_layout with its chart_id and a place (x, y, width in mm).
    A chart of a layer is drawn again when the filter of that layer changes.
-5. Export only when the user asks for a file (they confirm it): export_layout as pdf (georeferenced by default),
+6. Export only when the user asks for a file (they confirm it): export_layout as pdf (georeferenced by default),
    png, jpg or tif (a world file beside a page with a map; georeference false leaves it out) or svg (to edit). An
    image or an SVG is one file per page. dpi 150 by default; 300 for print.
 
@@ -40,8 +49,8 @@ it what is asked, and exports it when asked. Everything is undone with the turn.
    matters, hide_coverage to show the other layers only. The largest map follows each feature: map_mode auto (the
    feature plus margin %, 10 by default), fixed (the scale the map has) or predefined (the scales of the project).
    maps names other maps by their ref.
-3. A title that changes with each page: say it is done in the designer with an expression such as
-   [% "nom" %]; the agent does not edit texts.
+3. A title that changes with each page: edit_layout add_text or set_text with [% "nom" %] (a field of the
+   coverage layer) or [% @atlas_pagename %].
 4. export_layout with atlas true: one PDF of every page (single_file), or one file per feature, in a new folder;
    file_name sets their names (an expression).
 5. enabled false turns the atlas off.

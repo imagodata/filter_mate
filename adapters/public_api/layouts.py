@@ -485,10 +485,13 @@ def template_names() -> List[str]:
 def _templates() -> List[Any]:
     from qgis.core import QgsApplication
     found = []
+    # Where the designer of QGIS looks: the profile, the folders set in the options, then those QGIS ships.
+    folders = [os.path.join(QgsApplication.qgisSettingsDirPath(), 'composer_templates')]
     try:
-        folders = QgsApplication.layoutTemplatePaths()
-    except Exception:  # nosec B110 - no template folder
-        folders = []
+        folders += list(QgsApplication.layoutTemplatePaths())
+    except Exception:  # nosec B110 - no folder set in the options
+        pass
+    folders.append(os.path.join(QgsApplication.pkgDataPath(), 'composer_templates'))
     for folder in folders:
         try:
             for entry in sorted(os.listdir(folder)):
@@ -699,8 +702,9 @@ def _set_map(layout, item, change: Dict[str, Any]) -> None:
         item.setScale(scale)
 
 
-def _page_size(layout) -> Tuple[float, float]:
-    size = layout.pageCollection().page(0).pageSize()
+def _sheet_size(layout) -> Tuple[float, float]:
+    """The size of the first page, in the units of the layout (millimetres by default)."""
+    size = layout.convertToLayoutUnits(layout.pageCollection().page(0).pageSize())
     return size.width(), size.height()
 
 
@@ -711,7 +715,7 @@ def _edit(layout, change: Dict[str, Any]) -> Dict[str, Any]:
     do = change.get('do')
     if do not in EDITS:
         raise ValueError(f"do is one of {', '.join(EDITS)}")
-    width, height = _page_size(layout)
+    width, height = _sheet_size(layout)
     if do in ('move', 'remove', 'set_text'):
         item = _item_by_ref(layout, change.get('ref'))
         ref = item_ref(item)

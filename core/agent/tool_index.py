@@ -103,9 +103,10 @@ SUMMARIES = {
     "remove_widget": "Remove a widget",
     "show_chart": "A d3 chart in the chat",
     "export_chart": "A chart as PNG, JPG or SVG",
-    "describe_layout": "Read a print layout",
+    "describe_layout": "Read a layout",
     "set_atlas": "Atlas of a layout",
-    "add_chart_to_layout": "A chart in a print layout",
+    "edit_layout": "Change a layout",
+    "add_chart_to_layout": "A chart in a layout",
     "run_chart_code": "Draw a chart with your d3 code (expert)",
     "run_pyqgis": "Run Python in QGIS, approved by the user (expert)",
 }
