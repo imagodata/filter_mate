@@ -685,6 +685,10 @@ class SimulatedProject:
             "edit_layout": lambda args: {"layout": args["layout"], "done": [
                 {"do": change.get("do"), "ref": change.get("ref") or f"item{index}"}
                 for index, change in enumerate(args.get("changes", []), 1)], "items": 6, "pages": 1},
+            "make_cartogram": lambda args: {"layer": f"{args['layer']} - cartogram ({args['field']})",
+                                            "layer_id": "cartogram_1", "kind": args.get("kind", "contiguous"),
+                                            "features": 586, "field": args["field"], "crs": "EPSG:2154",
+                                            "error_before": 3.2, "error_after": 1.2},
             "suggest_crs": lambda args: {"bounds_wgs84": [0.9, 43.1, 2.0, 44.0], "from": "layers", "purpose":
                                          args.get("purpose", "general"), "scale": "local", "current": "EPSG:4326",
                                          "suggestions": [{"crs": "EPSG:3035" if args.get("purpose") == "areas"

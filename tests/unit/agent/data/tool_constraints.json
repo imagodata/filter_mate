@@ -1962,6 +1962,7 @@
    "name": {
     "enum": [
      "analysis",
+     "cartograms",
      "cartography",
      "configuration",
      "dashboards",
@@ -2011,6 +2012,46 @@
   },
   "required": [
    "layer"
+  ],
+  "type": "object"
+ },
+ "make_cartogram": {
+  "properties": {
+   "field": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "iterations": {
+    "default": 8,
+    "maximum": 30,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "kind": {
+    "default": "contiguous",
+    "enum": [
+     "contiguous",
+     "noncontiguous",
+     "dorling",
+     "demers"
+    ],
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "field"
   ],
   "type": "object"
  },

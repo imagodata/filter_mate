@@ -197,6 +197,15 @@ class TestHandlers:
         made = "PROJ:+proj=laea +lat_0=43.55 +lon_0=1.45 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"
         assert run(accessor, root, "set_project_crs", crs=made)[0] is False
 
+    def test_make_cartogram(self, api):
+        """2026-11-22: a layer whose areas show a field."""
+        accessor, root = api
+        error, answer = run(accessor, root, "make_cartogram", layer="communes", field="population")
+        assert not error and answer["kind"] == "contiguous" and answer["error_after"] < answer["error_before"]
+        assert run(accessor, root, "make_cartogram", layer="communes", field="population", kind="bubble")[0] is True
+        assert run(accessor, root, "make_cartogram", layer="nope", field="population")[0] is True
+        assert run(accessor, root, "make_cartogram", layer="communes", field="population", iterations=99)[0] is True
+
     def test_layout_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "create_layout", name="Carte", title="Communes")

@@ -815,6 +815,23 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/map/crs/suggest", _body(layers=layers, purpose=purpose))
 
+    @mcp.tool(annotations=_write("Make a cartogram", idempotent=False))
+    async def make_cartogram(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        field: Annotated[str, Field(min_length=1, max_length=200, description="Numeric: the quantity shown")],
+        kind: Annotated[Literal["contiguous", "noncontiguous", "dorling", "demers"], Field(description=(
+            "contiguous: polygons deformed, borders kept; noncontiguous: each scaled; dorling: circles; demers: "
+            "squares"))] = "contiguous",
+        iterations: Annotated[int, Field(ge=1, le=30, description="contiguous")] = 8,
+        name: Annotated[str, Field(max_length=200, description="Of the new layer")] = "",
+    ) -> Dict[str, Any]:
+        """Make a new layer whose areas show a quantity of a layer as filtered now (a population, votes...), not
+        the land. Returns layer, kind, features, crs, and error_before / error_after (1 is exact). In the chat of
+        FilterMate, undoing the turn removes the layer.
+        """
+        return await call("POST", "/layers/cartogram", _body(layer=layer, field=field, kind=kind,
+                                                            iterations=iterations, name=name))
+
     @mcp.tool(annotations=_write("Add a field", idempotent=False))
     async def add_field(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],

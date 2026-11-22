@@ -759,6 +759,11 @@ class FilterMateAccessor(Protocol):
         """Projections for the data of ``layers`` and a purpose, best first; raises FilterRejected."""
         ...
 
+    def make_cartogram(self, layer: str, field: str, kind: str = "contiguous", iterations: int = 8,
+                       name: str = "") -> Dict[str, Any]:
+        """A new layer whose areas show a field; raises FilterRejected when refused."""
+        ...
+
     def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
                   formula: str = "") -> FieldAdded:
         """Add a field in the edit buffer, filled by ``formula`` when given; raises FilterRejected."""
@@ -1231,6 +1236,19 @@ class InMemoryAccessor:
         return {"bounds_wgs84": [1.0, 43.2, 1.9, 43.9], "from": "layers" if layers else "layers shown",
                 "purpose": purpose, "scale": result["scale"], "current": "EPSG:4326",
                 "suggestions": result["suggestions"]}
+
+    def make_cartogram(self, layer: str, field: str, kind: str = "contiguous", iterations: int = 8,
+                       name: str = "") -> Dict[str, Any]:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        if kind not in ("contiguous", "noncontiguous", "dorling", "demers"):
+            raise FilterRejected("kind is one of contiguous, noncontiguous, dorling, demers")
+        answer = {"layer": name or f"{found.name} - cartogram ({field})", "layer_id": "cartogram_1", "kind": kind,
+                  "features": 3, "field": field, "crs": "EPSG:2154"}
+        if kind in ("contiguous", "noncontiguous"):
+            answer.update(error_before=1.8, error_after=1.1)
+        return answer
 
     def _edited(self, layer: str, **counts: int) -> EditResult:
         found = self._find(layer)
