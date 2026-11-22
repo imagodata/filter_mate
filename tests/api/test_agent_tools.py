@@ -427,7 +427,24 @@ class TestHandlers:
     def test_export_keeps_the_paths_of_this_machine(self, tmp_path):
         folder = (tmp_path / "export").resolve()
         accessor = Accessor(export=OperationResult(done=["a"], outputs={"a": str(folder / "a.gpkg")}))
-        assert run(accessor, tmp_path, "export_layers", layers=["a"])[1]["outputs"] == {"a": "a.gpkg"}
+        answer = run(accessor, tmp_path, "export_layers", layers=["a"])[1]
+        assert answer["outputs"] == {"a": "a.gpkg"}
+        assert not {"package", "tables", "styles"} & set(answer)  # only when a package or styles fill them
+
+    def test_export_package_and_styles_from_the_sub_folder(self, tmp_path):
+        """2026-11-22: the zip by its name in the sub-folder, the files by their names in the zip."""
+        folder = (tmp_path / "export").resolve()
+        accessor = Accessor(export=OperationResult(
+            done=["a", "b"], outputs={"b": "b.tif"}, package=str(folder / "lot.zip"), tables={"a": "a"},
+            styles={"a": "lot.gpkg", "b": "b.qml"}))
+        failed, answer = run(accessor, tmp_path, "export_layers", layers=["a", "b"], single_file=True, zip=True,
+                             styles="qml", package_name="lot")
+        assert not failed and answer["package"] == "lot.zip" and answer["outputs"] == {"b": "b.tif"}
+        assert answer["tables"] == {"a": "a"} and answer["styles"] == {"a": "lot.gpkg", "b": "b.qml"}
+        assert str(tmp_path) not in json.dumps(answer)
+        options = accessor.calls[-1][1]
+        assert (options["styles"], options["single_file"], options["zip_archive"], options["package_name"]) == (
+            "qml", True, True, "lot")
 
     @pytest.mark.parametrize("tool,key", [("apply_filter", "layer_name"), ("preview_filter", "layer_name")])
     def test_a_second_statement_never_reaches_qgis(self, api, tool, key):

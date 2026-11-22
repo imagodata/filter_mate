@@ -104,6 +104,20 @@ class TestExport:
 
     def test_rejects_unknown_formats(self, client):
         assert client.post("/export", json={"layers": ["mnt"], "raster_format": "PNG"}).status_code == 422
+        assert client.post("/export", json={"layers": ["mnt"], "styles": "lyrx"}).status_code == 422
+        assert client.post("/export", json={"layers": ["mnt"], "package_name": "x" * 101}).status_code == 422
+
+    def test_a_zip_and_one_geopackage(self, client, tmp_path):
+        """2026-11-22: the vector layers in one GeoPackage, everything in one zip; the names in the zip."""
+        response = client.post("/export", json={"layers": ["batiment", "mnt"], "vector_format": "GeoParquet",
+                                                "styles": "qml", "zip": True, "package_name": "lot"})
+        assert response.status_code == 200
+        root = (tmp_path / "exports" / "export").resolve()
+        assert response.json()["package"] == f"{root}/lot.zip"
+        assert response.json()["outputs"] == {"batiment": "batiment.gpkg", "mnt": "mnt.tif"}
+        single = client.post("/export", json={"layers": ["batiment", "mnt"], "single_file": True}).json()
+        assert single["tables"] == {"batiment": "batiment"} and single["package"] == f"{root}/export.gpkg"
+        assert single["outputs"] == {"mnt": f"{root}/mnt.tif"}
 
     def test_resolve_export_folder(self, tmp_path):
         assert resolve_export_folder(tmp_path, "a/b") == (tmp_path / "a" / "b").resolve()

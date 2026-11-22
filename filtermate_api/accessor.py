@@ -98,8 +98,13 @@ class OperationResult:
     failed: Dict[str, str] = field(default_factory=dict)
     skipped: Dict[str, str] = field(default_factory=dict)
     error: Optional[str] = None
-    # Export: layer name -> file written (server side).
+    # Export: layer name -> file written (server side); in a zip, the name of the file in it.
     outputs: Dict[str, str] = field(default_factory=dict)
+    # Export (2026-11-22): the zip, or else the single GeoPackage; the table of each layer in that GeoPackage; the
+    # style file of each layer.
+    package: Optional[str] = None
+    tables: Dict[str, str] = field(default_factory=dict)
+    styles: Dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -996,8 +1001,13 @@ class FilterMateAccessor(Protocol):
         ...
 
     def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
-                      point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
-        """Write the layers as filtered now into ``folder`` (already resolved by the route)."""
+                      point_cloud_format: str, crs: Optional[str] = None, styles: str = "none",
+                      single_file: bool = False, zip_archive: bool = False,
+                      package_name: str = "export") -> OperationResult:
+        """Write the layers as filtered now into ``folder`` (already resolved by the route): one file each, with a
+        style file beside when ``styles`` is qml or sld; the vector layers in one GeoPackage (``single_file``);
+        everything in one zip (``zip_archive``), never overwritten. ``package_name`` names the zip and the
+        GeoPackage."""
         ...
 
     def get_filter_state(self) -> List[FilteredLayer]:
@@ -1603,11 +1613,19 @@ class InMemoryAccessor:
         return OperationResult(done=done, skipped={name: "not filtered" for name in layers if name not in done})
 
     def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
-                      point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
+                      point_cloud_format: str, crs: Optional[str] = None, styles: str = "none",
+                      single_file: bool = False, zip_archive: bool = False,
+                      package_name: str = "export") -> OperationResult:
         extensions = {"vector": ".gpkg", "raster": ".tif", "point_cloud": ".laz"}
         kinds = {layer.name: layer.layer_kind for layer in self.layers}
-        outputs = {name: f"{folder}/{name}{extensions.get(kinds[name], '')}" for name in layers if name in kinds}
-        return OperationResult(done=list(outputs), outputs=outputs,
+        found = [name for name in layers if name in kinds]
+        tables = {name: name for name in found if single_file and kinds[name] == "vector"}
+        prefix = "" if zip_archive else f"{folder}/"
+        outputs = {name: f"{prefix}{name}{extensions.get(kinds[name], '')}" for name in found if name not in tables}
+        style_files = {name: f"{prefix}{name}.{styles}" for name in outputs if styles != "none"}
+        package = (f"{folder}/{package_name}.zip" if zip_archive
+                   else f"{folder}/{package_name}.gpkg" if tables else None)
+        return OperationResult(done=found, outputs=outputs, package=package, tables=tables, styles=style_files,
                                skipped={name: "layer not found" for name in layers if name not in kinds})
 
     def get_filter_state(self) -> List[FilteredLayer]:

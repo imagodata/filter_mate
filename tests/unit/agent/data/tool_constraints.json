@@ -1402,6 +1402,11 @@
     "minItems": 1,
     "type": "array"
    },
+   "package_name": {
+    "default": "export",
+    "maxLength": 100,
+    "type": "string"
+   },
    "point_cloud_format": {
     "default": "LAZ",
     "enum": [
@@ -1421,6 +1426,19 @@
     ],
     "type": "string"
    },
+   "single_file": {
+    "default": false,
+    "type": "boolean"
+   },
+   "styles": {
+    "default": "none",
+    "enum": [
+     "none",
+     "qml",
+     "sld"
+    ],
+    "type": "string"
+   },
    "subfolder": {
     "default": "export",
     "maxLength": 300,
@@ -1433,9 +1451,16 @@
      "GeoJSON",
      "ESRI Shapefile",
      "FlatGeobuf",
-     "CSV"
+     "CSV",
+     "KML",
+     "XLSX",
+     "GeoParquet"
     ],
     "type": "string"
+   },
+   "zip": {
+    "default": false,
+    "type": "boolean"
    }
   },
   "required": [
@@ -1965,6 +1990,7 @@
      "cartography",
      "configuration",
      "dashboards",
+     "deliver",
      "editing",
      "layouts",
      "open-data",
