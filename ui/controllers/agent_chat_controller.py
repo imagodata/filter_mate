@@ -358,7 +358,7 @@ class AgentChatController(QObject):
         try:
             from qgis.utils import iface
             iface.currentLayerChanged.disconnect(self.panel.facts_changed)
-        except Exception:  # no interface, or not connected
+        except (ImportError, AttributeError, RuntimeError, TypeError):  # no interface, or not connected
             pass
         for layer in self._facts_layers.values():
             self._unfollow_facts_layer(layer)
