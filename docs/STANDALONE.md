@@ -22,11 +22,13 @@ curl -LsSf https://raw.githubusercontent.com/imagodata/filter_mate/main/standalo
 powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/imagodata/filter_mate/main/standalone/install.ps1 | iex"
 ```
 
-Checked: `install.sh` as a plain user in `qgis/qgis:ltr` (QGIS found) and `python:3.12-slim` (no QGIS:
-`filtermate setup` offered); `install.ps1` on Windows 11 (QGIS 4.2 found). Or by hand:
+The package comes from the zip of `main` on GitHub: git is not needed. Checked: `install.sh` as a plain
+user in `qgis/qgis:ltr`, in `qgis/qgis:latest` without git (QGIS found, `check_standalone.py` 42/42) and
+in `python:3.12-slim` (no QGIS: `filtermate setup` offered); `install.ps1` on Windows 11 (QGIS 4.2 found,
+42/42). Or by hand:
 
 ```bash
-pipx install "git+https://github.com/imagodata/filter_mate"   # an isolated install of the command
+pipx install https://github.com/imagodata/filter_mate/archive/refs/heads/main.zip   # an isolated install of the command
 # or, in any Python 3.9 or later:
 pip install "git+https://github.com/imagodata/filter_mate"
 ```
