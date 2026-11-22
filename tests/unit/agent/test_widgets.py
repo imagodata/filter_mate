@@ -7,8 +7,9 @@ import pytest
 
 from core.agent.widgets import (
     CATEGORIES, CHART, HISTOGRAM, MAX_BARS, MAX_VALUES, MAX_WIDGETS, NOTHING, RANGE, RANGE_BINS, STAT, VALUES,
-    WidgetError, category_bars, condition, decimals, dumps, histogram_bars, layer_filter, make, parse, range_counts_hold,
-    range_edges, range_histogram, replaced, summary, wide_open, without,
+    WidgetError, category_bars, condition, decimals, dumps, histogram_bars, kept_span, layer_filter, make, parse,
+    range_counts, range_edges, range_histogram, range_reading_holds, read_range, replaced, summary, unknown_bins,
+    wide_open, without,
 )
 
 pytestmark = pytest.mark.unit
@@ -289,28 +290,46 @@ class TestRangeHistogram:
         assert sum(range_histogram([low, high], low, high)) == 2
 
 
-class TestRangeCountsHold:
-    """Bars read wide open, shown again while the range is narrower, as long as the layer read now agrees."""
+class TestRangeReadingHolds:
+    """The numbers read wide open, shown again while the range is narrower, as long as the layer read now agrees."""
 
-    OPENED = [3, 1, 4, 2]  # bars of 0-2.5, 2.5-5, 5-7.5, 7.5-10
+    OPENED = read_range([0.5, 0.8, 1.2, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0], 0, 10).values  # bars [3, 1, 4, 2] in 4
 
-    def narrowed(self, low, high):
-        return dict(a_range(minimum=0, maximum=10), low=low, high=high)
+    def narrowed(self, low, high, **changes):
+        return dict(a_range(minimum=0, maximum=10, **changes), low=low, high=high)
 
-    def test_a_narrower_range_agrees_with_its_bars_read_wide_open(self):
-        widget = self.narrowed(2.5, 7.0)  # the second bar whole, the third cut
-        assert range_counts_hold(self.OPENED, [0, 1, 3, 0], widget)
+    def now(self, values):
+        return read_range(values, 0, 10).values
 
-    def test_a_feature_added_or_removed_inside_the_range_shows(self):
-        widget = self.narrowed(2.5, 7.0)
-        assert not range_counts_hold(self.OPENED, [0, 0, 3, 0], widget)  # one less in a bar whole within
-        assert not range_counts_hold(self.OPENED, [0, 1, 5, 0], widget)  # more than wide open in a cut bar
-        assert not range_counts_hold(self.OPENED, [0, 1], widget)
+    def test_the_numbers_read_now_are_what_the_condition_keeps_of_those_read_wide_open(self):
+        assert range_counts(self.OPENED, 0, 10, bins=4) == [3, 1, 4, 2]
+        widget = self.narrowed(1.0, 10.0)
+        assert range_reading_holds(self.OPENED, self.now([1.2, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0]), widget)
 
-    def test_the_last_bar_holds_the_maximum(self):
-        widget = self.narrowed(7.5, 10.0)
-        assert range_counts_hold(self.OPENED, [0, 0, 0, 2], widget)
-        assert not range_counts_hold(self.OPENED, [0, 0, 0, 1], widget)
+    @pytest.mark.parametrize("now", [
+        [3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0],  # the feature of 1.2 deleted: a bar cut by the bound
+        [1.2, 1.3, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0],  # one added there
+        [1.9, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0],  # one moved to the next of the 24 bars
+        [1.2, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0],  # the one at the maximum gone
+    ])
+    def test_any_change_of_a_feature_shown_is_seen_in_a_bar_cut_or_whole(self, now):
+        assert not range_reading_holds(self.OPENED, self.now(now), self.narrowed(1.0, 10.0))
+
+    def test_the_bounds_as_the_condition_writes_them(self):
+        values = read_range([2, 3, 4, 5, 6], 0, 10).values
+        assert kept_span(values, self.narrowed(3.0, 5.0)) == (1, 4)  # >= 3 and <= 5: both kept
+        assert kept_span(values, self.narrowed(0.0, 10.0)) == (0, 5)  # at the ends: no condition
+        assert kept_span(values, self.narrowed(2.6, 5.4, integer=True)) == (1, 4)  # written 3 and 5
+        assert kept_span(values, self.narrowed(5.5, 5.5)) == (4, 4)
+
+    def test_what_is_left_out_of_the_bars_is_counted(self):
+        reading = read_range([None, -1, 11, float("nan"), "x", 4, 2], 0, 10)
+        assert list(reading.values) == [2.0, 4.0] and (reading.outside, reading.empty) == (4, 1)
+
+    def test_the_bars_a_layer_filtered_by_its_range_cannot_tell(self):
+        assert unknown_bins(self.narrowed(2.5, 7.0), bins=4) == [True, False, True, True]
+        assert unknown_bins(self.narrowed(0.0, 10.0), bins=4) == [False] * 4
+        assert unknown_bins(self.narrowed(0.0, 7.5), bins=4) == [False, False, False, True]
 
     def test_wide_open(self):
         widget = self.narrowed(3.0, 4.0)

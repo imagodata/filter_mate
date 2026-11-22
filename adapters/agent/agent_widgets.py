@@ -10,7 +10,7 @@ from qgis.PyQt.QtCore import QCoreApplication
 
 from ...core.agent.widgets import (
     CATEGORIES, CHART, MAX_VALUES, RANGE, SHOWING, STAT, VALUES, WidgetError, category_bars, dumps, histogram_bars,
-    layer_filter, make, parse, range_histogram, replaced, wide_open,
+    RangeReading, layer_filter, make, parse, read_range, replaced, wide_open,
 )
 
 logger = logging.getLogger("FilterMate.agent")
@@ -198,11 +198,11 @@ def chart_bars(widget: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
     return histogram_bars(values)
 
 
-def range_counts(widget: Dict[str, Any]) -> Optional[List[int]]:
-    """The bars of a range widget on its layer as filtered now: its field counted in equal parts of its bounds; None
-    when they cannot be read (see _field_values)."""
+def range_reading(widget: Dict[str, Any]) -> Optional[RangeReading]:
+    """The field of a range widget on its layer as filtered now (read_range); None when it cannot be read (see
+    _field_values)."""
     values = _field_values(widget)
-    return None if values is None else range_histogram(values, widget["minimum"], widget["maximum"])
+    return None if values is None else read_range(values, widget["minimum"], widget["maximum"])
 
 
 def opened_filter(widgets: Sequence[Dict[str, Any]], widget: Dict[str, Any]) -> str:

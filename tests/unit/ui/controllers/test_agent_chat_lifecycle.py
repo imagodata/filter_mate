@@ -1204,3 +1204,66 @@ def test_the_setup_reads_each_switch_as_the_plugin_does(ctrl_module, monkeypatch
         default = path not in wizard._UNSET_OFF
         assert wizard.read_switch(path, written) is config._get_option_bool(written, default), path
         assert wizard.read_switch(path, None) is default, path
+
+
+class TestRangeReadings:
+    """The field of a range widget: read once for a state of its layer, not out of view, its numbers read wide open
+    kept for the bars outside its bounds."""
+
+    @pytest.fixture
+    def setup(self, controller):
+        stub = sys.modules[f"{_PKG}.adapters.agent.agent_widgets"]
+        model = sys.modules[f"{_PKG}.core.agent.widgets"]
+        state = types.SimpleNamespace(widget=model.make([], "range", "L1", "communes", "", field="pop", minimum=0,
+                                                        maximum=10), subset="", values=[1, 2, 9, None], reads=0)
+        layer = types.SimpleNamespace(id=lambda: "L1", subsetString=lambda: state.subset)
+
+        def reading(widget):
+            state.reads += 1
+            return model.read_range(state.values, widget["minimum"], widget["maximum"])
+        stub.read_widgets = lambda project=None: [state.widget]
+        stub.widget_layer = lambda widget: layer
+        stub.opened_filter = lambda widgets, widget: ""
+        stub.range_reading = reading
+        controller.panel.isVisible.return_value = True
+        return state, model
+
+    @staticmethod
+    def shown(controller):
+        return controller.panel.widgets_strip.set_bars.call_args[0][1]
+
+    def test_read_once_until_the_layer_changes_and_not_while_out_of_view(self, controller, setup):
+        state, _model = setup
+        controller._refresh_widgets()
+        assert state.reads == 0  # at the next turn of the stat timer, not at once
+        controller._refresh_stats()
+        controller._refresh_stats()
+        assert state.reads == 1
+        controller._on_layer_changed("L1")  # a feature edited
+        controller._refresh_stats()
+        assert state.reads == 2
+        controller.panel.isVisible.return_value = False
+        controller._on_layer_changed("L1")
+        controller._refresh_stats()
+        assert state.reads == 2 and controller._stats_waiting
+        controller.panel.isVisible.return_value = True
+        controller._stat_timer.start.reset_mock()
+        controller._on_panel_shown()
+        controller._stat_timer.start.assert_called()
+        controller._refresh_stats()
+        assert state.reads == 3
+
+    def test_narrowed_the_bars_read_wide_open_stay_until_a_feature_changes(self, controller, setup):
+        state, model = setup
+        controller._refresh_stats()
+        opened = self.shown(controller)
+        assert sum(opened["counts"]) == 3 and opened["empty"] == 1 and opened["unknown"] == []
+        state.widget = dict(state.widget, low=5.0)  # narrowed: the layer filtered by it
+        state.subset, state.values = '"pop" >= 5.0', [9]
+        controller._refresh_stats()
+        assert self.shown(controller) == opened
+        controller._on_layer_changed("L1")  # an edit: what was read wide open is forgotten
+        controller._refresh_stats()
+        now = self.shown(controller)
+        assert sum(now["counts"]) == 1 and now["unknown"] == model.unknown_bins(state.widget)
+        assert "w1" not in controller._opened

@@ -2094,9 +2094,43 @@ def check_widgets(chat, provider, settings, ask, layer):
     wait(lambda: sum(bars()) == 60 and strip.cards["w2"].value.text() == "20", 3)
     check("widgets: narrowed from the top, the bars above stay", layer.subsetString() == '"pop" <= 2000' and
           sum(bars()) == 60 and histogram.range() == (None, 2000.0), (layer.subsetString(), bars()))
+
+    # A reading for each state of the layer, none while the section is out of view; an edit forgets the bars read
+    # wide open: the bars outside the bounds are hatched as unknown, not drawn empty.
+    import filter_mate.adapters.agent.agent_widgets as widgets_module
+    reading, reads = widgets_module.range_reading, []
+    widgets_module.range_reading = lambda widget: reads.append(widget["id"]) or reading(widget)
+    index = layer.fields().lookupField("pop")
+
+    def edit(old, new):
+        feature = next(feature for feature in layer.getFeatures() if feature["pop"] == old)
+        layer.startEditing()
+        layer.changeAttributeValue(feature.id(), index, new)
+        layer.commitChanges()
+    window = panel.window()
+    try:
+        chat._refresh_stats()
+        chat._refresh_stats()
+        check("widgets: a refresh with nothing changed reads nothing", reads == [], reads)
+        window.hide()
+        edit(1500, 1550)
+        QTest.qWait(700)
+        check("widgets: out of view, nothing is read", reads == [], reads)
+        window.show()
+        wait(lambda: reads and strip.cards["w1"].histogram._unknown, 3)
+        unknown = histogram._unknown
+        check("widgets: read once in view, the bars outside unknown after an edit", reads == ["w1"] and
+              sum(bars()) == 20 and unknown[0] is False and unknown[-1] is True, (reads, bars(), unknown))
+    finally:
+        widgets_module.range_reading = reading
+        window.show()
+    edit(1550, 1500)
     card.high.setValue(6000)
     card.flush()
     check("widgets: and wide open again", layer.subsetString() == "", layer.subsetString())
+    wait(lambda: sum(bars()) == 60 and not histogram._unknown, 3)
+    check("widgets: wide open, every bar known again", sum(bars()) == 60 and not histogram._unknown,
+          (bars(), histogram._unknown))
 
     provider.reset((200, {}, tool_turn("create_widget", {"kind": "values", "layer": "communes", "field": "pop"})),
                    (200, {}, text_turn("ok")))

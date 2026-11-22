@@ -142,7 +142,7 @@ def _value_at(histogram, x, minimum, maximum, places):
 
 
 class TestRangeHistogram:
-    BARS = [1] * 24
+    BARS = {"counts": [1] * 24, "unknown": [], "outside": 0, "empty": 0}
 
     def test_a_handle_dropped_moves_the_bound_and_its_box_then_filters_after_the_pause(self):
         holder, card = _shown_card(dict(_range(0.0, 100.0), id="w1"), self.BARS)
@@ -228,6 +228,82 @@ class TestRangeHistogram:
         histogram = strip.cards["w1"].histogram
         palette = importlib.import_module(f"{_PKG}.ui.styles.mockup_design").tokens(False)
         assert histogram._accent is not None and histogram._accent.name() == QtGui.QColor(palette["fm_accent"]).name()
+
+    @pytest.mark.parametrize("minimum, maximum, side", [(0.0234, 0.1234, "high"), (0.0236, 0.1236, "low")])
+    def test_a_handle_dropped_near_an_end_shown_as_that_end_is_the_end_itself(self, minimum, maximum, side):
+        holder, card = _shown_card(dict(_range(minimum, maximum), id="w1"), self.BARS)
+        histogram, box = card.histogram, getattr(card, side)
+        places = model.decimals(card.widget)
+        right = histogram.width() - 6
+        start, target = (6, 8) if side == "low" else (right, right - 2)  # 2 px from the end
+        value = _value_at(histogram, target, minimum, maximum, places)
+        end = box.minimum() if side == "low" else box.maximum()
+        assert value not in (minimum, maximum) and value == end  # the box shows it as its end
+        _drop(histogram, start, target)
+        assert card.widget[side] == (minimum if side == "low" else maximum)
+        assert model.condition(card.widget, _quote, repr) == "" and histogram.range() == (None, None)
+        state = card.flush() and card.applied
+        assert model.parse(model.dumps([state]))[0] == state  # kept as dropped once saved and read again
+        holder.deleteLater()
+
+    def test_a_value_typed_without_enter_is_kept_when_a_handle_is_dropped(self):
+        holder, card = _shown_card(dict(_range(0.0, 100.0), id="w1"), self.BARS)
+        histogram = card.histogram
+        card.low.lineEdit().setText("40")  # typed, Enter not pressed
+        target = 6 + int(0.8 * (histogram.width() - 12))
+        _drop(histogram, histogram.width() - 6, target)
+        assert card.widget["low"] == 40.0 and card.widget["high"] == _value_at(histogram, target, 0.0, 100.0, 2)
+        assert histogram.range() == (40.0, card.widget["high"])
+        holder.deleteLater()
+
+    def test_a_handle_dropped_past_a_value_typed_drags_it_along(self):
+        holder, card = _shown_card(dict(_range(0.0, 100.0), id="w1"), self.BARS)
+        histogram = card.histogram
+        card.low.lineEdit().setText("80")
+        target = 6 + int(0.5 * (histogram.width() - 12))
+        _drop(histogram, histogram.width() - 6, target)  # the high handle to 50, under the 80 typed
+        assert card.widget["low"] == card.widget["high"] == _value_at(histogram, target, 0.0, 100.0, 2)
+        holder.deleteLater()
+
+    def test_the_bars_a_filter_hid_are_hatched_and_what_is_left_out_is_said(self):
+        holder, card = _shown_card(dict(_range(0.0, 100.0), id="w1"))
+        unknown = [index < 12 for index in range(24)]
+        card.set_bars(dict(self.BARS, unknown=unknown, outside=12, empty=3))
+        assert card.histogram._unknown == unknown
+        assert card.note.isVisible() and card.note.text() == "12 outside the range · 3 without value"
+        card.set_bars(self.BARS)
+        assert not card.note.isVisible() and card.histogram._unknown == []
+        holder.deleteLater()
+
+    def test_hatched_bins_are_drawn(self):
+        histogram = histogram_module.RangeHistogramWidget()
+        histogram.resize(250, 80)
+        histogram.set_histogram([0] * 24, 0.0, 10.0)
+        plain = histogram.grab().toImage()
+        histogram.set_unknown([True] * 24)
+        hatched = histogram.grab().toImage()
+        row = 40
+        assert any(plain.pixel(x, row) != hatched.pixel(x, row) for x in range(10, 240))
+        histogram.deleteLater()
+
+    def test_a_range_with_one_value_has_no_histogram_and_emits_nothing(self, strip):
+        widget = dict(_range(0.0, 1.0), id="w1", minimum=5.0, maximum=5.0, low=5.0, high=5.0)
+        emitted = []
+        strip.changed.connect(emitted.append)
+        strip.set_widgets([widget])
+        strip.set_widgets([widget, _stat(2)])
+        strip.set_widgets([widget])
+        _run(strip_module.APPLY_DELAY_MS + 100)
+        assert emitted == [] and strip.cards["w1"].histogram is None
+
+    def test_a_card_drawn_again_keeps_its_bars_until_they_are_read(self, strip):
+        widget = dict(_range(0.0, 100.0), id="w1")
+        strip.set_widgets([widget])
+        strip.set_bars("w1", self.BARS)
+        strip.set_widgets([widget, _stat(2)])
+        assert strip.cards["w1"].bars == self.BARS and not strip.cards["w1"].histogram.isHidden()
+        strip.set_widgets([dict(widget, maximum=50.0, high=50.0), _stat(2)])  # other bounds: other bars
+        assert strip.cards["w1"].bars is None
 
 
 def _values(number, chosen=("a",)):
