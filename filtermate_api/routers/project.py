@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
-    ContourResult, ElevationResult, OsmResult, PopulationResult,
+    ContourResult, ElevationResult, LocalCopyResult, OsmResult, PopulationResult,
     Bookmarks, FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, PlacesResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
@@ -303,6 +303,26 @@ class DuplicateBody(BaseModel):
 
     layer: LayerName
     name: str = Field(default="", max_length=200)
+
+
+class LocalCopyBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: LayerName
+    action: Literal["copy", "back"] = "copy"
+    extent_wkt: str = Field(default="", max_length=100_000, description="Area as WKT; empty: the visible map")
+    crs: str = Field(default="", max_length=64, description="CRS of extent_wkt; empty: the CRS of the map")
+
+
+@router.post("/layers/local-copy", response_model=LocalCopyResult)
+def local_copy(payload: LocalCopyBody, request: Request) -> LocalCopyResult:
+    """Copy a web service layer over the visible map (or an area) to a file next to the project and read it, or
+    read its service again (action back)."""
+    try:
+        return _accessor(request).local_copy(payload.layer, action=payload.action, extent_wkt=payload.extent_wkt,
+                                             crs=payload.crs)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 
 
 @router.post("/layers/duplicate", response_model=LayerSummary)

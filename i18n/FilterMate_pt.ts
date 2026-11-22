@@ -358,6 +358,32 @@ Concorda?</translation>
         <translation>Camada adicionada: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
+        <source>Back to the service: {}</source>
+        <translation>Voltar ao serviço: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2707"/>
+        <source>Local copy: {}</source>
+        <translation>Cópia local: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3036"/>
+        <source>The agent wants the layer {} to read its web service again (its local copy stays on disk). Do you agree?</source>
+        <translation>O agente quer que a camada {} volte a ler o seu serviço web (a sua cópia local fica no disco). Concorda?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3046"/>
+        <source>The agent wants to copy the layer {} locally, and the layer then reads the copy:
+{}
+
+The service is read in the background: the copy can be cancelled. Do you agree?</source>
+        <translation>O agente quer copiar a camada {} localmente, e a camada passará depois a ler a cópia:
+{}
+
+O serviço é lido em segundo plano: a cópia pode ser cancelada. Concorda?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
         <source>Table added: {}</source>
         <translation>Tabela adicionada: {}</translation>
@@ -12939,6 +12965,310 @@ O onnxruntime vem do PyPI com o pip, o modelo de huggingface.co/{1}, cada arquiv
         <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Incompatibilidade de tipo no filtro: {warning_detail}...</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopy</name>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="623"/>
+        <source> (incomplete)</source>
+        <translation> (incompleta)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="221"/>
+        <source>Copy of the features of the visible map, {0} at most.
+
+Folder: {1}</source>
+        <translation>Cópia dos elementos do mapa visível, no máximo {0}.
+
+Pasta: {1}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="216"/>
+        <source>Copy of the visible map: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests to the service, {5:.0f} MB at most on disk.
+
+Folder: {6}</source>
+        <translation>Cópia do mapa visível: {0} x {1} píxeis, {2:.3g} {3} por píxel, {4} pedidos ao serviço, no máximo {5:.0f} MB no disco.
+
+Pasta: {6}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="355"/>
+        <source>FilterMate: local copy of {0}</source>
+        <translation>FilterMate: cópia local de {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="609"/>
+        <source>Its filter could not be put back on the service: filter it again.</source>
+        <translation>O seu filtro não pôde ser reposto no serviço: filtre-a novamente.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="579"/>
+        <source>Its filter could not be put on the copy (the GeoPackage reads another language): filter it again.</source>
+        <translation>O seu filtro não pôde ser aplicado à cópia (o GeoPackage lê outra linguagem): filtre-a novamente.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="622"/>
+        <source>Local copy of {0}: still image</source>
+        <translation>Cópia local de {0}: imagem fixa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="620"/>
+        <source>Local copy of {0}: {1} features</source>
+        <translation>Cópia local de {0}: {1} elementos</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="329"/>
+        <source>No folder can be written for the copy: neither next to the project nor in the QGIS profile.</source>
+        <translation>Não é possível escrever em nenhuma pasta para a cópia: nem junto ao projeto nem no perfil do QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="263"/>
+        <source>Only a layer of a web service (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, XYZ tiles) can be copied.</source>
+        <translation>Só uma camada de um serviço web (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, mosaicos XYZ) pode ser copiada.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="701"/>
+        <source>The local copy of {0} was not found: these layers read their web service. Their copy is looked for again the next time the project is opened.</source>
+        <translation>A cópia local de {0} não foi encontrada: estas camadas leem o seu serviço web. A sua cópia será procurada novamente da próxima vez que o projeto for aberto.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="605"/>
+        <source>The service could not be opened: the layer still reads its copy.</source>
+        <translation>Não foi possível abrir o serviço: a camada continua a ler a sua cópia.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="481"/>
+        <source>The service was read for {0:.0f} s, the most allowed: the copy holds {1} features and is not complete.</source>
+        <translation>O serviço foi lido durante {0:.0f} s, o máximo permitido: a cópia contém {1} elementos e não está completa.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="268"/>
+        <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
+        <translation>Os termos de {0} proíbem guardar os seus mosaicos: esta camada não é copiada. Outro mapa base pode sê-lo (IGN, Carto, OpenTopoMap...).</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="292"/>
+        <source>The visible map cannot be expressed in the coordinates of this layer.</source>
+        <translation>O mapa visível não pode ser expresso nas coordenadas desta camada.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="288"/>
+        <source>The visible map could not be read.</source>
+        <translation>Não foi possível ler o mapa visível.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="478"/>
+        <source>The visible map holds more than {0} features: only the first {0} were copied. Zoom in, or raise STREAM_COPY &gt; max_features.</source>
+        <translation>O mapa visível contém mais de {0} elementos: apenas os primeiros {0} foram copiados. Aproxime o zoom ou aumente STREAM_COPY &gt; max_features.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="312"/>
+        <source>The visible map is outside what this service draws.</source>
+        <translation>O mapa visível está fora do que este serviço desenha.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="258"/>
+        <source>This layer already reads its local copy: go back to the service first, or copy it again.</source>
+        <translation>Esta camada já lê a sua cópia local: volte primeiro ao serviço ou copie-a novamente.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="272"/>
+        <source>This layer cannot be read from its service now.</source>
+        <translation>Esta camada não pode ser lida a partir do seu serviço neste momento.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="596"/>
+        <source>This layer does not read a local copy.</source>
+        <translation>Esta camada não lê uma cópia local.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="279"/>
+        <source>This layer is being edited: save or discard the edits, then copy it.</source>
+        <translation>Esta camada está em edição: guarde ou descarte as edições e depois copie-a.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="601"/>
+        <source>This layer is being edited: save or discard the edits, then go back to its service.</source>
+        <translation>Esta camada está em edição: guarde ou descarte as edições e depois volte ao seu serviço.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="276"/>
+        <source>This layer is filtered by another layer: unfilter it, then copy it.</source>
+        <translation>Esta camada está filtrada por outra camada: desfiltre-a e depois copie-a.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="599"/>
+        <source>This layer is filtered by another layer: unfilter it, then go back to its service.</source>
+        <translation>Esta camada está filtrada por outra camada: desfiltre-a e depois volte ao seu serviço.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="319"/>
+        <source>This version of QGIS cannot check what a service answers while it is read: update QGIS to 3.26 or later to copy it.</source>
+        <translation>Esta versão do QGIS não consegue verificar o que um serviço responde enquanto é lido: atualize o QGIS para a versão 3.26 ou posterior para o copiar.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="227"/>
+        <source>map units</source>
+        <translation>unidades do mapa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="451"/>
+        <source>the GeoPackage could not be written: {0}</source>
+        <translation>não foi possível escrever o GeoPackage: {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="568"/>
+        <source>the copy could not be opened: the layer still reads its service</source>
+        <translation>não foi possível abrir a cópia: a camada continua a ler o seu serviço</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="391"/>
+        <source>the copy failed ({0})</source>
+        <translation>a cópia falhou ({0})</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="471"/>
+        <source>the copy was canceled</source>
+        <translation>a cópia foi cancelada</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="413"/>
+        <source>the service could not be opened</source>
+        <translation>não foi possível abrir o serviço</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="475"/>
+        <source>the service could not be read to the end: nothing was kept</source>
+        <translation>não foi possível ler o serviço até ao fim: nada foi guardado</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="473"/>
+        <source>the service gave no feature over the visible map: nothing was copied</source>
+        <translation>o serviço não devolveu nenhum elemento sobre o mapa visível: nada foi copiado</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="560"/>
+        <source>{0} is being edited: it stays on its service. Save or discard the edits, then copy it again.</source>
+        <translation>{0} está em edição: continua no seu serviço. Guarde ou descarte as edições e depois copie-a novamente.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="421"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} pedido(s) ao serviço ficaram sem resposta: a imagem pode ter buracos.</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopyActions</name>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Back to the service</source>
+        <translation>Voltar ao serviço</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Cancel</source>
+        <translation>Cancelar</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Copy</source>
+        <translation>Copiar</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Copy again</source>
+        <translation>Copiar novamente</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="173"/>
+        <source>Copying {0} over the visible map… (cancel it from the button or the task bar)</source>
+        <translation>A copiar {0} sobre o mapa visível… (cancele-a no botão ou na barra de tarefas)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="355"/>
+        <source>FilterMate: cancel the local copy</source>
+        <translation>FilterMate: cancelar a cópia local</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="356"/>
+        <source>FilterMate: local copy (back to the service, copy again)</source>
+        <translation>FilterMate: cópia local (voltar ao serviço, copiar novamente)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="307"/>
+        <source>FilterMate: local copy of the visible map</source>
+        <translation>FilterMate: cópia local do mapa visível</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="198"/>
+        <source>It reads its previous copy.</source>
+        <translation>Lê a sua cópia anterior.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Local copy of {0}</source>
+        <translation>Cópia local de {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="115"/>
+        <source>Local copy under way: click to cancel it</source>
+        <translation>Cópia local em curso: clique para a cancelar</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="121"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer, and read the layer from it (faster, and without network)</source>
+        <translation>Cópia local: guardar o que este serviço web mostra sobre o mapa visível num ficheiro deste computador e ler a camada a partir dele (mais rápido e sem rede)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="139"/>
+        <source>Only a layer of a web service (WFS, WMS, WMTS, XYZ tiles...) can be copied.</source>
+        <translation>Só uma camada de um serviço web (WFS, WMS, WMTS, mosaicos XYZ...) pode ser copiada.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="270"/>
+        <source>The copy covers the area of the map when it was made. Copy again reads the same area anew.</source>
+        <translation>A cópia cobre a zona do mapa no momento em que foi feita. Copiar novamente lê de novo a mesma zona.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="167"/>
+        <source>canceled</source>
+        <translation>cópia cancelada</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="191"/>
+        <source>{0} changed during its copy (a filter of another layer, another source): the copy is not used. Copy it again.</source>
+        <translation>{0} mudou durante a cópia (um filtro de outra camada, outra fonte): a cópia não é utilizada. Copie-a novamente.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="157"/>
+        <source>{0} is being copied already.</source>
+        <translation>{0} já está a ser copiada.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="215"/>
+        <source>{0} now reads its local copy ({1}).</source>
+        <translation>{0} lê agora a sua cópia local ({1}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="246"/>
+        <source>{0} reads its service again. Its copy is still in the folder of the copies.</source>
+        <translation>{0} volta a ler o seu serviço. A sua cópia continua na pasta das cópias.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="197"/>
+        <source>{0} was not copied: {1}.</source>
+        <translation>{0} não foi copiada: {1}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="202"/>
+        <source>{0} was removed during its copy: the file is kept in {1}.</source>
+        <translation>{0} foi removida durante a cópia: o ficheiro é guardado em {1}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
+        <source>{0}. Click to go back to the service or to copy the visible map again</source>
+        <translation>{0}. Clique para voltar ao serviço ou copiar novamente o mapa visível</translation>
     </message>
 </context>
 <context>

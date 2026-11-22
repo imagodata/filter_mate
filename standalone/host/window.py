@@ -98,6 +98,12 @@ class _TreeMenu(QgsLayerTreeViewMenuProvider):
         menu.addSeparator()
         menu.addAction(actions.actionRenameGroupOrLayer(menu))
         menu.addAction(actions.actionRemoveGroupOrLayer(menu))
+        custom = [action for action, (layer_type, every, ids) in window.custom_layer_actions.items()
+                  if layer.type() == layer_type and (every or layer.id() in ids)]
+        if custom:  # the entries of plugins (FilterMate: the local copy of a web service layer)
+            menu.addSeparator()
+            for action in custom:
+                menu.addAction(action)
         menu.addSeparator()
         menu.addAction(window.actions["properties"])
         return menu
@@ -115,6 +121,7 @@ class StandaloneWindow(QMainWindow):
         self.setAcceptDrops(True)
         self.interactive = interactive
         self.actions = {}
+        self.custom_layer_actions = {}  # QAction -> [layer type, every layer, ids of the layers] (StandaloneInterface)
         self._tables = []
         self._plugin_menus = {}
         self._plugins_root_menu = None

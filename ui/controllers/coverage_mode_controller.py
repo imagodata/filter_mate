@@ -3476,7 +3476,7 @@ class CoverageModeController(BaseController):
             try:
                 if kind is LayerKind.RASTER:
                     fmt = str(_option('raster_export_format', 'COG'))
-                    jobs.append(exporters.RasterExportJob(layer, exporters.output_path(folder, layer.name(), '.tif'), fmt, crs))
+                    jobs.append(exporters.raster_export_job(layer, exporters.output_path(folder, layer.name(), '.tif'), fmt, crs))
                 elif kind is LayerKind.POINT_CLOUD:
                     fmt = str(_option('point_cloud_export_format', 'LAZ'))
                     extension = exporters.POINT_CLOUD_FORMATS.get(fmt, '.laz')

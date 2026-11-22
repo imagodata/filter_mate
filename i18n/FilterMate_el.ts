@@ -358,6 +358,32 @@ Do you agree?</source>
         <translation>Προστέθηκε επίπεδο: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
+        <source>Back to the service: {}</source>
+        <translation>Επιστροφή στην υπηρεσία: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2707"/>
+        <source>Local copy: {}</source>
+        <translation>Τοπικό αντίγραφο: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3036"/>
+        <source>The agent wants the layer {} to read its web service again (its local copy stays on disk). Do you agree?</source>
+        <translation>Ο πράκτορας θέλει το επίπεδο {} να διαβάζει ξανά την υπηρεσία ιστού του (το τοπικό αντίγραφό του παραμένει στον δίσκο). Συμφωνείτε;</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3046"/>
+        <source>The agent wants to copy the layer {} locally, and the layer then reads the copy:
+{}
+
+The service is read in the background: the copy can be cancelled. Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να αντιγράψει τοπικά το επίπεδο {}· στη συνέχεια το επίπεδο θα διαβάζει το αντίγραφο:
+{}
+
+Η υπηρεσία διαβάζεται στο παρασκήνιο: η αντιγραφή μπορεί να ακυρωθεί. Συμφωνείτε;</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
         <source>Table added: {}</source>
         <translation>Προστέθηκε πίνακας: {}</translation>
@@ -12939,6 +12965,310 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Αναντιστοιχία τύπου στο φίλτρο: {warning_detail}...</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopy</name>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="623"/>
+        <source> (incomplete)</source>
+        <translation> (ατελές)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="221"/>
+        <source>Copy of the features of the visible map, {0} at most.
+
+Folder: {1}</source>
+        <translation>Αντίγραφο των οντοτήτων του ορατού χάρτη, το πολύ {0}.
+
+Φάκελος: {1}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="216"/>
+        <source>Copy of the visible map: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests to the service, {5:.0f} MB at most on disk.
+
+Folder: {6}</source>
+        <translation>Αντίγραφο του ορατού χάρτη: {0} x {1} εικονοστοιχεία, {2:.3g} {3} ανά εικονοστοιχείο, {4} αιτήματα προς την υπηρεσία, το πολύ {5:.0f} MB στον δίσκο.
+
+Φάκελος: {6}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="355"/>
+        <source>FilterMate: local copy of {0}</source>
+        <translation>FilterMate: τοπικό αντίγραφο του {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="609"/>
+        <source>Its filter could not be put back on the service: filter it again.</source>
+        <translation>Το φίλτρο του δεν μπόρεσε να επαναφερθεί στην υπηρεσία: φιλτράρετέ το ξανά.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="579"/>
+        <source>Its filter could not be put on the copy (the GeoPackage reads another language): filter it again.</source>
+        <translation>Το φίλτρο του δεν μπόρεσε να εφαρμοστεί στο αντίγραφο (το GeoPackage διαβάζει άλλη γλώσσα): φιλτράρετέ το ξανά.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="622"/>
+        <source>Local copy of {0}: still image</source>
+        <translation>Τοπικό αντίγραφο του {0}: στατική εικόνα</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="620"/>
+        <source>Local copy of {0}: {1} features</source>
+        <translation>Τοπικό αντίγραφο του {0}: {1} οντότητες</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="329"/>
+        <source>No folder can be written for the copy: neither next to the project nor in the QGIS profile.</source>
+        <translation>Δεν υπάρχει φάκελος στον οποίο να μπορεί να γραφτεί το αντίγραφο: ούτε δίπλα στο έργο ούτε στο προφίλ QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="263"/>
+        <source>Only a layer of a web service (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, XYZ tiles) can be copied.</source>
+        <translation>Μόνο ένα επίπεδο υπηρεσίας ιστού (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, πλακίδια XYZ) μπορεί να αντιγραφεί.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="701"/>
+        <source>The local copy of {0} was not found: these layers read their web service. Their copy is looked for again the next time the project is opened.</source>
+        <translation>Το τοπικό αντίγραφο του {0} δεν βρέθηκε: αυτά τα επίπεδα διαβάζουν την υπηρεσία ιστού τους. Το αντίγραφό τους θα αναζητηθεί ξανά την επόμενη φορά που θα ανοίξει το έργο.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="605"/>
+        <source>The service could not be opened: the layer still reads its copy.</source>
+        <translation>Δεν ήταν δυνατό να ανοιχτεί η υπηρεσία: το επίπεδο διαβάζει ακόμη το αντίγραφό του.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="481"/>
+        <source>The service was read for {0:.0f} s, the most allowed: the copy holds {1} features and is not complete.</source>
+        <translation>Η υπηρεσία διαβάστηκε για {0:.0f} s, το μέγιστο επιτρεπόμενο: το αντίγραφο περιέχει {1} οντότητες και δεν είναι πλήρες.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="268"/>
+        <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
+        <translation>Οι όροι του {0} απαγορεύουν τη διατήρηση των πλακιδίων του: αυτό το επίπεδο δεν αντιγράφεται. Άλλος χάρτης υποβάθρου μπορεί να αντιγραφεί (IGN, Carto, OpenTopoMap...).</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="292"/>
+        <source>The visible map cannot be expressed in the coordinates of this layer.</source>
+        <translation>Ο ορατός χάρτης δεν μπορεί να εκφραστεί στις συντεταγμένες αυτού του επιπέδου.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="288"/>
+        <source>The visible map could not be read.</source>
+        <translation>Δεν ήταν δυνατή η ανάγνωση του ορατού χάρτη.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="478"/>
+        <source>The visible map holds more than {0} features: only the first {0} were copied. Zoom in, or raise STREAM_COPY &gt; max_features.</source>
+        <translation>Ο ορατός χάρτης περιέχει περισσότερες από {0} οντότητες: αντιγράφηκαν μόνο οι πρώτες {0}. Κάντε μεγέθυνση ή αυξήστε το STREAM_COPY &gt; max_features.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="312"/>
+        <source>The visible map is outside what this service draws.</source>
+        <translation>Ο ορατός χάρτης βρίσκεται εκτός αυτού που σχεδιάζει αυτή η υπηρεσία.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="258"/>
+        <source>This layer already reads its local copy: go back to the service first, or copy it again.</source>
+        <translation>Αυτό το επίπεδο διαβάζει ήδη το τοπικό αντίγραφό του: επιστρέψτε πρώτα στην υπηρεσία ή αντιγράψτε το ξανά.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="272"/>
+        <source>This layer cannot be read from its service now.</source>
+        <translation>Αυτό το επίπεδο δεν μπορεί να διαβαστεί από την υπηρεσία του αυτή τη στιγμή.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="596"/>
+        <source>This layer does not read a local copy.</source>
+        <translation>Αυτό το επίπεδο δεν διαβάζει τοπικό αντίγραφο.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="279"/>
+        <source>This layer is being edited: save or discard the edits, then copy it.</source>
+        <translation>Αυτό το επίπεδο τροποποιείται: αποθηκεύστε ή απορρίψτε τις αλλαγές και μετά αντιγράψτε το.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="601"/>
+        <source>This layer is being edited: save or discard the edits, then go back to its service.</source>
+        <translation>Αυτό το επίπεδο τροποποιείται: αποθηκεύστε ή απορρίψτε τις αλλαγές και μετά επιστρέψτε στην υπηρεσία του.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="276"/>
+        <source>This layer is filtered by another layer: unfilter it, then copy it.</source>
+        <translation>Αυτό το επίπεδο φιλτράρεται από άλλο επίπεδο: αφαιρέστε το φίλτρο και μετά αντιγράψτε το.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="599"/>
+        <source>This layer is filtered by another layer: unfilter it, then go back to its service.</source>
+        <translation>Αυτό το επίπεδο φιλτράρεται από άλλο επίπεδο: αφαιρέστε το φίλτρο και μετά επιστρέψτε στην υπηρεσία του.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="319"/>
+        <source>This version of QGIS cannot check what a service answers while it is read: update QGIS to 3.26 or later to copy it.</source>
+        <translation>Αυτή η έκδοση του QGIS δεν μπορεί να ελέγξει τι απαντά μια υπηρεσία κατά την ανάγνωσή της: ενημερώστε το QGIS στην έκδοση 3.26 ή νεότερη για να την αντιγράψετε.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="227"/>
+        <source>map units</source>
+        <translation>μονάδες χάρτη</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="451"/>
+        <source>the GeoPackage could not be written: {0}</source>
+        <translation>δεν ήταν δυνατή η εγγραφή του GeoPackage: {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="568"/>
+        <source>the copy could not be opened: the layer still reads its service</source>
+        <translation>δεν ήταν δυνατό να ανοιχτεί το αντίγραφο: το επίπεδο διαβάζει ακόμη την υπηρεσία του</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="391"/>
+        <source>the copy failed ({0})</source>
+        <translation>η αντιγραφή απέτυχε ({0})</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="471"/>
+        <source>the copy was canceled</source>
+        <translation>η αντιγραφή ακυρώθηκε</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="413"/>
+        <source>the service could not be opened</source>
+        <translation>δεν ήταν δυνατό να ανοιχτεί η υπηρεσία</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="475"/>
+        <source>the service could not be read to the end: nothing was kept</source>
+        <translation>δεν ήταν δυνατή η ανάγνωση της υπηρεσίας μέχρι το τέλος: δεν κρατήθηκε τίποτα</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="473"/>
+        <source>the service gave no feature over the visible map: nothing was copied</source>
+        <translation>η υπηρεσία δεν έδωσε καμία οντότητα στον ορατό χάρτη: δεν αντιγράφηκε τίποτα</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="560"/>
+        <source>{0} is being edited: it stays on its service. Save or discard the edits, then copy it again.</source>
+        <translation>Το {0} τροποποιείται: παραμένει στην υπηρεσία του. Αποθηκεύστε ή απορρίψτε τις αλλαγές και μετά αντιγράψτε το ξανά.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="421"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} αίτημα(τα) προς την υπηρεσία έμειναν χωρίς απάντηση: η εικόνα μπορεί να έχει κενά.</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopyActions</name>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Back to the service</source>
+        <translation>Επιστροφή στην υπηρεσία</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Cancel</source>
+        <translation>Ακύρωση</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Copy</source>
+        <translation>Αντιγραφή</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Copy again</source>
+        <translation>Αντιγραφή ξανά</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="173"/>
+        <source>Copying {0} over the visible map… (cancel it from the button or the task bar)</source>
+        <translation>Αντιγραφή του {0} πάνω στον ορατό χάρτη… (ακυρώστε την από το κουμπί ή τη γραμμή εργασιών)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="355"/>
+        <source>FilterMate: cancel the local copy</source>
+        <translation>FilterMate: ακύρωση του τοπικού αντιγράφου</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="356"/>
+        <source>FilterMate: local copy (back to the service, copy again)</source>
+        <translation>FilterMate: τοπικό αντίγραφο (επιστροφή στην υπηρεσία, αντιγραφή ξανά)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="307"/>
+        <source>FilterMate: local copy of the visible map</source>
+        <translation>FilterMate: τοπικό αντίγραφο του ορατού χάρτη</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="198"/>
+        <source>It reads its previous copy.</source>
+        <translation>Διαβάζει το προηγούμενο αντίγραφό του.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Local copy of {0}</source>
+        <translation>Τοπικό αντίγραφο του {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="115"/>
+        <source>Local copy under way: click to cancel it</source>
+        <translation>Τοπική αντιγραφή σε εξέλιξη: κάντε κλικ για ακύρωση</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="121"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer, and read the layer from it (faster, and without network)</source>
+        <translation>Τοπικό αντίγραφο: κρατήστε ό,τι δείχνει αυτή η υπηρεσία ιστού στον ορατό χάρτη σε ένα αρχείο αυτού του υπολογιστή και διαβάστε το επίπεδο από αυτό (πιο γρήγορα και χωρίς δίκτυο)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="139"/>
+        <source>Only a layer of a web service (WFS, WMS, WMTS, XYZ tiles...) can be copied.</source>
+        <translation>Μόνο ένα επίπεδο υπηρεσίας ιστού (WFS, WMS, WMTS, πλακίδια XYZ...) μπορεί να αντιγραφεί.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="270"/>
+        <source>The copy covers the area of the map when it was made. Copy again reads the same area anew.</source>
+        <translation>Το αντίγραφο καλύπτει την περιοχή του χάρτη τη στιγμή που δημιουργήθηκε. Η αντιγραφή ξανά διαβάζει πάλι την ίδια περιοχή.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="167"/>
+        <source>canceled</source>
+        <translation>ακυρώθηκε</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="191"/>
+        <source>{0} changed during its copy (a filter of another layer, another source): the copy is not used. Copy it again.</source>
+        <translation>Το {0} άλλαξε κατά την αντιγραφή του (φίλτρο άλλου επιπέδου, άλλη πηγή): το αντίγραφο δεν χρησιμοποιείται. Αντιγράψτε το ξανά.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="157"/>
+        <source>{0} is being copied already.</source>
+        <translation>Το {0} αντιγράφεται ήδη.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="215"/>
+        <source>{0} now reads its local copy ({1}).</source>
+        <translation>Το {0} διαβάζει τώρα το τοπικό αντίγραφό του ({1}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="246"/>
+        <source>{0} reads its service again. Its copy is still in the folder of the copies.</source>
+        <translation>Το {0} διαβάζει ξανά την υπηρεσία του. Το αντίγραφό του παραμένει στον φάκελο των αντιγράφων.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="197"/>
+        <source>{0} was not copied: {1}.</source>
+        <translation>Το {0} δεν αντιγράφηκε: {1}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="202"/>
+        <source>{0} was removed during its copy: the file is kept in {1}.</source>
+        <translation>Το {0} αφαιρέθηκε κατά την αντιγραφή του: το αρχείο διατηρείται στο {1}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
+        <source>{0}. Click to go back to the service or to copy the visible map again</source>
+        <translation>{0}. Κάντε κλικ για να επιστρέψετε στην υπηρεσία ή να αντιγράψετε ξανά τον ορατό χάρτη</translation>
     </message>
 </context>
 <context>

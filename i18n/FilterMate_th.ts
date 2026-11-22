@@ -358,6 +358,32 @@ Do you agree?</source>
         <translation>เพิ่มเลเยอร์แล้ว: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
+        <source>Back to the service: {}</source>
+        <translation>กลับไปที่บริการ: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2707"/>
+        <source>Local copy: {}</source>
+        <translation>สำเนาในเครื่อง: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3036"/>
+        <source>The agent wants the layer {} to read its web service again (its local copy stays on disk). Do you agree?</source>
+        <translation>เอเจนต์ต้องการให้เลเยอร์ {} อ่านจากเว็บเซอร์วิสของตัวเองอีกครั้ง (สำเนาในเครื่องจะยังอยู่ในดิสก์) คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3046"/>
+        <source>The agent wants to copy the layer {} locally, and the layer then reads the copy:
+{}
+
+The service is read in the background: the copy can be cancelled. Do you agree?</source>
+        <translation>เอเจนต์ต้องการคัดลอกเลเยอร์ {} ไว้ในเครื่อง จากนั้นเลเยอร์จะอ่านจากสำเนา:
+{}
+
+ระบบอ่านบริการในเบื้องหลัง และสามารถยกเลิกการคัดลอกได้ คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
         <source>Table added: {}</source>
         <translation>เพิ่มตารางแล้ว: {}</translation>
@@ -12939,6 +12965,310 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>ประเภทไม่ตรงกันในตัวกรอง: {warning_detail}...</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopy</name>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="623"/>
+        <source> (incomplete)</source>
+        <translation> (ไม่สมบูรณ์)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="221"/>
+        <source>Copy of the features of the visible map, {0} at most.
+
+Folder: {1}</source>
+        <translation>สำเนาของฟีเจอร์ในแผนที่ที่มองเห็น สูงสุด {0} รายการ
+
+โฟลเดอร์: {1}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="216"/>
+        <source>Copy of the visible map: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests to the service, {5:.0f} MB at most on disk.
+
+Folder: {6}</source>
+        <translation>สำเนาของแผนที่ที่มองเห็น: {0} x {1} พิกเซล, {2:.3g} {3} ต่อพิกเซล, ส่งคำขอไปยังบริการ {4} ครั้ง, ใช้ดิสก์สูงสุด {5:.0f} MB
+
+โฟลเดอร์: {6}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="355"/>
+        <source>FilterMate: local copy of {0}</source>
+        <translation>FilterMate: สำเนาในเครื่องของ {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="609"/>
+        <source>Its filter could not be put back on the service: filter it again.</source>
+        <translation>ไม่สามารถนำตัวกรองของเลเยอร์นี้กลับไปใช้กับบริการได้ โปรดกรองอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="579"/>
+        <source>Its filter could not be put on the copy (the GeoPackage reads another language): filter it again.</source>
+        <translation>ไม่สามารถใช้ตัวกรองของเลเยอร์นี้กับสำเนาได้ (GeoPackage อ่านอีกภาษาหนึ่ง) โปรดกรองอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="622"/>
+        <source>Local copy of {0}: still image</source>
+        <translation>สำเนาในเครื่องของ {0}: ภาพนิ่ง</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="620"/>
+        <source>Local copy of {0}: {1} features</source>
+        <translation>สำเนาในเครื่องของ {0}: {1} ฟีเจอร์</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="329"/>
+        <source>No folder can be written for the copy: neither next to the project nor in the QGIS profile.</source>
+        <translation>ไม่มีโฟลเดอร์ที่เขียนสำเนาได้ ทั้งข้างโปรเจกต์และในโปรไฟล์ QGIS</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="263"/>
+        <source>Only a layer of a web service (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, XYZ tiles) can be copied.</source>
+        <translation>คัดลอกได้เฉพาะเลเยอร์ของเว็บเซอร์วิส (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, ไทล์ XYZ)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="701"/>
+        <source>The local copy of {0} was not found: these layers read their web service. Their copy is looked for again the next time the project is opened.</source>
+        <translation>ไม่พบสำเนาในเครื่องของ {0}: เลเยอร์เหล่านี้จะอ่านจากเว็บเซอร์วิสของตัวเอง ระบบจะค้นหาสำเนาของเลเยอร์อีกครั้งเมื่อเปิดโปรเจกต์ครั้งถัดไป</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="605"/>
+        <source>The service could not be opened: the layer still reads its copy.</source>
+        <translation>ไม่สามารถเปิดบริการได้ เลเยอร์ยังคงอ่านจากสำเนา</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="481"/>
+        <source>The service was read for {0:.0f} s, the most allowed: the copy holds {1} features and is not complete.</source>
+        <translation>อ่านบริการเป็นเวลา {0:.0f} วินาที ซึ่งเป็นเวลาสูงสุดที่อนุญาต สำเนามี {1} ฟีเจอร์และยังไม่สมบูรณ์</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="268"/>
+        <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
+        <translation>เงื่อนไขของ {0} ห้ามเก็บไทล์ไว้ จึงไม่คัดลอกเลเยอร์นี้ แต่สามารถคัดลอกแผนที่ฐานอื่นได้ (IGN, Carto, OpenTopoMap...)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="292"/>
+        <source>The visible map cannot be expressed in the coordinates of this layer.</source>
+        <translation>ไม่สามารถแสดงแผนที่ที่มองเห็นในพิกัดของเลเยอร์นี้ได้</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="288"/>
+        <source>The visible map could not be read.</source>
+        <translation>ไม่สามารถอ่านแผนที่ที่มองเห็นได้</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="478"/>
+        <source>The visible map holds more than {0} features: only the first {0} were copied. Zoom in, or raise STREAM_COPY &gt; max_features.</source>
+        <translation>แผนที่ที่มองเห็นมีฟีเจอร์มากกว่า {0} รายการ จึงคัดลอกเพียง {0} รายการแรก โปรดซูมเข้า หรือเพิ่มค่า STREAM_COPY &gt; max_features</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="312"/>
+        <source>The visible map is outside what this service draws.</source>
+        <translation>แผนที่ที่มองเห็นอยู่นอกพื้นที่ที่บริการนี้แสดงผล</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="258"/>
+        <source>This layer already reads its local copy: go back to the service first, or copy it again.</source>
+        <translation>เลเยอร์นี้อ่านจากสำเนาในเครื่องอยู่แล้ว โปรดกลับไปที่บริการก่อน หรือคัดลอกอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="272"/>
+        <source>This layer cannot be read from its service now.</source>
+        <translation>ขณะนี้ไม่สามารถอ่านเลเยอร์นี้จากบริการได้</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="596"/>
+        <source>This layer does not read a local copy.</source>
+        <translation>เลเยอร์นี้ไม่ได้อ่านจากสำเนาในเครื่อง</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="279"/>
+        <source>This layer is being edited: save or discard the edits, then copy it.</source>
+        <translation>กำลังแก้ไขเลเยอร์นี้ โปรดบันทึกหรือทิ้งการแก้ไขก่อน แล้วจึงคัดลอก</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="601"/>
+        <source>This layer is being edited: save or discard the edits, then go back to its service.</source>
+        <translation>กำลังแก้ไขเลเยอร์นี้ โปรดบันทึกหรือทิ้งการแก้ไขก่อน แล้วจึงกลับไปที่บริการ</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="276"/>
+        <source>This layer is filtered by another layer: unfilter it, then copy it.</source>
+        <translation>เลเยอร์นี้ถูกกรองโดยเลเยอร์อื่น โปรดยกเลิกการกรองก่อน แล้วจึงคัดลอก</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="599"/>
+        <source>This layer is filtered by another layer: unfilter it, then go back to its service.</source>
+        <translation>เลเยอร์นี้ถูกกรองโดยเลเยอร์อื่น โปรดยกเลิกการกรองก่อน แล้วจึงกลับไปที่บริการ</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="319"/>
+        <source>This version of QGIS cannot check what a service answers while it is read: update QGIS to 3.26 or later to copy it.</source>
+        <translation>QGIS เวอร์ชันนี้ไม่สามารถตรวจสอบคำตอบของบริการขณะอ่านได้ โปรดอัปเดต QGIS เป็น 3.26 ขึ้นไปเพื่อคัดลอก</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="227"/>
+        <source>map units</source>
+        <translation>หน่วยแผนที่</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="451"/>
+        <source>the GeoPackage could not be written: {0}</source>
+        <translation>ไม่สามารถเขียน GeoPackage ได้: {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="568"/>
+        <source>the copy could not be opened: the layer still reads its service</source>
+        <translation>ไม่สามารถเปิดสำเนาได้ เลเยอร์ยังคงอ่านจากบริการ</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="391"/>
+        <source>the copy failed ({0})</source>
+        <translation>การคัดลอกล้มเหลว ({0})</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="471"/>
+        <source>the copy was canceled</source>
+        <translation>ยกเลิกการคัดลอกแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="413"/>
+        <source>the service could not be opened</source>
+        <translation>ไม่สามารถเปิดบริการได้</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="475"/>
+        <source>the service could not be read to the end: nothing was kept</source>
+        <translation>ไม่สามารถอ่านบริการจนจบ จึงไม่ได้เก็บอะไรไว้</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="473"/>
+        <source>the service gave no feature over the visible map: nothing was copied</source>
+        <translation>บริการไม่ส่งฟีเจอร์ใดเลยในแผนที่ที่มองเห็น จึงไม่ได้คัดลอกอะไร</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="560"/>
+        <source>{0} is being edited: it stays on its service. Save or discard the edits, then copy it again.</source>
+        <translation>กำลังแก้ไข {0}: เลเยอร์ยังคงอยู่กับบริการ โปรดบันทึกหรือทิ้งการแก้ไข แล้วคัดลอกอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="421"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>คำขอ {0} รายการไปยังบริการไม่ได้รับคำตอบ ภาพอาจมีช่องว่าง</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopyActions</name>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Back to the service</source>
+        <translation>กลับไปที่บริการ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Cancel</source>
+        <translation>ยกเลิก</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Copy</source>
+        <translation>คัดลอก</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Copy again</source>
+        <translation>คัดลอกอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="173"/>
+        <source>Copying {0} over the visible map… (cancel it from the button or the task bar)</source>
+        <translation>กำลังคัดลอก {0} ทับแผนที่ที่มองเห็น… (ยกเลิกได้จากปุ่มหรือแถบงาน)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="355"/>
+        <source>FilterMate: cancel the local copy</source>
+        <translation>FilterMate: ยกเลิกการคัดลอกในเครื่อง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="356"/>
+        <source>FilterMate: local copy (back to the service, copy again)</source>
+        <translation>FilterMate: สำเนาในเครื่อง (กลับไปที่บริการ, คัดลอกอีกครั้ง)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="307"/>
+        <source>FilterMate: local copy of the visible map</source>
+        <translation>FilterMate: สำเนาในเครื่องของแผนที่ที่มองเห็น</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="198"/>
+        <source>It reads its previous copy.</source>
+        <translation>เลเยอร์อ่านจากสำเนาก่อนหน้า</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Local copy of {0}</source>
+        <translation>สำเนาในเครื่องของ {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="115"/>
+        <source>Local copy under way: click to cancel it</source>
+        <translation>กำลังคัดลอกในเครื่อง: คลิกเพื่อยกเลิก</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="121"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer, and read the layer from it (faster, and without network)</source>
+        <translation>สำเนาในเครื่อง: เก็บสิ่งที่เว็บเซอร์วิสนี้แสดงบนแผนที่ที่มองเห็นไว้ในไฟล์บนคอมพิวเตอร์เครื่องนี้ แล้วอ่านเลเยอร์จากไฟล์นั้น (เร็วกว่าและไม่ต้องใช้เครือข่าย)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="139"/>
+        <source>Only a layer of a web service (WFS, WMS, WMTS, XYZ tiles...) can be copied.</source>
+        <translation>คัดลอกได้เฉพาะเลเยอร์ของเว็บเซอร์วิส (WFS, WMS, WMTS, ไทล์ XYZ...)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="270"/>
+        <source>The copy covers the area of the map when it was made. Copy again reads the same area anew.</source>
+        <translation>สำเนาครอบคลุมพื้นที่ของแผนที่ ณ ตอนที่ทำสำเนา การคัดลอกอีกครั้งจะอ่านพื้นที่เดิมใหม่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="167"/>
+        <source>canceled</source>
+        <translation>ยกเลิกแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="191"/>
+        <source>{0} changed during its copy (a filter of another layer, another source): the copy is not used. Copy it again.</source>
+        <translation>{0} เปลี่ยนแปลงระหว่างการคัดลอก (ตัวกรองของเลเยอร์อื่น, แหล่งข้อมูลอื่น) จึงไม่ใช้สำเนา โปรดคัดลอกอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="157"/>
+        <source>{0} is being copied already.</source>
+        <translation>กำลังคัดลอก {0} อยู่แล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="215"/>
+        <source>{0} now reads its local copy ({1}).</source>
+        <translation>{0} อ่านจากสำเนาในเครื่อง ({1}) แล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="246"/>
+        <source>{0} reads its service again. Its copy is still in the folder of the copies.</source>
+        <translation>{0} อ่านจากบริการอีกครั้ง สำเนายังอยู่ในโฟลเดอร์สำเนา</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="197"/>
+        <source>{0} was not copied: {1}.</source>
+        <translation>ไม่ได้คัดลอก {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="202"/>
+        <source>{0} was removed during its copy: the file is kept in {1}.</source>
+        <translation>{0} ถูกลบระหว่างการคัดลอก ไฟล์ถูกเก็บไว้ใน {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
+        <source>{0}. Click to go back to the service or to copy the visible map again</source>
+        <translation>{0}. คลิกเพื่อกลับไปที่บริการหรือคัดลอกแผนที่ที่มองเห็นอีกครั้ง</translation>
     </message>
 </context>
 <context>

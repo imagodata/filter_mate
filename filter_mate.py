@@ -519,6 +519,15 @@ class FilterMate:
             from .adapters.qgis import python_dependencies
             python_dependencies.activate_installed()
 
+            # 2026-11-22: local copies of web service layers (dock button, menu of the layers, project hooks).
+            try:
+                from .ui.controllers.stream_copy_actions import StreamCopyActions
+                self._stream_copy = StreamCopyActions(self.iface)
+                self._stream_copy.start()
+            except Exception as exc:  # a feature: never in the way of the plugin
+                self._stream_copy = None
+                logger.warning(f"FilterMate: local copies of web services not available: {exc}")
+
             logger.debug("FilterMate.initGui: Completed successfully")
 
         except Exception as e:
@@ -1650,6 +1659,14 @@ class FilterMate:
         # Nettoyer les ressources de l'application FilterMate
         if self.app:
             self.app.cleanup()
+
+        stream_copy_actions = getattr(self, '_stream_copy', None)
+        if stream_copy_actions is not None:
+            try:
+                stream_copy_actions.stop()
+            except Exception as exc:  # nothing may stop the unload
+                logger.debug(f"Local copies not stopped: {exc}")
+            self._stream_copy = None
 
         for timer_name in ('_stale_cache_timer', '_dependency_check_timer'):
             timer = getattr(self, timer_name, None)
