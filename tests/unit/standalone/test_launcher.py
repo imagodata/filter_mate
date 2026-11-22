@@ -223,16 +223,18 @@ def test_windows_installs_are_found_by_their_python_qgis_script(tmp_path, monkey
     assert all(item.kind == "install" for item in found)
 
 
-def test_macos_bundles_get_the_environment_their_python_needs(tmp_path):
-    contents = tmp_path / "QGIS.app" / "Contents"
-    (contents / "MacOS" / "bin").mkdir(parents=True)
-    (contents / "MacOS" / "bin" / "python3").write_text("", encoding="utf-8")
+@pytest.mark.parametrize("python", ["MacOS/bin/python3", "MacOS/bin/python3.12", "MacOS/python3",
+                                    "Frameworks/Python.framework/Versions/3.12/bin/python3"])
+def test_macos_bundles_get_the_environment_their_python_needs(tmp_path, python):
+    contents = tmp_path / "QGIS-LTR.app" / "Contents"
+    (contents / python).parent.mkdir(parents=True)
+    (contents / python).write_text("", encoding="utf-8")
     (contents / "Resources" / "python").mkdir(parents=True)
     (contents / "Resources" / "proj").mkdir()
     (tmp_path / "QGIS-broken.app" / "Contents").mkdir(parents=True)  # no Python inside: skipped
     found = runtime._macos_installs(str(tmp_path))
-    assert len(found) == 1
-    assert found[0].env["PYTHONPATH"] == str(contents / "Resources" / "python")
+    assert len(found) == 1 and found[0].command == [str(contents / python)]
+    assert found[0].env["PYTHONPATH"].split(os.pathsep)[0] == str(contents / "Resources" / "python")
     assert found[0].env["QGIS_PREFIX_PATH"] == str(contents / "MacOS")
     assert found[0].env["PROJ_DATA"] == str(contents / "Resources" / "proj") and "GDAL_DATA" not in found[0].env
 
