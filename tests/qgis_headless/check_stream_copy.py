@@ -213,8 +213,20 @@ def check_agent_tool(port):
         again = tool.local_copy("Tuiles agent", extent_wkt=area, crs="EPSG:3857")
     except ValueError as exc:
         again = {"error": str(exc)}
-    check("agent tool: a layer already on its copy is refused with what to do", "action back" in again.get("error", ""),
+    check("agent tool: a layer already on its copy is refused with what to do", "action again" in again.get("error", ""),
           again)
+    from filter_mate.adapters.qgis import stream_copy
+    first = stream_copy.record_of(tiles)
+    try:
+        renewed = tool.local_copy("Tuiles agent", action="again")
+    except ValueError as exc:
+        renewed = {"error": str(exc)}
+    second = stream_copy.record_of(tiles)
+    check("agent tool: again copies the same area anew, at the same detail, the previous file removed",
+          renewed.get("reads") == "local copy" and second is not None and first is not None
+          and second.path != first.path and not os.path.exists(first.path)
+          and abs(second.resolution - first.resolution) <= first.resolution * 0.02
+          and tuple(round(v) for v in second.extent) == tuple(round(v) for v in first.extent), renewed)
     back = tool.local_copy("Tuiles agent", action="back")
     check("agent tool: back to the service", back.get("reads") == "service" and tiles.providerType() == "wms", back)
     try:

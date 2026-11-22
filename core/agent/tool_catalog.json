@@ -2827,10 +2827,11 @@
      },
      "action": {
       "default": "copy",
-      "description": "copy: read the service over the area into a file the layer then reads; back: the layer reads its service again",
+      "description": "copy: read the service over the area into a file the layer then reads; back: the layer reads its service again (the file stays); again: copy the area of its copy anew, the old file replaced",
       "enum": [
        "copy",
-       "back"
+       "back",
+       "again"
       ],
       "type": "string"
      },

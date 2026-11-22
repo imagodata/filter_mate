@@ -1410,6 +1410,8 @@ class InMemoryAccessor:
             raise FilterRejected(f"layer {layer!r} not found")
         if action == "back":
             return LocalCopyResult(layer_id=found.layer_id, name=found.name)
+        if action not in ("copy", "again"):
+            raise FilterRejected("action is one of copy, back, again")
         if found.provider_type.lower() not in ("wfs", "oapif", "arcgisfeatureserver", "wms"):
             raise FilterRejected(f"'{found.name}' is not a layer of a web service: only those are copied")
         features = found.provider_type.lower() != "wms"

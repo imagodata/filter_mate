@@ -358,6 +358,16 @@ Do you agree?</source>
         <translation>Слоят е добавен: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>Копиране отново: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>Агентът иска да копира слоя {} отново: същата област със същата подробност, прочетена наново от неговата уеб услуга; новото копие замества предишното. Съгласни ли сте?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>Обратно към услугата: {}</translation>
@@ -13269,6 +13279,11 @@ Folder: {6}</source>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}. Щракнете, за да се върнете към услугата или да копирате видимата карта отново</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. FilterMate чете този файл вместо уеб услугата: щракнете върху бутона за копиране на EXPLORING или върху менюто на слоя, за да се върнете към услугата.</translation>
     </message>
 </context>
 <context>

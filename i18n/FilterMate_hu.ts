@@ -358,6 +358,16 @@ Egyetért?</translation>
         <translation>Réteg hozzáadva: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>Másolás újra: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>Az ügynök újra le szeretné másolni a(z) {} réteget: ugyanazt a területet ugyanolyan részletességgel, újból beolvasva a webszolgáltatásából; az új másolat felváltja az előzőt. Elfogadja?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>Vissza a szolgáltatáshoz: {}</translation>
@@ -13269,6 +13279,11 @@ Mappa: {6}</translation>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}. Kattintson a szolgáltatáshoz való visszatéréshez vagy a látható térkép újramásolásához</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. A FilterMate ezt a fájlt olvassa a webszolgáltatás helyett: a szolgáltatásra való visszatéréshez kattintson az EXPLORING másolás gombjára, vagy a réteg menüjére.</translation>
     </message>
 </context>
 <context>

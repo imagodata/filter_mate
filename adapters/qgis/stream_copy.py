@@ -197,7 +197,8 @@ class CopyPlan:
     provider: str = ''
     subset: str = ''
     crs: Any = None
-    area: Any = None  # QgsRectangle, CRS of the layer
+    area: Any = None  # QgsRectangle, CRS of the layer: what is read (a web map: its grid, one cell of margin)
+    requested: Any = None  # the area asked, kept in the record: Copy again starts from it, never from a grid
     columns: int = 0
     rows: int = 0
     resolution: float = 0.0
@@ -292,6 +293,7 @@ def plan_copy(layer, extent=None, extent_crs=None, screen_width: int = 0, projec
     if area is None:
         plan.refusal = _tr("The visible map cannot be expressed in the coordinates of this layer.")
         return plan
+    plan.requested = area
     plan.limits = copy_limits()
     plan.provider, plan.crs = layer.providerType(), layer.crs()
     plan.source = stream_base(layer.source(), plan.provider)
@@ -398,7 +400,7 @@ class StreamCopyTask(QgsTask):
             self._snapshot = None
 
     def _record(self, **values) -> rules.LocalCopy:
-        area = self.plan.area
+        area = self.plan.requested or self.plan.area  # the area asked: each Copy again would grow by the margin
         crs = (self.plan.crs.authid() or self.plan.crs.toWkt()) if self.plan.crs is not None else ''
         return rules.LocalCopy(
             kind=self.plan.kind, stream_source=self.plan.source, stream_provider=self.plan.provider,

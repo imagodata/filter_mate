@@ -358,6 +358,16 @@ Do you agree?</source>
         <translation>Προστέθηκε επίπεδο: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>Αντιγραφή ξανά: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να αντιγράψει ξανά το επίπεδο {}: την ίδια περιοχή με την ίδια λεπτομέρεια, διαβασμένη εκ νέου από την υπηρεσία ιστού του· το νέο αντίγραφο αντικαθιστά το προηγούμενο. Συμφωνείτε;</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>Επιστροφή στην υπηρεσία: {}</translation>
@@ -13269,6 +13279,11 @@ Folder: {6}</source>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}. Κάντε κλικ για να επιστρέψετε στην υπηρεσία ή να αντιγράψετε ξανά τον ορατό χάρτη</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. Το FilterMate διαβάζει αυτό το αρχείο αντί για την υπηρεσία ιστού: κάντε κλικ στο κουμπί αντιγραφής του EXPLORING ή στο μενού του επιπέδου για να επιστρέψετε στην υπηρεσία.</translation>
     </message>
 </context>
 <context>

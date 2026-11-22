@@ -358,6 +358,16 @@ Do you agree?</source>
         <translation>परत जोड़ी गई: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>दोबारा प्रतिलिपि बनाएँ: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>एजेंट परत {} की दोबारा प्रतिलिपि बनाना चाहता है: वही क्षेत्र उसी विस्तार में, उसकी वेब सेवा से नए सिरे से पढ़ा जाएगा; नई प्रतिलिपि पिछली को बदल देगी। क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>सेवा पर वापस जाएँ: {}</translation>
@@ -13269,6 +13279,11 @@ Folder: {6}</source>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}। सेवा पर वापस जाने या दिखाई दे रहे मानचित्र की दोबारा प्रतिलिपि बनाने के लिए क्लिक करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}। FilterMate वेब सेवा की जगह इस फ़ाइल को पढ़ता है: सेवा पर लौटने के लिए EXPLORING के प्रतिलिपि बटन या परत के मेनू पर क्लिक करें।</translation>
     </message>
 </context>
 <context>

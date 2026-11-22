@@ -358,6 +358,16 @@ Se strinjate?</translation>
         <translation>Plast dodana: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>Kopiraj znova: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>Agent želi plast {} znova kopirati: isto območje z isto podrobnostjo, znova prebrano iz njene spletne storitve; nova kopija nadomesti prejšnjo. Se strinjate?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>Nazaj na storitev: {}</translation>
@@ -13269,6 +13279,11 @@ Mapa: {6}</translation>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}. Kliknite za vrnitev na storitev ali za ponovno kopiranje vidnega zemljevida</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. FilterMate bere to datoteko namesto spletne storitve: kliknite gumb za kopiranje v EXPLORING ali meni plasti, da se vrnete k storitvi.</translation>
     </message>
 </context>
 <context>
