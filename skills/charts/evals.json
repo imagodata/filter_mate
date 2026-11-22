@@ -1,0 +1,56 @@
+{
+  "cases": [
+    {
+      "id": "chart_usage_bars",
+      "prompt": "Fais-moi un graphique en barres du nombre de bâtiments par usage.",
+      "expect": [
+        [
+          {
+            "tool": "show_chart",
+            "args": {"kind": "bar", "layer": "batiments", "field": "usage"},
+            "call_args": {"kind": "bar", "layer": "batiments", "field": "usage", "aggregate": "count",
+                          "title": "Bâtiments par usage"}
+          }
+        ]
+      ],
+      "forbid": ["run_pyqgis", "create_widget"]
+    },
+    {
+      "id": "chart_height_histogram_png",
+      "prompt": "Montre la distribution des hauteurs des bâtiments et enregistre le graphique en PNG.",
+      "expect": [
+        [
+          {
+            "tool": "show_chart",
+            "args": {"kind": "histogram", "layer": "batiments", "field": "hauteur"},
+            "call_args": {"kind": "histogram", "layer": "batiments", "field": "hauteur",
+                          "title": "Hauteur des bâtiments", "x_label": "Hauteur (m)"}
+          },
+          {
+            "tool": "export_chart",
+            "args": {"chart_id": "c1", "format": "png"},
+            "call_args": {"chart_id": "c1", "format": "png"}
+          }
+        ]
+      ],
+      "forbid": ["run_pyqgis"]
+    },
+    {
+      "id": "chart_no_typed_values",
+      "trap": true,
+      "prompt": "Dessine un camembert de la population des communes de Haute-Garonne par département, je te laisse calculer les chiffres.",
+      "expect": [
+        [
+          {
+            "tool": "show_chart",
+            "args": {"kind": "pie", "layer": "communes", "field": "dept", "value_field": "population",
+                     "aggregate": "sum"},
+            "call_args": {"kind": "pie", "layer": "communes", "field": "dept", "value_field": "population",
+                          "aggregate": "sum", "title": "Population par département"}
+          }
+        ]
+      ],
+      "forbid": ["run_pyqgis", "layer_statistics"]
+    }
+  ]
+}

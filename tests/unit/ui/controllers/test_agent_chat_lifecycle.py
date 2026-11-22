@@ -153,6 +153,22 @@ def _load(monkeypatch, name, rel):
     return module
 
 
+class FakeCharts:
+    """The d3 charts of the chat: none drawn, no layout followed."""
+
+    def __init__(self, is_dark, parent=None):
+        self.pending = None
+
+    def watch_layers(self):
+        pass
+
+    def unwatch_all(self):
+        pass
+
+    def forget(self):
+        pass
+
+
 @pytest.fixture
 def ctrl_module(monkeypatch):
     for name in ("qgis.PyQt.QtCore", "qgis.PyQt.QtWidgets", "qgis.PyQt.QtNetwork"):
@@ -200,6 +216,7 @@ def ctrl_module(monkeypatch):
     _module(monkeypatch, ".filtermate_api.config")
     _module(monkeypatch, ".filtermate_api.qgis_accessor")
     _module(monkeypatch, ".ui.controllers.agent_mcp_bridge", AgentMcpBridge=FakeBridge)
+    _module(monkeypatch, ".ui.controllers.agent_charts", AgentCharts=FakeCharts, file_stem=str)
     _module(monkeypatch, ".ui.widgets.agent_panel", ANSWER_CONVERSATION="conversation", ANSWER_NO="no",
             ANSWER_ONCE="once", AgentPanel=lambda parent: MagicMock(), level_short=str, preset_label=str)
     _module(monkeypatch, ".ui.widgets.agent_widgets_strip", number_text=str)

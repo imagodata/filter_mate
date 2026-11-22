@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from dataclasses import asdict, replace
 from typing import Optional, Sequence, Tuple
@@ -79,7 +80,7 @@ from ...core.agent.memory import UnreadableMemory, chosen as memory_chosen, memo
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
-    ADD_NOTE, ADD_TABLE, ASK_USER, CREATE_WIDGET, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
+    ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CHART_TOOLS, CREATE_WIDGET, EXPORT_CHART, RUN_CHART_CODE, SHOW_CHART, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
     TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
@@ -97,6 +98,7 @@ from ...filtermate_api.config import _default_export_root
 from ...filtermate_api.main_thread import QGISBusy
 from ...filtermate_api.qgis_accessor import QGISFilterMateAccessor
 from .agent_mcp_bridge import NO_UNDO_POINT, AgentMcpBridge
+from .agent_charts import AgentCharts, file_stem
 from .history_tips import button_tip
 from ..widgets.agent_panel import (
     ANSWER_CONVERSATION, ANSWER_NO, ANSWER_ONCE, AgentPanel, AgentSettingsDialog, ask_code, ask_plain,
@@ -293,6 +295,7 @@ class AgentChatController(QObject):
         self.panel.recipe_run_requested.connect(self.run_recipe)
         self.panel.recipe_remove_requested.connect(self._on_remove_recipe)
         self.panel.recipe_live_toggled.connect(self._on_live_toggled)
+        self._charts = AgentCharts(lambda: self.panel._dark(), self)  # the theme of the dock, as the thread draws it
         self._restore_transcript()
         self._refresh_history()
         self._mcp = AgentMcpBridge(self, self)
@@ -315,6 +318,7 @@ class AgentChatController(QObject):
         QgsProject.instance().layersAdded.connect(self._on_layers_changed)
         QgsProject.instance().layersRemoved.connect(self._on_layers_changed)
         self._follow_welcome_facts()
+        self._charts.watch_layers()
 
     # --- the requests of the welcome follow the project ---------------------------
 
@@ -422,13 +426,18 @@ class AgentChatController(QObject):
         if self._engine is not None:
             self._engine.cancel()
 
+    @staticmethod
+    def _drop_chart_page() -> None:
+        from ...adapters.agent.chart_renderer import drop_page
+        drop_page()
+
     def shutdown(self) -> None:
         """The plugin unloads: nothing may arrive afterwards, not even the answer of a call of another application.
 
         Each step runs even when one before failed.
         """
         for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._unfollow_welcome_facts,
-                     self._disconnect_project,
+                     self._disconnect_project, self._charts.unwatch_all, self._drop_chart_page,
                      lambda: plugin_settings.clear_applier(self._settings_applier)):
             try:
                 step()
@@ -469,6 +478,8 @@ class AgentChatController(QObject):
         self._offer_setup_again()
         self._wizard.offer_back_again()  # the settings are those of every project: what puts them back stays
         self._refresh_history()
+        self._charts.forget()
+        self._charts.watch_layers()  # the charts of its layouts follow the filters of their layers
 
     # --- transcript and history -------------------------------------------------
 
@@ -505,6 +516,7 @@ class AgentChatController(QObject):
         self.panel.add_note(_tr("Earlier conversation: the agent starts afresh from here."))
 
     def _refresh_history(self) -> None:
+        self._charts.watch_layers()  # an undo or a redo may have brought a chart of a layout back
         self._refresh_widgets()  # an undo or a redo may have brought widgets back or taken them away
         self._refresh_recipes()
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
@@ -1288,7 +1300,10 @@ class AgentChatController(QObject):
         if not values.send_values:
             left_out.update(VALUES_TOOLS)
         if not values.expert_python:
-            left_out.add(RUN_PYTHON)
+            left_out.update((RUN_PYTHON, RUN_CHART_CODE))
+        from ...adapters.agent.chart_renderer import available as charts_available
+        if not charts_available():  # QGIS 3, a QGIS 4 without PyQt QtWebEngine: no chart tool, no skill charts
+            left_out.update(CHART_TOOLS)
         if not values.send_values:
             left_out.add(VIEW_MAP)  # an image of the map shows its labels and symbols: a value as much as a field
         if not kinds - {KIND_MCP, KIND_STAC, *NO_DATA_KINDS} and not searched:
@@ -1360,6 +1375,11 @@ class AgentChatController(QObject):
         handlers[REMOVE_NOTE] = self._remove_note_tool
         handlers[CREATE_WIDGET] = self._create_widget_tool
         handlers[REMOVE_WIDGET] = self._remove_widget_tool
+        handlers[SHOW_CHART] = lambda arguments: self._charts.show_chart(arguments, share_values=values.send_values)
+        handlers[RUN_CHART_CODE] = lambda arguments: self._charts.run_chart_code(arguments,
+                                                                                 share_values=values.send_values)
+        handlers[EXPORT_CHART] = lambda arguments: self._charts.export_chart(arguments, _default_export_root())
+        handlers[CHART_TO_LAYOUT] = lambda arguments: self._charts.add_to_layout(arguments)
         handlers[SAVE_RECIPE] = self._save_recipe_tool
         handlers[REMOVE_RECIPE] = self._remove_recipe_tool
         handlers[ASK_USER] = self._ask_user_tool
@@ -1653,8 +1673,9 @@ class AgentChatController(QObject):
                 self._live_sources[layer_id] = (layer, slot)
 
     def _on_layers_changed(self, *_args) -> None:
-        """A layer came or went: a source of a live recipe may be one of them."""
+        """A layer came or went: a source of a live recipe may be one of them, or of a chart of a layout."""
         self._follow_sources(self._armed_recipes())
+        self._charts.watch_layers()
 
     def followed_layer_ids(self):
         return set(self._live_sources)
@@ -2533,6 +2554,7 @@ class AgentChatController(QObject):
         self._transcript = []
         self._recap_from = 0
         self.panel.input.forget()
+        self._charts.forget()
         self._save_transcript()
 
     # --- what the user does -----------------------------------------------------
@@ -2826,6 +2848,13 @@ class AgentChatController(QObject):
             "set_project_crs": lambda: _tr("Project CRS: {}").format(args.get("crs", "")),
             "create_layout": lambda: _tr("Layout {}").format(args.get("name", "")),
             "export_layout": lambda: _tr("Layout {} exported").format(args.get("name", "")),
+            SHOW_CHART: lambda: _tr("Chart: {}").format(args.get("title") or args.get("field") or layer
+                                                        or args.get("kind", "")),
+            EXPORT_CHART: lambda: _tr("Chart {} saved as {}").format(args.get("chart_id", ""),
+                                                                     str(args.get("format") or "png").upper()),
+            RUN_CHART_CODE: lambda: _tr("Chart {} drawn with d3 code (expert)").format(args.get("chart_id", "")),
+            CHART_TO_LAYOUT: lambda: _tr("Chart {} put in the layout {}").format(args.get("chart_id", ""),
+                                                                                  args.get("layout", "")),
             RUN_PYTHON: lambda: _tr("Python code (expert, not undone)"),
             ADD_NOTE: lambda: _tr("Note kept for this project"),
             REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
@@ -2994,10 +3023,84 @@ class AgentChatController(QObject):
             logger.info("Agent tool %s refused: %s", call.name, result.content[:300])
         self.panel.finish_steps(not result.is_error)
         self._log_action(call, result, self._describe(call))
+        self._show_chart_card(call, result)
         self._offer_exploring(call, result)
         made = [] if result.is_error else made_layers(self._layers_before, self._project_layers())
         self._request_calls.append((call.name, call.arguments, result.is_error, self.describe_call(call), made))
         self.panel.set_status(_tr("Thinking…"))
+
+    def _show_chart_card(self, call: ToolCallPart, result: ToolResultPart) -> None:
+        """A chart show_chart drew, in a card of the thread; the transcript keeps a line of it (an SVG is too large
+        for it)."""
+        chart, self._charts.pending = self._charts.pending, None
+        if call.name not in (SHOW_CHART, RUN_CHART_CODE) or result.is_error or chart is None:
+            return
+        request = chart.request
+        if request.layer:
+            caption = _tr("{} · {} features as filtered when drawn").format(
+                chart.meta.get("layer_name", ""), chart.meta.get("features", 0))
+        else:
+            caption = _tr("Data given by the agent")
+        if chart.code:
+            caption += " · " + _tr("d3 code written by the agent (expert)")
+        self._flush_answer()
+        self.panel.add_chart(request.title, chart.svg, caption,
+                             on_save=lambda file_format, chart_id=chart.chart_id: self._save_chart(chart_id,
+                                                                                                  file_format),
+                             on_layout=lambda button, chart_id=chart.chart_id: self._chart_layout_menu(chart_id,
+                                                                                                      button))
+        self._record("note", _tr("Chart: {}").format(request.title or request.kind))
+
+    def _save_chart(self, chart_id: str, file_format: str) -> None:
+        """PNG, JPG or SVG of a card: where the user chooses."""
+        from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox
+        from qgis.core import QgsSettings
+        try:
+            chart = self._charts.chart(chart_id)
+        except ToolFailure as exc:
+            QMessageBox.warning(self.panel, _tr("Chart"), str(exc))
+            return
+        settings = QgsSettings()
+        folder = settings.value("FilterMate/agent/chart_folder", str(_default_export_root()), type=str)
+        names = {"png": _tr("PNG image (*.png)"), "jpg": _tr("JPEG image (*.jpg *.jpeg)"),
+                 "svg": _tr("SVG drawing (*.svg)")}
+        default = os.path.join(folder, f"{file_stem(chart.request.title or chart_id)}.{file_format}")
+        path, _ = QFileDialog.getSaveFileName(self.panel, _tr("Save the chart"), default, names[file_format])
+        if not path:
+            return
+        if not os.path.splitext(path)[1]:
+            path += "." + file_format
+        try:
+            self._charts.save_as(chart_id, path)
+        except Exception as exc:  # a folder that cannot be written, a chart its layer can no longer draw
+            logger.warning("Chart not saved: %s", exc)
+            QMessageBox.warning(self.panel, _tr("Chart"), _tr("The chart could not be saved: {}").format(exc))
+            return
+        settings.setValue("FilterMate/agent/chart_folder", os.path.dirname(path))
+        self.panel.add_note(_tr("Chart saved: {}").format(os.path.basename(path)))
+
+    def _chart_layout_menu(self, chart_id: str, button) -> None:
+        """The print layouts of the project, to put a chart in one."""
+        from qgis.PyQt.QtWidgets import QMenu
+        from ...adapters.public_api.layouts import layout_names
+        menu = QMenu(self.panel)
+        names = layout_names()
+        if not names:
+            action = menu.addAction(_tr("No print layout in the project: ask the agent for one"))
+            action.setEnabled(False)
+        for name in names:
+            action = menu.addAction(name)
+            action.triggered.connect(lambda _checked=False, name=name: self._chart_to_layout(chart_id, name))
+        menu.exec(button.mapToGlobal(button.rect().bottomLeft()))
+
+    def _chart_to_layout(self, chart_id: str, layout_name: str) -> None:
+        from qgis.PyQt.QtWidgets import QMessageBox
+        try:
+            self._charts.put_in_layout(chart_id, layout_name)
+        except ToolFailure as exc:
+            QMessageBox.warning(self.panel, _tr("Chart"), str(exc))
+            return
+        self.panel.add_note(_tr("Chart put in the layout {}").format(layout_name))
 
     def _log_action(self, call: ToolCallPart, result: ToolResultPart, label: str, keep: bool = True) -> None:
         """What changes something, or leaves the machine, stays in the thread."""
@@ -3086,7 +3189,7 @@ class AgentChatController(QObject):
         if call.name in ("create_layout", "export_layout") and isinstance(call.arguments, dict):
             keys = ("title", "page", "orientation") if call.name == "create_layout" else ("format", "dpi", "subfolder")
             return " · ".join(str(call.arguments[key]) for key in keys if call.arguments.get(key) not in (None, ""))
-        if call.name == RUN_PYTHON and isinstance(call.arguments, dict):
+        if call.name in (RUN_PYTHON, RUN_CHART_CODE) and isinstance(call.arguments, dict):
             return str(call.arguments.get("purpose", ""))
         if call.name == ADD_NOTE and isinstance(call.arguments, dict):
             return str(call.arguments.get("text", ""))
@@ -3188,6 +3291,12 @@ class AgentChatController(QObject):
             plugin_settings.freeze(call.name, call.arguments, rows)
             if problem or not any(row["before"] != row["after"] for row in rows):
                 return True  # nothing to show: every value is already set, or the tool refuses the call and says why
+        if call.name == RUN_CHART_CODE:
+            text = _tr("The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a "
+                       "hidden web page of QGIS that reads no file of yours; a web page can still reach the network."
+                       "\n\nWhat for: {}\n\nRun it?").format(str(call.arguments.get("chart_id", "")),
+                                                              one_line(str(call.arguments.get("purpose", "")), 300))
+            return bool(self._ask_code(title, text, str(call.arguments.get("code", ""))))
         if call.name == RUN_PYTHON:
             text = _tr("The agent wants to run this Python code in QGIS, with your rights: it can read and change "
                        "anything QGIS and your account can, and undoing the turn does not take it back.\n\nWhat for: "

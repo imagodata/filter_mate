@@ -72,6 +72,7 @@ SOURCES = \
     ../adapters/agent/settings.py \
     ../adapters/qgis/coverage_layers/point_cloud_footprint.py \
     ../ui/controllers/agent_chat_controller.py \
+    ../ui/controllers/agent_charts.py \
     ../adapters/agent/turn_effects.py \
     ../adapters/agent/agent_widgets.py \
     ../ui/controllers/property_controller.py \

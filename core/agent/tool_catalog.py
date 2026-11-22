@@ -69,6 +69,11 @@ VIEW_MAP = "view_map"
 RUN_PYTHON = "run_pyqgis"
 CREATE_WIDGET = "create_widget"
 REMOVE_WIDGET = "remove_widget"
+SHOW_CHART = "show_chart"
+EXPORT_CHART = "export_chart"
+CHART_TO_LAYOUT = "add_chart_to_layout"
+RUN_CHART_CODE = "run_chart_code"
+CHART_TOOLS = (SHOW_CHART, EXPORT_CHART, CHART_TO_LAYOUT, RUN_CHART_CODE)
 SAVE_RECIPE = "save_recipe"
 REMOVE_RECIPE = "remove_recipe"
 SHOW_SETTINGS_LINK = "show_settings_link"
@@ -201,6 +206,81 @@ CHAT_ONLY = (
         input_schema={"type": "object", "properties": {
             "widget_id": {"type": "string", "minLength": 1, "maxLength": 20}},
             "required": ["widget_id"], "additionalProperties": False},
+        chat_only=True),
+    # d3 charts (core/agent/charts.py): drawn in a hidden page of QtWebEngine (QGIS 4), shown in the thread, written to
+    # a file, put in a print layout and drawn again there when the filter of their layer changes.
+    ToolSpec(
+        name=SHOW_CHART, title="Draw a chart in the chat",
+        description=("Draw a d3 chart in the thread from a layer as filtered now (FilterMate reads it: never type its "
+                     "values) or from rows you give. bar, pie: field the categories, aggregate of value_field; "
+                     "histogram: field numeric; line, scatter: field the x, value_field the y. Returns chart_id, "
+                     "points, features."),
+        input_schema={"type": "object", "properties": {
+            "kind": {"type": "string", "enum": ["bar", "pie", "histogram", "line", "scatter"]},
+            "title": {"type": "string", "maxLength": 80},
+            "layer": {"type": "string", "maxLength": 1000},
+            "field": {"type": "string", "maxLength": 200},
+            "value_field": {"type": "string", "maxLength": 200},
+            "aggregate": {"type": "string", "enum": ["count", "sum", "mean", "min", "max"], "default": "count"},
+            "series_field": {"type": "string", "maxLength": 200, "description": "line, scatter"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 30, "description": "bar, pie: categories kept"},
+            "bins": {"type": "integer", "minimum": 2, "maximum": 50, "default": 12},
+            "sort": {"type": "string", "enum": ["value", "label"], "default": "value"},
+            "horizontal": {"type": "boolean"},
+            "donut": {"type": "boolean", "default": True},
+            "x_type": {"type": "string", "enum": ["number", "time"]},
+            "x_label": {"type": "string", "maxLength": 60},
+            "y_label": {"type": "string", "maxLength": 60},
+            "rows": {"type": "array", "maxItems": 500, "items": {"type": "object"},
+                     "description": "[{label, value}] or [{x, y, series}]"},
+            "width": {"type": "integer", "minimum": 280, "maximum": 1600, "default": 640},
+            "height": {"type": "integer", "minimum": 200, "maximum": 1200, "default": 400}},
+            "required": ["kind"], "additionalProperties": False},
+        read_only=True, chat_only=True),
+    ToolSpec(
+        name=RUN_CHART_CODE, title="Draw a chart with d3 code (expert)",
+        description=("Draw a chart of this conversation again with d3 code you write, over its data, for what no kind "
+                     "of show_chart draws (stacked bars, a heatmap, annotations). Offered only in the expert mode: "
+                     "the user reads the code and confirms each run. code is the body of function(d3, svg, data, "
+                     "width, height, palette); SVG shapes and text only. Returns a new chart_id, errors of the page, "
+                     "and the image drawn."),
+        input_schema={"type": "object", "properties": {
+            "chart_id": {"type": "string", "minLength": 1, "maxLength": 20, "description": "Its data, from show_chart"},
+            "purpose": {"type": "string", "minLength": 1, "maxLength": 300,
+                        "description": "What the code draws, in one sentence the user reads before saying yes"},
+            "code": {"type": "string", "minLength": 1, "maxLength": 20000}},
+            "required": ["chart_id", "purpose", "code"], "additionalProperties": False},
+        destructive=True, chat_only=True),
+    ToolSpec(
+        name=EXPORT_CHART, title="Save a chart as an image",
+        description=("Write a chart of this conversation (chart_id from show_chart) as PNG, JPG or SVG in a sub-folder "
+                     "of the export root, drawn light for paper. A file of the same name there is kept: the new one is "
+                     "named <name>_2... The user is asked first. Returns path (relative to the sub-folder) and bytes."),
+        input_schema={"type": "object", "properties": {
+            "chart_id": {"type": "string", "minLength": 1, "maxLength": 20},
+            "format": {"type": "string", "enum": ["png", "jpg", "svg"], "default": "png"},
+            "dpi": {"type": "integer", "minimum": 72, "maximum": 600, "default": 192,
+                    "description": "png, jpg: 96 is the size of the chart"},
+            "name": {"type": "string", "maxLength": 100, "description": "File name; default: the title"},
+            "subfolder": {"type": "string", "minLength": 1, "maxLength": 200, "default": "charts",
+                          "description": "Sub-folder of the export root (a/b allowed, no ..)"}},
+            "required": ["chart_id"], "additionalProperties": False},
+        destructive=True, chat_only=True),
+    ToolSpec(
+        name=CHART_TO_LAYOUT, title="Put a chart in a print layout",
+        description=("Put a chart of this conversation (chart_id) in a print layout of the project (create_layout "
+                     "makes one), as a picture drawn light: FilterMate draws it again from its layer when the filter "
+                     "of that layer changes; export_layout writes the page. Position in millimetres from the top left "
+                     "of the first page; default: its bottom right. Undone with the turn. Returns layout, item and its "
+                     "place."),
+        input_schema={"type": "object", "properties": {
+            "chart_id": {"type": "string", "minLength": 1, "maxLength": 20},
+            "layout": {"type": "string", "minLength": 1, "maxLength": 100,
+                       "description": "A layout of the project (map_context lists them)"},
+            "x": {"type": "number", "minimum": 0, "maximum": 2000},
+            "y": {"type": "number", "minimum": 0, "maximum": 2000},
+            "width": {"type": "number", "minimum": 10, "maximum": 2000, "description": "mm; the height follows"}},
+            "required": ["chart_id", "layout"], "additionalProperties": False},
         chat_only=True),
     ToolSpec(
         name=SAVE_RECIPE, title="Keep what was just done as a recipe",
