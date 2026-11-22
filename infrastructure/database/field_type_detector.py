@@ -21,6 +21,11 @@ except ImportError:
     QGIS_AVAILABLE = False
     QgsVectorLayer = object
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 def get_field_types_from_layer(layer: 'QgsVectorLayer') -> Dict[str, str]:
     """
@@ -83,7 +88,7 @@ def get_postgresql_field_types(layer: 'QgsVectorLayer', connection=None) -> Dict
         return {}
 
     # Check if PostgreSQL layer
-    if layer.providerType() != 'postgres':
+    if provider_key_of(layer) != 'postgres':
         logger.debug("Layer is not PostgreSQL, using QGIS field types")
         return get_field_types_from_layer(layer)
 

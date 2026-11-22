@@ -34,6 +34,11 @@ from qgis.core import (
     QgsProject,
 )
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger('FilterMate.Adapters.GeometryPreparation')
 
 # 2026-10-17: the source simplification (simplify_geometry_adaptive,
@@ -182,7 +187,7 @@ class GeometryPreparationAdapter:
 
         subset_string = layer.subsetString()
         feature_count = layer.featureCount()
-        is_virtual = layer.providerType() == 'virtual'
+        is_virtual = provider_key_of(layer) == 'virtual'
 
         logger.debug(
             f"copy_filtered_to_memory: {layer.name()}, "

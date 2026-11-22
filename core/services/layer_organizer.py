@@ -19,6 +19,11 @@ import logging
 from typing import Dict, List, Any, Optional, Tuple, Callable
 from dataclasses import dataclass, field
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger('FilterMate.Core.Services.LayerOrganizer')
 
 
@@ -214,7 +219,7 @@ class LayerOrganizer:
         # Even if stored value is non-empty, it may be incorrect (e.g., "geom" when actual is "geometry")
         # This was causing PostgreSQL EXISTS filters to fail silently
         stored_geom_field = layer_props.get("layer_geometry_field")
-        is_memory_layer = layer.providerType() == 'memory'
+        is_memory_layer = provider_key_of(layer) == 'memory'
 
         detected_geom = None
         try:

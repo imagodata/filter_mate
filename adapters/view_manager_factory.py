@@ -26,6 +26,11 @@ from ..core.ports.materialized_view_port import (
     ViewType
 )
 
+try:
+    from ..filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger('FilterMate.Backend.ViewManagerFactory')
 
 
@@ -164,7 +169,7 @@ def create_view_manager_for_layer(
         return None
 
     try:
-        provider_type = layer.providerType()
+        provider_type = provider_key_of(layer)
     except Exception as e:
         logger.warning(f"[Factory] Cannot get layer provider type: {e}")
         return None

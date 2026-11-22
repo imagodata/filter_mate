@@ -42,6 +42,11 @@ if TYPE_CHECKING:
 from ...infrastructure.utils.layer_utils import detect_layer_provider_type
 from ...infrastructure.utils.validation_utils import is_layer_source_available
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 # ===========================================================================
 # Section 1 — Filter Parameter Builder
@@ -657,7 +662,7 @@ class LayerFilterBuilder:
         except Exception:  # nosec B110 - best-effort detection, falls back below
             pass
 
-        provider = layer.providerType()
+        provider = provider_key_of(layer)
         if provider == 'postgres':
             return 'geom'
         elif provider == 'spatialite':

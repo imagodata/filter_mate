@@ -25,6 +25,11 @@ except ImportError:  # plugin root on sys.path in pure unit tests
     )
     from filtermate_core.filter.pk_formatter import is_null_value
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger('FilterMate.NativeFilterTranslation')
 
 MAX_EXPRESSION_LENGTH = 65536
@@ -76,7 +81,7 @@ _NOT_PLAIN_TEXT = ('json', 'jsonb')
 def native_dialect_for_layer(layer):
     """``postgresql``, ``sqlite``, ``ogr_sql``, or None when the subset is not native SQL we write."""
     try:
-        provider = (layer.providerType() or '').lower()
+        provider = (provider_key_of(layer) or '').lower()
         if provider == 'postgres':
             return POSTGRESQL
         if provider == 'spatialite':
@@ -270,7 +275,7 @@ def native_geometry(layer):
         provider = layer.dataProvider()
         if dialect == POSTGRESQL:
             source = POSTGIS
-        elif dialect == SQLITE and (layer.providerType() or '').lower() == 'ogr' and (
+        elif dialect == SQLITE and (provider_key_of(layer) or '').lower() == 'ogr' and (
                 provider.storageType() or '').lower() == 'gpkg':
             source = GEOPACKAGE
         else:

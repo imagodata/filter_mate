@@ -23,6 +23,11 @@ import time
 from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Optional
 
+try:
+    from ....filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger('FilterMate.Adapters.Backends.OGR.FilterExecutor')
 
 # =============================================================================
@@ -967,7 +972,7 @@ def prepare_ogr_source_geom(
     # layersAdded / willBeRemoved signals fired there). A layer created in Python
     # lives as long as a reference to it: the task keeps the one returned here
     # (ogr_source_geom), and Processing takes layer objects, in a project or not.
-    if layer and layer.isValid() and layer.providerType() == 'memory':
+    if layer and layer.isValid() and provider_key_of(layer) == 'memory':
         # PERF 2026-09-12: marker read by FilterMate's layersAdded/WillBeRemoved
         # handlers so this scratch layer never triggers a layer-management task
         layer.setCustomProperty('filterMate/internal_temp', True)

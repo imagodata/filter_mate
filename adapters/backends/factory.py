@@ -18,6 +18,11 @@ from ...core.ports.backend_port import BackendPort
 from ...core.domain.filter_expression import ProviderType
 from ...core.domain.layer_info import LayerInfo
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 if TYPE_CHECKING:
     from ...infrastructure.di.container import Container
 
@@ -391,7 +396,7 @@ class BackendFactory:
         for layer in layers:
             if layer is None:
                 continue
-            provider_type = layer.providerType() if hasattr(layer, 'providerType') else None
+            provider_type = provider_key_of(layer) if hasattr(layer, 'providerType') else None
             if provider_type != 'postgres':
                 return False
 

@@ -44,6 +44,11 @@ from ..core.services.auto_optimizer import AutoOptimizer, get_auto_optimizer
 
 from .backends.factory import BackendFactory, create_backend_factory
 
+try:
+    from ..filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 if TYPE_CHECKING:
     from qgis.core import QgsVectorLayer
 
@@ -263,7 +268,7 @@ def layer_info_from_qgis_layer(layer: 'QgsVectorLayer') -> LayerInfo:
     """
 
     # Determine provider type
-    provider_type = ProviderType.from_qgis_provider(layer.providerType())
+    provider_type = ProviderType.from_qgis_provider(provider_key_of(layer))
 
     # Determine geometry type
     wkb_type = layer.wkbType()
@@ -456,7 +461,7 @@ def create_filter_expression_from_legacy(
     Returns:
         FilterExpression domain object
     """
-    provider_type = ProviderType.from_qgis_provider(layer.providerType())
+    provider_type = ProviderType.from_qgis_provider(provider_key_of(layer))
 
     return FilterExpression.create(
         raw=raw_expression,

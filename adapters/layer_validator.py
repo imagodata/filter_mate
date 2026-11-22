@@ -48,6 +48,11 @@ except ImportError:
     def is_layer_source_available(layer, require_psycopg2=False):
         return layer is not None
 
+try:
+    from ..filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = get_logger(__name__)
 
 
@@ -157,7 +162,7 @@ class LayerValidator:
             return f"{name}: not a vector layer"
 
         # Check if layer is valid using object_safety module
-        is_postgres = layer.providerType() == 'postgres'
+        is_postgres = provider_key_of(layer) == 'postgres'
 
         if not is_valid_layer(layer):
             try:
@@ -179,7 +184,7 @@ class LayerValidator:
 
         # Check source availability for non-PostgreSQL layers
         if require_source and not is_layer_source_available(layer, require_psycopg2=False):
-            return f"{layer.name()}: source not available (provider={layer.providerType()})"
+            return f"{layer.name()}: source not available (provider={provider_key_of(layer)})"
 
         return None  # Layer is valid
 
@@ -249,7 +254,7 @@ class LayerValidator:
         if not self.is_vector_layer(layer):
             return False
         try:
-            return layer.providerType() == 'postgres'
+            return provider_key_of(layer) == 'postgres'
         except (RuntimeError, AttributeError):
             return False
 
@@ -266,7 +271,7 @@ class LayerValidator:
         if not self.is_vector_layer(layer):
             return False
         try:
-            return layer.providerType() == 'spatialite'
+            return provider_key_of(layer) == 'spatialite'
         except (RuntimeError, AttributeError):
             return False
 
@@ -283,7 +288,7 @@ class LayerValidator:
         if not self.is_vector_layer(layer):
             return 'unknown'
         try:
-            provider = layer.providerType()
+            provider = provider_key_of(layer)
             # Normalize 'postgres' to 'postgresql' for consistency
             if provider == 'postgres':
                 return 'postgresql'

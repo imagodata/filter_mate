@@ -32,6 +32,11 @@ from ....infrastructure.constants import (
 from ....infrastructure.utils import safe_set_subset_string
 from ...filter.sql_quotes import has_comparison_operator
 
+try:
+    from ....filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger('FilterMate.Tasks.AttributeFilterExecutor')
 
 
@@ -352,7 +357,7 @@ class AttributeFilterExecutor:
             return None
 
         expression = None
-        if feature_id_key and self.layer.providerType() in ('memory', 'delimitedtext'):
+        if feature_id_key and provider_key_of(self.layer) in ('memory', 'delimitedtext'):
             # The subset of these providers is a QGIS expression: the feature id is $id
             expression = f'$id IN ({", ".join(str(int(fid)) for fid in features_ids)})'
 

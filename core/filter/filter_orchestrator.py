@@ -40,6 +40,11 @@ from ...infrastructure.constants import (
     QGIS_PROVIDER_POSTGRES,
 )
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 _backend_services = get_backend_services()
 BackendFactory = _backend_services.get_backend_factory()
 
@@ -629,7 +634,7 @@ class FilterOrchestrator:
     def _provider_type(layer) -> str:
         """``layer.providerType()``, '' when it cannot be read."""
         try:
-            provider = layer.providerType()
+            provider = provider_key_of(layer)
         except Exception:  # nosec B110 - deleted layer / mock: no provider
             return ''
         return provider if isinstance(provider, str) else ''
@@ -815,7 +820,7 @@ class FilterOrchestrator:
 
         is_large_pg_table = (
             backend_name == PROVIDER_POSTGRES and
-            layer.providerType() == QGIS_PROVIDER_POSTGRES and
+            provider_key_of(layer) == QGIS_PROVIDER_POSTGRES and
             feature_count > 100000
         )
 
@@ -866,7 +871,7 @@ class FilterOrchestrator:
             # PostgreSQL provider leaves its internal connection in an aborted-transaction
             # state.  Calling reload() forces the provider to start a fresh connection,
             # so the subsequent setSubsetString() call in the OGR fallback can succeed.
-            if layer.providerType() == QGIS_PROVIDER_POSTGRES:
+            if provider_key_of(layer) == QGIS_PROVIDER_POSTGRES:
                 try:
                     logger.debug(f"🔄 Reloading PostgreSQL layer '{layer.name()}' to reset connection state...")
                     layer.dataProvider().reloadData()
@@ -976,14 +981,14 @@ class FilterOrchestrator:
         logger.debug(f"✓ orchestrate_geometric_filter: {layer.name()} → backend returned SUCCESS")
         logger.debug(f"  - Subset string applied: {final_expression[:200] if final_expression else '(empty)'}")
         logger.debug(f"  - Layer is valid: {layer.isValid()}")
-        logger.debug(f"  - Provider: {layer.providerType()}")
+        logger.debug(f"  - Provider: {provider_key_of(layer)}")
         logger.debug(f"  - CRS: {layer.crs().authid()}")
 
         # Warn if no features after filtering. Only meaningful when the subset
         # is already applied: 2026-10-17, a task queues it for the main thread on
         # every backend (the layer still holds the previous one here); a LIMIT 1
         # probe stops at the first match instead of counting everything.
-        if self.subset_queue_callback is None and layer.providerType() == QGIS_PROVIDER_POSTGRES \
+        if self.subset_queue_callback is None and provider_key_of(layer) == QGIS_PROVIDER_POSTGRES \
                 and final_expression and not self._has_any_feature(layer):
             # 2026-09-14: one INFO line here; the task reports every empty
             # target in a single WARNING (7 identical warnings per cascade with
