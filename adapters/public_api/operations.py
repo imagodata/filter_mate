@@ -30,12 +30,17 @@ import functools
 import json
 import logging
 import os
+import shutil
+import tempfile
+import zipfile
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from ...core.domain.api_requests import (
+    OPTIONAL_VECTOR_DRIVERS,
     OperationReport,
     POINT_CLOUD_EXPORT_FORMATS,
     RASTER_EXPORT_FORMATS,
+    STYLE_EXPORT_FORMATS,
     VECTOR_EXPORT_FORMATS,
     relation_numbers,
 )
@@ -871,7 +876,12 @@ def clear_filters(layers: Sequence, project=None, service=None) -> OperationRepo
 
 # --- export ----------------------------------------------------------------------
 
-def _unique_path(path: str, used: set) -> str:
+def _unique_path(path: str, used: set, sidecar: str = "") -> str:
+    """``path``, or ``<stem>_2<ext>``... when taken in this export.
+
+    With ``sidecar`` (``.qml``), the style file ``<stem><sidecar>`` beside it must be free too: a vector and a
+    raster of the same name would share one style file.
+    """
     root, ext = path, ""
     for compound in (".copc.laz",):
         if path.lower().endswith(compound):
@@ -879,22 +889,71 @@ def _unique_path(path: str, used: set) -> str:
             break
     else:
         root, ext = os.path.splitext(path)
-    candidate, index = path, 2
-    while candidate.lower() in used:
-        candidate = f"{root}_{index}{ext}"
+    candidate, stem, index = path, root, 2
+    while candidate.lower() in used or (sidecar and (stem + sidecar).lower() in used):
+        stem = f"{root}_{index}"
+        candidate = stem + ext
+        index += 1
+    used.add(candidate.lower())
+    if sidecar:
+        used.add((stem + sidecar).lower())
+    return candidate
+
+
+# Names a table of a GeoPackage cannot take: its own tables, and those QGIS adds (styles, projects).
+_GPKG_RESERVED = {"layer_styles", "qgis_projects"}
+_GPKG_RESERVED_PREFIXES = ("gpkg_", "sqlite_", "rtree_")
+# Spreadsheets: no style file beside them.
+_NO_STYLE_FORMATS = ("CSV", "XLSX")
+
+
+def _unique_table(name: str, used: set) -> str:
+    """A table name for ``name`` in the single GeoPackage, unique ignoring case (SQLite does)."""
+    base = (name or "").strip() or "layer"
+    if base.lower().startswith(_GPKG_RESERVED_PREFIXES):
+        base = f"t_{base}"
+    candidate, index = base, 2
+    while candidate.lower() in used or candidate.lower() in _GPKG_RESERVED:
+        candidate = f"{base}_{index}"
         index += 1
     used.add(candidate.lower())
     return candidate
 
 
+def _package_stem(package_name: str) -> str:
+    """File name of a package, without the extension the caller may have added."""
+    stem = (package_name or "").strip()
+    for extension in (".zip", ".gpkg"):
+        if stem.lower().endswith(extension):
+            stem = stem[:-len(extension)]
+    return "".join(c if c.isalnum() or c in "-_ ." else "_" for c in stem).strip(" .") or "export"
+
+
+def _available_driver(candidates: Sequence[str]) -> str:
+    """First of ``candidates`` the vector writer of this QGIS has; "" when none."""
+    from qgis.core import QgsVectorFileWriter
+    available = {details.driverName for details in QgsVectorFileWriter.supportedFiltersAndFormats()}
+    return next((driver for driver in candidates if driver in available), "")
+
+
 @_exclusive(tidy=False)
 def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", raster_format: str = "COG",
-                  point_cloud_format: str = "LAZ", crs=None, feedback=None, project=None) -> OperationReport:
+                  point_cloud_format: str = "LAZ", crs=None, feedback=None, project=None, styles: str = "none",
+                  single_file: bool = False, zip_archive: bool = False,
+                  package_name: str = "export") -> OperationReport:
     """Write each layer as it is filtered now into ``folder``.
 
     Vector layers keep the features of their subset, rasters the pixels kept
     (NoData elsewhere), point clouds the points kept. One file per layer,
     named after the layer; ``report.outputs`` maps layer names to the files.
+
+    2026-11-22: ``styles`` (``qml`` or ``sld``) writes the style of each vector layer beside its file, and a QML
+    beside each raster (``qml``); none beside a CSV or an XLSX. ``single_file`` (GPKG) writes every vector layer
+    into ``<package_name>.gpkg``, one table each (``report.tables``), the QML styles inside it. ``zip_archive``
+    packs every file written into ``<package_name>.zip``, never overwritten (``_2``, ``_3``... instead); the files
+    are written in a hidden folder first, so no file of ``folder`` is overwritten or removed, and
+    ``report.outputs`` and ``report.styles`` name the files in the zip. ``report.package`` is the zip, or else the
+    single GeoPackage.
 
     Args:
         layers: Layers of any kind (objects, ids or names); layer objects outside the project are accepted.
@@ -904,6 +963,10 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
         point_cloud_format: ``LAZ``, ``COPC``, ``LAS``, ``GPKG`` or ``CSV``.
         crs: Optional output CRS (``QgsCoordinateReferenceSystem``).
         feedback: Optional ``QgsFeedback`` (progress, cancellation).
+        styles: ``none``, ``qml`` or ``sld``.
+        single_file: Every vector layer in one GeoPackage (``vector_format`` GPKG only).
+        zip_archive: Every file written packed in one zip.
+        package_name: Name of the zip and of the single GeoPackage, without extension.
     """
     from qgis.core import QgsFeedback, QgsRasterBlockFeedback
     from ..qgis.coverage_layers.exporters import (
@@ -920,6 +983,12 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
     if point_cloud_format not in POINT_CLOUD_EXPORT_FORMATS:
         report.error = f"unknown point cloud format {point_cloud_format!r}"
         return report
+    if styles not in STYLE_EXPORT_FORMATS:
+        report.error = f"unknown style format {styles!r}"
+        return report
+    if single_file and vector_format != "GPKG":
+        report.error = "single_file writes a GeoPackage: vector_format must be GPKG"
+        return report
     if not folder:
         report.error = "no output folder"
         return report
@@ -931,65 +1000,203 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
             report.skipped[str(reference)] = "layer not found"
             continue
         resolved.append(layer)
+    driver, extension = VECTOR_EXPORT_FORMATS[vector_format]
+    if vector_format in OPTIONAL_VECTOR_DRIVERS and any(layer_kind(layer) is LayerKind.VECTOR for layer in resolved):
+        driver = _available_driver(OPTIONAL_VECTOR_DRIVERS[vector_format])
+        if not driver:
+            report.error = (f"{vector_format} cannot be written: the GDAL of this QGIS has no "
+                            f"{' or '.join(OPTIONAL_VECTOR_DRIVERS[vector_format])} driver")
+            return report
+    vector_style = styles if styles != "none" and vector_format not in _NO_STYLE_FORMATS else ""
+    raster_style = "qml" if styles == "qml" else ""
+    stem = _package_stem(package_name)
     used: set = set()
     from ..qgis.coverage_layers.exporters import export_sources
     sources = export_sources(resolved, project=project)
-    total = max(1, len(resolved))
-    for index, layer in enumerate(resolved):
-        if feedback is not None and feedback.isCanceled():
-            report.error = "canceled"
-            break
-        kind = layer_kind(layer)
-        name = layer.name()
-        label = _report_label(report, name, layer.id())
-        try:
-            if kind is LayerKind.VECTOR:
-                driver, extension = VECTOR_EXPORT_FORMATS[vector_format]
-                path = _output_file(_unique_path(output_path(folder, name, extension), used), sources)
-                block, release = _child_feedback(feedback, index, total, QgsFeedback)
-                try:
-                    ok, path, message = _export_vector(layer, path, driver, crs, project, feedback=block)
-                finally:
-                    release()
-            elif kind is LayerKind.RASTER and is_non_analysis_raster(layer):  # local_copy writes a web map
-                report.skipped[label] = RENDERED_NOT_EXPORTED
-                continue
-            elif kind is LayerKind.RASTER:
-                path = _output_file(_unique_path(output_path(folder, name, '.tif'), used), sources)
-                block, release = _child_feedback(feedback, index, total, QgsRasterBlockFeedback)
-                try:
-                    result = export_raster(layer, path, raster_format, crs, feedback=block)
-                finally:
-                    release()
-                ok, path, message = result.success, result.path, result.message
-            elif kind is LayerKind.POINT_CLOUD:
-                path = _output_file(_unique_path(output_path(folder, name, POINT_CLOUD_FORMATS[point_cloud_format]),
-                                                 used), sources)
-                block, release = _child_feedback(feedback, index, total, QgsFeedback)
-                try:
-                    result = export_point_cloud(layer, path, point_cloud_format, crs, feedback=block)
-                finally:
-                    release()
-                ok, path, message = result.success, result.path, result.message
+    try:
+        staging = tempfile.mkdtemp(prefix=".filtermate_zip_", dir=folder) if zip_archive else ""
+    except OSError as exc:
+        report.error = f"the export folder cannot be written ({exc.strerror or exc})"
+        return report
+    target = staging or folder
+    try:
+        gpkg = ""
+        if single_file:
+            gpkg = _unique_path(output_path(target, stem, ".gpkg"), used)
+            try:
+                _output_file(gpkg, sources)
+            except ValueError as exc:  # said with its name alone: the error reaches the model
+                report.error = str(exc).replace(gpkg, os.path.basename(gpkg))
+                return report
+        in_gpkg: List[Tuple[Any, str, str]] = []  # (layer, label, table) written into the single GeoPackage
+        tables: set = set()
+        total = max(1, len(resolved))
+        for index, layer in enumerate(resolved):
+            if feedback is not None and feedback.isCanceled():
+                report.error = "canceled"
+                break
+            kind = layer_kind(layer)
+            name = layer.name()
+            label = _report_label(report, name, layer.id())
+            table, style = "", ""
+            try:
+                if kind is LayerKind.VECTOR and gpkg:
+                    table = _unique_table(name, tables)
+                    block, release = _child_feedback(feedback, index, total, QgsFeedback)
+                    try:
+                        ok, path, message = _export_vector(layer, gpkg, driver, crs, project, feedback=block,
+                                                           table=table, append=bool(in_gpkg))
+                    finally:
+                        release()
+                    if ok:
+                        in_gpkg.append((layer, label, table))
+                elif kind is LayerKind.VECTOR:
+                    path = _output_file(_unique_path(output_path(target, name, extension), used,
+                                                     sidecar=f".{vector_style}" if vector_style else ""), sources)
+                    block, release = _child_feedback(feedback, index, total, QgsFeedback)
+                    try:
+                        ok, path, message = _export_vector(layer, path, driver, crs, project, feedback=block)
+                    finally:
+                        release()
+                    style = vector_style
+                elif kind is LayerKind.RASTER and is_non_analysis_raster(layer):  # local_copy writes a web map
+                    report.skipped[label] = RENDERED_NOT_EXPORTED
+                    continue
+                elif kind is LayerKind.RASTER:
+                    path = _output_file(_unique_path(output_path(target, name, '.tif'), used,
+                                                     sidecar=f".{raster_style}" if raster_style else ""), sources)
+                    block, release = _child_feedback(feedback, index, total, QgsRasterBlockFeedback)
+                    try:
+                        result = export_raster(layer, path, raster_format, crs, feedback=block)
+                    finally:
+                        release()
+                    ok, path, message = result.success, result.path, result.message
+                    style = raster_style
+                elif kind is LayerKind.POINT_CLOUD:
+                    path = _output_file(_unique_path(output_path(target, name,
+                                                                 POINT_CLOUD_FORMATS[point_cloud_format]),
+                                                     used), sources)
+                    block, release = _child_feedback(feedback, index, total, QgsFeedback)
+                    try:
+                        result = export_point_cloud(layer, path, point_cloud_format, crs, feedback=block)
+                    finally:
+                        release()
+                    ok, path, message = result.success, result.path, result.message
+                else:
+                    report.skipped[label] = ("vector tiles are filtered for display only, not exported"
+                                             if kind is LayerKind.VECTOR_TILE else NOT_FILTERABLE)
+                    continue
+            except ValueError as exc:  # output file refused
+                ok, path, message = False, '', str(exc)
+            except Exception as exc:  # one layer must not stop the others
+                logger.warning(f"[FM5] export of '{name}' failed: {exc}", exc_info=True)
+                ok, path, message = False, '', _unexpected(report, exc, label)
+            if ok:
+                report.done[layer.id()] = label
+                if table:
+                    report.tables[label] = table
+                else:
+                    report.outputs[label] = path
+                if message:
+                    report.details.setdefault("notes", {})[label] = message
+                if style:
+                    _style_beside(report, layer, label, path, style)
             else:
-                report.skipped[label] = ("vector tiles are filtered for display only, not exported"
-                                         if kind is LayerKind.VECTOR_TILE else NOT_FILTERABLE)
-                continue
-        except ValueError as exc:  # output file refused
-            ok, path, message = False, '', str(exc)
-        except Exception as exc:  # one layer must not stop the others
-            logger.warning(f"[FM5] export of '{name}' failed: {exc}", exc_info=True)
-            ok, path, message = False, '', _unexpected(report, exc, label)
-        if ok:
-            report.done[layer.id()] = label
-            report.outputs[label] = path
-            if message:
-                report.details.setdefault("notes", {})[label] = message
-        else:
-            report.failed[label] = message or "export failed"
-        if feedback is not None:
-            feedback.setProgress(100.0 * (index + 1) / total)
+                report.failed[label] = message or "export failed"
+            if feedback is not None:
+                feedback.setProgress(100.0 * (index + 1) / total)
+        if in_gpkg:
+            report.package = gpkg
+            if styles != "none":
+                _styles_in_gpkg(report, gpkg, in_gpkg, styles, target, used)
+        if staging and report.error:  # canceled: the files written are not kept
+            _discard(report, f"not kept: {report.error}")
+        elif staging:
+            _pack(report, staging, folder, stem)
+    finally:
+        if staging:
+            shutil.rmtree(staging, ignore_errors=True)
     return report
+
+
+def _style_beside(report: OperationReport, layer, label: str, path: str, style: str) -> None:
+    """The style of ``layer`` as ``<stem>.qml`` or ``.sld`` beside ``path``; a note when it is not written."""
+    from ...core.export.style_exporter import save_layer_style
+    style_path = os.path.splitext(path)[0] + f".{style}"
+    try:
+        if os.path.lexists(style_path):  # an older one, or a link the writer would follow: replaced
+            os.remove(style_path)
+        save_layer_style(layer, path, style)
+    except OSError as exc:
+        logger.warning(f"[FM5] style of '{label}' not written: {exc}")
+    if os.path.isfile(style_path):
+        report.styles[label] = style_path
+    else:
+        report.details.setdefault("notes", {})[label] = f"its {style.upper()} style could not be written"
+
+
+def _styles_in_gpkg(report: OperationReport, gpkg: str, in_gpkg, styles: str, target: str, used: set) -> None:
+    """The QML styles in the single GeoPackage (QGIS reads them there), and with ``sld`` a ``<table>.sld`` each."""
+    from ...core.export.gpkg_layer_tree_writer import write_layer_styles_to_gpkg
+    from ..qgis.coverage_layers.exporters import output_path
+    embedded = write_layer_styles_to_gpkg(gpkg, [(layer, table) for layer, _label, table in in_gpkg])
+    for layer, label, table in in_gpkg:
+        if styles == "sld":
+            _style_beside(report, layer, label, _unique_path(output_path(target, table, ".sld"), used), "sld")
+        elif embedded:
+            report.styles[label] = gpkg
+        else:
+            report.details.setdefault("notes", {})[label] = "its QML style could not be written"
+
+
+def _pack(report: OperationReport, staging: str, folder: str, stem: str) -> None:
+    """Every file of ``staging`` into ``<stem>.zip`` in ``folder`` (``_2``... when taken, never overwritten).
+
+    The report then names the files in the zip. A zip that cannot be written leaves nothing: the layers fail.
+    """
+    names = sorted(os.path.relpath(os.path.join(root, name), staging)
+                   for root, _dirs, files in os.walk(staging) for name in files)
+    if not names:
+        return
+    path, index, created = os.path.join(folder, f"{stem}.zip"), 2, False
+    try:
+        while True:
+            try:
+                archive = zipfile.ZipFile(path, "x", zipfile.ZIP_DEFLATED)  # "x": never an existing file or link
+                break
+            except FileExistsError:
+                path, index = os.path.join(folder, f"{stem}_{index}.zip"), index + 1
+        created = True
+        with archive:
+            for name in names:
+                archive.write(os.path.join(staging, name), name.replace(os.sep, "/"))
+    except OSError as exc:
+        logger.warning(f"[FM5] zip of the export not written: {exc}")
+        if created:
+            try:
+                os.remove(path)
+            except OSError:  # nosec B110 - the partial zip stays; the layers are failed below anyway
+                pass
+        _discard(report, f"the zip could not be written ({exc.strerror or exc})")
+        return
+
+    def inside(file_path: str) -> str:
+        return os.path.relpath(file_path, staging).replace(os.sep, "/")
+
+    report.outputs = {label: inside(file_path) for label, file_path in report.outputs.items()}
+    report.styles = {label: inside(file_path) for label, file_path in report.styles.items()}
+    report.package = path
+
+
+def _discard(report: OperationReport, reason: str) -> None:
+    """The layers done are failed for ``reason``: the files of the zip they went to are gone."""
+    for label in report.done.values():
+        report.failed[label] = reason
+    report.done.clear()
+    report.outputs.clear()
+    report.tables.clear()
+    report.styles.clear()
+    report.package = ""
 
 
 def _output_file(path: str, sources=None) -> str:
@@ -1037,13 +1244,20 @@ def _child_feedback(feedback, index: int, total: int, child_class):
     return block, lambda: _disconnect((feedback.canceled, block.cancel), (block.progressChanged, _progress))
 
 
-def _export_vector(layer, path: str, driver: str, crs, project, feedback=None) -> Tuple[bool, str, str]:
-    """``QgsVectorFileWriter`` honours the subset string: only the filtered features are written."""
+def _export_vector(layer, path: str, driver: str, crs, project, feedback=None, table: str = "",
+                   append: bool = False) -> Tuple[bool, str, str]:
+    """``QgsVectorFileWriter`` honours the subset string: only the filtered features are written.
+
+    ``table`` names the layer in the file (the layer's name by default); ``append`` adds it to an existing file
+    (the single GeoPackage) instead of replacing the file.
+    """
     from qgis.core import QgsCoordinateTransform, QgsVectorFileWriter
     options = QgsVectorFileWriter.SaveVectorOptions()
     options.driverName = driver
     options.fileEncoding = "UTF-8"
-    options.layerName = layer.name()
+    options.layerName = table or layer.name()
+    if append:
+        options.actionOnExistingFile = QgsVectorFileWriter.ActionOnExistingFile.CreateOrOverwriteLayer
     if feedback is not None:
         options.feedback = feedback
     if crs is not None and crs.isValid() and crs != layer.crs():

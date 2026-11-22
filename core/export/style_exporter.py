@@ -109,7 +109,12 @@ class StyleExporter:
         base, _ = os.path.splitext(output_path)
         style_path = os.path.normcase(f"{base}.{format_name}")
         try:
-            layer.saveNamedStyle(style_path)
+            # 2026-11-22: saveNamedStyle writes a QML whatever the extension; given x.sld it put the style in the
+            # style database of the profile and no file at all (measured in QGIS 3.22, 3.44 and 4.3).
+            if format_name == 'sld':
+                layer.saveSldStyle(style_path)
+            else:
+                layer.saveNamedStyle(style_path)
             logger.debug(f"Style saved: {style_path}")
             return True
         except Exception as e:

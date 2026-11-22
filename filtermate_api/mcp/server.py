@@ -1329,19 +1329,25 @@ def build_server(client: FilterMateClient) -> Any:
         layers: Annotated[LayerList, Field(description="Of any kind, one file each")],
         subfolder: Annotated[str, Field(max_length=300, description=(
             "Below the export root: a or a/b, letters, digits, _ . - only"))] = "export",
-        vector_format: Literal["GPKG", "GeoJSON", "ESRI Shapefile", "FlatGeobuf", "CSV"] = "GPKG",
+        vector_format: Literal["GPKG", "GeoJSON", "ESRI Shapefile", "FlatGeobuf", "CSV", "KML", "XLSX",
+                               "GeoParquet"] = "GPKG",
         raster_format: Literal["COG", "GTiff"] = "COG",
         point_cloud_format: Literal["LAZ", "COPC", "LAS", "GPKG", "CSV"] = "LAZ",
         crs: Annotated[Optional[str], Field(max_length=64, description="Omit: each layer's")] = None,
+        styles: Annotated[Literal["none", "qml", "sld"], Field(description="A style file beside each")] = "none",
+        single_file: Annotated[bool, Field(description="GPKG: all vector layers in one")] = False,
+        zip: Annotated[bool, Field(description="All files in one zip")] = False,  # noqa: A002
+        package_name: Annotated[str, Field(max_length=100, description="Of the zip or single GPKG")] = "export",
     ) -> Dict[str, Any]:
         """Write layers, as filtered now, to files on the QGIS machine below its export root; a file of the same
-        name is overwritten.
+        name is overwritten, a zip never.
 
-        Returns done, outputs ({layer name: file path}), failed and skipped.
+        Returns done, outputs ({layer name: file}), package, tables, styles, failed and skipped.
         """
         return await call("POST", "/export", _body(
             layers=layers, subfolder=subfolder, vector_format=vector_format, raster_format=raster_format,
-            point_cloud_format=point_cloud_format, crs=crs))
+            point_cloud_format=point_cloud_format, crs=crs, styles=styles, single_file=single_file, zip=zip,
+            package_name=package_name))
 
     # -- resources (read-only mirrors of two GET tools) --------------------------
     # Synchronous on purpose: async resource functions return '<coroutine ...>' in mcp 1.9.0 / 1.10.0.

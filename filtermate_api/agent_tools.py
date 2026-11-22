@@ -572,10 +572,19 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         answer = _report("Export", accessor.export_layers(
             layers=args["layers"], folder=str(folder), vector_format=args["vector_format"],
             raster_format=args["raster_format"], point_cloud_format=args["point_cloud_format"],
-            crs=args.get("crs")))
-        # The paths of this machine are not sent to the provider.
-        answer["outputs"] = {name: os.path.relpath(path, str(folder)) for name, path in answer["outputs"].items()}
-        return answer
+            crs=args.get("crs"), styles=args.get("styles") or "none", single_file=bool(args.get("single_file")),
+            zip_archive=bool(args.get("zip")), package_name=args.get("package_name") or "export"))
+
+        def relative(path: str) -> str:
+            """The paths of this machine are not sent to the provider; a name in the zip is relative already."""
+            return os.path.relpath(path, str(folder)) if os.path.isabs(path) else path
+
+        answer["outputs"] = {name: relative(path) for name, path in answer["outputs"].items()}
+        answer["styles"] = {name: relative(path) for name, path in answer["styles"].items()}
+        if answer["package"]:
+            answer["package"] = relative(answer["package"])
+        # What only a package or styles fill stays out of the answer otherwise.
+        return {key: value for key, value in answer.items() if value or key not in ("package", "tables", "styles")}
 
     def layer_options(args: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.layer_options(args["layer"])
