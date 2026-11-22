@@ -80,7 +80,8 @@ from ...core.agent.memory import UnreadableMemory, chosen as memory_chosen, memo
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
-    ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CHART_TOOLS, CREATE_WIDGET, EXPORT_CHART, RUN_CHART_CODE, SHOW_CHART, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
+    ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CHART_TOOLS, CREATE_WIDGET, EXPORT_CHART, RUN_CHART_CODE, SHOW_CHART,
+    LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
     TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )

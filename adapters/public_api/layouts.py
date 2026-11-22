@@ -657,7 +657,6 @@ def _font(label, size: Optional[float]) -> None:
     if size is None:
         return
     if hasattr(label, 'setTextFormat'):
-        from qgis.core import QgsTextFormat
         text_format = label.textFormat()
         text_format.setSize(size)
         label.setTextFormat(text_format)
