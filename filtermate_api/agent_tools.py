@@ -449,6 +449,14 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         return accessor.make_cartogram(args["layer"], args["field"], kind=args.get("kind") or "contiguous",
                                        iterations=args.get("iterations") or 8, name=args.get("name") or "")
 
+    def design_style(args: Dict[str, Any]) -> Dict[str, Any]:
+        keys = ("mode", "field", "palette", "look", "icon", "variant", "classes", "method", "limit", "reverse",
+                "size", "opacity", "color")
+        return accessor.design_style(args["layer"], **{key: args[key] for key in keys if args.get(key) is not None})
+
+    def list_palettes(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.list_palettes(args.get("role") or "")
+
     def suggest_crs(args: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.suggest_crs(layers=args.get("layers"), purpose=args.get("purpose") or "general")
 
@@ -626,7 +634,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "list_style_presets": list_style_presets, "apply_style_preset": apply_style_preset,
         "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
         "create_layout": create_layout, "export_layout": export_layout, "set_project_crs": set_project_crs,
-        "suggest_crs": suggest_crs, "make_cartogram": make_cartogram,
+        "suggest_crs": suggest_crs, "design_style": design_style, "list_palettes": list_palettes, "make_cartogram": make_cartogram,
         "describe_layout": describe_layout, "set_atlas": set_atlas, "edit_layout": edit_layout,
         "add_field": add_field, "join_layers": join_layers, "set_form": set_form, "relations": relations,
         "group_layers": group_layers, "rename_layer": rename_layer, "map_theme": map_theme,

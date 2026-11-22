@@ -582,6 +582,13 @@ class QGISFilterMateAccessor:
     def set_project_crs(self, crs: str) -> ProjectCrs:
         return ProjectCrs(**self._control("set_project_crs", crs))
 
+    def design_style(self, layer: str, **options: Any) -> Dict[str, Any]:
+        return self._control("design_style", layer, module="adapters.public_api.style_design",
+                             changes={"layer": layer}, **options)
+
+    def list_palettes(self, role: str = "") -> Dict[str, Any]:
+        return self._control("list_palettes", role, module="adapters.public_api.style_design")
+
     def suggest_crs(self, layers: Optional[List[str]] = None, purpose: str = "general") -> Dict[str, Any]:
         return self._control("suggest_crs", layers=list(layers or []), purpose=purpose)
 

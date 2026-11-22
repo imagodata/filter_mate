@@ -308,3 +308,14 @@ def write_providers(entries) -> None:
     QgsSettings().setValue(_PREFIX + "providers", json.dumps(
         [{"preset": entry.preset, "model": entry.model, "base_url": entry.base_url, "authcfg": entry.authcfg,
           "consent_target": entry.consent_target, "key_target": entry.key_target} for entry in entries]))
+
+
+def read_mode() -> str:
+    """The mode of the agent picked under the line of the chat (core/agent/modes.py), Act by default."""
+    from ...core.agent.modes import mode_or_default
+    return mode_or_default(QgsSettings().value(_PREFIX + "mode", ""))
+
+
+def write_mode(mode: str) -> None:
+    from ...core.agent.modes import mode_or_default
+    QgsSettings().setValue(_PREFIX + "mode", mode_or_default(mode))

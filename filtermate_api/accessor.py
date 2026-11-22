@@ -770,6 +770,14 @@ class FilterMateAccessor(Protocol):
         """Set the CRS of the project and of the map; raises FilterRejected on an unknown CRS."""
         ...
 
+    def design_style(self, layer: str, **options: Any) -> Dict[str, Any]:
+        """Compose a style from a validated palette; raises FilterRejected when refused."""
+        ...
+
+    def list_palettes(self, role: str = "") -> Dict[str, Any]:
+        """The palettes of a role, or all, and what the check of colours says of them."""
+        ...
+
     def suggest_crs(self, layers: Optional[List[str]] = None, purpose: str = "general") -> Dict[str, Any]:
         """Projections for the data of ``layers`` and a purpose, best first; raises FilterRejected."""
         ...
@@ -1314,6 +1322,28 @@ class InMemoryAccessor:
         if not crs.upper().startswith(("EPSG:", "PROJ:+PROJ=")) and not crs.isdigit():
             raise FilterRejected(f"{crs!r} is no CRS QGIS knows")
         return ProjectCrs(crs=crs if ":" in crs else f"EPSG:{crs}")
+
+    def design_style(self, layer: str, **options: Any) -> Dict[str, Any]:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        mode = options.get("mode", "single")
+        if mode not in ("single", "categorized", "graduated"):
+            raise FilterRejected("mode is one of single, categorized, graduated")
+        answer = {"layer_name": found.name, "mode": mode, "look": options.get("look", "flat"),
+                  "variant": options.get("variant", "light"), "palette": options.get("palette") or "filtermate",
+                  "colors": ["#2a78d6", "#eb6834", "#1baf7a"]}
+        if mode != "single":
+            answer.update(field=options.get("field", ""), categories=3, others=False)
+        return answer
+
+    def list_palettes(self, role: str = "") -> Dict[str, Any]:
+        rows = [{"name": "filtermate", "role": "categorical", "colors": ["#2a78d6", "#eb6834"], "problems": []},
+                {"name": "blues", "role": "sequential", "colors": ["#deebf7", "#08306b"], "problems": []}]
+        if role and role not in ("categorical", "sequential", "diverging", "status"):
+            raise FilterRejected("role is one of categorical, sequential, diverging, status")
+        return {"palettes": [row for row in rows if not role or row["role"] == role],
+                "defaults": {"categorical": "filtermate", "sequential": "blues"}}
 
     def suggest_crs(self, layers: Optional[List[str]] = None, purpose: str = "general") -> Dict[str, Any]:
         try:

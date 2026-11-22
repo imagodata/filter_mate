@@ -1,0 +1,29 @@
+{
+  "cases": [
+    {
+      "id": "styles_land_use_categories",
+      "prompt": "Fais un joli style pour l'occupation du sol des parcelles selon la section, lisible pour les daltoniens.",
+      "expect": [[{"tool": "design_style", "args": {"layer": "parcelles", "mode": "categorized", "field": "section"},
+                   "call_args": {"layer": "parcelles", "mode": "categorized", "field": "section", "palette": "okabe_ito",
+                                 "look": "outlined"}}]],
+      "forbid": ["run_pyqgis"]
+    },
+    {
+      "id": "styles_roads_casing",
+      "prompt": "Style moderne pour les routes selon leur nature, comme une carte routière.",
+      "expect": [[{"tool": "design_style", "args": {"layer": "routes", "mode": "categorized", "field": "nature",
+                                                    "look": "casing"},
+                   "call_args": {"layer": "routes", "mode": "categorized", "field": "nature", "look": "casing"}}]],
+      "forbid": ["run_pyqgis"]
+    },
+    {
+      "id": "styles_heights_sequential",
+      "trap": true,
+      "prompt": "Colore les bâtiments selon leur hauteur avec des couleurs bien différentes pour chaque classe.",
+      "expect": [[{"tool": "design_style", "args": {"layer": "batiments", "mode": "graduated", "field": "hauteur"},
+                   "call_args": {"layer": "batiments", "mode": "graduated", "field": "hauteur", "palette": "viridis",
+                                 "classes": 5}}]],
+      "forbid": ["run_pyqgis"]
+    }
+  ]
+}

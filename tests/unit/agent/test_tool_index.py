@@ -25,7 +25,7 @@ def test_index_lists_the_tools_in_order():
 
 
 def test_index_of_every_tool_stays_small():
-    assert len(index_block(chat_tools())) <= MAX_INDEX == 4900
+    assert len(index_block(chat_tools())) <= MAX_INDEX == 5100  # 4,800 until 2026-11-22: more tools since
 
 
 def test_no_index_without_tool():

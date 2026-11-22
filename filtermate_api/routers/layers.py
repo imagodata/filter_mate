@@ -284,3 +284,35 @@ def add_features(payload: AddFeaturesRequest, request: Request) -> EditResult:
     """Add features from WKT geometries, in the edit buffer of the layer (not saved)."""
     return _accessor(request).add_features(payload.layer, features=[item.model_dump() for item in payload.features],
                                            crs=payload.crs)
+
+
+class DesignStyleRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=1000)
+    mode: Literal["single", "categorized", "graduated"] = "single"
+    field: str = Field("", max_length=200)
+    palette: str = Field("", max_length=40)
+    look: Literal["flat", "outlined", "hatched", "casing", "halo", "dashed", "icon", "badge"] = "flat"
+    icon: str = Field("", max_length=60)
+    variant: Literal["light", "dark", "print", "discreet"] = "light"
+    classes: int = Field(5, ge=2, le=9)
+    method: Literal["quantile", "equal_interval", "jenks", "pretty"] = "quantile"
+    limit: int = Field(8, ge=1, le=12)
+    reverse: bool = False
+    size: Optional[float] = Field(None, gt=0, le=20)
+    opacity: Optional[float] = Field(None, ge=0, le=1)
+    color: str = Field("", max_length=20)
+
+
+@router.post("/design-style")
+def design_style(payload: DesignStyleRequest, request: Request) -> Dict[str, Any]:
+    """Compose a style for a vector layer from a validated palette (a refusal: FilterRejected, 400)."""
+    options = payload.model_dump(exclude={"layer"}, exclude_none=True)
+    return _accessor(request).design_style(payload.layer, **options)
+
+
+@router.get("/palettes")
+def list_palettes(request: Request, role: str = Query("", max_length=20)) -> Dict[str, Any]:
+    """The palettes of a role, or all, and what the check of colours says of them."""
+    return _accessor(request).list_palettes(role)
