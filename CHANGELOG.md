@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent charts, after a second review: the code of the expert mode tells a user who does not share values how many errors its page had, never their words (it could write the values in them); its page is dropped after each run, with any connection it opened from a frame of its own; a chart of code is drawn light, as it goes to paper. The SVG of a chart is walked without recursion, 100 levels and 60 000 elements at most, every `url()` of a value must point inside it (in capitals too), its sides are 4 000 pixels at most, and it is written without touching ElementTree for the rest of QGIS. The charts of layouts left after a round of drawing (12 charts or 4 seconds) are drawn in the next round instead of keeping the filter of before. `run_chart_code` opens no undo point (it changes nothing; it is asked at each run all the same) and comes after the other tools, as `run_pyqgis` does, so that the expert mode moves no other tool of the request. The charts of a project closed are forgotten. Bench: 47 checks.
 ## [5.1.2] - 2026-11-22
 
 The fixes and changes merged since 5.1.1. The panel: the buttons of FILTERING and EXPORTING in front of their rows,

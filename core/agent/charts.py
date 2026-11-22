@@ -479,29 +479,74 @@ def sanitize_svg(svg: str) -> str:
         root = ElementTree.fromstring(svg)  # nosec B314 - no DTD (refused above), from the page of the chart
     except ElementTree.ParseError as exc:
         raise ChartError(f"the SVG of the chart could not be read ({exc})") from None
-    if _local(root.tag) != "svg":
+    if root.tag != "{%s}svg" % SVG_NS:
         raise ChartError("the chart is no SVG")
-
-    def clean(element) -> None:
+    _check_size(root)
+    # Walked without recursion, every element of the namespace of SVG kept only (2026-11-22, second review: a tree
+    # 3,000 levels deep raised RecursionError), and the attributes of no namespace only.
+    stack, seen = [(root, 0)], 0
+    while stack:
+        element, depth = stack.pop()
+        seen += 1
+        if seen > MAX_SVG_ELEMENTS or depth > MAX_SVG_DEPTH:
+            raise ChartError("the SVG of the chart is too large or too deep")
         for child in list(element):
-            if not isinstance(child.tag, str) or _local(child.tag) in _DROPPED:
+            tag = child.tag if isinstance(child.tag, str) else ""
+            if not tag.startswith("{%s}" % SVG_NS) or _local(tag) in _DROPPED:
                 element.remove(child)
-                continue
-            clean(child)
+            else:
+                stack.append((child, depth + 1))
         for name in list(element.attrib):
-            value = str(element.attrib[name]).strip()
-            local = _local(name).lower()
-            if local == "href" and not value.startswith("#"):
-                del element.attrib[name]
-            elif local.startswith("on") or "url(" in value.replace(" ", "") and "url(#" not in value.replace(" ", ""):
-                del element.attrib[name]
-            elif local == "style":
+            value = str(element.attrib[name])
+            local = name.lower()
+            if name.startswith("{") or local in ("href", "style") or local.startswith("on") or not _local_urls(value):
                 del element.attrib[name]  # flatten() wrote the look as attributes; a style may hold url()
+    # Written here, by local names: ElementTree would need the namespace registered for the whole process (other
+    # plugins use it too). The depth is bounded above.
+    out: List[str] = []
+    _write(root, out, top=True)
+    return "".join(out)
 
-    clean(root)
-    ElementTree.register_namespace("", SVG_NS)
-    ElementTree.register_namespace("xlink", XLINK_NS)
-    return ElementTree.tostring(root, encoding="unicode")
+
+def _write(element, out: List[str], top: bool = False) -> None:
+    from xml.sax.saxutils import escape, quoteattr
+    tag = _local(element.tag)
+    attributes = "".join(f" {name}={quoteattr(str(value))}" for name, value in element.attrib.items())
+    if top:
+        attributes = f' xmlns="{SVG_NS}"' + attributes
+    out.append(f"<{tag}{attributes}>")
+    if element.text:
+        out.append(escape(element.text))
+    for child in element:
+        _write(child, out)
+        if child.tail:
+            out.append(escape(child.tail))
+    out.append(f"</{tag}>")
+
+
+_URL = re.compile(r"url\s*\(\s*['\"]?\s*([^)'\"]*)", re.I)
+MAX_SVG_ELEMENTS = 60_000
+MAX_SVG_DEPTH = 100
+MAX_SVG_SIDE = 4000  # pixels of the chart itself (an export multiplies them)
+
+
+def _local_urls(value: str) -> bool:
+    """Whether every url() of ``value`` points inside the document (#id)."""
+    return all(target.strip().startswith("#") for target in _URL.findall(value))
+
+
+def _check_size(root) -> None:
+    """A chart is a few hundred pixels: a side of millions makes a card or a layout item of millions too."""
+    for key in ("width", "height"):
+        text = str(root.attrib.get(key, "") or "").strip().lower().replace("px", "")
+        if not text:
+            continue
+        try:
+            size = float(text)
+        except ValueError:
+            raise ChartError(f"the {key} of the chart is no number of pixels") from None
+        if not math.isfinite(size) or not 1 <= size <= MAX_SVG_SIDE:
+            raise ChartError(f"the {key} of the chart goes from 1 to {MAX_SVG_SIDE} pixels")
 
 
 # --- what the model is told ----------------------------------------------------------------------------------------
