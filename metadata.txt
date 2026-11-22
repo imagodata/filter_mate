@@ -18,9 +18,9 @@ about=FilterMate filters several layers at once, from one panel. Select somethin
     📦 EXPORTING: save the filtered layers (GeoPackage, Shapefile, GeoTIFF, LAZ...).
     ↩️ Undo and redo every filter, keep favorites, compare the map before and after.
 
-    🤖 AGENT (experimental, optional): ask in plain words, for example "buildings above 1200 m in the selected commune". It filters, selects, styles, brings data in (OpenStreetMap, elevation, population, WMS) and exports, step by step, and asks before anything it cannot undo. Use your own key for Claude, Mistral or OpenAI, or a local Ollama model that keeps everything on your computer. No account, no telemetry. What is sent and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
+    🤖 AGENT (experimental, optional): ask in plain words, for example "buildings above 1200 m in the selected commune". It filters, selects, styles, brings data in (OpenStreetMap, elevation, population, WMS), draws charts, makes print layouts and atlases, and exports, step by step, and asks before anything it cannot undo. Use your own key for Claude, Mistral or OpenAI, or a local Ollama model that keeps everything on your computer. No account, no telemetry. What is sent and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
 
-    Works with PostGIS, GeoPackage, Spatialite, files, WFS, WMS and tile basemaps. QGIS 3.22 to 4.x, 34 languages, light and dark themes. Processing algorithms and a Python API for automation.
+    Works with PostGIS, GeoPackage, Spatialite, files, WFS, WMS and tile basemaps; a web layer can be copied next to the project to work offline. QGIS 3.22 to 4.x, 34 languages, light and dark themes. Processing algorithms and a Python API for automation.
     Optional, installed only if you agree: psycopg2 for PostgreSQL, PDAL for heights above the ground, onnxruntime to draw objects on images with SAM.
 
     📖 Guide: https://imagodata.github.io/filter_mate/guide.html
@@ -53,6 +53,8 @@ changelog=5.1.2
     - Panel: buttons beside their rows, the tools of the EXPLORING rail chosen per kind of layer, panels sized to what they show, lists readable in dark themes.
     - Filters: a filter a GeoPackage cannot run is refused and the previous one kept; a canceled filter leaves no trace in the history.
     - AGENT: example requests that fit your project, lighter with Ollama, exact population and elevation totals.
+    - Web layers (WFS, OGC API, ArcGIS) copied next to the project, to work without the network.
+    - AGENT: charts, print layouts and atlases, EXPLORING driven from the chat, a memory of your notes across projects.
     - Feedback forms in Vector > FilterMate and in the AGENT menu.
     5.1.1
     - Any section of the panel can become a QGIS panel; Compare the map before and after a filter; one history to go back to any step.
