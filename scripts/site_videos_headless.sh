@@ -7,6 +7,8 @@
 #   scripts/site_videos_headless.sh clip hero bridges ... record, then edit each clip (one QGIS at a time)
 #   scripts/site_videos_headless.sh clip hero-dark ...    the dark version: profile fmvideo-dark (Night Mapping)
 #   scripts/site_videos_headless.sh publish hero hero-dark ...  copy the edited MP4 / WebP into website/video/
+#   python3 scripts/site_takes_check.py ~/dev/fm-video hero ...  read each take before it is published (dock in one
+#                                                         piece, no empty band, the counts the pages quote)
 #   scripts/site_videos_headless.sh sam-model             fetch SAM 2.1 and onnxruntime into the recording profile
 #
 # Environment:
