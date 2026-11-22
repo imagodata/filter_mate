@@ -6,50 +6,26 @@
 name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
-description=Filter every layer of a project by its relation to a selection: vector, raster and LiDAR point clouds, on PostGIS, GeoPackage, Spatialite or files, with undo, favorites, export and an optional AI agent.
+description=Filter all the layers of a project at once by their relation to a selection: vector, raster and LiDAR point clouds, with undo, favorites, export and an optional AI assistant.
 version=5.1.2
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=🧭 FilterMate filters several layers at once by their relation to what you select, for vector, raster and LiDAR point cloud layers, from one panel.
+about=FilterMate filters several layers at once, from one panel. Select something on a layer and the other layers of the project keep only what relates to it: buildings near main roads, parcels on steep slopes, LiDAR points under rooftops.
 
-    Pick a layer, select what matters on it, and the other layers of the project are filtered by their relation to that selection: buildings near main roads, parcels on steep slopes, LiDAR points beneath rooftops, a DTM clipped around a church. On vector layers a filter is the layer's own subset string, its definition query: nothing is copied, styles stay. Rasters and point clouds are cut and keep their id, style and place in the layer tree. Every filter can be undone, saved as a favorite, exported, and replayed from Processing or Python.
+    🧭 EXPLORING: select on any layer. Features or an expression on a vector layer, a range of values on a raster (DEM, orthophoto), classes, heights or intensity on a point cloud (LAS, LAZ, COPC).
+    🔍 FILTERING: keep in the other layers what intersects, touches or lies within a distance of the selection, and combine it with their current filters. A vector layer is filtered by its own definition query: nothing is copied, styles stay.
+    📦 EXPORTING: save the filtered layers (GeoPackage, Shapefile, GeoTIFF, LAZ...).
+    ↩️ Undo and redo every filter, keep favorites, compare the map before and after.
 
-    🧭 EXPLORING selects on the current layer, whatever its kind:
-    - 🗺️ vector: one feature, several, or an expression;
-    - 🏔️ raster: band, pixel value picked on the map, value range on a live histogram, classes, raster calculator expression;
-    - ☁️ point cloud (LAS, LAZ, COPC, EPT, VPC): ASPRS / LiDAR HD classes, Z, intensity and return ranges, attribute conditions, height above a DTM.
+    🤖 AGENT (experimental, optional): ask in plain words, for example "buildings above 1200 m in the selected commune". It filters, selects, styles, brings data in (OpenStreetMap, elevation, population, WMS) and exports, step by step, and asks before anything it cannot undo. Use your own key for Claude, Mistral or OpenAI, or a local Ollama model that keeps everything on your computer. No account, no telemetry. What is sent and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
 
-    🔍 FILTERING relates that selection to layers of any kind (9 source / target combinations) with geometric predicates, a buffer, AND / OR with existing filters and a minimum coverage for polygons. Web maps (WMS, WMTS, tile basemaps) are filtered too: captured over the area, then cut like a local raster. The project is always saved with the original sources.
+    Works with PostGIS, GeoPackage, Spatialite, files, WFS, WMS and tile basemaps. QGIS 3.22 to 4.x, 34 languages, light and dark themes. Processing algorithms and a Python API for automation.
+    Optional, installed only if you agree: psycopg2 for PostgreSQL, PDAL for heights above the ground, onnxruntime to draw objects on images with SAM.
 
-    📦 EXPORTING writes the filtered layers: vector formats, GeoPackage with an embedded QGIS project, GeoTIFF / COG, LAZ / LAS / COPC.
-
-    🤖 AGENT mode (experimental) is a chat in the panel that drives FilterMate and QGIS from a sentence: "buildings above 1200 m in the selected commune". How it works:
-    1. You choose the model: Claude, Mistral, OpenAI or a compatible server with your own API key, kept in the authentication database of QGIS, or a local Ollama model, with which your requests stay on your computer. No account, no telemetry: FilterMate holds no key and has no server of its own. The settings guide you (a link to create a key, a Test button, the download of an Ollama model).
-    2. You write what you want in the AGENT section. With each request go your message, the extent of the map and the layer tree (names, types, fields, CRS); field values and an image of the map go only if you allow them, and the chat asks for your consent the first time you use a provider.
-    3. The agent works step by step with its tools, each step shown in the thread: it reads before it acts, tries a filter before applying it, and asks with choices to click when a choice is yours.
-    4. You stay in control: filters apply at once and each step, or the whole request, can be undone; exports, deletions and added or removed layers are confirmed; you choose how far it goes alone (four levels of autonomy, a rule per tool, layers it must never change).
-    What it does:
-    - 🔎 reads the project: layers, fields and their values, statistics, samples of features, what lies at a point, the map as you see it;
-    - 🔍 filters by attributes, across layers (geometric predicates, buffer), by a geometry, point clouds, favorites, and undoes or redoes;
-    - 🎯 selects features, zooms, shows and hides layers, keeps bookmarks and map themes;
-    - 🎨 styles and labels layers (rules, color ramps, labels by expression or along lines), groups, renames, duplicates and removes layers, adds fields and joins tables;
-    - ✏️ adds, updates and deletes features in the edit buffer, saved by you;
-    - 🌍 brings data in, each from a source you tick: files, WFS, WMS and WMTS services, the tables of a PostgreSQL connection, web basemaps, open data portals, Sentinel-2 scenes, the elevation of an area and its contour lines, OpenStreetMap features, the population, the natural risks of France; it finds a place by its name;
-    - ⚙️ runs the Processing algorithms of QGIS; draws objects with SAM and finds similar ones;
-    - 🖨️ makes and exports print layouts, sets the CRS of the project, exports the filtered layers;
-    - 🧩 follows your own skills, uses the MCP servers you connect, and keeps a request as a recipe that runs again without any model.
-    An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run. A built-in MCP server, off by default, lets Claude Code or another client on your computer use the same tools. With no model at all, Set up FilterMate asks the main settings with a few choices, and How FilterMate works tells the panel section by section. What is sent, to whom and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
-
-    🧩 Objects drawn by SAM (experimental): on an orthophoto, a click or a box and the SAM 2.1 model draws the object, locally on your CPU; similar objects are proposed, to keep or reject. The objects filter other layers, become a polygon layer, or are drawn from a layer of points or footprints in Processing.
-
-    ✨ Also: PostgreSQL / PostGIS, Spatialite, GeoPackage and OGR backends with spatial indexes; the sections of the panel in a rail, or as panels of QGIS, alone or grouped; undo / redo and the history of the project, to go back to before any step; Compare, the map before and after a filter on each side of a line; favorites shared through git repositories; ten Processing algorithms and four models, qgis_process, Python and REST APIs, MCP servers; light and dark themes; 34 languages; QGIS 3.22 to 4.x, Qt5 and Qt6.
-
-    🔧 Optional: psycopg2 for PostgreSQL, PDAL 2.4+ for the height above a DTM and COPC writing, onnxruntime and the SAM model (62 MB) for the objects, installed after a confirmation.
-
-    📖 User guide: https://imagodata.github.io/filter_mate/guide.html
-    💡 Sixteen use cases in English and French: https://imagodata.github.io/filter_mate/stories.html
-    💬 Your opinion, an idea, a review or a test: https://imagodata.github.io/filter_mate/feedback.html?ref=qgis-listing
+    📖 Guide: https://imagodata.github.io/filter_mate/guide.html
+    💡 Use cases: https://imagodata.github.io/filter_mate/stories.html
+    💬 Feedback: https://imagodata.github.io/filter_mate/feedback.html?ref=qgis-listing
 
 tracker=https://github.com/imagodata/filter_mate/issues
 repository=https://github.com/imagodata/filter_mate
@@ -72,16 +48,15 @@ tags=filter,spatial filter,multi-layer,subset,definition query,query,selection,b
 # that key only names other QGIS plugins.
 python_dependencies=onnxruntime
 
-changelog=v5.1.2 (2026-11-20):
-    - Panel: the buttons of FILTERING and EXPORTING in front of their rows, which can be packed at the top; the tool buttons of the EXPLORING rail chosen for each kind of layer; the multiple selection list readable in a dark theme.
-    - Filtering: a GeoPackage filter its source cannot run is refused and the previous one stays; a canceled or refused filter leaves no trace in the history; a point cloud rewritten by PDAL filters the same way at every run.
-    - AGENT: other example requests over its sources at each new conversation; shorter requests under Ollama; exact totals for population and elevation; OpenStreetMap shapes as mapped; menus that act on what was clicked.
-    - Feedback: entries in Vector > FilterMate and in the AGENT menu to give your opinion, suggest a feature or test the experimental features.
-    v5.1.1 (2026-11-17):
-    - Dock: the sections listed in a rail of chips; any section, EXPLORING included, can leave the dock for a panel of QGIS, alone or grouped, and comes back where you left it; buttons under each section; FILTERING and EXPORTING can be turned off; Compare shows the map before and after a filter on each side of a line; the history of the project is one panel, to go back to before any step.
-    - AGENT: the free quota is removed, the agent works with your own API key or a local Ollama model and its settings guide both; Set up FilterMate and How FilterMate works need no model; new sources to tick (elevation and contour lines worldwide, OpenStreetMap features, population, natural risks of France, web basemaps, WMS and WMTS, the tables of a PostgreSQL connection, a geocoder); labels by expression or along lines, styles by rules, blending modes; your own skills; shorter requests (29 percent cheaper over ten requests) and lighter tools for a local model.
-    - Filtering: a WMS, a WMTS or a tile basemap can be filtered; variables of QGIS, the project and the layer in filters; Undo and Redo per layer; the number of features told after a filter is the one shown; a filter of a GeoPackage counted ten times as fast; WFS fixes.
-    - After a review of 5.1.0: links to your own machine or network are not read, a key typed for one server is never sent to another, damaged recipes no longer block the panel, profiles and settings are bounded.
-    v5.1.0 (2026-11-13): two experimental sections, AGENT (a chat that filters, selects, styles, edits, adds open data and exports from a sentence, with Claude, Mistral, OpenAI, a compatible server or Ollama) and objects drawn by SAM 2.1 on the CPU; recipes run again without any model; levels of autonomy; a built-in MCP server; attribute filters in the native SQL of their source; geometric filters joined under OR and AND. Breaking: the REST API and the stdio MCP server accept only plain WHERE clauses.
-    v5.0.2 (2026-11-06): fixes when changing between vector layers; the compact profile on scaled 1080p screens; the mouse wheel no longer changes a list by accident; a search bar in the Configuration tab.
-    Release notes of every version: https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md
+changelog=5.1.2
+    - Fix: QGIS could freeze on Windows after the AGENT added an elevation layer.
+    - Panel: buttons beside their rows, the tools of the EXPLORING rail chosen per kind of layer, panels sized to what they show, lists readable in dark themes.
+    - Filters: a filter a GeoPackage cannot run is refused and the previous one kept; a canceled filter leaves no trace in the history.
+    - AGENT: example requests that fit your project, lighter with Ollama, exact population and elevation totals.
+    - Feedback forms in Vector > FilterMate and in the AGENT menu.
+    5.1.1
+    - Any section of the panel can become a QGIS panel; Compare the map before and after a filter; one history to go back to any step.
+    - AGENT works with your own API key or a local Ollama model, with new data sources: elevation, OpenStreetMap, population, WMS and WMTS, PostgreSQL tables.
+    - Web maps (WMS, WMTS, tiles) can be filtered; undo and redo per layer.
+    5.1.0: the experimental AGENT chat and objects drawn by SAM.
+    All release notes: https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md
