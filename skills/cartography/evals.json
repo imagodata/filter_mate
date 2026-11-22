@@ -528,6 +528,151 @@
     "run_algorithm",
     "update_features"
    ]
+  },
+  {
+   "id": "style_count_is_proportional",
+   "trap": true,
+   "note": "A count over communes of different sizes: circles, not colors (the skill says why in one sentence).",
+   "prompt": "Fais une carte de la population des communes.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "args": {
+       "layer": "communes",
+       "mode": "proportional",
+       "field": "population"
+      },
+      "call_args": {
+       "layer": "communes",
+       "mode": "proportional",
+       "field": "population"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "export_layers",
+    "update_features",
+    "run_algorithm"
+   ]
+  },
+  {
+   "id": "style_dot_density",
+   "prompt": "Montre la répartition de la population des communes avec des points, un point pour 500 habitants.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "args": {
+       "layer": "communes",
+       "mode": "dot_density",
+       "field": "population",
+       "per_dot": 500
+      },
+      "call_args": {
+       "layer": "communes",
+       "mode": "dot_density",
+       "field": "population",
+       "per_dot": 500
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "run_algorithm",
+    "add_layer",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "style_buildings_2_5d",
+   "prompt": "Affiche les bâtiments en 2.5D selon leur hauteur.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "args": {
+       "layer": "batiments",
+       "mode": "2.5d",
+       "field": "hauteur"
+      },
+      "call_args": {
+       "layer": "batiments",
+       "mode": "2.5d",
+       "field": "hauteur"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "run_algorithm",
+    "update_features"
+   ]
+  },
+  {
+   "id": "labels_on_a_box",
+   "prompt": "Les noms des communes se lisent mal sur l'orthophoto : mets-les sur un fond blanc.",
+   "expect": [
+    [
+     {
+      "tool": "set_labels",
+      "args": {
+       "layer": "communes",
+       "field": "nom",
+       "background": {
+        "any_of": [
+         "white",
+         "#ffffff",
+         "#FFFFFF"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "communes",
+       "field": "nom",
+       "background": "white",
+       "buffer": false
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "set_layer_style",
+    "apply_filter",
+    "add_basemap"
+   ]
+  },
+  {
+   "id": "labels_rivers_italic",
+   "prompt": "Écris le nom des cours d'eau le long de leur tracé, en italique.",
+   "expect": [
+    [
+     {
+      "tool": "set_labels",
+      "args": {
+       "layer": "cours_eau",
+       "field": "nom",
+       "placement": "curved",
+       "italic": true
+      },
+      "call_args": {
+       "layer": "cours_eau",
+       "field": "nom",
+       "placement": "curved",
+       "italic": true
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "set_layer_style",
+    "update_features"
+   ]
   }
  ]
 }

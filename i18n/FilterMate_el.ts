@@ -53,6 +53,11 @@
         <translation>Αναιρέθηκε: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
+        <source>Cartogram of {}</source>
+        <translation>Χαρτόγραμμα της {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2851"/>
         <source>Looking for a projection</source>
         <translation>Αναζήτηση προβολής</translation>

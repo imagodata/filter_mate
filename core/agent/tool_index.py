@@ -46,7 +46,7 @@ SUMMARIES = {
     "set_project_crs": "Set the project CRS",
     "find_place": "Find a place by name or address",
     # styles and layouts
-    "set_layer_style": "Style a layer: colors, classes, rules, ramp, relief",
+    "set_layer_style": "Style a layer: colors, classes, heatmap, sizes, relief",
     "set_labels": "Label features, or remove labels",
     "create_layout": "A print layout",
     "export_layout": "A print layout to PDF or PNG",
@@ -109,9 +109,10 @@ SUMMARIES = {
     "describe_layout": "Read a layout",
     "set_atlas": "Atlas of a layout",
     "suggest_crs": "Projections suited to the data",
+    "make_cartogram": "Areas that show a number",
     "edit_layout": "Change a layout",
     "add_chart_to_layout": "A chart in a layout",
-    "run_chart_code": "Draw a chart with your d3 code (expert)",
+    "run_chart_code": "A chart drawn by your d3 code",
     "run_pyqgis": "Run Python in QGIS, approved by the user (expert)",
 }
 

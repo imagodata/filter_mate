@@ -520,10 +520,11 @@ class QGISFilterMateAccessor:
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
                    color: str = "", buffer: bool = True, expression: str = "",
-                   visible_from_scale: Optional[float] = None, placement: str = "auto") -> LabelsResult:
+                   visible_from_scale: Optional[float] = None, placement: str = "auto",
+                   **options: Any) -> LabelsResult:
         return LabelsResult(**self._style("set_labels", layer, field=field, enabled=enabled, size=size, color=color,
                                           buffer=buffer, expression=expression, visible_from_scale=visible_from_scale,
-                                          placement=placement))
+                                          placement=placement, **options))
 
     @staticmethod
     def _layouts(name: str, *args, **kwargs):
@@ -583,6 +584,11 @@ class QGISFilterMateAccessor:
 
     def suggest_crs(self, layers: Optional[List[str]] = None, purpose: str = "general") -> Dict[str, Any]:
         return self._control("suggest_crs", layers=list(layers or []), purpose=purpose)
+
+    def make_cartogram(self, layer: str, field: str, kind: str = "contiguous", iterations: int = 8,
+                       name: str = "") -> Dict[str, Any]:
+        return self._control("make_cartogram", layer, field, kind=kind, iterations=iterations, name=name,
+                             module="adapters.public_api.cartograms")
 
     def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
                   formula: str = "") -> FieldAdded:
@@ -834,7 +840,9 @@ class QGISFilterMateAccessor:
     def _operation_result(report) -> OperationResult:
         error, failed = _client_messages(report)
         return OperationResult(done=report.done_names, failed=failed, skipped=dict(report.skipped),
-                               error=error, outputs=dict(report.outputs))
+                               error=error, outputs=dict(report.outputs),
+                               package=getattr(report, "package", "") or None,
+                               tables=dict(getattr(report, "tables", {})), styles=dict(getattr(report, "styles", {})))
 
     def _mark_applied(self, layer: str, source: str) -> None:
         self._last_applied_at = datetime.now(timezone.utc).isoformat()
@@ -903,11 +911,14 @@ class QGISFilterMateAccessor:
         return self._operation_result(report)
 
     def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
-                      point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
+                      point_cloud_format: str, crs: Optional[str] = None, styles: str = "none",
+                      single_file: bool = False, zip_archive: bool = False,
+                      package_name: str = "export") -> OperationResult:
         return run_on_main_thread(self._export_main_thread, list(layers), folder, vector_format, raster_format,
-                                  point_cloud_format, crs)
+                                  point_cloud_format, crs, styles, single_file, zip_archive, package_name)
 
-    def _export_main_thread(self, layers, folder, vector_format, raster_format, point_cloud_format, crs):
+    def _export_main_thread(self, layers, folder, vector_format, raster_format, point_cloud_format, crs,
+                            styles="none", single_file=False, zip_archive=False, package_name="export"):
         try:
             operations = _plugin_module("adapters.public_api.operations")
         except ImportError as exc:
@@ -919,7 +930,9 @@ class QGISFilterMateAccessor:
             if not output_crs.isValid():
                 return OperationResult(error="invalid CRS")
         report = operations.export_layers(layers, folder, vector_format=vector_format, raster_format=raster_format,
-                                          point_cloud_format=point_cloud_format, crs=output_crs)
+                                          point_cloud_format=point_cloud_format, crs=output_crs, styles=styles,
+                                          single_file=single_file, zip_archive=zip_archive,
+                                          package_name=package_name)
         _report_busy(report)
         return self._operation_result(report)
 

@@ -74,9 +74,10 @@ layer, no field to add.
 "A map of the communes by population, with their names, to print."
 
 1. The data on the map: filters, then zoom_to the layer.
-2. set_layer_style on the field: categorized for a text or a code with few values, graduated for a number
-   (quantile when a few values are far above the others, as populations and surfaces are), rules for thresholds the
-   user gives. The cartography skill says more on methods, ramps and colors: load it when the choice is not plain.
+2. set_layer_style on the field: categorized for a text or a code with few values; for a number, proportional
+   when it is a count (inhabitants, jobs), graduated when it is a rate or a density (quantile when a few values are
+   far above the others); rules for thresholds the user gives. The cartography skill says more on methods, ramps
+   and colors: load it when the choice is not plain.
 3. set_labels when names are asked.
 4. create_layout once the map looks right, with a title that says what the map shows. export_layout only when the
    user asks for a file.

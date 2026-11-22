@@ -53,6 +53,11 @@
         <translation>تم التراجع: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
+        <source>Cartogram of {}</source>
+        <translation>خريطة مشوهة (كارتوغرام) لـ {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2851"/>
         <source>Looking for a projection</source>
         <translation>البحث عن إسقاط</translation>

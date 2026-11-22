@@ -32,11 +32,12 @@ EXPECTED_TOOLS = {
     "add_service_layer", "add_basemap", "find_place", "search_imagery", "segment_objects", "similar_objects",
     "add_elevation", "contour_lines", "duplicate_layer", "add_osm_features", "add_population", "local_copy",
     "set_exploring", "layer_options", "set_layer_options", "export_options", "set_export_options",
+    "describe_layout", "set_atlas", "edit_layout", "suggest_crs", "make_cartogram", "set_form", "relations",
 }
 READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "describe_layer", "field_values",
              "preview_filter", "map_context", "search_open_data", "search_imagery", "find_place", "layer_statistics",
              "sample_features", "identify_at", "find_algorithms", "describe_algorithm", "layer_options",
-             "export_options"}
+             "export_options", "describe_layout", "suggest_crs"}
 OPEN_WORLD = {"add_layer", "search_open_data", "add_service_layer", "add_basemap", "search_imagery", "find_place",
               "add_elevation", "add_osm_features", "add_population", "local_copy"}
 DESTRUCTIVE = {"export_layers", "remove_layers", "delete_features", "export_layout"}
@@ -259,7 +260,12 @@ def test_export_layers(mcp, fake_api):
     assert (request["method"], request["path"]) == ("POST", "/export")
     assert request["body"] == {
         "layers": ["a"], "subfolder": "controle/2026-10", "vector_format": "GPKG", "raster_format": "COG",
-        "point_cloud_format": "COPC", "crs": "EPSG:2154"}
+        "point_cloud_format": "COPC", "crs": "EPSG:2154", "styles": "none", "single_file": False, "zip": False,
+        "package_name": "export"}
+    mcp.call("export_layers", {"layers": ["a"], "vector_format": "KML", "styles": "qml", "zip": True,
+                               "package_name": "lot"})
+    assert {key: last(fake_api)["body"][key] for key in ("vector_format", "styles", "zip", "package_name")} == {
+        "vector_format": "KML", "styles": "qml", "zip": True, "package_name": "lot"}
 
 
 # --- errors become readable tool errors ---------------------------------------------
@@ -303,7 +309,8 @@ def test_bad_arguments_are_refused_before_any_request(mcp, fake_api):
         ("cross_filter", {"source_layer": "a", "target_layers": ["b"], "predicates": ["Near"]}),
         ("cross_filter", {"source_layer": "a", "target_layers": ["b"], "operator": "XOR"}),
         ("cross_filter", {"source_layer": "a", "target_layers": ["b"], "coverage_min": 150}),
-        ("export_layers", {"layers": ["a"], "vector_format": "KML"}),
+        ("export_layers", {"layers": ["a"], "vector_format": "DXF"}),
+        ("export_layers", {"layers": ["a"], "styles": "lyrx"}),
         ("apply_filter", {"layer_name": "a"}),
     ]:
         result = mcp.call(name, arguments)

@@ -98,8 +98,13 @@ class OperationResult:
     failed: Dict[str, str] = field(default_factory=dict)
     skipped: Dict[str, str] = field(default_factory=dict)
     error: Optional[str] = None
-    # Export: layer name -> file written (server side).
+    # Export: layer name -> file written (server side); in a zip, the name of the file in it.
     outputs: Dict[str, str] = field(default_factory=dict)
+    # Export (2026-11-22): the zip, or else the single GeoPackage; the table of each layer in that GeoPackage; the
+    # style file of each layer.
+    package: Optional[str] = None
+    tables: Dict[str, str] = field(default_factory=dict)
+    styles: Dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -322,6 +327,8 @@ class StyleResult:
     z_factor: Optional[float] = None
     # What the model must know about the answer (a range left out because the user shares no values).
     note: str = ""
+    # dot_density: how much of the field one dot stands for.
+    per_dot: Optional[float] = None
 
 
 @dataclass(frozen=True)
@@ -334,7 +341,8 @@ class LabelsResult:
     expression: str = ""
     # The labels show when the map is at least this close (1:visible_from_scale); None at every scale.
     visible_from_scale: Optional[float] = None
-    # Where the labels of lines go: auto, curved (on the line, following it) or horizontal.
+    # Where the labels go: auto, curved, parallel or horizontal for lines; centroid, horizontal, free, around or
+    # perimeter for polygons; around for points.
     placement: str = ""
 
 
@@ -706,13 +714,20 @@ class FilterMateAccessor(Protocol):
         ...
 
     def set_layer_style(self, layer: str, mode: str, **options: Any) -> StyleResult:
-        """Draw a layer anew (single, categorized, graduated, pseudocolor, gray); raises FilterRejected when refused."""
+        """Draw a layer anew (single, categorized, graduated, proportional, heatmap, pseudocolor...); raises
+        FilterRejected when refused."""
         ...
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
                    color: str = "", buffer: bool = True, expression: str = "",
-                   visible_from_scale: Optional[float] = None, placement: str = "auto") -> LabelsResult:
-        """Label a vector layer with a field or an expression, or turn its labels off; raises FilterRejected when refused."""
+                   visible_from_scale: Optional[float] = None, placement: str = "auto",
+                   **options: Any) -> LabelsResult:
+        """Label a vector layer with a field or an expression, or turn its labels off; raises FilterRejected when
+        refused.
+
+        ``options``: the look of the labels (visible_to_scale, background, background_opacity, callouts, font, bold,
+        italic, wrap, priority, obstacle).
+        """
         ...
 
     def update_features(self, layer: str, values: Optional[Dict[str, Any]] = None,
@@ -757,6 +772,11 @@ class FilterMateAccessor(Protocol):
 
     def suggest_crs(self, layers: Optional[List[str]] = None, purpose: str = "general") -> Dict[str, Any]:
         """Projections for the data of ``layers`` and a purpose, best first; raises FilterRejected."""
+        ...
+
+    def make_cartogram(self, layer: str, field: str, kind: str = "contiguous", iterations: int = 8,
+                       name: str = "") -> Dict[str, Any]:
+        """A new layer whose areas show a field; raises FilterRejected when refused."""
         ...
 
     def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
@@ -1008,8 +1028,13 @@ class FilterMateAccessor(Protocol):
         ...
 
     def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
-                      point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
-        """Write the layers as filtered now into ``folder`` (already resolved by the route)."""
+                      point_cloud_format: str, crs: Optional[str] = None, styles: str = "none",
+                      single_file: bool = False, zip_archive: bool = False,
+                      package_name: str = "export") -> OperationResult:
+        """Write the layers as filtered now into ``folder`` (already resolved by the route): one file each, with a
+        style file beside when ``styles`` is qml or sld; the vector layers in one GeoPackage (``single_file``);
+        everything in one zip (``zip_archive``), never overwritten. ``package_name`` names the zip and the
+        GeoPackage."""
         ...
 
     def get_filter_state(self) -> List[FilteredLayer]:
@@ -1119,7 +1144,8 @@ class InMemoryAccessor:
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
                    color: str = "", buffer: bool = True, expression: str = "",
-                   visible_from_scale: Optional[float] = None, placement: str = "auto") -> LabelsResult:
+                   visible_from_scale: Optional[float] = None, placement: str = "auto",
+                   **options: Any) -> LabelsResult:
         found = self._find(layer)
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found")
@@ -1269,6 +1295,19 @@ class InMemoryAccessor:
         return {"bounds_wgs84": [1.0, 43.2, 1.9, 43.9], "from": "layers" if layers else "layers shown",
                 "purpose": purpose, "scale": result["scale"], "current": "EPSG:4326",
                 "suggestions": result["suggestions"]}
+
+    def make_cartogram(self, layer: str, field: str, kind: str = "contiguous", iterations: int = 8,
+                       name: str = "") -> Dict[str, Any]:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        if kind not in ("contiguous", "noncontiguous", "dorling", "demers"):
+            raise FilterRejected("kind is one of contiguous, noncontiguous, dorling, demers")
+        answer = {"layer": name or f"{found.name} - cartogram ({field})", "layer_id": "cartogram_1", "kind": kind,
+                  "features": 3, "field": field, "crs": "EPSG:2154"}
+        if kind in ("contiguous", "noncontiguous"):
+            answer.update(error_before=1.8, error_after=1.1)
+        return answer
 
     def _edited(self, layer: str, **counts: int) -> EditResult:
         found = self._find(layer)
@@ -1661,11 +1700,19 @@ class InMemoryAccessor:
         return OperationResult(done=done, skipped={name: "not filtered" for name in layers if name not in done})
 
     def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
-                      point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
+                      point_cloud_format: str, crs: Optional[str] = None, styles: str = "none",
+                      single_file: bool = False, zip_archive: bool = False,
+                      package_name: str = "export") -> OperationResult:
         extensions = {"vector": ".gpkg", "raster": ".tif", "point_cloud": ".laz"}
         kinds = {layer.name: layer.layer_kind for layer in self.layers}
-        outputs = {name: f"{folder}/{name}{extensions.get(kinds[name], '')}" for name in layers if name in kinds}
-        return OperationResult(done=list(outputs), outputs=outputs,
+        found = [name for name in layers if name in kinds]
+        tables = {name: name for name in found if single_file and kinds[name] == "vector"}
+        prefix = "" if zip_archive else f"{folder}/"
+        outputs = {name: f"{prefix}{name}{extensions.get(kinds[name], '')}" for name in found if name not in tables}
+        style_files = {name: f"{prefix}{name}.{styles}" for name in outputs if styles != "none"}
+        package = (f"{folder}/{package_name}.zip" if zip_archive
+                   else f"{folder}/{package_name}.gpkg" if tables else None)
+        return OperationResult(done=found, outputs=outputs, package=package, tables=tables, styles=style_files,
                                skipped={name: "layer not found" for name in layers if name not in kinds})
 
     def get_filter_state(self) -> List[FilteredLayer]:

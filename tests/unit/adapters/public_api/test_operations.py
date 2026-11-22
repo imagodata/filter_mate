@@ -6,9 +6,11 @@ imports reach ``core`` and ``adapters``); QGIS stays mocked by the root
 conftest, layers are small stand-ins.
 """
 import importlib
+import os
 import pathlib
 import sys
 import types
+import zipfile
 from unittest.mock import MagicMock
 
 import pytest
@@ -470,6 +472,157 @@ class TestUnexpectedErrorsFlagged:
         report = operations.export_layers([layer], str(tmp_path), project=_Project(layer))
         assert "no such table" in report.failed["parcelle"]
         assert report.details["internal_failures"] == ["parcelle"]
+
+
+class TestExportPackages:
+    """2026-11-22: style files, one GeoPackage, one zip (the real files: tests/qgis_headless/check_agent_export.py)."""
+
+    @staticmethod
+    def _writer(written, cancel=None):
+        def write(layer, path, driver, crs, project, feedback=None, table="", append=False):
+            written.append((layer.name(), os.path.basename(path), driver, table, append))
+            with open(path, "a") as handle:
+                handle.write(layer.name())
+            if cancel is not None:
+                cancel.cancel()
+            return True, path, ""
+        return write
+
+    @staticmethod
+    def _styles(monkeypatch):
+        """save_layer_style writes ``<stem>.<format>`` as the real one does."""
+        def save(layer, path, style_format, datatype=None):
+            with open(os.path.splitext(path)[0] + f".{style_format}", "w") as handle:
+                handle.write(layer.name())
+            return True
+        module = importlib.import_module(f"{_PKG}.core.export.style_exporter")
+        monkeypatch.setattr(module, "save_layer_style", save)
+
+    def test_zip_never_overwrites_nor_touches_the_folder(self, vector_world, tmp_path, monkeypatch):
+        monkeypatch.setattr(operations, "_export_vector", self._writer([]))
+        (tmp_path / "parcelle.gpkg").write_text("keep")
+        (tmp_path / "export.zip").write_text("older")
+        layers = [_Layer("A", "parcelle"), _Layer("B", "route")]
+        report = operations.export_layers(layers, str(tmp_path), project=_Project(*layers), zip_archive=True)
+        assert report.ok and report.package == str(tmp_path / "export_2.zip")
+        assert report.outputs == {"parcelle": "parcelle.gpkg", "route": "route.gpkg"}
+        assert sorted(zipfile.ZipFile(report.package).namelist()) == ["parcelle.gpkg", "route.gpkg"]
+        assert sorted(os.listdir(tmp_path)) == ["export.zip", "export_2.zip", "parcelle.gpkg"]  # no hidden folder left
+        assert (tmp_path / "parcelle.gpkg").read_text() == "keep" and (tmp_path / "export.zip").read_text() == "older"
+
+    def test_a_canceled_zip_keeps_nothing(self, vector_world, tmp_path, monkeypatch):
+        feedback = _Feedback()
+        monkeypatch.setattr(operations, "_export_vector", self._writer([], cancel=feedback))
+        layers = [_Layer("A", "parcelle"), _Layer("B", "route")]
+        report = operations.export_layers(layers, str(tmp_path), project=_Project(*layers), zip_archive=True,
+                                          feedback=feedback, package_name="lot")
+        assert report.error == "canceled" and not report.done and not report.outputs and not report.package
+        assert report.failed == {"parcelle": "not kept: canceled"}
+        assert os.listdir(tmp_path) == []
+
+    def test_single_file_one_table_each(self, vector_world, tmp_path, monkeypatch):
+        written = []
+        monkeypatch.setattr(operations, "_export_vector", self._writer(written))
+        layers = [_Layer("A", "parcelle"), _Layer("B", "PARCELLE"), _Layer("C", "gpkg_x"), _Layer("D", "layer_styles")]
+        report = operations.export_layers(layers, str(tmp_path), project=_Project(*layers), single_file=True,
+                                          package_name="lot.gpkg")
+        assert [row[1:] for row in written] == [
+            ("lot.gpkg", "GPKG", "parcelle", False), ("lot.gpkg", "GPKG", "PARCELLE_2", True),
+            ("lot.gpkg", "GPKG", "t_gpkg_x", True), ("lot.gpkg", "GPKG", "layer_styles_2", True)]
+        assert report.ok and report.package == str(tmp_path / "lot.gpkg") and not report.outputs
+        assert report.tables == {"parcelle": "parcelle", "PARCELLE": "PARCELLE_2", "gpkg_x": "t_gpkg_x",
+                                 "layer_styles": "layer_styles_2"}
+        assert report.to_dict()["tables"] == report.tables and "styles" not in report.to_dict()
+
+    def test_styles_beside_each_file_but_a_spreadsheet(self, vector_world, tmp_path, monkeypatch):
+        monkeypatch.setattr(operations, "_export_vector", self._writer([]))
+        self._styles(monkeypatch)
+        (tmp_path / "out").mkdir()
+        (tmp_path / "out" / "parcelle.sld").symlink_to(tmp_path / "victim.sld")
+        layers = [_Layer("A", "parcelle"), _Layer("B", "route")]
+        report = operations.export_layers(layers, str(tmp_path / "out"), project=_Project(*layers),
+                                          vector_format="ESRI Shapefile", styles="sld")
+        assert report.styles == {"parcelle": str(tmp_path / "out" / "parcelle.sld"),
+                                 "route": str(tmp_path / "out" / "route.sld")}
+        assert not (tmp_path / "out" / "parcelle.sld").is_symlink() and not (tmp_path / "victim.sld").exists()
+        report = operations.export_layers(layers, str(tmp_path / "csv"), project=_Project(*layers),
+                                          vector_format="CSV", styles="qml")
+        assert report.ok and not report.styles and sorted(os.listdir(tmp_path / "csv")) == ["parcelle.csv", "route.csv"]
+
+    def test_a_style_not_written_is_a_note(self, vector_world, tmp_path, monkeypatch):
+        monkeypatch.setattr(operations, "_export_vector", self._writer([]))
+        module = importlib.import_module(f"{_PKG}.core.export.style_exporter")
+        monkeypatch.setattr(module, "save_layer_style", lambda *args, **kwargs: False)
+        layer = _Layer("A", "parcelle")
+        report = operations.export_layers([layer], str(tmp_path), project=_Project(layer), styles="qml")
+        assert report.ok and not report.styles
+        assert report.details["notes"] == {"parcelle": "its QML style could not be written"}
+
+    @pytest.mark.parametrize("options, words", [
+        ({"single_file": True, "vector_format": "GeoJSON"}, "vector_format must be GPKG"),
+        ({"styles": "lyrx"}, "unknown style format"),
+        ({"vector_format": "DXF"}, "unknown vector format"),
+    ])
+    def test_refused(self, vector_world, tmp_path, options, words):
+        layer = _Layer("A", "parcelle")
+        report = operations.export_layers([layer], str(tmp_path / "out"), project=_Project(layer), **options)
+        assert words in report.error and not (tmp_path / "out").exists()
+
+    def test_a_single_geopackage_read_by_a_layer_is_refused_by_its_name(self, vector_world, tmp_path, monkeypatch):
+        written = []
+        monkeypatch.setattr(operations, "_export_vector", self._writer(written))
+        source = tmp_path / "export.gpkg"
+        source.write_bytes(b"precious")
+        layer = _Layer("A", "parcelle")
+        layer.source = lambda: f"{source}|layername=parcelle"
+        project = _Project(layer)
+        project.mapLayers = lambda: project.layers
+        report = operations.export_layers([layer], str(tmp_path), project=project, single_file=True)
+        assert report.error == "not written: export.gpkg is the data source of the layer 'parcelle'"
+        assert not written and source.read_bytes() == b"precious"
+
+    def test_a_folder_that_cannot_hold_the_zip_is_an_error(self, vector_world, tmp_path, monkeypatch):
+        def refused(**kwargs):
+            raise PermissionError(13, "Permission denied")
+
+        monkeypatch.setattr(operations.tempfile, "mkdtemp", refused)
+        layer = _Layer("A", "parcelle")
+        report = operations.export_layers([layer], str(tmp_path), project=_Project(layer), zip_archive=True)
+        assert report.error == "the export folder cannot be written (Permission denied)" and not report.done
+
+    def test_a_driver_this_qgis_lacks_is_refused_in_words(self, vector_world, tmp_path, monkeypatch):
+        written = []
+        monkeypatch.setattr(operations, "_export_vector", self._writer(written))
+        monkeypatch.setattr(operations, "_available_driver", lambda candidates: "")
+        layer = _Layer("A", "parcelle")
+        report = operations.export_layers([layer], str(tmp_path), project=_Project(layer), vector_format="GeoParquet")
+        assert report.error == "GeoParquet cannot be written: the GDAL of this QGIS has no Parquet driver"
+        assert not written and os.listdir(tmp_path) == []
+
+    def test_kml_falls_back_on_the_older_driver(self, vector_world, tmp_path, monkeypatch):
+        written = []
+        monkeypatch.setattr(operations, "_export_vector", self._writer(written))
+
+        class _Writer:
+            @staticmethod
+            def supportedFiltersAndFormats():
+                return [types.SimpleNamespace(driverName=name) for name in ("GPKG", "KML")]
+
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsVectorFileWriter", _Writer, raising=False)
+        layer = _Layer("A", "parcelle")
+        report = operations.export_layers([layer], str(tmp_path), project=_Project(layer), vector_format="KML")
+        assert report.ok and written == [("parcelle", "parcelle.kml", "KML", "", False)]
+
+    def test_a_sidecar_keeps_two_layers_of_one_name_apart(self):
+        used = set()
+        assert operations._unique_path("/o/mnt.gpkg", used, ".qml") == "/o/mnt.gpkg"
+        assert operations._unique_path("/o/mnt.tif", used, ".qml") == "/o/mnt_2.tif"  # mnt.qml is the vector's
+        assert operations._unique_path("/o/mnt.laz", used) == "/o/mnt.laz"  # no style: as before
+
+    @pytest.mark.parametrize("name, stem", [("export", "export"), ("Lot 31.zip", "Lot 31"), ("a/b.gpkg", "a_b"),
+                                            ("", "export"), ("..", "export")])
+    def test_package_stem(self, name, stem):
+        assert operations._package_stem(name) == stem
 
 
 class TestHomonymsEverywhere:

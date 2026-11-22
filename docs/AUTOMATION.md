@@ -41,7 +41,7 @@ Shared rules:
 | `filtermate:filter_point_cloud` | applies the same criteria to several point clouds (LiDAR HD tiles) | `LAYERS`, criteria, `OPERATOR` | `OUTPUT` |
 | `filtermate:clear_filters` | back to the original source, no filter | `LAYERS` | `OUTPUT` |
 | `filtermate:apply_favorite` | replays a favorite (subsets, raster / point cloud clips) | `FAVORITE` (name or id) | `OUTPUT` |
-| `filtermate:export_filtered_layers` | writes each layer as filtered now: GPKG / GeoJSON / SHP / FlatGeobuf / CSV, COG / GeoTIFF, LAZ / COPC / LAS / GPKG / CSV | `LAYERS`, `VECTOR_FORMAT`, `RASTER_FORMAT`, `POINT_CLOUD_FORMAT`, `CRS`, `OUTPUT_FOLDER` | `OUTPUT_FILES`, `OUTPUT_FOLDER` |
+| `filtermate:export_filtered_layers` | writes each layer as filtered now: GPKG / GeoJSON / SHP / FlatGeobuf / CSV / KML / XLSX / GeoParquet (the last three where GDAL has the driver), COG / GeoTIFF, LAZ / COPC / LAS / GPKG / CSV | `LAYERS`, `VECTOR_FORMAT`, `RASTER_FORMAT`, `POINT_CLOUD_FORMAT`, `CRS`, `OUTPUT_FOLDER` | `OUTPUT_FILES`, `OUTPUT_FOLDER` |
 | `filtermate:segment_from_features` | SAM draws on a raster one object per point or polygon of a guide layer (runs in the background, changes no layer) | `RASTER`, `FEATURES` | `OUTPUT` (polygons, `sam_score`, `sam_iou`) |
 | `filtermate:batch_filter` | one expression on several vector layers (4.8) | `INPUT_LAYERS`, `EXPRESSION` | counts |
 
@@ -218,7 +218,7 @@ Start the API from QGIS with a `QGISFilterMateAccessor(plugin.get_public_api(), 
 | `POST /filters/point-cloud` | `layers`, `criteria`, `operator` | `done`, `failed`, `skipped` |
 | `POST /filters/clear` | `layers` | same |
 | `GET /filters/state` | — | filtered layers: name, kind, subset, derived |
-| `POST /export` | `layers`, `subfolder`, `vector_format`, `raster_format`, `point_cloud_format`, `crs` | `done`, `outputs` (server paths) |
+| `POST /export` | `layers`, `subfolder`, `vector_format`, `raster_format`, `point_cloud_format`, `crs`, `styles` (`none`, `qml`, `sld`), `single_file`, `zip`, `package_name` | `done`, `outputs` (server paths; names in the zip with `zip`), `package`, `tables`, `styles` |
 | `GET /layers` | — | layers with `layer_kind` |
 | `POST /favorites/{id}/apply` | — | replays the favorite like the dock's menu: subsets (remote layers too), raster / point cloud clips |
 
