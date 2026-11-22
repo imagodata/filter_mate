@@ -779,6 +779,77 @@ def check_ask_user(panel, provider, ask):
           (len(provider.requests), frozen.result.text()))
 
 
+def check_welcome_follows_project(chat, panel, layer, work):
+    """The requests of the welcome follow the project (2026-11-20): the facts read in a real project, the set drawn again
+    when a layer comes, the selection or a filter changes, and the link that reconfigures FilterMate."""
+    from filter_mate.core.agent import example_prompts as prompts
+    from filter_mate.ui.widgets.agent_panel import FACTS_SETTLE_MS
+    catalog = {example.key: example for example in prompts.CATALOG}
+    project = QgsProject.instance()
+    settle = (FACTS_SETTLE_MS + 1500) / 1000
+
+    def true_of_project():
+        tokens = chat._read_welcome_facts().tokens()
+        return panel.example_keys and all(set(catalog[key].needs) <= tokens for key in panel.example_keys)
+
+    facts = chat._read_welcome_facts()
+    check("welcome: the facts of the project are read", facts.known and facts.vectors >= 1 and facts.layers >= 1
+          and facts.selected == 0 and facts.filtered == 0, facts)
+    check("welcome: the requests are true of the project", true_of_project(), panel.example_keys)
+    before = panel.example_keys
+    # A raster comes: the requests are drawn again, once the changes stop.
+    from osgeo import gdal
+    path = os.path.join(work, "dem.tif")
+    dataset = gdal.GetDriverByName("GTiff").Create(path, 4, 4, 1, gdal.GDT_Float32)
+    dataset.SetGeoTransform((650000, 10, 0, 6860000, 0, -10))
+    dataset.GetRasterBand(1).Fill(100)
+    dataset = None
+    from qgis.core import QgsRasterLayer
+    raster = QgsRasterLayer(path, "dem")
+    project.addMapLayer(raster)
+    check("welcome: a raster is counted", chat._read_welcome_facts().rasters == 1)
+    check("welcome: a layer added draws the requests again",
+          wait(lambda: panel.example_keys != before and true_of_project(), settle), (before, panel.example_keys))
+    # A selection.
+    layer.selectByIds([layer.allFeatureIds()[0]])
+    check("welcome: a selection is counted without reading features", chat._read_welcome_facts().selected == 1)
+    check("welcome: a selection brings a request about it",
+          wait(lambda: any("selection" in catalog[key].needs for key in panel.example_keys), settle), panel.example_keys)
+    # A filter.
+    layer.removeSelection()
+    layer.setSubsetString('"pop" > 1000')
+    check("welcome: a filter is counted", chat._read_welcome_facts().filtered == 1)
+    check("welcome: a filter brings a request about it",
+          wait(lambda: any("filter" in catalog[key].needs for key in panel.example_keys), settle), panel.example_keys)
+    check("welcome: every request stays true of the project", true_of_project(), panel.example_keys)
+    layer.setSubsetString("")
+    project.removeMapLayer(raster.id())
+    check("welcome: the raster removed is no longer counted", chat._read_welcome_facts().rasters == 0)
+    check("welcome: the requests are true after the layer went",
+          wait(lambda: not any("filter" in catalog[key].needs or "raster" in catalog[key].needs
+                               for key in panel.example_keys) and true_of_project(), settle), panel.example_keys)
+    # A reading that fails gives the neutral requests, not an exception.
+    real = chat._read_welcome_facts
+    panel.facts_provider = lambda: (_ for _ in ()).throw(RuntimeError("deleted"))
+    panel.clear_thread()
+    check("welcome: a reading that fails offers requests that suppose nothing",
+          len(panel.example_keys) == 4 and not any(catalog[key].needs for key in panel.example_keys), panel.example_keys)
+    panel.facts_provider = real
+    panel.clear_thread()
+    # The link to reconfigure: there with a model, and it starts the setup cards (no model needed).
+    started = []
+    real_start = chat._wizard.start
+    chat._wizard.start = lambda *args, **kwargs: started.append(True)
+    try:
+        check("welcome: the link to reconfigure is there with a model",
+              panel.reconfigure_button.isVisible() and not panel.setup_button.isVisible(), panel._ready)
+        panel.reconfigure_button.click()
+        check("welcome: the link starts the setup cards", started == [True], started)
+    finally:
+        chat._wizard.start = real_start
+    panel.clear_thread()
+
+
 def check_chat(provider, layer, authcfg, work):
     from filter_mate.adapters.agent.settings import AgentSettings, load_settings, save_settings, target_of
     from filter_mate.adapters.public_api.filter_mate_public_api import FilterMatePublicAPI
@@ -885,6 +956,7 @@ def check_chat(provider, layer, authcfg, work):
         check("an unknown form is refused", refused)
     finally:
         feedback_forms.open_form = real_open
+    check_welcome_follows_project(chat, panel, layer, work)
     panel.clear_thread()
     settings(consent=False)
     chat._refresh_ready()
