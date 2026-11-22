@@ -1293,6 +1293,16 @@ Az eszközei a projektjéből csak azt látják, amit az ügynök küld nekik, �
         <translation>Folytatás</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3674"/>
+        <source>Go: carry out the plan above, step by step.</source>
+        <translation>Indítás: hajtsd végre a fenti tervet lépésről lépésre.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3675"/>
+        <source>Go</source>
+        <translation>Indítás</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>A modell elutasította ezt a kérést.</translation>
@@ -1784,6 +1794,41 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>Több</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="590"/>
+        <source>Ask</source>
+        <translation>Kérdezz</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="591"/>
+        <source>Plan</source>
+        <translation>Terv</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="592"/>
+        <source>Act</source>
+        <translation>Cselekvés</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="593"/>
+        <source>answers and reads, changes nothing</source>
+        <translation>válaszol és olvas, semmit sem módosít</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="594"/>
+        <source>writes the steps, waits for your Go</source>
+        <translation>leírja a lépéseket, várja a jóváhagyását</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="595"/>
+        <source>does it, step by step</source>
+        <translation>lépésről lépésre elvégzi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="596"/>
+        <source>Mode of the agent: Ask answers and changes nothing, Plan writes the steps and waits for your Go, Act does it.</source>
+        <translation>Az ügynök módja: a Kérdezz válaszol és semmit sem módosít, a Terv leírja a lépéseket és várja a jóváhagyását, a Cselekvés elvégzi.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="864"/>

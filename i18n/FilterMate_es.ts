@@ -1293,6 +1293,16 @@ Sus herramientas solo verán de su proyecto lo que el agente les envíe, y lo qu
         <translation>Continuar</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3674"/>
+        <source>Go: carry out the plan above, step by step.</source>
+        <translation>Adelante: ejecuta el plan anterior, paso a paso.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3675"/>
+        <source>Go</source>
+        <translation>Adelante</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>El modelo rechazó esta petición.</translation>
@@ -1784,6 +1794,41 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>Más</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="590"/>
+        <source>Ask</source>
+        <translation>Preguntar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="591"/>
+        <source>Plan</source>
+        <translation>Planificar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="592"/>
+        <source>Act</source>
+        <translation>Actuar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="593"/>
+        <source>answers and reads, changes nothing</source>
+        <translation>responde y lee, no cambia nada</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="594"/>
+        <source>writes the steps, waits for your Go</source>
+        <translation>escribe los pasos, espera su visto bueno</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="595"/>
+        <source>does it, step by step</source>
+        <translation>lo hace, paso a paso</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="596"/>
+        <source>Mode of the agent: Ask answers and changes nothing, Plan writes the steps and waits for your Go, Act does it.</source>
+        <translation>Modo del agente: Preguntar responde y no cambia nada, Planificar escribe los pasos y espera su visto bueno, Actuar lo hace.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="864"/>

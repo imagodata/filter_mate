@@ -1293,6 +1293,16 @@ Its tools will see of your project only what the agent sends them, and what they
         <translation>Συνέχεια</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3674"/>
+        <source>Go: carry out the plan above, step by step.</source>
+        <translation>Ξεκίνα: εκτέλεσε το παραπάνω σχέδιο βήμα βήμα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3675"/>
+        <source>Go</source>
+        <translation>Ξεκίνα</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Το μοντέλο αρνήθηκε αυτό το αίτημα.</translation>
@@ -1784,6 +1794,41 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>Περισσότερα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="590"/>
+        <source>Ask</source>
+        <translation>Ρώτα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="591"/>
+        <source>Plan</source>
+        <translation>Σχέδιο</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="592"/>
+        <source>Act</source>
+        <translation>Ενέργεια</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="593"/>
+        <source>answers and reads, changes nothing</source>
+        <translation>απαντά και διαβάζει, δεν αλλάζει τίποτα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="594"/>
+        <source>writes the steps, waits for your Go</source>
+        <translation>γράφει τα βήματα, περιμένει την έγκρισή σας</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="595"/>
+        <source>does it, step by step</source>
+        <translation>το κάνει βήμα βήμα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="596"/>
+        <source>Mode of the agent: Ask answers and changes nothing, Plan writes the steps and waits for your Go, Act does it.</source>
+        <translation>Λειτουργία του πράκτορα: το Ρώτα απαντά και δεν αλλάζει τίποτα, το Σχέδιο γράφει τα βήματα και περιμένει την έγκρισή σας, η Ενέργεια το κάνει.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="864"/>

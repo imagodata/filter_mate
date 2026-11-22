@@ -1293,6 +1293,16 @@ Its tools will see of your project only what the agent sends them, and what they
         <translation>متابعة</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3674"/>
+        <source>Go: carry out the plan above, step by step.</source>
+        <translation>ابدأ: نفّذ الخطة أعلاه خطوة بخطوة.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3675"/>
+        <source>Go</source>
+        <translation>ابدأ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>رفض النموذج هذا الطلب.</translation>
@@ -1784,6 +1794,41 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>المزيد</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="590"/>
+        <source>Ask</source>
+        <translation>اسأل</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="591"/>
+        <source>Plan</source>
+        <translation>خطّط</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="592"/>
+        <source>Act</source>
+        <translation>نفّذ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="593"/>
+        <source>answers and reads, changes nothing</source>
+        <translation>يجيب ويقرأ، لا يغيّر شيئًا</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="594"/>
+        <source>writes the steps, waits for your Go</source>
+        <translation>يكتب الخطوات وينتظر موافقتك</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="595"/>
+        <source>does it, step by step</source>
+        <translation>ينفّذ خطوة بخطوة</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="596"/>
+        <source>Mode of the agent: Ask answers and changes nothing, Plan writes the steps and waits for your Go, Act does it.</source>
+        <translation>وضع الوكيل: «اسأل» يجيب ولا يغيّر شيئًا، «خطّط» يكتب الخطوات وينتظر موافقتك، «نفّذ» ينجز العمل.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="864"/>

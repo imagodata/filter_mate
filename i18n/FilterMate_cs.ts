@@ -1293,6 +1293,16 @@ Jeho nástroje uvidí z vašeho projektu jen to, co jim agent pošle, a jejich o
         <translation>Pokračovat</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3674"/>
+        <source>Go: carry out the plan above, step by step.</source>
+        <translation>Spustit: proveď plán výše krok za krokem.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3675"/>
+        <source>Go</source>
+        <translation>Spustit</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Model tento požadavek odmítl.</translation>
@@ -1784,6 +1794,41 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>Více</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="590"/>
+        <source>Ask</source>
+        <translation>Zeptat se</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="591"/>
+        <source>Plan</source>
+        <translation>Plán</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="592"/>
+        <source>Act</source>
+        <translation>Jednat</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="593"/>
+        <source>answers and reads, changes nothing</source>
+        <translation>odpovídá a čte, nic nemění</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="594"/>
+        <source>writes the steps, waits for your Go</source>
+        <translation>sepíše kroky, čeká na váš souhlas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="595"/>
+        <source>does it, step by step</source>
+        <translation>provede to krok za krokem</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="596"/>
+        <source>Mode of the agent: Ask answers and changes nothing, Plan writes the steps and waits for your Go, Act does it.</source>
+        <translation>Režim agenta: Zeptat se odpovídá a nic nemění, Plán sepíše kroky a čeká na váš souhlas, Jednat to provede.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="864"/>

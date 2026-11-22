@@ -1293,6 +1293,16 @@ Its tools will see of your project only what the agent sends them, and what they
         <translation>ทำต่อ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3674"/>
+        <source>Go: carry out the plan above, step by step.</source>
+        <translation>เริ่ม: ทำตามแผนด้านบนทีละขั้นตอน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3675"/>
+        <source>Go</source>
+        <translation>เริ่ม</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>โมเดลปฏิเสธคำขอนี้</translation>
@@ -1784,6 +1794,41 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>เพิ่มเติม</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="590"/>
+        <source>Ask</source>
+        <translation>ถาม</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="591"/>
+        <source>Plan</source>
+        <translation>วางแผน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="592"/>
+        <source>Act</source>
+        <translation>ลงมือ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="593"/>
+        <source>answers and reads, changes nothing</source>
+        <translation>ตอบและอ่าน ไม่เปลี่ยนแปลงอะไร</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="594"/>
+        <source>writes the steps, waits for your Go</source>
+        <translation>เขียนขั้นตอน รอการอนุมัติจากคุณ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="595"/>
+        <source>does it, step by step</source>
+        <translation>ทำทีละขั้นตอน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="596"/>
+        <source>Mode of the agent: Ask answers and changes nothing, Plan writes the steps and waits for your Go, Act does it.</source>
+        <translation>โหมดของเอเจนต์: ถาม ตอบและไม่เปลี่ยนแปลงอะไร วางแผน เขียนขั้นตอนและรอการอนุมัติจากคุณ ลงมือ ทำงานให้</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="864"/>

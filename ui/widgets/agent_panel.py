@@ -28,6 +28,7 @@ from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.example_prompts import (
     CATALOG as EXAMPLE_CATALOG, Facts, SHOWN as EXAMPLES_SHOWN, adjust as adjust_examples, pick as pick_examples,
 )
+from ...core.agent.modes import ACT, ASK, PLAN, mode_or_default
 from ...core.agent.memory import (
     ADD, EDIT, MAX_NOTES, MAX_SOURCE_NOTES, MAX_USER_NOTES, REMOVE, SCOPE_SOURCE, SCOPE_USER, Memory, Note,
     chosen as memory_chosen,
@@ -406,6 +407,7 @@ class AgentPanel(QFrame):
     """Widgets only: the controller decides what happens."""
 
     send_requested = pyqtSignal(str)
+    mode_changed = pyqtSignal(str)  # Ask, Plan or Act, picked under the line (core/agent/modes.py)
     stop_requested = pyqtSignal()
     undo_requested = pyqtSignal()
     settings_requested = pyqtSignal()
@@ -575,6 +577,33 @@ class AgentPanel(QFrame):
         self.destination.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         self.destination.setVisible(False)
 
+        # The mode of the agent (2026-11-22): Ask answers and changes nothing, Plan writes the steps and waits for Go,
+        # Act does it. Under the line, always in view: the user knows what the next request will be allowed to do.
+        self.mode_button = QToolButton(self)
+        self.mode_button.setObjectName("toolButton_agent_mode")
+        self.mode_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.mode_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.mode_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        mode_menu = QMenu(self.mode_button)
+        mode_menu.setObjectName("menu_agent_mode")
+        self._mode_actions = {}
+        for mode, label, words in ((ASK, _tr("Ask"), _tr("answers and reads, changes nothing")),
+                                   (PLAN, _tr("Plan"), _tr("writes the steps, waits for your Go")),
+                                   (ACT, _tr("Act"), _tr("does it, step by step"))):
+            action = mode_menu.addAction(f"{label} \u2014 {words}")
+            action.setCheckable(True)
+            action.triggered.connect(lambda _checked=False, chosen=mode: self._pick_mode(chosen))
+            self._mode_actions[mode] = (action, label)
+        self.mode_button.setMenu(mode_menu)
+        self._mode = ""
+        self.set_mode(ACT)
+
+        under = QHBoxLayout()
+        under.setContentsMargins(0, 0, 0, 0)
+        under.setSpacing(6)
+        under.addWidget(self.mode_button, 0, Qt.AlignmentFlag.AlignLeft)  # at the left also when the label is hidden
+        under.addWidget(self.destination, 1)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(6)
@@ -585,7 +614,7 @@ class AgentPanel(QFrame):
         layout.addWidget(self.widgets_strip)
         layout.addLayout(actions)
         layout.addLayout(ask)
-        layout.addWidget(self.destination)
+        layout.addLayout(under)
         self.set_ready(False)
         self.set_working(False)
         self._refresh_look()
@@ -894,6 +923,10 @@ class AgentPanel(QFrame):
             f" min-height: {INPUT_HEIGHT - 2}px; max-height: {INPUT_HEIGHT - 2}px; border: 1px solid"
             f" {palette['fm_field_border']}; border-radius: 6px; background: {palette['fm_field']}; }}"
             f"QToolButton#toolButton_agent_more:disabled {{ background: {palette['fm_group']}; }}"
+            f"QToolButton#toolButton_agent_mode {{ min-width: 0; max-width: 16777215px; min-height: 20px;"
+            f" max-height: 22px; padding: 0 8px; border: 1px solid {palette['fm_field_border']}; border-radius: 10px;"
+            f" background: {palette['fm_field']}; color: {palette['fm_text']}; font-size: 11px; }}"
+            f"QToolButton#toolButton_agent_mode:hover {{ border-color: {palette['fm_accent']}; }}"
             # The frame alone paints the background: a viewport or a page with one of its own squares the corners.
             "QScrollArea#scrollArea_agent_welcome > QWidget#qt_scrollarea_viewport, QWidget#widget_agent_welcome"
             " { background: transparent; }"
@@ -1214,6 +1247,25 @@ class AgentPanel(QFrame):
     def use_example(self, text: str) -> None:
         self.input.setText(text)
         self.input.setFocus()
+
+    def set_mode(self, mode: str) -> None:
+        """Show ``mode`` as the one picked, without telling anyone (the controller restores the saved one)."""
+        self._mode = mode_or_default(mode)
+        for each, (action, _label) in self._mode_actions.items():
+            action.setChecked(each == self._mode)
+        label = self._mode_actions[self._mode][1]
+        self.mode_button.setText(f"{label} \u25be")
+        self.mode_button.setToolTip(_tr("Mode of the agent: Ask answers and changes nothing, Plan writes the steps "
+                                        "and waits for your Go, Act does it."))
+
+    def mode(self) -> str:
+        return self._mode
+
+    def _pick_mode(self, mode: str) -> None:
+        changed = mode_or_default(mode) != self._mode
+        self.set_mode(mode)  # also checks the action again when the one already picked is clicked
+        if changed:
+            self.mode_changed.emit(self._mode)
 
     def set_working(self, working: bool) -> None:
         """While the agent works the next request can be typed, and the button stops it."""
