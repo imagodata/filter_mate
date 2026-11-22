@@ -81,6 +81,11 @@ Ishga tushirilsinmi?</translation>
         <translation>{} atlasi</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2853"/>
+        <source>Layout {} changed</source>
+        <translation>{} maketi o'zgartirildi</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Diagramma: {}</translation>

@@ -81,6 +81,11 @@ Run it?</source>
         <translation>{} 아틀라스</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2853"/>
+        <source>Layout {} changed</source>
+        <translation>레이아웃 {} 변경됨</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>차트: {}</translation>

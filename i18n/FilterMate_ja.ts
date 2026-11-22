@@ -81,6 +81,11 @@ Run it?</source>
         <translation>{} のアトラス</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2853"/>
+        <source>Layout {} changed</source>
+        <translation>レイアウト {} を変更しました</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>グラフ: {}</translation>
