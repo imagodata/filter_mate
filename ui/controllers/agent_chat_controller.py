@@ -29,8 +29,8 @@ from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.domain.history_timeline import KIND_AGENT, card_target, changes_map
 from ...core.agent.chat_setup import (
-    BASEMAP_TOOL, ELEVATION_TOOL, IMAGERY_TOOL, OPEN_DATA_TOOL, OSM_TOOL, PLACE_TOOL, POPULATION_TOOL, SERVICE_TOOL,
-    VALUES_TOOLS, chat_instructions, stable_order,
+    BASEMAP_TOOL, COPY_TOOL, ELEVATION_TOOL, IMAGERY_TOOL, OPEN_DATA_TOOL, OSM_TOOL, PLACE_TOOL, POPULATION_TOOL,
+    SERVICE_TOOL, VALUES_TOOLS, chat_instructions, stable_order,
 )
 from ...core.agent.families import CORE
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
@@ -164,6 +164,16 @@ def qgis_databases():
     except Exception:
         logger.debug("Agent: database connections not read", exc_info=True)
         return ()
+
+
+def _holds_web_service_layers() -> bool:
+    """Whether the project holds a layer of a web service, or its local copy: what local_copy acts on."""
+    try:
+        from qgis.core import QgsProject
+        from ...adapters.qgis.stream_copy import can_copy, is_local_copy
+        return any(can_copy(layer) or is_local_copy(layer) for layer in QgsProject.instance().mapLayers().values())
+    except Exception:
+        return False
 
 
 class AgentChatController(QObject):
@@ -1312,6 +1322,12 @@ class AgentChatController(QObject):
             left_out.add(POPULATION_TOOL)
         if KIND_GEOCODER not in kinds and KIND_GEOCODER not in configured_kinds.values():
             left_out.add(PLACE_TOOL)
+        if for_chat and not _holds_web_service_layers():
+            # Nothing to copy: it would only weigh on every request of the chat. Another application (the MCP server
+            # of the plugin, set up before a project is open) always has it.
+            left_out.add(COPY_TOOL)
+        if for_chat:
+            self._copy_offered = COPY_TOOL not in left_out  # else offered once a web service layer comes in
         if not databases or not for_chat:
             left_out.update((LIST_TABLES, ADD_TABLE))
         # the tools a setting brings after the others (lot 4 of the token diet: the start stays alike for the cache)
@@ -1373,7 +1389,8 @@ class AgentChatController(QObject):
         handlers[TURN_ON_OPTIONS] = self._turn_on_options_tool
         handlers[LIST_TABLES] = lambda arguments: self._list_tables_tool(databases, arguments)
         handlers[ADD_TABLE] = lambda arguments: self._add_table_tool(databases, arguments)
-        if "apply_filter" in handlers:
+        # The note asks the model to load a skill: not for a local model offered the filtering tools alone.
+        if "apply_filter" in handlers and any(tool.name == LOAD_SKILL for tool in tools):
             handlers["apply_filter"] = self._offering_tuning(handlers["apply_filter"])
         return tools, handlers, active
 
@@ -1382,14 +1399,18 @@ class AgentChatController(QObject):
         slider or EXPLORING for a threshold (core/agent/exploring_drive.tuning_offer); never when the user turned
         both ways off in the Tools tab."""
         from ...core.agent.exploring_drive import tuning_offer
+        offered = self._tuning_offered  # this conversation's: a call of an engine left that ends later writes there
 
         def run(arguments):
             result = handler(arguments)
-            layer = str(arguments.get("layer_name") or "")
+            reference = str(arguments.get("layer_name") or "")
+            found = QgsProject.instance().mapLayer(reference) or next(
+                iter(QgsProject.instance().mapLayersByName(reference)), None)
+            layer = found.id() if found is not None else reference  # a name and an id of one layer are one layer
             note = tuning_offer(arguments.get("expression"))
             ways_off = all(self._policy.turned_off(name) for name in (CREATE_WIDGET, "set_exploring"))
-            if note and isinstance(result, dict) and layer not in self._tuning_offered and not ways_off:
-                self._tuning_offered.add(layer)
+            if note and isinstance(result, dict) and layer not in offered and not ways_off:
+                offered.add(layer)
                 result = dict(result, offer=note)
             return result
         return run
@@ -2237,6 +2258,19 @@ class AgentChatController(QObject):
         kept = start if hidden else tools
         return list(kept), dict(handlers, **{LOAD_SKILL: load_and_offer}), hidden or set()
 
+    def _offer_local_copy(self, values: AgentSettings) -> None:
+        """A layer of a web service came into the project during the conversation: local_copy is offered from this
+        request on (left out at its start, when there was nothing to copy). Its handler is there already."""
+        if getattr(self, '_copy_offered', True) or self._engine is None:
+            return
+        if (values.rules.get(COPY_TOOL) == RULE_NEVER or self.local_filtering(values)
+                or not _holds_web_service_layers()):
+            return
+        spec = self._tools.get(COPY_TOOL)
+        if spec is not None:
+            self._engine.offer_tools([spec])
+            self._copy_offered = True
+
     def _build_engine(self) -> Optional[ChatEngine]:
         """A conversation from the settings; None, after saying why, when they are not complete."""
         values = load_settings()
@@ -2287,6 +2321,10 @@ class AgentChatController(QObject):
             for name in names:
                 if name in by_name:
                     later[name] = by_name[name]
+        if COPY_TOOL in names and COPY_TOOL not in by_name:
+            # Offered during the conversation (_offer_local_copy), not from its start: offered again by the next
+            # request, use_tools does not know it.
+            self._copy_offered = False
 
     @staticmethod
     def _chat_owned(handlers) -> dict:
@@ -2477,6 +2515,7 @@ class AgentChatController(QObject):
         chat_busy() was false, a second request could start beside it, and its end closed the undo point of the new
         turn. Until it ends, what it reports is not shown (_abandoned).
         """
+        self._tuning_offered = set()  # the model of the next conversation has not been told
         engine = self._engine
         if engine is not None and engine.busy:
             engine.cancel()
@@ -2514,7 +2553,6 @@ class AgentChatController(QObject):
         self._reset_view()
         self._transcript = []
         self._recap_from = 0
-        self._tuning_offered = set()
         self.panel.input.forget()
         self._charts.forget()
         self._save_transcript()
@@ -2542,6 +2580,7 @@ class AgentChatController(QObject):
                 self._building = False
         if self._engine is None:
             return
+        self._offer_local_copy(values)
         self._last_request = text
         self._request_calls = []
         self._exploring_offered = False
@@ -2882,6 +2921,9 @@ class AgentChatController(QObject):
                 one_line(str(args.get("name") or ""), 100) or "Contours {}".format(one_line(str(args.get("interval", "")), 20))),
             "duplicate_layer": lambda: _tr("Layer added: {}").format(
                 one_line(str(args.get("name") or ""), 100) or "{} (copy)".format(layer)),
+            "local_copy": lambda: (_tr("Back to the service: {}") if args.get("action") == "back"
+                                   else _tr("Copy again: {}") if args.get("action") == "again"
+                                   else _tr("Local copy: {}")).format(layer),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
@@ -3313,6 +3355,49 @@ class AgentChatController(QObject):
                 return one_line(f"{source.title} · {display_source(source.address)}", 300)
         return one_line(platform, 100)
 
+    @staticmethod
+    def _previous_copy_line(layer) -> str:
+        """What the copy to replace was (its date, features or image, its size on disk): the cost of the new one."""
+        if layer is None:
+            return ""
+        try:
+            import os
+            from ...adapters.qgis.stream_copy import copy_text, record_of
+            from ...core.agent.open_data import megabytes
+            record = record_of(layer)
+            if record is None:
+                return ""
+            size = os.path.getsize(record.path) if os.path.isfile(record.path) else -1
+            return "\n\n" + copy_text(record) + (f" · {megabytes(size)}" if size >= 0 else "")
+        except Exception:  # the question is asked all the same
+            return ""
+
+    @staticmethod
+    def _local_copy_question(arguments) -> str:
+        """What a local copy will read and write (its plan, nothing read yet), or the way back to the service."""
+        from ...adapters.public_api.operations import resolve_layer
+        name = str(arguments.get("layer", ""))
+        found = resolve_layer(name)
+        shown = one_line(found.name() if found is not None else name, 100)
+        if arguments.get("action") == "back":
+            return _tr("The agent wants the layer {} to read its web service again (its local copy stays on disk). "
+                       "Do you agree?").format(shown)
+        if arguments.get("action") == "again":
+            question = _tr("The agent wants to copy the layer {} again: the same area at the same detail, read anew "
+                           "from its web service; the new copy replaces the previous one. Do you agree?").format(shown)
+            return question + AgentChatController._previous_copy_line(found)
+        detail = ""
+        if found is not None:
+            try:
+                from ...adapters.public_api.stream_copy import plan_for
+                plan = plan_for(found, str(arguments.get("extent_wkt") or ""), str(arguments.get("crs") or ""))
+                detail = plan.refusal or plan.summary()
+            except (ValueError, RuntimeError) as exc:
+                detail = str(exc)
+        return _tr("The agent wants to copy the layer {} locally, and the layer then reads the copy:\n{}\n\nThe "
+                   "service is read in the background: the copy can be cancelled. Do you agree?").format(
+            shown, one_line(detail, 600))
+
     def _confirm_text(self, call: ToolCallPart) -> str:
         names = [one_line(layer, 100) for layer in (call.arguments.get("layers") or [])]
         layers = "\n".join(names[:MAX_LISTED]) + (f"\n(+{len(names) - MAX_LISTED})" if len(names) > MAX_LISTED else "")
@@ -3320,6 +3405,8 @@ class AgentChatController(QObject):
             text = _tr("The agent wants to run this action on an external connector:\n{}\n{}\n\nDo you agree?").format(
                 self._connector_labels[call.name],
                 json.dumps(call.arguments, ensure_ascii=False, default=str)[:500])
+        elif call.name == "local_copy":
+            text = self._local_copy_question(call.arguments)
         elif call.name == "add_service_layer":
             text = _tr("The agent wants to add this layer of a web service to the project:\n{} · {}\n\nDo you agree?").format(
                 one_line(call.arguments.get("platform", ""), 100), one_line(call.arguments.get("typename", ""), 200))

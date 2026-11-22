@@ -307,6 +307,13 @@ class DerivedSourceRegistry:
             element.appendChild(marker)
         except Exception as exc:
             logger.warning(f"[FM5] derived source of '{snapshot.layer_id}' not rewritten in the project: {exc}")
+        # A local copy of a web service clipped by another layer: its original source is the copy, and the project
+        # keeps the service (stream_copy). Written here too, so that the service wins whichever hook runs last.
+        try:
+            from ..stream_copy import rewrite_saved_layer
+            rewrite_saved_layer(project, layer, element, document)
+        except Exception as exc:
+            logger.debug(f"[FM5] local copy of '{snapshot.layer_id}' not checked when written: {exc}")
 
     # --- unload -------------------------------------------------------------
 

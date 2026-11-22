@@ -543,6 +543,27 @@ class OpenDataResult:
 
 
 @dataclass(frozen=True)
+class LocalCopyResult:
+    """A web service layer and what it reads now: its service, or its local copy of an area (``reads``).
+
+    ``feature_count`` for a copy of features (WFS), ``resolution`` (map units per pixel) and ``holes`` (requests the
+    service did not answer) for a copy of a web map. ``complete`` False: the copy stopped at its most features or
+    its longest time, or has holes; ``notes`` say which."""
+    layer_id: str
+    name: str
+    reads: str = "service"
+    kind: str = ""
+    file: str = ""
+    folder: str = ""
+    complete: bool = True
+    summary: str = ""
+    feature_count: Optional[int] = None
+    resolution: Optional[float] = None
+    holes: Optional[int] = None
+    notes: List[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class ElevationResult:
     """The elevation of an area, added to the project as a raster layer written on a grid in metres."""
     layer_id: str
@@ -813,9 +834,12 @@ class FilterMateAccessor(Protocol):
         ...
 
     def set_exploring(self, layer: str = "", tools: Optional[Dict[str, bool]] = None,
-                      press: Optional[List[str]] = None, show: bool = False) -> Dict[str, Any]:
-        """Drive FilterMate's EXPLORING panel as the user does: the layer it shows, the buttons of its rail turned on
-        or off (``tools``) or pressed (``press``), the panel opened in front (``show``); FilterRejected for what the
+                      press: Optional[List[str]] = None, show: bool = False,
+                      raster: Optional[Dict[str, Any]] = None,
+                      point_cloud: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Drive FilterMate's EXPLORING panel as the user does: the layer it shows, the range of a raster
+        (``raster``) or the classes or ranges of a point cloud (``point_cloud``), the buttons of its rail turned on or
+        off (``tools``) or pressed (``press``), the panel opened in front (``show``); FilterRejected for what the
         panel refuses."""
         ...
 
@@ -887,6 +911,11 @@ class FilterMateAccessor(Protocol):
 
     def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:
         """Add a second layer on the same data, just above the first; raises FilterRejected on an unknown one."""
+        ...
+
+    def local_copy(self, layer: str, action: str = "copy", extent_wkt: str = "", crs: str = "") -> LocalCopyResult:
+        """Copy a web service layer over the visible map (or ``extent_wkt``) to a file and read it, or with action
+        back read its service again; raises FilterRejected when refused or failed."""
         ...
 
     def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
@@ -1288,7 +1317,9 @@ class InMemoryAccessor:
                 "shown_in_panel": False}
 
     def set_exploring(self, layer: str = "", tools: Optional[Dict[str, bool]] = None,
-                      press: Optional[List[str]] = None, show: bool = False) -> Dict[str, Any]:
+                      press: Optional[List[str]] = None, show: bool = False,
+                      raster: Optional[Dict[str, Any]] = None,
+                      point_cloud: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         found = self._find(layer) if layer else self._find(self.exploring_panel.get("layer_id", ""))
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found" if layer else "EXPLORING shows no layer: name one (layer).")
@@ -1302,7 +1333,8 @@ class InMemoryAccessor:
             held[name] = bool(value)
         return {"layer_name": found.name, "layer_id": found.layer_id, "kind": found.layer_kind, "in_view": bool(show),
                 "tools": {name: "on" if value else "off" for name, value in held.items()},
-                "changed": changed, "pressed": list(press or [])}
+                "changed": changed + (["values"] if raster or point_cloud else []), "pressed": list(press or []),
+                **({"values": dict(raster or point_cloud)} if raster or point_cloud else {})}
 
     def export_options(self) -> Dict[str, Any]:
         return dict(self.export_panel, saved=True)
@@ -1417,6 +1449,23 @@ class InMemoryAccessor:
         summary = replace(found, layer_id=f"L{len(self.layers) + 1}", name=name or f"{found.name} (copy)")
         self.layers.append(summary)
         return summary
+
+    def local_copy(self, layer: str, action: str = "copy", extent_wkt: str = "", crs: str = "") -> LocalCopyResult:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        if action == "back":
+            return LocalCopyResult(layer_id=found.layer_id, name=found.name)
+        if action not in ("copy", "again"):
+            raise FilterRejected("action is one of copy, back, again")
+        if found.provider_type.lower() not in ("wfs", "oapif", "arcgisfeatureserver", "wms"):
+            raise FilterRejected(f"'{found.name}' is not a layer of a web service: only those are copied")
+        features = found.provider_type.lower() != "wms"
+        return LocalCopyResult(layer_id=found.layer_id, name=found.name, reads="local copy",
+                               kind="features" if features else "image", file=f"{found.name}.gpkg" if features
+                               else f"{found.name}.tif", folder="project_filtermate_local", summary="Local copy",
+                               feature_count=found.feature_count if features else None,
+                               resolution=None if features else 2.4, holes=None if features else 0)
 
     def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
                    extra_domains: Optional[str] = None) -> PlacesResult:
