@@ -53,6 +53,11 @@
         <translation>Rückgängig gemacht: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
+        <source>Cartogram of {}</source>
+        <translation>Kartogramm von {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2851"/>
         <source>Looking for a projection</source>
         <translation>Suche nach einer Projektion</translation>

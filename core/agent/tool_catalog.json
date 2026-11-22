@@ -2252,6 +2252,60 @@
    }
   },
   {
+   "name": "make_cartogram",
+   "title": "Make a cartogram",
+   "description": "Make a new layer whose areas show a quantity of a layer as filtered now (a population, votes...), not the land. Returns layer, kind, features, crs, and error_before / error_after (1 is exact). In the chat of FilterMate, undoing the turn removes the layer.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "field": {
+      "description": "Numeric: the quantity shown",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "kind": {
+      "default": "contiguous",
+      "description": "contiguous: polygons deformed, borders kept; noncontiguous: each scaled; dorling: circles; demers: squares",
+      "enum": [
+       "contiguous",
+       "noncontiguous",
+       "dorling",
+       "demers"
+      ],
+      "type": "string"
+     },
+     "iterations": {
+      "default": 8,
+      "description": "contiguous",
+      "maximum": 30,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "name": {
+      "default": "",
+      "description": "Of the new layer",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer",
+     "field"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "add_field",
    "title": "Add a field",
    "description": "Add a field to a vector layer, in its edit buffer: nothing is saved until the user saves the layer edits. With a formula the field is filled on every feature at once. Returns layer_name, field, type, computed (the features filled), and formula_error when the formula was refused (the field is then added, empty). In the chat of FilterMate, undoing the turn removes the field.",

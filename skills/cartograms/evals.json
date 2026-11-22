@@ -1,0 +1,38 @@
+{
+  "cases": [
+    {
+      "id": "cartogram_population",
+      "prompt": "Fais une anamorphose des communes selon leur population.",
+      "expect": [
+        [
+          {"tool": "make_cartogram", "args": {"layer": "communes", "field": "population"},
+           "call_args": {"layer": "communes", "field": "population", "kind": "contiguous"}}
+        ]
+      ],
+      "forbid": ["run_pyqgis"]
+    },
+    {
+      "id": "cartogram_dorling",
+      "prompt": "Montre la population des communes avec des cercles qui ne se chevauchent pas.",
+      "expect": [
+        [
+          {"tool": "make_cartogram", "args": {"layer": "communes", "field": "population", "kind": "dorling"},
+           "call_args": {"layer": "communes", "field": "population", "kind": "dorling"}}
+        ]
+      ],
+      "forbid": ["run_pyqgis"]
+    },
+    {
+      "id": "cartogram_no_rate",
+      "trap": true,
+      "prompt": "Fais une anamorphose des bâtiments selon leur hauteur moyenne... non, selon leur nombre d'étages.",
+      "expect": [
+        [
+          {"tool": "make_cartogram", "args": {"layer": "batiments", "field": "nb_etages"},
+           "call_args": {"layer": "batiments", "field": "nb_etages", "kind": "contiguous"}}
+        ]
+      ],
+      "forbid": ["run_pyqgis", "export_layers"]
+    }
+  ]
+}

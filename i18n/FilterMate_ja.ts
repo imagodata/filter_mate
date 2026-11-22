@@ -53,6 +53,11 @@
         <translation>元に戻しました: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
+        <source>Cartogram of {}</source>
+        <translation>{} のカルトグラム</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2851"/>
         <source>Looking for a projection</source>
         <translation>投影法を探しています</translation>
