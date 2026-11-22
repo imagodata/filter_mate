@@ -18,6 +18,7 @@ from . import paths, provision, runtime, version
 
 COMMANDS = ("run", "doctor", "setup", "version")
 
+
 def no_runtime_message() -> str:
     return f"""FilterMate runs on the QGIS libraries (PyQGIS {runtime.MIN_QGIS} or later) and found none on this machine.
 
