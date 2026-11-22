@@ -144,9 +144,30 @@ class _Gdal:
         return self.gdal
 
     def __exit__(self, *_: Any) -> None:
+        # Every reading, not only the tiles: contour_lines reads a raster of the project, which may be on a server.
+        self._release_connections()
         self.gdal.PopErrorHandler()
         for name, value in self._previous.items():
             self.gdal.SetThreadLocalConfigOption(name, value)
+
+    def _release_connections(self) -> None:
+        """Let go of the HTTP connections this thread opened through /vsicurl/ (libcurl), while it still runs.
+
+        2026-11-22: QGIS 4 on Windows froze twice right after add_elevation (21 November, 13:33 and 13:36): the task
+        that registers the new layer in the dock logged its start and nothing more, the main thread nothing either,
+        until QGIS was killed. GDAL keeps the connections of each thread for that thread, and lets go of them when the
+        thread ends; on Windows that end runs under the lock of the loader, which the start of every other thread (the
+        task, 500 ms later) and every load of a DLL wait for, and libcurl may wait there for a thread of its own (its
+        name resolver, a TLS session). Let go of here, the end of the thread has nothing of libcurl left to clean. The
+        likely cause, not a proven one: not reproduced under Linux (QGIS 3.44 and 4.3); what GDAL ends with the thread
+        beside it (a PROJ context of a reprojection) is not touched. A dataset still open (in the frames of an error, in
+        the pool of the sources of a VRT) takes a connection again only when it reads. It also empties what GDAL kept of
+        the files read by HTTP for the other readers of this process: their headers and blocks are read again.
+        """
+        try:
+            self.gdal.VSICurlClearCache()
+        except Exception as exc:  # noqa: BLE001 - a cleanup: the reading is done
+            logger.debug("GDAL HTTP connections not released: %s", repr(exc))
 
 
 def _attempt(gdal, call: Callable[[], Any]) -> Tuple[Any, str]:
@@ -342,6 +363,7 @@ def _warp(urls: Sequence[str], path: str, crs_text: str, bounds: Sequence[float]
     with _Gdal(tiles=True) as gdal:
         opened = []
         sources: Any = None
+        tile: Any = None
         try:
             for url in urls:  # one by one: Stop is heard between two tiles, and a tile that fails says why
                 reason = ended()
@@ -375,7 +397,7 @@ def _warp(urls: Sequence[str], path: str, crs_text: str, bounds: Sequence[float]
             dataset = None  # closes the file before QGIS opens it
             return answer
         finally:
-            sources = None
+            sources = tile = None  # the last tile too: closed before the connections are let go of (_Gdal)
             opened.clear()
 
 

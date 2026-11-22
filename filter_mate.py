@@ -449,6 +449,12 @@ class FilterMate:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         try:
+            from .infrastructure.utils import stall_watch
+            stall_watch.start()  # its thread now, at a quiet moment: never when a layer task starts
+        except Exception as exc:  # a diagnostic: never in the way of the plugin
+            logger.debug(f"Stall watch not started: {exc}")
+
+        try:
             # v4.4: QGIS factory already initialized in __init__ (required by AppInitializer)
             # This section kept for backward compatibility verification only
             logger.debug("FilterMate.initGui: Verifying QGIS factory initialization")
@@ -1499,6 +1505,11 @@ class FilterMate:
             python_dependencies.cancel()
         except Exception as exc:  # nothing may stop the unload
             logger.debug(f"Python dependencies install not canceled: {exc}")
+        try:
+            from .infrastructure.utils import stall_watch
+            stall_watch.shutdown()  # its thread ends at its next look
+        except Exception as exc:  # nothing may stop the unload
+            logger.debug(f"Stall watch not stopped: {exc}")
 
         # v4.7.0: Emit about_to_unload signal for inter-plugin communication
         if hasattr(self, '_public_api') and self._public_api is not None:

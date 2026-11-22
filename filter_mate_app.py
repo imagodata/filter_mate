@@ -1459,10 +1459,21 @@ class FilterMateApp:
         # releases the add_layers counter, then taskTerminated released it a second time: with
         # another add_layers pending the queue started a third one meanwhile.
         delivered = {'results': False}
+        # 2026-11-22: the stacks of every thread are written in the log folder if this task lasts far too long (QGIS
+        # froze twice while one registered an elevation raster of the agent, and the log said nothing of where).
+        try:
+            from .infrastructure.utils import stall_watch
+            watch = stall_watch.begin(task_name)
+            end_watch = lambda: stall_watch.end(watch)  # noqa: E731
+        except ImportError:  # a diagnostic: never in the way of the task
+            end_watch = lambda: None  # noqa: E731
 
         def on_results(result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids):
             delivered['results'] = True
-            self.layer_management_engine_task_completed(result_project_layers, tn, ids)
+            try:
+                self.layer_management_engine_task_completed(result_project_layers, tn, ids)
+            finally:
+                end_watch()  # after the completion: the other part of the task, on the main thread
 
         self.appTasks[task_name].resultingLayers.connect(on_results, Qt.ConnectionType.QueuedConnection)
         # 2026-10-17: savingLayerVariable / removingLayerVariable are no longer connected: their slots
@@ -1470,7 +1481,8 @@ class FilterMateApp:
         # (AttributeError if ever emitted). The task applies these variables itself, in finished()
         # on the main thread (its _deferred_layer_variables).
         self.appTasks[task_name].taskTerminated.connect(
-            lambda tn=task_name: self._handle_layer_task_terminated(tn, results_delivered=delivered['results']),
+            lambda tn=task_name: (end_watch(),
+                                  self._handle_layer_task_terminated(tn, results_delivered=delivered['results'])),
             Qt.ConnectionType.QueuedConnection
         )
 
