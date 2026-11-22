@@ -190,6 +190,11 @@ Do you agree?</source>
         <translation>Σταματήστε το αίτημα ή περιμένετε να ολοκληρωθεί για να ανοίξετε τις ρυθμίσεις.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
+        <source>The memory could not be saved: {}</source>
+        <translation>Δεν ήταν δυνατή η αποθήκευση της μνήμης: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Τίποτα για αναίρεση.</translation>
@@ -1676,6 +1681,66 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>Άλλες εφαρμογές</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1587"/>
+        <source>Memory</source>
+        <translation>Μνήμη</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1737"/>
+        <source>Keep notes from one project to the next</source>
+        <translation>Να κρατούνται σημειώσεις από το ένα έργο στο επόμενο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the QGIS profile). They are sent to your provider with a request: those for every project always, those of a layer when a layer of the same source is in the open project. Double-click a note to correct it.</source>
+        <translation>Οι σημειώσεις που γράφετε εδώ μένουν σε ένα αρχείο αυτού του υπολογιστή (agent_memory.json, στον φάκελο FilterMate του προφίλ QGIS). Στέλνονται στον πάροχό σας μαζί με ένα αίτημα: όσες αφορούν όλα τα έργα πάντα, όσες αφορούν ένα επίπεδο όταν ένα επίπεδο από την ίδια πηγή υπάρχει στο ανοιχτό έργο. Κάντε διπλό κλικ σε μια σημείωση για να τη διορθώσετε.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Every project</source>
+        <translation>Όλα τα έργα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1768"/>
+        <source>A note, in one sentence</source>
+        <translation>Μια σημείωση, σε μία πρόταση</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1779"/>
+        <source>Forget everything</source>
+        <translation>Να ξεχαστούν όλα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1781"/>
+        <source>Open the file</source>
+        <translation>Άνοιγμα του αρχείου</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1855"/>
+        <source>This list is full: remove a note first.</source>
+        <translation>Αυτή η λίστα είναι γεμάτη: αφαιρέστε πρώτα μια σημείωση.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1863"/>
+        <source>The memory file cannot be read ({}). Correct it or remove it: nothing is written to it meanwhile.</source>
+        <translation>Δεν είναι δυνατή η ανάγνωση του αρχείου μνήμης ({}). Διορθώστε το ή διαγράψτε το: στο μεταξύ δεν γράφεται τίποτα σε αυτό.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1872"/>
+        <source>Sent with this project: {} of {} notes.</source>
+        <translation>Στάλθηκαν με αυτό το έργο: {} από {} σημειώσεις.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1874"/>
+        <source>{} not sent: they hold attribute values, which you do not share.</source>
+        <translation>{} δεν στάλθηκαν: περιέχουν τιμές χαρακτηριστικών, τις οποίες δεν μοιράζεστε.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1920"/>
+        <source>Forget every note kept from one project to the next?</source>
+        <translation>Να ξεχαστούν όλες οι σημειώσεις που κρατήθηκαν από το ένα έργο στο επόμενο;</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="872"/>
