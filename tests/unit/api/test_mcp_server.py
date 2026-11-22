@@ -33,11 +33,12 @@ EXPECTED_TOOLS = {
     "add_elevation", "contour_lines", "duplicate_layer", "add_osm_features", "add_population", "local_copy",
     "set_exploring", "layer_options", "set_layer_options", "export_options", "set_export_options",
     "describe_layout", "set_atlas", "edit_layout", "suggest_crs", "make_cartogram", "set_form", "relations",
+    "design_style", "list_palettes",
 }
 READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "describe_layer", "field_values",
              "preview_filter", "map_context", "search_open_data", "search_imagery", "find_place", "layer_statistics",
              "sample_features", "identify_at", "find_algorithms", "describe_algorithm", "layer_options",
-             "export_options", "describe_layout", "suggest_crs"}
+             "export_options", "describe_layout", "suggest_crs", "list_palettes"}
 OPEN_WORLD = {"add_layer", "search_open_data", "add_service_layer", "add_basemap", "search_imagery", "find_place",
               "add_elevation", "add_osm_features", "add_population", "local_copy"}
 DESTRUCTIVE = {"export_layers", "remove_layers", "delete_features", "export_layout"}

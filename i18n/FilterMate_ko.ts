@@ -53,6 +53,11 @@
         <translation>실행 취소됨: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2865"/>
+        <source>Reading the palettes</source>
+        <translation>팔레트 읽는 중</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
         <source>Cartogram of {}</source>
         <translation>{} 카토그램</translation>

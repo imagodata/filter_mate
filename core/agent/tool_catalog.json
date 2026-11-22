@@ -2434,6 +2434,166 @@
    }
   },
   {
+   "name": "design_style",
+   "title": "Design a style",
+   "description": "Compose a finished style for a vector layer from a validated palette: one symbol, categories or classes, a look per geometry, SVG icons in the colour of their category, a variant for the map. Returns colors and problems (what readers with a colour deficiency cannot tell apart). Undone with the turn in the chat.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "mode": {
+      "default": "single",
+      "enum": [
+       "single",
+       "categorized",
+       "graduated"
+      ],
+      "type": "string"
+     },
+     "field": {
+      "default": "",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "palette": {
+      "default": "",
+      "description": "list_palettes; default by role",
+      "maxLength": 40,
+      "type": "string"
+     },
+     "look": {
+      "default": "flat",
+      "description": "polygon: flat, outlined, hatched; line: flat, casing, halo, dashed; point: flat, icon, badge",
+      "enum": [
+       "flat",
+       "outlined",
+       "hatched",
+       "casing",
+       "halo",
+       "dashed",
+       "icon",
+       "badge"
+      ],
+      "type": "string"
+     },
+     "icon": {
+      "default": "",
+      "description": "icon, badge: a word of an SVG of QGIS",
+      "maxLength": 60,
+      "type": "string"
+     },
+     "variant": {
+      "default": "light",
+      "enum": [
+       "light",
+       "dark",
+       "print",
+       "discreet"
+      ],
+      "type": "string"
+     },
+     "classes": {
+      "default": 5,
+      "maximum": 9,
+      "minimum": 2,
+      "type": "integer"
+     },
+     "method": {
+      "default": "quantile",
+      "enum": [
+       "quantile",
+       "equal_interval",
+       "jenks",
+       "pretty"
+      ],
+      "type": "string"
+     },
+     "limit": {
+      "default": 8,
+      "description": "categories; the rest grey",
+      "maximum": 12,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "reverse": {
+      "default": false,
+      "type": "boolean"
+     },
+     "size": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "maximum": 20,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "mm"
+     },
+     "opacity": {
+      "anyOf": [
+       {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "color": {
+      "default": "",
+      "description": "single: #rrggbb",
+      "maxLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "list_palettes",
+   "title": "List palettes",
+   "description": "The palettes design_style takes, by the job of their colours, with source, licence and problems.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "role": {
+      "default": "",
+      "description": "Empty: all",
+      "enum": [
+       "",
+       "categorical",
+       "sequential",
+       "diverging",
+       "status"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
    "name": "add_field",
    "title": "Add a field",
    "description": "Add a field to a vector layer, in its edit buffer: nothing is saved until the user saves the layer edits. With a formula the field is filled on every feature at once. Returns layer_name, field, type, computed (the features filled), and formula_error when the formula was refused (the field is then added, empty). In the chat of FilterMate, undoing the turn removes the field.",

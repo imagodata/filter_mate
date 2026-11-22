@@ -53,6 +53,11 @@
         <translation>Razveljavljeno: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2865"/>
+        <source>Reading the palettes</source>
+        <translation>Branje palet</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
         <source>Cartogram of {}</source>
         <translation>Kartogram sloja {}</translation>

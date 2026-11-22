@@ -53,6 +53,11 @@
         <translation>पूर्ववत किया गया: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2865"/>
+        <source>Reading the palettes</source>
+        <translation>पैलेट पढ़े जा रहे हैं</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
         <source>Cartogram of {}</source>
         <translation>{} का कार्टोग्राम</translation>

@@ -720,6 +720,16 @@ class SimulatedProject:
                                             "layer_id": "cartogram_1", "kind": args.get("kind", "contiguous"),
                                             "features": 586, "field": args["field"], "crs": "EPSG:2154",
                                             "error_before": 3.2, "error_after": 1.2},
+            "design_style": lambda args: {"layer_name": args["layer"], "mode": args.get("mode", "single"),
+                                          "look": args.get("look", "flat"), "variant": args.get("variant", "light"),
+                                          "palette": args.get("palette") or "filtermate",
+                                          "colors": ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]},
+            "list_palettes": lambda args: {"palettes": [{"name": "filtermate", "role": "categorical"},
+                                                        {"name": "okabe_ito", "role": "categorical"},
+                                                        {"name": "blues", "role": "sequential"},
+                                                        {"name": "viridis", "role": "sequential"},
+                                                        {"name": "rdbu", "role": "diverging"}],
+                                           "defaults": {"categorical": "filtermate", "sequential": "blues"}},
             "suggest_crs": lambda args: {"bounds_wgs84": [0.9, 43.1, 2.0, 44.0], "from": "layers", "purpose":
                                          args.get("purpose", "general"), "scale": "local", "current": "EPSG:4326",
                                          "suggestions": [{"crs": "EPSG:3035" if args.get("purpose") == "areas"

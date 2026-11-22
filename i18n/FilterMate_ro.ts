@@ -53,6 +53,11 @@
         <translation>Anulat: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2865"/>
+        <source>Reading the palettes</source>
+        <translation>Citirea paletelor</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
         <source>Cartogram of {}</source>
         <translation>Cartograma {}</translation>
