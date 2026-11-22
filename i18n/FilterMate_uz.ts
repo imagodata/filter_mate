@@ -2291,6 +2291,21 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Faol qatlam atrofida 100 m zona chizish</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Xaritada obyektlarni o'zim tanlay</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Raqamli maydon gistogrammasida slayder</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Bu rastrda pipetkani yoq</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Ushbu xaritaning chop etish maketini yaratish</translation>

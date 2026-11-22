@@ -2291,6 +2291,21 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <translation>Vykresli zónu 100 m kolem aktivní vrstvy</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Nech mě vybrat prvky na mapě</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Posuvník nad histogramem číselného pole</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Zapni pipetu na tomto rastru</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Vytvoř tiskovou kompozici této mapy</translation>

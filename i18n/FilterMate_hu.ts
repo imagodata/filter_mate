@@ -2291,6 +2291,21 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <translation>Rajzolj 100 m-es zónát az aktív réteg köré</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Hadd válasszak elemeket a térképen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Csúszka egy számmező hisztogramján</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Kapcsold be a pipettát ezen a raszteren</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Készíts nyomtatási elrendezést erről a térképről</translation>

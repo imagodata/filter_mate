@@ -2291,6 +2291,21 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <translation>Narysuj strefę 100 m wokół aktywnej warstwy</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Pozwól mi wybrać obiekty na mapie</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Suwak nad histogramem pola liczbowego</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Włącz pipetę na tym rastrze</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Utwórz układ wydruku tej mapy</translation>

@@ -2291,6 +2291,21 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <translation>Teken een zone van 100 m rond de actieve laag</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Laat mij objecten op de kaart kiezen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Schuifregelaar over het histogram van een veld</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Zet de pipet aan op dit raster</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Maak een printlay-out van deze kaart</translation>

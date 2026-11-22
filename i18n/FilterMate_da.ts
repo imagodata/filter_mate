@@ -2291,6 +2291,21 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
         <translation>Tegn en zone på 100 m rundt om det aktive lag</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Lad mig vælge objekter på kortet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>En skyder over et talfelts histogram</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Aktivér pipetten på denne raster</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Lav et printlayout af dette kort</translation>

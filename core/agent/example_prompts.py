@@ -133,6 +133,10 @@ CATALOG: Tuple[Example, ...] = (
     _p("lidar_inside", "cloud_cross", ("point_cloud", "selection"), "cross_filter"),
     _p("join", "join", ("many_vectors",), "join_layers"),
     _p("buffer_zone", "buffer", ("active_vector",), "run_algorithm"),
+    # EXPLORING driven or a slider made for the user, who then works with them (set_exploring, 2026-11-22).
+    _p("pick_on_map", "explore", ("active_vector",), "set_exploring"),
+    _p("slider_histogram", "widget", ("active_vector", "active_local"), "create_widget"),
+    _p("raster_pipette", "explore", ("active_raster",), "set_exploring"),
     _p("layout", "layout", ("data",), "create_layout"),
     _d("relief", "elevation", (), (), "find_place", "add_elevation", "set_layer_style", "contour_lines"),
     _d("elevation_view", "elevation", (), (), "add_elevation"),

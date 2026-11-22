@@ -2291,6 +2291,21 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Dibuixa una zona de 100 m al voltant de la capa activa</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Deixa'm triar entitats al mapa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Un control lliscant sobre l'histograma d'un camp</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Activa la pipeta en aquest ràster</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Fes un disseny d'impressió d'aquest mapa</translation>

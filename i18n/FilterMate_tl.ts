@@ -2291,6 +2291,21 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <translation>Gumuhit ng 100 m na zone sa paligid ng aktibong layer</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Hayaan akong pumili ng features sa mapa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Slider sa histogram ng numerong field</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>I-arm ang pipette sa raster na ito</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Gumawa ng print layout ng mapang ito</translation>

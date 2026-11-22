@@ -2291,6 +2291,21 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Nariši območje 100 m okoli aktivnega sloja</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Naj izberem elemente na zemljevidu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Drsnik nad histogramom številskega polja</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Vklopi kapalko na tem rastru</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Ustvari tiskalno postavitev te karte</translation>

@@ -2291,6 +2291,21 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>활성 레이어 주위에 100 m 구역 그리기</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>지도에서 피처를 직접 고를게요</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>숫자 필드 히스토그램 위 슬라이더</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>이 래스터에서 스포이트 켜기</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>이 지도의 인쇄 레이아웃 만들기</translation>

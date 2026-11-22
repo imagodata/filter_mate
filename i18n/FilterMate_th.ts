@@ -2291,6 +2291,21 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>วาดโซน 100 m รอบเลเยอร์ที่ใช้งาน</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>ให้ฉันเลือกฟีเจอร์บนแผนที่เอง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>แถบเลื่อนบนฮิสโทแกรมของฟิลด์ตัวเลข</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>เปิดหลอดดูดสีบนแรสเตอร์นี้</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>สร้างเค้าโครงการพิมพ์ของแผนที่นี้</translation>

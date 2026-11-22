@@ -2291,6 +2291,21 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Piirrä 100 m vyöhyke aktiivisen tason ympärille</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Anna minun valita kohteet kartalta</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Liukusäädin lukukentän histogrammin päällä</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Ota pipetti käyttöön tässä rasterissa</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Tee tästä kartasta tulostusasettelu</translation>

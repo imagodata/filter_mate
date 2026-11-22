@@ -2291,6 +2291,21 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>アクティブレイヤの周囲に 100 m のゾーンを描画</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>地図上で地物を選ばせて</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>数値フィールドのヒストグラムにスライダー</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>このラスタでスポイトを有効にして</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>この地図の印刷レイアウトを作成</translation>

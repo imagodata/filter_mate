@@ -2291,6 +2291,21 @@ Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
         <translation>Traccia una zona di 100 m attorno al livello attivo</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Fammi scegliere elementi sulla mappa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Un cursore sull'istogramma di un campo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Attiva la pipetta su questo raster</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Crea un layout di stampa di questa mappa</translation>

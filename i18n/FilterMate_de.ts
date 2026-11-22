@@ -2291,6 +2291,21 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <translation>Eine Zone von 100 m um die aktive Ebene zeichnen</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Lass mich Objekte auf der Karte wählen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Schieberegler über dem Histogramm eines Feldes</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Pipette auf diesem Raster aktivieren</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Druck-Layout dieser Karte erstellen</translation>

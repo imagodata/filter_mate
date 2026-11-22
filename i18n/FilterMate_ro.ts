@@ -2291,6 +2291,21 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Trasează o zonă de 100 m în jurul stratului activ</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Lasă-mă să aleg entități pe hartă</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Un cursor pe histograma unui câmp numeric</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Activează pipeta pe acest raster</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Creează un aspect de tipărire al acestei hărți</translation>

@@ -2291,6 +2291,21 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <translation>Etkin katmanın çevresine 100 m'lik bölge çiz</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Haritada nesneleri ben seçeyim</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Sayısal alanın histogramında kaydırıcı</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Bu rasterde damlalığı etkinleştir</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Bu haritanın baskı düzenini oluştur</translation>

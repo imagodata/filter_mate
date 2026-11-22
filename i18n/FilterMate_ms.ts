@@ -2291,6 +2291,21 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
         <translation>Lukis zon 100 m di sekeliling lapisan aktif</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Biar saya pilih fitur pada peta</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Penggelongsor pada histogram medan nombor</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Aktifkan pipet pada raster ini</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Buat reka letak cetakan peta ini</translation>

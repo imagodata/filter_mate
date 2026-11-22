@@ -2291,6 +2291,21 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Σχεδίασε ζώνη 100 m γύρω από το ενεργό επίπεδο</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Άσε με να διαλέξω στοιχεία στον χάρτη</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Ολισθητής στο ιστόγραμμα αριθμητικού πεδίου</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Ενεργοποίησε το σταγονόμετρο σε αυτό το ράστερ</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Φτιάξε διάταξη εκτύπωσης αυτού του χάρτη</translation>

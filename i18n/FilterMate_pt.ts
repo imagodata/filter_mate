@@ -2291,6 +2291,21 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>Traçar uma zona de 100 m à volta da camada ativa</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Deixa-me escolher elementos no mapa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Um cursor sobre o histograma de um campo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Ativa a pipeta neste raster</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Criar um layout de impressão deste mapa</translation>
