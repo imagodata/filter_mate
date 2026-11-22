@@ -166,13 +166,19 @@ def _conda_environments() -> List[Runtime]:
         if os.name == "nt":
             python = os.path.join(prefix, "python.exe")
             library = os.path.join(prefix, "Library")
-            env = {"QGIS_PREFIX_PATH": library,
+            bindings = os.path.join(library, "python")
+            env = {"QGIS_PREFIX_PATH": library, "QT_PLUGIN_PATH": os.path.join(library, "plugins"),
+                   "PYTHONPATH": os.pathsep.join([bindings, os.path.join(bindings, "plugins")]),
                    "PATH": os.pathsep.join([prefix, os.path.join(library, "bin"), os.environ.get("PATH", "")])}
             has_qgis = os.path.isdir(os.path.join(library, "python", "qgis")) or bool(
                 glob.glob(os.path.join(prefix, "Lib", "site-packages", "qgis")))
         else:
             python = os.path.join(prefix, "bin", "python")
-            env = {"PATH": os.pathsep.join([os.path.join(prefix, "bin"), os.environ.get("PATH", "")])}
+            # What the activation script of the qgis package sets: the python is started without activation.
+            bindings = os.path.join(prefix, "share", "qgis", "python")
+            env = {"QGIS_PREFIX_PATH": prefix, "QT_PLUGIN_PATH": os.path.join(prefix, "plugins"),
+                   "PYTHONPATH": os.pathsep.join([bindings, os.path.join(bindings, "plugins")]),
+                   "PATH": os.pathsep.join([os.path.join(prefix, "bin"), os.environ.get("PATH", "")])}
             has_qgis = bool(glob.glob(os.path.join(prefix, "lib", "python3*", "site-packages", "qgis"))) or \
                 os.path.isdir(os.path.join(prefix, "share", "qgis", "python", "qgis"))
         if has_qgis and os.path.exists(python) and not any(_same_python(python, known) for known in seen):

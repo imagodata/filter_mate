@@ -96,7 +96,7 @@ def test_the_environment_is_created_in_the_application_folder_from_conda_forge_o
     assert command[command.index("-p") + 1] == provision.environment_dir()
     assert command[command.index("-r") + 1] == provision.root_prefix()
     assert "--override-channels" in command and command[command.index("-c") + 1] == "conda-forge"
-    assert command[-1] == "qgis"
+    assert any(package.startswith("qgis") for package in command[command.index("conda-forge") + 1:])
     assert provision.environment_dir().startswith(paths.user_data_dir())
 
 
@@ -160,6 +160,8 @@ def test_no_runtime_is_reported_until_setup_ran_to_the_end():
     assert installed.kind == "private"
     assert installed.command[:2] == [provision.micromamba_path(), "run"] and installed.command[-1] == "python"
     assert provision.environment_dir() in installed.command
+    assert installed.env["PYTHONPATH"].split(os.pathsep)[0].startswith(provision.environment_dir())
+    assert installed.env["QGIS_PREFIX_PATH"].startswith(provision.environment_dir())
     assert any(candidate.kind == "private" for candidate in runtime.candidates())
 
 

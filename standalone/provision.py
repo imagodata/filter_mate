@@ -20,7 +20,10 @@ from . import paths
 
 RELEASES = "https://github.com/mamba-org/micromamba-releases/releases/latest/download/"
 CHANNEL = "conda-forge"
-PACKAGES = ("qgis",)
+# draco: QGIS 4.2.3 of conda-forge links libdraco.so.9, which draco 1.5.9 no longer has (November 2026); the
+# probe after the install says it when a pin like this one is needed again. qgis 3.44 is not offered: it is
+# solved with Python 3.14, for which conda-forge has no PyQt5.
+PACKAGES = ("qgis>=4.2", "draco<1.5.9")
 # Free space asked before starting: the environment and the package cache beside it.
 NEEDED_BYTES = 8 * 1024 ** 3
 # conda-forge mirrors stall now and then (a package below 30 bytes/s for a minute ends micromamba).
@@ -67,9 +70,15 @@ def installed_runtime():
     from .runtime import Runtime
     if not (os.path.exists(micromamba_path()) and os.path.exists(environment_python())):
         return None
-    env = {}
-    if os.name == "nt":  # conda-forge installs QGIS under Library on Windows; elsewhere the prefix is built in
-        env["QGIS_PREFIX_PATH"] = os.path.join(environment_dir(), "Library")
+    # What the activation script of the qgis package sets, which `micromamba run` does not run.
+    prefix = environment_dir()
+    base = os.path.join(prefix, "Library") if os.name == "nt" else prefix  # conda-forge puts QGIS under Library on Windows
+    python = os.path.join(base, "python")
+    if os.name != "nt":
+        python = os.path.join(prefix, "share", "qgis", "python")
+    env = {"QGIS_PREFIX_PATH": base,
+           "PYTHONPATH": os.pathsep.join([python, os.path.join(python, "plugins")]),
+           "QT_PLUGIN_PATH": os.path.join(base, "plugins")}
     command = [micromamba_path(), "run", "-r", root_prefix(), "-p", environment_dir(), "python"]
     return Runtime("private", command, f"FilterMate's own runtime ({environment_dir()})", env)
 
