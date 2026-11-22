@@ -2152,13 +2152,13 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Salvează straturile online într-un GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Salvează straturile la distanță într-un GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Exportă în LAZ punctele LiDAR păstrate</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Exportă în LAZ punctele LiDAR</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

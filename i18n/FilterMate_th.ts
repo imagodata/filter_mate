@@ -2152,13 +2152,13 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>บันทึกเลเยอร์ออนไลน์ลง GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>บันทึกเลเยอร์ระยะไกลลง GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>ส่งออกจุด LiDAR ที่เก็บไว้เป็น LAZ</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>ส่งออกจุด LiDAR เป็น LAZ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

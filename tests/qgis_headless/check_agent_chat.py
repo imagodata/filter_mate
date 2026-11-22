@@ -779,6 +779,117 @@ def check_ask_user(panel, provider, ask):
           (len(provider.requests), frozen.result.text()))
 
 
+def check_facts_of_real_layers(chat, work):
+    """What the facts read of real layers (2026-11-22): a terrain model, a picture, a layer that is not valid, a GDAL
+    description of a WMS, an XYZ basemap, a polygon layer, a layer of a web service that is not reachable."""
+    from osgeo import gdal
+    from qgis.core import QgsRasterLayer
+    project = QgsProject.instance()
+
+    def raster_file(name, bands, data_type):
+        path = os.path.join(work, name)
+        dataset = gdal.GetDriverByName("GTiff").Create(path, 4, 4, bands, data_type)
+        dataset.SetGeoTransform((650000, 10, 0, 6860000, 0, -10))
+        for band in range(1, bands + 1):
+            dataset.GetRasterBand(band).Fill(100)
+        dataset = None
+        return path
+
+    def facts_with(layer, active=True):
+        project.addMapLayer(layer)
+        chat._active_layer = lambda: layer if active else None  # no interface here: the active layer is told
+        try:
+            return chat._read_welcome_facts()
+        finally:
+            del chat._active_layer
+            project.removeMapLayer(layer.id())
+
+    base = chat._read_welcome_facts()
+    dem = QgsRasterLayer(raster_file("dem1.tif", 1, gdal.GDT_Float32), "dem1")
+    facts = facts_with(dem)
+    check("facts: a band of numbers is a terrain model", facts.elevations == base.elevations + 1 and facts.active_elevation
+          and "active_elevation" in facts.tokens(), facts)
+    rgb = QgsRasterLayer(raster_file("rgb.tif", 3, gdal.GDT_Byte), "rgb")
+    facts = facts_with(rgb)
+    check("facts: a picture is a raster, not a terrain model", facts.rasters == base.rasters + 1
+          and facts.elevations == base.elevations and not facts.active_elevation and facts.active == "raster", facts)
+    scan = QgsRasterLayer(raster_file("scan.tif", 1, gdal.GDT_Byte), "scan")
+    check("facts: one band of bytes (a scanned map) is not a terrain model",
+          not facts_with(scan).active_elevation)
+    moved = QgsRasterLayer(os.path.join(work, "nothing_here.tif"), "moved")
+    invalid = not moved.isValid()
+    facts = facts_with(moved)
+    check("facts: a layer that is not valid is not counted", invalid and facts.layers == base.layers
+          and facts.rasters == base.rasters and facts.active == "", facts)
+    xml = ("<GDAL_WMS><Service name=\"TMS\"><ServerUrl>http://127.0.0.1:9/${z}/${x}/${y}.png</ServerUrl></Service>"
+           "<DataWindow><UpperLeftX>-20037508.34</UpperLeftX><UpperLeftY>20037508.34</UpperLeftY>"
+           "<LowerRightX>20037508.34</LowerRightX><LowerRightY>-20037508.34</LowerRightY><TileLevel>18</TileLevel>"
+           "<TileCountX>1</TileCountX><TileCountY>1</TileCountY><YOrigin>top</YOrigin></DataWindow>"
+           "<Projection>EPSG:3857</Projection><BlockSizeX>256</BlockSizeX><BlockSizeY>256</BlockSizeY>"
+           "<BandsCount>3</BandsCount></GDAL_WMS>")
+    wms = QgsRasterLayer(xml, "wms", "gdal")  # the description is the source itself, as a user pastes it
+    if wms.isValid():
+        facts = facts_with(wms)
+        check("facts: a WMS described for GDAL is a basemap, not a raster to work on", facts.tiles == base.tiles + 1
+              and facts.rasters == base.rasters and facts.active == "other", facts)
+    else:
+        check("facts: a WMS described for GDAL (skipped: not valid here)", True)
+    xyz = QgsRasterLayer("type=xyz&url=http://127.0.0.1:9/{z}/{x}/{y}.png&zmax=19&zmin=0", "xyz", "wms")
+    if xyz.isValid():
+        facts = facts_with(xyz)
+        check("facts: an XYZ basemap is not data", facts.tiles == base.tiles + 1 and facts.rasters == base.rasters
+              and "active_raster" not in facts.tokens(), facts)
+    else:
+        check("facts: an XYZ basemap (skipped: not valid here)", True)
+    polygons = QgsVectorLayer("Polygon?crs=EPSG:4326&field=n:integer", "polygons", "memory")
+    points = QgsVectorLayer("Point?crs=EPSG:4326", "points_only", "memory")
+    project.addMapLayer(polygons)
+    after = chat._read_welcome_facts()
+    project.removeMapLayer(polygons.id())
+    project.addMapLayer(points)
+    plain = chat._read_welcome_facts()
+    project.removeMapLayer(points.id())
+    check("facts: a polygon layer is counted as polygons, a point layer is not", after.polygons == base.polygons + 1
+          and plain.polygons == base.polygons, (base.polygons, after.polygons, plain.polygons))
+    wfs = QgsVectorLayer("url='http://127.0.0.1:9/wfs' typename='x' version='auto'", "wfs", "WFS")
+    if wfs.isValid():
+        check("facts: a WFS layer is remote and not local for the tools", facts_with(wfs).active_local is False)
+    else:
+        check("facts: a layer of a web service that does not answer is not valid, so not counted",
+              facts_with(wfs).layers == base.layers)
+
+
+def check_facts_follow_taken_layers(chat, panel, work):
+    """A layer taken out of the project (not deleted) is no longer followed, and followed once when it comes back
+    (2026-11-22: it stayed connected and was connected again)."""
+    project = QgsProject.instance()
+    layer = QgsVectorLayer("Point?crs=EPSG:4326&field=n:integer", "taken", "memory")
+    feature = QgsFeature(layer.fields())
+    feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(1, 1)))
+    layer.dataProvider().addFeatures([feature])
+    plain = layer.receivers(layer.selectionChanged)
+    project.addMapLayer(layer)
+    wait(lambda: layer.id() in chat._facts_layers, 1)
+    check("follow: a layer added is followed once", layer.id() in chat._facts_layers
+          and layer.receivers(layer.selectionChanged) > plain, (plain, layer.receivers(layer.selectionChanged)))
+    followed = layer.receivers(layer.selectionChanged)
+    taken = project.takeMapLayer(layer)
+    QCoreApplication.processEvents()
+    check("follow: a layer taken out of the project is disconnected, not only forgotten",
+          layer.id() not in chat._facts_layers and taken.receivers(taken.selectionChanged) == plain,
+          (plain, taken.receivers(taken.selectionChanged)))
+    panel._facts_timer.stop()
+    taken.selectByIds(list(taken.allFeatureIds()))
+    check("follow: its selection no longer reads the project", not panel._facts_timer.isActive())
+    project.addMapLayer(taken)
+    wait(lambda: taken.id() in chat._facts_layers, 1)
+    check("follow: back in the project it is connected once, not twice",
+          taken.receivers(taken.selectionChanged) == followed, (followed, taken.receivers(taken.selectionChanged)))
+    taken.removeSelection()
+    project.removeMapLayer(taken.id())
+    wait(lambda: not panel._facts_timer.isActive(), 2)
+
+
 def check_welcome_follows_project(chat, panel, layer, work):
     """The requests of the welcome follow the project (2026-11-20): the facts read in a real project, the set drawn again
     when a layer comes, the selection or a filter changes, and the link that reconfigures FilterMate."""
@@ -808,13 +919,14 @@ def check_welcome_follows_project(chat, panel, layer, work):
     raster = QgsRasterLayer(path, "dem")
     project.addMapLayer(raster)
     check("welcome: a raster is counted", chat._read_welcome_facts().rasters == 1)
-    check("welcome: a layer added draws the requests again",
-          wait(lambda: panel.example_keys != before and true_of_project(), settle), (before, panel.example_keys))
+    check("welcome: a layer added is read and the requests stay true of the project",
+          wait(lambda: panel._examples_signature == chat._read_welcome_facts().signature(), settle)
+          and true_of_project(), (before, panel.example_keys))
     # A selection.
     layer.selectByIds([layer.allFeatureIds()[0]])
     check("welcome: a selection is counted without reading features", chat._read_welcome_facts().selected == 1)
     check("welcome: a selection brings a request about it",
-          wait(lambda: any("selection" in catalog[key].needs for key in panel.example_keys), settle), panel.example_keys)
+          wait(lambda: any({"selection", "local_selection"} & set(catalog[key].needs) for key in panel.example_keys), settle), panel.example_keys)
     # A filter.
     layer.removeSelection()
     layer.setSubsetString('"pop" > 1000')
@@ -828,6 +940,8 @@ def check_welcome_follows_project(chat, panel, layer, work):
     check("welcome: the requests are true after the layer went",
           wait(lambda: not any("filter" in catalog[key].needs or "raster" in catalog[key].needs
                                for key in panel.example_keys) and true_of_project(), settle), panel.example_keys)
+    check_facts_of_real_layers(chat, work)
+    check_facts_follow_taken_layers(chat, panel, work)
     # A reading that fails gives the neutral requests, not an exception.
     real = chat._read_welcome_facts
     panel.facts_provider = lambda: (_ for _ in ()).throw(RuntimeError("deleted"))

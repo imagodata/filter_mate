@@ -2152,13 +2152,13 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>I-save ang mga online layer sa GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>I-save ang mga remote layer sa GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>I-export sa LAZ ang mga LiDAR point na pinanatili</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>I-export sa LAZ ang mga LiDAR point</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

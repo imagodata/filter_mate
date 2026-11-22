@@ -2152,13 +2152,13 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Lưu các lớp trực tuyến vào GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Lưu các lớp từ xa vào GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Xuất các điểm LiDAR đã giữ ra LAZ</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Xuất các điểm LiDAR ra LAZ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

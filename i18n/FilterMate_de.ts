@@ -2152,13 +2152,13 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Online-Ebenen in einem GeoPackage speichern</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Entfernte Ebenen in einem GeoPackage speichern</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Behaltene LiDAR-Punkte als LAZ exportieren</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>LiDAR-Punkte als LAZ exportieren</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

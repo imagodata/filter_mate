@@ -2152,13 +2152,13 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Mentsd az online rétegeket GeoPackage-be</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Mentsd a távoli rétegeket GeoPackage-be</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Exportáld a megtartott LiDAR-pontokat LAZ-ba</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Exportáld a LiDAR-pontokat LAZ-ba</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

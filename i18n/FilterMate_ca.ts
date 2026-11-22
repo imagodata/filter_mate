@@ -2152,13 +2152,13 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Desa les capes en línia en un GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Desa les capes remotes en un GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Exporta a LAZ els punts LiDAR conservats</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Exporta a LAZ els punts LiDAR</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

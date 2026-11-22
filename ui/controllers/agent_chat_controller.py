@@ -100,6 +100,9 @@ from ..widgets.agent_panel import (
 from ..widgets.agent_widgets_strip import number_text
 
 logger = logging.getLogger("FilterMate.agent")
+# What on a layer changes the requests of the welcome: its selection, its filter, its source (a raster or a point cloud
+# is filtered by a source cut for the purpose).
+FACTS_SIGNALS = ("selectionChanged", "subsetStringChanged", "dataSourceChanged")
 
 LIVE_DELAY_MS = 800  # a burst of saves (several layers, or the edits of a script) runs a live recipe once
 LIVE_MAX_TRIES = 375  # while FilterMate or the chat works, or a target is edited: about five minutes, then the user is told
@@ -296,12 +299,16 @@ class AgentChatController(QObject):
     def _read_welcome_facts(self):
         """The state of QGIS and the project for the requests of the welcome (main thread; counts, no feature read)."""
         from ...adapters.qgis.project_facts import read_facts
+        return read_facts(active=self._active_layer())
+
+    @staticmethod
+    def _active_layer():
+        """The layer selected in the layer tree of QGIS; None without an interface (a script) or without a layer."""
         try:
             from qgis.utils import iface
-            active = iface.activeLayer() if iface is not None else None
-        except Exception:  # no interface (a script), or one closing
-            active = None
-        return read_facts(active=active)
+            return iface.activeLayer() if iface is not None else None
+        except Exception:  # an interface closing
+            return None
 
     def _follow_welcome_facts(self) -> None:
         """The welcome draws its requests again when a layer comes or goes, the selection or a filter changes, the
@@ -320,7 +327,9 @@ class AgentChatController(QObject):
         """A layer came or went, or a project opened or closed: follow the selection and filter of the layers there."""
         if args and isinstance(args[0], list) and args[0] and isinstance(args[0][0], str):  # layersRemoved: ids
             for layer_id in args[0]:
-                self._facts_layers.pop(layer_id, None)
+                layer = self._facts_layers.pop(layer_id, None)
+                if layer is not None:  # taken out of the project, not deleted: it is still connected
+                    self._unfollow_facts_layer(layer)
         elif args and isinstance(args[0], list):  # layersAdded: layers
             self._follow_facts_layers(args[0])
         self.panel.facts_changed()
@@ -331,7 +340,7 @@ class AgentChatController(QObject):
                 layer_id = layer.id()
                 if layer_id in self._facts_layers:
                     continue
-                for name in ("selectionChanged", "subsetStringChanged"):
+                for name in FACTS_SIGNALS:
                     emitter = getattr(layer, name, None)
                     if emitter is not None:
                         emitter.connect(self.panel.facts_changed)
@@ -352,12 +361,19 @@ class AgentChatController(QObject):
         except Exception:  # no interface, or not connected
             pass
         for layer in self._facts_layers.values():
-            for name in ("selectionChanged", "subsetStringChanged"):
-                try:
-                    getattr(layer, name).disconnect(self.panel.facts_changed)
-                except (RuntimeError, TypeError, AttributeError):
-                    pass
+            self._unfollow_facts_layer(layer)
         self._facts_layers = {}
+        try:
+            self.panel.stop_following()  # a change read 300 ms later would read a project of a controller shut down
+        except RuntimeError:  # the panel is gone with its dock
+            pass
+
+    def _unfollow_facts_layer(self, layer) -> None:
+        for name in FACTS_SIGNALS:
+            try:
+                getattr(layer, name).disconnect(self.panel.facts_changed)  # our slot: QGIS's own stay connected
+            except (RuntimeError, TypeError, AttributeError):  # deleted, or never connected
+                pass
 
     def _refresh_ready(self) -> None:
         """Whether the agent can answer, without opening the key store (it may ask for the master password)."""
@@ -426,6 +442,7 @@ class AgentChatController(QObject):
 
     def _on_project_read(self, *_args) -> None:
         """Another project is open: its own transcript comes back."""
+        self.panel.hold_examples()  # its active layer is set after it is read: the requests wait for it
         self._restore_transcript()
         self._offer_setup_again()
         self._wizard.offer_back_again()  # the settings are those of every project: what puts them back stays
@@ -639,6 +656,7 @@ class AgentChatController(QObject):
 
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
+        self.panel.hold_examples()
         abort_active(CHAT_WAITS)  # a tool of the chat waiting (Processing, a download) ends: its project is gone
         # The turn under way, ended below, must not be recorded against the closed project, nor the change another
         # application is making (its layers compared with the next project's, an Undo would remove them all).

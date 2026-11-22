@@ -2152,13 +2152,13 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="131"/>
-        <source>Save the online layers to a GeoPackage</source>
-        <translation>Spara onlinelagren i ett GeoPackage</translation>
+        <source>Save the remote layers to a GeoPackage</source>
+        <translation>Spara fjärrlagren i ett GeoPackage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="132"/>
-        <source>Export the LiDAR points kept to LAZ</source>
-        <translation>Exportera de behållna LiDAR-punkterna till LAZ</translation>
+        <source>Export the LiDAR points to LAZ</source>
+        <translation>Exportera LiDAR-punkterna till LAZ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="133"/>

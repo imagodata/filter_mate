@@ -14,8 +14,9 @@ from core.agent import example_prompts as ex
 PANEL = Path(__file__).resolve().parents[3] / "ui" / "widgets" / "agent_panel.py"
 TOOLS = {tool["name"] for tool in json.loads(
     (Path(__file__).resolve().parents[3] / "core" / "agent" / "tool_catalog.json").read_text(encoding="utf-8"))["tools"]}
-NEEDS = {"layers", "no_layers", "data", "several", "vector", "many_vectors", "raster", "point_cloud", "active_vector",
-         "active_raster", "active_point_cloud", "selection", "filter", "remote"}
+NEEDS = {"layers", "no_layers", "data", "no_data", "no_basemap", "several", "vector", "many_vectors", "raster",
+         "point_cloud", "polygons", "elevation", "active_vector", "active_raster", "active_point_cloud",
+         "active_elevation", "active_local", "selection", "local_selection", "filter", "remote"}
 
 
 def _by_key():
@@ -50,8 +51,11 @@ def test_a_country_request_is_offered_only_in_its_country():
 def facts(**given):
     """Facts the way the controller reads them, from the counts alone."""
     values = dict(known=True, layers=0, tiles=0, vectors=0, rasters=0, point_clouds=0, active="", selected=0,
-                  filtered=0, remote=0)
+                  filtered=0, remote=0, elevations=0, polygons=0, active_elevation=False, active_local=True)
     values.update(given)
+    values.setdefault("selected_local", values["selected"])
+    if values["active"] == "raster" and "active_elevation" not in given and "elevations" not in given:
+        values["elevations"], values["active_elevation"] = values["rasters"], True  # a raster is a terrain model here
     values["layers"] = max(values["layers"], values["tiles"] + values["vectors"] + values["rasters"]
                            + values["point_clouds"])
     return ex.Facts(**values)
@@ -161,7 +165,7 @@ def test_a_raster_active_gives_raster_requests_and_none_about_a_vector_layer_alo
     for seed in range(200):
         keys = ex.pick("en_US", facts=state, rng=random.Random(seed))
         needs = [set(catalog[key].needs) for key in keys]
-        assert any("active_raster" in need for need in needs), keys
+        assert any({"active_raster", "active_elevation"} & need for need in needs), keys
         assert not any({"vector", "active_vector", "many_vectors", "selection", "remote"} & need for need in needs)
 
 
@@ -170,7 +174,7 @@ def test_a_raster_next_to_vectors_still_has_a_raster_request_first():
     catalog = _by_key()
     for seed in range(200):
         needs = [set(catalog[key].needs) for key in ex.pick("en_US", facts=state, rng=random.Random(seed))]
-        assert any({"active_raster", "raster"} & need for need in needs)
+        assert any({"active_raster", "active_elevation", "raster", "elevation"} & need for need in needs)
         assert not any("active_vector" in need for need in needs)
 
 
@@ -180,7 +184,8 @@ def test_a_selection_brings_selection_requests():
     shown = set()
     for seed in range(200):
         keys = ex.pick("en_US", facts=state, rng=random.Random(seed))
-        assert any("selection" in catalog[key].needs and catalog[key].group == ex.PROJECT for key in keys), keys
+        assert any({"selection", "local_selection"} & set(catalog[key].needs) and catalog[key].group == ex.PROJECT
+                   for key in keys), keys
         shown.update(keys)
     assert {"zoom_selection", "sel_radius", "sel_other_layers", "roads_inside", "people_selected"} <= shown
     no_selection = {key for seed in range(200)
@@ -293,4 +298,110 @@ def test_the_active_layer_comes_first_when_nothing_else_moved(active, state):
     catalog = _by_key()
     for seed in range(200):
         keys = ex.pick("en_US", facts=facts(active=active, **state), rng=random.Random(seed))
-        assert any(f"active_{active}" in catalog[key].needs for key in keys), (active, keys)
+        assert any(f"active_{active}" in catalog[key].needs or (active == "raster" and "active_elevation" in catalog[key].needs)
+                   for key in keys), (active, keys)
+
+
+TERRAIN = {"slope", "hillshade", "contours", "slope_filter"}
+
+
+def _drawn(state, seeds=300, locale="en_US"):
+    return {key for seed in range(seeds) for key in ex.pick(locale, facts=state, rng=random.Random(seed))}
+
+
+def test_terrain_requests_need_a_raster_that_can_be_a_terrain_model():
+    """2026-11-22: an orthophoto or a scanned map was offered "Map the slope of the active raster"."""
+    picture = facts(rasters=1, vectors=1, active="raster", elevations=0, active_elevation=False)
+    assert not _drawn(picture) & TERRAIN
+    assert {"raster_ramp", "raster_stats"} <= _drawn(picture)  # style and statistics fit any raster
+    dem = facts(rasters=1, vectors=1, active="raster", elevations=1, active_elevation=True)
+    assert {"slope", "hillshade", "contours", "slope_filter"} <= _drawn(dem)
+    # A terrain model is in the project, another raster is active: no request on the active one, a filter by slope.
+    other = facts(rasters=2, vectors=1, active="raster", elevations=1, active_elevation=False)
+    assert not _drawn(other) & {"slope", "hillshade", "contours"} and "slope_filter" in _drawn(other)
+
+
+def test_a_service_layer_is_not_offered_what_its_tools_refuse():
+    """layer_statistics refuses a web service and sample_features reads a WFS without its selection."""
+    wfs = facts(vectors=1, active="vector", selected=3, selected_local=0, active_local=False)
+    assert not _drawn(wfs) & {"stats_active", "sel_stats", "sel_attributes"}
+    assert {"zoom_selection", "sel_radius", "fields", "color_by"} <= _drawn(wfs)  # what does work on a service
+    mixed = facts(vectors=2, active="vector", selected=3, selected_local=1)
+    assert {"sel_stats", "sel_attributes"} <= _drawn(mixed) and "stats_active" in _drawn(mixed)
+
+
+def test_polygons_are_for_the_statistics_of_a_raster_by_polygon():
+    points = facts(rasters=1, vectors=1, active="raster", polygons=0)
+    assert "zonal" not in _drawn(points)
+    assert "zonal" in _drawn(facts(rasters=1, vectors=1, active="raster", polygons=1))
+
+
+def test_a_basemap_alone_is_not_data_and_is_not_missing_either():
+    only_basemap = facts(tiles=1)
+    drawn = _drawn(only_basemap)
+    assert "add_basemap" not in drawn and "dark_basemap" not in drawn
+    mesh = facts(layers=1)  # a mesh: a layer, no data, no basemap
+    assert "add_basemap" in _drawn(mesh) and not any(
+        {c.key for c in ex.CATALOG if c.group == ex.PROJECT} & {key for key in _drawn(mesh)})
+    assert "add_basemap" in _drawn(facts()) and "dark_basemap" not in _drawn(facts())
+    assert "dark_basemap" in _drawn(facts(vectors=1, active="vector"))
+
+
+def _transitions():
+    states = list(_states())
+    rng = random.Random(4)
+    for _ in range(400):
+        yield rng.choice(states), rng.choice(states)
+
+
+def test_adjust_never_shows_a_request_that_is_false_and_fills_the_places():
+    catalog = _by_key()
+    for index, (before, now) in enumerate(_transitions()):
+        rng = random.Random(index)
+        current = ex.pick("fr_FR", facts=before, rng=rng)
+        keys = ex.adjust("fr_FR", current, current, before, now, rng=rng)
+        assert len(keys) == ex.SHOWN == len(set(keys)), (before, now, current, keys)
+        assert all(set(catalog[key].needs) <= now.tokens() for key in keys), (now, keys)
+        assert sum(catalog[key].group == ex.PROJECT for key in keys) <= ex.MAX_PROJECT
+        # A request still true stays where it was, but for the one that makes room for what the change brings.
+        moved = [place for place, key in enumerate(current)
+                 if set(catalog[key].needs) <= now.tokens() and keys[place] != key]
+        assert len(moved) <= 1, (before, now, current, keys)
+
+
+def test_adjust_without_a_change_changes_nothing():
+    for state in list(_states())[:80]:
+        current = ex.pick("en_US", facts=state, rng=random.Random(2))
+        assert ex.adjust("en_US", current, current, state, state, rng=random.Random(3)) == current
+
+
+def test_a_selection_changes_one_request_and_keeps_the_others_in_place():
+    catalog = _by_key()
+    before, now = facts(vectors=2, active="vector"), facts(vectors=2, active="vector", selected=3)
+    for seed in range(200):
+        current = ex.pick("en_US", facts=before, rng=random.Random(seed))
+        keys = ex.adjust("en_US", current, current, before, now, rng=random.Random(seed))
+        assert any(set(catalog[key].needs) & {"selection", "local_selection"} for key in keys), (current, keys)
+        assert sum(a != b for a, b in zip(current, keys)) <= 2, (current, keys)  # one in, and at most one more out
+        assert sum(1 for key in keys if key in current) >= 2
+
+
+def test_a_selection_ended_removes_what_depended_on_it_and_nothing_else():
+    catalog = _by_key()
+    before, now = facts(vectors=2, active="vector", selected=3), facts(vectors=2, active="vector")
+    for seed in range(200):
+        current = ex.pick("en_US", facts=before, rng=random.Random(seed))
+        keys = ex.adjust("en_US", current, current, before, now, rng=random.Random(seed))
+        assert not any(set(catalog[key].needs) & {"selection", "local_selection"} for key in keys)
+        gone = [place for place, key in enumerate(current) if set(catalog[key].needs) & {"selection", "local_selection"}]
+        assert all(keys[place] == key for place, key in enumerate(current) if place not in gone), (current, keys)
+
+
+def test_the_neutral_requests_stay_when_the_project_becomes_known():
+    catalog = _by_key()
+    unknown, now = ex.Facts.unknown(), facts(vectors=1, active="vector")
+    for seed in range(100):
+        current = ex.pick("en_US", facts=unknown, rng=random.Random(seed))
+        keys = ex.adjust("en_US", current, current, unknown, now, rng=random.Random(seed))
+        assert sum(1 for key in keys if key in current) >= 2
+        assert any(catalog[key].group == ex.PROJECT for key in keys)
