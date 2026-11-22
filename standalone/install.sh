@@ -3,10 +3,10 @@
 #   curl -LsSf https://raw.githubusercontent.com/imagodata/filter_mate/main/standalone/install.sh | sh
 # Installs the `filtermate` command with pipx (installed first for this user when missing), then says
 # which QGIS it will run on. Nothing needs administrator rights. FILTERMATE_SOURCE changes what is
-# installed (a wheel, a branch: git+https://github.com/imagodata/filter_mate@<branch>).
+# installed (a wheel, the zip of another branch, git+https://...).
 set -eu
 
-SOURCE="${FILTERMATE_SOURCE:-git+https://github.com/imagodata/filter_mate}"
+SOURCE="${FILTERMATE_SOURCE:-https://github.com/imagodata/filter_mate/archive/refs/heads/main.zip}"  # the zip of main: no git needed
 
 PYTHON=""
 for candidate in python3 python; do

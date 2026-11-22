@@ -128,7 +128,7 @@ curl -LsSf https://raw.githubusercontent.com/imagodata/filter_mate/main/standalo
 # Windows (PowerShell)
 powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/imagodata/filter_mate/main/standalone/install.ps1 | iex"
 # or, with pip or pipx already there, in any Python 3.9+
-pipx install "git+https://github.com/imagodata/filter_mate"
+pipx install https://github.com/imagodata/filter_mate/archive/refs/heads/main.zip
 
 filtermate parcels.gpkg dem.tif
 ```

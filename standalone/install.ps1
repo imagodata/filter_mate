@@ -4,7 +4,7 @@
 # which QGIS it will run on. Nothing needs administrator rights. $env:FILTERMATE_SOURCE changes what is installed.
 # Not "Stop": Windows PowerShell 5 takes what a program writes on stderr for an error; exit codes are read instead.
 $ErrorActionPreference = "Continue"
-$source = if ($env:FILTERMATE_SOURCE) { $env:FILTERMATE_SOURCE } else { "git+https://github.com/imagodata/filter_mate" }
+$source = if ($env:FILTERMATE_SOURCE) { $env:FILTERMATE_SOURCE } else { "https://github.com/imagodata/filter_mate/archive/refs/heads/main.zip" }  # the zip of main: no git needed
 
 $python = $null
 foreach ($candidate in @(@("py", "-3"), @("python"), @("python3"))) {
