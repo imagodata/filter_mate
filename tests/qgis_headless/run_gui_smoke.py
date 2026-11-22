@@ -7971,6 +7971,28 @@ def s_stream_copy_check():
           tiles.providerType() == 'gdal' and 'copie_filtermate_local' in tiles.source(), tiles.source()[-80:])
     check('stream copy: the button stays, and now offers the way back',
           button.isVisible() and 'back to the service' in button.toolTip(), button.toolTip()[:120])
+    actions = importlib.import_module(f'{PACKAGE}.ui.controllers.stream_copy_actions').get()
+    mark = actions.mark_of(tiles.id()) if actions is not None else None
+    node = project.layerTreeRoot().findLayer(tiles.id())
+    shown = iface.layerTreeView().indicators(node) if node is not None else []
+    check('stream copy: the layer panel of QGIS marks the layer that reads its copy',
+          mark is not None and mark in shown and 'Local copy' in mark.toolTip(),
+          (mark, len(shown), mark and mark.toolTip()[:80]))
+    # Grouped, the layer has a new node of the layer tree (QGIS moves a node by making another): the mark follows.
+    root = project.layerTreeRoot()
+    old = root.findLayer(tiles.id())
+    group = root.addGroup('Copies locales')
+    group.addChildNode(old.clone())
+    old.parent().removeChildNode(old)
+    STREAM_COPY['group'] = group
+
+    def marked():
+        node = root.findLayer(tiles.id())
+        return node is not None and actions.mark_of(tiles.id()) in iface.layerTreeView().indicators(node)
+    followed = settles(marked, 3.0)
+    node = root.findLayer(tiles.id())
+    check('stream copy: the mark follows the layer moved into a group', followed,
+          node and [indicator.toolTip()[:30] for indicator in iface.layerTreeView().indicators(node)])
     dock().comboBox_filtering_current_layer.setLayer(layer('zones'))
     return switched_to('zones', coverage_page=False)
 
@@ -7982,7 +8004,12 @@ def s_stream_copy_end():
     actions = importlib.import_module(f'{PACKAGE}.ui.controllers.stream_copy_actions').get()
     check('stream copy: back to the service', actions.back_to_stream(tiles) and tiles.providerType() == 'wms',
           tiles.providerType())
+    node = project.layerTreeRoot().findLayer(tiles.id())
+    check('stream copy: back on its service, the layer has no mark in the layer panel',
+          actions.mark_of(tiles.id()) is None and not iface.layerTreeView().indicators(node))
     project.removeMapLayer(tiles.id())
+    if STREAM_COPY.get('group') is not None:
+        project.layerTreeRoot().removeChildNode(STREAM_COPY['group'])
     STREAM_COPY['server'].shutdown()
     return None
 

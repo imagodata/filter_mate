@@ -358,6 +358,16 @@ Do you agree?</source>
         <translation>ንብርብር ተጨምሯል: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>እንደገና ቅዳ፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>ወኪሉ ንብርብር {} እንደገና መቅዳት ይፈልጋል፦ ተመሳሳይ አካባቢ በተመሳሳይ ዝርዝር ከድር አገልግሎቱ እንደገና ይነበባል፤ አዲሱ ቅጂ የቀደመውን ይተካል። ይስማማሉ?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>ወደ አገልግሎቱ ተመለስ፦ {}</translation>
@@ -13269,6 +13279,11 @@ Folder: {6}</source>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}። ወደ አገልግሎቱ ለመመለስ ወይም የሚታየውን ካርታ እንደገና ለመቅዳት ጠቅ ያድርጉ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}። FilterMate ከድር አገልግሎቱ ይልቅ ይህን ፋይል ያነባል፦ ወደ አገልግሎቱ ለመመለስ የEXPLORING የቅጂ አዝራርን ወይም የንብርብሩን ምናሌ ጠቅ ያድርጉ።</translation>
     </message>
 </context>
 <context>

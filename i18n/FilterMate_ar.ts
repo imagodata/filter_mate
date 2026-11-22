@@ -358,6 +358,16 @@ Do you agree?</source>
         <translation>تمت إضافة الطبقة: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>نسخ مرة أخرى: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>يريد الوكيل نسخ الطبقة {} مرة أخرى: المنطقة نفسها بالتفصيل نفسه، تُقرأ من جديد من خدمة الويب الخاصة بها، وتحل النسخة الجديدة محل السابقة. هل توافق؟</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>العودة إلى الخدمة: {}</translation>
@@ -13269,6 +13279,11 @@ Folder: {6}</source>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}. انقر للعودة إلى الخدمة أو لنسخ الخريطة المرئية من جديد</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. يقرأ FilterMate هذا الملف بدلاً من خدمة الويب: انقر على زر النسخ في EXPLORING أو على قائمة الطبقة للعودة إلى الخدمة.</translation>
     </message>
 </context>
 <context>

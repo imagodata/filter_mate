@@ -309,15 +309,15 @@ class LocalCopyBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     layer: LayerName
-    action: Literal["copy", "back"] = "copy"
+    action: Literal["copy", "back", "again"] = "copy"
     extent_wkt: str = Field(default="", max_length=100_000, description="Area as WKT; empty: the visible map")
     crs: str = Field(default="", max_length=64, description="CRS of extent_wkt; empty: the CRS of the map")
 
 
 @router.post("/layers/local-copy", response_model=LocalCopyResult)
 def local_copy(payload: LocalCopyBody, request: Request) -> LocalCopyResult:
-    """Copy a web service layer over the visible map (or an area) to a file next to the project and read it, or
-    read its service again (action back)."""
+    """Copy a web service layer over the visible map (or an area) to a file next to the project and read it; read
+    its service again (action back); copy the area of its copy anew (action again)."""
     try:
         return _accessor(request).local_copy(payload.layer, action=payload.action, extent_wkt=payload.extent_wkt,
                                              crs=payload.crs)

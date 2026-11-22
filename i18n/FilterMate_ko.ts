@@ -358,6 +358,16 @@ Do you agree?</source>
         <translation>레이어 추가됨: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>다시 복사: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>에이전트가 레이어 {}을(를) 다시 복사하려고 합니다. 같은 영역을 같은 상세도로 웹 서비스에서 새로 읽어 오며, 새 복사본이 이전 복사본을 대체합니다. 동의하십니까?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>서비스로 돌아가기: {}</translation>
@@ -13269,6 +13279,11 @@ Folder: {6}</source>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}. 클릭하면 서비스로 돌아가거나 보이는 지도를 다시 복사합니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. FilterMate는 웹 서비스 대신 이 파일을 읽습니다. 서비스로 돌아가려면 EXPLORING의 복사 버튼이나 레이어 메뉴를 클릭하세요.</translation>
     </message>
 </context>
 <context>

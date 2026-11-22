@@ -1307,8 +1307,12 @@ class AgentChatController(QObject):
             left_out.add(POPULATION_TOOL)
         if KIND_GEOCODER not in kinds and KIND_GEOCODER not in configured_kinds.values():
             left_out.add(PLACE_TOOL)
-        if not _holds_web_service_layers():
-            left_out.add(COPY_TOOL)  # nothing to copy: it would only weigh on every request
+        if for_chat and not _holds_web_service_layers():
+            # Nothing to copy: it would only weigh on every request of the chat. Another application (the MCP server
+            # of the plugin, set up before a project is open) always has it.
+            left_out.add(COPY_TOOL)
+        if for_chat:
+            self._copy_offered = COPY_TOOL not in left_out  # else offered once a web service layer comes in
         if not databases or not for_chat:
             left_out.update((LIST_TABLES, ADD_TABLE))
         # the tools a setting brings after the others (lot 4 of the token diet: the start stays alike for the cache)
@@ -2233,6 +2237,19 @@ class AgentChatController(QObject):
         kept = start if hidden else tools
         return list(kept), dict(handlers, **{LOAD_SKILL: load_and_offer}), hidden or set()
 
+    def _offer_local_copy(self, values: AgentSettings) -> None:
+        """A layer of a web service came into the project during the conversation: local_copy is offered from this
+        request on (left out at its start, when there was nothing to copy). Its handler is there already."""
+        if getattr(self, '_copy_offered', True) or self._engine is None:
+            return
+        if (values.rules.get(COPY_TOOL) == RULE_NEVER or self.local_filtering(values)
+                or not _holds_web_service_layers()):
+            return
+        spec = self._tools.get(COPY_TOOL)
+        if spec is not None:
+            self._engine.offer_tools([spec])
+            self._copy_offered = True
+
     def _build_engine(self) -> Optional[ChatEngine]:
         """A conversation from the settings; None, after saying why, when they are not complete."""
         values = load_settings()
@@ -2283,6 +2300,10 @@ class AgentChatController(QObject):
             for name in names:
                 if name in by_name:
                     later[name] = by_name[name]
+        if COPY_TOOL in names and COPY_TOOL not in by_name:
+            # Offered during the conversation (_offer_local_copy), not from its start: offered again by the next
+            # request, use_tools does not know it.
+            self._copy_offered = False
 
     @staticmethod
     def _chat_owned(handlers) -> dict:
@@ -2537,6 +2558,7 @@ class AgentChatController(QObject):
                 self._building = False
         if self._engine is None:
             return
+        self._offer_local_copy(values)
         self._last_request = text
         self._request_calls = []
         self._exploring_offered = False
@@ -2868,6 +2890,7 @@ class AgentChatController(QObject):
             "duplicate_layer": lambda: _tr("Layer added: {}").format(
                 one_line(str(args.get("name") or ""), 100) or "{} (copy)".format(layer)),
             "local_copy": lambda: (_tr("Back to the service: {}") if args.get("action") == "back"
+                                   else _tr("Copy again: {}") if args.get("action") == "again"
                                    else _tr("Local copy: {}")).format(layer),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
@@ -3230,6 +3253,9 @@ class AgentChatController(QObject):
         if arguments.get("action") == "back":
             return _tr("The agent wants the layer {} to read its web service again (its local copy stays on disk). "
                        "Do you agree?").format(shown)
+        if arguments.get("action") == "again":
+            return _tr("The agent wants to copy the layer {} again: the same area at the same detail, read anew from its "
+                       "web service; the new copy replaces the previous one. Do you agree?").format(shown)
         detail = ""
         if found is not None:
             try:

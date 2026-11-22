@@ -358,6 +358,16 @@ Hi esteu d'acord?</translation>
         <translation>Capa afegida: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>Copia de nou: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>L'agent vol copiar de nou la capa {}: la mateixa zona amb el mateix detall, llegida de nou del seu servei web; la còpia nova substitueix l'anterior. Hi estàs d'acord?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>Torna al servei: {}</translation>
@@ -13269,6 +13279,11 @@ Carpeta: {6}</translation>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}. Fes clic per tornar al servei o copiar de nou el mapa visible</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. FilterMate llegeix aquest fitxer en lloc del servei web: feu clic al botó de còpia d'EXPLORING, o al menú de la capa, per tornar al servei.</translation>
     </message>
 </context>
 <context>

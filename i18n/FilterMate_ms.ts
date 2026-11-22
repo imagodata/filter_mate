@@ -358,6 +358,16 @@ Adakah anda bersetuju?</translation>
         <translation>Lapisan ditambah: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>Salin semula: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>Ejen mahu menyalin semula lapisan {}: kawasan yang sama pada tahap perincian yang sama, dibaca semula daripada perkhidmatan webnya; salinan baharu menggantikan salinan sebelumnya. Adakah anda bersetuju?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>Kembali ke perkhidmatan: {}</translation>
@@ -13269,6 +13279,11 @@ Folder: {6}</translation>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}. Klik untuk kembali ke perkhidmatan atau menyalin semula peta yang kelihatan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. FilterMate membaca fail ini sebagai ganti perkhidmatan web: klik butang salin EXPLORING, atau menu lapisan, untuk kembali ke perkhidmatan.</translation>
     </message>
 </context>
 <context>

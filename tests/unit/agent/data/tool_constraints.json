@@ -1675,7 +1675,8 @@
     "default": "copy",
     "enum": [
      "copy",
-     "back"
+     "back",
+     "again"
     ],
     "type": "string"
    },

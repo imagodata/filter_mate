@@ -14,7 +14,7 @@ from typing import Any, Dict
 from ..agent.bounded_http import on_abort
 from .operations import busy_reason, resolve_layer, running
 
-ACTIONS = ('copy', 'back')
+ACTIONS = ('copy', 'back', 'again')
 
 
 def _actions():
@@ -69,8 +69,9 @@ def plan_for(layer, extent_wkt: str = '', crs: str = ''):
 
 
 def local_copy(layer: str, action: str = 'copy', extent_wkt: str = '', crs: str = '') -> Dict[str, Any]:
-    """Copy ``layer`` (a web service) over the visible map, or ``extent_wkt``, and make it read the copy; or with
-    ``action`` back, make it read its service again (the file stays).
+    """Copy ``layer`` (a web service) over the visible map, or ``extent_wkt``, and make it read the copy; with
+    ``action`` back, make it read its service again (the file stays); with ``action`` again, copy the area of its
+    copy anew at the same detail (the previous file replaced; read again when the new copy is not made).
 
     Raises:
         ValueError: An unknown layer, a layer that is no web service, a copy refused (terms of the server, nothing
@@ -83,6 +84,8 @@ def local_copy(layer: str, action: str = 'copy', extent_wkt: str = '', crs: str 
     found = resolve_layer(layer)
     if found is None:
         raise ValueError(f"layer {layer!r} not found")
+    if action != 'copy' and (extent_wkt or '').strip():
+        raise ValueError(f"extent_wkt is for action copy: action {action} keeps the area of the copy")
     actions = _actions()
     if action == 'back':
         try:
@@ -91,19 +94,29 @@ def local_copy(layer: str, action: str = 'copy', extent_wkt: str = '', crs: str 
             raise ValueError(str(exc)) from None
         actions._changed(found.id())
         return _answer(found, None, notes)
-    if stream_copy.is_local_copy(found):
-        raise ValueError(f"'{found.name()}' already reads its local copy: call local_copy with action back first to "
-                         "copy it again")
     busy = busy_reason()
     if busy:
         raise ValueError(busy)
-    plan = plan_for(found, extent_wkt, crs)
+    previous = None
+    if action == 'again':
+        if not stream_copy.is_local_copy(found):
+            raise ValueError(f"'{found.name()}' does not read a local copy: call local_copy with action copy")
+        try:
+            plan, previous = stream_copy.recopy_plan(found)  # on its service now, or on its copy again if refused
+        except RuntimeError as exc:
+            raise ValueError(str(exc)) from None
+        actions._changed(found.id())
+    elif stream_copy.is_local_copy(found):
+        raise ValueError(f"'{found.name()}' already reads its local copy: call local_copy with action again to copy "
+                         "the same area anew, or back to read its service")
+    else:
+        plan = plan_for(found, extent_wkt, crs)
     if plan.refusal:
         raise ValueError(plan.refusal)
     from qgis.PyQt.QtCore import QEventLoop, QTimer
     done = []
     with running('local_copy'):
-        refusal = actions.copy(found, confirm=False, plan=plan, on_done=done.append)
+        refusal = actions.copy(found, confirm=False, plan=plan, on_done=done.append, restore=previous)
         if refusal:
             raise ValueError(refusal)
         found_id = found.id()

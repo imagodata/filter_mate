@@ -42,6 +42,7 @@ class StreamCopyActions:
         self._tasks: Dict[str, object] = {}  # layer id -> copy under way
         self._action = None
         self._listeners: List[Callable[[str], None]] = []  # told the id of a layer whose copy state changed
+        self._marks: Dict[str, tuple] = {}  # layer id -> (node of the layer tree, indicator shown on it)
 
     # --- lifecycle --------------------------------------------------------------------------------------------
 
@@ -54,6 +55,20 @@ class StreamCopyActions:
             stream_copy.reattach_project()
         except Exception as exc:
             logger.debug(f"FilterMate local copies not read again at start: {exc}")
+        from qgis.core import QgsProject
+        project = QgsProject.instance()
+        # After the copies are found again (readProject of stream_copy runs first: connected before), and when a
+        # layer comes in (a copy duplicated, a layer definition pasted).
+        project.readProject.connect(self._refresh_marks_later)
+        project.layersAdded.connect(self._refresh_marks_later)
+        # A node moved or grouped is a new node of the layer tree, without the mark of the old one; and the old one
+        # goes after the new one came (the dock may let the events run between the two: a refresh then marks the
+        # old node, which is removed just after).
+        root = project.layerTreeRoot()
+        root.addedChildren.connect(self._refresh_marks_later)
+        root.removedChildren.connect(self._refresh_marks_later)
+        self._stopped = False
+        self.refresh_marks()
 
     def stop(self) -> None:
         """The copies under way end; the layers on their copy read their service, their record kept: a project
@@ -82,6 +97,14 @@ class StreamCopyActions:
             except Exception as exc:  # edits under way, a filter of another layer: it stays on its copy
                 logger.info(f"FilterMate local copy of a layer left as it is at unload: {exc}")
         self._remove_layer_menu_action()
+        self._stopped = True  # a refresh already queued does nothing
+        root = project.layerTreeRoot()
+        for signal in (project.readProject, project.layersAdded, root.addedChildren, root.removedChildren):
+            try:
+                signal.disconnect(self._refresh_marks_later)
+            except (TypeError, RuntimeError):
+                pass
+        self._clear_marks()
         stream_copy.uninstall()
         if _INSTANCE[0] is self:
             _INSTANCE[0] = None
@@ -93,11 +116,80 @@ class StreamCopyActions:
             self._listeners.append(listener)
 
     def _changed(self, layer_id: str) -> None:
+        self.refresh_marks()
         for listener in list(self._listeners):
             try:
                 listener(layer_id)
             except Exception as exc:
                 logger.debug(f"FilterMate local copy listener failed: {exc}")
+
+    # --- the mark in the layer tree ----------------------------------------------------------------------------
+
+    def _refresh_marks_later(self, *_args) -> None:
+        try:
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(0, self.refresh_marks)
+        except Exception:
+            self.refresh_marks()
+
+    def refresh_marks(self) -> None:
+        """An indicator on every layer that reads its local copy, in the layer tree of QGIS: the icon of the copy, its
+        date and state in its tooltip (a copy is never taken for the live service). Others lose theirs."""
+        view = self._tree_view()
+        if view is None or getattr(self, '_stopped', False):
+            return
+        from qgis.core import QgsProject
+        from ...adapters.qgis import stream_copy
+        try:
+            from qgis.gui import QgsLayerTreeViewIndicator
+        except ImportError:  # no layer tree view to mark
+            return
+        self._clear_marks(view)
+        root = QgsProject.instance().layerTreeRoot()
+        for layer in list(QgsProject.instance().mapLayers().values()):
+            try:
+                record = stream_copy.record_of(layer)
+                node = root.findLayer(layer.id()) if record is not None else None
+            except RuntimeError:
+                continue
+            if node is None:
+                continue
+            try:
+                indicator = QgsLayerTreeViewIndicator(view)
+                indicator.setIcon(_mark_icon())
+                indicator.setToolTip(_tr("{0}. FilterMate reads this file in place of the web service: click the copy "
+                                         "button of EXPLORING, or the menu of the layer, to go back.").format(
+                    stream_copy.copy_text(record)))
+                view.addIndicator(node, indicator)
+                self._marks[layer.id()] = (node, indicator)
+            except Exception as exc:  # one layer without its mark: the others keep theirs, the copy works the same
+                logger.debug(f"FilterMate local copy mark not shown: {exc}")
+                continue
+
+    def _clear_marks(self, view=None) -> None:
+        view = view or self._tree_view()
+        for node, indicator in list(self._marks.values()):
+            try:
+                if view is not None:
+                    view.removeIndicator(node, indicator)
+            except (RuntimeError, AttributeError, TypeError):
+                pass  # the node went with its layer
+            try:
+                indicator.deleteLater()  # a child of the view: removeIndicator does not delete it
+            except (RuntimeError, AttributeError):
+                pass
+        self._marks.clear()
+
+    def _tree_view(self):
+        try:
+            return self.iface.layerTreeView() if self.iface is not None else None
+        except (AttributeError, RuntimeError):
+            return None
+
+    def mark_of(self, layer_id: str):
+        """The indicator shown on a layer that reads its copy; None for another (checks)."""
+        entry = self._marks.get(layer_id)
+        return entry[1] if entry is not None else None
 
     # --- what a layer offers ------------------------------------------------------------------------------------
 
@@ -371,6 +463,27 @@ class StreamCopyActions:
             layer = None
         if layer is not None:
             self.trigger(layer)
+
+
+_MARK_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" '
+             'stroke="#2f7d6d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+             '<path d="M12 3v11M7.5 9.5L12 14l4.5-4.5"/><path d="M4 15v4.5h16V15"/></svg>')
+_ICON = []
+
+
+def _mark_icon():
+    """The icon of the copy (the tray of the button of the rail), drawn once."""
+    if not _ICON:
+        from qgis.PyQt.QtCore import QByteArray, Qt
+        from qgis.PyQt.QtGui import QIcon, QPainter, QPixmap
+        from qgis.PyQt.QtSvg import QSvgRenderer
+        pixmap = QPixmap(32, 32)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        QSvgRenderer(QByteArray(_MARK_SVG.encode('utf-8'))).render(painter)
+        painter.end()
+        _ICON.append(QIcon(pixmap))
+    return _ICON[0]
 
 
 def _was_a_stream(layer) -> bool:

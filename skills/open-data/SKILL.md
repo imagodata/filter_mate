@@ -103,7 +103,8 @@ Satellite imagery.
 local_copy copies a WFS, WMS, WMTS or XYZ layer over the visible map (or the extent_wkt of find_place) to a file next
 to the project; the layer then reads it, with its style and filter: faster, and without the network. A web map
 becomes a still image (zooming in shows no more detail). Use it when the user asks to work offline, to keep the data
-of a day, or when a service is slow; action back makes the layer read its service again. OpenStreetMap and Google
+of a day, or when a service is slow; action back makes the layer read its service again (its file stays), action
+again copies the same area anew and replaces the previous file. OpenStreetMap and Google
 tiles are refused: their terms forbid keeping them. Say when the copy is not complete (notes).
 
 ## Removing layers

@@ -358,6 +358,16 @@ Czy wyraża Pan/Pani zgodę?</translation>
         <translation>Dodano warstwę: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2886"/>
+        <source>Copy again: {}</source>
+        <translation>Kopiuj ponownie: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3250"/>
+        <source>The agent wants to copy the layer {} again: the same area at the same detail, read anew from its web service; the new copy replaces the previous one. Do you agree?</source>
+        <translation>Agent chce ponownie skopiować warstwę {}: ten sam obszar z tą samą szczegółowością, odczytany na nowo z jej usługi sieciowej; nowa kopia zastąpi poprzednią. Czy się zgadzasz?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
         <source>Back to the service: {}</source>
         <translation>Powrót do usługi: {}</translation>
@@ -13269,6 +13279,11 @@ Folder: {6}</translation>
         <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
         <source>{0}. Click to go back to the service or to copy the visible map again</source>
         <translation>{0}. Kliknij, aby wrócić do usługi lub skopiować widoczną mapę ponownie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="148"/>
+        <source>{0}. FilterMate reads this file in place of the web service: click the copy button of EXPLORING, or the menu of the layer, to go back.</source>
+        <translation>{0}. FilterMate odczytuje ten plik zamiast usługi sieciowej: kliknij przycisk kopiowania w EXPLORING lub menu warstwy, aby wrócić do usługi.</translation>
     </message>
 </context>
 <context>

@@ -1110,9 +1110,9 @@ def build_server(client: FilterMateClient) -> Any:
     async def local_copy(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description=(
             "Layer id or name of a web service: WFS, OGC API Features, WMS, WMTS or XYZ tiles"))],
-        action: Annotated[Literal["copy", "back"], Field(description=(
+        action: Annotated[Literal["copy", "back", "again"], Field(description=(
             "copy: read the service over the area into a file the layer then reads; back: the layer reads its "
-            "service again"))] = "copy",
+            "service again (the file stays); again: copy the area of its copy anew, the old file replaced"))] = "copy",
         extent_wkt: Annotated[str, Field(max_length=100_000, description=(
             "The area as WKT (the extent_wkt of find_place or map_context). Empty: the visible map"))] = "",
         crs: Annotated[str, Field(max_length=64, description=(

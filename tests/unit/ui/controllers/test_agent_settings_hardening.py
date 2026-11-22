@@ -210,7 +210,10 @@ class TestTheMcpServerTakesEveryTool:
         other = {tool.name for tool in tools_and_handlers(_Host(), values, for_chat=False)[0]}
         assert chat < other and "change_settings" in other and "change_settings" not in chat
         values.local_filtering_only = False
-        assert {tool.name for tool in tools_and_handlers(_Host(), values)[0]} == other
+        # local_copy: the chat gets it when the project holds a web service layer (none here), another application
+        # always (its tools are set up before a project is open).
+        assert {tool.name for tool in tools_and_handlers(_Host(), values)[0]} == other - {"local_copy"}
+        assert "local_copy" in other
 
     def test_the_server_asks_the_tools_for_another_application(self, monkeypatch):
         """2026-11-13: "only the tools that filter", a choice for a small model in the chat, took the settings,
