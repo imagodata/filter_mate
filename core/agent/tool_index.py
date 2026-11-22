@@ -46,7 +46,7 @@ SUMMARIES = {
     "set_project_crs": "Set the project CRS",
     "find_place": "Find a place by name or address",
     # styles and layouts
-    "set_layer_style": "Style a layer: colors, classes, rules, ramp, relief",
+    "set_layer_style": "Style a layer: colors, classes, heatmap, sizes, relief",
     "set_labels": "Label features, or remove labels",
     "create_layout": "A print layout",
     "export_layout": "A print layout to PDF or PNG",

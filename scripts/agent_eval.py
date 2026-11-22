@@ -242,6 +242,13 @@ class SimulatedProject:
             elif args["mode"] in raster_modes:
                 answer = {"layer_name": name, "mode": args["mode"], "band": 1, "minimum": 162.0, "maximum": 548.0,
                           "ramp": args.get("ramp") or "Spectral"}
+            elif args["mode"] in ("heatmap", "point_cluster", "point_displacement"):
+                # As QGIS: for a layer of points, and the project holds none.
+                raise ToolFailure(f"the mode {args['mode']} is for a layer of points: '{name}' has none")
+            elif args["mode"] in ("proportional", "dot_density", "2.5d"):
+                answer = {"layer_name": name, "mode": args["mode"], "field": args.get("field", "")}
+                if args["mode"] == "dot_density":
+                    answer["per_dot"] = args.get("per_dot") or 5000
             else:
                 answer = {"layer_name": name, "mode": args["mode"], "field": args.get("field", ""),
                           "classes": args.get("classes", 5) if args["mode"] == "graduated" else 3}

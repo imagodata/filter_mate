@@ -520,10 +520,11 @@ class QGISFilterMateAccessor:
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
                    color: str = "", buffer: bool = True, expression: str = "",
-                   visible_from_scale: Optional[float] = None, placement: str = "auto") -> LabelsResult:
+                   visible_from_scale: Optional[float] = None, placement: str = "auto",
+                   **options: Any) -> LabelsResult:
         return LabelsResult(**self._style("set_labels", layer, field=field, enabled=enabled, size=size, color=color,
                                           buffer=buffer, expression=expression, visible_from_scale=visible_from_scale,
-                                          placement=placement))
+                                          placement=placement, **options))
 
     @staticmethod
     def _layouts(name: str, *args, **kwargs):
