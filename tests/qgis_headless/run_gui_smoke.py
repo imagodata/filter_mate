@@ -6293,6 +6293,8 @@ def s_sizing_separator_dragged():
     window.splitDockWidget(d, layers, Qt.Orientation.Horizontal)  # Layers beside the dock, the same top
     pump(900)
     panels.detach('filtering')
+    # Below the dock, at once: a place kept beside it by an earlier step would give its width back to the dock (Qt)
+    window.splitDockWidget(d, panels.panel('filtering'), Qt.Orientation.Vertical)
     pump(1200)
     window.resizeDocks([d], [d.width() + 150], Qt.Orientation.Horizontal)  # the user drags the edge of the area
     pump(600)
