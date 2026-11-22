@@ -4,6 +4,11 @@ SOURCES = \
     ../filter_mate.py \
     ../filter_mate_app.py \
     ../filter_mate_dockwidget.py \
+    ../standalone/host/attribute_table.py \
+    ../standalone/host/map_tools.py \
+    ../standalone/host/qt.py \
+    ../standalone/host/sources.py \
+    ../standalone/host/window.py \
     ../adapters/database_manager.py \
     ../adapters/filter_result_handler.py \
     ../adapters/layer_refresh_manager.py \

@@ -7292,6 +7292,349 @@ Aniqlangan joy: {1}</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateStandalone</name>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="47"/>
+        <source>{0}: attributes</source>
+        <translation>{0}: atributlar</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="49"/>
+        <source>{0} features</source>
+        <translation>{0} ta obyekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="51"/>
+        <source>, {0} selected</source>
+        <translation>, {0} ta tanlangan</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="53"/>
+        <source> (filtered)</source>
+        <translation> (filtrlangan)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="49"/>
+        <source>Choose a vector layer in the layer panel first.</source>
+        <translation>Avval qatlamlar panelida vektor qatlamni tanlang.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="209"/>
+        <source>Nothing here.</source>
+        <translation>Bu yerda hech narsa yo'q.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="90"/>
+        <source>{0} could not be opened: {1}</source>
+        <translation>{0} ni ochib bo'lmadi: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="118"/>
+        <source>{0} could not be opened.</source>
+        <translation>{0} ni ochib bo'lmadi.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="188"/>
+        <source>The OpenStreetMap tiles could not be reached.</source>
+        <translation>OpenStreetMap plitalariga ulanib bo'lmadi.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="275"/>
+        <source>Add layers</source>
+        <translation>Qatlam qo'shish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="314"/>
+        <source>This source is not available here: {0}</source>
+        <translation>Bu manba bu yerda mavjud emas: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="316"/>
+        <source>This source is not available here.</source>
+        <translation>Bu manba bu yerda mavjud emas.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="343"/>
+        <source>Layers of {0}</source>
+        <translation>{0} qatlamlari</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="176"/>
+        <source>Layers</source>
+        <translation>Qatlamlar</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="195"/>
+        <source>&amp;New project</source>
+        <translation>&amp;Yangi loyiha</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="196"/>
+        <source>&amp;Open project...</source>
+        <translation>Loyihani &amp;ochish...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="197"/>
+        <source>&amp;Save project</source>
+        <translation>Loyihani &amp;saqlash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="198"/>
+        <source>Save project &amp;as...</source>
+        <translation>Loyihani &amp;boshqacha saqlash...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="200"/>
+        <source>&amp;Add layers...</source>
+        <translation>Qatlam &amp;qo'shish...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="201"/>
+        <source>Add &amp;files...</source>
+        <translation>&amp;Fayl qo'shish...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="202"/>
+        <source>Add the OpenStreetMap &amp;basemap</source>
+        <translation>OpenStreetMap &amp;asos xaritasini qo'shish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="203"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Chiqish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="205"/>
+        <source>Pan</source>
+        <translation>Surish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="206"/>
+        <source>Zoom in</source>
+        <translation>Yaqinlashtirish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="207"/>
+        <source>Zoom out</source>
+        <translation>Uzoqlashtirish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="208"/>
+        <source>Zoom to everything</source>
+        <translation>Hammasiga masshtablash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="209"/>
+        <source>Zoom to the layer</source>
+        <translation>Qatlamga masshtablash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="210"/>
+        <source>Zoom to the selection</source>
+        <translation>Tanlovga masshtablash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Qatlam tahrirlarini saqlash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>{0} ta qatlam tahrirlari saqlansinmi?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>{0} tahrirlarini saqlab bo'lmadi: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} allaqachon mavjud. Almashtirilsinmi?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>{0} ta vazifa hali bajarilmoqda. To'xtatib chiqilsinmi?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="211"/>
+        <source>Refresh</source>
+        <translation>Yangilash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="212"/>
+        <source>Select features</source>
+        <translation>Obyektlarni tanlash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="213"/>
+        <source>Select features: click or drag (Shift adds, Ctrl removes)</source>
+        <translation>Obyektlarni tanlash: bosing yoki torting (Shift qo'shadi, Ctrl olib tashlaydi)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="214"/>
+        <source>Select by polygon</source>
+        <translation>Poligon bilan tanlash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="215"/>
+        <source>Select by polygon: left clicks draw, a right click ends</source>
+        <translation>Poligon bilan tanlash: chap bosishlar chizadi, o'ng bosish tugatadi</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="216"/>
+        <source>Deselect all</source>
+        <translation>Barcha tanlovni bekor qilish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="217"/>
+        <source>Identify</source>
+        <translation>Aniqlash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="218"/>
+        <source>Open the attribute table</source>
+        <translation>Atributlar jadvalini ochish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="219"/>
+        <source>Layer properties...</source>
+        <translation>Qatlam xossalari...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>About FilterMate</source>
+        <translation>FilterMate haqida</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="235"/>
+        <source>Project</source>
+        <translation>Loyiha</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="237"/>
+        <source>Map</source>
+        <translation>Xarita</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="240"/>
+        <source>Plugins</source>
+        <translation>Plaginlar</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="259"/>
+        <source>Log messages</source>
+        <translation>Jurnal xabarlari</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="279"/>
+        <source>&amp;Project</source>
+        <translation>&amp;Loyiha</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="284"/>
+        <source>&amp;Layer</source>
+        <translation>&amp;Qatlam</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="289"/>
+        <source>&amp;View</source>
+        <translation>&amp;Ko'rinish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="295"/>
+        <source>Panels</source>
+        <translation>Panellar</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="298"/>
+        <source>Browser</source>
+        <translation>Brauzer</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="303"/>
+        <source>Toolbars</source>
+        <translation>Asboblar panellari</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="308"/>
+        <source>&amp;Help</source>
+        <translation>&amp;Yordam</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="325"/>
+        <source>Coordinate reference system of the map</source>
+        <translation>Xaritaning koordinatalar tizimi</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="442"/>
+        <source>Save the changes to the project?</source>
+        <translation>Loyihadagi o'zgarishlar saqlansinmi?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="462"/>
+        <source>Open a project</source>
+        <translation>Loyihani ochish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="469"/>
+        <source>{0} does not exist.</source>
+        <translation>{0} mavjud emas.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="479"/>
+        <source>The project could not be read: {0}</source>
+        <translation>Loyihani o'qib bo'lmadi: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="494"/>
+        <source>Save the project</source>
+        <translation>Loyihani saqlash</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="500"/>
+        <source>The project could not be saved: {0}</source>
+        <translation>Loyihani saqlab bo'lmadi: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="507"/>
+        <source>Add files</source>
+        <translation>Fayl qo'shish</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="559"/>
+        <source>P&amp;lugins</source>
+        <translation>&amp;Plaginlar</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="625"/>
+        <source>This kind of layer has no properties window here.</source>
+        <translation>Bu turdagi qatlamning bu yerda xossalar oynasi yo'q.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="629"/>
+        <source>The properties could not be opened: {0}</source>
+        <translation>Xossalarni ochib bo'lmadi: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="655"/>
+        <source>The browser could not be opened: {0}</source>
+        <translation>Brauzerni ochib bo'lmadi: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="666"/>
+        <source>Standalone application: the FilterMate dock on the QGIS libraries.</source>
+        <translation>Mustaqil ilova: QGIS kutubxonalari ustidagi FilterMate paneli.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="681"/>
+        <source>No CRS</source>
+        <translation>Koordinatalar tizimi yo'q</translation>
+    </message>
+</context>
+<context>
     <name>FilterResultHandler</name>
     <message>
         <location filename="../adapters/filter_result_handler.py" line="347"/>

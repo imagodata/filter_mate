@@ -7292,6 +7292,349 @@ Löst från: {1}</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateStandalone</name>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="47"/>
+        <source>{0}: attributes</source>
+        <translation>{0}: attribut</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="49"/>
+        <source>{0} features</source>
+        <translation>{0} objekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="51"/>
+        <source>, {0} selected</source>
+        <translation>, {0} valda</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="53"/>
+        <source> (filtered)</source>
+        <translation> (filtrerat)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="49"/>
+        <source>Choose a vector layer in the layer panel first.</source>
+        <translation>Välj först ett vektorlager i lagerpanelen.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="209"/>
+        <source>Nothing here.</source>
+        <translation>Här finns inget.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="90"/>
+        <source>{0} could not be opened: {1}</source>
+        <translation>{0} kunde inte öppnas: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="118"/>
+        <source>{0} could not be opened.</source>
+        <translation>{0} kunde inte öppnas.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="188"/>
+        <source>The OpenStreetMap tiles could not be reached.</source>
+        <translation>OpenStreetMap-plattorna kunde inte nås.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="275"/>
+        <source>Add layers</source>
+        <translation>Lägg till lager</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="314"/>
+        <source>This source is not available here: {0}</source>
+        <translation>Den här källan är inte tillgänglig här: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="316"/>
+        <source>This source is not available here.</source>
+        <translation>Den här källan är inte tillgänglig här.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="343"/>
+        <source>Layers of {0}</source>
+        <translation>Lager i {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="176"/>
+        <source>Layers</source>
+        <translation>Lager</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="195"/>
+        <source>&amp;New project</source>
+        <translation>&amp;Nytt projekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="196"/>
+        <source>&amp;Open project...</source>
+        <translation>&amp;Öppna projekt...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="197"/>
+        <source>&amp;Save project</source>
+        <translation>&amp;Spara projekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="198"/>
+        <source>Save project &amp;as...</source>
+        <translation>Spara projekt s&amp;om...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="200"/>
+        <source>&amp;Add layers...</source>
+        <translation>Lägg till &amp;lager...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="201"/>
+        <source>Add &amp;files...</source>
+        <translation>Lägg till &amp;filer...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="202"/>
+        <source>Add the OpenStreetMap &amp;basemap</source>
+        <translation>Lägg till OpenStreetMap-&amp;bakgrundskarta</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="203"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Avsluta</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="205"/>
+        <source>Pan</source>
+        <translation>Panorera</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="206"/>
+        <source>Zoom in</source>
+        <translation>Zooma in</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="207"/>
+        <source>Zoom out</source>
+        <translation>Zooma ut</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="208"/>
+        <source>Zoom to everything</source>
+        <translation>Zooma till allt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="209"/>
+        <source>Zoom to the layer</source>
+        <translation>Zooma till lagret</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="210"/>
+        <source>Zoom to the selection</source>
+        <translation>Zooma till urvalet</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Spara lagerredigeringar</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>Spara redigeringarna i {0} lager?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>Redigeringarna i {0} kunde inte sparas: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} finns redan. Ersätta den?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>{0} uppgifter körs fortfarande. Stoppa dem och avsluta?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="211"/>
+        <source>Refresh</source>
+        <translation>Uppdatera</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="212"/>
+        <source>Select features</source>
+        <translation>Välj objekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="213"/>
+        <source>Select features: click or drag (Shift adds, Ctrl removes)</source>
+        <translation>Välj objekt: klicka eller dra (Skift lägger till, Ctrl tar bort)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="214"/>
+        <source>Select by polygon</source>
+        <translation>Välj med polygon</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="215"/>
+        <source>Select by polygon: left clicks draw, a right click ends</source>
+        <translation>Välj med polygon: vänsterklick ritar, ett högerklick avslutar</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="216"/>
+        <source>Deselect all</source>
+        <translation>Avmarkera alla</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="217"/>
+        <source>Identify</source>
+        <translation>Identifiera</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="218"/>
+        <source>Open the attribute table</source>
+        <translation>Öppna attributtabellen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="219"/>
+        <source>Layer properties...</source>
+        <translation>Lageregenskaper...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>About FilterMate</source>
+        <translation>Om FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="235"/>
+        <source>Project</source>
+        <translation>Projekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="237"/>
+        <source>Map</source>
+        <translation>Karta</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="240"/>
+        <source>Plugins</source>
+        <translation>Tillägg</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="259"/>
+        <source>Log messages</source>
+        <translation>Loggmeddelanden</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="279"/>
+        <source>&amp;Project</source>
+        <translation>&amp;Projekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="284"/>
+        <source>&amp;Layer</source>
+        <translation>&amp;Lager</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="289"/>
+        <source>&amp;View</source>
+        <translation>&amp;Visa</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="295"/>
+        <source>Panels</source>
+        <translation>Paneler</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="298"/>
+        <source>Browser</source>
+        <translation>Bläddrare</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="303"/>
+        <source>Toolbars</source>
+        <translation>Verktygsfält</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="308"/>
+        <source>&amp;Help</source>
+        <translation>&amp;Hjälp</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="325"/>
+        <source>Coordinate reference system of the map</source>
+        <translation>Kartans koordinatreferenssystem</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="442"/>
+        <source>Save the changes to the project?</source>
+        <translation>Spara ändringarna i projektet?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="462"/>
+        <source>Open a project</source>
+        <translation>Öppna ett projekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="469"/>
+        <source>{0} does not exist.</source>
+        <translation>{0} finns inte.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="479"/>
+        <source>The project could not be read: {0}</source>
+        <translation>Projektet kunde inte läsas: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="494"/>
+        <source>Save the project</source>
+        <translation>Spara projektet</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="500"/>
+        <source>The project could not be saved: {0}</source>
+        <translation>Projektet kunde inte sparas: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="507"/>
+        <source>Add files</source>
+        <translation>Lägg till filer</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="559"/>
+        <source>P&amp;lugins</source>
+        <translation>&amp;Tillägg</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="625"/>
+        <source>This kind of layer has no properties window here.</source>
+        <translation>Den här typen av lager har inget egenskapsfönster här.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="629"/>
+        <source>The properties could not be opened: {0}</source>
+        <translation>Egenskaperna kunde inte öppnas: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="655"/>
+        <source>The browser could not be opened: {0}</source>
+        <translation>Bläddraren kunde inte öppnas: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="666"/>
+        <source>Standalone application: the FilterMate dock on the QGIS libraries.</source>
+        <translation>Fristående program: FilterMate-panelen på QGIS-biblioteken.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="681"/>
+        <source>No CRS</source>
+        <translation>Inget CRS</translation>
+    </message>
+</context>
+<context>
     <name>FilterResultHandler</name>
     <message>
         <location filename="../adapters/filter_result_handler.py" line="347"/>

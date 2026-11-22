@@ -1,0 +1,133 @@
+# The pip package of FilterMate: the plugin, importable as `filter_mate`, and the `filtermate`
+# command that starts it as an application of its own (see standalone/ and docs/STANDALONE.md).
+#
+# The repository root *is* the plugin folder, so every path below is put under `filter_mate/`
+# in the wheel. The QGIS plugin zip is built by scripts/prepare_plugin_zip.sh and ships neither
+# this file nor standalone/.
+
+[build-system]
+requires = ["hatchling>=1.27"]  # license-files as a list (PEP 639)
+build-backend = "hatchling.build"
+
+[project]
+name = "filtermate"
+dynamic = ["version"]
+description = "FilterMate as an application of its own: explore, filter and export vector, raster and point-cloud layers. The dock of the QGIS plugin, a map and the QGIS libraries, without the QGIS application."
+readme = "standalone/README.md"
+requires-python = ">=3.9"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [{ name = "imagodata" }]
+keywords = ["gis", "qgis", "filter", "postgis", "geopackage", "raster", "lidar"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: Science/Research",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+# None: the launcher is standard library only, and the QGIS libraries are not on PyPI. It finds
+# them in a QGIS install or installs a runtime of its own (`filtermate setup`).
+dependencies = []
+
+[project.urls]
+Homepage = "https://imagodata.github.io/filter_mate/"
+Repository = "https://github.com/imagodata/filter_mate"
+Issues = "https://github.com/imagodata/filter_mate/issues"
+Changelog = "https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md"
+
+[project.scripts]
+filtermate = "filter_mate.standalone.cli:main"
+
+[tool.hatch.version]
+path = "metadata.txt"
+pattern = "^version=(?P<version>[^\\s]+)"
+
+[tool.hatch.build]
+# Not .gitignore: its `memory/` rule (for agent notes) matches adapters/backends/memory/, which
+# is tracked, and the wheel lost that module. What goes in is listed here instead, and
+# scripts/build_wheel.sh builds from the tracked files only, as the plugin zip does.
+ignore-vcs = true
+
+[tool.hatch.build.targets.wheel]
+# What the plugin zip ships, plus standalone/. tests/unit/standalone/test_packaging.py checks
+# that a top-level folder of the plugin cannot be left out by mistake.
+include = [
+    "/__init__.py",
+    "/filter_mate.py",
+    "/filter_mate_app.py",
+    "/filter_mate_dockwidget.py",
+    "/filter_mate_dockwidget_base.ui",
+    "/metadata.txt",
+    "/icon.png",
+    "/LICENSE",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/TRADEMARKS.md",
+    "/adapters",
+    "/config",
+    "/core",
+    "/extensions",
+    "/filtermate_api",
+    "/filtermate_core",
+    "/i18n",
+    "/icons",
+    "/infrastructure",
+    "/processing",
+    "/resources",
+    "/skills",
+    "/standalone",
+    "/ui",
+]
+exclude = [
+    "__pycache__",
+    "*.py[cod]",
+    "*.log",
+    "*.bak",
+    "*.backup",
+    "*.orig",
+    "*.swp",
+    ".DS_Store",
+    "*.sqlite-wal",
+    "*.sqlite-shm",
+    "/i18n/*.ts",
+    "/i18n/*.pro",
+    "/config/backups",
+    "/skills/export",
+    "/standalone/docker",
+]
+
+[tool.hatch.build.targets.wheel.sources]
+"" = "filter_mate"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/__init__.py",
+    "/filter_mate*.py",
+    "/filter_mate_dockwidget_base.ui",
+    "/metadata.txt",
+    "/icon.png",
+    "/LICENSE",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/TRADEMARKS.md",
+    "/pyproject.toml",
+    "/adapters",
+    "/config",
+    "/core",
+    "/extensions",
+    "/filtermate_api",
+    "/filtermate_core",
+    "/i18n",
+    "/icons",
+    "/infrastructure",
+    "/processing",
+    "/resources",
+    "/skills",
+    "/standalone",
+    "/ui",
+]
+exclude = ["__pycache__", "*.py[cod]", "*.log", "*.bak", "*.backup", "*.orig", "/config/backups", "/skills/export"]
