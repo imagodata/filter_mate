@@ -355,7 +355,6 @@ def export_layout(name: str, folder: str, file_format: str = 'pdf', dpi: int = 1
 
 
 def _export_atlas(layout, folder: str, safe: str, file_format: str, settings, single_file: bool) -> Dict[str, Any]:
-    from qgis.core import QgsLayoutExporter
     atlas = layout.atlas() if hasattr(layout, 'atlas') else None
     if atlas is None or not atlas.enabled() or atlas.coverageLayer() is None:
         raise ValueError(f"the layout {layout.name()!r} has no atlas: set_atlas first")
