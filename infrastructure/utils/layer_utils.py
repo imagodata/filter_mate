@@ -56,6 +56,12 @@ except ImportError:
         PSYCOPG2_AVAILABLE = False
     POSTGRESQL_AVAILABLE = True  # QGIS native always available
 
+# What a task read of its layers on the main thread (2026-11-20): the layer itself outside a worker
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of, source_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of, source_of
+
 # Provider constants
 PROVIDER_POSTGRES = 'postgresql'
 PROVIDER_SPATIALITE = 'spatialite'
@@ -102,7 +108,7 @@ def detect_layer_provider_type(layer) -> str:
         return 'unknown'
 
     try:
-        provider_type = layer.providerType()
+        provider_type = provider_key_of(layer)
     except (RuntimeError, AttributeError):
         return 'unknown'
 
@@ -123,7 +129,7 @@ def detect_layer_provider_type(layer) -> str:
             return 'ogr'
         # Check if it's a GeoPackage or SQLite file - these support Spatialite SQL
         try:
-            source = layer.source()
+            source = source_of(layer)
             source_path = source.split('|')[0] if '|' in source else source
             lower_path = source_path.lower()
 
@@ -200,7 +206,7 @@ def get_datasource_connexion_from_layer(layer) -> Tuple[Optional[Any], Optional[
 
     # Check that it's a PostgreSQL source
     try:
-        if layer.providerType() != 'postgres':
+        if provider_key_of(layer) != 'postgres':
             return None, None
     except (RuntimeError, AttributeError):
         return None, None
@@ -1052,7 +1058,7 @@ def validate_mv_exists(layer, mv_name: str, schema: str = None) -> bool:
         return False
 
     try:
-        if not layer or layer.providerType() != 'postgres':
+        if not layer or provider_key_of(layer) != 'postgres':
             return False
     except (RuntimeError, AttributeError):
         return False
@@ -1102,7 +1108,7 @@ def clear_orphaned_mv_subset(layer) -> bool:
         return False
 
     try:
-        if layer.providerType() != 'postgres':
+        if provider_key_of(layer) != 'postgres':
             return False
     except (RuntimeError, AttributeError):
         return False
@@ -1231,7 +1237,7 @@ def validate_and_cleanup_postgres_layers(layers: List) -> List[str]:
             continue
 
         try:
-            if layer.providerType() != 'postgres':
+            if provider_key_of(layer) != 'postgres':
                 continue
         except (RuntimeError, AttributeError):
             continue
@@ -1306,7 +1312,7 @@ def get_spatialite_datasource_from_layer(layer) -> Tuple[Optional[str], Optional
     Returns:
         tuple: (db_path, table_name) or (None, None) if not Spatialite
     """
-    if layer.providerType() != 'spatialite':
+    if provider_key_of(layer) != 'spatialite':
         return None, None
 
     source_uri = QgsDataSourceUri(layer.source())

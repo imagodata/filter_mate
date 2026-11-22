@@ -139,6 +139,11 @@ from ...adapters.repositories.history_repository import (
     HistoryRepository, note_history_insert, recording_history_inserts,
 )
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 # EPIC-1 E13: Use BackendServices facade for all adapter imports
 # This maintains hexagonal architecture by routing through core/ports
 
@@ -333,6 +338,15 @@ class FilterEngineTask(QgsTask):
             from ...adapters.qgis.source_capability_probe import capture_network_manager
             capture_network_manager()
         except Exception:  # nosec B110 - provider error notifications remain available
+            pass
+        # The provider, the source, the id and the name of the layers of the project, read here on the
+        # main thread (2026-11-20): the worker asks them to core.domain.layer_facts, not to the layers
+        # (QGIS 4.3 reports providerType() called from another thread than the one the layer lives in)
+        self._layer_facts = None
+        try:
+            from ...infrastructure.utils.layer_facts import capture_layer_facts
+            self._layer_facts = capture_layer_facts()
+        except Exception:  # nosec B110 - the worker then reads the layers themselves, as before
             pass
 
         # H1 (audit 2026-04-29): stamp the subset-change token NOW (main
@@ -949,7 +963,7 @@ class FilterEngineTask(QgsTask):
             layer_id = self.task_parameters.get("infos", {}).get("layer_id")
             if layer_id:
                 layer = self.PROJECT.mapLayer(layer_id)
-                if layer and layer.providerType() == QGIS_PROVIDER_POSTGRES:
+                if layer and provider_key_of(layer) == QGIS_PROVIDER_POSTGRES:
                     connexion, source_uri = get_datasource_connexion_from_layer(layer)
                     if connexion is not None:
                         self.active_connections.append(connexion)
@@ -3264,6 +3278,9 @@ class FilterEngineTask(QgsTask):
     @main_thread_only
     def finished(self, result: Optional[bool]) -> None:
         """Handle task completion. Delegates to FinishedHandler."""
+        facts = getattr(self, '_layer_facts', None)
+        if facts is not None:  # the worker ended: the layers answer for themselves again
+            facts.release()
         orchestrator = getattr(self, '_filter_orchestrator', None)
         if orchestrator is not None and hasattr(orchestrator, 'report_empty_target_layers'):
             try:
