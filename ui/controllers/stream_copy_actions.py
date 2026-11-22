@@ -67,6 +67,10 @@ class StreamCopyActions:
         root = project.layerTreeRoot()
         root.addedChildren.connect(self._refresh_marks_later)
         root.removedChildren.connect(self._refresh_marks_later)
+        # Change Data Source of QGIS, Unfilter putting a web map back on its service: the mark follows the source.
+        self._watched: Dict[str, object] = {}
+        project.layersAdded.connect(self._watch_layers)
+        self._watch_layers(project.mapLayers().values())
         self._stopped = False
         self.refresh_marks()
 
@@ -104,6 +108,16 @@ class StreamCopyActions:
                 signal.disconnect(self._refresh_marks_later)
             except (TypeError, RuntimeError):
                 pass
+        try:
+            project.layersAdded.disconnect(self._watch_layers)
+        except (TypeError, RuntimeError):
+            pass
+        for layer in list(getattr(self, '_watched', {}).values()):
+            try:
+                layer.dataSourceChanged.disconnect(self._refresh_marks_later)
+            except (TypeError, RuntimeError, AttributeError):
+                pass  # removed with its layer
+        self._watched = {}
         self._clear_marks()
         stream_copy.uninstall()
         if _INSTANCE[0] is self:
@@ -124,6 +138,26 @@ class StreamCopyActions:
                 logger.debug(f"FilterMate local copy listener failed: {exc}")
 
     # --- the mark in the layer tree ----------------------------------------------------------------------------
+
+    def _watch_layers(self, layers) -> None:
+        """Refresh the marks when the source of a layer changes (once per layer)."""
+        watched = getattr(self, '_watched', None)
+        if watched is None:
+            return
+        for layer in layers or ():
+            try:
+                layer_id = layer.id()
+                if layer_id in watched or not hasattr(layer, 'dataSourceChanged'):
+                    continue
+                layer.dataSourceChanged.connect(self._refresh_marks_later)
+                watched[layer_id] = layer
+            except (RuntimeError, TypeError):
+                continue
+        for layer_id, layer in list(watched.items()):  # those removed since: not held
+            try:
+                layer.id()
+            except RuntimeError:
+                watched.pop(layer_id, None)
 
     def _refresh_marks_later(self, *_args) -> None:
         try:
