@@ -23,7 +23,9 @@ LOAD_TIMEOUT_MS = 15000  # the first load starts QtWebEngine
 READ_TIMEOUT_MS = 5000
 ALLOWED_SCHEMES = ("data", "about")
 JPEG_QUALITY = 92
-MAX_PIXELS = 40_000_000  # an export of 600 dpi of the largest chart is 10,000 x 7,500: no more
+# 160 MB of image in memory at most: 600 dpi of a chart of 640 x 400 is 4,000 x 2,500 (10 M); the largest chart
+# (1,600 x 1,200) is refused beyond about 400 dpi, with the words to lower it.
+MAX_PIXELS = 40_000_000
 
 
 class ChartEngineMissing(RuntimeError):
@@ -32,6 +34,10 @@ class ChartEngineMissing(RuntimeError):
 
 class ChartRenderError(RuntimeError):
     """The page drew no chart: the words are for the model."""
+
+
+class ChartBusy(ChartRenderError):
+    """Another chart is being drawn: the page is one, and its wait lets other events run (a timer, a reply)."""
 
 
 @dataclass
@@ -116,6 +122,11 @@ class _Page:
 
 
 _page: Optional[_Page] = None
+_busy = False
+
+
+def busy() -> bool:
+    return _busy
 
 
 def _the_page() -> _Page:
@@ -136,8 +147,22 @@ def drop_page() -> None:
 
 
 def render(html: str) -> Rendered:
-    """Load ``html`` in the hidden page and read its SVG back."""
+    """Load ``html`` in the hidden page and read its SVG back, cleaned (``sanitize_svg``). One at a time: the wait
+    lets timers and replies run, and a second chart loaded meanwhile would replace the first in the one page
+    (2026-11-22 review: the chart of a layout drawn again by its timer came back as the chart of the chat)."""
+    global _busy
+    if _busy:
+        raise ChartBusy("another chart is being drawn: call again in a moment")
+    _busy = True
+    try:
+        return _render(html)
+    finally:
+        _busy = False
+
+
+def _render(html: str) -> Rendered:
     from qgis.PyQt.QtCore import QEventLoop, QTimer, QUrl
+    from ...core.agent.charts import ChartError, sanitize_svg
     page = _the_page()
     page.console.clear()
     loop = QEventLoop()
@@ -179,17 +204,25 @@ def render(html: str) -> Rendered:
         _drop_stuck()
         raise ChartRenderError("the chart did not end in time (a loop that never ends?)")
     try:
-        result = json.loads(state["result"] or "null") or {}
-    except (TypeError, ValueError):
+        result = json.loads(state["result"]) if isinstance(state["result"], str) else {}
+    except ValueError:
         result = {}
-    errors = [str(item)[:300] for item in (result.get("errors") or [])][:5]
+    if not isinstance(result, dict):  # code of the model may have replaced FMCharts.result
+        result = {}
+    listed = result.get("errors") if isinstance(result.get("errors"), list) else []
+    errors = [str(item)[:300] for item in listed][:5]
     errors += [item for item in page.console if item not in errors][:5 - len(errors)]
-    svg = result.get("svg") or ""
+    svg = result.get("svg") if isinstance(result.get("svg"), str) else ""
     if not svg or "<svg" not in svg[:200]:
         raise ChartRenderError("no chart was drawn" + (": " + "; ".join(errors) if errors else ""))
-    unsupported = result.get("unsupported") or []
+    try:
+        svg = sanitize_svg(svg)
+    except ChartError as exc:
+        raise ChartRenderError(str(exc)) from None
+    svg_renderer(svg)  # QtSvg must read it: ChartRenderError otherwise
+    unsupported = result.get("unsupported") if isinstance(result.get("unsupported"), list) else []
     if unsupported:
-        errors.append("not kept in the image: " + ", ".join(str(item) for item in unsupported)
+        errors.append("left out of the chart: " + ", ".join(str(item)[:40] for item in unsupported[:3])
                       + " (draw with SVG shapes and text only)")
     return Rendered(svg, errors)
 

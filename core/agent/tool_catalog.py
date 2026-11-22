@@ -72,7 +72,8 @@ REMOVE_WIDGET = "remove_widget"
 SHOW_CHART = "show_chart"
 EXPORT_CHART = "export_chart"
 CHART_TO_LAYOUT = "add_chart_to_layout"
-CHART_TOOLS = (SHOW_CHART, EXPORT_CHART, CHART_TO_LAYOUT)
+RUN_CHART_CODE = "run_chart_code"
+CHART_TOOLS = (SHOW_CHART, EXPORT_CHART, CHART_TO_LAYOUT, RUN_CHART_CODE)
 SAVE_RECIPE = "save_recipe"
 REMOVE_RECIPE = "remove_recipe"
 SHOW_SETTINGS_LINK = "show_settings_link"
@@ -212,8 +213,8 @@ CHAT_ONLY = (
         name=SHOW_CHART, title="Draw a chart in the chat",
         description=("Draw a d3 chart in the thread from a layer as filtered now (FilterMate reads it: never type its "
                      "values) or from rows you give. bar, pie: field the categories, aggregate of value_field; "
-                     "histogram: field numeric; line, scatter: field the x, value_field the y. code: expert mode "
-                     "only. QGIS 4 only. Returns chart_id, points, features; with code, the image."),
+                     "histogram: field numeric; line, scatter: field the x, value_field the y. Returns chart_id, "
+                     "points, features."),
         input_schema={"type": "object", "properties": {
             "kind": {"type": "string", "enum": ["bar", "pie", "histogram", "line", "scatter"]},
             "title": {"type": "string", "maxLength": 80},
@@ -232,12 +233,24 @@ CHAT_ONLY = (
             "y_label": {"type": "string", "maxLength": 60},
             "rows": {"type": "array", "maxItems": 500, "items": {"type": "object"},
                      "description": "[{label, value}] or [{x, y, series}]"},
-            "code": {"type": "string", "maxLength": 20000,
-                     "description": "Expert: body of function(d3, svg, data, width, height, palette)"},
             "width": {"type": "integer", "minimum": 280, "maximum": 1600, "default": 640},
             "height": {"type": "integer", "minimum": 200, "maximum": 1200, "default": 400}},
             "required": ["kind"], "additionalProperties": False},
         read_only=True, chat_only=True),
+    ToolSpec(
+        name=RUN_CHART_CODE, title="Draw a chart with d3 code (expert)",
+        description=("Draw a chart of this conversation again with d3 code you write, over its data, for what no kind "
+                     "of show_chart draws (stacked bars, a heatmap, annotations). Offered only in the expert mode: "
+                     "the user reads the code and confirms each run. code is the body of function(d3, svg, data, "
+                     "width, height, palette); SVG shapes and text only. Returns a new chart_id, errors of the page, "
+                     "and the image drawn."),
+        input_schema={"type": "object", "properties": {
+            "chart_id": {"type": "string", "minLength": 1, "maxLength": 20, "description": "Its data, from show_chart"},
+            "purpose": {"type": "string", "minLength": 1, "maxLength": 300,
+                        "description": "What the code draws, in one sentence the user reads before saying yes"},
+            "code": {"type": "string", "minLength": 1, "maxLength": 20000}},
+            "required": ["chart_id", "purpose", "code"], "additionalProperties": False},
+        destructive=True, chat_only=True),
     ToolSpec(
         name=EXPORT_CHART, title="Save a chart as an image",
         description=("Write a chart of this conversation (chart_id from show_chart) as PNG, JPG or SVG in a sub-folder "

@@ -6,13 +6,17 @@ templates of ``resources/charts/fm_charts.js`` draw it in a page of QtWebEngine 
 (``adapters/agent/chart_renderer.py``), which hands back an SVG: shown in the chat, written as PNG, JPG or SVG, put in a
 print layout and drawn again there when the filter of its layer changes (``adapters/public_api/charts.py``).
 
-In the expert mode alone, the agent may write the d3 code itself: it runs in the same page, which reaches no network
-and no file (a Content-Security-Policy, and the renderer refuses every request that is not the page itself).
+In the expert mode alone, the agent may draw a chart again with d3 code it writes (run_chart_code), asked to the user
+at each run as Python is: a web page may still reach the network (WebRTC from a frame of its own, which neither the
+Content-Security-Policy nor the interceptor of requests sees); the page reaches no file, and the SVG it hands back is
+cleaned of every image and outside reference before QGIS reads it (``sanitize_svg``).
 """
 from __future__ import annotations
 
 import json
 import math
+import re
+import xml.etree.ElementTree as ElementTree  # nosec B405 - a DTD is refused before parsing (sanitize_svg)
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
@@ -56,6 +60,15 @@ PALETTES = {
              "series": ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#0ca30c", "#9085e9", "#e66767"]},
 }
 
+# Defence in depth: what a page could reach the network with, gone before any script of the chart runs. Not a
+# barrier (a frame of the page has them again): the code of the model is asked to the user at each run.
+GUARD = ("(function(){var w=window;['RTCPeerConnection','webkitRTCPeerConnection','RTCDataChannel','RTCIceCandidate',"
+         "'RTCSessionDescription','WebSocket','WebTransport','EventSource','XMLHttpRequest','fetch','Worker',"
+         "'SharedWorker','BroadcastChannel'].forEach(function(n){try{Object.defineProperty(w,n,{value:undefined,"
+         "writable:false,configurable:false});}catch(e){}});['sendBeacon','mediaDevices','serviceWorker'].forEach("
+         "function(n){try{Object.defineProperty(navigator,n,{value:undefined,configurable:false});}catch(e){}});})();")
+MAX_PAGE_BYTES = 1_400_000  # setHtml goes through a data: URL in base64, 2 MB at most: d3 and the templates are 0.3
+
 CSP = ("default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; "
        "connect-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'")
 
@@ -84,14 +97,13 @@ class ChartRequest:
     x_label: str = ""
     y_label: str = ""
     rows: Tuple[Dict[str, Any], ...] = ()
-    code: str = ""
     width: int = DEFAULT_SIZE[0]
     height: int = DEFAULT_SIZE[1]
 
     def as_arguments(self) -> Dict[str, Any]:
         """The request as arguments of show_chart again: kept on a layout item, to draw it again from its layer."""
         answer = {"kind": self.kind, "title": self.title, "width": self.width, "height": self.height}
-        for key in ("layer", "field", "value_field", "series_field", "x_type", "x_label", "y_label", "code"):
+        for key in ("layer", "field", "value_field", "series_field", "x_type", "x_label", "y_label"):
             if getattr(self, key):
                 answer[key] = getattr(self, key)
         if self.kind in (BAR, PIE, LINE):
@@ -124,7 +136,8 @@ def _whole(arguments: Dict[str, Any], key: str, default: int, low: int, high: in
     value = arguments.get(key)
     if value is None:
         return default
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or value != int(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) \
+            or value != int(value):
         raise ChartError(f"{key} is a whole number")
     if not low <= value <= high:
         raise ChartError(f"{key} is from {low} to {high}")
@@ -138,21 +151,12 @@ def _finite(value: Any) -> Optional[float]:
     return number if math.isfinite(number) else None
 
 
-def parse_request(arguments: Dict[str, Any], expert: bool = False) -> ChartRequest:
-    """``arguments`` of show_chart checked into a request; ChartError says what is wrong."""
+def parse_request(arguments: Dict[str, Any]) -> ChartRequest:
+    """``arguments`` of show_chart checked into a request; ChartError says what is wrong. Never code: a request
+    comes from the model, or from a layout item of a project someone else may have made."""
     if not isinstance(arguments, dict):
         raise ChartError("the arguments are an object")
     kind = arguments.get("kind") or ""
-    code = arguments.get("code") or ""
-    if not isinstance(code, str):
-        raise ChartError("code is text")
-    if code:
-        if not expert:
-            raise ChartError("code (d3 written by you) is only run in the expert mode, which the user did not turn "
-                             "on: use a kind and its fields instead")
-        if len(code) > MAX_CODE:
-            raise ChartError(f"code is {MAX_CODE} characters at most")
-        kind = kind or BAR  # what the data is shaped as
     if kind not in KINDS:
         raise ChartError(f"kind is one of {', '.join(KINDS)}")
     rows = arguments.get("rows") or []
@@ -185,7 +189,7 @@ def parse_request(arguments: Dict[str, Any], expert: bool = False) -> ChartReque
         bins=_whole(arguments, "bins", DEFAULT_BINS, 2, MAX_BINS), sort=sort, horizontal=horizontal,
         donut=arguments.get("donut") is not False, x_type=x_type,
         x_label=_text(arguments, "x_label", MAX_LABEL), y_label=_text(arguments, "y_label", MAX_LABEL),
-        rows=tuple(_row(row) for row in rows), code=code,
+        rows=tuple(_row(row) for row in rows),
         width=_whole(arguments, "width", DEFAULT_SIZE[0], MIN_SIZE[0], MAX_SIZE[0]),
         height=_whole(arguments, "height", DEFAULT_SIZE[1], MIN_SIZE[1], MAX_SIZE[1]))
     if layer:
@@ -230,11 +234,18 @@ def _reduce(values: List[float], aggregate: str) -> Optional[float]:
     numbers = [value for value in values if value is not None]
     if not numbers:
         return None
-    if aggregate == "sum":
-        return math.fsum(numbers)
-    if aggregate == "mean":
-        return math.fsum(numbers) / len(numbers)
-    return min(numbers) if aggregate == "min" else max(numbers)
+    try:
+        if aggregate == "sum":
+            result = math.fsum(numbers)
+        elif aggregate == "mean":
+            result = math.fsum(numbers) / len(numbers)
+        else:
+            result = min(numbers) if aggregate == "min" else max(numbers)
+    except OverflowError:
+        result = math.inf
+    if not math.isfinite(result):
+        raise ChartError(f"the {aggregate} of these values is beyond what a number holds")
+    return result
 
 
 def label_of(value: Any, empty: str) -> str:
@@ -262,13 +273,25 @@ def category_values(pairs: Iterable[Tuple[Any, Any]], aggregate: str, limit: int
     reduced.sort(key=lambda item: (-item[1], item[0]))
     kept, rest = reduced[:limit], reduced[limit:]
     if sort == "label":
-        kept.sort(key=lambda item: item[0])
+        numbers = [_as_number(label) for label, _, _ in kept]
+        if all(number is not None for number in numbers):  # 2 before 10
+            kept = [item for _, item in sorted(zip(numbers, kept), key=lambda pair: pair[0])]
+        else:
+            kept.sort(key=lambda item: item[0])
     bars = [{"label": label, "value": value, "others": False} for label, value, _ in kept]
     if rest:
         value = _reduce([number for _, _, values in rest for number in values], aggregate)
         if value is not None:
             bars.append({"label": others, "value": value, "others": True})
     return bars
+
+
+def _as_number(text: str) -> Optional[float]:
+    try:
+        number = float(text)
+    except ValueError:
+        return None
+    return number if math.isfinite(number) else None
 
 
 def histogram_values(values: Iterable[Any], bins: int) -> List[Dict[str, Any]]:
@@ -307,14 +330,21 @@ def line_values(triples: Iterable[Tuple[Any, Any, Any]], aggregate: str, x_type:
             points.append({"x": x_value, "y": value, "series": series})
     points.sort(key=lambda point: (point["series"], point["x"]))
     dropped = folded or len(points) > MAX_LINE_POINTS
-    return points[:MAX_LINE_POINTS], dropped
+    if len(points) > MAX_LINE_POINTS:  # taken evenly along every line, never the first ones only
+        step = len(points) / MAX_LINE_POINTS
+        points = [points[int(index * step)] for index in range(MAX_LINE_POINTS)]
+    return points, dropped
+
+
+_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 def _x(value: Any, x_type: str) -> Any:
     if x_type == "time":
         if isinstance(value, (datetime, date)):
-            return value.isoformat()
-        return value if isinstance(value, str) and value else None
+            value = value.isoformat()
+        # A date, with a time or not; a time of day alone is no place on a time axis.
+        return value if isinstance(value, str) and _ISO_DATE.match(value) else None
     return _finite(value)
 
 
@@ -355,7 +385,10 @@ def rows_data(request: ChartRequest, others: str, empty: str) -> Tuple[List[Dict
             raise ChartError("each row of a histogram holds a number value")
         data = histogram_values(values, request.bins)
         return data, {"points": len(values)}
-    x_type = request.x_type or ("time" if any(isinstance(row.get("x"), str) for row in rows) else "number")
+    texts = sum(isinstance(row.get("x"), str) for row in rows)
+    if 0 < texts < sum(row.get("x") is not None for row in rows):
+        raise ChartError("x is either numbers or dates (ISO text), not both in one chart")
+    x_type = request.x_type or ("time" if texts else "number")
     triples = [(row.get("x"), row.get("y"), row.get("series")) for row in rows]
     if kind == LINE:
         data, dropped = line_values(triples, "sum", x_type, empty, others)
@@ -397,6 +430,8 @@ def page_html(spec: Dict[str, Any], code: str = "", d3_source: Optional[str] = N
     data = script_json(spec)
     if len(data) > MAX_PAGE_DATA:
         raise ChartError("too much data for one chart: fewer categories, classes or points")
+    if code and len(code) > MAX_CODE:
+        raise ChartError(f"code is {MAX_CODE} characters at most")
     d3_source = _read(D3_FILE) if d3_source is None else d3_source
     templates = _read(TEMPLATES_FILE) if templates is None else templates
     if code:
@@ -407,11 +442,66 @@ def page_html(spec: Dict[str, Any], code: str = "", d3_source: Optional[str] = N
                 "SPEC.height, SPEC.palette); })();")
     else:
         draw = "var SPEC = " + data + ";\nFMCharts.draw(SPEC);"
-    return ("<!doctype html><html><head><meta charset=\"utf-8\">"
+    page = ("<!doctype html><html><head><meta charset=\"utf-8\">"
             f"<meta http-equiv=\"Content-Security-Policy\" content=\"{CSP}\">"
             "<style>html,body{margin:0;padding:0;background:transparent}</style>"
-            f"<script>{d3_source}</script><script>{templates}</script></head>"
+            f"<script>{GUARD}</script><script>{d3_source}</script><script>{templates}</script></head>"
             f"<body><div id=\"chart\"></div><script>{draw}</script></body></html>")
+    if len(page.encode("utf-8")) > MAX_PAGE_BYTES:
+        raise ChartError("too much data for one chart: fewer categories, classes or points")
+    return page
+
+
+# --- the SVG handed back ---------------------------------------------------------------------------------------
+
+SVG_NS = "http://www.w3.org/2000/svg"
+XLINK_NS = "http://www.w3.org/1999/xlink"
+# Never kept: what loads something (a file of this machine through QtSvg, a page), runs, or holds HTML.
+_DROPPED = {"image", "foreignObject", "script", "iframe", "object", "embed", "audio", "video", "style", "a", "use",
+            "feImage", "handler", "listener"}
+
+
+def _local(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1]
+
+
+def sanitize_svg(svg: str) -> str:
+    """``svg`` (from the page) with only shapes and text: no image, no element that loads or runs anything, no
+    reference outside the document, no DTD. ChartError when it is no SVG.
+
+    2026-11-22 (review): QtSvg loads the file an <image href="/path.png"> names, in the process of QGIS; the code of
+    the model chose it, and its image went back to the model."""
+    if not isinstance(svg, str) or not svg.strip():
+        raise ChartError("no chart was drawn")
+    if "<!DOCTYPE" in svg or "<!ENTITY" in svg or "<!doctype" in svg:
+        raise ChartError("the SVG of the chart declares a DTD: refused")
+    try:
+        root = ElementTree.fromstring(svg)  # nosec B314 - no DTD (refused above), from the page of the chart
+    except ElementTree.ParseError as exc:
+        raise ChartError(f"the SVG of the chart could not be read ({exc})") from None
+    if _local(root.tag) != "svg":
+        raise ChartError("the chart is no SVG")
+
+    def clean(element) -> None:
+        for child in list(element):
+            if not isinstance(child.tag, str) or _local(child.tag) in _DROPPED:
+                element.remove(child)
+                continue
+            clean(child)
+        for name in list(element.attrib):
+            value = str(element.attrib[name]).strip()
+            local = _local(name).lower()
+            if local == "href" and not value.startswith("#"):
+                del element.attrib[name]
+            elif local.startswith("on") or "url(" in value.replace(" ", "") and "url(#" not in value.replace(" ", ""):
+                del element.attrib[name]
+            elif local == "style":
+                del element.attrib[name]  # flatten() wrote the look as attributes; a style may hold url()
+
+    clean(root)
+    ElementTree.register_namespace("", SVG_NS)
+    ElementTree.register_namespace("xlink", XLINK_NS)
+    return ElementTree.tostring(root, encoding="unicode")
 
 
 # --- what the model is told ----------------------------------------------------------------------------------------
@@ -425,6 +515,10 @@ class Chart:
     svg: str
     theme: str = "light"
     meta: Dict[str, Any] = field(default_factory=dict)
+    # The data as drawn: a save or an export shows what the card shows, never the layer read again.
+    data: List[Dict[str, Any]] = field(default_factory=list)
+    # d3 written by the agent (run_chart_code), approved by the user: never run again without asking.
+    code: str = ""
 
 
 def summary(chart: Chart, data: List[Dict[str, Any]], share_values: bool) -> Dict[str, Any]:
@@ -435,7 +529,7 @@ def summary(chart: Chart, data: List[Dict[str, Any]], share_values: bool) -> Dic
     if request.layer:
         answer["layer"] = chart.meta.get("layer_name", request.layer)
         answer["features"] = chart.meta.get("features", 0)
-    if request.code:
+    if chart.code:
         answer["code"] = True
     if chart.meta.get("dropped"):
         answer["note"] = "some series or points were left out: the chart shows the largest ones"

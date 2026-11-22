@@ -165,6 +165,9 @@ class FakeCharts:
     def unwatch_all(self):
         pass
 
+    def forget(self):
+        pass
+
 
 @pytest.fixture
 def ctrl_module(monkeypatch):

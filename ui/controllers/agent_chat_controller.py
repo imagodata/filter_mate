@@ -80,7 +80,7 @@ from ...core.agent.memory import UnreadableMemory, chosen as memory_chosen, memo
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
-    ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CREATE_WIDGET, EXPORT_CHART, SHOW_CHART, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
+    ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CHART_TOOLS, CREATE_WIDGET, EXPORT_CHART, RUN_CHART_CODE, SHOW_CHART, LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
     TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
@@ -285,9 +285,9 @@ class AgentChatController(QObject):
         self.panel.recipe_run_requested.connect(self.run_recipe)
         self.panel.recipe_remove_requested.connect(self._on_remove_recipe)
         self.panel.recipe_live_toggled.connect(self._on_live_toggled)
+        self._charts = AgentCharts(lambda: self.panel._dark(), self)  # the theme of the dock, as the thread draws it
         self._restore_transcript()
         self._refresh_history()
-        self._charts = AgentCharts(lambda: self.panel._dark(), self)  # the theme of the dock, as the thread draws it
         self._mcp = AgentMcpBridge(self, self)
         self._journal_later = []
         trailer = add_page(self.panel)  # last: a failure before leaves the accordion untouched
@@ -468,6 +468,7 @@ class AgentChatController(QObject):
         self._offer_setup_again()
         self._wizard.offer_back_again()  # the settings are those of every project: what puts them back stays
         self._refresh_history()
+        self._charts.forget()
         self._charts.watch_layers()  # the charts of its layouts follow the filters of their layers
 
     # --- transcript and history -------------------------------------------------
@@ -505,6 +506,7 @@ class AgentChatController(QObject):
         self.panel.add_note(_tr("Earlier conversation: the agent starts afresh from here."))
 
     def _refresh_history(self) -> None:
+        self._charts.watch_layers()  # an undo or a redo may have brought a chart of a layout back
         self._refresh_widgets()  # an undo or a redo may have brought widgets back or taken them away
         self._refresh_recipes()
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
@@ -1288,7 +1290,10 @@ class AgentChatController(QObject):
         if not values.send_values:
             left_out.update(VALUES_TOOLS)
         if not values.expert_python:
-            left_out.add(RUN_PYTHON)
+            left_out.update((RUN_PYTHON, RUN_CHART_CODE))
+        from ...adapters.agent.chart_renderer import available as charts_available
+        if not charts_available():  # QGIS 3, a QGIS 4 without PyQt QtWebEngine: no chart tool, no skill charts
+            left_out.update(CHART_TOOLS)
         if not values.send_values:
             left_out.add(VIEW_MAP)  # an image of the map shows its labels and symbols: a value as much as a field
         if not kinds - {KIND_MCP, KIND_STAC, *NO_DATA_KINDS} and not searched:
@@ -1354,8 +1359,9 @@ class AgentChatController(QObject):
         handlers[REMOVE_NOTE] = self._remove_note_tool
         handlers[CREATE_WIDGET] = self._create_widget_tool
         handlers[REMOVE_WIDGET] = self._remove_widget_tool
-        handlers[SHOW_CHART] = lambda arguments: self._charts.show_chart(
-            arguments, expert=values.expert_python, share_values=values.send_values)
+        handlers[SHOW_CHART] = lambda arguments: self._charts.show_chart(arguments, share_values=values.send_values)
+        handlers[RUN_CHART_CODE] = lambda arguments: self._charts.run_chart_code(arguments,
+                                                                                 share_values=values.send_values)
         handlers[EXPORT_CHART] = lambda arguments: self._charts.export_chart(arguments, _default_export_root())
         handlers[CHART_TO_LAYOUT] = lambda arguments: self._charts.add_to_layout(arguments)
         handlers[SAVE_RECIPE] = self._save_recipe_tool
@@ -2510,6 +2516,7 @@ class AgentChatController(QObject):
         self._recap_from = 0
         self._tuning_offered = set()
         self.panel.input.forget()
+        self._charts.forget()
         self._save_transcript()
 
     # --- what the user does -----------------------------------------------------
@@ -2806,6 +2813,7 @@ class AgentChatController(QObject):
                                                         or args.get("kind", "")),
             EXPORT_CHART: lambda: _tr("Chart {} saved as {}").format(args.get("chart_id", ""),
                                                                      str(args.get("format") or "png").upper()),
+            RUN_CHART_CODE: lambda: _tr("Chart {} drawn with d3 code (expert)").format(args.get("chart_id", "")),
             CHART_TO_LAYOUT: lambda: _tr("Chart {} put in the layout {}").format(args.get("chart_id", ""),
                                                                                   args.get("layout", "")),
             RUN_PYTHON: lambda: _tr("Python code (expert, not undone)"),
@@ -2983,7 +2991,7 @@ class AgentChatController(QObject):
         """A chart show_chart drew, in a card of the thread; the transcript keeps a line of it (an SVG is too large
         for it)."""
         chart, self._charts.pending = self._charts.pending, None
-        if call.name != SHOW_CHART or result.is_error or chart is None:
+        if call.name not in (SHOW_CHART, RUN_CHART_CODE) or result.is_error or chart is None:
             return
         request = chart.request
         if request.layer:
@@ -2991,7 +2999,7 @@ class AgentChatController(QObject):
                 chart.meta.get("layer_name", ""), chart.meta.get("features", 0))
         else:
             caption = _tr("Data given by the agent")
-        if request.code:
+        if chart.code:
             caption += " · " + _tr("d3 code written by the agent (expert)")
         self._flush_answer()
         self.panel.add_chart(request.title, chart.svg, caption,
@@ -3139,7 +3147,7 @@ class AgentChatController(QObject):
         if call.name in ("create_layout", "export_layout") and isinstance(call.arguments, dict):
             keys = ("title", "page", "orientation") if call.name == "create_layout" else ("format", "dpi", "subfolder")
             return " · ".join(str(call.arguments[key]) for key in keys if call.arguments.get(key) not in (None, ""))
-        if call.name == RUN_PYTHON and isinstance(call.arguments, dict):
+        if call.name in (RUN_PYTHON, RUN_CHART_CODE) and isinstance(call.arguments, dict):
             return str(call.arguments.get("purpose", ""))
         if call.name == ADD_NOTE and isinstance(call.arguments, dict):
             return str(call.arguments.get("text", ""))
@@ -3241,6 +3249,12 @@ class AgentChatController(QObject):
             plugin_settings.freeze(call.name, call.arguments, rows)
             if problem or not any(row["before"] != row["after"] for row in rows):
                 return True  # nothing to show: every value is already set, or the tool refuses the call and says why
+        if call.name == RUN_CHART_CODE:
+            text = _tr("The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a "
+                       "hidden web page of QGIS that reads no file of yours; a web page can still reach the network."
+                       "\n\nWhat for: {}\n\nRun it?").format(str(call.arguments.get("chart_id", "")),
+                                                              one_line(str(call.arguments.get("purpose", "")), 300))
+            return bool(self._ask_code(title, text, str(call.arguments.get("code", ""))))
         if call.name == RUN_PYTHON:
             text = _tr("The agent wants to run this Python code in QGIS, with your rights: it can read and change "
                        "anything QGIS and your account can, and undoing the turn does not take it back.\n\nWhat for: "

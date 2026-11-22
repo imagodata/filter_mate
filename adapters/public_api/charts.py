@@ -36,7 +36,7 @@ def _value(value: Any) -> Any:
         return None
     if isinstance(value, (bool, int, float, str)):
         return value
-    for name in ("toPyDateTime", "toPyDate"):
+    for name in ("toPyDateTime", "toPyDate", "toPyTime"):
         convert = getattr(value, name, None)
         if callable(convert):
             try:
@@ -178,7 +178,7 @@ def add_to_layout(layout_name: str, svg: str, arguments: Dict[str, Any], aspect:
     page = layout.pageCollection().page(0)
     if page is None:
         raise ChartError(f"the layout {layout_name!r} has no page")
-    page_size = page.pageSize()
+    page_size = layout.convertToLayoutUnits(page.pageSize())  # the units of the layout: millimetres by default
     page_width, page_height = page_size.width(), page_size.height()
     for key, value in (("x", x), ("y", y), ("width", width)):
         if value is not None and not 0 <= value <= MAX_ITEM_MM:
@@ -225,7 +225,7 @@ def chart_items(layer_id: str = "") -> Iterator[Tuple[Any, Dict[str, Any]]]:
             if layer_id:
                 layer = project.mapLayer(layer_id)
                 reference = arguments.get("layer") or ""
-                if layer is None or reference not in (layer.id(), layer.name()):
+                if layer is None or not isinstance(reference, str) or reference not in (layer.id(), layer.name()):
                     continue
             yield item, arguments
 
@@ -297,7 +297,7 @@ def layer_ids_of_charts() -> List[str]:
     ids = []
     for _, arguments in chart_items():
         reference = arguments.get("layer") or ""
-        if not reference:
+        if not reference or not isinstance(reference, str):  # a project may hold anything there
             continue
         layer = project.mapLayer(reference)
         if layer is None:

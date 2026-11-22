@@ -6,17 +6,17 @@ metadata:
   version: 1
   plugin_min: 5.1.2
   audience: chat
-  tools: show_chart, export_chart, add_chart_to_layout, create_widget, create_layout, export_layout, describe_layer, field_values, layer_statistics, list_layers, map_context
+  tools: show_chart, run_chart_code, export_chart, add_chart_to_layout, create_widget, create_layout, export_layout, describe_layer, field_values, layer_statistics, list_layers, map_context
   risk: change
   trust: builtin
+  requires: show_chart
 ---
 
 # Charts with d3
 
 show_chart draws a chart with d3 in the thread. FilterMate reads the layer as it is filtered now and draws it with
 its own templates and colours: you describe the chart, you never compute or type its numbers. Charts need QtWebEngine
-(QGIS 4); when show_chart says it is missing, offer create_widget kind chart instead (bars or a histogram in the
-panel that follow the filters).
+(QGIS 4): without it these tools are not offered; create_widget kind chart gives bars or a histogram in the panel.
 
 ## Method
 
@@ -38,16 +38,20 @@ panel that follow the filters).
 6. To keep it as a file, export_chart (png by default, jpg for a light file, svg to edit it): the user is asked.
 7. To put it in a print layout: create_layout first when the project has none (map_context lists them), then
    add_chart_to_layout with the chart_id; export_layout writes the page. A chart from a layer is drawn again when the
-   filter of that layer changes; say so.
+   filter of that layer changes; say so. A chart of rows or of code stays as it was drawn.
+8. A save or an export shows the chart as its card shows it, drawn light: draw it again with show_chart to take a
+   new filter into account.
 
 ## Code (expert mode only)
 
-code is the body of function(d3, svg, data, width, height, palette): svg is the empty d3 selection to draw in,
-data is shaped as kind says (bar and pie: label, value, others; histogram: low, high, count; line and scatter: x, y,
-series), palette has background, text, muted, grid, axis, other and series (8 colours, in order). Write it only when
-no kind draws what the user asked (a stacked bar, a heatmap, an annotation). SVG shapes and text only: no canvas, no
-foreignObject, no image; set fill, stroke and font-size as attributes. You see the image it drew: check it.
-Without the expert mode, never pass code.
+run_chart_code draws a chart of this conversation again with d3 you write, over its data: only when no kind draws
+what the user asked (stacked bars, a heatmap, an annotation), and only when it is offered (the expert mode). The user
+reads the code and says yes at each run. Draw the data with show_chart first, then run_chart_code with its chart_id,
+a purpose in one sentence and code: the body of function(d3, svg, data, width, height, palette). svg is the empty
+d3 selection to draw in, data is shaped as kind says (bar and pie: label, value, others; histogram: low, high, count;
+line and scatter: x, y, series), palette has background, text, muted, grid, axis, other and series (8 colours, in
+order). SVG shapes and text only: an image, a canvas or a link is left out; set fill, stroke and font-size as
+attributes. You see the image it drew when the user shares values: check it.
 
 ## What never to do
 

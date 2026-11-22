@@ -54,6 +54,9 @@ def plugin_tools(monkeypatch):
     monkeypatch.setattr(chat_controller, "build_handlers", lambda *args, **kwargs: {})
     monkeypatch.setattr(chat_controller, "settings_handlers", lambda *args, **kwargs: {"load_skill": lambda arguments: {}})
     monkeypatch.setattr(chat_controller, "_default_export_root", lambda: None)
+    # The bench measures QGIS 4, whose Python has QtWebEngine: the chart tools are offered there.
+    renderer = importlib.import_module(f"{_PKG}.adapters.agent.chart_renderer")
+    monkeypatch.setattr(renderer, "_engine", "ok")
 
 
 @pytest.fixture(scope="module")

@@ -1726,7 +1726,6 @@
     "enum": [
      "analysis",
      "cartography",
-     "charts",
      "configuration",
      "dashboards",
      "editing",
@@ -2015,6 +2014,32 @@
   },
   "required": [
    "algorithm_id"
+  ],
+  "type": "object"
+ },
+ "run_chart_code": {
+  "additionalProperties": false,
+  "properties": {
+   "chart_id": {
+    "maxLength": 20,
+    "minLength": 1,
+    "type": "string"
+   },
+   "code": {
+    "maxLength": 20000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "purpose": {
+    "maxLength": 300,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "chart_id",
+   "purpose",
+   "code"
   ],
   "type": "object"
  },
@@ -2665,10 +2690,6 @@
     "maximum": 50,
     "minimum": 2,
     "type": "integer"
-   },
-   "code": {
-    "maxLength": 20000,
-    "type": "string"
    },
    "donut": {
     "default": true,

@@ -80,7 +80,7 @@ VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "
                         "set_exploring"})
 BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
-CODE_TOOLS = frozenset({"run_pyqgis"})
+CODE_TOOLS = frozenset({"run_pyqgis", "run_chart_code"})
 # What the user asks of the agent about its own work: its history, its notes and its recipes. And the questions it
 # asks them (ask_user): an answer changes nothing and authorizes nothing. They run at every level.
 AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_note", "save_recipe", "remove_recipe",

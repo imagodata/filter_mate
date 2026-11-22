@@ -68,7 +68,7 @@ def main():
     from filter_mate.ui.controllers.agent_charts import AgentCharts
     charts = AgentCharts(lambda: False)
     if not chart_renderer.available():
-        said = failure(lambda: charts.show_chart({"kind": "bar", "rows": [{"label": "a", "value": 1}]}, False, True))
+        said = failure(lambda: charts.show_chart({"kind": "bar", "rows": [{"label": "a", "value": 1}]}, True))
         check("no QtWebEngine: show_chart says so", "QtWebEngine" in said, said)
         return
 
@@ -82,7 +82,7 @@ def main():
 
     # --- every kind from the layer
     started = time.time()
-    bar = charts.show_chart({"kind": "bar", "layer": "batiments", "field": "usage", "title": "Usages"}, False, True)
+    bar = charts.show_chart({"kind": "bar", "layer": "batiments", "field": "usage", "title": "Usages"}, True)
     first = time.time() - started
     svg = charts.pending.svg
     check("bar: drawn from the layer, the NULL and the markup as categories", bar["features"] == 60 and
@@ -99,7 +99,7 @@ def main():
                        "series_field": "usage"},
                       {"kind": "bar", "layer": "batiments", "field": "usage", "value_field": "hauteur",
                        "aggregate": "sum", "horizontal": True}):
-        answer = charts.show_chart(arguments, False, True)
+        answer = charts.show_chart(arguments, True)
         svg = charts.pending.svg
         check(f"{arguments['kind']}: drawn", answer["points"] > 0 and "<svg" in svg and
               chart_renderer.svg_renderer(svg).isValid() and not answer.get("errors"), answer)
@@ -107,34 +107,53 @@ def main():
     line = charts.chart("c4")
     check("line: a date field is a time axis", line.meta.get("x_type") == "time", line.meta)
     check("no value of the layer for a user who does not share them",
-          "data" not in charts.show_chart({"kind": "bar", "layer": "batiments", "field": "usage"}, False, False))
+          "data" not in charts.show_chart({"kind": "bar", "layer": "batiments", "field": "usage"}, False))
 
     # --- rows, refusals
     rows = charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 3}, {"label": "B", "value": 7}],
-                              "title": "Rows"}, False, True)
+                              "title": "Rows"}, True)
     check("rows: drawn, said to be given", rows["source"] == "rows" and rows["points"] == 2, rows)
     for arguments, label in (({"kind": "bar", "layer": "batiments", "field": "nope"}, "an unknown field"),
                              ({"kind": "histogram", "layer": "batiments", "field": "usage"}, "a text histogram"),
                              ({"kind": "bar", "layer": "nope", "field": "usage"}, "an unknown layer"),
-                             ({"kind": "bar", "rows": [{"label": "A", "value": 1}], "code": "svg.append('rect')"},
-                              "code without the expert mode")):
-        check(f"refuses {label}", failure(lambda: charts.show_chart(arguments, False, True)))
+                             ({"kind": "bar", "rows": [{"label": "A", "value": 1e308}, {"label": "A", "value": 1e308}]},
+                              "a sum beyond a float")):
+        check(f"refuses {label}", failure(lambda: charts.show_chart(arguments, True)))
+    negative = charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": -3}, {"label": "B", "value": -7}]},
+                                 True)
+    check("bar: values all negative are drawn", negative["points"] == 2)
 
-    # --- code of the expert mode
+    # --- code of the expert mode: run_chart_code over the data of a chart
+    base = charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 3}, {"label": "B", "value": 7}]},
+                             True)["chart_id"]
+
+    def code_run(code, share=True):
+        return charts.run_chart_code({"chart_id": base, "purpose": "test", "code": code}, share)
+
     code = ("svg.selectAll('rect.x').data(data).join('rect').attr('x', (d, i) => 20 + i * 60).attr('y', 40)"
             ".attr('width', 50).attr('height', d => d.value * 10).attr('fill', palette.series[1]);")
-    drawn = charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 3}, {"label": "B", "value": 7}],
-                               "code": code}, True, True)
+    drawn = code_run(code)
     check("code: drawn, its image sent back", hasattr(drawn, "images") and drawn.answer["code"] and
-          charts.pending.svg.count("<rect") >= 3, getattr(drawn, "answer", drawn))
-    told = charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 1}],
-                              "code": "svg.append('rect').attr('x', nope.y);"}, True, True)
+          drawn.answer["drawn_from"] == base and charts.pending.svg.count("<rect") >= 3,
+          getattr(drawn, "answer", drawn))
+    hidden = code_run(code, share=False)
+    check("code: no image for a user who does not share values", not hasattr(hidden, "images"), hidden)
+    told = code_run("svg.append('rect').attr('x', nope.y);")
     check("code: an error of the script is told with what it drew",
           any("nope" in error for error in told.answer.get("errors", [])), told.answer)
-    said = failure(lambda: charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 1}],
-                                              "code": "d3.select('svg').remove(); throw new Error('boom');"},
-                                             True, True))
+    said = failure(lambda: code_run("d3.select('svg').remove(); throw new Error('boom');"))
     check("code: no chart at all is refused with the error", "boom" in said, said)
+    secret = os.path.join(work, "secret.png")
+    from qgis.PyQt.QtGui import QColor, QImage
+    red = QImage(20, 20, QImage.Format.Format_ARGB32)
+    red.fill(QColor("red"))
+    red.save(secret)
+    stolen = code_run(f"svg.append('image').attr('href', {secret!r}).attr('width', 600).attr('height', 380);"
+                      f"svg.append('image').attr('xlink:href', {secret!r});")
+    check("code: an image of the disk never reaches the chart", "secret" not in charts.pending.svg and
+          "<image" not in charts.pending.svg, stolen.answer)
+    replaced = failure(lambda: code_run("FMCharts.result = function () { return '[1]'; };"))
+    check("code: a result replaced by the code is refused in words", "no chart" in replaced, replaced)
 
     hits = []
 
@@ -147,29 +166,45 @@ def main():
         def log_message(self, *args):
             pass
 
+    import socket
     server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     address = f"http://127.0.0.1:{server.server_address[1]}"
+    stun = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    stun.bind(("127.0.0.1", 0))
+    stun.settimeout(0.1)
     leak = (f"fetch('{address}/fetch').catch(() => 0); new Image().src = '{address}/img';"
             f"svg.append('image').attr('href', '{address}/svg'); svg.append('rect').attr('width', 10)"
-            ".attr('height', 10);")
+            ".attr('height', 10); try { const pc = new RTCPeerConnection({iceServers: [{urls: "
+            f"'stun:127.0.0.1:{stun.getsockname()[1]}'}}]}}); pc.createDataChannel('x');"
+            " pc.createOffer().then(o => pc.setLocalDescription(o)); } catch (e) {}")
     try:
-        charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 1}], "code": leak}, True, True)
-    except Exception:  # noqa: BLE001 - only what reached the server matters
+        code_run(leak)
+    except Exception:  # noqa: BLE001 - only what reached the servers matters
         pass
+    packets = []
     deadline = time.time() + 2
     while time.time() < deadline:
         QgsApplication.processEvents()
-        time.sleep(0.05)
+        try:
+            packets.append(stun.recvfrom(2048)[0])
+        except socket.timeout:
+            pass
     server.shutdown()
-    check("code: reaches no network", not hits, hits)
+    check("code: reaches no web server", not hits, hits)
+    check("code: RTCPeerConnection is gone from the page (no STUN packet)", not packets, len(packets))
 
     started = time.time()
-    said = failure(lambda: charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 1}],
-                                              "code": "while (true) {}"}, True, True))
+    said = failure(lambda: code_run("while (true) {}"))
     check("code: a loop that never ends is stopped", "in time" in said and time.time() - started < 25, said)
-    again = charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 2}]}, False, True)
+    again = charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 2}]}, True)
     check("after it, a new page draws the next chart", again["points"] == 1, again)
+    chart_renderer._busy = True
+    try:
+        busy = failure(lambda: charts.show_chart({"kind": "bar", "rows": [{"label": "A", "value": 2}]}, True))
+    finally:
+        chart_renderer._busy = False
+    check("a chart asked while another is drawn is refused, never mixed", "another chart" in busy, busy)
 
     # --- exports
     root = os.path.join(work, "exports")
@@ -214,6 +249,24 @@ def main():
         QgsApplication.processEvents()
         time.sleep(0.05)
     check("layout: drawn again when the filter of its layer changes", items[0].picturePath() != before)
+    layer.setSubsetString("")
+    deadline = time.time() + 3
+    while time.time() < deadline:
+        QgsApplication.processEvents()
+        time.sleep(0.05)
+    import json as _json
+    planted = _json.loads(items[0].customProperty(PROPERTY))
+    planted["code"] = "svg.append('rect').attr('width', 99).attr('height', 99).attr('fill', 'red');"
+    items[0].setCustomProperty(PROPERTY, _json.dumps(planted))
+    kept = items[0].picturePath()
+    layer.setSubsetString("\"usage\" = 'Agricole'")
+    deadline = time.time() + 3
+    while time.time() < deadline:
+        QgsApplication.processEvents()
+        time.sleep(0.05)
+    check("layout: code a project holds is never run", items[0].picturePath() == kept)
+    planted.pop("code")
+    items[0].setCustomProperty(PROPERTY, _json.dumps(planted))
     layer.setSubsetString("")
     effects = recorder.finish()
     check("layout: the turn keeps the chart it put there", [effect[0] for effect in effects] == ["layout_item"],

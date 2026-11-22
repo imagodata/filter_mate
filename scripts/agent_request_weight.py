@@ -45,7 +45,9 @@ from agent.providers import PRESETS, create_provider  # noqa: E402
 from agent.providers.base import Provider, ProviderConfig  # noqa: E402
 from agent.providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import LOAD_SKILL, RUN_PYTHON, USE_TOOLS, ToolSpec, chat_tools, with_skill_tool  # noqa: E402
+from agent.tool_catalog import (  # noqa: E402
+    LOAD_SKILL, RUN_CHART_CODE, RUN_PYTHON, USE_TOOLS, ToolSpec, chat_tools, with_skill_tool,
+)
 from agent.chat_setup import SOURCE_TOOLS, chat_instructions, stable_order  # noqa: E402
 from agent.families import bringing, split_tools, use_tools_handler  # noqa: E402
 from agent.session import STATUS_DONE, AgentLimits, AgentSession, history_budget, run_exchange  # noqa: E402
@@ -186,7 +188,7 @@ def default_setup() -> Tuple[str, Tuple[ToolSpec, ...], Dict[str, List[str]]]:
     """``(instructions, tools offered at the start, tools held back with the skills that bring them)`` as the chat
     builds them with the default settings: the families on, no source ticked, the values shared, neither the expert
     mode nor the filtering tools alone (tests/unit/ui/controllers/test_agent_request_weight_default.py checks it)."""
-    tools = stable_order([tool for tool in chat_tools() if tool.name not in SOURCE_TOOLS and tool.name != RUN_PYTHON])
+    tools = stable_order([tool for tool in chat_tools() if tool.name not in SOURCE_TOOLS and tool.name not in (RUN_PYTHON, RUN_CHART_CODE)])
     tools = with_skill_tool(tools, {tool.name for tool in tools})
     brought = bringing(tools, SKILLS.values())
     start, available = split_tools(tools)

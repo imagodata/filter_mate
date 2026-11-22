@@ -89,7 +89,9 @@
     var data = spec.data, palette = spec.palette, root = svgRoot(spec);
     var longest = d3.max(data, function (d) { return String(d.label).length; }) || 0;
     var horizontal = spec.horizontal === true || (spec.horizontal !== false && (longest > 10 || data.length > 12));
-    var max = d3.max(data, function (d) { return d.value; }) || 0, min = Math.min(0, d3.min(data, function (d) { return d.value; }) || 0);
+    // 0 always inside the axis: the bars grow from it, all of them negative too.
+    var max = Math.max(0, d3.max(data, function (d) { return d.value; }) || 0);
+    var min = Math.min(0, d3.min(data, function (d) { return d.value; }) || 0);
     var labels = data.length <= 16;
     if (horizontal) {
       var left = Math.min(spec.width * 0.4, 12 + 6 * Math.min(longest, 28));
@@ -209,7 +211,9 @@
   // line: [{x, y, series}], x a number or a date (ISO text when x_type is "time"); one line per series, 2 px.
   function line(spec) {
     var palette = spec.palette, root = svgRoot(spec), time = spec.x_type === "time";
-    var data = spec.data.map(function (d) { return {x: time ? new Date(d.x) : d.x, y: d.y, series: d.series || ""}; })
+    // A date and time without a zone is read as UTC, as the axis shows it (a local reading shifted every point).
+    var utc = function (text) { return new Date(/T\d\d:\d\d(:\d\d(\.\d+)?)?$/.test(text) ? text + "Z" : text); };
+    var data = spec.data.map(function (d) { return {x: time ? utc(d.x) : d.x, y: d.y, series: d.series || ""}; })
       .filter(function (d) { return d.x !== null && !(time && isNaN(d.x)) && d.y !== null && isFinite(d.y); });
     var groups = d3.groups(data, function (d) { return d.series; });
     var several = groups.length > 1;
