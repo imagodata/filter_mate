@@ -120,26 +120,31 @@ class StyleRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
-    mode: Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray", "hillshade", "keep"]
+    mode: Literal["single", "categorized", "graduated", "rules", "proportional", "heatmap", "point_cluster",
+                  "point_displacement", "dot_density", "2.5d", "pseudocolor", "gray", "hillshade", "keep"]
     rules: Optional[List[StyleRule]] = Field(None, max_length=20)
     field: str = Field("", max_length=_MAX_NAME)
     color: str = Field("", max_length=50)
     ramp: str = Field("", max_length=100)
     classes: int = Field(5, ge=2, le=12)
     method: Literal["quantile", "equal_interval", "jenks", "pretty", "stddev"] = "quantile"
+    center: Optional[float] = Field(None, description="graduated: classes diverging from this value")
     invert: bool = False
     opacity: Optional[float] = Field(None, ge=0, le=1)
     band: int = Field(1, ge=1, le=1000)
     minimum: Optional[float] = None
     maximum: Optional[float] = None
-    width: Optional[float] = Field(None, gt=0, le=20, description="single: line or outline width, point size, in mm")
+    width: Optional[float] = Field(None, gt=0, le=20, description=(
+        "mm: line or outline width, point size; heatmap radius; point_cluster or point_displacement distance; the "
+        "largest proportional symbol; the size of a dot"))
+    per_dot: Optional[float] = Field(None, gt=0, description="dot_density: how much of the field one dot stands for")
     blend: Literal["", "normal", "multiply", "screen", "overlay", "darken", "lighten", "soft_light",
                    "hard_light"] = ""
     cut: Optional[float] = Field(None, gt=0, le=49, description="Raster: percent of the values left out at each end")
     discrete: bool = Field(False, description="pseudocolor: flat steps (classes of them) instead of a continuous ramp")
     azimuth: float = Field(315.0, ge=0, le=360, description="hillshade: where the light comes from, in degrees")
     altitude: float = Field(45.0, ge=0, le=90, description="hillshade: height of the light above the horizon")
-    z_factor: Optional[float] = Field(None, gt=0, le=1000, description="hillshade: stretch of the heights")
+    z_factor: Optional[float] = Field(None, gt=0, le=1000, description="hillshade, 2.5d: stretch of the heights")
     multidirectional: bool = Field(False, description="hillshade: lit from several directions")
 
     @model_validator(mode="after")
@@ -151,8 +156,8 @@ class StyleRequest(BaseModel):
 
 @router.post("/style", response_model=StyleResult)
 def set_layer_style(payload: StyleRequest, request: Request) -> StyleResult:
-    """Draw a layer anew: one symbol, categories, classes, rules, a raster ramp, gray stretch or hillshade, its
-    opacity and how it blends with what is under it."""
+    """Draw a layer anew: one symbol, categories, classes, rules, proportional symbols, a heatmap, clusters, dots,
+    2.5D blocks, a raster ramp, gray stretch or hillshade, its opacity and how it blends with what is under it."""
     options = payload.model_dump(exclude={"layer", "mode"})
     return _accessor(request).set_layer_style(payload.layer, payload.mode, **options)
 
@@ -168,16 +173,35 @@ class LabelsRequest(BaseModel):
     buffer: bool = True
     expression: str = Field("", max_length=2000)
     visible_from_scale: Optional[float] = Field(None, ge=1, le=1e9)
-    placement: Literal["auto", "curved", "horizontal"] = "auto"
+    placement: Literal["auto", "curved", "parallel", "horizontal", "centroid", "free", "around", "perimeter"] = "auto"
+    visible_to_scale: Optional[float] = Field(None, ge=1, le=1e9, description="Hidden when the map is closer")
+    background: str = Field("", max_length=50, description="Color of a box behind the text")
+    background_opacity: Optional[float] = Field(None, ge=0, le=1)
+    callouts: bool = Field(False, description="A line from a label moved away to its feature")
+    font: str = Field("", max_length=100, description="Font family")
+    bold: bool = False
+    italic: bool = False
+    wrap: Optional[int] = Field(None, ge=5, le=200, description="Characters per line at most")
+    priority: Optional[int] = Field(None, ge=0, le=10, description="Labels of a higher priority are placed first")
+    obstacle: Optional[bool] = Field(None, description="false: other labels may cover the features of the layer")
+
+    @model_validator(mode="after")
+    def _check_scales(self) -> "LabelsRequest":
+        if (self.visible_from_scale is not None and self.visible_to_scale is not None
+                and self.visible_to_scale >= self.visible_from_scale):
+            raise ValueError("visible_to_scale must be below visible_from_scale")
+        return self
 
 
 @router.post("/labels", response_model=LabelsResult)
 def set_labels(payload: LabelsRequest, request: Request) -> LabelsResult:
     """Label a vector layer with a field, or turn its labels off."""
+    options = payload.model_dump(exclude={"layer", "field", "enabled", "size", "color", "buffer", "expression",
+                                          "visible_from_scale", "placement"}, exclude_none=True)
     return _accessor(request).set_labels(payload.layer, field=payload.field, enabled=payload.enabled,
                                          size=payload.size, color=payload.color, buffer=payload.buffer,
                                          expression=payload.expression, visible_from_scale=payload.visible_from_scale,
-                                         placement=payload.placement)
+                                         placement=payload.placement, **options)
 
 
 class UpdateFeaturesRequest(BaseModel):

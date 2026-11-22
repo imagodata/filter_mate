@@ -260,7 +260,9 @@ class TestHandlers:
         assert run(accessor, root, "set_labels", layer="communes", field="nom", visible_from_scale=0)[0] is True
 
     @pytest.mark.parametrize("arguments", [
-        {"layer": "communes", "mode": "heatmap"}, {"layer": "communes", "mode": "graduated", "classes": 13},
+        {"layer": "communes", "mode": "bivariate"}, {"layer": "communes", "mode": "graduated", "classes": 13},
+        {"layer": "communes", "mode": "dot_density", "per_dot": 0},
+        {"layer": "communes", "mode": "heatmap", "width": 25},
         {"layer": "communes", "mode": "single", "opacity": 2}, {"layer": "communes", "mode": "graduated",
                                                                 "method": "natural"},
     ])
@@ -721,6 +723,36 @@ class TestHandlers:
         assert not error and answer["placement"] == "curved"
         assert run(accessor, root, "set_labels", layer="communes", field="nom", placement="diagonal")[0] is True
 
+    def test_thematic_maps_and_the_look_of_labels_reach_qgis(self, api):
+        accessor, root = api
+        styles, labels = [], []
+        accessor.set_layer_style = lambda layer, mode, **options: styles.append((mode, options)) \
+            or InMemoryAccessor.set_layer_style(accessor, layer, mode, **options)
+        accessor.set_labels = lambda layer, **options: labels.append(options) \
+            or InMemoryAccessor.set_labels(accessor, layer, **options)
+        for mode, extra in (("heatmap", {"width": 12, "ramp": "Magma"}), ("point_cluster", {"width": 4}),
+                            ("point_displacement", {}), ("proportional", {"field": "pop", "width": 15}),
+                            ("dot_density", {"field": "pop", "per_dot": 100}), ("2.5d", {"field": "h", "z_factor": 3}),
+                            ("graduated", {"field": "change", "center": 0, "ramp": "RdBu"})):
+            error, answer = run(accessor, root, "set_layer_style", layer="communes", mode=mode, **extra)
+            assert not error and answer["mode"] == mode, (mode, answer)
+            assert all(styles[-1][1][key] == value for key, value in extra.items()), (mode, styles[-1])
+        # What the model did not give is passed as None: QGIS keeps its own defaults.
+        assert styles[0][1]["per_dot"] is None and styles[0][1]["center"] is None
+        error, answer = run(accessor, root, "set_labels", layer="communes", field="nom", placement="perimeter",
+                            background="white", background_opacity=0.7, callouts=True, font="Arial", bold=True,
+                            wrap=15, priority=8, obstacle=False, visible_from_scale=100000, visible_to_scale=2000)
+        assert not error and answer["placement"] == "perimeter"
+        assert {key: labels[-1][key] for key in ("background", "background_opacity", "callouts", "font", "bold",
+                                                   "wrap", "priority", "obstacle", "visible_to_scale")} == {
+            "background": "white", "background_opacity": 0.7, "callouts": True, "font": "Arial", "bold": True,
+            "wrap": 15, "priority": 8, "obstacle": False, "visible_to_scale": 2000}
+        error, answer = run(accessor, root, "set_labels", layer="communes", field="nom")
+        assert not error and "obstacle" not in labels[-1] and "wrap" not in labels[-1]  # QGIS defaults kept
+        for wrong in ({"wrap": 2}, {"priority": 11}, {"background_opacity": 2}, {"placement": "spiral"},
+                      {"visible_to_scale": 0}):
+            assert run(accessor, root, "set_labels", layer="communes", field="nom", **wrong)[0] is True, wrong
+
     def test_a_basemap_the_user_added_is_named_by_its_id(self, tmp_path):
         accessor, asked = Accessor(), []
         accessor.add_basemap = lambda platform, name="", extra_domains=None: asked.append((platform, extra_domains)) \
@@ -883,6 +915,17 @@ class TestRoutes:
         response = client.post("/layers/labels", json={"layer": "communes", "field": "nom", "size": 9})
         assert response.status_code == 200 and response.json()["labels"] is True
         assert client.post("/layers/labels", json={"layer": "communes", "size": 100}).status_code == 422
+        response = client.post("/layers/style", json={"layer": "communes", "mode": "dot_density", "field": "pop",
+                                                      "per_dot": 50})
+        assert response.status_code == 200 and response.json()["mode"] == "dot_density"
+        assert client.post("/layers/style", json={"layer": "communes", "mode": "graduated", "field": "pop",
+                                                  "center": 0}).status_code == 200
+        response = client.post("/layers/labels", json={"layer": "communes", "field": "nom", "background": "white",
+                                                       "callouts": True, "wrap": 20, "placement": "free"})
+        assert response.status_code == 200 and response.json()["placement"] == "free"
+        for body in ({"layer": "communes", "visible_from_scale": 1000, "visible_to_scale": 5000},
+                     {"layer": "communes", "priority": 11}, {"layer": "communes", "placement": "spiral"}):
+            assert client.post("/layers/labels", json=body).status_code == 422, body
 
     def test_processing_routes(self, client):
         response = client.get("/processing/algorithms", params={"query": "buffer"})

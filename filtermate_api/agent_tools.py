@@ -126,7 +126,10 @@ LAYER_ARGUMENTS = ("layer", "layers", "layer_name", "source_layer", "target_laye
 # the model gave it.
 _STYLE_DEFAULTS = ("field", "color", "ramp", "classes", "method", "invert", "band", "discrete", "blend",
                    "multidirectional")
-_STYLE_OPTIONAL = ("opacity", "minimum", "maximum", "rules", "cut", "width", "z_factor")
+_STYLE_OPTIONAL = ("opacity", "minimum", "maximum", "rules", "cut", "width", "z_factor", "per_dot", "center")
+# What set_labels takes besides its first arguments: the look of the labels, passed only when the model gave it.
+_LABEL_OPTIONS = ("visible_to_scale", "background", "background_opacity", "callouts", "font", "bold", "italic", "wrap",
+                  "priority", "obstacle")
 
 
 def _one_layer_per_name(accessor: FilterMateAccessor, handler: Handler) -> Handler:
@@ -380,7 +383,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
                                           size=args.get("size"), color=args["color"], buffer=args["buffer"],
                                           expression=args["expression"],
                                           visible_from_scale=args.get("visible_from_scale"),
-                                          placement=args["placement"]))
+                                          placement=args["placement"],
+                                          **{key: args[key] for key in _LABEL_OPTIONS if args.get(key) is not None}))
 
     def create_layout(args: Dict[str, Any]) -> Dict[str, Any]:
         options = {key: args[key] for key in ("title", "page", "orientation", "extent_layer", "legend", "scale_bar",

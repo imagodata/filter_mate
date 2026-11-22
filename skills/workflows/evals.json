@@ -107,6 +107,40 @@
             "tool": "set_layer_style",
             "args": {
               "layer": "communes",
+              "mode": "proportional",
+              "field": "population"
+            },
+            "call_args": {
+              "layer": "communes",
+              "mode": "proportional",
+              "field": "population"
+            }
+          },
+          {
+            "tool": "set_labels",
+            "args": {
+              "layer": "communes"
+            },
+            "call_args": {
+              "layer": "communes",
+              "field": "nom"
+            }
+          },
+          {
+            "tool": "create_layout",
+            "args": {},
+            "call_args": {
+              "name": "Communes par population",
+              "title": "Population des communes",
+              "page": "A4"
+            }
+          }
+        ],
+        [
+          {
+            "tool": "set_layer_style",
+            "args": {
+              "layer": "communes",
               "mode": "graduated",
               "field": "population"
             },
@@ -143,7 +177,8 @@
         "export_layout",
         "export_layers",
         "run_algorithm"
-      ]
+      ],
+      "note": "A count: proportional circles since 5.1.2; graduated colors still pass (a workflow, not the choice)."
     },
     {
       "id": "workflow_start_again",
