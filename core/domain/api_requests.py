@@ -40,7 +40,18 @@ VECTOR_EXPORT_FORMATS: Dict[str, Tuple[str, str]] = {
     "ESRI Shapefile": ("ESRI Shapefile", ".shp"),
     "FlatGeobuf": ("FlatGeobuf", ".fgb"),
     "CSV": ("CSV", ".csv"),
+    "KML": ("LIBKML", ".kml"),
+    "XLSX": ("XLSX", ".xlsx"),
+    "GeoParquet": ("Parquet", ".parquet"),
 }
+# Formats whose GDAL driver a QGIS may lack: the drivers tried, in order. None there: the export is refused.
+OPTIONAL_VECTOR_DRIVERS: Dict[str, Tuple[str, ...]] = {
+    "KML": ("LIBKML", "KML"),
+    "XLSX": ("XLSX",),
+    "GeoParquet": ("Parquet",),
+}
+# Style files written beside the exported files; none for a spreadsheet (CSV, XLSX).
+STYLE_EXPORT_FORMATS: Tuple[str, ...] = ("none", "qml", "sld")
 RASTER_EXPORT_FORMATS: Tuple[str, ...] = ("COG", "GTiff")
 POINT_CLOUD_EXPORT_FORMATS: Tuple[str, ...] = ("LAZ", "COPC", "LAS", "GPKG", "CSV")
 
@@ -332,8 +343,11 @@ class OperationReport:
         skipped: ``{layer_name: reason}`` for the layers left out on purpose
             (not filterable, not in the project, the source itself).
         error: Error that stopped the whole operation, empty otherwise.
-        outputs: Files written, ``{layer_name: path}`` (exports).
+        outputs: Files written, ``{layer_name: path}`` (exports); in a zip, the name of the file in it.
         details: Free information (timings, source geometry statistics).
+        package: The one file holding an export: its zip, or else its single GeoPackage.
+        tables: ``{layer_name: table}`` of the layers written into the single GeoPackage.
+        styles: ``{layer_name: path}`` of the style files written beside the exported files.
     """
 
     done: Dict[str, str] = field(default_factory=dict)
@@ -342,6 +356,9 @@ class OperationReport:
     error: str = ""
     outputs: Dict[str, str] = field(default_factory=dict)
     details: Dict = field(default_factory=dict)
+    package: str = ""
+    tables: Dict[str, str] = field(default_factory=dict)
+    styles: Dict[str, str] = field(default_factory=dict)
 
     @property
     def ok(self) -> bool:
@@ -357,8 +374,8 @@ class OperationReport:
         return list(self.done.values())
 
     def to_dict(self) -> Dict:
-        """JSON-compatible view, layers by name (public API, REST)."""
-        return {
+        """JSON-compatible view, layers by name (public API, REST); the keys of a package only when set."""
+        data = {
             "ok": self.ok,
             "done": self.done_names,
             "failed": dict(self.failed),
@@ -367,6 +384,10 @@ class OperationReport:
             "outputs": dict(self.outputs),
             "details": dict(self.details),
         }
+        for key, value in (("package", self.package), ("tables", dict(self.tables)), ("styles", dict(self.styles))):
+            if value:
+                data[key] = value
+        return data
 
 
 _RASTER_KEYS = ("band", "mode", "minimum", "maximum", "classes", "expression", "derivative", "segments")

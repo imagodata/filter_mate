@@ -1,0 +1,77 @@
+{
+  "cases": [
+    {
+      "id": "deliver_zip_qgis_styles",
+      "prompt": "Filtre les communes du 31 et envoie-les-moi en zip avec leurs styles, c'est pour un collègue sous QGIS.",
+      "expect": [
+        [
+          {
+            "tool": "apply_filter",
+            "args": {"layer_name": "communes", "expression": {"contains": ["dept", "31"]}},
+            "call_args": {"layer_name": "communes", "expression": "\"dept\" = '31'"}
+          },
+          {
+            "tool": "export_layers",
+            "args": {"layers": ["communes"], "styles": "qml", "zip": true},
+            "call_args": {"layers": ["communes"], "vector_format": "GPKG", "styles": "qml", "zip": true,
+                          "package_name": "communes_31"}
+          }
+        ]
+      ],
+      "forbid": ["run_pyqgis"],
+      "touches": ["communes"]
+    },
+    {
+      "id": "deliver_spreadsheet",
+      "prompt": "Exporte les routes pour que je les ouvre dans Excel.",
+      "expect": [
+        [
+          {
+            "tool": "export_layers",
+            "args": {"layers": ["routes"], "vector_format": "XLSX"},
+            "call_args": {"layers": ["routes"], "vector_format": "XLSX"}
+          }
+        ]
+      ],
+      "forbid": ["run_pyqgis", "apply_filter"],
+      "touches": ["routes"]
+    },
+    {
+      "id": "deliver_one_geopackage",
+      "prompt": "Mets les bâtiments et les parcelles dans un seul GeoPackage.",
+      "expect": [
+        [
+          {
+            "tool": "export_layers",
+            "args": {"layers": ["batiments", "parcelles"], "single_file": true},
+            "call_args": {"layers": ["batiments", "parcelles"], "vector_format": "GPKG", "single_file": true}
+          }
+        ]
+      ],
+      "forbid": ["run_pyqgis"],
+      "touches": ["batiments", "parcelles"]
+    },
+    {
+      "id": "deliver_google_earth",
+      "prompt": "Je voudrais voir les cours d'eau dans Google Earth, tu peux me faire le fichier ?",
+      "expect": [
+        [
+          {
+            "tool": "export_layers",
+            "args": {"layers": ["cours_eau"], "vector_format": "KML"},
+            "call_args": {"layers": ["cours_eau"], "vector_format": "KML"}
+          }
+        ]
+      ],
+      "forbid": ["run_pyqgis"],
+      "touches": ["cours_eau"]
+    },
+    {
+      "id": "deliver_advice_is_not_an_export",
+      "trap": true,
+      "prompt": "Quel format me conseilles-tu pour envoyer les parcelles à un bureau d'études qui travaille sous QGIS ?",
+      "expect": [],
+      "forbid": ["export_layers", "run_pyqgis"]
+    }
+  ]
+}

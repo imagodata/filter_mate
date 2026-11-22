@@ -821,7 +821,9 @@ class QGISFilterMateAccessor:
     def _operation_result(report) -> OperationResult:
         error, failed = _client_messages(report)
         return OperationResult(done=report.done_names, failed=failed, skipped=dict(report.skipped),
-                               error=error, outputs=dict(report.outputs))
+                               error=error, outputs=dict(report.outputs),
+                               package=getattr(report, "package", "") or None,
+                               tables=dict(getattr(report, "tables", {})), styles=dict(getattr(report, "styles", {})))
 
     def _mark_applied(self, layer: str, source: str) -> None:
         self._last_applied_at = datetime.now(timezone.utc).isoformat()
@@ -890,11 +892,14 @@ class QGISFilterMateAccessor:
         return self._operation_result(report)
 
     def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
-                      point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
+                      point_cloud_format: str, crs: Optional[str] = None, styles: str = "none",
+                      single_file: bool = False, zip_archive: bool = False,
+                      package_name: str = "export") -> OperationResult:
         return run_on_main_thread(self._export_main_thread, list(layers), folder, vector_format, raster_format,
-                                  point_cloud_format, crs)
+                                  point_cloud_format, crs, styles, single_file, zip_archive, package_name)
 
-    def _export_main_thread(self, layers, folder, vector_format, raster_format, point_cloud_format, crs):
+    def _export_main_thread(self, layers, folder, vector_format, raster_format, point_cloud_format, crs,
+                            styles="none", single_file=False, zip_archive=False, package_name="export"):
         try:
             operations = _plugin_module("adapters.public_api.operations")
         except ImportError as exc:
@@ -906,7 +911,9 @@ class QGISFilterMateAccessor:
             if not output_crs.isValid():
                 return OperationResult(error="invalid CRS")
         report = operations.export_layers(layers, folder, vector_format=vector_format, raster_format=raster_format,
-                                          point_cloud_format=point_cloud_format, crs=output_crs)
+                                          point_cloud_format=point_cloud_format, crs=output_crs, styles=styles,
+                                          single_file=single_file, zip_archive=zip_archive,
+                                          package_name=package_name)
         _report_busy(report)
         return self._operation_result(report)
 

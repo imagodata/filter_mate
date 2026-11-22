@@ -26,15 +26,21 @@ class ExportRequestBody(BaseModel):
     layers: List[LayerName] = Field(..., min_length=1, max_length=1000,
                                     description="Layers of any kind, exported as filtered now")
     subfolder: str = Field(default="export", description="Sub-folder of the server export root (a/b allowed, no ..)")
-    vector_format: Literal["GPKG", "GeoJSON", "ESRI Shapefile", "FlatGeobuf", "CSV"] = "GPKG"
+    vector_format: Literal["GPKG", "GeoJSON", "ESRI Shapefile", "FlatGeobuf", "CSV", "KML", "XLSX",
+                           "GeoParquet"] = "GPKG"
     raster_format: Literal["COG", "GTiff"] = "COG"
     point_cloud_format: Literal["LAZ", "COPC", "LAS", "GPKG", "CSV"] = "LAZ"
     crs: Optional[str] = Field(default=None, max_length=64, description="Output CRS, e.g. EPSG:2154 (null = layer CRS)")
+    styles: Literal["none", "qml", "sld"] = Field(default="none", description="A style file beside each file")
+    single_file: bool = Field(default=False, description="GPKG: every vector layer in one GeoPackage")
+    zip: bool = Field(default=False, description="Every file written in one zip, never overwritten")
+    package_name: str = Field(default="export", max_length=100, description="Name of the zip or single GeoPackage")
 
 
 @router.post("", response_model=OperationResult)
 def export_layers(payload: ExportRequestBody, request: Request) -> OperationResult:
-    """Write each layer (vector, raster, point cloud) as filtered now, one file per layer."""
+    """Write each layer (vector, raster, point cloud) as filtered now, one file per layer, or packed (2026-11-22):
+    the vector layers in one GeoPackage, everything in one zip."""
     try:
         root = prepare_export_root(request.app.state.config.export_root)
     except ExportRootError as exc:
@@ -48,7 +54,9 @@ def export_layers(payload: ExportRequestBody, request: Request) -> OperationResu
     accessor: FilterMateAccessor = request.app.state.accessor
     result = accessor.export_layers(
         layers=payload.layers, folder=str(folder), vector_format=payload.vector_format,
-        raster_format=payload.raster_format, point_cloud_format=payload.point_cloud_format, crs=payload.crs)
+        raster_format=payload.raster_format, point_cloud_format=payload.point_cloud_format, crs=payload.crs,
+        styles=payload.styles, single_file=payload.single_file, zip_archive=payload.zip,
+        package_name=payload.package_name)
     if result.error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Export failed: {result.error}")
     return result

@@ -3654,7 +3654,7 @@
   {
    "name": "export_layers",
    "title": "Export filtered layers",
-   "description": "Write layers, as filtered now, to files on the QGIS machine below its export root; a file of the same name is overwritten. Returns done, outputs ({layer name: file path}), failed and skipped.",
+   "description": "Write layers, as filtered now, to files on the QGIS machine below its export root; a file of the same name is overwritten, a zip never. Returns done, outputs ({layer name: file}), package, tables, styles, failed and skipped.",
    "read_only": false,
    "destructive": true,
    "idempotent": true,
@@ -3683,7 +3683,10 @@
        "GeoJSON",
        "ESRI Shapefile",
        "FlatGeobuf",
-       "CSV"
+       "CSV",
+       "KML",
+       "XLSX",
+       "GeoParquet"
       ],
       "type": "string"
      },
@@ -3718,6 +3721,32 @@
       ],
       "default": null,
       "description": "Omit: each layer's"
+     },
+     "styles": {
+      "default": "none",
+      "description": "A style file beside each",
+      "enum": [
+       "none",
+       "qml",
+       "sld"
+      ],
+      "type": "string"
+     },
+     "single_file": {
+      "default": false,
+      "description": "GPKG: all vector layers in one",
+      "type": "boolean"
+     },
+     "zip": {
+      "default": false,
+      "description": "All files in one zip",
+      "type": "boolean"
+     },
+     "package_name": {
+      "default": "export",
+      "description": "Of the zip or single GPKG",
+      "maxLength": 100,
+      "type": "string"
      }
     },
     "required": [
