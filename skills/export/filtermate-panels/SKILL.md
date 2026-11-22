@@ -57,6 +57,9 @@ What the panel keeps, set as the user sets it there, then moved by them:
 - point cloud: classes (codes the cloud holds, from describe_layer), or ranges [{attribute, minimum, maximum}] on its
   attributes (Z, Intensity...), not both.
 
+Features chosen in the lists of EXPLORING (to look at them, or as the source the user filters from): sync on, then
+select_features with the expression; one feature goes in the single selection, several in the multiple one.
+
 To filter other layers by them, cross_filter keeps its own arguments: the panel is for the user to look and adjust.
 
 A tool on the map waits for the user's click: say in one sentence what to click. The map holds one tool at a time;

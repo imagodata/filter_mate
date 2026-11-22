@@ -1363,6 +1363,7 @@ class AgentChatController(QObject):
         slider or EXPLORING for a threshold (core/agent/exploring_drive.tuning_offer); never when the user turned
         both ways off in the Tools tab."""
         from ...core.agent.exploring_drive import tuning_offer
+        offered = self._tuning_offered  # this conversation's: a call of an engine left that ends later writes there
 
         def run(arguments):
             result = handler(arguments)
@@ -1372,8 +1373,8 @@ class AgentChatController(QObject):
             layer = found.id() if found is not None else reference  # a name and an id of one layer are one layer
             note = tuning_offer(arguments.get("expression"))
             ways_off = all(self._policy.turned_off(name) for name in (CREATE_WIDGET, "set_exploring"))
-            if note and isinstance(result, dict) and layer not in self._tuning_offered and not ways_off:
-                self._tuning_offered.add(layer)
+            if note and isinstance(result, dict) and layer not in offered and not ways_off:
+                offered.add(layer)
                 result = dict(result, offer=note)
             return result
         return run

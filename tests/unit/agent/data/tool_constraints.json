@@ -2181,33 +2181,61 @@
     "type": "string"
    },
    "point_cloud": {
-    "additionalProperties": true,
-    "default": {},
-    "type": "object"
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
    },
    "press": {
-    "default": [],
-    "items": {
-     "type": "string"
-    },
-    "maxItems": 4,
-    "type": "array"
+    "anyOf": [
+     {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 4,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
    },
    "raster": {
-    "additionalProperties": true,
-    "default": {},
-    "type": "object"
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
    },
    "show": {
     "default": false,
     "type": "boolean"
    },
    "tools": {
-    "additionalProperties": {
-     "type": "boolean"
-    },
-    "default": {},
-    "type": "object"
+    "anyOf": [
+     {
+      "additionalProperties": {
+       "type": "boolean"
+      },
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
    }
   },
   "type": "object"

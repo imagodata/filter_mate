@@ -853,14 +853,14 @@ def build_server(client: FilterMateClient) -> Any:
     async def set_exploring(
         layer: Annotated[str, Field(max_length=1000, description=(
             "Layer to show in EXPLORING, id or name; default: the one it shows"))] = "",
-        tools: Annotated[Dict[str, bool], Field(description="Buttons of the rail on (true) or off (false)")] = {},
-        press: Annotated[List[str], Field(max_length=4, description="Buttons pressed once")] = [],
+        tools: Annotated[Optional[Dict[str, bool]], Field(description="Buttons of the rail on (true) or off (false)")] = None,
+        press: Annotated[Optional[List[str]], Field(max_length=4, description="Buttons pressed once")] = None,
         show: Annotated[bool, Field(description="Open EXPLORING in front: only when the user asks to see it")] = False,
-        raster: Annotated[Dict[str, Any], Field(description=(
+        raster: Annotated[Optional[Dict[str, Any]], Field(description=(
             "band, quantity (value, slope_degrees, slope_percent, aspect, hillshade, roughness), minimum, maximum "
-            "(null: no bound)"))] = {},
-        point_cloud: Annotated[Dict[str, Any], Field(description=(
-            "classes [codes], or ranges [{attribute, minimum, maximum}]"))] = {},
+            "(null: no bound)"))] = None,
+        point_cloud: Annotated[Optional[Dict[str, Any]], Field(description=(
+            "classes [codes], or ranges [{attribute, minimum, maximum}]"))] = None,
     ) -> Dict[str, Any]:
         """Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, set what its panel keeps (the
         range of a raster on its histogram, the classes or ranges of a point cloud), turn the buttons of its rail on or

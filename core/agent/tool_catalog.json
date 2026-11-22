@@ -2231,21 +2231,35 @@
       "type": "string"
      },
      "tools": {
-      "additionalProperties": {
-       "type": "boolean"
-      },
-      "default": {},
-      "description": "Buttons of the rail on (true) or off (false)",
-      "type": "object"
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "boolean"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Buttons of the rail on (true) or off (false)"
      },
      "press": {
-      "default": [],
-      "description": "Buttons pressed once",
-      "items": {
-       "type": "string"
-      },
-      "maxItems": 4,
-      "type": "array"
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "maxItems": 4,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Buttons pressed once"
      },
      "show": {
       "default": false,
@@ -2253,16 +2267,30 @@
       "type": "boolean"
      },
      "raster": {
-      "additionalProperties": true,
-      "default": {},
-      "description": "band, quantity (value, slope_degrees, slope_percent, aspect, hillshade, roughness), minimum, maximum (null: no bound)",
-      "type": "object"
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "band, quantity (value, slope_degrees, slope_percent, aspect, hillshade, roughness), minimum, maximum (null: no bound)"
      },
      "point_cloud": {
-      "additionalProperties": true,
-      "default": {},
-      "description": "classes [codes], or ranges [{attribute, minimum, maximum}]",
-      "type": "object"
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "classes [codes], or ranges [{attribute, minimum, maximum}]"
      }
     },
     "type": "object"
