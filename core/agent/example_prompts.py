@@ -29,15 +29,21 @@ class Facts:
     """
 
     known: bool = False
-    layers: int = 0  # every layer of the project
-    tiles: int = 0  # of them, the web map images (XYZ, WMS...): a basemap is not data to work on
+    layers: int = 0  # every valid layer of the project
+    tiles: int = 0  # of them, the basemaps: web map images (XYZ, WMS...) and vector tiles, not data to work on
     vectors: int = 0
-    rasters: int = 0  # not the web map images
+    rasters: int = 0  # of values or colours a filter can read: not the web map images
     point_clouds: int = 0
     active: str = ""  # kind of the active layer: "vector", "raster", "point_cloud", "other"; "" when there is none
     selected: int = 0  # features selected, all vector layers together
-    filtered: int = 0  # layers with a filter (a subset string) set
+    filtered: int = 0  # layers with a filter: a subset string, or a source FilterMate swapped for a clipped copy
     remote: int = 0  # vector layers read from a server or a database
+    # Added for the requests a tool refuses or that only make sense for some layers (appended: positions kept).
+    elevations: int = 0  # rasters that can be a terrain model: one band of numbers, not a picture
+    polygons: int = 0  # vector layers of polygons
+    active_elevation: bool = False  # the active layer is one of them
+    active_local: bool = True  # the active layer is not read from a web service (WFS, OGC API, ArcGIS)
+    selected_local: int = 0  # features selected on layers that are not web services: the tools read those
 
     @classmethod
     def unknown(cls) -> "Facts":
@@ -48,12 +54,16 @@ class Facts:
         if not self.known:
             return frozenset()
         found = {"layers" if self.layers else "no_layers"}
-        flags = (("data", self.layers > self.tiles), ("several", self.layers - self.tiles > 1),
+        data = self.vectors + self.rasters + self.point_clouds
+        flags = (("data", data > 0), ("no_data", data == 0), ("no_basemap", self.tiles == 0), ("several", data > 1),
                  ("vector", self.vectors > 0), ("many_vectors", self.vectors > 1), ("raster", self.rasters > 0),
                  ("point_cloud", self.point_clouds > 0), ("selection", self.selected > 0),
-                 ("filter", self.filtered > 0), ("remote", self.remote > 0),
+                 ("local_selection", self.selected_local > 0), ("filter", self.filtered > 0),
+                 ("remote", self.remote > 0), ("elevation", self.elevations > 0), ("polygons", self.polygons > 0),
                  ("active_vector", self.active == "vector"), ("active_raster", self.active == "raster"),
-                 ("active_point_cloud", self.active == "point_cloud"))
+                 ("active_point_cloud", self.active == "point_cloud"),
+                 ("active_elevation", self.active == "raster" and self.active_elevation),
+                 ("active_local", bool(self.active) and self.active_local))
         found.update(name for name, true in flags if true)
         return frozenset(found)
 
@@ -67,9 +77,11 @@ class Example:
     """One request: its key, what it is about (``PROJECT`` or ``DATA``), its kind, what it supposes, the countries it
     needs, and the tools of the agent that carry it out (names of core/agent/tool_catalog.json).
 
-    ``needs`` are words of ``Facts.tokens``: layers, no_layers, data (a layer that is not a web map image), several
-    (two such layers), vector, many_vectors, raster, point_cloud, active_vector, active_raster, active_point_cloud,
-    selection, filter, remote."""
+    ``needs`` are words of ``Facts.tokens``: layers, no_layers, data (a vector, raster or point cloud layer: not a
+    basemap), no_data, no_basemap, several (two data layers), vector, many_vectors, raster, point_cloud, polygons,
+    elevation (a raster that can be a terrain model), active_vector, active_raster, active_point_cloud,
+    active_elevation, active_local (not a web service), selection, local_selection (on layers that are not web
+    services), filter, remote."""
 
     key: str
     group: str
@@ -99,9 +111,9 @@ CATALOG: Tuple[Example, ...] = (
     _p("cross_near", "near", ("many_vectors",), "cross_filter"),
     _p("zoom_selection", "zoom", ("selection",), "zoom_to"),
     _p("zoom_filtered", "zoom", ("filter",), "filter_state", "zoom_to"),
-    _p("sel_attributes", "attributes", ("selection",), "sample_features"),
-    _p("sel_stats", "stats", ("selection",), "layer_statistics"),
-    _p("stats_active", "stats", ("active_vector",), "layer_statistics"),
+    _p("sel_attributes", "attributes", ("local_selection",), "sample_features"),
+    _p("sel_stats", "stats", ("local_selection",), "layer_statistics"),
+    _p("stats_active", "stats", ("active_vector", "active_local"), "layer_statistics"),
     _p("filter_state", "filters", ("filter",), "filter_state", "layer_statistics"),
     _p("clear_all", "unfilter", ("filter",), "clear_filters"),
     _p("color_by", "style", ("active_vector",), "set_layer_style"),
@@ -111,12 +123,12 @@ CATALOG: Tuple[Example, ...] = (
     _p("export_active", "export", ("active_vector",), "export_layers"),
     _p("export_remote", "export", ("remote",), "export_layers"),
     _p("lidar_export", "export", ("point_cloud",), "export_layers"),
-    _p("slope", "terrain", ("active_raster",), "run_algorithm"),
-    _p("hillshade", "shade", ("active_raster",), "duplicate_layer", "set_layer_style"),
-    _p("contours", "contours", ("active_raster",), "contour_lines"),
+    _p("slope", "terrain", ("active_elevation",), "run_algorithm"),
+    _p("hillshade", "shade", ("active_elevation",), "duplicate_layer", "set_layer_style"),
+    _p("contours", "contours", ("active_elevation",), "contour_lines"),
     _p("raster_stats", "raster_stats", ("active_raster",), "run_algorithm"),
-    _p("slope_filter", "terrain_filter", ("raster", "vector"), "cross_filter"),
-    _p("zonal", "zonal", ("raster", "vector"), "run_algorithm"),
+    _p("slope_filter", "terrain_filter", ("elevation", "vector"), "cross_filter"),
+    _p("zonal", "zonal", ("raster", "polygons"), "run_algorithm"),
     _p("lidar_ground", "cloud_filter", ("point_cloud",), "point_cloud_filter"),
     _p("lidar_inside", "cloud_cross", ("point_cloud", "selection"), "cross_filter"),
     _p("join", "join", ("many_vectors",), "join_layers"),
@@ -129,8 +141,8 @@ CATALOG: Tuple[Example, ...] = (
     _d("osm_cafes", "osm", (), (), "add_osm_features"),
     _d("osm_cycle", "osm", (), (), "add_osm_features"),
     _d("osm_trees", "osm", (), (), "add_osm_features"),
-    _d("dark_basemap", "basemap", (), ("layers",), "add_basemap"),
-    _d("add_basemap", "basemap", (), ("no_layers",), "add_basemap"),
+    _d("dark_basemap", "basemap", (), ("data",), "add_basemap"),
+    _d("add_basemap", "basemap", (), ("no_data", "no_basemap"), "add_basemap"),
     _d("sentinel", "satellite", (), (), "search_imagery", "add_layer"),
     _d("zoom_park", "places", (), (), "find_place", "zoom_to"),
     _d("ods_toilets", "open_data", (), (), "search_open_data", "add_layer"),
@@ -185,9 +197,9 @@ def eligible(locale: str, facts: Optional[Facts] = None) -> Tuple[Example, ...]:
 
 # What a request supposes beyond a layer being there: the selection or a filter (the state moved), then the kind of
 # the active layer (what the user looks at); the others (a layer, a vector layer) are for any project.
-_MOVED = frozenset({"selection", "filter"})
-_ACTIVE = frozenset({"active_vector", "active_raster", "active_point_cloud"})  # all true or false together with the kind
-_PRESENCE = frozenset({"layers", "data", "several", "vector", "many_vectors"})
+_MOVED = frozenset({"selection", "local_selection", "filter"})
+_ACTIVE = frozenset({"active_vector", "active_raster", "active_point_cloud", "active_elevation"})
+_PRESENCE = frozenset({"layers", "data", "several", "vector", "many_vectors", "active_local"})
 
 
 def pick(locale: str, previous: Iterable[str] = (), count: int = SHOWN, rng: Optional[random.Random] = None,
