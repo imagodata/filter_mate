@@ -211,6 +211,48 @@ def main():
           "table" in made["items"] and made["extent_from"] == "layer", made)
     check("template: refuses an unknown one", refused(lambda: layouts.create_layout("x", template="nope")))
 
+    # --- 2026-11-22 review: names and expressions of the model stay where they belong
+    escape = os.path.join(work, "escape")
+    os.makedirs(escape)
+    layouts.set_atlas("Carte", "communes", file_name=f"'{escape}/evil_' || @atlas_featurenumber")
+    sandboxed = layouts.export_layout("Carte", folder, "png", dpi=72, atlas=True)
+    check("atlas: a file name with a path stays in the folder of the atlas",
+          not os.listdir(escape) and sandboxed["files"] >= 1, (os.listdir(escape), sandboxed))
+    check("atlas: the export leaves the file name of the layout as it was",
+          project.layoutManager().layoutByName("Carte").atlas().filenameExpression().startswith("'" + escape))
+    for call, label in ((lambda: layouts.set_atlas("Carte", "communes", filter_expression="env('HOME') <> ''"),
+                         "env() in a filter"),
+                        (lambda: layouts.set_atlas("Carte", "communes", page_name="eval('1')"), "eval() in a name"),
+                        (lambda: layouts.edit_layout("Carte", [{"do": "add_text", "text": "[% env('HOME') %]"}]),
+                         "env() in a text"),
+                        (lambda: layouts.create_layout("Titre", title="[% env('HOME') %]"), "env() in a title")):
+        check(f"refuses {label}", refused(call))
+    current = project.layoutManager().layoutByName("Carte")
+    refused(lambda: layouts.edit_layout("Carte", [{"do": "remove", "ref": "nope"}]))
+    check("edit: a change refused before any other keeps the same layout object (its designer stays open)",
+          project.layoutManager().layoutByName("Carte") is current)
+    tables_before = len(project.layoutManager().layoutByName("Carte").multiFrames())
+    table = layouts.edit_layout("Carte", [{"do": "add_table", "layer": "communes", "columns": "nom"}])
+    table_ref = table["done"][0]["ref"]
+    layouts.edit_layout("Carte", [{"do": "remove", "ref": table_ref}])
+    refs = {item["ref"] for item in layouts.describe_layout("Carte")["items"]}
+    check("edit: a table removed is gone from the page, frames and all (one column given as text)",
+          table_ref not in refs and len(project.layoutManager().layoutByName("Carte").multiFrames()) ==
+          tables_before, (table_ref, refs))
+    from filter_mate.adapters.public_api import charts as layout_charts
+    svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="40"><rect width="64" height="40"/></svg>'
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("u1", "add_chart_to_layout", {"chart_id": "c1", "layout": "Carte"}))
+    layout_charts.add_to_layout("Carte", svg, {"kind": "bar", "title": "t"}, 0.625)
+    recorder.before_call(ToolCallPart("u2", "set_atlas", {"layout": "Carte"}), 1)
+    layouts.set_atlas("Carte", "communes", page_name="\"nom\"")
+    effects = recorder.finish()
+    apply_effects(effects, undo=True)
+    charts_left = [item for item in project.layoutManager().layoutByName("Carte").items()
+                   if hasattr(item, "customProperty") and item.customProperty("filtermate/chart")]
+    check("undo: a chart and an atlas of one turn both go", not charts_left, [effect[0] for effect in effects])
+    apply_effects(effects, undo=False)
+
     off = layouts.set_atlas("Carte", enabled=False)
     check("atlas: turned off", off == {"layout": "Carte", "atlas": False} and
           not project.layoutManager().layoutByName("Carte").atlas().enabled(), off)

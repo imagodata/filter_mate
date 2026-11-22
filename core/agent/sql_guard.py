@@ -32,6 +32,19 @@ PROCESSING_FUNCTIONS = EXPRESSION_FUNCTIONS | frozenset({
     "pi", "point_on_surface", "power", "radians", "rpad", "scale_linear", "simplify", "sin", "sqrt", "tan", "title",
     "to_time", "translate", "x_max", "x_min", "y_max", "y_min", "z", "m",
 })
+# What a print layout (an atlas filter, a page or file name, a text) and an attribute form (a default value, a
+# constraint) need on top (2026-11-22, review: they took any expression, env() and sqlite_fetch_and_increment() too):
+# dates and formats, and the variables of an atlas page, a layout and the user. Still nothing that reads another
+# layer, a file or the environment, nor evaluates text.
+LAYOUT_FUNCTIONS = PROCESSING_FUNCTIONS | frozenset({
+    "format_date", "now", "to_datetime", "day_of_week", "hour", "minute", "second", "age", "regexp_replace",
+    "regexp_substr", "strpos", "wordwrap", "array", "array_to_string", "if",
+})
+LAYOUT_VARIABLES = EXPRESSION_VARIABLES | frozenset({
+    "@atlas_featurenumber", "@atlas_pagename", "@atlas_totalfeatures", "@atlas_featureid", "@atlas_layername",
+    "@layout_name", "@layout_page", "@layout_numpages", "@project_title", "@layer_name", "@row_number",
+    "@user_account_name", "@user_full_name", "@map_scale",
+})
 CAST_TYPES = frozenset({
     "bigint", "boolean", "char", "date", "double", "float", "int", "int4", "int8", "integer", "numeric", "precision",
     "real", "smallint", "text", "time", "timestamp", "timestamptz", "varchar",
@@ -101,6 +114,25 @@ def expression_problem(expression: str) -> str:
     return _problem(expression, EXPRESSION_FUNCTIONS, EXPRESSION_VARIABLES)
 
 
+def layout_expression_problem(expression: str) -> str:
+    """Why ``expression`` cannot be accepted in a layout or a form, written by a model; "" when it can."""
+    return _problem(expression, LAYOUT_FUNCTIONS, LAYOUT_VARIABLES)
+
+
+def text_expressions_problem(text: str) -> str:
+    """Why the ``[% ... %]`` of a text (a label of a layout) cannot be accepted; "" when every one can."""
+    start = text.find("[%")
+    while start >= 0:
+        end = text.find("%]", start + 2)
+        if end < 0:
+            return "a [% is never closed by %]"
+        problem = layout_expression_problem(text[start + 2:end])
+        if problem:
+            return f"[% {text[start + 2:end].strip()[:60]} %]: {problem}"
+        start = text.find("[%", end + 2)
+    return ""
+
+
 def processing_expression_problem(expression: str) -> str:
     """Why ``expression`` cannot be accepted as a Processing formula written by a model; "" when it can."""
     return _problem(expression, PROCESSING_FUNCTIONS, EXPRESSION_VARIABLES)
@@ -128,7 +160,7 @@ def _problem(expression: str, functions: frozenset, variables: frozenset) -> str
             index, previous = end, "value"
         elif char in _DIGITS:
             index, previous = _number_end(expression, index), "value"
-        elif char == "$" and variables:
+        elif char in "$@" and variables:
             end = _word_end(expression, index + 1)
             if expression[index:end].lower() not in variables:
                 return f"the variable {expression[index:end]} is not accepted"

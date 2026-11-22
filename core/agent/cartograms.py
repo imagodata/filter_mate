@@ -18,7 +18,7 @@ last point repeats the first.
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 KINDS = ("contiguous", "noncontiguous", "dorling", "demers")
 MAX_ITERATIONS = 30
@@ -27,6 +27,7 @@ MAX_WORK = 120_000_000  # polygons x vertices x iterations of a contiguous carto
 MAX_SYMBOLS = 2000  # circles or squares: the pairs are compared at each step
 SYMBOL_STEPS = 120
 SYMBOL_SHARE = 0.5  # of the area of the layer covered by the circles or squares
+MAX_SYMBOL_WORK = 40_000_000  # pairs compared x steps: 2,000 symbols get 10 steps, 600 the 120 (2026-11-22, review)
 
 
 class CartogramError(ValueError):
@@ -189,17 +190,19 @@ def noncontiguous(features: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return made
 
 
-def symbols(features: Sequence[Dict[str, Any]], squares: bool = False, steps: int = SYMBOL_STEPS
-            ) -> List[Tuple[float, float, float]]:
+def symbols(features: Sequence[Dict[str, Any]], squares: bool = False, steps: int = SYMBOL_STEPS,
+            total_area: Optional[float] = None) -> List[Tuple[float, float, float]]:
     """``(x, y, size)`` per feature: a circle (size its radius) or a square (size half its side) whose area is its
-    value, moved apart until none overlap and pulled back towards its feature."""
+    value, moved apart until none overlap and pulled back towards its feature. ``total_area``: what the symbols
+    share (``SYMBOL_SHARE`` of it); the area of the polygons by default, the extent of points for points."""
     np = _np()
     values = np.array(_values(features))
     if len(features) > MAX_SYMBOLS:
         raise CartogramError(f"{len(features)} features: {MAX_SYMBOLS} at most for circles or squares, filter first")
     areas = [area(feature["parts"]) for feature in features]
     centres = np.array([centroid(feature["parts"]) for feature in features], dtype=float)
-    total_area = sum(areas) or 1.0
+    total_area = total_area if total_area and total_area > 0 else (sum(areas) or 1.0)
+    steps = max(5, min(steps, int(MAX_SYMBOL_WORK / max(1, len(features)) ** 2)))
     scale = math.sqrt(SYMBOL_SHARE * total_area / float(values.sum()))
     sizes = np.sqrt(values) * scale / (1.0 if squares else math.sqrt(math.pi))
     if squares:

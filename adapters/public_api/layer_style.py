@@ -639,6 +639,8 @@ def _dot_density(layer, field: str, color, per_dot: Optional[float], dot: Option
     elif not math.isfinite(float(per_dot)) or float(per_dot) <= 0:
         raise ValueError('per_dot is how much of the field one dot stands for, above zero')
     per_dot = float(per_dot)
+    if float(_number(per_dot)) <= 0:  # 1e-18 was written 0 in the expression: no dot drawn (2026-11-22, review)
+        raise ValueError('per_dot is too small to be written: give a larger one')
     if top / per_dot > MAX_DOTS:
         raise ValueError(f"one dot for {per_dot:g} puts more than {MAX_DOTS} dots in a polygon: give a larger per_dot")
     count = QgsProperty.fromExpression(

@@ -38,6 +38,8 @@ def _layout(name: str):
     if layout is None:
         names = layout_names()
         raise ValueError(f"no layout {name!r} in the project" + (f": {', '.join(names)}" if names else ""))
+    if type(layout).__name__ == 'QgsReport':  # a report: no page of its own, no atlas
+        raise ValueError(f"{name!r} is a report, not a print layout: these tools read and change print layouts")
     return layout
 
 
@@ -167,6 +169,7 @@ def create_layout(name: str, title: str = '', page: str = 'A4', orientation: str
     items = ['map']
     if title:
         label = QgsLayoutItemLabel(layout)
+        _check_text(str(title))
         label.setText(' '.join(str(title).split())[:200])
         font = QFont()
         font.setPointSize(20)
@@ -366,8 +369,22 @@ def _export_atlas(layout, folder: str, safe: str, file_format: str, settings, si
     while os.path.exists(target):
         target, index = os.path.join(folder, f"{safe}_atlas_{index}"), index + 1
     os.makedirs(target)
-    if not atlas.filenameExpression():
-        atlas.setFilenameExpression(f"'{safe.replace(chr(39), '_')}_' || lpad(@atlas_featurenumber, 3, '0')")
+    # The name of each file, made of the expression of the atlas, never a path: QGIS joins it to the folder, and a
+    # name with a / or a .. wrote anywhere on the disk (2026-11-22, review). Put back as it was afterwards: an export
+    # changes nothing of the layout.
+    original = atlas.filenameExpression()
+    named = original or f"'{safe.replace(chr(39), '_')}_' || lpad(@atlas_featurenumber, 3, '0')"
+    atlas.setFilenameExpression(
+        f"replace(replace(replace(to_string({named}), '/', '_'), '\\\\', '_'), ':', '_')")
+    try:
+        return _write_atlas(atlas, target, safe, file_format, settings, single_file, count)
+    finally:
+        atlas.setFilenameExpression(original)
+
+
+def _write_atlas(atlas, target: str, safe: str, file_format: str, settings, single_file: bool,
+                 count: int) -> Dict[str, Any]:
+    from qgis.core import QgsLayoutExporter
     if file_format == 'pdf' and single_file:
         path = os.path.join(target, f"{safe}.pdf")
         result = QgsLayoutExporter.exportToPdf(atlas, path, settings)
@@ -382,9 +399,12 @@ def _export_atlas(layout, folder: str, safe: str, file_format: str, settings, si
     if not _ok(result) or not files:
         error = result[1] if isinstance(result, tuple) and len(result) > 1 else result
         raise ValueError(f"the atlas could not be exported ({error})")
-    return {'name': layout.name(), 'format': file_format, 'dpi': int(settings.dpi), 'path': target,
-            'bytes': sum(os.path.getsize(item) for item in files), 'files': len(files), 'pages': count,
-            'atlas': True}
+    answer = {'name': atlas.layout().name(), 'format': file_format, 'dpi': int(settings.dpi), 'path': target,
+              'bytes': sum(os.path.getsize(item) for item in files), 'files': len(files), 'pages': count,
+              'atlas': True}
+    if not (file_format == 'pdf' and single_file) and len(files) < count:
+        answer['note'] = 'pages of the same file name replaced each other: a file_name that differs per feature'
+    return answer
 
 
 # --- reading a layout and its atlas ------------------------------------------------------------------------------
@@ -511,6 +531,11 @@ def _expression(text: str, what: str) -> str:
         return ''
     if len(text) > 2000:
         raise ValueError(f"{what} is 2000 characters at most")
+    from ...core.agent.sql_guard import layout_expression_problem
+    # 2026-11-22 (review): an atlas filter can read the environment (env()) and give it back as a count of pages.
+    problem = layout_expression_problem(text)
+    if problem:
+        raise ValueError(f"{what}: {problem}")
     expression = QgsExpression(text)
     if expression.hasParserError():
         raise ValueError(f"{what} is not a valid QGIS expression: {expression.parserErrorString()}")
@@ -556,6 +581,8 @@ def set_atlas(layout_name: str, coverage_layer: str = '', enabled: bool = True, 
         raise ValueError(f"'{layer.name()}' is not a vector layer: an atlas pages through features")
     if not all_maps:
         raise ValueError(f"the layout {layout.name()!r} has no map")
+    if isinstance(maps, str):
+        maps = [maps]
     if maps:
         chosen = [item for item in all_maps if item_ref(item) in maps or item.id() in maps]
         unknown = set(maps) - {item_ref(item) for item in chosen} - {item.id() for item in chosen}
@@ -672,7 +699,16 @@ def _text_of(change: Dict[str, Any]) -> str:
         raise ValueError('text is needed')
     if len(text) > MAX_TEXT:
         raise ValueError(f"text is {MAX_TEXT} characters at most")
+    _check_text(text)
     return text
+
+
+def _check_text(text: str) -> None:
+    """A text of a layout evaluates its [% ... %] at each drawing: the same expressions as an atlas, no more."""
+    from ...core.agent.sql_guard import text_expressions_problem
+    problem = text_expressions_problem(text)
+    if problem:
+        raise ValueError(f"text: {problem}")
 
 
 def _layers_of(change: Dict[str, Any]) -> List[Any]:
@@ -720,7 +756,11 @@ def _edit(layout, change: Dict[str, Any]) -> Dict[str, Any]:
         ref = item_ref(item)
         if do == 'remove':
             if isinstance(item, QgsLayoutFrame) and item.multiFrame() is not None:
-                layout.removeMultiFrame(item.multiFrame())
+                # Its frames first: removeMultiFrame alone left the table drawn (2026-11-22, review).
+                multi = item.multiFrame()
+                for frame in list(multi.frames()):
+                    layout.removeLayoutItem(frame)
+                layout.removeMultiFrame(multi)
             else:
                 layout.removeLayoutItem(item)
             return {'do': do, 'ref': ref}
@@ -811,6 +851,8 @@ def _edit(layout, change: Dict[str, Any]) -> Dict[str, Any]:
             else QgsLayoutItemAttributeTable(layout)
         table.setVectorLayer(layer)
         columns = change.get('columns') or []
+        if isinstance(columns, str):  # one field given alone: never its letters
+            columns = [columns]
         missing = [name for name in columns if layer.fields().lookupField(name) < 0]
         if missing:
             raise ValueError(f"no field {missing} in '{layer.name()}': see describe_layer")
@@ -855,9 +897,13 @@ def edit_layout(layout_name: str, changes: List[Dict[str, Any]]) -> Dict[str, An
             except ValueError as exc:
                 raise ValueError(f"change {index} ({change.get('do')}): {exc}") from None
     except Exception:
-        manager = QgsProject.instance().layoutManager()
-        manager.removeLayout(layout)
-        layout_from_xml(before)
+        # Put back only when something changed: a change refused before any other left the layout as it was, and
+        # its designer stays open.
+        if layout_xml(layout) != before:
+            manager = QgsProject.instance().layoutManager()
+            manager.removeLayout(layout)
+            if not layout_from_xml(before):
+                raise ValueError(f"the layout {layout_name!r} could not be put back as it was: undo the turn") from None
         raise
     layout.refresh()
     return {'layout': layout.name(), 'done': done, 'items': len(layout_items(layout)),

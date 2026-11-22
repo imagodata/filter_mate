@@ -70,6 +70,12 @@ def _check_expression(layer, text: str, role: str) -> None:
     """Refuse an expression that does not parse, or that names a field ``layer`` does not have (a text written
     without its quotes reads as a field)."""
     from qgis.core import QgsExpression
+    from ...core.agent.sql_guard import layout_expression_problem
+    # 2026-11-22 (review): a default value runs at each feature entered, with the rights of the user: env(),
+    # load_layer() or sqlite_fetch_and_increment() are refused, as in a filter.
+    problem = layout_expression_problem(text)
+    if problem:
+        raise ValueError(f"{role} {text!r}: {problem}")
     expression = QgsExpression(text)
     if expression.hasParserError():
         reason = expression.parserErrorString() or "it does not parse"
@@ -384,7 +390,8 @@ def relation_layers(reference: str) -> List[str]:
     """The ids of the parent and child layers of the relation ``reference`` (an id or a name); [] when unknown."""
     from qgis.core import QgsProject
     try:
-        relation = _find_relation(QgsProject.instance().relationManager(), str(reference or ""))
+        # Stripped as relations() strips it: " rel1 " removed rel1 of a protected layer unchecked (2026-11-22, review).
+        relation = _find_relation(QgsProject.instance().relationManager(), str(reference or "").strip())
     except ValueError:
         return []
     return [relation.referencedLayerId(), relation.referencingLayerId()]
