@@ -8,6 +8,7 @@ without blocking it before a request is sent again to a provider that was busy.
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass, replace
 from typing import Any, Callable, Dict, Mapping, Optional, Protocol, Sequence, Tuple, Union
 
@@ -35,6 +36,10 @@ _NO_UNDO_POINT = "The undo point could not be made, so nothing was done."
 RETRY_WAITS = (2.0, 6.0)
 MAX_RETRY_WAIT = 30.0
 NO_RETRY_ABOVE = 120.0  # a Retry-After beyond this is not a busy moment: the failure is shown at once
+# A tool that took this long writes its time in the log, as the other timings of FilterMate (core/agent/performance.py
+# reads them for diagnose_performance). 2026-11-23: a freeze of 15 s in a cross filter of the agent showed only in
+# the timing of set_subset; a slow tool elsewhere left nothing.
+SLOW_TOOL_MS = 250
 
 
 def worth_retrying(error: ProviderError) -> bool:
@@ -315,7 +320,11 @@ class ChatEngine:
                 return ToolResultPart(call.call_id, _NO_UNDO_POINT, is_error=True)
         self._notify(self._listener.on_tool_start, call)
         generation = self._generation
+        started = time.monotonic()
         result = self._executor.execute(call)
+        spent = (time.monotonic() - started) * 1000
+        if spent >= SLOW_TOOL_MS:
+            logger.info(f"⏱ agent {call.name}: {spent:.0f} ms" + (" (failed)" if result.is_error else ""))
         end = getattr(self._checkpoint, "end", None)  # optional: what the user does next is not the turn's
         if began and end is not None:
             try:

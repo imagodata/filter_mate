@@ -150,6 +150,46 @@ def json1_available() -> bool:
     return gdal_sqlite_json1_available()
 
 
+def is_sqlite_storage(layer) -> bool:
+    """GeoPackage or SQLite layer read by OGR: its subset string is SQLite SQL."""
+    try:
+        storage_type = layer.dataProvider().storageType().lower()
+    except Exception:
+        return False
+    return 'geopackage' in storage_type or 'gpkg' in storage_type or 'sqlite' in storage_type
+
+
+def json_key_clause(field_sql: str, values: list, numeric: bool) -> str:
+    """``field IN (SELECT value FROM json_each('[...]'))``: a long key list of a GeoPackage / SQLite subset.
+
+    See KEY_LIST_JSON_THRESHOLD. 2026-10-17: integers are written as they are
+    (int64 beyond 2^53 included), integral floats as integers, other numbers
+    and text keys as JSON strings; None keys are dropped (they match nothing).
+    2026-11-23: a module function, so that the cross filter of the agent and of
+    the automation writes the same form as the dock (it wrote the plain list:
+    54,473 keys took 15 s in setSubsetString in QGIS 3.44 and 4.3, 1 ms in 3.22).
+    """
+    kept = [v for v in values if not is_null_value(v)]
+    if numeric:
+        items = []
+        for value in kept:
+            if isinstance(value, bool):
+                items.append(json.dumps(str(value)))
+            elif isinstance(value, int):
+                items.append(str(value))
+            elif isinstance(value, float) and value.is_integer():
+                items.append(str(int(value)))
+            elif isinstance(value, str) and value.lstrip('-').isdigit():
+                items.append(str(int(value)))
+            else:
+                items.append(json.dumps(value if isinstance(value, (int, float)) else str(value), ensure_ascii=False))
+        payload = "[" + ",".join(items) + "]"
+    else:
+        payload = json.dumps([str(v) for v in kept], ensure_ascii=False, separators=(",", ":"))
+    literal = payload.replace("'", "''")  # json.dumps output as one SQL string literal
+    return f"{field_sql} IN (SELECT value FROM json_each('{literal}'))"  # nosec B608 - JSON of the keys, quotes doubled
+
+
 # Import the port interface
 try:
     from ....core.ports.geometric_filter_port import GeometricFilterPort
@@ -1111,39 +1151,13 @@ class OGRExpressionBuilder(GeometricFilterPort):
     @staticmethod
     def _is_sqlite_storage(layer) -> bool:
         """GeoPackage or SQLite layer (subset strings are SQLite SQL)."""
-        try:
-            storage_type = layer.dataProvider().storageType().lower()
-        except Exception:
-            return False
-        return 'geopackage' in storage_type or 'gpkg' in storage_type or 'sqlite' in storage_type
+        return is_sqlite_storage(layer)
 
     def _json_key_clause(self, field_sql: str, values: list, numeric: bool) -> str:
-        """``field IN (SELECT value FROM json_each('[...]'))`` (see KEY_LIST_JSON_THRESHOLD).
-
-        2026-10-17: integers are written as they are (int64 beyond 2^53
-        included), integral floats as integers, other numbers and text keys
-        as JSON strings; None keys are dropped (they match nothing).
-        """
-        kept = [v for v in values if not is_null_value(v)]
-        if numeric:
-            items = []
-            for value in kept:
-                if isinstance(value, bool):
-                    items.append(json.dumps(str(value)))
-                elif isinstance(value, int):
-                    items.append(str(value))
-                elif isinstance(value, float) and value.is_integer():
-                    items.append(str(int(value)))
-                elif isinstance(value, str) and value.lstrip('-').isdigit():
-                    items.append(str(int(value)))
-                else:
-                    items.append(json.dumps(value if isinstance(value, (int, float)) else str(value), ensure_ascii=False))
-            payload = "[" + ",".join(items) + "]"
-        else:
-            payload = json.dumps([str(v) for v in kept], ensure_ascii=False, separators=(",", ":"))
-        self.log_info(f"  - {len(kept):,} keys: one JSON literal ({len(payload):,} chars) instead of an IN list")
-        literal = payload.replace("'", "''")  # json.dumps output as one SQL string literal
-        return f"{field_sql} IN (SELECT value FROM json_each('{literal}'))"  # nosec B608 - JSON of the keys, quotes doubled
+        """``field IN (SELECT value FROM json_each('[...]'))`` (see KEY_LIST_JSON_THRESHOLD and json_key_clause)."""
+        clause = json_key_clause(field_sql, values, numeric)
+        self.log_info(f"  - {len(values):,} keys: one JSON literal ({len(clause):,} chars) instead of an IN list")
+        return clause
 
     @staticmethod
     def _fetch_pk_values(layer, selected_ids, pk_field) -> list:

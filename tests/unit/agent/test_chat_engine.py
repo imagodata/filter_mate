@@ -696,3 +696,20 @@ def test_a_context_that_fails_does_not_leave_the_engine_busy(setup):
     assert session._messages == before  # nothing of the failed request, and the earlier one stays
     assert engine.send("third")  # the next request goes
     assert engine.busy and len(transport.starts) == 2
+
+
+# --- a slow tool says how long it took (2026-11-23) ----------------------------------------------------------------
+
+@pytest.mark.parametrize("spent, logged", [(0.3, True), (0.1, False)])
+def test_a_slow_tool_writes_its_time_in_the_log(monkeypatch, caplog, spent, logged):
+    import logging
+    from core.agent import chat_engine as engine_module
+    clock = iter([100.0, 100.0 + spent])
+    monkeypatch.setattr(engine_module.time, "monotonic", lambda: next(clock, 200.0))
+    engine, _session, transport, _listener, seen = _engine()
+    with caplog.at_level(logging.INFO, logger="FilterMate.agent"):
+        engine.send("go")
+        transport.emit(turn(STOP_TOOL_USE, call("read")))
+    lines = [record.getMessage() for record in caplog.records if record.getMessage().startswith("⏱ agent")]
+    assert seen == ["read"]
+    assert lines == (["⏱ agent read: 300 ms"] if logged else [])

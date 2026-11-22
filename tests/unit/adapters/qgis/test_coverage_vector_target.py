@@ -627,3 +627,47 @@ class TestWebServiceBoundedRead:
         job = engine.VectorTargetJob(layer, None)
         job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request('Disjoint'), lambda: False)
         assert not job.outcome.success and job.outcome.message == "dock refusal: read_error"
+
+
+class TestLongKeyLists:
+    """2026-11-23: a long key list of a GeoPackage / SQLite target is one JSON literal, as the dock writes it (54,473
+    keys in a plain list took 15 s in setSubsetString in QGIS 3.44 and 4.3, then 5 s at each read)."""
+
+    @staticmethod
+    def _job(json_keys, pk="fid", raw=False):
+        job = object.__new__(appliers.VectorTargetJob)
+        job._json_keys, job._pk, job._raw_pk = json_keys, pk, raw
+        return job
+
+    def test_a_long_integer_list_is_one_json_literal(self):
+        expression = self._job(True)._key_expression(list(range(1, 1502)) + [7], False, None)
+        assert expression.startswith('"fid" IN (SELECT value FROM json_each(\'[1,2,3,')
+        assert expression.count(",7]") + expression.count(",7,") == 1  # each key once
+
+    def test_text_keys_keep_their_quotes_doubled(self):
+        keys = [f"TRON'{index}" for index in range(1200)]
+        expression = self._job(True, pk="cleabs")._key_expression(keys, False, None)
+        assert expression.startswith('"cleabs" IN (SELECT value FROM json_each(\'["TRON\'\'0","TRON\'\'1",')
+
+    def test_a_short_list_stays_a_plain_list(self):
+        assert self._job(True)._key_expression([3, 1], False, None) == '"fid" IN (3, 1)'
+
+    @pytest.mark.parametrize("json_keys, keys", [
+        (False, list(range(2000))),  # not a GeoPackage, or no JSON1 in this SQLite
+        (True, [1.5] * 1001 + [2.5]),  # neither integers nor text: the plain list, as before
+        (True, list(range(1000)) + ["a"]),  # mixed
+    ])
+    def test_the_plain_list_otherwise(self, json_keys, keys):
+        assert "json_each" not in self._job(json_keys)._key_expression(keys, False, None)
+
+    def test_a_capped_source_still_gets_its_lists(self):
+        expression = self._job(False)._key_expression(list(range(5)), False, 2)
+        assert expression == '("fid" IN (0, 1) OR "fid" IN (2, 3) OR "fid" IN (4))'
+
+    def test_nothing_kept_keeps_nothing(self):
+        assert self._job(True)._key_expression([], False, None) == "1 = 0"
+
+    def test_a_raw_feature_id_is_never_offered_the_json_form(self):
+        job = self._job(True, pk="FID", raw=True)
+        job._remote_target = None
+        assert job._takes_json_keys(object()) is False
