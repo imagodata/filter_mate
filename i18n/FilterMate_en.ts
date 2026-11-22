@@ -1143,6 +1143,11 @@ Run it?</translation>
         <translation>Atlas of {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2853"/>
+        <source>Layout {} changed</source>
+        <translation>Layout {} changed</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Chart: {}</translation>

@@ -81,6 +81,11 @@ Jalankan?</translation>
         <translation>Atlas {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2853"/>
+        <source>Layout {} changed</source>
+        <translation>Tata letak {} diubah</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Grafik: {}</translation>

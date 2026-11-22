@@ -215,6 +215,18 @@ class TestHandlers:
         assert run(accessor, root, "set_atlas", layout="Carte", map_mode="zoom")[0] is True
         assert run(accessor, root, "set_atlas", layout="Carte", enabled=False)[1] == {"layout": "Carte", "atlas": False}
 
+    def test_edit_layout_and_templates(self, api):
+        """2026-11-22: a layout changed item by item, all or none; a layout made from a template."""
+        accessor, root = api
+        error, answer = run(accessor, root, "edit_layout", layout="Carte", changes=[
+            {"do": "add_text", "text": "[% \"nom\" %]", "x": 10, "y": 10}, {"do": "move", "ref": "map1", "x": 5}])
+        assert not error and [row["do"] for row in answer["done"]] == ["add_text", "move"]
+        assert run(accessor, root, "edit_layout", layout="Carte", changes=[{"do": "remove", "ref": "nope"}])[0] is True
+        assert run(accessor, root, "edit_layout", layout="Carte", changes=[{"do": "explode"}])[0] is True
+        assert run(accessor, root, "edit_layout", layout="Carte", changes=[])[0] is True
+        assert run(accessor, root, "edit_layout", layout="Carte", changes=[{"do": "add_page", "x": -1}])[0] is True
+        assert run(accessor, root, "create_layout", name="Modèle", template="A4 paysage")[0] is False
+
     def test_edit_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "update_features", layer="communes", values={"nom": "x"}, expression="true")
@@ -837,6 +849,13 @@ class TestRoutes:
         assert response.status_code == 200 and response.json()["atlas"] is True
         assert client.post("/layouts/atlas", json={"layout": "Carte", "coverage_layer": "nope"}).status_code == 400
         assert client.post("/layouts/atlas", json={"layout": "Carte", "margin": 900}).status_code == 422
+        edited = client.post("/layouts/edit", json={"layout": "Carte", "changes": [
+            {"do": "add_table", "layer": "communes", "columns": ["nom"], "max_rows": 10}]})
+        assert edited.status_code == 200 and edited.json()["done"][0]["do"] == "add_table"
+        assert client.post("/layouts/edit", json={"layout": "Carte", "changes": [{"do": "nope"}]}).status_code == 422
+        assert client.post("/layouts/edit", json={"layout": "Carte", "changes": [
+            {"do": "add_text", "text": "a", "font": 3}]}).status_code == 422
+        assert client.post("/layouts", json={"name": "T", "template": "Modèle"}).status_code == 200
 
     def test_edit_routes(self, client):
         response = client.post("/layers/features/update", json={"layer": "communes", "values": {"a": 1}, "expression": "true"})

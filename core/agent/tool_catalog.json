@@ -1764,6 +1764,12 @@
      "north_arrow": {
       "default": true,
       "type": "boolean"
+     },
+     "template": {
+      "default": "",
+      "description": "A template of the profile (describe_layout lists them): its page and items instead",
+      "maxLength": 200,
+      "type": "string"
      }
     },
     "required": [
@@ -1853,6 +1859,226 @@
       "type": "string"
      }
     },
+    "type": "object"
+   }
+  },
+  {
+   "name": "edit_layout",
+   "title": "Change a print layout",
+   "description": "Change a print layout item by item, all or none: add a text ([% \"nom\" %] follows an atlas), a map (extent_layer, or overview_of a map: a map of situation), a legend, scale bar or north arrow (of map), an attribute table (layer, columns, max_rows), a frame or a page; move, remove; set_text, set_map (layers, extent_layer, scale). Items by ref (describe_layout); x, y, width, height in mm from the top left of page. Returns done and items. In the chat of FilterMate, undoing the turn puts the layout back.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layout": {
+      "description": "A layout of the project",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "changes": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "do": {
+         "enum": [
+          "add_text",
+          "add_map",
+          "add_legend",
+          "add_scale_bar",
+          "add_north_arrow",
+          "add_table",
+          "add_shape",
+          "add_page",
+          "move",
+          "remove",
+          "set_text",
+          "set_map"
+         ],
+         "type": "string"
+        },
+        "ref": {
+         "default": "",
+         "description": "The item (move, remove, set_*)",
+         "maxLength": 100,
+         "type": "string"
+        },
+        "text": {
+         "default": "",
+         "maxLength": 2000,
+         "type": "string"
+        },
+        "font_size": {
+         "anyOf": [
+          {
+           "maximum": 200,
+           "minimum": 4,
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "layer": {
+         "default": "",
+         "description": "add_table",
+         "maxLength": 1000,
+         "type": "string"
+        },
+        "layers": {
+         "anyOf": [
+          {
+           "items": {
+            "type": "string"
+           },
+           "maxItems": 100,
+           "type": "array"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "extent_layer": {
+         "default": "",
+         "maxLength": 1000,
+         "type": "string"
+        },
+        "overview_of": {
+         "default": "",
+         "maxLength": 100,
+         "type": "string"
+        },
+        "map": {
+         "default": "",
+         "description": "Linked map; default the largest",
+         "maxLength": 100,
+         "type": "string"
+        },
+        "scale": {
+         "anyOf": [
+          {
+           "minimum": 1,
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "columns": {
+         "anyOf": [
+          {
+           "items": {
+            "type": "string"
+           },
+           "maxItems": 50,
+           "type": "array"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "max_rows": {
+         "anyOf": [
+          {
+           "maximum": 500,
+           "minimum": 1,
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "page": {
+         "anyOf": [
+          {
+           "minimum": 1,
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "x": {
+         "anyOf": [
+          {
+           "maximum": 5000,
+           "minimum": 0,
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "y": {
+         "anyOf": [
+          {
+           "maximum": 5000,
+           "minimum": 0,
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "width": {
+         "anyOf": [
+          {
+           "maximum": 5000,
+           "minimum": 1,
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "height": {
+         "anyOf": [
+          {
+           "maximum": 5000,
+           "minimum": 1,
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        }
+       },
+       "required": [
+        "do"
+       ],
+       "type": "object"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "layout",
+     "changes"
+    ],
     "type": "object"
    }
   },

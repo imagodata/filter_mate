@@ -81,6 +81,11 @@ Ne için: {}
         <translation>{} atlası</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2853"/>
+        <source>Layout {} changed</source>
+        <translation>{} yerleşimi değiştirildi</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Grafik: {}</translation>

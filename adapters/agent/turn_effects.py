@@ -25,7 +25,7 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
   and after the commands of the turn (``adapters/public_api/feature_edits.py``); ``opened``: the layer was not being
   edited before them (the turn put it in editing mode, and undoing the turn takes it out: ``_closable``);
 * ``("layout", "", xml, "", name)``: a print layout the turn added to the project;
-* ``("layout_state", "", before, after, name)``: a print layout of the project the turn changed (its atlas), as
+* ``("layout_state", "", before, after, name)``: a print layout of the project the turn changed (its atlas, its items), as
   its XML before and after; a layout the turn made is the effect "layout" alone;
 * ``("layout_item", "", xml, uuid, layout name)``: a chart the turn put in a print layout (add_chart_to_layout), as
   the XML of its item;
@@ -73,7 +73,7 @@ TREE_TOOLS = ("group_layers", "map_theme")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features", "add_field")
 LAYOUT_TOOLS = ("create_layout",)
 CHART_LAYOUT_TOOLS = ("add_chart_to_layout",)
-LAYOUT_STATE_TOOLS = ("set_atlas",)
+LAYOUT_STATE_TOOLS = ("set_atlas", "edit_layout")
 CRS_TOOLS = ("set_project_crs",)
 SETTINGS_TOOLS = ("change_settings", "apply_settings_profile")
 PANEL_TOOLS = ("set_layer_options",)

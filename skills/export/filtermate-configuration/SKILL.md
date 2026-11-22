@@ -1,6 +1,6 @@
 ---
 name: filtermate-configuration
-description: "Configure FilterMate through the MCP server of the FilterMate QGIS plugin: set FilterMate up (look, language, options, timeouts, caches, profiles), find why filters are slow. Use when the user asks for it in QGIS with FilterMate."
+description: "Configure FilterMate through the MCP server of the FilterMate QGIS plugin: set FilterMate up (look, language, options, caches, profiles), find why filters are slow. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/configuration/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->

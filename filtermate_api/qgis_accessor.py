@@ -551,6 +551,9 @@ class QGISFilterMateAccessor:
     def set_atlas(self, layout: str, **options: Any) -> Dict[str, Any]:
         return self._layouts("set_atlas", layout, **options)
 
+    def edit_layout(self, layout: str, changes: List[Dict[str, Any]]) -> Dict[str, Any]:
+        return self._layouts("edit_layout", layout, changes)
+
     @staticmethod
     def _edit(name: str, layer: str, **kwargs):
         """Call ``adapters.public_api.feature_edits.<name>`` on the main thread, unless ``layer`` is protected."""

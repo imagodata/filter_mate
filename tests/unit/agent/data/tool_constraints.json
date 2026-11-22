@@ -726,6 +726,11 @@
     "default": true,
     "type": "boolean"
    },
+   "template": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
    "title": {
     "default": "",
     "maxLength": 200,
@@ -1126,6 +1131,213 @@
   },
   "required": [
    "layer"
+  ],
+  "type": "object"
+ },
+ "edit_layout": {
+  "properties": {
+   "changes": {
+    "items": {
+     "additionalProperties": false,
+     "properties": {
+      "columns": {
+       "anyOf": [
+        {
+         "items": {
+          "type": "string"
+         },
+         "maxItems": 50,
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "do": {
+       "enum": [
+        "add_text",
+        "add_map",
+        "add_legend",
+        "add_scale_bar",
+        "add_north_arrow",
+        "add_table",
+        "add_shape",
+        "add_page",
+        "move",
+        "remove",
+        "set_text",
+        "set_map"
+       ],
+       "type": "string"
+      },
+      "extent_layer": {
+       "default": "",
+       "maxLength": 1000,
+       "type": "string"
+      },
+      "font_size": {
+       "anyOf": [
+        {
+         "maximum": 200,
+         "minimum": 4,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "height": {
+       "anyOf": [
+        {
+         "maximum": 5000,
+         "minimum": 1,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "layer": {
+       "default": "",
+       "maxLength": 1000,
+       "type": "string"
+      },
+      "layers": {
+       "anyOf": [
+        {
+         "items": {
+          "type": "string"
+         },
+         "maxItems": 100,
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "map": {
+       "default": "",
+       "maxLength": 100,
+       "type": "string"
+      },
+      "max_rows": {
+       "anyOf": [
+        {
+         "maximum": 500,
+         "minimum": 1,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "overview_of": {
+       "default": "",
+       "maxLength": 100,
+       "type": "string"
+      },
+      "page": {
+       "anyOf": [
+        {
+         "minimum": 1,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "ref": {
+       "default": "",
+       "maxLength": 100,
+       "type": "string"
+      },
+      "scale": {
+       "anyOf": [
+        {
+         "minimum": 1,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "text": {
+       "default": "",
+       "maxLength": 2000,
+       "type": "string"
+      },
+      "width": {
+       "anyOf": [
+        {
+         "maximum": 5000,
+         "minimum": 1,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "x": {
+       "anyOf": [
+        {
+         "maximum": 5000,
+         "minimum": 0,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "y": {
+       "anyOf": [
+        {
+         "maximum": 5000,
+         "minimum": 0,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      }
+     },
+     "required": [
+      "do"
+     ],
+     "type": "object"
+    },
+    "maxItems": 20,
+    "minItems": 1,
+    "type": "array"
+   },
+   "layout": {
+    "maxLength": 100,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layout",
+   "changes"
   ],
   "type": "object"
  },

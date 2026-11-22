@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 import math
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from .operations import resolve_layer
 
@@ -112,7 +112,8 @@ def _page_size(layout, page: str, orientation: str):
 
 def create_layout(name: str, title: str = '', page: str = 'A4', orientation: str = 'landscape',
                   layers: Optional[List[str]] = None, extent: Optional[List[float]] = None, extent_layer: str = '',
-                  legend: bool = True, scale_bar: bool = True, north_arrow: bool = True) -> Dict[str, Any]:
+                  legend: bool = True, scale_bar: bool = True, north_arrow: bool = True,
+                  template: str = '') -> Dict[str, Any]:
     """A print layout added to the project: a map of the layers shown, and its title, legend, scale and north.
 
     Args:
@@ -142,6 +143,8 @@ def create_layout(name: str, title: str = '', page: str = 'A4', orientation: str
                        if node.isVisible() and node.layer() is not None]
     if not shown:
         raise ValueError('no layer is shown: check one in the layer tree, or give layers')
+    if template:
+        return _create_from_template(name, template, chosen, shown, extent, extent_layer)
 
     layout = QgsPrintLayout(project)
     layout.initializeDefaults()
@@ -253,6 +256,32 @@ def _settings(file_format: str, dpi: int, georeference: bool):
         settings.generateWorldFile = bool(georeference)  # a .pgw / .jgw / .tfw beside each image of a map page
     settings.dpi = int(dpi)
     return settings
+
+
+def _create_from_template(name: str, template: str, chosen: List[Any], shown: List[Any],
+                          extent: Optional[List[float]], extent_layer: str) -> Dict[str, Any]:
+    """create_layout from a template: its pages and items as it has them, its largest map framed as asked."""
+    from qgis.core import QgsLayoutItemMap, QgsProject
+    project = QgsProject.instance()
+    layout = _from_template(name, template)
+    maps = [item for item in layout_items(layout) if isinstance(item, QgsLayoutItemMap)]
+    origin = ''
+    scale = None
+    if maps:
+        main = max(maps, key=lambda item: item.rect().width() * item.rect().height())
+        if chosen:
+            main.setLayers(chosen)
+            main.setKeepLayerSet(True)
+        crs = main.crs() if main.crs().isValid() else project.crs()
+        rectangle, origin = _extent(extent, extent_layer, shown, crs)
+        main.zoomToExtent(rectangle)
+        scale = main.scale()
+    if not project.layoutManager().addLayout(layout):
+        raise ValueError(f"the layout {name!r} could not be added to the project")
+    return {'name': name, 'page': '', 'orientation': '', 'items': sorted({_kind(item) for item in layout_items(layout)}),
+            'extent_from': origin, 'scale': round(scale) if scale is not None and math.isfinite(scale) else None,
+            'layers': [layer.name() for layer in chosen] or 'shown in the layer tree',
+            'note': f"Made from the template {template!r}: its texts are as it has them (set_text in edit_layout)."}
 
 
 def export_layout(name: str, folder: str, file_format: str = 'pdf', dpi: int = 150, georeference: bool = True,
@@ -456,10 +485,13 @@ def template_names() -> List[str]:
 def _templates() -> List[Any]:
     from qgis.core import QgsApplication
     found = []
+    # Where the designer of QGIS looks: the profile, the folders set in the options, then those QGIS ships.
+    folders = [os.path.join(QgsApplication.qgisSettingsDirPath(), 'composer_templates')]
     try:
-        folders = QgsApplication.layoutTemplatePaths()
-    except Exception:  # nosec B110 - no template folder
-        folders = []
+        folders += list(QgsApplication.layoutTemplatePaths())
+    except Exception:  # nosec B110 - no folder set in the options
+        pass
+    folders.append(os.path.join(QgsApplication.pkgDataPath(), 'composer_templates'))
     for folder in folders:
         try:
             for entry in sorted(os.listdir(folder)):
@@ -564,6 +596,295 @@ def set_atlas(layout_name: str, coverage_layer: str = '', enabled: bool = True, 
     if pages > MAX_ATLAS_PAGES:
         answer['note'] = f"{pages} pages: export_layout exports {MAX_ATLAS_PAGES} at most, filter the layer first"
     return answer
+
+
+# --- editing a layout -------------------------------------------------------------------------------------------
+
+EDITS = ('add_text', 'add_map', 'add_legend', 'add_scale_bar', 'add_north_arrow', 'add_table', 'add_shape',
+         'add_page', 'move', 'remove', 'set_text', 'set_map')
+MAX_EDITS = 20
+MAX_TEXT = 2000
+MAX_TABLE_ROWS = 500
+
+
+def _number(change: Dict[str, Any], key: str, low: float, high: float) -> Optional[float]:
+    value = change.get(key)
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise ValueError(f"{key} is a number")
+    if not low <= value <= high:
+        raise ValueError(f"{key} goes from {low:g} to {high:g}")
+    return float(value)
+
+
+def _item_by_ref(layout, ref: str):
+    ref = str(ref or '')
+    for item in layout_items(layout):
+        if ref and (item.id() == ref or item_ref(item) == ref):
+            return item
+    raise ValueError(f"no item {ref!r} in the layout: describe_layout names them (ref)")
+
+
+def _map_of(layout, ref: str = ''):
+    from qgis.core import QgsLayoutItemMap
+    if ref:
+        item = _item_by_ref(layout, ref)
+        if not isinstance(item, QgsLayoutItemMap):
+            raise ValueError(f"{ref!r} is not a map")
+        return item
+    maps = [item for item in layout_items(layout) if isinstance(item, QgsLayoutItemMap)]
+    if not maps:
+        raise ValueError('the layout has no map: add_map first')
+    return max(maps, key=lambda item: item.rect().width() * item.rect().height())
+
+
+def _place(layout, item, change: Dict[str, Any], default: Tuple[float, float, float, float]) -> None:
+    """Put ``item`` where ``change`` says (mm from the top left of its page), ``default`` for what it leaves out."""
+    from qgis.core import QgsLayoutPoint, QgsLayoutSize
+    pages = layout.pageCollection().pageCount()
+    page = int(_number(change, 'page', 1, max(1, pages)) or 1)
+    x = _number(change, 'x', 0, 5000)
+    y = _number(change, 'y', 0, 5000)
+    width = _number(change, 'width', 1, 5000)
+    height = _number(change, 'height', 1, 5000)
+    left, top, wide, high = default
+    item.attemptResize(QgsLayoutSize(width if width is not None else wide, height if height is not None else high, _mm()))
+    item.attemptMove(QgsLayoutPoint(x if x is not None else left, y if y is not None else top, _mm()), page=page - 1)
+
+
+def _font(label, size: Optional[float]) -> None:
+    if size is None:
+        return
+    if hasattr(label, 'setTextFormat'):
+        from qgis.core import QgsTextFormat
+        text_format = label.textFormat()
+        text_format.setSize(size)
+        label.setTextFormat(text_format)
+    else:
+        font = label.font()
+        font.setPointSizeF(size)
+        label.setFont(font)
+
+
+def _text_of(change: Dict[str, Any]) -> str:
+    text = change.get('text')
+    if not isinstance(text, str) or not text.strip():
+        raise ValueError('text is needed')
+    if len(text) > MAX_TEXT:
+        raise ValueError(f"text is {MAX_TEXT} characters at most")
+    return text
+
+
+def _layers_of(change: Dict[str, Any]) -> List[Any]:
+    chosen = []
+    for reference in change.get('layers') or []:
+        layer = resolve_layer(reference)
+        if layer is None:
+            raise ValueError(f"layer {reference!r} not found")
+        chosen.append(layer)
+    return chosen
+
+
+def _set_map(layout, item, change: Dict[str, Any]) -> None:
+    layers = _layers_of(change)
+    if layers:
+        item.setLayers(layers)
+        item.setKeepLayerSet(True)
+    if change.get('extent_layer'):
+        layer = resolve_layer(change['extent_layer'])
+        if layer is None:
+            raise ValueError(f"layer {change['extent_layer']!r} not found")
+        rectangle, _ = _extent(None, change['extent_layer'], [layer], item.crs())
+        item.zoomToExtent(rectangle)
+    scale = _number(change, 'scale', 1, 1e9)
+    if scale is not None:
+        item.setScale(scale)
+
+
+def _sheet_size(layout) -> Tuple[float, float]:
+    """The size of the first page, in the units of the layout (millimetres by default)."""
+    size = layout.convertToLayoutUnits(layout.pageCollection().page(0).pageSize())
+    return size.width(), size.height()
+
+
+def _edit(layout, change: Dict[str, Any]) -> Dict[str, Any]:
+    from qgis.core import (QgsLayoutFrame, QgsLayoutItemAttributeTable, QgsLayoutItemLabel, QgsLayoutItemLegend,
+                           QgsLayoutItemMap, QgsLayoutItemMapOverview, QgsLayoutItemPage, QgsLayoutItemPicture,
+                           QgsLayoutItemScaleBar, QgsLayoutItemShape, QgsLayoutSize, QgsVectorLayer)
+    do = change.get('do')
+    if do not in EDITS:
+        raise ValueError(f"do is one of {', '.join(EDITS)}")
+    width, height = _sheet_size(layout)
+    if do in ('move', 'remove', 'set_text'):
+        item = _item_by_ref(layout, change.get('ref'))
+        ref = item_ref(item)
+        if do == 'remove':
+            if isinstance(item, QgsLayoutFrame) and item.multiFrame() is not None:
+                layout.removeMultiFrame(item.multiFrame())
+            else:
+                layout.removeLayoutItem(item)
+            return {'do': do, 'ref': ref}
+        if do == 'set_text':
+            if not isinstance(item, QgsLayoutItemLabel):
+                raise ValueError(f"{ref!r} is not a text")
+            item.setText(_text_of(change))
+            _font(item, _number(change, 'font_size', 4, 200))
+            item.refresh()
+            return {'do': do, 'ref': ref}
+        position = layout.convertToLayoutUnits(item.pagePositionWithUnits())
+        size = layout.convertToLayoutUnits(item.sizeWithUnits())
+        _place(layout, item, dict(change, page=change.get('page') or item.page() + 1),
+               (position.x(), position.y(), size.width(), size.height()))
+        return {'do': do, 'ref': ref}
+    if do == 'set_map':
+        item = _map_of(layout, change.get('ref') or '')
+        _set_map(layout, item, change)
+        return {'do': do, 'ref': item_ref(item), 'scale': round(item.scale()) if math.isfinite(item.scale()) else None}
+    if do == 'add_page':
+        page = QgsLayoutItemPage(layout)
+        page.setPageSize(QgsLayoutSize(width, height, _mm()))
+        layout.pageCollection().addPage(page)
+        return {'do': do, 'page': layout.pageCollection().pageCount()}
+    if do == 'add_text':
+        item = QgsLayoutItemLabel(layout)
+        item.setText(_text_of(change))
+        _font(item, _number(change, 'font_size', 4, 200) or 12)
+        layout.addLayoutItem(item)
+        _place(layout, item, change, (MARGIN, MARGIN, width - 2 * MARGIN, 10))
+    elif do == 'add_map':
+        item = QgsLayoutItemMap(layout)
+        project_crs = layout.project().crs()
+        item.setCrs(project_crs)
+        item.setFrameEnabled(True)
+        layout.addLayoutItem(item)
+        _place(layout, item, change, (width - MARGIN - 70, MARGIN + 20, 70, 50))
+        overview_of = change.get('overview_of')
+        if overview_of:
+            target = _map_of(layout, overview_of)
+            item.setLayers(target.layers())
+            if change.get('layers') or change.get('extent_layer'):
+                _set_map(layout, item, change)
+            else:
+                item.zoomToExtent(target.extent().buffered(max(target.extent().width(), target.extent().height())
+                                                           * 2.0))
+            overview = QgsLayoutItemMapOverview('FilterMate overview', item)
+            overview.setLinkedMap(target)
+            item.overviews().addOverview(overview)
+        else:
+            if not change.get('extent_layer'):
+                raise ValueError('add_map needs extent_layer, or overview_of a map')
+            _set_map(layout, item, change)
+    elif do in ('add_legend', 'add_scale_bar', 'add_north_arrow'):
+        target = _map_of(layout, change.get('map') or '')
+        if do == 'add_legend':
+            item = QgsLayoutItemLegend(layout)
+            item.setTitle('')
+            item.setBackgroundEnabled(True)
+            item.setLinkedMap(target)
+            default = (width - MARGIN - 50, MARGIN + 20, 50, 40)
+        elif do == 'add_scale_bar':
+            item = QgsLayoutItemScaleBar(layout)
+            item.setLinkedMap(target)
+            item.applyDefaultSize()
+            item.setBackgroundEnabled(True)
+            default = (MARGIN + 3, height - MARGIN - 18, 60, 12)
+        else:
+            item = QgsLayoutItemPicture(layout)
+            item.setPicturePath(NORTH_ARROW)
+            item.setLinkedMap(target)
+            default = (MARGIN + 3, MARGIN + 20, 12, 12)
+        layout.addLayoutItem(item)
+        _place(layout, item, change, default)
+        if do == 'add_legend':
+            item.adjustBoxSize()
+    elif do == 'add_shape':
+        item = QgsLayoutItemShape(layout)
+        shapes = getattr(QgsLayoutItemShape, 'Shape', QgsLayoutItemShape)
+        item.setShapeType(shapes.Rectangle)
+        layout.addLayoutItem(item)
+        _place(layout, item, change, (MARGIN, MARGIN, 50, 30))
+    else:  # add_table
+        layer = resolve_layer(change.get('layer') or '')
+        if not isinstance(layer, QgsVectorLayer):
+            raise ValueError(f"layer {change.get('layer')!r} is not a vector layer of the project")
+        table = QgsLayoutItemAttributeTable.create(layout) if hasattr(QgsLayoutItemAttributeTable, 'create') \
+            else QgsLayoutItemAttributeTable(layout)
+        table.setVectorLayer(layer)
+        columns = change.get('columns') or []
+        missing = [name for name in columns if layer.fields().lookupField(name) < 0]
+        if missing:
+            raise ValueError(f"no field {missing} in '{layer.name()}': see describe_layer")
+        if columns:
+            table.setDisplayedFields(list(columns))
+        table.setMaximumNumberOfFeatures(int(_number(change, 'max_rows', 1, MAX_TABLE_ROWS) or 30))
+        atlas = layout.atlas() if hasattr(layout, 'atlas') else None
+        if atlas is not None and atlas.enabled() and atlas.coverageLayer() is not None \
+                and atlas.coverageLayer().id() == layer.id():
+            table.setFilterToAtlasFeature(True)  # the rows of the feature of each page
+        layout.addMultiFrame(table)
+        frame = QgsLayoutFrame(layout, table)
+        table.addFrame(frame)
+        _place(layout, frame, change, (MARGIN, height - MARGIN - 50, width / 2 - MARGIN, 50))
+        table.refresh()
+        return {'do': do, 'ref': item_ref(frame), 'layer': layer.name()}
+    return {'do': do, 'ref': item_ref(item)}
+
+
+def edit_layout(layout_name: str, changes: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Change a layout item by item: add a text, a map (``overview_of`` another one: a map of situation), a legend,
+    a scale bar, a north arrow, an attribute table, a frame or a page; move, remove; set a text or a map. In
+    millimetres from the top left of a page. All or nothing: a change refused puts the layout back as it was.
+
+    Raises:
+        ValueError: An unknown layout, change, item or layer, a value out of range.
+    """
+    from qgis.core import QgsProject
+    layout = _layout(layout_name)
+    if not isinstance(changes, list) or not changes:
+        raise ValueError('changes is a list of 1 to 20 changes')
+    if len(changes) > MAX_EDITS:
+        raise ValueError(f"{MAX_EDITS} changes at most in one call")
+    before = layout_xml(layout)
+    done = []
+    try:
+        for index, change in enumerate(changes, 1):
+            if not isinstance(change, dict):
+                raise ValueError('each change is an object')
+            try:
+                done.append(_edit(layout, change))
+            except ValueError as exc:
+                raise ValueError(f"change {index} ({change.get('do')}): {exc}") from None
+    except Exception:
+        manager = QgsProject.instance().layoutManager()
+        manager.removeLayout(layout)
+        layout_from_xml(before)
+        raise
+    layout.refresh()
+    return {'layout': layout.name(), 'done': done, 'items': len(layout_items(layout)),
+            'pages': layout.pageCollection().pageCount()}
+
+
+def _from_template(name: str, template: str):
+    """A layout of the project made from the template ``template`` of the profile (``template_names``)."""
+    from qgis.core import QgsPrintLayout, QgsProject, QgsReadWriteContext
+    from qgis.PyQt.QtXml import QDomDocument
+    paths = [path for path, _ in _templates() if os.path.splitext(os.path.basename(path))[0] == template]
+    if not paths:
+        names = template_names()
+        raise ValueError(f"no template {template!r}" + (f": {', '.join(names)}" if names else
+                                                        ": the profile has none"))
+    with open(paths[0], encoding='utf-8') as handle:
+        text = handle.read()
+    document = QDomDocument()
+    if not document.setContent(text):
+        raise ValueError(f"the template {template!r} could not be read")
+    layout = QgsPrintLayout(QgsProject.instance())
+    _, ok = layout.loadFromTemplate(document, QgsReadWriteContext())
+    if not ok:
+        raise ValueError(f"the template {template!r} could not be loaded")
+    layout.setName(name)
+    return layout
 
 
 def layout_xml(layout) -> str:

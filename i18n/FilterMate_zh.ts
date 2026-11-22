@@ -81,6 +81,11 @@ Run it?</source>
         <translation>{} 的图集</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2853"/>
+        <source>Layout {} changed</source>
+        <translation>布局 {} 已更改</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>图表：{}</translation>

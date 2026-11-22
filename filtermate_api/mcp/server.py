@@ -82,6 +82,29 @@ def _write(title: str, idempotent: bool, destructive: bool = False) -> ToolAnnot
                            idempotentHint=idempotent, openWorldHint=False)
 
 
+class LayoutChange(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    do: Literal["add_text", "add_map", "add_legend", "add_scale_bar", "add_north_arrow", "add_table", "add_shape",
+                "add_page", "move", "remove", "set_text", "set_map"]
+    ref: str = Field(default="", max_length=100, description="The item (move, remove, set_*)")
+    text: str = Field(default="", max_length=2000)
+    font_size: Optional[float] = Field(default=None, ge=4, le=200)
+    layer: str = Field(default="", max_length=1000, description="add_table")
+    layers: Optional[List[str]] = Field(default=None, max_length=100)
+    extent_layer: str = Field(default="", max_length=1000)
+    overview_of: str = Field(default="", max_length=100)
+    map: str = Field(default="", max_length=100, description="Linked map; default the largest")
+    scale: Optional[float] = Field(default=None, ge=1)
+    columns: Optional[List[str]] = Field(default=None, max_length=50)
+    max_rows: Optional[int] = Field(default=None, ge=1, le=500)
+    page: Optional[int] = Field(default=None, ge=1)
+    x: Optional[float] = Field(default=None, ge=0, le=5000)
+    y: Optional[float] = Field(default=None, ge=0, le=5000)
+    width: Optional[float] = Field(default=None, ge=1, le=5000)
+    height: Optional[float] = Field(default=None, ge=1, le=5000)
+
+
 class RasterSelection(BaseModel):
     """Pixels kept on a raster source (same rules as the EXPLORING raster panel of the dock)."""
 
@@ -680,6 +703,8 @@ def build_server(client: FilterMateClient) -> Any:
         legend: bool = True,
         scale_bar: bool = True,
         north_arrow: bool = True,
+        template: Annotated[str, Field(max_length=200, description=(
+            "A template of the profile (describe_layout lists them): its page and items instead"))] = "",
     ) -> Dict[str, Any]:
         """Make a print layout of the map (title, legend, scale bar, north arrow), added to the project for the
         user to finish; export_layout writes it to a file. Undoing the turn of the chat removes it.
@@ -688,7 +713,8 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/layouts", _body(
             name=name, title=title, page=page, orientation=orientation, layers=layers, extent=extent,
-            extent_layer=extent_layer, legend=legend, scale_bar=scale_bar, north_arrow=north_arrow))
+            extent_layer=extent_layer, legend=legend, scale_bar=scale_bar, north_arrow=north_arrow,
+            template=template))
 
     @mcp.tool(annotations=_write("Export a print layout", idempotent=False, destructive=True))
     async def export_layout(
@@ -720,6 +746,21 @@ def build_server(client: FilterMateClient) -> Any:
         and templates (the .qpt of the profile).
         """
         return await call("GET", "/layouts/details?" + urlencode({"name": name}))
+
+    @mcp.tool(annotations=_write("Change a print layout", idempotent=False))
+    async def edit_layout(
+        layout: Annotated[str, Field(min_length=1, max_length=100, description="A layout of the project")],
+        changes: Annotated[List[LayoutChange], Field(min_length=1, max_length=20)],
+    ) -> Dict[str, Any]:
+        """Change a print layout item by item, all or none: add a text ([% "nom" %] follows an atlas), a map
+        (extent_layer, or overview_of a map: a map of situation), a legend, scale bar or north arrow (of map), an
+        attribute table (layer, columns, max_rows), a frame or a page; move, remove; set_text, set_map (layers,
+        extent_layer, scale). Items by ref (describe_layout); x, y, width, height in mm from the top left of page.
+        Returns done and items. In the chat of FilterMate, undoing the turn puts the layout back.
+        """
+        return await call("POST", "/layouts/edit", _body(
+            layout=layout, changes=[change.model_dump(exclude_defaults=True) | {"do": change.do}
+                                    for change in changes]))
 
     @mcp.tool(annotations=_write("Set the atlas of a layout", idempotent=True))
     async def set_atlas(

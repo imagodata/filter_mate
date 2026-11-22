@@ -1,7 +1,7 @@
 ---
 name: dashboards
 title: Build a dashboard of widgets
-description: a dashboard in the AGENT panel to explore a layer (sliders, ticked values, numbers, charts)
+description: a dashboard in the AGENT panel to explore a layer (sliders, values, numbers, charts)
 metadata:
   version: 2
   plugin_min: 5.1.0

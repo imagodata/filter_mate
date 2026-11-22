@@ -152,8 +152,68 @@ def main():
     again = project.layoutManager().layoutByName("Carte")
     check("atlas: redo brings it back", not left and again.atlas().enabled() and
           again.atlas().coverageLayer() is not None and again.atlas().coverageLayer().id() == layer.id(), (done, left))
+    # --- edit_layout, all or nothing, undone with the turn
+    again.atlas().setEnabled(True)
+    main_ref = next(item["ref"] for item in layouts.describe_layout("Carte")["items"] if item["type"] == "map")
+    before_count = len(layouts.describe_layout("Carte")["items"])
+    refused_all = refused(lambda: layouts.edit_layout("Carte", [
+        {"do": "add_text", "text": "x"}, {"do": "remove", "ref": "nope"}]))
+    check("edit: a change refused leaves the layout as it was", refused_all and
+          len(layouts.describe_layout("Carte")["items"]) == before_count)
+    layout_now = project.layoutManager().layoutByName("Carte")
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("e1", "edit_layout", {"layout": "Carte"}))
+    edited = layouts.edit_layout("Carte", [
+        {"do": "add_text", "text": "Commune : [% \"nom\" %]", "font_size": 16, "x": 20, "y": 30, "width": 120,
+         "height": 10},
+        {"do": "add_map", "overview_of": main_ref, "x": 217, "y": 24, "width": 70, "height": 50},
+        {"do": "add_table", "layer": "communes", "columns": ["nom", "pop"], "max_rows": 5, "x": 20, "y": 150,
+         "width": 100, "height": 40},
+        {"do": "add_shape", "x": 5, "y": 5, "width": 10, "height": 10},
+        {"do": "add_page"}])
+    kinds = [item["type"] for item in layouts.describe_layout("Carte")["items"]]
+    check("edit: text, map of situation, table, frame and page added", [row["do"] for row in edited["done"]] == [
+        "add_text", "add_map", "add_table", "add_shape", "add_page"] and edited["pages"] == 2 and
+        kinds.count("map") == 2 and "table" in kinds and "shape" in kinds, (edited, kinds))
+    overview = [item for item in layout_now.items() if type(item).__name__ == "QgsLayoutItemMap"
+                and item.overviews().size() > 0] if layout_now is project.layoutManager().layoutByName("Carte") else []
+    check("edit: the map of situation shows the frame of the main map", len(overview) == 1)
+    text_ref, shape_ref = edited["done"][0]["ref"], edited["done"][3]["ref"]
+    moved = layouts.edit_layout("Carte", [
+        {"do": "move", "ref": text_ref, "x": 40, "y": 15, "page": 2},
+        {"do": "set_text", "ref": text_ref, "text": "Atlas des communes"},
+        {"do": "set_map", "ref": main_ref, "scale": 50000},
+        {"do": "remove", "ref": shape_ref}])
+    rows = {item["ref"]: item for item in layouts.describe_layout("Carte")["items"]}
+    check("edit: moved to page 2, its text set, the map at 1:50 000, the frame removed",
+          rows[text_ref]["page"] == 2 and rows[text_ref]["x_mm"] == 40.0 and
+          rows[text_ref]["text"] == "Atlas des communes" and shape_ref not in rows and
+          rows[main_ref]["scale"] == 50000, (moved, rows.get(text_ref), rows.get(main_ref)))
+    effects = recorder.finish()
+    check("edit: the turn keeps the layout before and after", [effect[0] for effect in effects] == ["layout_state"])
+    done, left = apply_effects(effects, undo=True)
+    check("edit: undo takes every change back", not left and
+          len(layouts.describe_layout("Carte")["items"]) == before_count, (done, left))
+    apply_effects(effects, undo=False)
+    check("edit: redo brings them back", len(layouts.describe_layout("Carte")["pages"]) == 2)
+
+    # --- a template of the profile
+    from qgis.core import QgsReadWriteContext
+    folder_templates = os.path.join(QgsApplication.qgisSettingsDirPath(), "composer_templates")
+    os.makedirs(folder_templates, exist_ok=True)
+    project.layoutManager().layoutByName("Carte").saveAsTemplate(
+        os.path.join(folder_templates, "Modele communes.qpt"), QgsReadWriteContext())
+    check("template: listed", "Modele communes" in layouts.describe_layout("")["templates"],
+          layouts.describe_layout("")["templates"])
+    made = layouts.create_layout("Depuis modele", template="Modele communes", extent_layer="communes")
+    from_template = layouts.describe_layout("Depuis modele")
+    check("template: a layout made from it, its pages and items", len(from_template["pages"]) == 2 and
+          "table" in made["items"] and made["extent_from"] == "layer", made)
+    check("template: refuses an unknown one", refused(lambda: layouts.create_layout("x", template="nope")))
+
     off = layouts.set_atlas("Carte", enabled=False)
-    check("atlas: turned off", off == {"layout": "Carte", "atlas": False} and not again.atlas().enabled(), off)
+    check("atlas: turned off", off == {"layout": "Carte", "atlas": False} and
+          not project.layoutManager().layoutByName("Carte").atlas().enabled(), off)
     check("export: an atlas turned off is refused", refused(lambda: layouts.export_layout("Carte", folder, atlas=True)))
 
 

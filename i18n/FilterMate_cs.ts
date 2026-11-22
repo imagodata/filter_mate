@@ -81,6 +81,11 @@ Spustit?</translation>
         <translation>Atlas sestavy {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2853"/>
+        <source>Layout {} changed</source>
+        <translation>Tisková sestava {} změněna</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Graf: {}</translation>
