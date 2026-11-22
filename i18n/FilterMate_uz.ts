@@ -144,6 +144,16 @@ Rozimisiz?</translation>
         <translation>Panel parametrlari: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2716"/>
+        <source>EXPLORING: {}</source>
+        <translation>EXPLORING: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2742"/>
+        <source>Open EXPLORING</source>
+        <translation>EXPLORING ni ochish</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
         <source>Export options of the panel</source>
         <translation>Panelning eksport parametrlari</translation>
@@ -536,6 +546,11 @@ Ishga tushirilsinmi?</translation>
         <location filename="../../adapters/agent/turn_effects.py" line="70"/>
         <source>export options of the panel</source>
         <translation>panelning eksport parametrlari</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="80"/>
+        <source>EXPLORING panel</source>
+        <translation>EXPLORING paneli</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
@@ -2276,6 +2291,21 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Faol qatlam atrofida 100 m zona chizish</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Xaritada obyektlarni o'zim tanlay</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Raqamli maydon gistogrammasida slayder</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Bu rastrda pipetkani yoq</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Ushbu xaritaning chop etish maketini yaratish</translation>
@@ -2663,6 +2693,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
         <source>(empty)</source>
         <translation>(bo‘sh)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} oraliqdan tashqarida</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} qiymatsiz</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>

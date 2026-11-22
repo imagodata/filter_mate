@@ -10,7 +10,7 @@ from qgis.PyQt.QtCore import QCoreApplication
 
 from ...core.agent.widgets import (
     CATEGORIES, CHART, MAX_VALUES, RANGE, SHOWING, STAT, VALUES, WidgetError, category_bars, dumps, histogram_bars,
-    layer_filter, make, parse,
+    RangeReading, layer_filter, make, parse, read_range, replaced, wide_open,
 )
 
 logger = logging.getLogger("FilterMate.agent")
@@ -158,9 +158,9 @@ def stat_value(widget: Dict[str, Any]) -> Optional[float]:
     return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
 
 
-def chart_bars(widget: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
-    """The bars of a chart widget on its layer as filtered now; None when they cannot be read (layer gone, field
-    gone, a web service, too many features)."""
+def _field_values(widget: Dict[str, Any]) -> Optional[List[Any]]:
+    """The values of the field of a widget on its layer as filtered now; None when they cannot be read (layer gone,
+    field gone, a web service, too many features)."""
     from qgis.core import QgsFeatureRequest
     from ..public_api.introspection import MAX_STAT_FEATURES, _refuse_web_service
     from ..qgis.feature_count import features_to_read
@@ -181,7 +181,13 @@ def chart_bars(widget: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
     request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry).setSubsetOfAttributes([index]) \
         .setLimit(MAX_STAT_FEATURES + 1)
     values = [_plain(feature.attribute(index)) for feature in layer.getFeatures(request)]
-    if len(values) > MAX_STAT_FEATURES:
+    return None if len(values) > MAX_STAT_FEATURES else values
+
+
+def chart_bars(widget: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
+    """The bars of a chart widget on its layer as filtered now; None when they cannot be read (see _field_values)."""
+    values = _field_values(widget)
+    if values is None:
         return None
     if widget["mode"] == CATEGORIES:
         counts: Dict[Any, int] = {}
@@ -190,3 +196,15 @@ def chart_bars(widget: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
             counts[key] = counts.get(key, 0) + 1
         return category_bars(counts.items(), total=len(values))
     return histogram_bars(values)
+
+
+def range_reading(widget: Dict[str, Any]) -> Optional[RangeReading]:
+    """The field of a range widget on its layer as filtered now (read_range); None when it cannot be read (see
+    _field_values)."""
+    values = _field_values(widget)
+    return None if values is None else read_range(values, widget["minimum"], widget["maximum"])
+
+
+def opened_filter(widgets: Sequence[Dict[str, Any]], widget: Dict[str, Any]) -> str:
+    """The filter of the layer of a range widget with that widget wide open: its base and the other widgets."""
+    return layer_filter(replaced(widgets, wide_open(widget)), widget["layer_id"], quote_field, quote_value)

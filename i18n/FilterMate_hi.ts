@@ -144,6 +144,16 @@ Do you agree?</source>
         <translation>पैनल के विकल्प: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2716"/>
+        <source>EXPLORING: {}</source>
+        <translation>EXPLORING: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2742"/>
+        <source>Open EXPLORING</source>
+        <translation>EXPLORING खोलें</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
         <source>Export options of the panel</source>
         <translation>पैनल के निर्यात विकल्प</translation>
@@ -536,6 +546,11 @@ Run it?</source>
         <location filename="../../adapters/agent/turn_effects.py" line="70"/>
         <source>export options of the panel</source>
         <translation>पैनल के निर्यात विकल्प</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="80"/>
+        <source>EXPLORING panel</source>
+        <translation>EXPLORING पैनल</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
@@ -2276,6 +2291,21 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>सक्रिय लेयर के चारों ओर 100 m का क्षेत्र बनाएँ</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>मुझे नक्शे पर फ़ीचर चुनने दें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>संख्या फ़ील्ड के हिस्टोग्राम पर स्लाइडर</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>इस रास्टर पर पिपेट चालू करें</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>इस मानचित्र का प्रिंट लेआउट बनाएँ</translation>
@@ -2663,6 +2693,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
         <source>(empty)</source>
         <translation>(खाली)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} सीमा से बाहर</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} बिना मान के</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>

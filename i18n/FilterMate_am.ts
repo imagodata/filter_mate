@@ -144,6 +144,16 @@ Do you agree?</source>
         <translation>የፓነል አማራጮች፦ {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2716"/>
+        <source>EXPLORING: {}</source>
+        <translation>EXPLORING፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2742"/>
+        <source>Open EXPLORING</source>
+        <translation>EXPLORING ክፈት</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
         <source>Export options of the panel</source>
         <translation>የፓነሉ የመላክ አማራጮች</translation>
@@ -536,6 +546,11 @@ Run it?</source>
         <location filename="../../adapters/agent/turn_effects.py" line="70"/>
         <source>export options of the panel</source>
         <translation>የፓነሉ የመላክ አማራጮች</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="80"/>
+        <source>EXPLORING panel</source>
+        <translation>የEXPLORING ፓነል</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
@@ -2276,6 +2291,21 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>በገባሪው ንብርብር ዙሪያ 100 m ዞን ሳል</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>በካርታው ላይ ገጽታዎችን ልምረጥ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>በቁጥር መስክ ሂስቶግራም ላይ ተንሸራታች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>በዚህ ራስተር ላይ ፒፔቱን አዘጋጅ</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>የዚህን ካርታ የህትመት አቀማመጥ ፍጠር</translation>
@@ -2663,6 +2693,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
         <source>(empty)</source>
         <translation>(ባዶ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} ከክልሉ ውጭ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} ዋጋ የሌላቸው</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>

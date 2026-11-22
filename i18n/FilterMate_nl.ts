@@ -144,6 +144,16 @@ Gaat u akkoord?</translation>
         <translation>Paneelopties van: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2716"/>
+        <source>EXPLORING: {}</source>
+        <translation>EXPLORING: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2742"/>
+        <source>Open EXPLORING</source>
+        <translation>EXPLORING openen</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
         <source>Export options of the panel</source>
         <translation>Exportopties van het paneel</translation>
@@ -536,6 +546,11 @@ Uitvoeren?</translation>
         <location filename="../../adapters/agent/turn_effects.py" line="70"/>
         <source>export options of the panel</source>
         <translation>exportopties van het paneel</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="80"/>
+        <source>EXPLORING panel</source>
+        <translation>EXPLORING-paneel</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
@@ -2276,6 +2291,21 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <translation>Teken een zone van 100 m rond de actieve laag</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Laat mij objecten op de kaart kiezen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Schuifregelaar over het histogram van een veld</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Zet de pipet aan op dit raster</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Maak een printlay-out van deze kaart</translation>
@@ -2663,6 +2693,16 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
         <source>(empty)</source>
         <translation>(leeg)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} buiten het bereik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} zonder waarde</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>

@@ -144,6 +144,16 @@ Souhlasíte?</translation>
         <translation>Možnosti panelů pro: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2716"/>
+        <source>EXPLORING: {}</source>
+        <translation>EXPLORING: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2742"/>
+        <source>Open EXPLORING</source>
+        <translation>Otevřít EXPLORING</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
         <source>Export options of the panel</source>
         <translation>Možnosti exportu panelu</translation>
@@ -536,6 +546,11 @@ Spustit?</translation>
         <location filename="../../adapters/agent/turn_effects.py" line="70"/>
         <source>export options of the panel</source>
         <translation>možnosti exportu panelu</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="80"/>
+        <source>EXPLORING panel</source>
+        <translation>panel EXPLORING</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
@@ -2276,6 +2291,21 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <translation>Vykresli zónu 100 m kolem aktivní vrstvy</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Nech mě vybrat prvky na mapě</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Posuvník nad histogramem číselného pole</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Zapni pipetu na tomto rastru</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Vytvoř tiskovou kompozici této mapy</translation>
@@ -2663,6 +2693,16 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
         <source>(empty)</source>
         <translation>(prázdné)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} mimo rozsah</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} bez hodnoty</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>

@@ -34,6 +34,9 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
   FilterMate's panel (``adapters/public_api/panel_options.py``): the options the turn changed only, before and after
   (``core.agent.panel_options.state_change``), as sorted JSON; the panel sets others itself;
 * ``("export_options", "", before, after)``: the export options of the project in that panel, the same way.
+* ``("exploring", "", changes, "")``: what set_exploring changed in the EXPLORING panel, in order, as JSON (the layer
+  shown, a button of the rail turned on or off: ``adapters/public_api/exploring_drive.py``); each one is taken back
+  only while the panel is still as the call left it.
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
@@ -69,6 +72,12 @@ CRS_TOOLS = ("set_project_crs",)
 SETTINGS_TOOLS = ("change_settings", "apply_settings_profile")
 PANEL_TOOLS = ("set_layer_options",)
 EXPORT_PANEL_TOOLS = ("set_export_options",)
+EXPLORING_TOOLS = ("set_exploring",)
+
+
+def _exploring_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "EXPLORING panel")
 
 
 def _export_options_label() -> str:
@@ -372,6 +381,8 @@ class EffectsRecorder:
         # ones (JSON).
         self._panel_layers: Dict[str, Tuple[str, str]] = {}
         self._export_panel: Optional[str] = None
+        # Where the journal of set_exploring stood before the turn first drove the panel.
+        self._exploring_mark: Optional[int] = None
 
     def before_call(self, call: Any, step: int = 0) -> None:
         project = QgsProject.instance()
@@ -473,6 +484,10 @@ class EffectsRecorder:
                 state = export_state(running_dock())
                 if state is not None and self._export_panel is None:
                     self._export_panel = _panel_json({"EXPORTING": state})
+            elif name in EXPLORING_TOOLS:
+                if self._exploring_mark is None:
+                    from ..public_api.exploring_drive import journal_mark
+                    self._exploring_mark = journal_mark()
             elif name == "set_layers_visibility":
                 for reference in _listed(arguments.get("layers")):
                     layer = _resolve(project, reference)
@@ -651,6 +666,11 @@ class EffectsRecorder:
                 was, made = state_change(json.loads(self._export_panel), {"EXPORTING": state})
                 if made["values"] or made["absent"]:
                     effects.append(("export_options", "", _panel_json(was), _panel_json(made)))
+        if self._exploring_mark is not None:
+            from ..public_api.exploring_drive import journal_since
+            changes = journal_since(self._exploring_mark)
+            if changes:
+                effects.append(("exploring", "", _panel_json(changes), ""))
         self.__init__(self._record_settings)
         return tuple(effects)
 
@@ -933,6 +953,13 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                     (done if restore_layer_state(running_dock(), layer_id, state) else left).append(effect[4])
                 else:
                     (done if restore_export_state(running_dock(), state) else left).append(_export_options_label())
+            elif kind == "exploring":
+                import json
+                from ..public_api.exploring_drive import replay
+                from ..public_api.panel_options import running_dock
+                outcome = replay(running_dock(), json.loads(effect[2]), undo)
+                if outcome:  # "" when the panel is already as wanted: nothing done, nothing to say
+                    (done if outcome == "done" else left).append(_exploring_label())
             elif kind == "notes":
                 from .project_notes_store import write_notes
                 write_notes(list(effect[2] if undo else effect[3]), project)

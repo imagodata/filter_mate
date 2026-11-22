@@ -6,8 +6,10 @@ import math
 import pytest
 
 from core.agent.widgets import (
-    CATEGORIES, CHART, HISTOGRAM, MAX_BARS, MAX_VALUES, MAX_WIDGETS, NOTHING, RANGE, STAT, VALUES, WidgetError,
-    category_bars, condition, decimals, dumps, histogram_bars, layer_filter, make, parse, replaced, summary, without,
+    CATEGORIES, CHART, HISTOGRAM, MAX_BARS, MAX_VALUES, MAX_WIDGETS, NOTHING, RANGE, RANGE_BINS, STAT, VALUES,
+    WidgetError, category_bars, condition, decimals, dumps, histogram_bars, kept_span, layer_filter, make, parse,
+    range_counts, range_edges, range_histogram, range_reading_holds, read_range, replaced, summary, unknown_bins,
+    wide_open, without,
 )
 
 pytestmark = pytest.mark.unit
@@ -263,3 +265,72 @@ class TestChart:
         assert [bar["count"] for bar in bars] == [1] + [0] * 8 + [1]
         assert bars[0]["low"] == low and bars[-1]["high"] == high
         assert all(math.isfinite(bar[key]) for bar in bars for key in ("low", "high"))
+
+
+class TestRangeHistogram:
+    """The bars under the handles of a range: counted on the bounds of the widget, not on the values read."""
+
+    def test_on_the_bounds_given_each_edge_in_the_bar_above_it_and_the_maximum_in_the_last(self):
+        assert range_histogram([0, 2.5, 5, 7.5, 10], 0, 10, bins=4) == [1, 1, 1, 2]
+        assert range_histogram([0, 9.99], 0, 10, bins=4) == [1, 0, 0, 1]
+        assert len(range_histogram([], 0, 10)) == RANGE_BINS and sum(range_histogram([], 0, 10)) == 0
+
+    def test_the_bounds_are_those_given_not_those_of_the_values(self):
+        assert range_histogram([4, 5], 0, 10, bins=5) == [0, 0, 2, 0, 0]
+
+    def test_a_value_outside_the_bounds_or_not_a_finite_number_is_left_out(self):
+        values = [-0.001, 10.001, None, "5", True, float("nan"), float("inf"), -float("inf"), 10 ** 400, 5]
+        assert range_histogram(values, 0, 10, bins=2) == [0, 1]
+
+    @pytest.mark.parametrize("low, high", [(-1.7e308, 1.7e308), (0, 5e-324), (1e15, 1e15 + 2)])
+    def test_edges_of_extreme_bounds_never_decrease_and_end_on_the_bounds(self, low, high):
+        edges = range_edges(low, high)
+        assert edges[0] == low and edges[-1] == high and edges == sorted(edges)
+        assert all(math.isfinite(edge) for edge in edges)
+        assert sum(range_histogram([low, high], low, high)) == 2
+
+
+class TestRangeReadingHolds:
+    """The numbers read wide open, shown again while the range is narrower, as long as the layer read now agrees."""
+
+    OPENED = read_range([0.5, 0.8, 1.2, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0], 0, 10).values  # bars [3, 1, 4, 2] in 4
+
+    def narrowed(self, low, high, **changes):
+        return dict(a_range(minimum=0, maximum=10, **changes), low=low, high=high)
+
+    def now(self, values):
+        return read_range(values, 0, 10).values
+
+    def test_the_numbers_read_now_are_what_the_condition_keeps_of_those_read_wide_open(self):
+        assert range_counts(self.OPENED, 0, 10, bins=4) == [3, 1, 4, 2]
+        widget = self.narrowed(1.0, 10.0)
+        assert range_reading_holds(self.OPENED, self.now([1.2, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0]), widget)
+
+    @pytest.mark.parametrize("now", [
+        [3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0],  # the feature of 1.2 deleted: a bar cut by the bound
+        [1.2, 1.3, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0],  # one added there
+        [1.9, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0, 10.0],  # one moved to the next of the 24 bars
+        [1.2, 3.0, 5.5, 6.0, 7.0, 7.4, 8.0],  # the one at the maximum gone
+    ])
+    def test_any_change_of_a_feature_shown_is_seen_in_a_bar_cut_or_whole(self, now):
+        assert not range_reading_holds(self.OPENED, self.now(now), self.narrowed(1.0, 10.0))
+
+    def test_the_bounds_as_the_condition_writes_them(self):
+        values = read_range([2, 3, 4, 5, 6], 0, 10).values
+        assert kept_span(values, self.narrowed(3.0, 5.0)) == (1, 4)  # >= 3 and <= 5: both kept
+        assert kept_span(values, self.narrowed(0.0, 10.0)) == (0, 5)  # at the ends: no condition
+        assert kept_span(values, self.narrowed(2.6, 5.4, integer=True)) == (1, 4)  # written 3 and 5
+        assert kept_span(values, self.narrowed(5.5, 5.5)) == (4, 4)
+
+    def test_what_is_left_out_of_the_bars_is_counted(self):
+        reading = read_range([None, -1, 11, float("nan"), "x", 4, 2], 0, 10)
+        assert list(reading.values) == [2.0, 4.0] and (reading.outside, reading.empty) == (4, 1)
+
+    def test_the_bars_a_layer_filtered_by_its_range_cannot_tell(self):
+        assert unknown_bins(self.narrowed(2.5, 7.0), bins=4) == [True, False, True, True]
+        assert unknown_bins(self.narrowed(0.0, 10.0), bins=4) == [False] * 4
+        assert unknown_bins(self.narrowed(0.0, 7.5), bins=4) == [False, False, False, True]
+
+    def test_wide_open(self):
+        widget = self.narrowed(3.0, 4.0)
+        assert wide_open(widget) == dict(widget, low=0, high=10) and condition(wide_open(widget), qf, qv) == ""
