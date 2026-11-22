@@ -246,3 +246,71 @@ def pick(locale: str, previous: Iterable[str] = (), count: int = SHOWN, rng: Opt
             break
     rng.shuffle(chosen)
     return tuple(example.key for example in chosen)
+
+
+MAX_PROJECT = 2  # requests about the project in one set
+
+
+def adjust(locale: str, current: Sequence[str], previous: Iterable[str], before: Facts, facts: Facts,
+           count: int = SHOWN, rng: Optional[random.Random] = None) -> Tuple[str, ...]:
+    """The set shown, brought up to date with ``facts`` when the project changed under it, not drawn again.
+
+    Keeps the requests of ``current`` that are still true, each in its place, so that a selection made and unmade does
+    not change the three requests that never depended on it. The places left (a request no longer true, or the one
+    made room for) take: one request about the project that the change made possible (a selection or a filter first,
+    then what ``facts`` newly allow, of a kind not there yet), then the rest of what ``pick`` would draw for ``facts``.
+    Every key returned is true of ``facts``.
+
+    Args:
+        locale: The locale of QGIS.
+        current: The keys on the welcome, in their places.
+        previous: The set seen before (kept clear of when the catalog allows it).
+        before: The facts ``current`` was drawn for.
+        facts: The facts now.
+        count: The number of requests.
+        rng: The source of randomness (tests).
+    """
+    rng = rng or random.Random()  # nosec B311 - which requests are shown, nothing secret
+    allowed = {example.key: example for example in eligible(locale, facts)}
+    kept = [key for key in dict.fromkeys(current) if key in allowed][:count]
+    result = list(kept)
+
+    def kinds() -> set:
+        return {allowed[key].kind for key in result}
+
+    def projects() -> int:
+        return sum(allowed[key].group == PROJECT for key in result)
+
+    gained = facts.tokens() - before.tokens()
+    new = [example for example in allowed.values()
+           if example.group == PROJECT and example.key not in result and gained & set(example.needs)]
+    moved = [example for example in new if _MOVED & set(example.needs)]
+    if moved or (new and projects() < MAX_PROJECT):
+        about_active = [example for example in new if _ACTIVE & set(example.needs)]
+        specific = [example for example in new if set(example.needs) - _PRESENCE - _MOVED]
+        candidates = [example for example in (moved or about_active or specific or new) if example.kind not in kinds()]
+        data = [key for key in result if allowed[key].group == DATA]
+        about = [key for key in result if allowed[key].group == PROJECT]
+        if candidates and projects() >= MAX_PROJECT and about:
+            result.remove(rng.choice(about))  # the selection or the filter takes the place of another request
+        elif candidates and len(result) >= count and data:
+            result.remove(rng.choice(data))  # room for the request the change brings
+        if candidates and len(result) < count:
+            result.append(rng.choice(candidates).key)
+    for key in pick(locale, previous, count, rng, facts):
+        if len(result) >= count:
+            break
+        if key not in result and allowed[key].kind not in kinds() and (
+                allowed[key].group == DATA or projects() < MAX_PROJECT):
+            result.append(key)
+    for key in allowed:  # a catalog too small for distinct kinds: the places are filled all the same
+        if len(result) >= count:
+            break
+        if key not in result and (allowed[key].group == DATA or projects() < MAX_PROJECT):
+            result.append(key)
+    # Each request keeps its place; the new ones take the places left.
+    slots: List[Optional[str]] = [key if key in result else None for key in list(current)[:count]]
+    slots += [None] * (count - len(slots))
+    spare = iter(key for key in result if key not in slots)
+    ordered = [key if key is not None else next(spare, None) for key in slots]
+    return tuple(key for key in ordered if key is not None)

@@ -345,3 +345,63 @@ def test_a_basemap_alone_is_not_data_and_is_not_missing_either():
         {c.key for c in ex.CATALOG if c.group == ex.PROJECT} & {key for key in _drawn(mesh)})
     assert "add_basemap" in _drawn(facts()) and "dark_basemap" not in _drawn(facts())
     assert "dark_basemap" in _drawn(facts(vectors=1, active="vector"))
+
+
+def _transitions():
+    states = list(_states())
+    rng = random.Random(4)
+    for _ in range(400):
+        yield rng.choice(states), rng.choice(states)
+
+
+def test_adjust_never_shows_a_request_that_is_false_and_fills_the_places():
+    catalog = _by_key()
+    for index, (before, now) in enumerate(_transitions()):
+        rng = random.Random(index)
+        current = ex.pick("fr_FR", facts=before, rng=rng)
+        keys = ex.adjust("fr_FR", current, current, before, now, rng=rng)
+        assert len(keys) == ex.SHOWN == len(set(keys)), (before, now, current, keys)
+        assert all(set(catalog[key].needs) <= now.tokens() for key in keys), (now, keys)
+        assert sum(catalog[key].group == ex.PROJECT for key in keys) <= ex.MAX_PROJECT
+        # A request still true stays where it was, but for the one that makes room for what the change brings.
+        moved = [place for place, key in enumerate(current)
+                 if set(catalog[key].needs) <= now.tokens() and keys[place] != key]
+        assert len(moved) <= 1, (before, now, current, keys)
+
+
+def test_adjust_without_a_change_changes_nothing():
+    for state in list(_states())[:80]:
+        current = ex.pick("en_US", facts=state, rng=random.Random(2))
+        assert ex.adjust("en_US", current, current, state, state, rng=random.Random(3)) == current
+
+
+def test_a_selection_changes_one_request_and_keeps_the_others_in_place():
+    catalog = _by_key()
+    before, now = facts(vectors=2, active="vector"), facts(vectors=2, active="vector", selected=3)
+    for seed in range(200):
+        current = ex.pick("en_US", facts=before, rng=random.Random(seed))
+        keys = ex.adjust("en_US", current, current, before, now, rng=random.Random(seed))
+        assert any(set(catalog[key].needs) & {"selection", "local_selection"} for key in keys), (current, keys)
+        assert sum(a != b for a, b in zip(current, keys)) <= 2, (current, keys)  # one in, and at most one more out
+        assert sum(1 for key in keys if key in current) >= 2
+
+
+def test_a_selection_ended_removes_what_depended_on_it_and_nothing_else():
+    catalog = _by_key()
+    before, now = facts(vectors=2, active="vector", selected=3), facts(vectors=2, active="vector")
+    for seed in range(200):
+        current = ex.pick("en_US", facts=before, rng=random.Random(seed))
+        keys = ex.adjust("en_US", current, current, before, now, rng=random.Random(seed))
+        assert not any(set(catalog[key].needs) & {"selection", "local_selection"} for key in keys)
+        gone = [place for place, key in enumerate(current) if set(catalog[key].needs) & {"selection", "local_selection"}]
+        assert all(keys[place] == key for place, key in enumerate(current) if place not in gone), (current, keys)
+
+
+def test_the_neutral_requests_stay_when_the_project_becomes_known():
+    catalog = _by_key()
+    unknown, now = ex.Facts.unknown(), facts(vectors=1, active="vector")
+    for seed in range(100):
+        current = ex.pick("en_US", facts=unknown, rng=random.Random(seed))
+        keys = ex.adjust("en_US", current, current, unknown, now, rng=random.Random(seed))
+        assert sum(1 for key in keys if key in current) >= 2
+        assert any(catalog[key].group == ex.PROJECT for key in keys)

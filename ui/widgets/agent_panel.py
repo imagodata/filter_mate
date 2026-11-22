@@ -25,7 +25,9 @@ from qgis.PyQt.QtWidgets import (
 
 from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
-from ...core.agent.example_prompts import Facts, SHOWN as EXAMPLES_SHOWN, pick as pick_examples
+from ...core.agent.example_prompts import (
+    CATALOG as EXAMPLE_CATALOG, Facts, SHOWN as EXAMPLES_SHOWN, adjust as adjust_examples, pick as pick_examples,
+)
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import (
     KIND_CKAN, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_WFS, KIND_WMS,
@@ -177,6 +179,11 @@ def example_text(key: str) -> str:
 def qgis_locale() -> str:
     """The locale of QGIS (``fr_FR``, ``en_GB``), else of the system: it chooses the requests about a country."""
     return str(QSettings().value("locale/userLocale", "") or "") or QLocale().name()
+
+
+def example_needs(key: str) -> Tuple[str, ...]:
+    """What a request of the welcome supposes of the project (core/agent/example_prompts.py)."""
+    return next((example.needs for example in EXAMPLE_CATALOG if example.key == key), ())
 
 
 def examples(previous: Sequence[str] = (), facts: Optional[Facts] = None) -> Tuple[Tuple[str, str], ...]:
@@ -428,6 +435,8 @@ class AgentPanel(QFrame):
         # the welcome follow it. None (a panel alone): unknown, and only requests that suppose nothing are offered.
         self.facts_provider: Optional[Callable[[], Facts]] = None
         self._examples_signature: Tuple[str, ...] = ()  # of the facts the requests on the welcome were drawn for
+        self._examples_facts = Facts.unknown()  # the facts themselves
+        self._hold = False  # a project is opening: the requests wait for it to settle
         self._facts_timer = QTimer(self)
         self._facts_timer.setSingleShot(True)
         self._facts_timer.setInterval(FACTS_SETTLE_MS)
@@ -1084,26 +1093,63 @@ class AgentPanel(QFrame):
             return Facts.unknown()
         return facts if isinstance(facts, Facts) else Facts.unknown()
 
+    def _seen_examples(self) -> List[str]:
+        value = QSettings().value(_LAST_EXAMPLES, "")
+        return [str(key) for key in (list(value) if isinstance(value, (list, tuple)) else str(value or "").split(","))]
+
+    def _set_examples(self, keys: Sequence[str], facts: Facts) -> None:
+        """Put these requests on the buttons, each in its place; a set that is not the one before counts as unseen."""
+        keys = tuple(keys)
+        if keys != self.example_keys:
+            self._examples_seen = False
+        self.example_keys = keys
+        self._examples_facts = facts
+        self._examples_signature = facts.signature()
+        for index, button in enumerate(self.example_buttons):
+            if index < len(keys):
+                text = example_text(keys[index])
+                if text != button.request():
+                    button.set_request(text)
+            button.setProperty("fm_example_drawn", index < len(keys))
+        self._show_examples()
+
     def shuffle_examples(self) -> None:
         """Other requests on the welcome, true of the project now, none of the set seen last (kept across sessions of
         QGIS).
 
         A set nobody saw stays while the project stays as it was drawn for: the thread is cleared twice when QGIS
         starts or a project opens (the project closed, then the one read), and a conversation restored hides the
-        welcome. Drawing then would count as seen a set that never was, and bring back the one seen before."""
+        welcome. Drawing then would count as seen a set that never was, and bring back the one seen before.
+
+        While a project opens (``hold_examples``) nothing is drawn: the layer that will be active is not set yet, and
+        the set would change 300 ms later. The requests that are no longer true are only hidden until then."""
         facts = self._read_facts()
+        if self._hold:
+            self._hide_false_examples(facts)
+            return
         if self.example_keys and not self._examples_seen and facts.signature() == self._examples_signature:
             return
-        value = QSettings().value(_LAST_EXAMPLES, "")
-        previous = list(value) if isinstance(value, (list, tuple)) else str(value or "").split(",")
-        drawn = examples([str(key) for key in previous], facts)
-        self.example_keys = tuple(key for key, _text in drawn)
-        self._examples_signature = facts.signature()
         self._examples_seen = False
-        for index, button in enumerate(self.example_buttons):
-            if index < len(drawn):
-                button.set_request(drawn[index][1])
-            button.setProperty("fm_example_drawn", index < len(drawn))
+        self._set_examples(tuple(key for key, _text in examples(self._seen_examples(), facts)), facts)
+
+    def hold_examples(self) -> None:
+        """A project is opening or closing: the requests are brought up to date once it has settled (the active layer
+        is set after the project is read), not drawn again for the instant in between."""
+        self._hold = True
+        self._facts_timer.start()
+
+    def stop_following(self) -> None:
+        """The controller is shut down: nothing is read of the project any more, a change that was about to be read
+        reads nothing."""
+        self._facts_timer.stop()
+        self._hold = False
+        self.facts_provider = None
+
+    def _hide_false_examples(self, facts: Facts) -> None:
+        tokens = facts.tokens()
+        for index, key in enumerate(self.example_keys):
+            if index < len(self.example_buttons) and not set(example_needs(key)) <= tokens:
+                self.example_buttons[index].setProperty("fm_example_drawn", False)
         self._show_examples()
 
     def facts_changed(self) -> None:
@@ -1112,20 +1158,33 @@ class AgentPanel(QFrame):
         self._facts_timer.start()
 
     def refresh_examples(self) -> None:
-        """Draw the requests again when what they depend on changed since they were drawn; not otherwise, so a set the
-        user is reading stays while the project stays as it is."""
-        if not hasattr(self, "example_buttons") or self._read_facts().signature() == self._examples_signature:
+        """Bring the requests up to date when what they depend on changed since they were drawn; not otherwise, so a
+        set the user is reading stays while the project stays as it is. Only the requests that are no longer true go,
+        and one the change makes possible comes (``core/agent/example_prompts.py: adjust``): the others stay."""
+        if not hasattr(self, "example_buttons"):
             return
-        self.shuffle_examples()
+        held, self._hold = self._hold, False
+        facts = self._read_facts()
+        if facts.signature() == self._examples_signature and not held:
+            return
+        self._adjust_examples(facts)
         if self._ready and self.isVisible() and self.stack.currentIndex() == _WELCOME_PAGE:
             self._examples_on_screen()
 
-    def _examples_on_screen(self) -> None:
-        """The welcome may be on screen: its requests are drawn again if the project changed since (a signal can be
-        missed, or come while the panel was hidden), and count as seen if they are still there in a moment. A set
-        shown for an instant (the thread cleared for the project closed, then for the one read) is not."""
-        if self._read_facts().signature() != self._examples_signature:
+    def _adjust_examples(self, facts: Facts) -> None:
+        if not self.example_keys:
             self.shuffle_examples()
+            return
+        keys = adjust_examples(qgis_locale(), self.example_keys, self._seen_examples(), self._examples_facts, facts)
+        self._set_examples(keys, facts)
+
+    def _examples_on_screen(self) -> None:
+        """The welcome may be on screen: its requests are brought up to date if the project changed since (a signal
+        can be missed, or come while the panel was hidden), and count as seen if they are still there in a moment. A
+        set shown for an instant (the thread cleared for the project closed, then for the one read) is not."""
+        facts = self._read_facts()
+        if facts.signature() != self._examples_signature and not self._hold:
+            self._adjust_examples(facts)
         if not self._examples_seen and self.example_keys:
             keys = self.example_keys
             QTimer.singleShot(EXAMPLES_SEEN_MS, lambda: self._examples_still_there(keys))

@@ -70,6 +70,10 @@ def facts(**given):
     values = dict(known=True, layers=0, tiles=0, vectors=0, rasters=0, point_clouds=0, active="", selected=0,
                   filtered=0, remote=0)
     values.update(given)
+    values.setdefault("selected_local", values["selected"])
+    if values["rasters"]:
+        values.setdefault("elevations", values["rasters"])
+        values.setdefault("active_elevation", values["active"] == "raster")
     values["layers"] = max(values["layers"], values["vectors"] + values["rasters"] + values["point_clouds"])
     return ex.Facts(**values)
 
@@ -126,11 +130,11 @@ def test_layers_changing_the_project_draw_the_requests_again():
     project.state = facts(rasters=1, active="raster")
     panel.refresh_examples()
     assert panel.example_keys != empty and _needs_hold(panel, project.state)
-    assert any("active_raster" in CATALOG[key].needs for key in panel.example_keys)
+    assert any({"active_raster", "active_elevation"} & set(CATALOG[key].needs) for key in panel.example_keys)
     project.state = facts(rasters=1, vectors=1, active="vector", selected=2)
     panel.refresh_examples()
     assert _needs_hold(panel, project.state)
-    assert any("selection" in CATALOG[key].needs for key in panel.example_keys)
+    assert any({"selection", "local_selection"} & set(CATALOG[key].needs) for key in panel.example_keys)
 
 
 def test_nothing_is_drawn_again_while_the_state_stays_as_drawn_for():
@@ -148,18 +152,76 @@ def test_nothing_is_drawn_again_while_the_state_stays_as_drawn_for():
     assert panel.example_keys == drawn and drawn != keys
 
 
-def test_a_set_that_was_seen_is_drawn_again_only_when_the_state_changes_and_without_what_was_seen():
+def test_a_set_that_was_seen_changes_only_what_the_state_changed():
     project = Project(facts(vectors=1, active="vector"))
     panel = _panel(project)
     panel._examples_seen = True  # as when it stayed on screen
     seen = panel.example_keys
     panel.refresh_examples()
     assert panel.example_keys == seen
-    QtCore.QSettings().setValue("filter_mate/agent/last_examples", ",".join(seen))
     project.state = facts(vectors=1, filtered=1, active="vector")
     panel.refresh_examples()
-    assert panel.example_keys != seen and not set(panel.example_keys) & set(seen)
+    assert panel.example_keys != seen and _needs_hold(panel, project.state)
+    assert any("filter" in CATALOG[key].needs for key in panel.example_keys)
+    assert sum(1 for key in panel.example_keys if key in seen) >= 2  # the others stay, each where it was
+    assert panel._examples_seen is False  # a set that is not the one seen counts again
+
+
+def test_a_selection_made_and_unmade_leaves_the_requests_that_did_not_depend_on_it():
+    project = Project(facts(vectors=2, active="vector"))
+    panel = _panel(project)
+    before = panel.example_keys
+    project.state = facts(vectors=2, active="vector", selected=2)
+    panel.refresh_examples()
+    with_selection = panel.example_keys
+    assert sum(a == b for a, b in zip(before, with_selection)) >= 2
+    project.state = facts(vectors=2, active="vector")
+    panel.refresh_examples()
     assert _needs_hold(panel, project.state)
+    assert not any({"selection", "local_selection"} & set(CATALOG[key].needs) for key in panel.example_keys)
+    assert sum(a == b for a, b in zip(with_selection, panel.example_keys)) >= 2
+
+
+def test_a_project_opening_does_not_redraw_the_requests_until_it_settles():
+    """2026-11-22: a set was drawn when the project was read, before its active layer was set, then again 300 ms later."""
+    project = Project(facts())
+    panel = _panel(project)
+    empty = panel.example_keys
+    panel.hold_examples()
+    project.state = facts(vectors=1, active="")  # the layers are there, the active layer is not set yet
+    panel.clear_thread()
+    panel.clear_thread()
+    assert panel.example_keys == empty  # nothing drawn for the instant in between
+    project.state = facts(vectors=1, active="vector")  # the active layer is set
+    QtTest.QTest.qWait(panel_module.FACTS_SETTLE_MS + 400)
+    assert _needs_hold(panel, project.state)
+    assert any({"active_vector", "active_local"} & set(CATALOG[key].needs) for key in panel.example_keys)
+    assert sum(1 for key in panel.example_keys if key in empty) >= 2
+
+
+def test_a_request_no_longer_true_is_hidden_while_the_project_opens():
+    project = Project(facts(vectors=1, active="vector"))
+    panel = _panel(project)
+    keys = panel.example_keys
+    panel.hold_examples()
+    project.state = facts()  # the project went away
+    panel.clear_thread()
+    assert panel.example_keys == keys
+    false_ones = [index for index, key in enumerate(keys) if CATALOG[key].needs]
+    assert false_ones and all(panel.example_buttons[index].isHidden() for index in false_ones)
+
+
+def test_nothing_is_read_after_the_controller_is_shut_down():
+    project = Project(facts())
+    panel = _panel(project)
+    panel.facts_changed()
+    reads = project.reads
+    panel.stop_following()
+    QtTest.QTest.qWait(panel_module.FACTS_SETTLE_MS + 300)
+    assert project.reads == reads and panel.facts_provider is None
+    panel.facts_changed()
+    panel.refresh_examples()
+    assert len(panel.example_keys) == ex.SHOWN  # still a panel with its requests, only neutral from now on
 
 
 def test_a_set_nobody_saw_is_kept_when_the_thread_is_cleared_and_the_state_is_the_same():
