@@ -44,6 +44,7 @@ from ....core.domain.cross_filter import (
     build_in_expression,
     combine_subset,
     coverage_ratio_ok,
+    quote_identifier,
 )
 from ....core.domain.filter_state import LayerSnapshot
 from ....core.filter.pk_formatter import is_null_value
@@ -329,6 +330,12 @@ class VectorTargetJob(TargetJob):
         self._centroid_eligible = self._is_polygon or layer.geometryType() == line_type
         self._use_centroids = False
         self._pk, self._raw_pk = self._primary_key(layer)
+        # 2026-11-23: a long key list of a GeoPackage / SQLite target is written as the dock writes it, one JSON
+        # literal (adapters/backends/ogr/expression_builder.KEY_LIST_JSON_THRESHOLD). The plain list froze QGIS:
+        # 54,473 OpenStreetMap buildings kept by the agent took 15 s in setSubsetString (QGIS 3.44 and 4.3), then
+        # 5 s at each read of the layer; the JSON form 18-49 ms, and 72-255 ms a read. Probed here, on the main
+        # thread: compute() runs in a worker.
+        self._json_keys = self._takes_json_keys(layer)
         # The cut by extent set in place of the list of keys when the service refuses it (apply).
         self._extent_fallback = ''
         # A layer that only asks the rectangle of the map writes a longer address for the same keys.
@@ -347,6 +354,34 @@ class VectorTargetJob(TargetJob):
             else:
                 self._error = no_key
         self._expression = ''
+
+    def _takes_json_keys(self, layer: QgsVectorLayer) -> bool:
+        """A local GeoPackage / SQLite target keyed by a field, whose SQLite evaluates ``json_each``.
+
+        The module of the JSON form is imported here, on the main thread, for every target: compute() uses it in a
+        worker."""
+        try:
+            from ...backends.ogr.expression_builder import is_sqlite_storage, json1_available
+            if self._pk is None or self._raw_pk or self._remote_target is not None:
+                return False
+            return layer.providerType() == 'ogr' and is_sqlite_storage(layer) and json1_available()
+        except Exception:  # the plain list, as before
+            logger.debug("[FM5] JSON key list not probed", exc_info=True)
+            return False
+
+    def _key_expression(self, kept, qgis_expression: bool, chunk: Optional[int]) -> str:
+        """The subset that keeps the features of the keys ``kept``: one JSON literal for a long list of a GeoPackage /
+        SQLite target (``_json_keys``), else literal IN lists, ORed where the source caps one list."""
+        from ...backends.ogr.expression_builder import KEY_LIST_JSON_THRESHOLD, json_key_clause
+        if self._json_keys and len(kept) > KEY_LIST_JSON_THRESHOLD:
+            numeric = all(isinstance(value, int) and not isinstance(value, bool) for value in kept)
+            if numeric or all(isinstance(value, str) for value in kept):
+                return json_key_clause(quote_identifier(self._pk), list(dict.fromkeys(kept)), numeric)
+        if chunk and len(kept) > chunk:
+            lists = [build_in_expression(self._pk, kept[i:i + chunk], raw_field=self._raw_pk,
+                                         qgis_expression=qgis_expression) for i in range(0, len(kept), chunk)]
+            return "(" + " OR ".join(lists) + ")"
+        return build_in_expression(self._pk, kept, raw_field=self._raw_pk, qgis_expression=qgis_expression)
 
     def _unfiltered_source(self, layer: QgsVectorLayer):
         """Feature source of every feature of ``layer``, its subset left out (main thread)."""
@@ -538,13 +573,7 @@ class VectorTargetJob(TargetJob):
             return
         qgis_expression = capability is not None and capability.subset_is_qgis_expression
         chunk = capability.in_list_max if capability is not None else None
-        if chunk and len(kept) > chunk:
-            lists = [build_in_expression(self._pk, kept[i:i + chunk], raw_field=self._raw_pk,
-                                         qgis_expression=qgis_expression) for i in range(0, len(kept), chunk)]
-            self._expression = "(" + " OR ".join(lists) + ")"
-        else:
-            self._expression = build_in_expression(self._pk, kept, raw_field=self._raw_pk,
-                                                   qgis_expression=qgis_expression)
+        self._expression = self._key_expression(kept, qgis_expression, chunk)
         # Release the provider connection held by the feature source before the
         # subset is applied (an open GeoPackage reader made the count fail).
         # The unfiltered copy, a QObject of the main thread, goes in apply().

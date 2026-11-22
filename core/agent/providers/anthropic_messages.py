@@ -23,7 +23,7 @@ DEFAULT_BASE_URL = "https://api.anthropic.com"
 API_VERSION = "2026-10-21"
 _FALLBACK_BETA = "server-side-fallback-2026-07-01"
 # Models with a server-side fallback when a request is declined (official API only).
-_FALLBACK_MODELS = frozenset({"claude-fable-5-1", "claude-opus-5-5", "claude-opus-5", "claude-sonnet-5-5"})
+_FALLBACK_MODELS = frozenset({"claude-fable-5-2", "claude-fable-5-1", "claude-opus-5-5", "claude-opus-5", "claude-sonnet-5-5"})
 
 _STOP_REASONS = {"end_turn": STOP_END, "stop_sequence": STOP_END, "tool_use": STOP_TOOL_USE,
                  "max_tokens": STOP_MAX_TOKENS, "refusal": STOP_REFUSAL}

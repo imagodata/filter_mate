@@ -96,6 +96,7 @@ class TestAnthropicRequest:
         assert json.loads(covered.body)["fallbacks"] == "default"
         assert covered.headers["anthropic-beta"] == "server-side-fallback-2026-07-01"
         assert "fallbacks" not in json.loads(claude("claude-haiku-5-5").build_request("S", [], []).body)
+        assert json.loads(claude("claude-fable-5-2").build_request("S", [], []).body)["fallbacks"] == "default"
         relay = claude("claude-opus-5-5", base_url="https://relay.example.org").build_request("S", [], [])
         assert "fallbacks" not in json.loads(relay.body)
 
