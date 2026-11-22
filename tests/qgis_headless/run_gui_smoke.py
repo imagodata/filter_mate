@@ -3600,7 +3600,121 @@ def s_setup_layout_back():
     return settled()
 
 
-WELCOME_STEPS = [s_tour, s_tour_links_check, s_tour_merged_check, s_setup_layout, s_setup_layout_check, s_setup_layout_back]
+def s_welcome_by_state():
+    """The requests of the welcome follow the project (2026-11-20), on a project of their own read as the controller reads
+    the open one (the layers of the dock stay where they are): nothing open, a raster, a vector layer and a selection;
+    a filter; and the link that reconfigures FilterMate with a model. The dock is left as it was found."""
+    from qgis.core import QgsFeature, QgsGeometry, QgsPointXY
+    from osgeo import gdal
+    d, chat = dock(), agent_chat()
+    panel = chat.panel
+    prompts = importlib.import_module(f'{PACKAGE}.core.agent.example_prompts')
+    reader = importlib.import_module(f'{PACKAGE}.adapters.qgis.project_facts')
+    catalog = {example.key: example for example in prompts.CATALOG}
+    scratch, kept = QgsProject(), {'provider': panel.facts_provider, 'ready': panel._ready}
+    active = []
+
+    def facts():
+        return reader.read_facts(project=scratch, active=active[0] if active else None)
+
+    def drawn():
+        panel.refresh_examples()
+        QApplication.processEvents()
+        return panel.example_keys
+
+    def true_now():
+        tokens = facts().tokens()
+        return all(set(catalog[key].needs) <= tokens for key in panel.example_keys)
+
+    chat.new_conversation()
+    d._fm_sections.open_top('agent')
+    panel.facts_provider = facts
+    panel.set_ready(True, 'Claude (Anthropic) · claude-haiku-5-5')  # a model is connected
+    QApplication.processEvents()
+    empty = drawn()
+    check('welcome by state: nothing open offers only ways to bring data in',
+          len(empty) == 4 and all(catalog[key].group == prompts.DATA for key in empty) and true_now()
+          and all(button.isVisible() for button in panel.example_buttons), str(empty))
+    grab('welcome_empty_project')
+    folder = tempfile.mkdtemp()
+    path = os.path.join(folder, 'dem.tif')
+    dataset = gdal.GetDriverByName('GTiff').Create(path, 4, 4, 1, gdal.GDT_Float32)
+    dataset.SetGeoTransform((650000, 10, 0, 6860000, 0, -10))
+    dataset.GetRasterBand(1).Fill(100)
+    dataset = None
+    raster = QgsRasterLayer(path, 'dem')
+    scratch.addMapLayer(raster)
+    active[:] = [raster]
+    with_raster = drawn()
+    check('welcome by state: a raster active gives requests about it, none about a vector layer',
+          with_raster != empty and true_now() and any('active_raster' in catalog[key].needs for key in with_raster)
+          and not any({'vector', 'active_vector', 'selection'} & set(catalog[key].needs) for key in with_raster),
+          str(with_raster))
+    grab('welcome_raster_active')
+    points = QgsVectorLayer('Point?crs=EPSG:4326&field=name:string', 'pts', 'memory')
+    features = []
+    for index in range(3):
+        feature = QgsFeature(points.fields())
+        feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(index, index)))
+        feature.setAttributes([f'p{index}'])
+        features.append(feature)
+    points.dataProvider().addFeatures(features)
+    scratch.addMapLayer(points)
+    active[:] = [points]
+    with_vector = drawn()
+    check('welcome by state: a vector layer added changes the requests to those about it',
+          with_vector != with_raster and true_now() and any('active_vector' in catalog[key].needs for key in with_vector),
+          str(with_vector))
+    points.selectByIds([next(iter(points.allFeatureIds()))])
+    selected = drawn()
+    check('welcome by state: a selection brings a request about it',
+          selected != with_vector and true_now() and any('selection' in catalog[key].needs for key in selected),
+          str(selected))
+    grab('welcome_vectors_selection')
+    points.removeSelection()
+    points.setSubsetString("name <> 'p0'")
+    filtered = drawn()
+    check('welcome by state: a filter brings a request about it',
+          true_now() and any('filter' in catalog[key].needs for key in filtered), str(filtered))
+    still = drawn()
+    check('welcome by state: nothing is drawn again while the state stays', still == filtered)
+    # A set that was seen is replaced only by a state that changed, and without what was seen.
+    panel._examples_seen = True
+    QSettings().setValue('filter_mate/agent/last_examples', ','.join(filtered))
+    points.setSubsetString('')
+    after = drawn()
+    check('welcome by state: the set seen is replaced by the state, none of its requests again',
+          after != filtered and not set(after) & set(filtered) and true_now(), f'{filtered} -> {after}')
+    # The link that reconfigures: there with a model, and the setup cards come in the thread.
+    check('welcome by state: the link to reconfigure is under the requests with a model, the button of the setup hidden',
+          panel.reconfigure_button.isVisible() and not panel.setup_button.isVisible()
+          and panel.reconfigure_button.geometry().top() > max(b.geometry().bottom() for b in panel.example_buttons)
+          and panel.reconfigure_button.geometry().bottom() <= panel.tour_button.geometry().top()
+          and panel.reconfigure_button.width() <= panel.stack.width(),
+          f'{panel.reconfigure_button.geometry()} {panel.tour_button.geometry()}')
+    grab('welcome_model_connected')
+    panel.reconfigure_button.click()
+    QApplication.processEvents()
+    check('welcome by state: the link starts the cards of the setup, no model asked',
+          _wizard_card() is not None and chat._engine is None, panel.thread.toPlainText()[:80])
+    chat.new_conversation()  # the cards are left unanswered: nothing is changed
+    chat._wizard.forget()
+    panel.set_ready(False)
+    QApplication.processEvents()
+    # Without a model the existing button is the only one: the link is not doubled.
+    check('welcome by state: without a model the button of the setup stays and the link is hidden',
+          not panel.setup_button.isHidden() and panel.reconfigure_button.isHidden(),
+          f'{panel.setup_button.isHidden()} {panel.reconfigure_button.isHidden()}')
+    panel.facts_provider = kept['provider']
+    chat._refresh_ready()
+    scratch.clear()
+    shutil.rmtree(folder, ignore_errors=True)
+    leave_welcome()
+    return settled()
+
+
+WELCOME_STEPS = [s_tour, s_tour_links_check, s_tour_merged_check, s_setup_layout, s_setup_layout_check, s_setup_layout_back,
+                 s_welcome_by_state]
 
 
 # --- what a section in its own panel still shares with the others (FM_ONLY=sync) -------------------------------------
