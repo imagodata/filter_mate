@@ -6,6 +6,8 @@ Source capability of a QGIS layer (see core.domain.source_capability).
 ``layer.source()`` once per (layer id, source): a layer whose source
 changes (a raster cut to a VRT, a layer repointed) is classified again.
 Every QGIS call is guarded: the module loads and answers under test mocks.
+In the worker of a task the three are those the task read on the main thread
+when it was created (``filtermate_core.domain.layer_facts``).
 
 It also proves the stable key of a local layer (core.domain.stable_key):
 :func:`key_field_is_unique` reads one field of every feature (in a task,
@@ -22,6 +24,11 @@ except ImportError:  # loaded outside the plugin package (unit tests)
     from core.domain.source_capability import SourceCapability, classify
     from core.domain.stable_key import FEATURE_ID, FEATURE_ID_KEY, NONE, KeyChoice, choose_key
     from core.filter.pk_formatter import is_null_value
+
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, provider_key_of, source_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, provider_key_of, source_of
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +64,9 @@ def capability_for_layer(layer: Any) -> Optional[SourceCapability]:
     if layer is None:
         return None
     try:
-        layer_id = layer.id()
-        provider_key = layer.providerType()
-        source = layer.source()
+        layer_id = id_of(layer)
+        provider_key = provider_key_of(layer)
+        source = source_of(layer)
     except (RuntimeError, AttributeError) as exc:
         logger.debug(f"Source capability unavailable: {exc}")
         return None
@@ -79,9 +86,9 @@ def capability_for_layer(layer: Any) -> Optional[SourceCapability]:
 
 def _data_key(layer: Any) -> Tuple[str, str]:
     """(layer id, source without its OGR subset): the data a key verdict is about."""
-    source = layer.source()
+    source = source_of(layer)
     source = source if isinstance(source, str) else ''
-    return str(layer.id()), source.split('|subset=', 1)[0]
+    return str(id_of(layer)), source.split('|subset=', 1)[0]
 
 
 def key_field_is_unique(layer: Any, name: str, scan: bool = True) -> Optional[bool]:

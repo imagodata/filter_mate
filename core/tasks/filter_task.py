@@ -139,6 +139,11 @@ from ...adapters.repositories.history_repository import (
     HistoryRepository, note_history_insert, recording_history_inserts,
 )
 
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of
+
 # EPIC-1 E13: Use BackendServices facade for all adapter imports
 # This maintains hexagonal architecture by routing through core/ports
 
@@ -333,6 +338,15 @@ class FilterEngineTask(QgsTask):
             from ...adapters.qgis.source_capability_probe import capture_network_manager
             capture_network_manager()
         except Exception:  # nosec B110 - provider error notifications remain available
+            pass
+        # The provider, the source, the id and the name of the layers of the project, read here on the
+        # main thread (2026-11-20): the worker asks them to core.domain.layer_facts, not to the layers
+        # (QGIS 4.3 reports providerType() called from another thread than the one the layer lives in)
+        self._layer_facts = None
+        try:
+            from ...infrastructure.utils.layer_facts import capture_layer_facts
+            self._layer_facts = capture_layer_facts()
+        except Exception:  # nosec B110 - the worker then reads the layers themselves, as before
             pass
 
         # H1 (audit 2026-04-29): stamp the subset-change token NOW (main
@@ -848,20 +862,21 @@ class FilterEngineTask(QgsTask):
             # Duplicates caused "Applying 2 pending subset requests" spam with
             # identical payloads and noisy "Task failed" on reopen.
             try:
-                layer_id = layer.id()
+                layer_id = id_of(layer)
             except (RuntimeError, AttributeError):
                 layer_id = None
             already_queued = any(
-                (getattr(existing_layer, 'id', lambda: None)() == layer_id and existing_expr == expression)
+                ((id_of(existing_layer) if hasattr(existing_layer, 'id') else None) == layer_id
+                 and existing_expr == expression)
                 for existing_layer, existing_expr in self._pending_subset_requests
                 if existing_layer is not None
             )
             if not already_queued:
                 self._pending_subset_requests.append((layer, expression))
                 expr_preview = (expression[:60] + '...') if len(expression) > 60 else expression
-                logger.debug(f"📥 Queued subset request for {layer.name()}: {expr_preview}")
+                logger.debug(f"📥 Queued subset request for {name_of(layer)}: {expr_preview}")
             else:
-                logger.debug(f"↩️ Dedup: subset request already queued for {layer.name()}")
+                logger.debug(f"↩️ Dedup: subset request already queued for {name_of(layer)}")
         else:
             logger.warning(f"⚠️ queue_subset_request called with invalid params: layer={layer}, expression={expression is not None}")
         return True  # Return True to indicate success (actual application is deferred)
@@ -949,7 +964,7 @@ class FilterEngineTask(QgsTask):
             layer_id = self.task_parameters.get("infos", {}).get("layer_id")
             if layer_id:
                 layer = self.PROJECT.mapLayer(layer_id)
-                if layer and layer.providerType() == QGIS_PROVIDER_POSTGRES:
+                if layer and provider_key_of(layer) == QGIS_PROVIDER_POSTGRES:
                     connexion, source_uri = get_datasource_connexion_from_layer(layer)
                     if connexion is not None:
                         self.active_connections.append(connexion)
@@ -1194,7 +1209,7 @@ class FilterEngineTask(QgsTask):
         logger.info(f"   action={self.task_action}")
         logger.info(f"   layers_count={self.layers_count}")
         source_layer = getattr(self, 'source_layer', None)
-        logger.info(f"   source_layer={source_layer.name() if source_layer else 'None (will be initialized)'}")
+        logger.info(f"   source_layer={name_of(source_layer) if source_layer else 'None (will be initialized)'}")
         logger.info(f"{'=' * 60}")
 
         # FIX 2026-01-16: Extract critical configuration values IMMEDIATELY
@@ -1259,12 +1274,12 @@ class FilterEngineTask(QgsTask):
                         existing_keys = set()
                         for existing_layer, existing_expr in self._pending_subset_requests:
                             try:
-                                existing_keys.add((existing_layer.id() if existing_layer else None, existing_expr))
+                                existing_keys.add((id_of(existing_layer) if existing_layer else None, existing_expr))
                             except (RuntimeError, AttributeError):
                                 continue
                         for new_layer, new_expr in result.context.result_processor._pending_subset_requests:
                             try:
-                                key = (new_layer.id() if new_layer else None, new_expr)
+                                key = (id_of(new_layer) if new_layer else None, new_expr)
                             except (RuntimeError, AttributeError):
                                 key = (None, new_expr)
                             if key not in existing_keys:
@@ -1964,7 +1979,7 @@ class FilterEngineTask(QgsTask):
         """
         # DIAGNOSTIC DÉTAILLÉ - ARCHITECTURE FIX 2026-01-16
         logger.info("=" * 70)
-        logger.info(f"🎯 execute_geometric_filtering: {layer.name()}")
+        logger.info(f"🎯 execute_geometric_filtering: {name_of(layer)}")
         logger.debug(f"   Provider: {layer_provider_type}")
         logger.info(f"   Predicates in task: {bool(getattr(self, 'current_predicates', None))}")
 
@@ -2018,7 +2033,7 @@ class FilterEngineTask(QgsTask):
         except Exception as e:  # catch-all safety net: geometric filtering must not crash the task
             logger.error("=" * 70)
             logger.error("❌ EXCEPTION in execute_geometric_filtering:")
-            logger.error(f"   Layer: {layer.name()}")
+            logger.error(f"   Layer: {name_of(layer)}")
             logger.error(f"   Provider: {layer_provider_type}")
             logger.error(f"   Exception type: {type(e).__name__}")
             logger.error(f"   Exception message: {str(e)}")
@@ -2338,7 +2353,7 @@ class FilterEngineTask(QgsTask):
             current_seq_order=current_seq_order,
             session_id=self.session_id,
             project_uuid=self.project_uuid,
-            source_layer_id=self.source_layer.id() if self.source_layer else None,
+            source_layer_id=id_of(self.source_layer) if self.source_layer else None,
             queue_subset_func=self._queue_subset_string
         )
 
@@ -2377,7 +2392,7 @@ class FilterEngineTask(QgsTask):
             current_seq_order=current_seq_order,
             session_id=self.session_id,
             project_uuid=self.project_uuid,
-            source_layer_id=self.source_layer.id() if self.source_layer else None,
+            source_layer_id=id_of(self.source_layer) if self.source_layer else None,
             queue_subset_func=self._queue_subset_string,
             get_spatialite_datasource_func=self._get_spatialite_datasource,
             task_parameters=self.task_parameters
@@ -2502,8 +2517,8 @@ class FilterEngineTask(QgsTask):
                 inserted = self._ps_manager.insert_subset_history(
                     history_id=history_id,
                     project_uuid=self.project_uuid,
-                    layer_id=layer.id(),
-                    source_layer_id=self.source_layer.id(),
+                    layer_id=id_of(layer),
+                    source_layer_id=id_of(self.source_layer),
                     seq_order=seq_order,
                     subset_string=sql_subset_string
                 )
@@ -2516,10 +2531,10 @@ class FilterEngineTask(QgsTask):
         # EPIC-1 E4-S9: Use centralized HistoryRepository instead of direct SQL
         history_repo = HistoryRepository(conn, cur)
         try:
-            source_layer_id = self.source_layer.id() if self.source_layer else ''
+            source_layer_id = id_of(self.source_layer) if self.source_layer else ''
             return history_repo.insert(
                 project_uuid=self.project_uuid,
-                layer_id=layer.id(),
+                layer_id=id_of(layer),
                 subset_string=sql_subset_string,
                 seq_order=seq_order,
                 source_layer_id=source_layer_id
@@ -2671,13 +2686,13 @@ class FilterEngineTask(QgsTask):
         try:
             if self._ps_manager:
                 try:
-                    self._ps_manager.delete_subset_history(self.project_uuid, layer.id())
+                    self._ps_manager.delete_subset_history(self.project_uuid, id_of(layer))
                 except (RuntimeError, OSError, AttributeError) as e:
                     logger.warning(f"Prepared statement failed, falling back to repository: {e}")
-                    history_repo.delete_for_layer(self.project_uuid, layer.id())
+                    history_repo.delete_for_layer(self.project_uuid, id_of(layer))
             else:
                 # Use repository instead of direct SQL
-                history_repo.delete_for_layer(self.project_uuid, layer.id())
+                history_repo.delete_for_layer(self.project_uuid, id_of(layer))
         finally:
             history_repo.close()
 
@@ -2724,13 +2739,13 @@ class FilterEngineTask(QgsTask):
         try:
             if self._ps_manager:
                 try:
-                    self._ps_manager.delete_subset_history(self.project_uuid, layer.id())
+                    self._ps_manager.delete_subset_history(self.project_uuid, id_of(layer))
                 except (RuntimeError, OSError, AttributeError) as e:
                     logger.warning(f"Prepared statement failed, falling back to repository: {e}")
-                    history_repo.delete_for_layer(self.project_uuid, layer.id())
+                    history_repo.delete_for_layer(self.project_uuid, id_of(layer))
             else:
                 # Use repository instead of direct SQL
-                history_repo.delete_for_layer(self.project_uuid, layer.id())
+                history_repo.delete_for_layer(self.project_uuid, id_of(layer))
         finally:
             history_repo.close()
 
@@ -2823,10 +2838,10 @@ class FilterEngineTask(QgsTask):
         try:
             # Delete last subset from history
             if last_subset_id:
-                history_repo.delete_entry(self.project_uuid, layer.id(), last_subset_id)
+                history_repo.delete_entry(self.project_uuid, id_of(layer), last_subset_id)
 
             # Get previous subset using repository
-            last_entry = history_repo.get_last_entry(self.project_uuid, layer.id())
+            last_entry = history_repo.get_last_entry(self.project_uuid, id_of(layer))
         finally:
             history_repo.close()
 
@@ -2838,7 +2853,7 @@ class FilterEngineTask(QgsTask):
             # Validate previous subset
             if not previous_subset or not previous_subset.strip():
                 logger.warning(
-                    f"Unfilter OGR: Previous subset from history is empty for {layer.name()}. "
+                    f"Unfilter OGR: Previous subset from history is empty for {name_of(layer)}. "
                     "Clearing layer filter."
                 )
                 previous_subset = None
@@ -2862,10 +2877,10 @@ class FilterEngineTask(QgsTask):
         try:
             # Delete last subset from history
             if last_subset_id:
-                history_repo.delete_entry(self.project_uuid, layer.id(), last_subset_id)
+                history_repo.delete_entry(self.project_uuid, id_of(layer), last_subset_id)
 
             # Get previous subset using repository
-            last_entry = history_repo.get_last_entry(self.project_uuid, layer.id())
+            last_entry = history_repo.get_last_entry(self.project_uuid, id_of(layer))
         finally:
             history_repo.close()
 
@@ -2875,7 +2890,7 @@ class FilterEngineTask(QgsTask):
             # CRITICAL FIX: Validate sql_subset_string from history before using
             if not sql_subset_string or not sql_subset_string.strip():
                 logger.warning(
-                    f"Unfilter: Previous subset string from history is empty for {layer.name()}. "
+                    f"Unfilter: Previous subset string from history is empty for {name_of(layer)}. "
                     "Clearing layer filter."
                 )
                 # THREAD SAFETY: Queue subset clear for application in finished()
@@ -3145,7 +3160,7 @@ class FilterEngineTask(QgsTask):
         """
         ids = getattr(self, '_history_inserted_ids', None)
         try:
-            source_id = self.source_layer.id()
+            source_id = id_of(self.source_layer)
         except (RuntimeError, AttributeError):
             return
         if ids:
@@ -3177,7 +3192,7 @@ class FilterEngineTask(QgsTask):
         source = getattr(self, 'source_layer', None)
         for layer in ([source] if source is not None else []) + list(self.param_all_layers):
             try:
-                layer_ids.append(layer.id())
+                layer_ids.append(id_of(layer))
             except (RuntimeError, AttributeError):
                 continue
         for name in names:
@@ -3264,6 +3279,9 @@ class FilterEngineTask(QgsTask):
     @main_thread_only
     def finished(self, result: Optional[bool]) -> None:
         """Handle task completion. Delegates to FinishedHandler."""
+        facts = getattr(self, '_layer_facts', None)
+        if facts is not None:  # the worker ended: the layers answer for themselves again
+            facts.release()
         orchestrator = getattr(self, '_filter_orchestrator', None)
         if orchestrator is not None and hasattr(orchestrator, 'report_empty_target_layers'):
             try:
@@ -3369,7 +3387,7 @@ class FilterEngineTask(QgsTask):
             layer = source_project.mapLayer(lid)
             if not layer:
                 continue
-            kml_path = os.path.join(output_folder, f"{layer.name()}.kml")
+            kml_path = os.path.join(output_folder, f"{name_of(layer)}.kml")
             if os.path.isfile(kml_path):
                 kml_files[lid] = kml_path
 

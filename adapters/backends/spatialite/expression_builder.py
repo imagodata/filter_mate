@@ -76,6 +76,11 @@ except ImportError:
         except Exception:
             return False
 
+try:
+    from ....filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 def json1_available() -> bool:
     """Whether GDAL's SQLite has ``json_each`` (see infrastructure.database.sqlite_capabilities)."""
@@ -105,7 +110,7 @@ class SpatialiteExpressionBuilder(SpatialiteSqlBuilder):
         if layer is None:
             return False
 
-        provider = layer.providerType()
+        provider = provider_key_of(layer)
         if provider == 'spatialite':
             return True
 

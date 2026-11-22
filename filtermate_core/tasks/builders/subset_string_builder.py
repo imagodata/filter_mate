@@ -17,6 +17,8 @@ import logging
 from typing import Optional, List, Dict, Tuple, Any, Callable
 from dataclasses import dataclass
 
+from ...domain.layer_facts import name_of
+
 logger = logging.getLogger('FilterMate.Tasks.SubsetStringBuilder')
 
 
@@ -29,7 +31,7 @@ class SubsetRequest:
 
     def __post_init__(self):
         if not self.layer_name and self.layer:
-            self.layer_name = self.layer.name()
+            self.layer_name = name_of(self.layer)
 
 
 @dataclass

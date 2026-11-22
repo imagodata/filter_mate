@@ -87,6 +87,11 @@ try:
 except ImportError:  # imported from the repository root (tests)
     from filtermate_core.sql.identifiers import sanitize_sql_identifier  # noqa: F401
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 def _provider_error_count(layer) -> int:
     try:
@@ -133,7 +138,7 @@ _UNRUNNABLE = re.compile(
 def _is_sql_file_layer(layer) -> bool:
     """Whether ``layer`` is a GeoPackage or a SQLite file read by GDAL (the ``ogr`` provider)."""
     try:
-        provider_type = layer.providerType()
+        provider_type = provider_key_of(layer)
         if not isinstance(provider_type, str) or provider_type.lower() != 'ogr':
             return False
         storage = layer.dataProvider().storageType()
@@ -354,7 +359,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
         if hasattr(layer, 'setSubsetString'):
             # FIX v4.2.13: Enhanced diagnostics for setSubsetString failures
             logger.debug(f"[SQL] Applying subset to layer '{layer.name()}':")
-            logger.debug(f"[SQL]   Provider: {layer.providerType()}")
+            logger.debug(f"[SQL]   Provider: {provider_key_of(layer)}")
             logger.debug(f"[SQL]   Expression length: {len(subset_expression) if subset_expression else 0} chars")
 
             # H2 FIX (2026-04-23): defense-in-depth sanitization at the universal
@@ -391,7 +396,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
             # FIX v4.8.2: Detect type mismatches BEFORE applying to PostgreSQL
             # Prevents "operator does not exist: character varying < integer" errors
             _t_phase = _perf.perf_counter()
-            if subset_expression and layer.providerType() == 'postgres':
+            if subset_expression and provider_key_of(layer) == 'postgres':
                 try:
                     from ..database.field_type_detector import get_field_types_from_layer
                     from ...core.services.expression_service import ExpressionService
@@ -429,7 +434,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
             # This ensures numeric comparisons have ::numeric casting
             _types_ms = (_perf.perf_counter() - _t_phase) * 1000.0
             _t_phase = _perf.perf_counter()
-            if subset_expression and layer.providerType() == 'postgres':
+            if subset_expression and provider_key_of(layer) == 'postgres':
                 try:
                     # Import from adapters (infrastructure/database -> adapters/backends)
                     from ...adapters.backends.postgresql.filter_executor import apply_postgresql_type_casting
@@ -477,7 +482,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
             # may leave its internal connection in an aborted-transaction state, causing
             # all subsequent setSubsetString() calls to fail even with valid expressions.
             # reloadData() forces a fresh connection so the retry has a clean state.
-            if not result and layer.providerType() == 'postgres' and not connection_lost:
+            if not result and provider_key_of(layer) == 'postgres' and not connection_lost:
                 logger.info(
                     f"[SQL] 🔄 setSubsetString failed for PostgreSQL layer '{layer.name()}' "
                     "- retrying once after reloadData()..."
@@ -526,7 +531,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                             for err_item in (provider.errors() or []):
                                 logger.warning(f"[SQL]   Provider errors(): {err_item}")
                         # For PostgreSQL, try executing a simple query to check connection state
-                        if layer.providerType() == 'postgres':
+                        if provider_key_of(layer) == 'postgres':
                             try:
                                 from ...infrastructure.utils import get_datasource_connexion_from_layer
                                 conn, _ = get_datasource_connexion_from_layer(layer)

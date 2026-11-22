@@ -56,6 +56,12 @@ except ImportError:
         PSYCOPG2_AVAILABLE = False
     POSTGRESQL_AVAILABLE = True  # QGIS native always available
 
+# What a task read of its layers on the main thread (2026-11-20): the layer itself outside a worker
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
+
 # Provider constants
 PROVIDER_POSTGRES = 'postgresql'
 PROVIDER_SPATIALITE = 'spatialite'
@@ -102,7 +108,7 @@ def detect_layer_provider_type(layer) -> str:
         return 'unknown'
 
     try:
-        provider_type = layer.providerType()
+        provider_type = provider_key_of(layer)
     except (RuntimeError, AttributeError):
         return 'unknown'
 
@@ -123,7 +129,7 @@ def detect_layer_provider_type(layer) -> str:
             return 'ogr'
         # Check if it's a GeoPackage or SQLite file - these support Spatialite SQL
         try:
-            source = layer.source()
+            source = source_of(layer)
             source_path = source.split('|')[0] if '|' in source else source
             lower_path = source_path.lower()
 
@@ -161,7 +167,7 @@ def get_data_source_uri(layer) -> Tuple[Optional[Any], Optional[str]]:
         return None, None
 
     try:
-        source_uri = QgsDataSourceUri(layer.source())
+        source_uri = QgsDataSourceUri(source_of(layer))
         if str(source_uri) == '':
             return None, None
         authcfg_id = source_uri.param('authcfg')
@@ -200,7 +206,7 @@ def get_datasource_connexion_from_layer(layer) -> Tuple[Optional[Any], Optional[
 
     # Check that it's a PostgreSQL source
     try:
-        if layer.providerType() != 'postgres':
+        if provider_key_of(layer) != 'postgres':
             return None, None
     except (RuntimeError, AttributeError):
         return None, None
@@ -233,7 +239,7 @@ def get_datasource_connexion_from_layer(layer) -> Tuple[Optional[Any], Optional[
         # short timeout) then plain parameters — a 15-21 s stall per filter was
         # measured inside psycopg2.connect() for a server answering in ms.
         try:
-            layer_label = f"layer '{layer.name()}'"
+            layer_label = f"layer '{name_of(layer)}'"
         except (RuntimeError, AttributeError):
             layer_label = ''
         connexion = pg_connect_with_fallback(connect_kwargs, layer_label)
@@ -249,7 +255,7 @@ def get_datasource_connexion_from_layer(layer) -> Tuple[Optional[Any], Optional[
     except Exception as e:
         layer_name = 'unknown'
         try:
-            layer_name = layer.name()
+            layer_name = name_of(layer)
         except (RuntimeError, AttributeError):
             pass  # Layer may have been deleted
         logger.error(f"PostgreSQL connection failed for layer '{layer_name}': {e}")
@@ -433,7 +439,7 @@ def _display_field_cache_key(layer, sample_size: int, use_value_relations: bool)
         display_expression = layer.displayExpression() or ''
     except (RuntimeError, AttributeError):
         display_expression = ''
-    return (layer.id(), field_names, subset, display_expression, int(sample_size), bool(use_value_relations))
+    return (id_of(layer), field_names, subset, display_expression, int(sample_size), bool(use_value_relations))
 
 
 def get_best_display_field(layer, sample_size: int = 10, use_value_relations: bool = True) -> str:
@@ -523,11 +529,11 @@ def _compute_best_display_field(layer, sample_size: int = 10, use_value_relation
     if layer_display_expr:
         if _is_non_boolean_display_expression(layer_display_expr):
             logger.info(
-                f"Skipping non-boolean display expression for {layer.name()}: "
+                f"Skipping non-boolean display expression for {name_of(layer)}: "
                 f"'{layer_display_expr[:80]}...' — falling back to a concrete field."
             )
         else:
-            logger.debug(f"Using layer display expression for {layer.name()}: {layer_display_expr}")
+            logger.debug(f"Using layer display expression for {name_of(layer)}: {layer_display_expr}")
             return layer_display_expr
 
     # Priority 2: Check for ValueRelation fields that could provide better display
@@ -545,7 +551,7 @@ def _compute_best_display_field(layer, sample_size: int = 10, use_value_relation
                 if any(pattern in value_field for pattern in name_patterns_vr):
                     expr = get_field_display_expression(layer, field_name)
                     if expr:
-                        logger.debug(f"Using ValueRelation display for {layer.name()}: {expr}")
+                        logger.debug(f"Using ValueRelation display for {name_of(layer)}: {expr}")
                         return expr
 
             # Store first VR expression for later fallback
@@ -594,24 +600,24 @@ def _compute_best_display_field(layer, sample_size: int = 10, use_value_relation
 
     # If no text field but we have a ValueRelation expression, use it
     if first_vr_expression:
-        logger.debug(f"Using fallback ValueRelation for {layer.name()}: {first_vr_expression}")
+        logger.debug(f"Using fallback ValueRelation for {name_of(layer)}: {first_vr_expression}")
         return first_vr_expression
 
     # Priority 5: Fallback to primary key (always has values by definition)
     pk = get_primary_key_name(layer)
     if pk:
-        logger.debug(f"Using primary key '{pk}' as fallback for {layer.name()}")
+        logger.debug(f"Using primary key '{pk}' as fallback for {name_of(layer)}")
         return pk
 
     # Priority 6: Last resort - find first field WITH VALUES
     for field in fields:
         if _field_has_values(layer, field.name(), sample_size):
-            logger.debug(f"Using first field with values '{field.name()}' for {layer.name()}")
+            logger.debug(f"Using first field with values '{field.name()}' for {name_of(layer)}")
             return field.name()
 
     # Absolute fallback: first field (even if empty - better than nothing)
     if fields.count() > 0:
-        logger.warning(f"No field with values found for {layer.name()}, using first field '{fields[0].name()}'")
+        logger.warning(f"No field with values found for {name_of(layer)}, using first field '{fields[0].name()}'")
         return fields[0].name()
 
     return ""
@@ -952,7 +958,7 @@ def get_geopackage_path(layer) -> Optional[str]:
         return None
 
     try:
-        source = layer.source()
+        source = source_of(layer)
         # GeoPackage sources can be like: "/path/to/file.gpkg|layername=tablename"
         source_path = source.split('|')[0] if '|' in source else source
 
@@ -1052,7 +1058,7 @@ def validate_mv_exists(layer, mv_name: str, schema: str = None) -> bool:
         return False
 
     try:
-        if not layer or layer.providerType() != 'postgres':
+        if not layer or provider_key_of(layer) != 'postgres':
             return False
     except (RuntimeError, AttributeError):
         return False
@@ -1102,7 +1108,7 @@ def clear_orphaned_mv_subset(layer) -> bool:
         return False
 
     try:
-        if layer.providerType() != 'postgres':
+        if provider_key_of(layer) != 'postgres':
             return False
     except (RuntimeError, AttributeError):
         return False
@@ -1125,12 +1131,12 @@ def clear_orphaned_mv_subset(layer) -> bool:
             return False
 
         logger.warning(
-            f"Layer '{layer.name()}' references missing MV '{schema}.{mv_name}'. "
+            f"Layer '{name_of(layer)}' references missing MV '{schema}.{mv_name}'. "
             "Clearing orphaned filter."
         )
 
         layer.setSubsetString("")
-        logger.info(f"Cleared orphaned MV reference from layer '{layer.name()}'")
+        logger.info(f"Cleared orphaned MV reference from layer '{name_of(layer)}'")
         return True
 
     except Exception as e:
@@ -1193,7 +1199,7 @@ def cleanup_corrupted_layer_filters(project) -> List[str]:
                 corruption_reason = f"unbalanced parentheses ({open_count} '(' vs {close_count} ')')"
 
             if is_corrupted:
-                layer_name = layer.name()
+                layer_name = name_of(layer)
                 logger.warning(f"CORRUPTED FILTER CLEARED for layer '{layer_name}': {corruption_reason}")
 
                 try:
@@ -1231,7 +1237,7 @@ def validate_and_cleanup_postgres_layers(layers: List) -> List[str]:
             continue
 
         try:
-            if layer.providerType() != 'postgres':
+            if provider_key_of(layer) != 'postgres':
                 continue
         except (RuntimeError, AttributeError):
             continue
@@ -1239,9 +1245,9 @@ def validate_and_cleanup_postgres_layers(layers: List) -> List[str]:
         try:
             # Use the proper MV cleanup function
             if clear_orphaned_mv_subset(layer):
-                cleaned_layers.append(layer.name())
+                cleaned_layers.append(name_of(layer))
         except Exception as e:
-            logger.debug(f"Error validating layer '{layer.name()}': {e}")
+            logger.debug(f"Error validating layer '{name_of(layer)}': {e}")
 
     if cleaned_layers:
         logger.warning(
@@ -1306,10 +1312,10 @@ def get_spatialite_datasource_from_layer(layer) -> Tuple[Optional[str], Optional
     Returns:
         tuple: (db_path, table_name) or (None, None) if not Spatialite
     """
-    if layer.providerType() != 'spatialite':
+    if provider_key_of(layer) != 'spatialite':
         return None, None
 
-    source_uri = QgsDataSourceUri(layer.source())
+    source_uri = QgsDataSourceUri(source_of(layer))
     db_path = source_uri.database()
     table_name = source_uri.table()
 

@@ -39,6 +39,11 @@ logger = setup_logger(
 # Lazy-load backend services
 from ..ports.backend_services import get_backend_services
 
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, name_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of
+
 
 class SubsetManagementHandler:
     """Handles layer subset string management for all backends.
@@ -278,8 +283,8 @@ class SubsetManagementHandler:
                 inserted = ps_manager.insert_subset_history(
                     history_id=history_id,
                     project_uuid=project_uuid,
-                    layer_id=layer.id(),
-                    source_layer_id=source_layer.id(),
+                    layer_id=id_of(layer),
+                    source_layer_id=id_of(source_layer),
                     seq_order=seq_order,
                     subset_string=sql_subset_string
                 )
@@ -292,10 +297,10 @@ class SubsetManagementHandler:
         # Fallback: Use centralized HistoryRepository
         history_repo = HistoryRepository(conn, cur)
         try:
-            source_layer_id = source_layer.id() if source_layer else ''
+            source_layer_id = id_of(source_layer) if source_layer else ''
             return history_repo.insert(
                 project_uuid=project_uuid,
-                layer_id=layer.id(),
+                layer_id=id_of(layer),
                 subset_string=sql_subset_string,
                 seq_order=seq_order,
                 source_layer_id=source_layer_id
@@ -475,12 +480,12 @@ class SubsetManagementHandler:
         try:
             if ps_manager:
                 try:
-                    ps_manager.delete_subset_history(project_uuid, layer.id())
+                    ps_manager.delete_subset_history(project_uuid, id_of(layer))
                 except (RuntimeError, OSError, AttributeError) as e:
                     logger.warning(f"Prepared statement failed, falling back to repository: {e}")
-                    history_repo.delete_for_layer(project_uuid, layer.id())
+                    history_repo.delete_for_layer(project_uuid, id_of(layer))
             else:
-                history_repo.delete_for_layer(project_uuid, layer.id())
+                history_repo.delete_for_layer(project_uuid, id_of(layer))
         finally:
             history_repo.close()
 
@@ -525,12 +530,12 @@ class SubsetManagementHandler:
         try:
             if ps_manager:
                 try:
-                    ps_manager.delete_subset_history(project_uuid, layer.id())
+                    ps_manager.delete_subset_history(project_uuid, id_of(layer))
                 except (RuntimeError, OSError, AttributeError) as e:
                     logger.warning(f"Prepared statement failed, falling back to repository: {e}")
-                    history_repo.delete_for_layer(project_uuid, layer.id())
+                    history_repo.delete_for_layer(project_uuid, id_of(layer))
             else:
-                history_repo.delete_for_layer(project_uuid, layer.id())
+                history_repo.delete_for_layer(project_uuid, id_of(layer))
         finally:
             history_repo.close()
 
@@ -636,8 +641,8 @@ class SubsetManagementHandler:
         history_repo = HistoryRepository(conn, cur)
         try:
             if last_subset_id:
-                history_repo.delete_entry(project_uuid, layer.id(), last_subset_id)
-            last_entry = history_repo.get_last_entry(project_uuid, layer.id())
+                history_repo.delete_entry(project_uuid, id_of(layer), last_subset_id)
+            last_entry = history_repo.get_last_entry(project_uuid, id_of(layer))
         finally:
             history_repo.close()
 
@@ -648,7 +653,7 @@ class SubsetManagementHandler:
 
             if not previous_subset or not previous_subset.strip():
                 logger.warning(
-                    f"Unfilter OGR: Previous subset from history is empty for {layer.name()}. "
+                    f"Unfilter OGR: Previous subset from history is empty for {name_of(layer)}. "
                     "Clearing layer filter."
                 )
                 previous_subset = None
@@ -688,8 +693,8 @@ class SubsetManagementHandler:
         history_repo = HistoryRepository(conn, cur)
         try:
             if last_subset_id:
-                history_repo.delete_entry(project_uuid, layer.id(), last_subset_id)
-            last_entry = history_repo.get_last_entry(project_uuid, layer.id())
+                history_repo.delete_entry(project_uuid, id_of(layer), last_subset_id)
+            last_entry = history_repo.get_last_entry(project_uuid, id_of(layer))
         finally:
             history_repo.close()
 
@@ -698,7 +703,7 @@ class SubsetManagementHandler:
 
             if not sql_subset_string or not sql_subset_string.strip():
                 logger.warning(
-                    f"Unfilter: Previous subset string from history is empty for {layer.name()}. "
+                    f"Unfilter: Previous subset string from history is empty for {name_of(layer)}. "
                     "Clearing layer filter."
                 )
                 queue_subset_fn(layer, '')
@@ -831,7 +836,7 @@ class SubsetManagementHandler:
 
                     if not sql_subset_string or not sql_subset_string.strip():
                         logger.warning(
-                            f"Skipping subset management for {layer.name()}: "
+                            f"Skipping subset management for {name_of(layer)}: "
                             "sql_subset_string is empty. Filter was applied via setSubsetString but "
                             "history/materialized view creation is skipped."
                         )

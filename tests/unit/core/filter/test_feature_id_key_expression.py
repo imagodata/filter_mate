@@ -21,6 +21,8 @@ from typing import List, Optional
 
 import pytest
 
+from filtermate_core.domain.layer_facts import name_of, provider_key_of
+
 pytestmark = pytest.mark.unit
 
 _PATH = Path(__file__).resolve().parents[4] / "core" / "tasks" / "executors" / "attribute_filter_executor.py"
@@ -35,7 +37,8 @@ def _namespace():
               and item.name in ("build_feature_id_expression", "_key_list_refusal")]
     namespace = {"__name__": "core.tasks.executors._fm_test_fid_key", "__package__": "core.tasks.executors",
                  "logger": logging.getLogger("fm.test.fid_key"), "PROVIDER_POSTGRES": "postgresql",
-                 "List": List, "Optional": Optional, "QgsFeature": object}
+                 "List": List, "Optional": Optional, "QgsFeature": object, "provider_key_of": provider_key_of,
+                 "name_of": name_of}
     exec(compile(ast.Module(body=nodes, type_ignores=[]), str(_PATH), "exec"), namespace)
     return namespace
 

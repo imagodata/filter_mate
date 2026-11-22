@@ -28,6 +28,11 @@ from dataclasses import dataclass, field
 from ..domain.filter_expression import ProviderType
 from ..domain.layer_info import LayerInfo, GeometryType
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger('FilterMate.Optimizer.Auto')
 
 
@@ -298,7 +303,7 @@ class LayerAnalyzer:
     @staticmethod
     def _qgs_layer_to_info(layer) -> LayerInfo:
         """Convert QgsVectorLayer to LayerInfo domain object."""
-        provider = layer.providerType()
+        provider = provider_key_of(layer)
         provider_map = {
             'postgres': ProviderType.POSTGRESQL,
             'spatialite': ProviderType.SPATIALITE,

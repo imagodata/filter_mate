@@ -39,6 +39,11 @@ from ...infrastructure.utils import is_layer_valid
 from ...infrastructure.parallel import ParallelFilterExecutor, ParallelConfig
 from ...config.config import ENV_VARS
 
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, name_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of
+
 # PERF 2026-09-12: per-layer cascade timings. A target that takes longer than
 # this gets its own ``⏱ layer_filter`` line; the cascade total is always logged.
 # They measure the worker side only: on PostgreSQL the subset is applied there,
@@ -220,7 +225,7 @@ class FilteringOrchestrator:
             logger.error("ABORTING: Distant layers will NOT be filtered")
             logger.error("   Reason: Source filter must succeed before filtering distant layers")
             # Set error message for user
-            source_name = source_layer.name() if source_layer else 'Unknown'
+            source_name = name_of(source_layer) if source_layer else 'Unknown'
             result['message'] = f"Failed to filter source layer '{source_name}'. Check Python console for details."
             return result
 
@@ -430,7 +435,7 @@ class FilteringOrchestrator:
 
         # Queue filter clear on source layer (will be applied in finished())
         queue_subset_string_callback(source_layer, '')
-        logger.info(f"  -> Queued clear on source: {source_layer.name()}")
+        logger.info(f"  -> Queued clear on source: {name_of(source_layer)}")
 
         # Queue filter clear on all selected associated layers
         # FIX 2026-01-15: Protect against division by zero when no layers selected
@@ -442,7 +447,7 @@ class FilteringOrchestrator:
             logger.debug(f"  -> Processing {len(layers[layer_provider_type])} {layer_provider_type} layer(s)")
             for layer, layer_props in layers[layer_provider_type]:
                 queue_subset_string_callback(layer, '')
-                logger.info(f"    -> Queued clear on: {layer.name()}")
+                logger.info(f"    -> Queued clear on: {name_of(layer)}")
                 i += 1
                 if layers_count > 0:
                     set_progress_callback(_progress_percent(i, layers_count))
@@ -492,7 +497,7 @@ class FilteringOrchestrator:
 
         i = 1
 
-        logger.info(f"  -> Resetting source layer: {source_layer.name()}")
+        logger.info(f"  -> Resetting source layer: {name_of(source_layer)}")
         manage_layer_subset_strings_callback(source_layer)
         # FIX 2026-01-15: Protect against division by zero when no layers selected
         if layers_count > 0:
@@ -501,7 +506,7 @@ class FilteringOrchestrator:
         for layer_provider_type in layers:
             logger.debug(f"  -> Processing {len(layers[layer_provider_type])} {layer_provider_type} layer(s)")
             for layer, layer_props in layers[layer_provider_type]:
-                logger.info(f"    -> Resetting: {layer.name()}")
+                logger.info(f"    -> Resetting: {name_of(layer)}")
                 manage_layer_subset_strings_callback(layer)
                 i += 1
                 set_progress_callback(_progress_percent(i, layers_count))
@@ -556,7 +561,7 @@ class FilteringOrchestrator:
             - Creates filter chain MV when multiple spatial filters are chained
             - Handles provider-specific geometry preparation (PostgreSQL, Spatialite, OGR)
         """
-        logger.info(f"manage_distant_layers_geometric_filtering: {source_layer.name()} (features: {source_layer.featureCount()})")
+        logger.info(f"manage_distant_layers_geometric_filtering: {name_of(source_layer)} (features: {source_layer.featureCount()})")
         logger.info("  is_field_expression: N/A (handled by caller)")
         logger.info("=" * 60)
 
@@ -662,8 +667,8 @@ class FilteringOrchestrator:
             logger.debug(f"  Provider: {provider_type} -> {len(layer_list)} layer(s)")
             for idx, (layer, layer_props) in enumerate(layer_list, 1):
                 try:
-                    logger.info(f"    {idx}. {layer.name()} (id={layer.id()[:8]}...)")
-                    layer_names_list.append(layer.name())
+                    logger.info(f"    {idx}. {name_of(layer)} (id={id_of(layer)[:8]}...)")
+                    layer_names_list.append(name_of(layer))
                 except RuntimeError:  # removed from the project meanwhile: skipped below
                     logger.info(f"    {idx}. {layer_props.get('layer_name', '?')} (removed meanwhile)")
             total_layers += len(layer_list)
@@ -811,13 +816,13 @@ class FilteringOrchestrator:
                 removed.append(layer_props.get('layer_name') or getattr(filter_result, 'layer_name', None)
                                or f"Layer_{i}")
                 continue
-            set_description_callback(f"Filtering layer {i}/{layers_count}: {layer.name()}")
+            set_description_callback(f"Filtering layer {i}/{layers_count}: {name_of(layer)}")
 
             # Results come back in completion order when the executor really
             # runs in parallel: name the layer from the result, not from the
             # zipped input.
             layer_ms = float(getattr(filter_result, 'execution_time_ms', 0.0) or 0.0)
-            result_name = getattr(filter_result, 'layer_name', None) or layer.name()
+            result_name = getattr(filter_result, 'layer_name', None) or name_of(layer)
             if layer_ms > slowest_ms:
                 slowest_name, slowest_ms = result_name, layer_ms
             if layer_ms >= LAYER_FILTER_LOG_THRESHOLD_MS:
@@ -830,12 +835,12 @@ class FilteringOrchestrator:
                 # change); with every backend queueing its subset for the main
                 # thread the number was stale anyway. The completion handler
                 # reports the counts once the subsets are applied.
-                logger.info(f"  {layer.name()} filtered in {layer_ms:.0f} ms")
+                logger.info(f"  {name_of(layer)} filtered in {layer_ms:.0f} ms")
             else:
                 failed_filters += 1
-                failed_layer_names.append(layer.name())
+                failed_layer_names.append(name_of(layer))
                 error_msg = filter_result.error_message if hasattr(filter_result, 'error_message') else getattr(filter_result, 'error', 'Unknown error')
-                logger.error(f"  {layer.name()} - errors occurred during filtering: {error_msg}")
+                logger.error(f"  {name_of(layer)} - errors occurred during filtering: {error_msg}")
 
             progress_percent = int(_progress_percent(i, layers_count))
             set_progress_callback(progress_percent)
@@ -924,7 +929,7 @@ class FilteringOrchestrator:
                         i += 1
                         continue
 
-                    layer_name = layer.name()
+                    layer_name = name_of(layer)
                 except (RuntimeError, AttributeError) as access_error:
                     logger.error(f"Layer {i}/{layers_count} access error (C++ object deleted): {access_error}")
                     failed_filters += 1
