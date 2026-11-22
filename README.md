@@ -118,6 +118,25 @@ button appears in the plugin toolbar.
 Manual install: download a zip from [GitHub Releases](https://github.com/imagodata/filter_mate/releases) and use
 **Plugins → Manage and Install Plugins → Install from ZIP**.
 
+### 🖥️ Without QGIS: the standalone application
+
+The same dock, unchanged, in a window of its own (a map, a layer panel, the QGIS libraries as the engine):
+
+```bash
+# macOS, Linux
+curl -LsSf https://raw.githubusercontent.com/imagodata/filter_mate/main/standalone/install.sh | sh
+# Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/imagodata/filter_mate/main/standalone/install.ps1 | iex"
+# or, with pip or pipx already there, in any Python 3.9+
+pipx install https://github.com/imagodata/filter_mate/archive/refs/heads/main.zip
+
+filtermate parcels.gpkg dem.tif
+```
+
+`filtermate` uses the QGIS of the machine (3.22 to 4.x, found by itself), or installs a runtime of its own without
+administrator rights (`filtermate setup`). A Docker image serves it in a browser. See
+[docs/STANDALONE.md](docs/STANDALONE.md).
+
 ### 📋 Requirements
 
 | | |
@@ -151,6 +170,7 @@ The same operation is available as the `filtermate:cross_filter_from_raster` Pro
 | 🤖 [docs/AGENT_MODE.md](docs/AGENT_MODE.md) | The AGENT section: providers, tools, levels of autonomy, undo, recipes, widgets, sources, the built-in MCP server. |
 | 🔒 [docs/AI_AND_DATA.md](docs/AI_AND_DATA.md) | AI and data: what the AGENT sends, to whom and when; no account, no telemetry. |
 | 🧩 [docs/SEGMENTATION.md](docs/SEGMENTATION.md) | Objects drawn by SAM: set up, use, Processing, what it is good at, with measured results. |
+| 🖥️ [docs/STANDALONE.md](docs/STANDALONE.md) | FilterMate without the QGIS application: the `filtermate` command, its engine, the browser image. |
 | ⚙️ [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API, MCP servers. |
 | ⭐ [docs/favorites_sharing/](docs/favorites_sharing/USER_GUIDE.md) | Sharing favorites through git repositories. |
 | 🏗️ [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) | Source tree, code rules, tests and releases, for contributors. |

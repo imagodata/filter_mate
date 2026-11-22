@@ -1743,6 +1743,38 @@
   ],
   "type": "object"
  },
+ "local_copy": {
+  "properties": {
+   "action": {
+    "default": "copy",
+    "enum": [
+     "copy",
+     "back",
+     "again"
+    ],
+    "type": "string"
+   },
+   "crs": {
+    "default": "",
+    "maxLength": 64,
+    "type": "string"
+   },
+   "extent_wkt": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
  "map_context": {
   "properties": {},
   "type": "object"
@@ -2280,6 +2312,18 @@
     "maxLength": 1000,
     "type": "string"
    },
+   "point_cloud": {
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
    "press": {
     "anyOf": [
      {
@@ -2288,6 +2332,18 @@
       },
       "maxItems": 4,
       "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "raster": {
+    "anyOf": [
+     {
+      "additionalProperties": true,
+      "type": "object"
      },
      {
       "type": "null"

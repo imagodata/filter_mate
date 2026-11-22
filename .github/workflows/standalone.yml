@@ -1,0 +1,62 @@
+# The standalone application on machines the maintainer does not have at hand (macOS above all).
+# Started by hand only (Actions > Standalone application > Run workflow): the other workflows are off,
+# and this one installs QGIS, which takes several minutes.
+name: Standalone application
+
+on:
+  workflow_dispatch:
+    inputs:
+      engines:
+        description: "Which QGIS to try: both, app (QGIS.app / the installed QGIS) or setup (filtermate setup)"
+        default: both
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: macos-latest, engine: app}
+          - {os: macos-latest, engine: setup}
+          - {os: macos-13, engine: setup}
+          - {os: windows-latest, engine: setup}
+          - {os: ubuntu-latest, engine: setup}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      FILTERMATE_HOME: ${{ github.workspace }}/../fmhome
+      FM_FIXTURES: ${{ github.workspace }}/../fm
+    steps:
+      - uses: actions/checkout@v4
+        if: inputs.engines == 'both' || inputs.engines == matrix.engine
+      - uses: actions/setup-python@v5
+        if: inputs.engines == 'both' || inputs.engines == matrix.engine
+        with:
+          python-version: "3.12"
+      - name: Install the package, as a user does
+        if: inputs.engines == 'both' || inputs.engines == matrix.engine
+        shell: bash
+        run: |
+          python -m pip install --upgrade pipx
+          python -m pipx install .
+          filtermate version
+      - name: QGIS.app from Homebrew
+        if: matrix.engine == 'app' && (inputs.engines == 'both' || inputs.engines == 'app')
+        run: brew install --cask qgis
+      - name: filtermate setup
+        if: matrix.engine == 'setup' && (inputs.engines == 'both' || inputs.engines == 'setup')
+        shell: bash
+        run: filtermate setup --yes
+      - name: filtermate doctor
+        if: inputs.engines == 'both' || inputs.engines == matrix.engine
+        shell: bash
+        run: filtermate doctor
+      - name: The window, a filter, a project, the closing (check_standalone.py)
+        if: inputs.engines == 'both' || inputs.engines == matrix.engine
+        shell: bash
+        run: |
+          filtermate --offscreen --size 1600x1000 --code tests/qgis_headless/check_standalone.py | tee check.log
+          grep -q "passed$" check.log && ! grep -q "^FAIL" check.log

@@ -7085,7 +7085,8 @@ def tools_rail(kind):
     d = dock()
     rail = d.widget_exploring_keys
     names = {name: key for key, name in tools_buttons()[kind].items()}
-    shown = sorted((button for button in rail.findChildren(QPushButton) if button.isVisibleTo(rail)),
+    shown = sorted((button for button in rail.findChildren(QPushButton) if button.isVisibleTo(rail)
+                    and button.objectName() != 'pushButton_exploring_stream_copy'),  # of a web service, any kind
                    key=lambda button: button.y())
     keys = [names.get(button.objectName(), button.objectName()) for button in shown]
     problems = []
@@ -7510,7 +7511,143 @@ def s_drive_undo_check():
     return settled()
 
 
-DRIVE_STEPS = [s_drive_begin, s_drive_raster_check, s_drive_undo_check]
+def drive_turn(arguments):
+    """set_exploring in a turn of its own, as the chat records it; the answer, and the effects of the turn."""
+    turn_effects = importlib.import_module(f'{PACKAGE}.adapters.agent.turn_effects')
+    messages = importlib.import_module(f'{PACKAGE}.core.agent.messages')
+    recorder = turn_effects.EffectsRecorder()
+    recorder.before_call(messages.ToolCallPart('v1', 'set_exploring', arguments))
+    answer = drive(**arguments)
+    recorder.after_call()
+    return answer, recorder.finish()
+
+
+def drive_undo(effects):
+    return importlib.import_module(f'{PACKAGE}.adapters.agent.turn_effects').apply_effects(effects, undo=True)
+
+
+def s_drive_values_begin():
+    """The range of a raster set in its panel, with the preview; then the selection sync replaces, given back."""
+    d = dock()
+    zones = layer('zones')
+    zones.selectByIds(sorted(zones.allFeatureIds())[:1])
+    DRIVE['selected'] = sorted(zones.selectedFeatureIds())
+    answer, effects = drive_turn({'tools': {'sync': True}})
+    DRIVE['sync'] = (answer, effects)
+    return settled()
+
+
+def s_drive_sync_check():
+    answer, effects = DRIVE['sync']
+    undone = drive_undo(effects)
+    pump(300)
+    check('drive: the selection sync replaced comes back with the undo', isinstance(answer, dict)
+          and sorted(layer('zones').selectedFeatureIds()) == DRIVE['selected']
+          and not dock().pushButton_checkable_exploring_selecting.isChecked(),
+          f"{answer} undone={undone} now={sorted(layer('zones').selectedFeatureIds())} was={DRIVE['selected']}")
+    dem = layer('dem')
+    stats = dem.dataProvider().bandStatistics(1)
+    DRIVE['low'] = low = stats.minimumValue + (stats.maximumValue - stats.minimumValue) / 2
+    DRIVE['before'] = None
+    answer, effects = drive_turn({'layer': 'dem', 'raster': {'minimum': low, 'maximum': None},
+                                  'tools': {'preview': True}})
+    DRIVE['raster'] = (answer, effects)
+    return switched_to('dem', True)
+
+
+def s_drive_raster_values_check():
+    answer, effects = DRIVE['raster']
+    panel = coverage()._raster_panel
+    state = panel.state()
+    check('drive: the range of the raster is set in its panel, RANGE active, the preview on',
+          isinstance(answer, dict) and state['mode'] == 'range' and state['minimum'] is not None
+          and abs(state['minimum'] - DRIVE['low']) < 1e-6 and state['maximum'] is None
+          and answer['tools'].get('preview') == 'on' and 'values' in answer['changed'], f"{answer} {state}")
+    check('drive: the histogram shows the range', panel._histogram.range()[0] is not None
+          and abs(panel._histogram.range()[0] - DRIVE['low']) < 1e-6, str(panel._histogram.range()))
+    bad = drive(raster={'band': 9})
+    check('drive: a band the raster has not is refused', isinstance(bad, str) and 'raster.band' in bad, str(bad))
+    DRIVE['raster_undo'] = drive_undo(effects)
+    return switched_to('zones', False)
+
+
+def s_drive_raster_undo_check():
+    done, left = DRIVE['raster_undo']
+    DRIVE['undo_left'] = left
+    tools_pick('dem', coverage_page=True)  # look at the panel of the raster again
+    return switched_to('dem', True)
+
+
+def s_drive_raster_undo_panel():
+    state = coverage()._raster_panel.state()
+    check('drive: the undo gives the range of before back and puts the preview down',
+          state['minimum'] is None and not dock().pushButton_checkable_exploring_selecting.isChecked()
+          and not DRIVE['undo_left'], f"{state['mode']} {state['minimum']} left={DRIVE['undo_left']}")
+    drive(raster={'minimum': DRIVE['low']})
+    slope = drive(raster={'quantity': 'slope_degrees'})
+    state = coverage()._raster_panel.state()
+    check('drive: another quantity without bounds forgets the bounds of the value (another unit)',
+          isinstance(slope, dict) and state['derivative'] == 'slope_degrees' and state['minimum'] is None
+          and state['maximum'] is None, f"{slope} {state['derivative']} {state['minimum']}")
+    drive(raster={'quantity': 'value'})
+    if not has_point_clouds():
+        report('SKIP', 'drive: point cloud values', f"QGIS {Qgis.QGIS_VERSION} < 3.26")
+        return tools_pick('zones', coverage_page=False)
+    cloud = layer('cloud')
+    listed = cloud.id() in app().PROJECT_LAYERS
+    DRIVE['cloud_listed'] = listed
+    if not listed:
+        before = dock().current_layer.name()
+        refused = drive(layer='cloud', point_cloud={'classes': [2]})
+        check('drive: a point cloud the panel does not list is refused, the panel stays on its layer',
+              isinstance(refused, str) and 'does not list' in refused and dock().current_layer.name() == before,
+              f"{refused} now={dock().current_layer.name()}")
+        return tools_pick('zones', coverage_page=False)
+    return tools_pick('cloud', coverage_page=True)
+
+
+def s_drive_cloud_check():
+    if has_point_clouds() and DRIVE.get('cloud_listed'):
+        panel = coverage()._pc_panel
+        codes = sorted(panel._present_codes()) or sorted(
+            int(item.data(Qt.ItemDataRole.UserRole)) for item in panel._class_items())
+        answer = drive(point_cloud={'classes': codes[:1]}) if codes else 'no class'
+        state = panel.state()
+        check('drive: the classes of a point cloud are set in its panel', isinstance(answer, dict)
+              and state['classes_enabled'] and state['classes'] == codes[:1], f"{answer} {state.get('classes')}")
+        both = drive(point_cloud={'classes': codes[:1], 'ranges': [{'attribute': 'Z', 'minimum': 0}]})
+        check('drive: classes and ranges together are refused', isinstance(both, str) and 'not both' in both, both)
+    return tools_pick('zones', coverage_page=False)
+
+
+def s_drive_pick_begin():
+    """Features chosen in the lists of EXPLORING as the skill panels says: sync on, then select_features."""
+    zones = layer('zones')
+    zones.removeSelection()
+    DRIVE['pick'] = drive(layer='zones', tools={'sync': True})
+    control = importlib.import_module(f'{PACKAGE}.adapters.public_api.project_control')
+    DRIVE['picked'] = control.select_features('zones', "\"name\" IS NOT NULL")
+    return settled()
+
+
+def s_drive_pick_check():
+    zones = layer('zones')
+    widget = dock().widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+    listed = widget.currentSelectedFeatures() or []
+    check('drive: features selected with sync on fill the multiple selection of EXPLORING',
+          zones.selectedFeatureCount() > 1 and len(listed) == zones.selectedFeatureCount()
+          and dock().current_exploring_groupbox == 'multiple_selection',
+          f"selected={zones.selectedFeatureCount()} listed={len(listed)} group={dock().current_exploring_groupbox} "
+          f"{DRIVE['pick']} {DRIVE['picked']}")
+    drive(tools={'sync': False})
+    zones.removeSelection()
+    dock().exploring_groupbox_changed('single_selection')
+    return settled()
+
+
+DRIVE_STEPS = [s_drive_begin, s_drive_raster_check, s_drive_undo_check, s_drive_values_begin, s_drive_sync_check,
+               s_drive_raster_values_check, s_drive_raster_undo_check, s_drive_raster_undo_panel, s_drive_cloud_check, s_drive_pick_begin,
+               s_drive_pick_check]
 
 
 # --- a source filtered again by an expression its SQL cannot write (FM_ONLY=refilter) ---------------------------------
@@ -7769,6 +7906,132 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, *EXPLO_STEPS,
          *SWITCH_STEPS, *ROWS_STEPS, *LIKE_STEPS, *REFILTER_STEPS, *SIZING_STEPS, s_finish]
 
+# --- the local copy of a web service layer: its button on the rail, one click, the layer on its copy (FM_ONLY=stream_copy)
+
+STREAM_COPY = {}
+
+
+def stream_copy_button():
+    return dock().findChild(QPushButton, 'pushButton_exploring_stream_copy')
+
+
+def s_stream_copy_begin():
+    """A tile server of the bench of the streams, and a layer of its tiles, current in the dock."""
+    import threading
+    from http.server import ThreadingHTTPServer
+    from qgis.core import QgsCoordinateReferenceSystem, QgsRectangle
+    sys.path.insert(0, os.path.join(os.environ.get('FM_REPO', '/src'), 'tests', 'qgis_headless'))
+    import check_stream_extent_clip as fixture
+    server = ThreadingHTTPServer(('127.0.0.1', 0), fixture.MapHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    STREAM_COPY['server'] = server
+    project.setFileName(os.path.join(tempfile.mkdtemp(), 'copie.qgz'))
+    uri = (f"type=xyz&url=http://127.0.0.1:{server.server_port}/tiles/{{z}}/{{x}}/{{y}}.png&zmin=0&zmax=14"
+           "&crs=EPSG:3857")
+    tiles = QgsRasterLayer(uri, 'Tuiles locales', 'wms')
+    project.addMapLayer(tiles)
+    STREAM_COPY['uri'] = uri
+    leave_welcome()
+    dock()._fm_sections.open_top('exploring')
+    iface.mapCanvas().setDestinationCrs(QgsCoordinateReferenceSystem('EPSG:3857'))
+    iface.mapCanvas().setExtent(QgsRectangle(100000, 100000, 300000, 250000))
+    dock().comboBox_filtering_current_layer.setLayer(tiles)
+    return switched_to('Tuiles locales', coverage_page=True)
+
+
+def s_stream_copy_click():
+    button = stream_copy_button()
+    check('stream copy: the button is on the rail of a web service layer, and says what it does',
+          button is not None and button.isVisible() and 'Local copy' in button.toolTip(),
+          button and (button.isVisible(), button.toolTip()[:80]))
+    actions = importlib.import_module(f'{PACKAGE}.ui.controllers.stream_copy_actions').get()
+    check('stream copy: the plugin started the local copies, with their entry in the menu of the layers',
+          actions is not None and actions._action is not None, actions)
+    exporting = dock()._controller_integration.exporting_controller
+    if exporting is not None:
+        exporting.populate_export_combobox()
+        widget = dock().widgets['EXPORTING']['LAYERS_TO_EXPORT']['WIDGET']
+        listed = [widget.itemText(index) for index in range(widget.count())]
+        check('stream copy: EXPORTING lists the web map (written as it draws over the visible map)',
+              any(text.startswith('Tuiles locales') for text in listed), listed)
+    if button is None or actions is None:
+        return None
+    actions._ask = lambda title, text, buttons: (STREAM_COPY.setdefault('asked', []).append(text), 0)[1]
+    button.click()
+    tiles = layer('Tuiles locales')
+    return lambda: tiles.providerType() == 'gdal' and tasks_idle()
+
+
+def s_stream_copy_check():
+    tiles = layer('Tuiles locales')
+    button = stream_copy_button()
+    asked = STREAM_COPY.get('asked') or ['']
+    check('stream copy: the cost was said before the copy (pixels, requests, folder)',
+          'pixels' in asked[0] and 'requests' in asked[0] and 'copie_filtermate_local' in asked[0], asked[0][:200])
+    check('stream copy: one click, and the layer reads a GeoTIFF next to the project',
+          tiles.providerType() == 'gdal' and 'copie_filtermate_local' in tiles.source(), tiles.source()[-80:])
+    check('stream copy: the button stays, and now offers the way back',
+          button.isVisible() and 'back to the service' in button.toolTip(), button.toolTip()[:120])
+    actions = importlib.import_module(f'{PACKAGE}.ui.controllers.stream_copy_actions').get()
+    mark = actions.mark_of(tiles.id()) if actions is not None else None
+    node = project.layerTreeRoot().findLayer(tiles.id())
+    shown = iface.layerTreeView().indicators(node) if node is not None else []
+    check('stream copy: the layer panel of QGIS marks the layer that reads its copy',
+          mark is not None and mark in shown and 'Local copy' in mark.toolTip(),
+          (mark, len(shown), mark and mark.toolTip()[:80]))
+    # Grouped, the layer has a new node of the layer tree (QGIS moves a node by making another): the mark follows.
+    root = project.layerTreeRoot()
+    old = root.findLayer(tiles.id())
+    group = root.addGroup('Copies locales')
+    group.addChildNode(old.clone())
+    old.parent().removeChildNode(old)
+    STREAM_COPY['group'] = group
+
+    def marked():
+        node = root.findLayer(tiles.id())
+        return node is not None and actions.mark_of(tiles.id()) in iface.layerTreeView().indicators(node)
+    followed = settles(marked, 3.0)
+    node = root.findLayer(tiles.id())
+    check('stream copy: the mark follows the layer moved into a group', followed,
+          node and [indicator.toolTip()[:30] for indicator in iface.layerTreeView().indicators(node)])
+    dock().comboBox_filtering_current_layer.setLayer(layer('zones'))
+    return switched_to('zones', coverage_page=False)
+
+
+def s_stream_copy_end():
+    button = stream_copy_button()
+    check('stream copy: no button on the rail of a local layer', not button.isVisible())
+    tiles = layer('Tuiles locales')
+    actions = importlib.import_module(f'{PACKAGE}.ui.controllers.stream_copy_actions').get()
+    check('stream copy: back to the service', actions.back_to_stream(tiles) and tiles.providerType() == 'wms',
+          tiles.providerType())
+    node = project.layerTreeRoot().findLayer(tiles.id())
+    check('stream copy: back on its service, the layer has no mark in the layer panel',
+          actions.mark_of(tiles.id()) is None and not iface.layerTreeView().indicators(node))
+    actions.copy(tiles, confirm=False)  # copied again, for Change Data Source in the next step
+    return lambda: actions.mark_of(tiles.id()) is not None and tasks_idle()
+
+
+def s_stream_copy_source_change():
+    """Change Data Source of QGIS on a layer that reads its copy: the mark goes, the layer reads what was chosen."""
+    tiles = layer('Tuiles locales')
+    actions = importlib.import_module(f'{PACKAGE}.ui.controllers.stream_copy_actions').get()
+    from qgis.core import QgsDataProvider
+    tiles.setDataSource(STREAM_COPY['uri'], tiles.name(), 'wms', QgsDataProvider.ProviderOptions())
+    check('stream copy: Change Data Source takes the mark away', settles(lambda: actions.mark_of(tiles.id()) is None, 3.0)
+          and tiles.providerType() == 'wms', (tiles.providerType(), actions.mark_of(tiles.id())))
+    project.removeMapLayer(tiles.id())
+    if STREAM_COPY.get('group') is not None:
+        project.layerTreeRoot().removeChildNode(STREAM_COPY['group'])
+    STREAM_COPY['server'].shutdown()
+    return None
+
+
+STREAM_COPY_STEPS = [s_stream_copy_begin, s_stream_copy_click, s_stream_copy_check, s_stream_copy_end,
+                     s_stream_copy_source_change]
+
+if os.environ.get('FM_ONLY') == 'stream_copy':  # the local copy of a web service layer from its button
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *STREAM_COPY_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'sections':  # the buttons under their section, a section in its own QGIS panel

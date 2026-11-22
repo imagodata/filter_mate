@@ -259,8 +259,8 @@ def is_captured_target_raster(layer: Any) -> bool:
 def is_untargetable_raster(layer: Any) -> bool:
     """True for a raster that is never a filter target: unsupported, or rendered and not captured.
 
-    The rule of the lists of targets, of the API and of the jobs; exports keep ``is_non_analysis_raster``
-    (a web map that was not cut is not exported).
+    The rule of the lists of targets, of the API and of the jobs, and of EXPORTING of the panel (which writes a web
+    map as it draws over the visible map); export_layers keeps ``is_non_analysis_raster``.
     """
     return is_non_analysis_raster(layer) and not is_captured_target_raster(layer)
 

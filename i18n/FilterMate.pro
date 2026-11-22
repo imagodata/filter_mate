@@ -4,6 +4,11 @@ SOURCES = \
     ../filter_mate.py \
     ../filter_mate_app.py \
     ../filter_mate_dockwidget.py \
+    ../standalone/host/attribute_table.py \
+    ../standalone/host/map_tools.py \
+    ../standalone/host/qt.py \
+    ../standalone/host/sources.py \
+    ../standalone/host/window.py \
     ../adapters/database_manager.py \
     ../adapters/filter_result_handler.py \
     ../adapters/layer_refresh_manager.py \
@@ -29,6 +34,7 @@ SOURCES = \
     ../adapters/qgis/coverage_layers/vector_tile_filters.py \
     ../adapters/qgis/coverage_layers/vector_tile_target.py \
     ../adapters/qgis/remote_materializer.py \
+    ../adapters/qgis/stream_copy.py \
     ../adapters/qgis/server_filter_translation.py \
     ../adapters/qgis/server_subset_job.py \
     ../adapters/qgis/subset_failure_reason.py \
@@ -90,6 +96,7 @@ SOURCES = \
     ../ui/controllers/welcome_tour.py \
     ../ui/controllers/segmentation_controller.py \
     ../ui/controllers/coverage_dock_extras.py \
+    ../ui/controllers/stream_copy_actions.py \
     ../ui/controllers/centroid_targets_sync.py \
     ../ui/dialogs/config_editor_widget.py \
     ../ui/dialogs/export_group_recap_dialog.py \

@@ -385,8 +385,12 @@ class EffectsRecorder:
         # ones (JSON).
         self._panel_layers: Dict[str, Tuple[str, str]] = {}
         self._export_panel: Optional[str] = None
-        # Where the journal of set_exploring stood before the turn first drove the panel.
-        self._exploring_mark: Optional[int] = None
+        # The parts of the journal of set_exploring written during the calls of the turn: (start, end) marks, end None
+        # while the call runs. A client of the MCP server or the REST API driving the panel meanwhile is not the turn.
+        self._exploring_windows: List[List[Optional[int]]] = []
+        # The layers whose selection is put back whatever the turn left: sync turned off by the undo empties it, even
+        # when the turn left it as it found it.
+        self._kept_selection: Set[str] = set()
 
     def before_call(self, call: Any, step: int = 0) -> None:
         project = QgsProject.instance()
@@ -493,9 +497,20 @@ class EffectsRecorder:
                 if state is not None and self._export_panel is None:
                     self._export_panel = _panel_json({"EXPORTING": state})
             elif name in EXPLORING_TOOLS:
-                if self._exploring_mark is None:
-                    from ..public_api.exploring_drive import journal_mark
-                    self._exploring_mark = journal_mark()
+                from ..public_api.exploring_drive import journal_mark
+                from ..public_api.panel_options import running_dock
+                self._exploring_windows.append([journal_mark(), None])
+                # sync replaces the selection of the map by that of the lists (and takes it away when turned off): the
+                # selection of the layer the call names, or of the one EXPLORING shows, is kept as select_features
+                # keeps it.
+                layer = _resolve(project, arguments.get("layer"))
+                if layer is None:
+                    layer = getattr(running_dock(), "current_layer", None)
+                selected = _selection(layer) if layer is not None else None
+                if selected is not None and layer.id() not in self._selection:
+                    self._selection[layer.id()] = selected
+                if selected is not None:
+                    self._kept_selection.add(layer.id())
             elif name == "set_layers_visibility":
                 for reference in _listed(arguments.get("layers")):
                     layer = _resolve(project, reference)
@@ -507,6 +522,9 @@ class EffectsRecorder:
 
     def after_call(self) -> None:
         """The call under way ended: the layers that came during it are those the turn added."""
+        if self._exploring_windows and self._exploring_windows[-1][1] is None:
+            from ..public_api.exploring_drive import journal_mark
+            self._exploring_windows[-1][1] = journal_mark()
         if self._call_ids is None:
             return
         came = set(QgsProject.instance().mapLayers()) - self._call_ids
@@ -560,10 +578,16 @@ class EffectsRecorder:
                 # A layer kept in memory: its definition would bring it back empty.
                 definition = "" if layer.providerType() == "memory" else _definition(layer)
                 effects.append(("added", layer_id, definition, _place(project, layer_id), layer.name()))
+        exploring: List[Dict[str, Any]] = []
+        if self._exploring_windows:
+            from ..public_api.exploring_drive import journal_since, net
+            exploring = net([entry for start, end in self._exploring_windows for entry in journal_since(start, end)])
+        # Only a layer whose sync the turn turned on or off: the undo of sync empties its selection.
+        synced = {entry.get("layer") for entry in exploring if entry.get("kind") == "tool" and entry.get("key") == "sync"}
         for layer_id, before in self._selection.items():
             layer = project.mapLayer(layer_id)
             after = _selection(layer) if layer is not None else None
-            if after is not None and after != before:
+            if after is not None and (after != before or (layer_id in self._kept_selection and layer_id in synced)):
                 effects.append(("selection", layer_id, before, after))
         for layer_id, before in self._visibility.items():
             after = _visible(project, layer_id)
@@ -681,11 +705,8 @@ class EffectsRecorder:
                 was, made = state_change(json.loads(self._export_panel), {"EXPORTING": state})
                 if made["values"] or made["absent"]:
                     effects.append(("export_options", "", _panel_json(was), _panel_json(made)))
-        if self._exploring_mark is not None:
-            from ..public_api.exploring_drive import journal_since
-            changes = journal_since(self._exploring_mark)
-            if changes:
-                effects.append(("exploring", "", _panel_json(changes), ""))
+        if exploring:
+            effects.append(("exploring", "", _panel_json(exploring), ""))
         self.__init__(self._record_settings)
         return tuple(effects)
 

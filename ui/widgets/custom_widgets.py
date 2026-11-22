@@ -2638,6 +2638,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 normalized_fids.add(str(fid))
 
         checked_count = list_widget.setCheckedByFeatureIds(normalized_fids, self)
+        # 2026-11-22: one entry per feature asked, not per form matched (1 and '1'): the normalized ids
+        # listed 10 selected features for 5, and the expression of the linked picker read each twice.
+        list_widget.setSelectedFeaturesList([[str(fid), fid, True] for fid in feature_ids])
 
         # PERF 2026-09-12: ids not present in a truncated/searched list (canvas
         # selection of a feature beyond the first N) are fetched by identifier

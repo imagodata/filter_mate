@@ -1,0 +1,4 @@
+# Only what the image of standalone/docker/Dockerfile copies: the wheel and the entry script.
+*
+!dist/filtermate-*.whl
+!standalone/docker/start.sh
