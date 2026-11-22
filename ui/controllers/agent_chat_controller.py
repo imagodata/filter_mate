@@ -28,8 +28,8 @@ from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.domain.history_timeline import KIND_AGENT, card_target, changes_map
 from ...core.agent.chat_setup import (
-    BASEMAP_TOOL, ELEVATION_TOOL, IMAGERY_TOOL, OPEN_DATA_TOOL, OSM_TOOL, PLACE_TOOL, POPULATION_TOOL, SERVICE_TOOL,
-    VALUES_TOOLS, chat_instructions, stable_order,
+    BASEMAP_TOOL, COPY_TOOL, ELEVATION_TOOL, IMAGERY_TOOL, OPEN_DATA_TOOL, OSM_TOOL, PLACE_TOOL, POPULATION_TOOL,
+    SERVICE_TOOL, VALUES_TOOLS, chat_instructions, stable_order,
 )
 from ...core.agent.families import CORE
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
@@ -162,6 +162,16 @@ def qgis_databases():
     except Exception:
         logger.debug("Agent: database connections not read", exc_info=True)
         return ()
+
+
+def _holds_web_service_layers() -> bool:
+    """Whether the project holds a layer of a web service, or its local copy: what local_copy acts on."""
+    try:
+        from qgis.core import QgsProject
+        from ...adapters.qgis.stream_copy import can_copy, is_local_copy
+        return any(can_copy(layer) or is_local_copy(layer) for layer in QgsProject.instance().mapLayers().values())
+    except Exception:
+        return False
 
 
 class AgentChatController(QObject):
@@ -1297,6 +1307,8 @@ class AgentChatController(QObject):
             left_out.add(POPULATION_TOOL)
         if KIND_GEOCODER not in kinds and KIND_GEOCODER not in configured_kinds.values():
             left_out.add(PLACE_TOOL)
+        if not _holds_web_service_layers():
+            left_out.add(COPY_TOOL)  # nothing to copy: it would only weigh on every request
         if not databases or not for_chat:
             left_out.update((LIST_TABLES, ADD_TABLE))
         # the tools a setting brings after the others (lot 4 of the token diet: the start stays alike for the cache)
@@ -2855,6 +2867,8 @@ class AgentChatController(QObject):
                 one_line(str(args.get("name") or ""), 100) or "Contours {}".format(one_line(str(args.get("interval", "")), 20))),
             "duplicate_layer": lambda: _tr("Layer added: {}").format(
                 one_line(str(args.get("name") or ""), 100) or "{} (copy)".format(layer)),
+            "local_copy": lambda: (_tr("Back to the service: {}") if args.get("action") == "back"
+                                   else _tr("Local copy: {}")).format(layer),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
@@ -3206,6 +3220,28 @@ class AgentChatController(QObject):
                 return one_line(f"{source.title} · {display_source(source.address)}", 300)
         return one_line(platform, 100)
 
+    @staticmethod
+    def _local_copy_question(arguments) -> str:
+        """What a local copy will read and write (its plan, nothing read yet), or the way back to the service."""
+        from ...adapters.public_api.operations import resolve_layer
+        name = str(arguments.get("layer", ""))
+        found = resolve_layer(name)
+        shown = one_line(found.name() if found is not None else name, 100)
+        if arguments.get("action") == "back":
+            return _tr("The agent wants the layer {} to read its web service again (its local copy stays on disk). "
+                       "Do you agree?").format(shown)
+        detail = ""
+        if found is not None:
+            try:
+                from ...adapters.public_api.stream_copy import plan_for
+                plan = plan_for(found, str(arguments.get("extent_wkt") or ""), str(arguments.get("crs") or ""))
+                detail = plan.refusal or plan.summary()
+            except (ValueError, RuntimeError) as exc:
+                detail = str(exc)
+        return _tr("The agent wants to copy the layer {} locally, and the layer then reads the copy:\n{}\n\nThe "
+                   "service is read in the background: the copy can be cancelled. Do you agree?").format(
+            shown, one_line(detail, 600))
+
     def _confirm_text(self, call: ToolCallPart) -> str:
         names = [one_line(layer, 100) for layer in (call.arguments.get("layers") or [])]
         layers = "\n".join(names[:MAX_LISTED]) + (f"\n(+{len(names) - MAX_LISTED})" if len(names) > MAX_LISTED else "")
@@ -3213,6 +3249,8 @@ class AgentChatController(QObject):
             text = _tr("The agent wants to run this action on an external connector:\n{}\n{}\n\nDo you agree?").format(
                 self._connector_labels[call.name],
                 json.dumps(call.arguments, ensure_ascii=False, default=str)[:500])
+        elif call.name == "local_copy":
+            text = self._local_copy_question(call.arguments)
         elif call.name == "add_service_layer":
             text = _tr("The agent wants to add this layer of a web service to the project:\n{} · {}\n\nDo you agree?").format(
                 one_line(call.arguments.get("platform", ""), 100), one_line(call.arguments.get("typename", ""), 200))

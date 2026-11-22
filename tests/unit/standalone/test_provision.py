@@ -193,3 +193,19 @@ def test_remove_deletes_the_runtime_folder_and_nothing_else():
     assert not os.path.exists(paths.runtime_dir())
     assert (profile / "settings.ini").read_text(encoding="utf-8") == "kept"
     assert provision.remove() is False
+
+
+def test_the_package_cache_is_short_on_windows(monkeypatch, tmp_path):
+    """Windows limits paths to 260 characters unless long paths are on; micromamba nests each package deep."""
+    monkeypatch.setattr(os, "name", "nt")
+    monkeypatch.delenv("FILTERMATE_HOME", raising=False)
+    monkeypatch.setenv("LOCALAPPDATA", "C:\\Users\\someone\\AppData\\Local")
+    assert provision.packages_cache().endswith("fmpk") and len(provision.packages_cache()) < 45
+    env = provision.micromamba_environment()
+    assert env["CONDA_PKGS_DIRS"] == env["MAMBA_PKGS_DIRS"] == provision.packages_cache()
+
+
+def test_the_package_cache_stays_in_the_runtime_elsewhere():
+    if os.name == "nt":
+        pytest.skip("Windows has its own place")
+    assert provision.packages_cache().startswith(paths.runtime_dir())

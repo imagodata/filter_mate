@@ -387,6 +387,27 @@
           "description": "Longest address of a request sent to a web service, in bytes. The exact filter of a WFS layer lists the keys of its features in that address; a longer list is not sent and the layer is cut by the extent of the source instead. Most servers read 8,000 bytes: raise it for a server that reads more"
         }
       },
+      "STREAM_COPY": {
+        "_display_name": "Local copies of web services",
+        "max_pixels": {
+          "value": 64000000,
+          "min": 65536,
+          "max": 268435456,
+          "description": "Most pixels of the local copy of a web map (WMS, WMTS, XYZ tiles) over the visible map: the finest level of the service this budget affords. 64,000,000 is 8,000 x 8,000 pixels, about 250 MB before compression"
+        },
+        "max_features": {
+          "value": 200000,
+          "min": 1,
+          "max": 5000000,
+          "description": "Most features of the local copy of a WFS, OGC API Features or ArcGIS Feature Service layer over the visible map. Beyond, the copy holds the first ones and says it is not complete"
+        },
+        "timeout_seconds": {
+          "value": 600,
+          "min": 10,
+          "max": 86400,
+          "description": "Longest a local copy reads its service, in seconds"
+        }
+      },
       "SERVER_FILTER": {
         "_display_name": "Server filters",
         "wfs_timeout_seconds": {

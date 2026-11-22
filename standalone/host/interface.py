@@ -48,6 +48,21 @@ class StandaloneInterface(QObject):
     def layerTreeView(self):
         return self._window.tree_view
 
+    # --- the menu of the layers: entries of plugins, as QGIS shows them ------------------------------------------
+
+    def addCustomActionForLayerType(self, action, menu, layer_type, all_layers):
+        """``action`` in the menu of the layers of ``layer_type``: every one, or those named by
+        :meth:`addCustomActionForLayer` (``menu``, a submenu of QGIS, is not kept: the entry goes at the end)."""
+        self._window.custom_layer_actions[action] = [layer_type, bool(all_layers), set()]
+
+    def addCustomActionForLayer(self, action, layer):
+        entry = self._window.custom_layer_actions.get(action)
+        if entry is not None and layer is not None:
+            entry[2].add(layer.id())
+
+    def removeCustomActionForLayerType(self, action) -> bool:
+        return self._window.custom_layer_actions.pop(action, None) is not None
+
     def layerTreeCanvasBridge(self):
         return self._window.bridge
 

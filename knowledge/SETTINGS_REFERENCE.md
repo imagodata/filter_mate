@@ -65,6 +65,16 @@ The tool buttons of the EXPLORING rail, for each kind of layer: the names of the
 | `timeout_seconds` | 90 | 1–86400 | Maximum remote read and local evaluation duration in seconds |
 | `max_request_bytes` | 8000 | 1000–1000000 | Longest address of a request sent to a web service, in bytes. The exact filter of a WFS layer lists the keys of its features in that address; a longer list is not sent and the layer is cut by the extent of the source instead. Most servers read 8,000 bytes: raise it for a server that reads more |
 
+## Settings > Performance > Local copies of web services
+
+`APP.OPTIONS.STREAM_COPY`
+
+| Setting | Default | Allowed | Description |
+|---|---|---|---|
+| `max_pixels` | 64000000 | 65536–268435456 | Most pixels of the local copy of a web map (WMS, WMTS, XYZ tiles) over the visible map: the finest level of the service this budget affords. 64,000,000 is 8,000 x 8,000 pixels, about 250 MB before compression |
+| `max_features` | 200000 | 1–5000000 | Most features of the local copy of a WFS, OGC API Features or ArcGIS Feature Service layer over the visible map. Beyond, the copy holds the first ones and says it is not complete |
+| `timeout_seconds` | 600 | 10–86400 | Longest a local copy reads its service, in seconds |
+
 ## Settings > Performance > Server filters
 
 `APP.OPTIONS.SERVER_FILTER`

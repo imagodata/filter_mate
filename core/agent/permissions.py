@@ -60,6 +60,8 @@ CHANGED_LAYERS = {
     # A copy is a second layer on the same source, and no protected one: what is edited in it is written in the
     # file of the layer copied (2026-11-15: a protected layer was edited through its copy).
     "duplicate_layer": ("layer",),
+    # The layer reads a file in place of its service: a protected layer keeps its source.
+    "local_copy": ("layer",),
     # The options of the layers in FilterMate's panels: [{"layer": ..., "exploring": ..., "filtering": ...}].
     "set_layer_options": ("layers",),
 }
@@ -96,7 +98,7 @@ SETTINGS_TOOLS = frozenset({"change_settings", "apply_settings_profile", "turn_o
 # before and after (a card, applied by the user). Each is asked alone, in its own words, as code is.
 ASKED_ALONE = CODE_TOOLS | SETTINGS_TOOLS | frozenset({
     "add_layer", "add_service_layer", "add_basemap", "add_elevation", "add_population", "add_osm_features",
-    "add_database_table", "delete_features", "export_layout"})
+    "add_database_table", "delete_features", "export_layout", "local_copy"})
 
 
 # How many actions one question lists. A yes is for what the question shows: past this number the actions are

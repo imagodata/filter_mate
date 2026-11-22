@@ -1669,6 +1669,37 @@
   ],
   "type": "object"
  },
+ "local_copy": {
+  "properties": {
+   "action": {
+    "default": "copy",
+    "enum": [
+     "copy",
+     "back"
+    ],
+    "type": "string"
+   },
+   "crs": {
+    "default": "",
+    "maxLength": 64,
+    "type": "string"
+   },
+   "extent_wkt": {
+    "default": "",
+    "maxLength": 100000,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
  "map_context": {
   "properties": {},
   "type": "object"

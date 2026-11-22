@@ -60,6 +60,31 @@ def micromamba_path() -> str:
     return os.path.join(paths.runtime_dir(), "bin", "micromamba.exe" if os.name == "nt" else "micromamba")
 
 
+def packages_cache() -> str:
+    """Where micromamba downloads and unpacks the packages.
+
+    Under the runtime, except on Windows: micromamba nests each package under
+    ``pkgs\\https\\conda.anaconda.org\\conda-forge\\win-64\\<package>``, and the deepest files of
+    QGIS then pass the 260 characters Windows allows when long paths are off (its default):
+    the unpacking fails ("the directory is not empty"). The cache goes in a short folder of
+    the user's local data there, emptied after the install and deleted with the runtime.
+    """
+    if os.name == "nt" and not os.environ.get("FILTERMATE_HOME"):
+        base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), "AppData", "Local")
+        return os.path.join(base, "fmpk")
+    if os.name == "nt":  # a folder the user chose (often another disk, for the room): kept short within it
+        return os.path.join(paths.user_data_dir(), "pk")
+    return os.path.join(root_prefix(), "pkgs")
+
+
+def micromamba_environment() -> dict:
+    """The environment of every micromamba command: its package cache (see ``packages_cache``)."""
+    env = dict(os.environ)
+    env["CONDA_PKGS_DIRS"] = packages_cache()
+    env["MAMBA_PKGS_DIRS"] = packages_cache()
+    return env
+
+
 def root_prefix() -> str:
     return os.path.join(paths.runtime_dir(), "root")
 
@@ -204,7 +229,7 @@ def install(log: Callable[[str], None] = print, packages=PACKAGES):
             shutil.rmtree(environment_dir())  # an install that stopped halfway
         try:
             # nosec B603 - the micromamba checked above, a fixed argument list
-            code = subprocess.call(create_command(micromamba, packages))  # nosec B603
+            code = subprocess.call(create_command(micromamba, packages), env=micromamba_environment())  # nosec B603
         except OSError as error:
             raise ProvisionError(f"micromamba did not start: {error}") from error
         if code == 0:
@@ -226,9 +251,10 @@ def install(log: Callable[[str], None] = print, packages=PACKAGES):
     # The package cache is as large as the environment and only useful for a reinstall.
     try:
         subprocess.call([micromamba, "clean", "--all", "--yes", "-r", root_prefix()],  # nosec B603
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=micromamba_environment())
     except OSError:
         pass
+    _remove_cache_outside()
     runtime_module.forget_cache()
     return installed
 
@@ -242,12 +268,25 @@ def remove() -> bool:
     if not os.path.exists(marker_path()):
         raise ProvisionError(f"{folder} was not made by `filtermate setup`: it is left alone.")
     runtime_module.forget_cache()
+    _remove_cache_outside()
     failed = []
     shutil.rmtree(folder, onerror=lambda _function, path, _info: failed.append(path))
     if failed:
         raise ProvisionError(f"{len(failed)} files of {folder} could not be deleted (FilterMate still running?), "
                              f"for instance {failed[0]}. Close it and run `filtermate setup --remove` again.")
     return True
+
+
+def _remove_cache_outside():
+    """The package cache, when it lives outside the runtime folder (Windows): only what micromamba put there."""
+    cache = packages_cache()
+    inside = os.path.normcase(os.path.abspath(cache)).startswith(os.path.normcase(os.path.abspath(paths.runtime_dir())))
+    if inside or not os.path.isdir(cache):
+        return
+    if any(name not in ("https", "cache", "urls", "urls.txt", "magic_file", "pkgs_dirs.txt") and not name.endswith(
+            (".conda", ".tar.bz2", ".json")) and not os.path.isdir(os.path.join(cache, name)) for name in os.listdir(cache)):
+        return  # not a cache of micromamba alone: left as it is
+    shutil.rmtree(cache, ignore_errors=True)
 
 
 def installed_size() -> int:
