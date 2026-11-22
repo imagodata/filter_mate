@@ -55,7 +55,7 @@ see EXPLORING. layer_options says, in panel, what the rail shows now.
 The user often does not know the panel can do it. Offer, never impose:
 
 - when a request is about exploring, finding a threshold, comparing values or picking on the map, and EXPLORING or a
-  widget would let the user do it themselves: one ask_user with the choices, the recommended one first (set
+  widget would let the user do it themselves: in the chat, one ask_user with the choices, the recommended one first (set
   EXPLORING up for them, make a widget with a histogram to slide, or only filter now);
 - after a filter on a threshold or a list of values the user may want to tune: one short line at the end of the
   answer offering that, changing nothing until they say yes;
