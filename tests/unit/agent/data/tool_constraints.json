@@ -1962,6 +1962,7 @@
    "name": {
     "enum": [
      "analysis",
+     "cartograms",
      "cartography",
      "configuration",
      "dashboards",
@@ -1969,6 +1970,7 @@
      "layouts",
      "open-data",
      "panels",
+     "projections",
      "raster-objects",
      "terrain",
      "workflows"
@@ -2010,6 +2012,46 @@
   },
   "required": [
    "layer"
+  ],
+  "type": "object"
+ },
+ "make_cartogram": {
+  "properties": {
+   "field": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   },
+   "iterations": {
+    "default": 8,
+    "maximum": 30,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "kind": {
+    "default": "contiguous",
+    "enum": [
+     "contiguous",
+     "noncontiguous",
+     "dorling",
+     "demers"
+    ],
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "name": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer",
+   "field"
   ],
   "type": "object"
  },
@@ -3349,6 +3391,40 @@
   "required": [
    "raster"
   ],
+  "type": "object"
+ },
+ "suggest_crs": {
+  "properties": {
+   "layers": {
+    "anyOf": [
+     {
+      "items": {
+       "maxLength": 1000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "purpose": {
+    "default": "general",
+    "enum": [
+     "general",
+     "areas",
+     "distances",
+     "shapes",
+     "world",
+     "web"
+    ],
+    "type": "string"
+   }
+  },
   "type": "object"
  },
  "turn_off_agent_options": {

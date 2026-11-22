@@ -807,8 +807,8 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Set the CRS of the project", idempotent=True))
     async def set_project_crs(
         crs: Annotated[str, Field(min_length=1, max_length=1000, description=(
-            "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, or a layer "
-            "of the project whose CRS is taken"))],
+            "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, a PROJ: "
+            "string from suggest_crs, or a layer of the project whose CRS is taken"))],
     ) -> Dict[str, Any]:
         """Set the CRS of the project, which the map follows: what the user calls changing the CRS of the view.
 
@@ -816,6 +816,37 @@ def build_server(client: FilterMateClient) -> Any:
         geographic and previous. In the chat of FilterMate, undoing the turn brings the previous CRS back.
         """
         return await call("POST", "/map/crs", _body(crs=crs))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Suggest projections", readOnlyHint=True, openWorldHint=False))
+    async def suggest_crs(
+        layers: Annotated[Optional[List[Annotated[str, Field(min_length=1, max_length=1000)]]], Field(
+            max_length=100, description="Default: the layers shown, then the view")] = None,
+        purpose: Annotated[Literal["general", "areas", "distances", "shapes", "world", "web"], Field(description=(
+            "areas: equal-area; distances; shapes: conformal; world; web"))] = "general",
+    ) -> Dict[str, Any]:
+        """Projections suited to where the data lie and what the map is for, best first: the official system of the
+        country, the local zone (UTM, Lambert CC), continental or world ones, and projections made for the data
+        (PROJ: strings). Each says what it keeps. Returns bounds_wgs84, scale, current and suggestions [{crs, name,
+        keeps, why, units}], each crs usable by set_project_crs. It changes nothing.
+        """
+        return await call("POST", "/map/crs/suggest", _body(layers=layers, purpose=purpose))
+
+    @mcp.tool(annotations=_write("Make a cartogram", idempotent=False))
+    async def make_cartogram(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        field: Annotated[str, Field(min_length=1, max_length=200, description="Numeric: the quantity shown")],
+        kind: Annotated[Literal["contiguous", "noncontiguous", "dorling", "demers"], Field(description=(
+            "contiguous: polygons deformed, borders kept; noncontiguous: each scaled; dorling: circles; demers: "
+            "squares"))] = "contiguous",
+        iterations: Annotated[int, Field(ge=1, le=30, description="contiguous")] = 8,
+        name: Annotated[str, Field(max_length=200, description="Of the new layer")] = "",
+    ) -> Dict[str, Any]:
+        """Make a new layer whose areas show a quantity of a layer as filtered now (a population, votes...), not
+        the land. Returns layer, kind, features, crs, and error_before / error_after (1 is exact). In the chat of
+        FilterMate, undoing the turn removes the layer.
+        """
+        return await call("POST", "/layers/cartogram", _body(layer=layer, field=field, kind=kind,
+                                                            iterations=iterations, name=name))
 
     @mcp.tool(annotations=_write("Add a field", idempotent=False))
     async def add_field(

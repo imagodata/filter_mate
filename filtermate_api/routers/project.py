@@ -45,6 +45,42 @@ class CrsBody(BaseModel):
     crs: str = Field(..., min_length=1, max_length=_MAX_NAME, description="EPSG:2154, 2154, or a layer of the project")
 
 
+class CrsSuggestBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layers: Optional[List[str]] = Field(None, max_length=100)
+    purpose: Literal["general", "areas", "distances", "shapes", "world", "web"] = "general"
+
+
+@router.post("/map/crs/suggest")
+def suggest_crs(payload: CrsSuggestBody, request: Request) -> Dict[str, Any]:
+    """Projections for the data of layers (default: those shown) and what the map is for, best first."""
+    try:
+        return _accessor(request).suggest_crs(layers=payload.layers, purpose=payload.purpose)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class CartogramBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
+    field: str = Field(..., min_length=1, max_length=200)
+    kind: Literal["contiguous", "noncontiguous", "dorling", "demers"] = "contiguous"
+    iterations: int = Field(8, ge=1, le=30)
+    name: str = Field("", max_length=200)
+
+
+@router.post("/layers/cartogram")
+def make_cartogram(payload: CartogramBody, request: Request) -> Dict[str, Any]:
+    """A new layer whose areas show a field of a layer, as it is filtered now."""
+    try:
+        return _accessor(request).make_cartogram(payload.layer, payload.field, kind=payload.kind,
+                                                 iterations=payload.iterations, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
 @router.post("/map/crs", response_model=ProjectCrs)
 def set_project_crs(payload: CrsBody, request: Request) -> ProjectCrs:
     """Set the CRS of the project, which the map follows."""

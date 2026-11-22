@@ -509,7 +509,7 @@ def sanitize_svg(svg: str) -> str:
 
 
 def _write(element, out: List[str], top: bool = False) -> None:
-    from xml.sax.saxutils import escape, quoteattr
+    from xml.sax.saxutils import escape, quoteattr  # nosec B406 - escapes the text written, parses nothing
     tag = _local(element.tag)
     attributes = "".join(f" {name}={quoteattr(str(value))}" for name, value in element.attrib.items())
     if top:

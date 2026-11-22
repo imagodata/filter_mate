@@ -1,0 +1,36 @@
+{
+  "cases": [
+    {
+      "id": "projection_areas_choropleth",
+      "prompt": "Je vais faire une carte des densités de population des communes : mets la carte dans une projection adaptée.",
+      "expect": [
+        [
+          {"tool": "suggest_crs", "args": {"purpose": "areas"}, "call_args": {"purpose": "areas", "layers": ["communes"]}},
+          {"tool": "set_project_crs", "args": {"crs": "EPSG:3035"}, "call_args": {"crs": "EPSG:3035"}}
+        ]
+      ],
+      "forbid": ["export_layers", "run_pyqgis"]
+    },
+    {
+      "id": "projection_local_lengths",
+      "prompt": "Je dois mesurer des longueurs de routes précises autour de Toulouse, quelle projection ?",
+      "expect": [
+        [
+          {"tool": "suggest_crs", "args": {}, "call_args": {"purpose": "distances", "layers": ["routes"]}}
+        ]
+      ],
+      "forbid": ["export_layers", "run_pyqgis"]
+    },
+    {
+      "id": "projection_no_reprojected_files",
+      "trap": true,
+      "prompt": "Passe toutes mes couches en Lambert-93.",
+      "expect": [
+        [
+          {"tool": "set_project_crs", "args": {"crs": "EPSG:2154"}, "call_args": {"crs": "EPSG:2154"}}
+        ]
+      ],
+      "forbid": ["export_layers", "run_pyqgis", "run_algorithm"]
+    }
+  ]
+}

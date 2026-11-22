@@ -2322,7 +2322,7 @@
    "input_schema": {
     "properties": {
      "crs": {
-      "description": "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, or a layer of the project whose CRS is taken",
+      "description": "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, a PROJ: string from suggest_crs, or a layer of the project whose CRS is taken",
       "maxLength": 1000,
       "minLength": 1,
       "type": "string"
@@ -2330,6 +2330,105 @@
     },
     "required": [
      "crs"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "suggest_crs",
+   "title": "Suggest projections",
+   "description": "Projections suited to where the data lie and what the map is for, best first: the official system of the country, the local zone (UTM, Lambert CC), continental or world ones, and projections made for the data (PROJ: strings). Each says what it keeps. Returns bounds_wgs84, scale, current and suggestions [{crs, name, keeps, why, units}], each crs usable by set_project_crs. It changes nothing.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "anyOf": [
+       {
+        "items": {
+         "maxLength": 1000,
+         "minLength": 1,
+         "type": "string"
+        },
+        "maxItems": 100,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Default: the layers shown, then the view"
+     },
+     "purpose": {
+      "default": "general",
+      "description": "areas: equal-area; distances; shapes: conformal; world; web",
+      "enum": [
+       "general",
+       "areas",
+       "distances",
+       "shapes",
+       "world",
+       "web"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
+   "name": "make_cartogram",
+   "title": "Make a cartogram",
+   "description": "Make a new layer whose areas show a quantity of a layer as filtered now (a population, votes...), not the land. Returns layer, kind, features, crs, and error_before / error_after (1 is exact). In the chat of FilterMate, undoing the turn removes the layer.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "field": {
+      "description": "Numeric: the quantity shown",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "kind": {
+      "default": "contiguous",
+      "description": "contiguous: polygons deformed, borders kept; noncontiguous: each scaled; dorling: circles; demers: squares",
+      "enum": [
+       "contiguous",
+       "noncontiguous",
+       "dorling",
+       "demers"
+      ],
+      "type": "string"
+     },
+     "iterations": {
+      "default": 8,
+      "description": "contiguous",
+      "maximum": 30,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "name": {
+      "default": "",
+      "description": "Of the new layer",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer",
+     "field"
     ],
     "type": "object"
    }

@@ -53,6 +53,16 @@
         <translation>เลิกทำแล้ว: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
+        <source>Cartogram of {}</source>
+        <translation>แผนที่บิดเบือนพื้นที่ของ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2851"/>
+        <source>Looking for a projection</source>
+        <translation>กำลังหาเส้นโครงแผนที่</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
         <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
 
