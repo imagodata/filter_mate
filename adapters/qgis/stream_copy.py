@@ -535,8 +535,8 @@ def _build_overviews(path: str) -> None:
         dataset = None
         try:
             gdal.SetThreadLocalConfigOption('COMPRESS_OVERVIEW', None)
-        except Exception:
-            pass
+        except Exception as exc:  # a cleanup: the overviews are written or not
+            logger.debug(f"FilterMate local copy: COMPRESS_OVERVIEW not reset: {exc}")
 
 
 # --- switching ----------------------------------------------------------------------------------------------------
@@ -705,8 +705,8 @@ def _on_read_project(*_args) -> None:
             from ...infrastructure.feedback import show_warning
             show_warning(_tr("The local copy of {0} was not found: these layers read their web service. Their copy "
                              "is looked for again the next time the project is opened.").format(", ".join(missing)))
-        except Exception:
-            pass
+        except Exception as exc:  # no message bar here: the log says it
+            logger.debug(f"FilterMate local copies: missing ones not shown: {exc}")
 
 
 def reattach_project(project=None) -> Tuple[int, List[str]]:
