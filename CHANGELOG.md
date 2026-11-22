@@ -16,7 +16,8 @@ All notable changes to FilterMate will be documented in this file.
   action `again` (the previous file replaced, read again when the new copy is not made), and gets `local_copy`
   from the next request on when a web service layer comes into the project during a conversation. Copy again
   starts from the area asked, no longer from the grid of the previous copy (a web map grew by one cell each time).
-  Three strings in the 34 catalogs.
+  Three strings in the 34 catalogs. The mark follows Change Data Source too, and the question of `again` says what
+  the copy to replace was (its date, features or image, its size on disk).
 - Streams: local copy of a web service layer. A WFS, OGC API Features or ArcGIS Feature Service layer is copied over
   the visible map to a GeoPackage, a WMS, WMTS or XYZ layer to a GeoTIFF (finest level of the service within the
   budget, overviews), in a background task that can be cancelled; the cost is said before (pixels, requests, size;

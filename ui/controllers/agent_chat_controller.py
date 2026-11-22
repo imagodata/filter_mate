@@ -3244,6 +3244,23 @@ class AgentChatController(QObject):
         return one_line(platform, 100)
 
     @staticmethod
+    def _previous_copy_line(layer) -> str:
+        """What the copy to replace was (its date, features or image, its size on disk): the cost of the new one."""
+        if layer is None:
+            return ""
+        try:
+            import os
+            from ...adapters.qgis.stream_copy import copy_text, record_of
+            from ...core.agent.open_data import megabytes
+            record = record_of(layer)
+            if record is None:
+                return ""
+            size = os.path.getsize(record.path) if os.path.isfile(record.path) else -1
+            return "\n\n" + copy_text(record) + (f" · {megabytes(size)}" if size >= 0 else "")
+        except Exception:  # the question is asked all the same
+            return ""
+
+    @staticmethod
     def _local_copy_question(arguments) -> str:
         """What a local copy will read and write (its plan, nothing read yet), or the way back to the service."""
         from ...adapters.public_api.operations import resolve_layer
@@ -3254,8 +3271,9 @@ class AgentChatController(QObject):
             return _tr("The agent wants the layer {} to read its web service again (its local copy stays on disk). "
                        "Do you agree?").format(shown)
         if arguments.get("action") == "again":
-            return _tr("The agent wants to copy the layer {} again: the same area at the same detail, read anew from its "
-                       "web service; the new copy replaces the previous one. Do you agree?").format(shown)
+            question = _tr("The agent wants to copy the layer {} again: the same area at the same detail, read anew "
+                           "from its web service; the new copy replaces the previous one. Do you agree?").format(shown)
+            return question + AgentChatController._previous_copy_line(found)
         detail = ""
         if found is not None:
             try:

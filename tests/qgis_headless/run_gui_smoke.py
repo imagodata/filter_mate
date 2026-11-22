@@ -7930,6 +7930,7 @@ def s_stream_copy_begin():
            "&crs=EPSG:3857")
     tiles = QgsRasterLayer(uri, 'Tuiles locales', 'wms')
     project.addMapLayer(tiles)
+    STREAM_COPY['uri'] = uri
     leave_welcome()
     dock()._fm_sections.open_top('exploring')
     iface.mapCanvas().setDestinationCrs(QgsCoordinateReferenceSystem('EPSG:3857'))
@@ -8007,6 +8008,18 @@ def s_stream_copy_end():
     node = project.layerTreeRoot().findLayer(tiles.id())
     check('stream copy: back on its service, the layer has no mark in the layer panel',
           actions.mark_of(tiles.id()) is None and not iface.layerTreeView().indicators(node))
+    actions.copy(tiles, confirm=False)  # copied again, for Change Data Source in the next step
+    return lambda: actions.mark_of(tiles.id()) is not None and tasks_idle()
+
+
+def s_stream_copy_source_change():
+    """Change Data Source of QGIS on a layer that reads its copy: the mark goes, the layer reads what was chosen."""
+    tiles = layer('Tuiles locales')
+    actions = importlib.import_module(f'{PACKAGE}.ui.controllers.stream_copy_actions').get()
+    from qgis.core import QgsDataProvider
+    tiles.setDataSource(STREAM_COPY['uri'], tiles.name(), 'wms', QgsDataProvider.ProviderOptions())
+    check('stream copy: Change Data Source takes the mark away', settles(lambda: actions.mark_of(tiles.id()) is None, 3.0)
+          and tiles.providerType() == 'wms', (tiles.providerType(), actions.mark_of(tiles.id())))
     project.removeMapLayer(tiles.id())
     if STREAM_COPY.get('group') is not None:
         project.layerTreeRoot().removeChildNode(STREAM_COPY['group'])
@@ -8014,7 +8027,8 @@ def s_stream_copy_end():
     return None
 
 
-STREAM_COPY_STEPS = [s_stream_copy_begin, s_stream_copy_click, s_stream_copy_check, s_stream_copy_end]
+STREAM_COPY_STEPS = [s_stream_copy_begin, s_stream_copy_click, s_stream_copy_check, s_stream_copy_end,
+                     s_stream_copy_source_change]
 
 if os.environ.get('FM_ONLY') == 'stream_copy':  # the local copy of a web service layer from its button
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *STREAM_COPY_STEPS, s_finish]
