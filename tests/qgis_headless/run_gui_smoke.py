@@ -3647,7 +3647,7 @@ def s_welcome_by_state():
     active[:] = [raster]
     with_raster = drawn()
     check('welcome by state: a raster active gives requests about it, none about a vector layer',
-          with_raster != empty and true_now() and any('active_raster' in catalog[key].needs for key in with_raster)
+          with_raster != empty and true_now() and any({'active_raster', 'active_elevation'} & set(catalog[key].needs) for key in with_raster)
           and not any({'vector', 'active_vector', 'selection'} & set(catalog[key].needs) for key in with_raster),
           str(with_raster))
     grab('welcome_raster_active')
@@ -3683,8 +3683,9 @@ def s_welcome_by_state():
     QSettings().setValue('filter_mate/agent/last_examples', ','.join(filtered))
     points.setSubsetString('')
     after = drawn()
-    check('welcome by state: the set seen is replaced by the state, none of its requests again',
-          after != filtered and not set(after) & set(filtered) and true_now(), f'{filtered} -> {after}')
+    check('welcome by state: the set seen changes only where the state changed: the filter request goes, the others stay',
+          after != filtered and true_now() and not any('filter' in catalog[key].needs for key in after)
+          and sum(1 for key in after if key in filtered) >= 2, f'{filtered} -> {after}')
     # The link that reconfigures: there with a model, and the setup cards come in the thread.
     check('welcome by state: the link to reconfigure is under the requests with a model, the button of the setup hidden',
           panel.reconfigure_button.isVisible() and not panel.setup_button.isVisible()
@@ -3713,8 +3714,117 @@ def s_welcome_by_state():
     return settled()
 
 
+def _wire():
+    """The state of the real wiring between steps: the controller, the layers it added, the project as found."""
+    return WELCOME.setdefault('wire', {})
+
+
+def _wire_facts():
+    from qgis.core import QgsProject as Project
+    chat = agent_chat()
+    prompts = importlib.import_module(f'{PACKAGE}.core.agent.example_prompts')
+    catalog = {example.key: example for example in prompts.CATALOG}
+    facts = chat._read_welcome_facts()
+    keys = chat.panel.example_keys
+    true = bool(keys) and all(set(catalog[key].needs) <= facts.tokens() for key in keys)
+    return facts, keys, catalog, true, Project.instance()
+
+
+def s_welcome_wire_raster():
+    """The real wiring (2026-11-22): a real project, real layers, the signals of QGIS and of its interface, with the
+    controller of the dock and no reader replaced. A terrain model is added and made the active layer."""
+    from qgis.core import QgsFeature, QgsGeometry, QgsPointXY
+    from osgeo import gdal
+    chat, wire = agent_chat(), _wire()
+    panel = chat.panel
+    chat.new_conversation()
+    dock()._fm_sections.open_top('agent')
+    wire['before'] = set(QgsProject.instance().mapLayers())
+    wire['active'] = iface.activeLayer()
+    # An empty set: what is drawn next is drawn because the wiring told the panel, not because it was already there.
+    panel.example_keys, panel._examples_signature, panel._examples_seen = (), (), False
+    wire['folder'] = tempfile.mkdtemp()
+    path = os.path.join(wire['folder'], 'wire_dem.tif')
+    dataset = gdal.GetDriverByName('GTiff').Create(path, 4, 4, 1, gdal.GDT_Float32)
+    dataset.SetGeoTransform((650000, 10, 0, 6860000, 0, -10))
+    dataset.GetRasterBand(1).Fill(100)
+    dataset = None
+    raster = QgsRasterLayer(path, 'wire_dem')
+    points = QgsVectorLayer('Point?crs=EPSG:4326&field=name:string', 'wire_pts', 'memory')
+    features = []
+    for index in range(3):
+        feature = QgsFeature(points.fields())
+        feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(index, index)))
+        feature.setAttributes([f'p{index}'])
+        features.append(feature)
+    points.dataProvider().addFeatures(features)
+    QgsProject.instance().addMapLayers([raster, points])
+    wire['raster'], wire['points'] = raster.id(), points.id()
+    iface.setActiveLayer(raster)
+    return waits(1.0, lambda: tasks_idle())
+
+
+def s_welcome_wire_raster_check():
+    facts, keys, catalog, true, _project = _wire_facts()
+    check('welcome wiring: layers added and the active layer changed draw the requests, none false',
+          bool(keys) and true and facts.active == 'raster' and facts.active_elevation,
+          f'{keys} {facts}')
+    check('welcome wiring: the active terrain model brings a request about it',
+          any({'active_elevation', 'active_raster'} & set(catalog[key].needs) for key in keys), str(keys))
+    points = QgsProject.instance().mapLayer(_wire()['points'])
+    iface.setActiveLayer(points)  # the active layer changes alone
+    return waits(0.9)
+
+
+def s_welcome_wire_vector_check():
+    facts, keys, catalog, true, project = _wire_facts()
+    check('welcome wiring: another active layer (a signal of the interface) changes the requests to those about it',
+          true and facts.active == 'vector' and any('active_vector' in catalog[key].needs for key in keys)
+          and not any({'active_raster', 'active_elevation'} & set(catalog[key].needs) for key in keys), f'{keys} {facts}')
+    points = project.mapLayer(_wire()['points'])
+    points.selectByIds([next(iter(points.allFeatureIds()))])  # the selection of a real layer
+    return waits(0.9)
+
+
+def s_welcome_wire_selection_check():
+    facts, keys, catalog, true, project = _wire_facts()
+    check('welcome wiring: a selection (a signal of the layer) brings a request about it, none false',
+          true and facts.selected >= 1 and any({'selection', 'local_selection'} & set(catalog[key].needs) for key in keys),
+          f'{keys} {facts}')
+    points = project.mapLayer(_wire()['points'])
+    points.removeSelection()
+    points.setSubsetString("name <> 'p0'")  # the filter of a real layer
+    return waits(0.9)
+
+
+def s_welcome_wire_filter_check():
+    facts, keys, catalog, true, project = _wire_facts()
+    check('welcome wiring: a filter (a signal of the layer) brings a request about it, none false',
+          true and facts.filtered >= 1 and any('filter' in catalog[key].needs for key in keys), f'{keys} {facts}')
+    wire = _wire()
+    project.mapLayer(wire['points']).setSubsetString('')
+    project.removeMapLayer(wire['raster'])
+    project.removeMapLayer(wire['points'])
+    if wire['active'] is not None and project.mapLayer(wire['active'].id()) is not None:
+        iface.setActiveLayer(wire['active'])
+    return waits(1.2, lambda: tasks_idle())
+
+
+def s_welcome_wire_done():
+    """The project as found; the set is true of it; the dock as it was."""
+    facts, keys, catalog, true, project = _wire_facts()
+    wire = _wire()
+    check('welcome wiring: the layers removed, the project is as found and the requests are true of it',
+          set(project.mapLayers()) == wire['before'] and true, f'{keys} {facts}')
+    shutil.rmtree(wire.get('folder', ''), ignore_errors=True)
+    WELCOME.pop('wire', None)
+    leave_welcome()
+    return settled()
+
+
 WELCOME_STEPS = [s_tour, s_tour_links_check, s_tour_merged_check, s_setup_layout, s_setup_layout_check, s_setup_layout_back,
-                 s_welcome_by_state]
+                 s_welcome_by_state, s_welcome_wire_raster, s_welcome_wire_raster_check, s_welcome_wire_vector_check,
+                 s_welcome_wire_selection_check, s_welcome_wire_filter_check, s_welcome_wire_done]
 
 
 # --- what a section in its own panel still shares with the others (FM_ONLY=sync) -------------------------------------

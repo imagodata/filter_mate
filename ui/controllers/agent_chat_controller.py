@@ -299,12 +299,16 @@ class AgentChatController(QObject):
     def _read_welcome_facts(self):
         """The state of QGIS and the project for the requests of the welcome (main thread; counts, no feature read)."""
         from ...adapters.qgis.project_facts import read_facts
+        return read_facts(active=self._active_layer())
+
+    @staticmethod
+    def _active_layer():
+        """The layer selected in the layer tree of QGIS; None without an interface (a script) or without a layer."""
         try:
             from qgis.utils import iface
-            active = iface.activeLayer() if iface is not None else None
-        except Exception:  # no interface (a script), or one closing
-            active = None
-        return read_facts(active=active)
+            return iface.activeLayer() if iface is not None else None
+        except Exception:  # an interface closing
+            return None
 
     def _follow_welcome_facts(self) -> None:
         """The welcome draws its requests again when a layer comes or goes, the selection or a filter changes, the
