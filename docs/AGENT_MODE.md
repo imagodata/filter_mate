@@ -165,6 +165,38 @@ Rules worth keeping:
   under a header saying they are data. A note comes back in every later conversation, so a text met in a tool
   result that asked to be kept would come back too: the prompt keeps notes to what the user asks, each note shows
   in the thread with its text, and undoing the turn takes it back (a `notes` effect of the turn).
+- **Memory from one project to the next** (`core/agent/memory.py`, `adapters/agent/memory_store.py`; spec
+  `docs/superpowers/specs/2026-11-22-agent-local-memory-design.md`, lot 1): notes kept outside the project, in
+  `agent_memory.json` of the `FilterMate` folder of the QGIS profile. Two scopes: `user` (every project: a word of
+  the trade, a preference) and `source` (a data source, by the signature of the favorites,
+  `core/domain/layer_signature.py`: the note comes back in any project that holds a layer of that source). Only a
+  table of PostgreSQL or SpatiaLite and a layer of a file (OGR) have one: for the other providers the signature is
+  the name the user gave the layer, which a new name would lose and two layers could share. None either for a layer
+  held in memory, cut by FilterMate or written by Processing in its temporary folder, nor for a source that is a
+  connection string or an address: it may hold a password or a token, and nothing of it is kept. Two files of the
+  same name in two folders share their notes, as two tables of the same schema and name do: the tab shows the
+  signature. In lot 1 the user writes them in
+  the Memory tab of the settings of the agent; the model only reads them, and no tool changes them. They go as a
+  part of the context of the request (`request_context.ContextParts.memory`), under a header saying they are
+  data: with the first request of a conversation, after a compaction, and when they changed; never in the
+  instructions, so the start of a request is the same for everyone. 3,000 characters at most
+  (`MAX_MEMORY_BLOCK`): past it the notes of the active layer go first, then those for every project, then the
+  other sources, the latest first, and a last line says how many were left. Measured with
+  `scripts/agent_request_weight.py --conversation --memory`: an empty memory weighs nothing; a full one costs the
+  conversation of the bench +9.6 % (+2.2 % for 643 characters). A note a model proposed while it read attribute
+  values (`with_values`, lot 2) is held back once the user no longer shares them. The file is JSON a person can
+  correct; one that cannot be read whole, a key this version does not know included, is never written (the tab
+  says why): nothing is dropped or corrected in silence. A write holds a lock file, is made on the file as it is at
+  that time, then replaces it in one move (through a link, with its permissions). The option `filter_mate/agent/memory` (on by default) stops
+  the sending. `scripts/agent_eval.py` plays four words of the trade without and with their note (`vocab_*` and
+  `vocab_*_memory`) and prints, for each, how often it passed and the median of the requests sent to the model.
+  Measured on 2026-11-22 with `--live --provider ollama --model qwen3.5:4b --families --repeat 3` (a small local
+  model, three runs: an order of magnitude, not a rate): 12 passes of 12 with the note against 5 of 12 without.
+  Over the runs that passed, the median of the requests to the model went from 5 to 4 (cours d'eau permanents) and
+  stayed at 4 (logements, cadastre); RD never passed without its note (3 requests with it). Over every run,
+  logements went from 14 to 4: without the note the model searched until it gave up. So the note makes the answer
+  right far more than it saves requests: the model still reads the layer before it filters, as its instructions
+  ask. The criterion of the spec (one request less in the median) is not met.
 - **Editing data** (`adapters/public_api/feature_edits.py`): `update_features` (values, or formulas computed on
   each feature), `delete_features` (the user confirms) and `add_features` (WKT, 100 at most) put the layer in
   editing mode and add one named command to its undo stack: nothing is written to the data source, the user saves
