@@ -7085,7 +7085,8 @@ def tools_rail(kind):
     d = dock()
     rail = d.widget_exploring_keys
     names = {name: key for key, name in tools_buttons()[kind].items()}
-    shown = sorted((button for button in rail.findChildren(QPushButton) if button.isVisibleTo(rail)),
+    shown = sorted((button for button in rail.findChildren(QPushButton) if button.isVisibleTo(rail)
+                    and button.objectName() != 'pushButton_exploring_stream_copy'),  # of a web service, any kind
                    key=lambda button: button.y())
     keys = [names.get(button.objectName(), button.objectName()) for button in shown]
     problems = []
@@ -7879,6 +7880,91 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, *EXPLO_STEPS,
          *SWITCH_STEPS, *ROWS_STEPS, *LIKE_STEPS, *REFILTER_STEPS, *SIZING_STEPS, s_finish]
 
+# --- the local copy of a web service layer: its button on the rail, one click, the layer on its copy (FM_ONLY=stream_copy)
+
+STREAM_COPY = {}
+
+
+def stream_copy_button():
+    return dock().findChild(QPushButton, 'pushButton_exploring_stream_copy')
+
+
+def s_stream_copy_begin():
+    """A tile server of the bench of the streams, and a layer of its tiles, current in the dock."""
+    import threading
+    from http.server import ThreadingHTTPServer
+    from qgis.core import QgsCoordinateReferenceSystem, QgsRectangle
+    sys.path.insert(0, os.path.join(os.environ.get('FM_REPO', '/src'), 'tests', 'qgis_headless'))
+    import check_stream_extent_clip as fixture
+    server = ThreadingHTTPServer(('127.0.0.1', 0), fixture.MapHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    STREAM_COPY['server'] = server
+    project.setFileName(os.path.join(tempfile.mkdtemp(), 'copie.qgz'))
+    uri = (f"type=xyz&url=http://127.0.0.1:{server.server_port}/tiles/{{z}}/{{x}}/{{y}}.png&zmin=0&zmax=14"
+           "&crs=EPSG:3857")
+    tiles = QgsRasterLayer(uri, 'Tuiles locales', 'wms')
+    project.addMapLayer(tiles)
+    leave_welcome()
+    dock()._fm_sections.open_top('exploring')
+    iface.mapCanvas().setDestinationCrs(QgsCoordinateReferenceSystem('EPSG:3857'))
+    iface.mapCanvas().setExtent(QgsRectangle(100000, 100000, 300000, 250000))
+    dock().comboBox_filtering_current_layer.setLayer(tiles)
+    return switched_to('Tuiles locales', coverage_page=True)
+
+
+def s_stream_copy_click():
+    button = stream_copy_button()
+    check('stream copy: the button is on the rail of a web service layer, and says what it does',
+          button is not None and button.isVisible() and 'Local copy' in button.toolTip(),
+          button and (button.isVisible(), button.toolTip()[:80]))
+    actions = importlib.import_module(f'{PACKAGE}.ui.controllers.stream_copy_actions').get()
+    check('stream copy: the plugin started the local copies, with their entry in the menu of the layers',
+          actions is not None and actions._action is not None, actions)
+    exporting = dock()._controller_integration.exporting_controller
+    if exporting is not None:
+        exporting.populate_export_combobox()
+        widget = dock().widgets['EXPORTING']['LAYERS_TO_EXPORT']['WIDGET']
+        listed = [widget.itemText(index) for index in range(widget.count())]
+        check('stream copy: EXPORTING lists the web map (written as it draws over the visible map)',
+              any(text.startswith('Tuiles locales') for text in listed), listed)
+    if button is None or actions is None:
+        return None
+    actions._ask = lambda title, text, buttons: (STREAM_COPY.setdefault('asked', []).append(text), 0)[1]
+    button.click()
+    tiles = layer('Tuiles locales')
+    return lambda: tiles.providerType() == 'gdal' and tasks_idle()
+
+
+def s_stream_copy_check():
+    tiles = layer('Tuiles locales')
+    button = stream_copy_button()
+    asked = STREAM_COPY.get('asked') or ['']
+    check('stream copy: the cost was said before the copy (pixels, requests, folder)',
+          'pixels' in asked[0] and 'requests' in asked[0] and 'copie_filtermate_local' in asked[0], asked[0][:200])
+    check('stream copy: one click, and the layer reads a GeoTIFF next to the project',
+          tiles.providerType() == 'gdal' and 'copie_filtermate_local' in tiles.source(), tiles.source()[-80:])
+    check('stream copy: the button stays, and now offers the way back',
+          button.isVisible() and 'back to the service' in button.toolTip(), button.toolTip()[:120])
+    dock().comboBox_filtering_current_layer.setLayer(layer('zones'))
+    return switched_to('zones', coverage_page=False)
+
+
+def s_stream_copy_end():
+    button = stream_copy_button()
+    check('stream copy: no button on the rail of a local layer', not button.isVisible())
+    tiles = layer('Tuiles locales')
+    actions = importlib.import_module(f'{PACKAGE}.ui.controllers.stream_copy_actions').get()
+    check('stream copy: back to the service', actions.back_to_stream(tiles) and tiles.providerType() == 'wms',
+          tiles.providerType())
+    project.removeMapLayer(tiles.id())
+    STREAM_COPY['server'].shutdown()
+    return None
+
+
+STREAM_COPY_STEPS = [s_stream_copy_begin, s_stream_copy_click, s_stream_copy_check, s_stream_copy_end]
+
+if os.environ.get('FM_ONLY') == 'stream_copy':  # the local copy of a web service layer from its button
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *STREAM_COPY_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'panels':  # the steps of the panels alone, after the plugin is up
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *PANEL_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'sections':  # the buttons under their section, a section in its own QGIS panel

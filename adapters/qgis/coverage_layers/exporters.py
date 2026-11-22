@@ -63,7 +63,8 @@ def _check_destination(path, sources) -> None:
 
 
 RENDERED_NOT_EXPORTED = ("a web map service (WMS, WMTS, XYZ tiles, ArcGIS MapServer) is an image drawn on request, "
-                         "not data: it is not exported")
+                         "not data: it is not exported here (EXPORTING of the panel writes a WMS, WMTS or XYZ layer as "
+                         "it draws over the visible map; local_copy keeps it next to the project)")
 
 
 class RasterExportJob:
@@ -159,9 +160,115 @@ class _NoScope:
         return False
 
 
+class WebMapExportJob(RasterExportJob):
+    """A web map (WMS, WMTS, XYZ tiles) written as it draws over the visible map (2026-11-22).
+
+    The grid is the one of its local copy (``adapters/qgis/stream_copy.plan_copy``): the finest level of the service
+    within ``STREAM_COPY.max_pixels``. Built on the main thread (the plan reads the map), :meth:`run` reads the
+    service in a worker thread: from the main thread it starts one and waits for it while the event loop turns.
+    The tiles of OpenStreetMap and Google are refused, as for a local copy. The layer itself does not change.
+    """
+
+    def __init__(self, layer, path: str, fmt: str = 'GTiff', crs=None, compress: str = 'DEFLATE', plan=None) -> None:
+        from ..source_capability_probe import capture_network_manager
+        from ..stream_copy import plan_copy
+        capture_network_manager()  # the tiles QGIS asks in a thread of its own are heard on the main thread
+        self.plan = plan or plan_copy(layer, with_folder=False)
+        if self.plan.refusal:
+            raise ValueError(self.plan.refusal)
+        self.layer_name = layer.name()
+        self.path = path
+        _check_destination(path, export_sources((layer,)))
+        self.fmt = fmt if fmt in RASTER_FORMATS else 'GTiff'
+        self.compress = compress
+        self.layer_crs = layer.crs()
+        self.target_crs = crs if crs is not None and crs.isValid() and crs != layer.crs() else None
+        # Not ``source``: the export task clears that attribute of its jobs when it ends.
+        self.provider_key, self.service_source = layer.providerType(), layer.source()
+        self.pipe_ok = True
+
+    def run(self, feedback=None) -> ExportResult:
+        import threading
+        if threading.current_thread() is threading.main_thread():
+            return _off_main_thread(lambda: self.run(feedback))
+        from osgeo import gdal
+        from ....core.domain.stream_copy import MAX_PIXELS
+        from .raster_materialization import materialize_web_map
+        from .target_appliers import _ProviderLayer
+        path, plan = self.path, self.plan
+        os.makedirs(os.path.dirname(os.path.abspath(path)) or '.', exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix='.filtermate-export-', dir=os.path.dirname(os.path.abspath(path))) as folder:
+            staging = os.path.join(folder, 'staging.tif')
+            base = _ProviderLayer.open(self.provider_key, self.service_source, self.layer_name)
+            if not base.isValid():
+                return ExportResult(False, path, 'the web map service could not be opened')
+            try:
+                _written, unread = materialize_web_map(
+                    base, plan.area, plan.columns, plan.rows,
+                    lambda: feedback is not None and feedback.isCanceled(),
+                    timeout=plan.limits.timeout_seconds, destination=staging, max_budget=MAX_PIXELS)
+            except (RuntimeError, ValueError) as exc:
+                canceled = feedback is not None and feedback.isCanceled()
+                return ExportResult(False, path, 'canceled' if canceled else str(exc))
+            finally:
+                base = None
+            manager = getattr(gdal, 'ExceptionMgr', None)
+            scope = manager(useExceptions=True) if manager is not None else _NoScope()
+            try:
+                with scope:
+                    result = self._finish(gdal, staging, path)
+            except Exception as exc:
+                _remove(staging)
+                return ExportResult(False, path, str(exc))
+        if result.success:
+            note = (f"the visible map, {plan.columns} x {plan.rows} pixels of {plan.resolution:.3g} map units: a still "
+                    "image of the web map")
+            if unread:
+                note += f"; {unread} request(s) of the service were not answered, the image may have holes"
+            return ExportResult(True, result.path, note)
+        return result
+
+
+def _off_main_thread(work):
+    """What ``work()`` returns, run in a worker thread while the event loop of the main thread turns."""
+    from qgis.PyQt.QtCore import QEventLoop, QThread, QTimer
+    outcome = {}
+
+    class Worker(QThread):
+        def run(self):  # noqa: D102 - the thread
+            try:
+                outcome['result'] = work()
+            except BaseException as exc:  # noqa: BLE001 - raised again on the main thread
+                outcome['error'] = exc
+
+    worker = Worker()
+    loop = QEventLoop()
+    timer = QTimer()
+    timer.setInterval(50)
+    timer.timeout.connect(lambda: loop.quit() if worker.isFinished() else None)
+    try:
+        worker.start()
+        timer.start()
+        loop.exec()
+    finally:
+        timer.stop()
+        worker.wait()
+    if 'error' in outcome:
+        raise outcome['error']
+    return outcome.get('result')
+
+
+def raster_export_job(layer, path: str, fmt: str = 'GTiff', crs=None, compress: str = 'DEFLATE') -> RasterExportJob:
+    """The job that writes ``layer``: a web map as it draws over the visible map, any other raster as it is."""
+    from ..point_cloud_capability import is_captured_target_raster, is_non_analysis_raster
+    if is_non_analysis_raster(layer) and is_captured_target_raster(layer):
+        return WebMapExportJob(layer, path, fmt, crs, compress)
+    return RasterExportJob(layer, path, fmt, crs, compress)
+
+
 def export_raster(layer, path: str, fmt: str = 'GTiff', crs=None, compress: str = 'DEFLATE', feedback=None) -> ExportResult:
     """Synchronous raster export (scripts); the dock uses :class:`CoverageExportTask`."""
-    return RasterExportJob(layer, path, fmt, crs, compress).run(feedback)
+    return raster_export_job(layer, path, fmt, crs, compress).run(feedback)
 
 
 def _remove(path: str) -> None:

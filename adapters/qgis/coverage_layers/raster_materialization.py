@@ -292,7 +292,8 @@ def _has_visible_pixel(path) -> bool:
         dataset = None
 
 
-def materialize_web_map(layer, area, columns, rows, is_canceled=None, timeout=WEB_MAP_TIMEOUT_SECONDS):
+def materialize_web_map(layer, area, columns, rows, is_canceled=None, timeout=WEB_MAP_TIMEOUT_SECONDS,
+                        destination=None, max_budget=WEB_MAP_MAX_BUDGET):
     """Write what a web map draws over ``area`` to a GeoTIFF (red, green, blue, alpha), from a worker only.
 
     2026-11-15. Read in real QGIS 3.22, 3.44 and 4.3: the writer of QGIS gets no error for a tile or a GetMap the
@@ -309,10 +310,13 @@ def materialize_web_map(layer, area, columns, rows, is_canceled=None, timeout=WE
         columns, rows: Size of the capture (``web_map_grid``).
         is_canceled: Cancellation predicate, polled ten times a second.
         timeout: Seconds after which the capture is given up.
+        destination: A file outside the session cache, for a local copy the user keeps (stream_copy): written
+            there, never settled, removed when the capture fails. None: a new path of the session cache.
+        max_budget: Most cells of the capture.
 
     Returns:
-        ``(path, unread)``: protected session path (the caller settles it), and the number of requests the
-        service never answered with an image (0: no hole).
+        ``(path, unread)``: the path (of the session cache: protected, the caller settles it), and the number of
+        requests the service never answered with an image (0: no hole).
 
     Raises:
         RuntimeError: Main thread, cancellation, timeout, failed export, or a service that answered no request.
@@ -329,9 +333,9 @@ def materialize_web_map(layer, area, columns, rows, is_canceled=None, timeout=WE
         raise RuntimeError(_tr('raster capture canceled'))
     if not layer.isValid():
         raise RuntimeError(_tr('raster capture source could not be opened'))
-    if int(columns) < 1 or int(rows) < 1 or int(columns) * int(rows) > WEB_MAP_MAX_BUDGET:
+    if int(columns) < 1 or int(rows) < 1 or int(columns) * int(rows) > int(max_budget):
         raise ValueError(_tr('raster capture requires a positive pixel limit'))
-    path = cache.new_path(layer.name(), '.tif')
+    path = destination or cache.new_path(layer.name(), '.tif')
     feedback = QgsRasterBlockFeedback()
     stop = threading.Event()
     deadline = time.monotonic() + max(1.0, float(timeout))
@@ -420,7 +424,8 @@ def materialize_web_map(layer, area, columns, rows, is_canceled=None, timeout=WE
                 os.remove(path + suffix)
             except OSError:
                 pass  # the cache collector retries files held open by a provider
-        cache.settle([path])
+        if not destination:
+            cache.settle([path])
         raise
     finally:
         stop.set()
