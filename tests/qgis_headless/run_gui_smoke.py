@@ -5741,6 +5741,25 @@ def sizing_armed():
     return getattr(dock()._fm_panels, '_armed', True)
 
 
+def user_drop(holder, act):
+    """``act`` (a move of ``holder``) as a drop with the mouse: the press on its title before, the release after,
+    as the panels see them (a drag with the real pointer blocks the steps: FM_ONLY=mouse does that one)."""
+    panels = dock()._fm_panels
+    on_mouse = getattr(panels, '_on_mouse', None)
+    try:
+        if on_mouse is not None:
+            on_mouse(True, holder)
+    except TypeError:  # a version that does not say which dock was pressed
+        on_mouse(True)
+    act()
+    pump(100)
+    try:
+        if on_mouse is not None:
+            on_mouse(False, holder)
+    except TypeError:
+        on_mouse(False)
+
+
 def sizing_reset():
     d = dock()
     d._fm_panels.attach_all()
@@ -5860,7 +5879,7 @@ def s_sizing_under_layers():
     if layers is None or not layers.isVisible() or panel is None:
         report('SKIP', 'sizing: a panel moved under the Layers panel', f"layers={layers} panel={panel}")
         return None
-    window.splitDockWidget(layers, panel, Qt.Orientation.Vertical)  # as a drop with the mouse under it
+    user_drop(panel, lambda: window.splitDockWidget(layers, panel, Qt.Orientation.Vertical))  # dropped under it
     pump(100)
     if panel in window.tabifiedDockWidgets(layers) or panel.isFloating() or window.dockWidgetArea(panel) != window.dockWidgetArea(layers):
         report('SKIP', 'sizing: a panel moved under the Layers panel', 'it became a tab or floats: not a column')
@@ -5893,7 +5912,7 @@ def s_sizing_beside():
     panels.detach('exploring')
     panels.detach('filtering')
     panel = panels.panel('filtering')
-    window.splitDockWidget(d, panel, Qt.Orientation.Horizontal)  # as a drop with the mouse beside it
+    user_drop(panel, lambda: window.splitDockWidget(d, panel, Qt.Orientation.Horizontal))  # dropped beside it
     pump(100)
     if panel.isFloating() or panel in window.tabifiedDockWidgets(d) or abs(panel.y() - d.y()) > 2:
         report('SKIP', 'sizing: FILTERING beside the dock', f"floating={panel.isFloating()} y={panel.y()} dock={d.y()}")
@@ -6144,7 +6163,7 @@ def s_sizing_width_given_back():
     for _round in range(10):
         panels.detach('filtering')
         panel = panels.panel('filtering')
-        window.splitDockWidget(d, panel, Qt.Orientation.Horizontal)  # as a drop with the mouse beside it
+        user_drop(panel, lambda: window.splitDockWidget(d, panel, Qt.Orientation.Horizontal))  # dropped beside it
         pump(1200)
         beside = (d.width(), panel.width(), abs(panel.y() - d.y()) <= 2 and not panel.isFloating())
         panels.attach('filtering')
@@ -6180,12 +6199,15 @@ def s_sizing_behind_a_tab():
     if panel not in window.tabifiedDockWidgets(layers):
         report('SKIP', 'sizing: a panel behind a tab', 'not tabbed')
         return None
+    tabbed = layers.height()
     panels.resize_soon()  # a change of a setting: every column
     pump(1200)
     after = (layers.width(), layers.height())
     check('sizing: FILTERING behind the tab of Layers is neither measured nor widened: the group keeps its width',
           after[0] == before[0], f"{before} -> {after}, the panel at {panel.geometry().getRect()} "
                                  f"needs {d.FILTERING.minimumSizeHint().width()} px")
+    check('sizing: FILTERING behind the tab of Layers: the group keeps its height', abs(after[1] - tabbed) <= 2,
+          f"{tabbed} -> {after[1]}")
     grab_window('sizing_16_behind_a_tab')
     return None
 
@@ -6231,6 +6253,136 @@ def s_sizing_whole_dock():
         apply_settings({'APP.DOCKWIDGET.UI_PROFILE': profile})
     window.resizeDocks([d], [SIZING['dock_width']], Qt.Orientation.Horizontal)
     pump(900)
+    return None
+
+
+def sizing_left_column(names):
+    """EXPLORING and / or FILTERING out, under Layers in the left area, each put there at once (see above). The
+    panels, or None when they are not one column under Layers."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    layers = window.findChild(QDockWidget, 'Layers')
+    if layers is None or not layers.isVisible():
+        return None
+    above = layers
+    for key in names:
+        panels.detach(key)
+        window.splitDockWidget(above, panels.panel(key), Qt.Orientation.Vertical)
+        above = panels.panel(key)
+    pump(1200)
+    found = [panels.panel(key) for key in names]
+    if any(panel is None or panel.isFloating() or window.tabifiedDockWidgets(panel) for panel in found) \
+            or len(set(found)) != len(found) or window.dockWidgetArea(found[-1]) != window.dockWidgetArea(layers):
+        return None
+    return found
+
+
+def s_sizing_separator_dragged():
+    """F1: Layers beside the dock in the right area. The user drags the edge of the area (no change of structure),
+    then FILTERING goes and comes back: the width the user set stays, nothing is given back over it."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    layers = window.findChild(QDockWidget, 'Layers')
+    if layers is None or not layers.isVisible():
+        report('SKIP', 'sizing: the edge of an area dragged by the user', 'no Layers panel')
+        return None
+    SIZING['layers_state'] = window.saveState()
+    sizing_reset()
+    window.splitDockWidget(d, layers, Qt.Orientation.Horizontal)  # Layers beside the dock, the same top
+    pump(900)
+    panels.detach('filtering')
+    pump(1200)
+    window.resizeDocks([d], [d.width() + 150], Qt.Orientation.Horizontal)  # the user drags the edge of the area
+    pump(600)
+    dragged = (d.width(), layers.width())
+    panels.resize_soon()  # an ordinary pass (a setting changed): not a change of structure
+    pump(900)
+    panels.attach('filtering')
+    pump(1200)
+    after = (d.width(), layers.width())
+    check('sizing: the edge of an area dragged by the user, then a panel back in the dock: the width the user set stays',
+          abs(after[0] - dragged[0]) <= 6 and abs(after[1] - dragged[1]) <= 6, f"{dragged} -> {after}")
+    window.restoreState(SIZING['layers_state'])
+    pump(600)
+    return None
+
+
+def s_sizing_dragged_away():
+    """F2: Layers above EXPLORING and FILTERING in the left area; FILTERING dragged away (floated by a double click
+    on its title): EXPLORING takes its room, Layers keeps its height."""
+    window = iface.mainWindow()
+    layers = window.findChild(QDockWidget, 'Layers')
+    sizing_reset()
+    found = sizing_left_column(['exploring', 'filtering'])
+    if found is None:
+        report('SKIP', 'sizing: a panel dragged out of its column', sizing_state())
+        return None
+    exploring, filtering = found
+    before = (layers.height(), exploring.height(), filtering.height())
+    user_drop(filtering, lambda: filtering.setFloating(True))
+    pump(1500)
+    after = (layers.height(), exploring.height())
+    check('sizing: FILTERING dragged out of its column, EXPLORING takes its room, Layers keeps its height',
+          abs(after[0] - before[0]) <= 4 and after[1] >= before[1] + before[2] - 20,
+          f"Layers, EXPLORING, FILTERING {before} -> {after}")
+    filtering.setFloating(False)
+    pump(600)
+    grab_window('sizing_19_dragged_away')
+    return None
+
+
+def s_sizing_beside_then_below():
+    """F3: FILTERING dropped beside the dock (the area grows), then below it in the same area: the area has its
+    width back."""
+    d = dock()
+    panels = d._fm_panels
+    window = iface.mainWindow()
+    sizing_reset()
+    window.resizeDocks([d], [SIZING['dock_width']], Qt.Orientation.Horizontal)
+    pump(900)
+    start = d.width()
+    panels.detach('filtering')
+    panel = panels.panel('filtering')
+    user_drop(panel, lambda: window.splitDockWidget(d, panel, Qt.Orientation.Horizontal))
+    pump(1200)
+    beside = (d.width(), panel.width(), abs(panel.y() - d.y()) <= 2)
+    user_drop(panel, lambda: window.splitDockWidget(d, panel, Qt.Orientation.Vertical))
+    pump(1500)
+    below = panel.y() > d.y() + 10 and abs(panel.x() - d.x()) <= 2
+    check('sizing: FILTERING beside the dock, then dropped below it: the area has its width back',
+          beside[2] and below and abs(d.width() - start) <= 6, f"start {start}, beside {beside}, below {below}: "
+                                                              f"{d.width()} px")
+    grab_window('sizing_20_beside_then_below')
+    return None
+
+
+def s_sizing_manual_between():
+    """F4: PANEL_SIZING manual, FILTERING closed by its cross meanwhile, then auto again: nothing noted under manual
+    is applied (Layers keeps the height it has)."""
+    window = iface.mainWindow()
+    layers = window.findChild(QDockWidget, 'Layers')
+    if not SIZING['auto']:
+        report('SKIP', 'sizing: manual, a panel closed, auto again', 'no such setting in this version')
+        return None
+    sizing_reset()
+    found = sizing_left_column(['exploring', 'filtering'])
+    if found is None:
+        report('SKIP', 'sizing: manual, a panel closed, auto again', sizing_state())
+        return None
+    exploring, filtering = found
+    apply_settings({'APP.DOCKWIDGET.PANEL_SIZING': 'manual'})
+    pump(600)
+    filtering.close()  # its cross, under manual
+    pump(1200)
+    window.resizeDocks([layers, exploring], [layers.height() + 60, exploring.height() - 60], Qt.Orientation.Vertical)
+    pump(600)
+    kept = layers.height()
+    apply_settings({'APP.DOCKWIDGET.PANEL_SIZING': 'auto'})  # sized again at once, from what is there now
+    pump(1200)
+    check('sizing: manual, a panel closed meanwhile, then auto: no height noted under manual comes back',
+          abs(layers.height() - kept) <= 4, f"Layers {kept} -> {layers.height()}")
     return None
 
 
@@ -6367,7 +6519,9 @@ SIZING_STEPS = [s_section_setup, s_vector_source, s_sizing_setup, s_sizing_filte
                 s_sizing_every_section, s_sizing_grouped, s_sizing_manual, s_sizing_under_layers, s_sizing_back_to_dock,
                 s_sizing_beside, s_sizing_floating, s_sizing_open_chip_again, s_sizing_elsewhere, s_sizing_opened_by_code,
                 s_sizing_short_screen, s_sizing_closed_by_cross, s_sizing_width_given_back, s_sizing_behind_a_tab,
-                s_sizing_whole_dock, s_sizing_alone, s_sizing_restart_docked, s_sizing_restart_floating, s_sizing_end]
+                s_sizing_whole_dock, s_sizing_alone, s_sizing_separator_dragged, s_sizing_dragged_away,
+                s_sizing_beside_then_below, s_sizing_manual_between, s_sizing_restart_docked, s_sizing_restart_floating,
+                s_sizing_end]
 
 
 # --- the two stacks and the rows as 5.1.1 laid them out (FM_ONLY=like511) ---------------------------------------------

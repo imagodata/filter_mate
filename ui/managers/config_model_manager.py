@@ -604,13 +604,14 @@ class ConfigModelManager:
     def _realign_sections(self):
         """FILTERING / EXPORTING shown as the configuration put back says (APP.OPTIONS.<NAME>.enabled)."""
         apply_options = getattr(self.dockwidget, 'apply_section_options', None)
-        if callable(apply_options):
-            apply_options()
+        changed = apply_options() if callable(apply_options) else []
         apply_tools = getattr(self.dockwidget, 'apply_exploring_tools', None)
         if callable(apply_tools):
             apply_tools()  # the tools of the EXPLORING rail, as the configuration put back says
         panels = getattr(self.dockwidget, '_fm_panels', None)
-        if panels is not None:  # the dock and the panels of its sections sized again from what they show now
+        # Sized again only when what they show changed (a section turned on or off, the headers, PANEL_SIZING): the
+        # configuration read again as it was leaves the sizes the user set (SECTION_HEIGHT alone changes no need).
+        if panels is not None and [what for what in (changed or []) if what != 'height']:
             try:
                 panels.resize_soon()
             except Exception as exc:  # the dock went away

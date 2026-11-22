@@ -1119,6 +1119,9 @@ def _apply_panel_sizing(dock: Any, config_data: Any, changed: list) -> list:
         mode = panel_sizing(config_data)
         if dock.property("fm_panel_sizing") not in (None, mode):
             changed.append("sizing")
+            panels = getattr(dock, "_fm_panels", None)
+            if panels is not None:  # heights and widths noted under the other mode are not used
+                panels.forget_sizes()
         dock.setProperty("fm_panel_sizing", mode)
     except Exception as exc:  # the dock went away (RuntimeError): no other change is lost
         logger.debug(f"Panel sizing not followed: {exc}")
