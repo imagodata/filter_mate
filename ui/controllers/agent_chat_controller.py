@@ -169,6 +169,8 @@ class AgentChatController(QObject):
         self._ask_name = ask_name or (lambda title, text, default: self._name_dialog(parent_widget, title, text, default))
         # The calls of the request under way, and the steps of the last request that changed something: a recipe.
         self._request_calls = []
+        self._exploring_offered = False  # the button that opens EXPLORING was put in the thread for this request
+        self._tuning_offered = set()  # the layers whose threshold the model was told to offer to tune, this conversation
         self._layers_before = ()  # the layer ids of the project when the tool under way started
         self._last_steps, self._last_steps_request = [], ""
         self._replaying = False
@@ -1316,7 +1318,26 @@ class AgentChatController(QObject):
         handlers[TURN_ON_OPTIONS] = self._turn_on_options_tool
         handlers[LIST_TABLES] = lambda arguments: self._list_tables_tool(databases, arguments)
         handlers[ADD_TABLE] = lambda arguments: self._add_table_tool(databases, arguments)
+        if "apply_filter" in handlers:
+            handlers["apply_filter"] = self._offering_tuning(handlers["apply_filter"])
         return tools, handlers, active
+
+    def _offering_tuning(self, handler):
+        """apply_filter, its answer holding once per layer and conversation the note that has the model offer a
+        slider or EXPLORING for a threshold (core/agent/exploring_drive.tuning_offer); never when the user turned
+        both ways off in the Tools tab."""
+        from ...core.agent.exploring_drive import tuning_offer
+
+        def run(arguments):
+            result = handler(arguments)
+            layer = str(arguments.get("layer_name") or "")
+            note = tuning_offer(arguments.get("expression"))
+            ways_off = all(self._policy.turned_off(name) for name in (CREATE_WIDGET, "set_exploring"))
+            if note and isinstance(result, dict) and layer not in self._tuning_offered and not ways_off:
+                self._tuning_offered.add(layer)
+                result = dict(result, offer=note)
+            return result
+        return run
 
     @staticmethod
     def _database(databases, arguments) -> str:
@@ -2360,6 +2381,7 @@ class AgentChatController(QObject):
         self._reset_view()
         self._transcript = []
         self._recap_from = 0
+        self._tuning_offered = set()
         self.panel.input.forget()
         self._save_transcript()
 
@@ -2388,6 +2410,7 @@ class AgentChatController(QObject):
             return
         self._last_request = text
         self._request_calls = []
+        self._exploring_offered = False
         self._checkpoint.label = text
         self.panel.clear_input()
         self.panel.show_thread()
@@ -2711,7 +2734,37 @@ class AgentChatController(QObject):
             "set_layer_options": lambda: _tr("Panel options of: {}").format(", ".join(
                 str(item.get("layer", "")) for item in (args.get("layers") or []) if isinstance(item, dict))),
             "set_export_options": lambda: _tr("Export options of the panel"),
+            "set_exploring": lambda: _tr("EXPLORING: {}").format(self._exploring_words(args)),
         }.get(call.name, lambda: call.name.replace("_", " "))()
+
+    @staticmethod
+    def _exploring_words(arguments) -> str:
+        """What a set_exploring call asks, on one line: the layer, +button turned on, −button turned off, the
+        buttons pressed (the short names of the rail, as its setting writes them)."""
+        tools = arguments.get("tools") if isinstance(arguments.get("tools"), dict) else {}
+        press = arguments.get("press") if isinstance(arguments.get("press"), list) else []
+        parts = [str(arguments.get("layer") or "")]
+        parts += [f"+{name}" for name, on in tools.items() if on is True]
+        parts += [f"\u2212{name}" for name, on in tools.items() if on is False]
+        parts += [str(name) for name in press]
+        return one_line(", ".join(part for part in parts if part), 120)
+
+    def _offer_exploring(self, call: ToolCallPart, result: ToolResultPart) -> None:
+        """EXPLORING was driven while the user cannot see it (folded behind the chat they are in): a button of the
+        thread opens it, once per request. Nothing folds the chat by itself."""
+        if call.name != "set_exploring" or result.is_error or self._exploring_offered:
+            return
+        try:
+            seen = json.loads(result.content).get("in_view", True)
+        except (ValueError, AttributeError):
+            return
+        if seen is False:
+            self._exploring_offered = True
+            self.panel.add_link(_tr("Open EXPLORING"), self._open_exploring)
+
+    def _open_exploring(self) -> None:
+        from ...adapters.public_api.exploring_drive import bring_in_view
+        bring_in_view(self._parent_widget)
 
     @staticmethod
     def _renamed_to(tool: str, arguments) -> str:
@@ -2763,6 +2816,7 @@ class AgentChatController(QObject):
             logger.info("Agent tool %s refused: %s", call.name, result.content[:300])
         self.panel.finish_steps(not result.is_error)
         self._log_action(call, result, self._describe(call))
+        self._offer_exploring(call, result)
         made = [] if result.is_error else made_layers(self._layers_before, self._project_layers())
         self._request_calls.append((call.name, call.arguments, result.is_error, self.describe_call(call), made))
         self.panel.set_status(_tr("Thinking…"))

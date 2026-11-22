@@ -582,6 +582,21 @@ class SimulatedProject:
             return {"changed": [dict(item, layer_name=name) for name, item in zip(names, items)],
                     "shown_in_panel": False}
 
+        def set_exploring(args):
+            """EXPLORING as the panel shows it: the layer, and the buttons of its rail turned on (the checks of the
+            rail itself are core/agent/exploring_drive.py, tested on their own)."""
+            state = self.__dict__.setdefault("exploring", {"layer": "", "tools": {}})
+            if args.get("layer"):
+                name, _ = self._layer(str(args["layer"]))
+                if name != state["layer"]:
+                    state.update(layer=name, tools={})
+            if not state["layer"]:
+                raise ToolFailure("EXPLORING shows no layer: name one (layer).")
+            state["tools"].update({str(key): bool(value) for key, value in (args.get("tools") or {}).items()})
+            return {"layer_name": state["layer"], "kind": LAYERS[state["layer"]]["kind"], "in_view": True,
+                    "tools": {key: "on" if value else "off" for key, value in state["tools"].items()},
+                    "changed": sorted(args.get("tools") or {}), "pressed": list(args.get("press") or [])}
+
         def export_options(_):
             return dict(self.export_panel, saved=True)
 
@@ -607,7 +622,7 @@ class SimulatedProject:
             "ask_user": ask_user,
             "agent_options": agent_options, "turn_off_agent_options": turn_off_agent_options,
             "turn_on_agent_options": turn_on_agent_options,
-            "layer_options": layer_options, "set_layer_options": set_layer_options,
+            "layer_options": layer_options, "set_layer_options": set_layer_options, "set_exploring": set_exploring,
             "export_options": export_options, "set_export_options": set_export_options,
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
             "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,

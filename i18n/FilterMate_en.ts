@@ -386,6 +386,11 @@ Run it?</translation>
         <translation>export options of the panel</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="80"/>
+        <source>EXPLORING panel</source>
+        <translation>EXPLORING panel</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
         <source>Show in the configuration: {}</source>
         <translation>Show in the configuration: {}</translation>
@@ -1011,6 +1016,16 @@ Do you agree?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2231"/>
         <source>Panel options of: {}</source>
         <translation>Panel options of: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2716"/>
+        <source>EXPLORING: {}</source>
+        <translation>EXPLORING: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2742"/>
+        <source>Open EXPLORING</source>
+        <translation>Open EXPLORING</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
