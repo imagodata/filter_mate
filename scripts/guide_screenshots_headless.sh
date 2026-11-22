@@ -18,6 +18,7 @@
 #                 is in WAL mode)
 #   FM_IMAGE      Docker image (default fm-video: qgis/qgis:stable + ffmpeg + PDAL; qgis/qgis:stable also works)
 #   FM_GUIDE_UNTIL  a step of guide_screenshots.py: stop after it (one image to retake)
+#   FM_GUIDE_LANG   language of QGIS and of the plugin (default en; fr for the pictures that carry words of the panel)
 #
 # Pitfalls: qgis/qgis:latest shows a tall red message bar (Qt warnings of a debug build); without --user the
 # images belong to root; a new profile needs QGIS4.ini or QGIS stops on its first-run dialog.
@@ -39,7 +40,7 @@ seed_profile() {
         '[qgis]' 'style=fusion' 'toolbarIconSize=24' '' '[authentication]' 'using-generated-random-password=true' '' \
         '[FilterMate]' 'discord_welcome_dismissed=true' 'whats_new_seen=99' \
         "agent\\setup_offered_version=$(sed -n 's/^version=//p' "$REPO/metadata.txt")" '' \
-        '[locale]' 'userLocale=en' > "$dir/QGIS/QGIS4.ini"
+        '[locale]' "userLocale=${FM_GUIDE_LANG:-en}" > "$dir/QGIS/QGIS4.ini"
     cp "$dir/QGIS/QGIS4.ini" "$dir/QGIS/QGIS3.ini"
 }
 
@@ -63,7 +64,7 @@ take() {  # take <run> <script> [docker -e arguments...]
         -v "$WORK:/w" -v "$GPKG_DIR:/bd" -v "$DATA:/data" \
         -e QGIS_PLUGINPATH=/w/plugins -e QT_SCALE_FACTOR=1.5 -e PYTHONDONTWRITEBYTECODE=1 -e FM_PLUGIN_LOADED=1 \
         "$@" "$IMAGE" bash -c \
-        "timeout ${FM_TIMEOUT:-900} dbus-run-session -- xvfb-run -a -s '-screen 0 3200x2000x24' qgis --nologo --noversioncheck --lang en --profiles-path /w/profiles --profile fmguide --code /w/scripts/$script" \
+        "timeout ${FM_TIMEOUT:-900} dbus-run-session -- xvfb-run -a -s '-screen 0 3200x2000x24' qgis --nologo --noversioncheck --lang ${FM_GUIDE_LANG:-en} --profiles-path /w/profiles --profile fmguide --code /w/scripts/$script" \
         > "$WORK/out/$name.stdout.txt" 2>&1 || echo "  $name ended with $?"
     ls "$WORK/out/$name"
 }
@@ -72,7 +73,7 @@ cmd="${1:-}"; shift || true
 case "$cmd" in
     guide)
         take guide guide_screenshots.py -e FM_GUIDE_OUT=/w/out/guide -e FM_GUIDE_GPKG=/bd/31.gpkg \
-            -e FM_GUIDE_UNTIL="${FM_GUIDE_UNTIL:-}" -e FM_GUIDE_EXPORT_DIR=/home/me/Documents/export
+            -e FM_GUIDE_UNTIL="${FM_GUIDE_UNTIL:-}" -e FM_GUIDE_DOCK_WIDTH="${FM_GUIDE_DOCK_WIDTH:-413}" -e FM_GUIDE_EXPORT_DIR=/home/me/Documents/export
         ;;
     tutorial)
         take tutorial guide_tutorial_screenshots.py -e FM_GUIDE_OUT=/w/out/tutorial -e FM_GUIDE_GPKG=/bd/31.gpkg

@@ -65,7 +65,8 @@ import traceback
 from qgis.core import (Qgis, QgsApplication, QgsExpression, QgsExpressionContext, QgsExpressionContextUtils,
                        QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer)
 from qgis.PyQt.QtCore import QPoint, QSettings, Qt, QTimer
-from qgis.PyQt.QtWidgets import QScrollArea
+from qgis.PyQt.QtGui import QPainter, QPixmap
+from qgis.PyQt.QtWidgets import QApplication, QScrollArea
 from qgis.utils import iface
 import qgis.utils
 
@@ -700,6 +701,170 @@ def s_cloud_settled():
 
 
 # -- EXPORTING and Configuration tabs
+
+def save_groups(name, groups, gap=8, fit=False):
+    """The cards ``groups`` of an EXPLORING panel one above the other in one image (a card is rendered whole, scrolled
+    out of view or not), each cut to what it holds: what a sub-section of the guide shows, without the rest of the
+    panel and without the room a card is given beyond its rows."""
+    pixmaps = []
+    for group in groups:
+        if group is None or not group.isVisibleTo(dock()):
+            continue
+        pm = group.grab()
+        ratio = pm.width() / max(group.width(), 1)  # the grab is in device pixels, whatever ratio the pixmap reports
+        if fit:  # a card the panel stretched (BANDS with a single band) is cut to what it holds
+            wanted = min(group.height(), max(group.sizeHint().height(), group.minimumSizeHint().height()) + 4)
+            pm = pm.copy(0, 0, pm.width(), round(wanted * ratio))
+        pm.setDevicePixelRatio(1.0)  # drawn in device pixels below
+        pixmaps.append((pm, round(gap * ratio)))
+    if not pixmaps:
+        check(f'{name}: a card to show', False)
+        return
+    width = max(pm.width() for pm, _ in pixmaps)
+    height = sum(pm.height() for pm, _ in pixmaps) + sum(space for _, space in pixmaps[:-1])
+    canvas = QPixmap(width, height)
+    canvas.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(canvas)
+    y = 0
+    for pm, space in pixmaps:
+        painter.drawPixmap(0, y, pm)
+        y += pm.height() + space
+    painter.end()
+    path = os.path.join(OUT, f'fm5_{name}.png')
+    ok = canvas.save(path, 'PNG')
+    check(f'saved fm5_{name}.png', ok and os.path.getsize(path) > 2000, f'{canvas.width()}x{canvas.height()}')
+
+
+# -- the sub-sections Raster and Point cloud of the guide (20 November 2026): cards of the panels, on the orthophoto
+# (three colour bands) and on the LiDAR square
+def s_ortho_source():
+    if not REAL:
+        return None
+    from qgis.core import QgsRasterLayer
+    ortho = QgsRasterLayer(os.path.join(os.environ['FM5_DATA'], os.environ.get('FM5_ORTHO', 'ortho_rvb.tif')), 'ortho', 'gdal')
+    check('orthophoto loads', ortho.isValid())
+    project.addMapLayer(ortho)
+    dock().comboBox_filtering_current_layer.setLayer(ortho)
+    return switched_to('ortho', coverage_page=True)
+
+
+def s_ortho_shot():
+    """The pipette card opened (the modes of the panel exclude each other: the expression comes in the next step)."""
+    if not REAL:
+        return None
+    panel = coverage()._raster_panel
+    panel._pipette_group.setChecked(True)
+    panel._pipette_group.setCollapsed(False)
+    since = time.time()
+    return lambda: time.time() - since > 2.5
+
+
+def s_ortho_save():
+    if not REAL:
+        return None
+    panel = coverage()._raster_panel
+    print(f'   [raster cards] bands {panel._bands_group.isVisible()}, pipette {panel._pipette_group.isVisible()}', flush=True)
+    save_groups('raster_bands', [panel._bands_group, panel._pipette_group], fit=True)
+    panel._insert_spectral('exg_vegetation')  # the expression of the spectral preset, written in the box
+    panel._expression_histogram.hide()  # empty until the pixels are read: the card shows the expression and its menu
+    since = time.time()
+    return lambda: time.time() - since > 2.5
+
+
+def s_ortho_expression_menu():
+    if not REAL:
+        return None
+    panel = coverage()._raster_panel
+    menu = panel._insert_button.menu()
+    menu.popup(QPoint(0, 0))
+    QApplication.processEvents()
+    menu.move(panel._insert_button.mapToGlobal(QPoint(0, panel._insert_button.height())))
+    STATE['insert_menu'] = menu
+    since = time.time()
+    return lambda: time.time() - since > 1.2
+
+
+def s_ortho_expression_save():
+    if not REAL:
+        return None
+    panel = coverage()._raster_panel
+    group, menu = panel._expression_group, STATE.pop('insert_menu')
+    button = panel._insert_button
+    pm = group.grab()  # laid out again at its own size: the card the guide shows, without the room the panel gave it
+    ratio = pm.width() / max(group.width(), 1)
+    shown = menu.grab()
+    shown.setDevicePixelRatio(1.0)  # drawn in device pixels, as the card
+    overlap = round(8 * ratio)  # the menu opens under the button, on the foot of the card
+    canvas = QPixmap(max(pm.width(), round(button.x() * ratio) + shown.width()), pm.height() + shown.height() - overlap)
+    canvas.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(canvas)
+    pm.setDevicePixelRatio(1.0)
+    painter.drawPixmap(0, 0, pm)
+    painter.drawPixmap(round(button.x() * ratio), pm.height() - overlap, shown)
+    painter.end()
+    ok = canvas.save(os.path.join(OUT, 'fm5_raster_expression.png'), 'PNG')
+    check('saved fm5_raster_expression.png', ok, f'{canvas.width()}x{canvas.height()}')
+    menu.close()
+    project.removeMapLayer(layer('ortho').id())
+    dock().comboBox_filtering_current_layer.setLayer(layer(DS['vector']))
+    return switched_to(DS['vector'], coverage_page=False)
+
+
+def s_cloud_cards_source():
+    if not has_point_clouds():
+        return None
+    dock().comboBox_filtering_current_layer.setLayer(layer(DS['cloud']))
+    return switched_to(DS['cloud'], coverage_page=True)
+
+
+def s_cloud_classes():
+    """The classes of the vegetation and of the buildings: the groups of the panel exclude each other (classes,
+    attributes, expression), so the attributes come in the next step."""
+    if not has_point_clouds():
+        return None
+    panel = coverage()._pc_panel
+    state = dict(panel.state())
+    state.update({'classes_enabled': True, 'classes': [3, 4, 5, 6], 'checked_classes': [3, 4, 5, 6], 'ranges_enabled': False,
+                  'hag_enabled': False})
+    panel.restore_state(state)
+    panel._classes_group.setChecked(True)
+    panel._classes_group.setCollapsed(False)
+    since = time.time()
+    return lambda: time.time() - since > 2.5
+
+
+def s_cloud_classes_save():
+    if not has_point_clouds():
+        return None
+    save_groups('pointcloud_classes', [coverage()._pc_panel._classes_group])
+    return None
+
+
+def s_cloud_cards():
+    """An intensity range, and the height above the DTM, which is always combined with the active group."""
+    if not has_point_clouds():
+        return None
+    panel = coverage()._pc_panel
+    state = dict(panel.state())
+    state.update({'classes_enabled': False, 'ranges_enabled': True, 'hag_enabled': True, 'hag_min': 7.0,
+                  'hag_layer_id': layer(DS['raster']).id(),
+                  'conditions': [{'attribute': 'Intensity', 'op': 'between', 'low': 20.0, 'high': 140.0, 'join': 'and'}]})
+    panel.restore_state(state)
+    for group in (panel._ranges_group, panel._hag_group):
+        group.setCollapsed(False)
+    since = time.time()
+    return lambda: time.time() - since > 2.5
+
+
+def s_cloud_cards_save():
+    if not has_point_clouds():
+        return None
+    panel = coverage()._pc_panel
+    save_groups('pointcloud_conditions', [panel._ranges_group, panel._hag_group])
+    dock().comboBox_filtering_current_layer.setLayer(layer(DS['vector']))
+    return switched_to(DS['vector'], coverage_page=False)
+
+
 def s_back_to_vector():
     dock().comboBox_filtering_current_layer.setLayer(layer(DS['vector']))
     return switched_to(DS['vector'], coverage_page=False)
@@ -776,6 +941,8 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready,
          s_raster_filter, s_raster_to_vector, s_raster_save,
          s_raster_settled,
          s_cloud_source, s_cloud_select, s_cloud_shot, s_cloud_to_vector, s_cloud_save, s_cloud_settled,
+         s_ortho_source, s_ortho_shot, s_ortho_save, s_ortho_expression_menu, s_ortho_expression_save,
+         s_cloud_cards_source, s_cloud_classes, s_cloud_classes_save, s_cloud_cards, s_cloud_cards_save,
          s_back_to_vector, s_export_tab, s_export_shot, s_config_tab, s_config_shot, s_finish]
 
 

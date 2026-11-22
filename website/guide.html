@@ -344,6 +344,11 @@
     <p>
         Each layer remembers its own exploring settings in the project, so switching layers and coming back restores your selection.
     </p>
+    <p>From the next release, right-click the rail to choose the buttons it shows: <em>More</em> always stays, so the rail is never empty. The choice is kept for each kind of layer, and asked by <em>Set up FilterMate</em> too.</p>
+    <figure class="narrow">
+        <img src="img/guide/exploring-tools-menu.png" alt="The menu of the EXPLORING rail: one check box for each button, More tools dimmed" loading="lazy" width="552" height="874">
+        <figcaption>Right-click the rail: one check box for each button of this kind of layer. A vector layer, a raster and a point cloud each keep their own choice.</figcaption>
+    </figure>
 </section>
 
 <!-- 5 ------------------------------------------------------------------ -->
@@ -376,6 +381,10 @@
         <tr><td><strong>Buffer type</strong></td><td>Style and segments</td><td>End-cap style (<em>Round</em>, <em>Flat</em>, <em>Square</em>) and the number of segments per quarter circle (default 5). Fewer segments are faster on very complex geometries.</td></tr>
     </table>
     </div>
+    <figure class="narrow">
+        <img src="img/guide/filtering-rows.png" alt="The six rows of the Filtering tab with their rail buttons on: source layer, layers to filter, combine operators, predicates, buffer value and buffer type" loading="lazy" width="552" height="417">
+        <figcaption>The six rows, each switched on by its button in the rail: source layer, layers to filter, combine operators, predicates, buffer value and type.</figcaption>
+    </figure>
 
     <h3>The eight predicates</h3>
     <div class="table-wrap">
@@ -391,6 +400,10 @@
         <tr><td><strong>Disjoint</strong></td><td>it has no point in common with the source.</td><td>Everything <em>outside</em> a zone. Combine with a buffer for exclusion rings.</td></tr>
     </table>
     </div>
+    <figure class="narrow">
+        <img src="img/guide/filtering-predicates.png" alt="The list of predicates dropped down, with Intersect, Contain and Are within ticked" loading="lazy" width="552" height="537">
+        <figcaption>The list of the eight predicates, three ticked: a target is kept when it meets any of them.</figcaption>
+    </figure>
 
     <h3>Buffers</h3>
     <ul>
@@ -399,6 +412,14 @@
         <li><strong>Expression buffer</strong>: the distance is evaluated per source feature, so a regulatory distance can come from an attribute.</li>
         <li>Distances are always in <strong>metres</strong>. Layers in a geographic CRS (degrees) are reprojected on the fly.</li>
     </ul>
+    <figure class="narrow">
+        <img src="img/guide/filtering-buffers.png" alt="The buffer row with the end-cap style list open: Round, Flat, Square" loading="lazy" width="552" height="500">
+        <figcaption>The end-cap style of the buffer: Round, Flat or Square, and the number of segments beside it.</figcaption>
+    </figure>
+    <figure class="narrow">
+        <img src="img/guide/filtering-buffer-expression.png" alt="The menu of the small arrow beside the buffer value, with an expression that gives the distance" loading="lazy" width="552" height="480">
+        <figcaption>The small arrow beside the value switches the distance to an expression, evaluated for each source feature; the value box is then dimmed.</figcaption>
+    </figure>
 
     <h3>Centroids</h3>
     <p>
@@ -406,6 +427,10 @@
         With very detailed polygons this can make a cascade several times faster, at the cost of exactness on the borders. FilterMate
         keeps the spatial index usable in both cases.
     </p>
+    <figure class="narrow">
+        <img src="img/guide/filtering-centroids.png" alt="The centroid box beside the source layer, and the list of the target layers with a centroid toggle on one of them" loading="lazy" width="552" height="417">
+        <figcaption>The box beside the source layer, and in the list of targets the toggle to the right of each layer: the layers that are tested by their centroids.</figcaption>
+    </figure>
 </section>
 
 <!-- 6 ------------------------------------------------------------------ -->
@@ -586,6 +611,10 @@ AND ST_Intersects("geom",
     <div class="callout tip">
         <strong>Large exports</strong> Layers above a few thousand features are streamed in chunks, so memory stays flat and the progress bar is accurate. Cancelling cleans up partial files.
     </div>
+    <figure class="medium">
+        <img src="img/guide/export-gpkg-recap.png" alt="The recap dialog before a GeoPackage export: the layers in their groups, and the box to preserve the group structure" loading="lazy" width="810" height="495">
+        <figcaption>The recap before the export: the layers in the groups of the project, and the box that keeps the groups in the file.</figcaption>
+    </figure>
 </section>
 
 <!-- 10 ----------------------------------------------------------------- -->
@@ -753,6 +782,14 @@ processing.run("filtermate:batch_filter", {
         <li><strong>Value range</strong>: drag the handles of the histogram, on one band or on every colour band at once; the quantity can be the value itself or, from a DTM, the <strong>slope</strong> (degrees or %), <strong>aspect</strong>, <strong>hillshade</strong> or <strong>roughness</strong>. The Select button (or the preview box) hides the other pixels on the map.</li>
         <li>A raster calculator <strong>expression</strong>, with an Insert menu for the band references and the spectral presets allowed by the roles: NDVI vegetation, NDVI bare soil, NDWI water, ExG vegetation.</li>
     </ul>
+    <figure class="narrow">
+        <img src="img/guide/fm5_raster_bands.png" alt="The BANDS and PIPETTE cards of an orthophoto: three colour bands, and the pipette set to similar pixels with a tolerance" loading="lazy" width="528" height="538">
+        <figcaption>An orthophoto: one row for each band with its colour role, and the pipette with its three targets and its tolerance.</figcaption>
+    </figure>
+    <figure class="narrow">
+        <img src="img/guide/fm5_raster_expression.png" alt="The RASTER EXPRESSION card with the excess green expression and the Insert menu: bands, spectral indexes, current range" loading="lazy" width="528" height="425">
+        <figcaption>The raster calculator: the Insert menu writes a band reference or a spectral preset; a pixel is kept where the expression is not 0.</figcaption>
+    </figure>
     <h3>Point cloud</h3>
     <ul>
         <li>ASPRS and LiDAR HD <strong>classes</strong> with presets (ground, vegetation, buildings, above ground, water, without noise).</li>
@@ -762,6 +799,14 @@ processing.run("filtermate:batch_filter", {
         <li>On the rail: the Identify button picks a <strong>class</strong>, the <strong>value pipette</strong> writes a condition around the picked value of the chosen attribute (Ctrl+click adds an OR), and the <strong>zone</strong> tool draws a rectangle, polygon, freehand shape or circle that cuts the footprint of the source.</li>
         <li>The <strong>object detector</strong> of the rail selects the object under the click (the cluster of points of its class: a building, a tree) or, with a right click on the button, every object of the cloud like it: area within chosen ratios of the clicked objects and, with <em>same shape</em> (on by default), compactness within the same ratios, so a hedge of the area of a tree is not taken for a tree.</li>
     </ul>
+    <figure class="narrow">
+        <img src="img/guide/fm5_pointcloud_classes.png" alt="The CLASSES card of a LiDAR HD cloud with the vegetation and building classes ticked" loading="lazy" width="528" height="401">
+        <figcaption>The classes of the cloud, with their colours: the ones ticked are kept.</figcaption>
+    </figure>
+    <figure class="narrow">
+        <img src="img/guide/fm5_pointcloud_conditions.png" alt="The ATTRIBUTES card with an intensity range, and the HEIGHT / DTM card at 7 m above the DTM" loading="lazy" width="528" height="589">
+        <figcaption>An attribute range, with + Condition to chain more, and the height above a DTM, always combined with the active group.</figcaption>
+    </figure>
     <h3 id="sam">Objects drawn by SAM <small>(5.1, experimental)</small></h3>
     <p>
         The two object targets of the pipette can use SAM 2.1 tiny, a segmentation model that runs on your computer, on the CPU. <em>Clicked object</em> draws the object under the click.
@@ -969,6 +1014,14 @@ processing.run("filtermate:batch_filter", {
         <img src="img/guide/agent-chat.png" alt="AGENT open above the folded EXPLORING section: two requests, each with a filter card that gives the features kept" loading="lazy" width="360" height="720">
         <figcaption>Two requests and their cards: each filter names its layers and gives the features it kept; <em>Undo</em> on the last card takes it back. AGENT shares the upper stack with EXPLORING, folded here.</figcaption>
     </figure>
+    <figure class="narrow">
+        <img src="img/guide/agent-welcome.png" alt="The welcome of AGENT with a local model chosen: four requests to try, drawn at random" loading="lazy" width="570" height="1074">
+        <figcaption>The welcome: four requests to try, one about your layers and the others each from another source. A click puts the request in the input line. Each new conversation draws other ones.</figcaption>
+    </figure>
+    <figure class="narrow">
+        <img src="img/guide/agent-menu.png" alt="The menu of the ⋯ button of AGENT, with its Feedback entries opened beside it" loading="lazy" width="609" height="600">
+        <figcaption>The ⋯ menu: the history, the recipes, a new conversation, the sources and the model; Feedback opens the forms of the site, and the welcome carries a link to become a tester of the new features.</figcaption>
+    </figure>
 
     <h3>It asks when the choice is yours <small>(5.1.1)</small></h3>
     <p>
@@ -1000,6 +1053,10 @@ processing.run("filtermate:batch_filter", {
         A team can write its own instructions for the agent (how it names layers, which sources to use, the steps of a delivery) as a skill: a folder holding a <code>SKILL.md</code>, in <code>FilterMate/skills</code> of your QGIS profile or in <code>filtermate_skills</code> next to a project.
         Before the agent follows one for the first time, you read all of it and allow it, and you are asked again when it changes. A skill gives the agent no right: every change stays asked as your settings say.
     </p>
+    <figure class="medium">
+        <img src="img/guide/agent-skill.png" alt="The dialog that asks before the agent follows a skill: its whole text, and Yes or No" loading="lazy" width="720" height="340">
+        <figcaption>Before the agent follows a skill for the first time: all of it is shown, and No is the default.</figcaption>
+    </figure>
 
     <h3>Filters apply at once, and each step can be undone</h3>
     <ul>
@@ -1021,6 +1078,10 @@ processing.run("filtermate:batch_filter", {
         <li>A layer is added only from a plain data file, a public https address or a service listed by a source you ticked. The agent cannot give QGIS a provider string of its own, a <code>PG:</code> or a <code>/vsi</code> path.</li>
         <li>A bench of 39 requests in French and English, on a simulated project, scored 39/39 with Claude Haiku 5.5 on 2026-11-10.</li>
     </ul>
+    <figure class="medium">
+        <img src="img/guide/agent-autonomy.png" alt="The Autonomy tab of the AGENT settings: Advisor, Careful, Standard, Autonomous, and the Expert box" loading="lazy" width="712" height="440">
+        <figcaption>The Autonomy tab: how far the agent goes alone. Standard asks before what cannot be undone.</figcaption>
+    </figure>
 
     <h3>Sources, ticked one by one</h3>
     <p>In the <em>Sources</em> tab of the settings, nothing is ticked at first. In the chat, only what is ticked can be used.</p>
@@ -1035,6 +1096,10 @@ processing.run("filtermate:batch_filter", {
         Any other file is copied to the <code>filtermate/open_data</code> folder of your QGIS profile first, within 512 MB and 3 minutes, without freezing the interface; an archive that would unpack to more than 2 GB is refused.
         Each failure says its cause: the status of the server, a web page, a file too large, too slow or cut, an archive with no layer.
     </p>
+    <figure class="medium">
+        <img src="img/guide/agent-sources.png" alt="The Sources tab of the AGENT settings: open data portals, imagery and basemaps, with data.gouv.fr, the IGN WFS and Earth Search ticked" loading="lazy" width="712" height="660">
+        <figcaption>The Sources tab: nothing is ticked at first; here data.gouv.fr, the IGN WFS and the Sentinel-2 scenes of Earth Search are.</figcaption>
+    </figure>
 
     <h3>What goes to the model</h3>
     <p>With each request, the provider you chose receives your sentence, the names of your layers and fields, the results of the tools it calls, and the state of the project:</p>
@@ -1060,6 +1125,10 @@ processing.run("filtermate:batch_filter", {
         <li>No Python package is needed. The stdio server described in <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener">docs/AUTOMATION.md</a> stays available.</li>
     </ul>
     <p>Developer notes: <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AGENT_MODE.md" target="_blank" rel="noopener">docs/AGENT_MODE.md</a>.</p>
+    <figure class="medium">
+        <img src="img/guide/agent-mcp.png" alt="The Other applications tab: the MCP server turned on, its port and its address, and the buttons that copy the configuration" loading="lazy" width="712" height="270">
+        <figcaption>The Other applications tab: the server is off until it is ticked; the buttons copy the configuration with the access token.</figcaption>
+    </figure>
 </section>
 
 <!-- 15 ----------------------------------------------------------------- -->
