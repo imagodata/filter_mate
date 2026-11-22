@@ -55,6 +55,11 @@ from contextlib import closing
 from typing import Any, Optional, Tuple
 from urllib.request import pathname2url
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger(__name__)
 
 TABLE_BUDGET = 0.25  # seconds of their own that counting a whole table may take, apart from COUNT_BUDGET
@@ -335,7 +340,7 @@ def _known(count: Any) -> Optional[int]:
 
 
 def _is_geopackage(layer: Any) -> bool:
-    if (layer.providerType() or '').lower() != 'ogr':
+    if (provider_key_of(layer) or '').lower() != 'ogr':
         return False
     provider = layer.dataProvider()
     return provider is not None and (provider.storageType() or '').upper() == 'GPKG'

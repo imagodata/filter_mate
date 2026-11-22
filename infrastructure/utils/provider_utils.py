@@ -19,6 +19,11 @@ except ImportError:
 # v4.1.5: Import canonical ProviderType from domain layer
 from ...core.domain.filter_expression import ProviderType
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 # Mapping from QGIS provider names to our enum
 _PROVIDER_MAP: Dict[str, ProviderType] = {
@@ -74,7 +79,7 @@ def detect_provider_type(layer) -> ProviderType:
     try:
         if not layer.isValid():
             return ProviderType.UNKNOWN
-        qgis_provider = layer.providerType().lower()
+        qgis_provider = provider_key_of(layer).lower()
     except RuntimeError:
         # Layer C++ object deleted
         return ProviderType.UNKNOWN

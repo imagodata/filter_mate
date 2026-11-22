@@ -67,6 +67,11 @@ logger = logging.getLogger('FilterMate.ConnectionPool')
 from .postgresql_support import POSTGRESQL_AVAILABLE
 from .pg_connect import pg_connect_with_fallback
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 PG_CONNECT_TIMEOUT_SECONDS = 15  # PERF 2026-09-12: bound the TCP connect of pooled connections
 _POOL_IDENTITY_SECRET = secrets.token_bytes(32)
@@ -866,7 +871,7 @@ def get_pooled_connection_from_layer(layer) -> Tuple[Optional[Any], Optional[Any
     if not POSTGRESQL_AVAILABLE:
         return None, None
 
-    if layer.providerType() != 'postgres':
+    if provider_key_of(layer) != 'postgres':
         return None, None
 
     from qgis.core import QgsDataSourceUri, QgsApplication, QgsAuthMethodConfig

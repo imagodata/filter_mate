@@ -18,6 +18,11 @@ from ...core.ports.backend_port import BackendPort
 from ...core.domain.filter_expression import ProviderType
 from ...core.domain.layer_info import LayerInfo
 
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of
+
 if TYPE_CHECKING:
     from ...infrastructure.di.container import Container
 
@@ -218,18 +223,18 @@ class BackendFactory:
             provider_type = provider_type_or_layer_info
 
             if force_ogr:
-                logger.debug(f"🔄 Force OGR mode: Returning OGR backend for '{layer.name() if layer else 'unknown'}' (bypassing auto-selection)")
+                logger.debug(f"🔄 Force OGR mode: Returning OGR backend for '{name_of(layer) if layer else 'unknown'}' (bypassing auto-selection)")
                 return OGRExpressionBuilder(task_params or {})
 
             # Check for forced backend in task_params
             forced_backends = (task_params or {}).get('forced_backends', {})
-            forced_backend = forced_backends.get(layer.id()) if layer and forced_backends else None
+            forced_backend = forced_backends.get(id_of(layer)) if layer and forced_backends else None
 
             if forced_backend:
-                logger.debug(f"🔒 Using forced backend '{forced_backend.upper()}' for layer '{layer.name() if layer else 'unknown'}'")
+                logger.debug(f"🔒 Using forced backend '{forced_backend.upper()}' for layer '{name_of(layer) if layer else 'unknown'}'")
                 provider_type = forced_backend
 
-            logger.debug(f"🔧 BackendFactory.get_backend() called for '{layer.name() if layer else 'unknown'}'")
+            logger.debug(f"🔧 BackendFactory.get_backend() called for '{name_of(layer) if layer else 'unknown'}'")
             logger.debug(f"   → provider_type (effective): '{provider_type}'")
 
             # v4.2.0: ALWAYS use LegacyAdapters for hexagonal architecture support
@@ -391,7 +396,7 @@ class BackendFactory:
         for layer in layers:
             if layer is None:
                 continue
-            provider_type = layer.providerType() if hasattr(layer, 'providerType') else None
+            provider_type = provider_key_of(layer) if hasattr(layer, 'providerType') else None
             if provider_type != 'postgres':
                 return False
 

@@ -30,6 +30,11 @@ from .mv_manager import MaterializedViewManager, MVConfig, create_mv_manager
 from .optimizer import QueryOptimizer, create_optimizer
 from .cleanup import create_cleanup_service
 
+try:
+    from ....filtermate_core.domain.layer_facts import id_of, name_of, source_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of, source_of
+
 logger = logging.getLogger('FilterMate.Backend.PostgreSQL')
 
 
@@ -316,7 +321,7 @@ class PostgreSQLBackend(BackendPort):
             # Source 3: Layer fallback
             if conn is None and layer:
                 try:
-                    conn = self._get_connection_from_layer(layer.id())
+                    conn = self._get_connection_from_layer(id_of(layer))
                     if conn:
                         conn_source = "layer"
                         logger.debug("[PostgreSQL] MV: Connection from layer: OK")
@@ -326,7 +331,7 @@ class PostgreSQLBackend(BackendPort):
             if conn is None:
                 logger.error("[PostgreSQL] No connection available for MV creation")
                 logger.error("[PostgreSQL] → Tried: pool, task_parameters, layer - all failed")
-                logger.error(f"[PostgreSQL] → Layer: {layer.name() if layer else 'None'}")
+                logger.error(f"[PostgreSQL] → Layer: {name_of(layer) if layer else 'None'}")
                 logger.error(f"[PostgreSQL] → Pool: {self._pool is not None}")
                 logger.error(f"[PostgreSQL] → task_parameters keys: {list(self._task_parameters.keys()) if self._task_parameters else 'None'}")
                 return None
@@ -444,7 +449,7 @@ class PostgreSQLBackend(BackendPort):
             return None, None
 
         try:
-            source = layer.source()
+            source = source_of(layer)
             from qgis.core import QgsDataSourceUri
             uri = QgsDataSourceUri(source)
             table = uri.table()

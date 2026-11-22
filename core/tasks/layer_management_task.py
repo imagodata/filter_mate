@@ -73,9 +73,9 @@ except ImportError:
     # Fallback definitions
     def get_source_table_name(layer):
         try:
-            return layer.source().split('table=')[1].split(' ')[0].strip('"')
+            return source_of(layer).split('table=')[1].split(' ')[0].strip('"')
         except (IndexError, AttributeError, TypeError):
-            return layer.name()  # Fallback to layer name
+            return name_of(layer)  # Fallback to layer name
 
     def geometry_type_to_string(geom_type):
         return str(geom_type)
@@ -176,6 +176,11 @@ except ImportError:
     def ensure_raster_layer_properties(layer_props, template):
         """Nothing to complete without the domain module."""
         return False
+
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
 
 
 class LayersManagementEngineTask(QgsTask):
@@ -289,6 +294,14 @@ class LayersManagementEngineTask(QgsTask):
             from ...infrastructure.utils.processing_context import capture_processing_settings
             capture_processing_settings()
         except ImportError:  # test doubles of the plugin packages
+            pass
+        # The provider, the source, the id and the name of the layers, read here on the main thread
+        # (2026-11-20): the worker asks them to core.domain.layer_facts, not to the layers
+        self._layer_facts = None
+        try:
+            from ...infrastructure.utils.layer_facts import capture_layer_facts
+            self._layer_facts = capture_layer_facts((task_parameters.get("task") or {}).get("layers") or ())
+        except Exception:  # nosec B110 - the worker then reads the layers themselves, as before
             pass
 
     def _ensure_db_directory_exists(self):
@@ -406,7 +419,7 @@ class LayersManagementEngineTask(QgsTask):
     def _layer_label(layer):
         """A layer's name for the log (an id string stands for itself)."""
         try:
-            return layer if isinstance(layer, str) else layer.name()
+            return layer if isinstance(layer, str) else name_of(layer)
         except (AttributeError, RuntimeError):
             return '?'
 
@@ -456,12 +469,12 @@ class LayersManagementEngineTask(QgsTask):
             if self.task_action == 'add_layers':
                 if not isinstance(layer, filterable_types):
                     done['other_type'].append(self._layer_label(layer))
-                elif layer.id() in self.project_layers.keys():
+                elif id_of(layer) in self.project_layers.keys():
                     done['known'].append(self._layer_label(layer))
                 else:
                     result = self.add_project_layer(layer)
-                    if layer.id() in self.project_layers:
-                        self.changed_layer_ids.append(layer.id())
+                    if id_of(layer) in self.project_layers:
+                        self.changed_layer_ids.append(id_of(layer))
                         done['registered'].append(self._layer_label(layer))
                     else:
                         done['dropped'].append(self._layer_label(layer))
@@ -473,7 +486,7 @@ class LayersManagementEngineTask(QgsTask):
                 # Ids (QGIS layersWillBeRemoved) or layer objects of any type (a raster / point cloud
                 # kind switched off: no longer a filterable type). Until 5.0 no id ever matched the
                 # isinstance check, so removed layers stayed registered with their properties.
-                layer_id = layer if isinstance(layer, str) else (layer.id() if hasattr(layer, 'id') else None)
+                layer_id = layer if isinstance(layer, str) else (id_of(layer) if hasattr(layer, 'id') else None)
                 if layer_id is not None:
                     # Even when absent from this task's copy: an add_layers running meanwhile may
                     # register it, and the layer is leaving the project (or its kind turned off).
@@ -509,7 +522,7 @@ class LayersManagementEngineTask(QgsTask):
         Returns:
             dict: Dictionary with 'infos', 'exploring', 'filtering' keys, or empty dict if not found
         """
-        spatialite_results = self.select_properties_from_spatialite(layer.id())
+        spatialite_results = self.select_properties_from_spatialite(id_of(layer))
         expected_count = self._properties_count()
 
         if not spatialite_results:
@@ -531,7 +544,7 @@ class LayersManagementEngineTask(QgsTask):
 
                 # THREAD SAFETY (v2.3.10): Queue for main thread execution
                 variable_key = f"filterMate_{property[0]}_{property[1]}"
-                self._deferred_layer_variables.append((layer.id(), variable_key, value_typped))
+                self._deferred_layer_variables.append((id_of(layer), variable_key, value_typped))
 
         # If property count has changed, update it
         actual_count = (
@@ -540,7 +553,7 @@ class LayersManagementEngineTask(QgsTask):
             len(existing_layer_variables.get("filtering", {}))
         )
         if actual_count > 0 and actual_count != expected_count:
-            logger.debug(f"Property count changed from {expected_count} to {actual_count} for layer {layer.id()}")
+            logger.debug(f"Property count changed from {expected_count} to {actual_count} for layer {id_of(layer)}")
             self._layer_properties_count = actual_count
 
         return existing_layer_variables
@@ -556,20 +569,20 @@ class LayersManagementEngineTask(QgsTask):
         (deferred to the main thread) and in the FilterMate database.
         """
         try:
-            if layer.providerType() not in ('postgres', 'spatialite'):
+            if provider_key_of(layer) not in ('postgres', 'spatialite'):
                 return
             from qgis.core import QgsDataSourceUri
-            detected = QgsDataSourceUri(layer.source()).geometryColumn()
+            detected = QgsDataSourceUri(source_of(layer)).geometryColumn()
         except (RuntimeError, AttributeError, TypeError):
             return
         stored = infos.get("layer_geometry_field")
         if not detected or not stored or stored in ('NULL', 'None') or stored == detected:
             return
         logger.info(
-            f"Geometry column of layer {layer.name()} corrected once: stored='{stored}', actual='{detected}'"
+            f"Geometry column of layer {name_of(layer)} corrected once: stored='{stored}', actual='{detected}'"
         )
         infos["layer_geometry_field"] = detected
-        self._deferred_layer_variables.append((layer.id(), "filterMate_infos_layer_geometry_field", detected))
+        self._deferred_layer_variables.append((id_of(layer), "filterMate_infos_layer_geometry_field", detected))
         try:
             with self._safe_spatialite_connect() as conn:
                 cur = conn.cursor()
@@ -578,12 +591,12 @@ class LayersManagementEngineTask(QgsTask):
                        SET meta_value = ?, _updated_at = datetime()
                        WHERE fk_project = ? AND layer_id = ?
                        AND meta_type = 'infos' AND meta_key = 'layer_geometry_field'""",
-                    (detected, str(self.project_uuid), layer.id())
+                    (detected, str(self.project_uuid), id_of(layer))
                 )
                 conn.commit()
                 cur.close()
         except (OSError, RuntimeError) as e:
-            logger.warning(f"Could not persist the geometry column of {layer.name()}: {e}")
+            logger.warning(f"Could not persist the geometry column of {name_of(layer)}: {e}")
 
     def _migrate_legacy_geometry_field(self, layer_variables, layer):
         """
@@ -607,7 +620,7 @@ class LayersManagementEngineTask(QgsTask):
         if "geometry_field" in infos and "layer_geometry_field" not in infos:
             infos["layer_geometry_field"] = infos["geometry_field"]
             del infos["geometry_field"]
-            logger.info(f"Migrated geometry_field to layer_geometry_field for layer {layer.id()}")
+            logger.info(f"Migrated geometry_field to layer_geometry_field for layer {id_of(layer)}")
 
         self._persist_verified_geometry_field(infos, layer)
 
@@ -621,12 +634,12 @@ class LayersManagementEngineTask(QgsTask):
         for prop_name, default_value in exploring_booleans.items():
             if prop_name not in exploring:
                 exploring[prop_name] = default_value
-                logger.info(f"Added missing '{prop_name}' property for layer {layer.id()}")
+                logger.info(f"Added missing '{prop_name}' property for layer {id_of(layer)}")
 
         # Ensure exploring groupbox property exists
         if "current_exploring_groupbox" not in exploring:
             exploring["current_exploring_groupbox"] = "single_selection"
-            logger.info(f"Added missing 'current_exploring_groupbox' property for layer {layer.id()}")
+            logger.info(f"Added missing 'current_exploring_groupbox' property for layer {id_of(layer)}")
 
         # Ensure all expression properties exist with primary key as default
         # FIX v4.1 Simon 2026-01-16: Garantir un fallback robuste si primary_key est vide
@@ -646,18 +659,18 @@ class LayersManagementEngineTask(QgsTask):
                 fields = layer.fields()
                 if fields.count() > 0:
                     fallback_field = fields[0].name()
-                    logger.info(f"No primary key, using first field '{fallback_field}' for layer {layer.id()}")
+                    logger.info(f"No primary key, using first field '{fallback_field}' for layer {id_of(layer)}")
                 else:
                     fallback_field = "$id"
-                    logger.warning(f"Layer {layer.id()} has no fields, using $id as fallback")
+                    logger.warning(f"Layer {id_of(layer)} has no fields, using $id as fallback")
             except (RuntimeError, AttributeError) as e:
                 fallback_field = "$id"
-                logger.error(f"Error getting fields for layer {layer.id()}: {e}, using $id")
+                logger.error(f"Error getting fields for layer {id_of(layer)}: {e}, using $id")
 
         for prop_name in expression_properties:
             if prop_name not in exploring:
                 exploring[prop_name] = fallback_field
-                logger.info(f"Added missing '{prop_name}' = '{fallback_field}' for layer {layer.id()}")
+                logger.info(f"Added missing '{prop_name}' = '{fallback_field}' for layer {id_of(layer)}")
 
             # Update database with new key name
             try:
@@ -668,11 +681,11 @@ class LayersManagementEngineTask(QgsTask):
                            SET meta_key = 'layer_geometry_field'
                            WHERE fk_project = ? AND layer_id = ?
                            AND meta_type = 'infos' AND meta_key = 'geometry_field'""",
-                        (str(self.project_uuid), layer.id())
+                        (str(self.project_uuid), id_of(layer))
                     )
                     conn.commit()
                     cur.close()
-                logger.debug(f"Updated database for layer {layer.id()}")
+                logger.debug(f"Updated database for layer {id_of(layer)}")
             except (OSError, RuntimeError) as e:
                 logger.warning(f"Could not update database for migration: {e}")
 
@@ -680,7 +693,7 @@ class LayersManagementEngineTask(QgsTask):
         if "layer_table_name" not in infos:
             source_table_name = get_source_table_name(layer)
             infos["layer_table_name"] = source_table_name
-            logger.info(f"Added layer_table_name='{source_table_name}' for layer {layer.id()}")
+            logger.info(f"Added layer_table_name='{source_table_name}' for layer {id_of(layer)}")
 
             try:
                 with self._safe_spatialite_connect() as conn:
@@ -689,7 +702,7 @@ class LayersManagementEngineTask(QgsTask):
                         """INSERT INTO fm_project_layers_properties
                            (fk_project, layer_id, meta_type, meta_key, meta_value)
                            VALUES (?, ?, 'infos', 'layer_table_name', ?)""",
-                        (str(self.project_uuid), layer.id(), source_table_name)
+                        (str(self.project_uuid), id_of(layer), source_table_name)
                     )
                     conn.commit()
                     cur.close()
@@ -700,7 +713,7 @@ class LayersManagementEngineTask(QgsTask):
         if "layer_provider_type" not in infos:
             layer_provider_type = detect_layer_provider_type(layer)
             infos["layer_provider_type"] = layer_provider_type
-            logger.debug(f"Added layer_provider_type='{layer_provider_type}' for layer {layer.id()}")
+            logger.debug(f"Added layer_provider_type='{layer_provider_type}' for layer {id_of(layer)}")
 
             try:
                 with self._safe_spatialite_connect() as conn:
@@ -709,7 +722,7 @@ class LayersManagementEngineTask(QgsTask):
                         """INSERT INTO fm_project_layers_properties
                            (fk_project, layer_id, meta_type, meta_key, meta_value)
                            VALUES (?, ?, 'infos', 'layer_provider_type', ?)""",
-                        (str(self.project_uuid), layer.id(), layer_provider_type)
+                        (str(self.project_uuid), id_of(layer), layer_provider_type)
                     )
                     conn.commit()
                     cur.close()
@@ -717,13 +730,13 @@ class LayersManagementEngineTask(QgsTask):
                 logger.warning(f"Could not add layer_provider_type to database: {e}")
 
             # THREAD SAFETY (v2.3.10): Queue for main thread execution
-            self._deferred_layer_variables.append((layer.id(), "filterMate_infos_layer_table_name", infos.get("layer_table_name", "")))
+            self._deferred_layer_variables.append((id_of(layer), "filterMate_infos_layer_table_name", infos.get("layer_table_name", "")))
 
         # Add layer_geometry_type if missing
         if "layer_geometry_type" not in infos:
             layer_geometry_type = geometry_type_to_string(layer)
             infos["layer_geometry_type"] = layer_geometry_type
-            logger.info(f"Added layer_geometry_type='{layer_geometry_type}' for layer {layer.id()}")
+            logger.info(f"Added layer_geometry_type='{layer_geometry_type}' for layer {id_of(layer)}")
 
             try:
                 with self._safe_spatialite_connect() as conn:
@@ -732,7 +745,7 @@ class LayersManagementEngineTask(QgsTask):
                         """INSERT INTO fm_project_layers_properties
                            (fk_project, layer_id, meta_type, meta_key, meta_value)
                            VALUES (?, ?, 'infos', 'layer_geometry_type', ?)""",
-                        (str(self.project_uuid), layer.id(), layer_geometry_type)
+                        (str(self.project_uuid), id_of(layer), layer_geometry_type)
                     )
                     conn.commit()
                     cur.close()
@@ -757,7 +770,7 @@ class LayersManagementEngineTask(QgsTask):
             # IMPROVED: Use QgsDataSourceUri for reliable parsing instead of fragile regex
             try:
                 from qgis.core import QgsDataSourceUri
-                source_uri = QgsDataSourceUri(layer.source())
+                source_uri = QgsDataSourceUri(source_of(layer))
 
                 # Extract schema
                 schema = source_uri.schema()
@@ -780,7 +793,7 @@ class LayersManagementEngineTask(QgsTask):
             except (RuntimeError, AttributeError, ValueError) as e:
                 logger.warning(f"Error parsing PostgreSQL layer source: {e}, falling back to regex")
                 # Fallback to regex if QgsDataSourceUri fails
-                layer_source = layer.source()
+                layer_source = source_of(layer)
                 regexp_match_schema = re.search(r'(?<=table=")[a-zA-Z0-9_-]*(?="\.)', layer_source)
                 if regexp_match_schema:
                     source_schema = regexp_match_schema.group()
@@ -805,7 +818,7 @@ class LayersManagementEngineTask(QgsTask):
             # METHOD 1: Query GeoPackage metadata (for .gpkg files)
             if not detected_geom_field:
                 try:
-                    source = layer.source()
+                    source = source_of(layer)
                     source_path = source.split('|')[0] if '|' in source else source
 
                     if source_path.lower().endswith('.gpkg'):
@@ -908,12 +921,12 @@ class LayersManagementEngineTask(QgsTask):
             # PostgreSQL layer is valid and loaded in QGIS = basic filtering ALWAYS works
             # via setSubsetString() which uses QGIS native PostgreSQL provider
             postgresql_connection_available = True
-            logger.debug(f"PostgreSQL layer {layer.name()}: basic filtering available via QGIS native API (psycopg2 not required)")
+            logger.debug(f"PostgreSQL layer {name_of(layer)}: basic filtering available via QGIS native API (psycopg2 not required)")
 
             # Warn user if psycopg2 is not available (advanced features disabled)
             if not POSTGRESQL_AVAILABLE:
                 logger.info(
-                    f"⚠️ PostgreSQL layer '{layer.name()}': psycopg2 not installed.\n"
+                    f"⚠️ PostgreSQL layer '{name_of(layer)}': psycopg2 not installed.\n"
                     "   Basic filtering works, but for MUCH faster performance:\n"
                     "   → Install: pip install psycopg2-binary\n"
                     "   → Enables materialized views (10-100x faster for large datasets)"
@@ -924,29 +937,29 @@ class LayersManagementEngineTask(QgsTask):
                 try:
                     from qgis.core import QgsDataSourceUri
                     from ...infrastructure.database.pg_connect import connection_identity
-                    uri = QgsDataSourceUri(layer.source())
+                    uri = QgsDataSourceUri(source_of(layer))
                     # 2026-11-12: host:port:database was "::" for every pg_service.conf
                     # service; the identity also tells users and authentications apart
                     cache_key = connection_identity(uri, uri.param('authcfg'))
 
                     if cache_key in self._postgresql_connection_cache:
                         psycopg2_connection_available = self._postgresql_connection_cache[cache_key]
-                        logger.debug(f"PostgreSQL connection for {layer.name()}: using cached psycopg2 result ({psycopg2_connection_available})")
+                        logger.debug(f"PostgreSQL connection for {name_of(layer)}: using cached psycopg2 result ({psycopg2_connection_available})")
                     else:
                         # Test connection once per datasource
                         conn, _ = get_datasource_connexion_from_layer(layer)
                         if conn is not None:
                             psycopg2_connection_available = True
                             conn.close()
-                            logger.debug(f"PostgreSQL layer {layer.name()}: psycopg2 connection available (advanced features enabled)")
+                            logger.debug(f"PostgreSQL layer {name_of(layer)}: psycopg2 connection available (advanced features enabled)")
                         else:
-                            logger.info(f"PostgreSQL layer {layer.name()}: psycopg2 connection unavailable (advanced features disabled, basic filtering still works)")
+                            logger.info(f"PostgreSQL layer {name_of(layer)}: psycopg2 connection unavailable (advanced features disabled, basic filtering still works)")
                         # Cache the result for other layers from same database
                         self._postgresql_connection_cache[cache_key] = psycopg2_connection_available
                 except (RuntimeError, OSError, AttributeError) as e:
-                    logger.info(f"PostgreSQL psycopg2 connection test failed for {layer.name()}: {e} (advanced features disabled, basic filtering still works)")
+                    logger.info(f"PostgreSQL psycopg2 connection test failed for {name_of(layer)}: {e} (advanced features disabled, basic filtering still works)")
             else:
-                logger.debug(f"PostgreSQL layer {layer.name()}: psycopg2 not installed (advanced features disabled, basic filtering still works)")
+                logger.debug(f"PostgreSQL layer {name_of(layer)}: psycopg2 not installed (advanced features disabled, basic filtering still works)")
 
         # Build properties from JSON templates
         # CRITICAL: Escape all string values to prevent JSON parsing errors
@@ -955,9 +968,9 @@ class LayersManagementEngineTask(QgsTask):
         new_layer_variables["infos"] = json.loads(
             self.json_template_layer_infos % (
                 escape_json_string(layer_geometry_type),
-                escape_json_string(layer.name()),
+                escape_json_string(name_of(layer)),
                 escape_json_string(source_table_name) if source_table_name else "",
-                escape_json_string(layer.id()),
+                escape_json_string(id_of(layer)),
                 escape_json_string(source_schema) if source_schema else "",
                 escape_json_string(layer_provider_type),
                 escape_json_string(layer.sourceCrs().authid()),
@@ -990,12 +1003,12 @@ class LayersManagementEngineTask(QgsTask):
             fields = layer.fields()
             if fields.count() > 0:
                 display_expression = fields[0].name()
-                logger.warning(f"No best field or PK found for layer '{layer.name()}', using first field '{display_expression}'")
+                logger.warning(f"No best field or PK found for layer '{name_of(layer)}', using first field '{display_expression}'")
             else:
                 display_expression = "$id"
-                logger.warning(f"Layer '{layer.name()}' has no fields, using $id as fallback")
+                logger.warning(f"Layer '{name_of(layer)}' has no fields, using $id as fallback")
 
-        logger.info(f"🎯 Display expression for new layer '{layer.name()}': '{display_expression}'")
+        logger.info(f"🎯 Display expression for new layer '{name_of(layer)}': '{display_expression}'")
 
         new_layer_variables["exploring"] = json.loads(
             self.json_template_layer_exploring % (
@@ -1010,7 +1023,7 @@ class LayersManagementEngineTask(QgsTask):
         new_layer_variables["filtering"] = json.loads(self.json_template_layer_filtering)
 
         # VERIFICATION v2.9.32: Log default centroid checkbox values to confirm they are False
-        logger.debug(f"🔍 Default centroid values for new layer {layer.name()}: "
+        logger.debug(f"🔍 Default centroid values for new layer {name_of(layer)}: "
                     f"use_centroids_source_layer={new_layer_variables['filtering']['use_centroids_source_layer']}, "
                     f"use_centroids_distant_layers={new_layer_variables['filtering']['use_centroids_distant_layers']}")
 
@@ -1048,7 +1061,7 @@ class LayersManagementEngineTask(QgsTask):
                 if type_returned in (list, dict):
                     value_typped = json.dumps(value_typped)
                 # THREAD SAFETY: Queue for main thread execution
-                self._deferred_layer_variables.append((layer.id(), variable_key, value_typped))
+                self._deferred_layer_variables.append((id_of(layer), variable_key, value_typped))
 
     def _create_spatial_index(self, layer, layer_props):
         """
@@ -1075,7 +1088,7 @@ class LayersManagementEngineTask(QgsTask):
                 try:
                     self.create_spatial_index_for_postgresql_layer(layer, layer_props)
                 except (AttributeError, KeyError) as e:
-                    logger.debug(f"Could not create spatial index for PostgreSQL layer {layer.id()}: {e}")
+                    logger.debug(f"Could not create spatial index for PostgreSQL layer {id_of(layer)}: {e}")
                     # Fallback to QGIS spatial index
                     self.create_spatial_index_for_layer(layer)
                 except Exception as e:  # catch-all safety net: includes psycopg2.Error and RuntimeError
@@ -1088,7 +1101,7 @@ class LayersManagementEngineTask(QgsTask):
             else:
                 # PostgreSQL layer but no psycopg2 connection - use QGIS spatial index
                 # Note: Basic filtering via setSubsetString still works fine
-                logger.info(f"Using QGIS spatial index for PostgreSQL layer {layer.name()} (psycopg2 unavailable)")
+                logger.info(f"Using QGIS spatial index for PostgreSQL layer {name_of(layer)} (psycopg2 unavailable)")
                 self.create_spatial_index_for_layer(layer)
         else:
             self.create_spatial_index_for_layer(layer)
@@ -1110,7 +1123,7 @@ class LayersManagementEngineTask(QgsTask):
 
         if not isinstance(layer, QgsVectorLayer) or not layer.isSpatial():
             # Log skipped non-spatial layers
-            layer_name = layer.name() if hasattr(layer, 'name') else 'unknown'
+            layer_name = name_of(layer) if hasattr(layer, 'name') else 'unknown'
             logger.debug(f"add_project_layer: Skipping non-spatial layer '{layer_name}'")
             return False
 
@@ -1119,7 +1132,7 @@ class LayersManagementEngineTask(QgsTask):
 
         if layer_variables:
             # CRITICAL: Validate PostgreSQL layers don't have virtual_id (legacy bug)
-            if layer.providerType() == 'postgres':
+            if provider_key_of(layer) == 'postgres':
                 primary_key = layer_variables.get("infos", {}).get("primary_key_name")
                 if primary_key == "virtual_id":
                     error_msg = self.tr(
@@ -1128,7 +1141,7 @@ class LayersManagementEngineTask(QgsTask):
                         "This error originates from a previous version of FilterMate.\n\n"
                         "Solution: Remove this layer from the FilterMate project, then re-add it.\n"
                         "Make sure the PostgreSQL table has a PRIMARY KEY defined."
-                    ).format(layer.name())
+                    ).format(name_of(layer))
                     logger.error(error_msg)
                     raise ValueError(error_msg)
 
@@ -1146,16 +1159,16 @@ class LayersManagementEngineTask(QgsTask):
 
             # Check if PostgreSQL layer using ctid (no PRIMARY KEY)
             primary_key = result[0]
-            if layer.providerType() == 'postgres' and primary_key == 'ctid':
+            if provider_key_of(layer) == 'postgres' and primary_key == 'ctid':
                 # Store warning for display on main thread in finished()
                 # DO NOT call iface.messageBar() here - causes crash (access violation)
                 warning_msg = self.tr(
                     "Layer '{0}' has no PRIMARY KEY. "
                     "Limited features: materialized views disabled. "
                     "Recommendation: add a PRIMARY KEY for optimal performance."
-                ).format(layer.name())
+                ).format(name_of(layer))
                 self._deferred_warnings.append(warning_msg)
-                logger.warning(f"PostgreSQL layer without PRIMARY KEY: {layer.name()}")
+                logger.warning(f"PostgreSQL layer without PRIMARY KEY: {name_of(layer)}")
 
             layer_variables = self._build_new_layer_properties(layer, result)
             self._set_layer_variables(layer, layer_variables)
@@ -1175,17 +1188,17 @@ class LayersManagementEngineTask(QgsTask):
             "exploring": layer_variables["exploring"],
             "filtering": layer_variables["filtering"]
         }
-        layer_props["infos"]["layer_id"] = layer.id()
+        layer_props["infos"]["layer_id"] = id_of(layer)
 
         # Save to database
-        self.insert_properties_to_spatialite(layer.id(), layer_props)
+        self.insert_properties_to_spatialite(id_of(layer), layer_props)
 
         # Mark spatial index as pending — will be created on-demand during filtering
         # (GeoPackage layers often already have rtree; processing.run is very slow on large layers)
         layer_props["infos"]["spatial_index_pending"] = True
 
         # Add to project layers dictionary
-        self.project_layers[layer.id()] = layer_props
+        self.project_layers[id_of(layer)] = layer_props
 
         return True
 
@@ -1222,19 +1235,19 @@ class LayersManagementEngineTask(QgsTask):
         except (RuntimeError, AttributeError):
             crs_authid = ""
         try:
-            qgis_provider = layer.providerType()
+            qgis_provider = provider_key_of(layer)
         except (RuntimeError, AttributeError):
             qgis_provider = ""
 
         template = build_template(
-            layer.id(),
-            layer.name(),
+            id_of(layer),
+            name_of(layer),
             crs_authid,
             qgis_provider,
             self._get_default_is_linking(),
         )
         if not all(section in template for section in ("infos", "exploring", "filtering")):
-            logger.warning(f"add_project_layer: no {kind_label} template available, skipping '{layer.name()}'")
+            logger.warning(f"add_project_layer: no {kind_label} template available, skipping '{name_of(layer)}'")
             return False
 
         layer_variables = self._load_existing_layer_properties(layer)
@@ -1259,14 +1272,14 @@ class LayersManagementEngineTask(QgsTask):
             "exploring": layer_variables["exploring"],
             "filtering": layer_variables["filtering"]
         }
-        layer_props["infos"]["layer_id"] = layer.id()
+        layer_props["infos"]["layer_id"] = id_of(layer)
 
         if is_new_layer:
-            self.insert_properties_to_spatialite(layer.id(), layer_props)
+            self.insert_properties_to_spatialite(id_of(layer), layer_props)
 
-        self.project_layers[layer.id()] = layer_props
+        self.project_layers[id_of(layer)] = layer_props
         logger.info(
-            f"add_project_layer: registered {kind_label} layer '{layer.name()}' "
+            f"add_project_layer: registered {kind_label} layer '{name_of(layer)}' "
             f"(provider={qgis_provider}, crs={crs_authid}, new={is_new_layer})"
         )
         return True
@@ -1283,7 +1296,7 @@ class LayersManagementEngineTask(QgsTask):
         """
         # Handle both layer objects and str (layer_id) for backwards compatibility
         if isinstance(layer, get_filterable_layer_types() or (QgsVectorLayer,)):
-            layer_id = layer.id()
+            layer_id = id_of(layer)
         elif isinstance(layer, str):
             layer_id = layer
         else:
@@ -1389,7 +1402,7 @@ class LayersManagementEngineTask(QgsTask):
         if not isinstance(stored, str) or not stored or stored == 'ctid':
             return
         try:
-            if layer.providerType() == 'postgres':
+            if provider_key_of(layer) == 'postgres':
                 return
             fields = layer.fields()
             names = [field.name() for field in fields]
@@ -1415,7 +1428,7 @@ class LayersManagementEngineTask(QgsTask):
             return
         infos["primary_key_name"], infos["primary_key_idx"], infos["primary_key_type"], \
             infos["primary_key_is_numeric"] = result
-        logger.info(f"Layer '{layer.name()}': stored key '{stored}' is no unique key, now '{result[0]}'")
+        logger.info(f"Layer '{name_of(layer)}': stored key '{stored}' is no unique key, now '{result[0]}'")
 
     @staticmethod
     def _key_field_is_unique(layer, name):
@@ -1470,7 +1483,7 @@ class LayersManagementEngineTask(QgsTask):
         Returns:
             tuple: (field_name, field_index, field_type, is_numeric) or False if canceled
         """
-        layer_provider = layer.providerType()
+        layer_provider = provider_key_of(layer)
 
         # Skip expensive featureCount() for non-PostgreSQL providers
         # (GeoPackage iterates all features internally — very slow on 100k+ rows)
@@ -1486,7 +1499,7 @@ class LayersManagementEngineTask(QgsTask):
 
         # For PostgreSQL or unknown feature count, trust primary key attributes
         if feature_count == -1:
-            logger.debug(f"Layer {layer.name()} has unknown feature count (-1), using primary key attributes directly")
+            logger.debug(f"Layer {name_of(layer)} has unknown feature count (-1), using primary key attributes directly")
 
         # 1. Check provider-declared primary key (always trust)
         primary_key_index = layer.primaryKeyAttributes()
@@ -1517,7 +1530,7 @@ class LayersManagementEngineTask(QgsTask):
             return self._search_postgresql_key_without_declared_key(layer)
 
         # No declared primary key (core.domain.stable_key)
-        logger.debug(f"Layer '{layer.name()}': No declared PRIMARY KEY, searching for suitable ID field")
+        logger.debug(f"Layer '{name_of(layer)}': No declared PRIMARY KEY, searching for suitable ID field")
         if self.isCanceled():
             return False
         from ..domain.stable_key import FEATURE_ID_KEY, NONE
@@ -1526,16 +1539,16 @@ class LayersManagementEngineTask(QgsTask):
             fields = layer.fields()
             field_idx = fields.indexFromName(choice.name)
             field = fields[field_idx]
-            logger.info(f"Layer '{layer.name()}': key field '{field.name()}' ({choice.origin}), using as primary key")
+            logger.info(f"Layer '{name_of(layer)}': key field '{field.name()}' ({choice.origin}), using as primary key")
             return (field.name(), field_idx, field.typeName(), field.isNumeric())
         if choice.origin == NONE:
             logger.warning(
-                f"Layer '{layer.name()}' ({layer.providerType()}): no unique key field "
+                f"Layer '{name_of(layer)}' ({provider_key_of(layer)}): no unique key field "
                 "(declared key, id, gml_id, cleabs, objectid...). Filters by feature list "
                 "will be refused on this layer; attribute and spatial filters still work."
             )
         else:
-            logger.info(f"Layer '{layer.name()}': no proven unique key field, using the QGIS feature id")
+            logger.info(f"Layer '{name_of(layer)}': no proven unique key field, using the QGIS feature id")
         return (FEATURE_ID_KEY, -1, 'Integer64', True)
 
     # PostgreSQL layers without a declared key (unchanged since v4.0.7)
@@ -1550,24 +1563,24 @@ class LayersManagementEngineTask(QgsTask):
                 return False
             if field.name().lower() in self.PG_PK_EXACT_NAMES:
                 field_idx = layer.fields().indexFromName(field.name())
-                logger.info(f"Layer '{layer.name()}': Found exact PK name '{field.name()}', using as primary key")
+                logger.info(f"Layer '{name_of(layer)}': Found exact PK name '{field.name()}', using as primary key")
                 return (field.name(), field_idx, field.typeName(), field.isNumeric())
         for field in layer.fields():
             if self.isCanceled():
                 return False
             if any(pattern in field.name().lower() for pattern in self.PG_UUID_PATTERNS):
                 field_idx = layer.fields().indexFromName(field.name())
-                logger.info(f"Layer '{layer.name()}': Found UUID field '{field.name()}', using as primary key")
+                logger.info(f"Layer '{name_of(layer)}': Found UUID field '{field.name()}', using as primary key")
                 return (field.name(), field_idx, field.typeName(), field.isNumeric())
         for field in layer.fields():
             if self.isCanceled():
                 return False
             if field.isNumeric() and any(pattern in field.name().lower() for pattern in self.PG_ID_PATTERNS):
                 field_idx = layer.fields().indexFromName(field.name())
-                logger.info(f"Layer '{layer.name()}': Found numeric ID field '{field.name()}', using as primary key")
+                logger.info(f"Layer '{name_of(layer)}': Found numeric ID field '{field.name()}', using as primary key")
                 return (field.name(), field_idx, field.typeName(), field.isNumeric())
         logger.warning(
-            f"PostgreSQL layer '{layer.name()}': No primary key or ID field found.\n"
+            f"PostgreSQL layer '{name_of(layer)}': No primary key or ID field found.\n"
             "   FilterMate will use 'ctid' (PostgreSQL internal identifier) with limitations:\n"
             "   - Attribute filtering: OK\n"
             "   - Basic geometry filtering: OK\n"
@@ -1622,9 +1635,9 @@ class LayersManagementEngineTask(QgsTask):
             try:
                 with pooled_connection_from_layer(layer) as (connexion, source_uri):
                     if connexion is None:
-                        logger.warning(f"Cannot create spatial index for PostgreSQL layer {layer.name()}: no database connection (pooled)")
+                        logger.warning(f"Cannot create spatial index for PostgreSQL layer {name_of(layer)}: no database connection (pooled)")
                         return False
-                    return self._create_postgresql_indexes(connexion, schema, table, geometry_field, primary_key_name, layer.name())
+                    return self._create_postgresql_indexes(connexion, schema, table, geometry_field, primary_key_name, name_of(layer))
             except (RuntimeError, OSError, AttributeError) as e:
                 logger.error(f"Pooled connection error for spatial index: {e}")
                 # Fallback to non-pooled connection
@@ -1635,11 +1648,11 @@ class LayersManagementEngineTask(QgsTask):
 
             # CRITICAL FIX: Check if connexion is None (PostgreSQL unavailable or connection failed)
             if connexion is None:
-                logger.warning(f"Cannot create spatial index for PostgreSQL layer {layer.name()}: no database connection")
+                logger.warning(f"Cannot create spatial index for PostgreSQL layer {name_of(layer)}: no database connection")
                 return False
 
             try:
-                return self._create_postgresql_indexes(connexion, schema, table, geometry_field, primary_key_name, layer.name())
+                return self._create_postgresql_indexes(connexion, schema, table, geometry_field, primary_key_name, name_of(layer))
             finally:
                 try:
                     connexion.close()
@@ -1786,7 +1799,7 @@ class LayersManagementEngineTask(QgsTask):
 
         except (RuntimeError, AttributeError) as e:
             safe_log(logger, logging.WARNING,
-                    f"Failed to create spatial index for layer {layer.name()}: {str(e)}")
+                    f"Failed to create spatial index for layer {name_of(layer)}: {str(e)}")
 
         return True
 
@@ -1806,20 +1819,20 @@ class LayersManagementEngineTask(QgsTask):
         if len(layer_properties) == 0:
             layer_all_properties_flag = True
 
-        if layer.id() in self.PROJECT_LAYERS.keys():
+        if id_of(layer) in self.PROJECT_LAYERS.keys():
             with self._safe_spatialite_connect() as conn:
                 cur = conn.cursor()
 
                 try:
                     if layer_all_properties_flag is True:
                         for key_group in ("infos", "exploring", "filtering"):
-                            for key, value in self.PROJECT_LAYERS[layer.id()][key_group].items():
+                            for key, value in self.PROJECT_LAYERS[id_of(layer)][key_group].items():
                                 value_typped, type_returned = self.return_typped_value(value, 'save')
                                 if type_returned in (list, dict):
                                     value_typped = json.dumps(value_typped)
                                 variable_key = f"filterMate_{key_group}_{key}"
                                 # THREAD SAFETY (v2.3.10): Queue for main thread execution
-                                self._deferred_layer_variables.append((layer.id(), variable_key, value_typped))
+                                self._deferred_layer_variables.append((id_of(layer), variable_key, value_typped))
                                 self.savingLayerVariable.emit(layer, variable_key, value_typped, type_returned)
                                 cur.execute(
                                     """INSERT INTO fm_project_layers_properties
@@ -1827,7 +1840,7 @@ class LayersManagementEngineTask(QgsTask):
                                     (
                                         str(uuid.uuid4()),
                                         str(self.project_uuid),
-                                        layer.id(),
+                                        id_of(layer),
                                         key_group,
                                         key,
                                         value_typped.replace("\'", "\'\'") if type_returned in (str, dict, list) else value_typped
@@ -1838,14 +1851,14 @@ class LayersManagementEngineTask(QgsTask):
                     else:
                         for layer_property in layer_properties:
                             if layer_property[0] in ("infos", "exploring", "filtering"):
-                                if layer_property[0] in self.PROJECT_LAYERS[layer.id()] and layer_property[1] in self.PROJECT_LAYERS[layer.id()][layer_property[0]]:
-                                    value = self.PROJECT_LAYERS[layer.id()][layer_property[0]][layer_property[1]]
+                                if layer_property[0] in self.PROJECT_LAYERS[id_of(layer)] and layer_property[1] in self.PROJECT_LAYERS[id_of(layer)][layer_property[0]]:
+                                    value = self.PROJECT_LAYERS[id_of(layer)][layer_property[0]][layer_property[1]]
                                     value_typped, type_returned = self.return_typped_value(value, 'save')
                                     if type_returned in (list, dict):
                                         value_typped = json.dumps(value_typped)
                                     variable_key = f"filterMate_{layer_property[0]}_{layer_property[1]}"
                                     # THREAD SAFETY (v2.3.10): Queue for main thread execution
-                                    self._deferred_layer_variables.append((layer.id(), variable_key, value_typped))
+                                    self._deferred_layer_variables.append((id_of(layer), variable_key, value_typped))
                                     self.savingLayerVariable.emit(layer, variable_key, value_typped, type_returned)
                                     cur.execute(
                                         """INSERT INTO fm_project_layers_properties
@@ -1853,7 +1866,7 @@ class LayersManagementEngineTask(QgsTask):
                                         (
                                             str(uuid.uuid4()),
                                             str(self.project_uuid),
-                                            layer.id(),
+                                            id_of(layer),
                                             layer_property[0],
                                             layer_property[1],
                                             value_typped.replace("\'", "\'\'") if type_returned in (str, dict, list) else value_typped
@@ -1880,7 +1893,7 @@ class LayersManagementEngineTask(QgsTask):
         if len(layer_properties) == 0:
             layer_all_properties_flag = True
 
-        if layer.id() in self.PROJECT_LAYERS.keys():
+        if id_of(layer) in self.PROJECT_LAYERS.keys():
             with self._safe_spatialite_connect() as conn:
                 cur = conn.cursor()
 
@@ -1889,24 +1902,24 @@ class LayersManagementEngineTask(QgsTask):
                         cur.execute(
                             """DELETE FROM fm_project_layers_properties
                                WHERE fk_project = ? AND layer_id = ?""",
-                            (str(self.project_uuid), layer.id())
+                            (str(self.project_uuid), id_of(layer))
                         )
                         conn.commit()
                         # THREAD SAFETY (v2.3.10): Queue for main thread execution (clear all)
-                        self._deferred_layer_variables.append((layer.id(), None, None))
+                        self._deferred_layer_variables.append((id_of(layer), None, None))
                     else:
                         for layer_property in layer_properties:
                             if layer_property[0] in ("infos", "exploring", "filtering"):
-                                if layer_property[0] in self.PROJECT_LAYERS[layer.id()] and layer_property[1] in self.PROJECT_LAYERS[layer.id()][layer_property[0]]:
+                                if layer_property[0] in self.PROJECT_LAYERS[id_of(layer)] and layer_property[1] in self.PROJECT_LAYERS[id_of(layer)][layer_property[0]]:
                                     cur.execute(
                                         """DELETE FROM fm_project_layers_properties
                                            WHERE fk_project = ? AND layer_id = ? AND meta_type = ? AND meta_key = ?""",
-                                        (str(self.project_uuid), layer.id(), layer_property[0], layer_property[1])
+                                        (str(self.project_uuid), id_of(layer), layer_property[0], layer_property[1])
                                     )
                                     conn.commit()
                                     variable_key = f"filterMate_{layer_property[0]}_{layer_property[1]}"
                                     # THREAD SAFETY (v2.3.10): Queue for main thread execution
-                                    self._deferred_layer_variables.append((layer.id(), variable_key, ''))
+                                    self._deferred_layer_variables.append((id_of(layer), variable_key, ''))
                                     self.removingLayerVariable.emit(layer, variable_key)
                 finally:
                     cur.close()
@@ -1926,11 +1939,11 @@ class LayersManagementEngineTask(QgsTask):
                     elif isinstance(layer_obj, QgsVectorLayer):
                         layer = layer_obj
 
-                    result_layers = [result_layer for result_layer in self.PROJECT.mapLayersByName(layer.name())]
+                    result_layers = [result_layer for result_layer in self.PROJECT.mapLayersByName(name_of(layer))]
                     if len(result_layers) > 0:
                         for result_layer in result_layers:
                             # THREAD SAFETY (v2.3.10): Queue for main thread execution
-                            self._deferred_layer_variables.append((result_layer.id(), None, None))
+                            self._deferred_layer_variables.append((id_of(result_layer), None, None))
                             if self.isCanceled():
                                 return False
                     if self.isCanceled():
@@ -1944,11 +1957,11 @@ class LayersManagementEngineTask(QgsTask):
                 if "layer_name" not in self.project_layers[layer_id]["infos"]:
                     continue
 
-                result_layers = [layer for layer in self.PROJECT.mapLayersByName(self.project_layers[layer_id]["infos"]["layer_name"]) if layer.id() == layer_id]
+                result_layers = [layer for layer in self.PROJECT.mapLayersByName(self.project_layers[layer_id]["infos"]["layer_name"]) if id_of(layer) == layer_id]
                 if len(result_layers) > 0:
                     result_layer = result_layers[0]
                     # THREAD SAFETY (v2.3.10): Queue for main thread execution
-                    self._deferred_layer_variables.append((result_layer.id(), None, None))
+                    self._deferred_layer_variables.append((id_of(result_layer), None, None))
 
                 if self.isCanceled():
                     return False
@@ -2105,6 +2118,9 @@ class LayersManagementEngineTask(QgsTask):
             result (bool): Task result
         """
         logger.info(f"LayersManagementEngineTask.finished(): task_action={self.task_action}, result={result}, project_layers count={len(self.project_layers) if self.project_layers else 0}")
+        facts = getattr(self, '_layer_facts', None)
+        if facts is not None:  # the worker ended: the layers answer for themselves again
+            facts.release()
         run_started = getattr(self, '_perf_run_started', None)
         if run_started is not None:
             # PERF 2026-09-12: worker run + wait for the main thread, per layer task

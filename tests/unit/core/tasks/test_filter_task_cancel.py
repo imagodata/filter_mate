@@ -24,6 +24,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from filtermate_core.domain.layer_facts import id_of, name_of
+
 pytestmark = pytest.mark.unit
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[4]
@@ -76,6 +78,7 @@ def _task_class(project_layers=None, active_tasks=()):
                           body=methods, decorator_list=[])
     project = types.SimpleNamespace(mapLayers=lambda: dict(project_layers or {}))
     namespace = {"QgsTask": _QgsTask, "logger": MagicMock(), "DEFAULT_TEMP_SCHEMA": "filtermate_temp",
+                 "id_of": id_of, "name_of": name_of,
                  "threading": types.SimpleNamespace(Thread=_Thread, Lock=threading.Lock),
                  "QgsProject": types.SimpleNamespace(instance=lambda: project), "_DEFERRED_VIEW_DROPS": _DEFERRED,
                  "_CREATED_VIEW": _created_view_pattern(), "List": list, "Any": object}

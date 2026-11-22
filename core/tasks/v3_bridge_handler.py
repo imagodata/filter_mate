@@ -35,6 +35,12 @@ logger = setup_logger(
 
 # Lazy load backend services for BridgeStatus
 from ..ports.backend_services import get_backend_services
+
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 _backend_services = get_backend_services()
 get_task_bridge, BridgeStatus = _backend_services.get_task_bridge()
 
@@ -218,7 +224,7 @@ class V3BridgeHandler:
             for idx, (provider_type, layer_list) in enumerate(layers_dict.items(), 1):
                 for layer, layer_props in layer_list:
                     logger.info(f"   {idx}. {layer.name()}:")
-                    logger.info(f"      - Provider: {layer.providerType()}")
+                    logger.info(f"      - Provider: {provider_key_of(layer)}")
                     logger.info(f"      - CRS: {layer.crs().authid() if layer.crs() else 'UNKNOWN'}")
                     logger.info(f"      - Geometry column: {layer_props.get('layer_geometry_field', 'UNKNOWN')}")
                     logger.info(f"      - Primary key: {layer_props.get('layer_key_column_name', 'UNKNOWN')}")

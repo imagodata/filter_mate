@@ -39,6 +39,11 @@ logger = setup_logger(
 
 # Lazy load pg_executor
 from ..ports.backend_services import get_backend_services
+
+try:
+    from ...filtermate_core.domain.layer_facts import name_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import name_of
 _backend_services = get_backend_services()
 pg_executor = _backend_services.get_postgresql_executor()
 PG_EXECUTOR_AVAILABLE = pg_executor is not None
@@ -466,7 +471,7 @@ class ExpressionFacadeHandler:
         # Queue source layer for filter application in finished()
         if hasattr(self.task, '_pending_subset_requests'):
             self.task._pending_subset_requests.append((self.task.source_layer, expression))
-            logger.info(f"Queued source layer {self.task.source_layer.name()} for filter application in finished()")
+            logger.info(f"Queued source layer {name_of(self.task.source_layer)} for filter application in finished()")
             # 2026-11-12: the source layer keeps its previous subset until finished();
             # the distant filters read the one it will have (ExpressionBuilder)
             self.task.task_parameters['source_subset_after_task'] = expression

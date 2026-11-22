@@ -23,6 +23,11 @@ from typing import Optional, Tuple, Callable
 # EPIC-1 E4-S9: Import centralized HistoryRepository
 from ...repositories.history_repository import HistoryRepository
 
+try:
+    from ....filtermate_core.domain.layer_facts import id_of, name_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of
+
 logger = logging.getLogger('FilterMate.Adapters.Backends.PostgreSQL.FilterActions')
 
 
@@ -717,7 +722,7 @@ def execute_filter_action_postgresql_materialized(
         # EPIC-1 E4-S9: Use centralized HistoryRepository instead of direct SQL
         history_repo = HistoryRepository(conn, cur)
         try:
-            last_entry = history_repo.get_last_entry(project_uuid, layer.id())
+            last_entry = history_repo.get_last_entry(project_uuid, id_of(layer))
             last_subset_id = last_entry.id if last_entry else None
         finally:
             history_repo.close()
@@ -826,25 +831,25 @@ def execute_reset_action_postgresql(
     Returns:
         bool: True if successful
     """
-    logger.info(f"[PostgreSQL] Reset Action - Layer: {layer.name()} ({layer.featureCount()} features) - Dropping materialized views")
+    logger.info(f"[PostgreSQL] Reset Action - Layer: {name_of(layer)} ({layer.featureCount()} features) - Dropping materialized views")
 
     # Delete history using prepared statements if available, otherwise use repository
     if delete_history_fn:
         try:
-            delete_history_fn(project_uuid, layer.id())
+            delete_history_fn(project_uuid, id_of(layer))
         except Exception as e:
-            logger.warning(f"[PostgreSQL] History Delete Fallback - Layer: {layer.name()} - {type(e).__name__}: {str(e)}")
+            logger.warning(f"[PostgreSQL] History Delete Fallback - Layer: {name_of(layer)} - {type(e).__name__}: {str(e)}")
             # EPIC-1 E4-S9: Use centralized HistoryRepository
             history_repo = HistoryRepository(conn, cur)
             try:
-                history_repo.delete_for_layer(project_uuid, layer.id())
+                history_repo.delete_for_layer(project_uuid, id_of(layer))
             finally:
                 history_repo.close()
     else:
         # EPIC-1 E4-S9: Use centralized HistoryRepository instead of direct SQL
         history_repo = HistoryRepository(conn, cur)
         try:
-            history_repo.delete_for_layer(project_uuid, layer.id())
+            history_repo.delete_for_layer(project_uuid, id_of(layer))
         finally:
             history_repo.close()
 
@@ -862,14 +867,14 @@ def execute_reset_action_postgresql(
         connexion = get_connection_fn()
     except Exception as e:  # catch-all safety net: the reset clears the filter without dropping views
         connexion = None
-        logger.warning(f"[PostgreSQL] Reset of {layer.name()}: materialized views not dropped: {e}")
+        logger.warning(f"[PostgreSQL] Reset of {name_of(layer)}: materialized views not dropped: {e}")
     if connexion is not None:
         execute_commands_fn(connexion, [sql_drop])
         logger.debug(f"[PostgreSQL] Materialized View Dropped - Schema: {schema} - Session: {session_name}")
 
     # THREAD SAFETY: Queue subset clear for application in finished()
     queue_subset_fn(layer, '')
-    logger.info(f"[PostgreSQL] Reset Complete - Layer: {layer.name()} - Filter cleared")
+    logger.info(f"[PostgreSQL] Reset Complete - Layer: {name_of(layer)} - Filter cleared")
     return True
 
 
@@ -915,17 +920,17 @@ def execute_unfilter_action_postgresql(
     Returns:
         bool: True if successful
     """
-    logger.info(f"[PostgreSQL] Unfilter Action - Layer: {layer.name()} ({layer.featureCount()} features) - Restoring previous filter")
+    logger.info(f"[PostgreSQL] Unfilter Action - Layer: {name_of(layer)} ({layer.featureCount()} features) - Restoring previous filter")
 
     # EPIC-1 E4-S9: Use centralized HistoryRepository instead of direct SQL
     history_repo = HistoryRepository(conn, cur)
     try:
         # Delete last subset from history
         if last_subset_id:
-            history_repo.delete_entry(project_uuid, layer.id(), last_subset_id)
+            history_repo.delete_entry(project_uuid, id_of(layer), last_subset_id)
 
         # Get previous subset
-        last_entry = history_repo.get_last_entry(project_uuid, layer.id())
+        last_entry = history_repo.get_last_entry(project_uuid, id_of(layer))
     finally:
         history_repo.close()
 
@@ -935,7 +940,7 @@ def execute_unfilter_action_postgresql(
         # Validate sql_subset_string from history
         if not sql_subset_string or not sql_subset_string.strip():
             logger.warning(
-                f"[PostgreSQL] Empty Previous Subset - Layer: {layer.name()} - "
+                f"[PostgreSQL] Empty Previous Subset - Layer: {name_of(layer)} - "
                 "History entry exists but subset string is empty. Clearing filter."
             )
             queue_subset_fn(layer, '')
@@ -970,10 +975,10 @@ def execute_unfilter_action_postgresql(
             f'(SELECT "fm_temp_mv_{session_name}"."{primary_key_name}" FROM "{schema}"."fm_temp_mv_{session_name}")'  # nosec B608
         )
         queue_subset_fn(layer, layer_subset_string)
-        logger.info(f"[PostgreSQL] Unfilter Complete - Layer: {layer.name()} - Previous state restored")
+        logger.info(f"[PostgreSQL] Unfilter Complete - Layer: {name_of(layer)} - Previous state restored")
     else:
         # No previous filter - clear
         queue_subset_fn(layer, '')
-        logger.info(f"[PostgreSQL] No Previous Filter - Layer: {layer.name()} - Filter cleared")
+        logger.info(f"[PostgreSQL] No Previous Filter - Layer: {name_of(layer)} - Filter cleared")
 
     return True

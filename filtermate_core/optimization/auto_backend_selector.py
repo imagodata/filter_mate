@@ -14,6 +14,8 @@ import logging
 
 from ..domain.filter_expression import ProviderType
 
+from ..domain.layer_facts import provider_key_of
+
 logger = logging.getLogger(__name__)
 
 # Alias for backward compatibility
@@ -114,7 +116,7 @@ class AutoBackendSelector:
             5. Select backend with highest confidence score
         """
         feature_count = layer.featureCount()
-        provider_type = layer.providerType()
+        provider_type = provider_key_of(layer)
         layer_id = layer.id()
 
         # Extract filter complexity

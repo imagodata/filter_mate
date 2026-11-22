@@ -27,6 +27,7 @@ import pytest
 from core.domain.stable_key import (
     DECLARED, FEATURE_ID, FEATURE_ID_KEY, NAMED, NONE, choose_key, is_feature_id_key, looks_like_key_name,
 )
+from filtermate_core.domain import layer_facts
 
 pytestmark = pytest.mark.unit
 
@@ -235,7 +236,8 @@ def _task_class():
     module = ast.Module(body=[ast.ClassDef(name="Task", bases=[], keywords=[], body=body, decorator_list=[])],
                         type_ignores=[])
     namespace = {"__name__": "core.tasks._fm_test_search_pk", "__package__": "core.tasks",
-                 "logger": logging.getLogger("fm.test.search_pk")}
+                 "logger": logging.getLogger("fm.test.search_pk"),
+                 "provider_key_of": layer_facts.provider_key_of, "name_of": layer_facts.name_of}
     exec(compile(ast.fix_missing_locations(module), str(path), "exec"), namespace)
     task = namespace["Task"]
     task.isCanceled = lambda self: False

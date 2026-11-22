@@ -30,6 +30,11 @@ from ...infrastructure.signal_utils import SignalBlocker
 from ..ports import get_backend_services
 from ..ports.qgis_port import MessageLevel, get_feedback_adapter
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 _backend_services = get_backend_services()
 is_valid_layer = _backend_services.is_valid_layer
 
@@ -305,7 +310,7 @@ class ResultProcessor:
                 logger.warning(f"  ✗ Failed to apply filter to {layer.name()}")
                 logger.warning(f"    → Error: {error_msg}")
                 logger.warning(f"    → Expression ({len(expression) if expression else 0} chars): {expression[:200] if expression else '(empty)'}...")
-                logger.warning(f"    → Provider: {layer.providerType()}")
+                logger.warning(f"    → Provider: {provider_key_of(layer)}")
 
                 QgsMessageLog.logMessage(
                     f"finished() ✗ FAILED: {layer.name()} - {error_msg}",
@@ -329,7 +334,7 @@ class ResultProcessor:
             layer: Layer to reload
             already_applied: Whether filter was already applied (skip updateExtents)
         """
-        provider_type = layer.providerType()
+        provider_type = provider_key_of(layer)
 
         # Force reload for PostgreSQL/Spatialite/OGR layers
         if provider_type in ('postgres', 'spatialite', 'ogr'):

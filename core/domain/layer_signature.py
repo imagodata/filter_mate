@@ -28,6 +28,11 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,7 +52,7 @@ class LayerSignature:
         resolve across projects.
         """
         try:
-            provider = layer.providerType() if hasattr(layer, 'providerType') else ''
+            provider = provider_key_of(layer) if hasattr(layer, 'providerType') else ''
         except (RuntimeError, AttributeError):
             provider = ''
 

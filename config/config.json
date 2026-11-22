@@ -156,6 +156,14 @@
         "_hidden": true,
         "description": "Marks a configuration whose SECTION_HEIGHT was put back to 'fill' once, when 'fill' became the default again (a 'fit' chosen afterwards is kept)"
       },
+      "PANEL_SIZING": {
+        "value": "auto",
+        "choices": [
+          "auto",
+          "manual"
+        ],
+        "description": "Height of the panels of the sections taken out of the dock, and of the dock: 'auto' (sized again when a section leaves, comes back or changes panel, when a panel is moved or opens another section: FILTERING and EXPORTING at the height their rows need, spread or not (SECTION_HEIGHT), the room left to EXPLORING, AGENT, CONFIGURATION or the other panels of QGIS; the dock in one piece is never resized), 'manual' (the heights QGIS and the user set stay)"
+      },
       "EXPLORING_TOOLS": {
         "_display_name": "EXPLORING tools",
         "description": "The tool buttons of the EXPLORING rail, for each kind of layer: the names of the buttons to hide, separated by commas (empty: all of them are shown). A tool hidden is not on the rail and is put down; a mode (sync, follow, link, preview) is turned off when its button is hidden, and no other way turns it on again meanwhile; the '...' button (more) is always shown. Right-click the rail to choose them with check boxes",

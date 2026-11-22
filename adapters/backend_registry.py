@@ -19,6 +19,11 @@ from ..infrastructure.constants import (
     PROVIDER_POSTGRES, PROVIDER_SPATIALITE, PROVIDER_OGR, PROVIDER_MEMORY,
 )
 
+try:
+    from ..filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 if TYPE_CHECKING:
     pass
 
@@ -197,7 +202,7 @@ class BackendRegistry(BackendRegistryPort):
         for layer in layers:
             if layer is None:
                 continue
-            provider_type = layer.providerType() if hasattr(layer, 'providerType') else None
+            provider_type = provider_key_of(layer) if hasattr(layer, 'providerType') else None
             if provider_type != 'postgres':
                 return False
 

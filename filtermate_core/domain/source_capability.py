@@ -33,6 +33,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Optional
 
+from .layer_facts import provider_key_of, source_of
+
 
 class Locality(Enum):
     """Where the data of a layer lives."""
@@ -403,14 +405,16 @@ def classify(provider_key: str, source: str, is_raster: bool = False) -> SourceC
 def classify_layer(layer: Any, is_raster: bool = False) -> SourceCapability:
     """:func:`classify` on any object with ``providerType()`` and ``source()`` (duck-typed).
 
-    Without QGIS (or for a deleted layer) the source is an empty string.
+    Without QGIS (or for a deleted layer) the source is an empty string. In the worker of a
+    task the two are those read when the task was created (:mod:`.layer_facts`): the layer
+    lives in the main thread.
     """
     try:
-        provider_key = layer.providerType()
+        provider_key = provider_key_of(layer)
     except (AttributeError, RuntimeError):
         provider_key = ''
     try:
-        source = layer.source()
+        source = source_of(layer)
     except (AttributeError, RuntimeError):
         source = ''
     return classify(provider_key if isinstance(provider_key, str) else '',
