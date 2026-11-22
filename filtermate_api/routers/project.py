@@ -100,6 +100,16 @@ class LayerOptionsBody(BaseModel):
     reason: str = Field(default="", max_length=500)
 
 
+class ExploringBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(default="", max_length=_MAX_NAME, description="Layer to show, id or name; the one shown by default")
+    tools: Dict[str, bool] = Field(default_factory=dict, max_length=10,
+                                   description="Buttons of the rail turned on (true) or off (false), by name")
+    press: List[str] = Field(default_factory=list, max_length=4, description="Buttons of the rail pressed once")
+    show: bool = Field(default=False, description="Open EXPLORING in front of the user")
+
+
 class ExportOptionsBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -124,6 +134,13 @@ def panel_layer(request: Request, layer: str = Query(..., min_length=1, max_leng
 def set_panel_layers(payload: LayerOptionsBody, request: Request) -> Dict[str, Any]:
     """Set the EXPLORING and FILTERING options of layers in FilterMate's panel, all or none."""
     return _panels(lambda: _accessor(request).set_layer_options([item.model_dump() for item in payload.layers]))
+
+
+@router.post("/panels/exploring")
+def drive_exploring(payload: ExploringBody, request: Request) -> Dict[str, Any]:
+    """Drive FilterMate's EXPLORING panel as the user does: its layer, the buttons of its rail."""
+    return _panels(lambda: _accessor(request).set_exploring(
+        layer=payload.layer, tools=payload.tools, press=payload.press, show=payload.show))
 
 
 @router.get("/panels/export")

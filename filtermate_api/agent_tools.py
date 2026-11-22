@@ -547,6 +547,10 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def set_layer_options(args: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.set_layer_options(args["layers"])
 
+    def set_exploring(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.set_exploring(layer=args.get("layer") or "", tools=args.get("tools"),
+                                      press=args.get("press"), show=bool(args.get("show")))
+
     def export_options(_: Dict[str, Any]) -> Dict[str, Any]:
         return accessor.export_options()
 
@@ -573,7 +577,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "add_population": add_population,
         "add_osm_features": add_osm_features,
         "segment_objects": segment_objects, "similar_objects": similar_objects,
-        "layer_options": layer_options, "set_layer_options": set_layer_options, "export_options": export_options,
+        "layer_options": layer_options, "set_layer_options": set_layer_options, "set_exploring": set_exploring,
+        "export_options": export_options,
         "set_export_options": set_export_options,
     }
     return {name: _guarded(_one_layer_per_name(accessor, handler)) for name, handler in handlers.items()}

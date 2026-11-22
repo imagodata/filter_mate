@@ -10,10 +10,12 @@ from pathlib import Path
 import pytest
 
 from core.agent import example_prompts as ex
+from core.agent.tool_catalog import CHAT_ONLY
 
 PANEL = Path(__file__).resolve().parents[3] / "ui" / "widgets" / "agent_panel.py"
 TOOLS = {tool["name"] for tool in json.loads(
     (Path(__file__).resolve().parents[3] / "core" / "agent" / "tool_catalog.json").read_text(encoding="utf-8"))["tools"]}
+TOOLS |= {tool.name for tool in CHAT_ONLY}  # the welcome is the chat's: its own tools (create_widget) carry requests too
 NEEDS = {"layers", "no_layers", "data", "no_data", "no_basemap", "several", "vector", "many_vectors", "raster",
          "point_cloud", "polygons", "elevation", "active_vector", "active_raster", "active_point_cloud",
          "active_elevation", "active_local", "selection", "local_selection", "filter", "remote"}
