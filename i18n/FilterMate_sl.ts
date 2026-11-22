@@ -7394,6 +7394,31 @@ Razrešeno iz: {1}</translation>
         <translation>Povečaj na izbor</translation>
     </message>
     <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Shrani urejanja plasti</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>Želite shraniti urejanja plasti ({0})?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>Urejanj plasti {0} ni bilo mogoče shraniti: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} že obstaja. Ga želite zamenjati?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>Še vedno se izvajajo opravila ({0}). Jih ustavim in končam?</translation>
+    </message>
+    <message>
         <location filename="../../standalone/host/window.py" line="211"/>
         <source>Refresh</source>
         <translation>Osveži</translation>

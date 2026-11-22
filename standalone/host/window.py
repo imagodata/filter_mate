@@ -217,6 +217,7 @@ class StandaloneWindow(QMainWindow):
         add("identify", _tr("Identify"), "/mActionIdentify.svg", checkable=True)
         add("table", _tr("Open the attribute table"), "/mActionOpenTable.svg", lambda: self.show_attribute_table(), "F6")
         add("properties", _tr("Layer properties..."), "/mActionOptions.svg", self.show_layer_properties)
+        add("save_edits", _tr("Save layer edits"), "/mActionSaveAllEdits.svg", self.save_layer_edits)
         add("about", _tr("About FilterMate"), None, self.show_about)
 
         self._map_tools = {
@@ -236,7 +237,8 @@ class StandaloneWindow(QMainWindow):
                                           ("new", "open", "save", None, "add_layers", "add_files"))
         self.map_toolbar = self._toolbar("mMapNavToolBar", _tr("Map"),
                                          ("pan", "zoom_in", "zoom_out", "zoom_full", "zoom_layer", "zoom_selection",
-                                          "refresh", None, "select", "select_polygon", "deselect", "identify", "table"))
+                                          "refresh", None, "select", "select_polygon", "deselect", "identify", "table",
+                                          "save_edits"))
         self.plugin_toolbar = QToolBar(_tr("Plugins"), self)
         self.plugin_toolbar.setObjectName("mPluginToolBar")
         self.addToolBar(self.plugin_toolbar)
@@ -283,7 +285,7 @@ class StandaloneWindow(QMainWindow):
 
         layer = bar.addMenu(_tr("&Layer"))
         layer.setObjectName("mLayerMenu")
-        for key in ("add_layers", "add_files", "basemap", None, "table", "properties"):
+        for key in ("add_layers", "add_files", "basemap", None, "table", "save_edits", "properties"):
             layer.addSeparator() if key is None else layer.addAction(self.actions[key])
 
         view = bar.addMenu(_tr("&View"))
@@ -368,7 +370,9 @@ class StandaloneWindow(QMainWindow):
         spatial = [layer for layer in layers if layer.isSpatial() and layer.crs().isValid()]
         if not spatial or self._reading_project:
             return
-        first_ones = len(project.mapLayers()) == len(layers)
+        added = {layer.id() for layer in layers}
+        # The first layers with a place on the map: a table without geometry opened before them does not count.
+        first_ones = not any(layer.isSpatial() and layer.id() not in added for layer in project.mapLayers().values())
         if first_ones:
             natural = next((layer for layer in spatial if not _is_web_tiles(layer)), spatial[0])
             project.setCrs(natural.crs())
@@ -377,12 +381,14 @@ class StandaloneWindow(QMainWindow):
             extent = None
             for layer in ([item for item in spatial if not _is_web_tiles(item)] or spatial):
                 part = self._to_map(layer, layer.extent())
-                if part is not None and not part.isEmpty():
+                if part is not None and not part.isNull():
                     if extent is None:
                         extent = part
                     else:
                         extent.combineExtentWith(part)
-            if extent is not None:
+            if extent is not None and not extent.isNull():
+                if extent.width() == 0 or extent.height() == 0:  # one point, or points on a line
+                    extent.grow(0.001 if project.crs().isGeographic() else 100.0)
                 extent.scale(1.05)
                 self.canvas.setExtent(extent)
             self.canvas.refresh()
@@ -432,12 +438,42 @@ class StandaloneWindow(QMainWindow):
 
     # --- projects -----------------------------------------------------------------------------------------------
 
+    def _edited_layers(self):
+        return [layer for layer in QgsProject.instance().mapLayers().values()
+                if isinstance(layer, QgsVectorLayer) and layer.isEditable() and layer.isModified()]
+
+    def save_layer_edits(self) -> bool:
+        """Save the edits of every layer that has some (the agent leaves its edits to be saved). False when one fails."""
+        for layer in self._edited_layers():
+            if not layer.commitChanges():
+                errors = "; ".join(layer.commitErrors()[:3])
+                self.message_bar.pushCritical("FilterMate", _tr("The edits of {0} could not be saved: {1}").format(
+                    layer.name(), errors))
+                return False
+        return True
+
     def _may_discard(self) -> bool:
-        """True when the current project can be left: saved, or the user agrees to lose its changes."""
-        project = QgsProject.instance()
-        if not self.interactive or not project.isDirty() or not project.mapLayers():
+        """True when the current project can be left: the edits of its layers and the project saved, or the user
+        agrees to lose them. Never asks when the window is driven by a script."""
+        if not self.interactive:
             return True
         buttons = QMessageBox.StandardButton
+        edited = self._edited_layers()
+        if edited:
+            answer = QMessageBox.question(
+                self, "FilterMate", _tr("Save the edits of {0} layers?").format(len(edited)),
+                buttons.Save | buttons.Discard | buttons.Cancel, buttons.Save)
+            if answer == buttons.Cancel:
+                return False
+            if answer == buttons.Save:
+                if not self.save_layer_edits():
+                    return False
+            else:
+                for layer in edited:
+                    layer.rollBack()
+        project = QgsProject.instance()
+        if not project.isDirty() or not project.mapLayers():
+            return True
         answer = QMessageBox.question(
             self, "FilterMate", _tr("Save the changes to the project?"),
             buttons.Save | buttons.Discard | buttons.Cancel, buttons.Save)
@@ -461,12 +497,16 @@ class StandaloneWindow(QMainWindow):
             return
         path, _ = QFileDialog.getOpenFileName(self, _tr("Open a project"), self._last_folder(), PROJECT_FILTER)
         if path:
-            self.open_project(path)
+            self.open_project(path, ask=False)
 
-    def open_project(self, path: str) -> bool:
+    def open_project(self, path: str, ask: bool = True) -> bool:
+        """Open a project file in place of the current one (whatever brings it: a drop, the browser, a script),
+        after the question about unsaved changes unless the caller asked it already."""
         path = os.path.abspath(os.path.expanduser(path))
         if not os.path.isfile(path):
             self.message_bar.pushWarning("FilterMate", _tr("{0} does not exist.").format(path))
+            return False
+        if ask and not self._may_discard():
             return False
         self._close_tables()
         project = QgsProject.instance()
@@ -495,7 +535,12 @@ class StandaloneWindow(QMainWindow):
             if not path:
                 return False
             if not path.lower().endswith(PROJECT_SUFFIXES):
-                path += ".qgz"
+                path += ".qgz"  # after the overwrite check of the dialog, which saw the name without it
+                if os.path.exists(path) and self.interactive and QMessageBox.question(
+                        self, "FilterMate", _tr("{0} already exists. Replace it?").format(os.path.basename(path)),
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                        QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+                    return False
         if not project.write(path):
             self.message_bar.pushCritical("FilterMate", _tr("The project could not be saved: {0}").format(project.error()))
             return False
@@ -713,10 +758,24 @@ class StandaloneWindow(QMainWindow):
             QTimer.singleShot(0, lambda: self.sources.open_paths(paths))
         event.acceptProposedAction()
 
+    def _may_stop_tasks(self) -> bool:
+        """True when no task runs, or the user agrees to stop them (an export cut short leaves a partial file)."""
+        manager = QgsApplication.taskManager()
+        running = manager.countActiveTasks()
+        if not running:
+            return True
+        if self.interactive and QMessageBox.question(
+                self, "FilterMate", _tr("{0} tasks are still running. Stop them and quit?").format(running),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+            return False
+        manager.cancelAll()
+        return True
+
     closing = None  # set by the application: called once the user agreed to close, before the window goes
 
     def closeEvent(self, event):
-        if not self._may_discard():
+        if not self._may_discard() or not self._may_stop_tasks():
             event.ignore()
             return
         self.save_window()

@@ -7394,6 +7394,31 @@ Resolt des de: {1}</translation>
         <translation>Zoom a la selecció</translation>
     </message>
     <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Desa les edicions de les capes</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>Voleu desar les edicions de {0} capes?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>No s'han pogut desar les edicions de {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} ja existeix. Voleu substituir-lo?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>Encara hi ha {0} tasques en curs. Voleu aturar-les i sortir?</translation>
+    </message>
+    <message>
         <location filename="../../standalone/host/window.py" line="211"/>
         <source>Refresh</source>
         <translation>Actualitza</translation>

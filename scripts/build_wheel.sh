@@ -36,6 +36,7 @@ else
     (cd "$STAGE" && python3 -m build --wheel --outdir "$STAGE/out" > "$STAGE/build.log" 2>&1) || { cat "$STAGE/build.log"; exit 1; }
 fi
 WHEEL="$(ls "$STAGE"/out/filtermate-*.whl)"
+rm -f "$DIST"/filtermate-*.whl  # one wheel in dist/: the Docker image installs dist/filtermate-*.whl
 cp "$WHEEL" "$DIST/"
 
 echo "[3/3] Checking its contents..."

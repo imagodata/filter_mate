@@ -7394,6 +7394,31 @@ Resolved from: {1}</source>
         <translation>चयन पर ज़ूम करें</translation>
     </message>
     <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>परतों के संपादन सहेजें</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>{0} परतों के संपादन सहेजें?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>{0} के संपादन सहेजे नहीं जा सके: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} पहले से मौजूद है। इसे बदलें?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>{0} कार्य अभी चल रहे हैं। उन्हें रोककर बाहर निकलें?</translation>
+    </message>
+    <message>
         <location filename="../../standalone/host/window.py" line="211"/>
         <source>Refresh</source>
         <translation>ताज़ा करें</translation>

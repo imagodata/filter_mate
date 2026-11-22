@@ -7394,6 +7394,31 @@ Risolto da: {1}</translation>
         <translation>Zoom sulla selezione</translation>
     </message>
     <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Salva le modifiche dei layer</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>Salvare le modifiche di {0} layer?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>Impossibile salvare le modifiche di {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} esiste già. Sostituirlo?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>{0} attività sono ancora in corso. Interromperle e uscire?</translation>
+    </message>
+    <message>
         <location filename="../../standalone/host/window.py" line="211"/>
         <source>Refresh</source>
         <translation>Aggiorna</translation>

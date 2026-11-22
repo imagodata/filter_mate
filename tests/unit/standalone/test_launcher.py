@@ -12,6 +12,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -246,21 +247,83 @@ def test_candidates_start_with_what_the_user_named(monkeypatch):
 # --- starting the host --------------------------------------------------------------------------------------------
 
 
-def test_the_host_is_started_by_the_bootstrap_file_with_the_arguments_of_the_user():
-    command = runtime.host_command(runtime.Runtime("install", ["C:\\QGIS\\bin\\python-qgis.bat"], "w"), ["--lang", "fr", "a b.gpkg"])
-    assert command == ["C:\\QGIS\\bin\\python-qgis.bat", runtime.BOOTSTRAP_SCRIPT, "--lang", "fr", "a b.gpkg"]
+def test_no_argument_of_the_user_goes_through_the_command_line_of_a_bat():
+    """cmd.exe reads ``&``, ``%VAR%`` and ``^`` in the arguments of a ``.bat``: the script and the arguments go
+    through the environment, the command line holds only a fixed loader."""
+    tricky = ["D:\\data\\R&D.gpkg", "100%TEMP%.gpkg", "a^b.shp", "a b.gpkg"]
+    command, env = runtime.host_command(runtime.Runtime("install", ["C:\\QGIS\\bin\\python-qgis.bat"], "w"), tricky)
+    assert command == ["C:\\QGIS\\bin\\python-qgis.bat", "-c", runtime.LOADER]
+    assert not any(character in runtime.LOADER for character in "&%^")
+    assert env["FILTERMATE_SCRIPT"] == runtime.BOOTSTRAP_SCRIPT and json.loads(env["FILTERMATE_SCRIPT_ARGS"]) == tricky
     assert os.path.isfile(runtime.BOOTSTRAP_SCRIPT) and os.path.isfile(runtime.PROBE_SCRIPT)
 
 
-def test_another_python_does_not_inherit_the_virtual_environment_of_the_launcher(monkeypatch):
+def test_another_python_does_not_inherit_the_environment_of_the_launcher(tmp_path, monkeypatch):
+    conda = str(tmp_path / "conda-env")
+    monkeypatch.setenv("CONDA_PREFIX", conda)
     monkeypatch.setenv("VIRTUAL_ENV", "/venv")
     monkeypatch.setenv("PYTHONHOME", "/venv")
-    monkeypatch.setenv("PYTHONPATH", "/mine")
+    monkeypatch.setenv("PROJ_DATA", os.path.join(conda, "share", "proj"))
+    monkeypatch.setenv("QT_PLUGIN_PATH", os.path.join(conda, "plugins"))
+    monkeypatch.setenv("PYTHONPATH", os.pathsep.join([os.path.join(conda, "lib"), "/usr/share/qgis/python"]))
+    monkeypatch.setenv("GDAL_DATA", "/usr/share/gdal")
     other = runtime.Runtime("install", ["python"], "other", env={"PYTHONPATH": "/qgis/python", "QGIS_PREFIX_PATH": "/qgis"})
     env = runtime.child_environment(other)
-    assert "VIRTUAL_ENV" not in env and "PYTHONHOME" not in env
-    assert env["PYTHONPATH"] == "/qgis/python" + os.pathsep + "/mine" and env["QGIS_PREFIX_PATH"] == "/qgis"
+    for name in ("VIRTUAL_ENV", "PYTHONHOME", "PROJ_DATA", "QT_PLUGIN_PATH", "CONDA_PREFIX"):
+        assert name not in env, name
+    # What points elsewhere stays: an install found through PYTHONPATH (qgis/qgis images, OSGeo4W shell, a build).
+    assert env["PYTHONPATH"] == os.pathsep.join(["/qgis/python", "/usr/share/qgis/python"])
+    assert env["GDAL_DATA"] == "/usr/share/gdal" and env["QGIS_PREFIX_PATH"] == "/qgis"
     assert runtime.child_environment(runtime.Runtime("current", [sys.executable], "me"))["VIRTUAL_ENV"] == "/venv"
+
+
+def test_the_bootstrap_says_when_its_python_lost_pyqgis():
+    """A runtime chosen at an earlier launch may have lost QGIS since: the host ends with EXIT_NO_QGIS."""
+    from standalone import _bootstrap
+    assert _bootstrap.EXIT_NO_QGIS == runtime.EXIT_NO_QGIS
+    done = subprocess.run([sys.executable, "-I", str(_STANDALONE / "_bootstrap.py")], capture_output=True, text=True,
+                          timeout=60)
+    if "qgis" in done.stderr.lower() and done.returncode == runtime.EXIT_NO_QGIS:
+        return
+    pytest.skip("this Python has PyQGIS")
+
+
+def test_a_runtime_that_lost_pyqgis_is_searched_again_once(monkeypatch):
+    calls, launched = [], []
+    monkeypatch.setattr(runtime, "resolve", lambda refresh=False: calls.append(refresh) or _usable(label=str(len(calls))))
+    monkeypatch.setattr(runtime, "launch", lambda chosen, args: launched.append(chosen.label) or (
+        runtime.EXIT_NO_QGIS if len(launched) == 1 else 0))
+    assert cli.main(["data.gpkg"]) == 0
+    assert calls == [False, True] and launched == ["1", "2"]
+
+
+def test_a_runtime_the_user_named_that_does_not_start_is_not_replaced(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv(runtime.ENV_OVERRIDE, str(tmp_path / "no-python"))
+    good = _answering(tmp_path, {"ok": True, "qgis": "3.44.0", "qgis_int": 34400})
+    monkeypatch.setattr(runtime, "candidates", lambda: [
+        runtime.Runtime("override", [str(tmp_path / "no-python")], "the named one"),
+        runtime.Runtime("install", good, "another")])
+    monkeypatch.setattr(runtime, "launch", lambda chosen, args: pytest.fail("nothing must start"))
+    assert cli.main([]) == 1
+    assert "the named one does not start" in capsys.readouterr().err
+
+
+def test_help_needs_no_qgis(monkeypatch, capsys):
+    monkeypatch.setattr(runtime, "resolve", lambda refresh=False: pytest.fail("no runtime is searched for --help"))
+    assert cli.main(["--help"]) == 0
+    text = capsys.readouterr().out
+    assert "--project" in text and "--runtime" in text and "doctor" in text
+
+
+def test_a_probe_that_hangs_is_ended_with_its_children(tmp_path):
+    script = tmp_path / "hang.py"
+    script.write_text("import subprocess, sys, time\n"
+                      "subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])\n"
+                      "time.sleep(60)\n", encoding="utf-8")
+    started = time.monotonic()
+    tried = runtime.probe(runtime.Runtime("install", [sys.executable, str(script)], "hang"), timeout=2)
+    assert not tried.usable and "no answer" in tried.describe()
+    assert time.monotonic() - started < 20, "the grandchild kept the pipes open"
 
 
 def test_launch_runs_the_host_in_the_runtime_and_returns_its_exit_code(tmp_path, monkeypatch):

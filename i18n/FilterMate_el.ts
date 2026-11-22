@@ -7394,6 +7394,31 @@ Resolved from: {1}</source>
         <translation>Εστίαση στην επιλογή</translation>
     </message>
     <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Αποθήκευση επεξεργασιών επιπέδων</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>Αποθήκευση των επεξεργασιών {0} επιπέδων;</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>Δεν ήταν δυνατή η αποθήκευση των επεξεργασιών του {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>Το {0} υπάρχει ήδη. Αντικατάσταση;</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>Εκτελούνται ακόμη {0} εργασίες. Διακοπή και έξοδος;</translation>
+    </message>
+    <message>
         <location filename="../../standalone/host/window.py" line="211"/>
         <source>Refresh</source>
         <translation>Ανανέωση</translation>

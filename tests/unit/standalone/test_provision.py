@@ -165,8 +165,27 @@ def test_no_runtime_is_reported_until_setup_ran_to_the_end():
     assert any(candidate.kind == "private" for candidate in runtime.candidates())
 
 
+def test_remove_leaves_alone_a_runtime_folder_setup_did_not_make():
+    """FILTERMATE_HOME pointed at a folder that has a runtime/ of its own: never deleted."""
+    os.makedirs(paths.runtime_dir())
+    (Path(paths.runtime_dir()) / "precious.txt").write_text("mine", encoding="utf-8")
+    with pytest.raises(provision.ProvisionError, match="left alone"):
+        provision.remove()
+    assert (Path(paths.runtime_dir()) / "precious.txt").exists()
+
+
+def test_setup_refuses_a_runtime_folder_it_did_not_make(monkeypatch):
+    os.makedirs(paths.runtime_dir())
+    (Path(paths.runtime_dir()) / "precious.txt").write_text("mine", encoding="utf-8")
+    monkeypatch.setattr(provision, "free_bytes", lambda: provision.NEEDED_BYTES * 2)
+    monkeypatch.setattr(provision, "fetch_micromamba", lambda log=print: pytest.fail("nothing must be downloaded"))
+    with pytest.raises(provision.ProvisionError, match="not made by FilterMate"):
+        provision.install(log=lambda _: None)
+
+
 def test_remove_deletes_the_runtime_folder_and_nothing_else():
     os.makedirs(provision.environment_dir())
+    Path(provision.marker_path()).write_text("", encoding="utf-8")
     profile = Path(paths.profile_dir())
     profile.mkdir(parents=True)
     (profile / "settings.ini").write_text("kept", encoding="utf-8")

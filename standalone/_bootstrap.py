@@ -16,8 +16,16 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _PACKAGE_DIR = os.path.dirname(_HERE)
 _NAME = "filter_mate"
 
+# Exit code when this Python has no PyQGIS (runtime.EXIT_NO_QGIS): the launcher then searches again.
+EXIT_NO_QGIS = 86
+
+
+def _same(first: str, second: str) -> bool:
+    return os.path.normcase(os.path.realpath(first)) == os.path.normcase(os.path.realpath(second))
+
+
 # Run as a script, this folder is first on the path: its modules (cli, runtime, ...) must not be importable bare.
-sys.path[:] = [entry for entry in sys.path if os.path.abspath(entry or os.getcwd()) != _HERE]
+sys.path[:] = [entry for entry in sys.path if not _same(entry or os.getcwd(), _HERE)]
 
 
 def register_package():
@@ -34,6 +42,9 @@ def register_package():
 
 
 def main(argv=None):
+    if importlib.util.find_spec("qgis") is None:  # found, not imported: the host sets the environment of QGIS first
+        print("FilterMate: this Python has no PyQGIS any more.", file=sys.stderr)
+        return EXIT_NO_QGIS
     register_package()
     from filter_mate.standalone.host.app import main as host_main
     return host_main(sys.argv[1:] if argv is None else argv)

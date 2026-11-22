@@ -7,39 +7,17 @@ profile is the application's own (``standalone.paths.profile_dir``): no QGIS pro
 is read or written.
 """
 
-import argparse
 import importlib
 import os
 import signal
 import sys
 import traceback
 
-from .. import PACKAGE, PACKAGE_DIR, paths, version
+from .. import PACKAGE, PACKAGE_DIR, paths
+from .options import build_parser
 
 ORGANIZATION = "FilterMate"
 APPLICATION = "FilterMateStandalone"
-
-
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="filtermate",
-        description="FilterMate as an application of its own: the dock of the QGIS plugin, a map and a layer panel.")
-    parser.add_argument("paths", nargs="*", metavar="FILE",
-                        help="a QGIS project (.qgz, .qgs) or data files to open (GeoPackage, Shapefile, GeoTIFF, LAZ...)")
-    parser.add_argument("--project", metavar="FILE", help="a QGIS project to open")
-    parser.add_argument("--basemap", action="store_true", help="add the OpenStreetMap basemap")
-    parser.add_argument("--lang", metavar="CODE", help="language of the interface (fr, en, de...); the system's by default")
-    parser.add_argument("--profile", metavar="FOLDER",
-                        help=f"folder of the application's settings (default: {paths.profile_dir()})")
-    parser.add_argument("--size", metavar="WxH", help="size of the window, for instance 1600x1000")
-    parser.add_argument("--maximized", action="store_true", help="open the window maximized (the size of the screen)")
-    parser.add_argument("--offscreen", action="store_true", help="no window on screen (automation, servers)")
-    parser.add_argument("--code", metavar="FILE", help="run this Python file once the window is up, as `qgis --code`")
-    parser.add_argument("--no-plugin", action="store_true",
-                        help="do not load FilterMate: the file given to --code loads it itself")
-    parser.add_argument("--no-welcome", action="store_true", help="skip the dialogs of a first start")
-    parser.add_argument("--version", action="version", version=f"FilterMate {version()}")
-    return parser
 
 
 def prepare_environment(options) -> str:
@@ -285,16 +263,29 @@ def main(argv=None) -> int:
     app.processEvents()
     init_processing()
 
+    welcome_keys = ("FilterMate/discord_welcome_dismissed", "FilterMate/whats_new_seen")
+    kept_welcome = {}
     if automated or options.no_welcome:
+        # For this session only: the values a user would see next time are put back when it ends.
         settings = QSettings()
+        kept_welcome = {key: settings.value(key) for key in welcome_keys}
         settings.setValue("FilterMate/discord_welcome_dismissed", True)
         settings.setValue("FilterMate/whats_new_seen", 9999)
+
+    def restore_welcome():
+        settings = QSettings()
+        for key, value in kept_welcome.items():
+            if value is None:
+                settings.remove(key)
+            else:
+                settings.setValue(key, value)
 
     state = {"plugin": None}
 
     def closing():
         unload_plugin()
         state["plugin"] = None
+        restore_welcome()
 
     window.closing = closing
 
@@ -324,6 +315,7 @@ def main(argv=None) -> int:
     if state["plugin"] is not None:  # the loop ended without the window closing (app.exit from a script)
         closing()
     window.disconnect_project()
+    restore_welcome()
     try:
         from qgis.core import QgsProject
         QgsProject.instance().clear()
@@ -339,9 +331,9 @@ def finish(app, code: int):
     application object is gone, and the process dies in ``QWidget::~QWidget`` (seen on most
     runs under a real display, QGIS 3.22, 3.44 and 4.3: exit codes 134 and 139). Deleting the
     windows first is no better: Qt then dies in the deferred deletions, one run in four. So
-    nothing is destroyed: the windows are hidden, the settings written, QGIS closed, what
-    Python runs at exit (``atexit``: the database pools and the caches of the plugin) runs, the
-    logs are flushed, and the process ends there with the application's exit code. The system
+    nothing is destroyed: the windows are hidden, what Python runs at exit (``atexit``: the
+    database pools and the caches of the plugin) runs while QGIS still runs, as in QGIS, the
+    settings and the logs are written, QGIS is closed, and the process ends there with the application's exit code. The system
     takes the memory back, as it does for any process.
     """
     import atexit
@@ -351,18 +343,22 @@ def finish(app, code: int):
     try:
         for widget in app.topLevelWidgets():
             widget.hide()
-        QSettings().sync()
     except Exception:  # nosec B110 - leaving anyway
         traceback.print_exc()
-    try:
-        app.exitQgis()
-    except Exception:  # nosec B110 - leaving anyway
-        traceback.print_exc()
+    # The order of QGIS: Python's own end (the atexit handlers of the plugin) while QGIS still runs, then QGIS.
     try:
         atexit._run_exitfuncs()
     except Exception:  # nosec B110 - leaving anyway
         traceback.print_exc()
+    try:
+        QSettings().sync()
+    except Exception:  # nosec B110 - leaving anyway
+        traceback.print_exc()
     logging.shutdown()
+    try:
+        app.exitQgis()
+    except Exception:  # nosec B110 - leaving anyway
+        traceback.print_exc()
     for stream in (sys.stdout, sys.stderr):
         try:
             stream.flush()

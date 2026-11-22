@@ -63,7 +63,10 @@ class StandaloneInterface(QObject):
         return self._window.tree_view.currentLayer()
 
     def setActiveLayer(self, layer) -> bool:
-        if layer is None or QgsProject.instance().mapLayer(layer.id()) is None:
+        try:
+            if layer is None or QgsProject.instance().mapLayer(layer.id()) is None:
+                return False
+        except RuntimeError:  # a layer already deleted
             return False
         self._window.tree_view.setCurrentLayer(layer)
         return True
@@ -126,6 +129,12 @@ class StandaloneInterface(QObject):
 
     def actionIdentify(self):
         return self._window.actions["identify"]
+
+    def actionSaveAllEdits(self):
+        return self._window.actions["save_edits"]
+
+    def actionSaveActiveLayerEdits(self):
+        return self._window.actions["save_edits"]
 
     def actionOpenTable(self):
         return self._window.actions["table"]

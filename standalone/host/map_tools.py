@@ -116,7 +116,14 @@ class SelectTool(_LayerTool):
             centre = self.toMapCoordinates(event.pos())
             rectangle = QgsRectangle(centre.x() - radius, centre.y() - radius, centre.x() + radius, centre.y() + radius)
         try:
-            layer.selectByRect(self.toLayerCoordinates(layer, rectangle), _behavior(event))
+            if dragging:
+                layer.selectByRect(self.toLayerCoordinates(layer, rectangle), _behavior(event))
+            else:  # a click: the feature under the pointer, the closest when several are within reach
+                area = self.toLayerCoordinates(layer, rectangle)
+                point = QgsGeometry.fromPointXY(self.toLayerCoordinates(layer, self.toMapCoordinates(event.pos())))
+                near = [(f.geometry().distance(point), f.id()) for f in layer.getFeatures(
+                    QgsFeatureRequest().setFilterRect(area).setNoAttributes()) if f.hasGeometry()]
+                layer.selectByIds([min(near)[1]] if near else [], _behavior(event))
         except Exception as error:  # a rectangle that does not project into the layer's CRS
             self._window.message_bar.pushWarning("FilterMate", str(error))
 

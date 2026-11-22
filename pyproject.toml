@@ -6,7 +6,7 @@
 # this file nor standalone/.
 
 [build-system]
-requires = ["hatchling>=1.21"]
+requires = ["hatchling>=1.27"]  # license-files as a list (PEP 639)
 build-backend = "hatchling.build"
 
 [project]
@@ -32,11 +32,6 @@ classifiers = [
 # None: the launcher is standard library only, and the QGIS libraries are not on PyPI. It finds
 # them in a QGIS install or installs a runtime of its own (`filtermate setup`).
 dependencies = []
-
-[project.optional-dependencies]
-# For the REST API and the MCP server of filtermate_api, in the Python that has PyQGIS.
-api = ["fastapi>=0.110.0,<1.0.0", "uvicorn[standard]>=0.29.0,<1.0.0", "pydantic>=2.0,<3.0"]
-mcp = ["mcp>=1.7,<3"]
 
 [project.urls]
 Homepage = "https://imagodata.github.io/filter_mate/"

@@ -36,6 +36,7 @@ from .qt import _tr
 
 PROJECT_SUFFIXES = (".qgs", ".qgz")
 OSM_URI = "type=xyz&url=https://tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&zmax=19&zmin=0"
+DATABASE_PROVIDERS = ("postgres", "spatialite", "mssql", "oracle", "hana", "postgresraster")
 # Above this many tables in one file, the user chooses instead of getting them all.
 ASK_ABOVE = 8
 
@@ -91,27 +92,48 @@ class Sources(QObject):
             return None
         return self._adopt(layer, name)
 
-    def _first_announcement(self, uri: str) -> bool:
+    @staticmethod
+    def _key(uri: str, provider: str) -> str:
+        """One spelling per layer: a database URI written twice may differ in the order of its keys."""
+        if provider in DATABASE_PROVIDERS:
+            try:
+                return provider + ":" + QgsDataSourceUri(uri).uri(False)
+            except Exception:  # nosec B110 - compared as written
+                pass
+        return provider + ":" + uri
+
+    def _first_announcement(self, key: str) -> bool:
         """False when a source screen announces again the layer it announced an instant ago.
 
         From QGIS 3.34 a screen emits ``addLayer`` and keeps emitting the older signal of its kind: both are
         connected, so that every version and every screen adds its layers, and the second one is dropped here.
+        The instant counts from the end of the first add, which can take seconds (a WFS, a PostGIS table).
         """
         now = time.monotonic()
-        self._recent = {known: at for known, at in self._recent.items() if now - at < 0.3}
-        if uri in self._recent:
-            return False
-        self._recent[uri] = now
-        return True
+        self._recent = {known: at for known, at in self._recent.items() if now - at < 1.0}
+        return key not in self._recent
+
+    def _done(self, key: str):
+        self._recent[key] = time.monotonic()
 
     def _announced(self, kind: str, uri: str, name: str = "", provider: str = ""):
-        if kind and self._first_announcement(uri):
-            self.add_layer(kind, uri, name, provider)
+        key = self._key(uri, provider)
+        if kind and self._first_announcement(key):
+            self._recent[key] = time.monotonic()
+            try:
+                self.add_layer(kind, uri, name, provider)
+            finally:
+                self._done(key)
 
-    def _announced_sources(self, uris, provider: str):
+    def _announced_sources(self, uris, provider: str, encoding: str = ""):
         for uri in uris:
-            if self._first_announcement(uri):
-                self.open_source(uri, provider)
+            key = self._key(uri, provider)
+            if self._first_announcement(key):
+                self._recent[key] = time.monotonic()
+                try:
+                    self.open_source(uri, provider, encoding)
+                finally:
+                    self._done(key)
 
     def _adopt(self, layer, name: str):
         if layer is None or not layer.isValid():
@@ -137,7 +159,7 @@ class Sources(QObject):
             added += len(self.open_source(path))
         return added
 
-    def open_source(self, uri: str, provider: str = ""):
+    def open_source(self, uri: str, provider: str = "", encoding: str = ""):
         """Every layer a file or a URI holds (the tables of a GeoPackage, the bands file of a raster...)."""
         try:
             registry = QgsProviderRegistry.instance()
@@ -157,6 +179,8 @@ class Sources(QObject):
             return []
         if len(details) > ASK_ABOVE and self.interactive:
             details = _choose_sublayers(self._window, os.path.basename(uri), details)
+            if not details:  # the choice was cancelled, or nothing ticked
+                return []
         from qgis.core import QgsProviderSublayerDetails
         options = QgsProviderSublayerDetails.LayerOptions(QgsProject.instance().transformContext())
         layers = []
@@ -166,6 +190,8 @@ class Sources(QObject):
             except Exception:
                 layer = None
             if layer is not None and layer.isValid():
+                if encoding and isinstance(layer, QgsVectorLayer):  # the encoding chosen in the source screen
+                    layer.setProviderEncoding(encoding)
                 layers.append(layer)
         if layers:
             QgsProject.instance().addMapLayers(layers)
@@ -181,7 +207,7 @@ class Sources(QObject):
     def add_basemap(self):
         """OpenStreetMap under the layers, for a map that is not a blank page."""
         for layer in QgsProject.instance().mapLayers().values():
-            if layer.source() == OSM_URI:
+            if layer.providerType() == "wms" and "tile.openstreetmap.org" in layer.source():
                 return layer
         layer = QgsRasterLayer(OSM_URI, "OpenStreetMap", "wms")
         if not layer.isValid():
@@ -247,7 +273,7 @@ class Sources(QObject):
             ("addMeshLayer", lambda uri, name, provider="mdal": self._announced("mesh", uri, name, provider)),
             ("addVectorTileLayer", lambda uri, name: self._announced("vectortile", uri, name, "")),
             ("addPointCloudLayer", lambda uri, name, provider: self._announced("pointcloud", uri, name, provider)),
-            ("addVectorLayers", lambda uris, _encoding="", _kind="": self._announced_sources(uris, "ogr")),
+            ("addVectorLayers", lambda uris, encoding="", _kind="": self._announced_sources(uris, "ogr", encoding)),
             ("addRasterLayers", lambda uris: self._announced_sources(uris, "gdal")),
             ("addDatabaseLayers", self.add_database_layers),
             ("connectionsChanged", self.reload_connections),

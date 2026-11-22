@@ -7394,6 +7394,31 @@ Resolved from: {1}</source>
         <translation>ซูมไปที่การเลือก</translation>
     </message>
     <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>บันทึกการแก้ไขเลเยอร์</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>บันทึกการแก้ไขของ {0} เลเยอร์หรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>ไม่สามารถบันทึกการแก้ไขของ {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>มี {0} อยู่แล้ว แทนที่หรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>ยังมีงานทำงานอยู่ {0} งาน หยุดและออกหรือไม่?</translation>
+    </message>
+    <message>
         <location filename="../../standalone/host/window.py" line="211"/>
         <source>Refresh</source>
         <translation>รีเฟรช</translation>

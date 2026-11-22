@@ -207,37 +207,130 @@ def candidates() -> List[Runtime]:
 # --- trying one ---------------------------------------------------------------------------------------------------
 
 
+# Variables that tie a process to one environment. Those that point into the launcher's own environment (its
+# virtual environment, the conda environment active in its shell) would point the QGIS of another install at the
+# wrong PROJ database, Qt plugins or Python packages. Those that point elsewhere are kept: a QGIS built from source,
+# the qgis/qgis images and the OSGeo4W shell find PyQGIS through PYTHONPATH.
+ALWAYS_DROPPED = ("PYTHONHOME", "VIRTUAL_ENV", "__PYVENV_LAUNCHER__", "PYTHONSTARTUP")
+PATH_LISTS = ("PYTHONPATH", "QT_PLUGIN_PATH", "GDAL_DRIVER_PATH")
+SINGLE_PATHS = ("QGIS_PREFIX_PATH", "PROJ_DATA", "PROJ_LIB", "GDAL_DATA", "CONDA_PREFIX")
+
+
+def _launcher_roots() -> List[str]:
+    """The folders of the launcher's own environment: its virtual environment, the active conda environment."""
+    roots = []
+    if sys.prefix != getattr(sys, "base_prefix", sys.prefix):
+        roots.append(sys.prefix)
+    if os.environ.get("CONDA_PREFIX"):
+        roots.append(os.environ["CONDA_PREFIX"])
+    return [os.path.normcase(os.path.abspath(root)) for root in roots]
+
+
+def _inside(path: str, roots: List[str]) -> bool:
+    path = os.path.normcase(os.path.abspath(path)) if path else ""
+    return any(path == root or path.startswith(root + os.sep) for root in roots)
+
+
+# Exit code of the host when its Python has no PyQGIS any more (the runtime was uninstalled since it was chosen).
+EXIT_NO_QGIS = 86
+# What the other Python runs: the script and the arguments come through the environment, never through the command
+# line, which a ``.bat`` hands to cmd.exe (``&``, ``%VAR%`` and ``^`` in a file name or a folder would be read as
+# commands, variables or escapes there).
+LOADER = ("import json, os, runpy, sys; script = os.environ.pop('FILTERMATE_SCRIPT'); "
+          "sys.argv = [script] + json.loads(os.environ.pop('FILTERMATE_SCRIPT_ARGS', '[]')); "
+          "runpy.run_path(script, run_name='__main__')")
+
+
 def child_environment(runtime: Runtime, extra: Optional[Dict[str, str]] = None) -> Dict[str, str]:
-    """The environment of a process started in ``runtime``."""
+    """The environment of a process started in ``runtime``: the launcher's, without what ties it to another install."""
     env = dict(os.environ)
-    for name, value in runtime.env.items():
-        if name == "PYTHONPATH" and env.get("PYTHONPATH"):
-            value = value + os.pathsep + env["PYTHONPATH"]
-        env[name] = value
-    # A virtual environment of the launcher must not leak into another Python.
     if runtime.kind != "current":
-        for name in ("PYTHONHOME", "VIRTUAL_ENV", "__PYVENV_LAUNCHER__"):
+        roots = _launcher_roots()
+        for name in ALWAYS_DROPPED:
             env.pop(name, None)
+        for name in SINGLE_PATHS:
+            if name in env and _inside(env[name], roots):
+                env.pop(name)
+        if roots and "CONDA_PREFIX" not in env:
+            env.pop("CONDA_DEFAULT_ENV", None)
+        for name in PATH_LISTS:
+            if name in env:
+                kept = [entry for entry in env[name].split(os.pathsep) if entry and not _inside(entry, roots)]
+                if kept:
+                    env[name] = os.pathsep.join(kept)
+                else:
+                    env.pop(name)
+    for name, value in runtime.env.items():
+        if name in PATH_LISTS and env.get(name):
+            value = value + os.pathsep + env[name]  # the runtime's own entries first
+        env[name] = value
     env.update(extra or {})
     return env
 
 
+def script_command(runtime: Runtime, script: str, arguments: Optional[List[str]] = None):
+    """The command and the environment that run ``script`` with ``arguments`` in the Python of ``runtime``."""
+    env = {"FILTERMATE_SCRIPT": script, "FILTERMATE_SCRIPT_ARGS": json.dumps(list(arguments or []))}
+    return runtime.command + ["-c", LOADER], env
+
+
+def _run(command: List[str], env: Dict[str, str], timeout: float):
+    """Run ``command``, its output captured; on a timeout, the whole tree is ended (a ``.bat`` or ``micromamba run``
+    starts the Python as a child, which would keep the pipes open). Returns (code, stdout, stderr), code None on a
+    timeout."""
+    options = {}
+    if os.name == "nt":
+        options["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    else:
+        options["start_new_session"] = True
+    # nosec B603 - a Python found on this machine, a fixed argument list
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL,  # nosec B603
+                               env=env, **options)
+    try:
+        out, err = process.communicate(timeout=timeout)
+        code = process.returncode
+    except subprocess.TimeoutExpired:
+        _end_tree(process)
+        try:
+            out, err = process.communicate(timeout=10)
+        except subprocess.TimeoutExpired:
+            out, err = b"", b""
+        code = None
+    return code, out.decode("utf-8", "replace"), err.decode("utf-8", "replace")
+
+
+def _end_tree(process) -> None:
+    try:
+        if os.name == "nt":
+            # nosec B603 B607 - taskkill of Windows on a process this module started
+            subprocess.run(["taskkill", "/T", "/F", "/PID", str(process.pid)], capture_output=True, timeout=30)  # nosec
+        else:
+            import signal
+            os.killpg(process.pid, signal.SIGKILL)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    try:
+        process.kill()
+    except OSError:
+        pass
+
+
 def probe(runtime: Runtime, timeout: float = 180.0) -> Runtime:
     """Start the Python of ``runtime`` and record what it has in ``runtime.info``."""
+    command, extra = script_command(runtime, PROBE_SCRIPT)
+    extra["QT_QPA_PLATFORM"] = "offscreen"
     try:
-        # nosec B603 - the command is a Python found on this machine, the argument a file of this package
-        done = subprocess.run(runtime.command + [PROBE_SCRIPT], capture_output=True, text=True, timeout=timeout,  # nosec B603
-                              env=child_environment(runtime, {"QT_QPA_PLATFORM": "offscreen"}))
+        code, out, err = _run(command, child_environment(runtime, extra), timeout)
     except FileNotFoundError:
         runtime.info = {"ok": False, "error": "not found"}
-        return runtime
-    except subprocess.TimeoutExpired:
-        runtime.info = {"ok": False, "error": f"no answer after {int(timeout)} s"}
         return runtime
     except OSError as error:
         runtime.info = {"ok": False, "error": str(error)}
         return runtime
-    for line in (done.stdout or "").splitlines():
+    if code is None:
+        runtime.info = {"ok": False, "error": f"no answer after {int(timeout)} s"}
+        return runtime
+    for line in out.splitlines():
         if line.startswith("FM_RUNTIME "):
             try:
                 runtime.info = json.loads(line[len("FM_RUNTIME "):])
@@ -246,8 +339,8 @@ def probe(runtime: Runtime, timeout: float = 180.0) -> Runtime:
             if not runtime.info.get("ok"):
                 runtime.info["error"] = _short(str(runtime.info.get("error") or "no PyQGIS"))
             return runtime
-    tail = (done.stderr or done.stdout or "").strip().splitlines()
-    runtime.info = {"ok": False, "error": _short(tail[-1]) if tail else f"exit code {done.returncode}"}
+    tail = (err or out).strip().splitlines()
+    runtime.info = {"ok": False, "error": _short(tail[-1]) if tail else f"exit code {code}"}
     return runtime
 
 
@@ -260,8 +353,11 @@ def _short(text: str, limit: int = 160) -> str:
 
 
 def _stamp(runtime: Runtime) -> float:
+    executable = runtime.command[0]
+    if not os.path.exists(executable):
+        executable = shutil.which(executable) or executable  # an override given as a bare command name
     try:
-        return os.path.getmtime(runtime.command[0])
+        return os.path.getmtime(executable)
     except OSError:
         return 0.0
 
@@ -315,6 +411,9 @@ def choose(tried: List[Runtime]) -> Optional[Runtime]:
     return max(rest, key=lambda runtime: int(runtime.info.get("qgis_int") or 0)) if rest else None
 
 
+last_override_failure: Optional[Runtime] = None  # set by resolve() when the runtime the user named does not start
+
+
 def resolve(refresh: bool = False) -> Optional[Runtime]:
     """The runtime to start the host in, None when this machine has none.
 
@@ -327,11 +426,17 @@ def resolve(refresh: bool = False) -> Optional[Runtime]:
         if cached is not None:
             return cached
     found = candidates()
+    global last_override_failure
+    last_override_failure = None
     for kind in ("override", "current", "private"):
         for runtime in found:
             if runtime.kind == kind and probe(runtime).usable:
                 _write_cache(runtime)
                 return runtime
+            if runtime.kind == "override":
+                # What the user named does not start: say so rather than start another QGIS behind their back.
+                last_override_failure = runtime
+                return None
     chosen = choose([probe(runtime) for runtime in found if runtime.kind in ("install", "conda")])
     if chosen is not None:
         _write_cache(chosen)
@@ -341,21 +446,26 @@ def resolve(refresh: bool = False) -> Optional[Runtime]:
 # --- starting -----------------------------------------------------------------------------------------------------
 
 
-def host_command(runtime: Runtime, host_args: List[str]) -> List[str]:
-    return runtime.command + [BOOTSTRAP_SCRIPT] + list(host_args)
+def host_command(runtime: Runtime, host_args: List[str]):
+    """The command and the extra environment that start the host in ``runtime``."""
+    return script_command(runtime, BOOTSTRAP_SCRIPT, host_args)
 
 
 def launch(runtime: Runtime, host_args: List[str]) -> int:
-    """Run the host in ``runtime`` and return its exit code."""
+    """Run the host in ``runtime`` and return its exit code (``EXIT_NO_QGIS`` when that Python lost PyQGIS)."""
     if runtime.kind == "current":
         from . import _bootstrap
         return int(_bootstrap.main(list(host_args)) or 0)
+    command, extra = host_command(runtime, host_args)
     try:
-        # nosec B603 - same command as the probe, with the arguments the user gave
-        return subprocess.call(host_command(runtime, host_args), env=child_environment(runtime))  # nosec B603
+        # nosec B603 - same command as the probe, the arguments of the user passed in the environment
+        code = subprocess.call(command, env=child_environment(runtime, extra))  # nosec B603
     except KeyboardInterrupt:
         return 130
     except OSError as error:
         forget_cache()
         print(f"FilterMate: cannot start {runtime.label}: {error}", file=sys.stderr)
         return 1
+    if code == EXIT_NO_QGIS:
+        forget_cache()
+    return code

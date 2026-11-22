@@ -7394,6 +7394,31 @@ Resolved from: {1}</source>
         <translation>ወደ ምርጫው አጉላ</translation>
     </message>
     <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>የንብርብር አርትዖቶችን አስቀምጥ</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>የ{0} ንብርብሮች አርትዖቶች ይቀመጡ?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>የ{0} አርትዖቶች ሊቀመጡ አልቻሉም: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} አስቀድሞ አለ። ይተካ?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>{0} ተግባራት አሁንም በሂደት ላይ ናቸው። አቁመህ ትወጣለህ?</translation>
+    </message>
+    <message>
         <location filename="../../standalone/host/window.py" line="211"/>
         <source>Refresh</source>
         <translation>አድስ</translation>

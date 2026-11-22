@@ -7,6 +7,7 @@ administrator rights, nothing outside that folder, removed with ``filtermate set
 """
 
 import hashlib
+import http.client
 import os
 import platform
 import shutil
@@ -46,6 +47,13 @@ def platform_tag() -> Optional[str]:
         return {"x86_64": "linux-64", "amd64": "linux-64", "aarch64": "linux-aarch64", "arm64": "linux-aarch64",
                 "ppc64le": "linux-ppc64le"}.get(machine)
     return None
+
+
+MARKER = ".filtermate-runtime"  # written first by setup: `setup --remove` deletes only a folder that has it
+
+
+def marker_path() -> str:
+    return os.path.join(paths.runtime_dir(), MARKER)
 
 
 def micromamba_path() -> str:
@@ -103,7 +111,7 @@ def _download(url: str, target: str, log: Callable[[str], None]) -> None:
                     shown = percent // 20
                     log(f"  {percent} %")
         os.replace(partial, target)
-    except OSError as error:
+    except (OSError, http.client.HTTPException) as error:  # IncompleteRead is no OSError
         try:
             os.remove(partial)
         except OSError:
@@ -117,7 +125,7 @@ def _read_url(url: str) -> str:
     try:
         with urllib.request.urlopen(url, timeout=120) as response:  # nosec B310 - https only
             return response.read().decode("utf-8", "replace")
-    except OSError as error:
+    except (OSError, http.client.HTTPException) as error:
         raise ProvisionError(f"Download failed ({url}): {error}") from error
 
 
@@ -142,11 +150,17 @@ def fetch_micromamba(log: Callable[[str], None] = print) -> str:
     log(f"Downloading micromamba ({tag})...")
     staged = target + ".new"
     _download(RELEASES + f"micromamba-{tag}", staged, log)
-    expected = _read_url(RELEASES + f"micromamba-{tag}.sha256").split()[0].strip().lower()
-    actual = _sha256(staged)
-    if len(expected) != 64 or actual != expected:
-        os.remove(staged)
-        raise ProvisionError("The micromamba download does not match its published SHA-256: nothing was installed.")
+    try:
+        words = _read_url(RELEASES + f"micromamba-{tag}.sha256").split()
+        expected = words[0].strip().lower() if words else ""
+        if len(expected) != 64 or _sha256(staged) != expected:
+            raise ProvisionError("The micromamba download does not match its published SHA-256: nothing was installed.")
+    except BaseException:
+        try:
+            os.remove(staged)
+        except OSError:
+            pass
+        raise
     if os.name != "nt":
         os.chmod(staged, os.stat(staged).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     os.replace(staged, target)
@@ -175,6 +189,13 @@ def install(log: Callable[[str], None] = print, packages=PACKAGES):
         raise ProvisionError(
             f"Not enough free space in {paths.runtime_dir()}: {free_bytes() / 1024 ** 3:.1f} GB free, "
             f"about {NEEDED_BYTES // 1024 ** 3} GB needed. Set FILTERMATE_HOME to a folder on another disk.")
+    folder = paths.runtime_dir()
+    if os.path.isdir(folder) and os.listdir(folder) and not os.path.exists(marker_path()):
+        raise ProvisionError(f"{folder} exists and was not made by FilterMate: nothing was installed there. "
+                             "Set FILTERMATE_HOME to another folder.")
+    os.makedirs(folder, exist_ok=True)
+    with open(marker_path(), "w", encoding="utf-8") as handle:
+        handle.write("The QGIS runtime of FilterMate (filtermate setup). `filtermate setup --remove` deletes this folder.\n")
     micromamba = fetch_micromamba(log)
     log(f"Installing QGIS from {CHANNEL} into {environment_dir()} (several minutes)...")
     code = 1
@@ -218,8 +239,14 @@ def remove() -> bool:
     folder = paths.runtime_dir()
     if not os.path.isdir(folder):
         return False
-    shutil.rmtree(folder)
+    if not os.path.exists(marker_path()):
+        raise ProvisionError(f"{folder} was not made by `filtermate setup`: it is left alone.")
     runtime_module.forget_cache()
+    failed = []
+    shutil.rmtree(folder, onerror=lambda _function, path, _info: failed.append(path))
+    if failed:
+        raise ProvisionError(f"{len(failed)} files of {folder} could not be deleted (FilterMate still running?), "
+                             f"for instance {failed[0]}. Close it and run `filtermate setup --remove` again.")
     return True
 
 

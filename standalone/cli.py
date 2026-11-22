@@ -97,7 +97,11 @@ def cmd_setup(args: List[str]) -> int:
         if not options.yes and not _confirm(f"Delete {folder}?"):
             _say("Nothing deleted.")
             return 1
-        provision.remove()
+        try:
+            provision.remove()
+        except provision.ProvisionError as error:
+            print(f"FilterMate: {error}", file=sys.stderr)
+            return 1
         _say(f"Deleted {folder}.")
         return 0
     existing = provision.installed_runtime()
@@ -106,7 +110,7 @@ def cmd_setup(args: List[str]) -> int:
         _say(f"  {folder}")
         return 0
     _say(f"This downloads QGIS from conda-forge into {folder}")
-    _say(f"(about 1.5 GB to download, {provision.NEEDED_BYTES // 1024 ** 3} GB of free space asked). Nothing else is changed.")
+    _say(f"(about 0.8 GB to download, 4.5 GB once installed; {provision.NEEDED_BYTES // 1024 ** 3} GB of free space asked). Nothing else is changed.")
     if not options.yes and not _confirm("Continue?"):
         _say("Nothing installed. Run `filtermate setup --yes` to install without the question.")
         return 1
@@ -142,10 +146,20 @@ def cmd_run(args: List[str]) -> int:
             host_args.append(argument)
         index += 1
     if any(a in ("-h", "--help") for a in host_args):
-        _say(__doc__.strip())
+        # Answered here: the options of the host need no QGIS to be listed, and a machine without one must not be
+        # offered an install for a --help.
+        from .host.options import build_parser
+        build_parser().print_help()
         _say("\nLauncher options:\n  --runtime PYTHON   start in this Python (same as {0})\n"
-             "  --refresh          search for a runtime again instead of reusing the last one\n".format(runtime.ENV_OVERRIDE))
+             "  --refresh          search for a runtime again instead of reusing the last one\n\n"
+             "Other commands: filtermate doctor | setup [--remove] | version".format(runtime.ENV_OVERRIDE))
+        return 0
+    runtime.last_override_failure = None
     chosen = runtime.resolve(refresh=refresh)
+    if chosen is None and runtime.last_override_failure is not None:
+        failed = runtime.last_override_failure
+        print(f"FilterMate: {failed.label} does not start: {failed.describe()}", file=sys.stderr)
+        return 1
     if chosen is None:
         print(no_runtime_message(), file=sys.stderr)
         if not _confirm("\nInstall the runtime now?"):
@@ -155,7 +169,12 @@ def cmd_run(args: List[str]) -> int:
         except provision.ProvisionError as error:
             print(f"FilterMate: {error}", file=sys.stderr)
             return 1
-    return runtime.launch(chosen, host_args)
+    code = runtime.launch(chosen, host_args)
+    if code == runtime.EXIT_NO_QGIS and not refresh:
+        # The QGIS chosen at an earlier launch is gone (uninstalled, its environment deleted): search again, once.
+        print(f"FilterMate: {chosen.label} has no PyQGIS any more; searching again.", file=sys.stderr)
+        return cmd_run(["--refresh"] + list(args))
+    return code
 
 
 def main(argv: Optional[List[str]] = None) -> int:

@@ -50,6 +50,10 @@ again):
    `QGIS*.app` on macOS, the conda environments listed in `~/.conda/environments.txt`.
 
 Each candidate is started once to check that it imports `qgis.gui`; a wrong guess costs a second.
+The other Python gets the files to open and the options through its environment, never through
+its command line: the `python-qgis.bat` of Windows hands that line to cmd.exe, which would read
+`&` or `%` in a file name. Variables that point into the environment of the command itself (its
+virtual environment, an active conda environment) are not passed on.
 
 ```bash
 filtermate doctor          # what was found, what FilterMate starts with
@@ -61,14 +65,20 @@ filtermate doctor --json   # the same, for a script
 On a machine with no QGIS:
 
 ```bash
-filtermate setup           # asks, then installs QGIS from conda-forge (about 1.5 GB to download)
+filtermate setup           # asks, then installs QGIS from conda-forge (0.8 GB to download, 4.5 GB on disk)
 filtermate setup --remove  # deletes it
 ```
 
 The runtime goes in the folder of the application, without administrator rights: micromamba
 (one file, checked against its published SHA-256) creates a conda-forge environment holding
-QGIS. A stalled download is tried again three times; what was downloaded is kept for the next
-attempt.
+QGIS 4.2 or later. A stalled download is tried again three times; what was downloaded is kept
+for the next attempt. `setup` and `setup --remove` touch only a `runtime/` folder that `setup`
+made (it leaves a marker there). Checked from a bare Linux machine (a `python:3.12-slim`
+container); not yet on Windows or macOS.
+
+When the QGIS chosen at an earlier launch is gone (uninstalled, an environment deleted), the
+next launch says so and searches again. A Python named with `FILTERMATE_QGIS_PYTHON` or
+`--runtime` that does not start is reported, never replaced by another QGIS.
 
 ## Where things are kept
 
@@ -122,9 +132,12 @@ api.apply_filter("parcels", "\"surface\" > 1000", "my-script")
 ## What differs from QGIS
 
 - One map, one layer panel; no print layouts, no editing toolbar, no Processing toolbox window
-  (the algorithms run: the agent and the automation use them).
+  (the algorithms run: the agent and the automation use them). **Layer > Save layer edits** saves
+  what the agent edited; leaving, opening another project or closing the window asks first, as
+  QGIS does, and so do running tasks (an export cut short would leave a partial file).
 - Other QGIS plugins are not loaded: the extensions of FilterMate that need one (QFieldCloud needs
-  QFieldSync, favorites sharing needs Resource Sharing) say once that they are off.
+  QFieldSync, favorites sharing needs Resource Sharing) say once that they are off (their message
+  says to restart QGIS: it is written for the plugin).
 - Each plugin menu sits in the menu bar instead of under Vector.
 - On Windows, the console the command was started from stays open while the application runs.
 
