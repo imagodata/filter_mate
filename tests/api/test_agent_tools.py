@@ -187,6 +187,16 @@ class TestHandlers:
         assert run(accessor, root, "map_theme", action="erase", name="Relief")[0] is True
         assert run(accessor, root, "map_theme", action="list")[1]["themes"] == ["Relief"]
 
+    def test_suggest_crs_and_a_projection_made_for_the_data(self, api):
+        """2026-11-22: projections suited to the data; a PROJ: string set as it is."""
+        accessor, root = api
+        error, answer = run(accessor, root, "suggest_crs", purpose="areas")
+        assert not error and answer["suggestions"][0]["keeps"] == "equal-area"
+        assert run(accessor, root, "suggest_crs", purpose="beauty")[0] is True
+        assert run(accessor, root, "suggest_crs", layers=["nope"])[0] is True
+        made = "PROJ:+proj=laea +lat_0=43.55 +lon_0=1.45 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"
+        assert run(accessor, root, "set_project_crs", crs=made)[0] is False
+
     def test_layout_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "create_layout", name="Carte", title="Communes")

@@ -2848,6 +2848,7 @@ class AgentChatController(QObject):
             "delete_features": lambda: _tr("Features deleted from {} (not saved)").format(layer),
             "add_features": lambda: _tr("Features added to {} (not saved)").format(layer),
             "set_project_crs": lambda: _tr("Project CRS: {}").format(args.get("crs", "")),
+            "suggest_crs": lambda: _tr("Looking for a projection"),
             "create_layout": lambda: _tr("Layout {}").format(args.get("name", "")),
             "export_layout": lambda: _tr("Layout {} exported").format(args.get("name", "")),
             "describe_layout": lambda: _tr("Reading the layout {}").format(args.get("name", "")),
