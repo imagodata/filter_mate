@@ -4,7 +4,7 @@ title: Deliver data as files
 description: files of the user's layers: format for whom, CRS, styles, a zip
 metadata:
   version: 1
-  plugin_min: 5.1.2
+  plugin_min: 5.2.0
   audience: chat, mcp
   tools: export_layers, filter_state, list_layers, describe_layer, preview_filter, apply_filter
   risk: change

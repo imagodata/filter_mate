@@ -4,7 +4,7 @@ title: Forms and relations for data entry
 description: data entry: form widgets, constraints, relations
 metadata:
   version: 1
-  plugin_min: 5.1.2
+  plugin_min: 5.2.0
   audience: chat, mcp
   tools: describe_layer, field_values, list_layers, set_form, relations, add_field
   risk: change

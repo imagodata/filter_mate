@@ -435,9 +435,9 @@ class StreamCopyActions:
             return
         from qgis.core import QgsProject
         try:
-            from qgis.PyQt.QtWidgets import QAction
-        except ImportError:  # Qt 6
             from qgis.PyQt.QtGui import QAction
+        except ImportError:  # QGIS < 3.34.2 (Qt5): QAction is in QtWidgets
+            from qgis.PyQt.QtWidgets import QAction
         self._action = QAction(_tr("FilterMate: local copy of the visible map"), self.iface.mainWindow())
         self._action.triggered.connect(self._on_layer_menu)
         for layer_type in _layer_types():

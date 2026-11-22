@@ -4,7 +4,7 @@ title: Choose the projection of the map
 description: the CRS that suits the data and the purpose of the map, or one made for them
 metadata:
   version: 1
-  plugin_min: 5.1.2
+  plugin_min: 5.2.0
   audience: chat, mcp
   tools: suggest_crs, set_project_crs, map_context, describe_layer, list_layers, export_layers
   risk: change

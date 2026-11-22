@@ -632,7 +632,7 @@ def lay_out_rows(dw: Any, mode: Any = None) -> bool:
     configuration of the dock when None); True when a section was laid out.
 
     * ``fill`` (default): one stretch between two rows, the rows spread over the height of the section, as from
-      5.0 to 5.1.1 (``fit`` was the default from 18 to 19 November 2026, in 5.1.2: the user asked for the layout
+      5.0 to 5.1.1 (``fit`` was the default from 18 to 19 November 2026, before 5.2.0: the user asked for the layout
       of 5.1.1 back).
     * ``fit``: each row at its own height, one gap (``ROW_GAP``) apart. The page takes the height of its rows:
       it is held to it in the scroll area that holds it (tool box or panel of QGIS, a ``Fixed`` vertical policy:

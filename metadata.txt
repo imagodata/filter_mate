@@ -7,7 +7,7 @@ name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 description=Filter all the layers of a project at once by their relation to a selection: vector, raster and LiDAR point clouds, with undo, favorites, export and an optional AI assistant.
-version=5.1.2
+version=5.2.0
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
@@ -48,14 +48,13 @@ tags=filter,spatial filter,multi-layer,subset,definition query,query,selection,b
 # that key only names other QGIS plugins.
 python_dependencies=onnxruntime
 
-changelog=5.1.2
-    - Fix: QGIS could freeze on Windows after the AGENT added an elevation layer.
-    - Panel: buttons beside their rows, the tools of the EXPLORING rail chosen per kind of layer, panels sized to what they show, lists readable in dark themes.
-    - Filters: a filter a GeoPackage cannot run is refused and the previous one kept; a canceled filter leaves no trace in the history.
-    - AGENT: example requests that fit your project, lighter with Ollama, exact population and elevation totals.
-    - Web layers (WFS, OGC API, ArcGIS) copied next to the project, to work without the network.
-    - AGENT: charts, print layouts and atlases, EXPLORING driven from the chat, a memory of your notes across projects.
-    - Feedback forms in Vector > FilterMate and in the AGENT menu.
+changelog=5.2.0: the AGENT becomes a full GIS partner
+    - Ask, Plan or Act: choose how far the AGENT goes before it touches your project.
+    - Maps ready to share: d3 charts, print layouts and atlases, projections, cartograms, styles from validated palettes, BD TOPO and OpenStreetMap drawn as their producers draw them.
+    - Work anywhere: web layers (WFS, OGC API, ArcGIS) copied next to the project for offline use; FilterMate also runs as a standalone application, without the QGIS window.
+    - A memory of your notes across projects, example requests that fit your data, lighter with Ollama.
+    - Steadier panel: buttons beside their rows, EXPLORING tools per kind of layer, panels sized to their content; no more freeze on Windows after an elevation layer.
+    - Safer filters: a GeoPackage filter that cannot run is refused and the previous one kept.
     5.1.1
     - Any section of the panel can become a QGIS panel; Compare the map before and after a filter; one history to go back to any step.
     - AGENT works with your own API key or a local Ollama model, with new data sources: elevation, OpenStreetMap, population, WMS and WMTS, PostgreSQL tables.
