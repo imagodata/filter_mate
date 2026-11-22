@@ -72,6 +72,16 @@ Jalankan?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Reading the layout {}</source>
+        <translation>Membaca susun atur {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2806"/>
+        <source>Atlas of {}</source>
+        <translation>Atlas {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Carta: {}</translation>
     </message>

@@ -72,6 +72,16 @@ Kjøre den?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Reading the layout {}</source>
+        <translation>Leser oppsettet {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2806"/>
+        <source>Atlas of {}</source>
+        <translation>Atlas for {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Diagram: {}</translation>
     </message>

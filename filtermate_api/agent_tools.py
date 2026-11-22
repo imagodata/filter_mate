@@ -396,9 +396,25 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
             raise ToolFailure("The export folder is not available.") from None
         except ValueError:
             raise ToolFailure("Invalid subfolder.") from None
-        answer = asdict(accessor.export_layout(args["name"], str(folder), file_format=args["format"], dpi=args["dpi"]))
+        answer = asdict(accessor.export_layout(args["name"], str(folder), file_format=args["format"], dpi=args["dpi"],
+                                               georeference=args.get("georeference", True),
+                                               atlas=bool(args.get("atlas")),
+                                               single_file=args.get("single_file", True)))
         answer["path"] = os.path.relpath(answer["path"], str(folder))  # the paths of this machine are not sent
-        return answer
+        # What a single file of one page does not need to say.
+        return {key: value for key, value in answer.items() if value or key not in ("files", "pages", "atlas")}
+
+    def describe_layout(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.describe_layout(args.get("name") or "")
+
+    def set_atlas(args: Dict[str, Any]) -> Dict[str, Any]:
+        options = {"coverage_layer": args.get("coverage_layer") or "", "enabled": args.get("enabled", True),
+                   "filter_expression": args.get("filter") or "", "page_name": args.get("page_name") or "",
+                   "sort_by": args.get("sort_by") or "", "descending": bool(args.get("descending")),
+                   "hide_coverage": bool(args.get("hide_coverage")), "map_mode": args.get("map_mode") or "auto",
+                   "margin": args.get("margin", 10), "file_name": args.get("file_name") or "",
+                   "maps": args.get("maps")}
+        return accessor.set_atlas(args["layout"], **options)
 
     def _edit_answer(result) -> Dict[str, Any]:
         answer = asdict(result)
@@ -565,6 +581,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "set_layer_style": set_layer_style, "set_labels": set_labels,
         "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
         "create_layout": create_layout, "export_layout": export_layout, "set_project_crs": set_project_crs,
+        "describe_layout": describe_layout, "set_atlas": set_atlas,
         "add_field": add_field, "join_layers": join_layers, "group_layers": group_layers, "rename_layer": rename_layer, "map_theme": map_theme,
         "bookmark": bookmark,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,

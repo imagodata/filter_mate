@@ -691,17 +691,59 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Export a print layout", idempotent=False, destructive=True))
     async def export_layout(
         name: Annotated[str, Field(min_length=1, max_length=100, description="A layout of the project (map_context lists them)")],
-        format: Annotated[Literal["pdf", "png"], Field(description="File format")] = "pdf",  # noqa: A002
+        format: Annotated[Literal["pdf", "png", "jpg", "svg", "tif"], Field(description="File format")] = "pdf",  # noqa: A002
         dpi: Annotated[int, Field(ge=72, le=600, description="Resolution")] = 150,
         subfolder: Annotated[str, Field(min_length=1, max_length=200, description=(
             "Sub-folder of the export root (a/b allowed, no ..)"))] = "layouts",
+        georeference: Annotated[bool, Field(description="PDF: georeferenced; image: a world file beside it")] = True,
+        atlas: Annotated[bool, Field(description="One page per feature of its atlas (set_atlas)")] = False,
+        single_file: Annotated[bool, Field(description="Atlas in PDF: one file; false: one per feature")] = True,
     ) -> Dict[str, Any]:
-        """Write a print layout of the project as a PDF or PNG file in a sub-folder of the export root.
+        """Write a print layout of the project as PDF, PNG, JPG, SVG or TIFF in a sub-folder of the export root.
 
-        A file of the same name there is kept: the new one is named <name>_2, <name>_3... The chat of FilterMate
-        asks the user first. Returns path (relative to the sub-folder) and bytes.
+        A file of the same name there is kept: the new one is named <name>_2, <name>_3...; an image or SVG has one
+        file per page. With atlas, a new folder <name>_atlas holds its pages (200 at most). The chat of FilterMate
+        asks the user first. Returns path (relative to the sub-folder), bytes, and files and pages when several.
         """
-        return await call("POST", "/layouts/export", _body(name=name, format=format, dpi=dpi, subfolder=subfolder))
+        return await call("POST", "/layouts/export", _body(name=name, format=format, dpi=dpi, subfolder=subfolder,
+                                                         georeference=georeference, atlas=atlas,
+                                                         single_file=single_file))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Read a print layout", readOnlyHint=True, openWorldHint=False))
+    async def describe_layout(
+        name: Annotated[str, Field(max_length=100, description="A layout; empty: list the layouts and templates")] = "",
+    ) -> Dict[str, Any]:
+        """What a print layout holds: pages [{page, width_mm, height_mm}], items [{ref, type, page, x_mm, y_mm,
+        width_mm, height_mm, and scale and layers of a map, text of a text}] and its atlas. Without a name, layouts
+        and templates (the .qpt of the profile).
+        """
+        return await call("GET", "/layouts/details?" + urlencode({"name": name}))
+
+    @mcp.tool(annotations=_write("Set the atlas of a layout", idempotent=True))
+    async def set_atlas(
+        layout: Annotated[str, Field(min_length=1, max_length=100, description="A layout of the project")],
+        coverage_layer: Annotated[str, Field(max_length=1000, description="Vector layer: one page per feature, as filtered now")] = "",
+        enabled: Annotated[bool, Field(description="false turns the atlas off")] = True,
+        filter: Annotated[str, Field(max_length=2000, description="QGIS expression: the features kept")] = "",  # noqa: A002
+        page_name: Annotated[str, Field(max_length=2000, description="Expression naming each page")] = "",
+        sort_by: Annotated[str, Field(max_length=2000, description="Expression ordering the pages")] = "",
+        descending: bool = False,
+        hide_coverage: Annotated[bool, Field(description="Hide the coverage layer on the maps")] = False,
+        map_mode: Annotated[Literal["auto", "fixed", "predefined"], Field(description=(
+            "auto: each feature plus margin; fixed: the scale of the map; predefined: the scales of the project"))] = "auto",
+        margin: Annotated[float, Field(ge=0, le=500, description="%, auto")] = 10,
+        file_name: Annotated[str, Field(max_length=2000, description="Expression naming the file of each page")] = "",
+        maps: Annotated[Optional[List[Annotated[str, Field(max_length=100)]]], Field(
+            max_length=20, description="refs of the maps that follow; default: the largest")] = None,
+    ) -> Dict[str, Any]:
+        """Turn the atlas of a print layout on: one page per feature of a vector layer as filtered now, its map
+        following each feature; export_layout with atlas writes them. Returns pages, maps and map_mode. In the chat
+        of FilterMate, undoing the turn puts the layout back as it was.
+        """
+        return await call("POST", "/layouts/atlas", _body(
+            layout=layout, coverage_layer=coverage_layer, enabled=enabled, filter=filter, page_name=page_name,
+            sort_by=sort_by, descending=descending, hide_coverage=hide_coverage, map_mode=map_mode, margin=margin,
+            file_name=file_name, maps=maps))
 
     @mcp.tool(annotations=_write("Set the CRS of the project", idempotent=True))
     async def set_project_crs(

@@ -1,0 +1,90 @@
+{
+  "cases": [
+    {
+      "id": "layout_atlas_communes",
+      "prompt": "Fais un atlas avec une page par commune du département 31, et le nom de la commune sur chaque page.",
+      "expect": [
+        [
+          {
+            "tool": "create_layout",
+            "any": true,
+            "args": {},
+            "call_args": {
+              "name": "Atlas des communes",
+              "title": "Communes de Haute-Garonne",
+              "extent_layer": "communes"
+            }
+          },
+          {
+            "tool": "set_atlas",
+            "args": {
+              "layout": "Atlas des communes",
+              "coverage_layer": "communes"
+            },
+            "call_args": {
+              "layout": "Atlas des communes",
+              "coverage_layer": "communes",
+              "filter": "\"dept\" = '31'",
+              "page_name": "\"nom\""
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_pyqgis",
+        "export_layout"
+      ]
+    },
+    {
+      "id": "layout_export_jpg",
+      "prompt": "Exporte la mise en page Carte des routes en JPG à 300 dpi.",
+      "expect": [
+        [
+          {
+            "tool": "export_layout",
+            "args": {
+              "name": "Carte des routes",
+              "format": "jpg",
+              "dpi": 300
+            },
+            "call_args": {
+              "name": "Carte des routes",
+              "format": "jpg",
+              "dpi": 300
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_pyqgis"
+      ]
+    },
+    {
+      "id": "layout_no_export_unasked",
+      "trap": true,
+      "prompt": "Prépare-moi une mise en page A3 portrait des cours d'eau, je l'exporterai plus tard.",
+      "expect": [
+        [
+          {
+            "tool": "create_layout",
+            "args": {
+              "page": "A3",
+              "orientation": "portrait"
+            },
+            "call_args": {
+              "name": "Cours d'eau",
+              "title": "Cours d'eau",
+              "page": "A3",
+              "orientation": "portrait",
+              "extent_layer": "cours_eau"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "export_layout",
+        "run_pyqgis"
+      ]
+    }
+  ]
+}

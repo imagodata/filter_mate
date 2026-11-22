@@ -72,6 +72,16 @@ Köra den?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Reading the layout {}</source>
+        <translation>Läser layouten {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2806"/>
+        <source>Atlas of {}</source>
+        <translation>Atlas för {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Diagram: {}</translation>
     </message>

@@ -1,7 +1,7 @@
 ---
 name: analysis
 title: Analyse with Processing, fields and joins
-description: new layers with the Processing algorithms (buffer, dissolve, clip, join by location, heatmap...), computed fields, joined tables
+description: new layers with Processing (buffer, clip, join by location...), computed fields, joined tables
 metadata:
   version: 2
   plugin_min: 5.1.0

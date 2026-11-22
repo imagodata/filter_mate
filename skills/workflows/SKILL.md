@@ -1,7 +1,7 @@
 ---
 name: workflows
 title: Chain the steps of a request
-description: a request of several steps (within a distance, around a place, counts, population, criteria, fetched then filtered) in the fewest calls
+description: requests of several steps (distances, places, counts, population, criteria) in the fewest calls
 metadata:
   version: 4
   plugin_min: 5.1.1

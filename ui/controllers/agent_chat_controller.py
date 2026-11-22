@@ -2809,6 +2809,8 @@ class AgentChatController(QObject):
             "set_project_crs": lambda: _tr("Project CRS: {}").format(args.get("crs", "")),
             "create_layout": lambda: _tr("Layout {}").format(args.get("name", "")),
             "export_layout": lambda: _tr("Layout {} exported").format(args.get("name", "")),
+            "describe_layout": lambda: _tr("Reading the layout {}").format(args.get("name", "")),
+            "set_atlas": lambda: _tr("Atlas of {}").format(args.get("layout", "")),
             SHOW_CHART: lambda: _tr("Chart: {}").format(args.get("title") or args.get("field") or layer
                                                         or args.get("kind", "")),
             EXPORT_CHART: lambda: _tr("Chart {} saved as {}").format(args.get("chart_id", ""),

@@ -678,6 +678,13 @@ class SimulatedProject:
                                            "extent_from": "view", "scale": 25000},
             "export_layout": lambda args: {"name": args["name"], "format": args.get("format", "pdf"),
                                            "path": f"{args['name']}.{args.get('format', 'pdf')}", "bytes": 120000},
+            "describe_layout": lambda args: {"name": args.get("name", ""), "pages": [
+                {"page": 1, "width_mm": 297.0, "height_mm": 210.0}], "items": [
+                {"ref": "map1", "type": "map", "page": 1, "x_mm": 10.0, "y_mm": 24.0, "width_mm": 277.0,
+                 "height_mm": 176.0, "scale": 25000, "layers": "shown in the tree"}]},
+            "set_atlas": lambda args: {"layout": args["layout"], "atlas": args.get("enabled", True),
+                                       "coverage_layer": args.get("coverage_layer", ""), "pages": 586,
+                                       "maps": ["map1"], "map_mode": args.get("map_mode", "auto")},
             "describe_settings": lambda args: describe_settings(
                 read_settings(self.settings), query=args.get("query", ""), section=args.get("section", ""),
                 changed_only=bool(args.get("changed_only")), limit=args.get("limit", 25)),
