@@ -73,8 +73,10 @@ The runtime goes in the folder of the application, without administrator rights:
 (one file, checked against its published SHA-256) creates a conda-forge environment holding
 QGIS 4.2 or later. A stalled download is tried again three times; what was downloaded is kept
 for the next attempt. `setup` and `setup --remove` touch only a `runtime/` folder that `setup`
-made (it leaves a marker there). Checked from a bare Linux machine (a `python:3.12-slim`
-container); not yet on Windows or macOS.
+made (it leaves a marker there). On Windows the package cache goes in `%LOCALAPPDATA%\fmpk` (a short
+path: Windows limits paths to 260 characters unless long paths are on, and the deepest files of QGIS
+pass that limit in micromamba's cache), emptied after the install. Checked from a bare Linux machine
+(a `python:3.12-slim` container) and on Windows 11 (long paths off); not on macOS.
 
 When the QGIS chosen at an earlier launch is gone (uninstalled, an environment deleted), the
 next launch says so and searches again. A Python named with `FILTERMATE_QGIS_PYTHON` or
@@ -162,3 +164,10 @@ docker run --rm -v "$PWD:/src:ro" qgis/qgis:ltr bash -c \
   The GUI smoke of the plugin runs in the window with
   `python3 standalone/_bootstrap.py --no-plugin --size 1600x1000 --code tests/qgis_headless/run_gui_smoke.py`
   under `xvfb-run` (see the skill `qgis-headless-bench`).
+
+## Publishing on PyPI
+
+`bash scripts/publish_pypi.sh --dry-run` builds the wheel and the source archive from the tracked
+files and checks them with twine. With an API token of the PyPI account,
+`PYPI_TOKEN=pypi-... bash scripts/publish_pypi.sh` uploads them (`--test` for test.pypi.org); the
+version is the plugin's, in `metadata.txt`. Once published, the install is `pipx install filtermate`.

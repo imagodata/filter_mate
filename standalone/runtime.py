@@ -104,20 +104,32 @@ def _windows_installs() -> List[Runtime]:
 
 
 def _macos_installs(applications: str = "/Applications") -> List[Runtime]:
+    """The Pythons of the QGIS bundles. Their layout changed across versions (``Contents/MacOS/bin/python3.x``,
+    ``Contents/MacOS/python3``, a ``Python.framework``): every one found is a candidate, and the probe keeps those
+    that import PyQGIS. A bundle whose Python does not (QGIS 4.2 was reported to fail so) leaves the conda
+    runtime of ``filtermate setup``."""
     found = []
-    for bundle in sorted(glob.glob(os.path.join(applications, "QGIS*.app")), reverse=True):
+    folders = [applications, os.path.join(os.path.expanduser("~"), "Applications")]
+    for bundle in sorted({b for folder in folders for b in glob.glob(os.path.join(folder, "QGIS*.app"))}, reverse=True):
         contents = os.path.join(bundle, "Contents")
-        python = next((p for p in (os.path.join(contents, "MacOS", "bin", "python3"),
-                                   os.path.join(contents, "MacOS", "python3"),
-                                   os.path.join(contents, "MacOS", "python")) if os.path.exists(p)), None)
-        if python is None:
+        pythons = []
+        for pattern in ("MacOS/bin/python3", "MacOS/bin/python3.[0-9]*", "MacOS/python3", "MacOS/python",
+                        "Frameworks/Python.framework/Versions/*/bin/python3"):
+            pythons += sorted(glob.glob(os.path.join(contents, pattern)), reverse=True)
+        pythons = [python for python in pythons if os.path.isfile(python) and not python.endswith("-config")]
+        if not pythons:
             continue
         resources = os.path.join(contents, "Resources")
-        env = {"PYTHONPATH": os.path.join(resources, "python"), "QGIS_PREFIX_PATH": os.path.join(contents, "MacOS")}
+        bindings = os.path.join(resources, "python")
+        env = {"PYTHONPATH": os.pathsep.join([bindings, os.path.join(bindings, "plugins")]),
+               "QGIS_PREFIX_PATH": os.path.join(contents, "MacOS")}
+        plugins = os.path.join(contents, "PlugIns")
+        if os.path.isdir(plugins):
+            env["QT_PLUGIN_PATH"] = plugins
         for variable, folder in (("PROJ_DATA", "proj"), ("PROJ_LIB", "proj"), ("GDAL_DATA", "gdal")):
             if os.path.isdir(os.path.join(resources, folder)):
                 env[variable] = os.path.join(resources, folder)
-        found.append(Runtime("install", [python], bundle, env))
+        found.append(Runtime("install", [pythons[0]], bundle, env))
     return found
 
 
