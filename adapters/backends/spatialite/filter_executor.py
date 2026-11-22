@@ -522,14 +522,14 @@ def _features_matching(layer, expression: str, source_layer=None, task_parameter
     expr = QgsExpression(expression)
     if expr.hasParserError():
         logger.error(f"[Spatialite] Source expression does not parse: {expr.parserErrorString()}")
-        raise source_selection_refusal(layer.name(), unreadable=True)
+        raise source_selection_refusal(name_of(layer), unreadable=True)
     try:
         # the layer's variables: the QGIS text of a native subset may read @variables
         request = selection_request(expr, source_layer or layer, (task_parameters or {}).get(SOURCE_CONTEXT_KEY))
         features = list(layer.getFeatures(request))
     except Exception as e:
         logger.error(f"[Spatialite] Source expression failed: {e}")
-        raise source_selection_refusal(layer.name(), unreadable=True) from e
+        raise source_selection_refusal(name_of(layer), unreadable=True) from e
     logger.info(f"[Spatialite] Source expression keeps {len(features)} feature(s)")
     return features
 
@@ -811,7 +811,7 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
 
     # Step 2: Check cache first
     current_subset = source_layer.subsetString() or ''
-    layer_id = source_layer.id()
+    layer_id = id_of(source_layer)
 
     if context.geom_cache:
         # Get features for cache key (we need to resolve first for proper cache lookup)
@@ -848,7 +848,7 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
                     # expression may be the SQL of its provider, not QGIS.
                     features = []
             if not features:
-                raise source_selection_refusal(source_layer.name())
+                raise source_selection_refusal(name_of(source_layer))
 
     if not features:
         return SpatialiteSourceResult(
@@ -944,6 +944,11 @@ try:
     from ....filtermate_core.sql.spatialite.qgis_expression import qgis_expression_to_spatialite  # noqa: F401  (moved to the host-free core)
 except ImportError:  # imported from the repository root (tests)
     from filtermate_core.sql.spatialite.qgis_expression import qgis_expression_to_spatialite  # noqa: F401
+
+try:
+    from ....filtermate_core.domain.layer_facts import id_of, name_of, source_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of, source_of
 
 
 def build_spatialite_query(
@@ -1077,7 +1082,7 @@ def apply_spatialite_subset(
         try:
             history_repo.insert(
                 project_uuid=project_uuid,
-                layer_id=layer.id(),
+                layer_id=id_of(layer),
                 subset_string=sql_subset_string,
                 seq_order=current_seq_order,
                 source_layer_id=source_layer_id or ''
@@ -1147,8 +1152,8 @@ def manage_spatialite_subset(
         )
     else:
         # Fallback: assume it's a native Spatialite layer
-        db_path = layer.source().split('|')[0]
-        table_name = layer.source().split('table=')[1].split(' ')[0] if 'table=' in layer.source() else layer.name()
+        db_path = source_of(layer).split('|')[0]
+        table_name = source_of(layer).split('table=')[1].split(' ')[0] if 'table=' in source_of(layer) else name_of(layer)
         layer_srid = layer.crs().authid().split(':')[1] if layer.crs().authid() else '4326'
         is_native_spatialite = True
 
@@ -1227,15 +1232,15 @@ def get_last_subset_info(cur, layer, project_uuid: str, conn=None) -> tuple:
     """
     from ....infrastructure.database.sql_utils import sanitize_sql_identifier
 
-    layer_name = layer.name()
+    layer_name = name_of(layer)
     # Use sanitize_sql_identifier to handle all special chars (em-dash, etc.)
-    name = sanitize_sql_identifier(layer.id().replace(layer_name, ''))
+    name = sanitize_sql_identifier(id_of(layer).replace(layer_name, ''))
 
     # EPIC-1 E4-S9: Use centralized HistoryRepository if connection available
     if conn:
         history_repo = HistoryRepository(conn, cur)
         try:
-            last_entry = history_repo.get_last_entry(project_uuid, layer.id())
+            last_entry = history_repo.get_last_entry(project_uuid, id_of(layer))
             if last_entry:
                 return last_entry.id, last_entry.seq_order, layer_name, name
             else:
@@ -1252,7 +1257,7 @@ def get_last_subset_info(cur, layer, project_uuid: str, conn=None) -> tuple:
             """SELECT * FROM fm_subset_history
                WHERE fk_project = ? AND layer_id = ?
                ORDER BY seq_order DESC LIMIT 1;""",
-            (project_uuid, layer.id())
+            (project_uuid, id_of(layer))
         )
 
         results = cur.fetchall()

@@ -43,9 +43,9 @@ from ...infrastructure.utils.layer_utils import detect_layer_provider_type
 from ...infrastructure.utils.validation_utils import is_layer_source_available
 
 try:
-    from ...filtermate_core.domain.layer_facts import provider_key_of
+    from ...filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
 except ImportError:  # loaded outside the plugin package (unit tests)
-    from filtermate_core.domain.layer_facts import provider_key_of
+    from filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
 
 
 # ===========================================================================
@@ -176,12 +176,12 @@ class FilterParameterBuilder:
 
         # Auto-fill layer_name
         if "layer_name" not in infos or infos["layer_name"] is None:
-            infos["layer_name"] = context.source_layer.name()
+            infos["layer_name"] = name_of(context.source_layer)
             _param_logger.info(f"Auto-filled layer_name='{infos['layer_name']}'")
 
         # Auto-fill layer_id
         if "layer_id" not in infos or infos["layer_id"] is None:
-            infos["layer_id"] = context.source_layer.id()
+            infos["layer_id"] = id_of(context.source_layer)
             _param_logger.info(f"Auto-filled layer_id='{infos['layer_id']}'")
 
         # Auto-fill layer_provider_type
@@ -203,7 +203,7 @@ class FilterParameterBuilder:
         if needs_detection:
             try:
                 from qgis.core import QgsDataSourceUri
-                uri = QgsDataSourceUri(context.source_layer.source())
+                uri = QgsDataSourceUri(source_of(context.source_layer))
                 geom_col = uri.geometryColumn()
                 if geom_col:
                     infos["layer_geometry_field"] = geom_col
@@ -251,7 +251,7 @@ class FilterParameterBuilder:
         # Auto-fill layer_schema (empty for non-PostgreSQL)
         if "layer_schema" not in infos or infos["layer_schema"] is None:
             if infos.get("layer_provider_type") == PROVIDER_POSTGRES:
-                source = context.source_layer.source()
+                source = source_of(context.source_layer)
                 match = re.search(r'table="([^"]+)"\.', source)
                 if match:
                     infos["layer_schema"] = match.group(1)
@@ -377,7 +377,7 @@ class FilterParameterBuilder:
 
         try:
             from qgis.core import QgsDataSourceUri
-            source_uri = QgsDataSourceUri(context.source_layer.source())
+            source_uri = QgsDataSourceUri(source_of(context.source_layer))
             detected_schema = source_uri.schema()
 
             if detected_schema:
@@ -527,13 +527,13 @@ class LayerFilterBuilder:
         """Build list of layers to filter with validation."""
         layers_to_filter = []
 
-        if source_layer.id() not in self._project_layers:
+        if id_of(source_layer) not in self._project_layers:
             _layer_logger.warning(
-                f"build_layers_to_filter: layer {source_layer.name()} not in PROJECT_LAYERS"
+                f"build_layers_to_filter: layer {name_of(source_layer)} not in PROJECT_LAYERS"
             )
             return layers_to_filter
 
-        raw_layers_list = self._project_layers[source_layer.id()]["filtering"].get(
+        raw_layers_list = self._project_layers[id_of(source_layer)]["filtering"].get(
             "layers_to_filter", []
         )
 
@@ -548,7 +548,7 @@ class LayerFilterBuilder:
             if infos.get("layer_provider_type") in COVERAGE_PROVIDER_TYPES:
                 _layer_logger.debug(f"build_layers_to_filter: coverage target {infos.get('layer_name')} left to the cross filter")
                 continue
-            result = self._validate_and_build_layer_info(layer_id, source_layer.id())
+            result = self._validate_and_build_layer_info(layer_id, id_of(source_layer))
 
             if result.is_valid and result.layer_info:
                 layers_to_filter.append(result.layer_info)
@@ -566,7 +566,7 @@ class LayerFilterBuilder:
     ) -> LayerValidationResult:
         if layer_id not in self._project_layers:
             layer_obj = self._project.mapLayer(layer_id)
-            layer_name = layer_obj.name() if layer_obj else "unknown"
+            layer_name = name_of(layer_obj) if layer_obj else "unknown"
             return LayerValidationResult(
                 layer_id=layer_id,
                 layer_name=layer_name,
@@ -635,12 +635,12 @@ class LayerFilterBuilder:
         layer_info: Dict[str, Any],
         missing_keys: List[str]
     ) -> Dict[str, Any]:
-        _layer_logger.debug(f"Auto-filling missing keys for {layer.name()}: {missing_keys}")
+        _layer_logger.debug(f"Auto-filling missing keys for {name_of(layer)}: {missing_keys}")
 
         if 'layer_name' in missing_keys or layer_info.get('layer_name') is None:
-            layer_info['layer_name'] = layer.name()
+            layer_info['layer_name'] = name_of(layer)
         if 'layer_id' in missing_keys or layer_info.get('layer_id') is None:
-            layer_info['layer_id'] = layer.id()
+            layer_info['layer_id'] = id_of(layer)
         if 'layer_geometry_field' in missing_keys or layer_info.get('layer_geometry_field') is None:
             layer_info['layer_geometry_field'] = self._detect_geometry_field(layer)
         if 'layer_provider_type' in missing_keys or layer_info.get('layer_provider_type') is None:
@@ -655,7 +655,7 @@ class LayerFilterBuilder:
     def _detect_geometry_field(self, layer: 'QgsVectorLayer') -> str:
         try:
             from qgis.core import QgsDataSourceUri
-            uri = QgsDataSourceUri(layer.source())
+            uri = QgsDataSourceUri(source_of(layer))
             geom_col = uri.geometryColumn()
             if geom_col:
                 return geom_col
@@ -675,14 +675,14 @@ class LayerFilterBuilder:
         if provider_type == 'postgresql':
             try:
                 from qgis.core import QgsDataSourceUri
-                source_uri = QgsDataSourceUri(layer.source())
+                source_uri = QgsDataSourceUri(source_of(layer))
                 schema = source_uri.schema()
                 if schema:
                     return schema
             except Exception:  # nosec B110 - best-effort detection, falls back below
                 pass
 
-            source = layer.source()
+            source = source_of(layer)
             match = re.search(r'table="([^"]+)"\.', source)
             if match:
                 return match.group(1)
@@ -710,15 +710,15 @@ class LayerFilterBuilder:
         from qgis.core import QgsVectorLayer as QVL
 
         _layer_logger.info("=== LayerFilterBuilder DIAGNOSTIC ===")
-        _layer_logger.info(f"  Source layer: {source_layer.name()} (id={source_layer.id()[:8]}...)")
+        _layer_logger.info(f"  Source layer: {name_of(source_layer)} (id={id_of(source_layer)[:8]}...)")
         _layer_logger.info(f"  User-selected layers: {len(raw_layers_list)}")
 
         all_available = []
         for key in list(self._project_layers.keys()):
-            if key != source_layer.id():
+            if key != id_of(source_layer):
                 layer_obj = self._project.mapLayer(key)
                 if layer_obj:
-                    all_available.append((layer_obj.name(), key[:8], key))
+                    all_available.append((name_of(layer_obj), key[:8], key))
 
         _layer_logger.info(f"  Available layers in PROJECT_LAYERS: {len(all_available)}")
         for name, key_prefix, full_key in all_available[:5]:
@@ -731,8 +731,8 @@ class LayerFilterBuilder:
 
         qgis_layers = [layer_item for layer_item in self._project.mapLayers().values() if isinstance(layer_item, QVL)]
         missing = [
-            layer_item.name() for layer_item in qgis_layers
-            if layer_item.id() not in self._project_layers and layer_item.id() != source_layer.id()
+            name_of(layer_item) for layer_item in qgis_layers
+            if id_of(layer_item) not in self._project_layers and id_of(layer_item) != id_of(source_layer)
         ]
 
         if missing:

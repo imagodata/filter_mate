@@ -24,9 +24,9 @@ from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Optional
 
 try:
-    from ....filtermate_core.domain.layer_facts import provider_key_of
+    from ....filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
 except ImportError:  # loaded outside the plugin package (unit tests)
-    from filtermate_core.domain.layer_facts import provider_key_of
+    from filtermate_core.domain.layer_facts import id_of, name_of, provider_key_of, source_of
 
 logger = logging.getLogger('FilterMate.Adapters.Backends.OGR.FilterExecutor')
 
@@ -47,7 +47,7 @@ def _log_ogr_phase(name: str, started: float, layer=None, threshold_ms: float = 
     if elapsed_ms < threshold_ms:
         return
     try:
-        label = f" ({layer.name()})" if layer is not None else ""
+        label = f" ({name_of(layer)})" if layer is not None else ""
     except (RuntimeError, AttributeError):
         label = ""
     logger.info(f"⏱ {name}: {elapsed_ms:.0f} ms{label}")
@@ -413,13 +413,13 @@ def execute_reset_action_ogr(
         if queue_subset_func:
             # Thread-safe: queue for main thread application
             queue_subset_func(layer, '')
-            logger.debug(f"[OGR] Reset: Queued empty subset for {layer.name()}")
+            logger.debug(f"[OGR] Reset: Queued empty subset for {name_of(layer)}")
         else:
             # Direct application (only safe from main thread)
             layer.setSubsetString('')
-            logger.debug(f"[OGR] Reset: Applied empty subset directly for {layer.name()}")
+            logger.debug(f"[OGR] Reset: Applied empty subset directly for {name_of(layer)}")
 
-        logger.debug(f"[OGR] OGR Reset completed for layer: {layer.name()}")
+        logger.debug(f"[OGR] OGR Reset completed for layer: {name_of(layer)}")
         return True
 
     except Exception as e:
@@ -458,20 +458,20 @@ def execute_unfilter_action_ogr(
             queue_subset_func(layer, subset_to_apply)
             logger.debug(
                 f"Unfilter: Queued {'previous' if previous_subset else 'empty'} "
-                f"subset for {layer.name()}"
+                f"subset for {name_of(layer)}"
             )
         else:
             # Direct application (only safe from main thread)
             layer.setSubsetString(subset_to_apply)
             logger.debug(
                 f"Unfilter: Applied {'previous' if previous_subset else 'empty'} "
-                f"subset directly for {layer.name()}"
+                f"subset directly for {name_of(layer)}"
             )
 
         if previous_subset:
-            logger.debug(f"[OGR] OGR Unfilter: Restored previous state for {layer.name()}")
+            logger.debug(f"[OGR] OGR Unfilter: Restored previous state for {name_of(layer)}")
         else:
-            logger.debug(f"[OGR] OGR Unfilter: Cleared filter for {layer.name()} (no previous state)")
+            logger.debug(f"[OGR] OGR Unfilter: Cleared filter for {name_of(layer)} (no previous state)")
 
         return True
 
@@ -822,7 +822,7 @@ def prepare_ogr_source_geom(
         mode = 'REMOTE_COPY'
 
     logger.debug(f"[OGR] === prepare_ogr_source_geom ({mode} MODE) ===")
-    logger.info(f"[OGR]   Source layer: {layer.name()}")
+    logger.info(f"[OGR]   Source layer: {name_of(layer)}")
     logger.info(f"[OGR]   Feature count: {layer.featureCount()}")
 
     if mode == "INVALID":
@@ -870,7 +870,7 @@ def prepare_ogr_source_geom(
         expr = QgsExpression(filter_to_use)
         if expr.hasParserError():
             logger.error(f"[OGR]   Expression parse error: {expr.parserErrorString()}")
-            raise source_selection_refusal(layer.name(), unreadable=True)
+            raise source_selection_refusal(name_of(layer), unreadable=True)
         try:
             # the layer's variables: the QGIS text of a native subset may read @variables
             # (``layer`` is the source layer itself here, read on the main thread when the task was created)
@@ -878,9 +878,9 @@ def prepare_ogr_source_geom(
             filtered_features = list(layer.getFeatures(request))
         except Exception as e:
             logger.error(f"[OGR]   Expression filtering failed: {e}")
-            raise source_selection_refusal(layer.name(), unreadable=True) from e
+            raise source_selection_refusal(name_of(layer), unreadable=True) from e
         if not filtered_features:
-            raise source_selection_refusal(layer.name())
+            raise source_selection_refusal(name_of(layer))
         if context.create_memory_layer_from_features:
             layer = context.create_memory_layer_from_features(
                 filtered_features, layer.crs(), "source_expr_filtered"
@@ -1243,7 +1243,7 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         expression = extent_subset(capability, rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
         if expression is None:
             return None
-        builder.user_warnings.append('{}: {}'.format(layer.name(), _remote_message(
+        builder.user_warnings.append('{}: {}'.format(name_of(layer), _remote_message(
             'by_extent_unverified' if reason == 'unverified_filter' else 'by_extent')))
         builder.remote_materialization_outcome = None  # nothing was read, or what was read is not what is kept
         written = write(builder._combine_with_old_subset(old_subset, combine_operator, expression), False)
@@ -1356,7 +1356,7 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         from ...qgis.remote_materializer import request_bytes_limit
         sent = list(keys) + [keys[0]] * max(0, listed - len(keys))  # the keys of a previous step go with them
         if not key_list_fits(builder._get_primary_key(layer), sent, request_bytes_limit(builder.task_params),
-                             asks_by_rectangle(layer.source() if hasattr(layer, 'source') else '')):
+                             asks_by_rectangle(source_of(layer) if hasattr(layer, 'source') else '')):
             cut = cut_by_extent()
             if cut is not None:
                 return cut
@@ -1388,7 +1388,7 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         from ...qgis.extent_fallback import remember
         by_extent = extent_subset(capability, rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
         if by_extent is not None:
-            remember(layer.id(), final, builder._combine_with_old_subset(old_subset, combine_operator, by_extent))
+            remember(id_of(layer), final, builder._combine_with_old_subset(old_subset, combine_operator, by_extent))
     return write(final, outcome is not None and not outcome.complete)
 
 
@@ -1617,7 +1617,7 @@ def execute_ogr_spatial_selection(
     # DIAGNOSTIC LOGS 2026-01-15: Trace OGR spatial selection execution
     logger.info("=" * 70)
     logger.info("[OGR] 🚀 execute_ogr_spatial_selection STARTING")  # nosec B608
-    logger.info(f"[OGR]    Layer: {current_layer.name() if hasattr(current_layer, 'name') else 'unknown'}")
+    logger.info(f"[OGR]    Layer: {name_of(current_layer) if hasattr(current_layer, 'name') else 'unknown'}")
     logger.info(f"[OGR]    Source geom: {ogr_source_geom.name() if hasattr(ogr_source_geom, 'name') else 'unknown'}")
     logger.info(f"[OGR]    Source features: {ogr_source_geom.featureCount() if hasattr(ogr_source_geom, 'featureCount') else 'unknown'}")
     logger.info(f"[OGR]    Predicate list (numeric): {predicate_list}")

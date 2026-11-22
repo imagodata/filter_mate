@@ -23,6 +23,11 @@ from qgis.core import QgsFeature
 # FIX 2026-01-18: Import get_qgis_factory for hexagonal expression handling
 from ..ports.qgis_port import get_qgis_factory
 
+try:
+    from ...filtermate_core.domain.layer_facts import name_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import name_of
+
 logger = logging.getLogger('FilterMate.Core.Services.SourceLayerFilterExecutor')
 
 
@@ -160,7 +165,7 @@ class SourceLayerFilterExecutor:
             for i, f in enumerate(task_features[:3]):  # Show first 3
                 logger.info(f"      feature[{i}]: id={f.id()}, isValid={f.isValid()}")
 
-        logger.info(f"   source_layer = '{context.source_layer.name() if context.source_layer else 'None'}'")
+        logger.info(f"   source_layer = '{name_of(context.source_layer) if context.source_layer else 'None'}'")
         logger.info(f"   primary_key_name = '{context.primary_key_name}'")
         logger.info("=" * 60)
 

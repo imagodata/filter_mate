@@ -18,6 +18,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from filtermate_core.domain.layer_facts import id_of
+
 pytestmark = pytest.mark.unit
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[4]
@@ -49,6 +51,7 @@ def env(tmp_path):
     assert len(methods) == len(_METHODS)
     holder = ast.ClassDef(name="_Task", bases=[], keywords=[], body=methods, decorator_list=[])
     namespace = {"uuid": uuid, "List": typing.List, "logger": MagicMock(), "HistoryRepository": repo.HistoryRepository,
+                 "id_of": id_of,
                  "create_prepared_statements": lambda conn, provider_type: None,  # the repository path
                  "note_history_insert": repo.note_history_insert,
                  "recording_history_inserts": repo.recording_history_inserts,

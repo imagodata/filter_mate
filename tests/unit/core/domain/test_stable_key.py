@@ -24,10 +24,10 @@ from pathlib import Path
 
 import pytest
 
-from filtermate_core.domain import layer_facts
 from core.domain.stable_key import (
     DECLARED, FEATURE_ID, FEATURE_ID_KEY, NAMED, NONE, choose_key, is_feature_id_key, looks_like_key_name,
 )
+from filtermate_core.domain import layer_facts
 
 pytestmark = pytest.mark.unit
 
