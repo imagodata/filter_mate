@@ -66,123 +66,127 @@ if __name__ == '__main__' and '--report' in _sys.argv:
     _arguments = _sys.argv[_sys.argv.index('--report') + 1:]
     _sys.exit(_report(_arguments[0], _arguments[1:]))
 
-from qgis.core import QgsMapLayer as _QgsMapLayer, QgsRasterLayer as _QgsRasterLayer, \
-    QgsVectorLayer as _QgsVectorLayer  # noqa: E402 - only in QGIS
-from qgis.PyQt.QtCore import QCoreApplication as _QCoreApplication, QThread as _QThread  # noqa: E402
 
-_MAIN_IDENT = _threading.get_ident()
-_MAIN_QTHREAD = _QCoreApplication.instance().thread()
-PROBE = {'lock': _threading.Lock(), 'off_main': _collections.Counter(), 'cross': _collections.Counter(),
-         'callers': _collections.Counter(), 'step': '(start)', 'printed': {},
-         'main_on_foreign': _collections.Counter(), 'main_callers': _collections.Counter()}
+def _fm_install_layer_reads_probe():
+    """Wrap the accessors and the exit of the bench. Everything lives in this function: the bench is run in the
+    globals of this script and may define any name of its own (run_gui_smoke.py has a ``PROBE``)."""
+    from qgis.core import QgsMapLayer, QgsRasterLayer, QgsVectorLayer
+    from qgis.PyQt.QtCore import QCoreApplication, QThread
+    threading, collections, sys, os, json, reference, extra = (
+        _threading, _collections, _sys, _os, _json, _REFERENCE, _EXTRA)
 
+    main_ident = threading.get_ident()
+    main_qthread = QCoreApplication.instance().thread()
+    lock = threading.Lock()
+    state = {'off_main': collections.Counter(), 'cross': collections.Counter(), 'callers': collections.Counter(),
+             'main_on_foreign': collections.Counter(), 'main_callers': collections.Counter(), 'printed': {},
+             'step': '(start)'}
 
-def _stack(depth=8):
-    frame = _sys._getframe(3)
-    parts = []
-    while frame is not None and len(parts) < depth:
-        filename = frame.f_code.co_filename
-        if 'probe_layer_reads' in filename or filename.startswith('<'):
+    def stack(depth=8):
+        frame = sys._getframe(3)
+        parts = []
+        while frame is not None and len(parts) < depth:
+            filename = frame.f_code.co_filename
+            if 'probe_layer_reads' in filename or filename.startswith('<'):
+                frame = frame.f_back
+                continue
+            if '/filter_mate/' in filename:
+                filename = filename.split('/filter_mate/', 1)[1]
+            parts.append(f"{filename}:{frame.f_lineno} {frame.f_code.co_name}")
             frame = frame.f_back
-            continue
-        if '/filter_mate/' in filename:
-            filename = filename.split('/filter_mate/', 1)[1]
-        parts.append(f"{filename}:{frame.f_lineno} {frame.f_code.co_name}")
-        frame = frame.f_back
-    return parts
+        return parts
 
+    def note(name, layer):
+        """A call made off the main thread."""
+        try:
+            cross = layer.thread() != QThread.currentThread()
+        except RuntimeError:  # deleted
+            cross = None
+        frames = stack()
+        with lock:
+            state['off_main'][name] += 1
+            if cross is not False:
+                state['cross'][name] += 1
+            key = f"{name} | cross={cross} | " + ' < '.join(frames[:5])
+            state['callers'][key] += 1
+            if name == 'providerType' and cross is not False:
+                seen = state['printed'].get(key, 0)
+                state['printed'][key] = seen + 1
+                if seen < 2:
+                    print(f"   [probe] providerType off its thread (step {state['step']}): " + ' < '.join(frames),
+                          flush=True)
 
-def _note(name, layer):
-    """A call made off the main thread."""
-    try:
-        cross = layer.thread() != _QThread.currentThread()
-    except RuntimeError:  # deleted
-        cross = None
-    stack = _stack()
-    with PROBE['lock']:
-        PROBE['off_main'][name] += 1
-        if cross is not False:
-            PROBE['cross'][name] += 1
-        key = f"{name} | cross={cross} | " + ' < '.join(stack[:5])
-        PROBE['callers'][key] += 1
-        if name == 'providerType' and cross is not False:
-            seen = PROBE['printed'].get(key, 0)
-            PROBE['printed'][key] = seen + 1
+    def note_main(name, layer):
+        """The main thread reads a layer that lives in another thread. No accessor of the layer here: it would
+        add a report of its own."""
+        frames = stack()
+        with lock:
+            state['main_on_foreign'][name] += 1
+            key = f"{name} | {type(layer).__name__} | " + ' < '.join(frames[:6])
+            state['main_callers'][key] += 1
+            seen = state['printed'].get(key, 0)
+            state['printed'][key] = seen + 1
             if seen < 2:
-                print(f"   [probe] providerType off its thread (step {PROBE['step']}): " + ' < '.join(stack),
-                      flush=True)
+                print(f"   [probe] the MAIN thread reads a layer of another thread: {name} (step {state['step']}): "
+                      + ' < '.join(frames), flush=True)
+
+    def wrap(name, original):
+        def wrapped(self, *args, **kwargs):
+            if threading.get_ident() != main_ident:
+                note(name, self)
+            else:
+                try:
+                    foreign = self.thread() != main_qthread
+                except RuntimeError:
+                    foreign = False
+                if foreign:
+                    note_main(name, self)
+            return original(self, *args, **kwargs)
+        wrapped.__name__ = name
+        return wrapped
+
+    classes = [QgsMapLayer, QgsVectorLayer, QgsRasterLayer]
+    try:
+        from qgis.core import QgsPointCloudLayer
+        classes.append(QgsPointCloudLayer)
+    except ImportError:
+        pass
+    # every original first: a class inherits the accessors its parent defines
+    originals = [(cls, name, getattr(cls, name)) for cls in classes for name in reference + extra
+                 if hasattr(cls, name)]
+    for cls, name, original in originals:
+        setattr(cls, name, wrap(name, original))
+
+    real_exit = os._exit
+
+    def leave(code=0):
+        with lock:
+            report = {
+                'reference': list(reference), 'off_main': dict(state['off_main']), 'cross': dict(state['cross']),
+                'off_main_reference_total': sum(state['off_main'][name] for name in reference),
+                'cross_reference_total': sum(state['cross'][name] for name in reference),
+                'callers': state['callers'].most_common(),
+                'main_on_foreign': dict(state['main_on_foreign']),
+                'main_callers': state['main_callers'].most_common(),
+            }
+        print('PROBE_JSON ' + json.dumps(report), flush=True)
+        real_exit(code)
+
+    os._exit = leave  # the benches leave through os._exit
+    return state
 
 
-def _note_main(name, layer):
-    """The main thread reads a layer that lives in another thread. No accessor of the layer here: it would
-    add a report of its own."""
-    stack = _stack()
-    with PROBE['lock']:
-        PROBE['main_on_foreign'][name] += 1
-        key = f"{name} | {type(layer).__name__} | " + ' < '.join(stack[:6])
-        PROBE['main_callers'][key] += 1
-        seen = PROBE['printed'].get(key, 0)
-        PROBE['printed'][key] = seen + 1
-        if seen < 2:
-            print(f"   [probe] the MAIN thread reads a layer of another thread: {name} (step {PROBE['step']}): "
-                  + ' < '.join(stack), flush=True)
-
-
-def _wrap(name, original):
-    def wrapped(self, *args, **kwargs):
-        if _threading.get_ident() != _MAIN_IDENT:
-            _note(name, self)
-        else:
-            try:
-                foreign = self.thread() != _MAIN_QTHREAD
-            except RuntimeError:
-                foreign = False
-            if foreign:
-                _note_main(name, self)
-        return original(self, *args, **kwargs)
-    wrapped.__name__ = name
-    return wrapped
-
-
-_classes = [_QgsMapLayer, _QgsVectorLayer, _QgsRasterLayer]
-try:
-    from qgis.core import QgsPointCloudLayer as _QgsPointCloudLayer
-    _classes.append(_QgsPointCloudLayer)
-except ImportError:
-    pass
-# every original first: a class inherits the accessors its parent defines
-_originals = [(cls, name, getattr(cls, name)) for cls in _classes for name in _REFERENCE + _EXTRA
-              if hasattr(cls, name)]
-for _cls, _name, _original in _originals:
-    setattr(_cls, _name, _wrap(_name, _original))
-
-_real_exit = _os._exit
-
-
-def _exit(code=0):
-    with PROBE['lock']:
-        report = {
-            'reference': list(_REFERENCE), 'off_main': dict(PROBE['off_main']), 'cross': dict(PROBE['cross']),
-            'off_main_reference_total': sum(PROBE['off_main'][name] for name in _REFERENCE),
-            'cross_reference_total': sum(PROBE['cross'][name] for name in _REFERENCE),
-            'callers': PROBE['callers'].most_common(),
-            'main_on_foreign': dict(PROBE['main_on_foreign']), 'main_callers': PROBE['main_callers'].most_common(),
-        }
-    print('PROBE_JSON ' + _json.dumps(report), flush=True)
-    _real_exit(code)
-
-
-_os._exit = _exit  # the benches leave through os._exit
-_bench = _os.environ.get('FM_PROBE_BENCH') or _os.path.join(
+_fm_layer_reads_state = _fm_install_layer_reads_probe()
+_fm_layer_reads_bench = _os.environ.get('FM_PROBE_BENCH') or _os.path.join(
     _os.environ.get('FM_REPO') or '/src', 'tests', 'qgis_headless', 'run_lifecycle_check.py')
-with open(_bench, encoding='utf-8') as _stream:
-    exec(compile(_stream.read(), _bench, 'exec'), globals())  # nosec B102 - a bench of this repository
+with open(_fm_layer_reads_bench, encoding='utf-8') as _fm_layer_reads_stream:
+    exec(compile(_fm_layer_reads_stream.read(), _fm_layer_reads_bench, 'exec'), globals())  # nosec B102 - a bench of this repository
 
-_bench_run_step = globals().get('run_step')
-if _bench_run_step is not None and 'STEPS' in globals():
+_fm_layer_reads_run_step = globals().get('run_step')
+if _fm_layer_reads_run_step is not None and 'STEPS' in globals():
     def run_step(index=0):  # noqa: F811 - the bench looks its run_step up in the globals at each step
         try:
-            PROBE['step'] = STEPS[index].__name__  # noqa: F821 - defined by the bench
+            _fm_layer_reads_state['step'] = STEPS[index].__name__  # noqa: F821 - defined by the bench
         except Exception:  # nosec B110 - the step name is only a label of the printed stacks
             pass
-        return _bench_run_step(index)
+        return _fm_layer_reads_run_step(index)
