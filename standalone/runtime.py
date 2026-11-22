@@ -179,7 +179,8 @@ def _conda_environments() -> List[Runtime]:
             python = os.path.join(prefix, "python.exe")
             library = os.path.join(prefix, "Library")
             bindings = os.path.join(library, "python")
-            env = {"QGIS_PREFIX_PATH": library, "QT_PLUGIN_PATH": os.path.join(library, "plugins"),
+            env = {"QGIS_PREFIX_PATH": library,
+                   "QT_PLUGIN_PATH": os.pathsep.join([os.path.join(library, "plugins"), os.path.join(library, "qtplugins")]),
                    "PYTHONPATH": os.pathsep.join([bindings, os.path.join(bindings, "plugins")]),
                    "PATH": os.pathsep.join([prefix, os.path.join(library, "bin"), os.environ.get("PATH", "")])}
             has_qgis = os.path.isdir(os.path.join(library, "python", "qgis")) or bool(

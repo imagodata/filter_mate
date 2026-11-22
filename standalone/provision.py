@@ -109,9 +109,10 @@ def installed_runtime():
     python = os.path.join(base, "python")
     if os.name != "nt":
         python = os.path.join(prefix, "share", "qgis", "python")
+    plugins = [os.path.join(base, "plugins")] + ([os.path.join(base, "qtplugins")] if os.name == "nt" else [])
     env = {"QGIS_PREFIX_PATH": base,
            "PYTHONPATH": os.pathsep.join([python, os.path.join(python, "plugins")]),
-           "QT_PLUGIN_PATH": os.path.join(base, "plugins")}
+           "QT_PLUGIN_PATH": os.pathsep.join(plugins)}
     command = [micromamba_path(), "run", "-r", root_prefix(), "-p", environment_dir(), "python"]
     return Runtime("private", command, f"FilterMate's own runtime ({environment_dir()})", env)
 

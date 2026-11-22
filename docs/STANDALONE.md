@@ -94,6 +94,10 @@ path: Windows limits paths to 260 characters unless long paths are on, and the d
 pass that limit in micromamba's cache), emptied after the install. Checked from a bare Linux machine
 (a `python:3.12-slim` container) and on Windows 11 (long paths off); not on macOS, which nobody here
 has (the GitHub workflow `standalone.yml` that would run it on a Mac is turned off, as every workflow).
+What was checked for macOS from Linux: conda-forge solves the same environment for `osx-arm64` and
+`osx-64` (QGIS 4.2.3, draco 1.5.7), micromamba has a build for both, and the `qgis` package of macOS
+puts PyQGIS where the runtime expects it (`share/qgis/python`), its activation script setting the same
+variables as `filtermate setup` does.
 
 When the QGIS chosen at an earlier launch is gone (uninstalled, an environment deleted), the
 next launch says so and searches again. A Python named with `FILTERMATE_QGIS_PYTHON` or
