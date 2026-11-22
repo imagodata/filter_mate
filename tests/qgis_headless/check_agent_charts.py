@@ -6,7 +6,9 @@ changes, and the undo of the turn. Run inside a qgis/qgis image that has PyQt6 Q
         qgis/qgis:latest sh -c "apt-get update -qq && apt-get install -y -qq python3-pyqt6.qtwebengine >/dev/null \\
         && xvfb-run -a python3 /src/tests/qgis_headless/check_agent_charts.py"
 
-Without QtWebEngine (QGIS 3, an image without it), checks that the tools say so and stops.
+Without QtWebEngine (QGIS 3, an image without it), checks that the tools say so and stops. On Windows, against the
+plugin of a profile: set QT_QPA_PLATFORM=offscreen and FM_PACKAGE_ROOT=<profile>\\python\\plugins, then run it with
+python-qgis.bat.
 Prints one PASS / FAIL line per check; exits with 1 when one failed.
 """
 import os
@@ -292,8 +294,11 @@ def main():
 if __name__ == "__main__":
     app = QgsApplication([b"check_agent_charts"], False)
     app.initQgis()
-    package_root = tempfile.mkdtemp()
-    os.symlink(os.environ.get("FM_REPO", "/src"), os.path.join(package_root, "filter_mate"))
+    # FM_PACKAGE_ROOT: a folder that already holds filter_mate (the plugins folder of a QGIS profile, on Windows
+    # where a link to the checkout of WSL does not work); otherwise a link to FM_REPO (/src in Docker).
+    package_root = os.environ.get("FM_PACKAGE_ROOT") or tempfile.mkdtemp()
+    if not os.environ.get("FM_PACKAGE_ROOT"):
+        os.symlink(os.environ.get("FM_REPO", "/src"), os.path.join(package_root, "filter_mate"))
     sys.path.insert(0, package_root)
     sys.dont_write_bytecode = True
     print(f"QGIS {__import__('qgis.core').core.Qgis.QGIS_VERSION}, Python {sys.version.split()[0]}")

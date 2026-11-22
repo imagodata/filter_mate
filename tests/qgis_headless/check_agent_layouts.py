@@ -196,6 +196,22 @@ def main():
           len(layouts.describe_layout("Carte")["items"]) == before_count, (done, left))
     apply_effects(effects, undo=False)
     check("edit: redo brings them back", len(layouts.describe_layout("Carte")["pages"]) == 2)
+    done, left = apply_effects(effects, undo=True)
+    check("edit: undo again after a redo", not left and len(layouts.describe_layout("Carte")["pages"]) == 1,
+          (done, left))
+    apply_effects(effects, undo=False)
+    # A change of the user in the designer after the turn: its undo leaves the layout as the user made it.
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("e2", "edit_layout", {"layout": "Carte"}))
+    added = layouts.edit_layout("Carte", [{"do": "add_shape", "x": 40, "y": 40, "width": 5, "height": 5}])
+    effects = recorder.finish()
+    from qgis.core import QgsLayoutPoint
+    shape = layouts._item_by_ref(project.layoutManager().layoutByName("Carte"), added["done"][0]["ref"])
+    shape.attemptMove(QgsLayoutPoint(80, 80, layouts._mm()))
+    done, left = apply_effects(effects, undo=True)
+    check("undo: a layout changed by the user since is left as it is, and said", left == ["Carte"] and
+          added["done"][0]["ref"] in {item["ref"] for item in layouts.describe_layout("Carte")["items"]},
+          (done, left))
 
     # --- a template of the profile
     from qgis.core import QgsReadWriteContext
