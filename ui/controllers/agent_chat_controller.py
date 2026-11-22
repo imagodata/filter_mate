@@ -81,7 +81,10 @@ from ...core.agent.tool_catalog import (
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
     TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
-from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
+from ...core.agent.widgets import (
+    CHART, RANGE, SHOWING, STAT, WidgetError, range_counts_hold, replaced as widget_replaced, summary as widget_summary,
+    wide_open, without,
+)
 from ...core.domain.layer_kind import LayerKind
 from ...adapters.agent import agent_widgets
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure, connector_gate
@@ -261,6 +264,7 @@ class AgentChatController(QObject):
         self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
+        self._opened_bars = {}  # range widget id -> (what they were read for, its bars read wide open): see _range_bars
         self._stat_timer = QTimer(self)
         self._stat_timer.setSingleShot(True)
         self._stat_timer.setInterval(300)
@@ -1936,7 +1940,7 @@ class AgentChatController(QObject):
             layer = agent_widgets.widget_layer(widget)
             if layer is None:
                 self.panel.widgets_strip.set_error(widget["id"], _tr("Its layer is no longer in the project."))
-            elif widget["kind"] in SHOWING:
+            elif widget["kind"] in SHOWING + (RANGE,):  # a range shows the bars of its field
                 wanted[layer.id()] = layer
         for layer_id in set(self._stat_layers) - set(wanted):
             self._follow(self._stat_layers.pop(layer_id), False)
@@ -1969,11 +1973,43 @@ class AgentChatController(QObject):
                 self.panel.widgets_strip.set_value(widget["id"], number_text(value))
             elif widget["kind"] == CHART:
                 self.panel.widgets_strip.set_bars(widget["id"], agent_widgets.chart_bars(widget))
+            elif widget["kind"] == RANGE:
+                self.panel.widgets_strip.set_bars(widget["id"], self._range_bars(widget, widgets))
+        for widget_id in set(self._opened_bars) - {widget["id"] for widget in widgets}:
+            del self._opened_bars[widget_id]
         # Read on this thread, up to MAX_STAT_FEATURES features a widget: the next refresh waits three times as long as
         # this one took (10 s at most), so a big layer being edited is not read again 300 ms after each change. One
         # delay for all the widgets; a timer already counting is left alone (setInterval would start it again).
         if not self._stat_timer.isActive():
             self._stat_timer.setInterval(min(10_000, max(300, int((time.monotonic() - started) * 3000))))
+
+    def _range_bars(self, widget, widgets):
+        """The bars of a range widget: its field on its layer filtered by everything but itself, so that the bars
+        outside its bounds stay, greyed, to widen it again; None when they cannot be read.
+
+        Its layer filtered by itself holds nothing outside its bounds, and it is never filtered otherwise nor copied
+        to be read. So the bars read while the range is wide open, with the layer filtered as its widgets say, are
+        kept here (not in the project) with that filter; while the range is narrower they are shown again as long
+        as the layer would have that same filter with the range wide open, and the features shown now agree with them
+        (range_counts_hold: none edited). Otherwise (a project opened with the range narrowed, another widget or the
+        features changed since), the features shown now, nothing outside the bounds, until the range is wide open.
+        """
+        now = agent_widgets.range_counts(widget)
+        layer = agent_widgets.widget_layer(widget)
+        if now is None or layer is None:
+            return now
+        key = (widget["layer_id"], widget["field"], widget["minimum"], widget["maximum"],
+               agent_widgets.opened_filter(widgets, widget))
+        if widget == wide_open(widget):
+            if (layer.subsetString() or "") == key[-1]:  # not a filter the user set over the widgets meanwhile
+                self._opened_bars[widget["id"]] = (key, now)
+            return now
+        kept = self._opened_bars.get(widget["id"])
+        if kept is not None and kept[0] == key:
+            if range_counts_hold(kept[1], now, widget):
+                return kept[1]
+            del self._opened_bars[widget["id"]]  # edited since: read again once wide open
+        return now
 
     def _on_widget_changed(self, widget) -> None:
         """The user moved a bound or ticked a value: kept in the project, and its layer filtered."""

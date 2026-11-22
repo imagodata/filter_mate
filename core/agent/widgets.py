@@ -3,7 +3,7 @@
 
 Plain Python. A widget is a dict, kept as JSON in the project, drawn by FilterMate with widgets it knows:
 
-- ``range``: two bounds on a numeric field; moving them filters the layer;
+- ``range``: two bounds on a numeric field, over a histogram of that field; moving them filters the layer;
 - ``values``: the values of a field, each ticked or not; ticking filters the layer;
 - ``stat``: a number computed on the layer as it is filtered now (count, sum, mean, minimum, maximum);
 - ``chart``: bars of the layer as filtered now: the features of each value of a field (the most frequent ones), or
@@ -16,6 +16,7 @@ functions (QGIS's), never from text a model wrote: a model only chooses the kind
 """
 from __future__ import annotations
 
+import bisect
 import json
 import math
 from decimal import ROUND_HALF_UP, Context, Decimal
@@ -29,6 +30,7 @@ CATEGORIES, HISTOGRAM = "categories", "histogram"
 CHART_MODES = (CATEGORIES, HISTOGRAM)
 MAX_BARS = 8  # the most frequent values; the others are summed in one bar
 HISTOGRAM_BINS = 10
+RANGE_BINS = 24  # the bars over the bounds of a range widget, under its handles
 AGGREGATES = ("count", "sum", "mean", "min", "max")
 MAX_WIDGETS = 12
 MAX_VALUES = 50
@@ -298,6 +300,50 @@ def histogram_bars(values: Iterable[Any], bins: int = HISTOGRAM_BINS) -> List[Di
     # An edge is a weighted mean of low and high: it never goes beyond them.
     edges = [low * (1 - index / bins) + high * (index / bins) for index in range(bins + 1)]
     return [{"low": edges[index], "high": edges[index + 1], "count": count} for index, count in enumerate(counts)]
+
+
+def range_edges(minimum: float, maximum: float, bins: int = RANGE_BINS) -> List[float]:
+    """The ``bins + 1`` edges of equal intervals from ``minimum`` to ``maximum``, never decreasing; the first and the
+    last are the two bounds themselves."""
+    # A weighted mean of the bounds, as in histogram_bars: no width that rounds to 0 or overflows.
+    edges = [minimum * (1 - index / bins) + maximum * (index / bins) for index in range(bins + 1)]
+    edges[0], edges[-1] = minimum, maximum
+    for index in range(1, bins + 1):
+        edges[index] = max(edges[index], edges[index - 1])
+    return edges
+
+
+def range_histogram(values: Iterable[Any], minimum: float, maximum: float, bins: int = RANGE_BINS) -> List[int]:
+    """The features of each of ``bins`` equal intervals of the FIXED bounds ``[minimum, maximum]`` (those of a range
+    widget, not those of the values read): an interval holds its low edge, the last one its high edge too. A value
+    outside the bounds, not a number or not finite is left out."""
+    edges = range_edges(minimum, maximum, bins)
+    counts = [0] * bins
+    for value in values:
+        number = _number(value)
+        if number is None or not minimum <= number <= maximum:
+            continue
+        counts[min(bisect.bisect_right(edges, number) - 1, bins - 1)] += 1
+    return counts
+
+
+def wide_open(widget: Dict[str, Any]) -> Dict[str, Any]:
+    """A range widget with its bounds at the ends of its field: it lets every feature through."""
+    return dict(widget, low=widget["minimum"], high=widget["maximum"])
+
+
+def range_counts_hold(opened: Sequence[int], now: Sequence[int], widget: Dict[str, Any]) -> bool:
+    """Whether ``opened``, the bars of a range widget read while it was wide open, still describe its layer read
+    ``now`` within its bounds: the same count in each bar that lies whole between the bounds, no more in the others.
+    False after an edit of the features shown, or another filter: the bars must be read again."""
+    if len(opened) != len(now):
+        return False
+    edges = range_edges(widget["minimum"], widget["maximum"], len(opened))
+    for index, (before, after) in enumerate(zip(opened, now)):
+        inside = widget["low"] <= edges[index] and edges[index + 1] <= widget["high"]
+        if after > before or (inside and after != before):
+            return False
+    return True
 
 
 def without(widgets: Sequence[Dict[str, Any]], widget_id: str) -> List[Dict[str, Any]]:

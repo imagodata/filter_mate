@@ -6,8 +6,9 @@ import math
 import pytest
 
 from core.agent.widgets import (
-    CATEGORIES, CHART, HISTOGRAM, MAX_BARS, MAX_VALUES, MAX_WIDGETS, NOTHING, RANGE, STAT, VALUES, WidgetError,
-    category_bars, condition, decimals, dumps, histogram_bars, layer_filter, make, parse, replaced, summary, without,
+    CATEGORIES, CHART, HISTOGRAM, MAX_BARS, MAX_VALUES, MAX_WIDGETS, NOTHING, RANGE, RANGE_BINS, STAT, VALUES,
+    WidgetError, category_bars, condition, decimals, dumps, histogram_bars, layer_filter, make, parse, range_counts_hold,
+    range_edges, range_histogram, replaced, summary, wide_open, without,
 )
 
 pytestmark = pytest.mark.unit
@@ -263,3 +264,54 @@ class TestChart:
         assert [bar["count"] for bar in bars] == [1] + [0] * 8 + [1]
         assert bars[0]["low"] == low and bars[-1]["high"] == high
         assert all(math.isfinite(bar[key]) for bar in bars for key in ("low", "high"))
+
+
+class TestRangeHistogram:
+    """The bars under the handles of a range: counted on the bounds of the widget, not on the values read."""
+
+    def test_on_the_bounds_given_each_edge_in_the_bar_above_it_and_the_maximum_in_the_last(self):
+        assert range_histogram([0, 2.5, 5, 7.5, 10], 0, 10, bins=4) == [1, 1, 1, 2]
+        assert range_histogram([0, 9.99], 0, 10, bins=4) == [1, 0, 0, 1]
+        assert len(range_histogram([], 0, 10)) == RANGE_BINS and sum(range_histogram([], 0, 10)) == 0
+
+    def test_the_bounds_are_those_given_not_those_of_the_values(self):
+        assert range_histogram([4, 5], 0, 10, bins=5) == [0, 0, 2, 0, 0]
+
+    def test_a_value_outside_the_bounds_or_not_a_finite_number_is_left_out(self):
+        values = [-0.001, 10.001, None, "5", True, float("nan"), float("inf"), -float("inf"), 10 ** 400, 5]
+        assert range_histogram(values, 0, 10, bins=2) == [0, 1]
+
+    @pytest.mark.parametrize("low, high", [(-1.7e308, 1.7e308), (0, 5e-324), (1e15, 1e15 + 2)])
+    def test_edges_of_extreme_bounds_never_decrease_and_end_on_the_bounds(self, low, high):
+        edges = range_edges(low, high)
+        assert edges[0] == low and edges[-1] == high and edges == sorted(edges)
+        assert all(math.isfinite(edge) for edge in edges)
+        assert sum(range_histogram([low, high], low, high)) == 2
+
+
+class TestRangeCountsHold:
+    """Bars read wide open, shown again while the range is narrower, as long as the layer read now agrees."""
+
+    OPENED = [3, 1, 4, 2]  # bars of 0-2.5, 2.5-5, 5-7.5, 7.5-10
+
+    def narrowed(self, low, high):
+        return dict(a_range(minimum=0, maximum=10), low=low, high=high)
+
+    def test_a_narrower_range_agrees_with_its_bars_read_wide_open(self):
+        widget = self.narrowed(2.5, 7.0)  # the second bar whole, the third cut
+        assert range_counts_hold(self.OPENED, [0, 1, 3, 0], widget)
+
+    def test_a_feature_added_or_removed_inside_the_range_shows(self):
+        widget = self.narrowed(2.5, 7.0)
+        assert not range_counts_hold(self.OPENED, [0, 0, 3, 0], widget)  # one less in a bar whole within
+        assert not range_counts_hold(self.OPENED, [0, 1, 5, 0], widget)  # more than wide open in a cut bar
+        assert not range_counts_hold(self.OPENED, [0, 1], widget)
+
+    def test_the_last_bar_holds_the_maximum(self):
+        widget = self.narrowed(7.5, 10.0)
+        assert range_counts_hold(self.OPENED, [0, 0, 0, 2], widget)
+        assert not range_counts_hold(self.OPENED, [0, 0, 0, 1], widget)
+
+    def test_wide_open(self):
+        widget = self.narrowed(3.0, 4.0)
+        assert wide_open(widget) == dict(widget, low=0, high=10) and condition(wide_open(widget), qf, qv) == ""

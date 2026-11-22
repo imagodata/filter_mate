@@ -18,6 +18,7 @@ from qgis.PyQt.QtWidgets import (
 from ...core.agent.widgets import CATEGORIES, CHART, RANGE, VALUES, decimals
 from ..styles.mockup_design import plugin_is_dark, tokens
 from .agent_thread import plain_tooltip
+from .coverage_panels.histogram_widget import RangeHistogramWidget
 
 APPLY_DELAY_MS = 400  # a value typed or ticked is applied once the user pauses
 STRIP_MAX_HEIGHT = 260
@@ -57,6 +58,9 @@ def number_text(value: Optional[float]) -> str:
 
 CHART_ROW = 16
 HISTOGRAM_HEIGHT = 64
+# The bars of a range as high as those of a chart, and the 11 px its histogram keeps above them and for its handles.
+RANGE_HISTOGRAM_HEIGHT = HISTOGRAM_HEIGHT + 11
+RANGE_HISTOGRAM_MIN_WIDTH = 60  # the boxes under it give the card its width, not the histogram
 
 
 def short_number(value: float) -> str:
@@ -194,11 +198,13 @@ class WidgetCard(QFrame):
         self.high: Optional[QDoubleSpinBox] = None
         self.values: Optional[QListWidget] = None
         self.chart: Optional[ChartView] = None
+        self.histogram: Optional[RangeHistogramWidget] = None
         if widget["kind"] == CHART:
             self.chart = ChartView(widget["mode"], self)
             self.chart.setObjectName("widget_agent_chart")
             layout.addWidget(self.chart)
         elif widget["kind"] == RANGE:
+            layout.addWidget(self._build_histogram())
             layout.addLayout(self._build_range())
         elif widget["kind"] == VALUES:
             layout.addWidget(self._build_values())
@@ -223,6 +229,28 @@ class WidgetCard(QFrame):
         if box.value() >= box.maximum():
             return self.widget["maximum"]
         return box.value()
+
+    def _build_histogram(self) -> RangeHistogramWidget:
+        """The bars of the field, the handles on the bounds; hidden until bars are read (set_bars)."""
+        widget = self.widget
+        self.histogram = RangeHistogramWidget(self)
+        self.histogram.setObjectName("widget_agent_range_histogram")
+        # Neither its width (280 px wished, 200 at least) nor its height (90 px wished) comes from the histogram.
+        self.histogram.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        self.histogram.setMinimumWidth(RANGE_HISTOGRAM_MIN_WIDTH)
+        self.histogram.setFixedHeight(RANGE_HISTOGRAM_HEIGHT)
+        self.histogram.set_decimals(decimals(widget))  # 0 for whole numbers: the handles stop on them
+        self.histogram.set_histogram([], widget["minimum"], widget["maximum"])  # its bounds first: set_range clamps
+        self.histogram.set_range(widget["low"], widget["high"])
+        self.histogram.rangeChanged.connect(self._on_histogram)
+        self.histogram.hide()
+        return self.histogram
+
+    def _histogram_range(self) -> tuple:
+        """The range the histogram holds when it shows the state of the widget: None for a bound at an end."""
+        widget = self.widget
+        return (None if widget["low"] <= widget["minimum"] else widget["low"],
+                None if widget["high"] >= widget["maximum"] else widget["high"])
 
     def _build_range(self) -> QHBoxLayout:
         row = QHBoxLayout()
@@ -284,6 +312,20 @@ class WidgetCard(QFrame):
             other.setValue(moved.value())
             other.blockSignals(False)
             self.widget[other_key] = self.widget[key]
+        if self.histogram is not None:
+            self.histogram.set_range(self.widget["low"], self.widget["high"])  # emits nothing
+        self._timer.start()
+
+    def _on_histogram(self, _low: float = 0.0, _high: float = 0.0) -> None:
+        """A handle dropped: both bounds as the histogram holds them; a handle at an end is the end of the field itself
+        (range() says None), as for a box (_bound)."""
+        low, high = self.histogram.range()
+        self.widget["low"] = self.widget["minimum"] if low is None else low
+        self.widget["high"] = self.widget["maximum"] if high is None else high
+        for box, key in ((self.low, "low"), (self.high, "high")):
+            box.blockSignals(True)  # the state is already written: no second start of the timer
+            box.setValue(self.widget[key])
+            box.blockSignals(False)
         self._timer.start()
 
     def _on_values(self, _item=None) -> None:
@@ -300,6 +342,8 @@ class WidgetCard(QFrame):
         for box in (self.low, self.high):
             if box is not None:
                 box.interpretText()  # a value typed without Enter
+        if self.histogram is not None and self.histogram.range() != self._histogram_range():
+            self._on_histogram()  # a handle still held
         if not self._timer.isActive():
             return False
         self._timer.stop()
@@ -311,8 +355,13 @@ class WidgetCard(QFrame):
             self.value.setText(text)
 
     def set_bars(self, bars) -> None:
+        """The bars of a chart; the counts of a range, or None: then its boxes alone."""
         if self.chart is not None:
             self.chart.set_bars(bars)
+        elif self.histogram is not None:
+            if bars:
+                self.histogram.set_histogram(bars, self.widget["minimum"], self.widget["maximum"])  # keeps its range
+            self.histogram.setVisible(bool(bars))
 
     def set_error(self, text: str) -> None:
         self.error.setText(text)
@@ -424,6 +473,8 @@ class WidgetsStrip(QFrame):
                 card.chart.accent = QColor(palette['fm_accent'])
                 card.chart.muted = QColor(palette['fm_text_muted'])
                 card.chart.update()
+            if card.histogram is not None:
+                card.histogram.set_accent(QColor(palette['fm_accent']))
         self.setStyleSheet(
             f"QFrame#frame_agent_widget {{ border: 1px solid {palette['fm_group_border']}; border-radius: 6px; }}"
             "QLabel#label_agent_widget_title { font-weight: 600; }"

@@ -32,13 +32,15 @@ def _load():
     try:
         for name, path in (("", _ROOT), (".core", _ROOT / "core"), (".core.agent", _ROOT / "core" / "agent"),
                            (".ui", _ROOT / "ui"), (".ui.widgets", _ROOT / "ui" / "widgets"),
-                           (".ui.styles", _ROOT / "ui" / "styles"), (".ui.layout", _ROOT / "ui" / "layout")):
+                           (".ui.styles", _ROOT / "ui" / "styles"), (".ui.layout", _ROOT / "ui" / "layout"),
+                           # its __init__ loads the panels of EXPLORING: the histogram alone
+                           (".ui.widgets.coverage_panels", _ROOT / "ui" / "widgets" / "coverage_panels")):
             package = types.ModuleType(_PKG + name)
             package.__path__ = [str(path)]
             sys.modules[_PKG + name] = package
         modules = [importlib.import_module(f"{_PKG}.{name}")
                    for name in ("ui.widgets.agent_widgets_strip", "ui.widgets.agent_thread", "core.agent.widgets",
-                                "ui.layout.action_bar_manager")]
+                                "ui.layout.action_bar_manager", "ui.widgets.coverage_panels.histogram_widget")]
     finally:
         for name, previous in saved.items():
             if previous is None:
@@ -48,7 +50,7 @@ def _load():
     return (app, *modules)
 
 
-_APP, strip_module, thread_module, model, action_bar_module = _load()
+_APP, strip_module, thread_module, model, action_bar_module, histogram_module = _load()
 Qt = QtCore.Qt
 
 
@@ -108,6 +110,124 @@ class TestRange:
     def test_whole_numbers_for_an_integer_field(self):
         widget = model.make([], model.RANGE, "L1", "communes", "", field="n", minimum=3, maximum=17, integer=True)
         assert model.condition(_moved(widget, low=5), _quote, repr) == '"n" >= 5'
+
+
+def _shown_card(widget, bars=None, width=380):
+    """A card in a holder as wide as a narrow dock, its bars set, laid out."""
+    holder = QtWidgets.QWidget()
+    layout = QtWidgets.QVBoxLayout(holder)
+    card = strip_module.WidgetCard(widget, holder)
+    layout.addWidget(card)
+    layout.addStretch(1)
+    holder.resize(width, 400)
+    holder.show()
+    if bars is not None:
+        card.set_bars(bars)
+    _run(30)
+    return holder, card
+
+
+def _drop(histogram, start, end):
+    """A handle grabbed at abscissa ``start`` of the histogram and dropped at ``end`` (pixels of the widget)."""
+    from PyQt5 import QtTest
+    y = histogram.height() // 2
+    QtTest.QTest.mousePress(histogram, Qt.LeftButton, Qt.NoModifier, QtCore.QPoint(start, y))
+    QtTest.QTest.mouseRelease(histogram, Qt.LeftButton, Qt.NoModifier, QtCore.QPoint(end, y))
+
+
+def _value_at(histogram, x, minimum, maximum, places):
+    """The value a handle dropped at ``x`` takes, as the histogram computes it."""
+    width = histogram.width() - 12  # the plot keeps 6 px on each side for the handles
+    return histogram_module.snap(histogram_module.value_at(x - 6, width, minimum, maximum), places, minimum, maximum)
+
+
+class TestRangeHistogram:
+    BARS = [1] * 24
+
+    def test_a_handle_dropped_moves_the_bound_and_its_box_then_filters_after_the_pause(self):
+        holder, card = _shown_card(dict(_range(0.0, 100.0), id="w1"), self.BARS)
+        emitted = []
+        card.changed.connect(emitted.append)
+        histogram = card.histogram
+        assert histogram.isVisible()
+        target = 6 + int(0.4 * (histogram.width() - 12))
+        expected = _value_at(histogram, target, 0.0, 100.0, 2)
+        _drop(histogram, 6, target)
+        assert card.widget["low"] == expected and card.low.value() == expected and card.widget["high"] == 100.0
+        assert emitted == []  # not before the pause
+        _run(strip_module.APPLY_DELAY_MS + 100)
+        assert len(emitted) == 1 and emitted[0]["low"] == expected
+        assert model.condition(emitted[0], _quote, repr) == f'"f" >= {expected!r}'
+        holder.deleteLater()
+
+    def test_a_box_moves_its_handle_and_nothing_is_applied_twice(self):
+        holder, card = _shown_card(dict(_range(0.0, 100.0), id="w1"), self.BARS)
+        emitted = []
+        card.changed.connect(emitted.append)
+        card.high.setValue(40.0)
+        assert card.histogram.range() == (None, 40.0)
+        card.low.setValue(60.0)  # past the other one: both bounds on it
+        assert card.histogram.range() == (60.0, 60.0)
+        _run(strip_module.APPLY_DELAY_MS + 100)
+        assert len(emitted) == 1 and (emitted[0]["low"], emitted[0]["high"]) == (60.0, 60.0)
+        holder.deleteLater()
+
+    def test_a_handle_dropped_at_an_end_is_the_end_of_the_field_itself(self):
+        holder, card = _shown_card(dict(_range(0.125, 10.006, low=5.0, high=6.0), id="w1"), self.BARS)
+        histogram = card.histogram
+        _drop(histogram, 6 + int(0.5 * (histogram.width() - 12)), 0)  # the low handle to the left end
+        _drop(histogram, 6 + int(0.6 * (histogram.width() - 12)), histogram.width())  # the high one to the right end
+        state = card.widget
+        assert (state["low"], state["high"]) == (0.125, 10.006) and model.condition(state, _quote, repr) == ""
+        assert card.low.value() == card.low.minimum()  # shown rounded, the state exact
+        holder.deleteLater()
+
+    def test_the_handles_of_an_integer_field_stop_on_whole_numbers(self):
+        widget = model.make([], model.RANGE, "L1", "communes", "", field="n", minimum=3, maximum=17, integer=True)
+        holder, card = _shown_card(dict(widget, id="w1"), self.BARS)
+        histogram = card.histogram
+        _drop(histogram, 6, 6 + int(0.37 * (histogram.width() - 12)))
+        low = card.widget["low"]
+        assert low == int(low) and 3 < low < 17 and model.condition(card.widget, _quote, repr) == f'"n" >= {int(low)}'
+        holder.deleteLater()
+
+    def test_without_bars_the_boxes_alone(self):
+        holder, card = _shown_card(dict(_range(0.0, 100.0), id="w1"))
+        assert not card.histogram.isVisible() and card.low.isVisible()
+        card.set_bars(self.BARS)
+        assert card.histogram.isVisible()
+        card.set_bars(None)  # too many features, a web service: no histogram, no empty frame
+        assert not card.histogram.isVisible()
+        holder.deleteLater()
+
+    def test_a_handle_held_while_its_card_goes_is_applied(self):
+        holder, card = _shown_card(dict(_range(0.0, 100.0), id="w1"), self.BARS)
+        emitted = []
+        card.changed.connect(emitted.append)
+        from PyQt5 import QtTest
+        histogram = card.histogram
+        y = histogram.height() // 2
+        target = 6 + int(0.7 * (histogram.width() - 12))
+        QtTest.QTest.mousePress(histogram, Qt.LeftButton, Qt.NoModifier, QtCore.QPoint(target, y))  # not released
+        assert card.flush() and emitted[-1]["high"] == _value_at(histogram, target, 0.0, 100.0, 2)
+        assert not card.flush()  # once
+        holder.deleteLater()
+
+    def test_the_histogram_does_not_widen_the_card_and_keeps_its_height(self):
+        holder, card = _shown_card(dict(_range(0.0, 100.0), id="w1"))
+        without = (card.minimumSizeHint().width(), card.sizeHint().width())
+        card.set_bars(self.BARS)
+        _run(30)
+        assert (card.minimumSizeHint().width(), card.sizeHint().width()) == without
+        assert card.histogram.height() == strip_module.RANGE_HISTOGRAM_HEIGHT
+        assert card.histogram.width() > 300  # as wide as the card in a dock of 380 px
+        holder.deleteLater()
+
+    def test_the_bars_take_the_accent_of_the_plugin(self, strip):
+        strip.set_widgets([dict(_range(0.0, 100.0), id="w1")])
+        histogram = strip.cards["w1"].histogram
+        palette = importlib.import_module(f"{_PKG}.ui.styles.mockup_design").tokens(False)
+        assert histogram._accent is not None and histogram._accent.name() == QtGui.QColor(palette["fm_accent"]).name()
 
 
 def _values(number, chosen=("a",)):

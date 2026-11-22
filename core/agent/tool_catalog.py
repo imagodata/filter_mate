@@ -179,8 +179,9 @@ CHAT_ONLY = (
     ToolSpec(
         name=CREATE_WIDGET, title="Make a widget for the user",
         description=("Make a control that stays in the AGENT panel, saved with the project, for the user to explore "
-                     "a vector layer alone: range (two bounds on a number, filters), values (ticked values, at most "
-                     "50, filters), stat (a number kept up to date) or chart (bars or a histogram, filters nothing). "
+                     "a vector layer alone: range (two bounds on a number over its histogram, filters), values "
+                     "(ticked values, at most 50, filters), stat (a number kept up to date) or chart (bars or a "
+                     "histogram, filters nothing). "
                      "The widgets of a layer narrow it together. For a widget, slider or dashboard asked; one per "
                      "call; undone with the turn. Returns widget and widgets."),
         input_schema={"type": "object", "properties": {
