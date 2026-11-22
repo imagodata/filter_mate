@@ -1,0 +1,49 @@
+{
+  "cases": [
+    {
+      "id": "form_lists_and_bounds",
+      "prompt": "Dans le formulaire des bâtiments, je veux une liste déroulante pour l'usage (Agricole, Commercial, Industriel, Résidentiel), une hauteur entre 0 et 300 m obligatoire, et le libellé « Hauteur (m) ».",
+      "expect": [
+        [
+          {"tool": "set_form", "args": {"layer": "batiments", "fields": {"contains": ["usage", "value_map", "hauteur", "range", "not_null", "Hauteur (m)"]}},
+           "call_args": {"layer": "batiments", "fields": [
+             {"field": "usage", "widget": "value_map", "values": ["Agricole", "Commercial", "Industriel", "Résidentiel"]},
+             {"field": "hauteur", "alias": "Hauteur (m)", "widget": "range", "min": 0, "max": 300, "step": 0.5, "not_null": true}
+           ]}}
+        ]
+      ],
+      "forbid": ["update_features", "add_features", "delete_features", "run_pyqgis"]
+    },
+    {
+      "id": "form_parcels_of_communes",
+      "prompt": "Relie les parcelles à leur commune par le code INSEE, et que l'on choisisse la commune d'une parcelle dans une liste.",
+      "expect": [
+        [
+          {"tool": "relations", "args": {"action": "add", "parent_layer": "communes", "parent_field": "insee", "child_layer": "parcelles", "child_field": "commune"},
+           "call_args": {"action": "add", "parent_layer": "communes", "parent_field": "insee", "child_layer": "parcelles", "child_field": "commune"}},
+          {"tool": "set_form", "args": {"layer": "parcelles", "fields": {"contains": ["commune", "relation_reference"]}},
+           "call_args": {"layer": "parcelles", "fields": [{"field": "commune", "widget": "relation_reference", "alias": "Commune"}]}}
+        ],
+        [
+          {"tool": "relations", "args": {"action": "add", "parent_layer": "communes", "parent_field": "insee", "child_layer": "parcelles", "child_field": "commune"},
+           "call_args": {"action": "add", "parent_layer": "communes", "parent_field": "insee", "child_layer": "parcelles", "child_field": "commune"}},
+          {"tool": "set_form", "args": {"layer": "parcelles", "fields": {"contains": ["commune", "value_relation", "insee"]}},
+           "call_args": {"layer": "parcelles", "fields": [{"field": "commune", "widget": "value_relation", "layer": "communes", "key": "insee", "value": "nom"}]}}
+        ]
+      ],
+      "forbid": ["update_features", "join_layers", "run_pyqgis"]
+    },
+    {
+      "id": "form_no_composition_for_lookup",
+      "trap": true,
+      "prompt": "Fais en sorte que les parcelles dépendent des communes par le code INSEE.",
+      "expect": [
+        [
+          {"tool": "relations", "args": {"action": "add", "parent_layer": "communes", "child_layer": "parcelles", "strength": {"any_of": ["association", null]}},
+           "call_args": {"action": "add", "parent_layer": "communes", "parent_field": "insee", "child_layer": "parcelles", "child_field": "commune"}}
+        ]
+      ],
+      "forbid": ["update_features", "delete_features", "run_pyqgis"]
+    }
+  ]
+}

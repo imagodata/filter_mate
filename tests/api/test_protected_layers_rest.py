@@ -94,6 +94,11 @@ WRITES = [
     ("add_features", lambda a: a.add_features("cadastre", features=[{"wkt": "POINT(0 0)"}])),
     ("add_field", lambda a: a.add_field("cadastre", "densite")),
     ("join_layers", lambda a: a.join_layers("cadastre", "routes", "a", "a")),
+    ("set_form", lambda a: a.set_form("cadastre", [{"field": "a", "alias": "A"}])),
+    ("relations add, the parent", lambda a: a.relations("add", parent_layer="cadastre", parent_field="a",
+                                                        child_layer="routes", child_field="a")),
+    ("relations add, the child", lambda a: a.relations("add", parent_layer="routes", parent_field="a",
+                                                       child_layer="cadastre", child_field="a")),
     ("rename_layer", lambda a: a.rename_layer("cadastre", "parcelles")),
     # A copy reads and writes the source of its layer, and is not protected: an edit of it was one of the layer.
     ("duplicate_layer", lambda a: a.duplicate_layer("cadastre", name="copie")),
@@ -128,6 +133,23 @@ class TestTheAccessorRefusesAChangeOfAProtectedLayer:
         except TypeError:  # the recorder's answer is not a whole JoinAdded: it was reached, which is the point
             pass
         assert operations.join_layers.called
+
+    def test_a_relation_of_a_protected_layer_is_not_removed(self, accessor, operations):
+        """2026-11-22: a relation removed is named by its id or name: its layers are found, then checked."""
+        operations.relation_layers.return_value = ["L1", "L2"]
+        with pytest.raises(LayerProtected, match="'cadastre'"):
+            accessor.relations("remove", name="parcelles des communes")
+        assert not operations.relations.called
+        operations.relation_layers.return_value = ["L3", "L2"]
+        operations.relations.return_value = {"action": "remove"}
+        assert accessor.relations("remove", name="routes des communes") == {"action": "remove"}
+        operations.relations.return_value = {"action": "list", "relations": []}
+        assert accessor.relations("list")["relations"] == []
+
+    def test_the_lookup_table_of_a_form_is_only_read(self, accessor, operations):
+        operations.set_form.return_value = {"layer_name": "routes", "fields": []}
+        assert accessor.set_form("routes", [{"field": "a", "widget": "value_relation", "layer": "cadastre",
+                                             "key": "a"}])["layer_name"] == "routes"
 
     def test_protected_layers_that_cannot_be_read_refuse_the_change(self, accessor, operations, monkeypatch):
         def unreadable():

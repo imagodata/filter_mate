@@ -602,6 +602,25 @@ class QGISFilterMateAccessor:
                                          prefix=prefix, module="adapters.public_api.fields_joins",
                                          changes={"layer": layer}))
 
+    def set_form(self, layer: str, fields: List[Dict[str, Any]]) -> Dict[str, Any]:
+        return self._control("set_form", layer, fields, module="adapters.public_api.forms", changes={"layer": layer})
+
+    def relations(self, action: str, **options: Any) -> Dict[str, Any]:
+        """``forms.relations`` on the main thread, unless a layer it links is protected: those named to add one, those
+        of the relation named to remove one (found there, on the main thread)."""
+        def call():
+            module = _plugin_module("adapters.public_api.forms")
+            parent, child = options.get("parent_layer", ""), options.get("child_layer", "")
+            if action == "remove":
+                parent, child = (module.relation_layers(options.get("name", "")) + ["", ""])[:2]
+            named = {key: value for key, value in (("parent_layer", parent), ("child_layer", child)) if value}
+            _refuse_protected("relations", {"action": action, **named})
+            try:
+                return _unless_busy(module.relations, action, **options)
+            except ValueError as exc:
+                raise FilterRejected(str(exc)) from None
+        return run_on_main_thread(call)
+
     def group_layers(self, layers: List[str], group: str = "", at_top: bool = True,
                      above: str = "") -> LayerTreeChange:
         return LayerTreeChange(**self._control("group_layers", layers, group=group, at_top=at_top, above=above,

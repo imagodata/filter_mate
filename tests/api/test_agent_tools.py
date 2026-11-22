@@ -157,6 +157,25 @@ class TestHandlers:
                    join_field="a")[0] is True
         assert run(accessor, root, "join_layers", layer="communes", target_field="a", join_field="a")[0] is True
 
+    def test_form_and_relation_tools(self, api):
+        """2026-11-22: the form of a layer and the relations of the project, checked against the catalog first."""
+        accessor, root = api
+        error, answer = run(accessor, root, "set_form", layer="communes", fields=[
+            {"field": "type", "widget": "value_map", "values": ["A", {"value": "B", "label": "Bâti"}]},
+            {"field": "pop", "widget": "range", "min": 0, "max": 10, "not_null": True, "enforce": True}])
+        assert not error and [row["field"] for row in answer["fields"]] == ["type", "pop"]
+        assert run(accessor, root, "set_form", layer="communes", fields=[])[0] is True
+        assert run(accessor, root, "set_form", layer="communes", fields=[{"field": "a", "widget": "slider"}])[0] is True
+        assert run(accessor, root, "set_form", layer="communes", fields=[{"field": "a", "colour": "red"}])[0] is True
+        assert run(accessor, root, "set_form", layer="communes", fields=[{"field": "a"}] * 51)[0] is True
+        error, answer = run(accessor, root, "relations", action="add", parent_layer="communes", parent_field="insee",
+                            child_layer="communes", child_field="parent", strength="composition")
+        assert not error and answer["relation"]["strength"] == "composition"
+        assert run(accessor, root, "relations", action="list")[1]["relations"][0]["id"] == answer["relation"]["id"]
+        assert run(accessor, root, "relations", action="add", strength="weak")[0] is True
+        assert run(accessor, root, "relations", action="remove", name=answer["relation"]["name"])[0] is False
+        assert run(accessor, root, "relations", action="remove", name="nope")[0] is True
+
     def test_layer_tree_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "group_layers", layers=["communes", "nope"], group="Base/Admin")
@@ -884,6 +903,22 @@ class TestRoutes:
         assert client.post("/layers/join", json={"layer": "communes", "join_layer": "communes", "target_field": "a",
                                                  "join_field": "a"}).status_code == 400
         assert client.post("/layers/join", json={"layer": "communes", "target_field": "a"}).status_code == 422
+
+    def test_form_and_relation_routes(self, client):
+        response = client.post("/layers/form", json={"layer": "communes", "fields": [
+            {"field": "type", "widget": "value_map", "values": ["A", {"value": "B", "label": "Bâti"}]}]})
+        assert response.status_code == 200 and response.json()["fields"][0]["field"] == "type"
+        assert client.post("/layers/form", json={"layer": "communes", "fields": []}).status_code == 422
+        assert client.post("/layers/form", json={"layer": "communes", "fields": [
+            {"field": "a", "widget": "slider"}]}).status_code == 422
+        assert client.post("/layers/form", json={"layer": "nope", "fields": [{"field": "a"}]}).status_code == 400
+        added = client.post("/project/relations", json={"action": "add", "parent_layer": "communes",
+                                                        "parent_field": "insee", "child_layer": "communes",
+                                                        "child_field": "parent"})
+        assert added.status_code == 200 and added.json()["relation"]["strength"] == "association"
+        assert client.post("/project/relations", json={"action": "list"}).json()["relations"]
+        assert client.post("/project/relations", json={"action": "drop"}).status_code == 422
+        assert client.post("/project/relations", json={"action": "remove", "name": "nope"}).status_code == 400
 
     def test_bookmark_route(self, client):
         assert client.post("/map/bookmarks", json={"action": "add", "name": "A"}).json()["bookmarks"] == ["A"]

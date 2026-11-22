@@ -2564,6 +2564,344 @@
    }
   },
   {
+   "name": "set_form",
+   "title": "Set the form of a layer",
+   "description": "Set how fields show in the attribute form of a layer, all or none; only what an entry gives changes, \"\" removes. Nothing is written to the data. Returns layer_name and fields. In the chat of FilterMate, undoing the turn puts the form back.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fields": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "field": {
+         "maxLength": 200,
+         "minLength": 1,
+         "type": "string"
+        },
+        "alias": {
+         "anyOf": [
+          {
+           "maxLength": 200,
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "widget": {
+         "anyOf": [
+          {
+           "enum": [
+            "value_map",
+            "value_relation",
+            "range",
+            "date",
+            "checkbox",
+            "text",
+            "hidden",
+            "relation_reference",
+            "default"
+           ],
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "default: QGIS chooses"
+        },
+        "values": {
+         "anyOf": [
+          {
+           "items": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "additionalProperties": false,
+              "properties": {
+               "value": {
+                "maxLength": 1000,
+                "minLength": 1,
+                "type": "string"
+               },
+               "label": {
+                "default": "",
+                "maxLength": 200,
+                "type": "string"
+               }
+              },
+              "required": [
+               "value"
+              ],
+              "type": "object"
+             }
+            ]
+           },
+           "maxItems": 500,
+           "type": "array"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "value_map"
+        },
+        "layer": {
+         "default": "",
+         "description": "value_relation: lookup layer",
+         "maxLength": 1000,
+         "type": "string"
+        },
+        "key": {
+         "default": "",
+         "description": "value_relation: field stored",
+         "maxLength": 200,
+         "type": "string"
+        },
+        "value": {
+         "default": "",
+         "description": "value_relation: field shown",
+         "maxLength": 200,
+         "type": "string"
+        },
+        "min": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "max": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "step": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "format": {
+         "default": "",
+         "description": "date: shown as dd/MM/yyyy",
+         "maxLength": 200,
+         "type": "string"
+        },
+        "multiline": {
+         "anyOf": [
+          {
+           "type": "boolean"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "not_null": {
+         "anyOf": [
+          {
+           "type": "boolean"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "unique": {
+         "anyOf": [
+          {
+           "type": "boolean"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "expression": {
+         "anyOf": [
+          {
+           "maxLength": 2000,
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Constraint, a QGIS condition"
+        },
+        "constraint_text": {
+         "default": "",
+         "maxLength": 200,
+         "type": "string"
+        },
+        "enforce": {
+         "anyOf": [
+          {
+           "type": "boolean"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Constraints refuse to save; default: they warn"
+        },
+        "default": {
+         "anyOf": [
+          {
+           "maxLength": 2000,
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Expression: now(), @user_account_name, $area, 'text'"
+        },
+        "default_on_update": {
+         "anyOf": [
+          {
+           "type": "boolean"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "editable": {
+         "anyOf": [
+          {
+           "type": "boolean"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "false: read only"
+        }
+       },
+       "required": [
+        "field"
+       ],
+       "type": "object"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "layer",
+     "fields"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "relations",
+   "title": "Relations of the project",
+   "description": "The relations of the project: list, add or remove. The form of a parent lists its children. Nothing is written to the data. Returns relations [{id, name, parent, child, fields, strength}], or the relation added or removed. In the chat of FilterMate, undoing the turn takes it back.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "action": {
+      "description": "add: each child feature points to a parent feature by a field",
+      "enum": [
+       "list",
+       "add",
+       "remove"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "description": "add: its name; remove: its id or name",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "parent_layer": {
+      "default": "",
+      "description": "add, such as communes",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "parent_field": {
+      "default": "",
+      "description": "add: its key, such as insee",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "child_layer": {
+      "default": "",
+      "description": "add, such as buildings",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "child_field": {
+      "default": "",
+      "description": "add: holds the parent's key",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "strength": {
+      "default": "association",
+      "description": "composition: children deleted with their parent",
+      "enum": [
+       "association",
+       "composition"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "action"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "group_layers",
    "title": "Put layers in a group",
    "description": "Organize the layer tree: put layers in a group, made where it is missing, first or last of it; or just above another layer, to draw them over it. Layers keep their data, style and visibility. Returns group, groups_made, moved and not_found. In the chat of FilterMate, undoing the turn puts each layer back and removes the groups it made.",
