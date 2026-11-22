@@ -39,7 +39,9 @@ CAUSE_REFUSED = "refused"
 class AgentLimits:
     """Bounds of one user request."""
 
-    max_model_turns: int = 16
+    # 2026-11-22: 16 cut a map made from a sentence (elevation, contours, natural areas, roads, a filter, styles, a
+    # layout) at its last step. Reaching it is no failure: the thread offers to go on (agent_chat_controller).
+    max_model_turns: int = 24
     # This many model turns before the end, the tool results say so: the model finishes instead of being cut.
     warn_turns_left: int = 2
     # Past this many characters (about a quarter as many tokens), the oldest requests are summed up in a few lines

@@ -1278,6 +1278,21 @@ Alatnya hanya akan melihat daripada projek anda apa yang dihantar ejen kepadanya
         <translation>Jawapan model terpotong: terlalu panjang.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>Ejen berhenti seketika selepas banyak langkah, sebelum permintaan selesai. Apa yang diubahnya kekal dan boleh dibuat asal.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Teruskan dengan baki permintaan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Teruskan</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Model menolak permintaan ini.</translation>

@@ -1278,6 +1278,21 @@ Its tools will see of your project only what the agent sends them, and what they
         <translation>የሞዴሉ መልስ ተቆርጧል፦ በጣም ረጅም ነበር።</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>ወኪሉ ከብዙ ደረጃዎች በኋላ ጥያቄው ሳያልቅ ቆም ብሏል። የቀየረው ይቀራል እና ሊቀለበስ ይችላል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>በጥያቄው የቀረውን ቀጥል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>ቀጥል</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>ሞዴሉ ይህን ጥያቄ አልተቀበለም።</translation>

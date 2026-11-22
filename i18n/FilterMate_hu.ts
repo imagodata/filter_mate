@@ -1278,6 +1278,21 @@ Az eszközei a projektjéből csak azt látják, amit az ügynök küld nekik, �
         <translation>A modell válasza megszakadt: túl hosszú volt.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>Az ügynök sok lépés után szünetet tartott, a kérés vége előtt. Amit módosított, megmarad és visszavonható.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Folytasd azzal, ami a kérésből még hátravan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Folytatás</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>A modell elutasította ezt a kérést.</translation>
