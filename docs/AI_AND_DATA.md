@@ -20,11 +20,17 @@ export, favorites, segmentation) runs on your computer and sends nothing.
 | The instructions and the list of tools of the chat | Every request |
 | A summary of the project: the map extent, the layer tree (names, types, fields, CRS), what changed since the last request | Every request |
 | Project notes you asked the agent to remember | Every request |
+| Notes you keep from one project to the next (the Memory tab of the AGENT settings): those for every project, and those of a layer whose source is in the open project. 3 000 characters at most | With the first request of a conversation, and again when they change. Never when the option is off |
 | Field values: statistics by group, a sample of features, what lies at a point, the values of a field | Only if you allow attribute values in the consent dialog |
 | An image of the map | Only with a provider that reads images, and only if you allow attribute values (a map shows its labels) |
 | Values already written in your filters and favorites | Every request: the consent dialog says so |
 
 The provider's own terms apply to what it receives: check whether it keeps or trains on your requests.
+
+## What stays on your computer
+
+- **The memory of the agent** is one file, `agent_memory.json`, in the `FilterMate` folder of your QGIS profile. You write its notes yourself in the Memory tab of the AGENT settings, where you correct and remove them; you can open the file, copy it to another computer or delete it. FilterMate has no server to send it to. A note goes to the provider you chose only as the table above says.
+- **The conversation** of each project is kept in the settings of QGIS until you start a new one.
 
 ## What is never sent
 

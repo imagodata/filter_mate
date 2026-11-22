@@ -144,6 +144,16 @@ Sunteți de acord?</translation>
         <translation>Opțiunile panourilor pentru: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2716"/>
+        <source>EXPLORING: {}</source>
+        <translation>EXPLORING: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2742"/>
+        <source>Open EXPLORING</source>
+        <translation>Deschide EXPLORING</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
         <source>Export options of the panel</source>
         <translation>Opțiunile de export ale panoului</translation>
@@ -188,6 +198,11 @@ Sunteți de acord?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
         <source>Stop the request, or wait for its end, to open the settings.</source>
         <translation>Opriți cererea sau așteptați să se termine pentru a deschide setările.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
+        <source>The memory could not be saved: {}</source>
+        <translation>Memoria nu a putut fi salvată: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
@@ -557,6 +572,11 @@ Pentru ce: {}
         <location filename="../../adapters/agent/turn_effects.py" line="70"/>
         <source>export options of the panel</source>
         <translation>opțiunile de export ale panoului</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="80"/>
+        <source>EXPLORING panel</source>
+        <translation>panoul EXPLORING</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
@@ -1704,6 +1724,66 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Alte aplicații</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1587"/>
+        <source>Memory</source>
+        <translation>Memorie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1737"/>
+        <source>Keep notes from one project to the next</source>
+        <translation>Păstrează note de la un proiect la altul</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the QGIS profile). They are sent to your provider with a request: those for every project always, those of a layer when a layer of the same source is in the open project. Double-click a note to correct it.</source>
+        <translation>Notele scrise aici rămân într-un fișier de pe acest calculator (agent_memory.json, în dosarul FilterMate din profilul QGIS). Sunt trimise furnizorului dvs. împreună cu o cerere: cele pentru toate proiectele întotdeauna, cele ale unui strat atunci când un strat din aceeași sursă se află în proiectul deschis. Faceți dublu clic pe o notă pentru a o corecta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Every project</source>
+        <translation>Toate proiectele</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1768"/>
+        <source>A note, in one sentence</source>
+        <translation>O notă, într-o frază</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1779"/>
+        <source>Forget everything</source>
+        <translation>Uită tot</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1781"/>
+        <source>Open the file</source>
+        <translation>Deschide fișierul</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1855"/>
+        <source>This list is full: remove a note first.</source>
+        <translation>Această listă este plină: eliminați mai întâi o notă.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1863"/>
+        <source>The memory file cannot be read ({}). Correct it or remove it: nothing is written to it meanwhile.</source>
+        <translation>Fișierul memoriei nu poate fi citit ({}). Corectați-l sau ștergeți-l: între timp nu se scrie nimic în el.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1872"/>
+        <source>Sent with this project: {} of {} notes.</source>
+        <translation>Trimise cu acest proiect: {} din {} note.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1874"/>
+        <source>{} not sent: they hold attribute values, which you do not share.</source>
+        <translation>{} netrimise: conțin valori ale atributelor, pe care nu le partajați.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1920"/>
+        <source>Forget every note kept from one project to the next?</source>
+        <translation>Uitați toate notele păstrate de la un proiect la altul?</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="872"/>
         <source>Port</source>
         <translation>Port</translation>
@@ -2237,6 +2317,21 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Trasează o zonă de 100 m în jurul stratului activ</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Lasă-mă să aleg entități pe hartă</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Un cursor pe histograma unui câmp numeric</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Activează pipeta pe acest raster</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Creează un aspect de tipărire al acestei hărți</translation>
@@ -2624,6 +2719,16 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
         <source>(empty)</source>
         <translation>(gol)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} în afara intervalului</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} fără valoare</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
@@ -7210,6 +7315,349 @@ Determinat din: {1}</translation>
         <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="550"/>
         <source>system PATH</source>
         <translation>PATH-ul sistemului</translation>
+    </message>
+</context>
+<context>
+    <name>FilterMateStandalone</name>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="47"/>
+        <source>{0}: attributes</source>
+        <translation>{0}: atribute</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="49"/>
+        <source>{0} features</source>
+        <translation>{0} entități</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="51"/>
+        <source>, {0} selected</source>
+        <translation>, {0} selectate</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="53"/>
+        <source> (filtered)</source>
+        <translation> (filtrat)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="49"/>
+        <source>Choose a vector layer in the layer panel first.</source>
+        <translation>Alegeți mai întâi un strat vectorial în panoul de straturi.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="209"/>
+        <source>Nothing here.</source>
+        <translation>Nimic aici.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="90"/>
+        <source>{0} could not be opened: {1}</source>
+        <translation>{0} nu a putut fi deschis: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="118"/>
+        <source>{0} could not be opened.</source>
+        <translation>{0} nu a putut fi deschis.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="188"/>
+        <source>The OpenStreetMap tiles could not be reached.</source>
+        <translation>Dalele OpenStreetMap nu au putut fi accesate.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="275"/>
+        <source>Add layers</source>
+        <translation>Adăugare straturi</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="314"/>
+        <source>This source is not available here: {0}</source>
+        <translation>Această sursă nu este disponibilă aici: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="316"/>
+        <source>This source is not available here.</source>
+        <translation>Această sursă nu este disponibilă aici.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="343"/>
+        <source>Layers of {0}</source>
+        <translation>Straturile din {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="176"/>
+        <source>Layers</source>
+        <translation>Straturi</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="195"/>
+        <source>&amp;New project</source>
+        <translation>Proiect &amp;nou</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="196"/>
+        <source>&amp;Open project...</source>
+        <translation>&amp;Deschidere proiect...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="197"/>
+        <source>&amp;Save project</source>
+        <translation>&amp;Salvare proiect</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="198"/>
+        <source>Save project &amp;as...</source>
+        <translation>Salvare proiect c&amp;a...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="200"/>
+        <source>&amp;Add layers...</source>
+        <translation>&amp;Adăugare straturi...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="201"/>
+        <source>Add &amp;files...</source>
+        <translation>Adăugare &amp;fișiere...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="202"/>
+        <source>Add the OpenStreetMap &amp;basemap</source>
+        <translation>Adăugare &amp;hartă de bază OpenStreetMap</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="203"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Ieșire</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="205"/>
+        <source>Pan</source>
+        <translation>Deplasare</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="206"/>
+        <source>Zoom in</source>
+        <translation>Mărire</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="207"/>
+        <source>Zoom out</source>
+        <translation>Micșorare</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="208"/>
+        <source>Zoom to everything</source>
+        <translation>Zoom la tot</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="209"/>
+        <source>Zoom to the layer</source>
+        <translation>Zoom la strat</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="210"/>
+        <source>Zoom to the selection</source>
+        <translation>Zoom la selecție</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Salvare editări straturi</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>Salvați editările straturilor ({0})?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>Editările stratului {0} nu au putut fi salvate: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} există deja. Îl înlocuiți?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>Încă rulează sarcini ({0}). Le opriți și ieșiți?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="211"/>
+        <source>Refresh</source>
+        <translation>Reîmprospătare</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="212"/>
+        <source>Select features</source>
+        <translation>Selectare entități</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="213"/>
+        <source>Select features: click or drag (Shift adds, Ctrl removes)</source>
+        <translation>Selectare entități: clic sau tragere (Shift adaugă, Ctrl elimină)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="214"/>
+        <source>Select by polygon</source>
+        <translation>Selectare după poligon</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="215"/>
+        <source>Select by polygon: left clicks draw, a right click ends</source>
+        <translation>Selectare după poligon: clicurile stânga desenează, un clic dreapta încheie</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="216"/>
+        <source>Deselect all</source>
+        <translation>Deselectare totală</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="217"/>
+        <source>Identify</source>
+        <translation>Identificare</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="218"/>
+        <source>Open the attribute table</source>
+        <translation>Deschidere tabel de atribute</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="219"/>
+        <source>Layer properties...</source>
+        <translation>Proprietățile stratului...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>About FilterMate</source>
+        <translation>Despre FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="235"/>
+        <source>Project</source>
+        <translation>Proiect</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="237"/>
+        <source>Map</source>
+        <translation>Hartă</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="240"/>
+        <source>Plugins</source>
+        <translation>Pluginuri</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="259"/>
+        <source>Log messages</source>
+        <translation>Mesaje de jurnal</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="279"/>
+        <source>&amp;Project</source>
+        <translation>&amp;Proiect</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="284"/>
+        <source>&amp;Layer</source>
+        <translation>&amp;Strat</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="289"/>
+        <source>&amp;View</source>
+        <translation>&amp;Vizualizare</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="295"/>
+        <source>Panels</source>
+        <translation>Panouri</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="298"/>
+        <source>Browser</source>
+        <translation>Navigator</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="303"/>
+        <source>Toolbars</source>
+        <translation>Bare de instrumente</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="308"/>
+        <source>&amp;Help</source>
+        <translation>A&amp;jutor</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="325"/>
+        <source>Coordinate reference system of the map</source>
+        <translation>Sistemul de coordonate de referință al hărții</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="442"/>
+        <source>Save the changes to the project?</source>
+        <translation>Salvați modificările proiectului?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="462"/>
+        <source>Open a project</source>
+        <translation>Deschidere proiect</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="469"/>
+        <source>{0} does not exist.</source>
+        <translation>{0} nu există.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="479"/>
+        <source>The project could not be read: {0}</source>
+        <translation>Proiectul nu a putut fi citit: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="494"/>
+        <source>Save the project</source>
+        <translation>Salvare proiect</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="500"/>
+        <source>The project could not be saved: {0}</source>
+        <translation>Proiectul nu a putut fi salvat: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="507"/>
+        <source>Add files</source>
+        <translation>Adăugare fișiere</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="559"/>
+        <source>P&amp;lugins</source>
+        <translation>P&amp;luginuri</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="625"/>
+        <source>This kind of layer has no properties window here.</source>
+        <translation>Acest tip de strat nu are aici o fereastră de proprietăți.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="629"/>
+        <source>The properties could not be opened: {0}</source>
+        <translation>Proprietățile nu au putut fi deschise: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="655"/>
+        <source>The browser could not be opened: {0}</source>
+        <translation>Navigatorul nu a putut fi deschis: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="666"/>
+        <source>Standalone application: the FilterMate dock on the QGIS libraries.</source>
+        <translation>Aplicație independentă: panoul FilterMate pe bibliotecile QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="681"/>
+        <source>No CRS</source>
+        <translation>Niciun SRC</translation>
     </message>
 </context>
 <context>

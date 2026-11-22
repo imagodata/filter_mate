@@ -144,6 +144,16 @@ Sind Sie einverstanden?</translation>
         <translation>Panel-Optionen für: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2716"/>
+        <source>EXPLORING: {}</source>
+        <translation>EXPLORING: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2742"/>
+        <source>Open EXPLORING</source>
+        <translation>EXPLORING öffnen</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
         <source>Export options of the panel</source>
         <translation>Exportoptionen des Panels</translation>
@@ -188,6 +198,11 @@ Sind Sie einverstanden?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
         <source>Stop the request, or wait for its end, to open the settings.</source>
         <translation>Stoppen Sie die Anfrage oder warten Sie ihr Ende ab, um die Einstellungen zu öffnen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
+        <source>The memory could not be saved: {}</source>
+        <translation>Das Gedächtnis konnte nicht gespeichert werden: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
@@ -557,6 +572,11 @@ Ausführen?</translation>
         <location filename="../../adapters/agent/turn_effects.py" line="70"/>
         <source>export options of the panel</source>
         <translation>Exportoptionen des Panels</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="80"/>
+        <source>EXPLORING panel</source>
+        <translation>EXPLORING-Bereich</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
@@ -1704,6 +1724,66 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <translation>Andere Anwendungen</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1587"/>
+        <source>Memory</source>
+        <translation>Gedächtnis</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1737"/>
+        <source>Keep notes from one project to the next</source>
+        <translation>Notizen von einem Projekt zum nächsten behalten</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the QGIS profile). They are sent to your provider with a request: those for every project always, those of a layer when a layer of the same source is in the open project. Double-click a note to correct it.</source>
+        <translation>Notizen, die Sie hier schreiben, bleiben in einer Datei auf diesem Computer (agent_memory.json, im FilterMate-Ordner des QGIS-Profils). Sie werden mit einer Anfrage an Ihren Anbieter gesendet: die für alle Projekte immer, die eines Layers, wenn ein Layer derselben Quelle im geöffneten Projekt ist. Doppelklicken Sie auf eine Notiz, um sie zu korrigieren.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Every project</source>
+        <translation>Alle Projekte</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1768"/>
+        <source>A note, in one sentence</source>
+        <translation>Eine Notiz, in einem Satz</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1779"/>
+        <source>Forget everything</source>
+        <translation>Alles vergessen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1781"/>
+        <source>Open the file</source>
+        <translation>Datei öffnen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1855"/>
+        <source>This list is full: remove a note first.</source>
+        <translation>Diese Liste ist voll: Entfernen Sie zuerst eine Notiz.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1863"/>
+        <source>The memory file cannot be read ({}). Correct it or remove it: nothing is written to it meanwhile.</source>
+        <translation>Die Gedächtnisdatei kann nicht gelesen werden ({}). Korrigieren oder löschen Sie sie: Bis dahin wird nichts hineingeschrieben.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1872"/>
+        <source>Sent with this project: {} of {} notes.</source>
+        <translation>Mit diesem Projekt gesendet: {} von {} Notizen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1874"/>
+        <source>{} not sent: they hold attribute values, which you do not share.</source>
+        <translation>{} nicht gesendet, weil sie Attributwerte enthalten, die Sie nicht teilen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1920"/>
+        <source>Forget every note kept from one project to the next?</source>
+        <translation>Alle Notizen vergessen, die von einem Projekt zum nächsten behalten werden?</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="872"/>
         <source>Port</source>
         <translation>Port</translation>
@@ -2237,6 +2317,21 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <translation>Eine Zone von 100 m um die aktive Ebene zeichnen</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Lass mich Objekte auf der Karte wählen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>Schieberegler über dem Histogramm eines Feldes</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Pipette auf diesem Raster aktivieren</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
         <source>Make a print layout of this map</source>
         <translation>Druck-Layout dieser Karte erstellen</translation>
@@ -2624,6 +2719,16 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
         <source>(empty)</source>
         <translation>(leer)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} außerhalb des Bereichs</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} ohne Wert</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
@@ -7210,6 +7315,349 @@ Ermittelt aus: {1}</translation>
         <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="550"/>
         <source>system PATH</source>
         <translation>System-PATH</translation>
+    </message>
+</context>
+<context>
+    <name>FilterMateStandalone</name>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="47"/>
+        <source>{0}: attributes</source>
+        <translation>{0}: Attribute</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="49"/>
+        <source>{0} features</source>
+        <translation>{0} Objekte</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="51"/>
+        <source>, {0} selected</source>
+        <translation>, {0} ausgewählt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/attribute_table.py" line="53"/>
+        <source> (filtered)</source>
+        <translation> (gefiltert)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="49"/>
+        <source>Choose a vector layer in the layer panel first.</source>
+        <translation>Wählen Sie zuerst einen Vektorlayer im Layer-Bedienfeld.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/map_tools.py" line="209"/>
+        <source>Nothing here.</source>
+        <translation>Hier ist nichts.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="90"/>
+        <source>{0} could not be opened: {1}</source>
+        <translation>{0} konnte nicht geöffnet werden: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="118"/>
+        <source>{0} could not be opened.</source>
+        <translation>{0} konnte nicht geöffnet werden.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="188"/>
+        <source>The OpenStreetMap tiles could not be reached.</source>
+        <translation>Die OpenStreetMap-Kacheln sind nicht erreichbar.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="275"/>
+        <source>Add layers</source>
+        <translation>Layer hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="314"/>
+        <source>This source is not available here: {0}</source>
+        <translation>Diese Quelle ist hier nicht verfügbar: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="316"/>
+        <source>This source is not available here.</source>
+        <translation>Diese Quelle ist hier nicht verfügbar.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/sources.py" line="343"/>
+        <source>Layers of {0}</source>
+        <translation>Layer von {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="176"/>
+        <source>Layers</source>
+        <translation>Layer</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="195"/>
+        <source>&amp;New project</source>
+        <translation>&amp;Neues Projekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="196"/>
+        <source>&amp;Open project...</source>
+        <translation>Projekt ö&amp;ffnen...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="197"/>
+        <source>&amp;Save project</source>
+        <translation>Projekt &amp;speichern</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="198"/>
+        <source>Save project &amp;as...</source>
+        <translation>Projekt speichern &amp;unter...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="200"/>
+        <source>&amp;Add layers...</source>
+        <translation>&amp;Layer hinzufügen...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="201"/>
+        <source>Add &amp;files...</source>
+        <translation>&amp;Dateien hinzufügen...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="202"/>
+        <source>Add the OpenStreetMap &amp;basemap</source>
+        <translation>OpenStreetMap-&amp;Hintergrundkarte hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="203"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Beenden</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="205"/>
+        <source>Pan</source>
+        <translation>Karte verschieben</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="206"/>
+        <source>Zoom in</source>
+        <translation>Hineinzoomen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="207"/>
+        <source>Zoom out</source>
+        <translation>Herauszoomen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="208"/>
+        <source>Zoom to everything</source>
+        <translation>Auf alles zoomen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="209"/>
+        <source>Zoom to the layer</source>
+        <translation>Auf den Layer zoomen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="210"/>
+        <source>Zoom to the selection</source>
+        <translation>Auf die Auswahl zoomen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>Save layer edits</source>
+        <translation>Layer-Bearbeitungen speichern</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="464"/>
+        <source>Save the edits of {0} layers?</source>
+        <translation>Bearbeitungen von {0} Layern speichern?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="450"/>
+        <source>The edits of {0} could not be saved: {1}</source>
+        <translation>Die Bearbeitungen von {0} konnten nicht gespeichert werden: {1}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="540"/>
+        <source>{0} already exists. Replace it?</source>
+        <translation>{0} existiert bereits. Ersetzen?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="768"/>
+        <source>{0} tasks are still running. Stop them and quit?</source>
+        <translation>{0} Aufgaben laufen noch. Abbrechen und beenden?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="211"/>
+        <source>Refresh</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="212"/>
+        <source>Select features</source>
+        <translation>Objekte auswählen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="213"/>
+        <source>Select features: click or drag (Shift adds, Ctrl removes)</source>
+        <translation>Objekte auswählen: klicken oder ziehen (Umschalt fügt hinzu, Strg entfernt)</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="214"/>
+        <source>Select by polygon</source>
+        <translation>Mit Polygon auswählen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="215"/>
+        <source>Select by polygon: left clicks draw, a right click ends</source>
+        <translation>Mit Polygon auswählen: Linksklicks zeichnen, ein Rechtsklick beendet</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="216"/>
+        <source>Deselect all</source>
+        <translation>Auswahl aufheben</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="217"/>
+        <source>Identify</source>
+        <translation>Objekte abfragen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="218"/>
+        <source>Open the attribute table</source>
+        <translation>Attributtabelle öffnen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="219"/>
+        <source>Layer properties...</source>
+        <translation>Layereigenschaften...</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="220"/>
+        <source>About FilterMate</source>
+        <translation>Über FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="235"/>
+        <source>Project</source>
+        <translation>Projekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="237"/>
+        <source>Map</source>
+        <translation>Karte</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="240"/>
+        <source>Plugins</source>
+        <translation>Erweiterungen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="259"/>
+        <source>Log messages</source>
+        <translation>Protokollmeldungen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="279"/>
+        <source>&amp;Project</source>
+        <translation>&amp;Projekt</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="284"/>
+        <source>&amp;Layer</source>
+        <translation>&amp;Layer</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="289"/>
+        <source>&amp;View</source>
+        <translation>&amp;Ansicht</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="295"/>
+        <source>Panels</source>
+        <translation>Bedienfelder</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="298"/>
+        <source>Browser</source>
+        <translation>Browser</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="303"/>
+        <source>Toolbars</source>
+        <translation>Werkzeugkästen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="308"/>
+        <source>&amp;Help</source>
+        <translation>&amp;Hilfe</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="325"/>
+        <source>Coordinate reference system of the map</source>
+        <translation>Koordinatenbezugssystem der Karte</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="442"/>
+        <source>Save the changes to the project?</source>
+        <translation>Änderungen am Projekt speichern?</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="462"/>
+        <source>Open a project</source>
+        <translation>Projekt öffnen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="469"/>
+        <source>{0} does not exist.</source>
+        <translation>{0} existiert nicht.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="479"/>
+        <source>The project could not be read: {0}</source>
+        <translation>Das Projekt konnte nicht gelesen werden: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="494"/>
+        <source>Save the project</source>
+        <translation>Projekt speichern</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="500"/>
+        <source>The project could not be saved: {0}</source>
+        <translation>Das Projekt konnte nicht gespeichert werden: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="507"/>
+        <source>Add files</source>
+        <translation>Dateien hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="559"/>
+        <source>P&amp;lugins</source>
+        <translation>&amp;Erweiterungen</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="625"/>
+        <source>This kind of layer has no properties window here.</source>
+        <translation>Diese Art von Layer hat hier kein Eigenschaftenfenster.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="629"/>
+        <source>The properties could not be opened: {0}</source>
+        <translation>Die Eigenschaften konnten nicht geöffnet werden: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="655"/>
+        <source>The browser could not be opened: {0}</source>
+        <translation>Der Browser konnte nicht geöffnet werden: {0}</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="666"/>
+        <source>Standalone application: the FilterMate dock on the QGIS libraries.</source>
+        <translation>Eigenständige Anwendung: das FilterMate-Bedienfeld auf den QGIS-Bibliotheken.</translation>
+    </message>
+    <message>
+        <location filename="../../standalone/host/window.py" line="681"/>
+        <source>No CRS</source>
+        <translation>Kein KBS</translation>
     </message>
 </context>
 <context>

@@ -7422,6 +7422,98 @@ TOOLS_STEPS = [s_tools_begin, s_tools_vector_check, s_tools_raster_check, s_tool
                s_tools_wizard, s_tools_wizard_apply, s_tools_wizard_check, s_tools_end]
 
 
+# --- EXPLORING driven by the agent as a hand drives it (set_exploring, FM_ONLY=drive) ---------------------------------
+
+DRIVE = {}
+
+
+def drive_module():
+    return importlib.import_module(f'{PACKAGE}.adapters.public_api.exploring_drive')
+
+
+def drive(**arguments):
+    """set_exploring on the dock, as the chat calls it; the answer, or the refusal as text."""
+    try:
+        return drive_module().set_exploring(dock(), **arguments)
+    except ValueError as exc:
+        return str(exc)
+
+
+def s_drive_begin():
+    leave_welcome()
+    turn_effects = importlib.import_module(f'{PACKAGE}.adapters.agent.turn_effects')
+    messages = importlib.import_module(f'{PACKAGE}.core.agent.messages')
+    DRIVE['recorder'] = recorder = turn_effects.EffectsRecorder()
+    arguments = {'layer': 'dem', 'tools': {'pipette': True}}
+    recorder.before_call(messages.ToolCallPart('d1', 'set_exploring', arguments))
+    DRIVE['answer'] = drive(**arguments)
+    recorder.after_call()
+    return switched_to('dem', True)
+
+
+def s_drive_raster_check():
+    answer = DRIVE['answer']
+    check('drive: the layer is shown in EXPLORING and the pipette armed on the map, as by a click',
+          isinstance(answer, dict) and answer['layer_name'] == 'dem' and answer['kind'] == 'raster'
+          and answer['tools'].get('pipette') == 'on' and tools_on_map() and coverage()._color_pick
+          and answer['changed'] == ['layer', 'pipette'], str(answer))
+    check('drive: its button shows down on the rail', dock().widget_exploring_keys.findChild(
+        QPushButton, 'pushButton_checkable_exploring_raster_pipette').isChecked())
+    two = drive(tools={'detector': True, 'similar': True})
+    check('drive: two tools for the map are refused, nothing changed', isinstance(two, str)
+          and 'one tool at a time' in two and coverage()._color_pick, str(two))
+    apply_settings({TOOLS_PATH.format('raster'): 'detector'})
+    pump(150)
+    hidden = drive(tools={'detector': True})
+    check('drive: a button the user hid is refused with the way to show it, the pipette stays',
+          isinstance(hidden, str) and 'right-click' in hidden and tools_on_map(), str(hidden))
+    apply_settings({TOOLS_PATH.format('raster'): ''})
+    pump(150)
+    swap = drive(tools={'pipette': False, 'similar': True})
+    check('drive: one tool put down for another, the map keeps one', isinstance(swap, dict)
+          and swap['tools'].get('similar') == 'on' and swap['tools'].get('pipette') == 'off' and tools_on_map(),
+          str(swap))
+    effects = DRIVE['recorder'].finish()
+    DRIVE['effects'] = effects
+    check('drive: the turn keeps what it drove', [effect[0] for effect in effects] == ['exploring'],
+          str([effect[:2] for effect in effects]))
+    turn_effects = importlib.import_module(f'{PACKAGE}.adapters.agent.turn_effects')
+    DRIVE['undo'] = turn_effects.apply_effects(effects, undo=True)
+    return switched_to('zones', False)
+
+
+def s_drive_undo_check():
+    done, left = DRIVE['undo']
+    check('drive: undoing the turn puts the tool down and shows the layer of before',
+          dock().current_layer.name() == 'zones' and not tools_on_map() and not coverage()._color_pick and done
+          and not left, f"done={done} left={left} on map={tools_on_map()}")
+    d = dock()
+    follow = d.pushButton_checkable_exploring_tracking
+    answer = drive(tools={'follow': True}, press=['zoom'])
+    check('drive: a mode of a vector layer turned on and an action pressed', isinstance(answer, dict)
+          and follow.isChecked() and answer['tools'].get('follow') == 'on' and answer['pressed'] == ['zoom']
+          and app().PROJECT_LAYERS[layer('zones').id()]['exploring'].get('is_tracking') is True, str(answer))
+    options = panels_module().layer_options(d, 'zones')
+    check('drive: layer_options says what the rail shows of the layer shown', options['panel'].get('shown')
+          and options['panel']['tools'].get('follow') == 'on', str(options['panel']))
+    d._fm_sections.open_top('agent')
+    pump(150)
+    folded = drive(tools={'follow': False})
+    check('drive: EXPLORING folded behind the chat is said so', isinstance(folded, dict)
+          and folded['in_view'] is False and 'note' in folded and not follow.isChecked(), str(folded))
+    shown = drive(show=True)
+    check('drive: show opens EXPLORING in front', isinstance(shown, dict) and shown['in_view'] is True
+          and d._fm_sections.in_view('exploring'), str(shown))
+    unknown = drive(tools={'pipette': True})
+    check('drive: a button of another rail is refused with those of this one', isinstance(unknown, str)
+          and 'sync, follow, zone, link' in unknown, unknown)
+    leave_welcome()
+    return settled()
+
+
+DRIVE_STEPS = [s_drive_begin, s_drive_raster_check, s_drive_undo_check]
+
+
 # --- a source filtered again by an expression its SQL cannot write (FM_ONLY=refilter) ---------------------------------
 # 2026-11-18: the first filter of the GeoPackage by bounds_width($geometry) > 60 listed the keys QGIS kept; a second
 # one replacing it read its features through that first filter, wrote no list and fell to the former conversion
@@ -7808,6 +7900,8 @@ if os.environ.get('FM_ONLY') == 'refilter':  # a source filtered again by an exp
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *REFILTER_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'tools_startup':  # the dock opened with buttons of the vector rail hidden (FM_TOOLS_HIDDEN)
     STEPS = [s_setup, s_open_plugin, s_dock_ready, s_tools_startup_check, s_finish]
+if os.environ.get('FM_ONLY') == 'drive':  # EXPLORING driven by the agent (set_exploring), undone with the turn
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *DRIVE_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'options':  # the menu of the options of the agent alone
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *OPTION_STEPS, s_finish]
 

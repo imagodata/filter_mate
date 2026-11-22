@@ -82,6 +82,9 @@ class AgentSettings:
     # since lot A (the connectors come the same way); saved under its own key: the old one, "tool_families", held an
     # "off" that every saved profile carried without the user having chosen it.
     tool_families: bool = True
+    # The notes kept from one project to the next (core/agent/memory.py) go with the requests. On by default: empty,
+    # it sends nothing, and nothing enters it that the user did not write or accept (decided 2026-11-22).
+    memory: bool = True
 
     @property
     def rules(self) -> dict:
@@ -166,7 +169,8 @@ def load_settings() -> AgentSettings:
         local_filtering_only=settings.value(_PREFIX + "local_filtering_only", False, type=bool),
         autonomy=level_or_default(str(settings.value(_PREFIX + "autonomy", DEFAULT_LEVEL) or "")),
         tool_rules=str(settings.value(_PREFIX + "tool_rules", "{}") or "{}"),
-        tool_families=settings.value(_PREFIX + "offer_tools_by_task", True, type=bool))
+        tool_families=settings.value(_PREFIX + "offer_tools_by_task", True, type=bool),
+        memory=settings.value(_PREFIX + "memory", True, type=bool))
 
 
 def save_settings(values: AgentSettings) -> None:
@@ -189,6 +193,7 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "mcp_token", values.mcp_token)
     settings.setValue(_PREFIX + "autonomy", level_or_default(values.autonomy))
     settings.setValue(_PREFIX + "tool_rules", json.dumps(values.rules, sort_keys=True))
+    settings.setValue(_PREFIX + "memory", values.memory)
 
 
 def _auth_manager():

@@ -2204,6 +2204,49 @@
   ],
   "type": "object"
  },
+ "set_exploring": {
+  "properties": {
+   "layer": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "press": {
+    "anyOf": [
+     {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 4,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "show": {
+    "default": false,
+    "type": "boolean"
+   },
+   "tools": {
+    "anyOf": [
+     {
+      "additionalProperties": {
+       "type": "boolean"
+      },
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   }
+  },
+  "type": "object"
+ },
  "set_export_options": {
   "properties": {
    "changes": {
@@ -2581,6 +2624,7 @@
      "sources",
      "autonomy",
      "tools",
+     "memory",
      "other_applications",
      "setting",
      "feedback"

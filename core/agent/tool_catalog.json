@@ -2161,7 +2161,7 @@
   {
    "name": "layer_options",
    "title": "Options of a layer in the panels",
-   "description": "What a layer shows in FilterMate's EXPLORING panel and its FILTERING options, with the values each takes. Needs FilterMate's panel open.",
+   "description": "What a layer shows in FilterMate's EXPLORING panel and its FILTERING options, with the values each takes; panel: whether EXPLORING shows it now, and then the buttons of its rail (set_exploring). Needs FilterMate's panel open.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
@@ -2211,6 +2211,62 @@
     "required": [
      "layers"
     ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "set_exploring",
+   "title": "Drive the EXPLORING panel",
+   "description": "Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, turn the buttons of its rail on or off, press those that run once. vector: sync (its lists follow the selection of the map), follow (the map goes to what is chosen), zone (a shape drawn selects), link; press zoom, identify. raster: preview (hide the pixels outside the selection), pipette (pixels like the one clicked), detector (the object clicked), similar (objects like it), link (the style follows the range); press zoom. point_cloud: preview, identify (class pipette), object, value_pipette, zone; press zoom. One tool on the map at a time: it waits for the user's click, so say what to click. A button the user hid, or greyed for the layer, is refused: say so. Undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press, hidden, unavailable), changed, pressed.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "default": "",
+      "description": "Layer to show in EXPLORING, id or name; default: the one it shows",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "tools": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "boolean"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Buttons of the rail turned on (true) or off (false), by name"
+     },
+     "press": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "maxItems": 4,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Buttons pressed once"
+     },
+     "show": {
+      "default": false,
+      "description": "true opens EXPLORING in front, in place of the chat when they share the panel: only when the user asks to see it",
+      "type": "boolean"
+     }
+    },
     "type": "object"
    }
   },

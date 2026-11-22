@@ -18,6 +18,7 @@ from ...adapters.agent.settings import (
     target_of, current_provider, read_providers, write_providers,
 )
 from ...adapters.agent import transcript_store
+from ...adapters.agent.memory_store import change_memory, memory_path, project_sources, read_memory
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
 from ...adapters.agent import plugin_settings
@@ -74,6 +75,7 @@ from ...core.agent.messages import request_usage
 from ...core.agent.session import (
     REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget, tools_weight,
 )
+from ...core.agent.memory import UnreadableMemory, chosen as memory_chosen, memory_block
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
@@ -81,7 +83,10 @@ from ...core.agent.tool_catalog import (
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
     TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
-from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
+from ...core.agent.widgets import (
+    CHART, RANGE, SHOWING, STAT, WidgetError, range_counts, range_reading_holds, replaced as widget_replaced,
+    summary as widget_summary, unknown_bins, wide_open, without,
+)
 from ...core.domain.layer_kind import LayerKind
 from ...adapters.agent import agent_widgets
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure, connector_gate
@@ -179,6 +184,8 @@ class AgentChatController(QObject):
         self._ask_name = ask_name or (lambda title, text, default: self._name_dialog(parent_widget, title, text, default))
         # The calls of the request under way, and the steps of the last request that changed something: a recipe.
         self._request_calls = []
+        self._exploring_offered = False  # the button that opens EXPLORING was put in the thread for this request
+        self._tuning_offered = set()  # the layers whose threshold the model was told to offer to tune, this conversation
         self._layers_before = ()  # the layer ids of the project when the tool under way started
         self._last_steps, self._last_steps_request = [], ""
         self._replaying = False
@@ -271,6 +278,11 @@ class AgentChatController(QObject):
         self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
+        self._opened = {}  # range widget id -> (what it was read for, its field read wide open): see _range_bars
+        self._readings = {}  # (layer id, field, bounds, subset, changes) -> its field read then: see _range_bars
+        self._layer_changes = {}  # layer id -> changes of its features or source seen
+        self._change_slots = {}  # layer id -> the slot its signals of changes call
+        self._stats_waiting = False  # a refresh asked while the section was not in view
         self._stat_timer = QTimer(self)
         self._stat_timer.setSingleShot(True)
         self._stat_timer.setInterval(300)
@@ -425,8 +437,8 @@ class AgentChatController(QObject):
 
     def _unfollow_layers(self) -> None:
         self._stat_timer.stop()
-        for layer in self._stat_layers.values():
-            self._follow(layer, False)
+        for layer_id, layer in self._stat_layers.items():
+            self._follow(layer_id, layer, False)
         self._stat_layers = {}
         self._follow_sources([])
         self._live_timer.stop()
@@ -818,6 +830,8 @@ class AgentChatController(QObject):
         the panel is shown behind another tab (as QGIS restores it): nobody saw the offer yet."""
         if self._setup_card is not None and self._agent_shown():
             self._keep_setup_offered()
+        if self._stats_waiting:  # the widgets were not read while out of view
+            self._stat_timer.start()
 
     def _keep_setup_offered(self) -> None:
         """The offer was seen or answered, or the setup started: not offered again for this version."""
@@ -897,6 +911,7 @@ class AgentChatController(QObject):
             self._links.append(lambda: self._open_feedback(form, "agent-chat"))
         elif target in SETTINGS_TABS:
             panel_words = {"provider": "Provider", "sources": "Sources", "autonomy": "Autonomy", "tools": "Tools",
+                           "memory": "Memory",
                            "other_applications": "Other applications"}  # the titles of the tabs, already translated
             names = {key: QCoreApplication.translate("AgentPanel", word) for key, word in panel_words.items()}
             label = _tr("Open Agent settings: {}").format(names[target])
@@ -936,10 +951,25 @@ class AgentChatController(QObject):
         protected = set(read_protected())
         project_layers = sorted(((layer.id(), layer.name(), layer.id() in protected)
                                  for layer in QgsProject.instance().mapLayers().values()), key=lambda row: row[1].lower())
+        memory, memory_error = None, ""
+        try:
+            memory = read_memory()
+        except UnreadableMemory as exc:  # the tab says so, and writes nothing
+            memory_error = str(exc)
+        try:  # the layers a request counts, in its order: the tab then says what a request sends
+            active_layer = self._active_layer()
+            memory_sources, memory_active = project_sources(
+                [row.get("layer_id", "") for row in self._layer_rows()],
+                active_layer.id() if active_layer is not None else "")
+        except Exception:  # the tab then offers the notes for every project only
+            logger.debug("Agent: sources of the project not read for the memory", exc_info=True)
+            memory_sources, memory_active = [], ""
         dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source,
                                      databases=qgis_databases(),
                                      provider_tester=self._test_provider, mcp_error=self._mcp.error,
                                      project_layers=project_layers,
+                                     memory=memory, memory_error=memory_error, memory_sources=memory_sources,
+                                     memory_active=memory_active, memory_file=str(memory_path() or ""),
                                      tools=[(tool.name, tool.title or tool.name, risk_of(tool))
                                             for tool in chat_tools() if tool.name not in AGENT_OWN])
         if tab:
@@ -986,7 +1016,14 @@ class AgentChatController(QObject):
                                         local_filtering_only=dialog.local_filtering_only.isChecked(),
                                         tool_families=dialog.tool_families.isChecked(),
                                         autonomy=dialog.chosen_autonomy(),
-                                        tool_rules=json.dumps(dialog.chosen_tool_rules())))
+                                        tool_rules=json.dumps(dialog.chosen_tool_rules()),
+                                        memory=dialog.memory_enabled.isChecked()))
+            memory_changes = dialog.memory_changes()
+            try:  # on the file as it is now: another QGIS may have written it since the dialog opened
+                if memory_changes:  # nothing changed: the file is not read, and one that cannot be is not an error here
+                    change_memory(memory_changes)
+            except (ValueError, OSError) as exc:  # the other settings are saved; the notes stay as they were
+                self._say(_tr("The memory could not be saved: {}").format(exc), error=True)
             self._remember_provider(load_settings())
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
             self._policy.rules = load_settings().rules
@@ -1328,7 +1365,26 @@ class AgentChatController(QObject):
         handlers[TURN_ON_OPTIONS] = self._turn_on_options_tool
         handlers[LIST_TABLES] = lambda arguments: self._list_tables_tool(databases, arguments)
         handlers[ADD_TABLE] = lambda arguments: self._add_table_tool(databases, arguments)
+        if "apply_filter" in handlers:
+            handlers["apply_filter"] = self._offering_tuning(handlers["apply_filter"])
         return tools, handlers, active
+
+    def _offering_tuning(self, handler):
+        """apply_filter, its answer holding once per layer and conversation the note that has the model offer a
+        slider or EXPLORING for a threshold (core/agent/exploring_drive.tuning_offer); never when the user turned
+        both ways off in the Tools tab."""
+        from ...core.agent.exploring_drive import tuning_offer
+
+        def run(arguments):
+            result = handler(arguments)
+            layer = str(arguments.get("layer_name") or "")
+            note = tuning_offer(arguments.get("expression"))
+            ways_off = all(self._policy.turned_off(name) for name in (CREATE_WIDGET, "set_exploring"))
+            if note and isinstance(result, dict) and layer not in self._tuning_offered and not ways_off:
+                self._tuning_offered.add(layer)
+                result = dict(result, offer=note)
+            return result
+        return run
 
     @staticmethod
     def _database(databases, arguments) -> str:
@@ -1936,7 +1992,8 @@ class AgentChatController(QObject):
     # --- widgets ----------------------------------------------------------------
 
     def _refresh_widgets(self) -> None:
-        """Draw the widgets of the project, and follow the layers their numbers are computed on."""
+        """Draw the widgets of the project, and follow the layers their numbers are computed on. Their numbers and bars
+        are read at the next turn of the stat timer: a range may read up to MAX_STAT_FEATURES features."""
         try:
             widgets = agent_widgets.read_widgets()
         except Exception:  # the panel works without them
@@ -1948,44 +2005,120 @@ class AgentChatController(QObject):
             layer = agent_widgets.widget_layer(widget)
             if layer is None:
                 self.panel.widgets_strip.set_error(widget["id"], _tr("Its layer is no longer in the project."))
-            elif widget["kind"] in SHOWING:
+            elif widget["kind"] in SHOWING + (RANGE,):  # a range shows the bars of its field
                 wanted[layer.id()] = layer
         for layer_id in set(self._stat_layers) - set(wanted):
-            self._follow(self._stat_layers.pop(layer_id), False)
+            self._follow(layer_id, self._stat_layers.pop(layer_id), False)
         for layer_id, layer in wanted.items():
             if layer_id not in self._stat_layers:
                 self._stat_layers[layer_id] = layer
-                self._follow(layer, True)
-        self._refresh_stats()
+                self._follow(layer_id, layer, True)
+        # What was read of a layer no longer followed would not know of its changes.
+        self._readings = {key: reading for key, reading in self._readings.items() if key[0] in self._stat_layers}
+        ids = {widget["id"] for widget in widgets}
+        self._opened = {key: kept for key, kept in self._opened.items() if key in ids and kept[0][0] in self._stat_layers}
+        self._stat_timer.start()
 
-    def _follow(self, layer, on: bool) -> None:
-        for signal in ("subsetStringChanged", "featureAdded", "featuresDeleted", "attributeValueChanged",
-                       "afterRollBack", "afterCommitChanges"):
+    # The changes of the features of a layer, or of its source: what was read of it is stale. Not dataChanged: QGIS
+    # emits it at each new subset string too (3.22 to 4.3), and a range moved would forget what it read wide open.
+    CHANGES = ("featureAdded", "featuresDeleted", "attributeValueChanged", "afterRollBack", "afterCommitChanges",
+               "dataSourceChanged")
+
+    def _follow(self, layer_id: str, layer, on: bool) -> None:
+        if on:
+            self._change_slots[layer_id] = lambda *_args: self._on_layer_changed(layer_id)
+        changed = self._change_slots.get(layer_id) if on else self._change_slots.pop(layer_id, None)
+        for signal in ("subsetStringChanged",) + self.CHANGES:
             emitter = getattr(layer, signal, None)
-            if emitter is None:
+            slot = self._stat_timer.start if signal == "subsetStringChanged" else changed
+            if emitter is None or slot is None:
                 continue
             try:
-                (emitter.connect if on else emitter.disconnect)(self._stat_timer.start)
+                (emitter.connect if on else emitter.disconnect)(slot)
             except (RuntimeError, TypeError):  # a layer deleted meanwhile, or never connected
                 pass
 
+    def _on_layer_changed(self, layer_id: str) -> None:
+        self._layer_changes[layer_id] = self._layer_changes.get(layer_id, 0) + 1
+        self._stat_timer.start()
+
+    def _widgets_in_view(self) -> bool:
+        return self.panel.isVisible() and self._agent_shown()
+
     def _refresh_stats(self) -> None:
+        if not self._widgets_in_view():  # read when the section comes in view (_on_panel_shown)
+            self._stats_waiting = True
+            return
+        self._stats_waiting = False
         started = time.monotonic()
         try:
             widgets = agent_widgets.read_widgets()
         except Exception:
             return
+        used = set()
         for widget in widgets:
             if widget["kind"] == STAT:
                 value = agent_widgets.stat_value(widget)
                 self.panel.widgets_strip.set_value(widget["id"], number_text(value))
             elif widget["kind"] == CHART:
                 self.panel.widgets_strip.set_bars(widget["id"], agent_widgets.chart_bars(widget))
+            elif widget["kind"] == RANGE:
+                self.panel.widgets_strip.set_bars(widget["id"], self._range_bars(widget, widgets, used))
+        self._readings = {key: reading for key, reading in self._readings.items() if key in used}
         # Read on this thread, up to MAX_STAT_FEATURES features a widget: the next refresh waits three times as long as
         # this one took (10 s at most), so a big layer being edited is not read again 300 ms after each change. One
         # delay for all the widgets; a timer already counting is left alone (setInterval would start it again).
         if not self._stat_timer.isActive():
             self._stat_timer.setInterval(min(10_000, max(300, int((time.monotonic() - started) * 3000))))
+
+    def _range_bars(self, widget, widgets, used):
+        """The bars of a range widget: its field on its layer filtered by everything but itself, so that the bars
+        outside its bounds stay, greyed, to widen it again; None when they cannot be read.
+
+        Its layer filtered by itself holds nothing outside its bounds, and it is never filtered otherwise nor copied
+        to be read. So the numbers read while the range is wide open, with the layer filtered as its widgets say, are
+        kept here (not in the project, 8 bytes each), for the same layer, field, bounds, filter of the layer with the
+        range wide open and changes of its features or source seen (else forgotten at once). While the range is
+        narrower, their bars are shown as long as what its condition keeps of them falls in each bar as the features
+        read now (range_reading_holds); else they are forgotten, and the features read now are shown, the bars not
+        whole within the bounds hatched as unknown, until the range is wide open again. Left unseen: what changes the
+        data of the layer without a signal of this layer (another layer of the same source, a program writing to it).
+
+        A reading is kept for its layer, field, bounds, filter and changes: a refresh with nothing changed reads
+        nothing. ``used`` collects the readings this refresh needs.
+        """
+        layer = agent_widgets.widget_layer(widget)
+        if layer is None:
+            return None
+        changes = self._layer_changes.get(widget["layer_id"], 0)
+        subset = layer.subsetString() or ""
+        read_key = (widget["layer_id"], widget["field"], widget["minimum"], widget["maximum"], subset, changes)
+        if read_key not in self._readings:
+            self._readings[read_key] = agent_widgets.range_reading(widget)
+        used.add(read_key)
+        now = self._readings[read_key]
+        if now is None:
+            return None
+        key = read_key[:4] + (agent_widgets.opened_filter(widgets, widget), changes)
+        kept = self._opened.get(widget["id"])
+        if kept is not None and kept[0] != key:
+            del self._opened[widget["id"]]
+            kept = None
+        if widget == wide_open(widget):
+            if subset == key[4]:  # not a filter the user set over the widgets meanwhile
+                self._opened[widget["id"]] = (key, now)
+            return self._range_shown(widget, now)
+        if kept is not None:
+            if range_reading_holds(kept[1].values, now.values, widget):
+                return self._range_shown(widget, kept[1])
+            del self._opened[widget["id"]]  # edited since: read again once wide open
+        return self._range_shown(widget, now, unknown_bins(widget))
+
+    @staticmethod
+    def _range_shown(widget, reading, unknown=None) -> dict:
+        """What the card of a range draws: its bars, those it cannot tell, the features left out of them."""
+        return {"counts": range_counts(reading.values, widget["minimum"], widget["maximum"]),
+                "unknown": unknown or [], "outside": reading.outside, "empty": reading.empty}
 
     def _on_widget_changed(self, widget) -> None:
         """The user moved a bound or ticked a value: kept in the project, and its layer filtered."""
@@ -2372,6 +2505,7 @@ class AgentChatController(QObject):
         self._reset_view()
         self._transcript = []
         self._recap_from = 0
+        self._tuning_offered = set()
         self.panel.input.forget()
         self._save_transcript()
 
@@ -2400,6 +2534,7 @@ class AgentChatController(QObject):
             return
         self._last_request = text
         self._request_calls = []
+        self._exploring_offered = False
         self._checkpoint.label = text
         self.panel.clear_input()
         self.panel.show_thread()
@@ -2488,7 +2623,7 @@ class AgentChatController(QObject):
     def _project_context(self, full: bool = True) -> str:
         """The map, the layers, their filters, the selections now and what the user changed since the last answer:
         the whole of it at the first request and after the history was rewritten (``full``), else what changed only,
-        and the notes, widgets, recipes and protected layers when they changed (token diet, lot 3).
+        and the notes, the memory, widgets, recipes and protected layers when they changed (token diet, lot 3).
 
         Sent after the request; empty when the project cannot be read.
         """
@@ -2503,6 +2638,7 @@ class AgentChatController(QObject):
         except Exception:  # the request goes without them
             logger.debug("Agent: project notes not read", exc_info=True)
             notes = ""
+        memory = self._memory_part(read)
         try:
             widgets = widget_summary(agent_widgets.read_widgets())
         except Exception:  # the request goes without them
@@ -2518,9 +2654,32 @@ class AgentChatController(QObject):
         outcomes, self._settings_outcomes = self._settings_outcomes, []  # the cards answered since the last request
         self._outcomes_sent = outcomes  # given back if the request is taken out of the conversation
         return compose(self._context_memory.delta(ContextParts(
-            summary=summary, notes=notes, widgets=widgets_part(widgets), recipes=recipes,
+            summary=summary, notes=notes, memory=memory, widgets=widgets_part(widgets), recipes=recipes,
             protected=protected_part(protected), decided=decided_part(outcomes), level=level_note(self._policy.level)),
             full))
+
+    @staticmethod
+    def _memory_part(read) -> str:
+        """The notes kept from one project to the next that are for this project (core/agent/memory.py): those for
+        every project, and those of the sources of its layers. "" when the option is off, when none is kept, or when
+        the file cannot be read (the Memory tab of the settings says why): the request goes without them.
+
+        ``read``: what ``_read_project`` gave, None when the project could not be read (the notes for every project
+        still go)."""
+        try:
+            values = load_settings()
+            if not values.memory:
+                return ""
+            memory = read_memory()
+            if not memory.notes:
+                return ""
+            layers, _selections, view = read if read is not None else ([], [], {})
+            sources, active = project_sources([row.get("layer_id", "") for row in layers],
+                                              str(view.get("active_layer_id") or ""))
+            return memory_block(memory_chosen(memory, sources, active, share_values=values.send_values))
+        except Exception:  # the request goes without them
+            logger.debug("Agent: memory not read", exc_info=True)
+            return ""
 
     def protection_refusal(self, call: ToolCallPart) -> str:
         """What a call that would change a protected layer, or of a tool turned off, is answered, for the MCP server
@@ -2725,7 +2884,37 @@ class AgentChatController(QObject):
             "set_layer_options": lambda: _tr("Panel options of: {}").format(", ".join(
                 str(item.get("layer", "")) for item in (args.get("layers") or []) if isinstance(item, dict))),
             "set_export_options": lambda: _tr("Export options of the panel"),
+            "set_exploring": lambda: _tr("EXPLORING: {}").format(self._exploring_words(args)),
         }.get(call.name, lambda: call.name.replace("_", " "))()
+
+    @staticmethod
+    def _exploring_words(arguments) -> str:
+        """What a set_exploring call asks, on one line: the layer, +button turned on, −button turned off, the
+        buttons pressed (the short names of the rail, as its setting writes them)."""
+        tools = arguments.get("tools") if isinstance(arguments.get("tools"), dict) else {}
+        press = arguments.get("press") if isinstance(arguments.get("press"), list) else []
+        parts = [str(arguments.get("layer") or "")]
+        parts += [f"+{name}" for name, on in tools.items() if on is True]
+        parts += [f"\u2212{name}" for name, on in tools.items() if on is False]
+        parts += [str(name) for name in press]
+        return one_line(", ".join(part for part in parts if part), 120)
+
+    def _offer_exploring(self, call: ToolCallPart, result: ToolResultPart) -> None:
+        """EXPLORING was driven while the user cannot see it (folded behind the chat they are in): a button of the
+        thread opens it, once per request. Nothing folds the chat by itself."""
+        if call.name != "set_exploring" or result.is_error or self._exploring_offered:
+            return
+        try:
+            seen = json.loads(result.content).get("in_view", True)
+        except (ValueError, AttributeError):
+            return
+        if seen is False:
+            self._exploring_offered = True
+            self.panel.add_link(_tr("Open EXPLORING"), self._open_exploring)
+
+    def _open_exploring(self) -> None:
+        from ...adapters.public_api.exploring_drive import bring_in_view
+        bring_in_view(self._parent_widget)
 
     @staticmethod
     def _renamed_to(tool: str, arguments) -> str:
@@ -2777,6 +2966,7 @@ class AgentChatController(QObject):
             logger.info("Agent tool %s refused: %s", call.name, result.content[:300])
         self.panel.finish_steps(not result.is_error)
         self._log_action(call, result, self._describe(call))
+        self._offer_exploring(call, result)
         made = [] if result.is_error else made_layers(self._layers_before, self._project_layers())
         self._request_calls.append((call.name, call.arguments, result.is_error, self.describe_call(call), made))
         self.panel.set_status(_tr("Thinking…"))

@@ -630,6 +630,11 @@ class QGISFilterMateAccessor:
         return self._control("set_layer_options", self._panel(), layers, module=self._PANELS,
                              changes={"layers": layers})
 
+    def set_exploring(self, layer: str = "", tools: Optional[Dict[str, bool]] = None,
+                      press: Optional[List[str]] = None, show: bool = False) -> Dict[str, Any]:
+        return self._control("set_exploring", self._panel(), layer=layer, tools=tools, press=press, show=show,
+                             module="adapters.public_api.exploring_drive")
+
     def export_options(self) -> Dict[str, Any]:
         return self._control("export_options", self._panel(), module=self._PANELS)
 

@@ -1127,6 +1127,54 @@ class CoverageDockExtras(QObject):
             return False
         return True
 
+    # === The rail driven by code (the agent: adapters/public_api/exploring_drive.py) ===
+
+    def rail_kind(self) -> str:
+        """The kind of layer whose rail is shown: ``vector``, ``raster`` or ``point_cloud``."""
+        return self._rail_kind
+
+    def _tool_on(self, kind: str, key: str, button: Any) -> bool:
+        if kind == 'point_cloud' and key == 'identify':  # the class pipette: its button is held down, not checked
+            controller = self._controller
+            return bool(controller._tool_on_map(controller._class_tool) and controller._pc_pick_mode == 'class')
+        return bool(button.isCheckable() and button.isChecked())
+
+    def tool_states(self) -> Dict[str, Tuple[str, str]]:
+        """Each button of the rail shown an agent drives, by its short name: its state (``on``, ``off``, ``press``
+        for one that runs once, ``hidden`` by the user's setting, ``unavailable`` when greyed) and, greyed, why (its
+        tooltip). The names and the states: ``core/agent/exploring_drive.py``."""
+        from ...core.agent.exploring_drive import HIDDEN, OFF, ON, PRESS, UNAVAILABLE, actions_of, driven
+        from .exploring_tool_choice import BUTTONS
+        kind = self._rail_kind
+        hidden = self.hidden_tools(kind)
+        table = BUTTONS.get(kind, {})
+        states: Dict[str, Tuple[str, str]] = {}
+        for key in driven(kind):
+            button = self._tool_button(table.get(key, ''))
+            if key in hidden:
+                states[key] = (HIDDEN, '')
+            elif button is None or button.isHidden():
+                states[key] = (UNAVAILABLE, '')
+            elif not button.isEnabled():
+                states[key] = (UNAVAILABLE, str(button.toolTip() or ''))
+            elif key in actions_of(kind):
+                states[key] = (PRESS, '')
+            else:
+                states[key] = (ON if self._tool_on(kind, key, button) else OFF, '')
+        return states
+
+    def click_tool(self, key: str) -> bool:
+        """Click the button ``key`` of the rail shown, as the user does: its own slots run, with the rules of the
+        rail. False when the rail has no such button, or the user hid it."""
+        from .exploring_tool_choice import BUTTONS
+        if key in self.hidden_tools(self._rail_kind):
+            return False
+        button = self._tool_button(BUTTONS.get(self._rail_kind, {}).get(key, ''))
+        if button is None or not button.isEnabled():
+            return False
+        button.click()
+        return True
+
     # === Point cloud: class pipette ===
 
     def _on_class_pipette_toggled(self, checked: bool) -> None:

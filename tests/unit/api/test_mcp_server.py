@@ -31,7 +31,7 @@ EXPECTED_TOOLS = {
     "zoom_to", "select_features", "set_layers_visibility", "add_layer", "remove_layers", "search_open_data",
     "add_service_layer", "add_basemap", "find_place", "search_imagery", "segment_objects", "similar_objects",
     "add_elevation", "contour_lines", "duplicate_layer", "add_osm_features", "add_population", "local_copy",
-    "layer_options", "set_layer_options", "export_options", "set_export_options",
+    "set_exploring", "layer_options", "set_layer_options", "export_options", "set_export_options",
 }
 READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "describe_layer", "field_values",
              "preview_filter", "map_context", "search_open_data", "search_imagery", "find_place", "layer_statistics",

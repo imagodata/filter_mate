@@ -75,9 +75,11 @@ JOINED_CHANGES = frozenset({"remove_layers"})
 # The highest class that runs without asking, at each level.
 _RUNS_ALONE = {ADVISOR: READ, CAREFUL: VIEW, STANDARD: BUFFER, AUTONOMOUS: LOCAL}
 
-# How the project shows, not what it holds: the map, the layer tree, the selection, the map themes.
+# How the project shows, not what it holds: the map, the layer tree, the selection, the map themes, the panel.
 VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "group_layers", "map_theme",
-                        "bookmark"})
+                        "bookmark",
+                        # EXPLORING driven as the user drives it: the layer it shows, a tool put on the map
+                        "set_exploring"})
 BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
 CODE_TOOLS = frozenset({"run_pyqgis"})

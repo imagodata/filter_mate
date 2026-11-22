@@ -28,7 +28,7 @@ from qgis.core import (  # noqa: E402
     QgsVectorFileWriter,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QCoreApplication, QSettings, Qt, QTimer  # noqa: E402
+from qgis.PyQt.QtCore import QCoreApplication, QPoint, QSettings, Qt, QTimer  # noqa: E402
 from qgis.PyQt.QtTest import QTest  # noqa: E402
 from qgis.PyQt.QtWidgets import QFrame, QLabel, QPushButton, QToolBox, QWidget  # noqa: E402
 
@@ -657,6 +657,75 @@ def check_families(chat, provider, settings, ask):
     settings()
 
 
+def check_memory(chat, provider, settings, ask, layer):
+    """The notes kept from one project to the next (core/agent/memory.py) with a real profile and real layers: the file
+    is in the profile, a note of a source comes with any layer of that source, and a conversation carries them once."""
+    from filter_mate.adapters.agent.memory_store import change_memory, memory_path, read_memory, source_signature
+    from filter_mate.core.agent.memory import ADD, HEADER, SCOPE_SOURCE, SCOPE_USER
+
+    def said(index=0):
+        """What the last message of the request ``index`` holds: the request of the user and its context."""
+        return json.dumps(provider.requests[index]["body"]["messages"][-1], ensure_ascii=False)
+
+    def hello():
+        settings()  # a new conversation: its first request carries the whole context
+        provider.reset((200, {}, text_turn("Bonjour.")), (200, {}, text_turn("Encore.")), (200, {}, text_turn("Oui.")))
+        return ask("bonjour")
+
+    path = memory_path()
+    in_bench = (path is not None and path.name == "agent_memory.json" and path.parent.name == "FilterMate"
+                and str(path).startswith(HOME))
+    check("memory: its file is in the profile, next to the skills", in_bench, path)
+    if not in_bench:  # never a file of a real profile: what follows writes and removes it
+        return
+    signature = source_signature(layer)
+    check("memory: a GeoPackage layer has the signature of the favorites", signature.startswith("ogr::"), signature)
+    scratch = QgsVectorLayer("Point?crs=EPSG:2154", "scratch", "memory")
+    check("memory: a layer held in memory has none", source_signature(scratch) == "")
+    if path.exists():
+        path.unlink()
+    hello()
+    check("memory: nothing kept, nothing sent", HEADER[:40] not in said(), said()[-300:])
+    change_memory([(ADD, SCOPE_USER, "", "", "RD = route départementale"),
+                   (ADD, SCOPE_SOURCE, signature, layer.name(), "pop compte les habitants")])
+    check("memory: the notes are written in the profile", path.exists() and len(read_memory().notes) == 2)
+    check("memory: the layer is in the project", QgsProject.instance().mapLayer(layer.id()) is not None)
+    hello()
+    first = said()
+    check("memory: a conversation starts with the notes for every project",
+          HEADER[:40] in first and "RD = route départementale" in first, first[-700:])
+    check("memory: and those of the source of a layer of the project, under its name",
+          f"For the layer {layer.name()}:" in first and "pop compte les habitants" in first, first[-700:])
+    ask("encore")
+    check("memory: they are sent once", HEADER[:40] not in said(1), said(1)[-300:])
+    # Another layer on the same data, as another project would hold it: another id, the same source.
+    again = QgsVectorLayer(layer.source(), "communes_bis", "ogr")
+    QgsProject.instance().addMapLayer(again)
+    ask("et maintenant ?")
+    parts = json.loads(said(2)).get("content")  # the request, then its context
+    texts = [part.get("text", "") for part in parts if isinstance(part, dict)] if isinstance(parts, list) else [str(parts)]
+    titles = [line for text in texts for line in text.splitlines() if line.startswith("For the layers ")]
+    check("memory: a second layer of the same source is named with the first, and the notes are sent again",
+          len(titles) == 1 and layer.name() in titles[0] and "communes_bis" in titles[0], said(2)[-700:])
+    QgsProject.instance().removeMapLayer(again.id())
+    settings(memory=False)
+    provider.reset((200, {}, text_turn("Bonjour.")))
+    ask("bonjour")
+    check("memory: off, nothing is sent and the file stays", HEADER[:40] not in said() and path.exists(), said()[-300:])
+    path.write_text("{ not json", encoding="utf-8")
+    hello()
+    check("memory: a file that cannot be read, and the request goes without it", HEADER[:40] not in said())
+    check("memory: that file is left as it is", path.read_text(encoding="utf-8") == "{ not json")
+    try:
+        change_memory([(ADD, SCOPE_USER, "", "", "a")])
+        refused = False
+    except ValueError:
+        refused = True
+    check("memory: and nothing is written to it", refused and path.read_text(encoding="utf-8") == "{ not json")
+    path.unlink()
+    settings()
+
+
 def check_agent_options(chat, provider, settings, ask):
     """The agent turns its sources off without a question, once the request ends; turning one on is asked (2026-11-16)."""
     from qgis.PyQt.QtCore import QCoreApplication
@@ -1258,6 +1327,7 @@ def check_chat(provider, layer, authcfg, work):
     # Here and not after the first filter: settings() starts a new conversation, and the checks above build on one.
     check_families(chat, provider, settings, ask)
     check_agent_options(chat, provider, settings, ask)
+    check_memory(chat, provider, settings, ask, layer)
 
     offered = [tool.name for tool in chat.tools_and_handlers(load_settings())[0]]
     check("view_map is offered with a key of the user and shared values", "view_map" in offered, offered)
@@ -1992,6 +2062,13 @@ def check_widgets(chat, provider, settings, ask, layer):
     check("widgets: listed with the next request", "Widgets of the panel" in sent and "w1" in sent, sent[-300:])
 
     card = strip.cards["w1"]
+    histogram = card.histogram
+
+    def bars():
+        return list(histogram._counts) if histogram.isVisibleTo(card) else []
+    wait(lambda: sum(bars()) == 60, 3)
+    check("widgets: a range shows the bars of its field", len(bars()) == 24 and sum(bars()) == 60 and
+          bars()[0] == 3 and bars()[-1] == 3, bars())
     card.low.setValue(1000)
     card.flush()
     check("widgets: moving a bound filters the layer", layer.subsetString() == '"pop" >= 1000', layer.subsetString())
@@ -1999,10 +2076,61 @@ def check_widgets(chat, provider, settings, ask, layer):
     wait(lambda: strip.cards["w2"].value.text() == "51", 3)
     check("widgets: the number follows the filter", strip.cards["w2"].value.text() == "51",
           strip.cards["w2"].value.text())
-    card = strip.cards["w1"]
-    card.low.setValue(100)
-    card.flush()
+    QTest.qWait(400)  # the bars read again with the number
+    check("widgets: the bars outside the range stay, to widen it again", sum(bars()) == 60 and
+          histogram.range() == (1000.0, None), (bars(), histogram.range()))
+    # A handle dragged to the left end by the mouse: the box follows, then the filter goes after the pause.
+    y = histogram.height() // 2
+    left = 6 + round((histogram.width() - 12) * 900 / 5900)  # the low handle, on 1000
+    QTest.mousePress(histogram, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, QPoint(left, y))
+    QTest.mouseRelease(histogram, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, QPoint(0, y))
+    check("widgets: a handle at the end moves its box", card.low.value() == 100 and card.widget["low"] == 100,
+          (card.low.value(), card.widget["low"]))
+    wait(lambda: layer.subsetString() == "", 3)
     check("widgets: wide open again, the filter goes", layer.subsetString() == "", layer.subsetString())
+    card = strip.cards["w1"]
+    card.high.setValue(2000)
+    card.flush()
+    wait(lambda: sum(bars()) == 60 and strip.cards["w2"].value.text() == "20", 3)
+    check("widgets: narrowed from the top, the bars above stay", layer.subsetString() == '"pop" <= 2000' and
+          sum(bars()) == 60 and histogram.range() == (None, 2000.0), (layer.subsetString(), bars()))
+
+    # A reading for each state of the layer, none while the section is out of view; an edit forgets the bars read
+    # wide open: the bars outside the bounds are hatched as unknown, not drawn empty.
+    import filter_mate.adapters.agent.agent_widgets as widgets_module
+    reading, reads = widgets_module.range_reading, []
+    widgets_module.range_reading = lambda widget: reads.append(widget["id"]) or reading(widget)
+    index = layer.fields().lookupField("pop")
+
+    def edit(old, new):
+        feature = next(feature for feature in layer.getFeatures() if feature["pop"] == old)
+        layer.startEditing()
+        layer.changeAttributeValue(feature.id(), index, new)
+        layer.commitChanges()
+    window = panel.window()
+    try:
+        chat._refresh_stats()
+        chat._refresh_stats()
+        check("widgets: a refresh with nothing changed reads nothing", reads == [], reads)
+        window.hide()
+        edit(1500, 1550)
+        QTest.qWait(700)
+        check("widgets: out of view, nothing is read", reads == [], reads)
+        window.show()
+        wait(lambda: reads and strip.cards["w1"].histogram._unknown, 3)
+        unknown = histogram._unknown
+        check("widgets: read once in view, the bars outside unknown after an edit", reads == ["w1"] and
+              sum(bars()) == 20 and unknown[0] is False and unknown[-1] is True, (reads, bars(), unknown))
+    finally:
+        widgets_module.range_reading = reading
+        window.show()
+    edit(1550, 1500)
+    card.high.setValue(6000)
+    card.flush()
+    check("widgets: and wide open again", layer.subsetString() == "", layer.subsetString())
+    wait(lambda: sum(bars()) == 60 and not histogram._unknown, 3)
+    check("widgets: wide open, every bar known again", sum(bars()) == 60 and not histogram._unknown,
+          (bars(), histogram._unknown))
 
     provider.reset((200, {}, tool_turn("create_widget", {"kind": "values", "layer": "communes", "field": "pop"})),
                    (200, {}, text_turn("ok")))

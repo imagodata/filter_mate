@@ -815,6 +815,13 @@ class FilterMateAccessor(Protocol):
         """Set the EXPLORING and FILTERING options of layers (``[{layer, exploring, filtering}]``), all or none."""
         ...
 
+    def set_exploring(self, layer: str = "", tools: Optional[Dict[str, bool]] = None,
+                      press: Optional[List[str]] = None, show: bool = False) -> Dict[str, Any]:
+        """Drive FilterMate's EXPLORING panel as the user does: the layer it shows, the buttons of its rail turned on
+        or off (``tools``) or pressed (``press``), the panel opened in front (``show``); FilterRejected for what the
+        panel refuses."""
+        ...
+
     def export_options(self) -> Dict[str, Any]:
         """How the project exports from FilterMate's EXPORTING panel."""
         ...
@@ -999,6 +1006,7 @@ class InMemoryAccessor:
     # The options of FilterMate's panels: by layer id ({"exploring": {...}, "filtering": {...}}), and the export ones.
     panel_layers: Dict[str, Dict[str, Dict[str, Any]]] = field(default_factory=dict)
     export_panel: Dict[str, Any] = field(default_factory=dict)
+    exploring_panel: Dict[str, Any] = field(default_factory=dict)
 
     def list_layers(self) -> List[LayerSummary]:
         return [self._with_active(layer) for layer in self.layers]
@@ -1258,6 +1266,23 @@ class InMemoryAccessor:
                 options.setdefault(group, {}).update(item.get(group) or {})
         return {"changed": [dict(item, layer_name=found.name) for found, item in zip(targets, layers)],
                 "shown_in_panel": False}
+
+    def set_exploring(self, layer: str = "", tools: Optional[Dict[str, bool]] = None,
+                      press: Optional[List[str]] = None, show: bool = False) -> Dict[str, Any]:
+        found = self._find(layer) if layer else self._find(self.exploring_panel.get("layer_id", ""))
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found" if layer else "EXPLORING shows no layer: name one (layer).")
+        changed = ["layer"] if found.layer_id != self.exploring_panel.get("layer_id") else []
+        if changed:
+            self.exploring_panel.update(layer_id=found.layer_id, tools={})
+        held = self.exploring_panel.setdefault("tools", {})
+        for name, value in (tools or {}).items():
+            if bool(held.get(name)) != bool(value):
+                changed.append(name)
+            held[name] = bool(value)
+        return {"layer_name": found.name, "layer_id": found.layer_id, "kind": found.layer_kind, "in_view": bool(show),
+                "tools": {name: "on" if value else "off" for name, value in held.items()},
+                "changed": changed, "pressed": list(press or [])}
 
     def export_options(self) -> Dict[str, Any]:
         return dict(self.export_panel, saved=True)

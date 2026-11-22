@@ -18,6 +18,7 @@ from qgis.PyQt.QtWidgets import (
 from ...core.agent.widgets import CATEGORIES, CHART, RANGE, VALUES, decimals
 from ..styles.mockup_design import plugin_is_dark, tokens
 from .agent_thread import plain_tooltip
+from .coverage_panels.histogram_widget import RangeHistogramWidget
 
 APPLY_DELAY_MS = 400  # a value typed or ticked is applied once the user pauses
 STRIP_MAX_HEIGHT = 260
@@ -57,6 +58,9 @@ def number_text(value: Optional[float]) -> str:
 
 CHART_ROW = 16
 HISTOGRAM_HEIGHT = 64
+# The bars of a range as high as those of a chart, and the 11 px its histogram keeps above them and for its handles.
+RANGE_HISTOGRAM_HEIGHT = HISTOGRAM_HEIGHT + 11
+RANGE_HISTOGRAM_MIN_WIDTH = 60  # the boxes under it give the card its width, not the histogram
 
 
 def short_number(value: float) -> str:
@@ -194,11 +198,21 @@ class WidgetCard(QFrame):
         self.high: Optional[QDoubleSpinBox] = None
         self.values: Optional[QListWidget] = None
         self.chart: Optional[ChartView] = None
+        self.histogram: Optional[RangeHistogramWidget] = None
+        self.note: Optional[QLabel] = None
+        self.bars = None  # the bars drawn last, given to the card that replaces this one
         if widget["kind"] == CHART:
             self.chart = ChartView(widget["mode"], self)
             self.chart.setObjectName("widget_agent_chart")
             layout.addWidget(self.chart)
         elif widget["kind"] == RANGE:
+            if widget["maximum"] > widget["minimum"]:  # else nothing to drag (an entry not made by make)
+                layout.addWidget(self._build_histogram())
+                self.note = QLabel(self)
+                self.note.setObjectName("label_agent_widget_note")
+                self.note.setTextFormat(Qt.TextFormat.PlainText)
+                self.note.hide()
+                layout.addWidget(self.note)
             layout.addLayout(self._build_range())
         elif widget["kind"] == VALUES:
             layout.addWidget(self._build_values())
@@ -223,6 +237,28 @@ class WidgetCard(QFrame):
         if box.value() >= box.maximum():
             return self.widget["maximum"]
         return box.value()
+
+    def _build_histogram(self) -> RangeHistogramWidget:
+        """The bars of the field, the handles on the bounds; hidden until bars are read (set_bars)."""
+        widget = self.widget
+        self.histogram = RangeHistogramWidget(self)
+        self.histogram.setObjectName("widget_agent_range_histogram")
+        # Neither its width (280 px wished, 200 at least) nor its height (90 px wished) comes from the histogram.
+        self.histogram.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        self.histogram.setMinimumWidth(RANGE_HISTOGRAM_MIN_WIDTH)
+        self.histogram.setFixedHeight(RANGE_HISTOGRAM_HEIGHT)
+        self.histogram.set_decimals(decimals(widget))  # 0 for whole numbers: the handles stop on them
+        self.histogram.set_histogram([], widget["minimum"], widget["maximum"])  # its bounds first: set_range clamps
+        self.histogram.set_range(widget["low"], widget["high"])
+        self.histogram.rangeChanged.connect(self._on_histogram)
+        self.histogram.hide()
+        return self.histogram
+
+    def _histogram_range(self) -> tuple:
+        """The range the histogram holds when it shows the state of the widget: None for a bound at an end."""
+        widget = self.widget
+        return (None if widget["low"] <= widget["minimum"] else widget["low"],
+                None if widget["high"] >= widget["maximum"] else widget["high"])
 
     def _build_range(self) -> QHBoxLayout:
         row = QHBoxLayout()
@@ -284,7 +320,35 @@ class WidgetCard(QFrame):
             other.setValue(moved.value())
             other.blockSignals(False)
             self.widget[other_key] = self.widget[key]
+        if self.histogram is not None:
+            self.histogram.set_range(self.widget["low"], self.widget["high"])  # emits nothing
         self._timer.start()
+
+    def _on_histogram(self, _low: float = 0.0, _high: float = 0.0) -> None:
+        """A handle dropped: the bound it moved is written in its box, then read as a typed bound is (_bound: a value
+        the box shows as an end is the end of the field itself, 0.1232 shown 0.123 keeps the feature of 0.1234). A
+        value typed without Enter in a box is taken first; the bound dropped past the other one drags it along."""
+        dropped, before = self.histogram.range(), self._histogram_range()
+        for box in (self.low, self.high):
+            box.interpretText()  # may move the handles (_on_range): ``dropped`` keeps where they were dropped
+        moved = [index for index in (0, 1) if dropped[index] != before[index]]
+        boxes, keys = (self.low, self.high), ("low", "high")
+        ends = (self.widget["minimum"], self.widget["maximum"])
+        for index in moved:
+            box = boxes[index]
+            box.blockSignals(True)  # written here: no second start of the timer
+            box.setValue(ends[index] if dropped[index] is None else dropped[index])
+            box.blockSignals(False)
+            self.widget[keys[index]] = self._bound(box)
+        if moved and self.widget["low"] > self.widget["high"]:
+            other = 1 if moved[-1] == 0 else 0
+            boxes[other].blockSignals(True)
+            boxes[other].setValue(boxes[moved[-1]].value())
+            boxes[other].blockSignals(False)
+            self.widget[keys[other]] = self.widget[keys[moved[-1]]]
+        self.histogram.set_range(self.widget["low"], self.widget["high"])  # an end shown at the end itself
+        if moved:
+            self._timer.start()
 
     def _on_values(self, _item=None) -> None:
         self.widget["chosen"] = [self.values.item(row).data(_VALUE_ROLE) for row in range(self.values.count())
@@ -297,6 +361,8 @@ class WidgetCard(QFrame):
 
     def flush(self) -> bool:
         """Apply now what waits for the pause (tests, and a widget about to go); True when something was."""
+        if self.histogram is not None and self.histogram.range() != self._histogram_range():
+            self._on_histogram()  # a handle still held; before the boxes, which would put it back
         for box in (self.low, self.high):
             if box is not None:
                 box.interpretText()  # a value typed without Enter
@@ -311,8 +377,23 @@ class WidgetCard(QFrame):
             self.value.setText(text)
 
     def set_bars(self, bars) -> None:
+        """The bars of a chart; for a range ``{"counts", "unknown", "outside", "empty"}`` (the bars, those not known,
+        the features left out of them), or None: then its boxes alone."""
+        self.bars = bars
         if self.chart is not None:
             self.chart.set_bars(bars)
+        elif self.histogram is not None:
+            if bars:
+                self.histogram.set_histogram(bars["counts"], self.widget["minimum"], self.widget["maximum"])
+                self.histogram.set_unknown(bars["unknown"])  # set_histogram keeps the range of the handles
+            self.histogram.setVisible(bool(bars))
+            parts = []
+            if bars and bars["outside"]:
+                parts.append(_tr("{} outside the range").format(number_text(bars["outside"])))
+            if bars and bars["empty"]:
+                parts.append(_tr("{} without value").format(number_text(bars["empty"])))
+            self.note.setText(" · ".join(parts))
+            self.note.setVisible(bool(parts))
 
     def set_error(self, text: str) -> None:
         self.error.setText(text)
@@ -363,6 +444,7 @@ class WidgetsStrip(QFrame):
         # now (``widgets`` was read before), unless its widget was removed or changed meanwhile (✕, an undo): its
         # filter stays as it was.
         flushed = {key: card for key, card in self.cards.items() if states.get(key) == card.applied and card.flush()}
+        drawn = dict(self.cards)
         for card in self.cards.values():
             self._column.removeWidget(card)  # deleteLater alone leaves it in the column, measured, until it goes
             card.blockSignals(True)  # what hiding it commits is not applied
@@ -374,6 +456,9 @@ class WidgetsStrip(QFrame):
             card = WidgetCard(old.widget if old is not None else widget, self._inner)
             if old is not None:  # with what applying it answered, said to the card that went
                 card.set_error(old.error.text())
+            before = drawn.get(widget["id"])
+            if before is not None and before.bars is not None and _shape(before.widget) == _shape(widget):
+                card.set_bars(before.bars)  # until they are read again (the stat timer): no card without its bars
             card.changed.connect(self.changed)
             card.remove_requested.connect(self.remove_requested)
             self._column.insertWidget(self._column.count() - 1, card)
@@ -424,10 +509,13 @@ class WidgetsStrip(QFrame):
                 card.chart.accent = QColor(palette['fm_accent'])
                 card.chart.muted = QColor(palette['fm_text_muted'])
                 card.chart.update()
+            if card.histogram is not None:
+                card.histogram.set_accent(QColor(palette['fm_accent']))
         self.setStyleSheet(
             f"QFrame#frame_agent_widget {{ border: 1px solid {palette['fm_group_border']}; border-radius: 6px; }}"
             "QLabel#label_agent_widget_title { font-weight: 600; }"
             f"QLabel#label_agent_widget_layer {{ color: {palette['fm_text_muted']}; font-size: 11px; }}"
+            f"QLabel#label_agent_widget_note {{ color: {palette['fm_text_muted']}; font-size: 11px; }}"
             "QLabel#label_agent_widget_value { font-size: 15px; font-weight: 600; }"
             "QLabel#label_agent_widget_error { color: #c0392b; font-size: 11px; }"
             f"QPushButton#pushButton_agent_widget_tick {{ color: {palette['fm_accent']}; border: none; padding: 0 6px;"

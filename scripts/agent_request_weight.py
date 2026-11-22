@@ -16,6 +16,12 @@ the cost or the largest request rises more than 5 % above the reference:
 
     python scripts/agent_request_weight.py --conversation
 
+``--conversation --memory`` replays it with the memory kept from one project to the next as full as a request may
+carry it (core/agent/memory.py, ``MAX_MEMORY_BLOCK``), and prints what that costs against the same conversation
+without it: the price of the worst case, which the budget is set on. An empty memory weighs nothing.
+
+    python scripts/agent_request_weight.py --conversation --memory
+
 Not weighed: the notes about the sources the user ticked, which core/agent/chat_setup.py adds to the instructions
 (--conversation weighs the history, with no source ticked), and, without --conversation, the history. Measured on 2026-11-15, these notes are 864 characters for a basemap, a
 geocoder, an elevation source, an OpenStreetMap server and a population grid, 2,086 with one source of every kind:
@@ -47,6 +53,7 @@ from agent.skills import SKILLS  # noqa: E402
 from agent.tool_executor import ToolExecutor  # noqa: E402
 from agent_eval import (  # noqa: E402
     ScriptedTransport, SimulatedProject, project_context, project_state_of, project_update_of, skill_loader)
+from agent.memory import MAX_MEMORY_BLOCK, SCOPE_SOURCE, Memory, added, chosen, memory_block  # noqa: E402
 from agent.project_notes import notes_block  # noqa: E402
 from agent.request_context import ContextMemory, ContextParts, compose, widgets_part  # noqa: E402
 
@@ -237,13 +244,29 @@ def bench_project() -> SimulatedProject:
     return project
 
 
-def bench_context(project: SimulatedProject, before, memory: Optional[ContextMemory] = None, full: bool = True) -> str:
+def full_memory_block(project: SimulatedProject) -> str:
+    """The notes kept from one project to the next as a request carries them when they fill their budget: notes for
+    every project and for each layer of the bench, more than fit (core/agent/memory.py)."""
+    kept = Memory()
+    for rank in range(12):
+        kept, _note = added(kept, f"Terme métier {rank} : " + BENCH_NOTES[rank % 2], today="2026-11-22")
+    sources = [(f"ogr::{name}", name) for name in project.layers]
+    for signature, name in sources:
+        for rank in range(3):
+            kept, _note = added(kept, f"Dans {name}, le mot d'usage {rank} désigne le champ status = 'AS_BUILT'.",
+                                SCOPE_SOURCE, signature, name, today="2026-11-22")
+    return memory_block(chosen(kept, sources, active=sources[0][0]))
+
+
+def bench_context(project: SimulatedProject, before, memory: Optional[ContextMemory] = None, full: bool = True,
+                  kept: str = "") -> str:
     """The context a request carries, as the chat composes it (core/agent/request_context.py): the whole of it, or what
-    changed since ``before`` when ``memory`` says what was sent already (lot 3)."""
+    changed since ``before`` when ``memory`` says what was sent already (lot 3). ``kept``: the notes kept from one
+    project to the next (``full_memory_block``); none by default, as for a user who wrote none."""
     memory = memory if memory is not None else ContextMemory()
     full = full or memory.empty or before is None
     summary = project_context(project, before=before) if full else project_update_of(project, before)
-    return compose(memory.delta(ContextParts(summary=summary, notes=notes_block(BENCH_NOTES),
+    return compose(memory.delta(ContextParts(summary=summary, notes=notes_block(BENCH_NOTES), memory=kept,
                                              widgets=widgets_part(BENCH_WIDGETS)), full))
 
 
@@ -295,6 +318,7 @@ class Replay:
     skills_loaded: List[str] = field(default_factory=list)
     summarized: int = 0  # requests the compaction summed up
     bodies: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)  # every request, by provider
+    memory_chars: int = 0  # the notes kept from one project to the next the conversation carried (--memory)
 
 
 def tools_start(kind: str, body: Dict[str, Any]) -> int:
@@ -356,12 +380,15 @@ class _Measured:
         return self._inner.send(request, session)
 
 
-def replay() -> Replay:
-    """The conversation played by the scripted model in one session of the chat, every call weighed."""
+def replay(with_memory: bool = False) -> Replay:
+    """The conversation played by the scripted model in one session of the chat, every call weighed.
+    ``with_memory``: with the memory kept from one project to the next as full as a request carries it."""
     instructions, tools, held = default_setup()
     kinds = providers()
     run = Replay()
     project = bench_project()
+    kept = full_memory_block(project) if with_memory else ""
+    run.memory_chars = len(kept)
     project.offered = {tool.name for tool in tools} | set(held)
     hidden = {tool.name: tool for tool in chat_tools() if tool.name in held}
     known = {tool.name for tool in tools} | set(hidden)
@@ -390,7 +417,7 @@ def replay() -> Replay:
         scripted.use_first({name: held[name] for name in hidden})  # a tool added before is not added again
         exchange = run_exchange(session, text, _Measured(scripted, kinds, rank, run, before), executor,
                                 confirm=lambda call: True,
-                                context=lambda full, seen=seen: bench_context(project, seen, memory, full))
+                                context=lambda full, seen=seen: bench_context(project, seen, memory, full, kept))
         memory.sent()
         seen = project_state_of(project)
         if exchange.error is not None:
@@ -426,6 +453,28 @@ def _rise(now: float, then: float) -> float:
     return now / then - 1 if then else 0.0
 
 
+def _totals(run: Replay) -> Dict[str, int]:
+    return {"calls": len(run.calls), "sent": sum(call.sent for call in run.calls),
+            "largest": max(call.sent for call in run.calls), "cost": round(estimated_cost(run.calls))}
+
+
+def report_memory() -> int:
+    """Print what a full memory costs the conversation, against the same without it; 1 when a replay failed or the
+    block passes its budget. Not held to the reference: it is the price of the worst case, to set the budget on."""
+    without, with_it = replay(), replay(with_memory=True)
+    before, after = _totals(without), _totals(with_it)
+    print(f"memory block: {with_it.memory_chars} characters (budget {MAX_MEMORY_BLOCK}), sent once in "
+          f"{after['calls']} calls")
+    for key in ("sent", "largest", "cost"):
+        print(f"  {key:8s} {before[key]:8d} -> {after[key]:8d}  {_rise(after[key], before[key]):+.1%}")
+    errors = without.errors + with_it.errors + broken_starts(with_it.calls)
+    if not 0 < with_it.memory_chars <= MAX_MEMORY_BLOCK:
+        errors.append(f"the block weighs {with_it.memory_chars}: it must fill its budget without passing it")
+    for error in errors:
+        print(f"  error: {error}")
+    return 1 if errors else 0
+
+
 def report_conversation() -> int:
     """Print the weight of each call and of the conversation; 1 when it rose past the reference, or the reference is of
     another conversation."""
@@ -434,8 +483,7 @@ def report_conversation() -> int:
     for call in run.calls:
         print(f"{call.request:4d} {call.tool_count:5d} {call.instructions:13d} {call.tools:7d} {call.history:8d} "
               f"{call.prefix['anthropic']:19d} {call.prefix['openai']:7d} {call.prefix['ollama']:7d} {call.num_ctx:8d}")
-    totals = {"calls": len(run.calls), "sent": sum(call.sent for call in run.calls),
-              "largest": max(call.sent for call in run.calls), "cost": round(estimated_cost(run.calls))}
+    totals = _totals(run)
     print(f"\n{totals['calls']} calls, {totals['sent']} characters sent, largest request {totals['largest']}, "
           f"estimated cost {totals['cost']} (characters at the price of an input not cached), "
           f"requests summed up {run.summarized}; fingerprint {fingerprint()}")
@@ -463,9 +511,13 @@ def main(argv=None) -> int:
     parser.add_argument("--top", type=int, default=10, help="how many of the heaviest tools to list")
     parser.add_argument("--conversation", action="store_true",
                         help="replay a conversation of ten requests and weigh each call, against the reference")
+    parser.add_argument("--memory", action="store_true",
+                        help="with --conversation: what a full memory kept from one project to the next costs it")
     args = parser.parse_args(argv)
+    if args.memory and not args.conversation:
+        parser.error("--memory goes with --conversation")
     if args.conversation:
-        return report_conversation()
+        return report_memory() if args.memory else report_conversation()
     size, room, context, tools = weigh()
     print(f"{len(tools)} tools and the instructions ({len(SYSTEM_PROMPT)} characters): {size} characters, "
           f"{room - size:+d} under the {room} of the {CONTEXT_STEPS[1]} step; num_ctx asked: {context}")

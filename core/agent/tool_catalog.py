@@ -79,7 +79,7 @@ ASK_USER = "ask_user"
 LIST_TABLES = "list_database_tables"
 ADD_TABLE = "add_database_table"
 # The tabs of the settings dialog of the agent a link may open (ui/widgets/agent_panel.AgentSettingsDialog).
-SETTINGS_TABS = ("provider", "sources", "autonomy", "tools", "other_applications")
+SETTINGS_TABS = ("provider", "sources", "autonomy", "tools", "memory", "other_applications")
 # The forms of the feedback page of the site a link may open (infrastructure/feedback_forms.py).
 FEEDBACK_FORMS = ("usage", "feature", "testers", "services")
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
@@ -179,8 +179,9 @@ CHAT_ONLY = (
     ToolSpec(
         name=CREATE_WIDGET, title="Make a widget for the user",
         description=("Make a control that stays in the AGENT panel, saved with the project, for the user to explore "
-                     "a vector layer alone: range (two bounds on a number, filters), values (ticked values, at most "
-                     "50, filters), stat (a number kept up to date) or chart (bars or a histogram, filters nothing). "
+                     "a vector layer alone: range (two bounds on a number over its histogram, filters), values "
+                     "(ticked values, at most 50, filters), stat (a number kept up to date) or chart (bars or a "
+                     "histogram, filters nothing). "
                      "The widgets of a layer narrow it together. For a widget, slider or dashboard asked; one per "
                      "call; undone with the turn. Returns widget and widgets."),
         input_schema={"type": "object", "properties": {
@@ -228,7 +229,8 @@ CHAT_ONLY = (
         description=("Put a button in the thread that takes the user to a setting they change themselves: a tab of "
                      "the settings of the agent (provider: provider, model, key; sources: open data and connectors; "
                      "autonomy: level, protected layers, expert mode; tools: always ask, always allow or never by "
-                     "tool; other_applications: the MCP server), or a setting of FilterMate in the configuration "
+                     "tool; memory: the notes kept from one project to the next; other_applications: the MCP server), or a "
+                     "setting of FilterMate in the configuration "
                      "tree (target setting, with its path). Use it with your answer when the user should change "
                      "something you may not (the settings of the agent, APP.OPTIONS.AGENT, a name or a path), or "
                      "asks where a setting is; target feedback: a form of the site, usage (an opinion, a problem), "

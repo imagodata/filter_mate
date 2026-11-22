@@ -14,7 +14,7 @@ from typing import Callable, List, Optional, Sequence, Tuple
 from qgis.PyQt.QtCore import (
     QByteArray, QCoreApplication, QEvent, QLocale, QSettings, QSize, Qt, QTimer, QUrl, pyqtSignal,
 )
-from qgis.PyQt.QtGui import QColor, QFont, QTextOption
+from qgis.PyQt.QtGui import QColor, QDesktopServices, QFont, QTextOption
 from qgis.PyQt.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QMenu,
@@ -28,12 +28,17 @@ from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.example_prompts import (
     CATALOG as EXAMPLE_CATALOG, Facts, SHOWN as EXAMPLES_SHOWN, adjust as adjust_examples, pick as pick_examples,
 )
+from ...core.agent.memory import (
+    ADD, EDIT, MAX_NOTES, MAX_SOURCE_NOTES, MAX_USER_NOTES, REMOVE, SCOPE_SOURCE, SCOPE_USER, Memory, Note,
+    chosen as memory_chosen,
+)
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import (
     KIND_CKAN, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_WFS, KIND_WMS,
     KIND_WMTS, KIND_XYZ,
 )
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
+from ...core.agent.project_notes import MAX_NOTE_CHARS
 from ...core.agent.providers import PRESETS
 from ...core.agent.providers.base import check_base_url, without_credentials, without_key
 from ...core.agent.providers.model_list import KEY_PAGES
@@ -142,6 +147,9 @@ def example_text(key: str) -> str:
         "lidar_inside": _tr("Keep the LiDAR points inside the selection"),
         "join": _tr("Join two layers by a common field"),
         "buffer_zone": _tr("Draw a 100 m zone around the active layer"),
+        "pick_on_map": _tr("Let me pick features on the map"),
+        "slider_histogram": _tr("A slider over a number field's histogram"),
+        "raster_pipette": _tr("Arm the pipette on this raster"),
         "layout": _tr("Make a print layout of this map"),
         "relief": _tr("Make a relief map of this area with contours"),
         "elevation_view": _tr("Add the elevation of the map view"),
@@ -1358,8 +1366,17 @@ class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
     def __init__(self, values, target_of, parent=None, tester=None, mcp_error="",
-                 project_layers=(), tools=(), provider_tester=None, databases=()) -> None:
+                 project_layers=(), tools=(), provider_tester=None, databases=(), memory=None, memory_error="",
+                 memory_sources=(), memory_active="", memory_file="") -> None:
         super().__init__(parent)
+        # The notes kept from one project to the next (core/agent/memory.py), for the Memory tab: None with
+        # ``memory_error`` when the file cannot be read. ``memory_sources``: (signature, name) of the layers of the open
+        # project; ``memory_active``: the signature of the active one; ``memory_file``: where the notes are kept.
+        self._memory_before = memory
+        self._memory_error = str(memory_error or "")
+        self._memory_sources = [(signature, name) for signature, name in memory_sources]
+        self._memory_active = memory_active
+        self._memory_file = str(memory_file or "")
         # The PostgreSQL connections of QGIS, as sources: read from QGIS, never added nor removed here.
         self._databases = tuple(databases)
         # (name, title, risk class) of the tools of the chat, for the exceptions of the Tools tab.
@@ -1570,6 +1587,8 @@ class AgentSettingsDialog(QDialog):
         if self._tools:
             self._tab_pages["tools"] = self._build_tools(values)
             self.tabs.addTab(self._tab_pages["tools"], _tr("Tools"))
+        self._tab_pages["memory"] = self._build_memory(values)
+        self.tabs.addTab(self._tab_pages["memory"], _tr("Memory"))
         self._tab_pages["other_applications"] = self._build_applications(values)
         self.tabs.addTab(self._tab_pages["other_applications"], _tr("Other applications"))
         if mcp_error:
@@ -1709,8 +1728,240 @@ class AgentSettingsDialog(QDialog):
                 for row in range(self.protected_layers.count())
                 if self.protected_layers.item(row).checkState() == Qt.CheckState.Checked]
 
+    # --- the Memory tab: the notes kept from one project to the next (core/agent/memory.py) ------------------------
+
+    def _build_memory(self, values) -> QWidget:
+        """The notes for every project and for each source, written, corrected and removed here; saved with Save.
+
+        The dialog works on a copy (``_memory_rows``) and gives the changes (``memory_changes``): they are made on the
+        file as it is at that time, which another QGIS may have written meanwhile."""
+        page = QWidget(self)
+        layout = QVBoxLayout(page)
+        layout.setSpacing(6)
+        self.memory_enabled = QCheckBox(_tr("Keep notes from one project to the next"), page)
+        self.memory_enabled.setObjectName("checkBox_agent_memory")
+        self.memory_enabled.setChecked(bool(getattr(values, "memory", True)))
+        note = QLabel(_tr(
+            "Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the "
+            "QGIS profile). They are sent to your provider with a request: those for every project always, those of a "
+            "layer when a layer of the same source is in the open project. Double-click a note to correct it."), page)
+        note.setObjectName("label_agent_settings_sub")
+        note.setWordWrap(True)
+        self.memory_notes = QTreeWidget(page)
+        self.memory_notes.setObjectName("treeWidget_agent_memory")
+        self.memory_notes.setHeaderHidden(True)
+        self.memory_notes.setRootIsDecorated(False)
+        self.memory_notes.setWordWrap(True)
+        self.memory_notes.setMinimumHeight(160)
+        before = self._memory_before.notes if self._memory_before is not None else ()
+        self._memory_rows = [{"id": row.id, "scope": row.scope, "signature": row.signature, "label": row.label,
+                              "text": row.text, "with_values": row.with_values} for row in before]
+        self.memory_place = QComboBox(page)
+        self.memory_place.setObjectName("comboBox_agent_memory_place")
+        self.memory_place.addItem(_tr("Every project"), "")
+        seen = set()
+        for signature, name in self._memory_sources:
+            if signature and signature not in seen:  # a layer held in memory has no source to remember
+                seen.add(signature)
+                self.memory_place.addItem(name, signature)
+                self.memory_place.setItemData(self.memory_place.count() - 1, plain_tooltip(signature),
+                                              Qt.ItemDataRole.ToolTipRole)
+        self.memory_text = QLineEdit(page)
+        self.memory_text.setObjectName("lineEdit_agent_memory_text")
+        self.memory_text.setMaxLength(MAX_NOTE_CHARS)
+        self.memory_text.setPlaceholderText(_tr("A note, in one sentence"))
+        self.memory_add = QPushButton(_tr("Add"), page)
+        self.memory_add.setObjectName("pushButton_agent_memory_add")
+        add_row = QHBoxLayout()
+        add_row.setContentsMargins(0, 0, 0, 0)
+        add_row.setSpacing(6)
+        add_row.addWidget(self.memory_place)
+        add_row.addWidget(self.memory_text, 1)
+        add_row.addWidget(self.memory_add)
+        self.memory_remove = QPushButton(_tr("Remove"), page)
+        self.memory_remove.setObjectName("pushButton_agent_memory_remove")
+        self.memory_forget_all = QPushButton(_tr("Forget everything"), page)
+        self.memory_forget_all.setObjectName("pushButton_agent_memory_forget_all")
+        self.memory_open = QPushButton(_tr("Open the file"), page)
+        self.memory_open.setObjectName("pushButton_agent_memory_open")
+        self.memory_open.setEnabled(bool(self._memory_file))
+        self.memory_open.setToolTip(plain_tooltip(self._memory_file))
+        buttons = QHBoxLayout()
+        buttons.setContentsMargins(0, 0, 0, 0)
+        buttons.setSpacing(6)
+        buttons.addWidget(self.memory_remove)
+        buttons.addWidget(self.memory_forget_all)
+        buttons.addStretch(1)
+        buttons.addWidget(self.memory_open)
+        self.memory_status = QLabel(page)
+        self.memory_status.setObjectName("label_agent_settings_note")
+        self.memory_status.setTextFormat(Qt.TextFormat.PlainText)  # it may quote why the file is not read
+        self.memory_status.setWordWrap(True)
+        layout.addWidget(self.memory_enabled)
+        layout.addWidget(note)
+        layout.addWidget(self.memory_notes, 1)
+        layout.addLayout(add_row)
+        layout.addLayout(buttons)
+        layout.addWidget(self.memory_status)
+        self.memory_add.clicked.connect(self._on_memory_add)
+        self.memory_text.returnPressed.connect(self._on_memory_add)
+        self.memory_text.textChanged.connect(self._update_memory_buttons)
+        self.memory_place.currentIndexChanged.connect(self._update_memory_buttons)
+        self.memory_remove.clicked.connect(self._on_memory_remove)
+        self.memory_forget_all.clicked.connect(self._on_memory_forget_all)
+        self.memory_open.clicked.connect(self._on_memory_open)
+        self.memory_notes.itemChanged.connect(self._on_memory_edited)
+        self.memory_notes.itemSelectionChanged.connect(self._update_memory_buttons)
+        self.send_values.toggled.connect(self._update_memory_status)
+        self.memory_enabled.toggled.connect(self._update_memory_status)
+        self._fill_memory()
+        return page
+
+    def keyPressEvent(self, event) -> None:  # noqa: N802 - Qt name
+        """Enter in the line of a note adds the note (``returnPressed``): it must not also reach the dialog, which
+        would press Save and close with every setting."""
+        if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter) and self.memory_text.hasFocus():
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+    @property
+    def _memory_readable(self) -> bool:
+        return self._memory_before is not None
+
+    def _memory_place_full(self, signature: str) -> bool:
+        there = sum(1 for row in self._memory_rows if row["signature"] == signature
+                    and row["scope"] == (SCOPE_SOURCE if signature else SCOPE_USER))
+        return there >= (MAX_SOURCE_NOTES if signature else MAX_USER_NOTES) or len(self._memory_rows) >= MAX_NOTES
+
+    def _fill_memory(self) -> None:
+        """The tree from the working copy: the notes for every project, then each source under its name."""
+        tree = self.memory_notes
+        tree.blockSignals(True)
+        tree.clear()
+        groups = {}
+        # Every project first, then each source in the order its first note was written; a row keeps its rank.
+        for rank, row in sorted(enumerate(self._memory_rows), key=lambda item: item[1]["scope"] != SCOPE_USER):
+            key = row["signature"] if row["scope"] == SCOPE_SOURCE else ""
+            parent = groups.get(key)
+            if parent is None:
+                title = _tr("Every project") if not key else f"{row['label'] or key} ({key})"
+                parent = groups[key] = QTreeWidgetItem(tree, [title])
+                parent.setFlags(Qt.ItemFlag.ItemIsEnabled)
+                font = parent.font(0)
+                font.setBold(True)
+                parent.setFont(0, font)
+            item = QTreeWidgetItem(parent, [row["text"]])
+            item.setData(0, Qt.ItemDataRole.UserRole, rank)
+            item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable)
+        tree.expandAll()
+        tree.blockSignals(False)
+        self._update_memory_buttons()
+        self._update_memory_status()
+
+    def _update_memory_buttons(self, *_args) -> None:
+        readable = self._memory_readable
+        signature = self.memory_place.currentData() or ""
+        full = self._memory_place_full(signature)
+        for widget in (self.memory_notes, self.memory_place, self.memory_text):
+            widget.setEnabled(readable)
+        self.memory_add.setEnabled(readable and not full and bool(self.memory_text.text().strip()))
+        self.memory_add.setToolTip(_tr("This list is full: remove a note first.") if full else "")
+        chosen_item = self.memory_notes.currentItem()
+        self.memory_remove.setEnabled(readable and chosen_item is not None and chosen_item.parent() is not None)
+        self.memory_forget_all.setEnabled(readable and bool(self._memory_rows))
+
+    def _update_memory_status(self, *_args) -> None:
+        """How many of the notes go with a request in the open project, as the chat chooses them."""
+        if not self._memory_readable:
+            self.memory_status.setText(_tr("The memory file cannot be read ({}). Correct it or remove it: nothing is "
+                                           "written to it meanwhile.").format(self._memory_error))
+            self.memory_status.setVisible(True)
+            return
+        notes = tuple(Note(id=row["id"] or f"new{rank}", scope=row["scope"], text=row["text"],
+                           signature=row["signature"], label=row["label"], with_values=row["with_values"])
+                      for rank, row in enumerate(self._memory_rows))
+        selection = memory_chosen(Memory(notes=notes), self._memory_sources, self._memory_active,
+                                  share_values=self.send_values.isChecked())
+        text = _tr("Sent with this project: {} of {} notes.").format(selection.sent, len(notes))
+        if selection.held_back:
+            text += " " + _tr("{} not sent: they hold attribute values, which you do not share.").format(
+                selection.held_back)
+        self.memory_status.setText(text)
+        # Unticked, none is sent: the count would say otherwise.
+        self.memory_status.setVisible(bool(notes) and self.memory_enabled.isChecked())
+
+    def _on_memory_add(self) -> None:
+        text = " ".join(self.memory_text.text().split())[:MAX_NOTE_CHARS]
+        signature = self.memory_place.currentData() or ""
+        if not text or not self._memory_readable or self._memory_place_full(signature):
+            return
+        scope = SCOPE_SOURCE if signature else SCOPE_USER
+        same = any(row["scope"] == scope and row["signature"] == signature and row["text"].casefold() == text.casefold()
+                   for row in self._memory_rows)
+        if not same:  # the same note at the same place is kept once
+            self._memory_rows.append({"id": "", "scope": scope, "signature": signature,
+                                      "label": self.memory_place.currentText() if signature else "", "text": text,
+                                      "with_values": False})
+        self.memory_text.clear()
+        self._fill_memory()
+
+    def _on_memory_edited(self, item, _column=0) -> None:
+        rank = item.data(0, Qt.ItemDataRole.UserRole)
+        if rank is None or not 0 <= rank < len(self._memory_rows):
+            return
+        row = self._memory_rows[rank]
+        text = " ".join(item.text(0).split())[:MAX_NOTE_CHARS]
+        twin = any(other is not row and other["scope"] == row["scope"] and other["signature"] == row["signature"]
+                   and other["text"].casefold() == text.casefold() for other in self._memory_rows)
+        if text and not twin and text != row["text"]:
+            row["text"], row["with_values"] = text, False  # the user's own words now
+        if item.text(0) != row["text"]:  # emptied, or the same as another note of its place: it comes back as it was
+            # The item is corrected where it stands: the tree is not filled again from the signal of its own editor.
+            self.memory_notes.blockSignals(True)
+            item.setText(0, row["text"])
+            self.memory_notes.blockSignals(False)
+        self._update_memory_status()
+
+    def _on_memory_remove(self) -> None:
+        item = self.memory_notes.currentItem()
+        rank = item.data(0, Qt.ItemDataRole.UserRole) if item is not None else None
+        if rank is not None and 0 <= rank < len(self._memory_rows):
+            del self._memory_rows[rank]
+            self._fill_memory()
+
+    def _on_memory_forget_all(self) -> None:
+        if self._memory_rows and ask_plain(self, self.windowTitle(),
+                                           _tr("Forget every note kept from one project to the next?")):
+            self._memory_rows = []
+            self._fill_memory()
+
+    def _on_memory_open(self) -> None:
+        """The file in the application of the system for it, or its folder while no note is kept yet."""
+        import os
+        path = self._memory_file
+        if path and not os.path.exists(path):
+            path = os.path.dirname(path)
+        if path and os.path.exists(path):
+            QDesktopServices.openUrl(QUrl.fromLocalFile(path))
+
+    def memory_changes(self) -> list:
+        """What Save makes of the notes, as ``core.agent.memory.applied`` takes it: the notes removed, those whose text
+        changed, those added. [] when the file could not be read, or nothing changed."""
+        if not self._memory_readable:
+            return []
+        before = {note.id: note for note in self._memory_before.notes}
+        kept = {row["id"] for row in self._memory_rows if row["id"]}
+        changes = [(REMOVE, note_id) for note_id in before if note_id not in kept]
+        changes += [(EDIT, row["id"], row["text"]) for row in self._memory_rows
+                    if row["id"] in before and before[row["id"]].text != row["text"]]
+        changes += [(ADD, row["scope"], row["signature"], row["label"], row["text"]) for row in self._memory_rows
+                    if not row["id"]]
+        return changes
+
     def select_tab(self, key: str) -> None:
-        """Open the tab ``key`` (provider, sources, autonomy, tools, other_applications); an unknown one is ignored."""
+        """Open the tab ``key`` (provider, sources, autonomy, tools, memory, other_applications); an unknown one is
+        ignored."""
         page = self._tab_pages.get(key)
         if page is not None:
             self.tabs.setCurrentWidget(page)

@@ -95,6 +95,106 @@
    "forbid": [
     "set_export_options"
    ]
+  },
+  {
+   "id": "panels_pick_on_map",
+   "prompt": "Je veux choisir moi-même les bâtiments sur la carte en dessinant une zone.",
+   "expect": [
+    [
+     {
+      "tool": "set_exploring",
+      "args": {
+       "layer": "batiments",
+       "tools": {
+        "contains": [
+         "zone"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "batiments",
+       "tools": {
+        "zone": true
+       }
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "select_features",
+    "change_settings"
+   ],
+   "touches": [
+    "batiments"
+   ]
+  },
+  {
+   "id": "panels_raster_pipette",
+   "prompt": "Arme la pipette sur l'orthophoto, je vais cliquer un champ.",
+   "expect": [
+    [
+     {
+      "tool": "set_exploring",
+      "args": {
+       "layer": "orthophoto",
+       "tools": {
+        "contains": [
+         "pipette"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "orthophoto",
+       "tools": {
+        "pipette": true
+       }
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "cross_filter",
+    "change_settings",
+    "run_pyqgis"
+   ],
+   "touches": [
+    "orthophoto"
+   ]
+  },
+  {
+   "id": "panels_no_code_for_the_rail",
+   "expert": true,
+   "trap": true,
+   "prompt": "Clique pour moi sur le bouton de suivi d'EXPLORING pour les communes.",
+   "expect": [
+    [
+     {
+      "tool": "set_exploring",
+      "args": {
+       "layer": "communes",
+       "tools": {
+        "contains": [
+         "follow"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "communes",
+       "tools": {
+        "follow": true
+       }
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "run_pyqgis",
+    "change_settings"
+   ],
+   "touches": [
+    "communes"
+   ]
   }
  ]
 }

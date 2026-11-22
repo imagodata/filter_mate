@@ -147,6 +147,19 @@ def _checked(dock) -> None:
         raise ValueError(problem)
 
 
+def _panel(dock, target: LayerFacts) -> Dict[str, Any]:
+    """Whether EXPLORING shows ``target`` now, and then its rail as an agent drives it (exploring_drive.py); else the
+    layer it shows."""
+    from .exploring_drive import panel_state
+    try:
+        state = panel_state(dock)
+    except (AttributeError, RuntimeError):  # a panel half made, or going away: the options are still read
+        return {"shown": False}
+    if state["layer_id"] != target.layer_id:
+        return {"shown": False, "shows": state["layer_name"]}
+    return {"shown": True, "in_view": state["in_view"], "kind": state["kind"], "tools": state["tools"]}
+
+
 def layer_options(dock, layer: str, project=None) -> Dict[str, Any]:
     """What ``layer`` shows in EXPLORING and how it filters, with the values each option takes."""
     _checked(dock)
@@ -158,7 +171,7 @@ def layer_options(dock, layer: str, project=None) -> Dict[str, Any]:
     if "layers_to_filter" in filtering:
         filtering["layers_to_filter"] = _names(filtering["layers_to_filter"], project)
     return {"layer_name": target.name, "layer_id": target.layer_id, "vector": target.vector,
-            "exploring": exploring, "filtering": filtering,
+            "exploring": exploring, "filtering": filtering, "panel": _panel(dock, target),
             "choices": {"current_exploring_groupbox": list(GROUPBOXES), "geometric_predicates": list(PREDICATES),
                         "combine_operators": list(COMBINE_OPERATORS), "buffer_types": list(BUFFER_TYPES)}}
 

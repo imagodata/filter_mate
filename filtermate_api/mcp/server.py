@@ -831,8 +831,9 @@ def build_server(client: FilterMateClient) -> Any:
     async def layer_options(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
     ) -> Dict[str, Any]:
-        """What a layer shows in FilterMate's EXPLORING panel and its FILTERING options, with the values each takes.
-        Needs FilterMate's panel open."""
+        """What a layer shows in FilterMate's EXPLORING panel and its FILTERING options, with the values each takes;
+        panel: whether EXPLORING shows it now, and then the buttons of its rail (set_exploring). Needs FilterMate's
+        panel open."""
         return await call("GET", "/panels/layer?" + urlencode({"layer": layer}))
 
     @mcp.tool(annotations=_write("Set the options of layers in the panels", idempotent=True))
@@ -849,6 +850,28 @@ def build_server(client: FilterMateClient) -> Any:
         buffer_value (metres), buffer_type (Round, Flat, Square), buffer_segments, and the has_... box of each.
         Returns changed and shown_in_panel."""
         return await call("POST", "/panels/layer", _body(layers=layers, reason=reason))
+
+    @mcp.tool(annotations=_write("Drive the EXPLORING panel", idempotent=True))
+    async def set_exploring(
+        layer: Annotated[str, Field(max_length=1000, description=(
+            "Layer to show in EXPLORING, id or name; default: the one it shows"))] = "",
+        tools: Annotated[Optional[Dict[str, bool]], Field(description=(
+            "Buttons of the rail turned on (true) or off (false), by name"))] = None,
+        press: Annotated[Optional[List[str]], Field(max_length=4, description="Buttons pressed once")] = None,
+        show: Annotated[bool, Field(description=(
+            "true opens EXPLORING in front, in place of the chat when they share the panel: only when the user asks "
+            "to see it"))] = False,
+    ) -> Dict[str, Any]:
+        """Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, turn the buttons of its
+        rail on or off, press those that run once. vector: sync (its lists follow the selection of the map), follow
+        (the map goes to what is chosen), zone (a shape drawn selects), link; press zoom, identify. raster: preview
+        (hide the pixels outside the selection), pipette (pixels like the one clicked), detector (the object
+        clicked), similar (objects like it), link (the style follows the range); press zoom. point_cloud: preview,
+        identify (class pipette), object, value_pipette, zone; press zoom. One tool on the map at a time: it waits
+        for the user's click, so say what to click. A button the user hid, or greyed for the layer, is refused: say
+        so. Undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press, hidden, unavailable),
+        changed, pressed."""
+        return await call("POST", "/panels/exploring", _body(layer=layer, tools=tools, press=press, show=show))
 
     @mcp.tool(annotations=ToolAnnotations(title="Export options of the panel", readOnlyHint=True,
                                           openWorldHint=False))
