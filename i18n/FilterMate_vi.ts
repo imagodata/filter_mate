@@ -1278,6 +1278,21 @@ Các công cụ của nó chỉ thấy từ dự án của bạn những gì tá
         <translation>Câu trả lời của mô hình bị cắt: nó quá dài.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>Tác tử đã tạm dừng sau nhiều bước, trước khi yêu cầu hoàn tất. Những gì nó đã thay đổi vẫn giữ và có thể hoàn tác.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Tiếp tục phần còn lại của yêu cầu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Tiếp tục</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Mô hình đã từ chối yêu cầu này.</translation>

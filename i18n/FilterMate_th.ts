@@ -1278,6 +1278,21 @@ Its tools will see of your project only what the agent sends them, and what they
         <translation>คำตอบของโมเดลถูกตัด: ยาวเกินไป</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>เอเจนต์หยุดพักหลังจากทำหลายขั้นตอน ก่อนที่คำขอจะเสร็จ สิ่งที่เปลี่ยนแล้วยังคงอยู่และเลิกทำได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>ทำส่วนที่เหลือของคำขอต่อ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>ทำต่อ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>โมเดลปฏิเสธคำขอนี้</translation>

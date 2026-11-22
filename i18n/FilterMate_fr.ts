@@ -1283,6 +1283,21 @@ Acceptez-vous ?</translation>
         <translation>La réponse du modèle a été coupée : elle était trop longue.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>L'agent a fait une pause après de nombreuses étapes, avant la fin de la demande. Ce qu'il a changé reste et peut être annulé.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Continue avec ce qui reste de la demande.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Continuer</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Le modèle a refusé cette demande.</translation>

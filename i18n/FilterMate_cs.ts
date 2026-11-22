@@ -1278,6 +1278,21 @@ Jeho nástroje uvidí z vašeho projektu jen to, co jim agent pošle, a jejich o
         <translation>Odpověď modelu byla useknuta: byla příliš dlouhá.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>Agent se po mnoha krocích pozastavil, ještě před koncem požadavku. Co změnil, zůstává a lze to vrátit.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Pokračuj tím, co z požadavku zbývá.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Pokračovat</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Model tento požadavek odmítl.</translation>

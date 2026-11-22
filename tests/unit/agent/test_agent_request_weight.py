@@ -148,8 +148,8 @@ def test_conversation_runs_offline_and_cleanly(weight, monkeypatch):
 
 
 def test_a_request_cut_short_is_reported(weight, monkeypatch):
-    steps = tuple(("describe_layer", {"layer": "routes"}) for _ in range(20))  # past the 16 turns of a request
-    monkeypatch.setattr(weight, "CONVERSATION", (("Décris les routes vingt fois.", steps),))
+    steps = tuple(("describe_layer", {"layer": "routes"}) for _ in range(30))  # past the 24 turns of a request
+    monkeypatch.setattr(weight, "CONVERSATION", (("Décris les routes trente fois.", steps),))
     assert any("request 1" in error for error in weight.replay().errors)
 
 

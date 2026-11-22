@@ -1278,6 +1278,21 @@ Dess verktyg ser bara den del av ditt projekt som agenten skickar till dem, och 
         <translation>Modellens svar kapades: det var för långt.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>Agenten pausade efter många steg, innan begäran var klar. Det den ändrade finns kvar och kan ångras.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Fortsätt med det som återstår av begäran.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Fortsätt</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Modellen avböjde den här begäran.</translation>

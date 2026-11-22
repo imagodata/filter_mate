@@ -1278,6 +1278,21 @@ Sus herramientas solo verán de su proyecto lo que el agente les envíe, y lo qu
         <translation>La respuesta del modelo se cortó: era demasiado larga.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>El agente hizo una pausa tras muchos pasos, antes de terminar la petición. Lo que cambió se mantiene y se puede deshacer.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Continúa con lo que falta de la petición.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Continuar</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>El modelo rechazó esta petición.</translation>

@@ -1278,6 +1278,21 @@ Its tools will see of your project only what the agent sends them, and what they
         <translation>قُطع ردّ النموذج: كان طويلًا جدًا.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>توقّف الوكيل مؤقتًا بعد خطوات كثيرة، قبل نهاية الطلب. ما غيّره يبقى ويمكن التراجع عنه.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>تابع ما تبقّى من الطلب.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>متابعة</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>رفض النموذج هذا الطلب.</translation>

@@ -1278,6 +1278,21 @@ Instrumentele sale vor vedea din proiectul dumneavoastră doar ceea ce le trimit
         <translation>Răspunsul modelului a fost tăiat: era prea lung.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>Agentul a făcut o pauză după mulți pași, înainte de sfârșitul cererii. Ce a schimbat rămâne și poate fi anulat.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Continuă cu ce a mai rămas din cerere.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Continuă</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Modelul a refuzat această cerere.</translation>

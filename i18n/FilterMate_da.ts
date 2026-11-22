@@ -1278,6 +1278,21 @@ Dens værktøjer ser kun det af dit projekt, som agenten sender dem, og det, de 
         <translation>Modellens svar blev afkortet: det var for langt.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3681"/>
+        <source>The agent paused after many steps, before the end of the request. What it changed stays and can be undone.</source>
+        <translation>Agenten holdt pause efter mange trin, før anmodningen var færdig. Det, den ændrede, bliver og kan fortrydes.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3682"/>
+        <source>Go on with what is left of the request.</source>
+        <translation>Fortsæt med det, der mangler af anmodningen.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3683"/>
+        <source>Continue</source>
+        <translation>Fortsæt</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>The model declined this request.</source>
         <translation>Modellen afviste denne anmodning.</translation>
