@@ -145,8 +145,9 @@ def check_request(kind: str, tools: Any, press: Any, states: Mapping[str, str],
 # (length("nom") > 0), nor text that holds a sign ('a<5').
 _OPERATOR = r"(?:<=|>=|<(?![>=])|(?<![-=!<])>(?!=))"
 _NUMBER = r"[-+]?(?:\d|\.\d)"
-_THRESHOLD = re.compile(rf'"[^"]+"\s*{_OPERATOR}\s*{_NUMBER}|(?<![\w"\'.]){_NUMBER}[\d.]*\s*{_OPERATOR}\s*"[^"]+"'
-                        rf'|"[^"]+"\s+(?:NOT\s+)?BETWEEN\s+{_NUMBER}', re.IGNORECASE)
+_FIELD = r'(?:"[^"]+"|(?<![\w$."\'])[A-Za-z_]\w*(?!\s*\())'
+_THRESHOLD = re.compile(rf'{_FIELD}\s*{_OPERATOR}\s*{_NUMBER}|(?<![\w"\'.]){_NUMBER}[\d.]*\s*{_OPERATOR}\s*{_FIELD}'
+                        rf'|{_FIELD}\s+(?:NOT\s+)?BETWEEN\s+{_NUMBER}', re.IGNORECASE)
 TUNING_OFFER = ("A threshold the user may want to tune: end your answer with one line offering it, a slider over the "
                 "histogram of the field (load_skill dashboards) or EXPLORING set up for them (load_skill panels). "
                 "Change nothing until they say yes.")

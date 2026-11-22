@@ -152,3 +152,15 @@ def test_point_cloud_classes_or_ranges_are_checked():
                           ({"z": 1}, "not a value")):
         clean, problems = check_point_cloud_values(values, holds, attributes)
         assert clean == {} and any(words in problem for problem in problems), (values, problems)
+
+
+@pytest.mark.parametrize("expression", ['pop > 1000', 'hauteur >= 15 AND "usage" = \'x\'', '"pop"/2 > 10'])
+def test_a_field_without_quotes_is_a_threshold_too(expression):
+    from core.agent.exploring_drive import TUNING_OFFER, tuning_offer
+    assert tuning_offer(expression) == (TUNING_OFFER if not expression.startswith('"pop"/') else "")
+
+
+@pytest.mark.parametrize("expression", ['length("nom") > 0', 'round("x") > 3', '$area > 0', 'num_geometries($geometry) > 1'])
+def test_a_function_compared_is_no_threshold(expression):
+    from core.agent.exploring_drive import tuning_offer
+    assert tuning_offer(expression) == ""

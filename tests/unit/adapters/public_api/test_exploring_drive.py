@@ -168,25 +168,29 @@ def test_a_layer_the_panel_does_not_list_is_refused_before_anything(setup):
 def test_a_busy_panel_is_refused_before_anything(setup, monkeypatch):
     """Review 5: a change of layer the panel defers would come later, unnoted."""
     monkeypatch.setattr(drive, "_busy", lambda dock: "a filter runs")
-    with pytest.raises(ValueError, match="busy .a filter runs."):
+    with pytest.raises(ValueError, match="busy: a filter runs"):
         drive.set_exploring(setup.dock, layer="towns", project=setup.project)
     assert setup.dock.current_layer is setup.roads
 
 
-def test_a_protected_layer_shows_but_its_options_are_not_changed(setup, monkeypatch):
-    """Review 2: follow and link write options of the layer."""
+def test_a_protected_layer_shows_but_its_tools_are_not_driven(setup, monkeypatch):
+    """Reviews of #600 (2) and lot 2 (13): follow and link write options of the layer, a tool changes its group."""
     monkeypatch.setattr(drive, "_protected", lambda layer: True)
     with pytest.raises(ValueError, match="protected towns"):
         drive.set_exploring(setup.dock, layer="towns", tools={"follow": True}, project=setup.project)
-    answer = drive.set_exploring(setup.dock, layer="towns", tools={"zone": True}, project=setup.project)
-    assert answer["changed"] == ["layer", "zone"]
+    with pytest.raises(ValueError, match="protected towns"):  # a tool may change its group or preview too
+        drive.set_exploring(setup.dock, layer="towns", tools={"zone": True}, project=setup.project)
+    answer = drive.set_exploring(setup.dock, layer="towns", press=["zoom"], project=setup.project)
+    assert answer["changed"] == ["layer"] and answer["pressed"] == ["zoom"]
 
 
-def test_the_net_change_keeps_the_first_before_and_the_last_after():
-    entries = [{"kind": "layer", "was": "a", "now": "b"}, {"kind": "tool", "layer": "b", "key": "zone", "was": False,
-                                                            "now": True},
+def test_the_net_change_keeps_the_layers_in_order_and_one_change_per_button():
+    """What was done on a layer the turn went through stays between the changes of layer that framed it."""
+    zone = {"kind": "tool", "layer": "b", "key": "zone"}
+    entries = [{"kind": "layer", "was": "a", "now": "b"}, dict(zone, was=False, now=True),
+               dict(zone, was=True, now=False), dict(zone, was=False, now=True),
                {"kind": "layer", "was": "b", "now": "c"}]
-    assert drive.net(entries) == [entries[1], {"kind": "layer", "was": "a", "now": "c"}]
+    assert drive.net(entries) == [entries[0], dict(zone, was=False, now=True), entries[4]]
 
 
 def test_a_part_of_the_journal_is_read_between_two_marks():
@@ -195,3 +199,26 @@ def test_a_part_of_the_journal_is_read_between_two_marks():
     end = drive.journal_mark()
     drive._note({"kind": "layer", "was": "b", "now": "c"})  # another client, after the call
     assert drive.journal_since(start, end) == [{"kind": "layer", "was": "a", "now": "b"}]
+
+
+def test_what_was_done_on_a_layer_the_turn_went_through_is_undone_on_it(setup):
+    """Review of lot 2, 1: the turn shows towns, turns sync on there, then shows roads... the undo turns sync off on
+    towns, where it was turned on."""
+    parks = _Layer("parks_3", "parks")
+    setup.dock.PROJECT_LAYERS["parks_3"] = {}
+    layers = {"roads_1": setup.roads, "towns_2": setup.towns, "parks_3": parks}
+    setup.project.mapLayer = layers.get
+    facts = [SimpleNamespace(layer_id=key, name=layer.name(), vector=True) for key, layer in layers.items()]
+    drive._facts = lambda _project: facts
+    rails = {key: _Rail() for key in layers}
+    setup.dock._controller_integration.coverage_controller.rail = lambda: rails[setup.dock.current_layer.id()]
+    mark, _ = _mark_and_drive(setup, layer="towns", tools={"sync": True})
+    _mark_and_drive(setup, layer="parks")
+    entries = drive.journal_since(mark)
+    assert drive.replay(setup.dock, entries, undo=True, project=setup.project) == "done"
+    assert setup.dock.current_layer is setup.roads and rails["towns_2"].on["sync"] is False
+
+
+def test_tools_that_are_not_an_object_are_refused(setup):
+    with pytest.raises(ValueError, match="tools: an object"):
+        drive.set_exploring(setup.dock, tools=["follow"], project=setup.project)

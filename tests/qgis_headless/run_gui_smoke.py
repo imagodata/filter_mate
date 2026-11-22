@@ -7582,6 +7582,13 @@ def s_drive_raster_undo_panel():
     check('drive: the undo gives the range of before back and puts the preview down',
           state['minimum'] is None and not dock().pushButton_checkable_exploring_selecting.isChecked()
           and not DRIVE['undo_left'], f"{state['mode']} {state['minimum']} left={DRIVE['undo_left']}")
+    drive(raster={'minimum': DRIVE['low']})
+    slope = drive(raster={'quantity': 'slope_degrees'})
+    state = coverage()._raster_panel.state()
+    check('drive: another quantity without bounds forgets the bounds of the value (another unit)',
+          isinstance(slope, dict) and state['derivative'] == 'slope_degrees' and state['minimum'] is None
+          and state['maximum'] is None, f"{slope} {state['derivative']} {state['minimum']}")
+    drive(raster={'quantity': 'value'})
     if not has_point_clouds():
         report('SKIP', 'drive: point cloud values', f"QGIS {Qgis.QGIS_VERSION} < 3.26")
         return tools_pick('zones', coverage_page=False)

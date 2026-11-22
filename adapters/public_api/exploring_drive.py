@@ -22,16 +22,12 @@ from .panel_options import _checked, _facts, _found, _project, dock_problem
 NOT_IN_VIEW = ("EXPLORING is folded behind another section of the panel: the user opens it with its chip (a button "
                "in the thread does it too), or puts it in its own panel with a right-click on that chip.")
 DOCK_CLOSED = "The FilterMate panel is closed: the user opens it (a button in the thread does it too)."
-BUSY = "The panel is busy ({}): nothing changed; try again once it is idle."
+BUSY = "Nothing changed, the panel is busy: {}"
 NOT_LISTED = ("EXPLORING does not list {}: a table without geometry, a layer FilterMate has not read yet, or a raster "
               "or point cloud while FilterMate's option for them is off (describe_settings: raster, point cloud).")
 NO_RAIL = "The rail of EXPLORING is not ready for {} yet: try again."
-PROTECTED = ("Not done: the user protected {} from the agent. EXPLORING may show it, but follow, link, preview and the "
-             "values of its panel change the layer: tell the user; do not try another tool to change it.")
-# The buttons that change the layer itself, not only how it is looked at: its options (follow, link), its filter (the
-# preview of a point cloud is a subset), its rendering (the preview and the style link of a raster).
-WRITES = {VECTOR: ("follow", "link"), RASTER: ("preview", "link"), POINT_CLOUD: ("preview",)}
-
+PROTECTED = ("Not done: the user protected {} from the agent. EXPLORING may show it, but its tools and the values of "
+             "its panel may change the layer: tell the user; do not try another tool to change it.")
 # What set_exploring changed, in order: {"kind": "layer", "was": id, "now": id} and
 # {"kind": "tool", "layer": id, "key": name, "was": bool, "now": bool}. Never emptied by a reader: a turn and each of
 # its steps keep the place they began at (``journal_mark``).
@@ -69,26 +65,28 @@ def _key(entry: Dict[str, Any]) -> Tuple[Any, ...]:
 
 
 def net(entries: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """One change per thing, from what it was before the first change to what the last one left: a button turned on
-    then off again by the turn is no change of the turn, and an undo must not click it (the user may have turned it on
-    since). In the order of the last change of each thing; what ends as it began is left out."""
+    """What an undo or a redo walks: one change per button and per panel (from what it was before the first change to
+    what the last one left), at the place of its last change; a button turned on then off again by the turn is no
+    change of the turn, and an undo must not click it (the user may have turned it on since). The changes of layer stay
+    as they were, in order: what was done on a layer the turn went through is undone on that layer. Only a round trip
+    on which nothing was left changed (the turn showed B, then A again) is dropped: the user may show B since."""
+    out: List[Dict[str, Any]] = []
     first: Dict[Tuple[Any, ...], Any] = {}
-    last: Dict[Tuple[Any, ...], Dict[str, Any]] = {}
-    order: List[Tuple[Any, ...]] = []
     for entry in entries:
         if not isinstance(entry, dict):
             continue
         key = _key(entry)
+        if entry.get("kind") == "layer":
+            out.append(dict(entry))
+            continue
         first.setdefault(key, entry.get("was"))
-        last[key] = entry
-        if key in order:
-            order.remove(key)
-        order.append(key)
-    out = []
-    for key in order:
-        entry = dict(last[key], was=first[key])
-        if entry.get("was") != entry.get("now"):
-            out.append(entry)
+        out = [item for item in out if _key(item) != key]
+        out.append(dict(entry, was=first[key]))
+    out = [entry for entry in out if entry.get("kind") == "layer" or entry.get("was") != entry.get("now")]
+    layers = [entry for entry in out if entry.get("kind") == "layer"]
+    if layers and layers[0].get("was") == layers[-1].get("now") and all(
+            entry.get("layer") == layers[0].get("was") for entry in out if entry.get("kind") != "layer"):
+        out = [entry for entry in out if entry.get("kind") != "layer"]
     return out
 
 
@@ -143,8 +141,9 @@ def _click(dock, key: str) -> bool:
 
 
 def _dock_shown(dock) -> bool:
+    """Whether the panel is open (it may be behind the tab of another panel of QGIS, which a raise brings forward)."""
     try:
-        return bool(dock.isVisible())
+        return not bool(dock.isHidden())
     except (AttributeError, RuntimeError):
         return True  # a stand-in of the tests: nothing to say
 
@@ -165,12 +164,12 @@ def in_view(dock) -> bool:
 def bring_in_view(dock) -> bool:
     """EXPLORING open and in front, as a click on its chip (the panel opened first when it is closed); True when the
     user sees it then."""
-    if not _dock_shown(dock):
-        try:
+    try:
+        if not _dock_shown(dock):
             dock.show()
-            dock.raise_()
-        except (AttributeError, RuntimeError):
-            return False
+        dock.raise_()  # in front of the tabs it shares with other panels
+    except (AttributeError, RuntimeError):
+        return False
     sections = getattr(dock, "_fm_sections", None)
     bring = getattr(sections, "bring_in_view", None)
     if callable(bring):
@@ -244,8 +243,9 @@ def _assumed(kind: str, hidden: Sequence[str]) -> Dict[str, str]:
 # --- The values of the panel of a raster and of a point cloud -----------------------------------------------------
 # The keys of the state of a panel that make what it selects (the rest is how it shows): compared before an undo puts
 # the state of before back, so that a change of the user since is left as it is.
-RASTER_STATE_KEYS = ("mode", "band", "derivative", "minimum", "maximum", "custom_quantity", "all_bands")
-POINT_CLOUD_STATE_KEYS = ("classes_enabled", "classes", "ranges_enabled", "conditions", "expression_enabled")
+RASTER_STATE_KEYS = ("mode", "pipette_bands", "derivative", "minimum", "maximum", "custom_quantity", "all_bands")
+POINT_CLOUD_STATE_KEYS = ("classes_enabled", "classes", "ranges_enabled", "conditions", "expression_enabled", "objects",
+                          "zone_wkt")
 
 
 def _coverage(dock) -> Any:
@@ -256,7 +256,7 @@ def _coverage(dock) -> Any:
 def _panel_of(dock, kind: str) -> Any:
     """The EXPLORING panel of a raster or a point cloud, or None."""
     coverage = _coverage(dock)
-    if coverage is None:
+    if coverage is None or kind not in (RASTER, POINT_CLOUD):
         return None
     return getattr(coverage, "_raster_panel" if kind == RASTER else "_pc_panel", None)
 
@@ -274,59 +274,75 @@ def _part(state: Dict[str, Any], kind: str) -> Dict[str, Any]:
 
 
 def _raster_facts(panel) -> Tuple[List[int], bool]:
-    summary = getattr(panel, "_summary", None)
-    bands = [int(info.number) for info in (getattr(summary, "bands", None) or ())]
-    return bands, bool(getattr(panel, "_rendered_only", False))
+    """The bands the panel lets the user choose (not an alpha band), and whether the raster gives colours only."""
+    return list(panel._selectable_bands()), bool(getattr(panel, "_rendered_only", False))
 
 
 def _point_cloud_facts(panel) -> Tuple[List[int], List[str]]:
     """The classes the panel lets the user tick (those of the cloud, or every ASPRS code when it does not know them),
     and the attributes of its conditions."""
     from qgis.PyQt.QtCore import Qt
-    classes = sorted({int(item.data(Qt.ItemDataRole.UserRole)) for item in panel._class_items()})
+    # A cloud without a Classification attribute has no CLASSES group: no class to set.
+    group = getattr(panel, "_classes_group", None)
+    classes = [] if group is not None and group.isHidden() else sorted(
+        {int(item.data(Qt.ItemDataRole.UserRole)) for item in panel._class_items()})
     attributes = [name for name, _label in (getattr(panel, "_condition_choices", None) or ())]
     return classes, attributes
 
 
-def _restored(dock, kind: str, panel, state: Dict[str, Any], band_was: Any = None) -> None:
-    """``state`` in the panel, then what the panel says when the user changes it: the histogram of a band chosen, the
-    group made active (the pipette follows it, as a click does), the selection (the preview follows)."""
-    mode_was = panel.state().get("mode") if kind == RASTER else None
-    panel.restore_state(state)
+def _restored(dock, kind: str, panel, wanted: Dict[str, Any]) -> None:
+    """The keys of the selection of ``wanted`` (``*_STATE_KEYS``) in the panel, the rest as it is now (what the user
+    set since: roles, tolerance, height...), then what the panel says when the user changes them: the bands chosen
+    (the histogram and the map follow), the quantity (its histogram), the group made active (its tool follows, as a
+    click does), the selection (the preview follows)."""
+    before = _plain(panel.state())
+    keys = RASTER_STATE_KEYS if kind == RASTER else POINT_CLOUD_STATE_KEYS
+    state = dict(before, **{key: wanted[key] for key in keys if key in wanted})
     if kind == RASTER:
-        band = panel.current_band()
-        if band != band_was:
-            panel.bandChanged.emit(band)
-        mode = panel.state().get("mode")
-        if mode != mode_was:
-            panel.modeChosen.emit(mode)
+        if list(state.get("pipette_bands") or []) != list(before.get("pipette_bands") or []):
+            low, high, derivative = state.get("minimum"), state.get("maximum"), state.get("derivative")
+            panel._set_selected_bands(list(state.get("pipette_bands") or []))  # the path of a band ticked
+            state = dict(_plain(panel.state()), derivative=derivative, minimum=low, maximum=high,
+                         mode=state.get("mode"), custom_quantity=state.get("custom_quantity"))
+        panel.restore_state(state)
+        after = _plain(panel.state())
+        if after.get("derivative") != before.get("derivative") or after.get("custom_quantity") != before.get(
+                "custom_quantity"):
+            panel.bandChanged.emit(panel.current_band())  # the histogram of the quantity now in use
+        if after.get("mode") != before.get("mode"):
+            panel.modeChosen.emit(after.get("mode"))
         panel.selectionChanged.emit()
     else:
+        panel.restore_state(state)
+        after = _plain(panel.state())
+        for group, flag in (("classes", "classes_enabled"), ("ranges", "ranges_enabled")):
+            if after.get(flag) and not before.get(flag):
+                panel.groupChosen.emit(group)  # its tool follows, as a click on the group does
         panel.criteriaChanged.emit()
 
 
-def _apply_raster(dock, panel, values: Dict[str, Any]) -> Dict[str, Any]:
-    before = panel.state()
-    state = dict(before, mode="range", custom_quantity=False, all_bands=False)
+def _apply_raster(dock, panel, values: Dict[str, Any]) -> None:
+    """The range of the raster set as the user sets it: RANGE active, on the band and the quantity asked; a band or a
+    quantity changed without bounds forgets the old ones (they were in another unit), as the panel does."""
+    state = _plain(panel.state())
     band = values.get("band", panel.current_band())
-    state.update(band=band, pipette_bands=[band])
-    if "quantity" in values:
-        state["derivative"] = values["quantity"]
-    for key in ("minimum", "maximum"):
-        if key in values:
-            state[key] = values[key]
-    _restored(dock, RASTER, panel, state, panel.current_band())
-    return before
+    quantity = values.get("quantity", state.get("derivative"))
+    wanted = dict(mode="range", custom_quantity=False, all_bands=False, pipette_bands=[band], derivative=quantity,
+                  minimum=state.get("minimum"), maximum=state.get("maximum"))
+    if band != panel.current_band() or quantity != state.get("derivative") or state.get("custom_quantity"):
+        wanted.update(minimum=None, maximum=None)
+    wanted.update({key: values[key] for key in ("minimum", "maximum") if key in values})
+    _restored(dock, RASTER, panel, wanted)
 
 
-def _apply_point_cloud(dock, panel, values: Dict[str, Any]) -> Dict[str, Any]:
+def _apply_point_cloud(dock, panel, values: Dict[str, Any]) -> None:
     from ...core.domain.point_cloud_attributes import (
         JOIN_AND, OP_BETWEEN, OP_GREATER_OR_EQUAL, OP_LESS_OR_EQUAL,
     )
-    before = panel.state()
-    state = dict(before, expression_enabled=False)
     if "classes" in values:
-        state.update(classes_enabled=True, classes=list(values["classes"]), ranges_enabled=False)
+        # The objects detected in CLASSES stand for their classes: the panel drops them when a class is ticked.
+        wanted = dict(classes_enabled=True, classes=list(values["classes"]), ranges_enabled=False,
+                      expression_enabled=False, objects={})
     else:
         conditions = []
         for item in values["ranges"]:
@@ -338,9 +354,10 @@ def _apply_point_cloud(dock, panel, values: Dict[str, Any]) -> Dict[str, Any]:
             else:
                 condition = {"op": OP_LESS_OR_EQUAL, "low": high}
             conditions.append(dict(condition, attribute=item["attribute"], join=JOIN_AND))
-        state.update(ranges_enabled=True, conditions=conditions, classes_enabled=False)
-    _restored(dock, POINT_CLOUD, panel, state)
-    return before
+        # The outline of a zone drawn went with its X / Y conditions, which these replace.
+        wanted = dict(ranges_enabled=True, conditions=conditions, classes_enabled=False, expression_enabled=False,
+                      zone_wkt="")
+    _restored(dock, POINT_CLOUD, panel, wanted)
 
 
 def _values_said(panel, kind: str) -> Dict[str, Any]:
@@ -392,8 +409,8 @@ def set_exploring(dock, layer: str = "", tools: Optional[Dict[str, bool]] = None
         problems.append(NOT_LISTED.format(target.name()))
     elif switching and _busy(dock):
         problems.append(BUSY.format(_busy(dock)))
-    if (raster or point_cloud or any(
-            (tools or {}).get(name) is not None for name in WRITES.get(kind, ()))) and _protected(target):
+    # On a protected layer EXPLORING only shows: a tool or a value may change its group, its preview or its style.
+    if (raster or point_cloud or (isinstance(tools, dict) and tools)) and _protected(target):
         problems.append(PROTECTED.format(target.name()))
     if problems:
         raise ValueError("; ".join(problems))
@@ -423,38 +440,33 @@ def set_exploring(dock, layer: str = "", tools: Optional[Dict[str, bool]] = None
     if problems:
         prefix = f"{target.name()} is shown in EXPLORING; not done: " if changed else ""
         raise ValueError(prefix + "; ".join(problems))
+    panel = panel if panel is not None else _panel_of(dock, kind)
+    part_before = _plain(panel.state()) if panel is not None and kind in (RASTER, POINT_CLOUD) else None
     if values:
         tools_before = {name: state for name, (state, _why) in states.items()}
-        before = _apply_raster(dock, panel, values) if kind == RASTER else _apply_point_cloud(dock, panel, values)
-        # A group made active takes its tool along (the RANGE group puts the pipette down): noted BEFORE the values,
-        # so that an undo (read from the end) gives the group back first, which arms its tool again by itself.
-        for name, state in ((_states(dock, kind) or {}).items()):
-            if tools_before.get(name) in (ON, OFF) and state[0] in (ON, OFF) and state[0] != tools_before[name]:
-                _note({"kind": "tool", "layer": target.id(), "key": name, "was": tools_before[name] == ON,
-                       "now": state[0] == ON})
-        _note({"kind": "values", "layer": target.id(), "type": kind, "was": _plain(before),
-               "now": _plain(panel.state())})
+        if kind == RASTER:
+            _apply_raster(dock, panel, values)
+        else:
+            _apply_point_cloud(dock, panel, values)
+        _note_moved(dock, kind, target, tools_before)
         changed.append("values")
         states = _states(dock, kind) or states
         plan, problems = check_request(kind, tools, press, {name: state for name, (state, _why) in states.items()},
                                        {name: why for name, (_state, why) in states.items()})
         if problems:
+            _note_values(kind, target, panel, part_before)
             raise ValueError(f"The values are set in EXPLORING; not done: {'; '.join(problems)}")
     refused: List[str] = []
     for name, on in plan["tools"]:
         before = {key: state for key, (state, _why) in (_states(dock, kind) or {}).items()}
         _click(dock, name)
-        after = {key: state for key, (state, _why) in (_states(dock, kind) or {}).items()}
-        # Every button that moved, the one asked and one the rail put down for it (one tool on the map at a time).
-        for key, state in after.items():
-            if before.get(key) in (ON, OFF) and state in (ON, OFF) and state != before[key]:
-                _note({"kind": "tool", "layer": target.id(), "key": key, "was": before[key] == ON,
-                       "now": state == ON})
-                if key == name or key not in changed:
-                    changed.append(key)
-        if after.get(name) != (ON if on else OFF):
+        moved = _note_moved(dock, kind, target, before, clicked=name)
+        changed += [key for key in moved if key not in changed]
+        if (_states(dock, kind) or {}).get(name, ("", ""))[0] != (ON if on else OFF):
             refused.append(name)
     pressed = [name for name in plan["press"] if _click(dock, name)]
+    if part_before is not None:
+        _note_values(kind, target, panel, part_before)  # what the values and the clicks left in the panel, once
     if show:
         bring_in_view(dock)
     answer = dict(panel_state(dock), changed=changed, pressed=pressed)
@@ -465,6 +477,26 @@ def set_exploring(dock, layer: str = "", tools: Optional[Dict[str, bool]] = None
     if not answer["in_view"]:
         answer["note"] = NOT_IN_VIEW if _dock_shown(dock) else DOCK_CLOSED
     return answer
+
+
+def _note_moved(dock, kind: str, target, before: Dict[str, str], clicked: str = "") -> List[str]:
+    """Note every button of the rail that went on or off since ``before`` (the one clicked, one the rail put down for
+    it, one the panel greyed because its group left): an undo puts each back. The one clicked is noted last, so that
+    an undo (read from the end) puts it down first, which gives the others their use back."""
+    after = {key: state for key, (state, _why) in (_states(dock, kind) or {}).items()}
+    moved = [key for key, state in after.items() if before.get(key) in (ON, OFF) and (state == ON) != (before[key] == ON)]
+    moved.sort(key=lambda key: key == clicked)
+    for key in moved:
+        _note({"kind": "tool", "layer": target.id(), "key": key, "was": before[key] == ON, "now": after[key] == ON})
+    return moved
+
+
+def _note_values(kind: str, target, panel, before: Dict[str, Any]) -> None:
+    """Note what the call left of the selection of the panel of a raster or a point cloud, when it changed (by the
+    values asked, or by a tool that made another group active)."""
+    after = _plain(panel.state())
+    if _part(after, kind) != _part(before, kind):
+        _note({"kind": "values", "layer": target.id(), "type": kind, "was": before, "now": after})
 
 
 def _protected(layer) -> bool:
@@ -518,7 +550,7 @@ def replay(dock, entries: Sequence[Dict[str, Any]], undo: bool, project=None) ->
             if now == _part(wanted, kind):
                 continue
             if now == _part(as_left, kind):
-                _restored(dock, kind, panel, wanted, panel.current_band() if kind == RASTER else None)
+                _restored(dock, kind, panel, wanted)
                 done = True
             else:
                 left = True

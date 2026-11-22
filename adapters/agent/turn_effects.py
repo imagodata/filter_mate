@@ -570,10 +570,16 @@ class EffectsRecorder:
                 # A layer kept in memory: its definition would bring it back empty.
                 definition = "" if layer.providerType() == "memory" else _definition(layer)
                 effects.append(("added", layer_id, definition, _place(project, layer_id), layer.name()))
+        exploring: List[Dict[str, Any]] = []
+        if self._exploring_windows:
+            from ..public_api.exploring_drive import journal_since, net
+            exploring = net([entry for start, end in self._exploring_windows for entry in journal_since(start, end)])
+        # Only a layer whose sync the turn turned on or off: the undo of sync empties its selection.
+        synced = {entry.get("layer") for entry in exploring if entry.get("kind") == "tool" and entry.get("key") == "sync"}
         for layer_id, before in self._selection.items():
             layer = project.mapLayer(layer_id)
             after = _selection(layer) if layer is not None else None
-            if after is not None and (after != before or layer_id in self._kept_selection):
+            if after is not None and (after != before or (layer_id in self._kept_selection and layer_id in synced)):
                 effects.append(("selection", layer_id, before, after))
         for layer_id, before in self._visibility.items():
             after = _visible(project, layer_id)
@@ -684,11 +690,8 @@ class EffectsRecorder:
                 was, made = state_change(json.loads(self._export_panel), {"EXPORTING": state})
                 if made["values"] or made["absent"]:
                     effects.append(("export_options", "", _panel_json(was), _panel_json(made)))
-        if self._exploring_windows:
-            from ..public_api.exploring_drive import journal_since, net
-            changes = net([entry for start, end in self._exploring_windows for entry in journal_since(start, end)])
-            if changes:
-                effects.append(("exploring", "", _panel_json(changes), ""))
+        if exploring:
+            effects.append(("exploring", "", _panel_json(exploring), ""))
         self.__init__(self._record_settings)
         return tuple(effects)
 
