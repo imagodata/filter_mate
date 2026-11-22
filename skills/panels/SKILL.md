@@ -1,7 +1,7 @@
 ---
 name: panels
 title: Set up the panels of FilterMate
-description: FilterMate's panels: the fields EXPLORING shows, its filtering options, the export options
+description: FilterMate's panels: EXPLORING fields, filtering and export options
 metadata:
   version: 4
   plugin_min: 5.1.0

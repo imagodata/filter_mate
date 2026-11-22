@@ -1,6 +1,6 @@
 ---
 name: filtermate-analysis
-description: "Analyse with Processing, fields and joins through the MCP server of the FilterMate QGIS plugin: new layers with the Processing algorithms (buffer, dissolve, clip, join by location, heatmap...), computed fields, joined tables. Use when the user asks for it in QGIS with FilterMate."
+description: "Analyse with Processing, fields and joins through the MCP server of the FilterMate QGIS plugin: new layers with Processing (buffer, clip, join by location...), computed fields, joined tables. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/analysis/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->

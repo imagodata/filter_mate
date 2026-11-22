@@ -1775,7 +1775,7 @@
   {
    "name": "export_layout",
    "title": "Export a print layout",
-   "description": "Write a print layout of the project as a PDF or PNG file in a sub-folder of the export root. A file of the same name there is kept: the new one is named <name>_2, <name>_3... The chat of FilterMate asks the user first. Returns path (relative to the sub-folder) and bytes.",
+   "description": "Write a print layout of the project as PDF, PNG, JPG, SVG or TIFF in a sub-folder of the export root. A file of the same name there is kept: the new one is named <name>_2, <name>_3...; an image or SVG has one file per page. With atlas, a new folder <name>_atlas holds its pages (200 at most). The chat of FilterMate asks the user first. Returns path (relative to the sub-folder), bytes, and files and pages when several.",
    "read_only": false,
    "destructive": true,
    "idempotent": false,
@@ -1793,7 +1793,10 @@
       "description": "File format",
       "enum": [
        "pdf",
-       "png"
+       "png",
+       "jpg",
+       "svg",
+       "tif"
       ],
       "type": "string"
      },
@@ -1810,10 +1813,146 @@
       "maxLength": 200,
       "minLength": 1,
       "type": "string"
+     },
+     "georeference": {
+      "default": true,
+      "description": "PDF: georeferenced; image: a world file beside it",
+      "type": "boolean"
+     },
+     "atlas": {
+      "default": false,
+      "description": "One page per feature of its atlas (set_atlas)",
+      "type": "boolean"
+     },
+     "single_file": {
+      "default": true,
+      "description": "Atlas in PDF: one file; false: one per feature",
+      "type": "boolean"
      }
     },
     "required": [
      "name"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "describe_layout",
+   "title": "Read a print layout",
+   "description": "What a print layout holds: pages [{page, width_mm, height_mm}], items [{ref, type, page, x_mm, y_mm, width_mm, height_mm, and scale and layers of a map, text of a text}] and its atlas. Without a name, layouts and templates (the .qpt of the profile).",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "name": {
+      "default": "",
+      "description": "A layout; empty: list the layouts and templates",
+      "maxLength": 100,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
+   "name": "set_atlas",
+   "title": "Set the atlas of a layout",
+   "description": "Turn the atlas of a print layout on: one page per feature of a vector layer as filtered now, its map following each feature; export_layout with atlas writes them. Returns pages, maps and map_mode. In the chat of FilterMate, undoing the turn puts the layout back as it was.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layout": {
+      "description": "A layout of the project",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "coverage_layer": {
+      "default": "",
+      "description": "Vector layer: one page per feature, as filtered now",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "enabled": {
+      "default": true,
+      "description": "false turns the atlas off",
+      "type": "boolean"
+     },
+     "filter": {
+      "default": "",
+      "description": "QGIS expression: the features kept",
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "page_name": {
+      "default": "",
+      "description": "Expression naming each page",
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "sort_by": {
+      "default": "",
+      "description": "Expression ordering the pages",
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "descending": {
+      "default": false,
+      "type": "boolean"
+     },
+     "hide_coverage": {
+      "default": false,
+      "description": "Hide the coverage layer on the maps",
+      "type": "boolean"
+     },
+     "map_mode": {
+      "default": "auto",
+      "description": "auto: each feature plus margin; fixed: the scale of the map; predefined: the scales of the project",
+      "enum": [
+       "auto",
+       "fixed",
+       "predefined"
+      ],
+      "type": "string"
+     },
+     "margin": {
+      "default": 10,
+      "description": "%, auto",
+      "maximum": 500,
+      "minimum": 0,
+      "type": "number"
+     },
+     "file_name": {
+      "default": "",
+      "description": "Expression naming the file of each page",
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "maps": {
+      "anyOf": [
+       {
+        "items": {
+         "maxLength": 100,
+         "type": "string"
+        },
+        "maxItems": 20,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "refs of the maps that follow; default: the largest"
+     }
+    },
+    "required": [
+     "layout"
     ],
     "type": "object"
    }

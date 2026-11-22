@@ -540,8 +540,16 @@ class QGISFilterMateAccessor:
     def create_layout(self, name: str, **options: Any) -> LayoutResult:
         return LayoutResult(**self._layouts("create_layout", name, **options))
 
-    def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150) -> LayoutExport:
-        return LayoutExport(**self._layouts("export_layout", name, folder, file_format=file_format, dpi=dpi))
+    def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150,
+                      georeference: bool = True, atlas: bool = False, single_file: bool = True) -> LayoutExport:
+        return LayoutExport(**self._layouts("export_layout", name, folder, file_format=file_format, dpi=dpi,
+                                            georeference=georeference, atlas=atlas, single_file=single_file))
+
+    def describe_layout(self, name: str = "") -> Dict[str, Any]:
+        return self._layouts("describe_layout", name)
+
+    def set_atlas(self, layout: str, **options: Any) -> Dict[str, Any]:
+        return self._layouts("set_atlas", layout, **options)
 
     @staticmethod
     def _edit(name: str, layer: str, **kwargs):

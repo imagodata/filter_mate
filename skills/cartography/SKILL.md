@@ -1,9 +1,9 @@
 ---
 name: cartography
 title: Make the map look right
-description: styles, labels, print layouts, the map CRS, the layer tree, map themes, bookmarks
+description: styles, labels, a simple print layout, the map CRS, the layer tree, map themes, bookmarks
 metadata:
-  version: 3
+  version: 4
   plugin_min: 5.1.0
   audience: chat, mcp
   tools: set_layer_style, set_labels, describe_layer, field_values, layer_statistics, create_layout, export_layout, set_project_crs, group_layers, rename_layer, map_theme, bookmark, zoom_to, map_context, view_map, add_basemap, duplicate_layer
@@ -77,10 +77,10 @@ settings of the agent, Sources tab.
 ## Layouts
 
 1. Set the map first: filters, style, zoom_to.
-2. create_layout makes a print layout of the map (title, legend, scale bar, north arrow) added to the project, in
-   the page size asked (A4 by default).
-3. export_layout writes one as PDF or PNG in the export folder, only when the user asks; they confirm the file.
-   map_context lists the layouts of the project.
+2. create_layout makes a print layout of the map (title, legend, scale bar, north arrow), A4 by default.
+3. export_layout writes it (PDF, PNG, JPG, SVG or TIFF) only when the user asks; they confirm the file.
+   map_context lists the layouts. In the chat, an atlas, a chart on the page or an existing layout to read: load
+   the skill layouts.
 
 ## The CRS of the map
 

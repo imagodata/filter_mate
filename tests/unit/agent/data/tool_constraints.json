@@ -1072,6 +1072,16 @@
   ],
   "type": "object"
  },
+ "describe_layout": {
+  "properties": {
+   "name": {
+    "default": "",
+    "maxLength": 100,
+    "type": "string"
+   }
+  },
+  "type": "object"
+ },
  "describe_settings": {
   "additionalProperties": false,
   "properties": {
@@ -1223,6 +1233,10 @@
  },
  "export_layout": {
   "properties": {
+   "atlas": {
+    "default": false,
+    "type": "boolean"
+   },
    "dpi": {
     "default": 150,
     "maximum": 600,
@@ -1233,14 +1247,25 @@
     "default": "pdf",
     "enum": [
      "pdf",
-     "png"
+     "png",
+     "jpg",
+     "svg",
+     "tif"
     ],
     "type": "string"
+   },
+   "georeference": {
+    "default": true,
+    "type": "boolean"
    },
    "name": {
     "maxLength": 100,
     "minLength": 1,
     "type": "string"
+   },
+   "single_file": {
+    "default": true,
+    "type": "boolean"
    },
    "subfolder": {
     "default": "layouts",
@@ -1729,6 +1754,7 @@
      "configuration",
      "dashboards",
      "editing",
+     "layouts",
      "open-data",
      "panels",
      "raster-objects",
@@ -2302,6 +2328,87 @@
   },
   "required": [
    "layer"
+  ],
+  "type": "object"
+ },
+ "set_atlas": {
+  "properties": {
+   "coverage_layer": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "descending": {
+    "default": false,
+    "type": "boolean"
+   },
+   "enabled": {
+    "default": true,
+    "type": "boolean"
+   },
+   "file_name": {
+    "default": "",
+    "maxLength": 2000,
+    "type": "string"
+   },
+   "filter": {
+    "default": "",
+    "maxLength": 2000,
+    "type": "string"
+   },
+   "hide_coverage": {
+    "default": false,
+    "type": "boolean"
+   },
+   "layout": {
+    "maxLength": 100,
+    "minLength": 1,
+    "type": "string"
+   },
+   "map_mode": {
+    "default": "auto",
+    "enum": [
+     "auto",
+     "fixed",
+     "predefined"
+    ],
+    "type": "string"
+   },
+   "maps": {
+    "anyOf": [
+     {
+      "items": {
+       "maxLength": 100,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "type": "array"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "margin": {
+    "default": 10,
+    "maximum": 500,
+    "minimum": 0,
+    "type": "number"
+   },
+   "page_name": {
+    "default": "",
+    "maxLength": 2000,
+    "type": "string"
+   },
+   "sort_by": {
+    "default": "",
+    "maxLength": 2000,
+    "type": "string"
+   }
+  },
+  "required": [
+   "layout"
   ],
   "type": "object"
  },

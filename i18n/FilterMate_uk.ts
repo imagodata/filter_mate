@@ -72,6 +72,16 @@ Run it?</source>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
+        <source>Reading the layout {}</source>
+        <translation>Читання макета {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2806"/>
+        <source>Atlas of {}</source>
+        <translation>Атлас макета {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Діаграма: {}</translation>
     </message>

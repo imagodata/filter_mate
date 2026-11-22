@@ -610,7 +610,7 @@ def check_layouts(project, work):
           os.path.dirname(pdf["path"]) == folder and pdf["path"].endswith(".pdf") and
           open(pdf["path"], "rb").read(4) == b"%PDF" and open(png["path"], "rb").read(4) == b"\x89PNG", (pdf, png))
     for call, label in ((lambda: layouts.export_layout("nope", folder), "an unknown layout"),
-                        (lambda: layouts.export_layout("Sans décor", folder, "svg"), "a format"),
+                        (lambda: layouts.export_layout("Sans décor", folder, "bmp"), "a format"),
                         (lambda: layouts.export_layout("Sans décor", folder, "png", dpi=5000), "a resolution")):
         check(f"layout: export refuses {label}", refused(call))
     effects = recorder.finish()

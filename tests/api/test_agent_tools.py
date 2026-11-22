@@ -197,6 +197,24 @@ class TestHandlers:
         assert run(accessor, root, "create_layout", name="Carte", page="B0")[0] is True
         assert run(accessor, root, "create_layout", name="Carte", extent=[1, 2, 3])[0] is True
 
+    def test_layout_formats_atlas_and_reading(self, api):
+        """2026-11-22: jpg, svg and tif besides pdf and png; an atlas of a layer; what a layout holds."""
+        accessor, root = api
+        error, answer = run(accessor, root, "export_layout", name="Carte", format="jpg", dpi=300)
+        assert not error and answer["path"] == "Carte.jpg" and "files" not in answer and "atlas" not in answer
+        assert run(accessor, root, "export_layout", name="Carte", format="bmp")[0] is True
+        error, answer = run(accessor, root, "export_layout", name="Carte", atlas=True, single_file=False)
+        assert not error and answer["atlas"] and answer["files"] == 3 and answer["path"] == "Carte_atlas"
+        error, answer = run(accessor, root, "describe_layout", name="Carte")
+        assert not error and answer["items"][0]["ref"] == "map1"
+        assert run(accessor, root, "describe_layout")[1] == {"layouts": [], "templates": []}
+        error, answer = run(accessor, root, "set_atlas", layout="Carte", coverage_layer="communes",
+                            page_name='"nom"', map_mode="fixed")
+        assert not error and answer["pages"] == 3 and answer["map_mode"] == "fixed"
+        assert run(accessor, root, "set_atlas", layout="Carte", coverage_layer="nope")[0] is True
+        assert run(accessor, root, "set_atlas", layout="Carte", map_mode="zoom")[0] is True
+        assert run(accessor, root, "set_atlas", layout="Carte", enabled=False)[1] == {"layout": "Carte", "atlas": False}
+
     def test_edit_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "update_features", layer="communes", values={"nom": "x"}, expression="true")
@@ -809,6 +827,16 @@ class TestRoutes:
         assert client.post("/layouts", json={"name": ""}).status_code == 422
         assert client.post("/layouts/export", json={"name": "Carte", "subfolder": "../x"}).status_code == 422
         assert client.post("/layouts/export", json={"name": "Carte", "dpi": 1000}).status_code == 422
+        assert client.post("/layouts/export", json={"name": "Carte", "format": "tif"}).status_code == 200
+        assert client.post("/layouts/export", json={"name": "Carte", "format": "bmp"}).status_code == 422
+        atlas = client.post("/layouts/export", json={"name": "Carte", "atlas": True}).json()
+        assert atlas["atlas"] and atlas["pages"] == 3 and atlas["path"] == "Carte_atlas"
+        assert client.get("/layouts/details", params={"name": "Carte"}).json()["pages"][0]["width_mm"] == 297.0
+        response = client.post("/layouts/atlas", json={"layout": "Carte", "coverage_layer": "communes",
+                                                       "filter": "\"pop\" > 10"})
+        assert response.status_code == 200 and response.json()["atlas"] is True
+        assert client.post("/layouts/atlas", json={"layout": "Carte", "coverage_layer": "nope"}).status_code == 400
+        assert client.post("/layouts/atlas", json={"layout": "Carte", "margin": 900}).status_code == 422
 
     def test_edit_routes(self, client):
         response = client.post("/layers/features/update", json={"layer": "communes", "values": {"a": 1}, "expression": "true"})

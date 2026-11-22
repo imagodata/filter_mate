@@ -25,6 +25,8 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
   and after the commands of the turn (``adapters/public_api/feature_edits.py``); ``opened``: the layer was not being
   edited before them (the turn put it in editing mode, and undoing the turn takes it out: ``_closable``);
 * ``("layout", "", xml, "", name)``: a print layout the turn added to the project;
+* ``("layout_state", "", before, after, name)``: a print layout of the project the turn changed (its atlas), as
+  its XML before and after; a layout the turn made is the effect "layout" alone;
 * ``("layout_item", "", xml, uuid, layout name)``: a chart the turn put in a print layout (add_chart_to_layout), as
   the XML of its item;
 * ``("project_crs", "", before, after)``: the CRS of the project, as an authid or ``WKT:`` and its WKT;
@@ -71,6 +73,7 @@ TREE_TOOLS = ("group_layers", "map_theme")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features", "add_field")
 LAYOUT_TOOLS = ("create_layout",)
 CHART_LAYOUT_TOOLS = ("add_chart_to_layout",)
+LAYOUT_STATE_TOOLS = ("set_atlas",)
 CRS_TOOLS = ("set_project_crs",)
 SETTINGS_TOOLS = ("change_settings", "apply_settings_profile")
 PANEL_TOOLS = ("set_layer_options",)
@@ -378,6 +381,7 @@ class EffectsRecorder:
         self._edits: Dict[str, Tuple[int, bool]] = {}  # index of the undo stack, and not being edited then
         self._layouts: Optional[Set[str]] = None
         self._chart_items: Optional[Dict[str, Set[str]]] = None  # {layout: uuids of its charts} before the turn
+        self._layout_states: Dict[str, str] = {}  # {layout name: its XML before the turn changed it}
         self._crs: Optional[str] = None
         # (call of the turn, path, value before that call), in order: a setting changed twice has two records.
         self._settings_calls: List[Tuple[int, str, Any]] = []
@@ -428,6 +432,12 @@ class EffectsRecorder:
             elif name in LAYOUT_TOOLS:
                 if self._layouts is None:
                     self._layouts = _layout_names(project)
+            elif name in LAYOUT_STATE_TOOLS:
+                layout_name = str(arguments.get("layout") or "")
+                layout = project.layoutManager().layoutByName(layout_name)
+                if layout is not None and layout_name not in self._layout_states:
+                    from ..public_api.layouts import layout_xml
+                    self._layout_states[layout_name] = layout_xml(layout)
             elif name in CHART_LAYOUT_TOOLS:
                 if self._chart_items is None:
                     from ..public_api.charts import layout_chart_uuids
@@ -626,6 +636,16 @@ class EffectsRecorder:
                 layout = project.layoutManager().layoutByName(name)
                 if layout is not None:
                     effects.append(("layout", "", layout_xml(layout), "", name))
+        if self._layout_states:
+            from ..public_api.layouts import layout_xml
+            made = (_layout_names(project) - self._layouts) if self._layouts is not None else set()
+            for name, before in sorted(self._layout_states.items()):
+                layout = project.layoutManager().layoutByName(name)
+                if layout is None or name in made:  # removed since, or made by the turn: its own effect says it
+                    continue
+                after = layout_xml(layout)
+                if after != before:
+                    effects.append(("layout_state", "", before, after, name))
         if self._chart_items is not None:
             from ..public_api.charts import find_item, item_xml, layout_chart_uuids
             for layout_name, uuids in sorted(layout_chart_uuids().items()):
@@ -865,6 +885,15 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                     done.append(_crs_label())
                 else:
                     left.append(_crs_label())
+            elif kind == "layout_state":
+                from ..public_api.layouts import layout_from_xml
+                manager = project.layoutManager()
+                layout = manager.layoutByName(effect[4])
+                if layout is None:
+                    left.append(effect[4])
+                else:
+                    manager.removeLayout(layout)
+                    (done if layout_from_xml(effect[2] if undo else effect[3]) else left).append(effect[4])
             elif kind == "layout_item":
                 from ..public_api.charts import find_item, remove_item, restore_item
                 if undo:

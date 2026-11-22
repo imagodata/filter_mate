@@ -374,6 +374,10 @@ class LayoutExport:
     # Relative to the export folder: the paths of this machine are not given out.
     path: str = ""
     bytes: int = 0
+    # Files written: one per page of an image or SVG, one per feature of an atlas (then path is its folder).
+    files: int = 0
+    pages: int = 0
+    atlas: bool = False
 
 
 @dataclass(frozen=True)
@@ -729,8 +733,18 @@ class FilterMateAccessor(Protocol):
         """A print layout of the map added to the project; raises FilterRejected when refused."""
         ...
 
-    def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150) -> LayoutExport:
-        """Write a layout of the project into ``folder`` (resolved by the route); raises FilterRejected."""
+    def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150,
+                      georeference: bool = True, atlas: bool = False, single_file: bool = True) -> LayoutExport:
+        """Write a layout of the project into ``folder`` (resolved by the route): PDF, PNG, JPG, SVG or TIFF, its
+        atlas one page per feature; raises FilterRejected."""
+        ...
+
+    def describe_layout(self, name: str = "") -> Dict[str, Any]:
+        """A layout: its pages, items and atlas; without a name, the layouts and the templates."""
+        ...
+
+    def set_atlas(self, layout: str, **options: Any) -> Dict[str, Any]:
+        """Turn the atlas of a layout on or off; raises FilterRejected when refused."""
         ...
 
     def set_project_crs(self, crs: str) -> ProjectCrs:
@@ -1102,10 +1116,30 @@ class InMemoryAccessor:
             raise FilterRejected("a layout needs a name")
         return LayoutResult(name=name, page=options.get("page", "A4"), items=["map"])
 
-    def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150) -> LayoutExport:
+    def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150,
+                      georeference: bool = True, atlas: bool = False, single_file: bool = True) -> LayoutExport:
         import os
+        if atlas:
+            return LayoutExport(name=name, format=file_format, dpi=dpi, path=os.path.join(folder, f"{name}_atlas"),
+                                bytes=1, files=1 if single_file and file_format == "pdf" else 3, pages=3, atlas=True)
         path = os.path.join(folder, f"{name}.{file_format}")
         return LayoutExport(name=name, format=file_format, dpi=dpi, path=path, bytes=1)
+
+    def describe_layout(self, name: str = "") -> Dict[str, Any]:
+        if not name:
+            return {"layouts": [], "templates": []}
+        return {"name": name, "pages": [{"page": 1, "width_mm": 297.0, "height_mm": 210.0}],
+                "items": [{"ref": "map1", "type": "map", "page": 1, "x_mm": 10.0, "y_mm": 24.0, "width_mm": 277.0,
+                           "height_mm": 176.0}]}
+
+    def set_atlas(self, layout: str, **options: Any) -> Dict[str, Any]:
+        if not options.get("enabled", True):
+            return {"layout": layout, "atlas": False}
+        found = self._find(options.get("coverage_layer", ""))
+        if found is None:
+            raise FilterRejected(f"layer {options.get('coverage_layer', '')!r} not found")
+        return {"layout": layout, "atlas": True, "coverage_layer": found.name, "pages": 3, "maps": ["map1"],
+                "map_mode": options.get("map_mode", "auto")}
 
     def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
                   formula: str = "") -> FieldAdded:
