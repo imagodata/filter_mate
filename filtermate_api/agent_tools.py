@@ -126,7 +126,10 @@ LAYER_ARGUMENTS = ("layer", "layers", "layer_name", "source_layer", "target_laye
 # the model gave it.
 _STYLE_DEFAULTS = ("field", "color", "ramp", "classes", "method", "invert", "band", "discrete", "blend",
                    "multidirectional")
-_STYLE_OPTIONAL = ("opacity", "minimum", "maximum", "rules", "cut", "width", "z_factor")
+_STYLE_OPTIONAL = ("opacity", "minimum", "maximum", "rules", "cut", "width", "z_factor", "per_dot", "center")
+# What set_labels takes besides its first arguments: the look of the labels, passed only when the model gave it.
+_LABEL_OPTIONS = ("visible_to_scale", "background", "background_opacity", "callouts", "font", "bold", "italic", "wrap",
+                  "priority", "obstacle")
 
 
 def _one_layer_per_name(accessor: FilterMateAccessor, handler: Handler) -> Handler:
@@ -380,7 +383,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
                                           size=args.get("size"), color=args["color"], buffer=args["buffer"],
                                           expression=args["expression"],
                                           visible_from_scale=args.get("visible_from_scale"),
-                                          placement=args["placement"]))
+                                          placement=args["placement"],
+                                          **{key: args[key] for key in _LABEL_OPTIONS if args.get(key) is not None}))
 
     def create_layout(args: Dict[str, Any]) -> Dict[str, Any]:
         options = {key: args[key] for key in ("title", "page", "orientation", "extent_layer", "legend", "scale_bar",
@@ -440,6 +444,13 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
 
     def set_project_crs(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.set_project_crs(args["crs"]))
+
+    def make_cartogram(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.make_cartogram(args["layer"], args["field"], kind=args.get("kind") or "contiguous",
+                                       iterations=args.get("iterations") or 8, name=args.get("name") or "")
+
+    def suggest_crs(args: Dict[str, Any]) -> Dict[str, Any]:
+        return accessor.suggest_crs(layers=args.get("layers"), purpose=args.get("purpose") or "general")
 
     def add_field(args: Dict[str, Any]) -> Dict[str, Any]:
         answer = asdict(accessor.add_field(args["layer"], args["name"], field_type=args["type"],
@@ -600,6 +611,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "set_layer_style": set_layer_style, "set_labels": set_labels,
         "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
         "create_layout": create_layout, "export_layout": export_layout, "set_project_crs": set_project_crs,
+        "suggest_crs": suggest_crs, "make_cartogram": make_cartogram,
         "describe_layout": describe_layout, "set_atlas": set_atlas, "edit_layout": edit_layout,
         "add_field": add_field, "join_layers": join_layers, "group_layers": group_layers, "rename_layer": rename_layer, "map_theme": map_theme,
         "bookmark": bookmark,

@@ -91,13 +91,15 @@ def test_a_source_ticked_leaves_the_paragraph():
     assert "find_place (" not in text and "add_basemap (" not in text and "add_elevation (" in text
 
 
-def test_the_fixed_part_is_under_20828(bench):
+def test_the_fixed_part_is_under_21150(bench):
     """Instructions with the index, and the tools of the core, as the default settings send them."""
     instructions, tools, _held = bench.default_setup()
     fixed = len(instructions) + sum(weight_of(tool) for tool in tools)
     # 2026-11-22: 19,968 before the d3 charts; their three lines of the index and the entry of the skill charts in
     # load_skill add 211 (20,179), all of it trimmed to the words that say what each one is.
-    # 2026-11-22: 20,244 before the richer exports; export_layers (a core tool) gains styles, single_file, zip,
-    # package_name and three formats (+493), and the skill deliver its entry in load_skill (+85): the bound is raised
-    # by those 578, the rest of the words being in the skill.
-    assert fixed < 20828, fixed
+    # 2026-11-22 (projections): suggest_crs in the index and the skill projections in load_skill add 152 (20,396);
+    # the descriptions of the other skills were already cut to their words for the layouts and the charts.
+    # 2026-11-22 (cartograms): make_cartogram in the index and the skill cartograms add 140 (20,536).
+    # 2026-11-22 (exports): export_layers, a tool of the core sent with every request, gains styles, single_file,
+    # zip, package_name and three formats (+493), and the skill deliver its entry in load_skill (+85): 21,117.
+    assert fixed < 21150, fixed

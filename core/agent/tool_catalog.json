@@ -1211,7 +1211,7 @@
   {
    "name": "set_layer_style",
    "title": "Style a layer",
-   "description": "Change how a layer is drawn: one symbol, categories, classes, rules, a raster ramp or a shaded relief, its opacity and blending. Replaces the style; a field of more than 100 values cannot be categorized. Returns mode, field, classes (how many), ramp, method; for a raster, band, minimum and maximum or a note. Undoing the turn of the chat brings the previous style back.",
+   "description": "Change how a layer is drawn; replaces its style. Undoing the turn of the chat brings the previous style back.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,
@@ -1225,12 +1225,18 @@
       "type": "string"
      },
      "mode": {
-      "description": "Vector: single, categorized, graduated, rules. Raster: pseudocolor, gray, hillshade. keep: only opacity and blend (the only mode for a WMS, WMTS or basemap)",
+      "description": "Points only: heatmap, point_cluster, point_displacement. Polygons only: dot_density, 2.5d. Raster: pseudocolor, gray, hillshade. keep: opacity and blend alone",
       "enum": [
        "single",
        "categorized",
        "graduated",
        "rules",
+       "proportional",
+       "heatmap",
+       "point_cluster",
+       "point_displacement",
+       "dot_density",
+       "2.5d",
        "pseudocolor",
        "gray",
        "hillshade",
@@ -1243,7 +1249,7 @@
        {
         "items": {
          "additionalProperties": false,
-         "description": "One rule of a rule-based style: the features a condition keeps, and their color.",
+         "description": "A condition and the color of what it keeps.",
          "properties": {
           "expression": {
            "default": "",
@@ -1290,23 +1296,23 @@
        }
       ],
       "default": null,
-      "description": "rules: a feature takes the first rule it matches; end with an empty expression, or the rest is not drawn"
+      "description": "A feature takes the first rule it matches; end with an empty expression, or the rest is not drawn"
      },
      "field": {
       "default": "",
-      "description": "categorized, graduated",
+      "description": "Classes, sizes, dots; heatmap: weight; 2.5d: height",
       "maxLength": 1000,
       "type": "string"
      },
      "color": {
       "default": "",
-      "description": "single: #rrggbb or a name",
+      "description": "#rrggbb or a name",
       "maxLength": 50,
       "type": "string"
      },
      "ramp": {
       "default": "",
-      "description": "QGIS ramp: Viridis, Spectral, Blues, RdYlGn, Magma, Turbo... Terrain for relief",
+      "description": "Viridis, Spectral, Blues, RdBu, YlOrRd, Magma... Terrain for relief",
       "maxLength": 100,
       "type": "string"
      },
@@ -1328,6 +1334,18 @@
        "stddev"
       ],
       "type": "string"
+     },
+     "center": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "graduated: diverging from this value"
      },
      "invert": {
       "default": false,
@@ -1363,7 +1381,7 @@
        }
       ],
       "default": null,
-      "description": "Raster: ramp bounds (statistics by default)"
+      "description": "Raster: ramp bounds"
      },
      "maximum": {
       "anyOf": [
@@ -1407,7 +1425,20 @@
        }
       ],
       "default": null,
-      "description": "single: line width, mm"
+      "description": "mm: line, point, heatmap radius, cluster distance, largest size"
+     },
+     "per_dot": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "dot_density: field units per dot"
      },
      "blend": {
       "default": "",
@@ -1434,7 +1465,7 @@
        }
       ],
       "default": null,
-      "description": "hillshade: 2 or 3 for a flat relief"
+      "description": "hillshade (2 or 3 for a flat relief), 2.5d: stretch"
      },
      "multidirectional": {
       "default": false,
@@ -1452,7 +1483,7 @@
   {
    "name": "set_labels",
    "title": "Label a layer",
-   "description": "Write the values of a field or an expression next to the features of a vector layer, or turn the labels off. Undoing the turn of the chat brings the previous labels back. Returns labels, field or expression, visible_from_scale and placement.",
+   "description": "Write a field or an expression next to the features of a vector layer, or turn the labels off. Undoing the turn of the chat brings the previous labels back.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,
@@ -1496,7 +1527,7 @@
      },
      "buffer": {
       "default": true,
-      "description": "A halo, to read it on any background",
+      "description": "A halo",
       "type": "boolean"
      },
      "expression": {
@@ -1519,15 +1550,112 @@
       "default": null,
       "description": "50000: from 1:50 000 and closer"
      },
+     "visible_to_scale": {
+      "anyOf": [
+       {
+        "maximum": 1000000000.0,
+        "minimum": 1,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "1000: hidden closer than 1:1 000"
+     },
      "placement": {
       "default": "auto",
-      "description": "curved: along lines (contours, rivers)",
+      "description": "Lines: curved (rivers), parallel, horizontal. Polygons: centroid, horizontal, free, around, perimeter. Points: around",
       "enum": [
        "auto",
        "curved",
-       "horizontal"
+       "parallel",
+       "horizontal",
+       "centroid",
+       "free",
+       "around",
+       "perimeter"
       ],
       "type": "string"
+     },
+     "background": {
+      "default": "",
+      "description": "Box color behind the text",
+      "maxLength": 50,
+      "type": "string"
+     },
+     "background_opacity": {
+      "anyOf": [
+       {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "callouts": {
+      "default": false,
+      "description": "Lines to labels moved away",
+      "type": "boolean"
+     },
+     "font": {
+      "default": "",
+      "description": "Family",
+      "maxLength": 100,
+      "type": "string"
+     },
+     "bold": {
+      "default": false,
+      "type": "boolean"
+     },
+     "italic": {
+      "default": false,
+      "type": "boolean"
+     },
+     "wrap": {
+      "anyOf": [
+       {
+        "maximum": 200,
+        "minimum": 5,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Characters per line"
+     },
+     "priority": {
+      "anyOf": [
+       {
+        "maximum": 10,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Higher placed first"
+     },
+     "obstacle": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "false: labels may cover it"
      }
     },
     "required": [
@@ -2194,7 +2322,7 @@
    "input_schema": {
     "properties": {
      "crs": {
-      "description": "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, or a layer of the project whose CRS is taken",
+      "description": "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, a PROJ: string from suggest_crs, or a layer of the project whose CRS is taken",
       "maxLength": 1000,
       "minLength": 1,
       "type": "string"
@@ -2202,6 +2330,105 @@
     },
     "required": [
      "crs"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "suggest_crs",
+   "title": "Suggest projections",
+   "description": "Projections suited to where the data lie and what the map is for, best first: the official system of the country, the local zone (UTM, Lambert CC), continental or world ones, and projections made for the data (PROJ: strings). Each says what it keeps. Returns bounds_wgs84, scale, current and suggestions [{crs, name, keeps, why, units}], each crs usable by set_project_crs. It changes nothing.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "anyOf": [
+       {
+        "items": {
+         "maxLength": 1000,
+         "minLength": 1,
+         "type": "string"
+        },
+        "maxItems": 100,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Default: the layers shown, then the view"
+     },
+     "purpose": {
+      "default": "general",
+      "description": "areas: equal-area; distances; shapes: conformal; world; web",
+      "enum": [
+       "general",
+       "areas",
+       "distances",
+       "shapes",
+       "world",
+       "web"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
+   "name": "make_cartogram",
+   "title": "Make a cartogram",
+   "description": "Make a new layer whose areas show a quantity of a layer as filtered now (a population, votes...), not the land. Returns layer, kind, features, crs, and error_before / error_after (1 is exact). In the chat of FilterMate, undoing the turn removes the layer.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "field": {
+      "description": "Numeric: the quantity shown",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "kind": {
+      "default": "contiguous",
+      "description": "contiguous: polygons deformed, borders kept; noncontiguous: each scaled; dorling: circles; demers: squares",
+      "enum": [
+       "contiguous",
+       "noncontiguous",
+       "dorling",
+       "demers"
+      ],
+      "type": "string"
+     },
+     "iterations": {
+      "default": 8,
+      "description": "contiguous",
+      "maximum": 30,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "name": {
+      "default": "",
+      "description": "Of the new layer",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer",
+     "field"
     ],
     "type": "object"
    }

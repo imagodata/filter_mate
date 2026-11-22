@@ -520,10 +520,11 @@ class QGISFilterMateAccessor:
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
                    color: str = "", buffer: bool = True, expression: str = "",
-                   visible_from_scale: Optional[float] = None, placement: str = "auto") -> LabelsResult:
+                   visible_from_scale: Optional[float] = None, placement: str = "auto",
+                   **options: Any) -> LabelsResult:
         return LabelsResult(**self._style("set_labels", layer, field=field, enabled=enabled, size=size, color=color,
                                           buffer=buffer, expression=expression, visible_from_scale=visible_from_scale,
-                                          placement=placement))
+                                          placement=placement, **options))
 
     @staticmethod
     def _layouts(name: str, *args, **kwargs):
@@ -580,6 +581,14 @@ class QGISFilterMateAccessor:
 
     def set_project_crs(self, crs: str) -> ProjectCrs:
         return ProjectCrs(**self._control("set_project_crs", crs))
+
+    def suggest_crs(self, layers: Optional[List[str]] = None, purpose: str = "general") -> Dict[str, Any]:
+        return self._control("suggest_crs", layers=list(layers or []), purpose=purpose)
+
+    def make_cartogram(self, layer: str, field: str, kind: str = "contiguous", iterations: int = 8,
+                       name: str = "") -> Dict[str, Any]:
+        return self._control("make_cartogram", layer, field, kind=kind, iterations=iterations, name=name,
+                             module="adapters.public_api.cartograms")
 
     def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
                   formula: str = "") -> FieldAdded:

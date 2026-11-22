@@ -136,7 +136,8 @@ def crs_from_definition(definition: str):
 def set_project_crs(crs: str) -> Dict[str, Any]:
     """Set the CRS of the project, which the map follows: layers in other CRS are reprojected on the fly.
 
-    ``crs`` is an authid (EPSG:2154), an EPSG code alone (2154), or a layer of the project whose CRS is taken.
+    ``crs`` is an authid (EPSG:2154), an EPSG code alone (2154), a ``PROJ:`` string (suggest_crs makes some), or a
+    layer of the project whose CRS is taken.
 
     Raises:
         ValueError: A CRS QGIS does not know, or a layer with none.
@@ -161,6 +162,76 @@ def set_project_crs(crs: str) -> Dict[str, Any]:
             'units': units, 'geographic': bool(target.isGeographic()),
             'previous': previous.authid() or previous.description() if previous.isValid() else '',
             'note': 'The map follows the CRS of the project; layers in other CRS are reprojected on the fly.'}
+
+
+def _bounds_in_degrees(layers: Optional[List[str]] = None) -> Tuple[List[float], str]:
+    """``[west, south, east, north]`` in WGS 84 of ``layers`` (default: the layers shown, then the map view) and
+    what they come from."""
+    from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject, QgsRectangle
+    project = QgsProject.instance()
+    wgs84 = QgsCoordinateReferenceSystem('EPSG:4326')
+    chosen = []
+    for reference in layers or []:
+        layer = resolve_layer(reference)
+        if layer is None:
+            raise ValueError(f"layer {reference!r} not found")
+        chosen.append(layer)
+    origin = 'layers'
+    if not chosen:
+        chosen = [node.layer() for node in project.layerTreeRoot().findLayers()
+                  if node.isVisible() and node.layer() is not None and node.layer().crs().isValid()]
+        origin = 'layers shown'
+    box = QgsRectangle()
+    box.setMinimal()
+    for layer in chosen:
+        extent = layer.extent()
+        if extent.isNull() or not layer.crs().isValid():
+            continue
+        try:
+            transform = QgsCoordinateTransform(layer.crs(), wgs84, project)
+            box.combineExtentWith(transform.transformBoundingBox(extent))
+        except Exception:  # nosec B112 - a layer that cannot be transformed counts for nothing
+            continue
+    if box.isNull() or not chosen:  # nothing with an extent: the view
+        try:
+            from qgis.utils import iface
+            canvas = iface.mapCanvas() if iface is not None else None
+        except Exception:  # nosec B110 - no interface (a script)
+            canvas = None
+        if canvas is None:
+            raise ValueError('no layer with an extent and no map view: give layers')
+        transform = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), wgs84, project)
+        box = transform.transformBoundingBox(canvas.extent())
+        origin = 'map view'
+    clamp = lambda value, low, high: max(low, min(high, value))  # noqa: E731
+    return ([round(clamp(box.xMinimum(), -180, 180), 4), round(clamp(box.yMinimum(), -90, 90), 4),
+             round(clamp(box.xMaximum(), -180, 180), 4), round(clamp(box.yMaximum(), -90, 90), 4)], origin)
+
+
+def suggest_crs(layers: Optional[List[str]] = None, purpose: str = 'general') -> Dict[str, Any]:
+    """Projections for the data of ``layers`` (default: the layers shown, then the view) and a purpose (general,
+    areas, distances, shapes, world, web), best first; each one usable as it is by set_project_crs."""
+    from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsUnitTypes
+    from ...core.agent.projections import ProjectionError, suggest
+    bounds, origin = _bounds_in_degrees(layers)
+    if bounds[1] >= bounds[3]:  # one point, or points on a parallel: a little room around them
+        bounds[1], bounds[3] = max(-90.0, bounds[1] - 0.01), min(90.0, bounds[3] + 0.01)
+    if bounds[0] == bounds[2]:
+        bounds[0], bounds[2] = max(-180.0, bounds[0] - 0.01), min(180.0, bounds[2] + 0.01)
+    try:
+        result = suggest(bounds, purpose)
+    except ProjectionError as exc:
+        raise ValueError(str(exc)) from None
+    rows = []
+    for row in result['suggestions']:
+        crs = QgsCoordinateReferenceSystem(row['crs'])
+        if not crs.isValid():  # a code this PROJ does not know: left out
+            continue
+        rows.append(dict(row, units=QgsUnitTypes.toString(crs.mapUnits())))
+    current = QgsProject.instance().crs()
+    return {'bounds_wgs84': bounds, 'from': origin, 'purpose': purpose, 'scale': result['scale'],
+            'current': current.authid() or current.description() if current.isValid() else '',
+            'suggestions': rows}
 
 
 def select_features(layer: str, expression: str = '', clear: bool = False, add: bool = False) -> Dict[str, Any]:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""How a layer is drawn, for the agent: one symbol, categories, classes, rules, a raster ramp or a hillshade,
-labels, opacity and blending.
+"""How a layer is drawn, for the agent: one symbol, categories, classes, rules, proportional symbols, a heatmap,
+clusters, dots, 2.5D blocks, a raster ramp or a hillshade, labels, opacity and blending.
 
 Main thread only, plain dicts out. The answer gives how many classes were made, never the values they hold: the
 attribute values stay out of what the model reads, as ``describe_layer`` does. The chat captures the style of the
@@ -22,7 +22,9 @@ logger = logging.getLogger('FilterMate.LayerStyle')
 MAX_CATEGORIES = 100
 MAX_CLASSES = 12
 MAX_RAMPS_LISTED = 40
-VECTOR_MODES = ('single', 'categorized', 'graduated', 'rules')
+POINT_MODES = ('heatmap', 'point_cluster', 'point_displacement')  # for a layer of points alone
+POLYGON_MODES = ('dot_density', '2.5d')  # for a layer of polygons alone
+VECTOR_MODES = ('single', 'categorized', 'graduated', 'rules', 'proportional') + POINT_MODES + POLYGON_MODES
 MAX_RULES = 20
 RASTER_MODES = ('pseudocolor', 'gray', 'hillshade')
 KEEP = 'keep'  # the drawing as it is: the opacity and the blending alone change
@@ -32,7 +34,11 @@ BLENDS = {'normal': 'SourceOver', 'multiply': 'Multiply', 'screen': 'Screen', 'o
           'darken': 'Darken', 'lighten': 'Lighten', 'soft_light': 'SoftLight', 'hard_light': 'HardLight'}
 MAX_WIDTH = 20.0  # millimetres: a line, an outline, the size of a point
 MAX_CUT = 49.0  # percent of the values left out at each end of a raster stretch
-LABEL_PLACEMENTS = ('auto', 'curved', 'horizontal')
+# Where labels go, by the geometries each placement is for, and its name in QgsPalLayerSettings.Placement.
+LABEL_PLACEMENTS = {'auto': ((), ''), 'curved': (('line',), 'Curved'), 'parallel': (('line',), 'Line'),
+                    'horizontal': (('line', 'polygon'), 'Horizontal'), 'centroid': (('polygon',), 'OverPoint'),
+                    'free': (('polygon',), 'Free'), 'around': (('point', 'polygon'), 'AroundPoint'),
+                    'perimeter': (('polygon',), 'PerimeterCurved')}
 # Ramps of FilterMate, beside those of QGIS: the first color, stops (where, color), the last color. Terrain is the
 # hypsometric tints of a relief map, from the green of the low ground to the pale rock of the summits; the style of
 # QGIS holds none that reads as heights.
@@ -42,7 +48,19 @@ OWN_RAMPS = {'terrain': ('Terrain', '#3f8f4f', ((0.2, '#a9cc7a'), (0.42, '#f3e7a
                                               (0.84, '#9a6b4c')), '#e3d5c2')}
 _DEGREES_Z_FACTOR = 1.0 / 111_320.0  # heights in metres over a grid in degrees
 METHODS = ('quantile', 'equal_interval', 'jenks', 'pretty', 'stddev')
-DEFAULT_RAMPS = {'categorized': 'Spectral', 'graduated': 'Viridis', 'pseudocolor': 'Spectral'}
+DEFAULT_RAMPS = {'categorized': 'Spectral', 'graduated': 'Viridis', 'pseudocolor': 'Spectral', 'heatmap': 'YlOrRd'}
+# Millimetres on the map, when the call gives no width: the radius of a heatmap, how close points are gathered, the
+# largest proportional symbol (a line: its widest), a dot.
+HEAT_RADIUS = 10.0
+POINT_DISTANCE = 3.0
+LARGEST_SYMBOL = 10.0
+WIDEST_LINE = 4.0
+DOT_SIZE = 0.6
+DOTS_IN_LARGEST = 100  # dot_density with no per_dot: about this many dots in the polygon of the largest value
+MAX_DOTS = 2000  # in one polygon: more freezes the drawing of each one
+# The renderers a cluster or a displacement can keep for the points they leave apart, and the mode each one is.
+KEPT_INSIDE = {'singleSymbol': 'single', 'categorizedSymbol': 'categorized', 'graduatedSymbol': 'graduated',
+               'RuleRenderer': 'rules'}
 
 
 def _layer(reference: str):
@@ -94,13 +112,44 @@ def _ramp(name: str, mode: str, invert: bool):
     return ramp, found
 
 
-def _field_index(layer, field: str, numeric: bool = False) -> int:
+def _field_index(layer, field: str, numeric: bool = False,
+                 need: str = 'graduated classes need numbers, use categorized') -> int:
     index = layer.fields().lookupField(field or '')
     if index < 0:
         raise ValueError(f"'{layer.name()}' has no field {field!r} (describe_layer lists them)")
     if numeric and not layer.fields().at(index).isNumeric():
-        raise ValueError(f"'{field}' is not a numeric field: graduated classes need numbers, use categorized")
+        raise ValueError(f"'{field}' is not a numeric field: {need}")
     return index
+
+
+def _field_name(layer, field: str) -> str:
+    """The name of ``field`` as the layer spells it; "" for none."""
+    return layer.fields().at(_field_index(layer, field)).name() if field else ''
+
+
+def _geometry(layer) -> str:
+    """point, line or polygon; "" for a table."""
+    from qgis.core import QgsWkbTypes
+    kind = QgsWkbTypes.geometryType(layer.wkbType())
+    types = QgsWkbTypes.GeometryType
+    for name, member in (('point', types.PointGeometry), ('line', types.LineGeometry),
+                         ('polygon', types.PolygonGeometry)):
+        if kind == member:
+            return name
+    return ''
+
+
+def _enum(owner, scope: str, name: str, legacy: str = ''):
+    """A member of an enum of QGIS, reached through its scope (QGIS 4) or on its class (QGIS 3), where it may have
+    another name (``legacy``: PropertyPointCount in 3.22)."""
+    member = getattr(getattr(owner, scope, None), name, None)
+    return member if member is not None else getattr(owner, legacy or name)
+
+
+def _millimetres():
+    from qgis.core import Qgis, QgsUnitTypes
+    unit = getattr(getattr(Qgis, 'RenderUnit', None), 'Millimeters', None)
+    return unit if unit is not None else QgsUnitTypes.RenderMillimeters
 
 
 def _width(value: Any) -> Optional[float]:
@@ -172,7 +221,9 @@ def _categorized(layer, field: str, ramp):
     return QgsCategorizedSymbolRenderer(layer.fields().at(index).name(), categories), len(categories)
 
 
-def _graduated(layer, field: str, ramp, classes: int, method: str):
+def _graduated(layer, field: str, ramp, classes: int, method: str, center: Optional[float] = None):
+    """Graduated classes; ``center`` makes them diverge from it: the middle color of the ramp at ``center``, the
+    classes on each side darker as they go away from it."""
     from qgis import core
     index = _field_index(layer, field, numeric=True)
     _read_values_guard(layer, all_values=True)
@@ -182,12 +233,43 @@ def _graduated(layer, field: str, ramp, classes: int, method: str):
     renderer = core.QgsGraduatedSymbolRenderer(layer.fields().at(index).name())
     renderer.setSourceSymbol(_symbol(layer))
     renderer.setSourceColorRamp(ramp)
-    renderer.setClassificationMethod(getattr(core, makers[method])())
+    classification = getattr(core, makers[method])()
+    if center is not None:
+        if not math.isfinite(float(center)):
+            raise ValueError('center must be a finite number')
+        if classification.symmetricModeAvailable():
+            # A limit of the classes at the center, as many classes on each side of it.
+            classification.setSymmetricMode(True, float(center), False)
+    renderer.setClassificationMethod(classification)
     renderer.updateClasses(layer, classes)
     made = len(renderer.ranges())
     if not made:
         raise ValueError(f"'{field}' has no value to make classes from")
+    if center is not None:
+        _diverge(renderer, float(center))
     return renderer, made
+
+
+def _diverge(renderer, center: float) -> None:
+    """Color the classes by their rank away from ``center``: the class that holds it takes the middle of the ramp,
+    the first class on each side the next step, and so on. The side with fewer classes stops short of the end of the
+    ramp, so a step means the same gap from the center on both sides, whatever the classes the method made.
+
+    Quantiles or natural breaks may make a class across the center: it takes the middle color.
+    """
+    ramp = renderer.sourceColorRamp()  # the renderer owns the ramp it was given
+    ranges = renderer.ranges()
+    below = [number for number, item in enumerate(ranges) if item.upperValue() <= center]
+    above = [number for number, item in enumerate(ranges) if item.lowerValue() >= center and number not in below]
+    across = [number for number in range(len(ranges)) if number not in below and number not in above]
+    steps = max(len(below), len(above), 1)
+    positions = {number: 0.5 for number in across}
+    positions.update({number: 0.5 - 0.5 * (len(below) - rank) / steps for rank, number in enumerate(below)})
+    positions.update({number: 0.5 + 0.5 * (rank + 1) / steps for rank, number in enumerate(above)})
+    for number, item in enumerate(ranges):
+        symbol = item.symbol().clone()
+        symbol.setColor(ramp.color(positions[number]))
+        renderer.updateRangeSymbol(number, symbol)
 
 
 def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[float], cut: Optional[float] = None,
@@ -405,6 +487,216 @@ def _rule_based(layer, rules: Optional[List[Dict[str, Any]]]):
     return QgsRuleBasedRenderer(root), len(rules)
 
 
+def _only_for(layer, mode: str, geometry: str) -> None:
+    if _geometry(layer) != geometry:
+        raise ValueError(f"the mode {mode} is for a layer of {geometry}s: '{layer.name()}' has none")
+
+
+def _positive_range(layer, field: str, mode: str):
+    """``(field name, its largest value)`` for a mode that sizes or counts by a field: zero or more, some above zero.
+
+    Raises:
+        ValueError: An unknown or text field, a web service, a value below zero, no value above zero.
+    """
+    index = _field_index(layer, field, numeric=True, need=f'{mode} needs numbers (a count, an amount)')
+    _read_values_guard(layer, all_values=False)
+    try:
+        low, top = float(layer.minimumValue(index)), float(layer.maximumValue(index))
+    except (TypeError, ValueError):
+        low = top = math.nan
+    if not (math.isfinite(low) and math.isfinite(top)) or top <= 0:
+        raise ValueError(f"'{field}' has no value above zero to draw {mode} from")
+    if low < 0:
+        raise ValueError(f"'{field}' holds values below zero, which {mode} cannot draw: use graduated with a center")
+    return layer.fields().at(index).name(), top
+
+
+def _heatmap(layer, field: str, ramp, radius: Optional[float]):
+    """The density of the points, as a heat of colors; ``field`` weighs each point."""
+    from qgis.core import QgsExpression, QgsGradientColorRamp, QgsGradientStop, QgsHeatmapRenderer
+    from qgis.PyQt.QtGui import QColor
+    _only_for(layer, 'heatmap', 'point')
+    renderer = QgsHeatmapRenderer()
+    if field:
+        index = _field_index(layer, field, numeric=True, need='a heatmap weighs points by numbers')
+        renderer.setWeightExpression(QgsExpression.quotedColumnRef(layer.fields().at(index).name()))
+    # The heat paints its lowest value over the whole map: the ramp starts transparent, or it hides every layer under.
+    clear = QColor(ramp.color(0.0))
+    clear.setAlpha(0)
+    renderer.setColorRamp(QgsGradientColorRamp(clear, QColor(ramp.color(1.0)), False, [
+        QgsGradientStop(step / 10, QColor(ramp.color(step / 10))) for step in range(1, 10)]))
+    renderer.setRadius(radius or HEAT_RADIUS)
+    renderer.setRadiusUnit(_millimetres())
+    return renderer
+
+
+def _point_distance(layer, mode: str, color, distance: Optional[float]):
+    """Points close together on the map gathered in one symbol that counts them (point_cluster), or spread around
+    their place (point_displacement). The points apart keep how they were drawn (categories, one symbol...).
+
+    Returns:
+        The renderer, and the mode the points apart are drawn with.
+    """
+    from qgis.core import QgsPointClusterRenderer, QgsPointDisplacementRenderer, QgsSingleSymbolRenderer
+    _only_for(layer, mode, 'point')
+    current = layer.renderer()
+    inner = current.embeddedRenderer() if current is not None and current.type() in (
+        'pointCluster', 'pointDisplacement') else current
+    if inner is not None and inner.type() in KEPT_INSIDE:
+        inner = inner.clone()
+    else:  # a heatmap, nothing: one symbol
+        inner = QgsSingleSymbolRenderer(_symbol(layer, color))
+    kept = KEPT_INSIDE[inner.type()]
+    renderer = QgsPointClusterRenderer() if mode == 'point_cluster' else QgsPointDisplacementRenderer()
+    renderer.setTolerance(distance or POINT_DISTANCE)
+    renderer.setToleranceUnit(_millimetres())
+    renderer.setEmbeddedRenderer(inner)
+    if mode == 'point_cluster' and color is not None:
+        # The disc only: the count is written over it by a second layer of the symbol, in its own color.
+        renderer.clusterSymbol().symbolLayer(0).setColor(color)
+    return renderer, kept
+
+
+def _proportional(layer, field: str, color, largest: Optional[float]):
+    """One symbol whose size follows ``field``: a circle whose area is in proportion to the value (on the point, or
+    inside each polygon), or a line whose width is. The largest value takes ``largest`` millimetres, zero none.
+
+    The largest symbols are drawn first, the small ones over them; over polygons, every outline before any circle.
+    """
+    from qgis.core import (
+        QgsCentroidFillSymbolLayer, QgsDataDefinedSizeLegend, QgsExpression, QgsFeatureRequest, QgsFillSymbol,
+        QgsMarkerSymbol, QgsProperty, QgsSingleSymbolRenderer, QgsSizeScaleTransformer,
+    )
+    geometry = _geometry(layer)
+    name, top = _positive_range(layer, field, 'proportional')
+    color = color if color is not None else _color('#e6550d')
+    line = geometry == 'line'
+    largest = largest or (WIDEST_LINE if line else LARGEST_SYMBOL)
+    scale = _enum(QgsSizeScaleTransformer, 'ScaleType', 'Linear' if line else 'Flannery')
+    # Flannery: the area of a circle grows a bit faster than the value, as the eye reads areas short.
+    size = QgsProperty.fromField(name)
+    size.setTransformer(QgsSizeScaleTransformer(scale, 0.0, top, 0.0, largest, 0.0, 1.0 if line else 0.57))
+    if line:
+        symbol = _symbol(layer, color)
+        symbol.setDataDefinedWidth(size)
+    else:
+        marker = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': color.name(), 'outline_color': 'white',
+                                               'outline_width': '0.2'})
+        marker.setOpacity(0.85)  # where circles overlap, the edge of the one under shows
+        marker.setDataDefinedSize(size)
+        if geometry == 'point':
+            symbol = marker
+        elif geometry == 'polygon':
+            symbol = QgsFillSymbol.createSimple({'color': '#f2f2f2', 'outline_color': '#9e9e9e',
+                                                 'outline_width': '0.2'})
+            centre = QgsCentroidFillSymbolLayer()
+            centre.setPointOnSurface(True)  # inside the polygon, whatever its shape
+            centre.setPointOnAllParts(False)
+            centre.setSubSymbol(marker)
+            centre.setRenderingPass(1)
+            symbol.appendSymbolLayer(centre)
+        else:
+            raise ValueError(f"'{layer.name()}' has no geometry to draw")
+    renderer = QgsSingleSymbolRenderer(symbol)
+    renderer.setOrderBy(QgsFeatureRequest.OrderBy([QgsFeatureRequest.OrderByClause(QgsExpression.quotedColumnRef(name),
+                                                                                   False)]))
+    renderer.setOrderByEnabled(True)
+    if geometry == 'polygon':
+        renderer.setUsingSymbolLevels(True)
+    if geometry == 'point':
+        legend = QgsDataDefinedSizeLegend()
+        legend.setLegendType(_enum(QgsDataDefinedSizeLegend, 'LegendType', 'LegendCollapsed'))
+        renderer.setDataDefinedSizeLegend(legend)
+    return renderer
+
+
+def _number(value: float) -> str:
+    """``value`` as an expression writes it: no exponent."""
+    return format(value, '.15f').rstrip('0').rstrip('.') or '0'
+
+
+def _nice(value: float) -> float:
+    """1, 2 or 5 times a power of ten, the nearest at or above ``value``."""
+    power = 10.0 ** math.floor(math.log10(value))
+    return next(step * power for step in (1, 2, 5, 10) if step * power >= value * (1 - 1e-9))
+
+
+def _dot_density(layer, field: str, color, per_dot: Optional[float], dot: Optional[float]):
+    """Dots spread at random in each polygon, one for every ``per_dot`` of ``field``: a count shown over areas of
+    any size. The dots keep their places from one drawing to the next.
+
+    Returns:
+        The renderer, and how much of the field one dot stands for.
+    """
+    from qgis.core import (
+        QgsExpression, QgsFillSymbol, QgsMarkerSymbol, QgsProperty, QgsRandomMarkerFillSymbolLayer,
+        QgsSingleSymbolRenderer, QgsSymbolLayer,
+    )
+    _only_for(layer, 'dot_density', 'polygon')
+    name, top = _positive_range(layer, field, 'dot_density')
+    if per_dot is None:
+        per_dot = _nice(top / DOTS_IN_LARGEST)
+    elif not math.isfinite(float(per_dot)) or float(per_dot) <= 0:
+        raise ValueError('per_dot is how much of the field one dot stands for, above zero')
+    per_dot = float(per_dot)
+    if top / per_dot > MAX_DOTS:
+        raise ValueError(f"one dot for {per_dot:g} puts more than {MAX_DOTS} dots in a polygon: give a larger per_dot")
+    count = QgsProperty.fromExpression(
+        f"max(0, min(floor(coalesce({QgsExpression.quotedColumnRef(name)}, 0) / {_number(per_dot)}), {MAX_DOTS}))")
+    dots = QgsRandomMarkerFillSymbolLayer()
+    dots.setSeed(1)  # the same places at each drawing: dots that move at each pan read as noise
+    dots.setClipPoints(True)
+    dots.setSubSymbol(QgsMarkerSymbol.createSimple({
+        'name': 'circle', 'color': (color.name() if color is not None else '#252525'), 'outline_style': 'no',
+        'size': f'{dot or DOT_SIZE:g}'}))
+    dots.setDataDefinedProperty(_enum(QgsSymbolLayer, 'Property', 'PointCount', 'PropertyPointCount'), count)
+    symbol = QgsFillSymbol.createSimple({'color': '#f7f7f7', 'outline_color': '#9e9e9e', 'outline_width': '0.2'})
+    symbol.appendSymbolLayer(dots)
+    return QgsSingleSymbolRenderer(symbol), per_dot
+
+
+def _blocks(layer, field: str, color, factor: Optional[float]):
+    """Polygons raised as blocks seen from the side (the 2.5D renderer of QGIS), ``field`` their height.
+
+    QGIS reads the height and the angle from variables of the layer, which a style does not keep: an undo would
+    leave them, and a redo find others. Written into the expressions of the symbol, they go with the style.
+    """
+    from qgis.core import Qgs25DRenderer, QgsExpression, QgsFeatureRequest, QgsReadWriteContext, QgsRenderContext
+    from qgis.PyQt.QtXml import QDomDocument
+    _only_for(layer, '2.5d', 'polygon')
+    if factor is not None and (not math.isfinite(float(factor)) or float(factor) <= 0):
+        raise ValueError('z_factor is above 0: how much the heights are stretched')
+    height = '10'  # the default height of QGIS, in the units of the layer
+    if field:
+        index = _field_index(layer, field, numeric=True, need='2.5d raises polygons by numbers (a height)')
+        height = f"coalesce({QgsExpression.quotedColumnRef(layer.fields().at(index).name())}, 0)"
+    stretch = float(factor or 1.0) * (_DEGREES_Z_FACTOR if layer.crs().isGeographic() else 1.0)
+
+    raised = f'(({height}) * {_number(stretch)})'
+
+    def written(text: str) -> str:
+        text = re.sub(r'eval\(\s*@qgis_25d_height\s*\)', lambda _match: raised, text)
+        return re.sub(r'eval\(\s*@qgis_25d_angle\s*\)|@qgis_25d_angle\b', '70', text)
+
+    renderer = Qgs25DRenderer()
+    if color is not None:
+        renderer.setRoofColor(color)
+    for symbol in renderer.symbols(QgsRenderContext()):  # the walls and the roof
+        for number in range(symbol.symbolLayerCount()):
+            part = symbol.symbolLayer(number)
+            if hasattr(part, 'geometryExpression'):
+                part.setGeometryExpression(written(part.geometryExpression()))
+    # The walls farthest from the eye first: an order by the angle too.
+    renderer.setOrderBy(QgsFeatureRequest.OrderBy([
+        QgsFeatureRequest.OrderByClause(written(clause.expression().expression()), clause.ascending(),
+                                        clause.nullsFirst()) for clause in renderer.orderBy().list()]))
+    document = QDomDocument('style')
+    document.appendChild(renderer.save(document, QgsReadWriteContext()))
+    if '@qgis_25d' in document.toString():
+        raise ValueError('2.5d cannot be drawn by this version of QGIS from FilterMate: style it in QGIS')
+    return renderer
+
+
 def _drawn_by_its_service(layer) -> bool:
     """Whether a raster is an image its service draws (WMS, WMTS, XYZ): no band value to read."""
     try:
@@ -429,11 +721,17 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
                     rules: Optional[List[Dict[str, Any]]] = None, width: Optional[float] = None, blend: str = '',
                     cut: Optional[float] = None, discrete: bool = False, azimuth: float = 315.0,
                     altitude: float = 45.0, z_factor: Optional[float] = None,
-                    multidirectional: bool = False, share_values: bool = True) -> Dict[str, Any]:
+                    multidirectional: bool = False, share_values: bool = True, per_dot: Optional[float] = None,
+                    center: Optional[float] = None) -> Dict[str, Any]:
     """Draw a layer anew; what was made, without the values of its classes.
 
     ``share_values`` False: the range read from a raster (extremes, percentiles) is not told, nor in a refusal, as
-    ``contour_lines`` does not tell its heights.
+    ``contour_lines`` does not tell its heights; nor how much a dot stands for when the call did not give it (read
+    from the largest value of the field).
+
+    ``width`` (millimetres) is also the radius of a heatmap, how close points are gathered (point_cluster,
+    point_displacement), the largest proportional symbol and the size of a dot; ``z_factor`` stretches the heights
+    of 2.5d; ``center`` makes graduated classes diverge from it.
 
     Raises:
         ValueError: An unknown layer, mode, field, color, ramp or blending, a field with too many values, a raster
@@ -458,6 +756,28 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
         from qgis.core import QgsSingleSymbolRenderer
         if mode == 'single':
             renderer = QgsSingleSymbolRenderer(_symbol(found, _color(color) if color else None, _width(width)))
+        elif mode == 'heatmap':
+            color_ramp, answer['ramp'] = _ramp(ramp, mode, invert)
+            renderer = _heatmap(found, field, color_ramp, _width(width))
+            answer['field'] = _field_name(found, field)
+        elif mode in ('point_cluster', 'point_displacement'):
+            renderer, kept = _point_distance(found, mode, _color(color) if color else None, _width(width))
+            answer['note'] = f"the points apart keep their style ({kept})"
+        elif mode == 'proportional':
+            renderer = _proportional(found, field, _color(color) if color else None, _width(width))
+            answer['field'] = _field_name(found, field)
+        elif mode == 'dot_density':
+            given = per_dot is not None
+            renderer, told = _dot_density(found, field, _color(color) if color else None, per_dot, _width(width))
+            answer['field'] = _field_name(found, field)
+            if given or share_values:
+                answer['per_dot'] = told
+            else:
+                answer['note'] = ("one dot stands for a share of the largest value, not told: the user shares no "
+                                  "values. Give per_dot to choose it")
+        elif mode == '2.5d':
+            renderer = _blocks(found, field, _color(color) if color else None, z_factor)
+            answer['field'] = _field_name(found, field)
         elif mode == 'categorized':
             color_ramp, answer['ramp'] = _ramp(ramp, mode, invert)
             renderer, answer['classes'] = _categorized(found, field, color_ramp)
@@ -469,7 +789,7 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
                 raise ValueError(f"method is one of {', '.join(METHODS)}")
             classes = max(2, min(int(classes), MAX_CLASSES))
             color_ramp, answer['ramp'] = _ramp(ramp, mode, invert)
-            renderer, answer['classes'] = _graduated(found, field, color_ramp, classes, method)
+            renderer, answer['classes'] = _graduated(found, field, color_ramp, classes, method, center)
             answer.update({'field': renderer.classAttribute(), 'method': method})
         found.setRenderer(renderer)
     elif kind is LayerKind.RASTER:
@@ -513,22 +833,24 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
 
 
 def _place_labels(layer, settings, placement: str) -> None:
-    """Where the labels of a line layer go: along each line following its curve, or flat beside it.
+    """Where the labels go. Lines: along each line following its curve, straight along it, or flat beside it.
+    Polygons: on the inside point, flat, anywhere inside, around it, or along its outline. Points: around each one.
 
     Raises:
-        ValueError: A placement that is none, or one asked of a layer that has no lines.
+        ValueError: A placement that is none, or one asked of a layer that has none of its geometries.
     """
-    from qgis.core import QgsPalLayerSettings, QgsWkbTypes
+    from qgis.core import QgsPalLayerSettings
     if placement not in LABEL_PLACEMENTS:
         raise ValueError(f"placement is one of {', '.join(LABEL_PLACEMENTS)}")
     if placement == 'auto':
         return
-    if QgsWkbTypes.geometryType(layer.wkbType()) != QgsWkbTypes.GeometryType.LineGeometry:
-        raise ValueError(f"placement {placement} is for a layer of lines: '{layer.name()}' has none")
-    if placement == 'horizontal':
-        settings.placement = QgsPalLayerSettings.Placement.Horizontal
+    geometries, name = LABEL_PLACEMENTS[placement]
+    if _geometry(layer) not in geometries:
+        kinds = ' or '.join({'point': 'points', 'line': 'lines', 'polygon': 'polygons'}[kind] for kind in geometries)
+        raise ValueError(f"placement {placement} is for a layer of {kinds}: '{layer.name()}' has none")
+    settings.placement = getattr(QgsPalLayerSettings.Placement, name)
+    if placement != 'curved':
         return
-    settings.placement = QgsPalLayerSettings.Placement.Curved
     try:
         # On the line itself, as the heights of contours are written: the name of the flag moved with the versions.
         from qgis.core import QgsLabeling
@@ -542,18 +864,80 @@ def _place_labels(layer, settings, placement: str) -> None:
             logger.debug("labels on the line: flag not set in this QGIS", exc_info=True)  # above the line, then
 
 
-def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional[float] = None, color: str = '',
-               buffer: bool = True, expression: str = '', visible_from_scale: Optional[float] = None,
-               placement: str = 'auto') -> Dict[str, Any]:
-    """Label the features of a vector layer with a field or an expression, or turn its labels off.
-
-    ``visible_from_scale``: the labels show when the map is at least that close (50000 for 1:50 000 and closer).
-    ``placement``: for lines, ``curved`` writes each label on its line, following it (the heights of contours, the
-    names of rivers), ``horizontal`` flat beside it; ``auto`` leaves the choice to QGIS.
+def _font(text, family: str, bold: bool, italic: bool) -> None:
+    """The family of the labels, bold, italic.
 
     Raises:
-        ValueError: Not a vector layer, an unknown field, an expression refused, a bad size, scale, color or
-            placement.
+        ValueError: A family not installed: QGIS would write with another one without a word.
+    """
+    from qgis.PyQt.QtGui import QFontDatabase
+    font = text.font()
+    if family:
+        try:
+            families = list(QFontDatabase.families())  # Qt 6: static
+        except TypeError:
+            families = list(QFontDatabase().families())
+        found = next((name for name in families if name.casefold() == family.strip().casefold()), None)
+        if found is None:
+            raise ValueError(f"no font {family[:100]!r} on this computer; some are: {', '.join(sorted(families)[:30])}")
+        font.setFamily(found)
+    font.setBold(bool(bold))
+    font.setItalic(bool(italic))
+    text.setFont(font)
+    if hasattr(text, 'setForcedBold'):  # QGIS 3.26 and later: the style named in the format wins over the font
+        text.setForcedBold(bool(bold))
+        text.setForcedItalic(bool(italic))
+
+
+def _background(text, color: str, opacity: Optional[float]) -> None:
+    """A box with round corners behind the text, a little larger than it."""
+    from qgis.core import QgsTextBackgroundSettings
+    from qgis.PyQt.QtCore import QSizeF
+    if opacity is not None and not 0 <= float(opacity) <= 1:
+        raise ValueError('background_opacity goes from 0 (invisible) to 1 (opaque)')
+    box = QgsTextBackgroundSettings()
+    box.setEnabled(True)
+    box.setType(_enum(QgsTextBackgroundSettings, 'ShapeType', 'ShapeRectangle'))
+    box.setSizeType(_enum(QgsTextBackgroundSettings, 'SizeType', 'SizeBuffer'))
+    box.setSize(QSizeF(1.0, 0.5))
+    box.setSizeUnit(_millimetres())
+    box.setRadii(QSizeF(0.5, 0.5))
+    box.setRadiiUnit(_millimetres())
+    box.setFillColor(_color(color))
+    box.setStrokeWidth(0.0)
+    box.setOpacity(1.0 if opacity is None else float(opacity))
+    text.setBackground(box)
+
+
+def _scale(name: str, value: Optional[float]) -> float:
+    """The denominator of a scale a call gave; 0.0 (no limit) for none."""
+    if value is None:
+        return 0.0
+    if not 1 <= float(value) <= 1e9:
+        raise ValueError(f'{name} is the denominator of a scale: 50000 for 1:50 000')
+    return float(value)
+
+
+def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional[float] = None, color: str = '',
+               buffer: bool = True, expression: str = '', visible_from_scale: Optional[float] = None,
+               placement: str = 'auto', visible_to_scale: Optional[float] = None, background: str = '',
+               background_opacity: Optional[float] = None, callouts: bool = False, font: str = '',
+               bold: bool = False, italic: bool = False, wrap: Optional[int] = None, priority: Optional[int] = None,
+               obstacle: Optional[bool] = None) -> Dict[str, Any]:
+    """Label the features of a vector layer with a field or an expression, or turn its labels off.
+
+    ``visible_from_scale``: the labels show when the map is at least that close (50000 for 1:50 000 and closer);
+    ``visible_to_scale``: they hide when it is closer than that.
+    ``placement``: for lines, ``curved`` writes each label on its line, following it (the heights of contours, the
+    names of rivers), ``parallel`` straight along it, ``horizontal`` flat beside it; for polygons ``centroid``,
+    ``horizontal``, ``free``, ``around`` or ``perimeter``; for points ``around``; ``auto`` leaves the choice to QGIS.
+    ``background``: a box of that color behind the text. ``callouts``: a line from a label moved away to its
+    feature. ``wrap``: characters per line at most. ``priority``: 0 to 10, the labels of a higher one are placed
+    first. ``obstacle`` False: other labels may cover the features of the layer (None: as QGIS does, they may not).
+
+    Raises:
+        ValueError: Not a vector layer, an unknown field or font, an expression refused, a bad size, scale, color,
+            placement, wrap or priority.
     """
     from qgis.core import QgsPalLayerSettings, QgsTextBufferSettings, QgsTextFormat, QgsVectorLayerSimpleLabeling
     found = _layer(layer)
@@ -573,12 +957,29 @@ def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional
         settings.fieldName = found.fields().at(_field_index(found, field)).name()
         settings.isExpression = False
     _place_labels(found, settings, placement or 'auto')
-    if visible_from_scale is not None:
-        if not 1 <= float(visible_from_scale) <= 1e9:
-            raise ValueError('visible_from_scale is the denominator of a scale: 50000 for 1:50 000')
+    if visible_from_scale is not None or visible_to_scale is not None:
+        farthest = _scale('visible_from_scale', visible_from_scale)
+        closest = _scale('visible_to_scale', visible_to_scale)
+        if farthest and closest >= farthest:
+            raise ValueError('visible_to_scale is the closest scale the labels show at: below visible_from_scale')
         settings.scaleVisibility = True
-        settings.minimumScale = float(visible_from_scale)  # the farthest scale the labels show at
-        settings.maximumScale = 0.0
+        settings.minimumScale = farthest  # the farthest scale the labels show at
+        settings.maximumScale = closest
+    if wrap is not None:
+        if not 5 <= int(wrap) <= 200:
+            raise ValueError('wrap goes from 5 to 200 characters per line')
+        settings.autoWrapLength = int(wrap)
+    if priority is not None:
+        if not 0 <= int(priority) <= 10:
+            raise ValueError('priority goes from 0 to 10')
+        settings.priority = int(priority)
+    if obstacle is not None:
+        settings.obstacleSettings().setIsObstacle(bool(obstacle))
+    if callouts:
+        from qgis.core import QgsSimpleLineCallout
+        callout = QgsSimpleLineCallout()
+        callout.setEnabled(True)
+        settings.setCallout(callout)
     text = QgsTextFormat()
     if size is not None:
         if not 4 <= float(size) <= 72:
@@ -586,11 +987,15 @@ def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional
         text.setSize(float(size))
     if color:
         text.setColor(_color(color))
+    if font or bold or italic:
+        _font(text, font, bold, italic)
     if buffer:
         halo = QgsTextBufferSettings()
         halo.setEnabled(True)
         halo.setSize(1.0)
         text.setBuffer(halo)
+    if background:
+        _background(text, background, background_opacity)
     settings.setFormat(text)
     found.setLabeling(QgsVectorLayerSimpleLabeling(settings))
     found.setLabelsEnabled(True)

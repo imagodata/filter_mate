@@ -133,7 +133,7 @@ class RasterSelection(BaseModel):
 
 
 class StyleRule(BaseModel):
-    """One rule of a rule-based style: the features a condition keeps, and their color."""
+    """A condition and the color of what it keeps."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -576,45 +576,48 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Style a layer", idempotent=True))
     async def set_layer_style(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name")],
-        mode: Annotated[Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray", "hillshade", "keep"], Field(description=(
-            "Vector: single, categorized, graduated, rules. Raster: pseudocolor, gray, hillshade. keep: only opacity "
-            "and blend (the only mode for a WMS, WMTS or basemap)"))],
+        mode: Annotated[Literal["single", "categorized", "graduated", "rules", "proportional", "heatmap",
+                                "point_cluster", "point_displacement", "dot_density", "2.5d", "pseudocolor", "gray",
+                                "hillshade", "keep"], Field(description=(
+            "Points only: heatmap, point_cluster, point_displacement. Polygons only: dot_density, 2.5d. Raster: "
+            "pseudocolor, gray, hillshade. keep: opacity and blend alone"))],
         rules: Annotated[Optional[List[StyleRule]], Field(max_length=20, description=(
-            "rules: a feature takes the first rule it matches; end with an empty expression, or the rest is not "
-            "drawn"))] = None,
-        field: Annotated[str, Field(max_length=1000, description="categorized, graduated")] = "",
-        color: Annotated[str, Field(max_length=50, description="single: #rrggbb or a name")] = "",
+            "A feature takes the first rule it matches; end with an empty expression, or the rest is not drawn"))
+        ] = None,
+        field: Annotated[str, Field(max_length=1000, description=(
+            "Classes, sizes, dots; heatmap: weight; 2.5d: height"))] = "",
+        color: Annotated[str, Field(max_length=50, description="#rrggbb or a name")] = "",
         ramp: Annotated[str, Field(max_length=100, description=(
-            "QGIS ramp: Viridis, Spectral, Blues, RdYlGn, Magma, Turbo... Terrain for relief"))] = "",
+            "Viridis, Spectral, Blues, RdBu, YlOrRd, Magma... Terrain for relief"))] = "",
         classes: Annotated[int, Field(ge=2, le=12, description="graduated, or pseudocolor with discrete")] = 5,
         method: Annotated[Literal["quantile", "equal_interval", "jenks", "pretty", "stddev"], Field(
             description="graduated")] = "quantile",
+        center: Annotated[Optional[float], Field(description="graduated: diverging from this value")] = None,
         invert: bool = False,
         opacity: Annotated[Optional[float], Field(ge=0, le=1)] = None,
         band: Annotated[int, Field(ge=1, le=1000, description="Raster")] = 1,
-        minimum: Annotated[Optional[float], Field(description="Raster: ramp bounds (statistics by default)")] = None,
+        minimum: Annotated[Optional[float], Field(description="Raster: ramp bounds")] = None,
         maximum: Optional[float] = None,
         cut: Annotated[Optional[float], Field(gt=0, le=49, description=(
             "Raster: % left out at each end of the ramp"))] = None,
         discrete: Annotated[bool, Field(description="pseudocolor: flat steps")] = False,
-        width: Annotated[Optional[float], Field(gt=0, le=20, description="single: line width, mm")] = None,
+        width: Annotated[Optional[float], Field(gt=0, le=20, description=(
+            "mm: line, point, heatmap radius, cluster distance, largest size"))] = None,
+        per_dot: Annotated[Optional[float], Field(gt=0, description="dot_density: field units per dot")] = None,
         blend: Annotated[Literal["", "normal", "multiply", "screen", "overlay", "soft_light"], Field(description=(
             "multiply darkens (a hillshade over colors); empty: unchanged"))] = "",
         z_factor: Annotated[Optional[float], Field(gt=0, le=1000, description=(
-            "hillshade: 2 or 3 for a flat relief"))] = None,
+            "hillshade (2 or 3 for a flat relief), 2.5d: stretch"))] = None,
         multidirectional: Annotated[bool, Field(description="hillshade")] = False,
     ) -> Dict[str, Any]:
-        """Change how a layer is drawn: one symbol, categories, classes, rules, a raster ramp or a shaded relief,
-        its opacity and blending. Replaces the style; a field of more than 100 values cannot be categorized.
-
-        Returns mode, field, classes (how many), ramp, method; for a raster, band, minimum and maximum or a note. Undoing the turn of the
-        chat brings the previous style back.
+        """Change how a layer is drawn; replaces its style. Undoing the turn of the chat brings the previous style
+        back.
         """
         return await call("POST", "/layers/style", _body(
             layer=layer, mode=mode, field=field, color=color, ramp=ramp, classes=classes, method=method,
             invert=invert, opacity=opacity, band=band, minimum=minimum, maximum=maximum, cut=cut, discrete=discrete,
-            width=width, blend=blend, z_factor=z_factor, multidirectional=multidirectional,
-            rules=[rule.model_dump(exclude_none=True) for rule in rules] if rules else None))
+            width=width, blend=blend, z_factor=z_factor, multidirectional=multidirectional, per_dot=per_dot,
+            center=center, rules=[rule.model_dump(exclude_none=True) for rule in rules] if rules else None))
 
     @mcp.tool(annotations=_write("Label a layer", idempotent=True))
     async def set_labels(
@@ -623,22 +626,35 @@ def build_server(client: FilterMateClient) -> Any:
         enabled: Annotated[bool, Field(description="false: labels off")] = True,
         size: Annotated[Optional[float], Field(ge=4, le=72, description="Points")] = None,
         color: Annotated[str, Field(max_length=50)] = "",
-        buffer: Annotated[bool, Field(description="A halo, to read it on any background")] = True,
+        buffer: Annotated[bool, Field(description="A halo")] = True,
         expression: Annotated[str, Field(max_length=2000, description=(
             "Instead of field, QGIS (NOT SQL): \"nom\" || ' (' || \"population\" || ')'"))] = "",
         visible_from_scale: Annotated[Optional[float], Field(ge=1, le=1e9, description=(
             "50000: from 1:50 000 and closer"))] = None,
-        placement: Annotated[Literal["auto", "curved", "horizontal"], Field(description=(
-            "curved: along lines (contours, rivers)"))] = "auto",
+        visible_to_scale: Annotated[Optional[float], Field(ge=1, le=1e9, description=(
+            "1000: hidden closer than 1:1 000"))] = None,
+        placement: Annotated[Literal["auto", "curved", "parallel", "horizontal", "centroid", "free", "around",
+                                     "perimeter"], Field(description=(
+            "Lines: curved (rivers), parallel, horizontal. Polygons: centroid, horizontal, free, around, perimeter. "
+            "Points: around"))] = "auto",
+        background: Annotated[str, Field(max_length=50, description="Box color behind the text")] = "",
+        background_opacity: Annotated[Optional[float], Field(ge=0, le=1)] = None,
+        callouts: Annotated[bool, Field(description="Lines to labels moved away")] = False,
+        font: Annotated[str, Field(max_length=100, description="Family")] = "",
+        bold: bool = False,
+        italic: bool = False,
+        wrap: Annotated[Optional[int], Field(ge=5, le=200, description="Characters per line")] = None,
+        priority: Annotated[Optional[int], Field(ge=0, le=10, description="Higher placed first")] = None,
+        obstacle: Annotated[Optional[bool], Field(description="false: labels may cover it")] = None,
     ) -> Dict[str, Any]:
-        """Write the values of a field or an expression next to the features of a vector layer, or turn the labels
-        off. Undoing the turn of the chat brings the previous labels back.
-
-        Returns labels, field or expression, visible_from_scale and placement.
+        """Write a field or an expression next to the features of a vector layer, or turn the labels off. Undoing
+        the turn of the chat brings the previous labels back.
         """
         return await call("POST", "/layers/labels", _body(
             layer=layer, field=field, enabled=enabled, size=size, color=color, buffer=buffer, expression=expression,
-            visible_from_scale=visible_from_scale, placement=placement))
+            visible_from_scale=visible_from_scale, placement=placement, visible_to_scale=visible_to_scale,
+            background=background, background_opacity=background_opacity, callouts=callouts, font=font, bold=bold,
+            italic=italic, wrap=wrap, priority=priority, obstacle=obstacle))
 
     @mcp.tool(annotations=_write("Edit attributes of features", idempotent=False))  # a formula such as "pop" * 2
     async def update_features(
@@ -791,8 +807,8 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Set the CRS of the project", idempotent=True))
     async def set_project_crs(
         crs: Annotated[str, Field(min_length=1, max_length=1000, description=(
-            "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, or a layer "
-            "of the project whose CRS is taken"))],
+            "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, a PROJ: "
+            "string from suggest_crs, or a layer of the project whose CRS is taken"))],
     ) -> Dict[str, Any]:
         """Set the CRS of the project, which the map follows: what the user calls changing the CRS of the view.
 
@@ -800,6 +816,37 @@ def build_server(client: FilterMateClient) -> Any:
         geographic and previous. In the chat of FilterMate, undoing the turn brings the previous CRS back.
         """
         return await call("POST", "/map/crs", _body(crs=crs))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Suggest projections", readOnlyHint=True, openWorldHint=False))
+    async def suggest_crs(
+        layers: Annotated[Optional[List[Annotated[str, Field(min_length=1, max_length=1000)]]], Field(
+            max_length=100, description="Default: the layers shown, then the view")] = None,
+        purpose: Annotated[Literal["general", "areas", "distances", "shapes", "world", "web"], Field(description=(
+            "areas: equal-area; distances; shapes: conformal; world; web"))] = "general",
+    ) -> Dict[str, Any]:
+        """Projections suited to where the data lie and what the map is for, best first: the official system of the
+        country, the local zone (UTM, Lambert CC), continental or world ones, and projections made for the data
+        (PROJ: strings). Each says what it keeps. Returns bounds_wgs84, scale, current and suggestions [{crs, name,
+        keeps, why, units}], each crs usable by set_project_crs. It changes nothing.
+        """
+        return await call("POST", "/map/crs/suggest", _body(layers=layers, purpose=purpose))
+
+    @mcp.tool(annotations=_write("Make a cartogram", idempotent=False))
+    async def make_cartogram(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        field: Annotated[str, Field(min_length=1, max_length=200, description="Numeric: the quantity shown")],
+        kind: Annotated[Literal["contiguous", "noncontiguous", "dorling", "demers"], Field(description=(
+            "contiguous: polygons deformed, borders kept; noncontiguous: each scaled; dorling: circles; demers: "
+            "squares"))] = "contiguous",
+        iterations: Annotated[int, Field(ge=1, le=30, description="contiguous")] = 8,
+        name: Annotated[str, Field(max_length=200, description="Of the new layer")] = "",
+    ) -> Dict[str, Any]:
+        """Make a new layer whose areas show a quantity of a layer as filtered now (a population, votes...), not
+        the land. Returns layer, kind, features, crs, and error_before / error_after (1 is exact). In the chat of
+        FilterMate, undoing the turn removes the layer.
+        """
+        return await call("POST", "/layers/cartogram", _body(layer=layer, field=field, kind=kind,
+                                                            iterations=iterations, name=name))
 
     @mcp.tool(annotations=_write("Add a field", idempotent=False))
     async def add_field(

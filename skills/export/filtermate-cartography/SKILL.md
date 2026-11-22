@@ -11,57 +11,78 @@ Needs the MCP server of FilterMate: in QGIS, Agent settings (menu ⋯ of the AGE
 
 All of this changes how the project shows, never its data, and is undone with the turn.
 
-## Styles and labels
+## Styles
 
-- set_layer_style draws a layer anew: one color, a color per value, graduated classes (five by default), a raster
-  color ramp, or rules: a color per condition ("population" > 10000 in red, the others in grey with a rule whose
-  expression is empty), for what a single field does not say. set_labels writes a field on the map, or an expression
-  that joins or formats values ("nom" || ' (' || "population" || ')'), and turns the labels off. With
-  visible_from_scale the labels only show once the map is close enough (50000: from 1:50 000).
-- Every mode replaces the style of the layer. To change its opacity alone, use the mode keep with opacity: the
-  categories of a layer and the colors of an orthophoto stay. It is the only mode of a WMS, WMTS or basemap image.
-- A single symbol and each rule take a width in millimetres (a line, an outline, the size of a point): the main
-  roads thicker than the others is rules with a width each. blend says how a layer mixes with what is under it:
-  multiply darkens (colors over a photograph), normal covers; it goes with any mode, keep included.
-- A raster with values takes pseudocolor (a ramp; cut 2 leaves the extreme values out of it; discrete for flat
-  steps), gray, or hillshade (a shaded relief drawn from elevations). A relief map, with its contours, is the
-  terrain skill: load it.
-- Labels of a layer of lines follow them with placement curved (rivers, roads).
-- One layer is drawn one way. duplicate_layer adds a second layer on the same data, just above the first, for
-  what needs two: a road with a wider line under it, an elevation as colors and as a relief.
+- set_layer_style draws a layer anew; every mode replaces its style. To change the opacity or the blending alone,
+  use the mode keep: the categories of a layer and the colors of an orthophoto stay. It is the only mode of a WMS,
+  WMTS or basemap image. blend multiply darkens (colors over a photograph), normal covers.
+- width is in millimetres: a line, an outline, the size of a point; each rule takes its own (the main roads
+  thicker). For the modes below it is the radius of a heatmap, the distance under which points gather, the largest
+  proportional symbol, the size of a dot.
+- A raster with values takes pseudocolor (cut 2 leaves the extreme values out; discrete for flat steps), gray, or
+  hillshade. A relief map with contours is the terrain skill: load it.
+- One layer is drawn one way. duplicate_layer adds a second layer on the same data, just above, for what needs two:
+  a road with a wider line under it, an elevation as colors and as a relief.
 - After a style the user will judge by eye, look with view_map when it is offered.
 
-## Choosing a style
+## Which map for which data
 
-When the user names no mode, ramp or number of classes, choose from the data, and say in one sentence what you chose.
+When the user names no mode, choose from the data (describe_layer for the fields and the geometry, field_values for a
+text, layer_statistics for a number), and say in one sentence what you chose and why.
 
-1. What the field holds (describe_layer for its type, field_values for a text field):
-   - a text or a code with few values (a nature, a usage, a class): categorized. Above about 12 values the colors
-     can no longer be told apart, and above 100 the mode is refused: group them with rules, or filter first.
-   - a number that measures (a population, a surface, a height, a rate): graduated.
-   - thresholds the user gives, or that have a meaning (over 10 000 inhabitants, under 5 % of slope): rules, one
-     color per condition, a last rule with an empty expression for the others.
-   - no field at all (the layer as a whole): single, with the color asked.
-2. For graduated, read the field with layer_statistics before choosing the method:
-   - the mean well under the middle of minimum and maximum (a few very large values: populations, surfaces):
-     quantile, or jenks when the user wants natural groups; equal_interval would put nearly everything in the first
-     class.
+- A text or a code with few values (a nature, a usage): categorized. Up to about 12 values the colors can be told
+  apart; above, group them with rules or filter first (above 100 the mode is refused).
+- Thresholds that mean something (over 10 000 inhabitants): rules, one color per condition, a last rule with an
+  empty expression for the others.
+- A count or an amount (inhabitants, jobs, accidents, tonnes) over areas of different sizes: proportional (a circle
+  in each polygon, its area in proportion to the value), never graduated colors: a large commune would look
+  important only for its size. Colors are for rates, shares and densities (per km², per 1,000 inhabitants, %): with
+  graduated. When the user asks for colors of a count, do it, and say in one sentence that circles or a density read
+  better.
+- A count over polygons, to show where it is spread: dot_density (one dot for per_dot units of the field; by default
+  a round share that puts about 100 dots in the largest).
+- Many points (thousands of accidents, trees, shops): heatmap, weighed by a field when each point counts for more
+  than one (field). Points close together that hide each other: point_cluster (one disc with their number) or
+  point_displacement (spread around their place, for a few at the same address). Both keep the categories the
+  layer had for the points left apart: style categorized first, then cluster.
+- Polygons with a height (buildings): 2.5d with the height field, z_factor to stretch it on a small scale map.
+- Lines with an amount (traffic, flows): proportional widths.
+- No field at all: single, with the color asked.
+
+## Classes and colors
+
+1. Graduated classes: five read well, three to seven is the range, twelve at most. Read the field with
+   layer_statistics first:
+   - a few very large values (the mean well under the middle of minimum and maximum): quantile, or jenks for natural
+     groups; equal_interval would put nearly everything in the first class.
    - values spread evenly: equal_interval, or pretty for round limits in the legend.
-   - a value compared with the average: stddev, with a diverging ramp.
-   - five classes read well; three to seven is the range. More only when asked.
-3. The ramp says what the values mean:
-   - more of something, from light to dark: Blues, Greens, Reds, YlOrRd, Viridis (read by color-blind people, and
-     in grey when printed).
-   - two directions around a middle (a change, a gap from the average, a balance): RdBu, RdYlGn, BrBG, with stddev
-     or with rules around the middle. RdYlGn puts red on the low values: pass invert when high is bad.
-   - categories: Spectral by default. Give the colors yourself with rules when they have a meaning.
-   - an elevation raster: pseudocolor with Terrain (the tints of a relief map), Spectral inverted or Viridis; a
-     slope or a density with YlOrRd.
-4. Colors people expect: water blue, vegetation green, built-up areas grey or red, a risk or an alert in red, what
-   is allowed in green. The color of a single symbol is a name (red, steelblue) or #rrggbb.
-5. Make it readable: a neutral basemap without labels under a colored layer; an opacity under 1 (0.6 to 0.8) on
-   filled polygons that hide the background; labels only on a layer of a few hundred features, or from a scale
-   (visible_from_scale) on a larger one.
+   - a value with a meaningful middle (a change, a balance, a gap from the average): give center (0 for a change,
+     the mean or a reference value), with a diverging ramp. The middle color falls on center, the classes on each
+     side darken as they go away; equal_interval, pretty or stddev put a limit exactly at center.
+2. The ramp says what the values mean:
+   - more of something, light to dark: Blues, Greens, Reds, YlOrRd, Viridis (read by color-blind people and in grey).
+   - two directions around a middle: RdBu, RdYlGn, BrBG, PiYG, always with center. RdYlGn puts red on the low
+     values: pass invert when high is bad.
+   - categories: Spectral by default; give the colors yourself with rules when they have a meaning.
+   - a heatmap: YlOrRd by default, Magma or Inferno on a dark basemap; its lowest values are left transparent.
+   - an elevation raster: pseudocolor with Terrain, Spectral inverted or Viridis.
+3. Colors people expect: water blue, vegetation green, built-up grey or red, a risk in red, what is allowed in green.
+   A color is a name (red, steelblue) or #rrggbb.
+4. A neutral basemap without labels under a colored layer; an opacity of 0.6 to 0.8 on filled polygons that hide
+   the background.
+
+## Labels that stay readable
+
+- set_labels writes a field, or an expression that joins values ("nom" || ' (' || "population" || ')'), and turns
+  the labels off. Labels on a few hundred features at most, or from a scale on a larger layer: visible_from_scale
+  50000 shows them from 1:50 000 and closer; visible_to_scale hides them closer than a scale.
+- The halo (buffer, on by default) reads on any background. On a photograph or a busy map, a background box
+  (white, background_opacity 0.8) with buffer false reads better.
+- placement: lines curved (rivers, contours) or parallel; polygons centroid, horizontal, free (anywhere inside),
+  around or perimeter; points around. callouts draws a line to a label moved away from its feature.
+- Long names: wrap at 12 to 20 characters per line. priority 8 to 10 for the labels that must show (towns), lower
+  for the others; obstacle false on a layer that other labels may cover (a background of polygons).
+- font names an installed family; bold for the main names, italic for water by custom.
 
 ## A background under the map
 
