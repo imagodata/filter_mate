@@ -2217,7 +2217,7 @@
   {
    "name": "set_exploring",
    "title": "Drive the EXPLORING panel",
-   "description": "Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, turn the buttons of its rail on or off, press those that run once. vector: sync (its lists follow the selection of the map), follow (the map goes to what is chosen), zone (a shape drawn selects), link; press zoom, identify. raster: preview (hide the pixels outside the selection), pipette (pixels like the one clicked), detector (the object clicked), similar (objects like it), link (the style follows the range); press zoom. point_cloud: preview, identify (class pipette), object, value_pipette, zone; press zoom. One tool on the map at a time: it waits for the user's click, so say what to click. A button the user hid, or greyed for the layer, is refused: say so. Undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press, hidden, unavailable), changed, pressed.",
+   "description": "Drive FilterMate's EXPLORING panel live, as the user does: show a layer in it, set what its panel keeps (the range of a raster on its histogram, the classes or ranges of a point cloud), turn the buttons of its rail on or off, press zoom or identify. The names of the buttons of each kind of layer: skill panels. One tool on the map at a time: it waits for the user's click, so say what to click. A button the user hid, or greyed, is refused: say so. In FilterMate's chat, undone with the turn. Returns layer_name, kind, in_view, tools (on, off, press, hidden, unavailable), changed, pressed, values.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,
@@ -2231,40 +2231,38 @@
       "type": "string"
      },
      "tools": {
-      "anyOf": [
-       {
-        "additionalProperties": {
-         "type": "boolean"
-        },
-        "type": "object"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "description": "Buttons of the rail turned on (true) or off (false), by name"
+      "additionalProperties": {
+       "type": "boolean"
+      },
+      "default": {},
+      "description": "Buttons of the rail on (true) or off (false)",
+      "type": "object"
      },
      "press": {
-      "anyOf": [
-       {
-        "items": {
-         "type": "string"
-        },
-        "maxItems": 4,
-        "type": "array"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "description": "Buttons pressed once"
+      "default": [],
+      "description": "Buttons pressed once",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 4,
+      "type": "array"
      },
      "show": {
       "default": false,
-      "description": "true opens EXPLORING in front, in place of the chat when they share the panel: only when the user asks to see it",
+      "description": "Open EXPLORING in front: only when the user asks to see it",
       "type": "boolean"
+     },
+     "raster": {
+      "additionalProperties": true,
+      "default": {},
+      "description": "band, quantity (value, slope_degrees, slope_percent, aspect, hillshade, roughness), minimum, maximum (null: no bound)",
+      "type": "object"
+     },
+     "point_cloud": {
+      "additionalProperties": true,
+      "default": {},
+      "description": "classes [codes], or ranges [{attribute, minimum, maximum}]",
+      "type": "object"
      }
     },
     "type": "object"

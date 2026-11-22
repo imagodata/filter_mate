@@ -1353,7 +1353,8 @@ class AgentChatController(QObject):
         handlers[TURN_ON_OPTIONS] = self._turn_on_options_tool
         handlers[LIST_TABLES] = lambda arguments: self._list_tables_tool(databases, arguments)
         handlers[ADD_TABLE] = lambda arguments: self._add_table_tool(databases, arguments)
-        if "apply_filter" in handlers:
+        # The note asks the model to load a skill: not for a local model offered the filtering tools alone.
+        if "apply_filter" in handlers and any(tool.name == LOAD_SKILL for tool in tools):
             handlers["apply_filter"] = self._offering_tuning(handlers["apply_filter"])
         return tools, handlers, active
 
@@ -1365,7 +1366,10 @@ class AgentChatController(QObject):
 
         def run(arguments):
             result = handler(arguments)
-            layer = str(arguments.get("layer_name") or "")
+            reference = str(arguments.get("layer_name") or "")
+            found = QgsProject.instance().mapLayer(reference) or next(
+                iter(QgsProject.instance().mapLayersByName(reference)), None)
+            layer = found.id() if found is not None else reference  # a name and an id of one layer are one layer
             note = tuning_offer(arguments.get("expression"))
             ways_off = all(self._policy.turned_off(name) for name in (CREATE_WIDGET, "set_exploring"))
             if note and isinstance(result, dict) and layer not in self._tuning_offered and not ways_off:
@@ -2456,6 +2460,7 @@ class AgentChatController(QObject):
         chat_busy() was false, a second request could start beside it, and its end closed the undo point of the new
         turn. Until it ends, what it reports is not shown (_abandoned).
         """
+        self._tuning_offered = set()  # the model of the next conversation has not been told
         engine = self._engine
         if engine is not None and engine.busy:
             engine.cancel()
@@ -2493,7 +2498,6 @@ class AgentChatController(QObject):
         self._reset_view()
         self._transcript = []
         self._recap_from = 0
-        self._tuning_offered = set()
         self.panel.input.forget()
         self._save_transcript()
 

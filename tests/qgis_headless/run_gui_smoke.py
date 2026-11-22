@@ -7510,7 +7510,117 @@ def s_drive_undo_check():
     return settled()
 
 
-DRIVE_STEPS = [s_drive_begin, s_drive_raster_check, s_drive_undo_check]
+def drive_turn(arguments):
+    """set_exploring in a turn of its own, as the chat records it; the answer, and the effects of the turn."""
+    turn_effects = importlib.import_module(f'{PACKAGE}.adapters.agent.turn_effects')
+    messages = importlib.import_module(f'{PACKAGE}.core.agent.messages')
+    recorder = turn_effects.EffectsRecorder()
+    recorder.before_call(messages.ToolCallPart('v1', 'set_exploring', arguments))
+    answer = drive(**arguments)
+    recorder.after_call()
+    return answer, recorder.finish()
+
+
+def drive_undo(effects):
+    return importlib.import_module(f'{PACKAGE}.adapters.agent.turn_effects').apply_effects(effects, undo=True)
+
+
+def s_drive_values_begin():
+    """The range of a raster set in its panel, with the preview; then the selection sync replaces, given back."""
+    d = dock()
+    zones = layer('zones')
+    zones.selectByIds(sorted(zones.allFeatureIds())[:1])
+    DRIVE['selected'] = sorted(zones.selectedFeatureIds())
+    answer, effects = drive_turn({'tools': {'sync': True}})
+    DRIVE['sync'] = (answer, effects)
+    return settled()
+
+
+def s_drive_sync_check():
+    answer, effects = DRIVE['sync']
+    undone = drive_undo(effects)
+    pump(300)
+    check('drive: the selection sync replaced comes back with the undo', isinstance(answer, dict)
+          and sorted(layer('zones').selectedFeatureIds()) == DRIVE['selected']
+          and not dock().pushButton_checkable_exploring_selecting.isChecked(),
+          f"{answer} undone={undone} now={sorted(layer('zones').selectedFeatureIds())} was={DRIVE['selected']}")
+    dem = layer('dem')
+    stats = dem.dataProvider().bandStatistics(1)
+    DRIVE['low'] = low = stats.minimumValue + (stats.maximumValue - stats.minimumValue) / 2
+    DRIVE['before'] = None
+    answer, effects = drive_turn({'layer': 'dem', 'raster': {'minimum': low, 'maximum': None},
+                                  'tools': {'preview': True}})
+    DRIVE['raster'] = (answer, effects)
+    return switched_to('dem', True)
+
+
+def s_drive_raster_values_check():
+    answer, effects = DRIVE['raster']
+    panel = coverage()._raster_panel
+    state = panel.state()
+    check('drive: the range of the raster is set in its panel, RANGE active, the preview on',
+          isinstance(answer, dict) and state['mode'] == 'range' and state['minimum'] is not None
+          and abs(state['minimum'] - DRIVE['low']) < 1e-6 and state['maximum'] is None
+          and answer['tools'].get('preview') == 'on' and 'values' in answer['changed'], f"{answer} {state}")
+    check('drive: the histogram shows the range', panel._histogram.range()[0] is not None
+          and abs(panel._histogram.range()[0] - DRIVE['low']) < 1e-6, str(panel._histogram.range()))
+    bad = drive(raster={'band': 9})
+    check('drive: a band the raster has not is refused', isinstance(bad, str) and 'raster.band' in bad, str(bad))
+    DRIVE['raster_undo'] = drive_undo(effects)
+    return switched_to('zones', False)
+
+
+def s_drive_raster_undo_check():
+    done, left = DRIVE['raster_undo']
+    DRIVE['undo_left'] = left
+    tools_pick('dem', coverage_page=True)  # look at the panel of the raster again
+    return switched_to('dem', True)
+
+
+def s_drive_raster_undo_panel():
+    state = coverage()._raster_panel.state()
+    check('drive: the undo gives the range of before back and puts the preview down',
+          state['minimum'] is None and not dock().pushButton_checkable_exploring_selecting.isChecked()
+          and not DRIVE['undo_left'], f"{state['mode']} {state['minimum']} left={DRIVE['undo_left']}")
+    drive(raster={'minimum': DRIVE['low']})
+    slope = drive(raster={'quantity': 'slope_degrees'})
+    state = coverage()._raster_panel.state()
+    check('drive: another quantity without bounds forgets the bounds of the value (another unit)',
+          isinstance(slope, dict) and state['derivative'] == 'slope_degrees' and state['minimum'] is None
+          and state['maximum'] is None, f"{slope} {state['derivative']} {state['minimum']}")
+    drive(raster={'quantity': 'value'})
+    if not has_point_clouds():
+        report('SKIP', 'drive: point cloud values', f"QGIS {Qgis.QGIS_VERSION} < 3.26")
+        return tools_pick('zones', coverage_page=False)
+    cloud = layer('cloud')
+    listed = cloud.id() in app().PROJECT_LAYERS
+    DRIVE['cloud_listed'] = listed
+    if not listed:
+        before = dock().current_layer.name()
+        refused = drive(layer='cloud', point_cloud={'classes': [2]})
+        check('drive: a point cloud the panel does not list is refused, the panel stays on its layer',
+              isinstance(refused, str) and 'does not list' in refused and dock().current_layer.name() == before,
+              f"{refused} now={dock().current_layer.name()}")
+        return tools_pick('zones', coverage_page=False)
+    return tools_pick('cloud', coverage_page=True)
+
+
+def s_drive_cloud_check():
+    if has_point_clouds() and DRIVE.get('cloud_listed'):
+        panel = coverage()._pc_panel
+        codes = sorted(panel._present_codes()) or sorted(
+            int(item.data(Qt.ItemDataRole.UserRole)) for item in panel._class_items())
+        answer = drive(point_cloud={'classes': codes[:1]}) if codes else 'no class'
+        state = panel.state()
+        check('drive: the classes of a point cloud are set in its panel', isinstance(answer, dict)
+              and state['classes_enabled'] and state['classes'] == codes[:1], f"{answer} {state.get('classes')}")
+        both = drive(point_cloud={'classes': codes[:1], 'ranges': [{'attribute': 'Z', 'minimum': 0}]})
+        check('drive: classes and ranges together are refused', isinstance(both, str) and 'not both' in both, both)
+    return tools_pick('zones', coverage_page=False)
+
+
+DRIVE_STEPS = [s_drive_begin, s_drive_raster_check, s_drive_undo_check, s_drive_values_begin, s_drive_sync_check,
+               s_drive_raster_values_check, s_drive_raster_undo_check, s_drive_raster_undo_panel, s_drive_cloud_check]
 
 
 # --- a source filtered again by an expression its SQL cannot write (FM_ONLY=refilter) ---------------------------------

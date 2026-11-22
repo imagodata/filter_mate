@@ -3,10 +3,10 @@ name: panels
 title: Set up the panels of FilterMate
 description: FilterMate's panels: the fields EXPLORING shows, its filtering options, the export options
 metadata:
-  version: 2
+  version: 3
   plugin_min: 5.1.0
   audience: chat, mcp
-  tools: layer_options, set_layer_options, set_exploring, export_options, set_export_options, list_layers, describe_layer, field_values, export_layers, ask_user
+  tools: layer_options, set_layer_options, set_exploring, export_options, set_export_options, list_layers, describe_layer, field_values, cross_filter, export_layers, ask_user
   risk: change
   trust: builtin
 ---
@@ -38,14 +38,34 @@ set_exploring does what a hand does on the panel: it shows a layer in EXPLORING,
 off, presses zoom or identify. Use it when the user wants to look, pick or choose on the map themselves:
 
 - "let me pick the buildings on the map": the layer in EXPLORING, current_exploring_groupbox multiple_selection
-  (set_layer_options), then zone on (a shape drawn selects) or sync on (their map selection fills the list);
+  (set_layer_options), then zone on (a shape drawn selects);
 - "which pixels look like this field": the raster, pipette on: the next click on the map picks; detector for the
   object clicked, similar for the objects like it;
 - "points of this class": the point cloud, identify on (class pipette), value_pipette for a value of an attribute;
 - "follow what I choose": follow on.
 
+The buttons of the rail, by kind of layer (tools: on or off; press: once):
+
+- vector: sync (what is chosen in its lists is selected on the map, and the other way round: it replaces the selection
+  of the map), follow (the map goes to what is chosen), zone (a shape
+  drawn selects), link (single and multiple selections together); press zoom, identify;
+- raster: preview (the pixels outside the selection hidden), pipette (pixels like the one clicked), detector (the
+  object clicked), similar (objects like it), link (the style follows the range); press zoom;
+- point cloud: preview (only the points kept shown), identify (class pipette), object, value_pipette, zone; press zoom.
+
+What the panel keeps, set as the user sets it there, then moved by them:
+
+- raster: band, quantity (value, or slope_degrees, slope_percent, aspect, hillshade, roughness of a DTM), minimum and
+  maximum (null: no bound). The RANGE group becomes the active one (the pipette goes down). "Show the pixels above
+  1,200 m": raster {"minimum": 1200, "maximum": null} with preview on;
+- point cloud: classes (codes the cloud holds, from describe_layer), or ranges [{attribute, minimum, maximum}] on its
+  attributes (Z, Intensity...), not both.
+
+To filter other layers by them, cross_filter keeps its own arguments: the panel is for the user to look and adjust.
+
 A tool on the map waits for the user's click: say in one sentence what to click. The map holds one tool at a time;
-set_exploring puts the previous one down. A button the user hid (refused with its setting) stays hidden: say they
+set_exploring puts the previous one down. follow, link, preview and the values change the layer itself: refused on a
+layer the user protected. A button the user hid (refused with its setting) stays hidden: say they
 show it again with a right-click on the rail, never change the setting for them. When in_view is false the panel is
 folded behind the chat: say so; the thread offers a button that opens it. Pass show true only when the user asks to
 see EXPLORING. layer_options says, in panel, what the rail shows now.
