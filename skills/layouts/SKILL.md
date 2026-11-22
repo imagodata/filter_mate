@@ -4,7 +4,7 @@ title: Print layouts and atlases
 description: print layouts, atlases (a page per feature) and their export
 metadata:
   version: 2
-  plugin_min: 5.1.2
+  plugin_min: 5.2.0
   audience: chat
   tools: create_layout, describe_layout, edit_layout, set_atlas, export_layout, add_chart_to_layout, show_chart, map_context, zoom_to, apply_filter, preview_filter, describe_layer, field_values, set_layer_style, set_labels
   risk: change

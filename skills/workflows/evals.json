@@ -178,7 +178,7 @@
         "export_layers",
         "run_algorithm"
       ],
-      "note": "A count: proportional circles since 5.1.2; graduated colors still pass (a workflow, not the choice)."
+      "note": "A count: proportional circles since 5.2.0; graduated colors still pass (a workflow, not the choice)."
     },
     {
       "id": "workflow_start_again",

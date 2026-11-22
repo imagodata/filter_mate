@@ -4,7 +4,7 @@ title: Design a modern style
 description: finished styles from validated palettes, looks, SVG icons and variants
 metadata:
   version: 1
-  plugin_min: 5.1.2
+  plugin_min: 5.2.0
   audience: chat, mcp
   tools: design_style, list_palettes, describe_layer, field_values, layer_statistics, set_labels, set_layer_style, map_context
   risk: change

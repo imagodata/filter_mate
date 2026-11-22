@@ -4,7 +4,7 @@ title: Cartograms and maps out of the ordinary
 description: cartograms (areas that show a number), hexagon and grid maps
 metadata:
   version: 1
-  plugin_min: 5.1.2
+  plugin_min: 5.2.0
   audience: chat, mcp
   tools: make_cartogram, describe_layer, layer_statistics, apply_filter, preview_filter, set_layer_style, set_labels, find_algorithms, describe_algorithm, run_algorithm, suggest_crs, set_project_crs, list_layers
   risk: change

@@ -26,6 +26,9 @@ PLUGIN_ROOT = Path(__file__).resolve().parent.parent
 EXCLUDED_DIRS = {
     "tests", ".git", "__pycache__", "website", "scripts", "docs", "_bmad", "_bmad-output",
     "knowledge", "dist", "build", "node_modules", ".claude", ".venv", "venv", "logs",
+    # Not in the plugin zip (scripts/prepare_plugin_zip.sh): the standalone application registers the
+    # package under the name filter_mate itself (standalone/_bootstrap.py).
+    "standalone",
 }
 PACKAGE_NAME = "filter_mate"
 
