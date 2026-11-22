@@ -3,10 +3,10 @@ name: panels
 title: Set up the panels of FilterMate
 description: FilterMate's panels: the fields EXPLORING shows, its filtering options, the export options
 metadata:
-  version: 3
+  version: 4
   plugin_min: 5.1.0
   audience: chat, mcp
-  tools: layer_options, set_layer_options, set_exploring, export_options, set_export_options, list_layers, describe_layer, field_values, cross_filter, export_layers, ask_user
+  tools: layer_options, set_layer_options, set_exploring, export_options, set_export_options, list_layers, describe_layer, field_values, cross_filter, select_features, export_layers, ask_user
   risk: change
   trust: builtin
 ---
@@ -60,6 +60,9 @@ What the panel keeps, set as the user sets it there, then moved by them:
   1,200 m": raster {"minimum": 1200, "maximum": null} with preview on;
 - point cloud: classes (codes the cloud holds, from describe_layer), or ranges [{attribute, minimum, maximum}] on its
   attributes (Z, Intensity...), not both.
+
+Features chosen in the lists of EXPLORING (to look at them, or as the source the user filters from): sync on, then
+select_features with the expression; one feature goes in the single selection, several in the multiple one.
 
 To filter other layers by them, cross_filter keeps its own arguments: the panel is for the user to look and adjust.
 

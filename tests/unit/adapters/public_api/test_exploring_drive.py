@@ -222,3 +222,19 @@ def test_what_was_done_on_a_layer_the_turn_went_through_is_undone_on_it(setup):
 def test_tools_that_are_not_an_object_are_refused(setup):
     with pytest.raises(ValueError, match="tools: an object"):
         drive.set_exploring(setup.dock, tools=["follow"], project=setup.project)
+
+
+def test_a_bound_the_panel_opened_once_the_histogram_came_is_as_the_call_left_it():
+    left = {"mode": "range", "minimum": -5.0, "maximum": 300.0}
+    assert drive._as_left(dict(left, minimum=None), left, "raster")  # below the data: every pixel on that side
+    assert not drive._as_left(dict(left, minimum=12.0), left, "raster")  # moved by the user
+    assert not drive._as_left(dict(left, mode="pipette", minimum=None), left, "raster")
+    assert not drive._as_left({"classes": None}, {"classes": [2]}, "point_cloud")
+
+
+def test_a_range_of_a_point_cloud_kept_within_its_values_is_said():
+    asked = [{"attribute": "Z", "minimum": -100.0, "maximum": 30.0}]
+    assert drive._ranges_moved(asked, {"ranges": [{"low": 2.0, "high": 30.0}]})
+    assert not drive._ranges_moved(asked, {"ranges": [{"low": -100.0, "high": 30.0}]})
+    assert not drive._ranges_moved([{"attribute": "Z", "minimum": 5.0, "maximum": None}],
+                                   {"ranges": [{"low": 5.0, "high": None}]})

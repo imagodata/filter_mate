@@ -46,6 +46,7 @@ def _dock(controller):
                          'subsetString.return_value': ''})
     return SimpleNamespace(current_layer=layer, tr=lambda text: text, _exploring_ctrl=controller,
                            _set_expression_loading_state=MagicMock(), _pending_feature_change_fid=7,
+                           current_exploring_groupbox='single_selection',
                            _is_layer_valid=lambda: True)
 
 

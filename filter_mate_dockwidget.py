@@ -5266,6 +5266,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         fid = getattr(self, '_pending_feature_change_fid', None)
         self._pending_feature_change_fid = None
+        # 2026-11-22: the single picker chooses the features only while its group is the active one. With
+        # another group active its feature is set by program (the first of the features the map synced,
+        # a reload of the widgets), and 300 ms later, out of the sync, it replaced the selection of the map
+        # with that one feature, the layer signals blocked: 5 features selected with sync on fell to 1.
+        if self.current_exploring_groupbox in ('multiple_selection', 'custom_selection'):
+            return
         if fid is not None and self._is_layer_valid():
             from .adapters.qgis.source_capability_probe import counts_cheaply
             if not counts_cheaply(self.current_layer) and self._exploring_ctrl:

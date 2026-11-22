@@ -267,6 +267,17 @@ def _plain(state: Dict[str, Any]) -> Dict[str, Any]:
     return json.loads(json.dumps(state, default=str))
 
 
+def _as_left(now: Dict[str, Any], left: Dict[str, Any], kind: str) -> bool:
+    """Whether the panel is as a call left it: the same selection, or the same but for a bound of a raster the panel
+    opened by itself once the histogram of the band came (a bound at or beyond the data keeps every pixel: None)."""
+    if now == left:
+        return True
+    if kind != RASTER:
+        return False
+    rest = [key for key in now if now.get(key) != left.get(key)]
+    return bool(rest) and all(key in ("minimum", "maximum") and now.get(key) is None for key in rest)
+
+
 def _part(state: Dict[str, Any], kind: str) -> Dict[str, Any]:
     keys = RASTER_STATE_KEYS if kind == RASTER else POINT_CLOUD_STATE_KEYS
     plain = _plain(state)
@@ -472,11 +483,27 @@ def set_exploring(dock, layer: str = "", tools: Optional[Dict[str, bool]] = None
     answer = dict(panel_state(dock), changed=changed, pressed=pressed)
     if values:
         answer["values"] = _values_said(panel, kind)
+        if kind == POINT_CLOUD and "ranges" in values and _ranges_moved(values["ranges"], answer["values"]):
+            answer["values_note"] = ("The panel keeps a range within the values the point cloud holds: values shows "
+                                     "what it keeps.")
     if refused:
         answer["not_changed"] = refused  # the panel kept them as they were (a rule of its rail): say so
     if not answer["in_view"]:
         answer["note"] = NOT_IN_VIEW if _dock_shown(dock) else DOCK_CLOSED
     return answer
+
+
+def _ranges_moved(asked: Sequence[Dict[str, Any]], said: Dict[str, Any]) -> bool:
+    """Whether the panel holds other bounds than those asked (its boxes stay within the values of the cloud)."""
+    kept = said.get("ranges") or []
+    if len(kept) != len(asked):
+        return True
+    for wanted, held in zip(asked, kept):
+        bounds = [value for value in (wanted.get("minimum"), wanted.get("maximum")) if value is not None]
+        holds = [value for value in (held.get("low"), held.get("high")) if value is not None]
+        if len(bounds) != len(holds) or any(abs(a - b) > 1e-9 * max(1.0, abs(a)) for a, b in zip(bounds, holds)):
+            return True
+    return False
 
 
 def _note_moved(dock, kind: str, target, before: Dict[str, str], clicked: str = "") -> List[str]:
@@ -549,7 +576,7 @@ def replay(dock, entries: Sequence[Dict[str, Any]], undo: bool, project=None) ->
             now = _part(panel.state(), kind)
             if now == _part(wanted, kind):
                 continue
-            if now == _part(as_left, kind):
+            if _as_left(now, _part(as_left, kind), kind):
                 _restored(dock, kind, panel, wanted)
                 done = True
             else:

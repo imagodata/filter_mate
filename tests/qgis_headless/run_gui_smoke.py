@@ -7620,8 +7620,34 @@ def s_drive_cloud_check():
     return tools_pick('zones', coverage_page=False)
 
 
+def s_drive_pick_begin():
+    """Features chosen in the lists of EXPLORING as the skill panels says: sync on, then select_features."""
+    zones = layer('zones')
+    zones.removeSelection()
+    DRIVE['pick'] = drive(layer='zones', tools={'sync': True})
+    control = importlib.import_module(f'{PACKAGE}.adapters.public_api.project_control')
+    DRIVE['picked'] = control.select_features('zones', "\"name\" IS NOT NULL")
+    return settled()
+
+
+def s_drive_pick_check():
+    zones = layer('zones')
+    widget = dock().widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+    listed = widget.currentSelectedFeatures() or []
+    check('drive: features selected with sync on fill the multiple selection of EXPLORING',
+          zones.selectedFeatureCount() > 1 and len(listed) == zones.selectedFeatureCount()
+          and dock().current_exploring_groupbox == 'multiple_selection',
+          f"selected={zones.selectedFeatureCount()} listed={len(listed)} group={dock().current_exploring_groupbox} "
+          f"{DRIVE['pick']} {DRIVE['picked']}")
+    drive(tools={'sync': False})
+    zones.removeSelection()
+    dock().exploring_groupbox_changed('single_selection')
+    return settled()
+
+
 DRIVE_STEPS = [s_drive_begin, s_drive_raster_check, s_drive_undo_check, s_drive_values_begin, s_drive_sync_check,
-               s_drive_raster_values_check, s_drive_raster_undo_check, s_drive_raster_undo_panel, s_drive_cloud_check]
+               s_drive_raster_values_check, s_drive_raster_undo_check, s_drive_raster_undo_panel, s_drive_cloud_check, s_drive_pick_begin,
+               s_drive_pick_check]
 
 
 # --- a source filtered again by an expression its SQL cannot write (FM_ONLY=refilter) ---------------------------------
