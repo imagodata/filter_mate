@@ -4,6 +4,9 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: elevation, population, contour lines and OpenStreetMap let go of the HTTP connections GDAL opened (libcurl) before their reading thread ends. QGIS 4 on Windows froze twice right after the agent added an elevation raster: the task that registers the new layer started and did nothing more, and QGIS had to be killed. The likely cause, not reproduced under Linux: on Windows a thread that ends cleans what each DLL kept for it under the lock of the loader, which the next thread and every DLL load wait for. GDAL then reads again the headers of the files other layers read by HTTP.
+- Layer tasks: when adding or removing layers lasts more than 60 s, the Python stack of every thread is written once in `logs/stall_stacks.log`, next to `filtermate.log`, and the log says so if the task ends at last. One thread watches, started with the plugin: a task that starts starts none. A freeze then says where it stopped, unless the main thread holds Python while blocked in native code.
+
 ## [5.1.2] - 2026-11-20
 
 The fixes and changes merged since 5.1.1. The panel: the buttons of FILTERING and EXPORTING in front of their rows,
