@@ -167,7 +167,7 @@ def get_data_source_uri(layer) -> Tuple[Optional[Any], Optional[str]]:
         return None, None
 
     try:
-        source_uri = QgsDataSourceUri(layer.source())
+        source_uri = QgsDataSourceUri(source_of(layer))
         if str(source_uri) == '':
             return None, None
         authcfg_id = source_uri.param('authcfg')

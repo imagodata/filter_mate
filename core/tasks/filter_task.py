@@ -866,7 +866,8 @@ class FilterEngineTask(QgsTask):
             except (RuntimeError, AttributeError):
                 layer_id = None
             already_queued = any(
-                (getattr(existing_layer, 'id', lambda: None)() == layer_id and existing_expr == expression)
+                ((id_of(existing_layer) if hasattr(existing_layer, 'id') else None) == layer_id
+                 and existing_expr == expression)
                 for existing_layer, existing_expr in self._pending_subset_requests
                 if existing_layer is not None
             )
