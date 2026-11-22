@@ -2086,6 +2086,146 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Поставь тёмную подложку под мои слои</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="112"/>
+        <source>What does the point cloud contain?</source>
+        <translation>Что содержит облако точек?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="115"/>
+        <source>Filter the other layers by the selection</source>
+        <translation>Отфильтровать другие слои по выделению</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="116"/>
+        <source>Keep what lies within 500 m of the selection</source>
+        <translation>Оставить всё в пределах 500 m от выделения</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="117"/>
+        <source>Keep what lies within 100 m of another layer</source>
+        <translation>Оставить всё в пределах 100 m от другого слоя</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="118"/>
+        <source>Zoom to the selected features</source>
+        <translation>Приблизить к выбранным объектам</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="119"/>
+        <source>Zoom to the features the filter keeps</source>
+        <translation>Приблизить к объектам, оставленным фильтром</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="120"/>
+        <source>Show the attributes of the selected features</source>
+        <translation>Показать атрибуты выбранных объектов</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="121"/>
+        <source>Count the selected features by category</source>
+        <translation>Посчитать выбранные объекты по категориям</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="122"/>
+        <source>Count the active layer's features by type</source>
+        <translation>Посчитать объекты активного слоя по типам</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="123"/>
+        <source>Which layers are filtered, and what is kept?</source>
+        <translation>Какие слои отфильтрованы и что осталось?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="124"/>
+        <source>Clear all the filters</source>
+        <translation>Сбросить все фильтры</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="127"/>
+        <source>Color the active raster with a ramp</source>
+        <translation>Раскрасить активный растр цветовой шкалой</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="130"/>
+        <source>Export the active layer to GeoJSON</source>
+        <translation>Экспортировать активный слой в GeoJSON</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="131"/>
+        <source>Save the online layers to a GeoPackage</source>
+        <translation>Сохранить онлайн-слои в GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="132"/>
+        <source>Export the LiDAR points kept to LAZ</source>
+        <translation>Экспортировать оставленные точки LiDAR в LAZ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="133"/>
+        <source>Map the slope of the active raster</source>
+        <translation>Построить карту уклонов активного растра</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="134"/>
+        <source>Add a shaded relief from the active raster</source>
+        <translation>Добавить отмывку рельефа по активному растру</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="135"/>
+        <source>Draw contour lines from the active raster</source>
+        <translation>Построить изолинии по активному растру</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="136"/>
+        <source>Give the min, max and mean of the raster</source>
+        <translation>Показать мин., макс. и среднее растра</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="137"/>
+        <source>Keep the features on slopes over 15 %</source>
+        <translation>Оставить объекты на склонах круче 15 %</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="138"/>
+        <source>Add the mean of the raster to each polygon</source>
+        <translation>Добавить среднее значение растра к каждому полигону</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="139"/>
+        <source>Keep only the ground points of the cloud</source>
+        <translation>Оставить только точки земли облака</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="140"/>
+        <source>Keep the LiDAR points inside the selection</source>
+        <translation>Оставить точки LiDAR внутри выделения</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="141"/>
+        <source>Join two layers by a common field</source>
+        <translation>Соединить два слоя по общему полю</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="142"/>
+        <source>Draw a 100 m zone around the active layer</source>
+        <translation>Построить зону 100 m вокруг активного слоя</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="143"/>
+        <source>Make a print layout of this map</source>
+        <translation>Создать макет печати этой карты</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Add a basemap to start the map</source>
+        <translation>Добавить подложку, чтобы начать</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="805"/>
+        <source>Reconfigure FilterMate…</source>
+        <translation>Перенастроить FilterMate…</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="121"/>
         <source>Find a cloud-free Sentinel-2 image here</source>
         <translation>Найди здесь снимок Sentinel-2 без облаков</translation>

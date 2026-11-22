@@ -2086,6 +2086,146 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <translation>Een donkere achtergrondkaart onder mijn lagen zetten</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="112"/>
+        <source>What does the point cloud contain?</source>
+        <translation>Wat bevat de puntenwolk?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="115"/>
+        <source>Filter the other layers by the selection</source>
+        <translation>Filter de andere lagen op de selectie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="116"/>
+        <source>Keep what lies within 500 m of the selection</source>
+        <translation>Behoud wat binnen 500 m van de selectie ligt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="117"/>
+        <source>Keep what lies within 100 m of another layer</source>
+        <translation>Behoud wat binnen 100 m van een andere laag ligt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="118"/>
+        <source>Zoom to the selected features</source>
+        <translation>Zoom naar de geselecteerde objecten</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="119"/>
+        <source>Zoom to the features the filter keeps</source>
+        <translation>Zoom naar de objecten die het filter behoudt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="120"/>
+        <source>Show the attributes of the selected features</source>
+        <translation>Toon de attributen van de geselecteerde objecten</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="121"/>
+        <source>Count the selected features by category</source>
+        <translation>Tel de geselecteerde objecten per categorie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="122"/>
+        <source>Count the active layer's features by type</source>
+        <translation>Tel de objecten van de actieve laag per type</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="123"/>
+        <source>Which layers are filtered, and what is kept?</source>
+        <translation>Welke lagen zijn gefilterd, en wat blijft er?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="124"/>
+        <source>Clear all the filters</source>
+        <translation>Wis alle filters</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="127"/>
+        <source>Color the active raster with a ramp</source>
+        <translation>Kleur het actieve raster met een kleurverloop</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="130"/>
+        <source>Export the active layer to GeoJSON</source>
+        <translation>Exporteer de actieve laag naar GeoJSON</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="131"/>
+        <source>Save the online layers to a GeoPackage</source>
+        <translation>Sla de onlinelagen op in een GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="132"/>
+        <source>Export the LiDAR points kept to LAZ</source>
+        <translation>Exporteer de behouden LiDAR-punten naar LAZ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="133"/>
+        <source>Map the slope of the active raster</source>
+        <translation>Breng de helling van het actieve raster in kaart</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="134"/>
+        <source>Add a shaded relief from the active raster</source>
+        <translation>Voeg een schaduwreliëf van het actieve raster toe</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="135"/>
+        <source>Draw contour lines from the active raster</source>
+        <translation>Teken hoogtelijnen van het actieve raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="136"/>
+        <source>Give the min, max and mean of the raster</source>
+        <translation>Geef min, max en gemiddelde van het raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="137"/>
+        <source>Keep the features on slopes over 15 %</source>
+        <translation>Behoud de objecten op hellingen boven 15 %</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="138"/>
+        <source>Add the mean of the raster to each polygon</source>
+        <translation>Voeg het rastergemiddelde toe aan elke polygoon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="139"/>
+        <source>Keep only the ground points of the cloud</source>
+        <translation>Behoud alleen de grondpunten van de wolk</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="140"/>
+        <source>Keep the LiDAR points inside the selection</source>
+        <translation>Behoud de LiDAR-punten binnen de selectie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="141"/>
+        <source>Join two layers by a common field</source>
+        <translation>Koppel twee lagen via een gemeenschappelijk veld</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="142"/>
+        <source>Draw a 100 m zone around the active layer</source>
+        <translation>Teken een zone van 100 m rond de actieve laag</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="143"/>
+        <source>Make a print layout of this map</source>
+        <translation>Maak een printlay-out van deze kaart</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Add a basemap to start the map</source>
+        <translation>Voeg een achtergrondkaart toe om te beginnen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="805"/>
+        <source>Reconfigure FilterMate…</source>
+        <translation>Herconfigureer FilterMate…</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="121"/>
         <source>Find a cloud-free Sentinel-2 image here</source>
         <translation>Hier een wolkenvrij Sentinel-2-beeld zoeken</translation>

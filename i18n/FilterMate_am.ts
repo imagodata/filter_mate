@@ -2086,6 +2086,146 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>ከንብርብሮቼ በታች ጥቁር መሠረት ካርታ አስቀምጥ</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="112"/>
+        <source>What does the point cloud contain?</source>
+        <translation>የነጥብ ደመናው ምን ይዟል?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="115"/>
+        <source>Filter the other layers by the selection</source>
+        <translation>ሌሎቹን ንብርብሮች በምርጫው አጣራ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="116"/>
+        <source>Keep what lies within 500 m of the selection</source>
+        <translation>ከምርጫው 500 m ውስጥ ያለውን አስቀር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="117"/>
+        <source>Keep what lies within 100 m of another layer</source>
+        <translation>ከሌላ ንብርብር 100 m ውስጥ ያለውን አስቀር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="118"/>
+        <source>Zoom to the selected features</source>
+        <translation>ወደ ተመረጡት ገጽታዎች አጉላ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="119"/>
+        <source>Zoom to the features the filter keeps</source>
+        <translation>ማጣሪያው ወደሚያስቀራቸው ገጽታዎች አጉላ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="120"/>
+        <source>Show the attributes of the selected features</source>
+        <translation>የተመረጡትን ገጽታዎች ባህሪያት አሳይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="121"/>
+        <source>Count the selected features by category</source>
+        <translation>የተመረጡትን ገጽታዎች በምድብ ቁጠር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="122"/>
+        <source>Count the active layer's features by type</source>
+        <translation>የገባሪውን ንብርብር ገጽታዎች በአይነት ቁጠር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="123"/>
+        <source>Which layers are filtered, and what is kept?</source>
+        <translation>የትኞቹ ንብርብሮች ተጣርተዋል፣ ምንስ ቀርቷል?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="124"/>
+        <source>Clear all the filters</source>
+        <translation>ሁሉንም ማጣሪያዎች አጽዳ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="127"/>
+        <source>Color the active raster with a ramp</source>
+        <translation>ገባሪውን ራስተር በቀለም ቅልመት ቀባ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="130"/>
+        <source>Export the active layer to GeoJSON</source>
+        <translation>ገባሪውን ንብርብር ወደ GeoJSON ላክ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="131"/>
+        <source>Save the online layers to a GeoPackage</source>
+        <translation>የመስመር ላይ ንብርብሮችን በGeoPackage አስቀምጥ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="132"/>
+        <source>Export the LiDAR points kept to LAZ</source>
+        <translation>የቀሩትን የLiDAR ነጥቦች ወደ LAZ ላክ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="133"/>
+        <source>Map the slope of the active raster</source>
+        <translation>የገባሪውን ራስተር ተዳፋት ካርታ አውጣ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="134"/>
+        <source>Add a shaded relief from the active raster</source>
+        <translation>ከገባሪው ራስተር ጥላ ያለበት ከፍታ ጨምር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="135"/>
+        <source>Draw contour lines from the active raster</source>
+        <translation>ከገባሪው ራስተር የኮንቱር መስመሮችን ሳል</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="136"/>
+        <source>Give the min, max and mean of the raster</source>
+        <translation>የራስተሩን ዝቅተኛ፣ ከፍተኛ እና አማካይ ስጥ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="137"/>
+        <source>Keep the features on slopes over 15 %</source>
+        <translation>ከ15 % በላይ ተዳፋት ላይ ያሉ ገጽታዎችን አስቀር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="138"/>
+        <source>Add the mean of the raster to each polygon</source>
+        <translation>የራስተሩን አማካይ ለእያንዳንዱ ፖሊጎን ጨምር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="139"/>
+        <source>Keep only the ground points of the cloud</source>
+        <translation>የደመናውን የመሬት ነጥቦች ብቻ አስቀር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="140"/>
+        <source>Keep the LiDAR points inside the selection</source>
+        <translation>በምርጫው ውስጥ ያሉ የLiDAR ነጥቦችን አስቀር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="141"/>
+        <source>Join two layers by a common field</source>
+        <translation>ሁለት ንብርብሮችን በጋራ መስክ አጣምር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="142"/>
+        <source>Draw a 100 m zone around the active layer</source>
+        <translation>በገባሪው ንብርብር ዙሪያ 100 m ዞን ሳል</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="143"/>
+        <source>Make a print layout of this map</source>
+        <translation>የዚህን ካርታ የህትመት አቀማመጥ ፍጠር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Add a basemap to start the map</source>
+        <translation>ካርታውን ለመጀመር የመነሻ ካርታ ጨምር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="805"/>
+        <source>Reconfigure FilterMate…</source>
+        <translation>FilterMateን እንደገና አዋቅር…</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="121"/>
         <source>Find a cloud-free Sentinel-2 image here</source>
         <translation>እዚህ ከደመና ነፃ የሆነ የ Sentinel-2 ምስል ፈልግ</translation>
