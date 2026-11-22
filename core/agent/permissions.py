@@ -96,7 +96,7 @@ SETTINGS_TOOLS = frozenset({"change_settings", "apply_settings_profile", "turn_o
 # before and after (a card, applied by the user). Each is asked alone, in its own words, as code is.
 ASKED_ALONE = CODE_TOOLS | SETTINGS_TOOLS | frozenset({
     "add_layer", "add_service_layer", "add_basemap", "add_elevation", "add_population", "add_osm_features",
-    "add_database_table", "delete_features", "export_layout"})
+    "add_database_table", "delete_features", "export_layout", "export_chart"})
 
 
 # How many actions one question lists. A yes is for what the question shows: past this number the actions are

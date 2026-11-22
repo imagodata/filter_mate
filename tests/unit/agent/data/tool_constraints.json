@@ -17,6 +17,41 @@
   ],
   "type": "object"
  },
+ "add_chart_to_layout": {
+  "additionalProperties": false,
+  "properties": {
+   "chart_id": {
+    "maxLength": 20,
+    "minLength": 1,
+    "type": "string"
+   },
+   "layout": {
+    "maxLength": 100,
+    "minLength": 1,
+    "type": "string"
+   },
+   "width": {
+    "maximum": 2000,
+    "minimum": 10,
+    "type": "number"
+   },
+   "x": {
+    "maximum": 2000,
+    "minimum": 0,
+    "type": "number"
+   },
+   "y": {
+    "maximum": 2000,
+    "minimum": 0,
+    "type": "number"
+   }
+  },
+  "required": [
+   "chart_id",
+   "layout"
+  ],
+  "type": "object"
+ },
  "add_database_table": {
   "additionalProperties": false,
   "properties": {
@@ -1084,6 +1119,45 @@
   ],
   "type": "object"
  },
+ "export_chart": {
+  "additionalProperties": false,
+  "properties": {
+   "chart_id": {
+    "maxLength": 20,
+    "minLength": 1,
+    "type": "string"
+   },
+   "dpi": {
+    "default": 192,
+    "maximum": 600,
+    "minimum": 72,
+    "type": "integer"
+   },
+   "format": {
+    "default": "png",
+    "enum": [
+     "png",
+     "jpg",
+     "svg"
+    ],
+    "type": "string"
+   },
+   "name": {
+    "maxLength": 100,
+    "type": "string"
+   },
+   "subfolder": {
+    "default": "charts",
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "chart_id"
+  ],
+  "type": "object"
+ },
  "export_layers": {
   "properties": {
    "crs": {
@@ -1652,6 +1726,7 @@
     "enum": [
      "analysis",
      "cartography",
+     "charts",
      "configuration",
      "dashboards",
      "editing",
@@ -2568,6 +2643,120 @@
   },
   "required": [
    "crs"
+  ],
+  "type": "object"
+ },
+ "show_chart": {
+  "additionalProperties": false,
+  "properties": {
+   "aggregate": {
+    "default": "count",
+    "enum": [
+     "count",
+     "sum",
+     "mean",
+     "min",
+     "max"
+    ],
+    "type": "string"
+   },
+   "bins": {
+    "default": 12,
+    "maximum": 50,
+    "minimum": 2,
+    "type": "integer"
+   },
+   "code": {
+    "maxLength": 20000,
+    "type": "string"
+   },
+   "donut": {
+    "default": true,
+    "type": "boolean"
+   },
+   "field": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "height": {
+    "default": 400,
+    "maximum": 1200,
+    "minimum": 200,
+    "type": "integer"
+   },
+   "horizontal": {
+    "type": "boolean"
+   },
+   "kind": {
+    "enum": [
+     "bar",
+     "pie",
+     "histogram",
+     "line",
+     "scatter"
+    ],
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "limit": {
+    "maximum": 30,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "rows": {
+    "items": {
+     "type": "object"
+    },
+    "maxItems": 500,
+    "type": "array"
+   },
+   "series_field": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "sort": {
+    "default": "value",
+    "enum": [
+     "value",
+     "label"
+    ],
+    "type": "string"
+   },
+   "title": {
+    "maxLength": 80,
+    "type": "string"
+   },
+   "value_field": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "width": {
+    "default": 640,
+    "maximum": 1600,
+    "minimum": 280,
+    "type": "integer"
+   },
+   "x_label": {
+    "maxLength": 60,
+    "type": "string"
+   },
+   "x_type": {
+    "enum": [
+     "number",
+     "time"
+    ],
+    "type": "string"
+   },
+   "y_label": {
+    "maxLength": 60,
+    "type": "string"
+   }
+  },
+  "required": [
+   "kind"
   ],
   "type": "object"
  },

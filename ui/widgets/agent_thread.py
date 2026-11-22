@@ -537,6 +537,97 @@ class ChangeCard(QFrame):
                            " { text-decoration: underline; }")
 
 
+class ChartView(QWidget):
+    """A chart of the agent (its SVG), as wide as the thread allows and never wider than drawn, its proportions kept."""
+
+    def __init__(self, svg: str, parent: QWidget) -> None:
+        super().__init__(parent)
+        from qgis.PyQt.QtCore import QByteArray
+        from qgis.PyQt.QtSvg import QSvgRenderer
+        self._renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")), self)
+        size = self._renderer.defaultSize() if self._renderer.isValid() else QSize(640, 400)
+        self._natural = QSize(max(1, size.width()), max(1, size.height()))
+        policy = QSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        policy.setHeightForWidth(True)
+        self.setSizePolicy(policy)
+        self.setMinimumWidth(60)
+
+    def hasHeightForWidth(self) -> bool:  # noqa: N802 - Qt name
+        return True
+
+    def heightForWidth(self, width: int) -> int:  # noqa: N802 - Qt name
+        shown = min(width, self._natural.width())
+        return max(1, round(shown * self._natural.height() / self._natural.width()))
+
+    def sizeHint(self) -> QSize:  # noqa: N802 - Qt name
+        return self._natural
+
+    def paintEvent(self, _event) -> None:  # noqa: N802 - Qt name
+        from qgis.PyQt.QtCore import QRectF
+        from qgis.PyQt.QtGui import QPainter
+        if not self._renderer.isValid():
+            return
+        width = min(self.width(), self._natural.width())
+        height = width * self._natural.height() / self._natural.width()
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self._renderer.render(painter, QRectF(0, 0, width, height))
+        painter.end()
+
+
+class ChartCard(QFrame):
+    """A chart the agent drew: its title, the chart, where its data comes from, and buttons to save it as PNG, JPG or
+    SVG or to put it in a print layout (the user's own actions)."""
+
+    def __init__(self, title: str, svg: str, caption: str, palette: dict, dark: bool, parent: QWidget,
+                 on_save: Optional[Callable[[str], None]] = None,
+                 on_layout: Optional[Callable[[QWidget], None]] = None) -> None:
+        super().__init__(parent)
+        self.setObjectName("frame_agent_chart")
+        column = QVBoxLayout(self)
+        column.setContentsMargins(8, 6, 8, 6)
+        column.setSpacing(4)
+        self._view = ChartView(svg, self)
+        column.addWidget(self._view)
+        self._caption = _plain_label(caption, self)
+        column.addWidget(self._caption)
+        row = QHBoxLayout()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(10)
+        self._buttons: List[QPushButton] = []
+        for label, file_format in (("PNG", "png"), ("JPG", "jpg"), ("SVG", "svg")):
+            button = QPushButton(label, self)
+            button.setObjectName("pushButton_agent_chart_" + file_format)
+            button.setToolTip(plain_tooltip(_tr("Save the chart as {}").format(label)))
+            if on_save is not None:
+                button.clicked.connect(lambda _checked=False, file_format=file_format: on_save(file_format))
+            self._buttons.append(button)
+            row.addWidget(button)
+        layout_button = QPushButton(_tr("Add to a layout"), self)
+        layout_button.setObjectName("pushButton_agent_chart_layout")
+        layout_button.setToolTip(plain_tooltip(_tr("Put the chart in a print layout of the project; it is drawn again "
+                                                   "when the filter of its layer changes")))
+        if on_layout is not None:
+            layout_button.clicked.connect(lambda _checked=False: on_layout(layout_button))
+        self._buttons.append(layout_button)
+        row.addWidget(layout_button)
+        row.addStretch(1)
+        column.addLayout(row)
+        self.restyle(palette, dark)
+
+    def restyle(self, palette: dict, dark: bool) -> None:
+        _sheet(self, f"QFrame#frame_agent_chart {{ background: {palette['fm_group']}; border: 1px solid"
+                     f" {palette['fm_group_border']}; border-radius: 6px; }} QFrame#frame_agent_chart QLabel"
+                     " { background: transparent; border: none; padding: 0px; }")
+        _sheet(self._caption, f"font-size: 11px; color: {palette['fm_text_muted']};")
+        for button in self._buttons:
+            button.setFlat(True)
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            _sheet(button, f"QPushButton {{ color: {palette['fm_accent']}; background: none; border: none;"
+                           " padding: 0; font-size: 11px; min-height: 0; } QPushButton:hover"
+                           " { text-decoration: underline; }")
+
+
 class AgentThread(QScrollArea):
     """The thread: bubbles, cards, steps and text, oldest first; it follows the end while the reader is there."""
 
@@ -672,6 +763,15 @@ class AgentThread(QScrollArea):
         plain = f"{mark} {text}" + (f"  ·  {count}" if count else "") + (f"\n   {detail}" if detail else "")
         self._append(_Item(card, plain, "card", card.restyle))
         self._refresh_undo()
+        self.end_answer()
+        return card
+
+    def add_chart(self, title: str, svg: str, caption: str, on_save: Optional[Callable[[str], None]] = None,
+                  on_layout: Optional[Callable[[QWidget], None]] = None) -> ChartCard:
+        """A chart the agent drew, in a card of its own."""
+        card = ChartCard(title, svg, caption, self._palette_of(), self._is_dark(), self._content, on_save, on_layout)
+        self._append(_Item(card, "▦ " + (title or _tr("Chart")) + (f"\n   {caption}" if caption else ""), "chart",
+                           card.restyle))
         self.end_answer()
         return card
 

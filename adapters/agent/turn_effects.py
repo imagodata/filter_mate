@@ -25,6 +25,8 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
   and after the commands of the turn (``adapters/public_api/feature_edits.py``); ``opened``: the layer was not being
   edited before them (the turn put it in editing mode, and undoing the turn takes it out: ``_closable``);
 * ``("layout", "", xml, "", name)``: a print layout the turn added to the project;
+* ``("layout_item", "", xml, uuid, layout name)``: a chart the turn put in a print layout (add_chart_to_layout), as
+  the XML of its item;
 * ``("project_crs", "", before, after)``: the CRS of the project, as an authid or ``WKT:`` and its WKT;
 * ``("settings", "", before, after, step)``: settings of FilterMate (config.json) the turn changed, as JSON
   ``{path: value}``, one effect per step that first changed them; ``step`` is the call of the turn (0, 1...) and,
@@ -68,6 +70,7 @@ RECIPE_TOOLS = ("save_recipe", "remove_recipe")
 TREE_TOOLS = ("group_layers", "map_theme")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features", "add_field")
 LAYOUT_TOOLS = ("create_layout",)
+CHART_LAYOUT_TOOLS = ("add_chart_to_layout",)
 CRS_TOOLS = ("set_project_crs",)
 SETTINGS_TOOLS = ("change_settings", "apply_settings_profile")
 PANEL_TOOLS = ("set_layer_options",)
@@ -374,6 +377,7 @@ class EffectsRecorder:
         self._current_styles: Dict[str, Optional[str]] = {}
         self._edits: Dict[str, Tuple[int, bool]] = {}  # index of the undo stack, and not being edited then
         self._layouts: Optional[Set[str]] = None
+        self._chart_items: Optional[Dict[str, Set[str]]] = None  # {layout: uuids of its charts} before the turn
         self._crs: Optional[str] = None
         # (call of the turn, path, value before that call), in order: a setting changed twice has two records.
         self._settings_calls: List[Tuple[int, str, Any]] = []
@@ -420,6 +424,10 @@ class EffectsRecorder:
             elif name in LAYOUT_TOOLS:
                 if self._layouts is None:
                     self._layouts = _layout_names(project)
+            elif name in CHART_LAYOUT_TOOLS:
+                if self._chart_items is None:
+                    from ..public_api.charts import layout_chart_uuids
+                    self._chart_items = layout_chart_uuids()
             elif name in EDIT_TOOLS:
                 layer = _resolve(project, arguments.get("layer"))
                 if isinstance(layer, QgsVectorLayer) and layer.id() not in self._edits:
@@ -594,6 +602,13 @@ class EffectsRecorder:
                 layout = project.layoutManager().layoutByName(name)
                 if layout is not None:
                     effects.append(("layout", "", layout_xml(layout), "", name))
+        if self._chart_items is not None:
+            from ..public_api.charts import find_item, item_xml, layout_chart_uuids
+            for layout_name, uuids in sorted(layout_chart_uuids().items()):
+                for uuid in sorted(uuids - self._chart_items.get(layout_name, set())):
+                    item = find_item(layout_name, uuid)
+                    if item is not None:
+                        effects.append(("layout_item", "", item_xml(item), uuid, layout_name))
         for layer_id, (before, opened) in self._edits.items():
             layer = project.mapLayer(layer_id)
             after = _edit_index(layer) if layer is not None else before
@@ -829,6 +844,14 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                     done.append(_crs_label())
                 else:
                     left.append(_crs_label())
+            elif kind == "layout_item":
+                from ..public_api.charts import find_item, remove_item, restore_item
+                if undo:
+                    (done if remove_item(effect[4], effect[3]) else left).append(effect[4])
+                elif find_item(effect[4], effect[3]) is None:
+                    (done if restore_item(effect[4], effect[2]) else left).append(effect[4])
+                else:
+                    done.append(effect[4])
             elif kind == "layout":
                 manager = project.layoutManager()
                 layout = manager.layoutByName(effect[4])
