@@ -675,6 +675,13 @@ def lay_out_rows(dw: Any, mode: Any = None) -> bool:
     return done
 
 
+def rows_height(page: Any) -> int:
+    """The height the rows of a FILTERING or EXPORTING page need, each at its own height and one gap apart: the
+    height ``fit`` holds the page to, and the least ``fill`` spreads them from. The size hint of the page in both
+    modes: the stretches of ``fill`` are empty items, which take no gap in a box layout and hint no height."""
+    return page.sizeHint().height()
+
+
 FILTERING_PAIRS = (
     ('pushButton_checkable_filtering_auto_current_layer', 'comboBox_filtering_current_layer'),
     ('pushButton_checkable_filtering_layers_to_filter', 'checkableComboBoxLayer_filtering_layers_to_filter'),
