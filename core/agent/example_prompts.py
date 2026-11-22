@@ -186,6 +186,7 @@ def eligible(locale: str, facts: Optional[Facts] = None) -> Tuple[Example, ...]:
 # What a request supposes beyond a layer being there: the selection or a filter (the state moved), then the kind of
 # the active layer (what the user looks at); the others (a layer, a vector layer) are for any project.
 _MOVED = frozenset({"selection", "filter"})
+_ACTIVE = frozenset({"active_vector", "active_raster", "active_point_cloud"})  # all true or false together with the kind
 _PRESENCE = frozenset({"layers", "data", "several", "vector", "many_vectors"})
 
 
@@ -194,8 +195,8 @@ def pick(locale: str, previous: Iterable[str] = (), count: int = SHOWN, rng: Opt
     """The keys of ``count`` requests for a new conversation, in a random order, all true of ``facts``.
 
     With no layer, only requests that bring data in. With layers, one or two about the project (two when a selection
-    or a filter is there): first one that follows the selection or the filters, else the active layer; the others
-    bring data in. Each is of another kind; none was in ``previous`` (the set shown before) when enough are left
+    or a filter is there): first one that follows the selection or the filters, else the active layer, else the kinds
+    of layers there are; the others bring data in. Each is of another kind; none was in ``previous`` (the set shown before) when enough are left
     without them. A request about the data of the country of the locale always takes one of the places, even one
     shown in the set before when it is the only one of its country."""
     rng = rng or random.Random()  # nosec B311 - which requests are shown, nothing secret
@@ -217,10 +218,11 @@ def pick(locale: str, previous: Iterable[str] = (), count: int = SHOWN, rng: Opt
     project = [example for example in pool if example.group == PROJECT]
     if project:
         moved = [example for example in project if _MOVED & set(example.needs)]
-        active = [example for example in project if set(example.needs) - _PRESENCE - _MOVED]
-        take(moved or active or project)
+        about_active = [example for example in project if _ACTIVE & set(example.needs)]
+        specific = [example for example in project if set(example.needs) - _PRESENCE - _MOVED]
+        take(moved or about_active or specific or project)
         if moved or rng.random() < 0.5:
-            take(active or project, strict=True)
+            take(specific or project, strict=True)
     # The country of the locale always has its place, even when its only request was in the set before.
     take([example for example in pool if example.regions] or [example for example in offered if example.regions])
     while len(chosen) < count:

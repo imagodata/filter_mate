@@ -285,3 +285,12 @@ def test_a_country_keeps_its_place_in_every_state():
         for seed in range(100):
             keys = ex.pick("fr_FR", facts=state, rng=random.Random(seed))
             assert any(catalog[key].regions for key in keys)
+
+
+@pytest.mark.parametrize("active, state", [("vector", dict(vectors=2, rasters=1)), ("raster", dict(vectors=2, rasters=1)),
+                                           ("point_cloud", dict(vectors=1, point_clouds=1))])
+def test_the_active_layer_comes_first_when_nothing_else_moved(active, state):
+    catalog = _by_key()
+    for seed in range(200):
+        keys = ex.pick("en_US", facts=facts(active=active, **state), rng=random.Random(seed))
+        assert any(f"active_{active}" in catalog[key].needs for key in keys), (active, keys)
