@@ -53,6 +53,24 @@
         <translation>Vráceno: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Agent chce nakreslit graf pomocí tohoto kódu d3 nad daty grafu {}. Běží ve skryté webové stránce QGIS, která nečte žádný z vašich souborů; webová stránka však přesto může přistupovat k síti.
+
+K čemu: {}
+
+Spustit?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Graf {} nakreslen kódem d3 (expert)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Graf: {}</translation>

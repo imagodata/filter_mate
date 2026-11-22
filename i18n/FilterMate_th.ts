@@ -53,6 +53,24 @@
         <translation>เลิกทำแล้ว: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>เอเจนต์ต้องการวาดแผนภูมิด้วยโค้ด d3 นี้ จากข้อมูลของแผนภูมิ {} โค้ดทำงานในหน้าเว็บที่ซ่อนอยู่ของ QGIS ซึ่งไม่อ่านไฟล์ใดของคุณ แต่หน้าเว็บยังเข้าถึงเครือข่ายได้
+
+เพื่ออะไร: {}
+
+รันหรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>วาดแผนภูมิ {} ด้วยโค้ด d3 แล้ว (ผู้เชี่ยวชาญ)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>แผนภูมิ: {}</translation>

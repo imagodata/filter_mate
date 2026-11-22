@@ -53,6 +53,24 @@
         <translation>Cofnięto: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Agent chce narysować wykres tym kodem d3, na danych wykresu {}. Działa w ukrytej stronie internetowej QGIS, która nie odczytuje żadnego Twojego pliku; strona internetowa może jednak nadal łączyć się z siecią.
+
+Po co: {}
+
+Uruchomić?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Wykres {} narysowano kodem d3 (ekspert)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Wykres: {}</translation>

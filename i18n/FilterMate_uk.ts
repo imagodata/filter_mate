@@ -53,6 +53,24 @@
         <translation>Скасовано: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Агент хоче намалювати діаграму за допомогою цього коду d3 за даними діаграми {}. Він виконується в прихованій вебсторінці QGIS, яка не читає жодного вашого файлу; вебсторінка все ж може звертатися до мережі.
+
+Для чого: {}
+
+Виконати?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Діаграму {} намальовано кодом d3 (експерт)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Діаграма: {}</translation>

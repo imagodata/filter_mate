@@ -53,6 +53,24 @@
         <translation>Dibuat asal: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Ejen mahu melukis carta dengan kod d3 ini, berdasarkan data carta {}. Ia berjalan dalam halaman web tersembunyi QGIS yang tidak membaca sebarang fail anda; namun halaman web masih boleh mencapai rangkaian.
+
+Untuk apa: {}
+
+Jalankan?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Carta {} dilukis dengan kod d3 (pakar)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Carta: {}</translation>

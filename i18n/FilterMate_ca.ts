@@ -53,6 +53,24 @@
         <translation>Desfet: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>L'agent vol dibuixar un gràfic amb aquest codi d3, sobre les dades del gràfic {}. S'executa en una pàgina web amagada de QGIS que no llegeix cap fitxer vostre; una pàgina web, però, pot accedir a la xarxa.
+
+Per a què: {}
+
+L'executem?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Gràfic {} dibuixat amb codi d3 (expert)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Gràfic: {}</translation>

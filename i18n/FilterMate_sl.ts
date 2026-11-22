@@ -53,6 +53,24 @@
         <translation>Razveljavljeno: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Agent želi narisati graf s to kodo d3, na podatkih grafa {}. Izvaja se v skriti spletni strani QGIS, ki ne bere nobene vaše datoteke; spletna stran pa lahko vseeno doseže omrežje.
+
+Za kaj: {}
+
+Jo zaženem?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Graf {} narisan s kodo d3 (strokovnjak)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Graf: {}</translation>

@@ -53,6 +53,24 @@
         <translation>Rückgängig gemacht: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Der Agent möchte mit diesem d3-Code ein Diagramm zeichnen, auf den Daten des Diagramms {}. Er läuft in einer versteckten Webseite von QGIS, die keine Ihrer Dateien liest; eine Webseite kann aber trotzdem das Netzwerk erreichen.
+
+Wofür: {}
+
+Ausführen?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Diagramm {} mit d3-Code gezeichnet (Experte)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Diagramm: {}</translation>

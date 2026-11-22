@@ -53,6 +53,24 @@
         <translation>실행 취소됨: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>에이전트가 이 d3 코드로 차트 {}의 데이터를 바탕으로 차트를 그리려고 합니다. QGIS의 숨겨진 웹 페이지에서 실행되며 사용자의 파일은 읽지 않지만, 웹 페이지는 여전히 네트워크에 접근할 수 있습니다.
+
+목적: {}
+
+실행할까요?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>차트 {}을(를) d3 코드로 그렸습니다 (전문가)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>차트: {}</translation>

@@ -53,6 +53,24 @@
         <translation>Αναιρέθηκε: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Ο πράκτορας θέλει να σχεδιάσει ένα διάγραμμα με αυτόν τον κώδικα d3, πάνω στα δεδομένα του διαγράμματος {}. Εκτελείται σε μια κρυφή ιστοσελίδα του QGIS που δεν διαβάζει κανένα αρχείο σας· μια ιστοσελίδα μπορεί πάντως να φτάσει στο δίκτυο.
+
+Για ποιο σκοπό: {}
+
+Να εκτελεστεί;</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Το διάγραμμα {} σχεδιάστηκε με κώδικα d3 (για ειδικούς)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Διάγραμμα: {}</translation>

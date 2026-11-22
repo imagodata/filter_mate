@@ -53,6 +53,24 @@
         <translation>تم التراجع: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>يريد الوكيل رسم مخطط بهذه الشيفرة d3، على بيانات المخطط {}. تعمل في صفحة ويب مخفية داخل QGIS لا تقرأ أي ملف من ملفاتك؛ ومع ذلك يمكن لصفحة الويب الوصول إلى الشبكة.
+
+الغرض: {}
+
+هل تريد تشغيلها؟</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>تم رسم المخطط {} بشيفرة d3 (خبير)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>مخطط: {}</translation>

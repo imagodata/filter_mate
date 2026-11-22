@@ -53,6 +53,24 @@
         <translation>已撤销：{}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>智能体想用这段 d3 代码，基于图表 {} 的数据绘制图表。它在 QGIS 的隐藏网页中运行，不会读取您的任何文件；不过网页仍可访问网络。
+
+用途：{}
+
+运行吗？</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>图表 {} 已用 d3 代码绘制（专家）</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>图表：{}</translation>

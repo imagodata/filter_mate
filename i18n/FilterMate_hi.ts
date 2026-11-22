@@ -53,6 +53,24 @@
         <translation>पूर्ववत किया गया: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>एजेंट इस d3 कोड से चार्ट {} के डेटा पर एक चार्ट बनाना चाहता है। यह QGIS के एक छिपे हुए वेब पेज में चलता है जो आपकी कोई फ़ाइल नहीं पढ़ता; फिर भी वेब पेज नेटवर्क तक पहुँच सकता है।
+
+किसलिए: {}
+
+चलाएँ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>चार्ट {} d3 कोड से बनाया गया (विशेषज्ञ)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>चार्ट: {}</translation>

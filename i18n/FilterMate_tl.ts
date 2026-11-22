@@ -53,6 +53,24 @@
         <translation>Na-undo: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Gustong gumuhit ng agent ng tsart gamit ang d3 code na ito, batay sa data ng tsart {}. Tumatakbo ito sa nakatagong web page ng QGIS na hindi bumabasa ng anumang file mo; gayunpaman, maaari pa ring abutin ng isang web page ang network.
+
+Para saan: {}
+
+Patakbuhin?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Iginuhit ang tsart {} gamit ang d3 code (eksperto)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Tsart: {}</translation>

@@ -53,6 +53,24 @@
         <translation>Angret: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Agenten vil tegne et diagram med denne d3-koden, over dataene i diagrammet {}. Den kjører på en skjult nettside i QGIS som ikke leser noen av filene dine; en nettside kan likevel nå nettverket.
+
+Hva for: {}
+
+Kjøre den?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Diagram {} tegnet med d3-kode (ekspert)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Diagram: {}</translation>

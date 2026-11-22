@@ -53,6 +53,24 @@
         <translation>Fortrudt: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3253"/>
+        <source>The agent wants to draw a chart with this d3 code, over the data of the chart {}. It runs in a hidden web page of QGIS that reads no file of yours; a web page can still reach the network.
+
+What for: {}
+
+Run it?</source>
+        <translation>Agenten vil tegne et diagram med denne d3-kode, over data fra diagrammet {}. Den kører i en skjult webside i QGIS, som ikke læser nogen af dine filer; en webside kan dog stadig nå netværket.
+
+Hvad til: {}
+
+Kør den?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2816"/>
+        <source>Chart {} drawn with d3 code (expert)</source>
+        <translation>Diagram {} tegnet med d3-kode (ekspert)</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2805"/>
         <source>Chart: {}</source>
         <translation>Diagram: {}</translation>
