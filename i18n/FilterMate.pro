@@ -29,6 +29,7 @@ SOURCES = \
     ../adapters/qgis/coverage_layers/vector_tile_filters.py \
     ../adapters/qgis/coverage_layers/vector_tile_target.py \
     ../adapters/qgis/remote_materializer.py \
+    ../adapters/qgis/stream_copy.py \
     ../adapters/qgis/server_filter_translation.py \
     ../adapters/qgis/server_subset_job.py \
     ../adapters/qgis/subset_failure_reason.py \
@@ -89,6 +90,7 @@ SOURCES = \
     ../ui/controllers/welcome_tour.py \
     ../ui/controllers/segmentation_controller.py \
     ../ui/controllers/coverage_dock_extras.py \
+    ../ui/controllers/stream_copy_actions.py \
     ../ui/controllers/centroid_targets_sync.py \
     ../ui/dialogs/config_editor_widget.py \
     ../ui/dialogs/export_group_recap_dialog.py \

@@ -2756,6 +2756,50 @@
    }
   },
   {
+   "name": "local_copy",
+   "title": "Copy a web service layer locally",
+   "description": "Copy a web service layer over an area to a file next to the project (GeoPackage for features, GeoTIFF for a web map), and the layer reads it with its style and filter: faster, and without the network. A web map is copied as a still image at the finest level the budget affords. Returns reads, file, feature_count or resolution, complete and notes. OpenStreetMap and Google tiles are refused. The chat of FilterMate asks the user first.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Layer id or name of a web service: WFS, OGC API Features, WMS, WMTS or XYZ tiles",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "action": {
+      "default": "copy",
+      "description": "copy: read the service over the area into a file the layer then reads; back: the layer reads its service again",
+      "enum": [
+       "copy",
+       "back"
+      ],
+      "type": "string"
+     },
+     "extent_wkt": {
+      "default": "",
+      "description": "The area as WKT (the extent_wkt of find_place or map_context). Empty: the visible map",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "crs": {
+      "default": "",
+      "description": "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty",
+      "maxLength": 64,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "search_imagery",
    "title": "Search satellite imagery",
    "description": "Find satellite scenes over an area, newest first, with the GeoTIFF of each one. Returns datasets [{id, publisher (collection), description (date and cloud cover), resources: [{format, url}]}]; format visual is the natural colour image. Then add_layer with its url and kind raster.",

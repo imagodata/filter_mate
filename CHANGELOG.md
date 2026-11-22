@@ -4,6 +4,23 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Streams: local copy of a web service layer. A WFS, OGC API Features or ArcGIS Feature Service layer is copied over
+  the visible map to a GeoPackage, a WMS, WMTS or XYZ layer to a GeoTIFF (finest level of the service within the
+  budget, overviews), in a background task that can be cancelled; the cost is said before (pixels, requests, size;
+  or the most features). The layer then reads its copy, with its style and its filter, and goes back to its service
+  in one click; Copy again reads the same area at the same detail, and the previous copy comes back when the new one
+  is not made. The copy lives next to the project (`<project>_filtermate_local`, the QGIS profile when that cannot be
+  written); the project file keeps the service with the filter of the layer, and finds the copy again when it is
+  read (offline too, with its opacity). A layer being edited, or filtered by another layer, keeps its source.
+  Started from a button of the EXPLORING rail (web service layers only), from the menu of the layers of QGIS, and by
+  the agent: tool `local_copy` (offered when the project holds a web service layer; asked first, with the cost),
+  also on the REST API (`POST /layers/local-copy`) and the MCP server. EXPORTING lists the WMS, WMTS and XYZ layers
+  and writes them as they draw over the visible map (not OpenStreetMap, Google nor Bing; an ArcGIS MapServer is still
+  left out; `export_layers` still skips web maps). OpenStreetMap, Google and Bing tiles are refused (their terms forbid
+  keeping them). Settings:
+  `APP.OPTIONS.STREAM_COPY` (`max_pixels`, `max_features`, `timeout_seconds`). Checked in QGIS 3.44 and 4.3
+  (`check_stream_copy.py`, `FM_ONLY=stream_copy`); a WFS is not copied before QGIS 3.26.
+
 ## [5.1.2] - 2026-11-22
 
 The fixes and changes merged since 5.1.1. The panel: the buttons of FILTERING and EXPORTING in front of their rows,

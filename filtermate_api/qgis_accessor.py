@@ -33,6 +33,7 @@ from .accessor import (
     ContourResult,
     CrossFilterResult,
     ElevationResult,
+    LocalCopyResult,
     OsmResult,
     PopulationResult,
     Favorite,
@@ -717,6 +718,10 @@ class QGISFilterMateAccessor:
 
     def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:
         return LayerSummary(**self._control("duplicate_layer", layer, name=name, changes={"layer": layer}))
+
+    def local_copy(self, layer: str, action: str = "copy", extent_wkt: str = "", crs: str = "") -> LocalCopyResult:
+        return LocalCopyResult(**self._control("local_copy", layer, action=action, extent_wkt=extent_wkt, crs=crs,
+                                               module="adapters.public_api.stream_copy", changes={"layer": layer}))
 
     def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
                    extra_domains: Optional[str] = None) -> PlacesResult:

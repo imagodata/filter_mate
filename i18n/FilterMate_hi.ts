@@ -343,6 +343,32 @@ Do you agree?</source>
         <translation>परत जोड़ी गई: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2706"/>
+        <source>Back to the service: {}</source>
+        <translation>सेवा पर वापस जाएँ: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2707"/>
+        <source>Local copy: {}</source>
+        <translation>स्थानीय प्रतिलिपि: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3036"/>
+        <source>The agent wants the layer {} to read its web service again (its local copy stays on disk). Do you agree?</source>
+        <translation>एजेंट चाहता है कि परत {} फिर से अपनी वेब सेवा से पढ़े (उसकी स्थानीय प्रतिलिपि डिस्क पर रहेगी)। क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3046"/>
+        <source>The agent wants to copy the layer {} locally, and the layer then reads the copy:
+{}
+
+The service is read in the background: the copy can be cancelled. Do you agree?</source>
+        <translation>एजेंट परत {} की स्थानीय प्रतिलिपि बनाना चाहता है; इसके बाद परत उसी प्रतिलिपि से पढ़ेगी:
+{}
+
+सेवा को पृष्ठभूमि में पढ़ा जाता है: प्रतिलिपि बनाना रद्द किया जा सकता है। क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
         <source>Table added: {}</source>
         <translation>तालिका जोड़ी गई: {}</translation>
@@ -12491,6 +12517,310 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>फ़िल्टर में प्रकार बेमेल: {warning_detail}...</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopy</name>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="623"/>
+        <source> (incomplete)</source>
+        <translation> (अधूरी)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="221"/>
+        <source>Copy of the features of the visible map, {0} at most.
+
+Folder: {1}</source>
+        <translation>दिखाई दे रहे मानचित्र के फ़ीचर की प्रतिलिपि, अधिकतम {0}।
+
+फ़ोल्डर: {1}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="216"/>
+        <source>Copy of the visible map: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests to the service, {5:.0f} MB at most on disk.
+
+Folder: {6}</source>
+        <translation>दिखाई दे रहे मानचित्र की प्रतिलिपि: {0} x {1} पिक्सेल, प्रति पिक्सेल {2:.3g} {3}, सेवा को {4} अनुरोध, डिस्क पर अधिकतम {5:.0f} MB।
+
+फ़ोल्डर: {6}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="355"/>
+        <source>FilterMate: local copy of {0}</source>
+        <translation>FilterMate: {0} की स्थानीय प्रतिलिपि</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="609"/>
+        <source>Its filter could not be put back on the service: filter it again.</source>
+        <translation>इसका फ़िल्टर सेवा पर वापस नहीं लगाया जा सका: इसे फिर से फ़िल्टर करें।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="579"/>
+        <source>Its filter could not be put on the copy (the GeoPackage reads another language): filter it again.</source>
+        <translation>इसका फ़िल्टर प्रतिलिपि पर नहीं लगाया जा सका (GeoPackage दूसरी भाषा पढ़ता है): इसे फिर से फ़िल्टर करें।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="622"/>
+        <source>Local copy of {0}: still image</source>
+        <translation>{0} की स्थानीय प्रतिलिपि: स्थिर चित्र</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="620"/>
+        <source>Local copy of {0}: {1} features</source>
+        <translation>{0} की स्थानीय प्रतिलिपि: {1} फ़ीचर</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="329"/>
+        <source>No folder can be written for the copy: neither next to the project nor in the QGIS profile.</source>
+        <translation>प्रतिलिपि के लिए कोई लिखने योग्य फ़ोल्डर नहीं मिला: न प्रोजेक्ट के पास, न QGIS प्रोफ़ाइल में।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="263"/>
+        <source>Only a layer of a web service (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, XYZ tiles) can be copied.</source>
+        <translation>केवल वेब सेवा की परत (WFS, OGC API Features, ArcGIS Feature Service, WMS, WMTS, XYZ टाइल) की प्रतिलिपि बनाई जा सकती है।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="701"/>
+        <source>The local copy of {0} was not found: these layers read their web service. Their copy is looked for again the next time the project is opened.</source>
+        <translation>{0} की स्थानीय प्रतिलिपि नहीं मिली: ये परतें अपनी वेब सेवा से पढ़ती हैं। प्रोजेक्ट अगली बार खुलने पर उनकी प्रतिलिपि फिर से खोजी जाएगी।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="605"/>
+        <source>The service could not be opened: the layer still reads its copy.</source>
+        <translation>सेवा खोली नहीं जा सकी: परत अब भी अपनी प्रतिलिपि से पढ़ती है।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="481"/>
+        <source>The service was read for {0:.0f} s, the most allowed: the copy holds {1} features and is not complete.</source>
+        <translation>सेवा को {0:.0f} सेकंड तक पढ़ा गया, जो अधिकतम अनुमत समय है: प्रतिलिपि में {1} फ़ीचर हैं और वह पूरी नहीं है।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="268"/>
+        <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
+        <translation>{0} की शर्तें उसकी टाइलें रखने की अनुमति नहीं देतीं: इस परत की प्रतिलिपि नहीं बनाई जाती। किसी दूसरे आधार मानचित्र की प्रतिलिपि बनाई जा सकती है (IGN, Carto, OpenTopoMap...)।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="292"/>
+        <source>The visible map cannot be expressed in the coordinates of this layer.</source>
+        <translation>दिखाई दे रहा मानचित्र इस परत के निर्देशांकों में व्यक्त नहीं किया जा सकता।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="288"/>
+        <source>The visible map could not be read.</source>
+        <translation>दिखाई दे रहा मानचित्र पढ़ा नहीं जा सका।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="478"/>
+        <source>The visible map holds more than {0} features: only the first {0} were copied. Zoom in, or raise STREAM_COPY &gt; max_features.</source>
+        <translation>दिखाई दे रहे मानचित्र में {0} से अधिक फ़ीचर हैं: केवल पहले {0} की प्रतिलिपि बनी। ज़ूम इन करें, या STREAM_COPY &gt; max_features बढ़ाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="312"/>
+        <source>The visible map is outside what this service draws.</source>
+        <translation>दिखाई दे रहा मानचित्र उस क्षेत्र से बाहर है जिसे यह सेवा दर्शाती है।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="258"/>
+        <source>This layer already reads its local copy: go back to the service first, or copy it again.</source>
+        <translation>यह परत पहले से अपनी स्थानीय प्रतिलिपि से पढ़ रही है: पहले सेवा पर वापस जाएँ, या इसकी फिर से प्रतिलिपि बनाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="272"/>
+        <source>This layer cannot be read from its service now.</source>
+        <translation>यह परत अभी अपनी सेवा से नहीं पढ़ी जा सकती।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="596"/>
+        <source>This layer does not read a local copy.</source>
+        <translation>यह परत स्थानीय प्रतिलिपि से नहीं पढ़ती।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="279"/>
+        <source>This layer is being edited: save or discard the edits, then copy it.</source>
+        <translation>यह परत संपादित हो रही है: संपादन सहेजें या छोड़ दें, फिर इसकी प्रतिलिपि बनाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="601"/>
+        <source>This layer is being edited: save or discard the edits, then go back to its service.</source>
+        <translation>यह परत संपादित हो रही है: संपादन सहेजें या छोड़ दें, फिर इसकी सेवा पर वापस जाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="276"/>
+        <source>This layer is filtered by another layer: unfilter it, then copy it.</source>
+        <translation>यह परत किसी दूसरी परत द्वारा फ़िल्टर की गई है: इसका फ़िल्टर हटाएँ, फिर इसकी प्रतिलिपि बनाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="599"/>
+        <source>This layer is filtered by another layer: unfilter it, then go back to its service.</source>
+        <translation>यह परत किसी दूसरी परत द्वारा फ़िल्टर की गई है: इसका फ़िल्टर हटाएँ, फिर इसकी सेवा पर वापस जाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="319"/>
+        <source>This version of QGIS cannot check what a service answers while it is read: update QGIS to 3.26 or later to copy it.</source>
+        <translation>QGIS का यह संस्करण पढ़ते समय सेवा के उत्तर की जाँच नहीं कर सकता: प्रतिलिपि बनाने के लिए QGIS को 3.26 या उससे नए संस्करण पर अपडेट करें।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="227"/>
+        <source>map units</source>
+        <translation>मानचित्र इकाइयाँ</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="451"/>
+        <source>the GeoPackage could not be written: {0}</source>
+        <translation>GeoPackage लिखा नहीं जा सका: {0}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="568"/>
+        <source>the copy could not be opened: the layer still reads its service</source>
+        <translation>प्रतिलिपि खोली नहीं जा सकी: परत अब भी अपनी सेवा से पढ़ती है</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="391"/>
+        <source>the copy failed ({0})</source>
+        <translation>प्रतिलिपि बनाना विफल रहा ({0})</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="471"/>
+        <source>the copy was canceled</source>
+        <translation>प्रतिलिपि बनाना रद्द किया गया</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="413"/>
+        <source>the service could not be opened</source>
+        <translation>सेवा खोली नहीं जा सकी</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="475"/>
+        <source>the service could not be read to the end: nothing was kept</source>
+        <translation>सेवा को अंत तक पढ़ा नहीं जा सका: कुछ भी नहीं रखा गया</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="473"/>
+        <source>the service gave no feature over the visible map: nothing was copied</source>
+        <translation>सेवा ने दिखाई दे रहे मानचित्र पर कोई फ़ीचर नहीं दिया: कुछ भी प्रतिलिपि नहीं हुआ</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="560"/>
+        <source>{0} is being edited: it stays on its service. Save or discard the edits, then copy it again.</source>
+        <translation>{0} संपादित हो रही है: यह अपनी सेवा पर ही रहती है। संपादन सहेजें या छोड़ दें, फिर इसकी दोबारा प्रतिलिपि बनाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="421"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>सेवा के {0} अनुरोधों का उत्तर नहीं मिला: चित्र में खाली जगहें हो सकती हैं।</translation>
+    </message>
+</context>
+<context>
+    <name>StreamCopyActions</name>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Back to the service</source>
+        <translation>सेवा पर वापस जाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Cancel</source>
+        <translation>रद्द करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Copy</source>
+        <translation>प्रतिलिपि बनाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="272"/>
+        <source>Copy again</source>
+        <translation>दोबारा प्रतिलिपि बनाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="173"/>
+        <source>Copying {0} over the visible map… (cancel it from the button or the task bar)</source>
+        <translation>{0} की दिखाई दे रहे मानचित्र पर प्रतिलिपि बनाई जा रही है… (इसे बटन या टास्क बार से रद्द करें)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="355"/>
+        <source>FilterMate: cancel the local copy</source>
+        <translation>FilterMate: स्थानीय प्रतिलिपि रद्द करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="356"/>
+        <source>FilterMate: local copy (back to the service, copy again)</source>
+        <translation>FilterMate: स्थानीय प्रतिलिपि (सेवा पर वापस जाएँ, दोबारा प्रतिलिपि बनाएँ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="307"/>
+        <source>FilterMate: local copy of the visible map</source>
+        <translation>FilterMate: दिखाई दे रहे मानचित्र की स्थानीय प्रतिलिपि</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="198"/>
+        <source>It reads its previous copy.</source>
+        <translation>यह अपनी पिछली प्रतिलिपि से पढ़ती है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="165"/>
+        <source>Local copy of {0}</source>
+        <translation>{0} की स्थानीय प्रतिलिपि</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="115"/>
+        <source>Local copy under way: click to cancel it</source>
+        <translation>स्थानीय प्रतिलिपि बन रही है: रद्द करने के लिए क्लिक करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="121"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer, and read the layer from it (faster, and without network)</source>
+        <translation>स्थानीय प्रतिलिपि: यह वेब सेवा दिखाई दे रहे मानचित्र पर जो दिखाती है उसे इस कंप्यूटर की एक फ़ाइल में रखें, और परत को उसी से पढ़ें (तेज़, और बिना नेटवर्क के)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="139"/>
+        <source>Only a layer of a web service (WFS, WMS, WMTS, XYZ tiles...) can be copied.</source>
+        <translation>केवल वेब सेवा की परत (WFS, WMS, WMTS, XYZ टाइल...) की प्रतिलिपि बनाई जा सकती है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="270"/>
+        <source>The copy covers the area of the map when it was made. Copy again reads the same area anew.</source>
+        <translation>प्रतिलिपि उस समय के मानचित्र क्षेत्र को कवर करती है जब वह बनाई गई थी। दोबारा प्रतिलिपि बनाने पर वही क्षेत्र फिर से पढ़ा जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="167"/>
+        <source>canceled</source>
+        <translation>रद्द किया गया</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="191"/>
+        <source>{0} changed during its copy (a filter of another layer, another source): the copy is not used. Copy it again.</source>
+        <translation>{0} प्रतिलिपि बनाते समय बदल गई (किसी दूसरी परत का फ़िल्टर, कोई दूसरा स्रोत): प्रतिलिपि का उपयोग नहीं किया गया। दोबारा प्रतिलिपि बनाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="157"/>
+        <source>{0} is being copied already.</source>
+        <translation>{0} की प्रतिलिपि पहले से बन रही है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="215"/>
+        <source>{0} now reads its local copy ({1}).</source>
+        <translation>{0} अब अपनी स्थानीय प्रतिलिपि ({1}) से पढ़ती है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="246"/>
+        <source>{0} reads its service again. Its copy is still in the folder of the copies.</source>
+        <translation>{0} फिर से अपनी सेवा से पढ़ती है। इसकी प्रतिलिपि प्रतिलिपियों के फ़ोल्डर में बनी रहती है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="197"/>
+        <source>{0} was not copied: {1}.</source>
+        <translation>{0} की प्रतिलिपि नहीं बनी: {1}।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="202"/>
+        <source>{0} was removed during its copy: the file is kept in {1}.</source>
+        <translation>{0} प्रतिलिपि बनाते समय हटा दी गई: फ़ाइल {1} में रखी गई है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/stream_copy_actions.py" line="118"/>
+        <source>{0}. Click to go back to the service or to copy the visible map again</source>
+        <translation>{0}। सेवा पर वापस जाने या दिखाई दे रहे मानचित्र की दोबारा प्रतिलिपि बनाने के लिए क्लिक करें</translation>
     </message>
 </context>
 <context>

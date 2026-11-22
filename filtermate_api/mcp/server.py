@@ -43,6 +43,8 @@ SERVER_NAME = "filtermate"
 # 30 + 90 + 240 + 60 = 420. A client that gives up before the plugin does shows a timeout while the layers arrive,
 # and a second call adds them again (330 s, the sum of the two limits alone, left no room for that).
 ADD_LAYER_TIMEOUT = 420.0
+# A local copy reads its service for STREAM_COPY.timeout_seconds at most (600 s by default), then writes its file.
+LOCAL_COPY_TIMEOUT = 720.0
 
 INSTRUCTIONS = """\
 Drives FilterMate, the QGIS filtering plugin, through its local REST API. QGIS must be running with the API started.
@@ -1079,6 +1081,29 @@ def build_server(client: FilterMateClient) -> Any:
         layer cannot show at once (an elevation as colors and as a hillshade). Returns its summary.
         """
         return await call("POST", "/layers/duplicate", _body(layer=layer, name=name))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Copy a web service layer locally", readOnlyHint=False,
+                                          destructiveHint=False, idempotentHint=False, openWorldHint=True))
+    async def local_copy(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description=(
+            "Layer id or name of a web service: WFS, OGC API Features, WMS, WMTS or XYZ tiles"))],
+        action: Annotated[Literal["copy", "back"], Field(description=(
+            "copy: read the service over the area into a file the layer then reads; back: the layer reads its "
+            "service again"))] = "copy",
+        extent_wkt: Annotated[str, Field(max_length=100_000, description=(
+            "The area as WKT (the extent_wkt of find_place or map_context). Empty: the visible map"))] = "",
+        crs: Annotated[str, Field(max_length=64, description=(
+            "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty"))] = "",
+    ) -> Dict[str, Any]:
+        """Copy a web service layer over an area to a file next to the project (GeoPackage for features, GeoTIFF for
+        a web map), and the layer reads it with its style and filter: faster, and without the network.
+
+        A web map is copied as a still image at the finest level the budget affords. Returns reads, file,
+        feature_count or resolution, complete and notes. OpenStreetMap and Google tiles are refused. The chat of
+        FilterMate asks the user first.
+        """
+        return await call("POST", "/layers/local-copy", _body(layer=layer, action=action, extent_wkt=extent_wkt,
+                                                               crs=crs), timeout=LOCAL_COPY_TIMEOUT)
 
     @mcp.tool(annotations=ToolAnnotations(title="Search satellite imagery", readOnlyHint=True, openWorldHint=True))
     async def search_imagery(

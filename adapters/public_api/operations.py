@@ -951,7 +951,7 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
                     ok, path, message = _export_vector(layer, path, driver, crs, project, feedback=block)
                 finally:
                     release()
-            elif kind is LayerKind.RASTER and is_non_analysis_raster(layer):
+            elif kind is LayerKind.RASTER and is_non_analysis_raster(layer):  # local_copy writes a web map
                 report.skipped[label] = RENDERED_NOT_EXPORTED
                 continue
             elif kind is LayerKind.RASTER:

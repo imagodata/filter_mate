@@ -73,6 +73,7 @@ SUMMARIES = {
     "add_elevation": "Elevation of an area, as a raster",
     "add_population": "Population of an area, as a raster",
     "add_osm_features": "OpenStreetMap features of given tags in an area",
+    "local_copy": "Copy a WFS / WMS layer to a local file, or back",
     "list_database_tables": "Tables of a PostgreSQL connection",
     "add_database_table": "Add a PostgreSQL table as a layer",
     # FilterMate itself
