@@ -18,6 +18,7 @@ from ...adapters.agent.settings import (
     target_of, current_provider, read_providers, write_providers,
 )
 from ...adapters.agent import transcript_store
+from ...adapters.agent.memory_store import change_memory, memory_path, project_sources, read_memory
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
 from ...adapters.agent import plugin_settings
@@ -74,6 +75,7 @@ from ...core.agent.messages import request_usage
 from ...core.agent.session import (
     REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget, tools_weight,
 )
+from ...core.agent.memory import UnreadableMemory, chosen as memory_chosen, memory_block
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
@@ -891,6 +893,7 @@ class AgentChatController(QObject):
             self._links.append(lambda: self._open_feedback(form, "agent-chat"))
         elif target in SETTINGS_TABS:
             panel_words = {"provider": "Provider", "sources": "Sources", "autonomy": "Autonomy", "tools": "Tools",
+                           "memory": "Memory",
                            "other_applications": "Other applications"}  # the titles of the tabs, already translated
             names = {key: QCoreApplication.translate("AgentPanel", word) for key, word in panel_words.items()}
             label = _tr("Open Agent settings: {}").format(names[target])
@@ -930,10 +933,25 @@ class AgentChatController(QObject):
         protected = set(read_protected())
         project_layers = sorted(((layer.id(), layer.name(), layer.id() in protected)
                                  for layer in QgsProject.instance().mapLayers().values()), key=lambda row: row[1].lower())
+        memory, memory_error = None, ""
+        try:
+            memory = read_memory()
+        except UnreadableMemory as exc:  # the tab says so, and writes nothing
+            memory_error = str(exc)
+        try:  # the layers a request counts, in its order: the tab then says what a request sends
+            active_layer = self._active_layer()
+            memory_sources, memory_active = project_sources(
+                [row.get("layer_id", "") for row in self._layer_rows()],
+                active_layer.id() if active_layer is not None else "")
+        except Exception:  # the tab then offers the notes for every project only
+            logger.debug("Agent: sources of the project not read for the memory", exc_info=True)
+            memory_sources, memory_active = [], ""
         dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source,
                                      databases=qgis_databases(),
                                      provider_tester=self._test_provider, mcp_error=self._mcp.error,
                                      project_layers=project_layers,
+                                     memory=memory, memory_error=memory_error, memory_sources=memory_sources,
+                                     memory_active=memory_active, memory_file=str(memory_path() or ""),
                                      tools=[(tool.name, tool.title or tool.name, risk_of(tool))
                                             for tool in chat_tools() if tool.name not in AGENT_OWN])
         if tab:
@@ -980,7 +998,14 @@ class AgentChatController(QObject):
                                         local_filtering_only=dialog.local_filtering_only.isChecked(),
                                         tool_families=dialog.tool_families.isChecked(),
                                         autonomy=dialog.chosen_autonomy(),
-                                        tool_rules=json.dumps(dialog.chosen_tool_rules())))
+                                        tool_rules=json.dumps(dialog.chosen_tool_rules()),
+                                        memory=dialog.memory_enabled.isChecked()))
+            memory_changes = dialog.memory_changes()
+            try:  # on the file as it is now: another QGIS may have written it since the dialog opened
+                if memory_changes:  # nothing changed: the file is not read, and one that cannot be is not an error here
+                    change_memory(memory_changes)
+            except (ValueError, OSError) as exc:  # the other settings are saved; the notes stay as they were
+                self._say(_tr("The memory could not be saved: {}").format(exc), error=True)
             self._remember_provider(load_settings())
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
             self._policy.rules = load_settings().rules
@@ -2512,7 +2537,7 @@ class AgentChatController(QObject):
     def _project_context(self, full: bool = True) -> str:
         """The map, the layers, their filters, the selections now and what the user changed since the last answer:
         the whole of it at the first request and after the history was rewritten (``full``), else what changed only,
-        and the notes, widgets, recipes and protected layers when they changed (token diet, lot 3).
+        and the notes, the memory, widgets, recipes and protected layers when they changed (token diet, lot 3).
 
         Sent after the request; empty when the project cannot be read.
         """
@@ -2527,6 +2552,7 @@ class AgentChatController(QObject):
         except Exception:  # the request goes without them
             logger.debug("Agent: project notes not read", exc_info=True)
             notes = ""
+        memory = self._memory_part(read)
         try:
             widgets = widget_summary(agent_widgets.read_widgets())
         except Exception:  # the request goes without them
@@ -2542,9 +2568,32 @@ class AgentChatController(QObject):
         outcomes, self._settings_outcomes = self._settings_outcomes, []  # the cards answered since the last request
         self._outcomes_sent = outcomes  # given back if the request is taken out of the conversation
         return compose(self._context_memory.delta(ContextParts(
-            summary=summary, notes=notes, widgets=widgets_part(widgets), recipes=recipes,
+            summary=summary, notes=notes, memory=memory, widgets=widgets_part(widgets), recipes=recipes,
             protected=protected_part(protected), decided=decided_part(outcomes), level=level_note(self._policy.level)),
             full))
+
+    @staticmethod
+    def _memory_part(read) -> str:
+        """The notes kept from one project to the next that are for this project (core/agent/memory.py): those for
+        every project, and those of the sources of its layers. "" when the option is off, when none is kept, or when
+        the file cannot be read (the Memory tab of the settings says why): the request goes without them.
+
+        ``read``: what ``_read_project`` gave, None when the project could not be read (the notes for every project
+        still go)."""
+        try:
+            values = load_settings()
+            if not values.memory:
+                return ""
+            memory = read_memory()
+            if not memory.notes:
+                return ""
+            layers, _selections, view = read if read is not None else ([], [], {})
+            sources, active = project_sources([row.get("layer_id", "") for row in layers],
+                                              str(view.get("active_layer_id") or ""))
+            return memory_block(memory_chosen(memory, sources, active, share_values=values.send_values))
+        except Exception:  # the request goes without them
+            logger.debug("Agent: memory not read", exc_info=True)
+            return ""
 
     def protection_refusal(self, call: ToolCallPart) -> str:
         """What a call that would change a protected layer, or of a tool turned off, is answered, for the MCP server

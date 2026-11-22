@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""The context sent with each request of the user: the state of the project, the notes, the widgets, the recipes, the
-layers protected, the settings decided, the level of autonomy.
+"""The context sent with each request of the user: the state of the project, the notes, the memory kept from one
+project to the next, the widgets, the recipes, the layers protected, the settings decided, the level of autonomy.
 
 Plain Python, out of ui/controllers/agent_chat_controller.py (token diet, lot 3, 2026-11-16) so that the measuring
 scripts compose it as the chat does.
@@ -18,6 +18,7 @@ class ContextParts:
 
     summary: str = ""
     notes: str = ""
+    memory: str = ""  # core/agent/memory.py: the notes kept from one project to the next, for this project
     widgets: str = ""
     recipes: str = ""
     protected: str = ""
@@ -47,13 +48,14 @@ def decided_part(outcomes: Sequence[str]) -> str:
 
 # Said once when a part that was sent is gone, instead of nothing (the model would keep the last one it read).
 REMOVED = {"notes": "The notes of this project were all removed.",
+           "memory": "The notes kept from one project to the next are no longer sent: do not rely on them.",
            "widgets": "The widgets of the panel were all removed.",
            "recipes": "No recipe is kept in this project any more.",
            "protected": "No layer is protected from the agent any more.",
            "level": ("Level of autonomy chosen by the user: standard again. The tools that change the project run as "
                      "usual, so act when asked instead of only describing the steps; the user confirms what needs it.")}
 # Sent again only when they changed; the state of the project (summary) and the settings decided are the caller's.
-_REPEATED = ("notes", "widgets", "recipes", "protected", "level")
+_REPEATED = ("notes", "memory", "widgets", "recipes", "protected", "level")
 
 
 class ContextMemory:

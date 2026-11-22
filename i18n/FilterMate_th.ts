@@ -190,6 +190,11 @@ Do you agree?</source>
         <translation>หยุดคำขอ หรือรอให้เสร็จสิ้น เพื่อเปิดการตั้งค่า</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
+        <source>The memory could not be saved: {}</source>
+        <translation>ไม่สามารถบันทึกความจำได้: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>ไม่มีสิ่งที่ต้องเลิกทำ</translation>
@@ -1676,6 +1681,66 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>แอปพลิเคชันอื่น</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1587"/>
+        <source>Memory</source>
+        <translation>ความจำ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1737"/>
+        <source>Keep notes from one project to the next</source>
+        <translation>เก็บโน้ตไว้ใช้ข้ามโครงการ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the QGIS profile). They are sent to your provider with a request: those for every project always, those of a layer when a layer of the same source is in the open project. Double-click a note to correct it.</source>
+        <translation>โน้ตที่คุณเขียนที่นี่จะอยู่ในไฟล์บนคอมพิวเตอร์เครื่องนี้ (agent_memory.json ในโฟลเดอร์ FilterMate ของโปรไฟล์ QGIS) โน้ตจะถูกส่งไปยังผู้ให้บริการของคุณพร้อมกับคำขอ: โน้ตสำหรับทุกโครงการจะส่งเสมอ ส่วนโน้ตของเลเยอร์จะส่งเมื่อมีเลเยอร์จากแหล่งข้อมูลเดียวกันอยู่ในโครงการที่เปิดอยู่ ดับเบิลคลิกที่โน้ตเพื่อแก้ไข</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Every project</source>
+        <translation>ทุกโครงการ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1768"/>
+        <source>A note, in one sentence</source>
+        <translation>โน้ตในประโยคเดียว</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1779"/>
+        <source>Forget everything</source>
+        <translation>ลืมทั้งหมด</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1781"/>
+        <source>Open the file</source>
+        <translation>เปิดไฟล์</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1855"/>
+        <source>This list is full: remove a note first.</source>
+        <translation>รายการนี้เต็มแล้ว: โปรดลบโน้ตออกหนึ่งรายการก่อน</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1863"/>
+        <source>The memory file cannot be read ({}). Correct it or remove it: nothing is written to it meanwhile.</source>
+        <translation>ไม่สามารถอ่านไฟล์ความจำได้ ({}) โปรดแก้ไขหรือลบไฟล์นี้: ระหว่างนี้จะไม่มีการเขียนข้อมูลใด ๆ ลงในไฟล์</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1872"/>
+        <source>Sent with this project: {} of {} notes.</source>
+        <translation>ส่งพร้อมกับโครงการนี้: {} จาก {} โน้ต</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1874"/>
+        <source>{} not sent: they hold attribute values, which you do not share.</source>
+        <translation>ไม่ได้ส่ง {} โน้ต: โน้ตเหล่านี้มีค่าแอตทริบิวต์ ซึ่งคุณไม่ได้แชร์</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1920"/>
+        <source>Forget every note kept from one project to the next?</source>
+        <translation>ลืมโน้ตทั้งหมดที่เก็บไว้ใช้ข้ามโครงการหรือไม่</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="872"/>
