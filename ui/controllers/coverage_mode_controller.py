@@ -741,6 +741,13 @@ class CoverageModeController(BaseController):
         """The tools the user shows on the EXPLORING rail changed (APP.DOCKWIDGET.EXPLORING_TOOLS): the rail follows."""
         self._extras_call('apply_tool_choice')
 
+    def rail(self) -> Any:
+        """What holds the EXPLORING rail (``CoverageDockExtras``: ``rail_kind``, ``tool_states``, ``click_tool``,
+        ``hidden_tools``), for who drives it by code; None when it could not be built."""
+        if self._extras is None:
+            self._extras_call('rail_kind')  # builds it
+        return self._extras
+
     def sync_vector_tools(self, groupbox: Optional[str]) -> None:
         """The vector EXPLORING group changed: the rail tools tied to the groups follow (R1)."""
         self._extras_call('sync_vector_tools', groupbox)

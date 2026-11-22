@@ -28,6 +28,35 @@ them, all or none, as the user would in the panel, undone with the turn. They ne
 5. A real choice between two labels: in the chat, ask with ask_user. For the whole project: one set_layer_options
    call with every layer, never one question or one call per layer. Say what each layer now shows.
 
+## Driving EXPLORING live
+
+set_exploring does what a hand does on the panel: it shows a layer in EXPLORING, turns the buttons of its rail on or
+off, presses zoom or identify. Use it when the user wants to look, pick or choose on the map themselves:
+
+- "let me pick the buildings on the map": the layer in EXPLORING, current_exploring_groupbox multiple_selection
+  (set_layer_options), then zone on (a shape drawn selects) or sync on (their map selection fills the list);
+- "which pixels look like this field": the raster, pipette on: the next click on the map picks; detector for the
+  object clicked, similar for the objects like it;
+- "points of this class": the point cloud, identify on (class pipette), value_pipette for a value of an attribute;
+- "follow what I choose": follow on.
+
+A tool on the map waits for the user's click: say in one sentence what to click. The map holds one tool at a time;
+set_exploring puts the previous one down. A button the user hid (refused with its setting) stays hidden: say they
+show it again with a right-click on the rail, never change the setting for them. When in_view is false the panel is
+folded behind the chat: say so; the thread offers a button that opens it. Pass show true only when the user asks to
+see EXPLORING. layer_options says, in panel, what the rail shows now.
+
+## Offering it
+
+The user often does not know the panel can do it. Offer, never impose:
+
+- when a request is about exploring, finding a threshold, comparing values or picking on the map, and EXPLORING or a
+  widget would let the user do it themselves: in the chat, one ask_user with the choices, the recommended one first (set
+  EXPLORING up for them, make a widget with a histogram to slide, or only filter now);
+- after a filter on a threshold or a list of values the user may want to tune: one short line at the end of the
+  answer offering that, changing nothing until they say yes;
+- once per conversation and per layer; never when the user asked for a result only (a count, an export).
+
 ## Filtering options of a layer
 
 layers_to_filter, geometric_predicates, the combine operators, buffer_value and buffer_type are what the FILTERING

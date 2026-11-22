@@ -391,6 +391,11 @@ Run it?</translation>
         <translation>export options of the panel</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="80"/>
+        <source>EXPLORING panel</source>
+        <translation>EXPLORING panel</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
         <source>Show in the configuration: {}</source>
         <translation>Show in the configuration: {}</translation>
@@ -1016,6 +1021,16 @@ Do you agree?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2231"/>
         <source>Panel options of: {}</source>
         <translation>Panel options of: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2716"/>
+        <source>EXPLORING: {}</source>
+        <translation>EXPLORING: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2742"/>
+        <source>Open EXPLORING</source>
+        <translation>Open EXPLORING</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2232"/>
@@ -2254,6 +2269,21 @@ Do you agree to all of them? No runs none of them.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="142"/>
         <source>Draw a 100 m zone around the active layer</source>
         <translation>Draw a 100 m zone around the active layer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="150"/>
+        <source>Let me pick features on the map</source>
+        <translation>Let me pick features on the map</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="151"/>
+        <source>A slider over a number field's histogram</source>
+        <translation>A slider over a number field's histogram</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="152"/>
+        <source>Arm the pipette on this raster</source>
+        <translation>Arm the pipette on this raster</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="143"/>
