@@ -200,6 +200,11 @@ Oletteko samaa mieltä?</translation>
         <translation>Pysäytä pyyntö tai odota sen päättymistä avataksesi asetukset.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
+        <source>The memory could not be saved: {}</source>
+        <translation>Muistia ei voitu tallentaa: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Ei mitään kumottavaa.</translation>
@@ -1691,6 +1696,66 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>Muut sovellukset</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1587"/>
+        <source>Memory</source>
+        <translation>Muisti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1737"/>
+        <source>Keep notes from one project to the next</source>
+        <translation>Säilytä muistiinpanot projektista toiseen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the QGIS profile). They are sent to your provider with a request: those for every project always, those of a layer when a layer of the same source is in the open project. Double-click a note to correct it.</source>
+        <translation>Tähän kirjoittamasi muistiinpanot pysyvät tiedostossa tällä tietokoneella (agent_memory.json, QGIS-profiilin FilterMate-kansiossa). Ne lähetetään palveluntarjoajallesi pyynnön mukana: kaikkia projekteja koskevat aina, tasoa koskevat silloin, kun avoimessa projektissa on saman lähteen taso. Korjaa muistiinpanoa kaksoisnapsauttamalla sitä.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Every project</source>
+        <translation>Kaikki projektit</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1768"/>
+        <source>A note, in one sentence</source>
+        <translation>Muistiinpano, yhdellä lauseella</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1779"/>
+        <source>Forget everything</source>
+        <translation>Unohda kaikki</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1781"/>
+        <source>Open the file</source>
+        <translation>Avaa tiedosto</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1855"/>
+        <source>This list is full: remove a note first.</source>
+        <translation>Tämä luettelo on täynnä: poista ensin yksi muistiinpano.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1863"/>
+        <source>The memory file cannot be read ({}). Correct it or remove it: nothing is written to it meanwhile.</source>
+        <translation>Muistitiedostoa ei voi lukea ({}). Korjaa se tai poista se: siihen ei sillä välin kirjoiteta mitään.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1872"/>
+        <source>Sent with this project: {} of {} notes.</source>
+        <translation>Lähetetty tämän projektin mukana: {}/{} muistiinpanoa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1874"/>
+        <source>{} not sent: they hold attribute values, which you do not share.</source>
+        <translation>{} jäi lähettämättä: ne sisältävät attribuuttiarvoja, joita et jaa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1920"/>
+        <source>Forget every note kept from one project to the next?</source>
+        <translation>Unohdetaanko kaikki projektista toiseen säilytetyt muistiinpanot?</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="872"/>

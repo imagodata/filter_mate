@@ -130,7 +130,7 @@ class FakeBridge:
 
 SETTINGS = types.SimpleNamespace(autonomy="standard", rules={}, preset="anthropic", model="m", ready=True,
                                  has_consent=True, send_values=True, expert_python=False, custom_sources="[]",
-                                 enabled_sources=[])
+                                 enabled_sources=[], memory=True)
 
 
 def _module(monkeypatch, name, **attrs):
@@ -175,6 +175,12 @@ def ctrl_module(monkeypatch):
     store.saved = []
     store.save = lambda key, transcript: store.saved.append((key, list(transcript)))
     _module(monkeypatch, ".adapters.agent.project_notes_store", read_notes=lambda project=None: [])
+    # The notes kept from one project to the next: none, unless a test gives some (``memory.held``).
+    memory = _module(monkeypatch, ".adapters.agent.memory_store", held=None, sources=([], ""), changed=[],
+                     memory_path=lambda: None)
+    memory.read_memory = lambda path=None: memory.held if memory.held is not None else types.SimpleNamespace(notes=())
+    memory.project_sources = lambda layer_ids=None, active_id="", project=None: memory.sources
+    memory.change_memory = lambda changes, path=None, today="": memory.changed.append(list(changes))
     recipes = _module(monkeypatch, ".adapters.agent.recipes_store", recipes=[])
     recipes.read_recipes = lambda project=None: list(recipes.recipes)
     _module(monkeypatch, ".adapters.agent.turn_checkpoint", TurnCheckpoint=FakeCheckpoint)
@@ -594,6 +600,37 @@ def test_the_summary_does_not_count_a_web_service(ctrl_module, controller, monke
     assert local.counted == 0
     assert [(row["name"], row["feature_count"], row["active_filter_expression"], row["group"], row["visible"])
             for row in rows] == [("LOCAL", 7, "a > 1", "", True), ("WFS", -1, "", "Base", False)]
+
+
+def test_the_memory_goes_with_the_context_of_a_request(ctrl_module, controller, monkeypatch):
+    """The notes for every project and those of the sources of the project, once; nothing when the option is off, when
+    none is kept, or when the file cannot be read."""
+    core_memory = sys.modules[f"{_PKG}.core.agent.memory"]
+    store = sys.modules[f"{_PKG}.adapters.agent.memory_store"]
+    assert controller._memory_part(None) == ""  # nothing kept: not a character more
+    kept, _note = core_memory.added(core_memory.Memory(), "MRO = zone de mutualisation")
+    kept, _note = core_memory.added(kept, "aérien = type_infra 'AER'", "source", "ogr::troncons", with_values=True)
+    store.held, store.sources = kept, ([("ogr::troncons", "Tronçons")], "ogr::troncons")
+    block = controller._memory_part(([{"layer_id": "t1"}], [], {"active_layer_id": "t1"}))
+    assert block.splitlines() == [core_memory.HEADER, core_memory.USER_TITLE, "- MRO = zone de mutualisation",
+                                  "For the layer Tronçons:", "- aérien = type_infra 'AER'"]
+    assert block in controller._project_context(full=True)
+    controller._context_memory.sent()
+    monkeypatch.setattr(controller, "_seen", {}, raising=False)  # an answer ended: the next request says what changed
+    monkeypatch.setattr(controller, "_read_project", lambda: None)
+    assert core_memory.HEADER not in controller._project_context(full=False)  # sent once, then when it changed
+    store.held, _note = core_memory.added(kept, "réponds en mètres")
+    assert "- réponds en mètres" in controller._project_context(full=False)
+    monkeypatch.setattr(ctrl_module, "load_settings", lambda: types.SimpleNamespace(memory=True, send_values=False))
+    assert "- aérien" not in controller._memory_part(([{"layer_id": "t1"}], [], {}))  # values no longer shared
+    monkeypatch.setattr(ctrl_module, "load_settings", lambda: types.SimpleNamespace(memory=False, send_values=True))
+    assert controller._memory_part(None) == ""
+    monkeypatch.setattr(ctrl_module, "load_settings", lambda: SETTINGS)
+
+    def unreadable(path=None):
+        raise core_memory.UnreadableMemory("it is not JSON")
+    monkeypatch.setattr(ctrl_module, "read_memory", unreadable)  # the name the controller bound at import
+    assert controller._memory_part(None) == ""  # the request goes without it; the Memory tab says why
 
 
 # --- 9: a controller half built, a shutdown that goes on -------------------------------------------------------

@@ -200,6 +200,11 @@ Do you agree?</source>
         <translation>أوقف الطلب أو انتظر انتهاءه لفتح الإعدادات.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
+        <source>The memory could not be saved: {}</source>
+        <translation>تعذّر حفظ الذاكرة: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>لا شيء للتراجع عنه.</translation>
@@ -1691,6 +1696,66 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>تطبيقات أخرى</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1587"/>
+        <source>Memory</source>
+        <translation>الذاكرة</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1737"/>
+        <source>Keep notes from one project to the next</source>
+        <translation>الاحتفاظ بالملاحظات من مشروع إلى آخر</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the QGIS profile). They are sent to your provider with a request: those for every project always, those of a layer when a layer of the same source is in the open project. Double-click a note to correct it.</source>
+        <translation>الملاحظات التي تكتبها هنا تبقى في ملف على هذا الكمبيوتر (agent_memory.json، في مجلد FilterMate ضمن ملف تعريف QGIS). تُرسل إلى مزوّدك مع الطلب: ملاحظات جميع المشاريع دائمًا، وملاحظات الطبقة عندما توجد طبقة من المصدر نفسه في المشروع المفتوح. انقر نقرًا مزدوجًا على ملاحظة لتصحيحها.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Every project</source>
+        <translation>جميع المشاريع</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1768"/>
+        <source>A note, in one sentence</source>
+        <translation>ملاحظة، في جملة واحدة</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1779"/>
+        <source>Forget everything</source>
+        <translation>نسيان الكل</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1781"/>
+        <source>Open the file</source>
+        <translation>فتح الملف</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1855"/>
+        <source>This list is full: remove a note first.</source>
+        <translation>هذه القائمة ممتلئة: أزل ملاحظة أولاً.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1863"/>
+        <source>The memory file cannot be read ({}). Correct it or remove it: nothing is written to it meanwhile.</source>
+        <translation>تعذّرت قراءة ملف الذاكرة ({}). صحّحه أو احذفه: لن يُكتب فيه شيء في هذه الأثناء.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1872"/>
+        <source>Sent with this project: {} of {} notes.</source>
+        <translation>أُرسل مع هذا المشروع: {} من أصل {} ملاحظة.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1874"/>
+        <source>{} not sent: they hold attribute values, which you do not share.</source>
+        <translation>{} لم تُرسل: تحتوي على قيم سمات لا تشاركها.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1920"/>
+        <source>Forget every note kept from one project to the next?</source>
+        <translation>هل تريد نسيان كل الملاحظات المحفوظة من مشروع إلى آخر؟</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="872"/>

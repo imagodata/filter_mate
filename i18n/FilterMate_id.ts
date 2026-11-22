@@ -200,6 +200,11 @@ Apakah Anda setuju?</translation>
         <translation>Hentikan permintaan, atau tunggu hingga selesai, untuk membuka pengaturan.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
+        <source>The memory could not be saved: {}</source>
+        <translation>Memori tidak dapat disimpan: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Tidak ada yang bisa diurungkan.</translation>
@@ -1691,6 +1696,66 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>Aplikasi lain</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1587"/>
+        <source>Memory</source>
+        <translation>Memori</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1737"/>
+        <source>Keep notes from one project to the next</source>
+        <translation>Simpan catatan dari satu proyek ke proyek berikutnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the QGIS profile). They are sent to your provider with a request: those for every project always, those of a layer when a layer of the same source is in the open project. Double-click a note to correct it.</source>
+        <translation>Catatan yang Anda tulis di sini tersimpan dalam sebuah berkas di komputer ini (agent_memory.json, di folder FilterMate pada profil QGIS). Catatan dikirim ke penyedia Anda bersama permintaan: catatan untuk semua proyek selalu dikirim, catatan sebuah lapisan dikirim bila lapisan dari sumber yang sama ada di proyek yang terbuka. Klik dua kali sebuah catatan untuk memperbaikinya.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Every project</source>
+        <translation>Semua proyek</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1768"/>
+        <source>A note, in one sentence</source>
+        <translation>Satu catatan, dalam satu kalimat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1779"/>
+        <source>Forget everything</source>
+        <translation>Lupakan semua</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1781"/>
+        <source>Open the file</source>
+        <translation>Buka berkas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1855"/>
+        <source>This list is full: remove a note first.</source>
+        <translation>Daftar ini penuh: hapus satu catatan terlebih dahulu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1863"/>
+        <source>The memory file cannot be read ({}). Correct it or remove it: nothing is written to it meanwhile.</source>
+        <translation>Berkas memori tidak dapat dibaca ({}). Perbaiki atau hapus berkas itu: sementara itu tidak ada yang ditulis ke dalamnya.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1872"/>
+        <source>Sent with this project: {} of {} notes.</source>
+        <translation>Dikirim bersama proyek ini: {} dari {} catatan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1874"/>
+        <source>{} not sent: they hold attribute values, which you do not share.</source>
+        <translation>{} tidak dikirim: berisi nilai atribut, yang tidak Anda bagikan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1920"/>
+        <source>Forget every note kept from one project to the next?</source>
+        <translation>Lupakan semua catatan yang disimpan dari satu proyek ke proyek berikutnya?</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="872"/>

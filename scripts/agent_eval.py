@@ -32,7 +32,9 @@ sys.path.insert(0, str(ROOT / "core"))
 from agent.messages import ERROR_NETWORK, ProviderError, StreamFailure  # noqa: E402
 from agent.providers import PRESETS, create_provider  # noqa: E402
 from agent.providers.base import ProviderConfig, error_from_response  # noqa: E402
+from agent.memory import SCOPE_SOURCE, Memory, added as memory_added, chosen as memory_chosen, memory_block  # noqa: E402
 from agent.project_summary import project_state, project_summary, project_update  # noqa: E402
+from agent.request_context import ContextParts, compose  # noqa: E402
 from agent.sql_guard import filter_problem  # noqa: E402
 
 # As filtermate_api/agent_tools.py words it (not imported: it needs QGIS).
@@ -903,6 +905,65 @@ def project_state_of(project: SimulatedProject) -> Dict[str, Any]:
     return project_state(*_project_rows(project))
 
 
+MEMORY_TWIN = "_memory"  # a case and its twin with the note kept: "vocab_x" and "vocab_x_memory"
+
+
+def case_memory(case: Dict[str, Any], project: SimulatedProject) -> str:
+    """The notes kept from one project to the next a case takes for granted, as a request carries them
+    (core/agent/memory.py): ``"memory": {"user": [notes], "sources": {layer: [notes]}}``; "" without any."""
+    wanted = case.get("memory") or {}
+    kept = Memory()
+    for text in wanted.get("user", []):
+        kept, _note = memory_added(kept, text)
+    for layer, notes in (wanted.get("sources") or {}).items():
+        for text in notes:
+            kept, _note = memory_added(kept, text, SCOPE_SOURCE, f"ogr::{layer}", layer)
+    sources = [(f"ogr::{name}", name) for name in project.layers]
+    active = f"ogr::{project.selected[0]}" if project.selected else ""
+    return memory_block(memory_chosen(kept, sources, active))
+
+
+class CountedTransport:
+    """A transport that counts the requests sent to the model: what a note kept is meant to save."""
+
+    def __init__(self, inner) -> None:
+        self._inner, self.sent = inner, 0
+
+    def send(self, request, session):
+        self.sent += 1
+        return self._inner.send(request, session)
+
+
+def memory_pairs(results: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Each case played with and without its note (``x`` and ``x_memory``): how often each passed, and the median of
+    the requests it sent to the model, over every run and over those that passed (None when none did): a run that
+    fails after many tries would make the note look better than it is."""
+    runs: Dict[str, List[Dict[str, Any]]] = {}
+    for result in results:
+        runs.setdefault(result["id"], []).append(result)
+
+    def median(values: List[int]) -> Optional[float]:
+        if not values:
+            return None
+        ordered = sorted(values)
+        middle = len(ordered) // 2
+        return float(ordered[middle]) if len(ordered) % 2 else (ordered[middle - 1] + ordered[middle]) / 2
+
+    def calls(played: List[Dict[str, Any]], passed_only: bool = False) -> Optional[float]:
+        return median([run["model_calls"] for run in played if run["passed"] or not passed_only])
+
+    pairs = []
+    for name, with_note in sorted(runs.items()):
+        without = runs.get(name[:-len(MEMORY_TWIN)]) if name.endswith(MEMORY_TWIN) else None
+        if without:
+            pairs.append({"id": name[:-len(MEMORY_TWIN)],
+                          "passed_without": sum(1 for run in without if run["passed"]), "runs_without": len(without),
+                          "passed_with": sum(1 for run in with_note if run["passed"]), "runs_with": len(with_note),
+                          "calls_without": calls(without), "calls_with": calls(with_note),
+                          "passed_calls_without": calls(without, True), "passed_calls_with": calls(with_note, True)})
+    return pairs
+
+
 def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
              prompt: str = "", families: bool = False) -> Dict[str, Any]:
     """Play one case; the outcome as a JSON-ready dict. ``filtering``: the tools a local model gets by default."""
@@ -937,8 +998,10 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
             hidden, lambda now: (session.offer(now), executor.offer(now)), known=offered | {USE_TOOLS}, skills=held)
     executor = ToolExecutor(tools, handlers_of_case)
     executor.hold(held)
-    exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True,
-                            context=project_context(project))
+    counted = CountedTransport(transport)
+    exchange = run_exchange(session, case["prompt"], counted, executor, confirm=lambda call: True,
+                            context=compose(ContextParts(summary=project_context(project),
+                                                         memory=case_memory(case, project))))
     write_tools = [tool.name for tool in load_catalog() + SETTINGS_TOOLS + CHAT_ONLY if not tool.read_only]
     reason = exchange.error.message if exchange.error else score_case(case, exchange.calls, project.by_ref, write_tools)
     if not reason and exchange.decision is not None and exchange.decision.status not in ("done", STATUS_RUN_TOOLS):
@@ -947,6 +1010,7 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
             # The arguments too, to read a failure of a live run without running it again (they are the bench's own
             # simulated project: no data of a user).
             "calls": [{"tool": call.name, "arguments": call.arguments} for call in exchange.calls],
+            "model_calls": counted.sent,
             "input_tokens": session.usage.input_tokens, "output_tokens": session.usage.output_tokens,
             "cache_read_tokens": session.usage.cache_read_tokens,
             "cache_write_tokens": session.usage.cache_write_tokens}
@@ -1064,6 +1128,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     passed = sum(1 for result in results if result["passed"])
     totals = _write_results(args.json, results, options) if args.json else _totals(results)
     print(f"\n{passed}/{len(results)} passed; tokens: {totals}")
+    pairs = memory_pairs(results)
+    if pairs:
+        print("with a note kept from one project to the next (passed; median of the requests to the model over "
+              "every run, then over the runs that passed):")
+
+        def said(value: Optional[float]) -> str:
+            return "-" if value is None else f"{value:g}"
+        for pair in pairs:
+            print(f"  {pair['id']:<24} without {pair['passed_without']}/{pair['runs_without']} "
+                  f"{said(pair['calls_without'])} ({said(pair['passed_calls_without'])}) -> with "
+                  f"{pair['passed_with']}/{pair['runs_with']} {said(pair['calls_with'])} "
+                  f"({said(pair['passed_calls_with'])})")
     if reference is not None:
         now = passes_by_case(results)
         lost, uneven = lost_cases(reference, now), uneven_cases(reference, now)

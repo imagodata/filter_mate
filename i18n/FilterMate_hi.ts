@@ -200,6 +200,11 @@ Do you agree?</source>
         <translation>सेटिंग्स खोलने के लिए अनुरोध रोकें या उसके समाप्त होने की प्रतीक्षा करें।</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
+        <source>The memory could not be saved: {}</source>
+        <translation>स्मृति सहेजी नहीं जा सकी: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>पूर्ववत करने के लिए कुछ नहीं।</translation>
@@ -1691,6 +1696,66 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>अन्य एप्लिकेशन</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1587"/>
+        <source>Memory</source>
+        <translation>स्मृति</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1737"/>
+        <source>Keep notes from one project to the next</source>
+        <translation>नोट एक प्रोजेक्ट से दूसरे प्रोजेक्ट तक रखें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the QGIS profile). They are sent to your provider with a request: those for every project always, those of a layer when a layer of the same source is in the open project. Double-click a note to correct it.</source>
+        <translation>यहाँ लिखे गए नोट इस कंप्यूटर की एक फ़ाइल में रहते हैं (agent_memory.json, QGIS प्रोफ़ाइल के FilterMate फ़ोल्डर में)। वे अनुरोध के साथ आपके प्रदाता को भेजे जाते हैं: सभी प्रोजेक्ट के नोट हमेशा, और किसी परत के नोट तब जब उसी स्रोत की कोई परत खुले प्रोजेक्ट में हो। किसी नोट को सुधारने के लिए उस पर डबल-क्लिक करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Every project</source>
+        <translation>सभी प्रोजेक्ट</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1768"/>
+        <source>A note, in one sentence</source>
+        <translation>एक नोट, एक वाक्य में</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1779"/>
+        <source>Forget everything</source>
+        <translation>सब कुछ भुला दें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1781"/>
+        <source>Open the file</source>
+        <translation>फ़ाइल खोलें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1855"/>
+        <source>This list is full: remove a note first.</source>
+        <translation>यह सूची भर गई है: पहले एक नोट हटाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1863"/>
+        <source>The memory file cannot be read ({}). Correct it or remove it: nothing is written to it meanwhile.</source>
+        <translation>स्मृति फ़ाइल पढ़ी नहीं जा सकती ({})। इसे सुधारें या हटा दें: तब तक इसमें कुछ नहीं लिखा जाता।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1872"/>
+        <source>Sent with this project: {} of {} notes.</source>
+        <translation>इस प्रोजेक्ट के साथ भेजे गए: {} नोट (कुल {} में से)।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1874"/>
+        <source>{} not sent: they hold attribute values, which you do not share.</source>
+        <translation>{} नहीं भेजे गए: इनमें विशेषता मान हैं, जिन्हें आप साझा नहीं करते।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1920"/>
+        <source>Forget every note kept from one project to the next?</source>
+        <translation>एक प्रोजेक्ट से दूसरे प्रोजेक्ट तक रखे गए सभी नोट भुला दें?</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="872"/>

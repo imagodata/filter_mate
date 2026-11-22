@@ -196,3 +196,29 @@ def test_the_bench_project_is_like_a_real_one(weight):
     assert {"describe_layer", "field_values", "sample_features"} <= set(reads)
     context = weight.bench_context(project, None)
     assert "Notes kept for this project" in context and "Widgets of the panel" in context
+
+
+# --- the memory kept from one project to the next (core/agent/memory.py) --------------------------------------------------
+
+def test_an_empty_memory_weighs_nothing(weight):
+    project = weight.bench_project()
+    assert weight.bench_context(project, None) == weight.bench_context(project, None, kept="")
+    assert "from one project to the next" not in weight.bench_context(project, None)
+
+
+def test_a_full_memory_fills_its_budget_and_is_sent_once(weight, capsys):
+    from core.agent.memory import HEADER, MAX_MEMORY_BLOCK
+    block = weight.full_memory_block(weight.bench_project())
+    assert 0.8 * MAX_MEMORY_BLOCK < len(block) <= MAX_MEMORY_BLOCK and "Not sent: " in block.splitlines()[-1]
+    run = weight.replay(with_memory=True)
+    assert not run.errors and not weight.broken_starts(run.calls)  # the start of each request still shared
+    firsts = [json.dumps(body, ensure_ascii=False).count(HEADER[:40]) for body in run.bodies["anthropic"]]
+    assert set(firsts) == {1}  # in the first request, and carried by the history after: never said twice
+    assert weight.main(["--conversation", "--memory"]) == 0
+    printed = capsys.readouterr().out
+    assert f"memory block: {len(block)} characters" in printed and "cost" in printed
+
+
+def test_memory_goes_with_conversation(weight):
+    with pytest.raises(SystemExit):
+        weight.main(["--memory"])

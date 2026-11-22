@@ -116,4 +116,4 @@ def _watch() -> None:
             if stalled:
                 write_stacks([entry[0] for entry in stalled])
         except Exception:  # noqa: BLE001 - a diagnostic: it must never take anything down
-            pass
+            logger.debug("stall watch: stacks not written", exc_info=True)
