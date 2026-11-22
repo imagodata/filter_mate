@@ -54,6 +54,11 @@ except ImportError:
         except Exception:
             return False
 
+try:
+    from ....filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 class PostgreSQLExpressionBuilder(PostgreSQLSqlBuilder):
     """PostGIS spatial filters on QGIS PostgreSQL layers (see the module docstring)."""
@@ -70,7 +75,7 @@ class PostgreSQLExpressionBuilder(PostgreSQLSqlBuilder):
         """
         if layer is None:
             return False
-        return layer.providerType() == 'postgres'
+        return provider_key_of(layer) == 'postgres'
 
     def apply_filter(
         self,

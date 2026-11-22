@@ -27,6 +27,11 @@ from qgis.core import (
     QgsDataSourceUri
 )
 
+try:
+    from ...filtermate_core.domain.layer_facts import id_of, name_of, source_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import id_of, name_of, source_of
+
 logger = logging.getLogger('filter_mate')
 
 
@@ -147,7 +152,7 @@ class ExpressionBuilder:
         """
         layer = layer_props.get('layer')
         try:
-            layer_id = layer.id() if layer is not None else layer_props.get('layer_id')
+            layer_id = id_of(layer) if layer is not None else layer_props.get('layer_id')
         except (RuntimeError, AttributeError):
             layer_id = layer_props.get('layer_id')
         chosen = (self.task_parameters.get('filtering') or {}).get('centroid_layers')
@@ -191,7 +196,7 @@ class ExpressionBuilder:
             logger.debug(f"   current_predicates: {self.current_predicates}")
             logger.debug(f"   source_geom type: {type(source_geom).__name__}")
             if hasattr(source_geom, 'name'):
-                logger.debug(f"   source_geom name: {source_geom.name()}")
+                logger.debug(f"   source_geom name: {name_of(source_geom)}")
             logger.debug(f"   layer_props keys: {list(layer_props.keys())}")
             logger.debug(f"   task_parameters['task'].get('features'): {len(self.task_parameters.get('task', {}).get('features', []))} features")
 
@@ -371,7 +376,7 @@ class ExpressionBuilder:
         logger.debug("=" * 80)
         logger.debug("🔍 _prepare_source_filter: ANALYZING source_subset")
         logger.debug("=" * 80)
-        logger.debug(f"   self.source_layer: {self.source_layer.name() if self.source_layer else 'None'}")
+        logger.debug(f"   self.source_layer: {name_of(self.source_layer) if self.source_layer else 'None'}")
         logger.debug(f"   source_subset: '{source_subset}'" if source_subset else "   source_subset: None (EMPTY!)")
 
         # Check if source_subset contains patterns that would be skipped
@@ -1207,7 +1212,7 @@ class ExpressionBuilder:
         parsed = QgsExpression(expression)
         if parsed.hasParserError():
             logger.error(f"   ❌ The source selection does not parse: {parsed.parserErrorString()}")
-            raise _source_selection_refusal(self.source_layer.name(), unreadable=True)
+            raise _source_selection_refusal(name_of(self.source_layer), unreadable=True)
         request.setFilterExpression(expression)
         _with_source_context(request, self.source_layer, self.task_parameters)
         layer = self.source_layer
@@ -1217,7 +1222,7 @@ class ExpressionBuilder:
             return list(layer.getFeatures(request))
         except Exception as e:
             logger.error(f"   ❌ The source selection failed: {e}")
-            raise _source_selection_refusal(self.source_layer.name(), unreadable=True) from e
+            raise _source_selection_refusal(name_of(self.source_layer), unreadable=True) from e
 
     def _unfiltered_source(self) -> Optional[QgsVectorLayer]:
         """A second layer on the data source of the source layer, without its subset; None when it cannot be opened.
@@ -1260,7 +1265,7 @@ class ExpressionBuilder:
             return
         if not self._features_of_the_selection(limit=1):
             logger.warning("   ⚠️ The source selection keeps no feature: nothing is filtered")
-            raise _source_selection_refusal(self.source_layer.name())
+            raise _source_selection_refusal(name_of(self.source_layer))
 
     def _empty_selection_filter(self) -> Optional[str]:
         """The source filter when the selection read keeps no feature (PATH 3A).
@@ -1422,10 +1427,10 @@ class ExpressionBuilder:
         if not source_table_name and self.source_layer:
             # Try to get from layer URI
             try:
-                uri = QgsDataSourceUri(self.source_layer.source())
+                uri = QgsDataSourceUri(source_of(self.source_layer))
                 source_table_name = uri.table()
             except Exception:
-                source_table_name = self.source_layer.name()
+                source_table_name = name_of(self.source_layer)
 
         return source_table_name
 
@@ -1624,7 +1629,7 @@ class ExpressionBuilder:
 
         if not source_geom_field and self.source_layer:
             try:
-                uri = QgsDataSourceUri(self.source_layer.source())
+                uri = QgsDataSourceUri(source_of(self.source_layer))
                 source_geom_field = uri.geometryColumn() or 'geom'
             except Exception:
                 source_geom_field = 'geom'

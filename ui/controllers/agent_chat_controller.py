@@ -232,6 +232,9 @@ class AgentChatController(QObject):
         self._answer = []
         self._header_label = None
         self.panel = AgentPanel(parent_widget)
+        self._facts_layers = {}  # layer id -> layer whose selection or filter the requests of the welcome follow
+        self.panel.facts_provider = self._read_welcome_facts
+        self.panel.refresh_examples()  # drawn for an unknown state in the panel: now for the project
         self.panel.send_requested.connect(self._on_send)
         self.panel.stop_requested.connect(self._on_stop)
         self.panel.undo_requested.connect(self._on_undo)
@@ -286,6 +289,75 @@ class AgentChatController(QObject):
         QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
         QgsProject.instance().layersAdded.connect(self._on_layers_changed)
         QgsProject.instance().layersRemoved.connect(self._on_layers_changed)
+        self._follow_welcome_facts()
+
+    # --- the requests of the welcome follow the project ---------------------------
+
+    def _read_welcome_facts(self):
+        """The state of QGIS and the project for the requests of the welcome (main thread; counts, no feature read)."""
+        from ...adapters.qgis.project_facts import read_facts
+        try:
+            from qgis.utils import iface
+            active = iface.activeLayer() if iface is not None else None
+        except Exception:  # no interface (a script), or one closing
+            active = None
+        return read_facts(active=active)
+
+    def _follow_welcome_facts(self) -> None:
+        """The welcome draws its requests again when a layer comes or goes, the selection or a filter changes, the
+        active layer is another one, or a project opens (the panel reads once the changes stop)."""
+        project = QgsProject.instance()
+        for signal in (project.layersAdded, project.layersRemoved, project.cleared, project.readProject):
+            signal.connect(self._on_welcome_facts_changed)
+        try:
+            from qgis.utils import iface
+            iface.currentLayerChanged.connect(self.panel.facts_changed)
+        except Exception:  # no interface (a script)
+            logger.debug("Agent: the active layer is not followed", exc_info=True)
+        self._follow_facts_layers(project.mapLayers().values())
+
+    def _on_welcome_facts_changed(self, *args) -> None:
+        """A layer came or went, or a project opened or closed: follow the selection and filter of the layers there."""
+        if args and isinstance(args[0], list) and args[0] and isinstance(args[0][0], str):  # layersRemoved: ids
+            for layer_id in args[0]:
+                self._facts_layers.pop(layer_id, None)
+        elif args and isinstance(args[0], list):  # layersAdded: layers
+            self._follow_facts_layers(args[0])
+        self.panel.facts_changed()
+
+    def _follow_facts_layers(self, layers) -> None:
+        for layer in list(layers):
+            try:
+                layer_id = layer.id()
+                if layer_id in self._facts_layers:
+                    continue
+                for name in ("selectionChanged", "subsetStringChanged"):
+                    emitter = getattr(layer, name, None)
+                    if emitter is not None:
+                        emitter.connect(self.panel.facts_changed)
+                self._facts_layers[layer_id] = layer
+            except (RuntimeError, TypeError, AttributeError):  # a layer deleted meanwhile
+                continue
+
+    def _unfollow_welcome_facts(self) -> None:
+        project = QgsProject.instance()
+        for signal in (project.layersAdded, project.layersRemoved, project.cleared, project.readProject):
+            try:
+                signal.disconnect(self._on_welcome_facts_changed)
+            except (RuntimeError, TypeError):  # already done, or never connected
+                pass
+        try:
+            from qgis.utils import iface
+            iface.currentLayerChanged.disconnect(self.panel.facts_changed)
+        except Exception:  # no interface, or not connected
+            pass
+        for layer in self._facts_layers.values():
+            for name in ("selectionChanged", "subsetStringChanged"):
+                try:
+                    getattr(layer, name).disconnect(self.panel.facts_changed)
+                except (RuntimeError, TypeError, AttributeError):
+                    pass
+        self._facts_layers = {}
 
     def _refresh_ready(self) -> None:
         """Whether the agent can answer, without opening the key store (it may ask for the master password)."""
@@ -317,7 +389,8 @@ class AgentChatController(QObject):
 
         Each step runs even when one before failed.
         """
-        for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._disconnect_project,
+        for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._unfollow_welcome_facts,
+                     self._disconnect_project,
                      lambda: plugin_settings.clear_applier(self._settings_applier)):
             try:
                 step()

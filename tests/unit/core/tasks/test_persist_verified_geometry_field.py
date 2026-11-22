@@ -15,6 +15,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from filtermate_core.domain import layer_facts
+
 _TASK = Path(__file__).resolve().parents[4] / "core" / "tasks" / "layer_management_task.py"
 
 
@@ -23,7 +25,9 @@ def _extract(name):
     for cls in (n for n in tree.body if isinstance(n, ast.ClassDef)):
         for node in cls.body:
             if isinstance(node, ast.FunctionDef) and node.name == name:
-                ns = {"logger": MagicMock()}
+                ns = {"logger": MagicMock(), "provider_key_of": layer_facts.provider_key_of,
+                      "source_of": layer_facts.source_of, "id_of": layer_facts.id_of,
+                      "name_of": layer_facts.name_of}
                 exec(compile(ast.Module(body=[node], type_ignores=[]), str(_TASK), "exec"), ns)
                 return ns[name]
     raise AssertionError(f"{name} not found")

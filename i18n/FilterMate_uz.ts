@@ -2086,6 +2086,146 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Qatlamlarim ostiga qorong'i asos xarita qo'y</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="112"/>
+        <source>What does the point cloud contain?</source>
+        <translation>Nuqtalar buluti nimani o'z ichiga oladi?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="115"/>
+        <source>Filter the other layers by the selection</source>
+        <translation>Boshqa qatlamlarni tanlov bo'yicha filtrlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="116"/>
+        <source>Keep what lies within 500 m of the selection</source>
+        <translation>Tanlovdan 500 m ichidagilarni saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="117"/>
+        <source>Keep what lies within 100 m of another layer</source>
+        <translation>Boshqa qatlamdan 100 m ichidagilarni saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="118"/>
+        <source>Zoom to the selected features</source>
+        <translation>Tanlangan obyektlarga yaqinlashtirish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="119"/>
+        <source>Zoom to the features the filter keeps</source>
+        <translation>Filtr saqlagan obyektlarga yaqinlashtirish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="120"/>
+        <source>Show the attributes of the selected features</source>
+        <translation>Tanlangan obyektlar atributlarini ko'rsatish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="121"/>
+        <source>Count the selected features by category</source>
+        <translation>Tanlangan obyektlarni toifa bo'yicha sanash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="122"/>
+        <source>Count the active layer's features by type</source>
+        <translation>Faol qatlam obyektlarini tur bo'yicha sanash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="123"/>
+        <source>Which layers are filtered, and what is kept?</source>
+        <translation>Qaysi qatlamlar filtrlangan va nima qolgan?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="124"/>
+        <source>Clear all the filters</source>
+        <translation>Barcha filtrlarni tozalash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="127"/>
+        <source>Color the active raster with a ramp</source>
+        <translation>Faol rasterni ranglar shkalasi bilan bo'yash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="130"/>
+        <source>Export the active layer to GeoJSON</source>
+        <translation>Faol qatlamni GeoJSON ga eksport qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="131"/>
+        <source>Save the online layers to a GeoPackage</source>
+        <translation>Onlayn qatlamlarni GeoPackage ga saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="132"/>
+        <source>Export the LiDAR points kept to LAZ</source>
+        <translation>Saqlangan LiDAR nuqtalarini LAZ ga eksport qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="133"/>
+        <source>Map the slope of the active raster</source>
+        <translation>Faol rasterning nishabligini xaritalash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="134"/>
+        <source>Add a shaded relief from the active raster</source>
+        <translation>Faol rasterdan soyali relyef qo'shish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="135"/>
+        <source>Draw contour lines from the active raster</source>
+        <translation>Faol rasterdan gorizontal chiziqlar chizish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="136"/>
+        <source>Give the min, max and mean of the raster</source>
+        <translation>Rasterning min, maks va o'rtachasini berish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="137"/>
+        <source>Keep the features on slopes over 15 %</source>
+        <translation>Nishabligi 15 % dan ortiq obyektlarni saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="138"/>
+        <source>Add the mean of the raster to each polygon</source>
+        <translation>Har bir poligonga raster o'rtachasini qo'shish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="139"/>
+        <source>Keep only the ground points of the cloud</source>
+        <translation>Bulutning faqat yer nuqtalarini saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="140"/>
+        <source>Keep the LiDAR points inside the selection</source>
+        <translation>Tanlov ichidagi LiDAR nuqtalarini saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="141"/>
+        <source>Join two layers by a common field</source>
+        <translation>Ikki qatlamni umumiy maydon bo'yicha birlashtirish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="142"/>
+        <source>Draw a 100 m zone around the active layer</source>
+        <translation>Faol qatlam atrofida 100 m zona chizish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="143"/>
+        <source>Make a print layout of this map</source>
+        <translation>Ushbu xaritaning chop etish maketini yaratish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Add a basemap to start the map</source>
+        <translation>Boshlash uchun asosiy xarita qo'shish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="805"/>
+        <source>Reconfigure FilterMate…</source>
+        <translation>FilterMate ni qayta sozlash…</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="121"/>
         <source>Find a cloud-free Sentinel-2 image here</source>
         <translation>Bu yerdan bulutsiz Sentinel-2 tasvirini top</translation>

@@ -2086,6 +2086,146 @@ Godtar du alle? Nei utfører ingen av dem.</translation>
         <translation>Legg et mørkt bakgrunnskart under lagene mine</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="112"/>
+        <source>What does the point cloud contain?</source>
+        <translation>Hva inneholder punktskyen?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="115"/>
+        <source>Filter the other layers by the selection</source>
+        <translation>Filtrer de andre lagene etter utvalget</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="116"/>
+        <source>Keep what lies within 500 m of the selection</source>
+        <translation>Behold det som ligger innenfor 500 m fra utvalget</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="117"/>
+        <source>Keep what lies within 100 m of another layer</source>
+        <translation>Behold det som ligger innenfor 100 m fra et annet lag</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="118"/>
+        <source>Zoom to the selected features</source>
+        <translation>Zoom til de valgte objektene</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="119"/>
+        <source>Zoom to the features the filter keeps</source>
+        <translation>Zoom til objektene filteret beholder</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="120"/>
+        <source>Show the attributes of the selected features</source>
+        <translation>Vis attributtene til de valgte objektene</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="121"/>
+        <source>Count the selected features by category</source>
+        <translation>Tell de valgte objektene etter kategori</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="122"/>
+        <source>Count the active layer's features by type</source>
+        <translation>Tell objektene i det aktive laget etter type</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="123"/>
+        <source>Which layers are filtered, and what is kept?</source>
+        <translation>Hvilke lag er filtrert, og hva beholdes?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="124"/>
+        <source>Clear all the filters</source>
+        <translation>Fjern alle filtre</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="127"/>
+        <source>Color the active raster with a ramp</source>
+        <translation>Fargelegg det aktive rasteret med en fargerampe</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="130"/>
+        <source>Export the active layer to GeoJSON</source>
+        <translation>Eksporter det aktive laget til GeoJSON</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="131"/>
+        <source>Save the online layers to a GeoPackage</source>
+        <translation>Lagre nettlagene i en GeoPackage</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="132"/>
+        <source>Export the LiDAR points kept to LAZ</source>
+        <translation>Eksporter de beholdte LiDAR-punktene til LAZ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="133"/>
+        <source>Map the slope of the active raster</source>
+        <translation>Kartlegg helningen til det aktive rasteret</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="134"/>
+        <source>Add a shaded relief from the active raster</source>
+        <translation>Legg til skyggerelieff fra det aktive rasteret</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="135"/>
+        <source>Draw contour lines from the active raster</source>
+        <translation>Tegn høydekurver fra det aktive rasteret</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="136"/>
+        <source>Give the min, max and mean of the raster</source>
+        <translation>Gi min, maks og gjennomsnitt for rasteret</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="137"/>
+        <source>Keep the features on slopes over 15 %</source>
+        <translation>Behold objekter på helninger over 15 %</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="138"/>
+        <source>Add the mean of the raster to each polygon</source>
+        <translation>Legg til rasterets gjennomsnitt i hver polygon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="139"/>
+        <source>Keep only the ground points of the cloud</source>
+        <translation>Behold bare bakkepunktene i skyen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="140"/>
+        <source>Keep the LiDAR points inside the selection</source>
+        <translation>Behold LiDAR-punktene innenfor utvalget</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="141"/>
+        <source>Join two layers by a common field</source>
+        <translation>Koble to lag med et felles felt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="142"/>
+        <source>Draw a 100 m zone around the active layer</source>
+        <translation>Tegn en sone på 100 m rundt det aktive laget</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="143"/>
+        <source>Make a print layout of this map</source>
+        <translation>Lag et utskriftsoppsett av dette kartet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Add a basemap to start the map</source>
+        <translation>Legg til et bakgrunnskart for å starte kartet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="805"/>
+        <source>Reconfigure FilterMate…</source>
+        <translation>Konfigurer FilterMate på nytt…</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="121"/>
         <source>Find a cloud-free Sentinel-2 image here</source>
         <translation>Finn et skyfritt Sentinel-2-bilde her</translation>

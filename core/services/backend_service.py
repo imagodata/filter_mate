@@ -26,6 +26,11 @@ if TYPE_CHECKING:
 from ..domain.filter_expression import ProviderType
 from enum import Enum
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger(__name__)
 
 
@@ -216,7 +221,7 @@ class BackendService(QObject):
         Returns:
             BackendType enum value
         """
-        provider_type = layer.providerType()
+        provider_type = provider_key_of(layer)
 
         # PostgreSQL layers ALWAYS use PostgreSQL backend (QGIS native API)
         if provider_type == 'postgres':
@@ -407,10 +412,10 @@ class BackendService(QObject):
             if not self.is_postgresql_available:
                 return False, False
             # PostgreSQL only works with postgres provider
-            return layer.providerType() == 'postgres', False
+            return provider_key_of(layer) == 'postgres', False
 
         elif backend_type == BackendType.SPATIALITE:
-            provider = layer.providerType()
+            provider = provider_key_of(layer)
             source = layer.source().lower()
 
             if provider == 'spatialite':
@@ -453,7 +458,7 @@ class BackendService(QObject):
             return []
 
         available = []
-        provider_type = layer.providerType()
+        provider_type = provider_key_of(layer)
         source = layer.source().lower()
 
         # PostgreSQL - FIX v4.1.4: ALWAYS available for postgres layers (QGIS native API)
@@ -528,7 +533,7 @@ class BackendService(QObject):
                 reason="Invalid or null layer"
             )
 
-        provider_type = layer.providerType()
+        provider_type = provider_key_of(layer)
         feature_count = layer.featureCount()
         available = self.get_available_backends_for_layer(layer)
 

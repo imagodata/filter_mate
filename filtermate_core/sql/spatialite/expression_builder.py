@@ -40,6 +40,7 @@ import time
 from typing import Dict, Optional, Any, Tuple
 from urllib.request import pathname2url
 
+from ...domain.layer_facts import name_of, provider_key_of, source_of
 from ...domain.wkt_bounds import wkt_bounds
 from ...ports.geometric_filter_port import GeometricFilterPort
 
@@ -122,7 +123,7 @@ def task_scoped_cache(task, name: str, owner) -> dict:
 def gpkg_layer_location(layer) -> Tuple[Optional[str], Optional[str]]:
     """(file path, table name) of an OGR GeoPackage layer, from its source URI."""
     try:
-        source = layer.source() or ''
+        source = source_of(layer) or ''
     except Exception:
         return None, None
     path, _, options = source.partition('|')
@@ -522,9 +523,9 @@ class SpatialiteSqlBuilder(GeometricFilterPort):
         if not layer or not self._is_geopackage(layer):
             return None
         try:
-            if layer.providerType() != 'ogr':
+            if provider_key_of(layer) != 'ogr':
                 return None
-            layer_name = layer.name()
+            layer_name = name_of(layer)
         except Exception:
             return None
         active = [str(name).lower().replace('st_', '') for name, enabled in predicates.items() if enabled]
@@ -570,7 +571,7 @@ class SpatialiteSqlBuilder(GeometricFilterPort):
         if not layer or not self._is_geopackage(layer):
             return None
         try:
-            if layer.providerType() != 'ogr':
+            if provider_key_of(layer) != 'ogr':
                 return None
         except Exception:
             return None
@@ -675,7 +676,7 @@ class SpatialiteSqlBuilder(GeometricFilterPort):
         """Check if layer is from a GeoPackage."""
         if not layer:
             return False
-        source = layer.source().lower()
+        source = source_of(layer).lower()
         return '.gpkg' in source or 'gpkg|' in source
 
     def _build_source_geometry_sql(

@@ -23,6 +23,11 @@ layer without its subset these readings use (unfiltered_copy).
 """
 import logging
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 logger = logging.getLogger('FilterMate.Adapters.Backends.SourceRefusal')
 
 # task_parameters key: the context of the source layer, read on the main thread
@@ -121,7 +126,7 @@ def unfiltered_copy(layer):
     """
     try:
         from qgis.core import QgsProviderRegistry, QgsVectorLayer
-        provider = layer.providerType()
+        provider = provider_key_of(layer)
         if provider == 'memory':
             return None
         registry = QgsProviderRegistry.instance()

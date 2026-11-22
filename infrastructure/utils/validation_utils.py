@@ -84,6 +84,11 @@ except ImportError:
         sip = None
 SIP_AVAILABLE = sip is not None
 
+try:
+    from ...filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 # =============================================================================
 # Core Validation Functions
@@ -196,7 +201,7 @@ def is_layer_source_available(
 
     # Get provider type
     try:
-        provider = layer.providerType()
+        provider = provider_key_of(layer)
     except (RuntimeError, AttributeError):
         return False
 
@@ -401,7 +406,7 @@ def get_layer_validation_info(layer: Any) -> dict:
     try:
         info['id'] = layer.id()
         info['name'] = layer.name()
-        info['provider'] = layer.providerType()
+        info['provider'] = provider_key_of(layer)
         info['source'] = layer.source()[:100] if layer.source() else None
     except Exception as e:
         info['errors'].append(f"Error accessing layer properties: {e}")

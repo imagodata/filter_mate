@@ -211,6 +211,11 @@ try:
 except ImportError:  # imported from the repository root (tests)
     from filtermate_core.sql.postgresql.qgis_expression import qgis_expression_to_postgis  # noqa: F401
 
+try:
+    from ....filtermate_core.domain.layer_facts import provider_key_of
+except ImportError:  # loaded outside the plugin package (unit tests)
+    from filtermate_core.domain.layer_facts import provider_key_of
+
 
 def build_postgis_predicates(
     postgis_predicates: list,
@@ -253,7 +258,7 @@ def build_postgis_predicates(
         layer = layer_props.get("layer")
         if layer:
             # FIX v4.0.8 (2026-01-16): Check if this is a memory layer
-            is_memory_layer = layer.providerType() == 'memory'
+            is_memory_layer = provider_key_of(layer) == 'memory'
 
             if is_memory_layer:
                 # Memory layers don't have URI-based geometry columns
