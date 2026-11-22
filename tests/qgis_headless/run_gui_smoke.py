@@ -3648,7 +3648,7 @@ def s_welcome_by_state():
     with_raster = drawn()
     check('welcome by state: a raster active gives requests about it, none about a vector layer',
           with_raster != empty and true_now() and any({'active_raster', 'active_elevation'} & set(catalog[key].needs) for key in with_raster)
-          and not any({'vector', 'active_vector', 'selection'} & set(catalog[key].needs) for key in with_raster),
+          and not any({'vector', 'active_vector', 'selection', 'local_selection'} & set(catalog[key].needs) for key in with_raster),
           str(with_raster))
     grab('welcome_raster_active')
     points = QgsVectorLayer('Point?crs=EPSG:4326&field=name:string', 'pts', 'memory')
@@ -3668,7 +3668,7 @@ def s_welcome_by_state():
     points.selectByIds([next(iter(points.allFeatureIds()))])
     selected = drawn()
     check('welcome by state: a selection brings a request about it',
-          selected != with_vector and true_now() and any('selection' in catalog[key].needs for key in selected),
+          selected != with_vector and true_now() and any({'selection', 'local_selection'} & set(catalog[key].needs) for key in selected),
           str(selected))
     grab('welcome_vectors_selection')
     points.removeSelection()
