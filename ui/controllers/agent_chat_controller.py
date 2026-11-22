@@ -16,7 +16,7 @@ from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 from ...adapters.agent.qt_transport import QtTransport
 from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, delete_own_key, load_settings, provider_config, read_key, save_settings, store_key,
-    target_of, current_provider, read_providers, write_providers,
+    target_of, current_provider, read_providers, write_providers, read_mode, write_mode,
 )
 from ...adapters.agent import transcript_store
 from ...adapters.agent.memory_store import change_memory, memory_path, project_sources, read_memory
@@ -51,6 +51,7 @@ from ...core.agent.sources import (
     KIND_MCP, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, all_sources, custom_from_json, enabled,
     database_sources, model_name, platform_aliases, platform_domains, platform_name,
 )
+from ...core.agent.modes import ACT, PLAN, level_for, mode_note, mode_or_default
 from ...core.agent.permissions import (
     ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, RULE_NEVER, RUN, STANDARD, TURNED_OFF, PermissionPolicy,
     asked_alone, level_note, risk_of,
@@ -259,6 +260,10 @@ class AgentChatController(QObject):
         self.panel.facts_provider = self._read_welcome_facts
         self.panel.refresh_examples()  # drawn for an unknown state in the panel: now for the project
         self.panel.send_requested.connect(self._on_send)
+        self._mode = read_mode()  # Ask, Plan or Act, kept from one session to the next (core/agent/modes.py)
+        self._request_mode = self._mode
+        self.panel.set_mode(self._mode)
+        self.panel.mode_changed.connect(self._on_mode_changed)
         self.panel.stop_requested.connect(self._on_stop)
         self.panel.undo_requested.connect(self._on_undo)
         self.panel.redo_requested.connect(self._on_redo)
@@ -2561,14 +2566,22 @@ class AgentChatController(QObject):
 
     # --- what the user does -----------------------------------------------------
 
-    def _on_send(self, text: str) -> None:
+    def _on_mode_changed(self, mode: str) -> None:
+        """The mode picked under the line: for the next request (one under way keeps the mode it was sent with)."""
+        self._mode = mode_or_default(mode)
+        write_mode(self._mode)
+
+    def _on_send(self, text: str, mode: str = "") -> None:
+        """Send ``text`` in the mode picked under the line, or in ``mode`` (the Go of a plan runs in Act)."""
         if self.chat_busy():
             return  # connecting to a connector lets the event loop run
         if self._mcp.busy:
             self._say(_tr("Another application is changing the project: try again in a moment."))
             return
         values = load_settings()  # however the settings were saved
-        self._policy.set_level(values.autonomy)
+        self._request_mode = mode_or_default(mode or self._mode)
+        # Ask and Plan run at the advisor level: only the tools that read run, whatever the Autonomy tab says.
+        self._policy.set_level(level_for(self._request_mode, values.autonomy))
         self._policy.rules = values.rules
         if self._engine is None:
             self._building = True
@@ -2706,8 +2719,13 @@ class AgentChatController(QObject):
         self._outcomes_sent = outcomes  # given back if the request is taken out of the conversation
         return compose(self._context_memory.delta(ContextParts(
             summary=summary, notes=notes, memory=memory, widgets=widgets_part(widgets), recipes=recipes,
-            protected=protected_part(protected), decided=decided_part(outcomes), level=level_note(self._policy.level)),
+            protected=protected_part(protected), decided=decided_part(outcomes), level=self._level_part()),
             full))
+
+    def _level_part(self) -> str:
+        """What the model is told of the level of the request: the note of its mode for Ask and Plan (they run at the
+        advisor level, which the user did not pick in the Autonomy tab), the note of the level for Act."""
+        return mode_note(self._request_mode) or level_note(self._policy.level)
 
     @staticmethod
     def _memory_part(read) -> str:
@@ -3643,6 +3661,21 @@ class AgentChatController(QObject):
             self.panel.show_error(*self._stop_words(outcome.reason, kept))
             return
         self._say(self._usage_words())  # the cards of the turn say what changed (mockup)
+        if self._request_mode == PLAN:
+            self._offer_to_carry_out()
+
+    def _offer_to_carry_out(self) -> None:
+        """A plan was written (the Plan mode): one click carries it out, in Act, with the plan in the conversation.
+        Once, and not while a request runs; the mode picked under the line stays Plan for the next request."""
+        clicked = []
+
+        def go() -> None:
+            if clicked or self.chat_busy():
+                return
+            clicked.append(True)
+            self._on_send(_tr("Go: carry out the plan above, step by step."), mode=ACT)
+
+        self.panel.add_link(_tr("Go"), go)
 
     @staticmethod
     def _request_dropped(outcome: ChatOutcome) -> bool:

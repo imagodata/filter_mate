@@ -60,7 +60,7 @@ def numpy_finite(ring) -> bool:
 
 
 def _read(layer, field: str, polygons: bool) -> Tuple[List[Dict[str, Any]], List[Any], Any, str]:
-    from qgis.core import QgsCoordinateTransform, QgsFeatureRequest, QgsGeometry, QgsProject, QgsWkbTypes
+    from qgis.core import QgsCoordinateTransform, QgsCsException, QgsFeatureRequest, QgsGeometry, QgsProject, QgsWkbTypes
     index = layer.fields().lookupField(field)
     if index < 0:
         raise CartogramError(f"no field {field!r} in '{layer.name()}': see describe_layer")
@@ -80,7 +80,7 @@ def _read(layer, field: str, polygons: bool) -> Tuple[List[Dict[str, Any]], List
             geometry = QgsGeometry(geometry.constGet().segmentize())
         try:
             geometry.transform(transform)
-        except Exception:  # QgsCsException: a feature beyond what the projection draws
+        except QgsCsException:  # a feature beyond what the projection draws
             continue
         value = feature.attribute(index)
         value = None if value is None or (hasattr(value, "isNull") and value.isNull()) else value
