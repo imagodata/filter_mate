@@ -28,7 +28,7 @@ from qgis.core import (  # noqa: E402
     QgsVectorFileWriter,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QCoreApplication, QSettings, Qt, QTimer  # noqa: E402
+from qgis.PyQt.QtCore import QCoreApplication, QPoint, QSettings, Qt, QTimer  # noqa: E402
 from qgis.PyQt.QtTest import QTest  # noqa: E402
 from qgis.PyQt.QtWidgets import QFrame, QLabel, QPushButton, QToolBox, QWidget  # noqa: E402
 
@@ -2062,6 +2062,13 @@ def check_widgets(chat, provider, settings, ask, layer):
     check("widgets: listed with the next request", "Widgets of the panel" in sent and "w1" in sent, sent[-300:])
 
     card = strip.cards["w1"]
+    histogram = card.histogram
+
+    def bars():
+        return list(histogram._counts) if histogram.isVisibleTo(card) else []
+    wait(lambda: sum(bars()) == 60, 3)
+    check("widgets: a range shows the bars of its field", len(bars()) == 24 and sum(bars()) == 60 and
+          bars()[0] == 3 and bars()[-1] == 3, bars())
     card.low.setValue(1000)
     card.flush()
     check("widgets: moving a bound filters the layer", layer.subsetString() == '"pop" >= 1000', layer.subsetString())
@@ -2069,10 +2076,61 @@ def check_widgets(chat, provider, settings, ask, layer):
     wait(lambda: strip.cards["w2"].value.text() == "51", 3)
     check("widgets: the number follows the filter", strip.cards["w2"].value.text() == "51",
           strip.cards["w2"].value.text())
-    card = strip.cards["w1"]
-    card.low.setValue(100)
-    card.flush()
+    QTest.qWait(400)  # the bars read again with the number
+    check("widgets: the bars outside the range stay, to widen it again", sum(bars()) == 60 and
+          histogram.range() == (1000.0, None), (bars(), histogram.range()))
+    # A handle dragged to the left end by the mouse: the box follows, then the filter goes after the pause.
+    y = histogram.height() // 2
+    left = 6 + round((histogram.width() - 12) * 900 / 5900)  # the low handle, on 1000
+    QTest.mousePress(histogram, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, QPoint(left, y))
+    QTest.mouseRelease(histogram, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, QPoint(0, y))
+    check("widgets: a handle at the end moves its box", card.low.value() == 100 and card.widget["low"] == 100,
+          (card.low.value(), card.widget["low"]))
+    wait(lambda: layer.subsetString() == "", 3)
     check("widgets: wide open again, the filter goes", layer.subsetString() == "", layer.subsetString())
+    card = strip.cards["w1"]
+    card.high.setValue(2000)
+    card.flush()
+    wait(lambda: sum(bars()) == 60 and strip.cards["w2"].value.text() == "20", 3)
+    check("widgets: narrowed from the top, the bars above stay", layer.subsetString() == '"pop" <= 2000' and
+          sum(bars()) == 60 and histogram.range() == (None, 2000.0), (layer.subsetString(), bars()))
+
+    # A reading for each state of the layer, none while the section is out of view; an edit forgets the bars read
+    # wide open: the bars outside the bounds are hatched as unknown, not drawn empty.
+    import filter_mate.adapters.agent.agent_widgets as widgets_module
+    reading, reads = widgets_module.range_reading, []
+    widgets_module.range_reading = lambda widget: reads.append(widget["id"]) or reading(widget)
+    index = layer.fields().lookupField("pop")
+
+    def edit(old, new):
+        feature = next(feature for feature in layer.getFeatures() if feature["pop"] == old)
+        layer.startEditing()
+        layer.changeAttributeValue(feature.id(), index, new)
+        layer.commitChanges()
+    window = panel.window()
+    try:
+        chat._refresh_stats()
+        chat._refresh_stats()
+        check("widgets: a refresh with nothing changed reads nothing", reads == [], reads)
+        window.hide()
+        edit(1500, 1550)
+        QTest.qWait(700)
+        check("widgets: out of view, nothing is read", reads == [], reads)
+        window.show()
+        wait(lambda: reads and strip.cards["w1"].histogram._unknown, 3)
+        unknown = histogram._unknown
+        check("widgets: read once in view, the bars outside unknown after an edit", reads == ["w1"] and
+              sum(bars()) == 20 and unknown[0] is False and unknown[-1] is True, (reads, bars(), unknown))
+    finally:
+        widgets_module.range_reading = reading
+        window.show()
+    edit(1550, 1500)
+    card.high.setValue(6000)
+    card.flush()
+    check("widgets: and wide open again", layer.subsetString() == "", layer.subsetString())
+    wait(lambda: sum(bars()) == 60 and not histogram._unknown, 3)
+    check("widgets: wide open, every bar known again", sum(bars()) == 60 and not histogram._unknown,
+          (bars(), histogram._unknown))
 
     provider.reset((200, {}, tool_turn("create_widget", {"kind": "values", "layer": "communes", "field": "pop"})),
                    (200, {}, text_turn("ok")))

@@ -2695,6 +2695,16 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>(vazio)</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} fora do intervalo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} sem valor</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
         <source>All</source>
         <translation>Todos</translation>

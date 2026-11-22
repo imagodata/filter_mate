@@ -3,7 +3,7 @@ name: dashboards
 title: Build a dashboard of widgets
 description: a dashboard in the AGENT panel to explore a layer (sliders, ticked values, numbers, charts)
 metadata:
-  version: 1
+  version: 2
   plugin_min: 5.1.0
   audience: chat
   tools: create_widget, remove_widget, apply_filter, describe_layer, field_values, layer_statistics, list_layers
@@ -25,7 +25,8 @@ write code (run_pyqgis) to make a window or a panel: widgets are the interface t
    - a stat with count first (the number of features shown, kept up to date);
    - a chart of the field that matters most (the 8 most frequent values and the others, or a histogram of 10
      classes for a number);
-   - a range on the key numeric field (two bounds: moving them filters the layer);
+   - a range on the key numeric field (two bounds over a histogram of that field: dragging its handles
+     or typing a bound filters the layer, the bars outside the bounds stay to widen it again);
    - values on a field with few values (50 at most; unticking filters the layer).
 3. Titles in the user's words, short.
 4. Then say how to use them: the widgets of one layer narrow it together, after the filter it had when its first

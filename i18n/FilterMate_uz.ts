@@ -2695,6 +2695,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>(bo‘sh)</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} oraliqdan tashqarida</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} qiymatsiz</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
         <source>All</source>
         <translation>Hammasi</translation>

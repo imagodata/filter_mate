@@ -2690,6 +2690,16 @@ Do you agree to all of them? No runs none of them.</translation>
         <translation>(empty)</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>{} outside the range</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>{} without value</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
         <source>All</source>
         <translation>All</translation>

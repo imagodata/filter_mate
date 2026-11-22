@@ -2695,6 +2695,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>(비어 있음)</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="392"/>
+        <source>{} outside the range</source>
+        <translation>범위 밖 {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="394"/>
+        <source>{} without value</source>
+        <translation>값 없음 {}</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
         <source>All</source>
         <translation>모두</translation>
