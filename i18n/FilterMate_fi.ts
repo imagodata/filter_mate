@@ -642,6 +642,16 @@ Ajetaanko?</translation>
         <translation>Tason {} nimiöt</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>Etsitään virallista tyyliä</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>Tason {} virallinen tyyli</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>Tämän keskustelun vanhimmat pyynnöt on nyt tiivistetty muutamaan riviin, jotta se pysyy lyhyenä.</translation>

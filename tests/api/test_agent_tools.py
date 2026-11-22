@@ -157,6 +157,23 @@ class TestHandlers:
                    join_field="a")[0] is True
         assert run(accessor, root, "join_layers", layer="communes", target_field="a", join_field="a")[0] is True
 
+    def test_official_style_tools(self, api):
+        """2026-11-22: the official styles listed for a layer, applied, a variant or a preset outside the catalog
+        refused before the accessor."""
+        accessor, root = api
+        error, answer = run(accessor, root, "list_style_presets")
+        assert not error and "ign/bdtopo/classique" in [row["preset"] for row in answer["presets"]]
+        error, answer = run(accessor, root, "list_style_presets", layer="communes")
+        assert not error and answer["presets"][0]["preset"] == "ign/bdtopo/classique"
+        error, answer = run(accessor, root, "apply_style_preset", layer="communes", preset="ign/bdtopo/classique",
+                            variant="sombre", all_scales=True)
+        assert not error and answer["variant"] == "sombre"
+        assert run(accessor, root, "apply_style_preset", layer="communes", preset="ign/bdtopo/classique",
+                   variant="sepia")[0] is True
+        assert run(accessor, root, "apply_style_preset", layer="communes", preset="")[0] is True
+        assert run(accessor, root, "apply_style_preset", layer="communes", preset="osm/colorful")[0] is True
+        assert run(accessor, root, "apply_style_preset", layer="nope", preset="osm/colorful")[0] is True
+
     def test_form_and_relation_tools(self, api):
         """2026-11-22: the form of a layer and the relations of the project, checked against the catalog first."""
         accessor, root = api
@@ -903,6 +920,19 @@ class TestRoutes:
         assert client.post("/layers/join", json={"layer": "communes", "join_layer": "communes", "target_field": "a",
                                                  "join_field": "a"}).status_code == 400
         assert client.post("/layers/join", json={"layer": "communes", "target_field": "a"}).status_code == 422
+
+    def test_official_style_routes(self, client):
+        response = client.post("/layers/style/presets", json={})
+        assert response.status_code == 200 and response.json()["presets"]
+        assert client.post("/layers/style/presets", json={"layer": "communes"}).json()["presets"][0]["table"] == \
+            "communes"
+        assert client.post("/layers/style/presets", json={"layer": "nope"}).status_code == 400
+        response = client.post("/layers/style/preset", json={"layer": "communes", "preset": "ign/bdtopo/classique",
+                                                             "variant": "gris"})
+        assert response.status_code == 200 and response.json()["preset"] == "ign/bdtopo/classique"
+        assert client.post("/layers/style/preset", json={"layer": "communes", "preset": "ign/bdtopo/classique",
+                                                         "variant": "sepia"}).status_code == 422
+        assert client.post("/layers/style/preset", json={"layer": "communes", "preset": "plan"}).status_code == 400
 
     def test_form_and_relation_routes(self, client):
         response = client.post("/layers/form", json={"layer": "communes", "fields": [

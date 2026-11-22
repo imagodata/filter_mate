@@ -999,6 +999,21 @@ opacity. The answer says how many classes were made, never their values. Before 
 the turn checkpoint keeps its symbology, labels and rendering as XML (`exportNamedStyle`), and undoing the turn puts
 them back (`importNamedStyle`); redoing it applies the new style again.
 
+Official styles (`adapters/public_api/style_presets.py`, `core/agent/style_presets.py`): `list_style_presets` and
+`apply_style_preset` draw a layer of the BD TOPO of IGN (styles `classique`, `routier`, `bati`, `hydrographie` of the
+Géoplateforme, Licence Ouverte 2.0) or of OpenStreetMap (the layers of `add_osm_features`, style VersaTiles colorful,
+CC0) as its producer draws it. `scripts/build_style_presets.py` (Docker, QGIS) converts the MapLibre styles with
+`QgsMapBoxGlStyleConverter` into a QML per table (`resources/styles/<family>/<dataset>/<style>/<table>.qml`): a
+rule-based renderer drawn in the order of the style (symbol levels), a line on an area made its outline, the zoom
+range of each class as a scale range (zoom z shown from 1:559,082,264/2^(z-0.5) to 1:559,082,264/2^(z+0.5), as QGIS
+draws vector tiles), `@vector_tile_zoom` computed from `@map_scale`, rule-based labels; the OSM filters of the
+Shortbread schema rewritten on the columns of `add_osm_features` (`highway`, `railway`, `waterway`, `landuse`,
+`natural`, `leisure`, `building`, `admin_level`). `resources/styles/manifest.json` lists each table with its geometry,
+the fields its style reads and those that tell it apart. A layer fits a table by its name (or the table of its source)
+or its fields, never without the fields the style reads; the variants `gris` and `sombre` are computed in OKLab from
+the colours of the QML when it is applied. The categories Symbology, Labeling and Rendering are loaded, undone with
+the turn as `set_layer_style`; refused on a protected layer. Bench: `tests/qgis_headless/check_agent_style_presets.py`.
+
 `apply_filter` and `preview_filter` take the same plain clauses through REST and both MCP servers: a subquery or a function
 outside the list answers 400. A filter still reaches the database with the rights of the user, so an external agent exposed to
 untrusted data is best run with a database role that cannot write.

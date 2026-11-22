@@ -642,6 +642,16 @@ Run it?</source>
         <translation>{} 的标注</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>正在查找官方样式</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>{} 的官方样式</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>为保持简短，本次对话中最早的请求现已概括为几行。</translation>

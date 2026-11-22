@@ -642,6 +642,16 @@ L'executem?</translation>
         <translation>Etiquetes de {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>Cercant un estil oficial</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>Estil oficial de {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>Les sol·licituds més antigues d'aquesta conversa ara es resumeixen en unes poques línies, per mantenir-la curta.</translation>

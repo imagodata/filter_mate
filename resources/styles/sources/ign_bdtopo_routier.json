@@ -1,0 +1,513 @@
+{
+    "version": 8,
+    "name": "BDTOPO",
+    "glyphs": "https://data.geopf.fr/annexes/ressources/vectorTiles/fonts/{fontstack}/{range}.pbf",
+    "sprite": "https://data.geopf.fr/annexes/ressources/vectorTiles/styles/BDTOPO/sprite/sprite_bdtopo",
+    "metadata": {"maputnik:renderer": "ol"},
+    "sources": {
+        "bdtopo": {
+          "type": "vector",
+          "tiles": [
+          "https://data.geopf.fr/tms/1.0.0/BDTOPO/{z}/{x}/{y}.pbf"
+          ],
+          "url":"https://data.geopf.fr/tms/1.0.0/BDTOPO/metadata.json"
+        }
+    },
+    "transition": {
+        "duration": 300,
+        "delay": 0
+    },
+    "layers": [
+        {
+            "id": "type_autoroutier",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Type autoroutier"
+              ]
+            ],
+            "paint": {
+              "line-color": "#5068d2",
+              "line-width": 3
+            }
+          },
+          {
+            "id": "route_a_deux_chaussees",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Route à 2 chaussées"
+              ]
+            ],
+            "paint": {
+              "line-color": "#ea2543",
+              "line-width": 2
+            }
+          },
+        {
+            "id": "route_a_une_chaussee",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Route à 1 chaussée"
+              ]
+            ],
+            "paint": {
+              "line-color": "#646464",
+              "line-width": 2
+            }
+          },
+          {
+            "id": "chemin",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Chemin"
+              ]
+            ],
+            "paint": {
+              "line-color": "#c76227",
+              "line-width": 1.5
+            }
+          },
+          {
+            "id": "bretelle",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Bretelle"
+              ]
+            ],
+            "paint": {
+              "line-color": "#16dbc1",
+              "line-width": 1.7
+            }
+          },
+          {
+            "id": "rond-point",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Rond-point"
+              ]
+            ],
+            "paint": {
+              "line-color": "#a0a0a0",
+              "line-width": 2
+            }
+          },
+          {
+            "id": "piste-cyclable",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Piste cyclable"
+              ]
+            ],
+            "paint": {
+              "line-color": "#00ff00",
+              "line-width": 1.5
+            }
+          },
+          {
+            "id": "escalier-outline",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Escalier"
+              ]
+            ],
+            "paint": {
+              "line-color": "#2d3427",
+              "line-width": 2
+            }
+          },
+          {
+            "id": "escalier-inline",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Escalier"
+              ]
+            ],
+            "paint": {
+              "line-color": "rgba(255, 255, 255, 1)",
+              "line-width": 1.8,
+              "line-dasharray": [3, 0.2]
+            }
+          },
+          {
+            "id": "route-empierre",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Route empierrée"
+              ]
+            ],
+            "paint": {
+              "line-color": "#646464",
+              "line-dasharray": [6, 2],
+              "line-width": 1.5
+            }
+          },
+          {
+            "id": "sentier-outline",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Sentier"
+              ]
+            ],
+            "paint": {
+              "line-color": "#69ff69",
+              "line-width": 2,
+              "line-dasharray": [3, 2]
+            }
+          },
+          {
+            "id": "sentier-inline",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "troncon_de_route",
+            "minzoom": 13,
+            "filter": [
+              "all",
+              [
+                "==",
+                "nature",
+                "Sentier"
+              ]
+            ],
+            "paint": {
+              "line-color": "#69ff69",
+              "line-width": 2,
+              "line-dasharray": [3, 2]
+            }
+          },
+          {
+            "id": "aire_de_repos_ou_de_service",
+            "type": "fill",
+            "source": "bdtopo",
+            "source-layer": "equipement_de_transport",
+            "minzoom": 15,
+            "filter": [
+              "==",
+              "nature",
+              "Aire de repos ou de service"
+            ],
+            "paint": {
+              "fill-color": "#5499e3"
+            }
+          },
+          {
+            "id": "aire_de_triage",
+            "type": "fill",
+            "source": "bdtopo",
+            "source-layer": "equipement_de_transport",
+            "minzoom": 15,
+            "filter": [
+              "==",
+              "nature",
+              "Aire de triage"
+            ],
+            "paint": {
+              "fill-color": "#839994"
+            }
+          },
+          {
+            "id": "arret_de_voyageur",
+            "type": "fill",
+            "source": "bdtopo",
+            "source-layer": "equipement_de_transport",
+            "minzoom": 15,
+            "filter": [
+              "==",
+              "nature",
+              "Arrêt voyageurs"
+            ],
+            "paint": {
+              "fill-color": "#5428d9"
+            }
+          },
+          {
+            "id": "autre_equipement",
+            "type": "fill",
+            "source": "bdtopo",
+            "source-layer": "equipement_de_transport",
+            "minzoom": 15,
+            "filter": [
+              "==",
+              "nature",
+              "Autre équipement"
+            ],
+            "paint": {
+              "fill-color": "#ca5324"
+            }
+          },
+          {
+            "id": "carrefour",
+            "type": "fill",
+            "source": "bdtopo",
+            "source-layer": "equipement_de_transport",
+            "minzoom": 15,
+            "filter": [
+              "==",
+              "nature",
+              "Carrefour"
+            ],
+            "paint": {
+              "fill-color": "#1dc04e"
+            }
+          },
+          {
+            "id": "gare_routiere",
+            "type": "fill",
+            "source": "bdtopo",
+            "source-layer": "equipement_de_transport",
+            "minzoom": 15,
+            "filter": [
+              "==",
+              "nature",
+              "Gare routière"
+            ],
+            "paint": {
+              "fill-color": "#df0f0f"
+            }
+          },
+          {
+            "id": "parking",
+            "type": "fill",
+            "source": "bdtopo",
+            "source-layer": "equipement_de_transport",
+            "minzoom": 15,
+            "filter": [
+              "==",
+              "nature",
+              "Parking"
+            ],
+            "paint": {
+              "fill-color": "#901d92"
+            }
+          },
+          {
+            "id": "peage",
+            "type": "fill",
+            "source": "bdtopo",
+            "source-layer": "equipement_de_transport",
+            "minzoom": 15,
+            "filter": [
+              "==",
+              "nature",
+              "Péage"
+            ],
+            "paint": {
+              "fill-color": "#6da0de"
+            }
+          },
+          {
+            "id": "region_limites",
+            "type": "line",
+            "paint": {
+              "line-color": "rgba(0, 0, 0, 1)",
+              "line-width": 2
+            },
+            "source": "bdtopo",
+            "source-layer": "region",
+            "layout": {"line-join": "bevel"}
+          },
+          {
+            "id": "departement_limites",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "departement",
+            "minzoom": 2,
+            "maxzoom": 12,
+            "paint": {
+              "line-width": 0.75,
+              "line-color": "#000000"
+            }
+          },
+          {
+            "id": "epci_limites",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "epci",
+            "paint": {
+              "line-width": 1.8,
+              "line-color": "#1f78b4"
+            },
+            "minzoom": 8,
+            "maxzoom": 15
+          },
+          {
+            "id": "arrondissement_limites",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "arrondissement",
+            "paint": {
+              "line-color": "#666666",
+              "line-dasharray": [18, 6],
+              "line-width": 0.75
+            },
+            "minzoom": 11,
+            "layout": {"line-join": "bevel"}
+          },
+          {
+            "id": "commune_limites",
+            "type": "line",
+            "source": "bdtopo",
+            "source-layer": "commune",
+            "paint": {
+              "line-color": "#999999",
+              "line-dasharray": [2, 4, 6, 4],
+              "line-width": 0.75
+            },
+            "minzoom": 11,
+            "layout": {"line-join": "bevel"}
+          },{
+            "id": "region_labels",
+            "type": "symbol",
+            "source": "bdtopo",
+            "source-layer": "region",
+            "layout": {
+              "text-field": "{nom_officiel}",
+              "text-size": 20,
+              "text-font": ["Open Sans Regular"]
+            },
+            "minzoom": 1,
+            "maxzoom": 7
+          },
+          {
+            "id": "departement_labels",
+            "type": "symbol",
+            "source": "bdtopo",
+            "source-layer": "departement",
+            "layout": {
+              "text-field": "{nom_officiel}",
+              "text-font": ["Open Sans Regular"],
+              "text-size": 20
+            },
+            "maxzoom": 10,
+            "minzoom": 7
+          },
+          {
+            "id": "epci_labels",
+            "type": "symbol",
+            "source": "bdtopo",
+            "source-layer": "epci",
+            "layout": {
+              "text-field": "{nom_officiel}",
+              "text-font": ["Open Sans Bold Italic"],
+              "text-size": 16,
+              "text-allow-overlap": false,
+              "text-ignore-placement": false,
+              "icon-text-fit": "none"
+            },
+            "paint": {
+              "text-color": "#1f78b4",
+              "text-halo-color": "rgba(255, 255, 255, 1)",
+              "text-halo-width": 5
+            },
+            "minzoom": 8,
+            "maxzoom": 15
+          },
+          {
+            "id": "arrondissement_labels",
+            "type": "symbol",
+            "source": "bdtopo",
+            "source-layer": "arrondissement",
+            "minzoom": 15,
+            "layout": {
+              "text-field": "{nom_officiel}",
+              "text-font": ["Open Sans Italic"]
+            },
+            "paint": {
+              "text-color": "rgba(0, 0, 0, 1)",
+              "text-halo-width": 1,
+              "text-halo-color": "rgba(255, 255, 255, 1)"
+            }
+          },
+          {
+            "id": "commune_labels",
+            "type": "symbol",
+            "source": "bdtopo",
+            "source-layer": "commune",
+            "minzoom": 12,
+            "layout": {
+              "text-field": "{nom_officiel}",
+              "text-font": ["Open Sans Regular"]
+            },
+            "paint": {
+              "text-color": "rgba(0, 0, 0, 1)",
+              "text-halo-width": 5,
+              "text-halo-color": "rgba(255, 255, 255, 1)"
+            }
+          }
+        ]
+    }

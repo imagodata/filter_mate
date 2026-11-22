@@ -642,6 +642,16 @@ Ausführen?</translation>
         <translation>Beschriftungen von {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>Suche nach einem offiziellen Stil</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>Offizieller Stil von {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>Die ältesten Anfragen dieses Gesprächs sind jetzt in wenigen Zeilen zusammengefasst, damit es kurz bleibt.</translation>

@@ -44,6 +44,10 @@ The plugin runs on QGIS 3.22 (Qt5) to QGIS 4.x (Qt6). Check in 3.22, LTR and lat
 
 - `canvas.grab()` can return the previous frame: render with `QgsMapRendererSequentialJob` for a picture.
 - `QgsRubberBand.setToGeometry(geometry, crs)`: pass the CRS of the geometry.
+- A rule-based renderer built in Python: `QgsRuleBasedRenderer(QgsFillSymbol())`, then its `rootRule()` (remove
+  the child it makes), never `QgsRuleBasedRenderer(QgsRuleBasedRenderer.Rule(None))`: that root is freed twice and the
+  heap breaks later, somewhere else (3.44 and 4.3, 2026-11-22). `LD_PRELOAD=libc_malloc_debug.so.0 MALLOC_CHECK_=3
+  MALLOC_PERTURB_=165` in the container makes such a crash happen at the first wrong free.
 
 ## Threads
 

@@ -642,6 +642,16 @@ Run it?</source>
         <translation>Ετικέτες του {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>Αναζήτηση επίσημου στυλ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>Επίσημο στυλ του {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>Τα παλαιότερα αιτήματα αυτής της συζήτησης συνοψίζονται πλέον σε λίγες γραμμές, ώστε να μένει σύντομη.</translation>

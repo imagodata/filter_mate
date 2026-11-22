@@ -642,6 +642,16 @@ Run it?</source>
         <translation>تسميات {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>البحث عن نمط رسمي</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>النمط الرسمي لـ {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>أقدم طلبات هذه المحادثة ملخّصة الآن في بضعة أسطر لإبقائها قصيرة.</translation>

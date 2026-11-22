@@ -673,6 +673,28 @@
     "set_layer_style",
     "update_features"
    ]
+  },
+  {
+   "id": "style_official_preset",
+   "prompt": "Dessine les routes comme l'IGN les dessine.",
+   "expect": [
+    [
+     {
+      "tool": "list_style_presets",
+      "args": {
+       "layer": "routes"
+      },
+      "call_args": {
+       "layer": "routes"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "run_pyqgis",
+    "export_layers"
+   ]
   }
  ]
 }

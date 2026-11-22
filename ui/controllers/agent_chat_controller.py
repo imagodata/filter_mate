@@ -2856,6 +2856,8 @@ class AgentChatController(QObject):
             "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),
             "set_layer_style": lambda: _tr("Style of {}").format(layer),
             "set_labels": lambda: _tr("Labels of {}").format(layer),
+            "list_style_presets": lambda: _tr("Looking for an official style"),
+            "apply_style_preset": lambda: _tr("Official style of {}").format(layer),
             "update_features": lambda: _tr("Edit of {} (not saved)").format(layer),
             "delete_features": lambda: _tr("Features deleted from {} (not saved)").format(layer),
             "add_features": lambda: _tr("Features added to {} (not saved)").format(layer),

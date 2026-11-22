@@ -642,6 +642,16 @@ Run it?</source>
         <translation>ป้ายกำกับของ {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>กำลังหาสไตล์ทางการ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>สไตล์ทางการของ {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>คำขอที่เก่าที่สุดของการสนทนานี้ถูกสรุปเป็นไม่กี่บรรทัดแล้ว เพื่อให้สั้นลง</translation>

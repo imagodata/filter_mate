@@ -642,6 +642,16 @@ Ishga tushirilsinmi?</translation>
         <translation>{} yorliqlari</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2859"/>
+        <source>Looking for an official style</source>
+        <translation>Rasmiy uslub qidirilmoqda</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2860"/>
+        <source>Official style of {}</source>
+        <translation>{} rasmiy uslubi</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
         <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
         <translation>Ushbu suhbatning eng eski so'rovlari qisqa bo'lishi uchun endi bir necha qatorda umumlashtirildi.</translation>

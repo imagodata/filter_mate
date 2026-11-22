@@ -695,6 +695,35 @@ def build_server(client: FilterMateClient) -> Any:
             background=background, background_opacity=background_opacity, callouts=callouts, font=font, bold=bold,
             italic=italic, wrap=wrap, priority=priority, obstacle=obstacle))
 
+    @mcp.tool(annotations=ToolAnnotations(title="Official styles for a layer", readOnlyHint=True,
+                                          openWorldHint=False))
+    async def list_style_presets(
+        layer: Annotated[str, Field(max_length=1000, description="Those that fit it; empty: all")] = "",
+    ) -> Dict[str, Any]:
+        """Official styles of data producers made for QGIS: the BD TOPO of IGN (classique, routier, bati,
+        hydrographie; a style per table) and OpenStreetMap (layers of add_osm_features). With a layer, those whose
+        table fits it by its name or fields, best first. Returns presets [{preset, table, title, rules, labels,
+        drawn_from}] and variants. It changes nothing.
+        """
+        return await call("POST", "/layers/style/presets", _body(layer=layer))
+
+    @mcp.tool(annotations=_write("Apply an official style", idempotent=True))
+    async def apply_style_preset(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        preset: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "From list_style_presets, such as ign/bdtopo/classique; add /table to force one"))],
+        variant: Annotated[Literal["", "gris", "sombre"], Field(description=(
+            "gris: a discreet grey background; sombre: for a dark background"))] = "",
+        all_scales: Annotated[bool, Field(description="Drawn at every scale, not only where the producer does")
+                              ] = False,
+    ) -> Dict[str, Any]:
+        """Draw a vector layer as its producer draws it (rules, symbols, labels, scale ranges); replaces its style.
+        Refused when the layer lacks the fields the style reads. Returns layer_name, preset, table, rules, labels,
+        drawn_from and attribution, to credit. Undoing the turn of the chat brings the previous style back.
+        """
+        return await call("POST", "/layers/style/preset", _body(layer=layer, preset=preset, variant=variant,
+                                                                 all_scales=all_scales))
+
     @mcp.tool(annotations=_write("Edit attributes of features", idempotent=False))  # a formula such as "pop" * 2
     async def update_features(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],

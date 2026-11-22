@@ -69,7 +69,7 @@ logger = logging.getLogger("FilterMate.agent")
 MAX_SELECTION = 100_000  # beyond, the selection is not kept: too much to hold for an undo
 Place = Tuple[Tuple[str, ...], int]
 # The tools that change how a layer is drawn: its style is kept before their first call in a turn.
-STYLE_TOOLS = ("set_layer_style", "set_labels")
+STYLE_TOOLS = ("set_layer_style", "set_labels", "apply_style_preset")
 NOTE_TOOLS = ("add_project_note", "remove_project_note")
 WIDGET_TOOLS = ("create_widget", "remove_widget")
 RECIPE_TOOLS = ("save_recipe", "remove_recipe")
