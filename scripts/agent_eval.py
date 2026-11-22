@@ -685,6 +685,11 @@ class SimulatedProject:
             "edit_layout": lambda args: {"layout": args["layout"], "done": [
                 {"do": change.get("do"), "ref": change.get("ref") or f"item{index}"}
                 for index, change in enumerate(args.get("changes", []), 1)], "items": 6, "pages": 1},
+            "suggest_crs": lambda args: {"bounds_wgs84": [0.9, 43.1, 2.0, 44.0], "from": "layers", "purpose":
+                                         args.get("purpose", "general"), "scale": "local", "current": "EPSG:4326",
+                                         "suggestions": [{"crs": "EPSG:3035" if args.get("purpose") == "areas"
+                                                          else "EPSG:2154", "name": "LAEA Europe", "keeps":
+                                                          "equal-area", "why": "", "units": "meters"}]},
             "set_atlas": lambda args: {"layout": args["layout"], "atlas": args.get("enabled", True),
                                        "coverage_layer": args.get("coverage_layer", ""), "pages": 586,
                                        "maps": ["map1"], "map_mode": args.get("map_mode", "auto")},

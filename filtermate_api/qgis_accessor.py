@@ -581,6 +581,9 @@ class QGISFilterMateAccessor:
     def set_project_crs(self, crs: str) -> ProjectCrs:
         return ProjectCrs(**self._control("set_project_crs", crs))
 
+    def suggest_crs(self, layers: Optional[List[str]] = None, purpose: str = "general") -> Dict[str, Any]:
+        return self._control("suggest_crs", layers=list(layers or []), purpose=purpose)
+
     def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
                   formula: str = "") -> FieldAdded:
         return FieldAdded(**self._control("add_field", layer, name, field_type=field_type, length=length,
