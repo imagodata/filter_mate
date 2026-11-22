@@ -53,6 +53,11 @@
         <translation>已撤销：{}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2865"/>
+        <source>Reading the palettes</source>
+        <translation>正在读取调色板</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2852"/>
         <source>Cartogram of {}</source>
         <translation>{} 的变形地图</translation>

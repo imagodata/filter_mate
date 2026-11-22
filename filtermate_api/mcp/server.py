@@ -887,6 +887,41 @@ def build_server(client: FilterMateClient) -> Any:
         return await call("POST", "/layers/cartogram", _body(layer=layer, field=field, kind=kind,
                                                             iterations=iterations, name=name))
 
+    @mcp.tool(annotations=_write("Design a style", idempotent=True))
+    async def design_style(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        mode: Literal["single", "categorized", "graduated"] = "single",
+        field: Annotated[str, Field(max_length=200)] = "",
+        palette: Annotated[str, Field(max_length=40, description="list_palettes; default by role")] = "",
+        look: Annotated[Literal["flat", "outlined", "hatched", "casing", "halo", "dashed", "icon", "badge"], Field(
+            description="polygon: flat, outlined, hatched; line: flat, casing, halo, dashed; point: flat, icon, "
+                        "badge")] = "flat",
+        icon: Annotated[str, Field(max_length=60, description="icon, badge: a word of an SVG of QGIS")] = "",
+        variant: Literal["light", "dark", "print", "discreet"] = "light",
+        classes: Annotated[int, Field(ge=2, le=9)] = 5,
+        method: Literal["quantile", "equal_interval", "jenks", "pretty"] = "quantile",
+        limit: Annotated[int, Field(ge=1, le=12, description="categories; the rest grey")] = 8,
+        reverse: bool = False,
+        size: Annotated[Optional[float], Field(gt=0, le=20, description="mm")] = None,
+        opacity: Annotated[Optional[float], Field(ge=0, le=1)] = None,
+        color: Annotated[str, Field(max_length=20, description="single: #rrggbb")] = "",
+    ) -> Dict[str, Any]:
+        """Compose a finished style for a vector layer from a validated palette: one symbol, categories or classes,
+        a look per geometry, SVG icons in the colour of their category, a variant for the map. Returns colors and
+        problems (what readers with a colour deficiency cannot tell apart). Undone with the turn in the chat.
+        """
+        return await call("POST", "/layers/design-style", _body(
+            layer=layer, mode=mode, field=field, palette=palette, look=look, icon=icon, variant=variant,
+            classes=classes, method=method, limit=limit, reverse=reverse, size=size, opacity=opacity, color=color))
+
+    @mcp.tool(annotations=ToolAnnotations(title="List palettes", readOnlyHint=True, openWorldHint=False))
+    async def list_palettes(
+        role: Annotated[Literal["", "categorical", "sequential", "diverging", "status"], Field(
+            description="Empty: all")] = "",
+    ) -> Dict[str, Any]:
+        """The palettes design_style takes, by the job of their colours, with source, licence and problems."""
+        return await call("GET", "/layers/palettes?" + urlencode({"role": role}))
+
     @mcp.tool(annotations=_write("Add a field", idempotent=False))
     async def add_field(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],

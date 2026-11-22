@@ -1111,6 +1111,124 @@
   },
   "type": "object"
  },
+ "design_style": {
+  "properties": {
+   "classes": {
+    "default": 5,
+    "maximum": 9,
+    "minimum": 2,
+    "type": "integer"
+   },
+   "color": {
+    "default": "",
+    "maxLength": 20,
+    "type": "string"
+   },
+   "field": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "icon": {
+    "default": "",
+    "maxLength": 60,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "limit": {
+    "default": 8,
+    "maximum": 12,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "look": {
+    "default": "flat",
+    "enum": [
+     "flat",
+     "outlined",
+     "hatched",
+     "casing",
+     "halo",
+     "dashed",
+     "icon",
+     "badge"
+    ],
+    "type": "string"
+   },
+   "method": {
+    "default": "quantile",
+    "enum": [
+     "quantile",
+     "equal_interval",
+     "jenks",
+     "pretty"
+    ],
+    "type": "string"
+   },
+   "mode": {
+    "default": "single",
+    "enum": [
+     "single",
+     "categorized",
+     "graduated"
+    ],
+    "type": "string"
+   },
+   "opacity": {
+    "anyOf": [
+     {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "palette": {
+    "default": "",
+    "maxLength": 40,
+    "type": "string"
+   },
+   "reverse": {
+    "default": false,
+    "type": "boolean"
+   },
+   "size": {
+    "anyOf": [
+     {
+      "exclusiveMinimum": 0,
+      "maximum": 20,
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
+   },
+   "variant": {
+    "default": "light",
+    "enum": [
+     "light",
+     "dark",
+     "print",
+     "discreet"
+    ],
+    "type": "string"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
  "diagnose_performance": {
   "additionalProperties": false,
   "properties": {},
@@ -1981,6 +2099,22 @@
   },
   "type": "object"
  },
+ "list_palettes": {
+  "properties": {
+   "role": {
+    "default": "",
+    "enum": [
+     "",
+     "categorical",
+     "sequential",
+     "diverging",
+     "status"
+    ],
+    "type": "string"
+   }
+  },
+  "type": "object"
+ },
  "load_skill": {
   "additionalProperties": false,
   "properties": {
@@ -1999,6 +2133,7 @@
      "panels",
      "projections",
      "raster-objects",
+     "styles",
      "terrain",
      "workflows"
     ],

@@ -225,6 +225,17 @@ class TestHandlers:
         assert run(accessor, root, "make_cartogram", layer="nope", field="population")[0] is True
         assert run(accessor, root, "make_cartogram", layer="communes", field="population", iterations=99)[0] is True
 
+    def test_design_style_and_palettes(self, api):
+        """2026-11-22: a style composed from a validated palette; the palettes by role."""
+        accessor, root = api
+        error, answer = run(accessor, root, "design_style", layer="communes", mode="categorized", field="nom",
+                            look="outlined")
+        assert not error and answer["mode"] == "categorized" and answer["colors"]
+        assert run(accessor, root, "design_style", layer="communes", look="sparkle")[0] is True
+        assert run(accessor, root, "design_style", layer="nope")[0] is True
+        error, answer = run(accessor, root, "list_palettes", role="sequential")
+        assert not error and all(row["role"] == "sequential" for row in answer["palettes"])
+
     def test_layout_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "create_layout", name="Carte", title="Communes")
