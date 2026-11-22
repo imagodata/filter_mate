@@ -940,6 +940,46 @@ def layout_xml(layout) -> str:
     return document.toString()
 
 
+def fingerprint(layout) -> str:
+    """What a user changes of a layout in the designer, in a form that a write and a read of its XML keep: each item
+    (uuid, kind, page, place and size to the tenth of a millimetre, its text) and the atlas. Two writes of the XML
+    of one layout differ once it went through readXml (2026-11-22): the XML cannot tell a change of the user."""
+    import json
+    rows = []
+    for item in layout_items(layout):
+        point = layout.convertToLayoutUnits(item.pagePositionWithUnits())
+        size = layout.convertToLayoutUnits(item.sizeWithUnits())
+        text = item.text() if hasattr(item, 'text') and callable(item.text) else ''
+        kind = _kind(item)
+        # A frame of a table takes the width of its columns again when it is read: its place only.
+        sized = kind not in ('table', 'frame')
+        rows.append([item.uuid(), kind, item.page(), round(point.x(), 1), round(point.y(), 1),
+                     round(size.width(), 1) if sized else None, round(size.height(), 1) if sized else None,
+                     str(text)])
+    atlas = layout.atlas() if hasattr(layout, 'atlas') else None
+    state = []
+    if atlas is not None:
+        coverage = atlas.coverageLayer()
+        # A filter or a sort turned off keeps its expression in memory, not in the XML: only when on.
+        state = [atlas.enabled(), coverage.id() if coverage is not None else '',
+                 atlas.filterExpression() if atlas.filterFeatures() else '', atlas.pageNameExpression(),
+                 atlas.sortExpression() if atlas.sortFeatures() else '', atlas.filenameExpression()]
+    return json.dumps([sorted(rows), state, layout.pageCollection().pageCount()], sort_keys=True, default=str)
+
+
+def fingerprint_of_xml(xml: str) -> str:
+    """The fingerprint of the layout ``xml`` holds, read in a layout that never joins the project; "" when unread."""
+    from qgis.core import QgsPrintLayout, QgsProject, QgsReadWriteContext
+    from qgis.PyQt.QtXml import QDomDocument
+    document = QDomDocument()
+    if not document.setContent(xml):
+        return ''
+    layout = QgsPrintLayout(QgsProject.instance())
+    if not layout.readXml(document.documentElement(), document, QgsReadWriteContext()):
+        return ''
+    return fingerprint(layout)
+
+
 def layout_from_xml(xml: str) -> bool:
     """Add the layout ``xml`` holds back to the project; False when it cannot come back."""
     from qgis.core import QgsPrintLayout, QgsProject, QgsReadWriteContext

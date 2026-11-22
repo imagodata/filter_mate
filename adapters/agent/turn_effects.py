@@ -954,10 +954,15 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                 else:
                     left.append(_crs_label())
             elif kind == "layout_state":
-                from ..public_api.layouts import layout_from_xml
+                from ..public_api.layouts import fingerprint, fingerprint_of_xml, layout_from_xml
                 manager = project.layoutManager()
                 layout = manager.layoutByName(effect[4])
+                left_as = effect[3] if undo else effect[2]
                 if layout is None:
+                    left.append(effect[4])
+                elif fingerprint(layout) != fingerprint_of_xml(left_as):
+                    # Changed in the designer since the turn (2026-11-22, review): the user's own work stays, and
+                    # the layout is named among what is left as it is.
                     left.append(effect[4])
                 else:
                     manager.removeLayout(layout)
