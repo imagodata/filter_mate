@@ -114,7 +114,7 @@ config.json
 - `fit`: the rows keep their own height, one gap (6 px) apart, at the top of the section; the room left stays under
   them, the rail band ends with the last row, a section shorter than its rows scrolls
 - Applied at once; in the dock, in a panel of QGIS and with the headers stacked alike. A configuration written
-  before the setting gets `fill`. `fit` was the default from 18 to 19 November 2026 (before the release of 5.2.0): a configuration that
+  before the setting gets `fill`. `fit` was the default from 18 to 19 November 2026 (before the release of 5.1.2): a configuration that
   holds it from then is put back to `fill` once (the hidden `SECTION_HEIGHT_FILL_BY_DEFAULT` marks it), a `fit`
   chosen afterwards is kept. The size of the widgets themselves is `UI_PROFILE`
 
