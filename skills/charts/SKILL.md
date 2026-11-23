@@ -4,7 +4,7 @@ title: Draw charts with d3
 description: d3 charts in the chat, saved as images or put in print layouts
 metadata:
   version: 1
-  plugin_min: 5.2.0
+  plugin_min: 5.1.2
   audience: chat
   tools: show_chart, run_chart_code, export_chart, add_chart_to_layout, create_widget, create_layout, export_layout, describe_layer, field_values, layer_statistics, list_layers, map_context
   risk: change

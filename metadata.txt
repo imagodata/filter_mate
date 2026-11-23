@@ -7,7 +7,7 @@ name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 description=Filter all the layers of a project at once by their relation to a selection: vector, raster and LiDAR point clouds, with undo, favorites, export and an optional AI assistant.
-version=5.2.0
+version=5.1.2
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
@@ -48,7 +48,7 @@ tags=filter,spatial filter,multi-layer,subset,definition query,query,selection,b
 # that key only names other QGIS plugins.
 python_dependencies=onnxruntime
 
-changelog=5.2.0: the AGENT becomes a full GIS partner
+changelog=5.1.2: the AGENT becomes a full GIS partner
     - Ask, Plan or Act: choose how far the AGENT goes before it touches your project.
     - Maps ready to share: d3 charts, print layouts and atlases, projections, cartograms, styles from validated palettes, BD TOPO and OpenStreetMap drawn as their producers draw them.
     - Work anywhere: web layers (WFS, OGC API, ArcGIS) copied next to the project for offline use; FilterMate also runs as a standalone application, without the QGIS window.

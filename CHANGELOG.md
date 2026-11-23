@@ -4,9 +4,9 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
-## [5.2.0] - 2026-11-23
+## [5.1.2] - 2026-11-23
 
-Everything merged since 5.1.1 (a 5.1.2 was prepared, never published: its content is here). The panel: the buttons of FILTERING and EXPORTING in front of their rows,
+Everything merged since 5.1.1. The panel: the buttons of FILTERING and EXPORTING in front of their rows,
 which can also be packed at the top (`SECTION_HEIGHT` = `fit`; the layout of 5.1.1 stays the default), the tool
 buttons of the EXPLORING rail chosen for each kind of layer, the rows of the multiple selection list readable in a
 dark theme, the sections set apart in their own panel closed and unloaded with the dock. Filters: a GeoPackage filter
