@@ -102,6 +102,23 @@ def main():
             check("IGN: statistics of a WFS layer stay refused", "web service" in str(exc), exc)
     finally:
         qgis.utils.iface = before
+    communes = QgsProject.instance().mapLayersByName("communes_ign")[0]
+    check("IGN: the communes are drawn at every scale", not communes.hasScaleBasedVisibility() and "note" not in summary,
+          summary)
+    # 2026-11-23: each move of the map downloads what the view holds; zoomed out over Toulouse, 406,007 buildings.
+    summary = project_control.add_service_layer("ign_wfs", "BDTOPO_V3:batiment", name="batiments_ign")
+    buildings = QgsProject.instance().mapLayersByName("batiments_ign")[0]
+    check("IGN: the BD TOPO buildings are drawn only closer than 1:25,000", buildings.hasScaleBasedVisibility()
+          and round(buildings.minimumScale()) == 25000 and "1:25,000" in summary.get("note", ""), summary)
+    check("IGN: and drawn at 1:25,000 itself", buildings.isInScaleRange(25000.000000006)
+          and not buildings.isInScaleRange(25100), buildings.minimumScale())
+    from filter_mate.filtermate_api.accessor import AddedServiceLayer
+    check("IGN: the answer, note and all, is what the chat and the REST API return",
+          AddedServiceLayer(**summary).note == summary["note"], summary)
+    summary = project_control.add_service_layer("ign_wfs", "BDTOPO_V3:troncon_de_route", name="routes_ign")
+    roads = QgsProject.instance().mapLayersByName("routes_ign")[0]
+    check("IGN: the BD TOPO roads are drawn only closer than 1:100,000", roads.hasScaleBasedVisibility()
+          and round(roads.minimumScale()) == 100000 and "1:100,000" in summary.get("note", ""), summary)
     try:
         project_control.add_service_layer("ign_wfs", "invented:layer' url='https://evil.example.org/wfs")
         check("IGN: a layer it does not list is refused", False)

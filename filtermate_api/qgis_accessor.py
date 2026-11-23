@@ -65,6 +65,7 @@ from .accessor import (
     HistoryStep,
     LayerDetails,
     LayerSummary,
+    AddedServiceLayer,
     MapContext,
     OpenDataResult,
     PlacesResult,
@@ -727,9 +728,10 @@ class QGISFilterMateAccessor:
                                               collections=collections, limit=limit, platform=platform, extra_domains=extra))
 
     def add_service_layer(self, platform: str, typename: str, name: str = "",
-                          extra_domains: Optional[str] = None) -> LayerSummary:
+                          extra_domains: Optional[str] = None) -> AddedServiceLayer:
         extra = self.configured_domains() if extra_domains is None else extra_domains
-        return LayerSummary(**self._control("add_service_layer", platform, typename, name=name, extra_domains=extra))
+        return AddedServiceLayer(**self._control("add_service_layer", platform, typename, name=name,
+                                                 extra_domains=extra))
 
     def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
         extra = self.configured_domains() if extra_domains is None else extra_domains

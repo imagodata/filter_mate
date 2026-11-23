@@ -180,7 +180,7 @@ class StylePresetRequest(BaseModel):
     layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
     preset: str = Field(..., min_length=1, max_length=200, description="ign/bdtopo/classique; /table to force one")
     variant: Literal["", "gris", "sombre"] = ""
-    all_scales: bool = Field(False, description="Drawn at every scale, the zoom levels of the producer dropped")
+    all_scales: bool = Field(False, description="The zoom levels of the producer dropped; the layer's own scale range stays")
 
 
 @router.post("/style/preset")

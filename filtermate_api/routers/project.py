@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
     ContourResult, ElevationResult, LocalCopyResult, OsmResult, PopulationResult,
-    Bookmarks, FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, PlacesResult, ProjectCrs, SegmentResult, SelectionResult,
+    AddedServiceLayer, Bookmarks, FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, PlacesResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
 from .filters import LayerName
@@ -215,8 +215,8 @@ class AddServiceLayerBody(BaseModel):
     name: str = Field(default="", max_length=200)
 
 
-@router.post("/layers/add-service", response_model=LayerSummary)
-def add_service_layer(payload: AddServiceLayerBody, request: Request) -> LayerSummary:
+@router.post("/layers/add-service", response_model=AddedServiceLayer)
+def add_service_layer(payload: AddServiceLayerBody, request: Request) -> AddedServiceLayer:
     """Add a layer of a WFS platform the user allowed."""
     try:
         return _accessor(request).add_service_layer(payload.platform, payload.typename, name=payload.name)

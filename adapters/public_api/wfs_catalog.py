@@ -25,6 +25,16 @@ _CACHE: Dict[str, Any] = {}
 
 XLINK = "http://www.w3.org/1999/xlink"
 
+# The most zoomed-out scale (denominator) a BD TOPO layer of the IGN Géoplateforme opened by the agent is drawn at. The
+# layer downloads what the view holds at each move of the map (restrictToRequestBBOX): zoomed out over Toulouse,
+# 406,007 buildings, 82 pages of 5,000 and minutes of server time (measured 2026-11-23). The user changes it in the
+# layer properties.
+GEOPLATEFORME = "data.geopf.fr"
+DRAWN_FROM = {"batiment": 25_000, "troncon_de_route": 100_000}
+# QGIS draws a layer only closer than its minimum scale, and a map set to 1:25,000 is at 25000.000000006: the minimum
+# is set a hair further out, so that the scale named is drawn.
+SCALE_MARGIN = 1.000001
+
 
 def _local(value) -> str:
     return value.toString() if hasattr(value, "toString") else str(value)
@@ -163,6 +173,15 @@ def search(base: str, query: str, limit: int) -> List[Dict[str, Any]]:
             for _score, _name, item in scored[:limit]]
 
 
+def drawn_from(base: str, typename: str) -> Optional[int]:
+    """The most zoomed-out scale a layer of the service is drawn at; None for every scale. Only the BD TOPO of the
+    Géoplateforme: a server elsewhere may publish an extract under the same names."""
+    namespace, _, table = typename.rpartition(":")
+    if (urlsplit(base).hostname or "").lower() != GEOPLATEFORME or not namespace.upper().startswith("BDTOPO"):
+        return None
+    return DRAWN_FROM.get(table.lower())
+
+
 def open_layer(base: str, typename: str, title: str) -> QgsVectorLayer:
     """A layer of the service. The URI is built here, for a name the service really lists.
 
@@ -183,4 +202,9 @@ def open_layer(base: str, typename: str, title: str) -> QgsVectorLayer:
     # 2D-typed layer lacks: the lesser harm.
     if item["crs"]:
         uri.setParam("srsname", item["crs"])
-    return QgsVectorLayer(uri.uri(False), (title or item["title"] or typename)[:80], "WFS")
+    layer = QgsVectorLayer(uri.uri(False), (title or item["title"] or typename)[:80], "WFS")
+    scale = drawn_from(base, typename)
+    if scale:
+        layer.setScaleBasedVisibility(True)
+        layer.setMinimumScale(scale * SCALE_MARGIN)  # QGIS's minimum scale is the most zoomed out one
+    return layer

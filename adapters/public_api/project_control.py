@@ -26,6 +26,7 @@ from ...core.agent.open_data import (
     source_problem, stac_search_body, valid_day,
 )
 from ...core.agent.sql_guard import expression_problem, quoted_identifiers
+from ...core.agent.style_presets import scale_words
 from ...core.domain.layer_kind import LayerKind
 from ..agent.bounded_http import STOPPED, TOO_LARGE, TOO_LONG, HttpFailure, fetch
 from ..qgis.feature_count import exact_feature_count
@@ -619,7 +620,12 @@ def add_service_layer(platform: str, typename: str, name: str = '', extra_domain
     if not layer.isValid():
         raise ValueError(f"{typename} could not be opened")  # nothing more is read from an invalid layer
     QgsProject.instance().addMapLayer(layer)
-    return _summary(layer, count_features=False)
+    answer = _summary(layer, count_features=False)
+    scale = wfs_catalog.drawn_from(base, typename)
+    if scale:
+        answer['note'] = (f"drawn only closer than {scale_words(scale)}: the layer downloads what the map shows at "
+                          "each move; the user changes it in the layer properties")
+    return answer
 
 
 def _basemap_template(platform: str, extra_domains: str) -> str:
