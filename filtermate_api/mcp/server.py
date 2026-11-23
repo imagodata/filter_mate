@@ -714,7 +714,7 @@ def build_server(client: FilterMateClient) -> Any:
             "From list_style_presets, such as ign/bdtopo/classique; add /table to force one"))],
         variant: Annotated[Literal["", "gris", "sombre"], Field(description=(
             "gris: a discreet grey background; sombre: for a dark background"))] = "",
-        all_scales: Annotated[bool, Field(description="Drawn at every scale, not only where the producer does")
+        all_scales: Annotated[bool, Field(description="Not only where the producer draws; the layer's own scale range stays")
                               ] = False,
     ) -> Dict[str, Any]:
         """Draw a vector layer as its producer draws it (rules, symbols, labels, scale ranges); replaces its style.

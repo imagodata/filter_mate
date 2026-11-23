@@ -164,6 +164,17 @@ class TestSegmentObjectsThroughTheAccessor:
         accessor.add_service_layer("ign_wfs", "BDTOPO:batiment", name="wfs", extra_domains="")
         control.add_service_layer.assert_called_once_with("ign_wfs", "BDTOPO:batiment", name="wfs", extra_domains="")
 
+    def test_add_service_layer_carries_its_note(self, plugin_modules):
+        # 2026-11-23: a BD TOPO layer of the Géoplateforme is drawn only from a scale, said in a note; LayerSummary
+        # had no such field, a TypeError in the chat and a 500 in REST. The lists of layers carry no note.
+        control = MagicMock()
+        control.add_service_layer.return_value = {"layer_id": "L8", "name": "batiments", "provider_type": "WFS",
+                                                  "note": "drawn only closer than 1:25,000"}
+        plugin_modules["adapters.public_api.project_control"] = control
+        added = _accessor({}).add_service_layer("ign_wfs", "BDTOPO_V3:batiment", name="batiments", extra_domains="")
+        assert added.note == "drawn only closer than 1:25,000" and added.name == "batiments"
+        assert "note" not in LayerSummary.__dataclass_fields__
+
     def test_a_refusal_is_a_filter_rejected(self, plugin_modules):
         plugin_modules["adapters.public_api.drawn_objects"].segment_objects.side_effect = ValueError("SAM is not installed")
         with pytest.raises(FilterRejected, match="SAM is not installed"):

@@ -1718,7 +1718,7 @@
      },
      "all_scales": {
       "default": false,
-      "description": "Drawn at every scale, not only where the producer does",
+      "description": "Not only where the producer draws; the layer's own scale range stays",
       "type": "boolean"
      }
     },

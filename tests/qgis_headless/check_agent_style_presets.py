@@ -174,6 +174,30 @@ def main():
     check("all_scales: no scale range left", all(rule.minimumScale() == 0 and rule.maximumScale() == 0
                                                  for rule in buildings.renderer().rootRule().children())
           and "drawn_from" not in answer, answer)
+    check("a layer drawn at every scale stays so", not buildings.hasScaleBasedVisibility())
+
+    # 2026-11-23: a BD TOPO layer of the Géoplateforme opened by the agent is drawn only from 1:25,000 (each move
+    # downloads what the view holds); the style, whose QML says hasScaleBasedVisibilityFlag="0", must not undo it.
+    buildings.setScaleBasedVisibility(True)
+    buildings.setMinimumScale(25000)
+    answer = style_presets.apply_style_preset("batiment", "ign/bdtopo/classique")
+    check("a style keeps the scale the layer is drawn from", buildings.hasScaleBasedVisibility()
+          and buildings.minimumScale() == 25000 and "1:25,000" in answer.get("note", ""), answer)
+    check("the answer gives the scale drawn from, the closer of the producer's (1:48,258) and the layer's",
+          answer.get("drawn_from") == "1:25,000" and "all_scales" not in answer["note"], answer)
+    answer = style_presets.apply_style_preset("batiment", "ign/bdtopo/classique", all_scales=True)
+    check("all_scales drops the ranges of the producer, not the scale of the layer",
+          buildings.hasScaleBasedVisibility() and buildings.minimumScale() == 25000
+          and all(rule.minimumScale() == 0 for rule in buildings.renderer().rootRule().children())
+          and "1:25,000" in answer.get("note", ""), answer)
+    buildings.setMinimumScale(1e8)  # QGIS's default: only a limit when zooming in
+    buildings.setMaximumScale(500)
+    answer = style_presets.apply_style_preset("batiment", "ign/bdtopo/classique")
+    check("a layer limited only when zooming in: the producer's scale, all_scales at every scale",
+          answer.get("drawn_from") == "1:48,258" and "100,000,000" not in answer["note"]
+          and "at every scale" in answer["note"], answer)
+    buildings.setMaximumScale(0)
+    buildings.setScaleBasedVisibility(False)
 
     answer = style_presets.apply_style_preset("OSM highway", "osm/colorful")
     check("OSM roads: rules on highway, the name labelled", answer["table"] == "roads" and

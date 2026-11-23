@@ -19,7 +19,7 @@ can do::
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
@@ -74,6 +74,13 @@ class LayerSummary:
     visible: bool = True
     # The groups it sits in, outermost first, joined by " / "; empty at the root.
     group: str = ""
+
+
+@dataclass(frozen=True)
+class AddedServiceLayer(LayerSummary):
+    """A layer of a web service just added, with what the caller should know of it (a BD TOPO layer of the
+    Géoplateforme drawn only closer than a scale); a field of its own, not of every summary the lists give."""
+    note: str = ""
 
 
 @dataclass(frozen=True)
@@ -914,7 +921,7 @@ class FilterMateAccessor(Protocol):
         ...
 
     def add_service_layer(self, platform: str, typename: str, name: str = "",
-                          extra_domains: Optional[str] = None) -> LayerSummary:
+                          extra_domains: Optional[str] = None) -> AddedServiceLayer:
         """Add a layer of a WFS platform; raises FilterRejected when it does not offer it."""
         ...
 
@@ -1532,10 +1539,10 @@ class InMemoryAccessor:
         return OpenDataResult(platform, "imagery", [], 0)
 
     def add_service_layer(self, platform: str, typename: str, name: str = "",
-                          extra_domains: Optional[str] = None) -> LayerSummary:
+                          extra_domains: Optional[str] = None) -> AddedServiceLayer:
         summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or typename, provider_type="WFS")
         self.layers.append(summary)
-        return summary
+        return AddedServiceLayer(**asdict(summary))
 
     def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
         summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or platform, provider_type="wms")

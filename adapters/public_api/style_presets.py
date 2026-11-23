@@ -28,6 +28,7 @@ logger = logging.getLogger('FilterMate.StylePresets')
 STYLES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                           'resources', 'styles')
 MAX_LISTED = 12
+UNLIMITED_SCALE = 1e8  # QGIS's default minimum scale of a layer
 _SOURCE_KEYS = ('layerName', 'table', 'typename', 'typeName', 'layer')
 _manifest_cache: Dict[str, Any] = {}
 
@@ -216,7 +217,7 @@ def _style_categories():
 
 
 def _every_scale(layer) -> None:
-    """The scale ranges of the rules of the style dropped: drawn at every scale."""
+    """The scale ranges of the rules of the style dropped: drawn at every scale the layer itself is drawn at."""
     from qgis.core import QgsRuleBasedLabeling, QgsRuleBasedRenderer
     renderer = layer.renderer()
     if isinstance(renderer, QgsRuleBasedRenderer):
@@ -228,7 +229,6 @@ def _every_scale(layer) -> None:
         for rule in labeling.rootRule().children():
             rule.setMinimumScale(0)
             rule.setMaximumScale(0)
-    layer.setScaleBasedVisibility(False)
 
 
 def _refresh(layer) -> None:
@@ -246,7 +246,8 @@ def _refresh(layer) -> None:
 def apply_style_preset(layer: str, preset: str, variant: str = '', all_scales: bool = False) -> Dict[str, Any]:
     """Draw ``layer`` with an official style: its symbols, labels and scale ranges, in a variant or not.
 
-    ``all_scales``: drawn at every scale, the zoom levels the producer draws each class from dropped.
+    ``all_scales``: the zoom levels the producer draws each class from dropped; the scale range of the layer itself
+    (its layer properties) stays.
 
     Raises:
         ValueError: An unknown layer, preset or variant, a layer that fits no table of the preset, a table whose
@@ -265,8 +266,14 @@ def apply_style_preset(layer: str, preset: str, variant: str = '', all_scales: b
         raise ValueError(f"the style {entry['file']} could not be read")
     if variant:
         _recolor_document(document, variant)
+    # The QML files say hasScaleBasedVisibilityFlag="0" and the Rendering category loads it: the scale the layer
+    # itself is drawn from (a BD TOPO layer of the Géoplateforme, wfs_catalog.DRAWN_FROM, or the user's) is kept.
+    own_scale = (found.hasScaleBasedVisibility(), found.minimumScale(), found.maximumScale())
     result = found.importNamedStyle(document, _style_categories())
     loaded, message = (result[0], result[1]) if isinstance(result, tuple) else (bool(result), '')
+    found.setScaleBasedVisibility(own_scale[0])
+    found.setMinimumScale(own_scale[1])
+    found.setMaximumScale(own_scale[2])
     if not loaded:
         raise ValueError(f"the style {preset_id}/{table} did not load: {message}")
     if all_scales:
@@ -276,8 +283,18 @@ def apply_style_preset(layer: str, preset: str, variant: str = '', all_scales: b
     answer: Dict[str, Any] = {'layer_name': found.name(), 'preset': preset_id, 'table': table,
                               'variant': variant or 'none', 'rules': entry['rules'], 'labels': entry['labels'],
                               'attribution': preset_entry['attribution']}
-    if entry.get('scale') and not all_scales:
-        answer['drawn_from'] = scale_words(entry['scale'])
-        answer['note'] = (f"as {preset_entry['title']} draws it: nothing shows when the map is further out than "
-                          f"{scale_words(entry['scale'])}; all_scales draws it at every scale")
+    producer = entry.get('scale') if not all_scales else None
+    # A minimum scale of 0, or QGIS's default 1:100,000,000, limits nothing.
+    own = own_scale[1] if own_scale[0] and 0 < own_scale[1] < UNLIMITED_SCALE else None
+    notes = []
+    if producer and (not own or producer < own):
+        notes.append(f"as {preset_entry['title']} draws it: nothing shows when the map is further out than "
+                     f"{scale_words(producer)}; all_scales draws it "
+                     + (f"up to {scale_words(own)}" if own else "at every scale"))
+    if own:
+        notes.append(f"the layer itself is drawn only closer than {scale_words(own)} (its own setting, kept; the "
+                     "user changes it in the layer properties)")
+    if producer or own:
+        answer['drawn_from'] = scale_words(min(scale for scale in (producer, own) if scale))
+        answer['note'] = '; '.join(notes)
     return answer
