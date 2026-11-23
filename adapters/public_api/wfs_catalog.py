@@ -178,6 +178,10 @@ def open_layer(base: str, typename: str, title: str) -> QgsVectorLayer:
     uri.setParam("version", "auto")
     uri.setParam("pagingEnabled", "true")
     uri.setParam("restrictToRequestBBOX", "1")
+    # The geometry type is read from a first feature, not from the DescribeFeatureType alone: the schema of the
+    # IGN Géoplateforme names no Z while the BD TOPO sends 3D geometries, so the layer was typed 2D and QGIS 4
+    # logged "Received feature geometry has Z values but the layer type ... does not". QGIS 3 ignores the parameter.
+    uri.setParam("forceInitialGetFeature", "true")
     if item["crs"]:
         uri.setParam("srsname", item["crs"])
     return QgsVectorLayer(uri.uri(False), (title or item["title"] or typename)[:80], "WFS")
