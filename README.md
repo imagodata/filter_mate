@@ -18,13 +18,13 @@ and replayed from Processing or a script. Or ask for them in a sentence: the AGE
 exports from a request, with the model you choose.
 
 <p align="center">
-  <img src="website/img/guide/fm5_vector_multiple.png?v=4" alt="FilterMate panel with a vector layer: several features ticked in the multiple selection, then the layers to filter" width="260">
+  <img src="website/img/guide/fm5_filtering_targets.png?v=1" alt="FilterMate panel with a vector layer: a building chosen, then the layers to filter, a LiDAR point cloud and a DTM among them" width="260">
   &nbsp;
   <img src="website/img/guide/fm5_raster_exploring.png?v=4" alt="FilterMate panel with a raster layer: band, value range and histogram, then the layers to filter" width="260">
   &nbsp;
   <img src="website/img/guide/fm5_pointcloud_exploring.png?v=4" alt="FilterMate panel with a LiDAR point cloud: classes and attribute ranges" width="260">
 </p>
-<p align="center"><em>The panel follows the current layer: several vector features ticked, a raster with its histogram, a LiDAR point cloud.</em></p>
+<p align="center"><em>The panel follows the current layer: a building of a vector layer filtering a point cloud and a DTM, a raster with its histogram, a LiDAR point cloud.</em></p>
 
 <p align="center">
   <img src="website/img/guide/agent-chat.png?v=7" alt="AGENT: two requests in a sentence, each with a filter card that gives the features kept" width="260">
