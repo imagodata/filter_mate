@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""A WFS layer opened by the agent asks QGIS to read a first feature for its geometry type (2026-11-23).
+"""A WFS layer opened by the agent does not ask QGIS for an initial GetFeature (2026-11-23).
 
-The DescribeFeatureType of the IGN Géoplateforme says ``MultiSurface`` or ``Curve`` with no word of a Z, while the
-BD TOPO sends 3D geometries. Typed from the schema alone, the layer was ``MultiPolygon`` or ``LineString`` and QGIS 4
-logged a CRITICAL "Received feature geometry has Z values but the layer type (...) does not" for each layer
-(checked in QGIS 4.3: with ``forceInitialGetFeature`` the layers are ``MultiPolygonZ`` and ``LineStringZ``; QGIS 3.44
-ignores the parameter and opens the layer as before).
+``forceInitialGetFeature`` (#641) typed the BD TOPO layers with their Z, which the DescribeFeatureType of the IGN
+Géoplateforme does not name, and silenced QGIS 4's CRITICAL "Received feature geometry has Z values but the layer
+type (...) does not". But QGIS sends that first GetFeature with no BBOX, and the Géoplateforme counts the whole table
+for its ``numberMatched``: 24 to 60 s for the 20.5 million road sections, past QGIS's 60 s network timeout, so the
+layer took 107 s to open (QGIS 4.3 against data.geopf.fr; with a BBOX the same request takes 0.3 s). The message is
+the lesser harm: the parameter stays off.
 
 The module is loaded for real under a synthetic package; QGIS stays mocked by the root conftest.
 """
@@ -68,17 +69,16 @@ def opened(monkeypatch):
     return wfs_catalog.open_layer("https://data.geopf.fr/wfs/ows", "BDTOPO_V3:batiment", "")
 
 
-def test_the_geometry_type_is_read_from_a_first_feature(opened):
-    assert opened.uri.params["forceInitialGetFeature"] == "true"
+def test_no_initial_get_feature_is_forced(opened):
+    assert "forceInitialGetFeature" not in opened.uri.params
 
 
-def test_the_rest_of_the_uri_is_unchanged(opened):
+def test_the_uri(opened):
     assert opened.provider == "WFS"
     assert opened.name == "Bâtiments"
     assert opened.uri.params == {
         "url": "https://data.geopf.fr/wfs/ows", "typename": "BDTOPO_V3:batiment", "version": "auto",
-        "pagingEnabled": "true", "restrictToRequestBBOX": "1", "srsname": "EPSG:4326",
-        "forceInitialGetFeature": "true"}
+        "pagingEnabled": "true", "restrictToRequestBBOX": "1", "srsname": "EPSG:4326"}
 
 
 def test_a_layer_the_service_does_not_list_is_refused(monkeypatch):
