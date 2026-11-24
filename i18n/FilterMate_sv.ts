@@ -4338,12 +4338,22 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <translation>Importera favoriter</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="899"/>
+        <source>The favorite could not be saved. Details in filtermate.log.</source>
+        <translation>Favoriten kunde inte sparas. Detaljer i filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="594"/>
+        <source>{0} favorite(s) imported, {1} skipped (already there).</source>
+        <translation>{0} favoriter importerade, {1} hoppades över (finns redan).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_controller.py" line="570"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
 No = Replace all existing</source>
-        <translation>Sla ihop med befintliga favoriter?
+        <translation type="obsolete">Sla ihop med befintliga favoriter?
 
 Ja = Lagg till befintliga
 Nej = Ersatt alla befintliga</translation>
@@ -4351,7 +4361,7 @@ Nej = Ersatt alla befintliga</translation>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="608"/>
         <source>Imported {0} favorites</source>
-        <translation>{0} favoriter importerade</translation>
+        <translation type="obsolete">{0} favoriter importerade</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="610"/>
@@ -4441,12 +4451,12 @@ Nej = Ersatt alla befintliga</translation>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="290"/>
         <source>Save to project (.qgz)</source>
-        <translation>Spara i projekt (.qgz)</translation>
+        <translation type="obsolete">Spara i projekt (.qgz)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="293"/>
         <source>Restore from project</source>
-        <translation>Aterstall fran projekt</translation>
+        <translation type="obsolete">Aterstall fran projekt</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="298"/>
@@ -4507,22 +4517,22 @@ Globala favoriter delas mellan alla projekt.</translation>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1070"/>
         <source>Saved {0} favorite(s) to project file</source>
-        <translation>{0} favorit(er) sparade i projektfil</translation>
+        <translation type="obsolete">{0} favorit(er) sparade i projektfil</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1072"/>
         <source>Save failed</source>
-        <translation>Sparande misslyckades</translation>
+        <translation type="obsolete">Sparande misslyckades</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1083"/>
         <source>Restored {0} favorite(s) from project file</source>
-        <translation>{0} favorit(er) aterstallda fran projektfil</translation>
+        <translation type="obsolete">{0} favorit(er) aterstallda fran projektfil</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1085"/>
         <source>No favorites to restore found in project</source>
-        <translation>Inga favoriter att aterstalla hittades i projektet</translation>
+        <translation type="obsolete">Inga favoriter att aterstalla hittades i projektet</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1116"/>
@@ -4666,7 +4676,7 @@ Tillämpa ett filter på ett lager, klicka sedan på ★-indikatorn och välj «
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1065"/>
         <source>Could not save favorites to project file: {0}</source>
-        <translation>Kunde inte spara favoriter i projektfilen: {0}</translation>
+        <translation type="obsolete">Kunde inte spara favoriter i projektfilen: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1121"/>
@@ -4902,6 +4912,166 @@ Separera flera taggar med kommatecken.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="739"/>
         <source>Close</source>
         <translation>Stang</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="108"/>
+        <source>Project · shared</source>
+        <translation>Projekt · delat</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="107"/>
+        <source>Global · this computer</source>
+        <translation>Global · den här datorn</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="118"/>
+        <source>Never used</source>
+        <translation>Aldrig använd</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="71"/>
+        <source>{0} layers</source>
+        <translation>{0} lager</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="96"/>
+        <source>Filter</source>
+        <translation>Filter</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="97"/>
+        <source>Then</source>
+        <translation>Därefter</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="98"/>
+        <source>Spatial</source>
+        <translation>Rumslig</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="99"/>
+        <source>Tags</source>
+        <translation>Taggar</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="121"/>
+        <source>Used {0} times</source>
+        <translation>Anvand {0} ganger</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="120"/>
+        <source>Used {0} time</source>
+        <translation>Använd {0} gång</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="89"/>
+        <source>buffer {0}</source>
+        <translation>buffert {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="324"/>
+        <source>Sort the favorites.</source>
+        <translation>Sortera favoriterna.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="325"/>
+        <source>Name</source>
+        <translation>Namn</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="326"/>
+        <source>Last used</source>
+        <translation>Senast använd</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="327"/>
+        <source>Most used</source>
+        <translation>Mest använd</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="426"/>
+        <source>Summary</source>
+        <translation>Sammanfattning</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="427"/>
+        <source>Layers</source>
+        <translation>Lager</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="929"/>
+        <source>Rename</source>
+        <translation>Byt namn</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="932"/>
+        <source>Duplicate</source>
+        <translation>Duplicera</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="894"/>
+        <source>created {0}</source>
+        <translation>skapad {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
+        <source>The name cannot be empty.</source>
+        <translation>Namnet får inte vara tomt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
+        <source>It is removed for everyone who opens this project.</source>
+        <translation>Den tas bort för alla som öppnar det här projektet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="880"/>
+        <source>Layers ({0})</source>
+        <translation>Lager ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="960"/>
+        <source>{0} (copy)</source>
+        <translation>{0} (kopia)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="971"/>
+        <source>Could not duplicate '{0}'.</source>
+        <translation>Kunde inte duplicera '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="987"/>
+        <source>Could not copy '{0}' to the global favorites.</source>
+        <translation>Kunde inte kopiera '{0}' till de globala favoriterna.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1012"/>
+        <source>Could not copy '{0}' to this project.</source>
+        <translation>Kunde inte kopiera '{0}' till det här projektet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1053"/>
+        <source>Another favorite is already named '{0}'.</source>
+        <translation>En annan favorit heter redan '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="939"/>
+        <source>Copy to project</source>
+        <translation>Kopiera till projekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="943"/>
+        <source>Copy to global</source>
+        <translation>Kopiera till global</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="984"/>
+        <source>Could not copy to global: {0}</source>
+        <translation>Kunde inte kopiera till globala: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1009"/>
+        <source>Could not copy to project: {0}</source>
+        <translation>Kunde inte kopiera till projektet: {0}</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="741"/>

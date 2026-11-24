@@ -4338,12 +4338,22 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>Importar favoritos</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="899"/>
+        <source>The favorite could not be saved. Details in filtermate.log.</source>
+        <translation>Não foi possível guardar o favorito. Detalhes em filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="594"/>
+        <source>{0} favorite(s) imported, {1} skipped (already there).</source>
+        <translation>{0} favorito(s) importado(s), {1} ignorado(s) (já existentes).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_controller.py" line="570"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
 No = Replace all existing</source>
-        <translation>Fundir com os favoritos existentes?
+        <translation type="obsolete">Fundir com os favoritos existentes?
 
 Sim = Adicionar aos existentes
 Não = Substituir todos os existentes</translation>
@@ -4351,7 +4361,7 @@ Não = Substituir todos os existentes</translation>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="608"/>
         <source>Imported {0} favorites</source>
-        <translation>{0} favoritos importados</translation>
+        <translation type="obsolete">{0} favoritos importados</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="610"/>
@@ -4441,12 +4451,12 @@ Não = Substituir todos os existentes</translation>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="290"/>
         <source>Save to project (.qgz)</source>
-        <translation>Guardar no projeto (.qgz)</translation>
+        <translation type="obsolete">Guardar no projeto (.qgz)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="293"/>
         <source>Restore from project</source>
-        <translation>Restaurar do projeto</translation>
+        <translation type="obsolete">Restaurar do projeto</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="298"/>
@@ -4507,22 +4517,22 @@ Os favoritos globais são partilhados entre todos os projetos.</translation>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1070"/>
         <source>Saved {0} favorite(s) to project file</source>
-        <translation>{0} favorito(s) guardado(s) no ficheiro do projeto</translation>
+        <translation type="obsolete">{0} favorito(s) guardado(s) no ficheiro do projeto</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1072"/>
         <source>Save failed</source>
-        <translation>Falha ao guardar</translation>
+        <translation type="obsolete">Falha ao guardar</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1083"/>
         <source>Restored {0} favorite(s) from project file</source>
-        <translation>{0} favorito(s) restaurado(s) do ficheiro do projeto</translation>
+        <translation type="obsolete">{0} favorito(s) restaurado(s) do ficheiro do projeto</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1085"/>
         <source>No favorites to restore found in project</source>
-        <translation>Nenhum favorito para restaurar encontrado no projeto</translation>
+        <translation type="obsolete">Nenhum favorito para restaurar encontrado no projeto</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1116"/>
@@ -4666,7 +4676,7 @@ Aplique um filtro a uma camada, clique no indicador ★ e escolha «Adicionar fi
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1065"/>
         <source>Could not save favorites to project file: {0}</source>
-        <translation>Não foi possível guardar os favoritos no ficheiro do projeto: {0}</translation>
+        <translation type="obsolete">Não foi possível guardar os favoritos no ficheiro do projeto: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1121"/>
@@ -4902,6 +4912,166 @@ Separe várias etiquetas com vírgulas.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="739"/>
         <source>Close</source>
         <translation>Fechar</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="108"/>
+        <source>Project · shared</source>
+        <translation>Projeto · partilhado</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="107"/>
+        <source>Global · this computer</source>
+        <translation>Global · este computador</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="118"/>
+        <source>Never used</source>
+        <translation>Nunca utilizado</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="71"/>
+        <source>{0} layers</source>
+        <translation>{0} camadas</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="96"/>
+        <source>Filter</source>
+        <translation>Filtro</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="97"/>
+        <source>Then</source>
+        <translation>Depois</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="98"/>
+        <source>Spatial</source>
+        <translation>Espacial</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="99"/>
+        <source>Tags</source>
+        <translation>Etiquetas</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="121"/>
+        <source>Used {0} times</source>
+        <translation>Utilizado {0} vezes</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="120"/>
+        <source>Used {0} time</source>
+        <translation>Utilizado {0} vez</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="89"/>
+        <source>buffer {0}</source>
+        <translation>buffer {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="324"/>
+        <source>Sort the favorites.</source>
+        <translation>Ordenar os favoritos.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="325"/>
+        <source>Name</source>
+        <translation>Nome</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="326"/>
+        <source>Last used</source>
+        <translation>Última utilização</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="327"/>
+        <source>Most used</source>
+        <translation>Mais utilizados</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="426"/>
+        <source>Summary</source>
+        <translation>Resumo</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="427"/>
+        <source>Layers</source>
+        <translation>Camadas</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="929"/>
+        <source>Rename</source>
+        <translation>Mudar o nome</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="932"/>
+        <source>Duplicate</source>
+        <translation>Duplicar</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="894"/>
+        <source>created {0}</source>
+        <translation>criado em {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
+        <source>The name cannot be empty.</source>
+        <translation>O nome não pode estar vazio.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
+        <source>It is removed for everyone who opens this project.</source>
+        <translation>É removido para todos os que abrirem este projeto.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="880"/>
+        <source>Layers ({0})</source>
+        <translation>Camadas ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="960"/>
+        <source>{0} (copy)</source>
+        <translation>{0} (cópia)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="971"/>
+        <source>Could not duplicate '{0}'.</source>
+        <translation>Não foi possível duplicar '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="987"/>
+        <source>Could not copy '{0}' to the global favorites.</source>
+        <translation>Não foi possível copiar '{0}' para os favoritos globais.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1012"/>
+        <source>Could not copy '{0}' to this project.</source>
+        <translation>Não foi possível copiar '{0}' para este projeto.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1053"/>
+        <source>Another favorite is already named '{0}'.</source>
+        <translation>Já existe outro favorito com o nome '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="939"/>
+        <source>Copy to project</source>
+        <translation>Copiar para o projeto</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="943"/>
+        <source>Copy to global</source>
+        <translation>Copiar para globais</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="984"/>
+        <source>Could not copy to global: {0}</source>
+        <translation>Não foi possível copiar para global: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1009"/>
+        <source>Could not copy to project: {0}</source>
+        <translation>Não foi possível copiar para o projeto: {0}</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="741"/>

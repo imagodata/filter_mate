@@ -360,13 +360,12 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         if self._list_widget.count() > 0:
             self._list_widget.setCurrentRow(0)
 
-    @staticmethod
-    def _plugin_theme_is_dark() -> bool:
-        """True when the plugin theme is the dark one (anything else is light)."""
+    def _plugin_theme_is_dark(self) -> bool:
+        """True when the plugin theme drawn on the dock the dialog belongs to is the dark one."""
         try:
-            from ..styles.style_loader import StyleLoader
-            return StyleLoader.get_current_theme() == 'dark'
-        except Exception:  # style loader unavailable: the light theme
+            from ..styles.mockup_design import plugin_is_dark
+            return bool(plugin_is_dark(self))
+        except Exception:  # style helpers unavailable: the light theme
             return False
 
     @staticmethod

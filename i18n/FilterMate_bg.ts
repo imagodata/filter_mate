@@ -4338,12 +4338,22 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Импорт на любими</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="899"/>
+        <source>The favorite could not be saved. Details in filtermate.log.</source>
+        <translation>Любимият не можа да бъде запазен. Подробности във filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="594"/>
+        <source>{0} favorite(s) imported, {1} skipped (already there).</source>
+        <translation>Импортирани любими: {0}, пропуснати: {1} (вече съществуват).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_controller.py" line="570"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
 No = Replace all existing</source>
-        <translation>Обединяване със съществуващите любими?
+        <translation type="obsolete">Обединяване със съществуващите любими?
 
 Да = Добавяне към съществуващите
 Не = Замяна на всички съществуващи</translation>
@@ -4351,7 +4361,7 @@ No = Replace all existing</source>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="608"/>
         <source>Imported {0} favorites</source>
-        <translation>{0} любими импортирани</translation>
+        <translation type="obsolete">{0} любими импортирани</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="610"/>
@@ -4441,12 +4451,12 @@ No = Replace all existing</source>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="290"/>
         <source>Save to project (.qgz)</source>
-        <translation>Запазване в проект (.qgz)</translation>
+        <translation type="obsolete">Запазване в проект (.qgz)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="293"/>
         <source>Restore from project</source>
-        <translation>Възстановяване от проект</translation>
+        <translation type="obsolete">Възстановяване от проект</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="298"/>
@@ -4507,22 +4517,22 @@ Global favorites are shared across all projects.</source>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1070"/>
         <source>Saved {0} favorite(s) to project file</source>
-        <translation>{0} любими запазени във файла на проекта</translation>
+        <translation type="obsolete">{0} любими запазени във файла на проекта</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1072"/>
         <source>Save failed</source>
-        <translation>Запазването е неуспешно</translation>
+        <translation type="obsolete">Запазването е неуспешно</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1083"/>
         <source>Restored {0} favorite(s) from project file</source>
-        <translation>{0} любими възстановени от файла на проекта</translation>
+        <translation type="obsolete">{0} любими възстановени от файла на проекта</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1085"/>
         <source>No favorites to restore found in project</source>
-        <translation>Не са намерени любими за възстановяване в проекта</translation>
+        <translation type="obsolete">Не са намерени любими за възстановяване в проекта</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1116"/>
@@ -4666,7 +4676,7 @@ Apply a filter to a layer, then click the ★ indicator and choose 'Add current 
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1065"/>
         <source>Could not save favorites to project file: {0}</source>
-        <translation>Любимите не могат да бъдат запазени във файла на проекта: {0}</translation>
+        <translation type="obsolete">Любимите не могат да бъдат запазени във файла на проекта: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1121"/>
@@ -4902,6 +4912,166 @@ Separate multiple tags with commas.</source>
         <location filename="../ui/dialogs/favorites_manager.py" line="739"/>
         <source>Close</source>
         <translation>Затваряне</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="108"/>
+        <source>Project · shared</source>
+        <translation>Проект · споделен</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="107"/>
+        <source>Global · this computer</source>
+        <translation>Глобален · този компютър</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="118"/>
+        <source>Never used</source>
+        <translation>Никога използван</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="71"/>
+        <source>{0} layers</source>
+        <translation>{0} слоя</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="96"/>
+        <source>Filter</source>
+        <translation>Филтър</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="97"/>
+        <source>Then</source>
+        <translation>След това</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="98"/>
+        <source>Spatial</source>
+        <translation>Пространствен</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="99"/>
+        <source>Tags</source>
+        <translation>Тагове</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="121"/>
+        <source>Used {0} times</source>
+        <translation>Използван {0} пъти</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="120"/>
+        <source>Used {0} time</source>
+        <translation>Използван {0} път</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="89"/>
+        <source>buffer {0}</source>
+        <translation>буфер {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="324"/>
+        <source>Sort the favorites.</source>
+        <translation>Сортиране на любимите.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="325"/>
+        <source>Name</source>
+        <translation>Име</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="326"/>
+        <source>Last used</source>
+        <translation>Последно използвани</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="327"/>
+        <source>Most used</source>
+        <translation>Най-често използвани</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="426"/>
+        <source>Summary</source>
+        <translation>Резюме</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="427"/>
+        <source>Layers</source>
+        <translation>Слоеве</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="929"/>
+        <source>Rename</source>
+        <translation>Преименуване</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="932"/>
+        <source>Duplicate</source>
+        <translation>Дублиране</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="894"/>
+        <source>created {0}</source>
+        <translation>създаден на {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
+        <source>The name cannot be empty.</source>
+        <translation>Името не може да е празно.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
+        <source>It is removed for everyone who opens this project.</source>
+        <translation>Премахва се за всички, които отварят този проект.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="880"/>
+        <source>Layers ({0})</source>
+        <translation>Слоеве ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="960"/>
+        <source>{0} (copy)</source>
+        <translation>{0} (копие)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="971"/>
+        <source>Could not duplicate '{0}'.</source>
+        <translation>'{0}' не може да бъде дублиран.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="987"/>
+        <source>Could not copy '{0}' to the global favorites.</source>
+        <translation>'{0}' не може да бъде копиран в глобалните любими.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1012"/>
+        <source>Could not copy '{0}' to this project.</source>
+        <translation>'{0}' не може да бъде копиран в този проект.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1053"/>
+        <source>Another favorite is already named '{0}'.</source>
+        <translation>Друг любим вече се нарича '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="939"/>
+        <source>Copy to project</source>
+        <translation>Копиране в проекта</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="943"/>
+        <source>Copy to global</source>
+        <translation>Копиране в глобалните</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="984"/>
+        <source>Could not copy to global: {0}</source>
+        <translation>Копирането в глобалните не е успешно: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1009"/>
+        <source>Could not copy to project: {0}</source>
+        <translation>Копирането в проекта не е успешно: {0}</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="741"/>

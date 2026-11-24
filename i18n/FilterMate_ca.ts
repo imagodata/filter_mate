@@ -4338,12 +4338,22 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Importar preferits</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="899"/>
+        <source>The favorite could not be saved. Details in filtermate.log.</source>
+        <translation>No s'ha pogut desar el preferit. Detalls a filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="594"/>
+        <source>{0} favorite(s) imported, {1} skipped (already there).</source>
+        <translation>{0} preferits importats, {1} omesos (ja hi eren).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/favorites_controller.py" line="570"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
 No = Replace all existing</source>
-        <translation>Fusionar amb els preferits existents?
+        <translation type="obsolete">Fusionar amb els preferits existents?
 
 Sí = Afegir als existents
 No = Reemplaçar tots els existents</translation>
@@ -4351,7 +4361,7 @@ No = Reemplaçar tots els existents</translation>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="608"/>
         <source>Imported {0} favorites</source>
-        <translation>{0} preferits importats</translation>
+        <translation type="obsolete">{0} preferits importats</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="610"/>
@@ -4441,12 +4451,12 @@ No = Reemplaçar tots els existents</translation>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="290"/>
         <source>Save to project (.qgz)</source>
-        <translation>Desar al projecte (.qgz)</translation>
+        <translation type="obsolete">Desar al projecte (.qgz)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="293"/>
         <source>Restore from project</source>
-        <translation>Restaurar des del projecte</translation>
+        <translation type="obsolete">Restaurar des del projecte</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_menu_builder.py" line="298"/>
@@ -4507,22 +4517,22 @@ Els preferits globals es comparteixen entre tots els projectes.</translation>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1070"/>
         <source>Saved {0} favorite(s) to project file</source>
-        <translation>{0} preferit(s) desat(s) al fitxer de projecte</translation>
+        <translation type="obsolete">{0} preferit(s) desat(s) al fitxer de projecte</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1072"/>
         <source>Save failed</source>
-        <translation>Error en desar</translation>
+        <translation type="obsolete">Error en desar</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1083"/>
         <source>Restored {0} favorite(s) from project file</source>
-        <translation>{0} preferit(s) restaurat(s) des del fitxer de projecte</translation>
+        <translation type="obsolete">{0} preferit(s) restaurat(s) des del fitxer de projecte</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1085"/>
         <source>No favorites to restore found in project</source>
-        <translation>No s'han trobat preferits per restaurar al projecte</translation>
+        <translation type="obsolete">No s'han trobat preferits per restaurar al projecte</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1116"/>
@@ -4666,7 +4676,7 @@ Apliqueu un filtre a una capa, feu clic a l'indicador ★ i trieu «Afegeix el f
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1065"/>
         <source>Could not save favorites to project file: {0}</source>
-        <translation>No s'han pogut desar els preferits al fitxer del projecte: {0}</translation>
+        <translation type="obsolete">No s'han pogut desar els preferits al fitxer del projecte: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1121"/>
@@ -4902,6 +4912,166 @@ Separeu múltiples etiquetes amb comes.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="739"/>
         <source>Close</source>
         <translation>Tancar</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="108"/>
+        <source>Project · shared</source>
+        <translation>Projecte · compartit</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="107"/>
+        <source>Global · this computer</source>
+        <translation>Global · aquest equip</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="118"/>
+        <source>Never used</source>
+        <translation>Mai utilitzat</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="71"/>
+        <source>{0} layers</source>
+        <translation>{0} capes</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="96"/>
+        <source>Filter</source>
+        <translation>Filtre</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="97"/>
+        <source>Then</source>
+        <translation>Després</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="98"/>
+        <source>Spatial</source>
+        <translation>Espacial</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="99"/>
+        <source>Tags</source>
+        <translation>Etiquetes</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="121"/>
+        <source>Used {0} times</source>
+        <translation>Utilitzat {0} vegades</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="120"/>
+        <source>Used {0} time</source>
+        <translation>Utilitzat {0} vegada</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="89"/>
+        <source>buffer {0}</source>
+        <translation>buffer {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="324"/>
+        <source>Sort the favorites.</source>
+        <translation>Ordena els preferits.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="325"/>
+        <source>Name</source>
+        <translation>Nom</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="326"/>
+        <source>Last used</source>
+        <translation>Darrer ús</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="327"/>
+        <source>Most used</source>
+        <translation>Més utilitzats</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="426"/>
+        <source>Summary</source>
+        <translation>Resum</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="427"/>
+        <source>Layers</source>
+        <translation>Capes</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="929"/>
+        <source>Rename</source>
+        <translation>Canvia el nom</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="932"/>
+        <source>Duplicate</source>
+        <translation>Duplica</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="894"/>
+        <source>created {0}</source>
+        <translation>creat el {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
+        <source>The name cannot be empty.</source>
+        <translation>El nom no pot estar buit.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
+        <source>It is removed for everyone who opens this project.</source>
+        <translation>S'elimina per a tothom qui obri aquest projecte.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="880"/>
+        <source>Layers ({0})</source>
+        <translation>Capes ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="960"/>
+        <source>{0} (copy)</source>
+        <translation>{0} (còpia)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="971"/>
+        <source>Could not duplicate '{0}'.</source>
+        <translation>No s'ha pogut duplicar '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="987"/>
+        <source>Could not copy '{0}' to the global favorites.</source>
+        <translation>No s'ha pogut copiar '{0}' als preferits globals.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1012"/>
+        <source>Could not copy '{0}' to this project.</source>
+        <translation>No s'ha pogut copiar '{0}' a aquest projecte.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1053"/>
+        <source>Another favorite is already named '{0}'.</source>
+        <translation>Un altre preferit ja es diu '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="939"/>
+        <source>Copy to project</source>
+        <translation>Copia al projecte</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="943"/>
+        <source>Copy to global</source>
+        <translation>Copia als globals</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="984"/>
+        <source>Could not copy to global: {0}</source>
+        <translation>No s'ha pogut copiar al global: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1009"/>
+        <source>Could not copy to project: {0}</source>
+        <translation>No s'ha pogut copiar al projecte: {0}</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="741"/>

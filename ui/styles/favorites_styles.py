@@ -214,6 +214,8 @@ _DIALOG_STYLESHEET_TEMPLATE: str = """
         padding: 8px;
         margin-top: -1px;
     }
+    /* No font-size or weight on the tabs: Qt measures a tab with the font of the bar, so a larger or bolder
+       style font clips the text of a tab such as "Layers (2)". */
     QTabBar { qproperty-drawBase: 0; }
     QTabBar::tab {
         color: {fm_text_muted};
@@ -224,14 +226,12 @@ _DIALOG_STYLESHEET_TEMPLATE: str = """
         margin-right: 3px;
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
-        font-size: 10pt;
         min-width: 70px;
     }
     QTabBar::tab:selected {
         color: {fm_text};
         background-color: {fm_group};
         border-bottom: 2px solid {fm_accent};
-        font-weight: 600;
     }
     QTabBar::tab:hover:!selected {
         color: {fm_text};

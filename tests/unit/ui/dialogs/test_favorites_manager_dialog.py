@@ -228,3 +228,12 @@ def test_deleting_a_global_favorite_does_not_mention_the_project(monkeypatch):
     assert len(asked) == 1
     assert "everyone" not in asked[0]
     assert service.global_favorites == []
+
+
+@pytest.mark.parametrize("glyph, dark", [("radio_dot_dark.svg", True), ("radio_dot_white.svg", False)])
+def test_the_dialog_takes_the_theme_drawn_on_its_dock(glyph, dark):
+    dock = QtWidgets.QWidget()
+    dock.setStyleSheet("QRadioButton::indicator:checked { image: url(:/%s); }" % glyph)
+    dialog = dialog_module.FavoritesManagerDialog(_Service([_favorite("Roads")]), dock)
+
+    assert dialog._dark is dark
