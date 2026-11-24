@@ -1107,7 +1107,9 @@ class FavoritesController(BaseController):
         if migration_service is None:
             return
         try:
-            deleted_count, _deleted_ids = migration_service.cleanup_orphan_projects()
+            # the project on screen, when it has no file yet, is not an orphan
+            current = getattr(getattr(self._favorites_service, 'favorites_manager', None), '_project_uuid', None)
+            deleted_count, _deleted_ids = migration_service.cleanup_orphan_projects(current_project_uuid=current)
             if deleted_count > 0:
                 self._show_success(self.tr("Cleaned up {0} orphan project(s)").format(deleted_count))
             else:

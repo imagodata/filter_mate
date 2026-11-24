@@ -382,3 +382,20 @@ def test_the_same_value_in_another_form_cancels_no_task_of_the_layer(env):
     env.layer.props["variableValues/filterMate_filtering_layers_to_filter"] = ["routes_1"]
     env.manager.save_single_property(env.layer, env.cursor, "filtering", "layers_to_filter", ["routes_1"])
     assert env.canceled == []
+
+
+def test_no_row_is_written_while_no_project_is_bound(env):
+    """2026-11-24: between a project closed and the next one bound (FilterMateApp.unbind_project) the rows went
+    under the id of the project closed, or under 'None' (the app gave str(None))."""
+    env.manager._get_project_uuid = lambda: None
+    assert env.manager.save_single_property(env.layer, env.cursor, "exploring", "is_linking", True) is True
+    assert env.cursor.rows == []  # the layer variable is the project's own: written
+    assert env.written == [("parcelles_1", {"filterMate_exploring_is_linking": True})]
+
+
+def test_nothing_is_removed_while_no_project_is_bound(env):
+    connections = []
+    env.manager._get_connection = lambda: connections.append(1)
+    env.manager._get_project_uuid = lambda: None
+    assert env.manager.remove_variables_from_layer(env.layer, [("exploring", "is_linking")]) is False
+    assert connections == []

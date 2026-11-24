@@ -142,3 +142,14 @@ def test_the_favorites_of_an_unsaved_project_opened_are_not_its_own_orphans(tmp_
     count, names = FavoritesMigrationService(path).migrate_orphan_favorites("orphan1")
     assert ("f-own", "orphan1", "mine") in _rows(path)
     assert names == ["lost elsewhere"]
+
+
+def test_the_cleanup_of_orphan_projects_keeps_the_project_on_screen(tmp_path):
+    """2026-11-24: a project with no file yet has no name: the ★ cleanup removed the row of the project bound."""
+    path = _db(tmp_path)
+    deleted, ids = FavoritesMigrationService(path).cleanup_orphan_projects(current_project_uuid="orphan1")
+    assert ids == ["orphan2"]
+    conn = sqlite3.connect(path)
+    assert [row[0] for row in conn.execute("SELECT project_id FROM fm_projects ORDER BY project_id")] == \
+        ["orphan1", "target"]
+    conn.close()

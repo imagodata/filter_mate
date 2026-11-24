@@ -1164,6 +1164,10 @@ class FilterMate:
             return
 
         try:
+            # 2026-11-24: the debounced layersAdded of the project closed would register layers (and bind a project,
+            # ensure_project_bound) during the event loop QGIS runs between closing a project and reading the next
+            self.app._stop_pending_layer_additions()
+
             # Reset all protection flags
             if hasattr(self.app, '_set_loading_flag'):
                 self.app._set_loading_flag(False)
@@ -1225,6 +1229,13 @@ class FilterMate:
 
         except Exception as e:
             logger.warning(f"FilterMate: Error during project cleared cleanup: {e}")
+
+        # 2026-11-24: the database stayed bound to the project closed — its favorites listed in the new project,
+        # and favorites and layer settings made there stored under the closed project's id. Nothing is bound until
+        # the next project is (projectRead / newProjectCreated, _auto_activate_plugin), or a favorite or a layer
+        # added binds the project on screen (ensure_project_bound). Not here: QGIS opening a project clears it, runs
+        # the event loop, then reads it (a binding then took the unsaved project of before the reading).
+        self.app.unbind_project()
 
     def _auto_activate_for_new_layers(self, layers):
         """Handle layersAdded signal specifically for auto-activation.
@@ -1318,9 +1329,11 @@ class FilterMate:
                 # This prevents multiple calls from projectRead + layersAdded signals
                 if hasattr(self.app, '_initializing_project') and self.app._initializing_project:
                     logger.debug("FilterMate: Skipping _auto_activate_plugin - already initializing project")
+                    self.app.ensure_project_bound()  # the initialization running binds it, unless it ran before
                     return
                 if hasattr(self.app, '_loading_new_project') and self.app._loading_new_project:
                     logger.debug("FilterMate: Skipping _auto_activate_plugin - loading new project")
+                    self.app.ensure_project_bound()
                     return
 
                 # CRITICAL: When a new project is loaded while plugin is active,
@@ -1334,8 +1347,17 @@ class FilterMate:
                     strong_self = weak_self()
                     if strong_self is not None:
                         strong_self._handle_project_change()
-                QTimer.singleShot(200, safe_handle_project_change)
+                QTimer.singleShot(200, safe_handle_project_change)  # it binds the project (both of its paths)
                 return
+
+        # 2026-11-24 (review): the panel closed (the app kept) or not reinitialized here, the project opened or
+        # created is bound now; before, a project opened with the panel closed was never bound: its favorites were
+        # not listed when the panel opened again, one added failed, and its layer settings went under the id of the
+        # project closed. Here, not on projectRead: a new project from a template is read under the template's
+        # file name, which QGIS empties afterwards.
+        if self.app:
+            self.app.bind_current_project()
+        if self.pluginIsActive:
             return
 
         if not auto_activate_enabled:
@@ -1391,11 +1413,13 @@ class FilterMate:
         # CRITICAL: Check if app is already initializing a project
         if hasattr(self.app, '_initializing_project') and self.app._initializing_project:
             logger.debug("FilterMate: Skipping _handle_project_change - already initializing")
+            self.app.ensure_project_bound()  # the initialization running binds it, unless it ran before
             return
 
         # CRITICAL: Also check if loading is in progress
         if hasattr(self.app, '_loading_new_project') and self.app._loading_new_project:
             logger.debug("FilterMate: Skipping _handle_project_change - loading new project")
+            self.app.ensure_project_bound()
             return
 
         project = QgsProject.instance()
@@ -1469,6 +1493,8 @@ class FilterMate:
 
         if not vector_layers:
             logger.info("FilterMate: New project has no vector layers")
+            # Its favorites and settings still belong to it (2026-11-24: the database stayed on the project before)
+            self.app.bind_current_project()
             # Only access dockwidget if it exists and has widgets_initialized
             if (self.app.dockwidget and
                 hasattr(self.app.dockwidget, 'widgets_initialized') and

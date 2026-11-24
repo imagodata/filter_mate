@@ -664,6 +664,9 @@ class FavoritesManager:
             raise FavoritesNotInitialized(
                 "FavoritesManager.add_favorite called before set_database"
             )
+        if not (target_project_uuid or self._project_uuid):
+            # 2026-11-24: the project was closed (FavoritesService._on_project_cleared); no row without a project
+            raise FavoritesNotInitialized("FavoritesManager.add_favorite called with no project bound")
 
         try:
             import sqlite3
