@@ -7,6 +7,7 @@ QGIS 3.44 before: a favorite added on computer A reached computer B one session 
 of its own (tests/qgis_headless/check_favorites_travel.py).
 """
 import json
+import sqlite3
 
 import pytest
 
@@ -230,6 +231,15 @@ def test_nothing_is_written_into_the_next_project_before_it_was_read(tmp_path):
     assert second.entries == {}
 
 
+def rows(tmp_path, name):
+    """(project id, favorite name) of every favorite in the SQLite of a computer."""
+    conn = sqlite3.connect(str(tmp_path / f"{name}.sqlite"))
+    try:
+        return sorted(conn.execute("SELECT project_uuid, name FROM fm_favorites").fetchall())
+    finally:
+        conn.close()
+
+
 def test_a_project_closed_leaves_no_favorite_of_it(tmp_path):
     """2026-11-24, seen by Simon: a project closed (QgsProject.cleared) kept its favorites listed (★ 3 on an empty
     project), and a favorite added then went to the closed project, then into its .qgz at its next opening."""
@@ -237,11 +247,75 @@ def test_a_project_closed_leaves_no_favorite_of_it(tmp_path):
     a = computer(tmp_path, "a", project)
     add(a, "fav_A1")
     a._on_project_cleared()  # QgsProject.cleared
-    assert names(a) == []
-    assert a._favorites_manager._project_uuid is None
-    try:
-        a.add_favorite("made with no project", "TRUE")
-    except Exception:
-        pass
+    assert names(a) == [] and not a.is_bound
+    # no project could be bound (no callback): refused, nothing written under any id
+    assert a.add_favorite("made with no project", "TRUE") is None
+    assert a.import_global_to_project("any") is None
+    assert rows(tmp_path, "a") == [(PROJECT_UUID, "fav_A1")]
     a = computer(tmp_path, "a", project)  # the project opened again
     assert names(a) == ["fav_A1"]
+
+
+def test_a_favorite_made_after_closing_goes_to_the_project_on_screen(tmp_path):
+    """Project > Close, then a favorite made: the service binds the project on screen first (the app's
+    ensure_project_bound), and the favorite is that project's, not the closed one's."""
+    closed, on_screen = Project(), Project()
+    a = computer(tmp_path, "a", closed)
+    add(a, "fav_A1")
+    a._on_project_cleared()
+    other_uuid = "99999999-2222-3333-4444-555555555555"
+
+    def bind():
+        a._project = staticmethod(lambda _project: on_screen)
+        a.set_database(str(tmp_path / "a.sqlite"), other_uuid)
+
+    a.set_bind_callback(bind)
+    assert add(a, "made after closing") is not None
+    assert rows(tmp_path, "a") == sorted([(PROJECT_UUID, "fav_A1"), (other_uuid, "made after closing")])
+    assert closed.favorites() == ["fav_A1"] and on_screen.favorites() == ["made after closing"]
+
+
+def test_an_import_while_nothing_can_be_bound_writes_nothing(tmp_path):
+    a = computer(tmp_path, "a", Project())
+    a._on_project_cleared()
+    bundle = tmp_path / "bundle.json"
+    bundle.write_text(json.dumps({"favorites": [{"name": "imported", "expression": "TRUE"}]}), encoding="utf-8")
+    a.set_bind_callback(lambda: None)  # binds nothing
+    result = a.import_favorites(str(bundle))
+    assert not result.success and rows(tmp_path, "a") == []
+
+
+def test_the_manager_refuses_a_favorite_with_no_project():
+    """FavoritesManager: no row without a project (before, the NOT NULL constraint refused it, by luck)."""
+    from core.domain.exceptions import FavoritesNotInitialized
+    manager = FavoritesManager()
+    manager._initialized = True
+    with pytest.raises(FavoritesNotInitialized):
+        manager.add_favorite(FilterFavorite(name="x", expression="TRUE"))
+
+
+class _Signal:
+    def __init__(self):
+        self.slots = []
+
+    def connect(self, slot):
+        self.slots.append(slot)
+
+    def disconnect(self, slot):
+        self.slots.remove(slot)
+
+
+def test_the_project_no_longer_calls_an_unloaded_service(monkeypatch):
+    """FilterMateApp.cleanup → teardown: the project kept calling the service of an unloaded plugin, whose
+    favorites_changed reached the widgets of the panel unloaded at the next project closed."""
+    import sys
+    import types
+    project = types.SimpleNamespace(cleared=_Signal(), readProject=_Signal(), projectSaved=_Signal())
+    monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject", types.SimpleNamespace(instance=lambda: project))
+    service = FavoritesService(FavoritesManager())
+    service.set_bind_callback(lambda: None)
+    assert [len(signal.slots) for signal in (project.cleared, project.readProject, project.projectSaved)] == [1, 1, 1]
+    service.teardown()
+    assert [len(signal.slots) for signal in (project.cleared, project.readProject, project.projectSaved)] == [0, 0, 0]
+    assert service._bind_project is None
+    service.teardown()  # twice: nothing to disconnect, no error

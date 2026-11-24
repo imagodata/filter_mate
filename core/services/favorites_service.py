@@ -110,6 +110,8 @@ class FavoritesService(QObject):
         # The project whose favorites the SQLite holds once read from its file (sync_with_project): only then are
         # changes written back to it, never into the project of before (2026-11-24).
         self._synced_project_uuid: Optional[str] = None
+        # Binds the current project when none is (set_bind_callback): a favorite added after Project > Close
+        self._bind_project = None
         self.favorites_changed.connect(self._mirror_to_project)
         self._watch_project()
 
@@ -126,14 +128,55 @@ class FavoritesService(QObject):
         except Exception as e:  # no QGIS project here (the API without QGIS, some tests)
             logger.debug(f"FavoritesService: project signals not watched: {e}")
 
+    def teardown(self) -> None:
+        """The plugin is unloaded (FilterMateApp.cleanup): the project no longer calls this service, whose
+        favorites_changed reached the widgets of the unloaded panel at the next project closed."""
+        self._bind_project = None
+        try:
+            from qgis.core import QgsProject
+            project = QgsProject.instance()
+            for signal, slot in ((project.cleared, self._on_project_cleared),
+                                 (project.readProject, self._forget_synced_project),
+                                 (project.projectSaved, self._on_project_saved)):
+                try:
+                    signal.disconnect(slot)
+                except (TypeError, RuntimeError):  # not connected (no QGIS project when created)
+                    pass
+        except Exception as e:  # no QGIS project here
+            logger.debug(f"FavoritesService: project signals not released: {e}")
+
+    def set_bind_callback(self, callback) -> None:
+        """``callback()`` binds the current project (FilterMateApp.ensure_project_bound); called before a favorite
+        is added, imported or duplicated while no project is bound."""
+        self._bind_project = callback
+
+    @property
+    def is_bound(self) -> bool:
+        """Whether the favorites are those of a project (set_database), not let go since a project was closed."""
+        return bool(self._favorites_manager and getattr(self._favorites_manager, "_project_uuid", None))
+
+    def _bound_for_writing(self) -> bool:
+        """Bind the current project first when none is (Project > Close, a project that failed to read): a
+        favorite made then goes to the project on screen. False when none could be bound: nothing is written."""
+        if not self.is_bound and self._bind_project is not None:
+            try:
+                self._bind_project()
+            except Exception as e:
+                logger.warning(f"Favorites: the current project could not be bound: {e}")
+        if not self.is_bound:
+            logger.warning("Favorites: no project bound, nothing written")
+            return False
+        return True
+
     def _forget_synced_project(self, *_args) -> None:
         self._synced_project_uuid = None
 
     def _on_project_cleared(self, *_args) -> None:
         """The project is closed (or another one is about to be read): its favorites leave the list, and nothing is
-        added under its id any more until FilterMate binds the next project (set_database). 2026-11-24: a project
-        closed kept its favorites listed (★ 3 on an empty project), and a favorite added then went to the closed
-        project, then into its .qgz at its next opening."""
+        added under its id any more until FilterMate binds the next project (set_database), or a favorite added binds
+        the project on screen first (_bound_for_writing). 2026-11-24: a project closed kept its favorites listed (★ 3
+        on an empty project), and a favorite added then went to the closed project, then into its .qgz at its next
+        opening."""
         self._synced_project_uuid = None
         manager = self._favorites_manager
         if not manager:
@@ -281,6 +324,8 @@ class FavoritesService(QObject):
         """
         if not self._favorites_manager:
             logger.error("FavoritesManager not initialized")
+            return None
+        if not self._bound_for_writing():
             return None
 
         try:
@@ -679,6 +724,8 @@ class FavoritesService(QObject):
                 file_path=file_path,
                 error_message="FavoritesManager not initialized"
             )
+        if not self._bound_for_writing():
+            return FavoriteImportResult(success=False, file_path=file_path, error_message="No project bound")
 
         try:
             import json
@@ -1006,7 +1053,7 @@ class FavoritesService(QObject):
         Returns:
             New favorite ID if successful, None otherwise
         """
-        if not self._favorites_manager:
+        if not self._favorites_manager or not self._bound_for_writing():
             return None
         new_id = self._favorites_manager.import_global_to_project(global_favorite_id)
         if new_id:

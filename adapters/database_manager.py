@@ -73,13 +73,16 @@ def purge_stale_projects(cursor, keep_project_uuid: Optional[str] = None,
     """
     Delete FilterMate rows of unsaved projects not touched for ``max_age_days``.
 
-    An unsaved QGIS project has neither name nor path in ``fm_projects``. Only
-    the MOST RECENT such row is ever reused by ``_load_or_create_project``
-    (``ORDER BY _created_at DESC LIMIT 1``), so every older unsaved row is
-    unreachable garbage once it is old enough. Saved projects (non-empty path
-    or name), the newest unsaved project and the session's current project
-    are never touched. The deletion runs inside a SAVEPOINT: on any error it
-    is rolled back as a whole and the error re-raised.
+    An unsaved QGIS project has neither name nor path in ``fm_projects``. Its
+    row is reached only by the session that created it (its id is in the
+    project, ``_load_or_create_project``; 2026-11-24, no row of another unsaved
+    project is reused any more), so it is unreachable garbage once it is old
+    enough. Saved projects (non-empty path or name), the session's current
+    project and the rows that still have favorites (orphan favorites, kept
+    countable: deleting their row hid them even from
+    ``count_orphan_favorites``) are never touched. The deletion runs inside a
+    SAVEPOINT: on any error it is rolled back as a whole and the error
+    re-raised.
 
     Args:
         cursor: Open sqlite3 cursor on the FilterMate database
@@ -95,17 +98,16 @@ def purge_stale_projects(cursor, keep_project_uuid: Optional[str] = None,
         keep_clause = " AND project_id != ?"
         params.append(str(keep_project_uuid))
 
+    cursor.execute("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'fm_favorites'")
+    if cursor.fetchone()[0]:
+        keep_clause += " AND project_id NOT IN (SELECT project_uuid FROM fm_favorites WHERE project_uuid IS NOT NULL)"
+
     cursor.execute(
-        "SELECT project_id FROM fm_projects "  # nosec B608 - keep_clause is a literal with a ? placeholder, values bound via params
+        "SELECT project_id FROM fm_projects "  # nosec B608 - keep_clause holds literals and a ? placeholder, values bound via params
         "WHERE (project_path IS NULL OR project_path = '') "
         "AND (project_name IS NULL OR project_name = '') "
         "AND datetime(_updated_at) < datetime('now', '-' || ? || ' days')"
-        + keep_clause +
-        " AND project_id != ("  # nosec B608 - same statement, placeholders only
-        "   SELECT project_id FROM fm_projects "
-        "   WHERE (project_path IS NULL OR project_path = '') "
-        "   AND (project_name IS NULL OR project_name = '') "
-        "   ORDER BY _created_at DESC LIMIT 1)",
+        + keep_clause,
         params
     )
     stale_ids = [row[0] for row in cursor.fetchall()]
@@ -472,13 +474,27 @@ class DatabaseManager:
             logger.warning("⚠️ Project is not saved yet (no filename). Favorites may become orphaned.")
             logger.warning("   Save the project to ensure favorites persist correctly.")
 
-        # FIX 2026-01-19: Use parameterized queries to avoid SQL injection
-        # and handle special characters (apostrophes, etc.) in paths
-        cursor.execute("""
-            SELECT * FROM fm_projects
-            WHERE project_name = ? AND project_path = ?
-            LIMIT 1;
-        """, (project_file_name, project_file_path))
+        if is_unsaved_project:
+            # 2026-11-24: a project with no file has an id of its own, the one it was given in this session (its
+            # variable, which QgsProject.clear() empties), never the row of another unsaved project. The most recent
+            # such row was reused before: every new project was bound to it, and its first "Save as" took the
+            # favorites and settings of all the unsaved sessions before it into its .qgz.
+            own_uuid = (self._project.customVariables() or {}).get('filterMate_db_project_uuid')
+            cursor.execute("""
+                SELECT * FROM fm_projects
+                WHERE project_id = ?
+                  AND (project_name = '' OR project_name IS NULL)
+                  AND (project_path = '' OR project_path IS NULL)
+                LIMIT 1;
+            """, (str(own_uuid or ''),))
+        else:
+            # FIX 2026-01-19: Use parameterized queries to avoid SQL injection
+            # and handle special characters (apostrophes, etc.) in paths
+            cursor.execute("""
+                SELECT * FROM fm_projects
+                WHERE project_name = ? AND project_path = ?
+                LIMIT 1;
+            """, (project_file_name, project_file_path))
 
         results = cursor.fetchall()
 
@@ -495,25 +511,6 @@ class DatabaseManager:
                 self._project, 'filterMate_db_project_uuid', self._project_uuid
             )
         else:
-            # FIX 2026-01-19: For unsaved projects, check if there's already an orphan project
-            # we can reuse instead of creating a new one
-            if is_unsaved_project:
-                cursor.execute("""
-                    SELECT project_id FROM fm_projects
-                    WHERE (project_name = '' OR project_name IS NULL)
-                      AND (project_path = '' OR project_path IS NULL)
-                    ORDER BY _created_at DESC
-                    LIMIT 1;
-                """)
-                orphan = cursor.fetchone()
-                if orphan:
-                    self._project_uuid = orphan[0]
-                    logger.info(f"✓ Reusing existing orphan project: UUID={self._project_uuid[:8]}...")
-                    QgsExpressionContextUtils.setProjectVariable(
-                        self._project, 'filterMate_db_project_uuid', self._project_uuid
-                    )
-                    return config_data
-
             self._project_uuid = str(uuid.uuid4())
             logger.info(f"Creating new project entry in database: UUID={self._project_uuid[:8]}...")
             # FIX 2026-01-19: Use parameterized query for INSERT as well
@@ -675,6 +672,8 @@ class DatabaseManager:
         Returns:
             bool: True if save successful
         """
+        if not self._project_uuid:
+            return False  # 2026-11-24: no project bound (one closed since): no row is written
         conn = None
         cur = None
         try:

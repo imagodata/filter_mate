@@ -363,6 +363,9 @@ class FilterMateApp:
         # 2026-10-17: _disconnect_all_signals had no caller: the project kept calling the slots
         # of an unloaded instance (layer additions / removals, saves on fileNameChanged).
         self._disconnect_all_signals()
+        # the project no longer calls the favorites (its next closing reached the widgets of this panel)
+        if getattr(self, 'favorites_manager', None) is not None:  # an app whose construction failed has none
+            self.favorites_manager.teardown()
         self._stop_pending_layer_additions()
         self._safe_cancel_all_tasks()
         # A filter task just canceled ends later (its run() returns at the next check): its
@@ -529,6 +532,8 @@ class FilterMateApp:
         if self._undo_redo_handler:
             logger.debug("FilterMate: UndoRedoHandler initialized (v4.0 migration)")
         self.favorites_manager = FavoritesService()
+        # A favorite made while no project is bound (Project > Close) binds the project on screen first
+        self.favorites_manager.set_bind_callback(self.ensure_project_bound)
         logger.info(f"FilterMate: FavoritesService initialized ({self.favorites_manager.count} favorites)")
 
         # v4.0.7: FavoritesMigrationService for orphan favorites handling
@@ -559,7 +564,7 @@ class FilterMateApp:
         if self._database_manager:
             logger.debug("FilterMate: DatabaseManager initialized (v4.0 migration)")
         self._variables_manager = VariablesPersistenceManager(
-            self.get_spatialite_connection, lambda: str(self.project_uuid),
+            self.get_spatialite_connection, lambda: self.project_uuid,  # None while no project is bound: nothing written
             lambda: self.PROJECT_LAYERS, return_typed_value,
             lambda layer_id: (
                 self._cancel_layer_tasks(layer_id)
@@ -883,6 +888,10 @@ class FilterMateApp:
             logger.debug("Calling AppInitializer.initialize_application()")
             try:
                 is_first_run = (self.dockwidget is None)
+                if not is_first_run:
+                    # The panel opened again: the project opened or closed meanwhile is bound (2026-11-24, the
+                    # first run binds it in init_filterMate_db)
+                    self.ensure_project_bound()
                 success = self._app_initializer.initialize_application(is_first_run)
                 logger.debug(f"AppInitializer returned {success}")
                 if success:
@@ -1866,6 +1875,10 @@ class FilterMateApp:
         if task_name == 'add_layers' and self._initializing_project:
             logger.debug("Skipping add_layers - project initialization in progress")
             return
+        if task_name == 'add_layers':
+            # The settings of the layers go under the current project: bound first when none is (2026-11-24,
+            # Project > Close then a layer added)
+            self.ensure_project_bound()
 
         # PERF 2026-09-12: "project open → panel ready" starts at the latest with
         # the first layer registration (handle_project_initialization starts it
@@ -2929,6 +2942,43 @@ class FilterMateApp:
         if self._datasource_manager:
             self._datasource_manager.create_spatial_index_for_layer(layer)
 
+    def bind_current_project(self):
+        """Bind FilterMate's database (favorites, layer settings) to the current project (init_filterMate_db).
+
+        Writing its id makes a project dirty: a new project with no file nobody changed stays clean (no question to
+        save an empty project). The dirty flag of a project opened from a file is left as the binding sets it: the
+        favorites reconciled with its file (sync_with_project) must be saved with it.
+        """
+        project = self.PROJECT
+        keep_clean = project is not None and not project.fileName() and not project.isDirty()
+        try:
+            self.init_filterMate_db()
+        except Exception as e:
+            logger.warning(f"FilterMate: database not bound to the current project: {e}")
+        if keep_clean and project.isDirty():
+            project.setDirty(False)
+
+    def ensure_project_bound(self) -> bool:
+        """Bind the current project when none is: a project was closed since (unbind_project) and nothing bound the
+        one on screen (Project > Close, a project that failed to read, the panel closed). Called by what needs the
+        database of the current project: a favorite added, imported or duplicated (FavoritesService), layers
+        registered (add_layers), the panel opened again.
+
+        Returns:
+            bool: whether a project is bound.
+        """
+        if not self.project_uuid or not self.favorites_manager.is_bound:
+            self.bind_current_project()
+        return bool(self.project_uuid)
+
+    def unbind_project(self):
+        """The project is closed (QgsProject.cleared): nothing is written under its id any more (layer settings,
+        project settings) until the next project is bound. 2026-11-24: the settings of the next project went under
+        the id of the project closed."""
+        self.project_uuid = None
+        if self._database_manager:
+            self._database_manager.project_uuid = None
+
     def init_filterMate_db(self):
         """Initialize FilterMate Spatialite database with required schema. Delegates to DatabaseManager."""
         if self.PROJECT is None:
@@ -2945,8 +2995,10 @@ class FilterMateApp:
             self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("FRESH_RELOAD_FLAG"), False
         )
         # The layers of this project start from the defaults: neither the SQLite (deleted) nor the project (read
-        # otherwise by the registration, 2026-11-24) gives their settings
-        self._fresh_reload_pending = bool(fresh_reload)
+        # otherwise by the registration, 2026-11-24) gives their settings. Cleared where it is used (get_task_parameters),
+        # never here: a second binding (the option already put back to False) lost the reset of this opening.
+        if fresh_reload:
+            self._fresh_reload_pending = True
         success, self.CONFIG_DATA = self._database_manager.initialize_database(
             config_data=self.CONFIG_DATA,
             fresh_reload=fresh_reload,
@@ -3018,8 +3070,8 @@ class FilterMateApp:
             # 2026-11-24: the orphan favorites (those of projects never saved) are no longer attached to the project
             # opened. Since #646 a project's favorites are written in its .qgz at each change, so a project saved for
             # the first time keeps them; attaching orphans only moved the favorites of an unsaved project into the
-            # next project opened, then into its file shared with others. They stay in the SQLite (the cleanup entry
-            # of the ★ menu still reaches them).
+            # next project opened, then into its file shared with others. They stay in the SQLite of this computer,
+            # listed nowhere (the cleanup of the ★ menu keeps them); purge_stale_projects keeps their project row.
             return changed
 
         except Exception as e:

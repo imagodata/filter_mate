@@ -164,8 +164,9 @@ class TestPurgeStaleProjects:
         assert _count(db, "fm_projects") == 1
         assert _count(db, "fm_project_layers_properties") == 1
 
-    def test_newest_unsaved_project_survives_even_when_old(self, db):
-        """_load_or_create_project reuses the most recent unsaved row: never purge it."""
+    def test_the_newest_unsaved_project_is_not_special_any_more(self, db):
+        """2026-11-24: no row of another unsaved project is reused (an unsaved project keeps the id of its session),
+        so the newest one is garbage once old enough, like the others."""
         dbm = _load_database_manager()
         cur = db.cursor()
         _add_project(cur, "saved", "a.qgz", "/tmp/a", days_old=1)  # nosec B108
@@ -173,9 +174,8 @@ class TestPurgeStaleProjects:
         _add_project(cur, "orphan-newest", "", "", days_old=45)
         db.commit()
 
-        assert dbm.purge_stale_projects(cur, keep_project_uuid="saved", max_age_days=30) == 1
-        assert _count(db, "fm_projects", "orphan-newest") == 1
-        assert _count(db, "fm_project_layers_properties", "orphan-newest") == 3
+        assert dbm.purge_stale_projects(cur, keep_project_uuid="saved", max_age_days=30) == 2
+        assert _count(db, "fm_projects", "orphan-newest") == 0
         assert _count(db, "fm_projects", "orphan-older") == 0
 
     def test_failure_rolls_back_every_delete(self, db):
