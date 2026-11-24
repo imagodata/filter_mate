@@ -2265,6 +2265,7 @@ class AgentChatController(QObject):
         from ...core.agent.families import bringing, split_tools, unlocked, use_tools_handler
         self._connectors = None
         self._index_tools = []
+        self._known_tools = None
         if LOAD_SKILL not in {tool.name for tool in tools}:
             return tools, handlers, set()
         entries = connector_entries(active)
@@ -2292,8 +2293,10 @@ class AgentChatController(QObject):
                 # the rules as they are now: the user may change them while the conversation goes on
                 return "turned off by the user in the Tools tab of the agent settings" \
                     if self._policy.turned_off(name) else ""
+            # Live: local_copy, offered once a web service layer comes in (_offer_local_copy), is added to it.
+            self._known_tools = {tool.name for tool in tools} | {USE_TOOLS}
             handlers = dict(handlers, **{USE_TOOLS: use_tools_handler(
-                later, offer, known={tool.name for tool in tools} | {USE_TOOLS}, refused=turned_off, skills=hidden,
+                later, offer, known=self._known_tools, refused=turned_off, skills=hidden,
                 everything={tool.name for tool in chat_tools()})})
 
         def offer_family(skill_name: str):
@@ -2330,7 +2333,11 @@ class AgentChatController(QObject):
 
     def _offer_local_copy(self, values: AgentSettings) -> None:
         """A layer of a web service came into the project during the conversation: local_copy is offered from this
-        request on (left out at its start, when there was nothing to copy). Its handler is there already."""
+        request on (left out at its start, when there was nothing to copy). Its handler is there already.
+
+        2026-11-24: also called when a tool of the agent adds a layer. Before, a WFS layer the agent added waited
+        for the next message of the user: the model, refused its statistics, asked use_tools for local_copy in the
+        same turn and was told to send the user to the agent settings, where nothing was off."""
         if getattr(self, '_copy_offered', True) or self._engine is None:
             return
         if (values.rules.get(COPY_TOOL) == RULE_NEVER or self.local_filtering(values)
@@ -2340,6 +2347,9 @@ class AgentChatController(QObject):
         if spec is not None:
             self._engine.offer_tools([spec])
             self._copy_offered = True
+            known = getattr(self, '_known_tools', None)
+            if known is not None:
+                known.add(COPY_TOOL)  # use_tools answers "already" instead of "not available"
 
     def _build_engine(self) -> Optional[ChatEngine]:
         """A conversation from the settings; None, after saying why, when they are not complete."""
@@ -2395,6 +2405,10 @@ class AgentChatController(QObject):
             # Offered during the conversation (_offer_local_copy), not from its start: offered again by the next
             # request, use_tools does not know it.
             self._copy_offered = False
+            (getattr(self, '_known_tools', None) or set()).discard(COPY_TOOL)
+            spec = getattr(self, '_tools', {}).get(COPY_TOOL)
+            if later is not None and spec is not None:
+                later[COPY_TOOL] = spec  # use_tools adds it again in this request (2026-11-24: it said "not here")
 
     @staticmethod
     def _chat_owned(handlers) -> dict:
@@ -3133,6 +3147,8 @@ class AgentChatController(QObject):
         self._offer_exploring(call, result)
         made = [] if result.is_error else made_layers(self._layers_before, self._project_layers())
         self._request_calls.append((call.name, call.arguments, result.is_error, self.describe_call(call), made))
+        if made and not getattr(self, '_copy_offered', True):
+            self._offer_local_copy(load_settings())  # a web service layer the agent added: copied in this turn
         self.panel.set_status(_tr("Thinking…"))
 
     def _show_chart_card(self, call: ToolCallPart, result: ToolResultPart) -> None:
