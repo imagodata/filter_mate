@@ -268,3 +268,59 @@ def test_full_cycle_add_reload(manager, favorites_module):
     assert reloaded.tags == ["a", "b"]
     assert reloaded.description == "desc"
     assert reloaded.expression == '"z" = 1'
+
+
+# ─── 2026-11-24 : the project is the truth for its favorites ──────────
+
+
+def test_replace_project_favorites_mirrors_the_list_and_keeps_the_ids(manager, favorites_module):
+    """The favorites of the .qgz replace those of the project in the SQLite, under the ids the project gave them."""
+    fav = favorites_module.FilterFavorite
+    manager.add_favorite(fav(name="removed elsewhere", expression="TRUE"))
+    kept = fav(id="kept-id", name="kept", expression="TRUE")
+    manager.add_favorite(kept)
+    manager.replace_project_favorites([
+        fav(id="kept-id", name="kept, renamed elsewhere", expression="TRUE", use_count=3),
+        fav(id="new-id", name="added elsewhere", expression="FALSE", created_at="2026-11-01T10:00:00",
+            updated_at="2026-11-02T10:00:00"),
+    ])
+    assert sorted(f.name for f in manager.get_all_favorites()) == ["added elsewhere", "kept, renamed elsewhere"]
+    assert manager.get_favorite("new-id").updated_at == "2026-11-02T10:00:00"
+    # read back from the SQLite, not only the cache
+    manager.set_database(manager._db_path, manager._project_uuid)
+    assert sorted(f.id for f in manager.get_all_favorites()) == ["kept-id", "new-id"]
+    assert manager.get_favorite("kept-id").use_count == 3
+
+
+def test_replace_project_favorites_leaves_a_row_of_another_project_with_the_same_id(manager, favorites_module):
+    """A copied .qgz carries ids the SQLite already has under the original project (``id`` is the primary key). Review
+    of 2026-11-24: the row was taken from the original, whose favorites were lost when its file did not list them.
+    The copy takes an id derived from it, the same at each opening."""
+    fav = favorites_module.FilterFavorite
+    manager.add_favorite(fav(id="shared-id", name="in the original", expression="TRUE"))
+    copy = favorites_module.FavoritesManager(db_path=manager._db_path, project_uuid="test-project-uuid-2")
+    copy.replace_project_favorites([fav(id="shared-id", name="in the copy", expression="TRUE")])
+    [taken] = copy.get_all_favorites()
+    assert taken.name == "in the copy" and taken.id != "shared-id"
+    copy.replace_project_favorites([fav(id="shared-id", name="in the copy", expression="TRUE")])
+    assert [f.id for f in copy.get_all_favorites()] == [taken.id]
+    manager.set_database(manager._db_path, manager._project_uuid)
+    assert [f.name for f in manager.get_all_favorites()] == ["in the original"]
+
+
+def test_the_ids_of_the_project_file_are_remembered_per_project(manager, favorites_module):
+    assert manager.known_file_ids() == []
+    manager.remember_file_ids(["b", "a", "a"])
+    other = favorites_module.FavoritesManager(db_path=manager._db_path, project_uuid="test-project-uuid-2")
+    assert other.known_file_ids() == []
+    manager.set_database(manager._db_path, manager._project_uuid)
+    assert manager.known_file_ids() == ["a", "b"]
+
+
+def test_replace_project_favorites_leaves_the_global_favorites(manager, favorites_module):
+    fav = favorites_module.FilterFavorite
+    manager.add_favorite(fav(name="local", expression="TRUE"))
+    global_id = manager.copy_to_global(manager.get_all_favorites()[0].id)
+    manager.replace_project_favorites([])
+    assert manager.get_all_favorites() == []
+    assert global_id in [f.id for f in manager.get_global_favorites()]

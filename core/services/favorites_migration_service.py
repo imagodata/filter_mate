@@ -150,12 +150,15 @@ class FavoritesMigrationService:
                     WHERE f.project_uuid = ?
                 """, (source_project_uuid,))
             else:
+                # Not the target itself: a project never saved has the shape of an orphan, and its own favorites
+                # were found identical to themselves and deleted (review of 2026-11-24).
                 cursor.execute("""
                     SELECT f.id, f.name, f.expression, f.layer_name FROM fm_favorites f
                     JOIN fm_projects p ON f.project_uuid = p.project_id
                     WHERE (p.project_name = '' OR p.project_name IS NULL)
                       AND (p.project_path = '' OR p.project_path IS NULL)
-                """)
+                      AND f.project_uuid != ?
+                """, (target_project_uuid,))
             favorites_to_migrate = cursor.fetchall()
 
             if not favorites_to_migrate:

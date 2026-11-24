@@ -107,6 +107,38 @@ class FavoritesService(QObject):
             self._favorites_manager = favorites_manager
 
         self._is_initialized = False
+        # The project whose favorites the SQLite holds once read from its file (sync_with_project): only then are
+        # changes written back to it, never into the project of before (2026-11-24).
+        self._synced_project_uuid: Optional[str] = None
+        self.favorites_changed.connect(self._mirror_to_project)
+        self._watch_project()
+
+    def _watch_project(self) -> None:
+        """A project being cleared or read stops the copy until its favorites are read (review of 2026-11-24: between
+        the reading of project B and the deferred set_database, a change wrote the favorites of A into B); a project
+        saved is what its file now holds."""
+        try:
+            from qgis.core import QgsProject
+            project = QgsProject.instance()
+            project.cleared.connect(self._forget_synced_project)
+            project.readProject.connect(self._forget_synced_project)
+            project.projectSaved.connect(self._on_project_saved)
+        except Exception as e:  # no QGIS project here (the API without QGIS, some tests)
+            logger.debug(f"FavoritesService: project signals not watched: {e}")
+
+    def _forget_synced_project(self, *_args) -> None:
+        self._synced_project_uuid = None
+
+    def _on_project_saved(self, *_args) -> None:
+        """The file holds the favorites now: remembered, so that one removed later on another computer goes here."""
+        manager = self._favorites_manager
+        if not manager or self._synced_project_uuid is None \
+                or self._synced_project_uuid != getattr(manager, "_project_uuid", None):
+            return
+        try:
+            manager.remember_file_ids([favorite.id for favorite in manager.get_all_favorites() if favorite.id])
+        except Exception as e:
+            logger.warning(f"Favorites of the saved project not remembered: {e}")
 
     # ─────────────────────────────────────────────────────────────────
     # Initialization
@@ -161,21 +193,15 @@ class FavoritesService(QObject):
             project_uuid: Project UUID for favorites isolation
         """
         if self._favorites_manager:
+            self._synced_project_uuid = None
             self._favorites_manager.set_database(db_path, project_uuid)
 
-            # FIX 2026-04-22: if the SQLite DB is empty but the .qgz project file
-            # carries a favorites backup (e.g. the plugin was re-installed, the
-            # user moved the project to another machine, or the sqlite was wiped),
-            # silently re-import the backup so favorites persist across transfer.
-            if self.count == 0:
-                try:
-                    restored = self.restore_from_project_file()
-                    if restored > 0:
-                        logger.info(
-                            f"✓ Auto-restored {restored} favorites from project file (.qgz) backup"
-                        )
-                except Exception as e:
-                    logger.debug(f"Auto-restore from project file skipped: {e}")
+            # 2026-11-24: the .qgz of a saved project is the truth for its favorites; the SQLite of this computer
+            # takes them (a project opened on another computer, a plugin reinstalled, a favorite removed elsewhere).
+            try:
+                self.sync_with_project()
+            except Exception as e:
+                logger.warning(f"Favorites of the project file not read: {e}")
 
             # CRITICAL: Emit favorites_changed to update UI after loading
             self.favorites_changed.emit()
@@ -774,17 +800,8 @@ class FavoritesService(QObject):
     # ─────────────────────────────────────────────────────────────────
 
     def save_to_project_file(self, project: Optional[Any] = None) -> bool:
-        """
-        Save favorites to QGIS project file as custom property.
-
-        This provides an additional backup in the .qgz file itself,
-        ensuring favorites are bundled with the project.
-
-        Args:
-            project: QgsProject instance (uses current if None)
-
-        Returns:
-            bool: True if saved successfully
+        """Write the favorites into the project now (they are written at each change anyway, once the project is
+        read: see ``sync_with_project``). The menu action and the sharing extension call it.
 
         Raises:
             FavoritesNotInitialized: if the service has no manager attached.
@@ -793,37 +810,9 @@ class FavoritesService(QObject):
             raise FavoritesNotInitialized(
                 "FavoritesService.save_to_project_file called before manager was attached"
             )
-
         try:
-            from qgis.core import QgsProject
-            import json
-
-            if project is None:
-                project = QgsProject.instance()
-
-            favorites = self.get_all_favorites()
-
-            if not favorites:
-                # Clear any existing property
-                project.removeEntry("FilterMate", "favorites_backup")
-                return True
-
-            # Serialize favorites
-            data = {
-                "version": "1.0",
-                "backup_type": "project_file",
-                "created_at": self._get_timestamp(),
-                "favorites": [f.to_dict() for f in favorites]
-            }
-
-            json_data = json.dumps(data, ensure_ascii=False)
-
-            # Store in project custom properties
-            project.writeEntry("FilterMate", "favorites_backup", json_data)
-
-            logger.info(f"✓ Saved {len(favorites)} favorites to project file")
+            self._mirror_to_project(project)
             return True
-
         except FavoritesError:
             raise
         except Exception as e:
@@ -831,112 +820,84 @@ class FavoritesService(QObject):
             raise FavoritePersistenceError("save_to_project_file", e) from e
 
     def restore_from_project_file(self, project: Optional[Any] = None) -> int:
-        """
-        Restore favorites from QGIS project file backup.
-
-        This is useful when the SQLite database is lost or corrupted.
-
-        Args:
-            project: QgsProject instance (uses current if None)
-
-        Returns:
-            int: Number of favorites restored
-        """
+        """Read the favorites of the project again (``sync_with_project``); the number it carries, 0 without any."""
         if not self._favorites_manager:
             return 0
-
         try:
-            from qgis.core import QgsProject
-            import json
-
-            if project is None:
-                project = QgsProject.instance()
-
-            # Read from project custom properties
-            json_data, success = project.readEntry("FilterMate", "favorites_backup", "")
-
-            if not success or not json_data:
-                logger.debug("No favorites backup found in project file")
-                return 0
-
-            data = json.loads(json_data)
-            favorites_data = data.get('favorites', [])
-
-            if not favorites_data:
-                return 0
-
-            # Import favorites — dedup by id, then by (name, updated_at).
-            # HIGH-4: dedup-by-name alone silently dropped newer edits from
-            # the .qgz when the DB had a stale version (or vice versa).
-            # Comparing updated_at now surfaces the newer version instead
-            # of the first-seen one.
-            from ..domain.favorites_manager import FilterFavorite
-            from datetime import datetime as _dt
-
-            def _parse_ts(value: Optional[str]) -> float:
-                if not value:
-                    return 0.0
-                try:
-                    return _dt.fromisoformat(value).timestamp()
-                except (ValueError, TypeError):
-                    return 0.0
-
-            imported = 0
-            updated = 0
-            for fav_data in favorites_data:
-                name = fav_data.get('name', '')
-                fav_id_from_backup = fav_data.get('id')
-                backup_updated_at = fav_data.get('updated_at')
-
-                # Check for existing favorite (id match first, name fallback)
-                existing = None
-                if fav_id_from_backup:
-                    existing = self._favorites_manager.get_favorite(fav_id_from_backup)
-                if existing is None:
-                    existing = self.get_favorite_by_name(name)
-
-                if existing is not None:
-                    # Keep the newer version — if the backup is strictly
-                    # newer, refresh the in-DB row with its content; else
-                    # skip silently (DB already has equal/newer data).
-                    existing_ts = _parse_ts(getattr(existing, 'updated_at', None))
-                    backup_ts = _parse_ts(backup_updated_at)
-                    if backup_ts > existing_ts:
-                        updatable_fields = {
-                            k: v for k, v in fav_data.items()
-                            if k in FilterFavorite.__dataclass_fields__
-                            and k not in ('id', 'created_at')
-                        }
-                        if self._favorites_manager.update_favorite(
-                            existing.id, **updatable_fields
-                        ):
-                            updated += 1
-                    continue
-
-                # Create and add favorite
-                favorite = FilterFavorite.from_dict(fav_data)
-                favorite.id = None  # Generate new ID
-
-                # CRIT-1: restore_from_project_file is a DB rebuild, not a
-                # user "add". The original created_at must survive so the
-                # user doesn't see every favorite suddenly re-stamped with
-                # today's date after a plugin reinstall.
-                if self._favorites_manager.add_favorite(favorite, preserve_timestamps=True):
-                    imported += 1
-
-            if updated:
-                logger.info(f"✓ Refreshed {updated} favorite(s) from newer .qgz backup")
-            imported += updated
-
-            if imported > 0:
-                self.favorites_changed.emit()
-                logger.info(f"✓ Restored {imported} favorites from project file")
-
-            return imported
-
+            return self.sync_with_project(project)
         except Exception as e:
             logger.error(f"Error restoring favorites from project file: {e}")
             return 0
+
+    @staticmethod
+    def _project(project: Optional[Any]) -> Any:
+        if project is not None:
+            return project
+        from qgis.core import QgsProject
+        return QgsProject.instance()
+
+    def sync_with_project(self, project: Optional[Any] = None) -> int:
+        """The favorites of the project, as its file carries them, in the SQLite of this computer.
+
+        Once a project is saved its file is the truth (decided 2026-11-24): a favorite removed or changed on another
+        computer is removed or changed here; the usage stays this computer's. A favorite made here that the file never
+        had (not saved yet, or a project this computer cannot write) stays: only what the file had and lost goes. A backup of before (written one session
+        late) is merged without copies; a project with none keeps the favorites of this computer. The result is
+        written back to the project when it differs, so the next save carries it.
+
+        Returns:
+            int: the favorites the project carried, 0 when it carried none.
+        """
+        from ..domain import project_favorites
+        manager = self._favorites_manager
+        if not manager:
+            return 0
+        project = self._project(project)
+        text, _found = project.readEntry(project_favorites.SCOPE, project_favorites.KEY, "")
+        stored, authoritative = project_favorites.read_payload(text)
+        local = [favorite.to_dict() for favorite in manager.get_all_favorites()]
+        known = manager.known_file_ids() if hasattr(manager, "known_file_ids") else []
+        wanted = project_favorites.reconcile(local, stored, authoritative, known)
+        if project_favorites.project_payload(wanted) != project_favorites.project_payload(local) or \
+                {row.get("id") for row in wanted} != {row.get("id") for row in local}:
+            manager.replace_project_favorites([FilterFavorite.from_dict(dict(row)) for row in wanted])
+            logger.info(f"✓ {len(wanted)} favorite(s) taken from the project file")
+        if hasattr(manager, "remember_file_ids"):
+            manager.remember_file_ids(project_favorites.file_ids(stored))
+        self._synced_project_uuid = getattr(manager, "_project_uuid", None)
+        self._mirror_to_project(project)
+        self.favorites_changed.emit()
+        return len(stored or [])
+
+    def reload_from_database(self) -> None:
+        """Read the favorites of the project from the SQLite again (rows another service wrote, the recovered orphan
+        favorites) and write them into the project."""
+        if self._favorites_manager and hasattr(self._favorites_manager, "_load_favorites"):
+            self._favorites_manager._load_favorites()
+            self.favorites_changed.emit()
+
+    def _mirror_to_project(self, project: Optional[Any] = None) -> None:
+        """Write the favorites into the project when they differ from what it holds (an unchanged project stays
+        clean). Only for the project they were read from: before ``sync_with_project``, nothing is written."""
+        try:
+            from ..domain import project_favorites
+            manager = self._favorites_manager
+            if not manager or not getattr(manager, "_initialized", True):
+                return
+            if self._synced_project_uuid is None \
+                    or self._synced_project_uuid != getattr(manager, "_project_uuid", None):
+                return
+            project = self._project(project)
+            favorites = [favorite.to_dict() for favorite in manager.get_all_favorites()]
+            text, found = project.readEntry(project_favorites.SCOPE, project_favorites.KEY, "")
+            if not favorites and not text:
+                return  # a project that never had favorites keeps no entry
+            payload = project_favorites.project_payload(favorites)
+            if payload != text:
+                project.writeEntry(project_favorites.SCOPE, project_favorites.KEY, payload)
+                logger.debug(f"Favorites written into the project ({len(favorites)})")
+        except Exception as e:  # a slot of favorites_changed: never an error dialog
+            logger.warning(f"Favorites not written into the project: {e}")
 
     # ─────────────────────────────────────────────────────────────────
     # Global Favorites Support
