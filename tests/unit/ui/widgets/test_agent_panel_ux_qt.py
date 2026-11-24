@@ -53,8 +53,6 @@ def _load():
 _APP, panel_module = _load()
 
 
-
-
 def _ready_panel():
     panel = panel_module.AgentPanel()
     panel.set_ready(True, "Claude")
@@ -153,3 +151,13 @@ def test_the_menu_has_three_groups_new_conversation_first():
     assert [len(group) > 0 for group in groups] == [True, True, True]
     assert groups[0][0] == "New conversation"
     assert "Agent settings" in groups[1] and "Feedback" in groups[2]
+
+
+def test_a_local_model_is_said_on_the_welcome():
+    panel = panel_module.AgentPanel()
+    panel.set_ready(True, "Ollama (local) · qwen3:8b", local=True)
+    assert panel.welcome_local.isVisibleTo(panel) and "this computer" in panel.welcome_local.text()
+    panel.set_ready(True, "Claude · haiku-5-5")
+    assert not panel.welcome_local.isVisibleTo(panel)
+    panel.set_ready(False, "", local=True)  # no provider set up: nothing to say yet
+    assert not panel.welcome_local.isVisibleTo(panel)

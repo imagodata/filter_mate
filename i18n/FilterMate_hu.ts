@@ -2882,6 +2882,11 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>A modell ezen a számítógépen fut: a projektje és a kérései nem jutnak el semmilyen MI-szolgáltatáshoz.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Vissza a sorba</translation>
     </message>

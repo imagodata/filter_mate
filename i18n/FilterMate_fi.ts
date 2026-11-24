@@ -2882,6 +2882,11 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Malli toimii tällä tietokoneella: projektiasi ja pyyntöjäsi ei lähetetä tekoälypalveluun.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Palauta se riville</translation>
     </message>

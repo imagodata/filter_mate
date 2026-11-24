@@ -2882,6 +2882,11 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Modelul rulează pe acest computer: proiectul și solicitările dumneavoastră nu sunt trimise către niciun serviciu de IA.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Puneți-o înapoi în rând</translation>
     </message>

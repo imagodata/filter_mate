@@ -2882,6 +2882,11 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Model běží na tomto počítači: váš projekt ani vaše požadavky se neodesílají žádné službě AI.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Vrátit ji do řádku</translation>
     </message>

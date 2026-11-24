@@ -2882,6 +2882,11 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Modellen kører på denne computer: dit projekt og dine forespørgsler sendes ikke til en AI-tjeneste.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Læg den tilbage i linjen</translation>
     </message>

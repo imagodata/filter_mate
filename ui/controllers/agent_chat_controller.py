@@ -454,7 +454,9 @@ class AgentChatController(QObject):
                 self._header_label.setText(destination if values.ready else ("MCP" if self._mcp.listening else ""))
             except RuntimeError:  # the header is gone with its dock
                 self._header_label = None
-        self.panel.set_ready(values.ready, "" if self._header_label is not None else destination)
+        from ...core.agent.local_model import runs_on_this_computer
+        self.panel.set_ready(values.ready, "" if self._header_label is not None else destination,
+                             local=runs_on_this_computer(getattr(values, "preset", ""), getattr(values, "base_url", "")))
 
     def stop(self) -> None:
         """The dock closes: it can reopen on this same conversation. A recipe stops before its next step."""

@@ -2882,6 +2882,11 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Het model draait op deze computer: uw project en uw verzoeken worden niet naar een AI-dienst gestuurd.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Terugzetten in de regel</translation>
     </message>
