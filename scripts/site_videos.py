@@ -1836,10 +1836,10 @@ def hillshade_layer(name):
     return rl
 
 
-def style_point_cloud(pc=None):
+def style_point_cloud(pc=None, hidden=(0, 1, 2, 7, 18, 64, 65, 66, 67)):
     """Classified rendering without the ground and unclassified points: the hillshade shows through.
 
-    Built here: at load time the layer only has the provisional extent renderer.
+    Built here: at load time the layer only has the provisional extent renderer. ``hidden``: the classes not drawn.
     """
     try:
         from qgis.core import QgsPointCloudClassifiedRenderer
@@ -1847,7 +1847,7 @@ def style_point_cloud(pc=None):
         renderer = QgsPointCloudClassifiedRenderer('Classification', QgsPointCloudClassifiedRenderer.defaultCategories())
         categories = renderer.categories()
         for category in categories:
-            if category.value() in (0, 1, 2, 7, 18, 64, 65, 66, 67):
+            if category.value() in hidden:
                 category.setRenderState(False)
         renderer.setCategories(categories)
         renderer.setPointSize(1.6)
@@ -1868,9 +1868,10 @@ def setup5(layer_names, hidden=(), margin=1.03):
                 ml = ramp_layer(FM5_DTM, name, DTM_COLORS, 0.62)
             elif name == 'pente':
                 ml = ramp_layer(FM5_SLOPE, name, SLOPE_COLORS, 0.72)
-            elif name == 'ortho':
+            elif name in ('ortho', 'ortho_rvb', 'ortho_irc'):
                 from qgis.core import QgsRasterLayer
-                ml = QgsRasterLayer(os.path.join(FM5_DIR, 'ortho_rvb.tif'), name, 'gdal')
+                ml = QgsRasterLayer(os.path.join(FM5_DIR, 'ortho_irc.tif' if name == 'ortho_irc' else 'ortho_rvb.tif'),
+                                    name, 'gdal')
             elif name == 'lhd':
                 from qgis.core import QgsPointCloudLayer
                 ml = QgsPointCloudLayer(FM5_TILE, name, 'copc')
@@ -2021,11 +2022,12 @@ def run_filter_long(fast=8.0):
     ]
 
 
-def fm5_scene():
-    """Start recording on the whole square kilometre."""
+def fm5_scene(cloud_hidden=None):
+    """Start recording on the whole square kilometre. ``cloud_hidden``: the classes of lhd not drawn (default: the
+    ground, the unclassified points and the noise)."""
     def style_cloud():
         if QgsProject.instance().mapLayersByName('lhd'):
-            style_point_cloud()
+            style_point_cloud() if cloud_hidden is None else style_point_cloud(hidden=cloud_hidden)
     return [(500, wait_idle()), (0, style_cloud), (0, refocus), (800, wait_idle()), (500, rec_start),
             (0, cam('full', dur=0, drift=1.03)), hold(1200),
             (0, cam('canvas', dur=1.4, drift=1.03)), hold(1400)]
@@ -2259,6 +2261,426 @@ SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment'], fit=('FILTER
     + act('pushButton_action_export', export_with_recap) + [hold(1500)] \
     + settle(4.0) + [(0, wait_long()), result('One ZIP: the terrain model (GeoTIFF) and the point cloud (LAZ)')] \
     + show_map(3000) + ending()
+
+
+# ------------------------------------------------------------------ stories 13 to 15: a raster or a cloud filters another
+# coverage layer (the squares of Fenouillet: ortho_irc / ortho_rvb 0.25 m, lhd, mnt 0.5 m).
+def menu_pick(get_button, text, keep=1700):
+    """Open the menu of a tool button where a click would, glide to the entry ``text`` and trigger it."""
+    def open_menu():
+        button = get_button()
+        menu = button.menu()
+        menu.popup(button.mapToGlobal(QPoint(0, button.height())))
+        if menu not in REC.windows:
+            REC.windows.append(menu)
+        log(f'menu of {button.objectName()}: {[a.text() for a in menu.actions() if not a.isSeparator()]}')
+
+        def entry():
+            return next((a for a in menu.actions() if a.text().replace('&', '').strip() == text), None)
+
+        def highlight():
+            action = entry()
+            if action is None:
+                log(f'menu entry not found: {text}')
+                return
+            r = to_main(menu, menu.actionGeometry(action))
+            REC.event('point', x=r.center().x(), y=r.center().y())
+            menu.setActiveAction(action)
+
+        def activate():
+            action = entry()
+            if action is not None:
+                r = to_main(menu, menu.actionGeometry(action))
+                REC.event('click', x=r.center().x(), y=r.center().y())
+            menu.close()
+            if menu in REC.windows:
+                REC.windows.remove(menu)
+            if action is not None:
+                action.trigger()
+                log(f'menu entry triggered: {text}')
+
+        QTimer.singleShot(350, highlight)
+        QTimer.singleShot(keep, activate)
+
+    return act(get_button, open_menu) + [hold(keep + 600)]
+
+
+def legend_visible(name, on):
+    """Tick or untick a layer in the Layers panel (the cursor goes to its check box)."""
+    def box_rect():
+        r = tree_item(name)()
+        return QRect(r.x(), r.y(), 22, r.height())
+
+    def toggle():
+        node = QgsProject.instance().layerTreeRoot().findLayer(layer(name).id())
+        node.setItemVisibilityChecked(on)
+    return act(box_rect, toggle, lead=700, after=700)
+
+
+def raster_kept(name):
+    """Pixels of the raster layer ``name`` that are not NoData (its mask), read from the file it shows now."""
+    from osgeo import gdal
+    ml = layer(name)
+    ds = gdal.Open(ml.source())
+    mask = ds.GetRasterBand(1).GetMaskBand().ReadAsArray()
+    kept = int((mask > 0).sum())
+    gt = ds.GetGeoTransform()
+    out = {'source': ml.source(), 'size': (ds.RasterXSize, ds.RasterYSize), 'kept': kept,
+           'kept_m2': round(kept * abs(gt[1] * gt[5]), 1)}
+    log(f'raster kept {name} {out}')
+    return out
+
+
+def raster_base(name, path):
+    """The same count on the original file: the share kept is read against it."""
+    from osgeo import gdal
+    ds = gdal.Open(path)
+    mask = ds.GetRasterBand(1).GetMaskBand().ReadAsArray()
+    total = int((mask > 0).sum())
+    log(f'raster base {name} {path} size {(ds.RasterXSize, ds.RasterYSize)} valid {total}')
+    return total
+
+
+def cloud_kept(name):
+    from filter_mate.adapters.qgis.coverage_layers.target_appliers import derived_point_count
+    ml = layer(name)
+    n = derived_point_count(ml)
+    log(f'cloud kept {name} {n} points, source {ml.source()} subset {ml.subsetString()!r}')
+    return n
+
+
+def result_with(text_of):
+    """The closing line of a take, written from what ``text_of()`` measures at that moment."""
+    def _s():
+        try:
+            text = text_of()
+        except Exception:
+            log(traceback.format_exc())
+            return
+        REC.event('caption', text=text, style='result')
+        log(f'result {text}')
+    _s.text = True
+    return (0, _s)
+
+
+def ending_coverage(report):
+    """ending() for coverage targets: the counts are logged by ``report`` once the recording is over."""
+    return [(0, cam('full', dur=1.6)), (2200, stop_recording), (0, report), (500, quit_when_idle)]
+
+
+def band_chip(number):
+    return lambda: raster_panel()._band_rows[number]['chip']
+
+
+def log_raster_state():
+    panel = raster_panel()
+    log(f'raster roles {panel.band_roles()} mode {panel.active_mode()} kept ratio {panel.kept_ratio()} '
+        f'expression {panel._expression_edit.toPlainText()!r}')
+
+
+# ndvi (story 13): the colour infrared orthophoto, NDVI > 0.3 (its bands told as IRC) -> clips the RGB orthophoto.
+def ndvi_result():
+    kept = raster_kept('ortho_rvb')
+    total = STATE.get('rvb_total') or raster_base('ortho_rvb', os.path.join(FM5_DIR, 'ortho_rvb.tif'))
+    STATE['rvb_total'] = total
+    return f'NDVI > 0.3: {kept["kept_m2"] / 10000:.1f} ha of the RGB orthophoto kept ({100 * kept["kept"] / total:.0f} %)'
+
+
+def ndvi_report():
+    raster_base('ortho_rvb', os.path.join(FM5_DIR, 'ortho_rvb.tif'))
+    raster_kept('ortho_rvb')
+    log_raster_state()
+
+
+# The result is read closer, on the gardens and the trees along the motorway (FM_NDVI_DETAIL: xmin,ymin,xmax,ymax).
+NDVI_DETAIL = tuple(float(v) for v in os.environ.get('FM_NDVI_DETAIL', '571600,6289600,572000,6289900').split(','))
+
+NDVI = boot5(['ortho_rvb', 'ortho_irc']) + fm5_scene() + to_exploring('ortho_irc') + [
+    (0, cam(lambda: raster_panel()._bands_group, dur=1.2, pad=30)), hold(600),
+] + menu_pick(band_chip(1), 'Every band: IRC') + [
+    hold(900), (0, log_raster_state), still('s13-01'),
+] + act(group_check(lambda: raster_panel()._expression_group), open_group(lambda: raster_panel()._expression_group)) + [
+    hold(600), (0, ensure_visible(lambda: raster_panel()._insert_button)), hold(300),
+    (0, cam(lambda: raster_panel()._expression_group, dur=1.2, pad=30)),
+] + menu_pick(lambda: raster_panel()._insert_button, 'Vegetation (NDVI > 0.3)') + [hold(900)] \
+    + act('pushButton_checkable_exploring_selecting', click_selecting) + settle(3.0) + show_map(2600) + [
+    (0, cam(lambda: raster_panel()._expression_group, dur=1.2, pad=30)), hold(900),
+    (0, log_raster_state), still('s13-02'), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+] + targets(['ortho_rvb']) + predicates(['intersect']) + [
+    (200, buffer_off), hold(500), still('s13-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter_long() + legend_visible('ortho_irc', False) + settle() + show_map(1500, 1.05) + [
+    (0, zoom_rect(*NDVI_DETAIL))] + settle() + show_map(1200, 1.05) + [
+    (300, speed(4.0)), result_with(ndvi_result), (0, speed(1.0)), hold(3000), still('s13-04'),
+] + ending_coverage(ndvi_report)
+
+
+# roofs (story 14): the RGB orthophoto, the pipette on "Clicked object" (colour engine): a click on a roof, a
+# Ctrl+click on its neighbour -> the LiDAR points beneath them. FM_ROOF_POINTS ("x,y;x,y"), FM_ROOF_RECT: the clicks
+# and the frame, by default the two terracotta roofs of the business park of Fenouillet.
+ROOF_POINTS = [tuple(float(v) for v in xy.split(',')) for xy in
+               os.environ.get('FM_ROOF_POINTS', '571330,6289645;571366,6289670').split(';')]
+ROOF_RECT = tuple(float(v) for v in os.environ.get('FM_ROOF_RECT', '571200,6289520,571480,6289740').split(','))
+
+
+def roof_click(x, y, extend):
+    """A click of the pixel picker on the map (Ctrl+click when ``extend``): the signal a real click emits."""
+    def _s():
+        from qgis.core import QgsPointXY
+        canvas = iface.mapCanvas()
+        pt = QgsPointXY(x, y)
+        px = canvas.getCoordinateTransform().transform(pt)
+        r = to_main(canvas, QRect(int(px.x()), int(px.y()), 1, 1))
+        REC.event('point', x=r.center().x(), y=r.center().y())
+        REC.event('click', x=r.center().x(), y=r.center().y())
+        tool = coverage()._pixel_tool
+        if tool is None or canvas.mapTool() is not tool:
+            log(f'pixel picker not on the map ({type(canvas.mapTool()).__name__})')
+            return
+        tool.show_marker(pt)
+        tool.picked.emit(pt, extend)
+        log(f'roof click {x} {y} extend={extend}')
+    return _s
+
+
+def roofs_found(n):
+    def _s():
+        found = raster_panel().detected_objects()
+        done = not tasks_running() and found is not None and (found[0] or 0) >= n
+        if done:
+            log(f'roof objects {found}')
+        return not done
+    _s.max_tries = 240
+    return _s
+
+
+def object_target():
+    panel = raster_panel()
+    panel._runtime_asked = True  # no offer to install SAM: the colour engine, as a new install without the model
+    panel._target_buttons['object'].click()
+    log(f'target {panel.pick_target()} engine {panel.object_engine()}')
+
+
+def detector_on():
+    """The object detector of the rail on the map (it may already show down for the target chosen in PIPETTE)."""
+    if not detector_button().isChecked():
+        detector_button().click()
+    tool = coverage()._pixel_tool
+    log(f'detector checked {detector_button().isChecked()} tool on map {tool is not None and iface.mapCanvas().mapTool() is tool}')
+
+
+def roofs_result():
+    n = cloud_kept('lhd')
+    found = raster_panel().detected_objects() or (None, None, False)
+    area = f' · {found[1]:,.0f} m²' if found[1] else ''
+    return f'{n:,} LiDAR points beneath the 2 roofs{area}'
+
+
+def roofs_report():
+    cloud_kept('lhd')
+    log(f'roof objects {raster_panel().detected_objects()}')
+
+
+ROOFS = boot5(['ortho_rvb', 'lhd'], hidden=('lhd',)) + fm5_scene(cloud_hidden=(7, 18)) + to_exploring('ortho_rvb') + [
+    (0, zoom_rect(*ROOF_RECT)),
+] + settle() + show_map(1800) + [
+    (0, cam(lambda: raster_panel()._bands_group, dur=1.2, pad=30)), hold(1500), (0, log_raster_state),
+    still('s14-01'),
+] + act(group_check(lambda: raster_panel()._pipette_group), open_group(lambda: raster_panel()._pipette_group)) + [
+    hold(600), (0, ensure_visible(lambda: raster_panel()._target_buttons['object'])), hold(300),
+    (0, cam(lambda: raster_panel()._pipette_group, dur=1.2, pad=30)),
+] + act(lambda: raster_panel()._target_buttons['object'], object_target) + [hold(900)] \
+    + act(detector_button, detector_on) + [hold(900)] + [
+    (900, roof_click(*ROOF_POINTS[0], False)), (300, speed(3.0)), (500, roofs_found(1)), (200, speed(1.0)), hold(1600),
+    (900, roof_click(*ROOF_POINTS[1], True)), (300, speed(3.0)), (500, roofs_found(2)), (200, speed(1.0)), hold(1600),
+    (0, cam(lambda: raster_panel()._pipette_group, dur=1.2, pad=30)), hold(1200), still('s14-02'),
+    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+] + targets(['lhd']) + predicates(['intersect']) + [
+    (200, buffer_off), hold(500), still('s14-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter_long() + [(0, zoom_rect(*ROOF_RECT))] + legend_visible('lhd', True) + settle() + show_map(1500, 1.05) \
+    + legend_visible('ortho_rvb', False) + settle() + show_map(1200, 1.05) + [
+    (300, speed(4.0)), result_with(roofs_result), (0, speed(1.0)), hold(3000), still('s14-04'),
+] + ending_coverage(roofs_report)
+
+
+# ground (story 15): the cloud, CLASSES / Selection: Ground (class 2) -> clips the DTM.
+def mnt_opaque():
+    ml = layer('mnt')
+    ml.renderer().setOpacity(0.9)
+    ml.triggerRepaint()
+
+
+def ground_result():
+    kept = raster_kept('mnt')
+    total = STATE.get('mnt_total') or raster_base('mnt', FM5_DTM)
+    STATE['mnt_total'] = total
+    return f'DTM beneath the ground points: {100 * kept["kept"] / total:.0f} % of its pixels kept'
+
+
+def ground_report():
+    raster_base('mnt', FM5_DTM)
+    raster_kept('mnt')
+    log(f'classes {pc_panel()._class_summary_label.text()!r} expression {pc_panel().expression()!r}')
+
+
+def log_classes():
+    log(f'classes {pc_panel()._class_summary_label.text()!r} expression {pc_panel().expression()!r}')
+
+
+GROUND = boot5(['mnt', 'lhd']) + [(0, mnt_opaque)] + fm5_scene(cloud_hidden=(0, 1, 7, 18, 64, 65, 66, 67)) \
+    + to_exploring('lhd') + [
+    (0, ensure_visible(lambda: pc_panel()._classes_list)), hold(300),
+    (0, cam(lambda: pc_panel()._classes_group, dur=1.2, pad=30)), hold(1800), (0, log_classes), still('s15-01'),
+] + menu_pick(lambda: pc_panel()._quick_button, 'Ground') + [hold(900), (0, log_classes)] \
+    + act('pushButton_checkable_exploring_selecting', click_selecting) + settle(3.0) + show_map(2600) + [
+    (0, cam(lambda: pc_panel()._classes_group, dur=1.2, pad=30)), hold(900), still('s15-02'),
+    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+] + targets(['mnt']) + predicates(['intersect']) + [
+    (200, buffer_off), hold(500), still('s15-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter_long() + legend_visible('lhd', False) + settle() + show_map(1500, 1.05) + [
+    (300, speed(4.0)), result_with(ground_result), (0, speed(1.0)), hold(3000), still('s15-04'),
+] + ending_coverage(ground_report)
+
+
+# wires (story 16): a LiDAR survey with classified wires (Wellington, New Zealand, NZTM 2000), loaded twice. The
+# vegetation copy keeps class 5 alone (filtered alone), the network copy keeps the wire conductors (class 14; no class 13
+# in this survey); a 10 m buffer around the wire footprint clips the vegetation copy. FM_WIRES_DIR: the folder of
+# wellington_lines.copc.laz (mounted with FM_DOCKER_ARGS="-v <folder>:/wires:ro").
+WIRES_DIR = os.environ.get('FM_WIRES_DIR', '/wires')
+WIRES_TILE = os.path.join(WIRES_DIR, 'wellington_lines.copc.laz')
+WIRES_DETAIL = tuple(float(v) for v in os.environ.get('FM_WIRES_DETAIL', '1746820,5429380,1747040,5429640').split(','))
+WIRES_EXTENT = tuple(float(v) for v in os.environ.get('FM_WIRES_EXTENT', '1746880,5429040,1747360,5429760').split(','))
+
+
+def style_cloud_classes(pc, shown, size=1.6, colours=None):
+    """Classified rendering of ``pc`` drawing only the classes ``shown`` (``colours``: code -> colour)."""
+    from qgis.core import QgsPointCloudClassifiedRenderer
+    renderer = QgsPointCloudClassifiedRenderer('Classification', QgsPointCloudClassifiedRenderer.defaultCategories())
+    categories = renderer.categories()
+    for category in categories:
+        category.setRenderState(category.value() in shown)
+        if colours and category.value() in colours:
+            category.setColor(QColor(colours[category.value()]))
+    renderer.setCategories(categories)
+    renderer.setPointSize(size)
+    pc.setRenderer(renderer)
+    pc.triggerRepaint()
+
+
+def setup_wires():
+    from qgis.core import QgsCoordinateReferenceSystem, QgsPointCloudLayer
+    canvas = prepare_window()
+    QgsProject.instance().setCrs(QgsCoordinateReferenceSystem('EPSG:2193'))
+    for name in ('lhd_vegetation', 'lhd_reseau'):
+        ml = QgsPointCloudLayer(WIRES_TILE, name, 'copc')
+        log(f'layer {name} valid={ml.isValid()} crs={ml.crs().authid() or ml.crs().description()} '
+            f'points={ml.pointCount()}')
+        QgsProject.instance().addMapLayer(ml)
+    log(f'project crs {QgsProject.instance().crs().authid()}')
+    bb = QgsRectangle(*WIRES_EXTENT)
+    bb.scale(1.03)
+    STATE['scene_rect'] = QgsRectangle(bb)
+    STATE['boot_extent'] = QgsRectangle(bb)
+    set_extent(bb)
+    canvas.setRenderFlag(True)
+
+
+def wires_style():
+    # the vegetation copy: everything above the ground; the network copy: its wires only, in amber
+    style_cloud_classes(layer('lhd_vegetation'), (3, 4, 5, 6), 1.4)
+    style_cloud_classes(layer('lhd_reseau'), (13, 14), 1.4, {13: '#b45309', 14: '#d97706'})
+
+
+def class_item(code):
+    def _item():
+        return next(item for item in pc_panel()._class_items() if int(item.data(Qt.ItemDataRole.UserRole)) == code)
+    return _item
+
+
+def only_class(code):
+    """Selection > No class, then the box of ``code`` ticked, as a user does."""
+    item = class_item(code)
+
+    def scroll():
+        item().listWidget().scrollToItem(item())
+
+    def rect():
+        view = item().listWidget()
+        r = to_main(view.viewport(), view.visualItemRect(item()))
+        return QRect(r.x(), r.y(), 24, r.height())  # its check box
+
+    def check():
+        item().setCheckState(Qt.CheckState.Checked)
+        log(f'class {code} checked: {pc_panel()._checked_codes()} expression {pc_panel().expression()!r}')
+    return (menu_pick(lambda: pc_panel()._quick_button, 'No class') + [hold(500), (0, scroll), hold(200)]
+            + act(rect, check) + [hold(900)])
+
+
+def log_cloud(name):
+    def _s():
+        from filter_mate.adapters.qgis.coverage_layers.target_appliers import derived_point_count
+        ml = layer(name)
+        log(f'cloud {name} points {derived_point_count(ml)} subset {ml.subsetString()!r} source {ml.source()}')
+    return _s
+
+
+def cloud_points(path, classes, label):
+    """Points of the classes ``classes`` ("5:5") in the file ``path``, counted by PDAL."""
+    import subprocess
+    stages = [path, {'type': 'filters.range', 'limits': f'Classification[{classes}]'},
+              {'type': 'filters.stats', 'dimensions': 'Classification'}]
+    out = subprocess.run(['pdal', 'pipeline', '--stdin', '--metadata', 'STDOUT'], input=json.dumps(stages),
+                         capture_output=True, text=True, timeout=600)
+    try:
+        n = int(json.loads(out.stdout)['stages']['filters.stats']['statistic'][0]['count'])
+    except Exception:
+        log(f'pdal count {label} failed: {out.stderr[-400:]} {out.stdout[-300:]}')
+        return -1
+    log(f'cloud points {label} classes {classes}: {n} ({path})')
+    return n
+
+
+def wires_result():
+    n = cloud_points(layer('lhd_vegetation').source(), '5:5', 'lhd_vegetation in the corridor')
+    return f'{n:,} high vegetation points within 10 m of the wires'
+
+
+def wires_report():
+    for name in ('lhd_reseau', 'lhd_vegetation'):
+        log_cloud(name)()
+    cloud_points(layer('lhd_vegetation').source(), '5:5', 'lhd_vegetation in the corridor')
+    cloud_points(layer('lhd_vegetation').source(), '0:255', 'lhd_vegetation file, every class')
+    cloud_points(layer('lhd_reseau').source(), '14:14', 'lhd_reseau now')
+    cloud_points(WIRES_TILE, '5:5', 'survey')
+    cloud_points(WIRES_TILE, '14:14', 'survey')
+    cloud_points(WIRES_TILE, '13:13', 'survey')
+
+
+WIRES = [(1000, setup_wires), (3000, open_plugin), (8000, size_dock), (1500, wait_idle()),
+         (500, fit_window(('FILTERING',))), (2500, wait_idle()), (0, wires_style)] + [
+    (500, wait_idle()), (0, refocus), (800, wait_idle()), (500, rec_start),
+    (0, cam('full', dur=0, drift=1.03)), hold(1200), (0, cam('canvas', dur=1.4, drift=1.03)), hold(1400),
+] + to_exploring('lhd_vegetation') + [
+    (0, ensure_visible(lambda: pc_panel()._classes_list)), hold(300),
+    (0, cam(['layers', lambda: pc_panel()._classes_group], dur=1.2, pad=20)), hold(1800), (0, log_classes),
+    still('s16-01'),
+    (0, cam(lambda: pc_panel()._classes_group, dur=1.2, pad=30)),
+] + only_class(5) + [(0, log_classes), (0, cam('dock', dur=1.2, pad=10))] \
+    + act('pushButton_checkable_filtering_layers_to_filter', enable('pushButton_checkable_filtering_layers_to_filter', False)) \
+    + [hold(600)] + run_filter_long() + [(0, log_cloud('lhd_vegetation'))] + show_map(2000) + [
+    (0, cam('dock', dur=1.2, pad=10)), hold(600), still('s16-02'),
+] + to_exploring('lhd_reseau') + [
+    (0, ensure_visible(lambda: pc_panel()._classes_list)), hold(300),
+    (0, cam(lambda: pc_panel()._classes_group, dur=1.2, pad=30)), hold(900),
+] + only_class(14) + [(0, log_classes)] + act('pushButton_checkable_exploring_selecting', click_selecting) \
+    + settle(3.0) + show_map(2400) + [
+    (0, cam(lambda: pc_panel()._classes_group, dur=1.2, pad=30)), hold(900), still('s16-03'),
+    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+] + targets(['lhd_vegetation']) + predicates(['intersect']) \
+    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(10) + [
+    hold(500), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter_long() + settle() + show_map(1500, 1.05) + [
+    (300, speed(4.0)), result_with(wires_result), (0, speed(1.0)), hold(2000), (0, zoom_rect(*WIRES_DETAIL)),
+] + settle() + show_map(2500, 1.04) + [still('s16-04')] + ending_coverage(wires_report)
 
 
 # ------------------------------------------------------------------ FilterMate 5.1: the dock, its panels, its settings
@@ -3122,6 +3544,30 @@ PRUNING = texted(PRUNING, 'Which roads need pruning?', [
     ('s11-03', caption('4 · Filter')),
     ('filtered', result('{troncon_de_route:,} road sections to prune', ['troncon_de_route'])),
 ])
+NDVI = texted(NDVI, 'Vegetation of an infrared image, on the RGB one', [
+    ('start', caption('1 · Tell the bands: infrared, red, green')),
+    ('s13-01', caption('2 · Keep the vegetation: NDVI > 0.3')),
+    ('s13-02', caption('3 · Target the RGB orthophoto')),
+    ('s13-03', caption('4 · Filter')),
+])
+ROOFS = texted(ROOFS, 'The LiDAR points beneath two roofs', [
+    ('start', caption('1 · The RGB orthophoto, on the roofs')),
+    ('s14-01', caption('2 · Pipette: click a roof, Ctrl+click the next one')),
+    ('s14-02', caption('3 · Target the LiDAR point cloud')),
+    ('s14-03', caption('4 · Filter')),
+])
+GROUND = texted(GROUND, 'The terrain model where the ground was measured', [
+    ('start', caption('1 · The classes of the LiDAR cloud')),
+    ('s15-01', caption('2 · Keep the ground (class 2)')),
+    ('s15-02', caption('3 · Target the terrain model')),
+    ('s15-03', caption('4 · Filter')),
+])
+WIRES = texted(WIRES, 'High vegetation near the power lines', [
+    ('start', caption('1 · The survey loaded twice: network and vegetation')),
+    ('s16-01', caption('2 · Vegetation copy: class 5 only, filtered alone')),
+    ('s16-02', caption('3 · Network copy: the wire conductors (class 14)')),
+    ('s16-03', caption('4 · Target the vegetation, 10 m around the wires')),
+])
 SURVEY = texted(SURVEY, 'A survey package around one building', [
     ('start', caption('1 · Pick the tallest building')),
     ('s12-01', caption('2 · Target the terrain model and the point cloud, 50 m around')),
@@ -3135,6 +3581,7 @@ CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'la
          'explore': EXPLORE, 'buffer': BUFFER2, 'noise': NOISE2, 'bridges': BRIDGES2, 'brush': BRUSH,
          'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT2, 'processing': PROCESSING,
          'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY,
+         'ndvi': NDVI, 'roofs': ROOFS, 'ground': GROUND, 'wires': WIRES,
          # the first cut of the four stories told again with the buttons of EXPLORING, Undo / Redo and the walk
          # through a result (the teaser was edited from them)
          'noise_plain': NOISE, 'buffer_plain': BUFFER, 'bridges_plain': BRIDGES, 'export_plain': EXPORT}
