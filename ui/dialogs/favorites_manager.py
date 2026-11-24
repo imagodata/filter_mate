@@ -5,13 +5,18 @@ Dialog for managing filter favorites with list, edit, delete, and search capabil
 Extracted from filter_mate_dockwidget.py for better modularity.
 """
 import logging
+import re
+
+from ..styles.favorites_styles import favorites_dialog_stylesheet
+from ..styles.mockup_design import MONO_FAMILY, render_icon
+from .favorite_summary import date_text, scope_badge, summary_rows, use_text
 
 try:
     from qgis.PyQt.QtWidgets import (
-        QButtonGroup, QComboBox, QDialog, QVBoxLayout, QHBoxLayout, QListWidget,
+        QComboBox, QDialog, QVBoxLayout, QHBoxLayout, QListWidget,
         QListWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QMessageBox,
-        QFormLayout, QDialogButtonBox, QRadioButton, QSplitter, QTreeWidget,
-        QTreeWidgetItem, QHeaderView, QTabWidget, QWidget
+        QAbstractItemView, QFormLayout, QFrame, QScrollArea, QSplitter,
+        QTableWidget, QTableWidgetItem, QHeaderView, QTabWidget, QWidget
     )
     from qgis.PyQt.QtCore import Qt, pyqtSignal
     HAS_QGIS = True
@@ -30,13 +35,13 @@ except ImportError:
     QTextEdit = object
     QMessageBox = None
     QFormLayout = object
-    QDialogButtonBox = object
-    QButtonGroup = object
     QComboBox = object
-    QRadioButton = object
+    QFrame = object
+    QScrollArea = object
     QSplitter = object
-    QTreeWidget = object
-    QTreeWidgetItem = object
+    QAbstractItemView = object
+    QTableWidget = object
+    QTableWidgetItem = object
     QHeaderView = None
     QTabWidget = object
     Qt = None
@@ -47,6 +52,15 @@ except ImportError:
 # Scope kinds of ``_favorite_scope_kind`` that apply to every project of this
 # computer; the list shows them with the globe icon instead of the star.
 _GLOBAL_SCOPE_KINDS = frozenset({"shared_global", "mine_global"})
+
+
+def _breakable(text: str) -> str:
+    """``text`` with a zero-width break opportunity after separators.
+
+    A word-wrapped QLabel only breaks between words, so a long expression
+    without spaces (``1,2,3,...``) would widen the dialog instead of wrapping.
+    """
+    return re.sub(r"([,;|/)\]])", "\\1\u200b", text)
 
 
 def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
@@ -75,10 +89,10 @@ def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
     return "shared_global" if is_global else "shared_here"
 
 
-from ..styles.favorites_styles import favorites_dialog_stylesheet
-from ..styles.mockup_design import render_icon
-
 logger = logging.getLogger(__name__)
+
+# Longest expression text shown in a Layers row; the tooltip has the full one.
+_REMOTE_EXPRESSION_CHARS = 200
 
 
 class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
@@ -87,7 +101,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     Features:
     - List all favorites with search/filter
-    - Edit favorite name, description, tags, and expression
+    - Read a summary of each favorite; edit its name, description and tags
     - Delete favorites
     - Apply favorites directly
     - View remote layer details
@@ -202,8 +216,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
     def _setup_ui(self):
         """Build the dialog UI."""
         self.setWindowTitle(self.tr("FilterMate - Favorites Manager"))
-        self.setMinimumSize(600, 450)
-        self.resize(720, 520)
+        self.setMinimumSize(720, 500)
+        self.resize(900, 620)
         self.setModal(True)
 
         # Theme of the plugin, read each time the dialog opens
@@ -304,8 +318,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         right_panel = self._create_right_panel()
         splitter.addWidget(right_panel)
 
-        # Set splitter proportions (30% list, 70% details)
-        splitter.setSizes([220, 480])
+        # Set splitter proportions (list 1/3, details 2/3)
+        splitter.setSizes([300, 600])
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 2)
         layout.addWidget(splitter, 1)
@@ -364,8 +378,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         left_layout.setSpacing(0)
 
         self._list_widget = QListWidget()
-        self._list_widget.setMinimumWidth(180)
-        self._list_widget.setMaximumWidth(250)
+        self._list_widget.setMinimumWidth(240)
+        # A long name ends with "…" instead of widening the list or scrolling it.
+        self._list_widget.setTextElideMode(Qt.TextElideMode.ElideRight)
+        self._list_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self._list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._list_widget.currentItemChanged.connect(self._on_selection_changed)
 
@@ -380,38 +396,68 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         right_layout.setSpacing(0)
 
         self._tab_widget = QTabWidget()
+        # A selected (bold) tab is never cut: no "…", scroll buttons when the tabs do not fit.
+        self._tab_widget.tabBar().setElideMode(Qt.TextElideMode.ElideNone)
+        self._tab_widget.tabBar().setUsesScrollButtons(True)
 
-        # Tab 1: General Info
-        general_tab = self._create_general_tab()
-        self._tab_widget.addTab(general_tab, self.tr("General"))
-
-        # Tab 2: Expression
-        expr_tab = self._create_expression_tab()
-        self._tab_widget.addTab(expr_tab, self.tr("Expression"))
-
-        # Tab 3: Remote Layers
-        remote_tab = self._create_remote_tab()
-        self._tab_widget.addTab(remote_tab, self.tr("Remote"))
+        self._tab_widget.addTab(self._create_summary_tab(), self.tr("Summary"))
+        self._tab_widget.addTab(self._create_remote_tab(), self.tr("Layers"))
 
         right_layout.addWidget(self._tab_widget)
         return right_panel
 
-    def _create_general_tab(self) -> QWidget:
-        """Create the General Info tab."""
-        general_tab = QWidget(self)
-        general_layout = QFormLayout(general_tab)
-        general_layout.setContentsMargins(12, 12, 12, 12)
-        general_layout.setSpacing(10)
-        general_layout.setRowWrapPolicy(QFormLayout.RowWrapPolicy.DontWrapRows)
+    def _create_summary_tab(self) -> QWidget:
+        """Create the Summary tab: what the favorite does, then what can be edited."""
+        summary_tab = QWidget(self)
+        tab_layout = QVBoxLayout(summary_tab)
+        tab_layout.setContentsMargins(0, 0, 0, 0)
+        tab_layout.setSpacing(0)
+
+        # Everything scrolls vertically; the width never grows with a long expression.
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        content = QWidget()
+        content.setObjectName("summaryContent")
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(12, 10, 12, 10)
+        content_layout.setSpacing(10)
+
+        self._scope_badge_label = QLabel("")
+        self._scope_badge_label.setObjectName("scopeBadge")
+        self._scope_badge_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        badge_row = QHBoxLayout()
+        badge_row.setContentsMargins(0, 0, 0, 0)
+        badge_row.addWidget(self._scope_badge_label)
+        badge_row.addStretch()
+        content_layout.addLayout(badge_row)
+
+        # Read-only summary rows (rebuilt on each selection by _show_summary_rows)
+        self._summary_form = QFormLayout()
+        self._summary_form.setContentsMargins(0, 0, 0, 0)
+        self._summary_form.setSpacing(2)
+        self._summary_form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.DontWrapRows)
+        self._summary_form.setLabelAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        content_layout.addLayout(self._summary_form)
+
+        # Editable fields
+        edit_form = QFormLayout()
+        edit_form.setContentsMargins(0, 0, 0, 0)
+        edit_form.setSpacing(8)
+        edit_form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.DontWrapRows)
+        edit_form.setLabelAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
         self._name_edit = QLineEdit()
         self._name_edit.setPlaceholderText(self.tr("Favorite name"))
-        general_layout.addRow(self.tr("Name:"), self._name_edit)
+        edit_form.addRow(self._field_label(self.tr("Name:")), self._name_edit)
 
         self._description_edit = QTextEdit()
-        self._description_edit.setMaximumHeight(70)
+        self._description_edit.setAcceptRichText(False)
+        # 3 lines high (a longer text scrolls inside): the whole tab stays on one screen
+        self._description_edit.setFixedHeight(self._lines_height(self._description_edit, 3))
         self._description_edit.setPlaceholderText(self.tr("Description (auto-generated, editable)"))
-        general_layout.addRow(self.tr("Description:"), self._description_edit)
+        edit_form.addRow(self._field_label(self.tr("Description:")), self._description_edit)
 
         self._tags_edit = QLineEdit()
         self._tags_edit.setPlaceholderText(
@@ -420,123 +466,60 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._tags_edit.setToolTip(
             self.tr("Tags help organize and search favorites.\nSeparate multiple tags with commas.")
         )
-        general_layout.addRow(self.tr("Tags:"), self._tags_edit)
+        edit_form.addRow(self._field_label(self.tr("Tags:")), self._tags_edit)
+        content_layout.addLayout(edit_form)
 
-        self._layer_label = QLabel("-")
-        self._layer_label.setObjectName("infoLabel")
-        self._layer_label.setWordWrap(True)
-        general_layout.addRow(self.tr("Source Layer:"), self._layer_label)
+        # "Used 3 times · created 24/11/2026"
+        self._usage_label = QLabel("-")
+        self._usage_label.setObjectName("infoLabel")
+        self._usage_label.setWordWrap(True)
+        content_layout.addWidget(self._usage_label)
+        content_layout.addStretch()
 
-        self._provider_label = QLabel("-")
-        self._provider_label.setObjectName("infoLabel")
-        general_layout.addRow(self.tr("Provider:"), self._provider_label)
+        scroll.setWidget(content)
+        tab_layout.addWidget(scroll)
+        return summary_tab
 
-        # Stats row
-        stats_layout = QHBoxLayout()
-        stats_layout.setContentsMargins(0, 4, 0, 0)
-        self._use_count_label = QLabel("-")
-        self._created_label = QLabel("-")
-        self._created_label.setObjectName("infoLabel")
-        stats_layout.addWidget(QLabel(self.tr("Used:")))
-        stats_layout.addWidget(self._use_count_label)
-        stats_layout.addStretch()
-        stats_layout.addWidget(QLabel(self.tr("Created:")))
-        stats_layout.addWidget(self._created_label)
-        general_layout.addRow(stats_layout)
+    @staticmethod
+    def _field_label(text: str) -> "QLabel":
+        """Muted label of a form row, the same as the summary labels."""
+        label = QLabel(text)
+        label.setObjectName("summaryKey")
+        label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        return label
 
-        # Scope controls (v5.1) — two independent dimensions: owner (mine
-        # vs shared) and project (this vs all). Each dimension is a pair
-        # of mutually exclusive radios; the combination gives the 4
-        # scopes surfaced in the header filter combo.
-        scope_container = QWidget(general_tab)
-        scope_v = QVBoxLayout(scope_container)
-        scope_v.setContentsMargins(0, 0, 0, 0)
-        scope_v.setSpacing(4)
-
-        owner_row = QHBoxLayout()
-        owner_row.setSpacing(8)
-        self._scope_mine_radio = QRadioButton(self.tr("Mine"))
-        self._scope_shared_radio = QRadioButton(self.tr("Shared"))
-        self._scope_owner_group = QButtonGroup(self)
-        self._scope_owner_group.addButton(self._scope_mine_radio)
-        self._scope_owner_group.addButton(self._scope_shared_radio)
-        owner_row.addWidget(self._scope_mine_radio)
-        owner_row.addWidget(self._scope_shared_radio)
-        owner_row.addStretch()
-        scope_v.addLayout(owner_row)
-
-        project_row = QHBoxLayout()
-        project_row.setSpacing(8)
-        self._scope_proj_here_radio = QRadioButton(self.tr("This project"))
-        self._scope_proj_all_radio = QRadioButton(self.tr("All projects"))
-        # Project dimension is read-only for now: moving a favorite
-        # across projects would require cross-cache bookkeeping that
-        # belongs in a dedicated "move/duplicate" flow. Radios show the
-        # current project scope for transparency but can't be flipped.
-        self._scope_proj_here_radio.setEnabled(False)
-        self._scope_proj_all_radio.setEnabled(False)
-        ro_tip = self.tr(
-            "Project scope is set when the favorite is created. Move it "
-            "via the filtering tab (coming soon) to switch projects."
-        )
-        self._scope_proj_here_radio.setToolTip(ro_tip)
-        self._scope_proj_all_radio.setToolTip(ro_tip)
-        self._scope_project_group = QButtonGroup(self)
-        self._scope_project_group.addButton(self._scope_proj_here_radio)
-        self._scope_project_group.addButton(self._scope_proj_all_radio)
-        project_row.addWidget(self._scope_proj_here_radio)
-        project_row.addWidget(self._scope_proj_all_radio)
-        project_row.addStretch()
-        scope_v.addLayout(project_row)
-
-        # A small owner label showing who currently owns this favorite —
-        # useful when editing someone else's shared favorite so the user
-        # isn't surprised when "Mine" gets auto-selected on save.
-        self._owner_label = QLabel("-")
-        self._owner_label.setObjectName("infoLabel")
-        scope_v.addWidget(self._owner_label)
-
-        general_layout.addRow(self.tr("Visibility:"), scope_container)
-
-        return general_tab
-
-    def _create_expression_tab(self) -> QWidget:
-        """Create the Expression tab."""
-        expr_tab = QWidget(self)
-        expr_layout = QVBoxLayout(expr_tab)
-        expr_layout.setContentsMargins(12, 12, 12, 12)
-        expr_layout.setSpacing(8)
-
-        source_expr_label = QLabel(self.tr("<b>Source Layer Expression:</b>"))
-        expr_layout.addWidget(source_expr_label)
-
-        self._expression_edit = QTextEdit()
-        self._expression_edit.setPlaceholderText(self.tr("Filter expression for source layer"))
-        self._expression_edit.setStyleSheet(
-            "font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 10pt;"
-        )
-        expr_layout.addWidget(self._expression_edit)
-
-        return expr_tab
+    @staticmethod
+    def _lines_height(edit: "QTextEdit", lines: int) -> int:
+        """Height of ``lines`` text lines in ``edit`` (its padding and frame included)."""
+        return int(edit.fontMetrics().lineSpacing() * lines) + 24
 
     def _create_remote_tab(self) -> QWidget:
-        """Create the Remote Layers tab."""
+        """Create the Layers tab: the remote layers the favorite filters."""
         remote_tab = QWidget(self)
         remote_layout = QVBoxLayout(remote_tab)
         remote_layout.setContentsMargins(12, 12, 12, 12)
         remote_layout.setSpacing(8)
 
-        remote_header = QLabel(self.tr("<b>Filtered Remote Layers:</b>"))
-        remote_layout.addWidget(remote_header)
-
-        self._remote_tree = QTreeWidget()
-        self._remote_tree.setHeaderLabels([self.tr("Layer"), self.tr("Features"), self.tr("Expression")])
-        self._remote_tree.setColumnCount(3)
-        self._remote_tree.header().setStretchLastSection(True)
-        self._remote_tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self._remote_tree.header().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        self._remote_tree.setAlternatingRowColors(True)
-        remote_layout.addWidget(self._remote_tree)
+        self._remote_table = QTableWidget(0, 3)
+        self._remote_table.setHorizontalHeaderLabels(
+            [self.tr("Layer"), self.tr("Features"), self.tr("Expression")]
+        )
+        self._remote_table.verticalHeader().setVisible(False)
+        # Rows grow with the wrapped expression and follow the column width
+        self._remote_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self._remote_table.setWordWrap(True)
+        self._remote_table.setTextElideMode(Qt.TextElideMode.ElideNone)
+        self._remote_table.setShowGrid(False)
+        self._remote_table.setAlternatingRowColors(True)
+        self._remote_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self._remote_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
+        self._remote_table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        header = self._remote_table.horizontalHeader()
+        header.setDefaultAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        header.setStretchLastSection(True)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        remote_layout.addWidget(self._remote_table)
 
         self._no_remote_label = QLabel(self.tr("<i>No remote layers in this favorite</i>"))
         self._no_remote_label.setObjectName("noRemoteLabel")
@@ -596,18 +579,12 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
 
         for fav in favorites_to_show:
-            layers_count = fav.get_layers_count() if hasattr(fav, 'get_layers_count') else 1
-
             kind = _favorite_scope_kind(
                 fav, current_user, project_uuid, GLOBAL_PROJECT_UUID,
             )
             # The scope is the icon (globe: all projects, star: this project);
             # the text is the name.
-            item_text = fav.name
-            if layers_count > 1:
-                item_text += f" [{layers_count}]"
-
-            item = QListWidgetItem(item_text)
+            item = QListWidgetItem(fav.name)
             scope_icon = render_icon(
                 "projection" if kind in _GLOBAL_SCOPE_KINDS else "star", self._dark
             )
@@ -735,6 +712,37 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                 return None
         return None
 
+    def _favorite_is_global(self, fav) -> bool:
+        """True when ``fav`` applies to every project of this computer."""
+        try:
+            from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
+        except Exception:
+            GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
+        project_uuid = getattr(self._favorites_service, "_project_uuid", None)
+        kind = _favorite_scope_kind(
+            fav, self._resolve_current_user(), project_uuid, GLOBAL_PROJECT_UUID,
+        )
+        return kind in _GLOBAL_SCOPE_KINDS
+
+    def _clear_summary_rows(self) -> None:
+        """Remove the read-only rows of the Summary tab."""
+        while self._summary_form.rowCount():
+            self._summary_form.removeRow(0)
+
+    def _show_summary_rows(self, fav) -> None:
+        """Rebuild the read-only rows (Filter / Then / Spatial / Tags) of ``fav``."""
+        self._clear_summary_rows()
+        for label, text in summary_rows(fav, self.tr):
+            key = self._field_label(label)
+            value = QLabel(_breakable(text))
+            value.setObjectName("summaryValue")
+            value.setWordWrap(True)
+            value.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            if label == self.tr("Filter"):
+                # Expressions read better in the mono family
+                value.setStyleSheet(f"font-family: '{MONO_FAMILY}', monospace;")
+            self._summary_form.addRow(key, value)
+
     def _on_selection_changed(self):
         """Handle selection change in list."""
         item = self._list_widget.currentItem()
@@ -749,74 +757,19 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
         self._current_fav_id = fav_id
 
-        # Update General tab
+        # Summary tab
+        self._scope_badge_label.setText(scope_badge(self._favorite_is_global(fav), self.tr))
+        self._show_summary_rows(fav)
         self._name_edit.setText(fav.name)
         self._description_edit.setText(fav.description or "")
         self._tags_edit.setText(", ".join(fav.tags) if fav.tags else "")
-        self._layer_label.setText(fav.layer_name or "-")
-        self._provider_label.setText(fav.layer_provider or "-")
-        self._use_count_label.setText(f"{fav.use_count} times")
-        self._created_label.setText(fav.created_at[:16] if fav.created_at else "-")
+        self._usage_label.setText(self._usage_text(fav))
 
-        # Scope radios — owner dimension
-        current_user = self._resolve_current_user()
-        owner = getattr(fav, "owner", None)
-        # ``blockSignals`` keeps the radios from triggering save-state
-        # side effects while we initialise them from the loaded favorite.
-        for radio in (
-            self._scope_mine_radio, self._scope_shared_radio,
-            self._scope_proj_here_radio, self._scope_proj_all_radio,
-        ):
-            radio.blockSignals(True)
-        try:
-            if owner is None:
-                self._scope_shared_radio.setChecked(True)
-            else:
-                # Mine when the owner matches the resolved current user,
-                # otherwise we still show "Mine" so saving doesn't silently
-                # strip someone else's ownership — the owner label below
-                # disambiguates for the user.
-                self._scope_mine_radio.setChecked(True)
-
-            # Scope radios — project dimension. _load_favorites only ever
-            # loads one project at a time, so there's no per-row info here
-            # — the dialog offers the choice as a "move on save" control.
-            try:
-                from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
-            except Exception:
-                GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
-            project_uuid = getattr(self._favorites_service, "_project_uuid", None)
-            if project_uuid == GLOBAL_PROJECT_UUID:
-                self._scope_proj_all_radio.setChecked(True)
-            else:
-                self._scope_proj_here_radio.setChecked(True)
-        finally:
-            for radio in (
-                self._scope_mine_radio, self._scope_shared_radio,
-                self._scope_proj_here_radio, self._scope_proj_all_radio,
-            ):
-                radio.blockSignals(False)
-
-        # Owner identity label
-        if owner is None:
-            self._owner_label.setText(self.tr("— (shared with everyone)"))
-        elif current_user and owner == current_user:
-            self._owner_label.setText(self.tr("{0} (you)").format(owner))
-        else:
-            # Editing someone else's favorite — highlight it so saving
-            # as "Mine" doesn't feel surreptitious.
-            self._owner_label.setText(self.tr(
-                "{0} — selecting 'Mine' on save will transfer ownership to you"
-            ).format(owner))
-
-        # Update Expression tab
-        self._expression_edit.setText(fav.expression)
-
-        # Update Remote Layers tab
-        self._remote_tree.clear()
+        # Layers tab
+        self._remote_table.setRowCount(0)
         if fav.remote_layers and len(fav.remote_layers) > 0:
             self._no_remote_label.hide()
-            self._remote_tree.show()
+            self._remote_table.show()
 
             for key, layer_data in fav.remote_layers.items():
                 # Handle both new format (dict) and legacy format (string layer_id)
@@ -836,30 +789,40 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                     feature_count = '?'
                     display = key
                     signature = None
-                tree_item = QTreeWidgetItem([
-                    display,
-                    str(feature_count),
-                    expr[:80] + "..." if len(expr) > 80 else expr
-                ])
+                shown = expr if len(expr) <= _REMOTE_EXPRESSION_CHARS else expr[:_REMOTE_EXPRESSION_CHARS] + "…"
+                row = self._remote_table.rowCount()
+                self._remote_table.insertRow(row)
+                cells = [
+                    QTableWidgetItem(display),
+                    QTableWidgetItem(str(feature_count)),
+                    QTableWidgetItem(_breakable(shown)),
+                ]
+                # The full expression (and the layer signature) in the tooltip
                 tooltip = expr
                 if signature and signature != display:
                     tooltip = f"[{signature}]\n{expr}" if expr else f"[{signature}]"
-                tree_item.setToolTip(0, signature or display)
-                tree_item.setToolTip(2, tooltip)
-                self._remote_tree.addTopLevelItem(tree_item)
+                cells[0].setToolTip(signature or display)
+                cells[2].setToolTip(tooltip)
+                for column, cell in enumerate(cells):
+                    self._remote_table.setItem(row, column, cell)
 
             self._tab_widget.setTabText(
-                2, self.tr("Remote ({0})").format(len(fav.remote_layers))
+                1, self.tr("Layers ({0})").format(len(fav.remote_layers))
             )
         else:
-            self._remote_tree.hide()
+            self._remote_table.hide()
             self._no_remote_label.show()
-            self._tab_widget.setTabText(2, self.tr("Remote"))
+            self._tab_widget.setTabText(1, self.tr("Layers"))
 
         # Enable buttons
         self._apply_btn.setEnabled(True)
         self._save_btn.setEnabled(True)
         self._delete_btn.setEnabled(True)
+
+    def _usage_text(self, fav) -> str:
+        """'Used 3 times · created 24/11/2026'."""
+        created = self.tr("created {0}").format(date_text(fav.created_at))
+        return f"{use_text(fav.use_count, getattr(fav, 'last_used_at', None), self.tr)} · {created}"
 
     def _on_apply(self):
         """Apply selected favorite."""
@@ -873,26 +836,11 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
 
         new_name = self._name_edit.text().strip()
-        new_expr = self._expression_edit.toPlainText().strip()
         new_desc = self._description_edit.toPlainText().strip()
         new_tags = [
             tag.strip() for tag in self._tags_edit.text().split(',')
             if tag.strip()
         ]
-
-        # Resolve the target owner from the scope radios. "Shared" →
-        # owner NULL; "Mine" → current resolved user. We never write
-        # "Mine" when no identity is resolvable — would produce an
-        # empty-string owner that the scope filter treats as a foreign
-        # user, confusing everyone.
-        desired_owner = None
-        if hasattr(self, "_scope_mine_radio") and self._scope_mine_radio.isChecked():
-            desired_owner = self._resolve_current_user() or None
-
-        # Project dimension isn't editable inline (changing project_uuid
-        # would require moving the row across caches, out of scope for
-        # this dialog). The radio stays read-only: enabled visually so
-        # the user sees the current state, but save does not act on it.
 
         if new_name:
             # F16 phase 4 lazy import: keeps this module importable in
@@ -906,10 +854,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                 self._favorites_service.update_favorite(
                     self._current_fav_id,
                     name=new_name,
-                    expression=new_expr,
                     description=new_desc,
                     tags=new_tags,
-                    owner=desired_owner,
                 )
                 self._favorites_service.save()
             except FavoritePersistenceError as e:
@@ -1034,38 +980,19 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _clear_details(self):
         """Clear all detail fields."""
-        # Tab 1: General
+        # Summary tab
+        self._scope_badge_label.setText("")
+        self._clear_summary_rows()
         self._name_edit.clear()
         self._description_edit.clear()
         self._tags_edit.clear()
-        self._layer_label.setText("-")
-        self._provider_label.setText("-")
-        self._use_count_label.setText("-")
-        self._created_label.setText("-")
-        # Scope radios — reset without firing signals so the next
-        # selection starts from a clean state.
-        for radio in (
-            getattr(self, "_scope_mine_radio", None),
-            getattr(self, "_scope_shared_radio", None),
-            getattr(self, "_scope_proj_here_radio", None),
-            getattr(self, "_scope_proj_all_radio", None),
-        ):
-            if radio is None:
-                continue
-            radio.blockSignals(True)
-            radio.setChecked(False)
-            radio.blockSignals(False)
-        if hasattr(self, "_owner_label") and self._owner_label is not None:
-            self._owner_label.setText("-")
+        self._usage_label.setText("-")
 
-        # Tab 2: Expression
-        self._expression_edit.clear()
-
-        # Tab 3: Remote Layers
-        self._remote_tree.clear()
+        # Layers tab
+        self._remote_table.setRowCount(0)
         self._no_remote_label.show()
-        self._remote_tree.hide()
-        self._tab_widget.setTabText(2, "🗂️ " + self.tr("Remote Layers"))
+        self._remote_table.hide()
+        self._tab_widget.setTabText(1, self.tr("Layers"))
 
     # ─── favorites_sharing integration (optional) ─────────────────────
 

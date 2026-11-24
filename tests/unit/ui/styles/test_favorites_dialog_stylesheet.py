@@ -37,3 +37,12 @@ def test_dialog_source_has_no_emoji():
     source = _DIALOG_SOURCE.read_text(encoding="utf-8")
     present = [e for e in _EMOJI if e in source]
     assert not present, f"emoji left in favorites_manager.py: {present}"
+
+
+def test_combo_arrow_is_the_dock_chevron():
+    for dark in (True, False):
+        sheet = favorites_dialog_stylesheet(dark)
+        assert "{spin_down_icon}" not in sheet
+        match = re.search(r'QComboBox::down-arrow \{\s*image: url\("([^"]+)"\)', sheet)
+        assert match, "the combo box has no arrow image"
+        assert Path(match.group(1)).is_file(), match.group(1)

@@ -9,6 +9,7 @@ entry points stay in sync.
 
 from __future__ import annotations
 
+import os
 from typing import Dict
 
 from .mockup_design import apply_tokens
@@ -90,6 +91,12 @@ ICONS: Dict[str, str] = {
 }
 
 
+# Chevron of the dock's combo boxes and spin boxes (resources/styles/spin_down.svg).
+_SPIN_DOWN_ICON: str = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "resources", "styles", "spin_down.svg",
+).replace("\\", "/")
+
 _DIALOG_STYLESHEET_TEMPLATE: str = """
     QDialog { background-color: {fm_bg}; }
     QLabel { color: {fm_text}; }
@@ -100,6 +107,18 @@ _DIALOG_STYLESHEET_TEMPLATE: str = """
         margin-bottom: 4px;
     }
     QLabel#infoLabel { color: {fm_text_muted}; font-size: 9pt; }
+    QLabel#summaryKey { color: {fm_text_muted}; font-size: 9pt; padding-top: 1px; }
+    QLabel#summaryValue { color: {fm_text}; font-size: 10pt; }
+    QLabel#scopeBadge {
+        color: {fm_text};
+        background-color: {fm_active};
+        border: 1px solid {fm_active_border};
+        border-radius: 9px;
+        padding: 2px 10px;
+        font-size: 9pt;
+        font-weight: 600;
+    }
+    QScrollArea, QWidget#summaryContent { background: transparent; }
     QLabel#noRemoteLabel {
         color: {fm_text_muted};
         font-style: italic;
@@ -125,6 +144,20 @@ _DIALOG_STYLESHEET_TEMPLATE: str = """
     QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled, QComboBox:disabled {
         color: {fm_text_disabled};
     }
+    QComboBox { padding-right: 24px; }
+    /* The native drop-down arrow was cut on the light theme: the same chevron as the dock's. */
+    QComboBox::drop-down {
+        subcontrol-origin: padding;
+        subcontrol-position: center right;
+        width: 22px;
+        border: none;
+        background: transparent;
+    }
+    QComboBox::down-arrow {
+        image: url("{spin_down_icon}");
+        width: 10px;
+        height: 10px;
+    }
     QLineEdit#searchEdit { padding: 8px 12px; border-radius: 8px; }
     QComboBox QAbstractItemView {
         color: {fm_text};
@@ -134,7 +167,7 @@ _DIALOG_STYLESHEET_TEMPLATE: str = """
         selection-color: {fm_text};
     }
 
-    QListWidget, QTreeWidget {
+    QListWidget, QTableWidget {
         color: {fm_text};
         background-color: {fm_list};
         alternate-background-color: {fm_group};
@@ -148,13 +181,13 @@ _DIALOG_STYLESHEET_TEMPLATE: str = """
         border-radius: 6px;
         margin: 2px 0px;
     }
-    QTreeWidget::item { padding: 4px; }
-    QListWidget::item:selected, QTreeWidget::item:selected {
+    QTableWidget::item { padding: 4px; }
+    QListWidget::item:selected, QTableWidget::item:selected {
         background-color: {fm_active};
         color: {fm_text};
         border: 1px solid {fm_active_border};
     }
-    QListWidget::item:hover:!selected, QTreeWidget::item:hover:!selected {
+    QListWidget::item:hover:!selected, QTableWidget::item:hover:!selected {
         background-color: {fm_hover};
     }
     QHeaderView::section {
@@ -164,6 +197,8 @@ _DIALOG_STYLESHEET_TEMPLATE: str = """
         border: none;
         border-bottom: 1px solid {fm_group_border};
         font-weight: 500;
+        font-size: 9pt;
+        text-align: left;
     }
 
     QTabWidget::pane {
@@ -245,4 +280,5 @@ def favorites_dialog_stylesheet(dark: bool) -> str:
     Every color is a ``mockup_design.TOKENS`` value of the chosen variant, so the
     dialog follows the same palette as the dock.
     """
-    return apply_tokens(_DIALOG_STYLESHEET_TEMPLATE, dark)
+    sheet = apply_tokens(_DIALOG_STYLESHEET_TEMPLATE, dark)
+    return sheet.replace("{spin_down_icon}", _SPIN_DOWN_ICON)
