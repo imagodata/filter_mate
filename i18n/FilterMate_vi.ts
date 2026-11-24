@@ -12694,6 +12694,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>Công cụ đám mây điểm</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Project</source>
+        <translation>Dự án</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>Lọc</translation>
@@ -12767,6 +12772,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../ui/controllers/setup_wizard.py" line="61"/>
         <source>Buttons of the EXPLORING rail for point clouds</source>
         <translation>Các nút của thanh EXPLORING cho đám mây điểm</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="66"/>
+        <source>Opening a project whose layers carry other FilterMate settings than yours asks which ones to apply</source>
+        <translation>Khi mở một dự án có các lớp mang cài đặt FilterMate khác với của bạn, sẽ hỏi nên áp dụng những cài đặt nào</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>
@@ -13029,6 +13039,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>Hàng</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Heights</source>
+        <translation>Chiều cao</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Cách bảng điều khiển liệt kê các phần của nó</translation>
@@ -13037,6 +13052,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
         <source>How the rows of FILTERING and EXPORTING use the height</source>
         <translation>Cách các hàng của FILTERING và EXPORTING dùng chiều cao</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="60"/>
+        <source>How the panels of the sections taken out of the dock take their height</source>
+        <translation>Cách các bảng điều khiển của những phần tách khỏi bảng điều khiển FilterMate nhận chiều cao</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -13062,6 +13082,36 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
         <source>Packed at the top</source>
         <translation>Gom ở phía trên</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="136"/>
+        <source>Fitted by FilterMate</source>
+        <translation>FilterMate tự điều chỉnh</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="137"/>
+        <source>Sized again when a section leaves, comes back or moves: FILTERING and EXPORTING get the height their rows need, the room left goes to the other sections.</source>
+        <translation>Được đặt lại kích thước khi một phần rời đi, quay lại hoặc di chuyển: FILTERING và EXPORTING nhận chiều cao mà các hàng của chúng cần, phần còn lại dành cho các phần khác.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>As QGIS and you leave them</source>
+        <translation>Như QGIS và bạn để lại</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>The heights QGIS and you set stay.</source>
+        <translation>Các chiều cao do QGIS và bạn đặt được giữ nguyên.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="141"/>
+        <source>Remember &quot;Do not ask again for this project&quot;</source>
+        <translation>Ghi nhớ “Không hỏi lại cho dự án này”</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="142"/>
+        <source>Unticked, the question is asked at each opening, and the answers remembered are forgotten.</source>
+        <translation>Nếu bỏ chọn, câu hỏi được đặt ra ở mỗi lần mở, và các câu trả lời đã ghi nhớ sẽ bị quên.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
@@ -13142,6 +13192,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Thu phóng tới phần còn lại</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="149"/>
+        <source>The map goes to the filtered features of the source layer, after a filter and when a favorite is applied.</source>
+        <translation>Bản đồ thu phóng tới các đối tượng đã lọc của lớp nguồn, sau một bộ lọc và khi áp dụng một mục yêu thích.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="92"/>

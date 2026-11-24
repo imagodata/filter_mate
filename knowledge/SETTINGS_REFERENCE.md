@@ -331,7 +331,7 @@ Layer exploration and feature identification settings
 |---|---|---|---|
 | `point_buffer_distance_m` | 50 | 1–10000 | Buffer distance in meters applied to point features for zoom-to-feature |
 | `feature_picker_limit` | 1000 | 100–50000 | Maximum number of features loaded in the feature picker list widget |
-| `auto_zoom_on_filter` | true |  | Auto-zoom on the union extent of filtered layers (source + cascade targets) after a filter or favorite is applied. Per-layer is_tracking still forces zoom on its own layer. |
+| `auto_zoom_on_filter` | true |  | Auto-zoom, after a filter or a favorite is applied, to the filtered extent of the source layer (to its targets when the source is left unfiltered, as a favorite can). Per-layer is_tracking still forces zoom on its own layer. |
 
 ## Settings > Performance > POINT_CLOUD
 

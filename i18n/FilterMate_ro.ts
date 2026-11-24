@@ -12694,6 +12694,11 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Instrumente pentru nor de puncte</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Project</source>
+        <translation>Proiect</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>Filtrare</translation>
@@ -12767,6 +12772,11 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../ui/controllers/setup_wizard.py" line="61"/>
         <source>Buttons of the EXPLORING rail for point clouds</source>
         <translation>Butoanele barei EXPLORING pentru nori de puncte</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="66"/>
+        <source>Opening a project whose layers carry other FilterMate settings than yours asks which ones to apply</source>
+        <translation>La deschiderea unui proiect ale cărui straturi poartă alte setări FilterMate decât ale dumneavoastră, se întreabă care să fie aplicate</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>
@@ -13029,6 +13039,11 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Rânduri</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Heights</source>
+        <translation>Înălțimi</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Cum listează panoul secțiunile sale</translation>
@@ -13037,6 +13052,11 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
         <source>How the rows of FILTERING and EXPORTING use the height</source>
         <translation>Cum folosesc înălțimea rândurile din FILTERING și EXPORTING</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="60"/>
+        <source>How the panels of the sections taken out of the dock take their height</source>
+        <translation>Cum își primesc înălțimea panourile secțiunilor scoase din panoul FilterMate</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -13062,6 +13082,36 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
         <source>Packed at the top</source>
         <translation>Grupate sus</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="136"/>
+        <source>Fitted by FilterMate</source>
+        <translation>Ajustate de FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="137"/>
+        <source>Sized again when a section leaves, comes back or moves: FILTERING and EXPORTING get the height their rows need, the room left goes to the other sections.</source>
+        <translation>Sunt redimensionate când o secțiune pleacă, revine sau se mută: FILTERING și EXPORTING primesc înălțimea de care au nevoie rândurile lor, iar spațiul rămas merge la celelalte secțiuni.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>As QGIS and you leave them</source>
+        <translation>Cum le lăsați dumneavoastră și QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>The heights QGIS and you set stay.</source>
+        <translation>Înălțimile stabilite de QGIS și de dumneavoastră rămân.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="141"/>
+        <source>Remember &quot;Do not ask again for this project&quot;</source>
+        <translation>Reține „Nu mai întreba pentru acest proiect”</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="142"/>
+        <source>Unticked, the question is asked at each opening, and the answers remembered are forgotten.</source>
+        <translation>Dacă nu este bifat, întrebarea se pune la fiecare deschidere, iar răspunsurile reținute sunt uitate.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
@@ -13142,6 +13192,11 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Zoom pe ceea ce rămâne</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="149"/>
+        <source>The map goes to the filtered features of the source layer, after a filter and when a favorite is applied.</source>
+        <translation>Harta se apropie de entitățile filtrate ale stratului sursă, după un filtru și când se aplică un favorit.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="92"/>

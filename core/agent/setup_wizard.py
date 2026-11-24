@@ -32,6 +32,7 @@ LANGUAGE = "APP.DOCKWIDGET.LANGUAGE"
 ACTION_BAR = "APP.DOCKWIDGET.ACTION_BAR_POSITION"
 SECTION_HEADERS = "APP.DOCKWIDGET.SECTION_HEADERS"
 SECTION_HEIGHT = "APP.DOCKWIDGET.SECTION_HEIGHT"
+PANEL_SIZING = "APP.DOCKWIDGET.PANEL_SIZING"
 AUTO_ZOOM = OPTIONS + "EXPLORATION.auto_zoom_on_filter"
 PERSIST_HISTORY = OPTIONS + "HISTORY.persist_history"
 HINTS = OPTIONS + "AUTO_OPTIMIZATION.show_optimization_hints"
@@ -42,6 +43,9 @@ GPKG_GROUPS = OPTIONS + "GPKG_PRESERVE_GROUPS"
 KML_GROUPS = OPTIONS + "KML_PRESERVE_GROUPS"
 RASTER_FORMAT = OPTIONS + "CROSS_FILTER.raster_export_format"
 POINT_CLOUD_FORMAT = OPTIONS + "CROSS_FILTER.point_cloud_export_format"
+# Remember the answer "Do not ask again for this project" of the question asked at the opening of a project whose
+# layers carry other settings than this computer's (adapters/layer_settings_question.py).
+REMEMBER_ANSWERS = OPTIONS + "LAYER_SETTINGS.remember_answers"
 
 # Steps, in the order they come; FILTERING and EXPORTING only when the section is kept.
 FEATURES, LOOK, LAYOUT, EXPLORING, FILTERING, EXPORTING = ("features", "look", "layout", "exploring", "filtering",
@@ -61,6 +65,7 @@ DATA_SWITCHES = {"rasters": RASTER_ON, "point_clouds": POINT_CLOUD_ON}
 AFTER_FILTER_SWITCHES = {"zoom": AUTO_ZOOM, "history": PERSIST_HISTORY, "hints": HINTS, "auto": AUTO_STRATEGY}
 TARGET_SWITCHES = {"rasters": RASTER_TARGETS, "point_clouds": POINT_CLOUD_TARGETS}
 GROUP_SWITCHES = {"gpkg": GPKG_GROUPS, "kml": KML_GROUPS}
+PROJECT_SWITCHES = {"remember": REMEMBER_ANSWERS}
 # One choice, the value of a setting (the choices of config.default.json, a few of them).
 THEMES = ("auto", "light", "dark", "default")
 PROFILES = ("auto", "compact", "normal", "hidpi")
@@ -68,6 +73,7 @@ LANGUAGES = ("auto", "en", "fr")
 ACTION_BARS = ("bottom", "top", "left", "right", "sections")  # sections: each section shows its own buttons
 HEADERS = ("rail", "stacked")  # a rail of chips per stack (the default), or the headers one above the other
 HEIGHTS = ("fill", "fit")  # the rows of FILTERING / EXPORTING spread (the default), or one gap apart at the top
+SIZINGS = ("auto", "manual")  # the panels of the sections taken out of the dock sized by FilterMate, or left as set
 # Where the sections are: in the FilterMate panel, in panels of QGIS, or some of them apart (as they are now).
 IN_DOCK, IN_PANELS, AS_NOW = "dock", "panels", "as_now"
 LAYOUTS = (IN_DOCK, IN_PANELS)
@@ -100,8 +106,9 @@ WEB_VALUES = {"large": {WFS_TIMEOUT: 120, REMOTE_TIMEOUT: 180}, "other": {WFS_TI
 
 # Every setting the setup may change: the values it reads first.
 PATHS = tuple(sorted({*SECTION_SWITCHES.values(), *DATA_SWITCHES.values(), *AFTER_FILTER_SWITCHES.values(),
-                      *TARGET_SWITCHES.values(), *GROUP_SWITCHES.values(), THEME, UI_PROFILE, LANGUAGE, ACTION_BAR,
-                      SECTION_HEADERS, SECTION_HEIGHT, *TOOL_SETTINGS.values(),
+                      *TARGET_SWITCHES.values(), *GROUP_SWITCHES.values(), *PROJECT_SWITCHES.values(),
+                      THEME, UI_PROFILE, LANGUAGE, ACTION_BAR, SECTION_HEADERS, SECTION_HEIGHT, PANEL_SIZING,
+                      *TOOL_SETTINGS.values(),
                       RASTER_FORMAT, POINT_CLOUD_FORMAT, *_MEDIUM, *WEB_VALUES["large"],
                       *POSTGRES_VALUES["large"]}))
 
@@ -188,7 +195,7 @@ def read_switch(path: str, value: Any = ABSENT) -> bool:
 
 
 SWITCHES = frozenset({*SECTION_SWITCHES.values(), *DATA_SWITCHES.values(), *AFTER_FILTER_SWITCHES.values(),
-                      *TARGET_SWITCHES.values(), *GROUP_SWITCHES.values()})
+                      *TARGET_SWITCHES.values(), *GROUP_SWITCHES.values(), *PROJECT_SWITCHES.values()})
 
 
 def is_on(values: Mapping[str, Any], path: str) -> bool:
@@ -251,10 +258,15 @@ def step_questions(step: str, values: Mapping[str, Any], facts: ProjectFacts, an
             questions.append(_one_of("headers", HEADERS, values.get(SECTION_HEADERS)))
         if isinstance(values.get(SECTION_HEIGHT), str):  # nor one from before the height of the rows
             questions.append(_one_of("height", HEIGHTS, values.get(SECTION_HEIGHT)))
+        # The sizing of panels matters only where sections can leave the dock (the dock in one piece is never
+        # resized); a configuration from before the setting has none.
+        if facts.layout and isinstance(values.get(PANEL_SIZING), str):
+            questions.append(_one_of("sizing", SIZINGS, values.get(PANEL_SIZING)))
         return questions + [_one_of("action_bar", ACTION_BARS, values.get(ACTION_BAR))]
     if step == EXPLORING:
         data = kept_data(values, answers)  # a kind of data turned off in FEATURES has no rail to ask about
-        return [_tools(kind, values) for kind in TOOL_KINDS if kind not in TOOLS_DATA or TOOLS_DATA[kind] in data]
+        tools = [_tools(kind, values) for kind in TOOL_KINDS if kind not in TOOLS_DATA or TOOLS_DATA[kind] in data]
+        return tools + [_switches("project", PROJECT_SWITCHES, values)]
     if step == FILTERING:
         questions = [_switches("after", AFTER_FILTER_SWITCHES, values)]
         data = kept_data(values, answers)
@@ -315,11 +327,13 @@ def changes(values: Mapping[str, Any], answers: Answers) -> List[Dict[str, Any]]
     one(LOOK, "language", LANGUAGE)
     one(LAYOUT, "headers", SECTION_HEADERS)
     one(LAYOUT, "height", SECTION_HEIGHT)
+    one(LAYOUT, "sizing", PANEL_SIZING)
     one(LAYOUT, "action_bar", ACTION_BAR)
     for kind, path in TOOL_SETTINGS.items():
         chosen = answers.get(EXPLORING, tools_key(kind))
         if chosen is not None:  # an empty answer hides every button that can be
             wanted[path] = exploring_tools.setting_from_shown(kind, chosen)
+    switches(EXPLORING, "project", PROJECT_SWITCHES)
     switches(FILTERING, "after", AFTER_FILTER_SWITCHES)
     data = answers.get(FEATURES, "data")
     switches(FILTERING, "targets", {name: path for name, path in TARGET_SWITCHES.items()

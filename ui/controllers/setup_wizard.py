@@ -38,10 +38,10 @@ LANGUAGE_NAMES = {"en": "English", "fr": "Français", "de": "Deutsch", "es": "Es
 def _headers() -> Dict[str, str]:
     return {"sections": _tr("Sections"), "data": _tr("Data"), "size": _tr("Size"), "theme": _tr("Theme"),
             "profile": _tr("Panel"), "language": _tr("Language"), "panels": _tr("Layout"),
-            "headers": _tr("Headers"), "height": _tr("Rows"),
+            "headers": _tr("Headers"), "height": _tr("Rows"), "sizing": _tr("Heights"),
             "action_bar": _tr("Buttons"),
             "tools_vector": _tr("Vector tools"), "tools_raster": _tr("Raster tools"),
-            "tools_point_cloud": _tr("Cloud tools"),
+            "tools_point_cloud": _tr("Cloud tools"), "project": _tr("Project"),
             "after": _tr("Filtering"), "targets": _tr("Targets"), "groups": _tr("Groups"),
             "raster_format": _tr("Rasters"), "point_cloud_format": _tr("Clouds")}
 
@@ -57,11 +57,14 @@ def _questions() -> Dict[str, str]:
         "panels": _tr("Where the sections go"),
         "headers": _tr("How the panel lists its sections"),
         "height": _tr("How the rows of FILTERING and EXPORTING use the height"),
+        "sizing": _tr("How the panels of the sections taken out of the dock take their height"),
         "action_bar": _tr("Where the action buttons go (Filter, Export...)"),
         "tools_vector": _tr("Buttons of the EXPLORING rail for vector layers (right-click the rail to change them "
                             "later)"),
         "tools_raster": _tr("Buttons of the EXPLORING rail for rasters"),
         "tools_point_cloud": _tr("Buttons of the EXPLORING rail for point clouds"),
+        "project": _tr("Opening a project whose layers carry other FilterMate settings than yours asks which ones "
+                       "to apply"),
         "after": _tr("When you filter"),
         "targets": _tr("A vector layer also filters these layers (cut to its features)"),
         "groups": _tr("When you export to a file, keep the groups of the layer tree"),
@@ -129,11 +132,22 @@ def _labels(facts: wizard.ProjectFacts, stacked: bool = False) -> Dict[str, Dict
             # the room left under them", and the default is fill again (19 November 2026).
             "fit": (_tr("Packed at the top"), ""),
         },
+        "sizing": {
+            "auto": (_tr("Fitted by FilterMate"),
+                     _tr("Sized again when a section leaves, comes back or moves: FILTERING and EXPORTING get the "
+                         "height their rows need, the room left goes to the other sections.")),
+            "manual": (_tr("As QGIS and you leave them"), _tr("The heights QGIS and you set stay.")),
+        },
+        "project": {"remember": (_tr("Remember \"Do not ask again for this project\""),
+                                 _tr("Unticked, the question is asked at each opening, and the answers "
+                                     "remembered are forgotten."))},
         "action_bar": {"bottom": (_tr("Bottom"), ""), "top": (_tr("Top"), ""), "left": (_tr("Left"), ""),
                        "right": (_tr("Right"), ""),
                        "sections": (_tr("Under each section"), _tr("Each section shows its own buttons while it "
                                                                    "is open."))},
-        "after": {"zoom": (_tr("Zoom to what is kept"), ""),
+        "after": {"zoom": (_tr("Zoom to what is kept"),
+                           _tr("The map goes to the filtered features of the source layer, after a filter and when "
+                               "a favorite is applied.")),
                   "history": (_tr("Keep the history of filters in the project"), ""),
                   "hints": (_tr("Show optimization tips"), ""),
                   "auto": (_tr("Let FilterMate choose the fastest way"), "")},
