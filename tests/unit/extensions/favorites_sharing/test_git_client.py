@@ -178,6 +178,15 @@ class TestGitClient:
             client.clone(str(seeded_remote), branch="main")
         assert "timeout" in excinfo.value.stderr.lower()
 
+    @pytest.mark.parametrize("branch", ["", "-b", "--upload-pack=x"])
+    def test_switch_branch_refuses_option_like_names(self, tmp_path, seeded_remote, branch):
+        client = GitClient(cwd=str(tmp_path / "clone"))
+        client.clone(str(seeded_remote), branch="main")
+        with pytest.raises(GitError) as excinfo:
+            client.switch_branch(branch)
+        assert "invalid branch name" in excinfo.value.stderr
+        assert client.current_branch() == "main"
+
     def test_missing_git_binary(self, tmp_path):
         client = GitClient(cwd=str(tmp_path), git_binary="git-does-not-exist-xyz")
         with pytest.raises(GitError) as excinfo:

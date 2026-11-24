@@ -369,6 +369,87 @@ class TestPublishBundleE2E:
         ).stdout.strip()
         assert url == str(moved)
 
+    def test_publish_pushes_to_the_configured_git_url(self, tmp_path, seeded_bare):
+        """The publish dialog and quick publish both run publish_to_remote.
+
+        After a change of git_url, the whole flow (pull, commit, push)
+        reaches the new remote: the bundle lands there.
+        """
+        mgr = self._make_manager(tmp_path, seeded_bare)
+        repo = mgr.get_default()
+        assert mgr.prepare_clone(repo).success
+        clone = repo.expanded_local_clone
+        _run(["git", "config", "user.email", "t@example.com"], cwd=clone)
+        _run(["git", "config", "user.name", "T"], cwd=clone)
+
+        moved = tmp_path / "moved.git"
+        _run(["git", "clone", "--bare", str(seeded_bare), str(moved)])
+        os.rename(seeded_bare, tmp_path / "gone.git")
+
+        mgr = RemoteRepoManager(FakeExtension([{
+            "name": "Acme",
+            "git_url": str(moved),
+            "branch": "main",
+            "local_clone": clone,
+            "target_collection": "acme",
+            "is_default": True,
+        }]))
+        sync = mgr.publish_to_remote(
+            mgr.get_by_name("Acme"), self._write_bundle_fn('{"v": 2}\n'),
+        )
+        assert sync.success, sync.error_message
+        assert sync.pushed is True
+
+        verify_dir = tmp_path / "verify"
+        _run(["git", "clone", str(moved), str(verify_dir)])
+        assert (verify_dir / "collections" / "acme" / "favorites.fmfav-pack.json").exists()
+
+    def test_existing_clone_follows_the_configured_branch(self, tmp_path, seeded_bare):
+        """A clone on ``main`` publishes to the branch set now in the config.
+
+        Pulling ``team`` into ``main`` would merge the two branches; the
+        clone switches to the configured branch first, then pulls and pushes.
+        """
+        mgr = self._make_manager(tmp_path, seeded_bare)
+        repo = mgr.get_default()
+        assert mgr.prepare_clone(repo).success
+        clone = repo.expanded_local_clone
+        _run(["git", "config", "user.email", "t@example.com"], cwd=clone)
+        _run(["git", "config", "user.name", "T"], cwd=clone)
+
+        # Someone else creates the ``team`` branch on the server
+        other = tmp_path / "other"
+        _run(["git", "clone", str(seeded_bare), str(other)])
+        _run(["git", "switch", "-c", "team"], cwd=other)
+        (other / "TEAM.md").write_text("team\n")
+        _run(["git", "add", "TEAM.md"], cwd=other)
+        _run(["git", "-c", "user.email=o@example.com", "-c", "user.name=O",
+              "commit", "-m", "team"], cwd=other)
+        _run(["git", "push", "origin", "team"], cwd=other)
+
+        mgr = RemoteRepoManager(FakeExtension([{
+            "name": "Acme",
+            "git_url": str(seeded_bare),
+            "branch": "team",
+            "local_clone": clone,
+            "target_collection": "acme",
+            "is_default": True,
+        }]))
+        sync = mgr.publish_to_remote(
+            mgr.get_by_name("Acme"), self._write_bundle_fn('{"v": 3}\n'),
+        )
+        assert sync.success, sync.error_message
+        assert sync.pushed is True
+
+        on_team = tmp_path / "on_team"
+        _run(["git", "clone", "--branch", "team", str(seeded_bare), str(on_team)])
+        assert (on_team / "TEAM.md").exists()
+        assert (on_team / "collections" / "acme" / "favorites.fmfav-pack.json").exists()
+        on_main = tmp_path / "on_main"
+        _run(["git", "clone", "--branch", "main", str(seeded_bare), str(on_main)])
+        assert not (on_main / "TEAM.md").exists()
+        assert not (on_main / "collections").exists()
+
     def test_bundle_write_exception_surfaces_as_error(self, tmp_path, seeded_bare):
         mgr = self._make_manager(tmp_path, seeded_bare)
         repo = mgr.get_default()

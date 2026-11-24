@@ -550,6 +550,15 @@ class RemoteRepoManager:
                         _scrub_text(repo.git_url), _scrub_text(current) or "<none>",
                     )
                     client.set_remote_url(repo.git_url, "origin")
+                # Same for the branch: pulling the configured branch into
+                # another one would merge them, so switch to it first.
+                checked_out = client.current_branch()
+                if repo.branch and checked_out != repo.branch:
+                    logger.info(
+                        "Clone %s switched to the configured branch %s (was %s)",
+                        repo.expanded_local_clone, repo.branch, checked_out or "<detached>",
+                    )
+                    client.switch_branch(repo.branch, "origin")
                 logger.info("Fast-forward pull on %s", repo.expanded_local_clone)
                 client.pull_fast_forward()
         except GitError as exc:
