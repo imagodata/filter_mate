@@ -11,6 +11,12 @@ fav_A2, saves; ``B2`` B opens it, removes fav_A1, saves; ``A3`` A opens it; ``C`
 ``FAVS <role> db=[...] qgz=[...]`` and PASS / FAIL lines.
 
 Before (QGIS 3.44): the .qgz got fav_A1 only when A opened the project again, B never had fav_A2.
+
+The project closed (2026-11-24): ``AX`` a new project, a favorite made there; ``AY`` the first project reopened
+without it; ``AD`` a copy of the project opened with the panel closed, the panel opened again, a favorite added;
+``AC`` Project > Close, a layer added, a favorite made; ``AT`` a new project from a template with layers (the .sh puts
+the template in the profile; skipped where QGIS lists no template: QGIS 4.3 lists none headless); ``AF`` a project
+that fails to read, a layer added, a favorite made; ``AZ`` the project opened at the end: none of those favorites in it.
 """
 import json
 import os
@@ -22,6 +28,7 @@ import traceback
 
 from qgis.core import QgsFeature, QgsGeometry, QgsProject, QgsRectangle, QgsSettings, QgsVectorFileWriter, QgsVectorLayer
 from qgis.PyQt.QtCore import QTimer
+from qgis.PyQt.QtWidgets import QAction, QMenu
 from qgis.utils import iface
 import qgis.utils
 
@@ -51,10 +58,10 @@ def in_db():
     return sorted(favorite.name for favorite in app().favorites_manager.get_all_favorites())
 
 
-def in_qgz():
+def in_qgz(path=PROJECT_PATH):
     """The favorites the .qgz on disk carries, read by a project of its own."""
     other = QgsProject()
-    if not other.read(PROJECT_PATH):
+    if not other.read(path):
         return None
     data, _ok = other.readEntry("FilterMate", "favorites_backup", "")
     return sorted(favorite.get("name") for favorite in json.loads(data).get("favorites", [])) if data else []
@@ -67,6 +74,7 @@ EXPECTED = {  # what the SQLite of the computer and the .qgz on disk hold at the
     "B2": (["fav_A2"], ["fav_A2"]),
     "A3": (["fav_A2"], ["fav_A2"]),
     "AY": (["fav_A2"], ["fav_A2"]),  # after the whole sequence: the project holds fav_A2
+    "AZ": (["fav_A2"], ["fav_A2"]),  # after the roles of the project closed: none of their favorites
     "C": (["fav_A2"], ["fav_A2"]),
 }
 
@@ -161,11 +169,171 @@ def report_closed():
           f"favorites={in_db()} qgz={in_qgz()} (before closing {BEFORE_CLOSING['qgz']})")
 
 
+def new_project_again():
+    BEFORE_CLOSING["uuid"] = app().project_uuid
+    iface.newProject(False)
+
+
+def another_id_for_the_next_new_project():
+    """2026-11-24 (review): every new project was bound to the most recent unsaved row, so the next one listed the
+    favorite made in the first."""
+    check("the next new project has an id of its own and none of the favorites of the one before",
+          app().project_uuid not in (None, BEFORE_CLOSING["uuid"]) and in_db() == [],
+          f"uuid={app().project_uuid} before={BEFORE_CLOSING['uuid']} favorites={in_db()}")
+
+
 def after_new_project():
     badge = app().dockwidget.favorites_indicator_label.text()
     check("a project closed leaves no favorite of it", in_db() == [] and "1" not in badge and "2" not in badge,
           f"favorites={in_db()} badge={badge!r}")
     check("binding the new project leaves it clean", not QgsProject.instance().isDirty())
+
+
+def plugin():
+    return qgis.utils.plugins[PACKAGE]
+
+
+def of_the_project_in_the_sqlite():
+    """The favorites this computer's SQLite holds for travel.qgz, whatever FilterMate is bound to."""
+    import sqlite3
+    conn = sqlite3.connect(app().db_file_path)
+    try:
+        return sorted(row[0] for row in conn.execute(
+            "SELECT f.name FROM fm_favorites f JOIN fm_projects p ON f.project_uuid = p.project_id "
+            "WHERE p.project_name = 'travel.qgz'"))
+    finally:
+        conn.close()
+
+
+def badge():
+    return app().dockwidget.favorites_indicator_label.text()
+
+
+DOCK_COPY = os.path.join(WORK, "dock.qgz")
+
+
+def close_dock():
+    shutil.copy(PROJECT_PATH, DOCK_COPY)
+    app().dockwidget.close()
+    check("the panel is closed", not plugin().pluginIsActive)
+
+
+def open_copy():
+    check("the copy opens with the panel closed", iface.addProject(DOCK_COPY))
+
+
+def bound_with_the_panel_closed():
+    check("the project opened with the panel closed is bound", in_db() == ["fav_A2"] and app().favorites_manager.is_bound,
+          f"favorites={in_db()} uuid={app().project_uuid}")
+
+
+def reopen_dock():
+    plugin().run()
+
+
+def listed_when_the_panel_opens_again():
+    check("its favorites are listed when the panel opens again", in_db() == ["fav_A2"] and "1" in badge(),
+          f"favorites={in_db()} badge={badge()!r}")
+
+
+def save_copy():
+    iface.actionSaveProject().trigger()
+    check("a favorite added lands in the project opened with the panel closed",
+          in_qgz(DOCK_COPY) == ["fav_A2", "made with the panel reopened"] and in_qgz() == ["fav_A2"]
+          and of_the_project_in_the_sqlite() == ["fav_A2"],
+          f"copy={in_qgz(DOCK_COPY)} project={in_qgz()} sqlite of the project={of_the_project_in_the_sqlite()}")
+
+
+def close_project():
+    BEFORE_CLOSING["uuid"] = app().project_uuid
+    iface.mainWindow().findChild(QAction, "mActionCloseProject").trigger()
+
+
+def after_closing():
+    check("Project > Close leaves no favorite of the project", in_db() == [] and "1" not in badge(),
+          f"favorites={in_db()} badge={badge()!r} uuid={app().project_uuid}")
+
+
+def report_after_closing():
+    check("a favorite made after Project > Close and a layer added is not the closed project's",
+          in_db() == ["made after closing"] and app().project_uuid not in (None, BEFORE_CLOSING["uuid"])
+          and in_qgz() == ["fav_A2"] and of_the_project_in_the_sqlite() == ["fav_A2"],
+          f"favorites={in_db()} uuid={app().project_uuid} qgz={in_qgz()} sqlite={of_the_project_in_the_sqlite()}")
+
+
+TEMPLATE = {}
+
+
+def from_template():
+    BEFORE_CLOSING["uuid"] = app().project_uuid
+    menu = iface.mainWindow().findChild(QMenu, "mProjectFromTemplateMenu")
+    if menu is not None:
+        menu.aboutToShow.emit()  # QGIS 4 may list the templates when the menu opens
+    actions = [action for action in (menu.actions() if menu is not None else []) if action.text().startswith("travel")]
+    TEMPLATE["listed"] = bool(actions)
+    if not actions:
+        print(f"INFO {ROLE} no template listed by this QGIS (menu={menu is not None}): role skipped", flush=True)
+        return
+    actions[0].trigger()
+
+
+def after_template():
+    if not TEMPLATE["listed"]:
+        return
+    check("a new project from a template has no file", QgsProject.instance().fileName() == "",
+          QgsProject.instance().fileName())
+    check("it has an id of its own, not the template project's",
+          app().project_uuid not in (None, BEFORE_CLOSING["uuid"]), f"uuid={app().project_uuid}")
+    check("it starts with the template's favorites", in_db() == ["fav_A2"], f"favorites={in_db()}")
+    print(f"INFO {ROLE} dirty after the template: {QgsProject.instance().isDirty()}", flush=True)
+
+
+def report_template():
+    if not TEMPLATE["listed"]:
+        return
+    check("a favorite made from the template is not the template project's",
+          in_db() == ["fav_A2", "made from the template"] and of_the_project_in_the_sqlite() == ["fav_A2"]
+          and in_qgz() == ["fav_A2"], f"favorites={in_db()} sqlite={of_the_project_in_the_sqlite()} qgz={in_qgz()}")
+
+
+def add_if_template(name):
+    step = add(name)
+
+    def maybe():
+        if TEMPLATE["listed"]:
+            step()
+    maybe.__name__ = f"add_{name.replace(' ', '_')}"
+    return maybe
+
+
+BROKEN = os.path.join(WORK, "broken.qgs")  # a .qgz that fails to unzip takes another path in QGIS
+
+
+def open_broken():
+    BEFORE_CLOSING["uuid"] = app().project_uuid
+    with open(BROKEN, "w") as handle:
+        handle.write("not a project")
+    check("a project that fails to read is refused", not iface.addProject(BROKEN))
+
+
+def after_broken():
+    print(f"INFO {ROLE} after the failed read: file={QgsProject.instance().fileName()!r} uuid={app().project_uuid}",
+          flush=True)
+    check("a project that failed to read shows no favorite of the project before", in_db() == [],
+          f"favorites={in_db()}")
+
+
+def bound_by_the_layer_added():
+    """No signal of a project follows a failed read: the registration of the layer binds the project (add_layers)."""
+    check("a layer added after a failed read binds the project on screen", app().project_uuid is not None
+          and app().project_uuid != BEFORE_CLOSING["uuid"], f"uuid={app().project_uuid}")
+
+
+def report_broken():
+    check("a favorite made after a failed read is not the project before's",
+          in_db() == ["made after a failed read"] and app().project_uuid not in (None, BEFORE_CLOSING["uuid"])
+          and of_the_project_in_the_sqlite() == ["fav_A2"] and in_qgz() == ["fav_A2"],
+          f"favorites={in_db()} uuid={app().project_uuid} sqlite={of_the_project_in_the_sqlite()} qgz={in_qgz()}")
 
 
 STEPS = {
@@ -176,8 +344,18 @@ STEPS = {
     "A3": [(start_plugin, 8), (open_project, 12), (report, 0)],
     "C": [(start_plugin, 8), (open_project, 12), (clean_after_opening, 0), (report, 0)],
     "AX": [(start_plugin, 8), (open_project, 12), (new_project, 6), (after_new_project, 1),
-           (add_a_layer, 12), (add("made in the new project"), 1), (report_closed, 0)],
+           (add_a_layer, 12), (add("made in the new project"), 1), (report_closed, 0), (new_project_again, 6),
+           (another_id_for_the_next_new_project, 0)],
     "AY": [(start_plugin, 8), (open_project, 12), (report, 0)],
+    "AD": [(start_plugin, 8), (close_dock, 2), (open_copy, 12), (bound_with_the_panel_closed, 0), (reopen_dock, 6),
+           (listed_when_the_panel_opens_again, 0), (add("made with the panel reopened"), 1), (save_copy, 3)],
+    "AC": [(start_plugin, 8), (open_project, 12), (close_project, 6), (after_closing, 0), (add_a_layer, 12),
+           (add("made after closing"), 1), (report_after_closing, 0)],
+    "AT": [(start_plugin, 8), (open_project, 12), (from_template, 12), (after_template, 0),
+           (add_if_template("made from the template"), 1), (report_template, 0)],
+    "AF": [(start_plugin, 8), (open_project, 12), (open_broken, 6), (after_broken, 0), (add_a_layer, 12),
+           (bound_by_the_layer_added, 0), (add("made after a failed read"), 1), (report_broken, 0)],
+    "AZ": [(start_plugin, 8), (open_project, 12), (report, 0)],
 }[ROLE]
 
 
