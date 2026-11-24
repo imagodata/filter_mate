@@ -5,11 +5,11 @@ Dialog for managing filter favorites with list, edit, delete, and search capabil
 Extracted from filter_mate_dockwidget.py for better modularity.
 """
 import logging
-import re
 
 from ..styles.favorites_styles import favorites_dialog_stylesheet
 from ..styles.mockup_design import MONO_FAMILY, render_icon
 from .favorite_summary import date_text, scope_badge, summary_rows, use_text
+from .favorite_summary_widgets import ExpressionView, text_value
 
 try:
     from qgis.PyQt.QtWidgets import (
@@ -52,15 +52,6 @@ except ImportError:
 # Scope kinds of ``_favorite_scope_kind`` that apply to every project of this
 # computer; the list shows them with the globe icon instead of the star.
 _GLOBAL_SCOPE_KINDS = frozenset({"shared_global", "mine_global"})
-
-
-def _breakable(text: str) -> str:
-    """``text`` with a zero-width break opportunity after separators.
-
-    A word-wrapped QLabel only breaks between words, so a long expression
-    without spaces (``1,2,3,...``) would widen the dialog instead of wrapping.
-    """
-    return re.sub(r"([,;|/)\]])", "\\1\u200b", text)
 
 
 def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
@@ -734,13 +725,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._clear_summary_rows()
         for label, text in summary_rows(fav, self.tr):
             key = self._field_label(label)
-            value = QLabel(_breakable(text))
-            value.setObjectName("summaryValue")
-            value.setWordWrap(True)
-            value.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            if label == self.tr("Filter"):
-                # Expressions read better in the mono family
-                value.setStyleSheet(f"font-family: '{MONO_FAMILY}', monospace;")
+            # An expression wraps in a read-only view, every other value in a plain label;
+            # neither is altered, so a selection copies exactly what is stored.
+            value = ExpressionView(text, MONO_FAMILY) if label == self.tr("Filter") else text_value(text)
             self._summary_form.addRow(key, value)
 
     def _on_selection_changed(self):
@@ -795,7 +782,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                 cells = [
                     QTableWidgetItem(display),
                     QTableWidgetItem(str(feature_count)),
-                    QTableWidgetItem(_breakable(shown)),
+                    QTableWidgetItem(shown),
                 ]
                 # The full expression (and the layer signature) in the tooltip
                 tooltip = expr

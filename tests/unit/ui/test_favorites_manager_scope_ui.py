@@ -92,13 +92,3 @@ class TestGlobalKinds:
             pytest.skip(f"UI module not importable: {exc}")
         assert _GLOBAL_SCOPE_KINDS == {"shared_global", "mine_global"}
 
-
-class TestBreakable:
-    def test_break_opportunity_after_separators_only(self):
-        try:
-            from ui.dialogs.favorites_manager import _breakable
-        except ImportError as exc:
-            pytest.skip(f"UI module not importable: {exc}")
-        broken = _breakable('"fid" IN (1,2)')
-        assert broken == '"fid" IN (1,​2)​'
-        assert broken.replace("​", "") == '"fid" IN (1,2)'

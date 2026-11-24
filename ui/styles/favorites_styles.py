@@ -118,6 +118,12 @@ _DIALOG_STYLESHEET_TEMPLATE: str = """
         font-size: 9pt;
         font-weight: 600;
     }
+    QPlainTextEdit#summaryFilter {
+        background: transparent;
+        border: none;
+        padding: 0px;
+        font-size: 10pt;
+    }
     QScrollArea, QWidget#summaryContent { background: transparent; }
     QLabel#noRemoteLabel {
         color: {fm_text_muted};
