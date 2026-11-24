@@ -322,6 +322,15 @@ class FavoritesManager:
                 CREATE INDEX IF NOT EXISTS idx_favorites_project_name
                 ON fm_favorites(project_uuid, name)
             """)
+            # 2026-11-24: the ids of the favorites a project file held when this computer last read or saved it,
+            # to tell a favorite removed on another computer from one made here and not saved yet.
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS fm_favorites_project_files (
+                    project_uuid TEXT PRIMARY KEY,
+                    file_ids TEXT NOT NULL,
+                    updated_at TEXT
+                )
+            """)
             # v5.1: owner-scoped queries (project_uuid + owner) are the
             # common hot path when the scope filter is "mine" / "mine this
             # project". Partial index skips rows with NULL owner to keep
@@ -842,6 +851,89 @@ class FavoritesManager:
         except Exception as e:
             logger.error(f"Failed to update favorite: {e}")
             raise FavoritePersistenceError("update_favorite", e) from e
+
+    def replace_project_favorites(self, favorites: List[FilterFavorite]) -> None:
+        """The favorites of the active project become ``favorites``, under their own ids, in one transaction.
+
+        The .qgz of a saved project is the truth for its favorites (2026-11-24): the rows of the project not in the
+        list go; an id another project already has here (a copied .qgz, ``id`` is the primary key) is replaced by
+        one derived from it, which the favorite then carries; timestamps, owner and usage are kept as given.
+
+        Raises:
+            FavoritesNotInitialized: before ``set_database``.
+            FavoritePersistenceError: the SQLite refused it; nothing changed.
+        """
+        if not self._initialized:
+            raise FavoritesNotInitialized("FavoritesManager.replace_project_favorites called before set_database")
+        import sqlite3
+        conn = sqlite3.connect(self._db_path)
+        try:
+            with conn:
+                conn.execute("DELETE FROM fm_favorites WHERE project_uuid = ?", (self._project_uuid,))
+                for favorite in favorites:
+                    favorite.id = favorite.id or str(uuid.uuid4())
+                    # An id another project of this computer has (a copy of the .qgz, a project saved under another
+                    # name, a favorite made global) stays its own: this one takes an id derived from it, the same
+                    # at each opening, which the project then carries (review of 2026-11-24: the row was taken from
+                    # the other project, whose favorites were lost when its file did not list them).
+                    taken = conn.execute("SELECT 1 FROM fm_favorites WHERE id = ? AND project_uuid != ?",
+                                         (favorite.id, self._project_uuid)).fetchone()
+                    if taken:
+                        favorite.id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{self._project_uuid}/{favorite.id}"))
+                    favorite.created_at = favorite.created_at or datetime.now().isoformat()
+                    favorite.updated_at = favorite.updated_at or favorite.created_at
+                    conn.execute("""
+                        INSERT INTO fm_favorites (
+                            id, project_uuid, name, expression, layer_name, layer_id,
+                            layer_provider, description, tags, created_at, updated_at,
+                            use_count, last_used_at, remote_layers, spatial_config, owner
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        favorite.id, self._project_uuid, favorite.name, favorite.expression, favorite.layer_name,
+                        favorite.layer_id, favorite.layer_provider, favorite.description,
+                        json.dumps(favorite.tags) if favorite.tags else None,
+                        favorite.created_at, favorite.updated_at, favorite.use_count, favorite.last_used_at,
+                        json.dumps(favorite.remote_layers) if favorite.remote_layers else None,
+                        json.dumps(favorite.spatial_config) if favorite.spatial_config else None,
+                        favorite.owner,
+                    ))
+        except Exception as e:
+            logger.error(f"Failed to replace the favorites of the project: {e}")
+            raise FavoritePersistenceError("replace_project_favorites", e) from e
+        finally:
+            conn.close()
+        self._favorites = {favorite.id: favorite for favorite in favorites}
+        logger.info(f"✓ {len(favorites)} favorite(s) of the project file in the database")
+
+    def known_file_ids(self) -> List[str]:
+        """The ids of the favorites the file of the active project held when this computer last read or saved it."""
+        if not self._initialized or not self._project_uuid:
+            return []
+        import sqlite3
+        conn = sqlite3.connect(self._db_path)
+        try:
+            row = conn.execute("SELECT file_ids FROM fm_favorites_project_files WHERE project_uuid = ?",
+                               (self._project_uuid,)).fetchone()
+        finally:
+            conn.close()
+        try:
+            return list(json.loads(row[0])) if row else []
+        except (TypeError, ValueError):
+            return []
+
+    def remember_file_ids(self, ids: List[str]) -> None:
+        """What the file of the active project holds now (read, or just saved)."""
+        if not self._initialized or not self._project_uuid:
+            return
+        import sqlite3
+        conn = sqlite3.connect(self._db_path)
+        try:
+            with conn:
+                conn.execute("INSERT OR REPLACE INTO fm_favorites_project_files (project_uuid, file_ids, updated_at) "
+                             "VALUES (?, ?, ?)", (self._project_uuid, json.dumps(sorted(set(ids))),
+                                                  datetime.now().isoformat()))
+        finally:
+            conn.close()
 
     def increment_use_count(self, favorite_id: str) -> bool:
         """Increment use count for a favorite.

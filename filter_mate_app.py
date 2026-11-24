@@ -2921,17 +2921,19 @@ class FilterMateApp:
             self.db_file_path = self._database_manager.db_file_path
             self.project_uuid = self._database_manager.project_uuid
 
-            # === AUTO-MIGRATION OF ORPHAN FAVORITES ===
-            # Check and migrate orphan favorites to current project
-            self._auto_migrate_orphan_favorites()
-
             # Configure FavoritesService with SQLite database
-            # Note: set_database() already calls _load_favorites() internally
+            # Note: set_database() already calls _load_favorites() internally, then takes the favorites of the
+            # project file (the truth for a saved project, 2026-11-24)
             if hasattr(self, 'favorites_manager') and self.db_file_path and self.project_uuid:
                 logger.debug("Configuring FavoritesService with database:")
                 logger.debug(f"  → DB Path: {self.db_file_path}")
                 logger.debug(f"  → Project UUID: {self.project_uuid}")
                 self.favorites_manager.set_database(self.db_file_path, str(self.project_uuid))
+                # === AUTO-MIGRATION OF ORPHAN FAVORITES ===
+                # After the project file was read: before, the favorites it recovers were removed at once by a
+                # project that does not list them. Read again, then written into the project.
+                if self._auto_migrate_orphan_favorites():
+                    self.favorites_manager.reload_from_database()
                 favorites_count = self.favorites_manager.count
                 logger.info(f"✓ FavoritesService configured ({favorites_count} favorites loaded)")
                 if favorites_count == 0:
@@ -2959,9 +2961,13 @@ class FilterMateApp:
 
         Called during init_filterMate_db() after database initialization.
         Shows notification if favorites were migrated.
+
+        Returns:
+            bool: whether rows of the project changed in the SQLite (copies removed, orphans recovered).
         """
         if not self._favorites_migration_service or not self.db_file_path or not self.project_uuid:
-            return
+            return False
+        changed = False
 
         try:
             # Configure migration service with current database
@@ -2969,11 +2975,11 @@ class FilterMateApp:
             # 2026-09-14: exact copies left by the unstable project identity of
             # earlier versions are removed even when there is no orphan left.
             if hasattr(self._favorites_migration_service, 'dedupe_project_favorites'):
-                self._favorites_migration_service.dedupe_project_favorites(str(self.project_uuid))
+                changed = bool(self._favorites_migration_service.dedupe_project_favorites(str(self.project_uuid)))
             orphan_count = self._favorites_migration_service.count_orphan_favorites()
 
             if orphan_count == 0:
-                return
+                return changed
 
             # Auto-migrate orphans to current project
             migrated_count, migrated_names = self._favorites_migration_service.auto_migrate_on_project_load(
@@ -2992,9 +2998,11 @@ class FilterMateApp:
                         QCoreApplication.translate("FilterMateApp", "Recovered {0} orphan favorite(s): {1}").format(migrated_count, names_preview)
                     )
                 logger.info(f"✓ Auto-migrated {migrated_count} orphan favorites to current project")
+            return changed or migrated_count > 0
 
         except Exception as e:
             logger.warning(f"Orphan favorites migration failed (non-critical): {e}")
+            return changed
 
     def add_project_datasource(self, layer):
         """Add PostgreSQL datasource and create temp schema via DatasourceManager."""
@@ -3030,15 +3038,9 @@ class FilterMateApp:
             # Atomic, UTF-8: a crash in the middle used to leave a truncated config.json
             atomic_json_write(ENV_VARS["CONFIG_JSON_PATH"], config_data_clean, indent=4)
 
-            # Save favorites to project
-            if self.favorites_manager is not None:
-                self.favorites_manager.save()
-                count = self.favorites_manager.count
-                logger.debug(f"Saved {count} favorites to project")
-
-                # Also backup favorites to .qgz project file
-                self.favorites_manager.save_to_project_file(self.PROJECT)
-                logger.debug(f"Backed up {count} favorites to project file (.qgz)")
+            # The favorites are written into the project at each change, once it was read (FavoritesService
+            # .sync_with_project). Written here, at the change of file name of an opening, they were the favorites of
+            # the project of before.
 
     def layer_management_engine_task_completed(self, result_project_layers, task_name, changed_layer_ids=None):
         """Handle layer management task completion. Delegates to LayerTaskCompletionHandler.

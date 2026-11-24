@@ -130,3 +130,15 @@ def test_missing_database_file_is_not_created(tmp_path):
     service = FavoritesMigrationService(str(path))
     assert service.count_orphan_favorites() == 0
     assert not path.exists()
+
+
+@pytest.mark.unit
+def test_the_favorites_of_an_unsaved_project_opened_are_not_its_own_orphans(tmp_path):
+    """Review of 2026-11-24: a project never saved has the shape of an orphan (no name, no path); its own favorites
+    were taken for orphans, found identical to themselves, and deleted at the opening."""
+    path = _db(tmp_path)
+    _add(path, "f-own", "orphan1", "mine")
+    _add(path, "f-other", "orphan2", "lost elsewhere", "\"w\" > 50", "troncon_de_route")
+    count, names = FavoritesMigrationService(path).migrate_orphan_favorites("orphan1")
+    assert ("f-own", "orphan1", "mine") in _rows(path)
+    assert names == ["lost elsewhere"]
