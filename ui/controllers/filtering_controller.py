@@ -542,7 +542,8 @@ class FilteringController(BaseController, LayerSelectionMixin):
                     continue
 
                 # Layer is valid - add to combobox
-                display_name = f"{layer_name} [{layer_crs}]"
+                from ...core.domain.layer_label import layer_label
+                display_name = layer_label(layer_name, layer_crs)
                 item_data = {"layer_id": key, "layer_geometry_type": layer_info["layer_geometry_type"]}
                 layers_widget.addItem(layer_icon, display_name, item_data)
 
@@ -566,7 +567,8 @@ class FilteringController(BaseController, LayerSelectionMixin):
             for missing_layer in missing:
                 # v4.2: Skip non-spatial tables (tables without geometry)
                 if missing_layer.isValid() and missing_layer.isSpatial() and is_layer_source_available(missing_layer, require_psycopg2=False):
-                    display_name = f"{missing_layer.name()} [{missing_layer.crs().authid()}]"
+                    from ...core.domain.layer_label import layer_label
+                    display_name = layer_label(missing_layer.name(), missing_layer.crs().authid())
                     geom_type_str = geometry_type_to_string(missing_layer)
                     layer_icon = dockwidget.icon_per_geometry_type(geom_type_str)
                     logger.debug(
@@ -586,10 +588,11 @@ class FilteringController(BaseController, LayerSelectionMixin):
 
             # Web basemaps: greyed and never checkable, so that their absence from the targets says why.
             from ...adapters.qgis.point_cloud_capability import is_listed_rendered_raster
+            from ...core.domain.layer_label import layer_label
             for rendered in project.mapLayers().values():
                 if rendered.id() != layer.id() and is_listed_rendered_raster(rendered, vector_source):
                     layers_widget.add_unfilterable_item(dockwidget.icon_per_geometry_type('GeometryType.Raster'),
-                                                        f"{rendered.name()} [{rendered.crs().authid()}]", rendered.id())
+                                                        layer_label(rendered.name(), rendered.crs().authid()), rendered.id())
             logger.info(f"✓ populate_layers_checkable_combobox: Added {layers_widget.count()} layers (source layer '{layer.name()}' excluded)")
             logger.info("=== populate_layers_checkable_combobox END ===")
             return True
