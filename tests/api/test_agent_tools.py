@@ -572,6 +572,38 @@ class TestHandlers:
         opened = ToolExecutor(tools, build_handlers(accessor, tmp_path, allow_remote_sources=True))
         assert not opened.execute(ToolCallPart("c", "add_layer", {"source": "https://x.org/b.geojson"})).is_error
 
+    def test_add_layer_opens_a_file_export_layers_wrote(self, tmp_path):
+        """2026-11-24: the chat names the files of export_layers below its sub-folder; add_layer read them as paths of
+        the folder of QGIS and answered "this file does not exist" (a WFS layer exported to be read locally)."""
+        accessor = Accessor()
+        (tmp_path / "europe_map").mkdir()
+        (tmp_path / "europe_map" / "Pays du monde.gpkg").write_bytes(b"")
+        failed, answer = run(accessor, tmp_path, "add_layer", source="europe_map/Pays du monde.gpkg|layername=Europe")
+        assert not failed and answer["name"] == "Europe"  # never the path of this machine, which a title from it is
+        failed, answer = run(accessor, tmp_path, "add_layer", source="Pays du monde.gpkg")  # as outputs names it
+        assert not failed and answer["name"] == "Pays du monde"
+        failed, answer = run(accessor, tmp_path, "add_layer", source="Pays du monde.gpkg", name="Europe")
+        assert not failed and answer["name"] == "Europe"
+
+    def test_add_layer_bare_name_found_once_or_said(self, tmp_path):
+        accessor = Accessor()
+        failed, message = run(accessor, tmp_path, "add_layer", source="a.gpkg")
+        assert failed and "no file a.gpkg" in message and str(tmp_path) not in message
+        for folder in ("x", "y"):
+            (tmp_path / folder).mkdir()
+            (tmp_path / folder / "a.gpkg").write_bytes(b"")
+        failed, message = run(accessor, tmp_path, "add_layer", source="a.gpkg")
+        assert failed and "several files a.gpkg" in message and "<subfolder>/" in message
+        assert not run(accessor, tmp_path, "add_layer", source="y/a.gpkg")[0]
+
+    @pytest.mark.parametrize("source", ["../a.gpkg", "europe_map/../../a.gpkg", "a b/x.gpkg", "..", "./a.gpkg"])
+    def test_add_layer_never_leaves_the_export_root(self, tmp_path, source):
+        (tmp_path / "root").mkdir()
+        (tmp_path / "a.gpkg").write_bytes(b"")
+        accessor = Accessor()
+        failed, message = run(accessor, tmp_path / "root", "add_layer", source=source)
+        assert failed and not accessor.layers[1:]
+
     def test_driving_tools(self, api):
         accessor, root = api
         assert run(accessor, root, "zoom_to", layer="communes", selected_only=True)[1]["scale"] == 10000.0
