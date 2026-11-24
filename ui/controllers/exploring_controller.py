@@ -2879,6 +2879,17 @@ class ExploringController(BaseController, LayerSelectionMixin):
         except Exception as e:
             logger.debug(f"selection strip not updated: {e}")
 
+    def _multiple_filter(self, multiple_widget):
+        """The filter expression the multiple selection list of the current layer holds ('' without one)."""
+        layer = self._dockwidget.current_layer
+        lists = getattr(multiple_widget, 'list_widgets', {}) or {}
+        if layer is None or layer.id() not in lists:
+            return ''
+        try:
+            return lists[layer.id()].getFilterExpression() or ''
+        except (RuntimeError, AttributeError):
+            return ''
+
     def exploring_link_widgets(self, expression=None, change_source=None):
         """
         Link single and multiple selection widgets based on IS_LINKING state.
@@ -2919,27 +2930,40 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 return False
 
             if layer_props["exploring"]["is_linking"]:
-                if QgsExpression(layer_props["exploring"]["custom_selection_expression"]).isValid():
-                    if not QgsExpression(layer_props["exploring"]["custom_selection_expression"]).isField():
-                        custom_filter = layer_props["exploring"]["custom_selection_expression"]
-                        self._dockwidget.widgets["EXPLORING"]["MULTIPLE_SELECTION_FEATURES"]["WIDGET"].setFilterExpression(custom_filter, layer_props)
+                # 2026-11-24, asked: a custom expression entered filters both lists, whatever group is in use, and
+                # the features checked in the multiple list are all the single list shows, within that expression.
+                # A field alone is what the custom expression holds by default: no filter then. An expression being
+                # typed that does not parse leaves the lists as they are.
+                multiple_widget = self._dockwidget.widgets["EXPLORING"]["MULTIPLE_SELECTION_FEATURES"]["WIDGET"]
+                custom_text = (layer_props["exploring"].get("custom_selection_expression") or "").strip()
+                custom_expression = QgsExpression(custom_text)
+                custom_invalid = bool(custom_text) and not custom_expression.isValid()
+                if custom_text and not custom_invalid and not custom_expression.isField():
+                    custom_filter = custom_text
+                if custom_filter is not None:
+                    multiple_widget.setFilterExpression(custom_filter, layer_props)
+                elif not custom_invalid and self._multiple_filter(multiple_widget):
+                    multiple_widget.setFilterExpression('', layer_props)
 
+                def _within_custom(other):
+                    return f"({custom_filter}) AND ({other})" if custom_filter is not None else other
+
+                checked = multiple_widget.currentSelectedFeatures()
                 if expression is not None:
-                    _safe_set_single_filter(expression)
-                elif self._dockwidget.widgets["EXPLORING"]["MULTIPLE_SELECTION_FEATURES"]["WIDGET"].currentSelectedFeatures() is not False:
-                    features, expression = self.get_exploring_features(self._dockwidget.widgets["EXPLORING"]["MULTIPLE_SELECTION_FEATURES"]["WIDGET"].currentSelectedFeatures(), True)
-                    if len(features) > 0 and expression is not None:
-                        _safe_set_single_filter(expression)
-                elif self._dockwidget.widgets["EXPLORING"]["MULTIPLE_SELECTION_FEATURES"]["WIDGET"].currentVisibleFeatures() is not False:
-                    features, expression = self.get_exploring_features(self._dockwidget.widgets["EXPLORING"]["MULTIPLE_SELECTION_FEATURES"]["WIDGET"].currentVisibleFeatures(), True)
-                    if len(features) > 0 and expression is not None:
-                        _safe_set_single_filter(expression)
+                    _safe_set_single_filter(_within_custom(expression) if expression else custom_filter)
+                elif checked is not False:
+                    features, checked_expression = self.get_exploring_features(checked, True)
+                    if len(features) > 0 and checked_expression is not None:
+                        _safe_set_single_filter(_within_custom(checked_expression))
                 elif custom_filter is not None:
-                    # 2026-11-06: nothing visible in the multiple list means the custom expression matches
-                    # nothing (or the list is not loaded yet). Applied to the single list while another
-                    # group is in use, it emptied that list for an expression the user had left behind.
-                    in_custom_group = self._dockwidget.current_exploring_groupbox == "custom_selection"
-                    _safe_set_single_filter(custom_filter if in_custom_group else '')
+                    _safe_set_single_filter(custom_filter)
+                elif not custom_invalid and multiple_widget.currentVisibleFeatures() is not False:
+                    features, visible_expression = self.get_exploring_features(
+                        multiple_widget.currentVisibleFeatures(), True)
+                    if len(features) > 0 and visible_expression is not None:
+                        _safe_set_single_filter(visible_expression)
+                elif not custom_invalid:
+                    _safe_set_single_filter('')
 
                 # BIDIRECTIONAL DISPLAY EXPRESSION SYNCHRONIZATION
                 # FIX 2026-01-18: Enhanced linking to always sync when is_linking is checked
@@ -3153,6 +3177,12 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 expression = self._dockwidget.widgets["EXPLORING"]["CUSTOM_SELECTION_EXPRESSION"]["WIDGET"].expression()
                 if expression is not None:
                     current_expression = layer_props["exploring"]["custom_selection_expression"]
+                    # With linking on, the lists follow the custom expression at once (2026-11-24): they were
+                    # filtered only at the next change of group or layer. The expression is often stored already
+                    # (_refresh_feature_pickers_for_field_change writes it before this debounced call).
+                    if layer_props["exploring"].get("is_linking", False):
+                        layer_props["exploring"]["custom_selection_expression"] = expression
+                        self.exploring_link_widgets()
                     if current_expression != expression:
                         self._dockwidget.PROJECT_LAYERS[self._dockwidget.current_layer.id()]["exploring"]["custom_selection_expression"] = expression
                         self._dockwidget.invalidate_expression_cache(self._dockwidget.current_layer.id())
