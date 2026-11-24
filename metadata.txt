@@ -50,12 +50,13 @@ python_dependencies=onnxruntime
 
 changelog=5.1.2: the AGENT becomes a full GIS partner
     - Ask, Plan or Act: choose how far the AGENT goes before it touches your project.
+    - A clearer AGENT panel: permissions asked in the thread instead of a blocking dialog, formatted answers with clickable layer names, a history per project and across projects, @ to name a layer; it says when its model runs on this computer.
     - Maps ready to share: d3 charts, print layouts and atlases, projections, cartograms, styles from validated palettes, BD TOPO and OpenStreetMap drawn as their producers draw them.
     - Work anywhere: web layers (WFS, OGC API, ArcGIS) copied next to the project for offline use; FilterMate also runs as a standalone application, without the QGIS window.
     - A memory of your notes across projects, example requests that fit your data, lighter with Ollama.
     - Steadier panel: buttons beside their rows, EXPLORING tools per kind of layer, panels sized to their content; no more freeze on Windows after an elevation layer.
     - Safer filters: a GeoPackage filter that cannot run is refused and the previous one kept.
-    - Favorites and layer settings travel with the project (.qgz); a redesigned favorites manager; shared repos follow their configured URL, branch, bundle name and commit e-mail.
+    - Favorites and layer settings travel with the project (.qgz) and follow the project on screen; a redesigned favorites manager; shared repos follow their configured URL, branch, bundle name and commit e-mail.
     5.1.1
     - Any section of the panel can become a QGIS panel; Compare the map before and after a filter; one history to go back to any step.
     - AGENT works with your own API key or a local Ollama model, with new data sources: elevation, OpenStreetMap, population, WMS and WMTS, PostgreSQL tables.
