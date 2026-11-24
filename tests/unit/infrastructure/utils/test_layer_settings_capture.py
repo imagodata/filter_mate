@@ -3,9 +3,9 @@
 2026-11-24: the settings a project carries for its layers are read on the main thread when the task that registers
 the layers is created (``capture_layer_settings``); on the way, a legacy name the panel wrote until 5.1.2 is moved under
 the right one, the names of FilterMate leave the variables of QGIS (they broke the pairing of the user's variables), and
-a layer to filter the project does not have is left out. The project is the truth only for values this version wrote,
-in a project that can be saved (``project_is_truth``); a setting that changes marks the project modified
-(``settings_written``).
+The project is the truth for a layer only when this version wrote its settings (the layer carries
+``filterMate/settings_version``) in a project that can be saved (``layer_is_truth``); a setting that changes marks the
+project modified (``settings_written``).
 
 Module tested: infrastructure.utils.layer_settings
 """
@@ -38,7 +38,6 @@ def _load():
 
 
 layer_settings = _load()
-ALL_LAYERS = {"parcelles_1", "routes_1"}
 
 
 class Layer:
@@ -71,21 +70,20 @@ class Layer:
 
 
 class Project:
-    def __init__(self, path="", version=0, layers=()):
+    def __init__(self, path="", layers=(), storage=None):
         self.path = path
-        self.entries = {("FilterMate", "layer_settings_version"): version} if version else {}
+        self.storage = storage
         self.dirty = False
         self.layers = {layer.id(): layer for layer in layers}
 
     def fileName(self):
         return self.path
 
-    def readNumEntry(self, scope, key, default=0):
-        return (self.entries.get((scope, key), default), (scope, key) in self.entries)
+    def projectStorage(self):
+        return self.storage
 
-    def writeEntry(self, scope, key, value):
-        self.entries[(scope, key)] = value
-        self.dirty = True
+    def mapLayers(self):
+        return dict(self.layers)
 
     def setDirty(self, dirty=True):
         self.dirty = dirty
@@ -99,7 +97,17 @@ def V(name):
 
 
 def capture(layers, **kwargs):
-    return layer_settings.capture_layer_settings(layers, layer_ids=kwargs.pop("layer_ids", ALL_LAYERS), **kwargs)
+    return layer_settings.capture_layer_settings(layers, **kwargs)
+
+
+MARKED = {"filterMate/settings_version": 2}
+
+
+@pytest.fixture
+def saved(tmp_path):
+    path = tmp_path / "p.qgz"
+    path.write_text("x")
+    return path
 
 
 def test_reads_the_settings_of_each_layer():
@@ -170,15 +178,11 @@ def test_a_pairing_that_cannot_be_told_keeps_the_names_with_a_value():
     assert layer.props["variableValues"] == ["x"]
 
 
-def test_a_layer_to_filter_the_project_does_not_have_is_left_out():
-    """A layer duplicated or added from a .qlr brings the targets of its source."""
-    layer = Layer("parcelles_2", {
-        V("filterMate_filtering_layers_to_filter"): '["routes_1", "rivers_of_another_project"]',
-        V("filterMate_filtering_centroid_layers"): '["gone"]',
-        V("filterMate_filtering_has_layers_to_filter"): True,
-    })
-    assert capture([layer]) == {"parcelles_2": {"filtering": {
-        "layers_to_filter": '["routes_1"]', "centroid_layers": "[]", "has_layers_to_filter": True}}}
+def test_the_layers_to_filter_are_read_as_stored():
+    """A layer to filter the project does not have is left out in memory only (the task), never in the project."""
+    layer = Layer("parcelles_2", {V("filterMate_filtering_layers_to_filter"): '["routes_1", "rivers_of_another"]'})
+    assert capture([layer]) == {"parcelles_2": {"filtering": {"layers_to_filter": '["routes_1", "rivers_of_another"]'}}}
+    assert layer.writes == []
 
 
 def test_known_and_deleted_layers_are_left():
@@ -189,61 +193,75 @@ def test_known_and_deleted_layers_are_left():
 
 
 def test_no_layers():
-    assert layer_settings.capture_layer_settings(None, layer_ids=set()) == {}
+    assert layer_settings.capture_layer_settings(None) == {}
 
 
 class TestTheProjectIsTheTruth:
 
-    def test_for_what_this_version_wrote_in_a_file_it_can_save(self, tmp_path):
-        path = tmp_path / "p.qgz"
-        path.write_text("x")
-        assert layer_settings.project_is_truth(Project(str(path), version=2)) is True
+    def test_for_a_layer_whose_settings_this_version_wrote_in_a_file_it_can_save(self, saved):
+        marked, unmarked = Layer("a", MARKED), Layer("b")
+        project = Project(str(saved), layers=[marked, unmarked])
+        assert layer_settings.layer_is_truth(marked, project) is True
+        assert layer_settings.layer_is_truth(unmarked, project) is False  # written by an earlier version
+        assert layer_settings.truth_layer_ids([marked, unmarked, "an id"], project) == {"a"}
 
-    def test_not_for_a_project_of_an_earlier_version(self, tmp_path):
-        path = tmp_path / "p.qgz"
-        path.write_text("x")
-        assert layer_settings.project_is_truth(Project(str(path))) is False
-
-    def test_not_for_a_read_only_project(self, tmp_path):
-        path = tmp_path / "p.qgz"
-        path.write_text("x")
-        path.chmod(0o444)
+    def test_not_in_a_read_only_project(self, saved):
+        saved.chmod(0o444)
         try:
-            assert layer_settings.project_is_truth(Project(str(path), version=2)) is False
+            assert layer_settings.layer_is_truth(Layer("a", MARKED), Project(str(saved))) is False
         finally:
-            path.chmod(0o644)
+            saved.chmod(0o644)
 
-    def test_not_for_a_project_without_file(self):
-        assert layer_settings.project_is_truth(Project("", version=2)) is False
+    def test_not_in_a_project_without_file(self):
+        assert layer_settings.layer_is_truth(Layer("a", MARKED), Project("")) is False
+
+    @pytest.mark.parametrize("uri", ["postgresql:?service=pg&schema=public&project=travaux",
+                                     "geopackage:/data/projets.gpkg?projectName=travaux"])
+    def test_in_a_project_stored_in_a_database(self, uri):
+        assert layer_settings.project_file_writable(Project(uri)) is True
+        assert layer_settings.layer_is_truth(Layer("a", MARKED), Project(uri)) is True
+
+    def test_in_a_project_with_a_storage(self):
+        assert layer_settings.project_file_writable(Project("travaux", storage=object())) is True
+
+    def test_a_windows_path_is_a_file(self, saved):
+        assert layer_settings.project_file_writable(Project("C:/nowhere/p.qgz")) is False
 
 
 class TestSettingsWritten:
 
-    def test_the_project_is_modified_and_says_its_version(self, tmp_path):
-        path = tmp_path / "p.qgz"
-        path.write_text("x")
-        project = Project(str(path))
-        assert layer_settings.settings_written(project) is True
-        assert project.dirty and project.entries == {("FilterMate", "layer_settings_version"): 2}
+    def test_the_layer_says_it_and_the_project_is_modified(self, saved):
+        layer = Layer("parcelles_1")
+        project = Project(str(saved), layers=[layer])
+        assert layer_settings.settings_written(project, "parcelles_1") is True
+        assert project.dirty and layer.props == MARKED
 
-    def test_nothing_in_a_read_only_project(self, tmp_path):
-        path = tmp_path / "p.qgz"
-        path.write_text("x")
-        path.chmod(0o444)
-        project = Project(str(path))
+    def test_without_change_the_layer_says_it_and_the_project_stays(self, saved):
+        layer = Layer("parcelles_1")
+        project = Project(str(saved), layers=[layer])
+        assert layer_settings.settings_written(project, "parcelles_1", changed=False) is False
+        assert not project.dirty and layer.props == MARKED
+
+    def test_nothing_modified_in_a_read_only_project(self, saved):
+        saved.chmod(0o444)
+        project = Project(str(saved), layers=[Layer("parcelles_1")])
         try:
-            assert layer_settings.settings_written(project) is False
+            assert layer_settings.settings_written(project, "parcelles_1") is False
         finally:
-            path.chmod(0o644)
-        assert not project.dirty and project.entries == {}
+            saved.chmod(0o644)
+        assert not project.dirty
 
-    def test_a_change_of_form_only_is_no_change(self, tmp_path):
+    def test_a_change_of_form_only_is_no_change(self):
         layer = Layer("parcelles_1", {V("filterMate_filtering_layers_to_filter"): ["routes_1"],
-                                      V("filterMate_exploring_is_linking"): True})
+                                      V("filterMate_exploring_is_linking"): True,
+                                      V("filterMate_filtering_buffer_value_property"): 0,
+                                      V("filterMate_filtering_geometric_predicates"): None})
         project = Project(layers=[layer])
         change = layer_settings.settings_change
         assert not change("parcelles_1", {"filterMate_filtering_layers_to_filter": '["routes_1"]'}, project)
         assert not change("parcelles_1", {"filterMate_exploring_is_linking": True}, project)
+        assert not change("parcelles_1", {"filterMate_filtering_buffer_value_property": False}, project)  # 0 = False
+        assert not change("parcelles_1", {"filterMate_filtering_geometric_predicates": "[]"}, project)  # None = []
         assert change("parcelles_1", {"filterMate_exploring_is_linking": False}, project)
         assert change("parcelles_1", {"filterMate_filtering_layers_to_filter": "[]"}, project)
         assert not change("parcelles_1", {"filterMate_infos_layer_name": "other"}, project)  # infos: not carried
@@ -258,13 +276,13 @@ def test_a_direct_write_since_a_registration_wins():
                                             layer_settings.write_epoch())
 
 
-def test_a_fresh_reload_clears_the_variables_of_filtermate(tmp_path):
-    path = tmp_path / "p.qgz"
-    path.write_text("x")
+def test_a_fresh_reload_clears_the_variables_of_filtermate(saved):
+    path = saved
     layer = Layer("parcelles_1", {V("filterMate_exploring_is_linking"): False, V("filterMate_infos_layer_name"): "p",
                                   V("exploring_is_tracking"): True, "variableNames": ["my_var"],
                                   "variableValues": ["hello"], "labeling/enabled": True})
     project = Project(str(path), layers=[layer])
     assert layer_settings.clear_filtermate_variables("parcelles_1", project) == 3
-    assert layer.props == {"variableNames": ["my_var"], "variableValues": ["hello"], "labeling/enabled": True}
+    assert layer.props == {"variableNames": ["my_var"], "variableValues": ["hello"], "labeling/enabled": True,
+                           **MARKED}  # the registration that follows writes the defaults
     assert project.dirty

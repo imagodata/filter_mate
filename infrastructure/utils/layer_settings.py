@@ -10,16 +10,17 @@ is created, and the worker puts them over the copy of this computer's SQLite, or
 
 import logging
 import os
-from typing import Any, Collection, Dict, Iterable, Optional
+import re
+from typing import Any, Collection, Dict, Iterable, Optional, Set
 
 try:
     from ...core.domain.project_layer_settings import (
-        GROUPS, LEGACY_GROUPS, PREFIX, SCOPE, VALUES, VERSION, VERSION_KEY, drop_missing_layers, is_settings_property,
-        legacy_moves, project_settings, repaired_variable_names, same_setting)
+        GROUPS, LEGACY_GROUPS, PREFIX, VALUES, VERSION, VERSION_PROPERTY, is_settings_property, legacy_moves,
+        project_settings, repaired_variable_names, same_setting)
 except ImportError:  # loaded outside the plugin package (unit tests)
     from core.domain.project_layer_settings import (
-        GROUPS, LEGACY_GROUPS, PREFIX, SCOPE, VALUES, VERSION, VERSION_KEY, drop_missing_layers, is_settings_property,
-        legacy_moves, project_settings, repaired_variable_names, same_setting)
+        GROUPS, LEGACY_GROUPS, PREFIX, VALUES, VERSION, VERSION_PROPERTY, is_settings_property, legacy_moves,
+        project_settings, repaired_variable_names, same_setting)
 from .type_utils import return_typed_value
 
 logger = logging.getLogger('FilterMate.Infrastructure.LayerSettings')
@@ -30,14 +31,23 @@ def load(text: str) -> Any:
     return return_typed_value(text, 'load')[0]
 
 
-def same(one: Any, other: Any) -> bool:
-    """Two stored forms of the same setting (``'["a"]'`` and ``["a"]``)."""
-    return same_setting(one, other, load)
+def _key(name: Any) -> str:
+    """The key of a variable ``filterMate_<group>_<key>`` ("" for another name)."""
+    for group in GROUPS:
+        head = f"{PREFIX}{group}_"
+        if isinstance(name, str) and name.startswith(head):
+            return name[len(head):]
+    return ""
+
+
+def same(one: Any, other: Any, name: str = "") -> bool:
+    """Two stored forms of the same setting (``'["a"]'`` and ``["a"]``) of the variable ``name``."""
+    return same_setting(one, other, load, _key(name))
 
 
 def is_setting_variable(name: Any) -> bool:
     """``filterMate_exploring_*`` or ``filterMate_filtering_*``: a setting the project carries."""
-    return isinstance(name, str) and any(name.startswith(f"{PREFIX}{group}_") for group in GROUPS)
+    return bool(_key(name))
 
 
 def _project(project: Any = None) -> Any:
@@ -47,42 +57,52 @@ def _project(project: Any = None) -> Any:
     return QgsProject.instance()
 
 
+_URI = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]+:")  # postgresql:, geopackage:... (not a drive letter)
+
+
 def project_file_writable(project: Any = None) -> bool:
-    """The project has a file this computer can write: what it carries can be saved."""
+    """The project has a file this computer can write, or is stored in a database (whose writing QGIS checks)."""
+    project = _project(project)
     try:
-        path = _project(project).fileName()
+        path = project.fileName()
+        storage = project.projectStorage() if hasattr(project, "projectStorage") else None
     except (RuntimeError, AttributeError):
         return False
-    return bool(path) and os.access(path, os.W_OK)
+    if not path:
+        return False
+    if storage is not None or _URI.match(path):
+        return True
+    return os.access(path, os.W_OK)
 
 
-def project_is_truth(project: Any = None) -> bool:
-    """The settings the project carries win over this computer's SQLite.
+def layer_is_truth(layer: Any, project: Any = None) -> bool:
+    """The settings the project carries for ``layer`` win over this computer's SQLite.
 
-    Only for values this version wrote (the project entry of the version), and only in a project that can be saved:
-    otherwise the SQLite wins where it has a setting, and the project gives the others.
+    Only for values this version wrote for the layer (its :data:`VERSION_PROPERTY`), and only in a project that can be
+    saved: otherwise the SQLite wins where it has a setting, and the project gives the others.
+    """
+    try:
+        marked = layer.customProperty(VERSION_PROPERTY, 0)
+        return int(marked or 0) >= VERSION and project_file_writable(project)
+    except (RuntimeError, AttributeError, TypeError, ValueError):
+        return False
+
+
+def settings_written(project: Any = None, layer_id: Optional[str] = None, changed: bool = True) -> bool:
+    """This version wrote the settings of a layer: the layer says so (:data:`VERSION_PROPERTY`), and when a setting
+    changed the project is modified (a layer variable alone is no change for QGIS, which would not ask to save it).
+    Nothing is marked modified in a project that cannot be saved.
+
+    Returns:
+        True when the project was marked modified.
     """
     project = _project(project)
-    if not project_file_writable(project):
-        return False
     try:
-        version, _found = project.readNumEntry(SCOPE, VERSION_KEY, 0)
-    except (RuntimeError, AttributeError, TypeError):
-        return False
-    return version >= VERSION
-
-
-def settings_written(project: Any = None) -> bool:
-    """A setting of a layer changed in the project: the project is modified (a layer variable alone is no change for
-    QGIS, which would not ask to save it), and says the version of its settings. Nothing in a project that cannot be
-    saved (read-only, or no file yet).
-    """
-    project = _project(project)
-    if not project_file_writable(project):
-        return False
-    try:
-        if project.readNumEntry(SCOPE, VERSION_KEY, 0)[0] != VERSION:
-            project.writeEntry(SCOPE, VERSION_KEY, VERSION)
+        layer = project.mapLayer(layer_id) if layer_id else None
+        if layer is not None and layer.customProperty(VERSION_PROPERTY) != VERSION:
+            layer.setCustomProperty(VERSION_PROPERTY, VERSION)
+        if not changed or not project_file_writable(project):
+            return False
         project.setDirty(True)
     except (RuntimeError, AttributeError, TypeError) as exc:
         logger.debug(f"Project not marked modified: {exc}")
@@ -131,7 +151,7 @@ def settings_change(layer_id: str, variables: Dict[str, Any], project: Any = Non
         layer = _project(project).mapLayer(layer_id)
         if layer is None:
             return False
-        return any(is_setting_variable(name) and not same(layer.customProperty(f"{VALUES}{name}"), value)
+        return any(is_setting_variable(name) and not same(layer.customProperty(f"{VALUES}{name}"), value, name)
                    for name, value in variables.items())
     except (RuntimeError, AttributeError) as exc:
         logger.debug(f"Settings of {layer_id} not compared: {exc}")
@@ -147,7 +167,7 @@ def clear_filtermate_variables(layer_id: str, project: Any = None) -> int:
         logger.debug(f"Variables of {layer_id} not cleared: {exc}")
         return 0
     if removed:
-        settings_written(project)
+        settings_written(project, layer_id)
     return removed
 
 
@@ -173,8 +193,7 @@ def _move_legacy(layer: Any, properties: Dict[str, Any]) -> None:
         logger.info(f"Layer {layer.id()}: {len(removals)} FilterMate setting(s) of a legacy name moved")
 
 
-def capture_layer_settings(layers: Iterable[Any] = (), known: Iterable[str] = (),
-                           layer_ids: Optional[Collection[str]] = None) -> Dict[str, Dict[str, Dict[str, Any]]]:
+def capture_layer_settings(layers: Iterable[Any] = (), known: Iterable[str] = ()) -> Dict[str, Dict[str, Dict[str, Any]]]:
     """Main thread: the settings each of ``layers`` carries in the project, for the task that registers them.
 
     The names of FilterMate leave the variables of QGIS, and the legacy names are moved, on the way.
@@ -182,18 +201,11 @@ def capture_layer_settings(layers: Iterable[Any] = (), known: Iterable[str] = ()
     Args:
         layers: Layers the task is given (ids and other items are left out).
         known: Ids of the layers registered already: the task leaves them, and their variables are the current ones.
-        layer_ids: Ids of the layers of the project (default: QgsProject.instance()): a layer to filter that is not
-            one of them is left out.
 
     Returns:
         ``{layer_id: {group: {key: value as stored}}}``, only for layers that carry some.
     """
     known = set(known or ())
-    if layer_ids is None:
-        try:
-            layer_ids = set(_project().mapLayers().keys())
-        except Exception:  # catch-all safety net: the lists are then kept as they are
-            layer_ids = None
     captured = {}
     for layer in layers or ():
         if isinstance(layer, str):
@@ -212,14 +224,34 @@ def capture_layer_settings(layers: Iterable[Any] = (), known: Iterable[str] = ()
         except (AttributeError, RuntimeError, TypeError) as exc:  # a deleted layer, or not a map layer
             logger.debug(f"Settings of a layer not read: {exc}")
             continue
-        if settings and layer_ids is not None:
-            settings = drop_missing_layers(settings, layer_ids, load)
         if settings:
             captured[layer_id] = settings
     return captured
 
 
+def truth_layer_ids(layers: Iterable[Any] = (), project: Any = None) -> Set[str]:
+    """Main thread: the ids of ``layers`` whose settings in the project win over this computer's SQLite."""
+    found = set()
+    for layer in layers or ():
+        if isinstance(layer, str):
+            continue
+        try:
+            if layer_is_truth(layer, project):
+                found.add(layer.id())
+        except (AttributeError, RuntimeError):
+            continue
+    return found
+
+
+def project_layer_ids(project: Any = None) -> Optional[Set[str]]:
+    """Main thread: the ids of the layers of the project (None when it cannot be read)."""
+    try:
+        return set(_project(project).mapLayers().keys())
+    except Exception:  # catch-all safety net: the lists of layers are then used as they are
+        return None
+
+
 __all__ = ['GROUPS', 'LEGACY_GROUPS', 'capture_layer_settings', 'clear_filtermate_variables', 'is_setting_variable',
-           'note_direct_write', 'settings_change',
-           'project_file_writable', 'project_is_truth', 'remove_filtermate_variables', 'same', 'settings_written',
+           'layer_is_truth', 'note_direct_write', 'project_file_writable', 'project_layer_ids',
+           'remove_filtermate_variables', 'same', 'settings_change', 'settings_written', 'truth_layer_ids',
            'write_epoch', 'written_since']

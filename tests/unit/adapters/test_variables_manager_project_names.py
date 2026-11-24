@@ -77,25 +77,35 @@ class Layer:
     def customProperty(self, key, default=None):
         return self.props.get(key, default)
 
+    def setCustomProperty(self, key, value):
+        self.props[key] = value
+
     def removeCustomProperty(self, key):
         self.props.pop(key, None)
 
 
+class Signal:
+    def __init__(self):
+        self.slots = []
+
+    def connect(self, slot):
+        self.slots.append(slot)
+
+    def emit(self, *args):
+        for slot in self.slots:
+            slot(*args)
+
+
 class Project:
     def __init__(self, layer, path):
-        self.layer, self.path, self.dirty, self.entries = layer, path, [], {}
+        self.layer, self.path, self.dirty = layer, path, []
+        self.cleared, self.readProject = Signal(), Signal()
 
     def mapLayer(self, layer_id):
         return self.layer if self.layer is not None and layer_id == self.layer.id() else None
 
     def fileName(self):
         return self.path
-
-    def readNumEntry(self, scope, key, default=0):
-        return self.entries.get(key, default), key in self.entries
-
-    def writeEntry(self, scope, key, value):
-        self.entries[key] = value
 
     def setDirty(self, dirty=True):
         self.dirty.append(dirty)
@@ -167,6 +177,7 @@ def test_a_change_is_written_under_the_name_the_project_is_read_from(env):
     assert env.written == [("parcelles_1", {"filterMate_exploring_is_linking": False})]
     assert env.cursor.rows == [("INSERT", (env.cursor.rows[0][1][0], "p-1", "parcelles_1", "exploring", "is_linking",
                                            "False"))]
+    assert env.cursor.rows[0][1][0].startswith("v2-")  # written as is: read back without un-doubling quotes
     assert env.dirty == [True]  # QGIS asks to save the project at closing
 
 
@@ -232,7 +243,7 @@ def test_a_removed_setting_goes_out_of_the_project(env, monkeypatch):
     env.manager._get_connection = lambda: Conn()
     env.manager._get_project_layers = lambda: {"parcelles_1": {"exploring": {"is_tracking": True, "is_linking": False}}}
     assert env.manager.remove_variables_from_layer(env.layer, [("exploring", "is_tracking")]) is True
-    assert env.layer.props == {"variableValues/filterMate_exploring_is_linking": False}
+    assert env.layer.props == {"variableValues/filterMate_exploring_is_linking": False, "filterMate/settings_version": 2}
     assert env.dirty == [True]
     assert [row[0] for row in env.cursor.rows] == ["DELETE"]
 
@@ -245,9 +256,9 @@ def test_the_same_value_in_another_form_leaves_the_project_as_it_was(env):
     assert env.dirty == []
 
 
-def test_the_version_of_the_settings_is_written_with_them(env):
+def test_the_layer_says_this_version_wrote_its_settings(env):
     env.manager.save_single_property(env.layer, env.cursor, "exploring", "is_linking", False)
-    assert env.project.entries == {"layer_settings_version": 2}
+    assert env.layer.props["filterMate/settings_version"] == 2
 
 
 def test_a_read_only_project_is_not_marked_modified(env):
@@ -257,7 +268,7 @@ def test_a_read_only_project_is_not_marked_modified(env):
     finally:
         env.path.chmod(0o644)
     assert env.layer.props["variableValues/filterMate_exploring_is_linking"] is False  # this session holds it
-    assert env.dirty == [] and env.project.entries == {}
+    assert env.dirty == []
 
 
 def test_a_project_without_file_is_not_marked_modified(env):
@@ -276,9 +287,35 @@ def test_deferred_values_of_another_project_are_never_written(env):
     env.changing = True
     env.manager.save_single_property(env.layer, env.cursor, "exploring", "is_tracking", True)
     env.changing = False
-    env.project.path = str(env.path.with_name("other.qgz"))  # another project opened meanwhile
+    env.project.readProject.emit(None)  # another project (or the same file again) read meanwhile
     env.timers.run()
     assert env.written == [] and env.manager._pending_attempts == 0
+
+
+def test_deferred_values_survive_a_save_as(env):
+    env.changing = True
+    env.manager.save_single_property(env.layer, env.cursor, "exploring", "is_tracking", True)
+    env.changing = False
+    env.project.path = str(env.path.with_name("copy.qgz"))
+    env.timers.run()
+    assert env.written == [("parcelles_1", {"filterMate_exploring_is_tracking": True})]
+
+
+def test_a_removal_is_noted_for_a_registration_queued_before(env):
+    env.layer.props = {"variableValues/filterMate_exploring_is_tracking": True}
+    queued_at = layer_settings.write_epoch()
+    env.manager._remove_variables(env.layer, ["filterMate_exploring_is_tracking"])
+    assert layer_settings.written_since("parcelles_1", "filterMate_exploring_is_tracking", queued_at)
+
+
+def test_removing_everything_leaves_the_variables_of_the_user(env):
+    env.layer.props = {"variableValues/filterMate_exploring_is_tracking": True, "variableNames": ["my_var"],
+                       "variableValues": ["hello"]}
+    queued_at = layer_settings.write_epoch()
+    env.manager._remove_variables(env.layer)
+    assert env.layer.props == {"variableNames": ["my_var"], "variableValues": ["hello"],
+                               "filterMate/settings_version": 2}
+    assert layer_settings.written_since("parcelles_1", "filterMate_exploring_is_tracking", queued_at)
 
 
 def test_deferred_values_of_a_layer_gone_are_never_written(env):
@@ -317,4 +354,4 @@ def test_a_setting_removed_by_restore_layer_state_goes_out_of_the_project(env):
     env.manager._get_connection = lambda: Conn()
     env.manager._get_project_layers = lambda: {"parcelles_1": {"exploring": {}}}  # the key is gone already
     env.manager.remove_variables_from_layer(env.layer, [("exploring", "is_tracking")])
-    assert env.layer.props == {} and [row[0] for row in env.cursor.rows] == ["DELETE"]
+    assert env.layer.props == {"filterMate/settings_version": 2} and [row[0] for row in env.cursor.rows] == ["DELETE"]

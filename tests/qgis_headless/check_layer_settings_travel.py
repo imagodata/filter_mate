@@ -274,11 +274,12 @@ def set_options(change):
 
 
 def inject_legacy():
-    """What 5.1.2 left in a saved project: a change under the legacy name beside the right one, no version entry, and
+    """What 5.1.2 left in a saved project: a change under the legacy name beside the right one, no version mark, and
     FilterMate's names among the variables of QGIS, before one of the user."""
     other = QgsProject()
     check("the project is read without QGIS's panel", other.read(PROJECT_PATH))
-    other.removeEntry("FilterMate", "layer_settings_version")
+    for name in ("parcelles", "routes"):
+        layer_named(name, other).removeCustomProperty("filterMate/settings_version")
     layer = layer_named("parcelles", other)
     layer.setCustomProperty("variableValues/exploring_custom_selection_expression", '"rank" < 5')
     layer.setCustomProperty("variableValues/infos_layer_name", "parcelles")
@@ -299,8 +300,9 @@ def the_variable_of_the_user_is_right():
 def the_version_is_saved():
     other = QgsProject()
     other.read(PROJECT_PATH)
-    check("the .qgz says the version of its settings",
-          other.readNumEntry("FilterMate", "layer_settings_version", 0)[0] == 2)
+    check("the layers of the .qgz say this version wrote their settings",
+          all(layer_named(name, other).customProperty("filterMate/settings_version") == 2
+              for name in ("parcelles", "routes")))
 
 
 def an_empty_list_survives_the_qgz():

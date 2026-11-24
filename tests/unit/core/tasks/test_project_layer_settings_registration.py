@@ -190,7 +190,7 @@ def test_a_value_the_panel_wrote_after_the_queue_wins(vector, monkeypatch):
         write_epoch=lambda: noted.epoch,
         written_since=lambda layer_id, name, epoch: (layer_id, name) in noted.direct,
         settings_change=lambda layer_id, variables: bool(variables),
-        settings_written=lambda: setattr(noted, "marked", noted.marked + 1),
+        settings_written=lambda layer_id=None, changed=True: setattr(noted, "marked", noted.marked + changed),
         clear_filtermate_variables=MagicMock())
     written = []
     later = []
@@ -201,11 +201,12 @@ def test_a_value_the_panel_wrote_after_the_queue_wins(vector, monkeypatch):
     monkeypatch.setattr(task_mod, "MESSAGE_TASKS_CATEGORIES", {"add_layers": "ManageLayers"})
     task = _registering({})
     task.exception, task.project_layers, task._layer_facts = None, None, None
+    task._queued_at = 0  # read when the task was made, before its worker read the SQLite
     task._deferred_layer_variables = [("parcelles_1", "filterMate_exploring_is_linking", True),
                                       ("parcelles_1", "filterMate_exploring_is_tracking", False)]
 
+    noted.direct.add(("parcelles_1", "filterMate_exploring_is_linking"))  # the panel, while the worker ran
     task.finished(True)
-    noted.direct.add(("parcelles_1", "filterMate_exploring_is_linking"))  # the panel, before the next turn
     for callback in later:
         callback()
 
@@ -251,3 +252,60 @@ def test_the_lists_of_the_sqlite_are_queued_as_their_json_text(vector):
     assert _variables(task) == {"filterMate_filtering_layers_to_filter": "[]",
                                 "filterMate_filtering_geometric_predicates": '["Intersect"]',
                                 "filterMate_exploring_single_selection_expression": '"nom"'}
+
+
+def test_the_project_wins_only_for_the_layers_this_version_wrote(vector):
+    """A layer of the project without filterMate/settings_version (never rewritten by this version, its source
+    missing at the first opening, say) keeps the SQLite's value, even when another layer is marked."""
+    task = _registering(SQLITE, PROJECT)
+    task._project_settings_win = {"another_layer"}
+    task._load_existing_layer_properties = MagicMock(side_effect=lambda layer: _queued_from_sqlite(task, layer))
+    assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
+    assert task.project_layers["parcelles_1"]["exploring"]["single_selection_expression"] == '"fid"'  # the SQLite's
+    task._project_settings_win = {"parcelles_1"}
+    task._load_existing_layer_properties = MagicMock(side_effect=lambda layer: _queued_from_sqlite(task, layer))
+    assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
+    assert task.project_layers["parcelles_1"]["exploring"]["single_selection_expression"] == '"nom"'
+
+
+def test_a_layer_to_filter_the_project_does_not_have_is_left_out_in_memory_only(vector):
+    task = _registering(SQLITE, {"filtering": {"layers_to_filter": '["routes_1", "rivers_of_another"]'}})
+    task._project_layer_ids = {"parcelles_1", "routes_1"}
+    task._load_existing_layer_properties = MagicMock(side_effect=lambda layer: _queued_from_sqlite(task, layer))
+    saved = []
+    task.insert_properties_to_spatialite = MagicMock(
+        side_effect=lambda layer_id, props: saved.append(json.loads(json.dumps(props))))
+    assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
+    assert task.project_layers["parcelles_1"]["filtering"]["layers_to_filter"] == ["routes_1"]  # the panel
+    assert saved[0]["filtering"]["layers_to_filter"] == ["routes_1", "rivers_of_another"]  # the SQLite: as it was
+    assert _variables(task)["filterMate_filtering_layers_to_filter"] == '["routes_1", "rivers_of_another"]'
+
+
+EMPTY_TEXT_TEST = '"nom" <> ' + "''"
+
+
+def test_a_value_with_quotes_comes_back_as_written(vector, tmp_path):
+    """The rows this task writes from now on are read as is; the rows it wrote before had their quotes doubled."""
+    import sqlite3
+    path = tmp_path / "fm.sqlite"
+    with sqlite3.connect(path) as conn:
+        conn.execute("CREATE TABLE fm_project_layers_properties (id TEXT PRIMARY KEY, _updated_at DATETIME, "
+                     "fk_project TEXT, layer_id TEXT, meta_type TEXT, meta_key TEXT, meta_value TEXT, "
+                     "UNIQUE(fk_project, layer_id, meta_type, meta_key) ON CONFLICT REPLACE)")
+        doubled = EMPTY_TEXT_TEST.replace("'", "''")  # as 5.1.2 wrote it
+        conn.execute("INSERT INTO fm_project_layers_properties VALUES ('0b9c', datetime(), 'p-1', 'parcelles_1', "
+                     "'exploring', 'multiple_selection_expression', ?)", (doubled,))
+    task = _registering({})
+    task.project_uuid = "p-1"
+    task._safe_spatialite_connect = lambda: sqlite3.connect(path)
+    for name in ("insert_properties_to_spatialite", "select_properties_from_spatialite",
+                 "_load_existing_layer_properties"):
+        setattr(task, name, types.MethodType(getattr(task_mod.LayersManagementEngineTask, name), task))
+    task.insert_properties_to_spatialite("parcelles_1", {"exploring": {"custom_selection_expression": EMPTY_TEXT_TEST},
+                                                         "filtering": {"has_buffer_value": True}})
+    loaded = task._load_existing_layer_properties(_vector_layer("parcelles_1", "parcelles"))
+    assert loaded["exploring"]["custom_selection_expression"] == EMPTY_TEXT_TEST  # written as is, read as is
+    assert loaded["exploring"]["multiple_selection_expression"] == EMPTY_TEXT_TEST  # a row of before
+    with sqlite3.connect(path) as conn:
+        assert conn.execute("SELECT meta_value FROM fm_project_layers_properties WHERE meta_key = 'has_buffer_value'"
+                            ).fetchone() == ("True",)

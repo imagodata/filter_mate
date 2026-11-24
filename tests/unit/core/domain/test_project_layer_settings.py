@@ -147,26 +147,45 @@ class TestStorage:
 
     @pytest.mark.parametrize("one, other, same", [
         ('["a"]', ["a"], True), ("[]", [], True), (True, True, True), (True, 1, False), ("True", True, True),
-        (0.0, 0, True), ('"nom"', '"nom"', True), ('"nom"', '"rank"', False), (None, "[]", False), (None, None, True),
+        (0.0, 0, True), ('"nom"', '"nom"', True), ('"nom"', '"rank"', False), (None, None, True),
+        (None, "", True), (None, "[]", True), (None, [], True), (None, {}, True), (None, "{}", True),
+        (None, '"nom"', False), (None, False, False), (None, 0, False),
     ])
     def test_the_same_setting_in_another_form(self, one, other, same):
+        """None is what a .qgz gives back for an empty value: 5.1.2 stored its empty lists as such."""
         assert pls.same_setting(one, other, load) is same
 
+    @pytest.mark.parametrize("key", sorted(pls.FLAGS))
+    def test_a_flag_and_the_1_or_0_the_sqlite_gave_for_it(self, key):
+        assert pls.same_setting(0, False, load, key) and pls.same_setting(True, 1, load, key)
+        assert pls.as_flag(key, 1) is True and pls.as_flag(key, 0) is False
 
-class TestDropMissingLayers:
+    def test_a_number_that_is_no_flag_stays_a_number(self):
+        assert not pls.same_setting(0, False, load, "buffer_segments")
+        assert pls.as_flag("buffer_segments", 1) == 1 and type(pls.as_flag("buffer_segments", 1)) is int
+        assert pls.as_flag("is_linking", 2) == 2  # not a value a flag was stored as
+
+    def test_the_flags_without_a_prefix_are_flags(self):
+        assert "buffer_value_property" in pls.FLAGS
+
+
+class TestPresentLayers:
 
     def test_only_the_layers_of_the_project_stay(self):
-        settings = {"exploring": {"is_linking": True},
-                    "filtering": {"layers_to_filter": '["a", "gone"]', "centroid_layers": ["gone"],
-                                  "geometric_predicates": '["Intersect"]'}}
-        assert pls.drop_missing_layers(settings, {"a"}, load) == {
-            "exploring": {"is_linking": True},
-            "filtering": {"layers_to_filter": '["a"]', "centroid_layers": "[]",
-                          "geometric_predicates": '["Intersect"]'}}
+        assert pls.present_layers(["a", "gone", {"layer_id": "x"}], {"a"}) == ["a", {"layer_id": "x"}]
 
-    def test_nothing_missing_keeps_the_stored_form(self):
-        settings = {"filtering": {"layers_to_filter": ["a"]}}
-        assert pls.drop_missing_layers(settings, {"a"}, load) == settings
+    def test_what_is_no_list_stays(self):
+        assert pls.present_layers("", {"a"}) == ""
+
+
+class TestEmptyValue:
+
+    @pytest.mark.parametrize("current, key, empty", [
+        ("x", "buffer_value_expression", ""), (["a"], "anything", []), (None, "layers_to_filter", []),
+        (None, "centroid_layers", []), (None, "geometric_predicates", []), (None, "custom_selection_expression", ""),
+    ])
+    def test_a_list_where_the_setting_is_a_list(self, current, key, empty):
+        assert pls.empty_value(current, key) == empty
 
 
 class TestRepairedVariableNames:

@@ -10,10 +10,10 @@ Until 5.1.2 a change made in the panel was written as ``variableValues/<group>_<
 right name kept the value of the registration. That legacy value is the latest the user chose: it wins over the right
 name, and is moved under it once (:func:`legacy_moves`).
 
-The project is the truth only for values this version wrote (2026-11-24, review): the project entry
-``FilterMate/layer_settings_version`` (:data:`VERSION`) is written with them. A project without it (the first opening
-after the update, written by an earlier version) gives the settings the SQLite of this computer does not have; so does
-a project that cannot be saved (read-only, or no file yet).
+The project is the truth only for values this version wrote (2026-11-24, review): each layer whose settings this
+version wrote carries the custom property :data:`VERSION_PROPERTY`. A layer without it (the first opening after the
+update, written by an earlier version) gives the settings the SQLite of this computer does not have; so does any layer
+of a project that cannot be saved (a read-only file, or no file yet).
 
 Lists and dicts are stored as their JSON text (:func:`storable`), as the panel writes them: an empty list stored as
 such comes back from a .qgz as None (QgsXmlUtils, measured in QGIS 3.44 and 4.3).
@@ -26,14 +26,21 @@ from __future__ import annotations
 import json
 from typing import Any, Callable, Collection, Dict, List, Mapping, Optional, Tuple
 
-SCOPE = "FilterMate"
-VERSION_KEY = "layer_settings_version"
+VERSION_PROPERTY = "filterMate/settings_version"  # a custom property of the layer
 VERSION = 2
 VALUES = "variableValues/"
 PREFIX = "filterMate_"
 GROUPS = ("exploring", "filtering")  # what travels with the project
 LEGACY_GROUPS = ("infos", "exploring", "filtering")  # what the panel wrote under a legacy name
 LAYER_ID_LISTS = ("layers_to_filter", "centroid_layers")  # filtering settings that list layers by id
+LISTS = LAYER_ID_LISTS + ("geometric_predicates",)
+# The flags of the templates of LayersManagementEngineTask (the SQLite gives 1 / 0 for those it stored as bools)
+FLAGS = frozenset((
+    "is_changing_all_layer_properties", "is_tracking", "is_selecting", "is_linking",
+    "has_layers_to_filter", "has_combine_operator", "has_geometric_predicates", "use_centroids_source_layer",
+    "use_centroids_distant_layers", "has_buffer_value", "buffer_value_property", "has_buffer_type",
+    "has_simplify_tolerance"))
+EMPTY_FORMS = ("", "[]", "{}")
 
 Settings = Dict[str, Dict[str, Any]]
 
@@ -135,15 +142,25 @@ def storable(value: Any) -> Any:
     return value
 
 
-def empty_value(current: Any) -> Any:
-    """What a setting read as None from a .qgz holds: an empty list where the panel holds a list, else an empty text."""
-    return [] if isinstance(current, (list, tuple)) else ""
+def empty_value(current: Any, key: str = "") -> Any:
+    """What a setting read as None from a .qgz holds: an empty list where the panel holds a list (or the setting is a
+    list), else an empty text."""
+    return [] if isinstance(current, (list, tuple)) or key in LISTS else ""
 
 
-def same_setting(one: Any, other: Any, load: Callable[[str], Any]) -> bool:
-    """True when two stored forms hold the same setting (``'["a"]'`` and ``["a"]``; ``""`` and the None a .qgz gives
-    back for it; ``True`` and ``True``)."""
-    one, other = typed_value("" if one is None else one, load), typed_value("" if other is None else other, load)
+def as_flag(key: str, value: Any) -> Any:
+    """A flag the SQLite gave as 1 / 0 is the bool it was stored as."""
+    if key in FLAGS and type(value) is int and value in (0, 1):
+        return bool(value)
+    return value
+
+
+def same_setting(one: Any, other: Any, load: Callable[[str], Any], key: str = "") -> bool:
+    """True when two stored forms hold the same setting: ``'["a"]'`` and ``["a"]``; None (what a .qgz gives back for
+    an empty value) and ``""``, ``[]``, ``"[]"``, ``{}``; a flag and the 1 / 0 the SQLite gave for it."""
+    if one is None or other is None:
+        return all(value is None or value in EMPTY_FORMS or value == [] or value == {} for value in (one, other))
+    one, other = as_flag(key, typed_value(one, load)), as_flag(key, typed_value(other, load))
     if isinstance(one, bool) or isinstance(other, bool):
         return type(one) is type(other) and one == other
     if isinstance(one, (int, float)) and isinstance(other, (int, float)):
@@ -151,26 +168,11 @@ def same_setting(one: Any, other: Any, load: Callable[[str], Any]) -> bool:
     return type(one) is type(other) and one == other
 
 
-def drop_missing_layers(settings: Settings, layer_ids: Collection[str], load: Callable[[str], Any]) -> Settings:
-    """The settings without the layers the project does not have, in the lists of layers of ``filtering``.
-
-    A layer duplicated, or added from a definition file (.qlr), brings the settings of its source: its layers to
-    filter may be layers of another project.
-    """
-    filtering = settings.get("filtering")
-    if not filtering:
-        return settings
-    kept = dict(filtering)
-    for key in LAYER_ID_LISTS:
-        if key not in kept:
-            continue
-        listed = typed_value(kept[key], load)
-        if not isinstance(listed, list):
-            continue
-        present = [item for item in listed if not isinstance(item, str) or item in layer_ids]
-        if len(present) != len(listed):
-            kept[key] = storable(present)
-    return dict(settings, filtering=kept)
+def present_layers(value: Any, layer_ids: Collection[str]) -> Any:
+    """A list of layers without the ids the project does not have (an item that is not an id stays)."""
+    if not isinstance(value, list):
+        return value
+    return [item for item in value if not isinstance(item, str) or item in layer_ids]
 
 
 def repaired_variable_names(names: Any, values: Any, ours: Collection[str]) -> Optional[Tuple[List[Any], Any]]:
