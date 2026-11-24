@@ -80,18 +80,14 @@ class TestScopeKind:
 
 
 # ---------------------------------------------------------------------------
-# Badge glyphs
+# Global kinds (the list shows them with the globe icon)
 # ---------------------------------------------------------------------------
 
 
-class TestBadges:
-    def test_every_classifier_output_has_a_badge(self):
-        """Guard against a future classifier adding a kind without a badge."""
+class TestGlobalKinds:
+    def test_global_kinds_are_the_classifier_global_outputs(self):
         try:
-            from ui.dialogs.favorites_manager import _SCOPE_BADGES
+            from ui.dialogs.favorites_manager import _GLOBAL_SCOPE_KINDS
         except ImportError as exc:
             pytest.skip(f"UI module not importable: {exc}")
-        for key in ("mine_here", "mine_global",
-                    "shared_here", "shared_global", "foreign"):
-            assert key in _SCOPE_BADGES, f"Missing badge for scope kind {key!r}"
-            assert _SCOPE_BADGES[key], f"Empty badge for scope kind {key!r}"
+        assert _GLOBAL_SCOPE_KINDS == {"shared_global", "mine_global"}

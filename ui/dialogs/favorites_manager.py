@@ -44,21 +44,16 @@ except ImportError:
     def pyqtSignal(*args):
         return None
 
-# Scope badge + label constants — kept close to the UI so copywriter
-# tweaks don't require touching the domain layer.
-_SCOPE_BADGES = {
-    "shared_here":   "👥",   # project=this, owner=NULL
-    "shared_global": "🌐",   # project=GLOBAL, owner=NULL
-    "mine_here":     "🔒",   # project=this, owner=me
-    "mine_global":   "👤",   # project=GLOBAL, owner=me
-    "foreign":       "•",    # someone else's favorite (visible in shared DB)
-}
+# Scope kinds of ``_favorite_scope_kind`` that apply to every project of this
+# computer; the list shows them with the globe icon instead of the star.
+_GLOBAL_SCOPE_KINDS = frozenset({"shared_global", "mine_global"})
 
 
 def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
     """Classify a favorite for badge/filter purposes.
 
-    Returns one of the keys in ``_SCOPE_BADGES``. "foreign" means the
+    Returns "shared_here", "shared_global", "mine_here", "mine_global" or
+    "foreign". "foreign" means the
     favorite belongs to another user — kept visible because forbidding
     the owner column would be surprising, but flagged so users can tell
     which ones aren't theirs.
@@ -79,6 +74,9 @@ def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
         return "mine_global" if is_global else "mine_here"
     return "shared_global" if is_global else "shared_here"
 
+
+from ..styles.favorites_styles import favorites_dialog_stylesheet
+from ..styles.mockup_design import render_icon
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +104,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         favoriteDeleted = pyqtSignal(str)
         favoriteUpdated = pyqtSignal(str)
         favoritesChanged = pyqtSignal()
+
+    _dark = False  # theme of the dialog, set by _setup_ui
 
     def __init__(self, favorites_manager, parent=None, extension_bridge=None):
         """
@@ -206,8 +206,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self.resize(720, 520)
         self.setModal(True)
 
-        # Apply FilterMate dialog style
-        self.setStyleSheet(self._get_dialog_stylesheet())
+        # Theme of the plugin, read each time the dialog opens
+        self._dark = self._plugin_theme_is_dark()
+        self.setStyleSheet(favorites_dialog_stylesheet(self._dark))
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
@@ -229,7 +230,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # FIX 2026-04-23: discoverable shortcut to the Resource Sharing
         # picker — only shown when the favorites_sharing extension is active
         # so regular users never see a button they can't use.
-        self._shared_btn = QPushButton("📡 " + self.tr("Shared..."))
+        self._shared_btn = QPushButton(self.tr("Shared..."))
         self._shared_btn.setObjectName("sharedBtn")
         self._shared_btn.setToolTip(self.tr(
             "Browse favorites shared via QGIS Resource Sharing collections"
@@ -241,7 +242,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # Publish button — symmetric counterpart that pushes favorites into
         # a Resource Sharing collection. Hidden when the extension is
         # inactive or when there is nothing to publish.
-        self._publish_btn = QPushButton("📤 " + self.tr("Publish..."))
+        self._publish_btn = QPushButton(self.tr("Publish..."))
         self._publish_btn.setObjectName("publishBtn")
         self._publish_btn.setToolTip(self.tr(
             "Publish selected favorites into a Resource Sharing collection"
@@ -257,16 +258,15 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # Search box + scope filter (v5.1)
         search_layout = QHBoxLayout()
         search_layout.setSpacing(8)
-        search_label = QLabel("🔍")
-        search_label.setObjectName("searchIcon")
-        search_layout.addWidget(search_label)
-
         self._search_edit = QLineEdit()
         self._search_edit.setObjectName("searchEdit")
         self._search_edit.setPlaceholderText(
             self.tr("Search by name, expression, tags, or description...")
         )
         self._search_edit.setClearButtonEnabled(True)
+        search_icon = self._theme_icon("/search.svg")
+        if search_icon is not None:
+            self._search_edit.addAction(search_icon, QLineEdit.ActionPosition.LeadingPosition)
         self._search_edit.textChanged.connect(self._on_search_changed)
         search_layout.addWidget(self._search_edit, 1)
 
@@ -281,11 +281,11 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         ))
         # Keep enum keys in sync with FavoriteScope so the lookup is
         # a direct dict access — no parallel mapping to maintain.
-        self._scope_combo.addItem("🔎 " + self.tr("All"), "all")
-        self._scope_combo.addItem("🌐 " + self.tr("Shared · All projects"), "global_shared")
-        self._scope_combo.addItem("👥 " + self.tr("Shared · This project"), "project_shared")
-        self._scope_combo.addItem("👤 " + self.tr("Mine · All projects"), "global_mine")
-        self._scope_combo.addItem("🔒 " + self.tr("Mine · This project"), "project_mine")
+        self._scope_combo.addItem(self.tr("All"), "all")
+        self._scope_combo.addItem(self.tr("Shared · All projects"), "global_shared")
+        self._scope_combo.addItem(self.tr("Shared · This project"), "project_shared")
+        self._scope_combo.addItem(self.tr("Mine · All projects"), "global_mine")
+        self._scope_combo.addItem(self.tr("Mine · This project"), "project_mine")
         self._scope_combo.currentIndexChanged.connect(self._on_scope_changed)
         search_layout.addWidget(self._scope_combo)
         layout.addLayout(search_layout)
@@ -325,199 +325,32 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         if self._list_widget.count() > 0:
             self._list_widget.setCurrentRow(0)
 
-    def _get_dialog_stylesheet(self) -> str:
-        """Get FilterMate harmonized stylesheet for the dialog."""
-        return """
-            /* Dialog background */
-            QDialog {
-                background-color: #f8f9fa;
-            }
+    @staticmethod
+    def _plugin_theme_is_dark() -> bool:
+        """True when the plugin theme is the dark one (anything else is light)."""
+        try:
+            from ..styles.style_loader import StyleLoader
+            return StyleLoader.get_current_theme() == 'dark'
+        except Exception:  # style loader unavailable: the light theme
+            return False
 
-            /* Header */
-            QLabel#dialogHeader {
-                font-size: 14pt;
-                font-weight: 600;
-                color: #2c3e50;
-                padding: 8px 0px;
-                margin-bottom: 4px;
-            }
+    @staticmethod
+    def _theme_icon(name: str):
+        """QGIS theme icon ``name`` (e.g. ``/mActionFileSave.svg``), None when it is missing."""
+        try:
+            from qgis.core import QgsApplication
+            icon = QgsApplication.getThemeIcon(name)
+        except Exception:
+            return None
+        return None if icon is None or icon.isNull() else icon
 
-            /* Search */
-            QLabel#searchIcon {
-                font-size: 14pt;
-                padding: 4px;
-            }
-            QLineEdit#searchEdit {
-                padding: 8px 12px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                background-color: white;
-                font-size: 10pt;
-            }
-            QLineEdit#searchEdit:focus {
-                border-color: #f39c12;
-                background-color: #fffef5;
-            }
-
-            /* List widget */
-            QListWidget {
-                background-color: white;
-                border: 1px solid #e0e0e0;
-                border-radius: 8px;
-                padding: 4px;
-                font-size: 10pt;
-            }
-            QListWidget::item {
-                padding: 8px 10px;
-                border-radius: 6px;
-                margin: 2px 0px;
-            }
-            QListWidget::item:selected {
-                background-color: #f5b041;
-                color: white;
-            }
-            QListWidget::item:hover:!selected {
-                background-color: #fef5e7;
-            }
-
-            /* Tab widget */
-            QTabWidget::pane {
-                border: 1px solid #e0e0e0;
-                border-radius: 8px;
-                background-color: white;
-                padding: 8px;
-                margin-top: -1px;
-            }
-            QTabBar {
-                qproperty-drawBase: 0;
-            }
-            QTabBar::tab {
-                background-color: #f0f0f0;
-                color: #555555;
-                border: 1px solid #ddd;
-                border-bottom: none;
-                padding: 8px 14px;
-                margin-right: 3px;
-                border-top-left-radius: 6px;
-                border-top-right-radius: 6px;
-                font-size: 10pt;
-                min-width: 70px;
-            }
-            QTabBar::tab:selected {
-                background-color: white;
-                color: #2c3e50;
-                border-bottom: 2px solid #f39c12;
-                font-weight: 600;
-            }
-            QTabBar::tab:hover:!selected {
-                background-color: #fef5e7;
-                color: #34495e;
-            }
-
-            /* Form inputs */
-            QLineEdit, QTextEdit {
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                padding: 6px 10px;
-                background-color: white;
-                font-size: 10pt;
-            }
-            QLineEdit:focus, QTextEdit:focus {
-                border-color: #f39c12;
-                background-color: #fffef5;
-            }
-
-            /* Tree widget */
-            QTreeWidget {
-                background-color: white;
-                border: 1px solid #e0e0e0;
-                border-radius: 6px;
-                alternate-background-color: #fafafa;
-            }
-            QTreeWidget::item {
-                padding: 4px;
-            }
-            QHeaderView::section {
-                background-color: #f5f5f5;
-                padding: 6px 8px;
-                border: none;
-                border-bottom: 1px solid #ddd;
-                font-weight: 500;
-            }
-
-            /* Buttons - FilterMate mousse style */
-            QPushButton {
-                padding: 8px 16px;
-                border-radius: 8px;
-                font-size: 10pt;
-                font-weight: 500;
-                border: none;
-            }
-            QPushButton#applyBtn {
-                background-color: #27ae60;
-                color: white;
-            }
-            QPushButton#applyBtn:hover {
-                background-color: #219a52;
-            }
-            QPushButton#applyBtn:disabled {
-                background-color: #95d5b2;
-                color: #e8e8e8;
-            }
-            QPushButton#saveBtn {
-                background-color: #3498db;
-                color: white;
-            }
-            QPushButton#saveBtn:hover {
-                background-color: #2980b9;
-            }
-            QPushButton#saveBtn:disabled {
-                background-color: #a9cce3;
-                color: #e8e8e8;
-            }
-            QPushButton#deleteBtn {
-                background-color: #e74c3c;
-                color: white;
-            }
-            QPushButton#deleteBtn:hover {
-                background-color: #c0392b;
-            }
-            QPushButton#deleteBtn:disabled {
-                background-color: #f5b7b1;
-                color: #e8e8e8;
-            }
-            QPushButton#closeBtn {
-                background-color: #ecf0f1;
-                color: #2c3e50;
-                border: 1px solid #bdc3c7;
-            }
-            QPushButton#closeBtn:hover {
-                background-color: #d5dbdb;
-            }
-
-            /* Labels */
-            QLabel {
-                color: #34495e;
-            }
-            QLabel#infoLabel {
-                color: #7f8c8d;
-                font-size: 9pt;
-            }
-            QLabel#noRemoteLabel {
-                color: #95a5a6;
-                font-style: italic;
-                padding: 20px;
-            }
-
-            /* Splitter */
-            QSplitter::handle {
-                background-color: #e0e0e0;
-                width: 1px;
-            }
-            QSplitter::handle:hover {
-                background-color: #f39c12;
-            }
-        """
+    def _icon_button(self, text: str, icon_name: str) -> "QPushButton":
+        """Button with the QGIS theme icon ``icon_name``; the text alone when the icon is missing."""
+        button = QPushButton(text)
+        icon = self._theme_icon(icon_name)
+        if icon is not None:
+            button.setIcon(icon)
+        return button
 
     def _create_left_panel(self) -> QWidget:
         """Create the left panel with favorites list."""
@@ -718,19 +551,19 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         button_layout.setContentsMargins(0, 12, 0, 0)
         button_layout.setSpacing(10)
 
-        self._apply_btn = QPushButton("▶ " + self.tr("Apply"))
+        self._apply_btn = self._icon_button(self.tr("Apply"), "/mActionFilter2.svg")
         self._apply_btn.setObjectName("applyBtn")
         self._apply_btn.setEnabled(False)
         self._apply_btn.setToolTip(self.tr("Apply this favorite filter to the project"))
         self._apply_btn.clicked.connect(self._on_apply)
 
-        self._save_btn = QPushButton("💾 " + self.tr("Save Changes"))
+        self._save_btn = self._icon_button(self.tr("Save Changes"), "/mActionFileSave.svg")
         self._save_btn.setObjectName("saveBtn")
         self._save_btn.setEnabled(False)
         self._save_btn.setToolTip(self.tr("Save modifications to this favorite"))
         self._save_btn.clicked.connect(self._on_save)
 
-        self._delete_btn = QPushButton("🗑️ " + self.tr("Delete"))
+        self._delete_btn = self._icon_button(self.tr("Delete"), "/mActionDeleteSelected.svg")
         self._delete_btn.setObjectName("deleteBtn")
         self._delete_btn.setEnabled(False)
         self._delete_btn.setToolTip(self.tr("Permanently delete this favorite"))
@@ -768,15 +601,18 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             kind = _favorite_scope_kind(
                 fav, current_user, project_uuid, GLOBAL_PROJECT_UUID,
             )
-            badge = _SCOPE_BADGES.get(kind, "")
-            # Layout: "<badge> ★ <name> [<layers>] 🏷️"
-            item_text = (f"{badge} " if badge else "") + f"★ {fav.name}"
+            # The scope is the icon (globe: all projects, star: this project);
+            # the text is the name.
+            item_text = fav.name
             if layers_count > 1:
                 item_text += f" [{layers_count}]"
-            if fav.tags:
-                item_text += " 🏷️"
 
             item = QListWidgetItem(item_text)
+            scope_icon = render_icon(
+                "projection" if kind in _GLOBAL_SCOPE_KINDS else "star", self._dark
+            )
+            if scope_icon is not None:
+                item.setIcon(scope_icon)
             item.setData(Qt.ItemDataRole.UserRole, fav.id)
 
             owner = getattr(fav, "owner", None)
