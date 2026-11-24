@@ -7385,6 +7385,41 @@ Résolu depuis : {1}</translation>
         <translation>Collection :</translation>
     </message>
     <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="149"/>
+        <source>Bundle file name:</source>
+        <translation>Nom du fichier de lot :</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="155"/>
+        <source>Commit e-mail:</source>
+        <translation>E-mail des commits :</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="147"/>
+        <source>Empty = {0}</source>
+        <translation>Vide = {0}</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="331"/>
+        <source>Invalid commit e-mail</source>
+        <translation>E-mail des commits invalide</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="332"/>
+        <source>'{0}' is not an e-mail address (name@domain).</source>
+        <translation>« {0} » n'est pas une adresse e-mail (nom@domaine).</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="332"/>
+        <source>Invalid bundle file name</source>
+        <translation>Nom du fichier de lot invalide</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="333"/>
+        <source>'{0}': use only letters, digits, '_' and '-'.</source>
+        <translation>« {0} » : utilisez seulement des lettres, des chiffres, '_' et '-'.</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="98"/>
         <source>Configure a git-backed publish target. Anonymous repos can leave Authentication empty — only publishers need credentials.</source>
         <translation>Configurez une cible de publication adossée à git. Les dépôts anonymes peuvent laisser l'authentification vide — seuls les éditeurs ont besoin d'identifiants.</translation>

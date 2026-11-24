@@ -23,6 +23,7 @@ import logging
 import os
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
+from ..remote_repo_manager import DEFAULT_BUNDLE_NAME
 from ..scanner import ResourceSharingScanner
 
 if TYPE_CHECKING:
@@ -116,7 +117,7 @@ class BundlePublisher:
     # ── Filename sanitiser --------------------------------------------
 
     @staticmethod
-    def sanitize_bundle_filename(raw: str, default: str = "favorites") -> str:
+    def sanitize_bundle_filename(raw: str, default: str = DEFAULT_BUNDLE_NAME) -> str:
         """Produce a safe bundle filename ending in .fmfav-pack.json.
 
         1. strip whitespace, fall back to ``default`` when empty;

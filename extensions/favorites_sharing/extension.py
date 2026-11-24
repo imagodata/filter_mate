@@ -173,7 +173,8 @@ class FavoritesSharingExtension(BaseExtension):
                     "List of git-backed collection repos that can be "
                     "selected as publish targets. Each entry: "
                     "{name, git_url, branch, local_clone, "
-                    "target_collection, is_default?, authcfg_id?}. "
+                    "target_collection, is_default?, authcfg_id?, "
+                    "bundle_name?, commit_email?}. "
                     "local_clone is resolved under the "
                     "QGIS roaming profile dir by default: an empty value "
                     "maps to [profile]/FilterMate/repos/<name>; a "
@@ -188,7 +189,11 @@ class FavoritesSharingExtension(BaseExtension):
                     "leaves the push to the user (fallback A: SMB mount "
                     "/ external sync). authcfg_id references a QGIS Auth "
                     "Manager entry (the plaintext auth_header of 4.x is "
-                    "refused since 5.0). Use the 'Manage Repos…' dialog "
+                    "refused since 5.0). bundle_name is the file name of "
+                    "the published bundle (empty = favorites) and "
+                    "commit_email the e-mail of the publish commits "
+                    "(empty = filter_mate@imagodata.local). Use the "
+                    "'Manage Repos…' dialog "
                     "to create entries."
                 ),
             },

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -35,6 +36,57 @@ PLAINTEXT_AUTH_REMOVED_IN = "5.0.0"
 # Repos already reported. Re-parsing the same config (e.g. on every
 # save_repos round-trip) would otherwise log one error per read.
 _PLAINTEXT_AUTH_REPORTED: set = set()
+
+# Fallbacks used only when a repo entry leaves ``bundle_name`` or
+# ``commit_email`` empty: everything else comes from the entry itself.
+DEFAULT_BUNDLE_NAME = "favorites"
+DEFAULT_COMMIT_NAME = "FilterMate"
+DEFAULT_COMMIT_EMAIL = "filter_mate@imagodata.local"
+
+# ASCII ``local@domain``: the local part with the usual unquoted characters
+# (not starting with ``-``), the domain as dot-separated labels.
+_COMMIT_EMAIL_RE = re.compile(
+    r"[A-Za-z0-9.!#$%&'*+/=?^_`{|}~][A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]*"
+    r"@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?"
+    r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*"
+)
+
+def _text_field(entry: Dict[str, Any], key: str, repo_name: str) -> str:
+    """String value of ``key`` in a repo entry; another type is ignored (logged)."""
+    value = entry.get(key)
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        logger.warning("Repo %r: %s must be text, got %r; ignored", repo_name, key, value)
+        return ""
+    return value.strip()
+
+
+def is_valid_commit_email(value: str) -> bool:
+    """True for a single ASCII ``local@domain`` address, as git records it."""
+    return bool(_COMMIT_EMAIL_RE.fullmatch((value or "").strip()))
+
+
+def is_valid_bundle_name(value: str) -> bool:
+    """True when the bundle file name is written as typed: letters, digits, ``_`` and ``-``.
+
+    Same rule as ``BundlePublisher.sanitize_bundle_filename``, which replaces
+    any other character with ``_``.
+    """
+    value = (value or "").strip()
+    return bool(value) and all(c.isalnum() or c in "_-" for c in value)
+
+
+def _commit_name(author_name: str) -> str:
+    """Author name for git: an ``<email>`` typed in the Author field is dropped.
+
+    The e-mail of the commit is the repo's; git would otherwise record the
+    first ``<…>`` of the string. Control characters are removed, and a name
+    left empty (or only ``<``) falls back to ``DEFAULT_COMMIT_NAME``.
+    """
+    name = (author_name or "").split("<", 1)[0]
+    name = "".join(c for c in name if c.isprintable()).strip()
+    return name or DEFAULT_COMMIT_NAME
 
 
 def _profile_repos_root() -> str:
@@ -104,6 +156,10 @@ class RemoteRepo:
     is_default: bool = False
     # References an entry in QgsAuthManager. Encrypted at rest.
     authcfg_id: str = ""
+    # File name of the published bundle (empty = DEFAULT_BUNDLE_NAME)
+    bundle_name: str = ""
+    # E-mail of the publish commits (empty = DEFAULT_COMMIT_EMAIL)
+    commit_email: str = ""
     # Forward-compatible catch-all for unknown fields
     extra: Dict[str, Any] = field(default_factory=dict)
 
@@ -181,6 +237,26 @@ class RemoteRepo:
     def has_remote(self) -> bool:
         return bool(self.git_url)
 
+    @property
+    def effective_bundle_name(self) -> str:
+        """Bundle file name of this repo, ``DEFAULT_BUNDLE_NAME`` when unset."""
+        return self.bundle_name or DEFAULT_BUNDLE_NAME
+
+    def commit_author(self, author_name: str = "") -> str:
+        """``"Name <email>"`` for the publish commits to this repo.
+
+        The e-mail is the repo's ``commit_email``; an invalid one (edited
+        by hand in config.json) is ignored for ``DEFAULT_COMMIT_EMAIL``.
+        """
+        email = self.commit_email
+        if email and not is_valid_commit_email(email):
+            logger.warning(
+                "Repo %r: commit_email %r is not an e-mail address, using %s",
+                self.name, email, DEFAULT_COMMIT_EMAIL,
+            )
+            email = ""
+        return f"{_commit_name(author_name)} <{email or DEFAULT_COMMIT_EMAIL}>"
+
     def status(self) -> RepoStatus:
         local = self.expanded_local_clone
         if not local:
@@ -223,6 +299,7 @@ class RemoteRepo:
         known = {
             "name", "git_url", "branch", "local_clone",
             "target_collection", "is_default", "authcfg_id", "auth_header",
+            "bundle_name", "commit_email",
         }
         extra = {k: v for k, v in entry.items() if k not in known}
 
@@ -246,6 +323,8 @@ class RemoteRepo:
             target_collection=str(entry.get("target_collection") or "").strip(),
             is_default=bool(entry.get("is_default") or False),
             authcfg_id=str(entry.get("authcfg_id") or "").strip(),
+            bundle_name=_text_field(entry, "bundle_name", name),
+            commit_email=_text_field(entry, "commit_email", name),
             extra=extra,
         )
 
@@ -274,7 +353,7 @@ class RemoteRepoManager:
     non-git concern in the git-failure envelope.
     """
 
-    DEFAULT_COMMIT_AUTHOR = "FilterMate <filter_mate@imagodata.local>"
+    DEFAULT_COMMIT_AUTHOR = f"{DEFAULT_COMMIT_NAME} <{DEFAULT_COMMIT_EMAIL}>"
 
     def __init__(self, extension):
         """
@@ -437,7 +516,8 @@ class RemoteRepoManager:
         """
         entry: Dict[str, Any] = {"name": repo.name}
         for key in ("git_url", "branch", "local_clone",
-                    "target_collection", "authcfg_id"):
+                    "target_collection", "authcfg_id",
+                    "bundle_name", "commit_email"):
             val = getattr(repo, key, "")
             if val:
                 entry[key] = val
@@ -590,7 +670,8 @@ class RemoteRepoManager:
                 writes the bundle file and returns its absolute path.
                 Any exception it raises is captured into the result.
             commit_author: Override for git author, e.g. "Team <email>".
-                When None, falls back to ``DEFAULT_COMMIT_AUTHOR``.
+                When None, falls back to ``repo.commit_author()`` (the
+                repo's ``commit_email``, else ``DEFAULT_COMMIT_AUTHOR``).
 
         Returns:
             RepoSyncResult — on failure ``error_message`` is set and
@@ -648,7 +729,7 @@ class RemoteRepoManager:
             )
             client.commit(
                 msg,
-                author=commit_author or self.DEFAULT_COMMIT_AUTHOR,
+                author=commit_author or repo.commit_author(),
             )
             sync.commit_sha = client.head_sha() or ""
 

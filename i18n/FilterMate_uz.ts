@@ -7375,6 +7375,41 @@ Aniqlangan joy: {1}</translation>
         <translation>To‘plam:</translation>
     </message>
     <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="149"/>
+        <source>Bundle file name:</source>
+        <translation>Paket fayl nomi:</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="155"/>
+        <source>Commit e-mail:</source>
+        <translation>Commit e-pochtasi:</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="147"/>
+        <source>Empty = {0}</source>
+        <translation>Bo'sh = {0}</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="331"/>
+        <source>Invalid commit e-mail</source>
+        <translation>Commit e-pochtasi noto'g'ri</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="332"/>
+        <source>'{0}' is not an e-mail address (name@domain).</source>
+        <translation>'{0}' e-pochta manzili emas (name@domain).</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="332"/>
+        <source>Invalid bundle file name</source>
+        <translation>Paket fayl nomi noto'g'ri</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="333"/>
+        <source>'{0}': use only letters, digits, '_' and '-'.</source>
+        <translation>'{0}': faqat harflar, raqamlar, '_' va '-' dan foydalaning.</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="98"/>
         <source>Configure a git-backed publish target. Anonymous repos can leave Authentication empty — only publishers need credentials.</source>
         <translation>git asosidagi nashr nishonini sozlang. Anonim omborlar uchun Autentifikatsiyani bo‘sh qoldirish mumkin — faqat nashr etuvchilarga hisob ma’lumotlari kerak.</translation>

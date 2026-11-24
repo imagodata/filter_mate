@@ -7375,6 +7375,41 @@ Ditemukan dari: {1}</translation>
         <translation>Koleksi:</translation>
     </message>
     <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="149"/>
+        <source>Bundle file name:</source>
+        <translation>Nama berkas paket:</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="155"/>
+        <source>Commit e-mail:</source>
+        <translation>Email commit:</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="147"/>
+        <source>Empty = {0}</source>
+        <translation>Kosong = {0}</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="331"/>
+        <source>Invalid commit e-mail</source>
+        <translation>Email commit tidak valid</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="332"/>
+        <source>'{0}' is not an e-mail address (name@domain).</source>
+        <translation>'{0}' bukan alamat email (name@domain).</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="332"/>
+        <source>Invalid bundle file name</source>
+        <translation>Nama berkas paket tidak valid</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="333"/>
+        <source>'{0}': use only letters, digits, '_' and '-'.</source>
+        <translation>'{0}': gunakan hanya huruf, angka, '_' dan '-'.</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="98"/>
         <source>Configure a git-backed publish target. Anonymous repos can leave Authentication empty — only publishers need credentials.</source>
         <translation>Konfigurasikan target publikasi berbasis git. Repo anonim dapat mengosongkan Autentikasi — hanya penerbit yang memerlukan kredensial.</translation>

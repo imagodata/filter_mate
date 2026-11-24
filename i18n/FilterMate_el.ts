@@ -7375,6 +7375,41 @@ Resolved from: {1}</source>
         <translation>Συλλογή:</translation>
     </message>
     <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="149"/>
+        <source>Bundle file name:</source>
+        <translation>Όνομα αρχείου πακέτου:</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="155"/>
+        <source>Commit e-mail:</source>
+        <translation>Email των commit:</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="147"/>
+        <source>Empty = {0}</source>
+        <translation>Κενό = {0}</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="331"/>
+        <source>Invalid commit e-mail</source>
+        <translation>Μη έγκυρο email των commit</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="332"/>
+        <source>'{0}' is not an e-mail address (name@domain).</source>
+        <translation>Το '{0}' δεν είναι διεύθυνση email (name@domain).</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="332"/>
+        <source>Invalid bundle file name</source>
+        <translation>Μη έγκυρο όνομα αρχείου πακέτου</translation>
+    </message>
+    <message>
+        <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="333"/>
+        <source>'{0}': use only letters, digits, '_' and '-'.</source>
+        <translation>'{0}': χρησιμοποιήστε μόνο γράμματα, ψηφία, '_' και '-'.</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="98"/>
         <source>Configure a git-backed publish target. Anonymous repos can leave Authentication empty — only publishers need credentials.</source>
         <translation>Ρυθμίστε έναν προορισμό δημοσίευσης βασισμένο σε git. Στα ανώνυμα αποθετήρια ο Έλεγχος ταυτότητας μπορεί να μείνει κενός — διαπιστευτήρια χρειάζονται μόνο οι εκδότες.</translation>

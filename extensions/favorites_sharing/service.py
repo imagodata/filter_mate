@@ -24,6 +24,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from .remote_repo_manager import DEFAULT_BUNDLE_NAME
 from .scanner import ResourceSharingScanner, SharedFavorite
 from .services import BundlePublisher, FavoritesForkService, SharedFavoritesQuery
 
@@ -118,7 +119,7 @@ class FavoritesSharingService:
         return self._publisher.suggest_new_collection_dir(folder_name)
 
     @staticmethod
-    def _sanitize_bundle_filename(raw: str, default: str = "favorites") -> str:
+    def _sanitize_bundle_filename(raw: str, default: str = DEFAULT_BUNDLE_NAME) -> str:
         """Backwards-compat alias of :meth:`BundlePublisher.sanitize_bundle_filename`."""
         return BundlePublisher.sanitize_bundle_filename(raw, default=default)
 

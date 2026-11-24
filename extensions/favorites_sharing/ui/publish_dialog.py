@@ -32,7 +32,7 @@ try:
 except ImportError:  # pragma: no cover
     HAS_QT = False
 
-from ..remote_repo_manager import RemoteRepo, RemoteRepoManager
+from ..remote_repo_manager import DEFAULT_BUNDLE_NAME, RemoteRepo, RemoteRepoManager
 from ..service import CollectionTarget, FavoritesSharingService
 from .publish_model import read_config_defaults, resolve_remote_repo_manager
 
@@ -192,7 +192,10 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         layout.addWidget(QLabel(self.tr("<b>2. Bundle file name</b>")))
         self._bundle_name_edit = QLineEdit()
         self._bundle_name_edit.setPlaceholderText(self.tr("e.g. zones_bruxelles"))
-        self._bundle_name_edit.setText("favorites")
+        self._bundle_name_edit.setText(DEFAULT_BUNDLE_NAME)
+        # Last name the dialog filled in itself: a repo target replaces it
+        # with the repo's bundle_name, a name typed by the user is kept.
+        self._auto_bundle_name = DEFAULT_BUNDLE_NAME
         layout.addWidget(self._bundle_name_edit)
         layout.addWidget(QLabel(self.tr(
             "<small>→ <code>&lt;target&gt;/filter_mate/favorites/&lt;name&gt;.fmfav-pack.json</code></small>"
@@ -339,6 +342,9 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
 
     def _on_target_changed(self) -> None:
         data = self._target_combo.currentData()
+        if not (isinstance(data, str) and data.startswith(self._REMOTE_REPO_DATA_PREFIX)):
+            # A name taken from a repo entry does not carry over to a local target
+            self._follow_bundle_name(DEFAULT_BUNDLE_NAME)
 
         if isinstance(data, CollectionTarget):
             self._set_path_hint(data.collection_dir)
@@ -355,6 +361,8 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             self._meta_desc_edit.setPlainText(str(meta.get('description') or ""))
         elif isinstance(data, str) and data.startswith(self._REMOTE_REPO_DATA_PREFIX):
             repo = self._resolve_selected_repo(data)
+            # A repo gone from the config since the list was filled: back to the default
+            self._follow_bundle_name(repo.effective_bundle_name if repo else DEFAULT_BUNDLE_NAME)
             if repo is not None:
                 hint = self._format_repo_hint(repo)
                 self._set_path_hint(hint)
@@ -371,6 +379,13 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
                 self._set_path_hint(self._custom_dir)
             else:
                 self._set_path_hint(self.tr("Click 'Browse...' to choose a directory."))
+
+    def _follow_bundle_name(self, name: str) -> None:
+        """Show ``name`` in the bundle field unless the user typed their own."""
+        current = self._bundle_name_edit.text().strip()
+        if current in ("", self._auto_bundle_name):
+            self._bundle_name_edit.setText(name)
+            self._auto_bundle_name = name
 
     def _set_path_hint(self, text: str) -> None:
         self._target_path_label.setText(f"<code>{text}</code>")
@@ -542,7 +557,7 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             )
             return
 
-        bundle_name = self._bundle_name_edit.text().strip() or "favorites"
+        bundle_name = self._bundle_name_edit.text().strip() or repo.effective_bundle_name
         metadata = self._collect_metadata()
 
         # Inline closure: lets RemoteRepoManager call back into the
@@ -566,11 +581,8 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
                 )
             return result.bundle_path
 
-        # Build a plausible commit author from the metadata form
-        author_name = metadata.get('author') or ''
-        commit_author: Optional[str] = None
-        if author_name:
-            commit_author = f"{author_name} <filter_mate@imagodata.local>"
+        # Author name from the metadata form, e-mail from the repo entry
+        commit_author = repo.commit_author(metadata.get('author') or '')
 
         # Wrap the whole pipeline in a callable for the worker
         def _publish_op():
@@ -713,7 +725,7 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         if target is None:
             return
 
-        bundle_name = self._bundle_name_edit.text().strip() or "favorites"
+        bundle_name = self._bundle_name_edit.text().strip() or DEFAULT_BUNDLE_NAME
         metadata = self._collect_metadata()
 
         result = self._sharing_service.publish_bundle(
