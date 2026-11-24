@@ -1468,12 +1468,15 @@ class FilterMateApp:
         except ImportError:  # a diagnostic: never in the way of the task
             end_watch = lambda: None  # noqa: E731
 
-        def on_results(result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids):
+        def on_results(result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids,
+                       asks=getattr(self.appTasks[task_name], 'settings_to_ask', None)):
             delivered['results'] = True
             try:
                 self.layer_management_engine_task_completed(result_project_layers, tn, ids)
             finally:
                 end_watch()  # after the completion: the other part of the task, on the main thread
+            if asks:  # 2026-11-24: settings of the project that differ from this computer's: asked once
+                self._ask_layer_settings(asks)
 
         self.appTasks[task_name].resultingLayers.connect(on_results, Qt.ConnectionType.QueuedConnection)
         # 2026-10-17: savingLayerVariable / removingLayerVariable are no longer connected: their slots
@@ -1488,6 +1491,20 @@ class FilterMateApp:
 
         # Add to task manager
         QgsApplication.taskManager().addTask(self.appTasks[task_name])
+
+    def _ask_layer_settings(self, asks):
+        """Ask which settings of the project to apply where they differ from this computer's (LayerSettingsQuestion)."""
+        question = getattr(self, '_layer_settings_question', None)
+        if question is None:
+            try:
+                from .adapters.layer_settings_question import LayerSettingsQuestion
+            except ImportError as e:
+                logger.warning(f"Layer settings question unavailable: {e}")
+                return
+            question = self._layer_settings_question = LayerSettingsQuestion(
+                lambda: self.PROJECT_LAYERS, self.save_variables_from_layer, lambda: self.dockwidget,
+                lambda: self.CONFIG_DATA)
+        question.receive(asks)
 
     def _legacy_dispatch_task(self, task_name: str, data=None):
         """Legacy task dispatcher fallback when TaskOrchestrator unavailable."""

@@ -205,3 +205,68 @@ def repaired_variable_names(names: Any, values: Any, ours: Collection[str]) -> O
         return theirs, values_list
     kept = [name for index, name in enumerate(names) if index not in mine or index < len(values_list)]
     return (kept, values) if len(kept) != len(names) else None
+
+
+# --- The question asked at the opening of a project (2026-11-24) ----------------------------------------------------
+#
+# A setting the project carries (its layer marked, the file writable) that differs from the one this computer's SQLite
+# has is not applied at the registration: the user is asked once for the whole project which groups to take. A group
+# kept leaves this computer's values in the panel and the SQLite, and the project's in the project (never written over
+# them: the settings of the others stay in a shared project). Asks are ``{layer_id: {group: {key: (mine, project's)}}}``.
+
+Asks = Dict[str, Dict[str, Dict[str, Tuple[Any, Any]]]]
+
+
+def merged_asks(pending: Asks, new: Asks) -> Asks:
+    """The asks of several registrations of one project, the latest for a setting."""
+    merged = {layer_id: {group: dict(keys) for group, keys in groups.items()} for layer_id, groups in pending.items()}
+    for layer_id, groups in (new or {}).items():
+        for group, keys in groups.items():
+            merged.setdefault(layer_id, {}).setdefault(group, {}).update(keys)
+    return merged
+
+
+def asked_groups(asks: Asks) -> List[str]:
+    """The groups the question is about, in the order of :data:`GROUPS`."""
+    present = {group for groups in asks.values() for group, keys in groups.items() if keys}
+    return [group for group in GROUPS if group in present]
+
+
+def settings_to_apply(asks: Asks, groups: Collection[str], held: Mapping[str, Mapping[str, Mapping[str, Any]]],
+                      load: Callable[[str], Any]) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    """``{layer_id: {group: {key: the project's value}}}`` to put in the panel for the groups the user took.
+
+    A setting the panel no longer holds as it was at the registration (changed meanwhile by the user, or the layer
+    gone) is left: the latest change wins.
+
+    Args:
+        asks: What the registrations found different.
+        groups: The groups the user took.
+        held: The settings the panel holds now (``PROJECT_LAYERS``).
+    """
+    chosen: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for layer_id, by_group in asks.items():
+        props = held.get(layer_id)
+        if not isinstance(props, Mapping):
+            continue
+        for group, keys in by_group.items():
+            if group not in groups:
+                continue
+            now = props.get(group) or {}
+            for key, (mine, theirs) in keys.items():
+                if key in now and same_setting(now[key], mine, load, key):
+                    chosen.setdefault(layer_id, {}).setdefault(group, {})[key] = theirs
+    return chosen
+
+
+def answer_text(groups: Collection[str]) -> str:
+    """A remembered answer as stored: the groups taken, comma separated ('' for none)."""
+    return ",".join(group for group in GROUPS if group in groups)
+
+
+def answer_groups(text: Any) -> Optional[List[str]]:
+    """The groups of a remembered answer; None when there is none (a text that is no answer included)."""
+    if not isinstance(text, str):
+        return None
+    groups = [part for part in text.split(",") if part]
+    return groups if all(group in GROUPS for group in groups) else None

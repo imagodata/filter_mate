@@ -78,16 +78,22 @@ def _variables(task, layer_id="parcelles_1"):
     return written
 
 
-def test_the_project_wins_over_the_sqlite_of_this_computer(vector):
+def test_a_setting_of_the_project_that_differs_from_the_sqlite_is_asked_not_applied(vector):
+    """2026-11-24: the user is asked once for the project; until then the panel holds this computer's value and the
+    project keeps its own (the variable is queued as stored: not written)."""
     task = _registering(SQLITE, PROJECT)
     task._load_existing_layer_properties = MagicMock(side_effect=lambda layer: _queued_from_sqlite(task, layer))
 
     assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
 
     props = task.project_layers["parcelles_1"]
-    assert props["exploring"] == {"single_selection_expression": '"nom"', "custom_selection_expression": '"rank" > 10',
-                                  "is_linking": False, "current_exploring_groupbox": "single_selection"}
-    assert props["filtering"] == {"has_layers_to_filter": True, "layers_to_filter": ["routes_1"], "buffer_value": 12.5}
+    assert props["exploring"] == SQLITE["exploring"]
+    assert props["filtering"] == SQLITE["filtering"]
+    assert task.settings_to_ask == {"parcelles_1": {
+        "exploring": {"single_selection_expression": ('"fid"', '"nom"'),
+                      "custom_selection_expression": ('"fid"', '"rank" > 10'), "is_linking": (True, False)},
+        "filtering": {"has_layers_to_filter": (False, True), "layers_to_filter": ([], ["routes_1"]),
+                      "buffer_value": (0.0, 12.5)}}}
     assert props["infos"]["primary_key_name"] == "fid"  # infos: from the layer and the SQLite, not the project
     task.insert_properties_to_spatialite.assert_called_once_with("parcelles_1", props)  # the copy follows
     variables = _variables(task)
@@ -216,11 +222,12 @@ def test_a_value_the_panel_wrote_after_the_queue_wins(vector, monkeypatch):
 
 def test_an_empty_value_read_back_as_none_is_empty_again(vector):
     """An empty text, or an empty list stored as such, comes back from a .qgz as None (QGIS 3.44 and 4.3)."""
-    sqlite = {"infos": {}, "exploring": {}, "filtering": {"buffer_value_expression": "x", "layers_to_filter": ["a"]}}
+    sqlite = {"infos": {}, "exploring": {}, "filtering": {"has_buffer_value": False}}
     task = _registering(sqlite, {"filtering": {"buffer_value_expression": None, "layers_to_filter": None}})
     task._load_existing_layer_properties = MagicMock(return_value={g: dict(v) for g, v in sqlite.items()})
     assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
-    assert task.project_layers["parcelles_1"]["filtering"] == {"buffer_value_expression": "", "layers_to_filter": []}
+    assert task.project_layers["parcelles_1"]["filtering"] == {"has_buffer_value": False, "buffer_value_expression": "",
+                                                                "layers_to_filter": []}
     assert _variables(task) == {"filterMate_filtering_buffer_value_expression": "",
                                 "filterMate_filtering_layers_to_filter": "[]"}
 
@@ -262,17 +269,20 @@ def test_the_project_wins_only_for_the_layers_this_version_wrote(vector):
     task._load_existing_layer_properties = MagicMock(side_effect=lambda layer: _queued_from_sqlite(task, layer))
     assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
     assert task.project_layers["parcelles_1"]["exploring"]["single_selection_expression"] == '"fid"'  # the SQLite's
+    assert getattr(task, "settings_to_ask", {}) == {}  # nothing to ask: the SQLite wins
     task._project_settings_win = {"parcelles_1"}
     task._load_existing_layer_properties = MagicMock(side_effect=lambda layer: _queued_from_sqlite(task, layer))
     assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
-    assert task.project_layers["parcelles_1"]["exploring"]["single_selection_expression"] == '"nom"'
+    assert task.settings_to_ask["parcelles_1"]["exploring"]["single_selection_expression"] == ('"fid"', '"nom"')
 
 
 def test_a_layer_to_filter_the_project_does_not_have_is_left_out_in_memory_only(vector):
-    task = _registering(SQLITE, {"filtering": {"layers_to_filter": '["routes_1", "rivers_of_another"]'}})
+    task = _registering({"infos": {}, "exploring": {}, "filtering": {}},
+                        {"filtering": {"layers_to_filter": '["routes_1", "rivers_of_another"]'}})
     task._project_layer_ids = {"parcelles_1", "routes_1"}
     task._load_existing_layer_properties = MagicMock(side_effect=lambda layer: _queued_from_sqlite(task, layer))
     saved = []
+    task._load_existing_layer_properties = MagicMock(return_value={"infos": {}, "exploring": {}, "filtering": {}})
     task.insert_properties_to_spatialite = MagicMock(
         side_effect=lambda layer_id, props: saved.append(json.loads(json.dumps(props))))
     assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
