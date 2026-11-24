@@ -995,6 +995,65 @@ class TestDirectSubsetApply:
         assert "EXISTS" in names_to_subsets["Cables"]
         assert "EXISTS" in names_to_subsets["Points de demande"]
 
+    def _record_zoom(self, monkeypatch):
+        """Stub adapters.auto_zoom (imported by the apply at call time) and record the zoom."""
+        calls = {}
+        stub = types.ModuleType("_fm_test_ui_shim.adapters.auto_zoom")
+
+        def zoom_layers_for_filter(source, targets=(), source_filtered=True):
+            calls["for_filter"] = (source, list(targets), source_filtered)
+            return ["zoom-layers"]
+
+        stub.zoom_layers_for_filter = zoom_layers_for_filter
+        stub.bump_subset_change_token = lambda: 7
+        stub.auto_zoom_to_filtered = lambda layers, *a, **k: calls.setdefault("zoomed", layers)
+        if "_fm_test_ui_shim.adapters" not in sys.modules:
+            package = types.ModuleType("_fm_test_ui_shim.adapters")
+            package.__path__ = []
+            monkeypatch.setitem(sys.modules, package.__name__, package)
+        monkeypatch.setitem(sys.modules, stub.__name__, stub)
+        return calls
+
+    def _two_target_favorite(self, monkeypatch, expression):
+        zone_pop = self._make_layer("Zones POP", "postgres::infra.zone_pop", "zonepop-id")
+        cables = self._make_layer("Cables", "postgres::infra.cables", "cables-id")
+        demand = self._make_layer("Points de demande", "postgres::infra.demand_points", "demand-id")
+        self._stub_qgis_project({zone_pop.id(): zone_pop, cables.id(): cables, demand.id(): demand})
+        signatures = {zone_pop: "postgres::infra.zone_pop", cables: "postgres::infra.cables",
+                      demand: "postgres::infra.demand_points"}
+        monkeypatch.setattr(favorites_spatial_helpers, "layer_signature_for",
+                            lambda layer: signatures.get(layer, "unknown::?"))
+        self._patch_safe_set_subset_string(monkeypatch, [])
+        ctrl = FavoritesController.__new__(FavoritesController)
+        ctrl._dockwidget = MagicMock()
+        ctrl._favorites_service = None
+        fav = MagicMock()
+        fav.name = "zoomy"
+        fav.layer_id = None
+        fav.layer_name = "Zones POP"
+        fav.expression = expression
+        fav.spatial_config = {'source_layer_signature': 'postgres::infra.zone_pop'}
+        fav.remote_layers = {
+            sig: {'expression': 'EXISTS (...)', 'layer_signature': sig}
+            for sig in ('postgres::infra.cables', 'postgres::infra.demand_points')
+        }
+        return ctrl, fav, zone_pop, cables, demand
+
+    def test_replay_zooms_to_the_filtered_source_layer(self, monkeypatch):
+        """2026-11-24: the map goes to the source of the favorite, not to the union with its targets."""
+        calls = self._record_zoom(monkeypatch)
+        ctrl, fav, zone_pop, cables, demand = self._two_target_favorite(monkeypatch, "\"id\" = 1")
+        assert ctrl._spatial.apply_favorite_subsets_directly(fav) is True
+        assert calls["for_filter"] == (zone_pop, [cables, demand], True)
+        assert calls["zoomed"] == ["zoom-layers"]
+
+    def test_replay_without_source_expression_zooms_to_the_targets(self, monkeypatch):
+        """A favorite that filters only its targets: its source is unfiltered, the map goes to the targets."""
+        calls = self._record_zoom(monkeypatch)
+        ctrl, fav, zone_pop, cables, demand = self._two_target_favorite(monkeypatch, "  ")
+        assert ctrl._spatial.apply_favorite_subsets_directly(fav) is True
+        assert calls["for_filter"] == (zone_pop, [cables, demand], False)
+
     def test_unresolvable_target_does_not_abort(self, monkeypatch):
         """A target layer that's no longer in the project is logged-skipped;
         other applies still go through and the call still reports success."""
