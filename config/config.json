@@ -886,7 +886,7 @@
         },
         "auto_zoom_on_filter": {
           "value": true,
-          "description": "Auto-zoom on the union extent of filtered layers (source + cascade targets) after a filter or favorite is applied. Per-layer is_tracking still forces zoom on its own layer."
+          "description": "Auto-zoom, after a filter or a favorite is applied, to the filtered extent of the source layer (to its targets when the source is left unfiltered, as a favorite can). Per-layer is_tracking still forces zoom on its own layer."
         }
       },
       "POINT_CLOUD": {

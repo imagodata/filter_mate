@@ -172,7 +172,7 @@ def test_the_layout_step_asks_the_panels_and_the_buttons(values):
     look = wizard.step_questions(wizard.LOOK, values, facts, wizard.Answers())
     assert [ask.key for ask in look] == ["theme", "profile", "language"]
     layout = wizard.step_questions(wizard.LAYOUT, values, facts, wizard.Answers())
-    assert [ask.key for ask in layout] == ["panels", "headers", "height", "action_bar"]
+    assert [ask.key for ask in layout] == ["panels", "headers", "height", "sizing", "action_bar"]
     panels = layout[0]
     assert [choice.key for choice in panels.choices] == list(wizard.LAYOUTS) and not panels.multi
     assert [choice.key for choice in panels.choices if choice.selected] == [wizard.IN_DOCK]
@@ -269,12 +269,78 @@ def test_the_height_of_the_rows_is_applied_at_once(settings):
     assert rows and rows[0]["effect"] == EFFECT_NOW
 
 
-def test_the_sizing_of_the_panels_is_applied_at_once_and_not_asked_by_the_setup(settings):
+# --- the heights of the panels of the sections taken out of the dock (PANEL_SIZING, from 5.1.2) ---------------------
+
+
+def _sizing(values, facts):
+    return [ask for ask in wizard.step_questions(wizard.LAYOUT, values, facts, wizard.Answers())
+            if ask.key == "sizing"]
+
+
+def test_the_sizing_of_the_panels_is_applied_at_once(settings):
     from core.agent.settings_reference import EFFECT_NOW
-    path = "APP.DOCKWIDGET.PANEL_SIZING"
-    rows = plan(settings, [{"path": path, "value": "manual"}], by_user=True)
+    rows = plan(settings, [{"path": wizard.PANEL_SIZING, "value": "manual"}], by_user=True)
     assert rows and rows[0]["effect"] == EFFECT_NOW
-    assert path not in {question_path for question_path in vars(wizard).values() if isinstance(question_path, str)}
+
+
+def test_the_sizing_is_auto_by_default_and_manual_is_a_choice(values, settings):
+    (sizing,) = _sizing(values, wizard.ProjectFacts(layout=wizard.IN_DOCK))
+    assert [choice.key for choice in sizing.choices] == ["auto", "manual"] and not sizing.multi
+    assert [choice.key for choice in sizing.choices if choice.selected] == ["auto"]
+    assert set(wizard.SIZINGS) == set({row.path: row for row in settings}[wizard.PANEL_SIZING].choices)
+    answers = wizard.Answers()
+    answers.record(wizard.LAYOUT, {"sizing": ["manual"], "action_bar": ["bottom"]})
+    assert wizard.changes(values, answers) == [{"path": wizard.PANEL_SIZING, "value": "manual"}]
+    answers.record(wizard.LAYOUT, {"sizing": ["auto"], "action_bar": ["bottom"]})
+    assert wizard.changes(values, answers) == []  # the default: nothing changes
+
+
+def test_a_sizing_set_elsewhere_is_offered_ticked(values):
+    (sizing,) = _sizing(dict(values, **{wizard.PANEL_SIZING: "manual"}), wizard.ProjectFacts(layout=wizard.AS_NOW))
+    assert [choice.key for choice in sizing.choices if choice.selected] == ["manual"]
+
+
+def test_sections_that_cannot_leave_the_dock_have_no_panels_to_size(values):
+    assert _sizing(values, wizard.ProjectFacts()) == []
+
+
+def test_a_configuration_without_the_sizing_is_not_asked(values):
+    older = {path: value for path, value in values.items() if path != wizard.PANEL_SIZING}
+    assert _sizing(older, wizard.ProjectFacts(layout=wizard.IN_DOCK)) == []
+
+
+# --- the answers kept for a project (LAYER_SETTINGS.remember_answers, from 5.1.2) ----------------------------------------
+
+
+def _project_question(values, answers=None):
+    questions = wizard.step_questions(wizard.EXPLORING, values, wizard.ProjectFacts(), answers or wizard.Answers())
+    return [ask for ask in questions if ask.key == "project"]
+
+
+def test_remembering_the_answers_is_asked_with_the_tools_and_ticked_by_default(values, settings):
+    assert wizard.REMEMBER_ANSWERS in wizard.PATHS
+    assert {row.path: row for row in settings}[wizard.REMEMBER_ANSWERS].value is True
+    (project,) = _project_question(values)
+    assert project.multi and [(choice.key, choice.selected) for choice in project.choices] == [("remember", True)]
+    assert wizard.step_questions(wizard.EXPLORING, values, wizard.ProjectFacts(), wizard.Answers())[-1].key == "project"
+
+
+def test_the_question_of_the_project_is_asked_whatever_data_is_kept(values):
+    answers = wizard.Answers()
+    answers.record(wizard.FEATURES, {"sections": [], "data": [], "size": ["keep"]})
+    assert len(_project_question(values, answers)) == 1  # EXPLORING is always there
+
+
+def test_not_remembering_the_answers_is_a_change(values):
+    answers = wizard.Answers()
+    answers.record(wizard.EXPLORING, {"project": []})
+    assert wizard.changes(values, answers) == [{"path": wizard.REMEMBER_ANSWERS, "value": False}]
+    answers.record(wizard.EXPLORING, {"project": ["remember"]})
+    assert wizard.changes(values, answers) == []  # the default: nothing changes
+    off = dict(values, **{wizard.REMEMBER_ANSWERS: False})
+    assert [choice.selected for choice in _project_question(off)[0].choices] == [False]
+    assert wizard.changes(off, answers) == [{"path": wizard.REMEMBER_ANSWERS, "value": True}]
+
 
 
 # --- the tools of the EXPLORING rail, one question per kind of layer ---------------------------------------------------
@@ -285,7 +351,8 @@ TOOLS = wizard.TOOL_SETTINGS
 def _tools_step(values, data, answers=None):
     answers = answers or wizard.Answers()
     answers.record(wizard.FEATURES, {"sections": ["filtering", "exporting", "agent"], "data": data, "size": ["keep"]})
-    return answers, wizard.step_questions(wizard.EXPLORING, values, wizard.ProjectFacts(), answers)
+    questions = wizard.step_questions(wizard.EXPLORING, values, wizard.ProjectFacts(), answers)
+    return answers, [ask for ask in questions if ask.key.startswith("tools_")]  # "project" comes after them
 
 
 def test_the_tools_step_comes_after_the_layout_and_before_the_sections_it_precedes_in_the_panel():
@@ -308,7 +375,7 @@ def test_vector_layers_are_always_asked_the_other_kinds_when_their_data_is_ticke
 def test_a_kind_of_data_left_as_it_is_is_asked_as_the_settings_say(values):
     values = dict(values, **{wizard.RASTER_ON: False, wizard.POINT_CLOUD_ON: True})
     questions = wizard.step_questions(wizard.EXPLORING, values, wizard.ProjectFacts(), wizard.Answers())
-    assert [ask.key for ask in questions] == ["tools_vector", "tools_point_cloud"]
+    assert [ask.key for ask in questions] == ["tools_vector", "tools_point_cloud", "project"]
 
 
 def test_the_choices_are_the_buttons_that_can_be_hidden_all_ticked_by_default(values):

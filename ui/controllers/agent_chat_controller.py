@@ -203,10 +203,13 @@ class AgentChatController(QObject):
         self._live_timer.setSingleShot(True)
         self._live_timer.setInterval(LIVE_DELAY_MS)
         self._live_timer.timeout.connect(self._run_live)
-        self._ask_user = ask_user or (lambda title, text: ask_plain(parent_widget, title, text))
+        # The questions of the permissions are cards of the thread during a turn of the chat (2026-11-24), dialogs
+        # otherwise (another application asks, the panel is out of view, nothing runs): see _ask_in_thread.
+        self._asking_external = False
+        self._ask_user = ask_user or self._ask_yes_no
         if ask_choice is None:  # a yes / no given alone answers the questions with three answers too
             ask_choice = ((lambda title, text: ANSWER_ONCE if self._ask_user(title, text) else ANSWER_NO) if ask_user
-                          else (lambda title, text: ask_with_conversation(parent_widget, title, text)))
+                          else self._ask_three)
         self._ask_choice = ask_choice
         # The level of the settings, and what the user allowed for the conversation under way.
         # The layers the user protected in the open project: refused to the chat, the recipes and other applications.
@@ -258,6 +261,9 @@ class AgentChatController(QObject):
         self.panel = AgentPanel(parent_widget)
         self._facts_layers = {}  # layer id -> layer whose selection or filter the requests of the welcome follow
         self.panel.facts_provider = self._read_welcome_facts
+        # The names of the layers become links in the answers; a click makes that layer the active one.
+        self.panel.thread.layer_names = self._linked_layer_names
+        self.panel.layer_link_clicked.connect(self._on_layer_link)
         self.panel.refresh_examples()  # drawn for an unknown state in the panel: now for the project
         self.panel.send_requested.connect(self._on_send)
         self._mode = read_mode()  # Ask, Plan or Act, kept from one session to the next (core/agent/modes.py)
@@ -332,6 +338,30 @@ class AgentChatController(QObject):
         """The state of QGIS and the project for the requests of the welcome (main thread; counts, no feature read)."""
         from ...adapters.qgis.project_facts import read_facts
         return read_facts(active=self._active_layer())
+
+    @staticmethod
+    def _layers_in_tree_order():
+        """The layers of the project in the order of its layer tree, then the ones out of it."""
+        project = QgsProject.instance()
+        in_tree = [node.layer() for node in project.layerTreeRoot().findLayers() if node.layer() is not None]
+        ids = {layer.id() for layer in in_tree}
+        return in_tree + [layer for layer in project.mapLayers().values() if layer.id() not in ids]
+
+    def _linked_layer_names(self):
+        return [layer.name() for layer in self._layers_in_tree_order()]
+
+    def _on_layer_link(self, name: str) -> None:
+        """A layer named in an answer was clicked: it becomes the active layer of QGIS (nothing else changes)."""
+        layer = next((layer for layer in self._layers_in_tree_order() if layer.name() == name), None)
+        if layer is None:
+            self._say(_tr("The layer {} is no longer in the project.").format(name))
+            return
+        try:
+            from qgis.utils import iface
+            if iface is not None:
+                iface.setActiveLayer(layer)
+        except Exception:  # an interface closing
+            logger.debug("Agent: the layer clicked could not be made active", exc_info=True)
 
     @staticmethod
     def _active_layer():
@@ -3215,8 +3245,79 @@ class AgentChatController(QObject):
             self._refresh_history()
 
     def confirm_external(self, call: ToolCallPart, client: str) -> bool:
-        """The usual question, under the name of the application that asks."""
-        return self._confirm(call, _tr("Another application: {}").format(client))
+        """The usual question, under the name of the application that asks: in a dialog, which comes in front of
+        the application that asked, never in the thread of the chat."""
+        previous, self._asking_external = self._asking_external, True
+        try:
+            return self._confirm(call, _tr("Another application: {}").format(client))
+        finally:
+            self._asking_external = previous
+
+    def _ask_yes_no(self, title: str, text: str) -> bool:
+        answer = self._ask_in_thread(title, text, with_conversation=False)
+        return ask_plain(self._parent_widget, title, text) if answer is None else answer == ANSWER_ONCE
+
+    def _ask_three(self, title: str, text: str) -> str:
+        answer = self._ask_in_thread(title, text, with_conversation=True)
+        return ask_with_conversation(self._parent_widget, title, text) if answer is None else answer
+
+    def _ask_in_thread(self, title: str, text: str, with_conversation: bool) -> Optional[str]:
+        """A question of the permissions as a card of the thread, while the chat runs a request or a recipe: QGIS
+        stays usable and the thread readable while it waits (a dialog of the system stopped both).
+
+        Returns ANSWER_ONCE, ANSWER_CONVERSATION or ANSWER_NO; None when the card cannot be seen or does not belong
+        in the thread (another application asks, nothing runs, the panel is closed): the caller asks in a dialog.
+        Stop, or the card taken away (a new conversation, another project), answers No.
+        """
+        if self._asking_external or not self.chat_busy():
+            return None
+        try:
+            self._show_agent()  # a question nobody sees would hold the turn until Stop
+            if not (self.panel.isVisible() and self._agent_shown()):
+                return None
+            # The title of the question when it says more than the name of the agent (a recipe, a live recipe).
+            heading = title if title and title != _tr("FilterMate agent") else _tr("The agent asks before it acts")
+            texts = {"chip": _tr("Permission"), "heading": heading,
+                     "yes": _tr("Yes"), "no": _tr("No"), # The words of the dialog it replaces, already translated in its context.
+                     "always": QCoreApplication.translate("AgentPanel", "Yes for this conversation"),
+                     "always_tip": QCoreApplication.translate(
+                         "AgentPanel", "This action runs without asking again until you start a new conversation, "
+                                       "open another project or change the level of autonomy."),
+                     "allowed": _tr("Allowed"), "allowed_always": _tr("Allowed for this conversation"),
+                     "refused": _tr("Refused")}
+            card = self.panel.add_confirm_card(texts, text, with_conversation)
+        except RuntimeError:  # the panel is gone: the dialog asks
+            return None
+        loop = QEventLoop()
+        outcome = {}
+
+        def answered(answer: str) -> None:
+            outcome.setdefault("answer", answer)
+            loop.quit()
+
+        def refused() -> None:
+            outcome.setdefault("answer", ANSWER_NO)
+            loop.quit()
+
+        def stopped() -> None:
+            try:
+                card.finish(ANSWER_NO)
+            except RuntimeError:  # the card went with the panel
+                pass
+            refused()
+
+        card.answered.connect(answered)
+        card.destroyed.connect(lambda *_args: refused())
+        # A wait of the chat: its Stop ends it (abort_active(CHAT_WAITS)). The engine asks outside of the waits of its
+        # tools, which are the ones owned by the chat otherwise: unowned, Stop would not reach the card.
+        with owned_by(CHAT_WAITS):
+            forget = on_abort(stopped)
+        try:
+            if "answer" not in outcome and not card.done:
+                loop.exec()
+        finally:
+            forget()
+        return outcome.get("answer", ANSWER_NO)
 
     @staticmethod
     def _run_detail(call: ToolCallPart) -> str:
