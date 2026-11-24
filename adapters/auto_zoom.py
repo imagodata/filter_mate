@@ -8,6 +8,8 @@ share the same global flag, per-layer ``is_tracking`` override, and union
 extent computation.
 
 Resolution rules:
+- The callers pass the layers of :func:`zoom_layers_for_filter`: the filtered
+  source layer (its targets only when the source itself was not filtered).
 - If the global flag ``APP.OPTIONS.EXPLORATION.auto_zoom_on_filter`` is true,
   zoom to the union extent of all provided layers.
 - Otherwise, zoom only to layers whose ``PROJECT_LAYERS[layer_id].exploring.is_tracking``
@@ -85,45 +87,19 @@ def _is_tracking(layer_id: str, project_layers: Mapping[str, Any]) -> bool:
     return bool(exploring.get("is_tracking", False))
 
 
-# Predicates whose targets may lie far outside the source features: keep the
-# union of every filtered layer for them. Names are matched by prefix because
-# the UI stores them as "Intersect", "Contain", "Disjoint", ...
-_UNBOUNDED_PREDICATE_PREFIXES = ('disjoint', 'contain')
+def zoom_layers_for_filter(source_layer, target_layers=(), source_filtered: bool = True) -> list:
+    """The layers the map zooms to after a filter or the replay of a favorite.
 
-
-def cascade_zoom_scope(task_parameters: Optional[Mapping[str, Any]], source_crs_is_geographic: bool = False):
+    2026-11-24 (Simon): the filtered extent of the source layer, whatever the
+    predicates and whether or not other layers were filtered with it: the map
+    showed the union with the targets after an attribute filter, a Disjoint or
+    a Contain, and the replay of a favorite always did. The targets are taken
+    only when the source was not filtered (a favorite that filters its targets
+    alone), so the map still goes where the filter applied.
     """
-    Decide which layers the post-filter auto-zoom needs.
-
-    PERF 2026-09-12: computing the union extent of 17 PostgreSQL target
-    layers cost 2.2 s (feature scan) to 9.8 s (server-side ST_Extent) on the
-    main thread after every filter. After a spatial cascade the targets were
-    selected *around the source features*, so the source layer's own filtered
-    extent (a handful of features) is the view the user asked for.
-
-    Returns:
-        (source_only, margin): ``source_only`` is True when the zoom can be
-        computed from the source layer alone; ``margin`` is the buffer
-        distance to grow the extent by (layer units, projected CRS only).
-    """
-    filtering = (task_parameters or {}).get("filtering") or {}
-    if not isinstance(filtering, Mapping) or not filtering.get("has_geometric_predicates"):
-        return False, 0.0
-    predicates = filtering.get("geometric_predicates") or []
-    names = [str(p).strip().lower() for p in predicates if p]
-    if not names:
-        return False, 0.0
-    if any(name.startswith(_UNBOUNDED_PREDICATE_PREFIXES) for name in names):
-        return False, 0.0
-
-    margin = 0.0
-    if filtering.get("has_buffer_value") and not filtering.get("buffer_value_property") \
-            and not filtering.get("buffer_value_expression") and not source_crs_is_geographic:
-        try:
-            margin = max(0.0, float(filtering.get("buffer_value") or 0.0))
-        except (TypeError, ValueError):
-            margin = 0.0
-    return True, margin
+    if source_layer is not None and source_filtered:
+        return [source_layer]
+    return [layer for layer in (target_layers or ()) if layer is not None]
 
 
 def _layer_extent(layer: QgsVectorLayer, dockwidget: Any = None) -> Optional[QgsRectangle]:

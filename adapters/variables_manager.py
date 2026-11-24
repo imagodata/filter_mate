@@ -217,6 +217,11 @@ class VariablesPersistenceManager:
 
         # Always save to database (even if QGIS variable failed)
         project_uuid = self._get_project_uuid()
+        if not project_uuid:
+            # 2026-11-24: no project bound (one closed since, FilterMateApp.unbind_project): the row went under the
+            # id of the project closed, or under 'None'
+            logger.debug(f"save_single_property: no project bound, {key_group}.{key} not stored in the SQLite")
+            return True
         cursor.execute(
             """INSERT INTO fm_project_layers_properties
                VALUES(?, datetime(), ?, ?, ?, ?, ?)""",
@@ -451,12 +456,15 @@ class VariablesPersistenceManager:
             logger.warning(f"Layer {layer_id} not in PROJECT_LAYERS, cannot remove properties")
             return False
 
+        project_uuid = self._get_project_uuid()
+        if not project_uuid:  # no project bound (2026-11-24): nothing of the project closed is removed
+            logger.debug(f"remove_variables_from_layer: no project bound, nothing removed for {layer_id}")
+            return False
+
         # Get database connection
         conn = self._get_connection()
         if conn is None:
             return False
-
-        project_uuid = self._get_project_uuid()
 
         try:
             with conn:
