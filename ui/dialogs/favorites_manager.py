@@ -1059,12 +1059,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             # manual per-item text edit we used to do was out of sync
             # with the new badge prefix and lost the current scope filter.
             self._refresh_filtered_list()
-            # Re-select the same id after repopulation so the details
-            # pane keeps showing the user's edit.
-            for i in range(self._list_widget.count()):
-                if self._list_widget.item(i).data(Qt.ItemDataRole.UserRole) == self._current_fav_id:
-                    self._list_widget.setCurrentRow(i)
-                    break
+            # The refresh already highlighted the saved row without notifying
+            # (an edit in progress stays on an external change); here the edit is
+            # saved, so rebuild the details from the stored favorite.
+            self._on_selection_changed()
 
             self.favoriteUpdated.emit(self._current_fav_id)
             self.favoritesChanged.emit()
