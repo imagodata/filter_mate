@@ -2996,13 +2996,13 @@ class FilterMateApp:
 
     def _auto_migrate_orphan_favorites(self):
         """
-        Automatically migrate orphan favorites to the current project.
+        Remove the exact copies among the favorites of the current project (orphan favorites are no longer
+        attached to it, see below).
 
         Called during init_filterMate_db() after database initialization.
-        Shows notification if favorites were migrated.
 
         Returns:
-            bool: whether rows of the project changed in the SQLite (copies removed, orphans recovered).
+            bool: whether rows of the project changed in the SQLite (copies removed).
         """
         if not self._favorites_migration_service or not self.db_file_path or not self.project_uuid:
             return False
@@ -3015,29 +3015,12 @@ class FilterMateApp:
             # earlier versions are removed even when there is no orphan left.
             if hasattr(self._favorites_migration_service, 'dedupe_project_favorites'):
                 changed = bool(self._favorites_migration_service.dedupe_project_favorites(str(self.project_uuid)))
-            orphan_count = self._favorites_migration_service.count_orphan_favorites()
-
-            if orphan_count == 0:
-                return changed
-
-            # Auto-migrate orphans to current project
-            migrated_count, migrated_names = self._favorites_migration_service.auto_migrate_on_project_load(
-                str(self.project_uuid)
-            )
-
-            # Show notification if favorites were migrated
-            if migrated_count > 0:
-                names_preview = ', '.join(migrated_names[:3])
-                if len(migrated_names) > 3:
-                    names_preview += f" (+{len(migrated_names) - 3} more)"
-
-                if should_show_message('success'):
-                    iface.messageBar().pushSuccess(
-                        "FilterMate",
-                        QCoreApplication.translate("FilterMateApp", "Recovered {0} orphan favorite(s): {1}").format(migrated_count, names_preview)
-                    )
-                logger.info(f"✓ Auto-migrated {migrated_count} orphan favorites to current project")
-            return changed or migrated_count > 0
+            # 2026-11-24: the orphan favorites (those of projects never saved) are no longer attached to the project
+            # opened. Since #646 a project's favorites are written in its .qgz at each change, so a project saved for
+            # the first time keeps them; attaching orphans only moved the favorites of an unsaved project into the
+            # next project opened, then into its file shared with others. They stay in the SQLite (the cleanup entry
+            # of the ★ menu still reaches them).
+            return changed
 
         except Exception as e:
             logger.warning(f"Orphan favorites migration failed (non-critical): {e}")

@@ -228,3 +228,20 @@ def test_nothing_is_written_into_the_next_project_before_it_was_read(tmp_path):
     service._forget_synced_project()  # QgsProject.cleared / readProject
     add(service, "made meanwhile")
     assert second.entries == {}
+
+
+def test_a_project_closed_leaves_no_favorite_of_it(tmp_path):
+    """2026-11-24, seen by Simon: a project closed (QgsProject.cleared) kept its favorites listed (★ 3 on an empty
+    project), and a favorite added then went to the closed project, then into its .qgz at its next opening."""
+    project = Project()
+    a = computer(tmp_path, "a", project)
+    add(a, "fav_A1")
+    a._on_project_cleared()  # QgsProject.cleared
+    assert names(a) == []
+    assert a._favorites_manager._project_uuid is None
+    try:
+        a.add_favorite("made with no project", "TRUE")
+    except Exception:
+        pass
+    a = computer(tmp_path, "a", project)  # the project opened again
+    assert names(a) == ["fav_A1"]

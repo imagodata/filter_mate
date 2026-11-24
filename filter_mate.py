@@ -1226,6 +1226,39 @@ class FilterMate:
         except Exception as e:
             logger.warning(f"FilterMate: Error during project cleared cleanup: {e}")
 
+        # 2026-11-24: the database stayed bound to the project closed — its favorites listed in the new project,
+        # and favorites and layer settings made there stored under the closed project's id. Once the event loop
+        # runs again, a new project (no file) is bound; a project read meanwhile is bound by its readProject path.
+        import weakref
+        from qgis.PyQt.QtCore import QTimer
+        weak_self = weakref.ref(self)
+
+        def bind_new_project():
+            strong_self = weak_self()
+            if strong_self is None or strong_self.app is None:
+                return
+            from qgis.core import QgsProject
+            if QgsProject.instance().fileName():
+                return
+            strong_self._bind_database_keeping_clean()
+
+        QTimer.singleShot(0, bind_new_project)
+
+    def _bind_database_keeping_clean(self):
+        """Bind FilterMate's database (favorites, layer settings) to the current project. Writing its id in the
+        project makes a project dirty: one nobody changed stays clean (no question to save an empty project)."""
+        from qgis.core import QgsProject
+        if not self.app or not hasattr(self.app, 'init_filterMate_db'):
+            return
+        project = QgsProject.instance()
+        was_dirty = project.isDirty()
+        try:
+            self.app.init_filterMate_db()
+        except Exception as e:
+            logger.warning(f"FilterMate: database not bound to the current project: {e}")
+        if not was_dirty and project.isDirty():
+            project.setDirty(False)
+
     def _auto_activate_for_new_layers(self, layers):
         """Handle layersAdded signal specifically for auto-activation.
 
@@ -1469,6 +1502,8 @@ class FilterMate:
 
         if not vector_layers:
             logger.info("FilterMate: New project has no vector layers")
+            # Its favorites and settings still belong to it (2026-11-24: the database stayed on the project before)
+            self._bind_database_keeping_clean()
             # Only access dockwidget if it exists and has widgets_initialized
             if (self.app.dockwidget and
                 hasattr(self.app.dockwidget, 'widgets_initialized') and

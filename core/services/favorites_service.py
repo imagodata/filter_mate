@@ -120,7 +120,7 @@ class FavoritesService(QObject):
         try:
             from qgis.core import QgsProject
             project = QgsProject.instance()
-            project.cleared.connect(self._forget_synced_project)
+            project.cleared.connect(self._on_project_cleared)
             project.readProject.connect(self._forget_synced_project)
             project.projectSaved.connect(self._on_project_saved)
         except Exception as e:  # no QGIS project here (the API without QGIS, some tests)
@@ -128,6 +128,19 @@ class FavoritesService(QObject):
 
     def _forget_synced_project(self, *_args) -> None:
         self._synced_project_uuid = None
+
+    def _on_project_cleared(self, *_args) -> None:
+        """The project is closed (or another one is about to be read): its favorites leave the list, and nothing is
+        added under its id any more until FilterMate binds the next project (set_database). 2026-11-24: a project
+        closed kept its favorites listed (★ 3 on an empty project), and a favorite added then went to the closed
+        project, then into its .qgz at its next opening."""
+        self._synced_project_uuid = None
+        manager = self._favorites_manager
+        if not manager:
+            return
+        manager._favorites = {}
+        manager._project_uuid = None
+        self.favorites_changed.emit()
 
     def _on_project_saved(self, *_args) -> None:
         """The file holds the favorites now: remembered, so that one removed later on another computer goes here."""

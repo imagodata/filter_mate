@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- A project closed no longer leaves its favorites behind. Closing a project (or starting a new one) kept FilterMate bound to it: its favorites stayed listed (★ 3 on an empty project), and a favorite or a layer setting made in the new project was stored under the closed project, then written into its .qgz at its next opening. FilterMate now lets go of the closed project at once and binds the new one (an empty new project stays clean: no question to save it), and also binds a project opened without vector layers. The favorites of a project never saved are no longer attached to the next project opened (since favorites travel in the .qgz, a project saved for the first time keeps its own; attaching them only moved them into another, possibly shared, project); they stay in the SQLite. Bench: `check_favorites_travel.sh` (now eight roles: close, new project, a favorite made there, the first project reopened) on QGIS 3.44 and 4.3.
+
 ## [5.1.2] - 2026-11-24
 
 Everything merged since 5.1.1. The panel: the buttons of FILTERING and EXPORTING in front of their rows,

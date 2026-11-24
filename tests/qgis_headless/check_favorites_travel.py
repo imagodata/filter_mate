@@ -66,6 +66,7 @@ EXPECTED = {  # what the SQLite of the computer and the .qgz on disk hold at the
     "A2": (["fav_A1", "fav_A2"], ["fav_A1", "fav_A2"]),
     "B2": (["fav_A2"], ["fav_A2"]),
     "A3": (["fav_A2"], ["fav_A2"]),
+    "AY": (["fav_A2"], ["fav_A2"]),  # after the whole sequence: the project holds fav_A2
     "C": (["fav_A2"], ["fav_A2"]),
 }
 
@@ -139,6 +140,34 @@ def ctrl_s():
     check("Ctrl+S leaves the project saved", not QgsProject.instance().isDirty())
 
 
+BEFORE_CLOSING = {}
+
+
+def new_project():
+    BEFORE_CLOSING["qgz"] = in_qgz()
+    BEFORE_CLOSING["db"] = in_db()
+    iface.newProject(False)
+
+
+def add_a_layer():
+    layer = QgsVectorLayer(f"{os.path.join(WORK, 'data.gpkg')}|layername=parcelles", "parcelles", "ogr")
+    QgsProject.instance().addMapLayer(layer)
+    print(f"INFO layer added, valid={layer.isValid()}", flush=True)
+
+
+def report_closed():
+    check("a favorite made in the new project stays in it, not in the project closed",
+          in_db() == ["made in the new project"] and in_qgz() == BEFORE_CLOSING["qgz"],
+          f"favorites={in_db()} qgz={in_qgz()} (before closing {BEFORE_CLOSING['qgz']})")
+
+
+def after_new_project():
+    badge = app().dockwidget.favorites_indicator_label.text()
+    check("a project closed leaves no favorite of it", in_db() == [] and "1" not in badge and "2" not in badge,
+          f"favorites={in_db()} badge={badge!r}")
+    check("binding the new project leaves it clean", not QgsProject.instance().isDirty())
+
+
 STEPS = {
     "A1": [(start_plugin, 8), (make_project, 6), (add("fav_A1"), 1), (ctrl_s, 3), (report, 0)],
     "B1": [(start_plugin, 8), (open_project, 12), (report, 0)],
@@ -146,6 +175,9 @@ STEPS = {
     "B2": [(start_plugin, 8), (open_project, 12), (remove("fav_A1"), 1), (ctrl_s, 3), (report, 0)],
     "A3": [(start_plugin, 8), (open_project, 12), (report, 0)],
     "C": [(start_plugin, 8), (open_project, 12), (clean_after_opening, 0), (report, 0)],
+    "AX": [(start_plugin, 8), (open_project, 12), (new_project, 6), (after_new_project, 1),
+           (add_a_layer, 12), (add("made in the new project"), 1), (report_closed, 0)],
+    "AY": [(start_plugin, 8), (open_project, 12), (report, 0)],
 }[ROLE]
 
 
