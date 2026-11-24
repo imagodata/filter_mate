@@ -429,6 +429,22 @@ class GitClient:
         """
         return self._run(["remote", "set-url", "--", remote, git_url])
 
+    def switch_branch(self, branch: str, remote: str = "origin") -> GitResult:
+        """Fetch ``remote`` and check out ``branch``.
+
+        ``git checkout <branch> --`` switches to the local branch, or
+        creates it tracking ``<remote>/<branch>``. A name starting with
+        ``-`` is refused: no git branch can have one, and it would be
+        read as an option.
+        """
+        if not branch or branch.startswith("-"):
+            raise GitError(
+                ["checkout", branch], returncode=-3, stdout="",
+                stderr=f"invalid branch name: {branch!r}", cwd=self.cwd,
+            )
+        self._run(["fetch", "--", remote])
+        return self._run(["checkout", branch, "--"])
+
     def pull_fast_forward(self) -> GitResult:
         """``git pull --ff-only`` — refuses to merge on divergence.
 
