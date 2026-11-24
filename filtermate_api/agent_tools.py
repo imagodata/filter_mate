@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
 from urllib.parse import urlsplit
 
 from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected, LayerProtected
-from .export_root import ExportRootError, prepare_export_root, resolve_export_folder
+from .export_root import ExportRootError, prepare_export_root, resolve_export_folder, resolve_exported_file
 from .filter_combine import combined
 from .layer_listing import select_layers, short_filter
 from .main_thread import QGISBusy
@@ -521,7 +521,14 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         problem = source_problem(args["source"], allow_remote_sources)
         if problem:
             raise ToolFailure(f"This layer cannot be added: {problem}.")
-        return asdict(accessor.add_layer(args["source"], name=args["name"], kind=args["kind"]))
+        try:  # a file export_layers wrote, named as its answer names it (2026-11-24)
+            source, title = resolve_exported_file(export_root, args["source"])
+        except ExportRootError as exc:
+            logger.error("Agent add_layer below the export root refused: %s (%s)", exc, export_root)
+            raise ToolFailure("The export folder is not available.") from None
+        except ValueError as exc:
+            raise ToolFailure(f"This layer cannot be added: {exc}.") from None
+        return asdict(accessor.add_layer(source, name=args["name"] or title, kind=args["kind"]))
 
     def remove_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         return _report("Remove", accessor.remove_layers(args["layers"]))

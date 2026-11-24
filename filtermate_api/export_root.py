@@ -9,6 +9,7 @@ import os
 import re
 import stat
 from pathlib import Path
+from typing import Tuple
 
 _SUBFOLDER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(/[A-Za-z0-9][A-Za-z0-9_.-]{0,63}){0,3}$")
 
@@ -55,3 +56,65 @@ def resolve_export_folder(root: Path, subfolder: str) -> Path:
     if folder != root and root not in folder.parents:
         raise ValueError("invalid subfolder")
     return folder
+
+
+EXPORTED_FILE = "a relative source is a file export_layers wrote, given as <subfolder>/<its file in outputs>"
+MAX_DEPTH = 4  # the sub-folders a client may name: a/b/c/d
+
+
+def _relative(path: str) -> bool:
+    """Neither a URL, a provider or GDAL string (``PG:``, ``C:``), nor a path from a root (``/x``, ``\\x``): those
+    are left to the checks of add_layer, which say what they are."""
+    return not (os.path.isabs(path) or path.startswith(("/", "\\")) or "://" in path
+                or re.match(r"^[A-Za-z0-9_]+:", path))
+
+
+def _found_below(root: Path, name: str) -> Path:
+    """The one file named ``name`` below ``root`` (sub-folders a client may name); ValueError with none or several."""
+    found = []
+    for folder, children, files in os.walk(root, followlinks=False):
+        depth = len(Path(folder).relative_to(root).parts)
+        children[:] = [] if depth >= MAX_DEPTH else [child for child in children if not child.startswith(".")]
+        if name in files:
+            found.append(Path(folder) / name)
+    if len(found) == 1:
+        return found[0]
+    if found:
+        raise ValueError(f"several files {name} below the export root: {EXPORTED_FILE}")
+    raise ValueError(f"no file {name} below the export root: {EXPORTED_FILE}")
+
+
+def resolve_exported_file(root: Path, source: str) -> Tuple[str, str]:
+    """``(source as it opens, default layer name)``: a relative path is a file export_layers wrote, below ``root``.
+
+    2026-11-24: the chat gets the files of export_layers below its sub-folder (the paths of this machine are not sent
+    to the provider), and add_layer took only absolute paths: a model exported a filtered WFS layer to read it
+    locally, then got "this file does not exist" for its own "Pays du monde.gpkg". A bare file name is the one file
+    of that name below ``root``. Any other source is returned unchanged, with no name. The name is the table or the
+    file stem: the title QGIS would draw from a Windows path is that path, which the provider must not read.
+
+    Raises:
+        ValueError: The path leaves ``root``, or no file is there (the message says how to name one).
+        ExportRootError: ``root`` cannot be used.
+    """
+    path, bar, table = source.partition("|")
+    if not _relative(path):
+        return source, ""
+    folder, _, name = path.replace("\\", "/").rpartition("/")
+    root = prepare_export_root(root).resolve()
+    if folder:
+        try:
+            directory = resolve_export_folder(root, folder)
+        except ValueError:
+            raise ValueError(EXPORTED_FILE) from None
+        full = (directory / name).resolve()
+        if not name or full.parent != directory or not full.is_file():
+            raise ValueError(f"no file {path} below the export root: {EXPORTED_FILE}")
+    else:
+        if not name or name in (".", ".."):
+            raise ValueError(EXPORTED_FILE)
+        full = _found_below(root, name).resolve()
+        if root not in full.parents:
+            raise ValueError(EXPORTED_FILE)
+    title = table.partition("=")[2] if table.startswith("layername=") else full.stem
+    return str(full) + bar + table, title
