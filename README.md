@@ -97,7 +97,8 @@ the original source back, and project files are always saved with the original s
 - ↩️ **Undo / Redo** of every filter, per layer, and the history of the project in one panel, where you go back to
   before any step. **Compare** shows the map before and after the last filter, or a state you pinned, on each side
   of a line across the map.
-- ⭐ **Favorites**: save a filter with its layers and settings, replay it in a click, share it with a team through a git
+- ⭐ **Favorites**: save a filter with its layers and settings, replay it in a click; favorites and the settings of
+  each layer are saved in the project, so they travel with it. Share them with a team through a git
   repository ([docs/favorites_sharing/USER_GUIDE.md](docs/favorites_sharing/USER_GUIDE.md)).
 - ⚙️ **Automation**: ten Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
   other plugins, an optional REST API, and two MCP servers for AI assistants: one built into the plugin, one over stdio

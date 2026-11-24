@@ -9,8 +9,11 @@ user-facing string goes through ``tr`` with an English source.
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Tuple
+
+logger = logging.getLogger('FilterMate.FavoriteSummary')
 
 try:  # QLocale is only used for the short date; absent or mocked in unit tests
     from qgis.PyQt.QtCore import QDate, QLocale
@@ -140,5 +143,5 @@ def date_text(iso: Optional[str]) -> str:
                 short = QLocale.FormatType.ShortFormat
             return QLocale().toString(QDate(moment.year, moment.month, moment.day), short)
         except Exception:
-            pass
+            logger.debug("Locale date format unavailable, using dd/mm/yyyy", exc_info=True)
     return moment.strftime("%d/%m/%Y")
