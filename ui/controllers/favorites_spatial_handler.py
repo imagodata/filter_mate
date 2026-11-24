@@ -744,7 +744,8 @@ class FavoritesSpatialHandler:
 
         applied: list = []
         skipped: list = []
-        zoom_layers: list = []  # Source + targets actually filtered, for auto-zoom
+        source_zoomed = None  # The source layer, once its subset is applied
+        target_zoom_layers: list = []  # Targets actually filtered (zoomed when the source is not)
 
         spatial_config = favorite.spatial_config or {}
 
@@ -757,7 +758,7 @@ class FavoritesSpatialHandler:
             try:
                 if safe_set_subset_string(source_layer, source_subset):
                     applied.append(source_layer.name())
-                    zoom_layers.append(source_layer)
+                    source_zoomed = source_layer
                     logger.info(
                         f"  ✓ Source layer '{source_layer.name()}' subset applied "
                         f"({len(source_subset)} chars)"
@@ -808,7 +809,7 @@ class FavoritesSpatialHandler:
             try:
                 if safe_set_subset_string(target_layer, target_subset):
                     applied.append(target_layer.name())
-                    zoom_layers.append(target_layer)
+                    target_zoom_layers.append(target_layer)
                     fresh_count = exact_filtered_feature_count(target_layer)
                     if isinstance(payload, dict):
                         new_payload = dict(payload)
@@ -886,8 +887,9 @@ class FavoritesSpatialHandler:
         except Exception:  # nosec B110 - best-effort canvas refresh; filter already applied regardless
             pass
 
-        # Auto-zoom on the union extent of every layer the favorite
-        # touched (mirrors the normal filter completion flow).
+        # Auto-zoom on the filtered extent of the source layer, as after a
+        # normal filter (zoom_layers_for_filter); on its targets when the
+        # favorite leaves the source unfiltered (empty expression).
         # H1 (audit 2026-04-29): bump the subset-change token before zoom
         # so any in-flight filter task whose finished() hasn't fired yet
         # sees a newer token and skips its now-stale zoom.
@@ -895,6 +897,7 @@ class FavoritesSpatialHandler:
             from ...adapters.auto_zoom import (
                 auto_zoom_to_filtered,
                 bump_subset_change_token,
+                zoom_layers_for_filter,
             )
 
             project_layers: dict = {}
@@ -905,7 +908,8 @@ class FavoritesSpatialHandler:
 
             my_token = bump_subset_change_token()
             auto_zoom_to_filtered(
-                zoom_layers,
+                zoom_layers_for_filter(source_zoomed, target_zoom_layers,
+                                       source_filtered=bool(source_subset.strip())),
                 project_layers,
                 dockwidget=self._dockwidget,
                 expected_token=my_token,
