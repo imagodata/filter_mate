@@ -51,6 +51,7 @@ _COMMIT_EMAIL_RE = re.compile(
     r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*"
 )
 
+
 def _text_field(entry: Dict[str, Any], key: str, repo_name: str) -> str:
     """String value of ``key`` in a repo entry; another type is ignored (logged)."""
     value = entry.get(key)
