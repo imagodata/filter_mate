@@ -1451,11 +1451,15 @@ def check_chat(provider, layer, authcfg, work):
     provider.reset((200, {}, text_turn("**Vecteur (2)**\n- routes : 131 lignes\n## Titre")))
     ask("liste")
     shown = [label.text() for label in panel.thread.findChildren(QLabel) if "routes" in label.text()]
-    check("Markdown marks are taken out", shown and "**" not in shown[-1] and "• routes" in shown[-1]
-          and "##" not in shown[-1], shown)
+    # Drawn from its Markdown since 2026-11-24: bold, a list and a heading as tags of our own, no mark left.
+    check("Markdown is drawn, its marks taken out", shown and "**" not in shown[-1] and "<b>Vecteur (2)</b>" in shown[-1]
+          and "<li>" in shown[-1] and "<b>Titre</b>" in shown[-1] and "##" not in shown[-1], shown)
     provider.reset((200, {}, text_turn('<img src="http://evil.example/x.png"> <a href="x">lien</a>')))
     ask("montre")
     check("what the model writes stays plain text", '<img src="http://evil.example/x.png">' in panel.thread.toPlainText())
+    drawn = [label.text() for label in panel.thread.findChildren(QLabel) if "lien" in label.text()]  # long words get ZWSP
+    check("and is drawn escaped: no image, no link of the model", drawn and "<img" not in drawn[-1]
+          and "&lt;img" in drawn[-1] and '<a href="x"' not in drawn[-1], drawn)
     check("the conversation goes on", len(provider.requests[0]["body"]["messages"]) >= 7, provider.requests[0]["body"]["messages"])
 
     settings()
@@ -1857,6 +1861,7 @@ def check_chat(provider, layer, authcfg, work):
     dialog.close()
     check_steps(chat, provider, settings, ask, layer)
     check_autonomy(chat, provider, settings, ask, answers, layer)
+    check_permission_cards(chat, provider, settings, ask, layer)
     check_widgets(chat, provider, settings, ask, layer)
     check_protected(chat, provider, settings, ask, layer)
     check_tool_rules(chat, provider, settings, ask, layer)
@@ -1926,6 +1931,69 @@ def check_autonomy(chat, provider, settings, ask, answers, layer):
     settings()
     check("standard: nothing shown next to the model", "Standard" not in shown() and "test-model" in shown(), shown())
     panel.clear_thread()
+
+
+def check_permission_cards(chat, provider, settings, ask, layer):
+    """The questions of the permissions as cards of the thread during a turn (2026-11-24), dialogs otherwise."""
+    from qgis.PyQt.QtCore import QTimer
+
+    import filter_mate.ui.controllers.agent_chat_controller as controller_module
+    from filter_mate.ui.widgets.agent_thread import ConfirmCard
+
+    panel = chat.panel
+    dialogs = []
+    saved = (controller_module.ask_plain, controller_module.ask_with_conversation, chat._ask_user, chat._ask_choice)
+    # A dialog would hang the bench: it answers No, and says it was opened.
+    controller_module.ask_plain = lambda *args: dialogs.append(args) or False
+    controller_module.ask_with_conversation = lambda *args: dialogs.append(args) or "no"
+    chat._ask_user, chat._ask_choice = chat._ask_yes_no, chat._ask_three
+
+    def when_card(action, tries=60):
+        card = next((item.widget for item in reversed(panel.thread._items)
+                     if isinstance(item.widget, ConfirmCard) and not item.widget.done), None)
+        if card is not None:
+            action(card)
+        elif tries:
+            QTimer.singleShot(100, lambda: when_card(action, tries - 1))
+        else:  # never hang the bench on a card that did not come
+            panel.stop_requested.emit()
+
+    filter_call = {"layer_name": "communes", "expression": '"pop" > 3000'}
+    try:
+        settings(autonomy="careful")
+        chat.new_conversation()
+        layer.setSubsetString("")
+        provider.reset((200, {}, tool_turn("apply_filter", filter_call)), (200, {}, text_turn("ok")))
+        seen = []
+        when_card(lambda card: (seen.append(card.always_button is not None), card.yes_button.click()))
+        ask("filtre")
+        check("permission card: asked in the thread, Yes applies", seen == [True] and not dialogs
+              and layer.subsetString() == '"pop" > 3000', (seen, dialogs, layer.subsetString()))
+        check("permission card: the answer stays written", "Allowed" in panel.thread.toPlainText(),
+              panel.thread.toPlainText()[-200:])
+        provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 4000'})),
+                       (200, {}, text_turn("ok")))
+        when_card(lambda card: card.no_button.click())
+        ask("encore")
+        check("permission card: No refuses", layer.subsetString() == '"pop" > 3000' and not dialogs,
+              (layer.subsetString(), dialogs))
+        provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 5000'})),
+                       (200, {}, text_turn("ok")))
+        when_card(lambda card: panel.stop_requested.emit())
+        ask("encore")
+        stopped = next(item.widget for item in reversed(panel.thread._items) if isinstance(item.widget, ConfirmCard))
+        check("permission card: Stop answers No and closes the card", stopped.done and stopped.answer == "no"
+              and layer.subsetString() == '"pop" > 3000', (stopped.answer, layer.subsetString()))
+        # Nothing runs: a question (removing a recipe) is a dialog, as before.
+        check("permission card: a question outside a turn is a dialog", chat._ask_yes_no("t", "Remove?") is False
+              and len(dialogs) == 1, dialogs)
+    finally:
+        (controller_module.ask_plain, controller_module.ask_with_conversation, chat._ask_user,
+         chat._ask_choice) = saved
+        layer.setSubsetString("")
+        settings()
+        chat.new_conversation()
+        panel.clear_thread()
 
 
 def check_asked_together(chat, provider, settings, ask, layer):
