@@ -79,6 +79,14 @@ class _Service(QtCore.QObject):
             setattr(self.favorites[fav_id], key, value)
         return True
 
+    def remove_favorite(self, fav_id):
+        return self.favorites.pop(fav_id, None) is not None
+
+    def remove_global_favorite(self, fav_id):
+        before = len(self.global_favorites)
+        self.global_favorites = [f for f in self.global_favorites if f.id != fav_id]
+        return len(self.global_favorites) < before
+
     def save(self):
         return True
 
@@ -126,3 +134,97 @@ def test_applying_a_global_favorite_emits_its_own_signal():
     dialog._on_item_double_clicked(dialog._list_widget.item(1))  # "Roads (Global)" after "Roads"
 
     assert applied == [("global", global_favorite.id)]
+
+
+@pytest.fixture
+def warnings(monkeypatch):
+    """The warnings the dialog pushes to the message bar."""
+    shown = []
+    monkeypatch.setattr(dialog_module.FavoritesManagerDialog, "_show_warning", lambda self, message: shown.append(message))
+    return shown
+
+
+def test_saving_an_empty_name_is_refused_and_keeps_the_field(warnings):
+    favorite = _favorite("Roads")
+    service = _Service([favorite])
+    dialog = dialog_module.FavoritesManagerDialog(service)
+
+    dialog._name_edit.setText("   ")
+    dialog._on_save()
+
+    assert warnings == ["The name cannot be empty."]
+    assert service.favorites[favorite.id].name == "Roads"
+    assert dialog._name_edit.text() == "   "
+
+
+def test_saving_a_name_another_favorite_has_is_refused_and_keeps_the_field(warnings):
+    roads, parks = _favorite("Roads"), _favorite("Parks")
+    service = _Service([roads, parks])
+    dialog = dialog_module.FavoritesManagerDialog(service)
+    dialog._select_favorite(parks.id)
+
+    dialog._name_edit.setText("Roads")
+    dialog._on_save()
+
+    assert warnings == ["Another favorite is already named 'Roads'."]
+    assert service.favorites[parks.id].name == "Parks"
+    assert dialog._name_edit.text() == "Roads"
+
+
+def test_saving_the_same_name_again_is_not_a_duplicate(warnings):
+    favorite = _favorite("Roads")
+    dialog = dialog_module.FavoritesManagerDialog(_Service([favorite]))
+
+    dialog._description_edit.setPlainText("main roads")
+    dialog._on_save()
+
+    assert warnings == []
+
+
+def test_a_global_favorite_named_like_a_project_one_is_not_a_duplicate(warnings):
+    project, global_favorite = _favorite("Parks"), _favorite("Roads")
+    service = _Service([project], [global_favorite])
+    dialog = dialog_module.FavoritesManagerDialog(service)
+
+    dialog._name_edit.setText("Roads")
+    dialog._on_save()
+
+    assert warnings == []
+    assert service.favorites[project.id].name == "Roads"
+
+
+def _question_texts(monkeypatch, answer):
+    asked = []
+
+    def question(parent, title, text, *args):
+        asked.append(text)
+        return answer
+
+    monkeypatch.setattr(dialog_module.QMessageBox, "question", staticmethod(question))
+    return asked
+
+
+def test_deleting_a_project_favorite_warns_it_is_removed_for_everyone(monkeypatch):
+    favorite = _favorite("Roads")
+    dialog = dialog_module.FavoritesManagerDialog(_Service([favorite]))
+    asked = _question_texts(monkeypatch, dialog_module.QMessageBox.StandardButton.No)
+
+    dialog._on_delete()
+
+    assert len(asked) == 1
+    assert "Delete favorite 'Roads'?" in asked[0]
+    assert "It is removed for everyone who opens this project." in asked[0]
+
+
+def test_deleting_a_global_favorite_does_not_mention_the_project(monkeypatch):
+    project, global_favorite = _favorite("Roads"), _favorite("Roads (Global)")
+    service = _Service([project], [global_favorite])
+    dialog = dialog_module.FavoritesManagerDialog(service)
+    dialog._select_favorite(global_favorite.id)
+    asked = _question_texts(monkeypatch, dialog_module.QMessageBox.StandardButton.Yes)
+
+    dialog._on_delete()
+
+    assert len(asked) == 1
+    assert "everyone" not in asked[0]
+    assert service.global_favorites == []

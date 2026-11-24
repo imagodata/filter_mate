@@ -1341,3 +1341,93 @@ class TestTeardown:
         ctrl._favorites_service = None
         ctrl.teardown()
         assert ctrl._favorites_service is None
+
+
+# ---------------------------------------------------------------------------
+# add_current_to_favorites / import_favorites — honest messages
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def _empty_project(monkeypatch):
+    """The add path reads the project's layers: give it an empty one."""
+    project = MagicMock()
+    project.mapLayers.return_value = {}
+    monkeypatch.setattr(favorites_controller, "QgsProject", MagicMock(instance=lambda: project))
+
+
+def _make_message_controller(service):
+    ctrl = FavoritesController.__new__(FavoritesController)
+    ctrl._favorites_service = service
+    ctrl._dockwidget = MagicMock()
+    ctrl._spatial_instance = MagicMock()
+    ctrl._show_warning = MagicMock()
+    ctrl._show_error = MagicMock()
+    ctrl._show_info = MagicMock()
+    ctrl._show_success = MagicMock()
+    ctrl.tr = lambda s: s
+    ctrl.get_current_filter_expression = lambda: '"a" = 1'
+    ctrl._validate_favorite_name = lambda name: True
+    ctrl.favorite_added = MagicMock()
+    ctrl.favorites_changed = MagicMock()
+    ctrl.update_indicator = MagicMock()
+    return ctrl
+
+
+@pytest.mark.usefixtures("_empty_project")
+class TestAddCurrentToFavorites:
+    def test_add_failure_is_said(self):
+        service = MagicMock()
+        service.add_favorite.return_value = None
+        ctrl = _make_message_controller(service)
+
+        assert ctrl.add_current_to_favorites("Roads") is False
+
+        ctrl._show_warning.assert_called_once_with(
+            "The favorite could not be saved. Details in filtermate.log."
+        )
+        ctrl._show_success.assert_not_called()
+
+    def test_add_success_does_not_warn(self):
+        service = MagicMock()
+        service.add_favorite.return_value = "fav-1"
+        ctrl = _make_message_controller(service)
+
+        assert ctrl.add_current_to_favorites("Roads") is True
+
+        ctrl._show_warning.assert_not_called()
+        ctrl._show_success.assert_called_once()
+
+
+@pytest.mark.usefixtures("_empty_project")
+class TestImportFavorites:
+    def test_import_has_no_replace_all(self, monkeypatch):
+        service = MagicMock()
+        service.import_favorites.return_value = types.SimpleNamespace(imported_count=2, skipped_count=1)
+        ctrl = _make_message_controller(service)
+        question = MagicMock()
+        monkeypatch.setattr(favorites_controller, "QMessageBox", question)
+
+        assert ctrl.import_favorites("/tmp/favs.json") == 2
+
+        question.question.assert_not_called()
+        service.import_favorites.assert_called_once_with("/tmp/favs.json", skip_duplicates=True)
+        ctrl._show_success.assert_called_once_with("2 favorite(s) imported, 1 skipped (already there).")
+
+    def test_import_of_only_duplicates_says_so(self):
+        service = MagicMock()
+        service.import_favorites.return_value = types.SimpleNamespace(imported_count=0, skipped_count=3)
+        ctrl = _make_message_controller(service)
+
+        assert ctrl.import_favorites("/tmp/favs.json") == 0
+
+        ctrl._show_info.assert_called_once_with("0 favorite(s) imported, 3 skipped (already there).")
+        ctrl._show_warning.assert_not_called()
+
+    def test_import_of_nothing_warns(self):
+        service = MagicMock()
+        service.import_favorites.return_value = types.SimpleNamespace(imported_count=0, skipped_count=0)
+        ctrl = _make_message_controller(service)
+
+        assert ctrl.import_favorites("/tmp/favs.json") == 0
+
+        ctrl._show_warning.assert_called_once_with("No favorites imported")

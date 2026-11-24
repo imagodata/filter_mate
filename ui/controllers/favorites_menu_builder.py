@@ -129,8 +129,6 @@ ACTION_SHARED_PICKER = "__SHARED_PICKER__"
 ACTION_PUBLISH_SHARING = "__PUBLISH_SHARING__"
 ACTION_QUICK_PUBLISH_SHARING = "__QUICK_PUBLISH_SHARING__"
 ACTION_MANAGE_SHARING_REPOS = "__MANAGE_SHARING_REPOS__"
-ACTION_BACKUP_TO_PROJECT = "__BACKUP_TO_PROJECT__"
-ACTION_RESTORE_FROM_PROJECT = "__RESTORE_FROM_PROJECT__"
 ACTION_CLEANUP_ORPHANS = "__CLEANUP_ORPHANS__"
 ACTION_SHOW_STATS = "__SHOW_STATS__"
 
@@ -283,17 +281,9 @@ class FavoritesMenuBuilder:
 
     @staticmethod
     def _add_maintenance_submenu(menu: QMenu, controller: "FavoritesController") -> None:
-        """Backup / restore / cleanup / stats operations under one sub-menu."""
+        """Cleanup / stats operations under one sub-menu."""
         menu.addSeparator()
         maintenance_menu = menu.addMenu("🔧 " + controller.tr("Maintenance"))
-
-        backup_action = maintenance_menu.addAction("💾 " + controller.tr("Save to project (.qgz)"))
-        backup_action.setData(ACTION_BACKUP_TO_PROJECT)
-
-        restore_action = maintenance_menu.addAction("📂 " + controller.tr("Restore from project"))
-        restore_action.setData(ACTION_RESTORE_FROM_PROJECT)
-
-        maintenance_menu.addSeparator()
 
         cleanup_action = maintenance_menu.addAction("🧹 " + controller.tr("Clean up orphan projects"))
         cleanup_action.setData(ACTION_CLEANUP_ORPHANS)

@@ -201,6 +201,14 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         except ImportError:
             logger.error(message)
 
+    def _show_warning(self, message: str) -> None:
+        """Push a warning to the QGIS message bar (the dialog stays open, the fields keep their text)."""
+        try:
+            from ...infrastructure.feedback import show_warning
+            show_warning(message)
+        except ImportError:
+            logger.warning(message)
+
     def closeEvent(self, event):
         """Disconnect from external signals before Qt destroys the dialog.
 
@@ -1011,6 +1019,19 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._select_favorite(select_id)
         self.favoritesChanged.emit()
 
+    def _name_taken_in_scope(self, name: str) -> bool:
+        """True when another favorite of the selected one's scope already has ``name``."""
+        current = self._find_favorite(self._current_fav_id)
+        if current is None:
+            return False
+        is_global = self._favorite_is_global(current)
+        return any(
+            fav.id != self._current_fav_id
+            and self._favorite_is_global(fav) == is_global
+            and (getattr(fav, 'name', '') or '').strip() == name
+            for fav in self._all_favorites
+        )
+
     def _on_save(self):
         """Save changes to selected favorite."""
         if not self._current_fav_id or not self._favorites_service:
@@ -1025,48 +1046,54 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             if tag.strip()
         ]
 
-        if new_name:
-            # F16 phase 4 lazy import: keeps this module importable in
-            # tests that lack the 3-level package nesting needed by a
-            # top-level ``from ...core.domain.exceptions`` statement.
-            from ...core.domain.exceptions import FavoritePersistenceError
-            # FIX 2026-04-22: suppress re-entrant external refresh triggered by
-            # the manager's own favorites_changed emission.
-            self._suppress_external_refresh = True
-            try:
-                self._favorites_service.update_favorite(
-                    self._current_fav_id,
-                    name=new_name,
-                    description=new_desc,
-                    tags=new_tags,
-                )
-                self._favorites_service.save()
-            except FavoritePersistenceError as e:
-                self._show_error(self.tr(
-                    "Could not save '{0}': {1}"
-                ).format(new_name, e.__cause__ or e))
-                return
-            finally:
-                self._suppress_external_refresh = False
+        if not new_name:
+            self._show_warning(self.tr("The name cannot be empty."))
+            return
+        if self._name_taken_in_scope(new_name):
+            self._show_warning(self.tr("Another favorite is already named '{0}'.").format(new_name))
+            return
 
-            # FIX 2026-04-22: refresh the local cache so the next search or
-            # populate_list() call reflects the edited name/tags. Without this,
-            # _all_favorites still held the pre-edit FilterFavorite and
-            # clearing the search box silently restored the old display.
-            self._all_favorites = self._load_favorites()
-            # v5.1: re-render the list via the unified refresh so the
-            # scope badge reflects the freshly-persisted owner. The
-            # manual per-item text edit we used to do was out of sync
-            # with the new badge prefix and lost the current scope filter.
-            self._refresh_filtered_list()
-            # The refresh already highlighted the saved row without notifying
-            # (an edit in progress stays on an external change); here the edit is
-            # saved, so rebuild the details from the stored favorite.
-            self._on_selection_changed()
+        # F16 phase 4 lazy import: keeps this module importable in
+        # tests that lack the 3-level package nesting needed by a
+        # top-level ``from ...core.domain.exceptions`` statement.
+        from ...core.domain.exceptions import FavoritePersistenceError
+        # FIX 2026-04-22: suppress re-entrant external refresh triggered by
+        # the manager's own favorites_changed emission.
+        self._suppress_external_refresh = True
+        try:
+            self._favorites_service.update_favorite(
+                self._current_fav_id,
+                name=new_name,
+                description=new_desc,
+                tags=new_tags,
+            )
+            self._favorites_service.save()
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr(
+                "Could not save '{0}': {1}"
+            ).format(new_name, e.__cause__ or e))
+            return
+        finally:
+            self._suppress_external_refresh = False
 
-            self.favoriteUpdated.emit(self._current_fav_id)
-            self.favoritesChanged.emit()
-            logger.info(f"Favorite updated: {new_name}")
+        # FIX 2026-04-22: refresh the local cache so the next search or
+        # populate_list() call reflects the edited name/tags. Without this,
+        # _all_favorites still held the pre-edit FilterFavorite and
+        # clearing the search box silently restored the old display.
+        self._all_favorites = self._load_favorites()
+        # v5.1: re-render the list via the unified refresh so the
+        # scope badge reflects the freshly-persisted owner. The
+        # manual per-item text edit we used to do was out of sync
+        # with the new badge prefix and lost the current scope filter.
+        self._refresh_filtered_list()
+        # The refresh already highlighted the saved row without notifying
+        # (an edit in progress stays on an external change); here the edit is
+        # saved, so rebuild the details from the stored favorite.
+        self._on_selection_changed()
+
+        self.favoriteUpdated.emit(self._current_fav_id)
+        self.favoritesChanged.emit()
+        logger.info(f"Favorite updated: {new_name}")
 
     def _on_delete(self):
         """Delete selected favorite."""
@@ -1080,10 +1107,14 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # F11 policy: stays a modal QMessageBox.question because deletion
         # is destructive and a toast confirm would risk silent data loss
         # if missed.
+        question = self.tr("Delete favorite '{0}'?").format(fav.name)
+        if not self._favorite_is_global(fav):
+            # A project favorite travels with the project file: the others see it go.
+            question += "\n\n" + self.tr("It is removed for everyone who opens this project.")
         reply = QMessageBox.question(
             self,
             self.tr("Delete Favorite"),
-            self.tr("Delete favorite '{0}'?").format(fav.name),
+            question,
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
