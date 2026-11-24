@@ -84,6 +84,16 @@ The tool buttons of the EXPLORING rail, for each kind of layer: the names of the
 | `wfs_timeout_seconds` | 60 | 1–600 | Maximum wait for a WFS or OGC API Features server filter, in seconds (1 to 600); the previous filter is kept after it |
 | `timeout_seconds` | 30 | 1–600 | Maximum wait for a server filter on other services (ArcGIS Feature Server, databases), in seconds (1 to 600); the previous filter is kept after it |
 
+## Settings > Performance > LAYER_SETTINGS
+
+`APP.OPTIONS.LAYER_SETTINGS`
+
+The FilterMate settings of the layers a saved project carries
+
+| Setting | Default | Allowed | Description |
+|---|---|---|---|
+| `remember_answers` | true | true, false | Remember the answer given with "Do not ask again for this project" when the settings a project carries for its layers differ from yours. Turned off, the answers remembered are forgotten and the question is asked at each opening |
+
 ## Settings > Performance > SMALL_DATASET_OPTIMIZATION
 
 `APP.OPTIONS.SMALL_DATASET_OPTIMIZATION`
