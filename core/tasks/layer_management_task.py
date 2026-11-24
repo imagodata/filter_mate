@@ -46,6 +46,10 @@ logger = setup_logger(
     level=logging.INFO
 )
 
+# The id of a row of fm_project_layers_properties written with its value as is (2026-11-24); the rows this task
+# wrote before have their quotes doubled
+ROW_AS_IS = "v2-"
+
 # Import constants
 # Constants - previously from modules.constants
 PROVIDER_POSTGRES = "postgres"
@@ -86,7 +90,6 @@ except ImportError:
 # Import object safety utilities (migrated from modules.object_safety)
 from ...infrastructure.utils import (
     safe_emit,
-    safe_set_layer_variables,
     safe_set_layer_variables_batch,
     is_qgis_alive
 )
@@ -303,6 +306,25 @@ class LayersManagementEngineTask(QgsTask):
             self._layer_facts = capture_layer_facts((task_parameters.get("task") or {}).get("layers") or ())
         except Exception:  # nosec B110 - the worker then reads the layers themselves, as before
             pass
+        # The settings the project carries for the layers to register, read here on the main thread (2026-11-24):
+        # once saved, the project is the truth for them, the SQLite of this computer a working copy
+        # (a fresh reload starts from the defaults: then nothing is read). The project is the truth only for values
+        # this version wrote, in a project that can be saved (project_is_truth); else this computer's SQLite wins.
+        self._project_settings = {}
+        self._project_settings_win = set()  # ids of the layers whose settings this version wrote (layer_is_truth)
+        self._project_layer_ids = None
+        self._queued_at = None  # a variable the panel writes from now on wins over what this task queues
+        task = task_parameters.get("task") or {}
+        if task_action == 'add_layers' and not task.get("reset_all_layers_variables_flag"):
+            try:
+                from ...infrastructure.utils import layer_settings
+                layers = task.get("layers") or ()
+                self._queued_at = layer_settings.write_epoch()
+                self._project_settings = layer_settings.capture_layer_settings(layers, task.get("project_layers") or {})
+                self._project_settings_win = layer_settings.truth_layer_ids(layers)
+                self._project_layer_ids = layer_settings.project_layer_ids()
+            except Exception as exc:  # catch-all safety net: the SQLite of this computer then gives them, as before
+                logger.warning(f"Settings of the project not read for the layers to register: {exc}")
 
     def _ensure_db_directory_exists(self):
         """
@@ -536,15 +558,23 @@ class LayersManagementEngineTask(QgsTask):
 
         for property in spatialite_results:
             if property[0] in existing_layer_variables:
-                value_typped, type_returned = self.return_typped_value(
-                    property[2].replace("\'\'", "\'"),
-                    'load'
-                )
+                # Written as is from 2026-11-24 (an id "v2-..."); before, this task doubled the quotes and the panel
+                # did not, so a value of the panel such as "x" <> '' came back as "x" <> '
+                text = property[2] if len(property) > 3 and str(property[3]).startswith(ROW_AS_IS) \
+                    else property[2].replace("\'\'", "\'")
+                value_typped, type_returned = self.return_typped_value(text, 'load')
+                if property[0] != "infos":
+                    # 2026-11-24: a flag this task stored as a bool (SQLite keeps 1 for it): a bool again, before
+                    # it goes into the project and to the panel (Qt6 takes no int for setChecked)
+                    from ..domain.project_layer_settings import as_flag
+                    value_typped = as_flag(property[1], value_typped)
                 existing_layer_variables[property[0]][property[1]] = value_typped
 
-                # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                # THREAD SAFETY (v2.3.10): Queue for main thread execution. A list as its JSON text, as the panel
+                # writes it (2026-11-24: an empty list stored as such comes back from a .qgz as None)
                 variable_key = f"filterMate_{property[0]}_{property[1]}"
-                self._deferred_layer_variables.append((id_of(layer), variable_key, value_typped))
+                stored = json.dumps(value_typped) if isinstance(value_typped, (list, dict)) else value_typped
+                self._deferred_layer_variables.append((id_of(layer), variable_key, stored))
 
         # If property count has changed, update it
         actual_count = (
@@ -557,6 +587,58 @@ class LayersManagementEngineTask(QgsTask):
             self._layer_properties_count = actual_count
 
         return existing_layer_variables
+
+    def _apply_project_settings(self, layer, layer_variables, local=None):
+        """Put the settings the project carries for ``layer`` over the ones of this computer (2026-11-24).
+
+        Once saved, the project is the truth for the ``exploring`` and ``filtering`` settings of its layers: opened on
+        another computer, or moved, the SQLite here has none of them, or older ones. They were read on the main thread
+        when the task was created (``capture_layer_settings``). Each is queued again as stored, after the value of
+        the SQLite or the default, so a variable already right is not written.
+
+        When the project is not the truth (written by an earlier version, read-only, no file: ``project_is_truth``),
+        a setting this computer's SQLite has stays, and is written into the project.
+
+        Args:
+            layer (QgsVectorLayer): Layer being registered
+            layer_variables (dict): Its properties ('infos', 'exploring', 'filtering'), completed in place
+            local (dict): What the SQLite gave for the layer, None for a layer this computer never saw
+        """
+        settings = (getattr(self, '_project_settings', None) or {}).get(id_of(layer))
+        if not settings:
+            return
+        from ..domain.project_layer_settings import empty_value, storable, typed_value, variable_name
+
+        def load(text):
+            return self.return_typped_value(text, 'load')[0]
+
+        winners = getattr(self, '_project_settings_win', None)
+        project_wins = winners if isinstance(winners, bool) else (winners is None or id_of(layer) in winners)
+        applied = 0
+        for group, values in settings.items():
+            target = layer_variables.setdefault(group, {})
+            for key, stored in values.items():
+                if not project_wins and local and key in local.get(group, {}):
+                    continue
+                if stored is None:  # an empty text, or an empty list stored as such, read from a .qgz
+                    stored = storable(empty_value(target.get(key), key))
+                target[key] = typed_value(stored, load)
+                self._deferred_layer_variables.append((id_of(layer), variable_name(group, key), storable(stored)))
+                applied += 1
+        logger.debug(f"Layer {id_of(layer)}: {applied} setting(s) of the project applied")
+
+    def _drop_missing_layers(self, layer_props):
+        """The panel works only with the layers of the project (2026-11-24): a layer duplicated, or added from a .qlr,
+        brings the layers to filter of its source. In memory only: the SQLite and the project keep what they hold, as
+        the list of layers may be read before every layer of a long opening is there."""
+        layer_ids = getattr(self, '_project_layer_ids', None)
+        if layer_ids is None:
+            return
+        from ..domain.project_layer_settings import LAYER_ID_LISTS, present_layers
+        filtering = layer_props.get("filtering", {})
+        for key in LAYER_ID_LISTS:
+            if key in filtering:
+                filtering[key] = present_layers(filtering[key], layer_ids)
 
     def _persist_verified_geometry_field(self, infos, layer):
         """Replace a stored geometry column that no longer matches the layer URI.
@@ -699,14 +781,16 @@ class LayersManagementEngineTask(QgsTask):
                 with self._safe_spatialite_connect() as conn:
                     cur = conn.cursor()
                     cur.execute(
+                        # 2026-11-24: with the id and the date (NOT NULL): without them the row was refused
+                        # (sqlite3.IntegrityError) and the registration of the layer failed
                         """INSERT INTO fm_project_layers_properties
-                           (fk_project, layer_id, meta_type, meta_key, meta_value)
-                           VALUES (?, ?, 'infos', 'layer_table_name', ?)""",
-                        (str(self.project_uuid), id_of(layer), source_table_name)
+                           (id, _updated_at, fk_project, layer_id, meta_type, meta_key, meta_value)
+                           VALUES (?, datetime(), ?, ?, 'infos', 'layer_table_name', ?)""",
+                        (f"{ROW_AS_IS}{uuid.uuid4()}", str(self.project_uuid), id_of(layer), source_table_name)
                     )
                     conn.commit()
                     cur.close()
-            except (OSError, RuntimeError) as e:
+            except (OSError, RuntimeError, sqlite3.Error) as e:
                 logger.warning(f"Could not add layer_table_name to database: {e}")
 
         # Add layer_provider_type if missing
@@ -719,14 +803,16 @@ class LayersManagementEngineTask(QgsTask):
                 with self._safe_spatialite_connect() as conn:
                     cur = conn.cursor()
                     cur.execute(
+                        # 2026-11-24: with the id and the date (NOT NULL): without them the row was refused
+                        # (sqlite3.IntegrityError) and the registration of the layer failed
                         """INSERT INTO fm_project_layers_properties
-                           (fk_project, layer_id, meta_type, meta_key, meta_value)
-                           VALUES (?, ?, 'infos', 'layer_provider_type', ?)""",
-                        (str(self.project_uuid), id_of(layer), layer_provider_type)
+                           (id, _updated_at, fk_project, layer_id, meta_type, meta_key, meta_value)
+                           VALUES (?, datetime(), ?, ?, 'infos', 'layer_provider_type', ?)""",
+                        (f"{ROW_AS_IS}{uuid.uuid4()}", str(self.project_uuid), id_of(layer), layer_provider_type)
                     )
                     conn.commit()
                     cur.close()
-            except (OSError, RuntimeError) as e:
+            except (OSError, RuntimeError, sqlite3.Error) as e:
                 logger.warning(f"Could not add layer_provider_type to database: {e}")
 
             # THREAD SAFETY (v2.3.10): Queue for main thread execution
@@ -742,14 +828,16 @@ class LayersManagementEngineTask(QgsTask):
                 with self._safe_spatialite_connect() as conn:
                     cur = conn.cursor()
                     cur.execute(
+                        # 2026-11-24: with the id and the date (NOT NULL): without them the row was refused
+                        # (sqlite3.IntegrityError) and the registration of the layer failed
                         """INSERT INTO fm_project_layers_properties
-                           (fk_project, layer_id, meta_type, meta_key, meta_value)
-                           VALUES (?, ?, 'infos', 'layer_geometry_type', ?)""",
-                        (str(self.project_uuid), id_of(layer), layer_geometry_type)
+                           (id, _updated_at, fk_project, layer_id, meta_type, meta_key, meta_value)
+                           VALUES (?, datetime(), ?, ?, 'infos', 'layer_geometry_type', ?)""",
+                        (f"{ROW_AS_IS}{uuid.uuid4()}", str(self.project_uuid), id_of(layer), layer_geometry_type)
                     )
                     conn.commit()
                     cur.close()
-            except (OSError, RuntimeError) as e:
+            except (OSError, RuntimeError, sqlite3.Error) as e:
                 logger.warning(f"Could not add layer_geometry_type to database: {e}")
 
     def _detect_layer_metadata(self, layer, layer_provider_type):
@@ -1131,6 +1219,8 @@ class LayersManagementEngineTask(QgsTask):
         layer_variables = self._load_existing_layer_properties(layer)
 
         if layer_variables:
+            self._apply_project_settings(layer, layer_variables,
+                                         local={group: dict(values) for group, values in layer_variables.items()})
             # CRITICAL: Validate PostgreSQL layers don't have virtual_id (legacy bug)
             if provider_key_of(layer) == 'postgres':
                 primary_key = layer_variables.get("infos", {}).get("primary_key_name")
@@ -1172,6 +1262,7 @@ class LayersManagementEngineTask(QgsTask):
 
             layer_variables = self._build_new_layer_properties(layer, result)
             self._set_layer_variables(layer, layer_variables)
+            self._apply_project_settings(layer, layer_variables)
 
         # Update properties count if first layer
         if self._properties_count() == 0:
@@ -1192,6 +1283,7 @@ class LayersManagementEngineTask(QgsTask):
 
         # Save to database
         self.insert_properties_to_spatialite(id_of(layer), layer_props)
+        self._drop_missing_layers(layer_props)
 
         # Mark spatial index as pending — will be created on-demand during filtering
         # (GeoPackage layers often already have rtree; processing.run is very slow on large layers)
@@ -1877,53 +1969,6 @@ class LayersManagementEngineTask(QgsTask):
                 finally:
                     cur.close()
 
-    def remove_variables_from_layer(self, layer, layer_properties=[]):
-        """
-        Remove layer variables from Spatialite database.
-
-        Args:
-            layer (QgsVectorLayer): Layer to remove variables from
-            layer_properties (list): List of (key_group, key) tuples, or empty for all properties
-        """
-        layer_all_properties_flag = False
-        if not isinstance(layer, QgsVectorLayer):
-            logger.error(f"remove_variables_from_layer: Expected QgsVectorLayer, got {type(layer).__name__}")
-            return
-
-        if len(layer_properties) == 0:
-            layer_all_properties_flag = True
-
-        if id_of(layer) in self.PROJECT_LAYERS.keys():
-            with self._safe_spatialite_connect() as conn:
-                cur = conn.cursor()
-
-                try:
-                    if layer_all_properties_flag is True:
-                        cur.execute(
-                            """DELETE FROM fm_project_layers_properties
-                               WHERE fk_project = ? AND layer_id = ?""",
-                            (str(self.project_uuid), id_of(layer))
-                        )
-                        conn.commit()
-                        # THREAD SAFETY (v2.3.10): Queue for main thread execution (clear all)
-                        self._deferred_layer_variables.append((id_of(layer), None, None))
-                    else:
-                        for layer_property in layer_properties:
-                            if layer_property[0] in ("infos", "exploring", "filtering"):
-                                if layer_property[0] in self.PROJECT_LAYERS[id_of(layer)] and layer_property[1] in self.PROJECT_LAYERS[id_of(layer)][layer_property[0]]:
-                                    cur.execute(
-                                        """DELETE FROM fm_project_layers_properties
-                                           WHERE fk_project = ? AND layer_id = ? AND meta_type = ? AND meta_key = ?""",
-                                        (str(self.project_uuid), id_of(layer), layer_property[0], layer_property[1])
-                                    )
-                                    conn.commit()
-                                    variable_key = f"filterMate_{layer_property[0]}_{layer_property[1]}"
-                                    # THREAD SAFETY (v2.3.10): Queue for main thread execution
-                                    self._deferred_layer_variables.append((id_of(layer), variable_key, ''))
-                                    self.removingLayerVariable.emit(layer, variable_key)
-                finally:
-                    cur.close()
-
     def remove_variables_from_all_layers(self):
         """
         Remove variables from all layers in the project.
@@ -1933,19 +1978,18 @@ class LayersManagementEngineTask(QgsTask):
         """
         if len(self.project_layers) == 0:
             if len(self.layers) > 0:
+                # 2026-11-24: each layer given, of any kind (a raster first left `layer` unbound: UnboundLocalError,
+                # nothing registered), by its own id: the layers of the same name, read from the project in this
+                # worker, lost their variables too
                 for layer_obj in self.layers:
-                    if isinstance(layer_obj, tuple) and len(list(layer_obj)) == 3:
-                        layer = layer_obj[0]
-                    elif isinstance(layer_obj, QgsVectorLayer):
-                        layer = layer_obj
-
-                    result_layers = [result_layer for result_layer in self.PROJECT.mapLayersByName(name_of(layer))]
-                    if len(result_layers) > 0:
-                        for result_layer in result_layers:
-                            # THREAD SAFETY (v2.3.10): Queue for main thread execution
-                            self._deferred_layer_variables.append((id_of(result_layer), None, None))
-                            if self.isCanceled():
-                                return False
+                    layer = layer_obj[0] if isinstance(layer_obj, tuple) and len(layer_obj) == 3 else layer_obj
+                    try:
+                        layer_id = layer if isinstance(layer, str) else id_of(layer)
+                    except (AttributeError, RuntimeError):  # not a layer, or deleted
+                        continue
+                    if layer_id:
+                        # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                        self._deferred_layer_variables.append((layer_id, None, None))
                     if self.isCanceled():
                         return False
             else:
@@ -1984,7 +2028,7 @@ class LayersManagementEngineTask(QgsTask):
             with self._safe_spatialite_connect() as conn:
                 cur = conn.cursor()
                 cur.execute(
-                    """SELECT meta_type, meta_key, meta_value FROM fm_project_layers_properties
+                    """SELECT meta_type, meta_key, meta_value, id FROM fm_project_layers_properties
                        WHERE fk_project = ? and layer_id = ?""",
                     (str(self.project_uuid), layer_id)
                 )
@@ -2023,12 +2067,13 @@ class LayersManagementEngineTask(QgsTask):
                                 """INSERT INTO fm_project_layers_properties
                                    VALUES(?, datetime(), ?, ?, ?, ?, ?)""",
                                 (
-                                    str(uuid.uuid4()),
+                                    f"{ROW_AS_IS}{uuid.uuid4()}",  # written as is (2026-11-24): no doubled quote
                                     str(self.project_uuid),
                                     layer_id,
                                     key_group,
                                     key,
-                                    value_typped.replace("\'", "\'\'") if type_returned in (str, dict, list) else value_typped
+                                    str(value_typped) if type_returned is bool  # 'True', not 1 (2026-11-24)
+                                    else value_typped
                                 )
                             )
                     conn.commit()
@@ -2149,6 +2194,15 @@ class LayersManagementEngineTask(QgsTask):
                 # and clear immediately so task can be fully cleaned up
                 operations_to_apply = list(self._deferred_layer_variables)
                 self._deferred_layer_variables.clear()
+                # 2026-11-24: a variable the panel writes from now on wins over the value queued here, and the project
+                # is modified when a setting it carries changes
+                try:
+                    from ...infrastructure.utils import layer_settings
+                    queued_at = getattr(self, '_queued_at', None)
+                    if queued_at is None:
+                        queued_at = layer_settings.write_epoch()
+                except ImportError:  # test doubles of the plugin packages
+                    layer_settings, queued_at = None, 0
 
                 # CRASH FIX (v2.4.9): Use QTimer.singleShot(0) to defer operations
                 # to the next event loop cycle. This provides a complete "round-trip"
@@ -2175,6 +2229,11 @@ class LayersManagementEngineTask(QgsTask):
 
                         def _flush_batch(target_layer_id):
                             variables = pending_batches.pop(target_layer_id, None)
+                            changed = False
+                            if variables and layer_settings is not None:
+                                variables = {name: value for name, value in variables.items()
+                                             if not layer_settings.written_since(target_layer_id, name, queued_at)}
+                                changed = layer_settings.settings_change(target_layer_id, variables)
                             if not variables:
                                 return
                             written, ok = safe_set_layer_variables_batch(target_layer_id, variables)
@@ -2182,6 +2241,9 @@ class LayersManagementEngineTask(QgsTask):
                                 logger.debug(f"Could not set {len(variables)} layer variables for {target_layer_id} (layer may be deleted)")
                             elif written:
                                 logger.debug(f"Set {written}/{len(variables)} layer variables for {target_layer_id} (rest unchanged)")
+                            if ok and layer_settings is not None:
+                                # The layer says this version wrote its settings; the project is modified if one changed
+                                layer_settings.settings_written(layer_id=target_layer_id, changed=changed)
 
                         for layer_id, variable_key, value in operations_to_apply:
                             if variable_key is None:
@@ -2189,9 +2251,10 @@ class LayersManagementEngineTask(QgsTask):
                                     logger.debug("QGIS became unavailable during layer variable loop")
                                     break
                                 _flush_batch(layer_id)
-                                # Clear all layer variables using safe wrapper
-                                if not safe_set_layer_variables(layer_id, {}):
-                                    logger.debug(f"Could not clear layer variables for {layer_id} (layer may be deleted)")
+                                # Clear the variables of FilterMate (2026-11-24: safe_set_layer_variables(id, {})
+                                # did nothing, and a fresh reload found the settings of the project again)
+                                if layer_settings is not None:
+                                    layer_settings.clear_filtermate_variables(layer_id)
                                 continue
                             if layer_id not in pending_batches:
                                 pending_batches[layer_id] = {}

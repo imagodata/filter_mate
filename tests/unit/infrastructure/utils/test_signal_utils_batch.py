@@ -3,8 +3,9 @@
 PERF 2026-09-12: batched layer-variable writes.
 
 ``safe_set_layer_variables_batch`` must run the crash-safety gate chain once
-per layer, write ``variableNames`` once, write only values that changed, and
-report (written, ok). ``safe_set_layer_variable`` keeps its one-shot contract.
+per layer, write only values that changed, and report (written, ok). 2026-11-24:
+``variableNames`` is left alone (QGIS pairs it by position with its own list of
+values: a name of FilterMate there gave a value of the user to another name). ``safe_set_layer_variable`` keeps its one-shot contract.
 
 ``signal_utils`` is loaded inside a private throw-away package so its
 ``from .validation_utils import …`` resolves without touching the shared
@@ -77,7 +78,7 @@ def signal_utils(monkeypatch):
 @pytest.mark.unit
 class TestSafeSetLayerVariablesBatch:
 
-    def test_writes_every_new_variable_and_names_once(self, signal_utils):
+    def test_writes_every_new_variable_and_no_name(self, signal_utils):
         layer = FakeLayer()
         project = FakeProject({"L1": layer})
         variables = {"filterMate_infos_a": 1, "filterMate_exploring_b": "x", "filterMate_filtering_c": True}
@@ -85,13 +86,10 @@ class TestSafeSetLayerVariablesBatch:
         written, ok = signal_utils.safe_set_layer_variables_batch("L1", variables, project=project)
 
         assert (written, ok) == (3, True)
-        assert layer.set_calls[0][0] == "variableNames"  # names referenced before any value lands
         assert layer.customProperty("variableValues/filterMate_infos_a") == 1
         assert layer.customProperty("variableValues/filterMate_exploring_b") == "x"
         assert layer.customProperty("variableValues/filterMate_filtering_c") is True
-        assert layer.customProperty("variableNames") == list(variables)
-        names_writes = [c for c in layer.set_calls if c[0] == "variableNames"]
-        assert len(names_writes) == 1
+        assert [c for c in layer.set_calls if c[0] == "variableNames"] == []
 
     def test_unchanged_values_are_skipped(self, signal_utils):
         layer = FakeLayer()
@@ -134,15 +132,17 @@ class TestSafeSetLayerVariablesBatch:
     def test_empty_batch_is_a_noop(self, signal_utils):
         assert signal_utils.safe_set_layer_variables_batch("L1", {}, project=FakeProject({})) == (0, True)
 
-    def test_existing_names_of_other_types_are_normalised(self, signal_utils):
+    def test_the_variables_of_the_user_are_left_alone(self, signal_utils):
         layer = FakeLayer()
-        layer._props["variableNames"] = "legacy_single_name"
+        layer._props["variableNames"] = ["my_var"]
+        layer._props["variableValues"] = ["hello"]
         project = FakeProject({"L1": layer})
 
-        written, ok = signal_utils.safe_set_layer_variables_batch("L1", {"new": 1}, project=project)
+        written, ok = signal_utils.safe_set_layer_variables_batch("L1", {"filterMate_exploring_b": True}, project=project)
 
         assert (written, ok) == (1, True)
-        assert layer.customProperty("variableNames") == ["legacy_single_name", "new"]
+        assert layer.customProperty("variableNames") == ["my_var"]
+        assert layer.customProperty("variableValues") == ["hello"]
 
 
 @pytest.mark.unit
@@ -172,7 +172,7 @@ class TestSafeSetLayerVariableStillWorks:
         assert signal_utils.safe_set_layer_variable("L1", "filterMate_infos_x", "val", project=project) is True
 
         assert layer.customProperty("variableValues/filterMate_infos_x") == "val"
-        assert layer.customProperty("variableNames") == ["filterMate_infos_x"]
+        assert layer.customProperty("variableNames") is None
 
     def test_single_write_rejects_missing_layer(self, signal_utils):
         assert signal_utils.safe_set_layer_variable("ghost", "k", 1, project=FakeProject({})) is False

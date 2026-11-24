@@ -3286,6 +3286,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if layer_id in self.PROJECT_LAYERS:
                 self.PROJECT_LAYERS[layer_id]["exploring"]["is_linking"] = checked
                 logger.info(f"IS_LINKING state updated in PROJECT_LAYERS: {checked}")
+                # 2026-11-24: saved as the other settings of the layer (the click was kept for the session only)
+                self.setLayerVariableEvent(self.current_layer, [("exploring", "is_linking")])
             logger.info(f"IS_LINKING {'ON' if checked else 'OFF'}: Calling exploring_link_widgets()")
 
             # FIX 2026-01-18 v6: When enabling IS_LINKING, propagate the CURRENT groupbox's field

@@ -19,9 +19,9 @@ from typing import Optional, List, Tuple, Any, Dict, Callable
 try:
     from qgis.core import (
         QgsProject,
-        QgsExpressionContextUtils,
         QgsVectorLayer
     )
+    from qgis.PyQt.QtCore import QTimer
     import sip
 except ImportError:
     try:
@@ -42,7 +42,7 @@ try:
     from ..infrastructure.utils import (
         is_layer_valid as is_valid_layer,
         is_qgis_alive,
-        safe_set_layer_variable
+        safe_set_layer_variables_batch
     )
 except ImportError:
     # Mock for testing without QGIS
@@ -52,10 +52,45 @@ except ImportError:
     def is_qgis_alive():
         return True
 
-    def safe_set_layer_variable(layer_id, name, value):
-        return True
+    def safe_set_layer_variables_batch(layer_id, variables):
+        return len(variables), True
+
+try:
+    from ..infrastructure.utils import layer_settings
+except ImportError:  # without the plugin package: the variables are written, nothing is compared nor marked
+    class layer_settings:  # noqa: N801 - stands for the module
+        @staticmethod
+        def note_direct_write(layer_id, name):
+            pass
+
+        @staticmethod
+        def is_setting_variable(name):
+            return False
+
+        @staticmethod
+        def same(one, other, name=""):
+            return one == other
+
+        @staticmethod
+        def settings_written(project=None, layer_id=None, changed=True):
+            return False
+
+        @staticmethod
+        def remove_filtermate_variables(layer, names=None):
+            return 0
+
+        @staticmethod
+        def filtermate_variable_names(layer):
+            return []
+
+# The id of a row written with its value as is (LayersManagementEngineTask.ROW_AS_IS, 2026-11-24)
+ROW_AS_IS = "v2-"
 
 logger = get_logger(__name__)
+
+# A variable saved during a layer change is written once it ends: checked every 100 ms, written after 5 s anyway
+PENDING_VARIABLES_DELAY_MS = 100
+PENDING_VARIABLES_MAX_ATTEMPTS = 50
 
 
 class VariablesPersistenceManager:
@@ -97,6 +132,10 @@ class VariablesPersistenceManager:
         self._return_typped_value = return_typped_value
         self._cancel_layer_tasks = cancel_layer_tasks
         self._is_layer_change_in_progress = is_layer_change_in_progress
+        # Variables not written during a layer change: {layer_id: {name: value}}, written once it ends
+        self._pending_variables: Dict[str, Dict[str, Any]] = {}
+        self._pending_attempts = 0
+        self._watch_project()
 
     def save_single_property(
         self,
@@ -157,29 +196,114 @@ class VariablesPersistenceManager:
         if type_returned in (list, dict):
             value_typped = json.dumps(value_typped)
 
-        # Save to QGIS variable if safe
+        # Save to QGIS variable if safe. 2026-11-24: under its name filterMate_<group>_<key>, the one the project is
+        # read from (the panel wrote <group>_<key>, and the project kept the value of the registration)
+        variable_name = f"filterMate_{key_group}_{key}"
         project_layer = QgsProject.instance().mapLayer(layer_id)
-        if project_layer is not None and not skip_qgis_variable:
+        layer_settings.note_direct_write(layer_id, variable_name)  # a registration queued before must not undo it
+        if skip_qgis_variable:
+            # Written once the layer change ends: the saved project must carry the value the SQLite has
+            self._defer_variable(layer_id, variable_name, value_typped)
+        elif project_layer is not None:
             if sip is not None and not sip.isdeleted(project_layer):
                 # Cancel running tasks to prevent race conditions
                 if self._cancel_layer_tasks:
                     self._cancel_layer_tasks(layer_id)
 
-                # Use safe wrapper for variable setting
-                variable_name = f"{key_group}_{key}"
-                if not safe_set_layer_variable(layer_id, variable_name, value_typped):
-                    logger.debug(f"save_single_property: safe_set_layer_variable failed for {layer_id}.{variable_name}")
+                self._drop_pending(layer_id, variable_name)  # a value deferred before is older than this one
+                self._write_variables(layer_id, {variable_name: value_typped})
 
         # Always save to database (even if QGIS variable failed)
         project_uuid = self._get_project_uuid()
         cursor.execute(
             """INSERT INTO fm_project_layers_properties
                VALUES(?, datetime(), ?, ?, ?, ?, ?)""",
-            (str(uuid.uuid4()), str(project_uuid), layer_id,
+            (f"{ROW_AS_IS}{uuid.uuid4()}", str(project_uuid), layer_id,
              key_group, key, str(value_typped))
         )
 
         return True
+
+    def _write_variables(self, layer_id: str, variables: Dict[str, Any]) -> None:
+        """Write variables of a layer; the project is modified when a setting it carries changed (not only its form:
+        ``'["a"]'`` for ``["a"]``), as for any change of a project."""
+        layer = QgsProject.instance().mapLayer(layer_id)
+        changed = layer is not None and any(
+            layer_settings.is_setting_variable(name)
+            and not layer_settings.same(layer.customProperty(f"variableValues/{name}"), value, name)
+            for name, value in variables.items())
+        _written, ok = safe_set_layer_variables_batch(layer_id, variables)
+        if not ok:
+            logger.debug(f"Variables not written for {layer_id} (layer may be deleted)")
+        else:
+            # The layer says this version wrote its settings; the project is modified if one changed
+            layer_settings.settings_written(layer_id=layer_id, changed=changed)
+
+    def _defer_variable(self, layer_id: str, name: str, value: Any) -> None:
+        """Write a layer variable once the layer change in progress ends (the latest value of each name)."""
+        self._pending_variables.setdefault(layer_id, {})[name] = value
+        if self._pending_attempts == 0:
+            self._pending_attempts = 1
+            QTimer.singleShot(PENDING_VARIABLES_DELAY_MS, self._write_pending_variables)
+
+    def _write_pending_variables(self) -> None:
+        """Write the deferred layer variables, or wait again while the layer change goes on."""
+        waiting = False
+        try:
+            if not self._pending_variables or not is_qgis_alive():
+                self._pending_variables = {}
+                return
+            changing = self._is_layer_change_in_progress and self._is_layer_change_in_progress()
+            if changing and self._pending_attempts < PENDING_VARIABLES_MAX_ATTEMPTS:
+                self._pending_attempts += 1
+                QTimer.singleShot(PENDING_VARIABLES_DELAY_MS, self._write_pending_variables)
+                waiting = True
+                return
+            pending, self._pending_variables = self._pending_variables, {}
+            for layer_id, variables in pending.items():
+                if QgsProject.instance().mapLayer(layer_id) is not None:  # not for a layer gone meanwhile
+                    self._write_variables(layer_id, variables)
+        finally:
+            if not waiting:
+                self._pending_attempts = 0
+
+    def _watch_project(self) -> None:
+        """A project cleared or read drops the deferred variables: they belong to the project of before (a "Save as"
+        keeps them, a quick reopening of the same file does not)."""
+        try:
+            project = QgsProject.instance()
+            project.cleared.connect(self._forget_pending)
+            project.readProject.connect(self._forget_pending)
+        except Exception as e:  # no QGIS project here (some tests)
+            logger.debug(f"VariablesPersistenceManager: project signals not watched: {e}")
+
+    def _forget_pending(self, *_args) -> None:
+        self._pending_variables = {}
+
+    def _drop_pending(self, layer_id: str, name: str) -> None:
+        """Forget a deferred value of a layer variable."""
+        pending = self._pending_variables.get(layer_id)
+        if pending is not None:
+            pending.pop(name, None)
+            if not pending:
+                del self._pending_variables[layer_id]
+
+    def _remove_variables(self, layer: 'QgsVectorLayer', names: Optional[List[str]] = None) -> None:
+        """Remove FilterMate variables of a layer, ``names`` or all, out of the project too."""
+        try:
+            layer_id = layer.id()
+            for name in names if names is not None else list(self._pending_variables.get(layer_id, {})):
+                self._drop_pending(layer_id, name)
+            if names is None:  # the legacy names too (exploring_*, filtering_*, infos_*)
+                names = layer_settings.filtermate_variable_names(layer)
+            for name in names:  # a registration queued before must not bring it back
+                layer_settings.note_direct_write(layer_id, name)
+            removed = layer_settings.remove_filtermate_variables(layer, names)
+        except (RuntimeError, OSError, SystemError) as e:
+            logger.debug(f"Variables not removed: {e}")
+            return
+        if removed:
+            layer_settings.settings_written(layer_id=layer_id, changed=any(map(layer_settings.is_setting_variable, names)))
 
     def save_variables_from_layer(
         self,
@@ -346,9 +470,11 @@ class VariablesPersistenceManager:
                     # Clear QGIS layer variables
                     if sip is not None and not sip.isdeleted(fresh_layer):
                         try:
-                            QgsExpressionContextUtils.setLayerVariables(fresh_layer, {})
+                            # FilterMate's values only (2026-11-24): setLayerVariables(layer, {}) also erased the
+                            # variables of the user; out of the project too
+                            self._remove_variables(fresh_layer)
                         except (RuntimeError, OSError, SystemError) as e:
-                            logger.warning(f"remove_variables_from_layer: setLayerVariables failed: {e}")
+                            logger.warning(f"remove_variables_from_layer: variables not removed: {e}")
                 else:
                     # Remove specific properties
                     for layer_property in layer_properties:
@@ -356,14 +482,16 @@ class VariablesPersistenceManager:
                         if key_group not in ("infos", "exploring", "filtering"):
                             continue
 
-                        if (key_group in project_layers[layer_id] and
-                                key in project_layers[layer_id][key_group]):
-                            cur.execute(
-                                """DELETE FROM fm_project_layers_properties
-                                   WHERE fk_project = ? and layer_id = ?
-                                   and meta_type = ? and meta_key = ?""",
-                                (str(project_uuid), layer_id, key_group, key)
-                            )
+                        # 2026-11-24: whether the panel still holds the key or not (restore_layer_state removes
+                        # it from PROJECT_LAYERS first, and the row and the variable stayed)
+                        cur.execute(
+                            """DELETE FROM fm_project_layers_properties
+                               WHERE fk_project = ? and layer_id = ?
+                               and meta_type = ? and meta_key = ?""",
+                            (str(project_uuid), layer_id, key_group, key)
+                        )
+                        # Out of the project too: the project would bring the value back
+                        self._remove_variables(fresh_layer, [f"filterMate_{key_group}_{key}"])
         finally:
             pass  # Context manager handles connection cleanup
 

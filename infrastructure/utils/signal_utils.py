@@ -354,24 +354,11 @@ def safe_set_layer_variable(layer_id: str, variable_key: str, value: Any, projec
         # CRASH FIX (v2.4.9): Use direct setCustomProperty instead of
         # QgsExpressionContextUtils.setLayerVariable. This allows us to wrap the
         # actual C++ call in a try/except that can catch RuntimeError.
-        # QgsExpressionContextUtils.setLayerVariable internally calls setCustomProperty
-        # with key format "variableValues/<variable_name>" for the value and
-        # "variableNames" for tracking variable names.
+        # 2026-11-24: the value is a custom property of its own, "variableValues/<variable_name>". Its name is no
+        # longer added to "variableNames": QGIS pairs that list by position with its own list "variableValues", and
+        # a name of FilterMate there gave the value of a variable of the user to another name.
         try:
-            # Format variable key as QGIS expects for layer variables
             prop_key = f"variableValues/{variable_key}"
-
-            # Get existing variable names list
-            existing_names = fresh_layer.customProperty('variableNames', [])
-            if not isinstance(existing_names, list):
-                existing_names = [existing_names] if existing_names else []
-
-            # Add variable name if not already tracked
-            if variable_key not in existing_names:
-                existing_names.append(variable_key)
-                fresh_layer.setCustomProperty('variableNames', existing_names)
-
-            # Set the variable value
             fresh_layer.setCustomProperty(prop_key, value)
 
             logger.debug(f"Successfully set layer variable {variable_key} for {layer_id}")
@@ -453,9 +440,8 @@ def safe_set_layer_variables_batch(
     Set several layer variables with ONE pass through the crash-safety gates.
 
     PERF 2026-09-12: replaces N calls to safe_set_layer_variable for the same
-    layer (N gate chains, N re-writes of the growing ``variableNames`` list and,
-    on Windows, N processEvents() flushes) by one gated resolution, one
-    ``variableNames`` write and one ``variableValues/<key>`` write per changed
+    layer (N gate chains and, on Windows, N processEvents() flushes) by one
+    gated resolution and one ``variableValues/<key>`` write per changed
     value. Values already stored with the same content are skipped when
     ``skip_unchanged`` is True, which is the case for every layer re-loaded
     from a saved project.
@@ -479,33 +465,19 @@ def safe_set_layer_variables_batch(
 
     written = 0
     try:
-        existing_names = fresh_layer.customProperty('variableNames', [])
-        if not isinstance(existing_names, list):
-            existing_names = [existing_names] if existing_names else []
-        existing_set = set(existing_names)
-        names_changed = False
-
         to_write = []
         for variable_key, value in variables.items():
             prop_key = f"variableValues/{variable_key}"
-            if variable_key in existing_set and skip_unchanged:
+            if skip_unchanged:
                 try:
                     current = fresh_layer.customProperty(prop_key, None)
                 except (RuntimeError, OSError, SystemError):
                     current = None
                 if current is not None and _variable_values_equal(current, value):
                     continue
-            if variable_key not in existing_set:
-                existing_names.append(variable_key)
-                existing_set.add(variable_key)
-                names_changed = True
             to_write.append((prop_key, value))
 
-        # Names first (as QgsExpressionContextUtils.setLayerVariable does), so a
-        # value written just before the layer disappears is never unreferenced.
-        if names_changed:
-            fresh_layer.setCustomProperty('variableNames', existing_names)
-
+        # 2026-11-24: the names are no longer added to "variableNames" (see safe_set_layer_variable)
         for prop_key, value in to_write:
             fresh_layer.setCustomProperty(prop_key, value)
             written += 1

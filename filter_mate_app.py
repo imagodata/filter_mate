@@ -2581,9 +2581,13 @@ class FilterMateApp:
                 layers = data if isinstance(data, list) else [data]
                 # Safely check has_loaded_layers - default to False if dockwidget not available
                 has_loaded = self.dockwidget.has_loaded_layers if self.dockwidget else False
-                reset_flag = (_get_option_value(
+                # 2026-11-24: init_filterMate_db puts the option back to False once the SQLite is deleted, before the
+                # layers are registered: the reset of this opening is remembered there (_fresh_reload_pending)
+                reset_flag = ((_get_option_value(
                     self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("FRESH_RELOAD_FLAG"), False
-                ) and not has_loaded)
+                ) or getattr(self, '_fresh_reload_pending', False)) and not has_loaded)
+                if reset_flag:
+                    self._fresh_reload_pending = False  # once: the layers added later keep their settings
                 return self._build_layer_management_params(layers, reset_flag)
 
     def _refresh_layers_and_canvas(self, source_layer):
@@ -2908,6 +2912,9 @@ class FilterMateApp:
         fresh_reload = _get_option_value(
             self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("FRESH_RELOAD_FLAG"), False
         )
+        # The layers of this project start from the defaults: neither the SQLite (deleted) nor the project (read
+        # otherwise by the registration, 2026-11-24) gives their settings
+        self._fresh_reload_pending = bool(fresh_reload)
         success, self.CONFIG_DATA = self._database_manager.initialize_database(
             config_data=self.CONFIG_DATA,
             fresh_reload=fresh_reload,
