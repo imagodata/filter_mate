@@ -92,3 +92,14 @@ class TestGlobalKinds:
             pytest.skip(f"UI module not importable: {exc}")
         assert _GLOBAL_SCOPE_KINDS == {"shared_global", "mine_global"}
 
+
+
+class TestScopeKeys:
+    def test_every_scope_combo_key_maps_to_a_classifier_kind(self):
+        try:
+            from ui.dialogs.favorites_manager import _SCOPE_KEY_KINDS
+        except ImportError as exc:
+            pytest.skip(f"UI module not importable: {exc}")
+        from core.domain.favorites_manager import FavoriteScope
+        assert set(_SCOPE_KEY_KINDS) == {scope.value for scope in FavoriteScope} - {"all"}
+        assert set(_SCOPE_KEY_KINDS.values()) == {"shared_here", "shared_global", "mine_here", "mine_global"}

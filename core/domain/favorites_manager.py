@@ -1007,7 +1007,7 @@ class FavoritesManager:
                 SELECT id, name, expression, layer_name, layer_id,
                        layer_provider, description, tags, created_at,
                        updated_at, use_count, last_used_at,
-                       remote_layers, spatial_config
+                       remote_layers, spatial_config, owner
                 FROM fm_favorites
                 WHERE project_uuid = ?
                 ORDER BY name
@@ -1030,6 +1030,7 @@ class FavoritesManager:
                     'last_used_at': row['last_used_at'],
                     'remote_layers': json.loads(row['remote_layers']) if row['remote_layers'] else None,
                     'spatial_config': json.loads(row['spatial_config']) if row['spatial_config'] else None,
+                    'owner': row['owner'],
                 }
                 global_favorites.append(FilterFavorite.from_dict(data))
 
@@ -1040,6 +1041,36 @@ class FavoritesManager:
         except Exception as e:
             logger.error(f"Failed to load global favorites: {e}")
             return []
+
+    def remove_global_favorite(self, favorite_id: str) -> bool:
+        """Remove a global favorite (it is not in the project cache).
+
+        Returns:
+            True when a global favorite of this id was removed, False when there is none.
+
+        Raises:
+            FavoritesNotInitialized: if the database was never bootstrapped.
+            FavoritePersistenceError: if the database could not be written.
+        """
+        if not self._initialized or not self._db_path:
+            raise FavoritesNotInitialized(
+                f"remove_global_favorite({favorite_id!r}) called before set_database"
+            )
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self._db_path)
+            try:
+                cursor = conn.execute(
+                    "DELETE FROM fm_favorites WHERE id = ? AND project_uuid = ?",
+                    (favorite_id, GLOBAL_PROJECT_UUID),
+                )
+                conn.commit()
+                return cursor.rowcount > 0
+            finally:
+                conn.close()
+        except Exception as e:
+            logger.error(f"Failed to remove global favorite: {e}")
+            raise FavoritePersistenceError("remove_global_favorite", e) from e
 
     def make_favorite_global(self, favorite_id: str) -> bool:
         """

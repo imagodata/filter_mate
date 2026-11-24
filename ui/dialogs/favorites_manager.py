@@ -4,10 +4,12 @@ FilterMate FavoritesManagerDialog.
 Dialog for managing filter favorites with list, edit, delete, and search capabilities.
 Extracted from filter_mate_dockwidget.py for better modularity.
 """
+import copy
 import logging
 
 from ..styles.favorites_styles import favorites_dialog_stylesheet
 from ..styles.mockup_design import MONO_FAMILY, render_icon
+from .favorite_order import SORT_LAST_USED, SORT_MOST_USED, SORT_NAME, sorted_favorites
 from .favorite_summary import date_text, scope_badge, summary_rows, use_text
 from .favorite_summary_widgets import ExpressionView, text_value
 
@@ -16,7 +18,7 @@ try:
         QComboBox, QDialog, QVBoxLayout, QHBoxLayout, QListWidget,
         QListWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QMessageBox,
         QAbstractItemView, QFormLayout, QFrame, QScrollArea, QSplitter,
-        QTableWidget, QTableWidgetItem, QHeaderView, QTabWidget, QWidget
+        QTableWidget, QTableWidgetItem, QHeaderView, QTabWidget, QWidget, QMenu
     )
     from qgis.PyQt.QtCore import Qt, pyqtSignal
     HAS_QGIS = True
@@ -44,6 +46,7 @@ except ImportError:
     QTableWidgetItem = object
     QHeaderView = None
     QTabWidget = object
+    QMenu = object
     Qt = None
 
     def pyqtSignal(*args):
@@ -52,6 +55,14 @@ except ImportError:
 # Scope kinds of ``_favorite_scope_kind`` that apply to every project of this
 # computer; the list shows them with the globe icon instead of the star.
 _GLOBAL_SCOPE_KINDS = frozenset({"shared_global", "mine_global"})
+
+# Scope combo entry (``FavoriteScope`` value) -> scope kind of ``_favorite_scope_kind``.
+_SCOPE_KEY_KINDS = {
+    "global_shared": "shared_global",
+    "project_shared": "shared_here",
+    "global_mine": "mine_global",
+    "project_mine": "mine_here",
+}
 
 
 def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
@@ -91,14 +102,16 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
     Dialog for managing filter favorites.
 
     Features:
-    - List all favorites with search/filter
+    - List the project favorites then the global ones, with search/filter/sort
+    - Double-click or context menu: apply, rename, duplicate, delete, copy to global/project
     - Read a summary of each favorite; edit its name, description and tags
     - Delete favorites
     - Apply favorites directly
     - View remote layer details
 
     Signals:
-        favoriteApplied: Emitted when a favorite is applied (favorite_id)
+        favoriteApplied: Emitted when a project favorite is applied (favorite_id)
+        globalFavoriteApplied: Emitted when a global favorite is applied (favorite_id)
         favoriteDeleted: Emitted when a favorite is deleted (favorite_id)
         favoriteUpdated: Emitted when a favorite is updated (favorite_id)
         favoritesChanged: Emitted when favorites list changes
@@ -106,6 +119,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     if HAS_QGIS:
         favoriteApplied = pyqtSignal(str)
+        globalFavoriteApplied = pyqtSignal(str)
         favoriteDeleted = pyqtSignal(str)
         favoriteUpdated = pyqtSignal(str)
         favoritesChanged = pyqtSignal()
@@ -132,7 +146,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._favorites_service = favorites_manager
         self._extension_bridge = extension_bridge
         self._current_fav_id = None
-        self._all_favorites = []
+        self._all_favorites = []  # the project favorites then the global ones
+        self._global_ids = set()  # ids of the global ones among them
         # FIX 2026-04-22: re-entrancy guard so our own update/delete don't bounce
         # back through the external-change refresh slot.
         self._suppress_external_refresh = False
@@ -224,9 +239,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         header_row.setContentsMargins(0, 0, 0, 0)
         header_row.setSpacing(8)
 
+        self._all_favorites = self._load_favorites()
         fav_count = self._favorites_service.count if self._favorites_service else 0
         self._header_label = QLabel(
-            self.tr("<b>Saved Favorites ({0})</b>").format(fav_count)
+            self.tr("<b>Saved Favorites ({0})</b>").format(len(self._all_favorites))
         )
         self._header_label.setObjectName("dialogHeader")
         header_row.addWidget(self._header_label)
@@ -293,6 +309,16 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._scope_combo.addItem(self.tr("Mine · This project"), "project_mine")
         self._scope_combo.currentIndexChanged.connect(self._on_scope_changed)
         search_layout.addWidget(self._scope_combo)
+
+        # Sort: by name (default), by last use or by number of uses
+        self._sort_combo = QComboBox()
+        self._sort_combo.setObjectName("sortCombo")
+        self._sort_combo.setToolTip(self.tr("Sort the favorites."))
+        self._sort_combo.addItem(self.tr("Name"), SORT_NAME)
+        self._sort_combo.addItem(self.tr("Last used"), SORT_LAST_USED)
+        self._sort_combo.addItem(self.tr("Most used"), SORT_MOST_USED)
+        self._sort_combo.currentIndexChanged.connect(self._on_sort_changed)
+        search_layout.addWidget(self._sort_combo)
         layout.addLayout(search_layout)
 
         # Main content with splitter
@@ -319,12 +345,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         button_layout = self._create_buttons()
         layout.addLayout(button_layout)
 
-        # Initial population (handle None favorites_manager)
-        if self._favorites_service:
-            self._all_favorites = self._favorites_service.get_all_favorites()
-        else:
-            self._all_favorites = []
-        self._populate_list(self._all_favorites)
+        # Initial population (the favorites were loaded with the header)
+        self._populate_list(sorted_favorites(self._all_favorites, self._current_sort_key()))
 
         # Select first item
         if self._list_widget.count() > 0:
@@ -375,6 +397,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._list_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self._list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._list_widget.currentItemChanged.connect(self._on_selection_changed)
+        self._list_widget.itemDoubleClicked.connect(self._on_item_double_clicked)
+        self._list_widget.customContextMenuRequested.connect(self._on_list_context_menu)
 
         left_layout.addWidget(self._list_widget)
         return left_panel
@@ -560,25 +584,17 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         """Populate list widget with given favorites."""
         self._list_widget.clear()
 
-        # Pre-resolve identity / project once — avoids a per-item cascade
+        # Pre-resolve identity once — avoids a per-item cascade
         # lookup that would otherwise fire for every favorite.
         current_user = self._resolve_current_user()
-        project_uuid = getattr(self._favorites_service, "_project_uuid", None)
-        try:
-            from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
-        except Exception:
-            GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
 
         for fav in favorites_to_show:
-            kind = _favorite_scope_kind(
-                fav, current_user, project_uuid, GLOBAL_PROJECT_UUID,
-            )
+            kind = self._scope_kind(fav, current_user)
             # The scope is the icon (globe: all projects, star: this project);
             # the text is the name.
             item = QListWidgetItem(fav.name)
-            scope_icon = render_icon(
-                "projection" if kind in _GLOBAL_SCOPE_KINDS else "star", self._dark
-            )
+            is_global = fav.id in self._global_ids or kind in _GLOBAL_SCOPE_KINDS
+            scope_icon = render_icon("projection" if is_global else "star", self._dark)
             if scope_icon is not None:
                 item.setIcon(scope_icon)
             item.setData(Qt.ItemDataRole.UserRole, fav.id)
@@ -616,6 +632,16 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         """Refresh the list when the scope combo changes."""
         self._refresh_filtered_list()
 
+    def _on_sort_changed(self, _index: int = 0):
+        """Refresh the list when the sort combo changes."""
+        self._refresh_filtered_list()
+
+    def _current_sort_key(self) -> str:
+        """Key of the sort combo entry (defaults to the name)."""
+        combo = getattr(self, "_sort_combo", None)
+        data = combo.currentData() if combo is not None else None
+        return str(data) if data else SORT_NAME
+
     def _refresh_filtered_list(self):
         """Recompute and repopulate the list from search × scope state.
 
@@ -642,9 +668,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         else:
             visible = scoped
 
-        self._populate_list(visible)
+        self._populate_list(sorted_favorites(visible, self._current_sort_key()))
+        self._select_favorite(self._current_fav_id, notify=False)
 
-        total = self._favorites_service.count
+        total = len(self._all_favorites)
         if len(visible) == total:
             self._header_label.setText(
                 self.tr("<b>Saved Favorites ({0})</b>").format(total)
@@ -674,21 +701,15 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return list(favorites)
 
         current_user = self._resolve_current_user()
-        project_uuid = getattr(self._favorites_service, "_project_uuid", None)
-        try:
-            from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
-        except Exception:
-            GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
 
         def _kind(fav):
-            return _favorite_scope_kind(
-                fav, current_user, project_uuid, GLOBAL_PROJECT_UUID,
-            )
+            return self._scope_kind(fav, current_user)
 
         # "shared_*" scopes: owner IS NULL × project dimension
         # "mine_*" scopes: owner == me × project dimension
         # "foreign" never matches a filter entry — always only visible in ALL.
-        return [f for f in favorites if _kind(f) == scope_key]
+        wanted = _SCOPE_KEY_KINDS.get(scope_key, scope_key)
+        return [f for f in favorites if _kind(f) == wanted]
 
     def _resolve_current_user(self):
         """Pull the current user identity from the manager (cached)."""
@@ -703,17 +724,67 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                 return None
         return None
 
-    def _favorite_is_global(self, fav) -> bool:
-        """True when ``fav`` applies to every project of this computer."""
+    def _scope_kind(self, fav, current_user=None) -> str:
+        """Scope kind of ``fav`` (see ``_favorite_scope_kind``).
+
+        A favorite of the global list is of the global project whatever the
+        project the manager is pinned to.
+        """
         try:
             from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
         except Exception:
             GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
-        project_uuid = getattr(self._favorites_service, "_project_uuid", None)
-        kind = _favorite_scope_kind(
-            fav, self._resolve_current_user(), project_uuid, GLOBAL_PROJECT_UUID,
+        if fav.id in self._global_ids:
+            project_uuid = GLOBAL_PROJECT_UUID
+        else:
+            project_uuid = getattr(self._favorites_service, "_project_uuid", None)
+        return _favorite_scope_kind(fav, current_user, project_uuid, GLOBAL_PROJECT_UUID)
+
+    def _favorite_is_global(self, fav) -> bool:
+        """True when ``fav`` applies to every project of this computer."""
+        return (
+            fav.id in self._global_ids
+            or self._scope_kind(fav, self._resolve_current_user()) in _GLOBAL_SCOPE_KINDS
         )
-        return kind in _GLOBAL_SCOPE_KINDS
+
+    def _load_favorites(self) -> list:
+        """The project favorites then the global ones; remembers which are global."""
+        service = self._favorites_service
+        if not service:
+            self._global_ids = set()
+            return []
+        favorites = list(service.get_all_favorites())
+        known = {fav.id for fav in favorites}
+        global_favorites = [fav for fav in service.get_global_favorites() if fav.id not in known]
+        self._global_ids = {fav.id for fav in global_favorites}
+        return favorites + global_favorites
+
+    def _find_favorite(self, fav_id):
+        """The favorite of this id among the project and global ones, None when gone."""
+        if fav_id in self._global_ids:
+            return next((fav for fav in self._all_favorites if fav.id == fav_id), None)
+        return self._favorites_service.get_favorite(fav_id) if self._favorites_service else None
+
+    def _select_favorite(self, fav_id, notify: bool = True) -> bool:
+        """Select the row of ``fav_id``; False when it is not listed.
+
+        With ``notify`` False the details panel is left as it is (an edit in
+        progress stays), only the highlighted row follows.
+        """
+        if not fav_id:
+            return False
+        for row in range(self._list_widget.count()):
+            if self._list_widget.item(row).data(Qt.ItemDataRole.UserRole) == fav_id:
+                if notify:
+                    self._list_widget.setCurrentRow(row)
+                else:
+                    self._list_widget.blockSignals(True)
+                    try:
+                        self._list_widget.setCurrentRow(row)
+                    finally:
+                        self._list_widget.blockSignals(False)
+                return True
+        return False
 
     def _clear_summary_rows(self) -> None:
         """Remove the read-only rows of the Summary tab."""
@@ -737,12 +808,16 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
 
         fav_id = item.data(Qt.ItemDataRole.UserRole)
-        fav = self._favorites_service.get_favorite(fav_id)
+        fav = self._find_favorite(fav_id)
 
         if not fav:
             return
 
         self._current_fav_id = fav_id
+        # A global favorite is read-only here (apply, copy and delete only)
+        editable = fav_id not in self._global_ids
+        for field in (self._name_edit, self._description_edit, self._tags_edit):
+            field.setEnabled(editable)
 
         # Summary tab
         self._scope_badge_label.setText(scope_badge(self._favorite_is_global(fav), self.tr))
@@ -803,7 +878,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
         # Enable buttons
         self._apply_btn.setEnabled(True)
-        self._save_btn.setEnabled(True)
+        self._save_btn.setEnabled(editable)
         self._delete_btn.setEnabled(True)
 
     def _usage_text(self, fav) -> str:
@@ -813,13 +888,134 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _on_apply(self):
         """Apply selected favorite."""
-        if self._current_fav_id:
-            self.favoriteApplied.emit(self._current_fav_id)
-            self.accept()
+        self._apply_favorite(self._current_fav_id)
+
+    def _apply_favorite(self, fav_id) -> None:
+        """Ask for ``fav_id`` to be applied (the signal depends on its scope), then close."""
+        if not fav_id:
+            return
+        if fav_id in self._global_ids:
+            self.globalFavoriteApplied.emit(fav_id)
+        else:
+            self.favoriteApplied.emit(fav_id)
+        self.accept()
+
+    def _on_item_double_clicked(self, item) -> None:
+        """Double-click on a row applies its favorite."""
+        self._apply_favorite(item.data(Qt.ItemDataRole.UserRole))
+
+    def _on_list_context_menu(self, pos) -> None:
+        """Context menu of a row: apply, rename, duplicate, delete, copy to global/project."""
+        item = self._list_widget.itemAt(pos)
+        if item is None:
+            return
+        self._list_widget.setCurrentItem(item)
+        menu = self._build_context_menu(item.data(Qt.ItemDataRole.UserRole))
+        menu.exec(self._list_widget.viewport().mapToGlobal(pos))
+
+    def _build_context_menu(self, fav_id) -> "QMenu":
+        """Menu of the favorite ``fav_id``; a global one cannot be renamed or duplicated."""
+        is_global = fav_id in self._global_ids
+        menu = QMenu(self)
+        menu.addAction(self.tr("Apply")).triggered.connect(lambda: self._apply_favorite(fav_id))
+        rename = menu.addAction(self.tr("Rename"))
+        rename.setEnabled(not is_global)
+        rename.triggered.connect(self._focus_name_edit)
+        duplicate = menu.addAction(self.tr("Duplicate"))
+        duplicate.setEnabled(not is_global)
+        duplicate.triggered.connect(lambda: self._duplicate_favorite(fav_id))
+        menu.addSeparator()
+        menu.addAction(self.tr("Delete")).triggered.connect(self._on_delete)
+        menu.addSeparator()
+        if is_global:
+            menu.addAction(self.tr("Copy to project")).triggered.connect(
+                lambda: self._copy_to_project(fav_id)
+            )
+        else:
+            menu.addAction(self.tr("Copy to global")).triggered.connect(
+                lambda: self._copy_to_global(fav_id)
+            )
+        return menu
+
+    def _focus_name_edit(self) -> None:
+        """Rename: show the Summary tab with the Name field focused and selected."""
+        self._tab_widget.setCurrentIndex(0)
+        self._name_edit.setFocus()
+        self._name_edit.selectAll()
+
+    def _duplicate_favorite(self, fav_id) -> None:
+        """Add a copy of the project favorite ``fav_id`` named '<name> (copy)' and select it."""
+        fav = self._find_favorite(fav_id)
+        if fav is None or fav_id in self._global_ids:
+            return
+        new_id = self._favorites_service.add_favorite(
+            name=self.tr("{0} (copy)").format(fav.name),
+            expression=fav.expression,
+            layer_name=fav.layer_name,
+            layer_id=fav.layer_id,
+            layer_provider=fav.layer_provider,
+            spatial_config=copy.deepcopy(fav.spatial_config),
+            remote_layers=copy.deepcopy(fav.remote_layers),
+            tags=list(fav.tags or []),
+            description=fav.description or "",
+        )
+        if not new_id:
+            self._show_error(self.tr("Could not duplicate '{0}'.").format(fav.name))
+            return
+        self._after_list_change(new_id)
+
+    def _copy_to_global(self, fav_id) -> None:
+        """Copy the project favorite ``fav_id`` to the global favorites and select the copy."""
+        fav = self._find_favorite(fav_id)
+        if fav is None or fav_id in self._global_ids:
+            return
+        from ...core.domain.exceptions import FavoritePersistenceError
+        try:
+            new_id = self._favorites_service.copy_to_global(fav_id)
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr("Could not copy to global: {0}").format(e.__cause__ or e))
+            return
+        if not new_id:
+            self._show_error(self.tr("Could not copy '{0}' to the global favorites.").format(fav.name))
+            return
+        self._after_list_change(new_id)
+
+    def _copy_to_project(self, fav_id) -> None:
+        """Copy the global favorite ``fav_id`` to this project and select the copy.
+
+        A project favorite with the same name and expression is reused, as when
+        the global favorite is applied.
+        """
+        fav = self._find_favorite(fav_id)
+        if fav is None or fav_id not in self._global_ids:
+            return
+        from ...core.domain.exceptions import FavoritePersistenceError
+        from ...core.domain.global_favorite_copy import project_copy_of_global
+        existing = project_copy_of_global(fav, self._favorites_service.get_all_favorites())
+        if existing is not None:
+            self._select_favorite(existing.id)
+            return
+        try:
+            new_id = self._favorites_service.import_global_to_project(fav_id)
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr("Could not copy to project: {0}").format(e.__cause__ or e))
+            return
+        if not new_id:
+            self._show_error(self.tr("Could not copy '{0}' to this project.").format(fav.name))
+            return
+        self._after_list_change(new_id)
+
+    def _after_list_change(self, select_id) -> None:
+        """Reload the list after a favorite was added, select ``select_id``, tell the owner."""
+        self.refresh()
+        self._select_favorite(select_id)
+        self.favoritesChanged.emit()
 
     def _on_save(self):
         """Save changes to selected favorite."""
         if not self._current_fav_id or not self._favorites_service:
+            return
+        if self._current_fav_id in self._global_ids:  # read-only here
             return
 
         new_name = self._name_edit.text().strip()
@@ -857,7 +1053,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             # populate_list() call reflects the edited name/tags. Without this,
             # _all_favorites still held the pre-edit FilterFavorite and
             # clearing the search box silently restored the old display.
-            self._all_favorites = self._favorites_service.get_all_favorites()
+            self._all_favorites = self._load_favorites()
             # v5.1: re-render the list via the unified refresh so the
             # scope badge reflects the freshly-persisted owner. The
             # manual per-item text edit we used to do was out of sync
@@ -879,7 +1075,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         if not self._current_fav_id or not self._favorites_service:
             return
 
-        fav = self._favorites_service.get_favorite(self._current_fav_id)
+        fav = self._find_favorite(self._current_fav_id)
         if not fav:
             return
 
@@ -897,13 +1093,17 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
 
         deleted_id = self._current_fav_id
+        is_global = deleted_id in self._global_ids
         # F16 phase 4 lazy import — see _on_save for rationale.
         from ...core.domain.exceptions import FavoritePersistenceError
         # FIX 2026-04-22: suppress re-entrant external refresh from manager's
         # own favorites_changed emission during delete + save.
         self._suppress_external_refresh = True
         try:
-            removed = self._favorites_service.remove_favorite(deleted_id)
+            if is_global:
+                removed = self._favorites_service.remove_global_favorite(deleted_id)
+            else:
+                removed = self._favorites_service.remove_favorite(deleted_id)
         except FavoritePersistenceError as e:
             self._show_error(self.tr(
                 "Could not delete '{0}': {1}"
@@ -930,9 +1130,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             if getattr(f, 'id', None) != deleted_id
         ]
 
-        fav_count = self._favorites_service.count if self._favorites_service else 0
+        self._global_ids.discard(deleted_id)
         self._header_label.setText(
-            self.tr("<b>Saved Favorites ({0})</b>").format(fav_count)
+            self.tr("<b>Saved Favorites ({0})</b>").format(len(self._all_favorites))
         )
 
         # Save changes
@@ -973,6 +1173,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._name_edit.clear()
         self._description_edit.clear()
         self._tags_edit.clear()
+        for field in (self._name_edit, self._description_edit, self._tags_edit):
+            field.setEnabled(True)
         self._usage_label.setText("-")
 
         # Layers tab
@@ -1047,10 +1249,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         ``_refresh_filtered_list`` so the user's filtering state
         survives ``favorites_changed`` and shared-picker imports.
         """
+        self._all_favorites = self._load_favorites()
         if not self._favorites_service:
-            self._all_favorites = []
             self._populate_list(self._all_favorites)
             self._header_label.setText(self.tr("<b>Saved Favorites (0)</b>"))
             return
-        self._all_favorites = self._favorites_service.get_all_favorites()
         self._refresh_filtered_list()

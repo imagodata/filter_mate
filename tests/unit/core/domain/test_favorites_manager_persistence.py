@@ -324,3 +324,29 @@ def test_replace_project_favorites_leaves_the_global_favorites(manager, favorite
     manager.replace_project_favorites([])
     assert manager.get_all_favorites() == []
     assert global_id in [f.id for f in manager.get_global_favorites()]
+
+
+def test_remove_global_favorite_deletes_only_a_global_one(manager, favorites_module):
+    fav = favorites_module.FilterFavorite
+    manager.add_favorite(fav(name="local", expression="TRUE"))
+    local_id = manager.get_all_favorites()[0].id
+    global_id = manager.copy_to_global(local_id)
+
+    assert manager.remove_global_favorite(local_id) is False  # a project favorite stays
+    assert manager.get_favorite(local_id) is not None
+    assert manager.remove_global_favorite(global_id) is True
+    assert manager.get_global_favorites() == []
+    assert manager.remove_global_favorite(global_id) is False
+
+
+def test_remove_global_favorite_before_set_database_raises(favorites_module):
+    from _fm_fav_persist_pkg.exceptions import FavoritesNotInitialized
+    with pytest.raises(FavoritesNotInitialized):
+        favorites_module.FavoritesManager().remove_global_favorite("x")
+
+
+def test_global_favorites_carry_their_owner(manager, favorites_module):
+    manager.set_current_user("alice")
+    manager.add_favorite(favorites_module.FilterFavorite(name="local", expression="TRUE"))
+    manager.copy_to_global(manager.get_all_favorites()[0].id)
+    assert [f.owner for f in manager.get_global_favorites()] == ["alice"]

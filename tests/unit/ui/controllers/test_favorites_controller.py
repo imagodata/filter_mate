@@ -1194,6 +1194,72 @@ class TestApplyFavoriteCatchesNotInitialized:
         ctrl.favorite_applied.emit.assert_called_once()
 
 
+class TestApplyGlobalFavorite:
+    """Applying a global favorite imports it into the project once."""
+
+    def _make_controller(self, service):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        ctrl._favorites_service = service
+        ctrl._show_error = MagicMock()
+        ctrl.tr = lambda s: s
+        ctrl.update_indicator = MagicMock()
+        ctrl.apply_favorite = MagicMock(return_value=True)
+        return ctrl
+
+    @staticmethod
+    def _favorite(fav_id, name, expression="\"a\" = 1"):
+        fav = MagicMock()
+        fav.id, fav.name, fav.expression = fav_id, name, expression
+        return fav
+
+    def test_applying_a_global_favorite_twice_keeps_one_copy(self):
+        service = MagicMock()
+        service.get_global_favorites.return_value = [self._favorite("g1", "Roads")]
+        service.get_all_favorites.return_value = [
+            self._favorite("p0", "Other", "TRUE"),
+            self._favorite("p1", "Roads"),
+        ]
+        ctrl = self._make_controller(service)
+
+        assert ctrl._apply_global_favorite("g1") is True
+
+        service.import_global_to_project.assert_not_called()
+        ctrl.apply_favorite.assert_called_once_with("p1")
+
+    def test_the_copy_made_by_copy_to_global_is_found_without_its_suffix(self):
+        service = MagicMock()
+        service.get_global_favorites.return_value = [self._favorite("g1", "Roads (Global)")]
+        service.get_all_favorites.return_value = [self._favorite("p1", "Roads")]
+        ctrl = self._make_controller(service)
+
+        ctrl._apply_global_favorite("g1")
+
+        service.import_global_to_project.assert_not_called()
+        ctrl.apply_favorite.assert_called_once_with("p1")
+
+    def test_a_global_favorite_without_a_project_copy_is_imported_then_applied(self):
+        service = MagicMock()
+        service.get_global_favorites.return_value = [self._favorite("g1", "Roads")]
+        service.get_all_favorites.return_value = [self._favorite("p1", "Roads", "\"b\" = 2")]
+        service.import_global_to_project.return_value = "p2"
+        ctrl = self._make_controller(service)
+
+        assert ctrl._apply_global_favorite("g1") is True
+
+        service.import_global_to_project.assert_called_once_with("g1")
+        ctrl.apply_favorite.assert_called_once_with("p2")
+
+    def test_an_unknown_global_favorite_is_not_applied(self):
+        service = MagicMock()
+        service.get_global_favorites.return_value = []
+        ctrl = self._make_controller(service)
+
+        assert ctrl._apply_global_favorite("g1") is False
+
+        service.import_global_to_project.assert_not_called()
+        ctrl.apply_favorite.assert_not_called()
+
+
 class TestRemoveFavoriteCatchesNotInitialized:
     def _make_controller(self, manager_mock):
         ctrl = FavoritesController.__new__(FavoritesController)

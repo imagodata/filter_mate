@@ -24,6 +24,7 @@ from ...core.domain.exceptions import (
     FavoritesError,
     FavoritesNotInitialized,
 )
+from ...core.domain.global_favorite_copy import project_copy_of_global
 from .base_controller import BaseController
 from .favorites_spatial_helpers import (
     exact_filtered_feature_count,
@@ -649,13 +650,18 @@ class FavoritesController(BaseController):
             # session. Disconnect in ``finally`` so the lifetime is
             # bounded by this call.
             dialog.favoriteApplied.connect(self.apply_favorite)
+            dialog.globalFavoriteApplied.connect(self._apply_global_favorite)
             try:
                 dialog.exec()
             finally:
-                try:
-                    dialog.favoriteApplied.disconnect(self.apply_favorite)
-                except (TypeError, RuntimeError):
-                    pass
+                for signal, slot in (
+                    (dialog.favoriteApplied, self.apply_favorite),
+                    (dialog.globalFavoriteApplied, self._apply_global_favorite),
+                ):
+                    try:
+                        signal.disconnect(slot)
+                    except (TypeError, RuntimeError):
+                        pass
             # Refresh after dialog closes
             self.favorites_changed.emit()
             self.update_indicator()
@@ -1016,9 +1022,25 @@ class FavoritesController(BaseController):
         return self._favorites_service.get_global_favorites()
 
     def _apply_global_favorite(self, favorite_id: str) -> bool:
-        """Apply a global favorite."""
+        """Apply a global favorite.
+
+        The favorite is imported into the project first, once: applying it
+        again reuses the project favorite of the same name and expression.
+        """
         if not self._favorites_service:
             return False
+
+        global_favorite = next(
+            (f for f in self._favorites_service.get_global_favorites() if f.id == favorite_id),
+            None,
+        )
+        if global_favorite is None:
+            return False
+        existing = project_copy_of_global(
+            global_favorite, self._favorites_service.get_all_favorites()
+        )
+        if existing is not None:
+            return self.apply_favorite(existing.id)
 
         # First, import the global favorite to the current project
         try:
