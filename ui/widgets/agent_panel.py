@@ -528,6 +528,10 @@ class AgentPanel(QFrame):
         self.more_button.setToolTip(_tr("More"))
         self.more_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         menu = QMenu(self.more_button)
+        # Three groups (2026-11-24): the conversation, the agent, help. New conversation comes first, and is also a
+        # link under the line once something was asked.
+        self.new_action = menu.addAction(_tr("New conversation"))
+        self.new_action.triggered.connect(self.new_conversation_requested)
         self.history_action = menu.addAction(_tr("History…"))
         self.history_action.triggered.connect(self.history_requested)
         # Recipes: the changes of a request kept in the project, run again without the model.
@@ -536,18 +540,6 @@ class AgentPanel(QFrame):
         self._recipes = []
         self._can_save_recipe = False
         self.set_recipes([], False)
-        self.new_action = menu.addAction(_tr("New conversation"))
-        self.new_action.triggered.connect(self.new_conversation_requested)
-        self.setup_action = menu.addAction(_tr("Set up FilterMate…"))
-        self.setup_action.triggered.connect(self.setup_requested)
-        self.tour_action = menu.addAction(_tr("How FilterMate works"))
-        self.tour_action.triggered.connect(self.tour_requested)
-        # The forms of the feedback page of the site, as in Vector > FilterMate (infrastructure/feedback_forms.py).
-        self.feedback_menu = menu.addMenu(_tr("Feedback"))
-        self.feedback_menu.setObjectName("menu_agent_feedback")
-        for form, words in FEEDBACK_ENTRIES:
-            action = self.feedback_menu.addAction(QCoreApplication.translate("FilterMate", words))
-            action.triggered.connect(lambda _checked=False, chosen=form: self.feedback_requested.emit(chosen, "agent-menu"))
         # Sources, model and the MCP server of the plugin, turned on or off without opening the settings.
         menu.addSeparator()
         self.sources_menu = menu.addMenu(_tr("Sources"))
@@ -559,9 +551,19 @@ class AgentPanel(QFrame):
         self.mcp_action.triggered.connect(self.mcp_toggled)
         self._option_menus = []
         menu.aboutToShow.connect(self.options_requested)
-        menu.addSeparator()
         self.settings_action = menu.addAction(_tr("Agent settings"))
         self.settings_action.triggered.connect(self.settings_requested)
+        menu.addSeparator()
+        self.setup_action = menu.addAction(_tr("Set up FilterMate…"))
+        self.setup_action.triggered.connect(self.setup_requested)
+        self.tour_action = menu.addAction(_tr("How FilterMate works"))
+        self.tour_action.triggered.connect(self.tour_requested)
+        # The forms of the feedback page of the site, as in Vector > FilterMate (infrastructure/feedback_forms.py).
+        self.feedback_menu = menu.addMenu(_tr("Feedback"))
+        self.feedback_menu.setObjectName("menu_agent_feedback")
+        for form, words in FEEDBACK_ENTRIES:
+            action = self.feedback_menu.addAction(QCoreApplication.translate("FilterMate", words))
+            action.triggered.connect(lambda _checked=False, chosen=form: self.feedback_requested.emit(chosen, "agent-menu"))
         self.more_button.setMenu(menu)
 
         ask = QHBoxLayout()
@@ -603,6 +605,15 @@ class AgentPanel(QFrame):
         under.setSpacing(6)
         under.addWidget(self.mode_button, 0, Qt.AlignmentFlag.AlignLeft)  # at the left also when the label is hidden
         under.addWidget(self.destination, 1)
+        # A new conversation in one click once something was asked (2026-11-24: it was in the menu "⋯" only).
+        self.new_button = QPushButton(_tr("New conversation"), self)
+        self.new_button.setObjectName("pushButton_agent_new")
+        self.new_button.setFlat(True)
+        self.new_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.new_button.setToolTip(_tr("Start afresh: the agent forgets this conversation, the changes stay"))
+        self.new_button.clicked.connect(self.new_conversation_requested)
+        self.new_button.setVisible(False)
+        under.addWidget(self.new_button, 0, Qt.AlignmentFlag.AlignRight)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -927,6 +938,9 @@ class AgentPanel(QFrame):
             f" max-height: 22px; padding: 0 8px; border: 1px solid {palette['fm_field_border']}; border-radius: 10px;"
             f" background: {palette['fm_field']}; color: {palette['fm_text']}; font-size: 11px; }}"
             f"QToolButton#toolButton_agent_mode:hover {{ border-color: {palette['fm_accent']}; }}"
+            # Act changes the project: its chip is drawn in the accent; Ask and Plan, which change nothing, stay plain.
+            + (f"QToolButton#toolButton_agent_mode {{ border-color: {palette['fm_accent']}; color: {palette['fm_accent']};"
+               " font-weight: 600; }" if self._mode == ACT else "") +
             # The frame alone paints the background: a viewport or a page with one of its own squares the corners.
             "QScrollArea#scrollArea_agent_welcome > QWidget#qt_scrollarea_viewport, QWidget#widget_agent_welcome"
             " { background: transparent; }"
@@ -944,6 +958,10 @@ class AgentPanel(QFrame):
             f"QPushButton#pushButton_agent_setup {{ padding: 8px 16px; border: 1px solid {palette['fm_group_border']};"
             f" border-radius: 6px; background: {palette['fm_group']}; color: {palette['fm_text']}; }}"
             f"QPushButton#pushButton_agent_setup:hover {{ border-color: {palette['fm_active_border']}; }}"
+            f"QPushButton#pushButton_agent_new {{ padding: 0 2px; font-size: 11px; font-weight: 500; border: none;"
+            f" background: transparent; color: {palette['fm_accent']}; min-height: 0; }}"
+            f"QPushButton#pushButton_agent_new:hover {{ text-decoration: underline; }}"
+            f"QPushButton#pushButton_agent_new:disabled {{ color: {muted}; }}"
             f"QPushButton#pushButton_agent_tour, QPushButton#pushButton_agent_testers,"
             f" QPushButton#pushButton_agent_reconfigure {{ padding: 4px 0; font-size: 12px;"
             f" font-weight: 500; border: none; background: transparent; color: {palette['fm_accent']}; text-align: left; }}"
@@ -1096,9 +1114,10 @@ class AgentPanel(QFrame):
         """Whether a provider is set up; ``destination`` says where the requests go."""
         self._ready = ready
         if ready:
-            self.welcome_title.setText(_tr("What do you want to filter?"))
-            self.welcome_text.setText(_tr("Describe it in your own words. The agent reads the project, tries the filter, "
-                                          "then applies it. Each turn can be undone."))
+            # What the agent does goes beyond filters (2026-11-24): open data, relief, styles, charts, layouts.
+            self.welcome_title.setText(_tr("What should the agent do?"))
+            self.welcome_text.setText(_tr("Filter, find open data, style or map: describe it in your own words. The "
+                                          "agent reads the project and shows each step. Each turn can be undone."))
         else:
             self.welcome_title.setText(_tr("Filter your layers from a sentence"))
             self.welcome_text.setText(_tr("The agent reads the layers of your project, writes the filters and applies "
@@ -1111,7 +1130,7 @@ class AgentPanel(QFrame):
         # Nothing can be asked before a provider is set up (mockup: Welcome board); the menu still opens the settings.
         if hasattr(self, "send_button"):
             self.input.setEnabled(ready)
-            self.input.setPlaceholderText(_tr("Ask for a filter…") if ready else _tr("Connect a provider to start"))
+            self._refresh_placeholder()
             self.send_button.setEnabled(ready or self._working)
         if hasattr(self, "try_label"):
             self.try_label.setVisible(ready)
@@ -1257,6 +1276,19 @@ class AgentPanel(QFrame):
         self.mode_button.setText(f"{label} \u25be")
         self.mode_button.setToolTip(_tr("Mode of the agent: Ask answers and changes nothing, Plan writes the steps "
                                         "and waits for your Go, Act does it."))
+        self._refresh_placeholder()
+        if hasattr(self, "thread"):
+            self._refresh_look()  # the chip takes the color of its mode
+
+    def _refresh_placeholder(self) -> None:
+        """The line to ask says what the next request may do: the mode picked under it (2026-11-24)."""
+        if not hasattr(self, "input"):
+            return
+        if not self._ready:
+            self.input.setPlaceholderText(_tr("Connect a provider to start"))
+            return
+        self.input.setPlaceholderText({ASK: _tr("Ask a question about the project…"),
+                                       PLAN: _tr("Describe what to plan…")}.get(self._mode, _tr("Ask the agent…")))
 
     def mode(self) -> str:
         return self._mode
@@ -1279,6 +1311,7 @@ class AgentPanel(QFrame):
         self.send_button.setToolTip(_tr("Stop (Esc)") if working else _tr("Send (Enter)"))
         self.send_button.setEnabled(self._ready or working)
         self.thread.set_hint(_tr("You can already type the next request.") if working else "")
+        self._refresh_new_button()
         self._refresh_look()
 
     def set_can_undo(self, possible: bool) -> None:
@@ -1324,6 +1357,7 @@ class AgentPanel(QFrame):
         if hasattr(self, "example_buttons"):
             self.shuffle_examples()  # a new conversation offers other requests
         self.stack.setCurrentIndex(_WELCOME_PAGE)
+        self._refresh_new_button()
         if hasattr(self, "example_buttons"):
             self._examples_on_screen()  # the welcome may have been on screen already: no show event then
 
@@ -1337,6 +1371,14 @@ class AgentPanel(QFrame):
     def _show_conversation(self) -> None:
         if not self.history_shown:
             self.stack.setCurrentIndex(_THREAD_PAGE)
+        self._refresh_new_button()
+
+    def _refresh_new_button(self) -> None:
+        """The link to a new conversation: once the thread holds something, and not while the agent works."""
+        if hasattr(self, "new_button"):
+            # The thread page is shown before its first line is added (_show_conversation).
+            self.new_button.setVisible(not self.thread.is_empty() or self.stack.currentIndex() == _THREAD_PAGE)
+            self.new_button.setEnabled(not self._working)
 
     def add_user(self, text: str) -> None:
         """A request of the user, in a tinted bubble on the right."""
