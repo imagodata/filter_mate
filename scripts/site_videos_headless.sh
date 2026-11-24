@@ -29,6 +29,9 @@
 #   FM5_SURVEY_EXPR="\"usage_1\" = 'Commercial et services'" FM5_SURVEY_RECT=571230,6289080,571600,6289450 \
 #   scripts/site_videos_headless.sh clip metropole bridges explore heights survey compare favorites export processing sam
 #   FM_DOCKER_ARGS="--network host" FM_AGENT_MODEL=qwen3.5:4b scripts/site_videos_headless.sh clip agent
+# Stories 13 to 15 (ndvi, roofs, ground) use the square of FM5_DATA (ortho_irc.tif too); story 16 (wires) a LiDAR
+# survey with classified wires, wellington_lines.copc.laz, mounted read-only:
+#   FM_DOCKER_ARGS="-v <its folder>:/wires:ro" FM_SIZE=1280x720 FM_CRF=30 scripts/site_videos_headless.sh clip wires
 #   FM_DOCKER_ARGS="--network <net of the PostGIS container>" FM_PG="host=... dbname=... user=... password=..." \
 #   scripts/site_videos_headless.sh clip postgis
 # (a model that does not fit the graphics card never answers within the take: qwen3:8b with a 16k context on 8 GB)
