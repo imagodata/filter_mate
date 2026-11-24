@@ -385,7 +385,8 @@ class ExportingController(BaseController):
                 # Validate layer is usable
                 layer_obj = project.mapLayer(layer_id)
                 if layer_obj and (_is_coverage_layer(layer_obj) or (isinstance(layer_obj, QgsVectorLayer) and is_layer_source_available(layer_obj, require_psycopg2=False))):
-                    display_name = f"{layer_name} [{layer_crs_authid}]"
+                    from ...core.domain.layer_label import layer_label
+                    display_name = layer_label(layer_name, layer_crs_authid)
                     item_data = {"layer_id": key, "layer_geometry_type": layer_info["layer_geometry_type"]}
                     layers_widget.addItem(layer_icon, display_name, item_data)
                     item = layers_widget.model().item(item_index)
@@ -395,7 +396,8 @@ class ExportingController(BaseController):
             # Add missing PostgreSQL layers
             for pg_layer in missing_postgres:
                 if pg_layer.isValid() and is_layer_source_available(pg_layer, require_psycopg2=False):
-                    display_name = f"{pg_layer.name()} [{pg_layer.crs().authid()}]"
+                    from ...core.domain.layer_label import layer_label
+                    display_name = layer_label(pg_layer.name(), pg_layer.crs().authid())
                     geom_type_str = geometry_type_to_string(pg_layer)
                     layer_icon = dockwidget.icon_per_geometry_type(geom_type_str)
                     logger.debug(f"populate_export_combobox [PostgreSQL]: layer='{pg_layer.name()}', geom_type='{geom_type_str}', icon_isNull={layer_icon.isNull() if layer_icon else 'None'}")
@@ -409,7 +411,8 @@ class ExportingController(BaseController):
             # Add missing remote layers
             for remote_layer in missing_remote:
                 if remote_layer.isValid() and is_layer_source_available(remote_layer, require_psycopg2=False):
-                    display_name = f"{remote_layer.name()} [{remote_layer.crs().authid()}]"
+                    from ...core.domain.layer_label import layer_label
+                    display_name = layer_label(remote_layer.name(), remote_layer.crs().authid())
                     geom_type_str = geometry_type_to_string(remote_layer)
                     layer_icon = dockwidget.icon_per_geometry_type(geom_type_str)
                     logger.debug(f"populate_export_combobox [Remote]: layer='{remote_layer.name()}', geom_type='{geom_type_str}', icon_isNull={layer_icon.isNull() if layer_icon else 'None'}")

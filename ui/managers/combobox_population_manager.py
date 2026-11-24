@@ -400,7 +400,8 @@ class ComboboxPopulationManager:
                             layer_obj, require_psycopg2=False
                         )
                     ):
-                        display_name = f"{layer_name} [{layer_crs_authid}]"
+                        from ...core.domain.layer_label import layer_label
+                        display_name = layer_label(layer_name, layer_crs_authid)
                         item_data = {
                             "layer_id": key,
                             "layer_geometry_type": geom_type,
@@ -580,7 +581,8 @@ class ComboboxPopulationManager:
                             continue
 
                     # Add to combobox
-                    display_name = f"{layer_name} [{layer_crs}]"
+                    from ...core.domain.layer_label import layer_label
+                    display_name = layer_label(layer_name, layer_crs)
                     item_data = {
                         "layer_id": key,
                         "layer_geometry_type": geom_type,
@@ -598,9 +600,10 @@ class ComboboxPopulationManager:
                 from ...adapters.qgis.point_cloud_capability import is_listed_rendered_raster
                 for rendered in project.mapLayers().values():
                     if rendered.id() != layer.id() and is_listed_rendered_raster(rendered, vector_source):
+                        from ...core.domain.layer_label import layer_label
                         layers_widget.add_unfilterable_item(
                             dw.icon_per_geometry_type('GeometryType.Raster'),
-                            f"{rendered.name()} [{rendered.crs().authid()}]", rendered.id())
+                            layer_label(rendered.name(), rendered.crs().authid()), rendered.id())
 
             logger.info(
                 f"populate_filtering_direct: Added {item_index} layers "

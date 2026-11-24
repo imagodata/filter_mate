@@ -13,6 +13,7 @@ from ..accessor import (
     MapThemes, OpenDataResult, OperationResult, PlacesResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
+from ..export_root import ExportRootError, resolve_exported_file
 from .filters import LayerName
 
 router = APIRouter(tags=["project"])
@@ -203,9 +204,15 @@ class AddLayerBody(BaseModel):
 
 @router.post("/layers/add", response_model=LayerSummary)
 def add_layer(payload: AddLayerBody, request: Request) -> LayerSummary:
-    """Add a layer to the project."""
+    """Add a layer to the project; a relative source is a file ``POST /export`` wrote below the export root."""
     try:
-        return _accessor(request).add_layer(payload.source, name=payload.name, kind=payload.kind)
+        source, title = resolve_exported_file(request.app.state.config.export_root, payload.source)
+    except ExportRootError:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Export root unavailable") from None
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+    try:
+        return _accessor(request).add_layer(source, name=payload.name or title, kind=payload.kind)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

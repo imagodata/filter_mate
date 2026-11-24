@@ -1820,6 +1820,9 @@ def ramp_layer(path, name, colors, opacity):
     shader = QgsRasterShader()
     shader.setRasterShaderFunction(fn)
     renderer = QgsSingleBandPseudoColorRenderer(rl.dataProvider(), 1, shader)
+    # The bounds of the ramp: unset, the legend of the layer tree reads "nan" (seen in the take of story 15).
+    renderer.setClassificationMin(colors[0][0])
+    renderer.setClassificationMax(colors[-1][0])
     renderer.setOpacity(opacity)
     rl.setRenderer(renderer)
     return rl

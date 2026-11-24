@@ -77,7 +77,13 @@ def _refuse_web_service(layer) -> None:
     from ..qgis.source_capability_probe import capability_for_layer
     capability = capability_for_layer(layer)
     if capability is not None and capability.is_remote_service:
-        raise ValueError(f"'{layer.name()}' is a web service: it is not read to answer this")
+        # 2026-11-24: the way out said with the refusal; without it a model tried four tools, exported the layer
+        # and could not open its own file again (a session of QGIS 4 on 'Pays du monde'). Only for a layer of a
+        # vector service local_copy copies (a WMS copy is a rendered image, a WCS or a tile service is not copied).
+        from ..qgis.stream_copy import can_copy
+        way_out = ". local_copy makes a local copy of it that this tool reads" \
+            if can_copy(layer) and layer_kind(layer) is LayerKind.VECTOR else ""
+        raise ValueError(f"'{layer.name()}' is a web service: it is not read to answer this{way_out}")
 
 
 def _resolve(reference: str):
