@@ -8,15 +8,16 @@ follow the links it holds. Nothing here ever parses HTML.
 from __future__ import annotations
 
 import html
+import re
 import time
 from typing import Callable, List, Optional, Sequence, Tuple
 
 from qgis.PyQt.QtCore import (
-    QByteArray, QCoreApplication, QEvent, QLocale, QSettings, QSize, Qt, QTimer, QUrl, pyqtSignal,
+    QByteArray, QCoreApplication, QEvent, QLocale, QSettings, QSize, QStringListModel, Qt, QTimer, QUrl, pyqtSignal,
 )
-from qgis.PyQt.QtGui import QColor, QDesktopServices, QFont, QTextOption
+from qgis.PyQt.QtGui import QColor, QDesktopServices, QFont, QTextCursor, QTextOption
 from qgis.PyQt.QtWidgets import (
-    QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
+    QApplication, QCheckBox, QComboBox, QCompleter, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QMenu,
     QButtonGroup, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QRadioButton,
     QScrollArea, QSizePolicy, QSpinBox, QStackedWidget,
@@ -57,6 +58,7 @@ from ..styles.theme_manager import OWN_STYLE_PROPERTY
 
 PANEL_NAME = "AGENT"
 INPUT_HEIGHT = 32
+_MENTION = re.compile(r"(?:^|(?<=\s))@([^\s@]*)$")  # "@" at the start of a word, and what follows it
 THREAD_MIN_HEIGHT = 60  # the dock has to stay usable on small screens
 BUTTON_SIZE = 26
 ICON_SIZE = 16
@@ -250,16 +252,51 @@ class ExampleButton(QPushButton):
         self.setText(self.fontMetrics().elidedText(self._request, Qt.TextElideMode.ElideRight, room).replace("&", "&&"))
 
 
-class AgentInput(QLineEdit):
-    """One line, with the previous requests on the arrows and Escape to stop."""
+class AgentInput(QPlainTextEdit):
+    """The line to ask (2026-11-24: several lines). It grows with what is typed, up to MAX_LINES; Enter sends,
+    Shift+Enter goes to the line; the arrows give the previous requests from its first and last line; Escape stops;
+    "@" offers the layers of the project and writes the name chosen.
+
+    The API of the QLineEdit it replaced is kept (``text``, ``setText``, ``insert``, ``returnPressed``): the panel,
+    the benches and the takes of the site use it.
+    """
 
     escape_pressed = pyqtSignal()
+    returnPressed = pyqtSignal()  # noqa: N815 - the name of the QLineEdit signal it replaces
+    MAX_LINES = 5
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._history = []
         self._position = 0
         self._draft = ""
+        self.layer_names: Callable[[], Sequence[str]] = lambda: ()  # the panel sets it: the names "@" offers
+        self.setTabChangesFocus(True)
+        self.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.document().setDocumentMargin(2)
+        self._names_model = QStringListModel(self)
+        self.completer = QCompleter(self._names_model, self)
+        self.completer.setWidget(self)
+        self.completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.completer.setFilterMode(Qt.MatchFlag.MatchContains)
+        self.completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
+        self.completer.activated[str].connect(self._insert_name)
+        self.textChanged.connect(self._fit)
+        self._fit()
+
+    # --- the API of the QLineEdit ------------------------------------------------
+
+    def text(self) -> str:
+        return self.toPlainText()
+
+    def setText(self, text: str) -> None:  # noqa: N802 - Qt name
+        self.setPlainText(text)
+        self.moveCursor(QTextCursor.MoveOperation.End)
+
+    def insert(self, text: str) -> None:
+        self.insertPlainText(text)
 
     def forget(self) -> None:
         self._history, self._position, self._draft = [], 0, ""
@@ -269,20 +306,105 @@ class AgentInput(QLineEdit):
             self._history.append(text)
         self._position = len(self._history)
 
+    # --- height ------------------------------------------------------------------
+
+    def _fit(self) -> None:
+        """As tall as its lines, MAX_LINES at most (then it scrolls), never less than one line of the panel."""
+        lines = max(1, int(self.document().size().height()))
+        shown = min(lines, self.MAX_LINES)
+        # What the frame, its padding and the margins of the document take, read rather than guessed: the sheet
+        # and the style of each platform differ.
+        chrome = max(0, self.height() - self.viewport().height())
+        needed = shown * self.fontMetrics().lineSpacing() + int(2 * self.document().documentMargin()) + chrome + 2
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded if lines > self.MAX_LINES
+                                        else Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        height = max(INPUT_HEIGHT, needed)
+        if height != self.height():
+            self.setFixedHeight(height)
+
+    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt name
+        super().resizeEvent(event)
+        self._fit()  # a narrower line wraps into more lines
+
+    # --- keys --------------------------------------------------------------------
+
     def keyPressEvent(self, event) -> None:  # noqa: N802 - Qt name
         key = event.key()
+        popup = self.completer.popup()
+        if popup.isVisible() and key in (Qt.Key.Key_Enter, Qt.Key.Key_Return, Qt.Key.Key_Escape, Qt.Key.Key_Tab,
+                                         Qt.Key.Key_Backtab):
+            event.ignore()  # the completer takes them: the name chosen, or the list closed
+            return
+        if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                self.insertPlainText("\n")
+            else:
+                self.returnPressed.emit()
+            return
+        cursor = self.textCursor()
         if key == Qt.Key.Key_Escape:
             self.escape_pressed.emit()
-        elif key == Qt.Key.Key_Up and self._position > 0:
+        elif key == Qt.Key.Key_Up and self._position > 0 and self._on_first_line(cursor):
             if self._position == len(self._history):
                 self._draft = self.text()
             self._position -= 1
             self.setText(self._history[self._position])
-        elif key == Qt.Key.Key_Down and self._position < len(self._history):
+        elif key == Qt.Key.Key_Down and self._position < len(self._history) and self._on_last_line(cursor):
             self._position += 1
             self.setText(self._history[self._position] if self._position < len(self._history) else self._draft)
         else:
             super().keyPressEvent(event)
+            self._offer_names()
+
+    @staticmethod
+    def _on_first_line(cursor: QTextCursor) -> bool:
+        probe = QTextCursor(cursor)
+        return not probe.movePosition(QTextCursor.MoveOperation.Up)
+
+    @staticmethod
+    def _on_last_line(cursor: QTextCursor) -> bool:
+        probe = QTextCursor(cursor)
+        return not probe.movePosition(QTextCursor.MoveOperation.Down)
+
+    # --- "@" and the layers ----------------------------------------------------------
+
+    def _typed_mention(self) -> Optional[str]:
+        """What follows the "@" being typed at the cursor, None when the cursor is not in such a word."""
+        cursor = self.textCursor()
+        before = cursor.block().text()[:cursor.positionInBlock()]
+        match = _MENTION.search(before)
+        return match.group(1) if match else None
+
+    def _offer_names(self) -> None:
+        typed = self._typed_mention()
+        if typed is None:
+            self.completer.popup().hide()
+            return
+        try:
+            names = sorted({name for name in self.layer_names() if name}, key=str.lower)
+        except Exception:  # a project closing
+            names = []
+        if not names:
+            self.completer.popup().hide()
+            return
+        self._names_model.setStringList(names)
+        self.completer.setCompletionPrefix(typed)
+        if self.completer.completionCount() == 0:
+            self.completer.popup().hide()
+            return
+        rect = self.cursorRect()
+        rect.setWidth(max(160, self.completer.popup().sizeHintForColumn(0)
+                          + self.completer.popup().verticalScrollBar().sizeHint().width()))
+        self.completer.complete(rect)
+
+    def _insert_name(self, name: str) -> None:
+        """The "@..." typed becomes the name chosen, as the model reads it."""
+        typed = self._typed_mention()
+        cursor = self.textCursor()
+        if typed is not None:
+            cursor.movePosition(QTextCursor.MoveOperation.Left, QTextCursor.MoveMode.KeepAnchor, len(typed) + 1)
+        cursor.insertText(name)
+        self.setTextCursor(cursor)
 
 
 def ask_plain(parent, title: str, text: str) -> bool:
@@ -514,10 +636,32 @@ class AgentPanel(QFrame):
         actions.addWidget(self.fix_button)
         actions.addWidget(self.undo_button)
 
+        # A request sent while the agent works waits here, in view, and goes when the request under way ends
+        # (2026-11-24: Enter did nothing then, and the text stayed in the line).
+        self._queued = ""
+        self._queue_paused = False
+        self.queue_row = QFrame(self)
+        self.queue_row.setObjectName("frame_agent_queued")
+        queue_layout = QHBoxLayout(self.queue_row)
+        queue_layout.setContentsMargins(8, 3, 4, 3)
+        queue_layout.setSpacing(6)
+        self.queue_label = ElidedLabel("", self.queue_row)
+        self.queue_label.setObjectName("label_agent_queued")
+        self.queue_cancel = QPushButton("\u2715", self.queue_row)
+        self.queue_cancel.setObjectName("pushButton_agent_queued_cancel")
+        self.queue_cancel.setFlat(True)
+        self.queue_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.queue_cancel.setToolTip(_tr("Do not send it"))
+        self.queue_cancel.clicked.connect(self.cancel_queued)
+        queue_layout.addWidget(self.queue_label, 1)
+        queue_layout.addWidget(self.queue_cancel)
+        self.queue_row.setVisible(False)
+
         self.input = AgentInput(self)
         self.input.setObjectName("lineEdit_agent_input")
         self.input.setPlaceholderText(_tr("Ask for a filter…"))
         self.input.returnPressed.connect(self._on_send)
+        self.input.layer_names = lambda: self.thread.layer_names()  # read when "@" is typed: the controller sets it
         self.input.escape_pressed.connect(self._on_escape)
 
         self.send_button = QToolButton(self)
@@ -575,8 +719,8 @@ class AgentPanel(QFrame):
         ask.setContentsMargins(0, 0, 0, 0)
         ask.setSpacing(6)
         ask.addWidget(self.input, 1)
-        ask.addWidget(self.send_button)
-        ask.addWidget(self.more_button)
+        ask.addWidget(self.send_button, 0, Qt.AlignmentFlag.AlignBottom)  # at the last line of a request that grew
+        ask.addWidget(self.more_button, 0, Qt.AlignmentFlag.AlignBottom)
 
         self.destination = QLabel(self)
         self.destination.setObjectName("label_agent_destination")
@@ -629,6 +773,7 @@ class AgentPanel(QFrame):
         self.widgets_strip = WidgetsStrip(self)
         layout.addWidget(self.widgets_strip)
         layout.addLayout(actions)
+        layout.addWidget(self.queue_row)
         layout.addLayout(ask)
         layout.addLayout(under)
         self.set_ready(False)
@@ -999,10 +1144,15 @@ class AgentPanel(QFrame):
             f"max-height: {BUTTON_SIZE}px; padding: 0; margin: 0; }}"
             "QToolButton::menu-indicator { image: none; }"
             f"QListWidget {{ font-family: '{FONT_FAMILY}', sans-serif; }}"
-            f"QLineEdit#lineEdit_agent_input {{ min-height: {INPUT_HEIGHT - 2}px; max-height: {INPUT_HEIGHT}px;"
-            f" border: 1px solid {palette['fm_field_border']}; border-radius: 6px; padding: 0 10px;"
-            f" background: {palette['fm_field']}; color: {palette['fm_text']}; }}"
-            f"QLineEdit#lineEdit_agent_input:focus {{ border-color: {palette['fm_accent']}; }}"
+            # Several lines since 2026-11-24 (AgentInput sets its height): the object name of the line it was is kept.
+            f"QPlainTextEdit#lineEdit_agent_input {{ border: 1px solid {palette['fm_field_border']}; border-radius: 6px;"
+            f" padding: 2px 6px; background: {palette['fm_field']}; color: {palette['fm_text']}; }}"
+            f"QPlainTextEdit#lineEdit_agent_input:focus {{ border-color: {palette['fm_accent']}; }}"
+            f"QFrame#frame_agent_queued {{ background: {palette['fm_group']}; border: 1px dashed"
+            f" {palette['fm_group_border']}; border-radius: 6px; }}"
+            f"QLabel#label_agent_queued {{ font-size: 12px; color: {muted}; background: transparent; border: none; }}"
+            f"QPushButton#pushButton_agent_queued_cancel {{ border: none; background: transparent; color: {muted};"
+            " padding: 0 4px; min-height: 0; min-width: 0; }"
             f"QToolButton#toolButton_agent_send {{ min-width: {INPUT_HEIGHT}px; max-width: {INPUT_HEIGHT}px;"
             f" min-height: {INPUT_HEIGHT}px; max-height: {INPUT_HEIGHT}px; border: none; border-radius: 6px;"
             f" background: {send_color}; }}"
@@ -1395,7 +1545,10 @@ class AgentPanel(QFrame):
         self.thread.set_compare_possible(self._can_compare and not working)  # the map changes under the comparison
         self.send_button.setToolTip(_tr("Stop (Esc)") if working else _tr("Send (Enter)"))
         self.send_button.setEnabled(self._ready or working)
-        self.thread.set_hint(_tr("You can already type the next request.") if working else "")
+        self.thread.set_hint(_tr("You can already type the next request: Enter keeps it for when this one ends.")
+                             if working else "")
+        if not working and self._queued and not getattr(self, "_queue_paused", False):
+            QTimer.singleShot(0, self._send_queued)  # once the engine let go of the request that ended
         self._refresh_new_button()
         self._refresh_look()
 
@@ -1418,23 +1571,71 @@ class AgentPanel(QFrame):
 
     def _on_send(self) -> None:
         text = self.input.text().strip()
-        if text and not self._working:
-            self.send_requested.emit(text)
+        if not text:
+            return
+        if self._working:  # it waits for the request under way: one at a time, the last one typed
+            self._queued, self._queue_paused = text, False
+            self.input.clear()
+            self.queue_label.set_full_text(_tr("Next: {}").format(" ".join(text.split())))
+            self.queue_label.setToolTip(plain_tooltip(text))
+            self.queue_row.setVisible(True)
+            return
+        self.send_requested.emit(text)
+
+    @property
+    def queued(self) -> str:
+        return self._queued
+
+    def pause_queued(self) -> None:
+        """Stop halts the agent: the request waiting stays in view and does not go by itself (the one stopped comes
+        back in the line); ✕ puts it in the line."""
+        if self._queued:
+            self._queue_paused = True
+            self.queue_cancel.setToolTip(_tr("Put it back in the line"))
+
+    def cancel_queued(self) -> None:
+        """The request waiting goes back to the line, after what is there, to be changed or sent later."""
+        text, self._queued = self._queued, ""
+        self._queue_paused = False
+        self.queue_cancel.setToolTip(_tr("Do not send it"))
+        self.queue_row.setVisible(False)
+        if text:
+            typed = self.input.text().rstrip()
+            self.input.setText(f"{typed}\n{text}" if typed else text)
+
+    def _send_queued(self) -> None:
+        """The request under way ended: the one waiting goes, from the line (the controller empties it once sent;
+        refused, it stays there)."""
+        if getattr(self, "_queue_paused", False):
+            return  # stopped: it waits for the user
+        text, self._queued = self._queued, ""
+        self.queue_row.setVisible(False)
+        if not text or self._working:
+            self._queued = text or self._queued
+            self.queue_row.setVisible(bool(self._queued))
+            return
+        self.input.setText(text)
+        self.send_requested.emit(text)
 
     def _on_send_or_stop(self) -> None:
         if self._working:
+            self.pause_queued()
             self.stop_requested.emit()
         else:
             self._on_send()
 
     def _on_escape(self) -> None:
         if self._working:
+            self.pause_queued()
             self.stop_requested.emit()
 
     def clear_input(self) -> None:
         self.input.clear()
 
     def clear_thread(self) -> None:
+        self._queued = ""  # a new conversation, another project: what waited for the old one does not go
+        self._queue_paused = False
+        self.queue_row.setVisible(False)
         self.thread.clear()
         self.set_can_undo(False)
         self._in_answer = False

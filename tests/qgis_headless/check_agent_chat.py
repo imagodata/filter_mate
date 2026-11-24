@@ -796,6 +796,26 @@ def check_ask_user(panel, provider, ask):
           frozen.done and "Routes: Principales (Recommended)" in panel.thread.toPlainText(),
           panel.thread.toPlainText()[-300:])
 
+    # A request typed and sent while the card waits (2026-11-24): it waits in view, then goes once the turn ended.
+    provider.reset((200, {}, tool_turn("ask_user", {"questions": questions["questions"][:1]})),
+                   (200, {}, text_turn("Entendu.")), (200, {}, text_turn("Et voici la suite.")))
+
+    def queue_then_answer(card):
+        panel.input.setText("et ensuite ?")
+        panel.input.returnPressed.emit()
+        queued.append((panel.queued, panel.queue_row.isVisibleTo(panel)))
+        card._groups[0][0][0][0].click()
+        card.answer_button.click()
+
+    queued = []
+    when_card(queue_then_answer)
+    check("queue: a request that asks ends", ask("filtre les routes"))
+    check("queue: the request sent meanwhile waits in view", queued == [("et ensuite ?", True)], queued)
+    check("queue: it goes once the turn ended", wait(lambda: "Et voici la suite." in panel.thread.toPlainText()
+                                                     and not panel._working, 10) and panel.queued == ""
+          and len(provider.requests) == 3, (panel.queued, len(provider.requests), panel.thread.toPlainText()[-200:]))
+    check("queue: its line is emptied once sent", panel.input.text() == "", panel.input.text())
+
     provider.reset((200, {}, tool_turn("ask_user", {"questions": questions["questions"][:1]})),
                    (200, {}, text_turn("Entendu.")))
 
@@ -1528,11 +1548,18 @@ def check_chat(provider, layer, authcfg, work):
     panel.input.setText("la suivante")
     panel.input.returnPressed.emit()
     wait(lambda: False, 0.1)
-    check("the next request can be typed, not sent", len(provider.requests) == before and panel.input.text() == "la suivante")
-    panel.input.clear()
+    # Sent while the agent works, it waits in view (2026-11-24), it is not sent.
+    check("the next request can be typed, not sent", len(provider.requests) == before and panel.queued == "la suivante"
+          and panel.input.text() == "", (len(provider.requests), panel.queued, panel.input.text()))
     QTest.keyClick(panel.input, Qt.Key.Key_Escape)
     check("escape stops", wait(lambda: not panel._working, 3) and not panel.progress.isVisible())
+    wait(lambda: False, 0.2)
     check("a stopped request comes back", panel.input.text() == "longue question", panel.input.text())
+    check("and the one waiting does not go by itself", panel.queued == "la suivante" and not panel._working
+          and len(provider.requests) == before, (panel.queued, len(provider.requests)))
+    panel.cancel_queued()
+    check("its cross puts it in the line, after the stopped one", panel.input.text() == "longue question\nla suivante"
+          and not panel.queue_row.isVisibleTo(panel), panel.input.text())
     panel.input.clear()
     provider.release.set()
 

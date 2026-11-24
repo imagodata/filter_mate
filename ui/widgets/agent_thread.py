@@ -152,6 +152,12 @@ class ElidedLabel(QLabel):
         self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         self.setText(text)
 
+    def set_full_text(self, text: str) -> None:
+        """Another text, cut to the width the label has now."""
+        self._full = text
+        self.setToolTip(plain_tooltip(text))
+        self.setText(QFontMetrics(self.font()).elidedText(text, Qt.TextElideMode.ElideRight, max(self.width(), 10)))
+
     def resizeEvent(self, event) -> None:  # noqa: N802 - Qt name
         super().resizeEvent(event)
         self.setText(QFontMetrics(self.font()).elidedText(self._full, Qt.TextElideMode.ElideRight, max(self.width(), 10)))
