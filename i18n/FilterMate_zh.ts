@@ -8260,6 +8260,34 @@ Resolved from: {1}</source>
     </message>
 </context>
 <context>
+    <name>LayerSettingsDialog</name>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="36"/>
+        <source>FilterMate - Settings of the layers</source>
+        <translation>FilterMate - 图层设置</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="42"/>
+        <source>This project carries FilterMate settings for its layers that differ from yours. Apply the project's settings for:</source>
+        <translation>此项目包含其图层的 FilterMate 设置，与您的设置不同。为以下部分应用项目的设置：</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="55"/>
+        <source>Do not ask again for this project</source>
+        <translation>此项目不再询问</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="63"/>
+        <source>Keep mine</source>
+        <translation>保留我的设置</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="68"/>
+        <source>Apply</source>
+        <translation>应用</translation>
+    </message>
+</context>
+<context>
     <name>LayerSnapshot</name>
     <message>
         <location filename="../adapters/qgis/coverage_layers/snapshots.py" line="619"/>

@@ -157,10 +157,13 @@ def as_flag(key: str, value: Any) -> Any:
 
 def same_setting(one: Any, other: Any, load: Callable[[str], Any], key: str = "") -> bool:
     """True when two stored forms hold the same setting: ``'["a"]'`` and ``["a"]``; None (what a .qgz gives back for
-    an empty value) and ``""``, ``[]``, ``"[]"``, ``{}``; a flag and the 1 / 0 the SQLite gave for it."""
+    an empty value) and ``""``, ``[]``, ``"[]"``, ``{}``; a flag and the 1 / 0 the SQLite gave for it; two lists of
+    layers in another order."""
     if one is None or other is None:
         return all(value is None or value in EMPTY_FORMS or value == [] or value == {} for value in (one, other))
     one, other = as_flag(key, typed_value(one, load)), as_flag(key, typed_value(other, load))
+    if key in LAYER_ID_LISTS and isinstance(one, list) and isinstance(other, list):
+        return sorted(map(str, one)) == sorted(map(str, other))
     if isinstance(one, bool) or isinstance(other, bool):
         return type(one) is type(other) and one == other
     if isinstance(one, (int, float)) and isinstance(other, (int, float)):
@@ -205,3 +208,93 @@ def repaired_variable_names(names: Any, values: Any, ours: Collection[str]) -> O
         return theirs, values_list
     kept = [name for index, name in enumerate(names) if index not in mine or index < len(values_list)]
     return (kept, values) if len(kept) != len(names) else None
+
+
+# --- The question asked at the opening of a project (2026-11-24) ----------------------------------------------------
+#
+# A setting the project carries (its layer marked, the file writable) that differs from the one this computer's SQLite
+# has is not applied at the registration: the user is asked once for the whole project which groups to take. A group
+# kept leaves this computer's values in the panel and the SQLite, and the project's in the project (never written over
+# them: the settings of the others stay in a shared project). Asks are ``{layer_id: {group: {key: (mine, project's)}}}``.
+
+Asks = Dict[str, Dict[str, Dict[str, Tuple[Any, Any]]]]
+
+
+def merged_asks(pending: Asks, new: Asks) -> Asks:
+    """The asks of several registrations of one project, the latest for a setting."""
+    merged = {layer_id: {group: dict(keys) for group, keys in groups.items()} for layer_id, groups in pending.items()}
+    for layer_id, groups in (new or {}).items():
+        for group, keys in groups.items():
+            merged.setdefault(layer_id, {}).setdefault(group, {}).update(keys)
+    return merged
+
+
+def asked_groups(asks: Asks) -> List[str]:
+    """The groups the question is about, in the order of :data:`GROUPS`."""
+    present = {group for groups in asks.values() for group, keys in groups.items() if keys}
+    return [group for group in GROUPS if group in present]
+
+
+def settings_to_apply(asks: Asks, groups: Collection[str], held: Mapping[str, Mapping[str, Mapping[str, Any]]],
+                      load: Callable[[str], Any], layer_ids: Optional[Collection[str]] = None
+                      ) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    """``{layer_id: {group: {key: the project's value}}}`` to put in the panel for the groups the user took.
+
+    A setting the panel no longer holds as it was at the registration (changed meanwhile by the user, or the layer
+    gone) is left: the latest change wins. A list of layers is compared without the layers the project does not have
+    (as the panel holds it), and given as the project stores it: the panel leaves them out, in memory only.
+
+    Args:
+        asks: What the registrations found different.
+        groups: The groups the user took.
+        held: The settings the panel holds now (``PROJECT_LAYERS``).
+        layer_ids: The layers of the project: a list of layers keeps only them, as the panel does.
+    """
+    chosen: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for layer_id, by_group in asks.items():
+        props = held.get(layer_id)
+        if not isinstance(props, Mapping):
+            continue
+        for group, keys in by_group.items():
+            if group not in groups:
+                continue
+            now = props.get(group) or {}
+            for key, (mine, theirs) in keys.items():
+                seen_mine, seen_theirs = mine, theirs
+                if key in LAYER_ID_LISTS and layer_ids is not None:  # compared as the panel holds them
+                    seen_mine, seen_theirs = present_layers(mine, layer_ids), present_layers(theirs, layer_ids)
+                if key in now and same_setting(now[key], seen_mine, load, key) \
+                        and not same_setting(seen_theirs, seen_mine, load, key):
+                    # The project's value as stored: its variable holds it already, nothing is written there
+                    chosen.setdefault(layer_id, {}).setdefault(group, {})[key] = theirs
+    return chosen
+
+
+def without_groups(asks: Asks, groups: Collection[str]) -> Asks:
+    """The asks left once ``groups`` are settled."""
+    left: Asks = {}
+    for layer_id, by_group in asks.items():
+        kept = {group: keys for group, keys in by_group.items() if keys and group not in groups}
+        if kept:
+            left[layer_id] = kept
+    return left
+
+
+ANSWERS = {"apply": True, "keep": False}
+
+
+def answer_text(decisions: Mapping[str, bool]) -> str:
+    """Remembered answers as stored, one per group asked: ``exploring:keep,filtering:apply``."""
+    return ",".join(f"{group}:{'apply' if decisions[group] else 'keep'}" for group in GROUPS if group in decisions)
+
+
+def answer_decisions(text: Any) -> Dict[str, bool]:
+    """``{group: apply}`` of remembered answers (a group never asked is absent: it is asked)."""
+    decisions: Dict[str, bool] = {}
+    if not isinstance(text, str):
+        return decisions
+    for part in text.split(","):
+        group, _sep, answer = part.partition(":")
+        if group in GROUPS and answer in ANSWERS:
+            decisions[group] = ANSWERS[answer]
+    return decisions

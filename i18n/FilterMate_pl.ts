@@ -8260,6 +8260,34 @@ Ustalono z: {1}</translation>
     </message>
 </context>
 <context>
+    <name>LayerSettingsDialog</name>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="36"/>
+        <source>FilterMate - Settings of the layers</source>
+        <translation>FilterMate - Ustawienia warstw</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="42"/>
+        <source>This project carries FilterMate settings for its layers that differ from yours. Apply the project's settings for:</source>
+        <translation>Ten projekt zawiera ustawienia FilterMate dla swoich warstw, które różnią się od Twoich. Zastosuj ustawienia projektu dla:</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="55"/>
+        <source>Do not ask again for this project</source>
+        <translation>Nie pytaj ponownie dla tego projektu</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="63"/>
+        <source>Keep mine</source>
+        <translation>Zachowaj moje</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="68"/>
+        <source>Apply</source>
+        <translation>Zastosuj</translation>
+    </message>
+</context>
+<context>
     <name>LayerSnapshot</name>
     <message>
         <location filename="../adapters/qgis/coverage_layers/snapshots.py" line="619"/>

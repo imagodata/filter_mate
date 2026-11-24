@@ -8260,6 +8260,34 @@ Resolved from: {1}</source>
     </message>
 </context>
 <context>
+    <name>LayerSettingsDialog</name>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="36"/>
+        <source>FilterMate - Settings of the layers</source>
+        <translation>FilterMate - परतों की सेटिंग्स</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="42"/>
+        <source>This project carries FilterMate settings for its layers that differ from yours. Apply the project's settings for:</source>
+        <translation>इस प्रोजेक्ट में इसकी परतों के लिए FilterMate सेटिंग्स हैं जो आपकी सेटिंग्स से अलग हैं। इनके लिए प्रोजेक्ट की सेटिंग्स लागू करें:</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="55"/>
+        <source>Do not ask again for this project</source>
+        <translation>इस प्रोजेक्ट के लिए फिर से न पूछें</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="63"/>
+        <source>Keep mine</source>
+        <translation>मेरी सेटिंग्स रखें</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="68"/>
+        <source>Apply</source>
+        <translation>लागू करें</translation>
+    </message>
+</context>
+<context>
     <name>LayerSnapshot</name>
     <message>
         <location filename="../adapters/qgis/coverage_layers/snapshots.py" line="619"/>

@@ -8248,6 +8248,34 @@ Nalezeno z: {1}</translation>
     </message>
 </context>
 <context>
+    <name>LayerSettingsDialog</name>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="36"/>
+        <source>FilterMate - Settings of the layers</source>
+        <translation>FilterMate - Nastavení vrstev</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="42"/>
+        <source>This project carries FilterMate settings for its layers that differ from yours. Apply the project's settings for:</source>
+        <translation>Tento projekt obsahuje nastavení FilterMate pro své vrstvy, která se liší od vašich. Použít nastavení projektu pro:</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="55"/>
+        <source>Do not ask again for this project</source>
+        <translation>Pro tento projekt se již neptat</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="63"/>
+        <source>Keep mine</source>
+        <translation>Ponechat moje</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="68"/>
+        <source>Apply</source>
+        <translation>Použít</translation>
+    </message>
+</context>
+<context>
     <name>LayerSnapshot</name>
     <message>
         <location filename="../adapters/qgis/coverage_layers/snapshots.py" line="619"/>

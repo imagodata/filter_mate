@@ -8260,6 +8260,34 @@ Aniqlangan joy: {1}</translation>
     </message>
 </context>
 <context>
+    <name>LayerSettingsDialog</name>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="36"/>
+        <source>FilterMate - Settings of the layers</source>
+        <translation>FilterMate - Qatlamlar sozlamalari</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="42"/>
+        <source>This project carries FilterMate settings for its layers that differ from yours. Apply the project's settings for:</source>
+        <translation>Bu loyiha qatlamlari uchun sizning sozlamalaringizdan farq qiladigan FilterMate sozlamalarini o'z ichiga oladi. Loyiha sozlamalarini quyidagilar uchun qo'llash:</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="55"/>
+        <source>Do not ask again for this project</source>
+        <translation>Bu loyiha uchun boshqa so'ramaslik</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="63"/>
+        <source>Keep mine</source>
+        <translation>Meniklarini saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/layer_settings_dialog.py" line="68"/>
+        <source>Apply</source>
+        <translation>Qo'llash</translation>
+    </message>
+</context>
+<context>
     <name>LayerSnapshot</name>
     <message>
         <location filename="../adapters/qgis/coverage_layers/snapshots.py" line="619"/>

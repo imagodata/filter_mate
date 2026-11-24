@@ -101,6 +101,7 @@ SOURCES = \
     ../ui/dialogs/config_editor_widget.py \
     ../ui/dialogs/export_group_recap_dialog.py \
     ../ui/dialogs/favorites_manager.py \
+    ../ui/dialogs/layer_settings_dialog.py \
     ../ui/dialogs/optimization_dialog.py \
     ../ui/dialogs/postgres_info_dialog.py \
     ../ui/managers/combobox_population_manager.py \

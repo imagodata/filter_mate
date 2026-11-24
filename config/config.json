@@ -454,6 +454,14 @@
         "value": false,
         "description": "Force a fresh reload of the plugin on next startup (automatically reset to false after reload)"
       },
+      "LAYER_SETTINGS": {
+        "description": "The FilterMate settings of the layers a saved project carries",
+        "remember_answers": {
+          "value": true,
+          "choices": [true, false],
+          "description": "Remember the answer given with \"Do not ask again for this project\" when the settings a project carries for its layers differ from yours. Turned off, the answers remembered are forgotten and the question is asked at each opening"
+        }
+      },
       "SMALL_DATASET_OPTIMIZATION": {
         "description": "For PostgreSQL layers with fewer features than threshold, use OGR memory backend for faster filtering (avoids network overhead)",
         "enabled": {

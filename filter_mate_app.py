@@ -357,6 +357,9 @@ class FilterMateApp:
         if getattr(self, '_unloading', False):
             return
         self._unloading = True
+        question = getattr(self, '_layer_settings_question', None)
+        if question is not None:  # no question after the unload, the project's signals released
+            question.teardown()
         # 2026-10-17: _disconnect_all_signals had no caller: the project kept calling the slots
         # of an unloaded instance (layer additions / removals, saves on fileNameChanged).
         self._disconnect_all_signals()
@@ -1468,12 +1471,21 @@ class FilterMateApp:
         except ImportError:  # a diagnostic: never in the way of the task
             end_watch = lambda: None  # noqa: E731
 
-        def on_results(result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids):
+        asks = getattr(self.appTasks[task_name], 'settings_to_ask', None)
+        # The project the task registers for: its asks are left when another project was read or cleared meanwhile
+        question = self._layer_settings_question_service() if task_name == "add_layers" else None
+        generation = getattr(question, 'generation', None)
+
+        def on_results(result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids,
+                       asks=asks, generation=generation):
             delivered['results'] = True
             try:
                 self.layer_management_engine_task_completed(result_project_layers, tn, ids)
             finally:
                 end_watch()  # after the completion: the other part of the task, on the main thread
+            # 2026-11-24: settings of the project that differ from this computer's: asked once, not while unloading
+            if asks and not (getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False)):
+                self._ask_layer_settings(asks, generation)
 
         self.appTasks[task_name].resultingLayers.connect(on_results, Qt.ConnectionType.QueuedConnection)
         # 2026-10-17: savingLayerVariable / removingLayerVariable are no longer connected: their slots
@@ -1488,6 +1500,26 @@ class FilterMateApp:
 
         # Add to task manager
         QgsApplication.taskManager().addTask(self.appTasks[task_name])
+
+    def _layer_settings_question_service(self):
+        """LayerSettingsQuestion of this app (made at the first add_layers task), None when unavailable."""
+        question = getattr(self, '_layer_settings_question', None)
+        if question is None:
+            try:
+                from .adapters.layer_settings_question import LayerSettingsQuestion
+            except ImportError as e:
+                logger.warning(f"Layer settings question unavailable: {e}")
+                return None
+            question = self._layer_settings_question = LayerSettingsQuestion(
+                lambda: self.PROJECT_LAYERS, self.save_variables_from_layer, lambda: self.dockwidget,
+                lambda: self.CONFIG_DATA)
+        return question
+
+    def _ask_layer_settings(self, asks, generation=None):
+        """Ask which settings of the project to apply where they differ from this computer's (LayerSettingsQuestion)."""
+        question = self._layer_settings_question_service()
+        if question is not None:
+            question.receive(asks, generation)
 
     def _legacy_dispatch_task(self, task_name: str, data=None):
         """Legacy task dispatcher fallback when TaskOrchestrator unavailable."""

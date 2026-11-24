@@ -311,6 +311,9 @@ class LayersManagementEngineTask(QgsTask):
         # (a fresh reload starts from the defaults: then nothing is read). The project is the truth only for values
         # this version wrote, in a project that can be saved (project_is_truth); else this computer's SQLite wins.
         self._project_settings = {}
+        # {layer_id: {group: {key: (this computer's value, the project's)}}}: the settings of the project that differ
+        # from this computer's, asked to the user when the task ends (FilterMateApp, LayerSettingsQuestion)
+        self.settings_to_ask = {}
         self._project_settings_win = set()  # ids of the layers whose settings this version wrote (layer_is_truth)
         self._project_layer_ids = None
         self._queued_at = None  # a variable the panel writes from now on wins over what this task queues
@@ -599,6 +602,10 @@ class LayersManagementEngineTask(QgsTask):
         When the project is not the truth (written by an earlier version, read-only, no file: ``project_is_truth``),
         a setting this computer's SQLite has stays, and is written into the project.
 
+        A setting of the project that differs from the one of this computer's SQLite is not applied here
+        (2026-11-24): the user is asked once for the whole project which groups to take (``settings_to_ask``, read by
+        the app when the task ends). Until then the panel holds this computer's value and the project keeps its own.
+
         Args:
             layer (QgsVectorLayer): Layer being registered
             layer_variables (dict): Its properties ('infos', 'exploring', 'filtering'), completed in place
@@ -607,7 +614,7 @@ class LayersManagementEngineTask(QgsTask):
         settings = (getattr(self, '_project_settings', None) or {}).get(id_of(layer))
         if not settings:
             return
-        from ..domain.project_layer_settings import empty_value, storable, typed_value, variable_name
+        from ..domain.project_layer_settings import empty_value, same_setting, storable, typed_value, variable_name
 
         def load(text):
             return self.return_typped_value(text, 'load')[0]
@@ -622,8 +629,17 @@ class LayersManagementEngineTask(QgsTask):
                     continue
                 if stored is None:  # an empty text, or an empty list stored as such, read from a .qgz
                     stored = storable(empty_value(target.get(key), key))
-                target[key] = typed_value(stored, load)
                 self._deferred_layer_variables.append((id_of(layer), variable_name(group, key), storable(stored)))
+                value = typed_value(stored, load)
+                mine = (local or {}).get(group, {})
+                if key in mine and not same_setting(mine[key], value, load, key):
+                    # Asked to the user once the task ends: this computer's value until the answer
+                    asks = getattr(self, 'settings_to_ask', None)
+                    if asks is None:
+                        asks = self.settings_to_ask = {}
+                    asks.setdefault(id_of(layer), {}).setdefault(group, {})[key] = (mine[key], value)
+                    continue
+                target[key] = value
                 applied += 1
         logger.debug(f"Layer {id_of(layer)}: {applied} setting(s) of the project applied")
 
@@ -634,11 +650,21 @@ class LayersManagementEngineTask(QgsTask):
         layer_ids = getattr(self, '_project_layer_ids', None)
         if layer_ids is None:
             return
-        from ..domain.project_layer_settings import LAYER_ID_LISTS, present_layers
+        from ..domain.project_layer_settings import LAYER_ID_LISTS, present_layers, same_setting
         filtering = layer_props.get("filtering", {})
         for key in LAYER_ID_LISTS:
             if key in filtering:
                 filtering[key] = present_layers(filtering[key], layer_ids)
+        # A difference asked about is compared as the panel holds it, with the same layers left out; it is kept as
+        # stored (a layer not loaded yet when the task was made must not leave the project)
+        asked = (getattr(self, 'settings_to_ask', None) or {}).get(layer_props.get("infos", {}).get("layer_id"), {})
+        for key in LAYER_ID_LISTS:
+            pair = asked.get("filtering", {}).get(key)
+            if pair is None:
+                continue
+            mine, theirs = present_layers(pair[0], layer_ids), present_layers(pair[1], layer_ids)
+            if same_setting(mine, theirs, lambda text: self.return_typped_value(text, 'load')[0], key):
+                del asked["filtering"][key]
 
     def _persist_verified_geometry_field(self, infos, layer):
         """Replace a stored geometry column that no longer matches the layer URI.

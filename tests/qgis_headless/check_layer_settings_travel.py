@@ -8,8 +8,12 @@ per step, ``FM_ROLE`` saying which; the user's gestures: open the project, set t
 
 Roles: ``A1`` computer A makes the project (layers parcelles and routes), sets parcelles (the field shown in single
 selection, a custom expression, the linking button off, routes as a layer to filter), saves; ``B1`` computer B opens
-it, finds them, sets another field and the linking button on, saves; ``A2`` A opens it (its SQLite still has its own
-settings) and finds B's; ``C`` a new computer opens it. Each prints ``SETTINGS <role> ...`` and PASS / FAIL lines.
+it, finds them without a question (no setting of its own), sets another field and the linking button on (EXPLORING)
+and a geometric predicate (FILTERING), saves; ``A2`` A opens it (its SQLite still has its own settings): the question is asked once
+(captures of the dialog in light and dark themes when ``FM_SHOTS`` names a folder), A answers FILTERING only and
+"Do not ask again": A keeps its EXPLORING, takes B's FILTERING, and its Ctrl+S leaves B's EXPLORING in the .qgz; ``A3``
+A opens it again: no question, the same answer; ``C`` a new computer opens it: no question, B's settings. Each prints
+``SETTINGS <role> ...`` and PASS / FAIL lines.
 
 The linking button is clicked as the user does (its ``toggled`` signal, LayerPropertyController); the other settings
 go through ``set_layer_options``, which saves them as the panel does (``settingLayerVariable``).
@@ -43,14 +47,20 @@ QTimer.singleShot(5 * 60 * 1000, lambda: (print("FAIL watchdog", flush=True), os
 qgis.utils.showException = lambda *a, **k: print("   [Python exception]", a[1] if len(a) > 1 else a, flush=True)
 
 KEYS = (("exploring", "single_selection_expression"), ("exploring", "custom_selection_expression"),
-        ("exploring", "is_linking"), ("filtering", "has_layers_to_filter"), ("filtering", "layers_to_filter"))
+        ("exploring", "is_linking"), ("filtering", "has_layers_to_filter"), ("filtering", "layers_to_filter"),
+        ("filtering", "has_geometric_predicates"), ("filtering", "geometric_predicates"))
 SET_BY_A = {"single_selection_expression": '"nom"', "custom_selection_expression": '"rank" > 10', "is_linking": False,
-            "has_layers_to_filter": True, "layers_to_filter": ["routes"]}
-SET_BY_B = dict(SET_BY_A, single_selection_expression='"rank"', is_linking=True)
-LEGACY = dict(SET_BY_B, custom_selection_expression='"rank" < 5')
-# in the panel and the .qgz at the end
-EXPECTED = {"A1": SET_BY_A, "B1": SET_BY_B, "A2": SET_BY_B, "C": SET_BY_B, "A3": SET_BY_B, "L": LEGACY}
-OPENED = {"B1": SET_BY_A, "A2": SET_BY_B, "C": SET_BY_B, "A3": SET_BY_B, "L": LEGACY}  # once the project is open
+            "has_layers_to_filter": True, "layers_to_filter": ["routes"], "has_geometric_predicates": False,
+            "geometric_predicates": []}
+SET_BY_B = dict(SET_BY_A, single_selection_expression='"rank"', is_linking=True, has_geometric_predicates=True,
+                geometric_predicates=["Intersect"])
+MIXED = dict(SET_BY_B, single_selection_expression='"nom"', is_linking=False)  # A's EXPLORING, B's FILTERING
+LEGACY = dict(MIXED, custom_selection_expression='"rank" < 5')
+# (in the panel, in the .qgz) at the end
+EXPECTED = {"A1": (SET_BY_A, SET_BY_A), "B1": (SET_BY_B, SET_BY_B), "A2": (MIXED, SET_BY_B), "A3": (MIXED, SET_BY_B),
+            "C": (SET_BY_B, SET_BY_B), "A4": (MIXED, MIXED), "L": (LEGACY, LEGACY)}
+OPENED = {"B1": SET_BY_A, "A2": MIXED, "A3": MIXED, "C": SET_BY_B, "A4": MIXED, "L": LEGACY}  # once open (answered)
+SHOTS = os.environ.get("FM_SHOTS", "")
 
 
 def check(label, condition, detail=""):
@@ -169,9 +179,10 @@ def _same(one, other):
     return one == other
 
 
-def mirror():
+def mirror(groups=("exploring", "filtering")):
     """What the SQLite of this computer keeps for parcelles is what its variables hold (the project saves the
-    variables); what the panel holds and was not saved (no SQLite row either) is said, not checked."""
+    variables), for ``groups`` (a group kept at the question is this computer's in the SQLite and the others' in the
+    project); what the panel holds and was not saved (no SQLite row either) is said, not checked."""
     from filter_mate.infrastructure.utils.type_utils import return_typed_value
     layer = layer_named("parcelles")
     props = app().PROJECT_LAYERS.get(layer.id())
@@ -180,6 +191,7 @@ def mirror():
         rows = conn.execute("SELECT meta_type, meta_key, meta_value FROM fm_project_layers_properties WHERE "
                             "fk_project = ? AND layer_id = ? AND meta_type IN ('exploring', 'filtering')",
                             (str(app().project_uuid), layer.id())).fetchall()
+    rows = [row for row in rows if row[0] in groups]
     apart = [f"{group}.{key}: sqlite={text!r} variable={stored(layer, group, key)!r}" for group, key, text in rows
              if not _same(return_typed_value(text, 'load')[0], stored(layer, group, key))]
     check(f"the {len(rows)} settings this computer saved are in the variables of the layer", rows and not apart,
@@ -191,11 +203,70 @@ def mirror():
         print(f"INFO {ROLE} held by the panel only (not saved by FilterMate): {'; '.join(unsaved)}", flush=True)
 
 
+def mirror_of(groups):
+    def step():
+        mirror(groups)
+    step.__name__ = f"mirror_{'_'.join(groups)}"
+    return step
+
+
 def report():
     panel, qgz = in_panel(), in_qgz()
     print(f"SETTINGS {ROLE} panel={panel} qgz={qgz}", flush=True)
-    check("the settings of the panel and of the project file", panel == qgz == EXPECTED[ROLE],
-          f"expected {EXPECTED[ROLE]}")
+    check("the settings of the panel and of the project file", (panel, qgz) == EXPECTED[ROLE],
+          f"expected panel={EXPECTED[ROLE][0]} qgz={EXPECTED[ROLE][1]}")
+
+
+DIALOG = "FilterMateLayerSettingsDialog"
+
+
+def the_question():
+    from qgis.PyQt.QtWidgets import QApplication
+    return next((widget for widget in QApplication.topLevelWidgets()
+                 if widget.objectName() == DIALOG and widget.isVisible()), None)
+
+
+def no_question():
+    check("no question about the settings of the layers", the_question() is None)
+
+
+def _shot(dialog, theme):
+    if not SHOTS:
+        return
+    from qgis.PyQt.QtWidgets import QApplication
+    try:
+        QgsApplication.setUITheme(theme)
+    except Exception as exc:  # the theme of QGIS could not be set: the capture shows the one in use
+        print(f"INFO {ROLE} theme {theme} not set: {exc}", flush=True)
+    for _ in range(5):
+        QApplication.processEvents()
+    name = "dark" if theme != "default" else "light"
+    path = os.path.join(SHOTS, f"layer_settings_dialog_{os.environ.get('FM_IMAGE', 'qgis')}_{name}.png")
+    check(f"the dialog is captured ({name})", dialog.grab().save(path), path)
+
+
+def answer(groups, remember):
+    def step():
+        from qgis.PyQt.QtWidgets import QCheckBox, QPushButton
+        dialog = the_question()
+        check("the question is asked once for the project", dialog is not None)
+        if dialog is None:
+            return
+        print(f"INFO {ROLE} question: {dialog.windowTitle()!r} groups="
+              f"{[box.objectName() for box in dialog.findChildren(QCheckBox) if box.objectName() != 'remember']}",
+              flush=True)
+        _shot(dialog, "default")  # the theme in use first
+        _shot(dialog, "Night Mapping")
+        if SHOTS:
+            QgsApplication.setUITheme("default")
+        for name in ("exploring", "filtering"):
+            box = dialog.findChild(QCheckBox, name)
+            if box is not None:
+                box.setChecked(name in groups)
+        dialog.findChild(QCheckBox, "remember").setChecked(remember)
+        dialog.findChild(QPushButton, "apply").click()
+    step.__name__ = f"answer_{'_'.join(groups) or 'none'}{'_remembered' if remember else ''}"
+    return step
 
 
 def start_plugin():
@@ -338,19 +409,26 @@ QUIET = [(show("routes"), 3), (show("parcelles"), 3), (filter_parcelles, 8),
 STEPS = {
     "A1": [(start_plugin, 8), (make_project, 10), (show_parcelles, 3), (click_linking(False), 2),
            (set_options(A_SETTINGS), 2), (mirror, 0), (ctrl_s, 3), (report, 0), (an_empty_list_survives_the_qgz, 0)],
-    "B1": [(start_plugin, 8), (report_sqlite, 0), (open_project, 12), (report_opened, 0), (mirror, 0),
-           (show_parcelles, 3), (set_options({"exploring": {"single_selection_expression": '"rank"'}}), 2),
-           (click_linking(True), 2), (mirror, 0), (ctrl_s, 3), (report, 0)],
-    "A2": [(start_plugin, 8), (count_marks, 0), (report_sqlite, 0), (open_project, 12), (report_opened, 0),
-           (no_marks("the opening"), 0), (mirror, 0), (report, 0)] + QUIET,
-    "C": [(start_plugin, 8), (count_marks, 0), (open_project, 12), (report_opened, 0), (no_marks("the opening"), 0),
-          (mirror, 0), (report, 0)] + QUIET,
-    # A opens it once 5.1.2 wrote an older value under the legacy name: its SQLite wins, into the project
-    "A3": [(inject_legacy, 0), (start_plugin, 8), (open_project, 12), (report_opened, 0), (mirror, 0),
-           (the_variable_of_the_user_is_right, 0), (ctrl_s, 3), (report, 0), (no_legacy_left, 0),
+    "B1": [(start_plugin, 8), (report_sqlite, 0), (open_project, 12), (no_question, 0), (report_opened, 0),
+           (mirror, 0), (show_parcelles, 3), (set_options({"exploring": {"single_selection_expression": '"rank"'}}), 2),
+           (click_linking(True), 2),
+           (set_options({"filtering": {"has_geometric_predicates": True, "geometric_predicates": ["Intersect"]}}), 2),
+           (mirror, 0), (ctrl_s, 3), (report, 0)],
+    # A opens it: its own settings differ from the project's, the question; FILTERING only, remembered
+    "A2": [(start_plugin, 8), (count_marks, 0), (report_sqlite, 0), (open_project, 12),
+           (answer(["filtering"], True), 4), (report_opened, 0), (no_marks("the opening and the answer"), 0),
+           (mirror_of(("filtering",)), 0), (ctrl_s, 3), (report, 0)] + QUIET,
+    # A opens it again: no question, the answer remembered
+    "A3": [(start_plugin, 8), (count_marks, 0), (open_project, 12), (no_question, 0), (report_opened, 0),
+           (no_marks("the opening"), 0), (mirror_of(("filtering",)), 0), (report, 0)],
+    "C": [(start_plugin, 8), (count_marks, 0), (open_project, 12), (no_question, 0), (report_opened, 0),
+          (no_marks("the opening"), 0), (mirror, 0), (report, 0)] + QUIET,
+    # A opens it once 5.1.2 wrote an older value under the legacy name: its SQLite wins, into the project, no question
+    "A4": [(inject_legacy, 0), (start_plugin, 8), (open_project, 12), (no_question, 0), (report_opened, 0),
+           (mirror, 0), (the_variable_of_the_user_is_right, 0), (ctrl_s, 3), (report, 0), (no_legacy_left, 0),
            (the_version_is_saved, 0)],
     # A new computer opens it: the value under the legacy name is the latest the user chose
-    "L": [(inject_legacy, 0), (start_plugin, 8), (open_project, 12), (report_opened, 0), (mirror, 0),
+    "L": [(inject_legacy, 0), (start_plugin, 8), (open_project, 12), (no_question, 0), (report_opened, 0), (mirror, 0),
           (the_variable_of_the_user_is_right, 0), (ctrl_s, 3), (report, 0), (no_legacy_left, 0), (show_parcelles, 3),
           (set_options({"exploring": {"custom_selection_expression": '"rank" < 6'}}), 2), (dirty_after_a_change, 0)],
 }[ROLE]
@@ -370,10 +448,11 @@ def run(index=0):
 
 
 def close_modal():
-    """A modal dialog left open would block the run: say which, and close it."""
+    """A modal dialog left open would block the run: say which, and close it. The question about the settings of the
+    layers is left open: the steps answer it, or say it was asked when it should not have been."""
     from qgis.PyQt.QtWidgets import QApplication
     modal = QApplication.activeModalWidget()
-    if modal is not None:
+    if modal is not None and modal.objectName() != DIALOG:
         print(f"  modal closed: {modal.windowTitle()!r} {type(modal).__name__}", flush=True)
         modal.reject() if hasattr(modal, "reject") else modal.close()
 
