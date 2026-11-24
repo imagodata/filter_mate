@@ -2,7 +2,7 @@ r"""The favorites manager of FilterMate as a user sees it, grabbed to PNG in a r
 
 Starts the plugin, loads three layers, saves four favorites (one with remote layers, a spatial configuration and tags;
 a plain one; one with 400 ids and a long name; a global one), shows the dialog non-modally and grabs the dock, each
-tab of the first favorite, the long-name favorite and the global favorite to ``FM_GRAB_DIR`` (default ``/out``).
+tab of the first favorite, the long-name favorite, the global favorite and the message of a refused rename to ``FM_GRAB_DIR`` (default ``/out``).
 ``FM_THEME=dark`` (or ``light``) sets ``APP.DOCKWIDGET.COLORS.ACTIVE_THEME`` before the plugin starts. The language
 is the one of QGIS (``--lang fr``); ``FM_LOCALE=fr`` sets the locale of the dates, as the machine of a user does
 (the container has the C locale): this checks the localized date of the usage line on Qt5 and Qt6.
@@ -135,6 +135,14 @@ def longname():
 
 def done():
     dlg.grab().save(f"{OUT}/3_dialog_global.png")
+    select("Routes"); dlg._tab_widget.setCurrentIndex(0); dlg._name_edit.setText("")
+    dlg._on_save()  # refused: the message shows on the bar at the top of the dialog
+    QTimer.singleShot(800, refused)
+
+def refused():
+    bar = dlg._message_bar
+    print("message bar:", type(bar).__name__, "visible:", bar.isVisible(), flush=True)
+    dlg.grab().save(f"{OUT}/4_dialog_refused.png")
     print("done", sorted(os.listdir(OUT)), flush=True); os._exit(0)
 
 STEPS = [(start, 8), (data, 6), (favs, 2), (shots, 0)]

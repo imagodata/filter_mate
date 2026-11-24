@@ -68,7 +68,7 @@ def _remote_text(favorite, tr: Callable[[str], str]) -> str:
         parts.append(f"{name} ({count})" if count is not None else name)
     if not parts:
         return ""
-    head = tr("{0} layers").format(len(parts))
+    head = tr("{0} layer").format(len(parts)) if len(parts) == 1 else tr("{0} layers").format(len(parts))
     return f"{head} : {_SEP.join(parts)}"
 
 

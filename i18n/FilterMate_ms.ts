@@ -4934,6 +4934,11 @@ Pisahkan berbilang teg dengan koma.</translation>
         <translation>{0} lapisan</translation>
     </message>
     <message>
+        <location filename="../ui/dialogs/favorite_summary.py" line="71"/>
+        <source>{0} layer</source>
+        <translation>{0} lapisan</translation>
+    </message>
+    <message>
         <location filename="../ui/dialogs/favorite_summary.py" line="96"/>
         <source>Filter</source>
         <translation>Penapis</translation>

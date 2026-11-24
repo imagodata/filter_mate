@@ -583,7 +583,9 @@ class FavoritesController(BaseController):
             self.update_indicator()
             self._show_success(self._import_summary(count, skipped))
         elif skipped > 0:
-            self._show_info(self._import_summary(count, skipped))
+            # A warning, not an info: info messages are hidden at the default
+            # feedback level and the user would see nothing happen.
+            self._show_warning(self._import_summary(count, skipped))
         else:
             self._show_warning(self.tr("No favorites imported"))
 
@@ -601,13 +603,18 @@ class FavoritesController(BaseController):
                 self._show_warning(self.tr("Favorites manager not initialized. Please restart FilterMate."))
                 return
 
-            # FIX 2026-04-23 (LOW-3): when there are no favorites AND the
-            # favorites_sharing extension isn't active, opening an empty
-            # manager is confusing — surface the suggested next step
-            # instead. When sharing IS active we still open the dialog so
-            # the user can reach the "📡 Shared..." button.
-            if self.count == 0 and not self._is_sharing_extension_active():
-                self._show_info(self.tr(
+            # FIX 2026-04-23 (LOW-3): when there are no favorites (of the
+            # project nor global ones) AND the favorites_sharing extension
+            # isn't active, opening an empty manager is confusing — surface
+            # the suggested next step instead. When sharing IS active we still
+            # open the dialog so the user can reach the "Shared..." button.
+            # A warning, not an info: info is hidden at the default feedback level.
+            if (
+                self.count == 0
+                and not self._has_global_favorites()
+                and not self._is_sharing_extension_active()
+            ):
+                self._show_warning(self.tr(
                     "No favorites saved yet — apply a filter then click the "
                     "★ indicator to save your first one."
                 ))
@@ -635,6 +642,9 @@ class FavoritesController(BaseController):
             try:
                 dialog.exec()
             finally:
+                # The dialog is parented to the dock: without this it stays
+                # alive (and answers favorites_changed) after it is closed.
+                dialog.deleteLater()
                 for signal, slot in (
                     (dialog.favoriteApplied, self.apply_favorite),
                     (dialog.globalFavoriteApplied, self._apply_global_favorite),
@@ -654,6 +664,17 @@ class FavoritesController(BaseController):
             self._show_warning(self.tr("The favorites manager could not be opened. Details in filtermate.log."))
 
     # === Private Methods ===
+
+    def _has_global_favorites(self) -> bool:
+        """True when at least one global favorite exists (they are listed in every project)."""
+        getter = getattr(self._favorites_service, "get_global_favorites", None)
+        if not callable(getter):
+            return False
+        try:
+            return bool(getter())
+        except Exception as e:
+            logger.debug(f"Global favorites not read: {e}")
+            return False
 
     def _find_indicator_label(self) -> None:
         """Find the favorites indicator label in dockwidget."""

@@ -52,16 +52,28 @@ except ImportError:
     def pyqtSignal(*args):
         return None
 
+try:
+    from qgis.gui import QgsMessageBar
+except ImportError:  # no QGIS GUI module: the dialog falls back to a plain label
+    QgsMessageBar = None
+
 # Scope kinds of ``_favorite_scope_kind`` that apply to every project of this
 # computer; the list shows them with the globe icon instead of the star.
 _GLOBAL_SCOPE_KINDS = frozenset({"shared_global", "mine_global"})
 
-# Scope combo entry (``FavoriteScope`` value) -> scope kind of ``_favorite_scope_kind``.
-_SCOPE_KEY_KINDS = {
-    "global_shared": "shared_global",
-    "project_shared": "shared_here",
-    "global_mine": "mine_global",
-    "project_mine": "mine_here",
+# Scope kinds of the favorites owned by the current user.
+_MINE_SCOPE_KINDS = frozenset({"mine_here", "mine_global"})
+
+# Scope combo entry (``FavoriteScope`` value) -> (kept globally?, mine only?).
+# "Shared" entries list what is kept in the project or in the global list
+# whoever owns it (every favorite is stamped with its owner since the OS user is
+# known, so the owner cannot tell shared ones apart); "Mine" entries also
+# require the owner to be the current user.
+_SCOPE_KEY_FILTERS = {
+    "global_shared": (True, False),
+    "project_shared": (False, False),
+    "global_mine": (True, True),
+    "project_mine": (False, True),
 }
 
 
@@ -152,7 +164,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # back through the external-change refresh slot.
         self._suppress_external_refresh = False
         # F13 fix 2026-04-27: track the external-change subscription so
-        # closeEvent can disconnect it. Without this the manager keeps a
+        # done() can disconnect it. Without this the manager keeps a
         # hard ref to the dialog through the signal slot — every open/close
         # cycle leaked one dialog instance.
         self._external_change_connected = False
@@ -186,36 +198,63 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         except (RuntimeError, AttributeError) as e:
             logger.debug(f"Could not refresh dialog on external change: {e}")
 
-    def _show_error(self, message: str) -> None:
-        """Push a critical/error notification to the QGIS message bar.
+    def _make_message_bar(self) -> "QWidget":
+        """The bar at the top of the dialog; the main window's bar hides behind a modal dialog.
 
-        F11 policy: transactional failures (delete, save) surface via
-        ``infrastructure.feedback.show_error`` rather than a modal
-        ``QMessageBox.warning`` — the dialog stays usable, the toast is
-        visible at the top of the canvas, and the full traceback can be
-        read in View → Panels → Log Messages.
+        A ``QgsMessageBar`` when QGIS provides one, else a plain hidden label
+        (same two entry points: ``pushWarning`` / ``pushCritical`` through
+        ``_push_message``).
         """
-        try:
-            from ...infrastructure.feedback import show_error
-            show_error(message)
-        except ImportError:
-            logger.error(message)
+        if isinstance(QgsMessageBar, type):
+            return QgsMessageBar(self)
+        label = QLabel(self)
+        label.setObjectName("dialogMessageBar")
+        label.setWordWrap(True)
+        label.hide()
+        return label
+
+    def _push_message(self, message: str, critical: bool) -> bool:
+        """Show ``message`` in the dialog's bar. False when there is none (the caller falls back)."""
+        bar = getattr(self, "_message_bar", None)
+        if bar is None:
+            return False
+        if isinstance(QgsMessageBar, type) and isinstance(bar, QgsMessageBar):
+            bar.clearWidgets()
+            (bar.pushCritical if critical else bar.pushWarning)("", message)
+        else:
+            bar.setText(message)
+            bar.show()
+        return True
+
+    def _show_error(self, message: str) -> None:
+        """Show a critical message at the top of the dialog (the dialog stays usable).
+
+        F11 policy: transactional failures (delete, save) surface as a message,
+        not a modal ``QMessageBox.warning``. The bar is the dialog's own: the
+        QGIS one is behind a modal dialog. The full traceback can be read in
+        View -> Panels -> Log Messages.
+        """
+        logger.error(message)
+        self._push_message(message, critical=True)
 
     def _show_warning(self, message: str) -> None:
-        """Push a warning to the QGIS message bar (the dialog stays open, the fields keep their text)."""
-        try:
-            from ...infrastructure.feedback import show_warning
-            show_warning(message)
-        except ImportError:
-            logger.warning(message)
+        """Show a warning at the top of the dialog (the dialog stays open, the fields keep their text)."""
+        logger.warning(message)
+        self._push_message(message, critical=False)
 
-    def closeEvent(self, event):
-        """Disconnect from external signals before Qt destroys the dialog.
+    def done(self, result):
+        """Disconnect from external signals when the dialog closes (accept, reject, close).
 
-        F13 fix 2026-04-27: the manager's ``favorites_changed`` signal
-        held a hard ref to ``_on_external_favorites_changed``, keeping
-        every closed dialog alive across Open → Close → Open cycles.
+        F13 fix 2026-04-27: the manager's ``favorites_changed`` signal held a
+        hard ref to ``_on_external_favorites_changed``, keeping every closed
+        dialog alive across Open -> Close -> Open cycles. ``accept()`` and
+        ``reject()`` do not go through ``closeEvent``, ``done()`` is what they
+        and the window close button all end in.
         """
+        self._disconnect_external_changes()
+        super().done(result)
+
+    def _disconnect_external_changes(self) -> None:
         if self._external_change_connected and self._favorites_service is not None:
             try:
                 self._favorites_service.favorites_changed.disconnect(
@@ -224,8 +263,6 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             except (TypeError, RuntimeError):
                 pass
             self._external_change_connected = False
-        if HAS_QGIS:
-            super().closeEvent(event)
 
     def _setup_ui(self):
         """Build the dialog UI."""
@@ -241,6 +278,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(12)
+
+        # Messages of the dialog (refused rename, failed copy ...)
+        self._message_bar = self._make_message_bar()
+        layout.addWidget(self._message_bar)
 
         # Header row with count + optional shared-favorites shortcut
         header_row = QHBoxLayout()
@@ -700,23 +741,29 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
         Mirrors ``FavoritesManager.list_by_scope`` but stays in the UI
         layer so the manager cache (already loaded + search-friendly)
-        is reused rather than re-queried. Keeps "foreign" favorites
-        (those owned by another user) visible in the ALL scope so users
-        never get confused about missing rows.
+        is reused rather than re-queried. Favorites owned by another user
+        stay visible in the ALL scope and the "Shared" ones so users never
+        get confused about missing rows.
         """
         if scope_key == "all" or not favorites:
             return list(favorites)
 
         current_user = self._resolve_current_user()
 
-        def _kind(fav):
-            return self._scope_kind(fav, current_user)
-
-        # "shared_*" scopes: owner IS NULL × project dimension
-        # "mine_*" scopes: owner == me × project dimension
-        # "foreign" never matches a filter entry — always only visible in ALL.
-        wanted = _SCOPE_KEY_KINDS.get(scope_key, scope_key)
-        return [f for f in favorites if _kind(f) == wanted]
+        # "*_shared" scopes: where the favorite is kept (project or global list),
+        # whoever owns it. "*_mine" scopes: the same, and its owner is the
+        # current user. Favorites of another person show under "*_shared" or "All".
+        wanted = _SCOPE_KEY_FILTERS.get(scope_key)
+        if wanted is None:
+            return []
+        want_global, mine_only = wanted
+        matching = []
+        for fav in favorites:
+            kind = self._scope_kind(fav, current_user)
+            is_global = fav.id in self._global_ids or kind in _GLOBAL_SCOPE_KINDS
+            if is_global == want_global and (not mine_only or kind in _MINE_SCOPE_KINDS):
+                matching.append(fav)
+        return matching
 
     def _resolve_current_user(self):
         """Pull the current user identity from the manager (cached)."""
@@ -918,7 +965,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
         self._list_widget.setCurrentItem(item)
         menu = self._build_context_menu(item.data(Qt.ItemDataRole.UserRole))
-        menu.exec(self._list_widget.viewport().mapToGlobal(pos))
+        try:
+            menu.exec(self._list_widget.viewport().mapToGlobal(pos))
+        finally:
+            menu.deleteLater()  # parented to the dialog: it would pile up there
 
     def _build_context_menu(self, fav_id) -> "QMenu":
         """Menu of the favorite ``fav_id``; a global one cannot be renamed or duplicated."""

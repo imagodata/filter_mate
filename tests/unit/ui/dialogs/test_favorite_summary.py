@@ -94,3 +94,12 @@ def test_use_text():
 def test_scope_badge():
     assert fs.scope_badge(True, tr) == "Global · this computer"
     assert fs.scope_badge(False, tr) == "Project · shared"
+
+
+def test_one_remote_layer_is_not_plural():
+    fav = FilterFavorite(
+        name="x", expression="1=1", layer_name="l",
+        remote_layers={"ogr::batiment": {"feature_count": 3}},
+    )
+    assert dict(fs.summary_rows(fav, tr))["Then"].startswith("1 layer : ")
+    assert dict(fs.summary_rows(_full(), tr))["Then"].startswith("2 layers : ")

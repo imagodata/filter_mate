@@ -26,6 +26,17 @@ import pytest
 _project_root = pathlib.Path(__file__).resolve().parents[4]
 
 
+_SAVED_QT_STUBS = {}
+
+
+def _restore_qt_stubs():
+    """Put back the QtCore names that _ensure_favorites_mocks replaced."""
+    qtcore = sys.modules["qgis.PyQt.QtCore"]
+    for name, value in _SAVED_QT_STUBS.items():
+        setattr(qtcore, name, value)
+    _SAVED_QT_STUBS.clear()
+
+
 def _ensure_favorites_mocks():
     """Install the minimum set of mocks needed to import FavoritesController."""
     ROOT = "filter_mate"
@@ -60,9 +71,14 @@ def _ensure_favorites_mocks():
     for name, mock_obj in qgis_mocks.items():
         sys.modules.setdefault(name, mock_obj)
 
-    # pyqtSignal returns a callable that yields a MagicMock descriptor
-    sys.modules["qgis.PyQt.QtCore"].pyqtSignal = MagicMock(side_effect=lambda *a, **kw: MagicMock())
-    sys.modules["qgis.PyQt.QtCore"].QObject = object
+    # pyqtSignal returns a callable that yields a MagicMock descriptor. These two
+    # stubs are only needed while the controller module is imported: the previous
+    # values come back in _restore_qt_stubs (a QObject left as ``object`` made
+    # every later FavoritesService(...) of the session fail).
+    qtcore = sys.modules["qgis.PyQt.QtCore"]
+    _SAVED_QT_STUBS.update({name: getattr(qtcore, name) for name in ("pyqtSignal", "QObject") if hasattr(qtcore, name)})
+    qtcore.pyqtSignal = MagicMock(side_effect=lambda *a, **kw: MagicMock())
+    qtcore.QObject = object
 
     # Provide a FakeBaseController so we don't hit the QObject/ABCMeta metaclass
     # conflict that arises when QObject is a MagicMock.
@@ -210,6 +226,7 @@ def _load_favorites_controller():
 
 
 favorites_controller = _load_favorites_controller()
+_restore_qt_stubs()
 FavoritesController = favorites_controller.FavoritesController
 
 # F4 step 3 phase 2 (2026-04-28): tests that monkeypatch ``layer_signature_for``
@@ -1355,6 +1372,36 @@ def _empty_project(monkeypatch):
     monkeypatch.setattr(favorites_controller, "QgsProject", MagicMock(instance=lambda: project))
 
 
+@pytest.fixture
+def real_feedback(monkeypatch):
+    """The real infrastructure.feedback (and config.feedback_config) behind the controller, with a fake QGIS iface.
+
+    Returns the iface: ``iface.messageBar()`` records what the helpers push.
+    """
+    shim = "_fm_test_ui_shim"
+
+    def load(name, relative, search=False):
+        path = _project_root / relative
+        spec = importlib.util.spec_from_file_location(
+            name, str(path), submodule_search_locations=[str(path.parent)] if search else None
+        )
+        module = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, name, module)
+        spec.loader.exec_module(module)
+        return module
+
+    for pkg, directory in ((f"{shim}.config", "config"), (f"{shim}.infrastructure", "infrastructure")):
+        package = types.ModuleType(pkg)
+        package.__path__ = [str(_project_root / directory)]
+        monkeypatch.setitem(sys.modules, pkg, package)
+    config = load(f"{shim}.config.feedback_config", "config/feedback_config.py")
+    monkeypatch.setattr(config, "_current_level", config.FeedbackLevel.NORMAL)
+    load(f"{shim}.infrastructure.feedback", "infrastructure/feedback/__init__.py", search=True)
+    iface = MagicMock()
+    monkeypatch.setitem(sys.modules, "qgis.utils", types.SimpleNamespace(iface=iface))
+    return iface
+
+
 def _make_message_controller(service):
     ctrl = FavoritesController.__new__(FavoritesController)
     ctrl._favorites_service = service
@@ -1420,8 +1467,23 @@ class TestImportFavorites:
 
         assert ctrl.import_favorites("/tmp/favs.json") == 0
 
-        ctrl._show_info.assert_called_once_with("0 favorite(s) imported, 3 skipped (already there).")
-        ctrl._show_warning.assert_not_called()
+        ctrl._show_warning.assert_called_once_with("0 favorite(s) imported, 3 skipped (already there).")
+        ctrl._show_info.assert_not_called()
+
+    def test_import_of_only_duplicates_reaches_the_message_bar_at_the_default_level(self, real_feedback):
+        """Through the real feedback helpers and should_show_message: 'info' is hidden by default, so it must not be info."""
+        service = MagicMock()
+        service.import_favorites.return_value = types.SimpleNamespace(imported_count=0, skipped_count=3)
+        ctrl = _make_message_controller(service)
+        for name in ("_show_info", "_show_warning"):
+            setattr(ctrl, name, getattr(FavoritesController, name).__get__(ctrl))
+
+        ctrl.import_favorites("/tmp/favs.json")
+
+        real_feedback.messageBar().pushWarning.assert_called_once_with(
+            "FilterMate", "0 favorite(s) imported, 3 skipped (already there)."
+        )
+        real_feedback.messageBar().pushInfo.assert_not_called()
 
     def test_import_of_nothing_warns(self):
         service = MagicMock()
@@ -1431,3 +1493,46 @@ class TestImportFavorites:
         assert ctrl.import_favorites("/tmp/favs.json") == 0
 
         ctrl._show_warning.assert_called_once_with("No favorites imported")
+
+
+class TestShowManagerDialog:
+    """The empty-state hint and the dialog's life cycle."""
+
+    @staticmethod
+    def _controller(service, sharing=False):
+        ctrl = _make_message_controller(service)
+        ctrl._is_sharing_extension_active = lambda: sharing
+        ctrl._extension_bridge = None
+        ctrl.favorites_changed = MagicMock()
+        return ctrl
+
+    @staticmethod
+    def _service(count, global_favorites):
+        service = MagicMock()
+        service.count = count
+        service.get_global_favorites.return_value = global_favorites
+        return service
+
+    def test_no_favorite_at_all_says_so_with_a_warning(self, monkeypatch):
+        dialogs = MagicMock()
+        monkeypatch.setitem(sys.modules, "_fm_test_ui_shim.ui.dialogs", dialogs)
+        ctrl = self._controller(self._service(0, []))
+
+        ctrl.show_manager_dialog()
+
+        ctrl._show_warning.assert_called_once()
+        assert "No favorites saved yet" in ctrl._show_warning.call_args.args[0]
+        ctrl._show_info.assert_not_called()
+        dialogs.FavoritesManagerDialog.assert_not_called()
+
+    def test_global_favorites_alone_open_the_manager_and_the_dialog_is_deleted(self, monkeypatch):
+        dialogs = MagicMock()
+        monkeypatch.setitem(sys.modules, "_fm_test_ui_shim.ui.dialogs", dialogs)
+        ctrl = self._controller(self._service(0, [MagicMock()]))
+
+        ctrl.show_manager_dialog()
+
+        dialog = dialogs.FavoritesManagerDialog.return_value
+        dialog.exec.assert_called_once()
+        dialog.deleteLater.assert_called_once()
+        ctrl._show_warning.assert_not_called()

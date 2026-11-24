@@ -95,11 +95,23 @@ class TestGlobalKinds:
 
 
 class TestScopeKeys:
-    def test_every_scope_combo_key_maps_to_a_classifier_kind(self):
+    def test_every_scope_combo_key_has_a_filter(self):
         try:
-            from ui.dialogs.favorites_manager import _SCOPE_KEY_KINDS
+            from ui.dialogs.favorites_manager import _SCOPE_KEY_FILTERS
         except ImportError as exc:
             pytest.skip(f"UI module not importable: {exc}")
         from core.domain.favorites_manager import FavoriteScope
-        assert set(_SCOPE_KEY_KINDS) == {scope.value for scope in FavoriteScope} - {"all"}
-        assert set(_SCOPE_KEY_KINDS.values()) == {"shared_here", "shared_global", "mine_here", "mine_global"}
+        assert set(_SCOPE_KEY_FILTERS) == {scope.value for scope in FavoriteScope} - {"all"}
+
+    def test_shared_entries_follow_where_it_is_kept_and_mine_entries_also_the_owner(self):
+        try:
+            from ui.dialogs.favorites_manager import _SCOPE_KEY_FILTERS
+        except ImportError as exc:
+            pytest.skip(f"UI module not importable: {exc}")
+        # (kept in the global list, owner must be the current user)
+        assert _SCOPE_KEY_FILTERS == {
+            "global_shared": (True, False),
+            "project_shared": (False, False),
+            "global_mine": (True, True),
+            "project_mine": (False, True),
+        }

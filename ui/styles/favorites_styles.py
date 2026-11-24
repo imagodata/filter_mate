@@ -151,6 +151,13 @@ _DIALOG_STYLESHEET_TEMPLATE: str = """
         color: {fm_text_disabled};
     }
     QComboBox { padding-right: 24px; }
+    /* The text of the dialog's message bar is a QTextEdit: keep it as QGIS draws it, not as a field. */
+    QgsMessageBar QTextEdit {
+        background: transparent;
+        border: none;
+        padding: 0;
+        color: palette(window-text);
+    }
     /* The native drop-down arrow was cut on the light theme: the same chevron as the dock's. */
     QComboBox::drop-down {
         subcontrol-origin: padding;

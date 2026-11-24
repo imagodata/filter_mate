@@ -9,6 +9,7 @@ import os
 import pathlib
 import sys
 import types
+from unittest import mock as unittest_mock
 
 import pytest
 
@@ -237,3 +238,86 @@ def test_the_dialog_takes_the_theme_drawn_on_its_dock(glyph, dark):
     dialog = dialog_module.FavoritesManagerDialog(_Service([_favorite("Roads")]), dock)
 
     assert dialog._dark is dark
+
+
+def test_a_refused_rename_is_shown_inside_the_dialog_not_on_the_main_message_bar():
+    """The main window's message bar is behind a modal dialog: the dialog has its own."""
+    dialog = dialog_module.FavoritesManagerDialog(_Service([_favorite("Roads")]))
+    assert dialog._message_bar.isHidden()
+
+    dialog._name_edit.setText("")
+    dialog._on_save()
+
+    assert not dialog._message_bar.isHidden()
+    assert dialog._message_bar.text() == "The name cannot be empty."
+    assert dialog.layout().indexOf(dialog._message_bar) == 0
+
+
+def test_a_failure_is_shown_inside_the_dialog():
+    dialog = dialog_module.FavoritesManagerDialog(_Service([_favorite("Roads")]))
+
+    dialog._show_error("Could not duplicate 'Roads'.")
+
+    assert dialog._message_bar.text() == "Could not duplicate 'Roads'."
+
+
+@pytest.mark.parametrize("close", ["accept", "reject"])
+def test_a_closed_dialog_no_longer_follows_the_service(close):
+    service = _Service([_favorite("Roads")])
+    dialog = dialog_module.FavoritesManagerDialog(service)
+    refreshed = []
+    dialog.refresh = lambda: refreshed.append(1)
+    service.favorites_changed.emit()
+    assert refreshed == [1]
+
+    getattr(dialog, close)()
+    service.favorites_changed.emit()
+
+    assert refreshed == [1]
+
+
+def test_the_context_menu_is_deleted_after_it_closes(monkeypatch):
+    dialog = dialog_module.FavoritesManagerDialog(_Service([_favorite("Roads")]))
+    menu = unittest_mock.MagicMock()
+    monkeypatch.setattr(dialog, "_build_context_menu", lambda fav_id: menu)
+    item = dialog._list_widget.item(0)
+
+    dialog._on_list_context_menu(dialog._list_widget.visualItemRect(item).center())
+
+    menu.exec.assert_called_once()
+    menu.deleteLater.assert_called_once()
+
+
+def _scope_fixture():
+    """Project: mine, Bob's, shared (no owner); global: mine, Bob's."""
+    project_mine = _favorite("Project mine")
+    project_bob = _favorite("Project Bob's")
+    project_bob.owner = "bob"
+    project_ownerless = _favorite("Project ownerless")
+    project_ownerless.owner = None
+    global_mine = _favorite("Global mine")
+    global_bob = _favorite("Global Bob's")
+    global_bob.owner = "bob"
+    service = _Service([project_mine, project_bob, project_ownerless], [global_mine, global_bob])
+    return dialog_module.FavoritesManagerDialog(service)
+
+
+@pytest.mark.parametrize("key, names", [
+    ("all", {"Project mine", "Project Bob's", "Project ownerless", "Global mine", "Global Bob's"}),
+    ("project_shared", {"Project mine", "Project Bob's", "Project ownerless"}),
+    ("global_shared", {"Global mine", "Global Bob's"}),
+    ("project_mine", {"Project mine"}),
+    ("global_mine", {"Global mine"}),
+])
+def test_the_scope_filter_follows_where_a_favorite_is_kept_and_who_owns_it(key, names):
+    dialog = _scope_fixture()
+
+    shown = dialog._apply_scope_filter(dialog._all_favorites, key)
+
+    assert {fav.name for fav in shown} == names
+
+
+def test_a_global_favorite_alone_is_listed_when_the_project_has_none():
+    dialog = dialog_module.FavoritesManagerDialog(_Service([], [_favorite("Roads (Global)")]))
+
+    assert dialog._list_widget.count() == 1
