@@ -1238,6 +1238,46 @@ Alat-alatnya hanya akan melihat dari proyek Anda apa yang dikirim agen kepadanya
         <translation>Berpikir…</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The layer {} is no longer in the project.</source>
+        <translation>Lapisan {} tidak lagi ada di proyek.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Refused</source>
+        <translation>Ditolak</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed for this conversation</source>
+        <translation>Diizinkan untuk percakapan ini</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed</source>
+        <translation>Diizinkan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>No</source>
+        <translation>Tidak</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Yes</source>
+        <translation>Ya</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The agent asks before it acts</source>
+        <translation>Agen bertanya sebelum bertindak</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Permission</source>
+        <translation>Izin</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
         <translation>Terlalu banyak akun baru dari alamat ini hari ini: coba lagi besok, atau masukkan kunci API Anda sendiri.</translation>

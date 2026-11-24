@@ -397,6 +397,16 @@ class TestStrip:
         assert "<img" not in tooltip and "&lt;img" in tooltip
 
 
+def _select_all(label):
+    """Select the whole text a label shows: an answer is rich text, its ``text()`` is the markup."""
+    document = QtGui.QTextDocument()
+    if label.textFormat() == QtCore.Qt.TextFormat.RichText:
+        document.setHtml(label.text())
+    else:
+        document.setPlainText(label.text())
+    label.setSelection(0, len(document.toPlainText()))
+
+
 @pytest.fixture
 def thread():
     from_tokens = importlib.import_module(f"{_PKG}.ui.styles.mockup_design").tokens
@@ -423,7 +433,43 @@ class TestThread:
         assert len(drawn) == 1
         thread.add_text("Fin.")
         thread.end_answer()
-        assert drawn[-1] == thread_module.plain_markdown(text + "Fin.").strip("\n") and len(drawn) == 2
+        # Drawn from its Markdown (2026-11-24): bold and list as tags of our own, no mark left.
+        assert len(drawn) == 2 and "<b>roads</b>" in drawn[-1] and "<li>deux</li>" in drawn[-1]
+        assert "**" not in drawn[-1] and "Fin." in drawn[-1]
+
+    def test_an_answer_escapes_the_model_and_links_the_layers(self, thread):
+        clicked = []
+        thread.layer_names = lambda: ["communes", "batiments"]
+        thread.on_layer = clicked.append
+        thread.add_text('Gardé sur communes <img src="file:///x.png"> et `batiments`.')
+        thread.end_answer()
+        label = thread._items[-1].widget
+        assert label.textFormat() == QtCore.Qt.TextFormat.RichText
+        assert "<img" not in label.text() and "&lt;img" in label.text()
+        assert 'href="layer:0"' in label.text() and 'href="layer:1"' in label.text()
+        label.linkActivated.emit("layer:1")
+        label.linkActivated.emit("https://evil.example")  # never a link of ours: nothing happens
+        assert clicked == ["batiments"]
+        assert thread.toPlainText().endswith('`batiments`.')  # the transcription keeps what the model wrote
+
+    def test_a_confirm_card_answers_once_then_freezes(self, thread):
+        texts = {"chip": "Permission", "heading": "The agent asks", "yes": "Yes", "no": "No",
+                 "always": "Yes for this conversation", "always_tip": "tip", "allowed": "Allowed",
+                 "allowed_always": "Allowed for this conversation", "refused": "Refused"}
+        card = thread.add_confirm_card(texts, "Export communes?", True)
+        answers = []
+        card.answered.connect(answers.append)
+        _run()  # a widget added to a shown layout is shown at the next turn of the event loop
+        assert card.always_button is not None and card.always_button.isVisibleTo(thread)
+        card.always_button.click()
+        card.no_button.click()  # gone, and the card answered already
+        assert answers == ["conversation"] and card.done and card.result.text() == "Allowed for this conversation"
+        assert not card.yes_button.isVisibleTo(thread)
+        assert "Export communes?" in thread.toPlainText() and "Allowed for this conversation" in thread.toPlainText()
+        plain = thread.add_confirm_card(texts, "Remove?", False)
+        assert plain.always_button is None
+        plain.finish("no")  # Stop: the controller closes it
+        assert plain.done and plain.result.text() == "Refused"
 
     def test_a_long_answer_is_drawn_less_often(self, thread):
         thread.add_text("x" * 12000)
@@ -519,22 +565,23 @@ class TestWidth:
         thread.add_text(self.PATH)
         thread.end_answer()
         label = thread._items[-1].widget
-        label.setSelection(0, len(label.text()))
+        _select_all(label)
         assert thread_module.ZWSP in label.selectedText()
         QtWidgets.QApplication.clipboard().setText(label.selectedText())
         _run(50)
         assert QtWidgets.QApplication.clipboard().text() == self.PATH
 
     def test_a_copy_over_several_lines_is_cleaned_too(self, thread):
-        """A QLabel gives its breaks as U+2029 in selectedText() and as \\n on the clipboard: they must still match."""
-        text = f"Exported to\n{self.PATH}\n\nand to\n{self.PATH}"
+        """A QLabel gives its breaks as U+2029 in selectedText() and as \\n on the clipboard: they must still match.
+        (An answer is rich text since 2026-11-24: two paragraphs are copied one line apart, not two.)"""
+        text = f"Exported to\n{self.PATH}\nand to\n{self.PATH}"
         thread.add_text(text)
         thread.end_answer()
         label = thread._items[-1].widget
-        label.setSelection(0, len(label.text()))
+        _select_all(label)
         selected = label.selectedText()
-        assert thread_module.ZWSP in selected and "\u2029" in selected
-        QtWidgets.QApplication.clipboard().setText(selected.replace("\u2029", "\n"))
+        assert thread_module.ZWSP in selected and ("\u2029" in selected or "\u2028" in selected)
+        QtWidgets.QApplication.clipboard().setText(selected.replace("\u2029", "\n").replace("\u2028", "\n"))
         _run(50)
         assert QtWidgets.QApplication.clipboard().text() == text
 
@@ -546,7 +593,7 @@ class TestWidth:
         thread.end_answer()
         thread.show()
         label = thread._items[-1].widget
-        label.setSelection(0, len(label.text()))
+        _select_all(label)
         assert "\u00a0" in label.selectedText() and thread_module.ZWSP in label.selectedText()
         QtWidgets.QApplication.clipboard().clear()
         label.setFocus()

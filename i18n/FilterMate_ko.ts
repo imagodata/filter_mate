@@ -1238,6 +1238,46 @@ Its tools will see of your project only what the agent sends them, and what they
         <translation>생각 중…</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The layer {} is no longer in the project.</source>
+        <translation>레이어 {}이(가) 더 이상 프로젝트에 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Refused</source>
+        <translation>거부됨</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed for this conversation</source>
+        <translation>이 대화에서 허용됨</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed</source>
+        <translation>허용됨</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>No</source>
+        <translation>아니요</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Yes</source>
+        <translation>예</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The agent asks before it acts</source>
+        <translation>에이전트는 실행하기 전에 먼저 묻습니다</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Permission</source>
+        <translation>권한</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
         <translation>오늘 이 주소에서 만든 새 계정이 너무 많습니다. 내일 다시 시도하거나 본인의 API 키를 입력하세요.</translation>

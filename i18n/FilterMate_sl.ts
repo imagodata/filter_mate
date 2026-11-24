@@ -1238,6 +1238,46 @@ Njegova orodja bodo od vašega projekta videla le tisto, kar jim pošlje agent, 
         <translation>Razmišljanje…</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The layer {} is no longer in the project.</source>
+        <translation>Plasti {} ni več v projektu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Refused</source>
+        <translation>Zavrnjeno</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed for this conversation</source>
+        <translation>Dovoljeno za ta pogovor</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed</source>
+        <translation>Dovoljeno</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>No</source>
+        <translation>Ne</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Yes</source>
+        <translation>Da</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The agent asks before it acts</source>
+        <translation>Agent vpraša, preden ukrepa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Permission</source>
+        <translation>Dovoljenje</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
         <translation>Danes je bilo s tega naslova ustvarjenih preveč novih računov: poskusite jutri ali vnesite svoj ključ API.</translation>

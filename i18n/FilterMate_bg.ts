@@ -1238,6 +1238,46 @@ Its tools will see of your project only what the agent sends them, and what they
         <translation>Мислене…</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The layer {} is no longer in the project.</source>
+        <translation>Слоят {} вече не е в проекта.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Refused</source>
+        <translation>Отказано</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed for this conversation</source>
+        <translation>Разрешено за този разговор</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed</source>
+        <translation>Разрешено</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>No</source>
+        <translation>Не</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Yes</source>
+        <translation>Да</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The agent asks before it acts</source>
+        <translation>Агентът пита, преди да действа</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Permission</source>
+        <translation>Разрешение</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
         <translation>Твърде много нови акаунти от този адрес днес: опитайте утре или въведете собствен API ключ.</translation>

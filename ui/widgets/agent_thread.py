@@ -20,6 +20,7 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from ...core.agent.questions import MAX_OTHER
+from .agent_markdown import answer_html, layer_of_link
 
 BUBBLE_SHARE = 0.88  # of the width of the thread
 ANSWER_DELAY_MS = 80  # the answer being written is drawn again at most so often, whatever the number of fragments
@@ -253,6 +254,104 @@ class SettingsCard(QFrame):
         _sheet(self.cancel_button, f"QPushButton {{ font-size: 12px; padding: 4px 12px; border: 1px solid"
                                    f" {palette['fm_group_border']}; border-radius: 6px; background: {palette['fm_list']};"
                                    f" color: {palette['fm_text']}; }}")
+
+
+class ConfirmCard(QFrame):
+    """A question of the permissions in the thread (2026-11-24; a dialog of the system until then, which stopped
+    QGIS, did not take the theme and hid the thread): what the agent wants to do, then Yes, Yes for this
+    conversation when the action can be allowed so, and No. The controller waits for ``answered`` ("once",
+    "conversation" or "no"); the card then freezes on the answer. No is the answer of a card taken away."""
+
+    answered = pyqtSignal(str)
+
+    def __init__(self, texts: dict, text: str, with_conversation: bool, parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self.setObjectName("frame_agent_confirm")
+        self._texts = texts
+        self._done = False
+        self.answer = ""
+        column = QVBoxLayout(self)
+        column.setContentsMargins(10, 10, 10, 10)
+        column.setSpacing(6)
+        head = QHBoxLayout()
+        head.setContentsMargins(0, 0, 0, 0)
+        head.setSpacing(8)
+        self.chip = QLabel(texts["chip"], self)
+        self.chip.setObjectName("label_agent_confirm_chip")
+        self.chip.setTextFormat(Qt.TextFormat.PlainText)
+        self.heading = _plain_label(texts["heading"], self)
+        head.addWidget(self.chip, 0, Qt.AlignmentFlag.AlignTop)
+        head.addWidget(self.heading, 1)
+        column.addLayout(head)
+        self.body = _plain_label(text, self)
+        self.body.setObjectName("label_agent_confirm_text")
+        self.body.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        column.addWidget(self.body)
+        buttons = QHBoxLayout()
+        buttons.setContentsMargins(0, 0, 0, 0)
+        buttons.setSpacing(6)
+        self.yes_button = QPushButton(texts["yes"], self)
+        self.yes_button.setObjectName("pushButton_agent_confirm_yes")
+        self.always_button = ElidedButton(texts["always"], self) if with_conversation else None  # a narrow dock elides it
+        if self.always_button is not None:
+            self.always_button.setObjectName("pushButton_agent_confirm_always")
+            self.always_button.setToolTip(texts["always_tip"])
+        self.no_button = QPushButton(texts["no"], self)
+        self.no_button.setObjectName("pushButton_agent_confirm_no")
+        for button, answer in ((self.yes_button, "once"), (self.always_button, "conversation"), (self.no_button, "no")):
+            if button is None:
+                continue
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            button.clicked.connect(lambda _checked=False, chosen=answer: self._choose(chosen))
+            buttons.addWidget(button)
+        buttons.addStretch(1)
+        column.addLayout(buttons)
+        self.result = _plain_label("", self)
+        self.result.setObjectName("label_agent_confirm_result")
+        self.result.setVisible(False)
+        column.addWidget(self.result)
+
+    @property
+    def done(self) -> bool:
+        return self._done
+
+    def _choose(self, answer: str) -> None:
+        if self._done:
+            return
+        self.finish(answer)
+        self.answered.emit(answer)
+
+    def finish(self, answer: str) -> None:
+        """Answered, refused or taken away: the buttons go, the answer stays written."""
+        if self._done:
+            return
+        self._done = True
+        self.answer = answer
+        for button in (self.yes_button, self.always_button, self.no_button):
+            if button is not None:
+                button.setEnabled(False)
+                button.setVisible(False)
+        self.result.setText(self._texts.get({"once": "allowed", "conversation": "allowed_always"}.get(answer, "refused"),
+                                            ""))
+        self.result.setVisible(True)
+
+    def restyle(self, palette: dict, _dark: bool) -> None:
+        _sheet(self, f"QFrame#frame_agent_confirm {{ background: {palette['fm_list']}; border: 1px solid"
+                     f" {palette['fm_accent']}; border-radius: 6px; }} QFrame#frame_agent_confirm QLabel {{"
+                     " background: transparent; border: none; padding: 0px; }")
+        _sheet(self.chip, f"background: {palette['fm_active']}; color: {palette['fm_text']}; border-radius: 4px;"
+                          " padding: 1px 6px; font-size: 11px; font-weight: 600;")
+        _sheet(self.heading, f"font-size: 12px; font-weight: 600; color: {palette['fm_text']};")
+        _sheet(self.body, f"font-size: 12px; color: {palette['fm_text']};")
+        _sheet(self.result, f"font-size: 11px; color: {palette['fm_text_muted']};")
+        _sheet(self.yes_button, f"QPushButton {{ font-size: 12px; font-weight: 600; padding: 4px 14px; border: none;"
+                                f" border-radius: 6px; background: {palette['fm_accent']}; color: white; }}")
+        secondary = (f"QPushButton {{ font-size: 12px; padding: 4px 12px; border: 1px solid"
+                     f" {palette['fm_group_border']}; border-radius: 6px; background: {palette['fm_list']};"
+                     f" color: {palette['fm_text']}; }}")
+        for button in (self.always_button, self.no_button):
+            if button is not None:
+                _sheet(button, secondary)
 
 
 class QuestionCard(QFrame):
@@ -652,6 +751,10 @@ class AgentThread(QScrollArea):
         self._answer: Optional[_Item] = None
         self._answer_raw = ""
         self._step_cards: List[ChangeCard] = []  # the cards of the last step of the history
+        # The names of the layers of the project, read when an answer starts: they become links in it, and a click
+        # on one gives its name to ``on_layer`` (the panel sets both).
+        self.layer_names: Callable[[], Sequence[str]] = lambda: ()
+        self.on_layer: Optional[Callable[[str], None]] = None
         self._undo_possible = False
         self._compare_possible = False  # Compare on the cards: the dock can compare, and the agent does not work
         self._content = QWidget(self)
@@ -855,6 +958,16 @@ class AgentThread(QScrollArea):
         self.end_answer()
         return card
 
+    def add_confirm_card(self, texts: dict, text: str, with_conversation: bool) -> "ConfirmCard":
+        """A question of the permissions in the thread (ConfirmCard); the caller waits for ``answered``, and the
+        transcription keeps the question with its answer."""
+        card = ConfirmCard(texts, text, with_conversation, self._content)
+        item = _Item(card, f"? {text}", "confirm", card.restyle)
+        card.answered.connect(lambda _answer: setattr(item, "plain", f"{item.plain}\n   {card.result.text()}"))
+        self._append(item)
+        self.end_answer()
+        return card
+
     @staticmethod
     def _close_question_item(item: "_Item", card: "QuestionCard") -> None:
         item.plain += "".join(f"\n   {line}" for line in card.summary_lines())
@@ -894,10 +1007,27 @@ class AgentThread(QScrollArea):
         """
         self._answer_raw += text
         if self._answer is None:
-            label = _plain_label("", self._content)
-            label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            self._answer = _Item(label, "", "text",
-                                 lambda palette, _dark: _sheet(label, f"font-size: 13px; color: {palette['fm_text']};"))
+            label = QLabel(self._content)
+            label.setWordWrap(True)
+            # Rich text whose only markup is ours (agent_markdown): every character the model wrote is escaped.
+            label.setTextFormat(Qt.TextFormat.RichText)
+            label.setOpenExternalLinks(False)
+            label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse
+                                          | Qt.TextInteractionFlag.LinksAccessibleByMouse)
+            item = _Item(label, "", "text")
+            try:
+                item.names = tuple(self.layer_names())  # type: ignore[attr-defined]
+            except Exception:  # a project closing: no link this time
+                item.names = ()  # type: ignore[attr-defined]
+            label.linkActivated.connect(lambda link, shown=item: self._layer_clicked(link, shown.names))
+
+            def look(palette: dict, _dark: bool, shown=item) -> None:
+                _sheet(shown.widget, f"font-size: 13px; color: {palette['fm_text']};")
+                if shown.plain:  # its links and its code take the colors of the theme
+                    self._render_answer(shown)
+
+            item.look = look
+            self._answer = item
             self._append(self._answer)
         self._answer.plain = self._answer_raw
         if not self._answer_timer.isActive():
@@ -905,9 +1035,23 @@ class AgentThread(QScrollArea):
 
     def _show_answer(self) -> None:
         self._answer_timer.stop()
-        self._answer.widget.setText(breakable(plain_markdown(self._answer_raw).strip("\n")))
+        self._render_answer(self._answer)
         self._fit_timer.start()
         self._follow_end()
+
+    def _render_answer(self, item: _Item) -> None:
+        """An answer drawn from its Markdown: bold, lists, code, tables, the names of the layers as links."""
+        palette = self._palette_of()
+        colors = {"accent": palette["fm_accent"], "code_bg": palette["fm_group"], "rule": palette["fm_group_border"]}
+        try:
+            item.widget.setText(answer_html(item.plain.strip("\n"), getattr(item, "names", ()), colors, breakable))
+        except RuntimeError:  # cleared meanwhile
+            pass
+
+    def _layer_clicked(self, link: str, names: Sequence[str]) -> None:
+        name = layer_of_link(link, names)
+        if name and self.on_layer is not None:
+            self.on_layer(name)
 
     def add_step(self, text: str) -> None:
         """A step of the running request; the previous one is marked done."""

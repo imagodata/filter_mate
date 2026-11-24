@@ -1238,6 +1238,46 @@ Bağlayıcının araçları projenizden yalnızca aracının kendilerine gönder
         <translation>Düşünüyor…</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The layer {} is no longer in the project.</source>
+        <translation>{} katmanı artık projede değil.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Refused</source>
+        <translation>Reddedildi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed for this conversation</source>
+        <translation>Bu konuşma için izin verildi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Allowed</source>
+        <translation>İzin verildi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>No</source>
+        <translation>Hayır</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Yes</source>
+        <translation>Evet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>The agent asks before it acts</source>
+        <translation>Aracı harekete geçmeden önce sorar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Permission</source>
+        <translation>İzin</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
         <translation>Bugün bu adresten çok fazla yeni hesap açıldı: yarın yeniden deneyin veya kendi API anahtarınızı girin.</translation>

@@ -433,6 +433,7 @@ class AgentPanel(QFrame):
     recipe_run_requested = pyqtSignal(str)
     recipe_remove_requested = pyqtSignal(str)
     recipe_live_toggled = pyqtSignal(str, bool)
+    layer_link_clicked = pyqtSignal(str)  # the name of a layer clicked in an answer (agent_markdown)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -471,6 +472,7 @@ class AgentPanel(QFrame):
         self.thread = AgentThread(lambda: tokens(self._dark()), self._dark, self.undo_requested.emit, self,
                                   self.card_compare_requested.emit)
         self.thread.setMinimumHeight(THREAD_MIN_HEIGHT)
+        self.thread.on_layer = self.layer_link_clicked.emit
         self.stack.addWidget(self.thread)
         self.stack.addWidget(self._build_history())
         # The accordion gives the section a fixed height: the pages take what is left above the input, never
@@ -1430,6 +1432,15 @@ class AgentPanel(QFrame):
         """
         self.stack.setCurrentIndex(_THREAD_PAGE)
         card = self.thread.add_question_card(texts, questions, free_other=free_other)
+        self._in_answer = False
+        return card
+
+    def add_confirm_card(self, texts: dict, text: str, with_conversation: bool):
+        """A question of the permissions in the thread (agent_thread.ConfirmCard), shown even from the history page:
+        the turn waits for the answer."""
+        self.stack.setCurrentIndex(_THREAD_PAGE)
+        self._refresh_new_button()
+        card = self.thread.add_confirm_card(texts, text, with_conversation)
         self._in_answer = False
         return card
 
