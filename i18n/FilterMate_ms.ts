@@ -2882,6 +2882,11 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Model berjalan pada komputer ini: projek dan permintaan anda tidak dihantar ke perkhidmatan AI.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Kembalikan ke baris</translation>
     </message>

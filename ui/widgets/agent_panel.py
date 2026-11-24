@@ -1088,6 +1088,12 @@ class AgentPanel(QFrame):
         self.testers_button.setObjectName("pushButton_agent_testers")
         self.testers_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.testers_button.clicked.connect(lambda: self.feedback_requested.emit("testers", "agent-welcome"))
+        # A model that runs on this computer is a reason to choose it: the welcome says so (2026-11-24).
+        self.welcome_local = QLabel(_tr("The model runs on this computer: your project and your requests are not sent "
+                                        "to an AI service."), page)
+        self.welcome_local.setObjectName("label_agent_welcome_local")
+        self.welcome_local.setWordWrap(True)
+        self.welcome_local.setVisible(False)
         self.try_label = QLabel(_tr("TRY"), page)
         self.try_label.setObjectName("label_agent_try")
         page.setObjectName("widget_agent_welcome")
@@ -1100,6 +1106,7 @@ class AgentPanel(QFrame):
         layout.addWidget(self.welcome_note)
         layout.addWidget(self.configure_button, 0, Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(self.setup_button, 0, Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.welcome_local)
         layout.addSpacing(4)
         layout.addWidget(self.try_label)
         self.example_buttons = []
@@ -1195,6 +1202,8 @@ class AgentPanel(QFrame):
             f" QPushButton#pushButton_agent_reconfigure:hover {{ text-decoration: underline; }}"
             f"QLabel#label_agent_welcome_note {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
             f" {palette['fm_group_border']}; padding: 0 0 0 10px; }}"
+            f"QLabel#label_agent_welcome_local {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
+            f" {palette['fm_accent']}; padding: 0 0 0 10px; }}"
             f"QFrame#frame_agent_history {{ background: {palette['fm_list']}; border: 1px solid"
             f" {palette['fm_group_border']}; border-radius: 6px; }}"
             f"QWidget#widget_agent_history_header {{ background: transparent; border: none; border-bottom: 1px solid"
@@ -1345,9 +1354,12 @@ class AgentPanel(QFrame):
     def recipes(self):
         return list(self._recipes)
 
-    def set_ready(self, ready: bool, destination: str = "") -> None:
-        """Whether a provider is set up; ``destination`` says where the requests go."""
+    def set_ready(self, ready: bool, destination: str = "", local: bool = False) -> None:
+        """Whether a provider is set up; ``destination`` says where the requests go, ``local`` whether its model runs
+        on this computer (core/agent/local_model.py)."""
         self._ready = ready
+        if hasattr(self, "welcome_local"):
+            self.welcome_local.setVisible(bool(ready and local))
         if ready:
             # What the agent does goes beyond filters (2026-11-24): open data, relief, styles, charts, layouts.
             self.welcome_title.setText(_tr("What should the agent do?"))

@@ -2882,6 +2882,11 @@ Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Il modello gira su questo computer: il tuo progetto e le tue richieste non vengono inviati a nessun servizio di IA.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Rimettila nella riga</translation>
     </message>

@@ -2882,6 +2882,11 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Model shu kompyuterda ishlaydi: loyihangiz va so'rovlaringiz hech qanday AI xizmatiga yuborilmaydi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Qatorga qaytarish</translation>
     </message>

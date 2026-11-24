@@ -2882,6 +2882,11 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Model działa na tym komputerze: twój projekt i twoje żądania nie są wysyłane do żadnej usługi AI.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Przywróć do wiersza</translation>
     </message>

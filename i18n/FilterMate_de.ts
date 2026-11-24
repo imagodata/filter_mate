@@ -2882,6 +2882,11 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Das Modell läuft auf diesem Computer: Ihr Projekt und Ihre Anfragen werden an keinen KI-Dienst gesendet.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Zurück in die Zeile</translation>
     </message>

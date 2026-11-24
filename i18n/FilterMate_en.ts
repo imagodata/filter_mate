@@ -2877,6 +2877,11 @@ Do you agree to all of them? No runs none of them.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>The model runs on this computer: your project and your requests are not sent to an AI service.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Put it back in the line</translation>
     </message>

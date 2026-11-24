@@ -2882,6 +2882,11 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>मॉडल इसी कंप्यूटर पर चलता है: आपकी परियोजना और आपके अनुरोध किसी AI सेवा को नहीं भेजे जाते।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>इसे पंक्ति में वापस रखें</translation>
     </message>

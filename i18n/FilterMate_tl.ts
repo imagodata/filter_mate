@@ -2882,6 +2882,11 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Tumatakbo ang model sa computer na ito: hindi ipinapadala ang iyong proyekto at mga kahilingan sa anumang serbisyo ng AI.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Ibalik sa linya</translation>
     </message>

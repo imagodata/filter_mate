@@ -2882,6 +2882,11 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>El model s'executa en aquest ordinador: el vostre projecte i les vostres sol·licituds no s'envien a cap servei d'IA.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Torna-la a la línia</translation>
     </message>

@@ -2882,6 +2882,11 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>O modelo corre neste computador: o seu projeto e os seus pedidos não são enviados para nenhum serviço de IA.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Devolvê-la à linha</translation>
     </message>

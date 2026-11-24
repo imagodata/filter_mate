@@ -2882,6 +2882,11 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>모델이 이 컴퓨터에서 실행됩니다. 프로젝트와 요청은 AI 서비스로 전송되지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>입력란으로 되돌리기</translation>
     </message>

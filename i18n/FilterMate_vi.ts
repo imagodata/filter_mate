@@ -2882,6 +2882,11 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>The model runs on this computer: your project and your requests are not sent to an AI service.</source>
+        <translation>Mô hình chạy trên máy tính này: dự án và yêu cầu của bạn không được gửi tới dịch vụ AI nào.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>Put it back in the line</source>
         <translation>Đưa lại vào dòng</translation>
     </message>
