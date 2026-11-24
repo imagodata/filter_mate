@@ -157,10 +157,13 @@ def as_flag(key: str, value: Any) -> Any:
 
 def same_setting(one: Any, other: Any, load: Callable[[str], Any], key: str = "") -> bool:
     """True when two stored forms hold the same setting: ``'["a"]'`` and ``["a"]``; None (what a .qgz gives back for
-    an empty value) and ``""``, ``[]``, ``"[]"``, ``{}``; a flag and the 1 / 0 the SQLite gave for it."""
+    an empty value) and ``""``, ``[]``, ``"[]"``, ``{}``; a flag and the 1 / 0 the SQLite gave for it; two lists of
+    layers in another order."""
     if one is None or other is None:
         return all(value is None or value in EMPTY_FORMS or value == [] or value == {} for value in (one, other))
     one, other = as_flag(key, typed_value(one, load)), as_flag(key, typed_value(other, load))
+    if key in LAYER_ID_LISTS and isinstance(one, list) and isinstance(other, list):
+        return sorted(map(str, one)) == sorted(map(str, other))
     if isinstance(one, bool) or isinstance(other, bool):
         return type(one) is type(other) and one == other
     if isinstance(one, (int, float)) and isinstance(other, (int, float)):
@@ -233,7 +236,8 @@ def asked_groups(asks: Asks) -> List[str]:
 
 
 def settings_to_apply(asks: Asks, groups: Collection[str], held: Mapping[str, Mapping[str, Mapping[str, Any]]],
-                      load: Callable[[str], Any]) -> Dict[str, Dict[str, Dict[str, Any]]]:
+                      load: Callable[[str], Any], layer_ids: Optional[Collection[str]] = None
+                      ) -> Dict[str, Dict[str, Dict[str, Any]]]:
     """``{layer_id: {group: {key: the project's value}}}`` to put in the panel for the groups the user took.
 
     A setting the panel no longer holds as it was at the registration (changed meanwhile by the user, or the layer
@@ -243,6 +247,7 @@ def settings_to_apply(asks: Asks, groups: Collection[str], held: Mapping[str, Ma
         asks: What the registrations found different.
         groups: The groups the user took.
         held: The settings the panel holds now (``PROJECT_LAYERS``).
+        layer_ids: The layers of the project: a list of layers keeps only them, as the panel does.
     """
     chosen: Dict[str, Dict[str, Dict[str, Any]]] = {}
     for layer_id, by_group in asks.items():
@@ -254,19 +259,38 @@ def settings_to_apply(asks: Asks, groups: Collection[str], held: Mapping[str, Ma
                 continue
             now = props.get(group) or {}
             for key, (mine, theirs) in keys.items():
-                if key in now and same_setting(now[key], mine, load, key):
+                if key in LAYER_ID_LISTS and layer_ids is not None:  # as the panel holds them
+                    mine, theirs = present_layers(mine, layer_ids), present_layers(theirs, layer_ids)
+                if key in now and same_setting(now[key], mine, load, key) and not same_setting(theirs, mine, load, key):
                     chosen.setdefault(layer_id, {}).setdefault(group, {})[key] = theirs
     return chosen
 
 
-def answer_text(groups: Collection[str]) -> str:
-    """A remembered answer as stored: the groups taken, comma separated ('' for none)."""
-    return ",".join(group for group in GROUPS if group in groups)
+def without_groups(asks: Asks, groups: Collection[str]) -> Asks:
+    """The asks left once ``groups`` are settled."""
+    left: Asks = {}
+    for layer_id, by_group in asks.items():
+        kept = {group: keys for group, keys in by_group.items() if keys and group not in groups}
+        if kept:
+            left[layer_id] = kept
+    return left
 
 
-def answer_groups(text: Any) -> Optional[List[str]]:
-    """The groups of a remembered answer; None when there is none (a text that is no answer included)."""
+ANSWERS = {"apply": True, "keep": False}
+
+
+def answer_text(decisions: Mapping[str, bool]) -> str:
+    """Remembered answers as stored, one per group asked: ``exploring:keep,filtering:apply``."""
+    return ",".join(f"{group}:{'apply' if decisions[group] else 'keep'}" for group in GROUPS if group in decisions)
+
+
+def answer_decisions(text: Any) -> Dict[str, bool]:
+    """``{group: apply}`` of remembered answers (a group never asked is absent: it is asked)."""
+    decisions: Dict[str, bool] = {}
     if not isinstance(text, str):
-        return None
-    groups = [part for part in text.split(",") if part]
-    return groups if all(group in GROUPS for group in groups) else None
+        return decisions
+    for part in text.split(","):
+        group, _sep, answer = part.partition(":")
+        if group in GROUPS and answer in ANSWERS:
+            decisions[group] = ANSWERS[answer]
+    return decisions

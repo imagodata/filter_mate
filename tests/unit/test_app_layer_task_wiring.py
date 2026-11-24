@@ -42,6 +42,7 @@ class _Signal:
 class _FakeTask:
     def __init__(self, description, task_action, task_parameters):
         self.changed_layer_ids = []
+        self.settings_to_ask = {}
         self.resultingLayers = _Signal()
         self.savingLayerVariable = _Signal()
         self.removingLayerVariable = _Signal()
@@ -131,7 +132,8 @@ def test_a_failed_add_layers_releases_its_counter_once(tasks_package):
     })
     app = types.SimpleNamespace(appTasks={}, tasks_descriptions={"add_layers": "Adding layers"},
                                 dockwidget=None, layer_management_engine_task_completed=MagicMock(),
-                                _handle_layer_task_terminated=MagicMock())
+                                _handle_layer_task_terminated=MagicMock(),
+                                _layer_settings_question_service=lambda: None)
     namespace["_execute_layer_task"](app, "add_layers", {"task": {"layers": []}})
     task = app.appTasks["add_layers"]
     task.resultingLayers.emit({"A": {}})
@@ -151,10 +153,39 @@ def test_an_add_layers_terminated_without_results_still_releases(tasks_package):
     })
     app = types.SimpleNamespace(appTasks={}, tasks_descriptions={"add_layers": "Adding layers"},
                                 dockwidget=None, layer_management_engine_task_completed=MagicMock(),
-                                _handle_layer_task_terminated=MagicMock())
+                                _handle_layer_task_terminated=MagicMock(),
+                                _layer_settings_question_service=lambda: None)
     namespace["_execute_layer_task"](app, "add_layers", {"task": {"layers": []}})
     app.appTasks["add_layers"].taskTerminated.emit()
     app._handle_layer_task_terminated.assert_called_once_with("add_layers", results_delivered=False)
+
+
+def test_the_asks_of_a_project_left_meanwhile_are_not_asked(tasks_package):
+    """2026-11-24 (review): the settings a registration found different are asked for the project it registered: a
+    project read or cleared since (the question's generation changed), or the plugin unloading, leaves them."""
+    namespace = _extract(["_execute_layer_task"], {
+        "__package__": _PKG, "Qt": MagicMock(), "QgsApplication": MagicMock(),
+    })
+    question = types.SimpleNamespace(generation=3)
+    asked = []
+    app = types.SimpleNamespace(appTasks={}, tasks_descriptions={"add_layers": "Adding layers"},
+                                dockwidget=None, layer_management_engine_task_completed=MagicMock(),
+                                _handle_layer_task_terminated=MagicMock(),
+                                _layer_settings_question_service=lambda: question,
+                                _ask_layer_settings=lambda asks, generation: asked.append((asks, generation)))
+    namespace["_execute_layer_task"](app, "add_layers", {"task": {"layers": []}})
+    task = app.appTasks["add_layers"]
+    task.settings_to_ask["L"] = {"exploring": {"is_linking": (True, False)}}
+    task.resultingLayers.emit({"L": {}})
+    assert asked == [({"L": {"exploring": {"is_linking": (True, False)}}}, 3)]  # with the project's generation
+
+    asked.clear()
+    namespace["_execute_layer_task"](app, "add_layers", {"task": {"layers": []}})
+    task = app.appTasks["add_layers"]
+    task.settings_to_ask["L"] = {"exploring": {"is_linking": (True, False)}}
+    app._unloading = True
+    task.resultingLayers.emit({"L": {}})
+    assert asked == []
 
 
 class _ReentrantDock:

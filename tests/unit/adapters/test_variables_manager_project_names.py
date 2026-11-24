@@ -161,12 +161,12 @@ def env(monkeypatch, tmp_path):
 
     monkeypatch.setattr(vm, "safe_set_layer_variables_batch", batch)
     state = types.SimpleNamespace(changing=False, layer=layer, written=written, timers=timers, cursor=Cursor(),
-                                  dirty=dirty, project=project, path=path)
+                                  dirty=dirty, project=project, path=path, canceled=[])
 
     manager = vm.VariablesPersistenceManager(
         get_spatialite_connection=lambda: None, get_project_uuid=lambda: "p-1",
         get_project_layers=lambda: {layer.id(): {"exploring": {}, "filtering": {}}},
-        return_typped_value=return_typed_value, cancel_layer_tasks=lambda layer_id: None,
+        return_typped_value=return_typed_value, cancel_layer_tasks=lambda layer_id: state.canceled.append(layer_id),
         is_layer_change_in_progress=lambda: state.changing)
     state.manager = manager
     return state
@@ -365,3 +365,13 @@ def test_removing_everything_takes_the_legacy_names_too(env):
     env.manager._remove_variables(env.layer)
     assert env.layer.props == {"variableValues/my_own": 1, "filterMate/settings_version": 2}
     assert layer_settings.written_since("parcelles_1", "exploring_is_linking", queued_at)
+
+
+def test_a_value_already_held_cancels_no_task_of_the_layer(env):
+    """The settings applied after the question at the opening are in the variables already: the tasks of the layer
+    (its feature lists) go on (review of 2026-11-24)."""
+    env.layer.props["variableValues/filterMate_exploring_is_linking"] = False
+    env.manager.save_single_property(env.layer, env.cursor, "exploring", "is_linking", False)
+    assert env.canceled == []
+    env.manager.save_single_property(env.layer, env.cursor, "exploring", "is_linking", True)
+    assert env.canceled == ["parcelles_1"]

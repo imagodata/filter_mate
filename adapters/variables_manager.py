@@ -206,8 +206,10 @@ class VariablesPersistenceManager:
             self._defer_variable(layer_id, variable_name, value_typped)
         elif project_layer is not None:
             if sip is not None and not sip.isdeleted(project_layer):
-                # Cancel running tasks to prevent race conditions
-                if self._cancel_layer_tasks:
+                # Cancel running tasks to prevent race conditions; not when the variable already holds the value
+                # (2026-11-24: the settings applied after the question at the opening, among others)
+                if self._cancel_layer_tasks and \
+                        project_layer.customProperty(f"variableValues/{variable_name}") != value_typped:
                     self._cancel_layer_tasks(layer_id)
 
                 self._drop_pending(layer_id, variable_name)  # a value deferred before is older than this one

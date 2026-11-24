@@ -650,11 +650,22 @@ class LayersManagementEngineTask(QgsTask):
         layer_ids = getattr(self, '_project_layer_ids', None)
         if layer_ids is None:
             return
-        from ..domain.project_layer_settings import LAYER_ID_LISTS, present_layers
+        from ..domain.project_layer_settings import LAYER_ID_LISTS, present_layers, same_setting
         filtering = layer_props.get("filtering", {})
         for key in LAYER_ID_LISTS:
             if key in filtering:
                 filtering[key] = present_layers(filtering[key], layer_ids)
+        # A difference asked about is compared as the panel holds it: with the same layers left out
+        asked = (getattr(self, 'settings_to_ask', None) or {}).get(layer_props.get("infos", {}).get("layer_id"), {})
+        for key in LAYER_ID_LISTS:
+            pair = asked.get("filtering", {}).get(key)
+            if pair is None:
+                continue
+            mine, theirs = present_layers(pair[0], layer_ids), present_layers(pair[1], layer_ids)
+            if same_setting(mine, theirs, lambda text: self.return_typped_value(text, 'load')[0], key):
+                del asked["filtering"][key]
+            else:
+                asked["filtering"][key] = (mine, theirs)
 
     def _persist_verified_geometry_field(self, infos, layer):
         """Replace a stored geometry column that no longer matches the layer URI.

@@ -360,3 +360,18 @@ def test_the_legacy_infos_rows_are_written_with_their_id_and_date(vector, tmp_pa
         rows = sorted(conn.execute("SELECT meta_key, meta_value FROM fm_project_layers_properties").fetchall())
     assert rows == [("layer_geometry_type", "GeometryType.Polygon"), ("layer_provider_type", "ogr"),
                     ("layer_table_name", "parcelles")]
+
+
+def test_a_difference_of_layers_is_asked_as_the_panel_holds_them(vector):
+    """C (review of 2026-11-24): the panel leaves out the layers the project does not have; a difference that is
+    only such a layer, or the order, is no difference, and the one asked keeps the layers of the project only."""
+    sqlite = {"infos": {}, "exploring": {},
+              "filtering": {"layers_to_filter": ["routes_1", "gone"], "centroid_layers": ["routes_1", "rivers_1"]}}
+    project = {"filtering": {"layers_to_filter": '["rivers_1", "gone_too"]',
+                             "centroid_layers": '["rivers_1", "routes_1", "gone"]'}}
+    task = _registering(sqlite, project)
+    task._project_layer_ids = {"parcelles_1", "routes_1", "rivers_1"}
+    task._load_existing_layer_properties = MagicMock(side_effect=lambda layer: _queued_from_sqlite(task, layer, sqlite))
+    assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
+    assert task.project_layers["parcelles_1"]["filtering"]["layers_to_filter"] == ["routes_1"]
+    assert task.settings_to_ask == {"parcelles_1": {"filtering": {"layers_to_filter": (["routes_1"], ["rivers_1"])}}}
