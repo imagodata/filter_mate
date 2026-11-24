@@ -335,6 +335,40 @@ class TestPublishBundleE2E:
         assert sync.skipped_push_reason == "no_remote"
         assert os.path.isfile(sync.bundle_written_at)
 
+    def test_existing_clone_follows_the_configured_git_url(self, tmp_path, seeded_bare):
+        """A clone made from an old URL pulls and pushes to the URL in the config.
+
+        The clone keeps the ``origin`` it was cloned from; when the repo's
+        ``git_url`` changes (a new port, a new host), the next publish must
+        talk to the new URL, not to the one stored in ``.git/config``.
+        """
+        mgr = self._make_manager(tmp_path, seeded_bare)
+        repo = mgr.get_default()
+        assert mgr.prepare_clone(repo).success
+
+        moved = tmp_path / "moved.git"
+        _run(["git", "clone", "--bare", str(seeded_bare), str(moved)])
+        old_origin = tmp_path / "gone.git"
+        os.rename(seeded_bare, old_origin)  # the old URL no longer answers
+
+        mgr = RemoteRepoManager(FakeExtension([{
+            "name": "Acme",
+            "git_url": str(moved),
+            "branch": "main",
+            "local_clone": repo.expanded_local_clone,
+            "target_collection": "acme",
+            "is_default": True,
+        }]))
+        repo = mgr.get_default()
+        sync = mgr.prepare_clone(repo)
+        assert sync.success, sync.error_message
+
+        url = subprocess.run(
+            ["git", "config", "--get", "remote.origin.url"],
+            cwd=repo.expanded_local_clone, capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        assert url == str(moved)
+
     def test_bundle_write_exception_surfaces_as_error(self, tmp_path, seeded_bare):
         mgr = self._make_manager(tmp_path, seeded_bare)
         repo = mgr.get_default()

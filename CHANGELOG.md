@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Favorites sharing: a quick publish reaches the server of the repo's `git_url` as set now. A clone kept the `origin` it was first cloned from, so after a change of port or host in the remote repo settings, `pull` and `push` still went to the old address and failed ("Failed to connect"). The clone's `origin` now follows the configured `git_url` before each pull.
 - Agent: the buildings and road sections of the BD TOPO added from the IGN Géoplateforme (`add_service_layer`) are drawn only closer than 1:25,000 and 1:100,000. Such a layer downloads what the map shows at each move: zoomed out over Toulouse, 406,007 buildings, 82 pages of 5,000 and minutes of server time, and the Géoplateforme failed some of them. The scale is a setting of the layer, which the user changes in its properties; the answer says it in a `note` (`AddedServiceLayer`, also in REST). An official style no longer clears it (its QML says no scale and the Rendering category loaded it), and `all_scales` drops the zoom levels of the producer only, not the scale range of the layer itself. Asking QGIS for an initial GetFeature to type these 3D layers (#641) was undone (#642): QGIS sends it with no BBOX, and the Géoplateforme counts the whole table for it, 24 to 60 s for the roads. Bench: `check_agent_style_presets.py` 31 checks, `check_agent_sources_live.py` on QGIS 3.44 and 4.3.
 
 ## [5.1.2] - 2026-11-23

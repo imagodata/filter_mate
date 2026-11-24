@@ -416,6 +416,19 @@ class GitClient:
         # Run from parent so we can target cwd that doesn't exist yet.
         return self._run(args, cwd=parent or None)
 
+    def get_remote_url(self, remote: str = "origin") -> str:
+        """URL configured for ``remote`` in the clone ("" when it has none)."""
+        res = self._run(["config", "--get", f"remote.{remote}.url"], check=False)
+        return (res.stdout or "").strip() if res.ok else ""
+
+    def set_remote_url(self, git_url: str, remote: str = "origin") -> GitResult:
+        """``git remote set-url -- <remote> <url>``.
+
+        The ``--`` separator keeps a URL starting with ``-`` from being
+        read as an option, as in :meth:`clone`.
+        """
+        return self._run(["remote", "set-url", "--", remote, git_url])
+
     def pull_fast_forward(self) -> GitResult:
         """``git pull --ff-only`` — refuses to merge on divergence.
 
