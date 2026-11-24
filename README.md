@@ -75,7 +75,7 @@ the original source back, and project files are always saved with the original s
 - 🌐 **Web services and remote files** (WFS, OGC API Features, ArcGIS, WMS / WMTS / XYZ, WCS, vector tiles, remote COPC / EPT): filtered and explored with bounded, cancellable reads, never on the main thread, and with an explicit refusal rather than a silently partial result. A WMS, a WMTS or a tile basemap can itself be a layer to filter: captured over the area, then cut like a local raster.
 - 🤖 **AGENT** (experimental): a chat in the panel that drives FilterMate and QGIS from a sentence, Processing algorithms included, with Claude, Mistral,
   OpenAI or any compatible server, a local Ollama model (the settings help to install it and to download a model). Filters apply at once
-  and each step can be undone; exports and added or removed layers are confirmed. You choose how far it goes alone
+  and each step can be undone; exports and added or removed layers are confirmed in the thread, without stopping QGIS, and its history keeps the requests of every project. You choose how far it goes alone
   (four levels of autonomy, a rule per tool, layers it must never change). Recipes keep a request in the project and run
   it again without any model, or by themselves each time the edits of their source are saved. When a choice is yours
   it asks with choices to click; *Set up FilterMate* asks the main settings with a few choices, with no model at all
