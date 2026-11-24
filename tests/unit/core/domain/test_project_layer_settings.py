@@ -71,9 +71,12 @@ class TestProjectSettings:
         assert pls.project_settings(properties) == {
             "exploring": {"single_selection_expression": '"nom"', "is_linking": True}}
 
-    def test_a_value_none_is_no_value(self):
-        assert pls.project_settings({prop("filterMate_exploring_is_linking"): None,
-                                     prop("exploring_is_tracking"): None}) == {}
+    def test_a_value_none_is_an_empty_value(self):
+        """An empty text (or an empty list stored as such) comes back from a .qgz as None, the property there."""
+        assert pls.project_settings({prop("filterMate_filtering_buffer_value_expression"): None}) == {
+            "filtering": {"buffer_value_expression": None}}
+        assert pls.empty_value("") == "" and pls.empty_value(["a"]) == [] and pls.empty_value(None) == ""
+        assert pls.same_setting(None, "", load)
 
     def test_nothing(self):
         assert pls.project_settings({}) == {}
@@ -131,3 +134,51 @@ class TestTypedValue:
 
     def test_variable_name(self):
         assert pls.variable_name("filtering", "buffer_value") == "filterMate_filtering_buffer_value"
+
+
+class TestStorage:
+
+    @pytest.mark.parametrize("value, stored", [
+        ([], "[]"), (["routes_1"], '["routes_1"]'), (("a",), '["a"]'), ({"k": 1}, '{"k": 1}'),
+        (True, True), (0.0, 0.0), ('"nom"', '"nom"'),
+    ])
+    def test_a_list_is_stored_as_its_json_text(self, value, stored):
+        assert pls.storable(value) == stored
+
+    @pytest.mark.parametrize("one, other, same", [
+        ('["a"]', ["a"], True), ("[]", [], True), (True, True, True), (True, 1, False), ("True", True, True),
+        (0.0, 0, True), ('"nom"', '"nom"', True), ('"nom"', '"rank"', False), (None, "[]", False), (None, None, True),
+    ])
+    def test_the_same_setting_in_another_form(self, one, other, same):
+        assert pls.same_setting(one, other, load) is same
+
+
+class TestDropMissingLayers:
+
+    def test_only_the_layers_of_the_project_stay(self):
+        settings = {"exploring": {"is_linking": True},
+                    "filtering": {"layers_to_filter": '["a", "gone"]', "centroid_layers": ["gone"],
+                                  "geometric_predicates": '["Intersect"]'}}
+        assert pls.drop_missing_layers(settings, {"a"}, load) == {
+            "exploring": {"is_linking": True},
+            "filtering": {"layers_to_filter": '["a"]', "centroid_layers": "[]",
+                          "geometric_predicates": '["Intersect"]'}}
+
+    def test_nothing_missing_keeps_the_stored_form(self):
+        settings = {"filtering": {"layers_to_filter": ["a"]}}
+        assert pls.drop_missing_layers(settings, {"a"}, load) == settings
+
+
+class TestRepairedVariableNames:
+
+    def test_the_value_of_the_user_comes_back_to_its_name(self):
+        assert pls.repaired_variable_names(["filterMate_exploring_b", "my_var"], ["hello"], ()) == (
+            ["my_var"], ["hello"])
+
+    def test_lists_of_the_same_length_keep_their_pairs(self):
+        assert pls.repaired_variable_names(["exploring_x", "my_var"], ["1", "hello"], {"exploring_x"}) == (
+            ["my_var"], ["hello"])
+
+    def test_nothing_of_filtermate(self):
+        assert pls.repaired_variable_names(["my_var"], ["hello"], ()) is None
+        assert pls.repaired_variable_names(None, None, ()) is None

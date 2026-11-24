@@ -48,8 +48,9 @@ SET_BY_A = {"single_selection_expression": '"nom"', "custom_selection_expression
             "has_layers_to_filter": True, "layers_to_filter": ["routes"]}
 SET_BY_B = dict(SET_BY_A, single_selection_expression='"rank"', is_linking=True)
 LEGACY = dict(SET_BY_B, custom_selection_expression='"rank" < 5')
-EXPECTED = {"A1": SET_BY_A, "B1": SET_BY_B, "A2": SET_BY_B, "C": SET_BY_B, "L": LEGACY}  # panel and .qgz at the end
-OPENED = {"B1": SET_BY_A, "A2": SET_BY_B, "C": SET_BY_B, "L": LEGACY}  # in the panel once the project is open
+# in the panel and the .qgz at the end
+EXPECTED = {"A1": SET_BY_A, "B1": SET_BY_B, "A2": SET_BY_B, "C": SET_BY_B, "A3": SET_BY_B, "L": LEGACY}
+OPENED = {"B1": SET_BY_A, "A2": SET_BY_B, "C": SET_BY_B, "A3": SET_BY_B, "L": LEGACY}  # once the project is open
 
 
 def check(label, condition, detail=""):
@@ -120,8 +121,43 @@ def report_sqlite():
     print(f"INFO {ROLE} SQLite of this computer before the opening: {in_sqlite()}", flush=True)
 
 
+MARKS = []  # each time FilterMate marked the project modified for a setting of a layer (settings_written)
+
+
+def count_marks():
+    """From now on, count what layer_settings.settings_written marks."""
+    from filter_mate.infrastructure.utils import layer_settings
+    original = layer_settings.settings_written
+
+    def counted(*args, **kwargs):
+        marked = original(*args, **kwargs)
+        if marked:
+            MARKS.append(1)
+        return marked
+    layer_settings.settings_written = counted
+
+
+def no_marks(what):
+    def step():
+        check(f"nothing marked modified by the settings ({what})", not MARKS, f"{len(MARKS)} mark(s)")
+        print(f"INFO {ROLE} project modified after {what}: {QgsProject.instance().isDirty()}", flush=True)
+        MARKS.clear()
+    step.__name__ = f"no_marks_{what.replace(' ', '_')}"
+    return step
+
+
+def show(name):
+    def step():
+        dock().current_layer_changed(layer_named(name), manual_change=True)
+    step.__name__ = f"show_{name}"
+    return step
+
+
+def filter_parcelles():
+    app().manage_task('filter')
+
+
 def report_opened():
-    print(f"INFO {ROLE} dirty after the opening: {QgsProject.instance().isDirty()}", flush=True)
     panel = in_panel()
     print(f"SETTINGS {ROLE} opened panel={panel}", flush=True)
     check("the panel has the settings the project carries", panel == OPENED[ROLE], f"expected {OPENED[ROLE]}")
@@ -238,13 +274,41 @@ def set_options(change):
 
 
 def inject_legacy():
-    """What the panel of 5.1.2 left in a saved project: a change under the legacy name, beside the right one."""
+    """What 5.1.2 left in a saved project: a change under the legacy name beside the right one, no version entry, and
+    FilterMate's names among the variables of QGIS, before one of the user."""
     other = QgsProject()
     check("the project is read without QGIS's panel", other.read(PROJECT_PATH))
+    other.removeEntry("FilterMate", "layer_settings_version")
     layer = layer_named("parcelles", other)
     layer.setCustomProperty("variableValues/exploring_custom_selection_expression", '"rank" < 5')
     layer.setCustomProperty("variableValues/infos_layer_name", "parcelles")
+    layer.setCustomProperty("variableNames", ["filterMate_exploring_is_linking", "exploring_custom_selection_expression",
+                                              "my_var"])
+    layer.setCustomProperty("variableValues", ["hello"])
     check("the legacy names are written into the project", other.write(PROJECT_PATH))
+
+
+def the_variable_of_the_user_is_right():
+    from qgis.core import QgsExpressionContextUtils
+    scope = QgsExpressionContextUtils.layerScope(layer_named("parcelles"))
+    check("the variable of the user has its value", scope.variable("my_var") == "hello",
+          {name: scope.variable(name) for name in scope.variableNames() if not name.startswith("layer")
+           and not name.startswith("_")})
+
+
+def the_version_is_saved():
+    other = QgsProject()
+    other.read(PROJECT_PATH)
+    check("the .qgz says the version of its settings",
+          other.readNumEntry("FilterMate", "layer_settings_version", 0)[0] == 2)
+
+
+def an_empty_list_survives_the_qgz():
+    """routes has no layer to filter: its empty list is in the .qgz as such (not None, as a list stored as such)."""
+    other = QgsProject()
+    other.read(PROJECT_PATH)
+    stored_value = layer_named("routes", other).customProperty("variableValues/filterMate_filtering_layers_to_filter")
+    check("an empty list survives the .qgz", stored_value == "[]", repr(stored_value))
 
 
 def no_legacy_left():
@@ -267,16 +331,25 @@ def ctrl_s():
 
 A_SETTINGS = {"exploring": {"single_selection_expression": '"nom"', "custom_selection_expression": '"rank" > 10'},
               "filtering": {"has_layers_to_filter": True, "layers_to_filter": ["routes"]}}
+QUIET = [(show("routes"), 3), (show("parcelles"), 3), (filter_parcelles, 8),
+         (no_marks("a change of layer and a filter"), 0)]
 STEPS = {
     "A1": [(start_plugin, 8), (make_project, 10), (show_parcelles, 3), (click_linking(False), 2),
-           (set_options(A_SETTINGS), 2), (mirror, 0), (ctrl_s, 3), (report, 0)],
+           (set_options(A_SETTINGS), 2), (mirror, 0), (ctrl_s, 3), (report, 0), (an_empty_list_survives_the_qgz, 0)],
     "B1": [(start_plugin, 8), (report_sqlite, 0), (open_project, 12), (report_opened, 0), (mirror, 0),
            (show_parcelles, 3), (set_options({"exploring": {"single_selection_expression": '"rank"'}}), 2),
            (click_linking(True), 2), (mirror, 0), (ctrl_s, 3), (report, 0)],
-    "A2": [(start_plugin, 8), (report_sqlite, 0), (open_project, 12), (report_opened, 0), (mirror, 0), (report, 0)],
-    "C": [(start_plugin, 8), (open_project, 12), (report_opened, 0), (mirror, 0), (report, 0)],
-    "L": [(inject_legacy, 0), (start_plugin, 8), (open_project, 12), (report_opened, 0), (mirror, 0), (ctrl_s, 3),
-          (report, 0), (no_legacy_left, 0), (show_parcelles, 3),
+    "A2": [(start_plugin, 8), (count_marks, 0), (report_sqlite, 0), (open_project, 12), (report_opened, 0),
+           (no_marks("the opening"), 0), (mirror, 0), (report, 0)] + QUIET,
+    "C": [(start_plugin, 8), (count_marks, 0), (open_project, 12), (report_opened, 0), (no_marks("the opening"), 0),
+          (mirror, 0), (report, 0)] + QUIET,
+    # A opens it once 5.1.2 wrote an older value under the legacy name: its SQLite wins, into the project
+    "A3": [(inject_legacy, 0), (start_plugin, 8), (open_project, 12), (report_opened, 0), (mirror, 0),
+           (the_variable_of_the_user_is_right, 0), (ctrl_s, 3), (report, 0), (no_legacy_left, 0),
+           (the_version_is_saved, 0)],
+    # A new computer opens it: the value under the legacy name is the latest the user chose
+    "L": [(inject_legacy, 0), (start_plugin, 8), (open_project, 12), (report_opened, 0), (mirror, 0),
+          (the_variable_of_the_user_is_right, 0), (ctrl_s, 3), (report, 0), (no_legacy_left, 0), (show_parcelles, 3),
           (set_options({"exploring": {"custom_selection_expression": '"rank" < 6'}}), 2), (dirty_after_a_change, 0)],
 }[ROLE]
 

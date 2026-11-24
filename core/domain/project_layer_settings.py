@@ -10,17 +10,30 @@ Until 5.1.2 a change made in the panel was written as ``variableValues/<group>_<
 right name kept the value of the registration. That legacy value is the latest the user chose: it wins over the right
 name, and is moved under it once (:func:`legacy_moves`).
 
+The project is the truth only for values this version wrote (2026-11-24, review): the project entry
+``FilterMate/layer_settings_version`` (:data:`VERSION`) is written with them. A project without it (the first opening
+after the update, written by an earlier version) gives the settings the SQLite of this computer does not have; so does
+a project that cannot be saved (read-only, or no file yet).
+
+Lists and dicts are stored as their JSON text (:func:`storable`), as the panel writes them: an empty list stored as
+such comes back from a .qgz as None (QgsXmlUtils, measured in QGIS 3.44 and 4.3).
+
 Pure: the custom properties of a layer in (a dict), plain dicts out (infrastructure.utils.layer_settings reads and
 writes the layer).
 """
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple
+import json
+from typing import Any, Callable, Collection, Dict, List, Mapping, Optional, Tuple
 
+SCOPE = "FilterMate"
+VERSION_KEY = "layer_settings_version"
+VERSION = 2
 VALUES = "variableValues/"
 PREFIX = "filterMate_"
 GROUPS = ("exploring", "filtering")  # what travels with the project
 LEGACY_GROUPS = ("infos", "exploring", "filtering")  # what the panel wrote under a legacy name
+LAYER_ID_LISTS = ("layers_to_filter", "centroid_layers")  # filtering settings that list layers by id
 
 Settings = Dict[str, Dict[str, Any]]
 
@@ -54,13 +67,16 @@ def is_settings_property(key: Any) -> bool:
 def project_settings(properties: Mapping[str, Any]) -> Settings:
     """``{group: {key: value as stored}}``: the settings a layer carries, a legacy name over the right one.
 
+    A value None is kept: an empty text comes back from a .qgz as None (as an empty list stored as such), and the
+    property is there (:func:`empty_value` tells which).
+
     Args:
         properties: Custom properties of the layer (other keys are left out), as ``customProperty`` gives them.
     """
     settings: Settings = {}
     legacy: Settings = {}
     for key, value in properties.items():
-        if value is None or not is_settings_property(key):
+        if not is_settings_property(key):
             continue
         name = key[len(VALUES):]
         found = _setting(name, PREFIX, GROUPS)
@@ -93,7 +109,7 @@ def legacy_moves(properties: Mapping[str, Any]) -> Tuple[Dict[str, Any], List[st
             continue
         removals.append(name)
         if found[0] in GROUPS and value is not None:
-            writes[variable_name(*found)] = value
+            writes[variable_name(*found)] = storable(value)
     return writes, sorted(removals)
 
 
@@ -110,3 +126,80 @@ def typed_value(stored: Any, load: Callable[[str], Any]) -> Any:
         return load(stored)
     except (ValueError, TypeError):
         return stored
+
+
+def storable(value: Any) -> Any:
+    """A setting as it is stored: a list or a dict as its JSON text (it then survives a .qgz), the rest as it is."""
+    if isinstance(value, (list, tuple, dict)):
+        return json.dumps(list(value) if isinstance(value, tuple) else value)
+    return value
+
+
+def empty_value(current: Any) -> Any:
+    """What a setting read as None from a .qgz holds: an empty list where the panel holds a list, else an empty text."""
+    return [] if isinstance(current, (list, tuple)) else ""
+
+
+def same_setting(one: Any, other: Any, load: Callable[[str], Any]) -> bool:
+    """True when two stored forms hold the same setting (``'["a"]'`` and ``["a"]``; ``""`` and the None a .qgz gives
+    back for it; ``True`` and ``True``)."""
+    one, other = typed_value("" if one is None else one, load), typed_value("" if other is None else other, load)
+    if isinstance(one, bool) or isinstance(other, bool):
+        return type(one) is type(other) and one == other
+    if isinstance(one, (int, float)) and isinstance(other, (int, float)):
+        return one == other
+    return type(one) is type(other) and one == other
+
+
+def drop_missing_layers(settings: Settings, layer_ids: Collection[str], load: Callable[[str], Any]) -> Settings:
+    """The settings without the layers the project does not have, in the lists of layers of ``filtering``.
+
+    A layer duplicated, or added from a definition file (.qlr), brings the settings of its source: its layers to
+    filter may be layers of another project.
+    """
+    filtering = settings.get("filtering")
+    if not filtering:
+        return settings
+    kept = dict(filtering)
+    for key in LAYER_ID_LISTS:
+        if key not in kept:
+            continue
+        listed = typed_value(kept[key], load)
+        if not isinstance(listed, list):
+            continue
+        present = [item for item in listed if not isinstance(item, str) or item in layer_ids]
+        if len(present) != len(listed):
+            kept[key] = storable(present)
+    return dict(settings, filtering=kept)
+
+
+def repaired_variable_names(names: Any, values: Any, ours: Collection[str]) -> Optional[Tuple[List[Any], Any]]:
+    """``(variableNames, variableValues)`` without the names of FilterMate, None when there is nothing to change.
+
+    QGIS keeps the variables of a layer in two lists, paired by position. FilterMate added its names to the first one
+    (its values are properties of their own), so a variable the user added after them took the value of a name of
+    FilterMate. Repaired when the pairing can be told:
+
+    - both lists of the same length (QGIS wrote them together): each name of FilterMate goes with its value;
+    - as many values as names of the user (only the user's variables have values): the user's names, those values;
+    - otherwise only the names of FilterMate that have no value at all go.
+
+    Args:
+        names: ``customProperty('variableNames')``.
+        values: ``customProperty('variableValues')``.
+        ours: Names of FilterMate (the ``variableValues/<name>`` properties of the layer, and ``filterMate_*``).
+    """
+    if not isinstance(names, list):
+        return None
+    values_list = values if isinstance(values, list) else ([] if values in (None, "") else [values])
+    mine = [index for index, name in enumerate(names) if isinstance(name, str)
+            and (name.startswith(PREFIX) or name in ours)]
+    if not mine:
+        return None
+    theirs = [name for index, name in enumerate(names) if index not in mine]
+    if len(values_list) == len(names):
+        return theirs, [value for index, value in enumerate(values_list) if index not in mine]
+    if len(values_list) == len(theirs):
+        return theirs, values_list
+    kept = [name for index, name in enumerate(names) if index not in mine or index < len(values_list)]
+    return (kept, values) if len(kept) != len(names) else None

@@ -4,7 +4,7 @@
 export FM_WORK=${FM_WORK:-/work} QT_QPA_PLATFORM=xcb
 mkdir -p "$FM_WORK"
 status=0
-for role in A1 B1 A2 C L; do
+for role in A1 B1 A2 C A3 L; do
   computer=${role:0:1}
   FM_ROLE=$role timeout 300 dbus-run-session -- xvfb-run -a -s '-screen 0 1600x1000x24' \
     qgis --nologo --noversioncheck --lang en --profiles-path "$FM_WORK/profiles_$computer" \

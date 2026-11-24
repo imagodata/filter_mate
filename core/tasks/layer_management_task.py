@@ -86,7 +86,6 @@ except ImportError:
 # Import object safety utilities (migrated from modules.object_safety)
 from ...infrastructure.utils import (
     safe_emit,
-    safe_set_layer_variables,
     safe_set_layer_variables_batch,
     is_qgis_alive
 )
@@ -305,12 +304,16 @@ class LayersManagementEngineTask(QgsTask):
             pass
         # The settings the project carries for the layers to register, read here on the main thread (2026-11-24):
         # once saved, the project is the truth for them, the SQLite of this computer a working copy
+        # (a fresh reload starts from the defaults: then nothing is read). The project is the truth only for values
+        # this version wrote, in a project that can be saved (project_is_truth); else this computer's SQLite wins.
         self._project_settings = {}
-        if task_action == 'add_layers':
+        self._project_settings_win = False
+        task = task_parameters.get("task") or {}
+        if task_action == 'add_layers' and not task.get("reset_all_layers_variables_flag"):
             try:
-                from ...infrastructure.utils.layer_settings import capture_layer_settings
-                task = task_parameters.get("task") or {}
+                from ...infrastructure.utils.layer_settings import capture_layer_settings, project_is_truth
                 self._project_settings = capture_layer_settings(task.get("layers") or (), task.get("project_layers") or {})
+                self._project_settings_win = project_is_truth()
             except Exception as exc:  # catch-all safety net: the SQLite of this computer then gives them, as before
                 logger.warning(f"Settings of the project not read for the layers to register: {exc}")
 
@@ -550,11 +553,18 @@ class LayersManagementEngineTask(QgsTask):
                     property[2].replace("\'\'", "\'"),
                     'load'
                 )
+                if (type_returned is int and value_typped in (0, 1) and property[0] != "infos"
+                        and property[1].startswith(("is_", "has_", "use_"))):
+                    # 2026-11-24: a flag this task stored as a bool (SQLite keeps 1 for it): a bool again, before
+                    # it goes into the project and to the panel (Qt6 takes no int for setChecked)
+                    value_typped = bool(value_typped)
                 existing_layer_variables[property[0]][property[1]] = value_typped
 
-                # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                # THREAD SAFETY (v2.3.10): Queue for main thread execution. A list as its JSON text, as the panel
+                # writes it (2026-11-24: an empty list stored as such comes back from a .qgz as None)
                 variable_key = f"filterMate_{property[0]}_{property[1]}"
-                self._deferred_layer_variables.append((id_of(layer), variable_key, value_typped))
+                stored = json.dumps(value_typped) if isinstance(value_typped, (list, dict)) else value_typped
+                self._deferred_layer_variables.append((id_of(layer), variable_key, stored))
 
         # If property count has changed, update it
         actual_count = (
@@ -568,7 +578,7 @@ class LayersManagementEngineTask(QgsTask):
 
         return existing_layer_variables
 
-    def _apply_project_settings(self, layer, layer_variables):
+    def _apply_project_settings(self, layer, layer_variables, local=None):
         """Put the settings the project carries for ``layer`` over the ones of this computer (2026-11-24).
 
         Once saved, the project is the truth for the ``exploring`` and ``filtering`` settings of its layers: opened on
@@ -576,24 +586,35 @@ class LayersManagementEngineTask(QgsTask):
         when the task was created (``capture_layer_settings``). Each is queued again as stored, after the value of
         the SQLite or the default, so a variable already right is not written.
 
+        When the project is not the truth (written by an earlier version, read-only, no file: ``project_is_truth``),
+        a setting this computer's SQLite has stays, and is written into the project.
+
         Args:
             layer (QgsVectorLayer): Layer being registered
             layer_variables (dict): Its properties ('infos', 'exploring', 'filtering'), completed in place
+            local (dict): What the SQLite gave for the layer, None for a layer this computer never saw
         """
         settings = (getattr(self, '_project_settings', None) or {}).get(id_of(layer))
         if not settings:
             return
-        from ..domain.project_layer_settings import typed_value, variable_name
+        from ..domain.project_layer_settings import empty_value, storable, typed_value, variable_name
 
         def load(text):
             return self.return_typped_value(text, 'load')[0]
 
+        project_wins = getattr(self, '_project_settings_win', True)
+        applied = 0
         for group, values in settings.items():
             target = layer_variables.setdefault(group, {})
             for key, stored in values.items():
+                if not project_wins and local and key in local.get(group, {}):
+                    continue
+                if stored is None:  # an empty text, or an empty list stored as such, read from a .qgz
+                    stored = storable(empty_value(target.get(key)))
                 target[key] = typed_value(stored, load)
-                self._deferred_layer_variables.append((id_of(layer), variable_name(group, key), stored))
-        logger.debug(f"Layer {id_of(layer)}: settings of the project applied ({sum(map(len, settings.values()))})")
+                self._deferred_layer_variables.append((id_of(layer), variable_name(group, key), storable(stored)))
+                applied += 1
+        logger.debug(f"Layer {id_of(layer)}: {applied} setting(s) of the project applied")
 
     def _persist_verified_geometry_field(self, infos, layer):
         """Replace a stored geometry column that no longer matches the layer URI.
@@ -1168,7 +1189,8 @@ class LayersManagementEngineTask(QgsTask):
         layer_variables = self._load_existing_layer_properties(layer)
 
         if layer_variables:
-            self._apply_project_settings(layer, layer_variables)
+            self._apply_project_settings(layer, layer_variables,
+                                         local={group: dict(values) for group, values in layer_variables.items()})
             # CRITICAL: Validate PostgreSQL layers don't have virtual_id (legacy bug)
             if provider_key_of(layer) == 'postgres':
                 primary_key = layer_variables.get("infos", {}).get("primary_key_name")
@@ -2067,7 +2089,9 @@ class LayersManagementEngineTask(QgsTask):
                                     layer_id,
                                     key_group,
                                     key,
-                                    value_typped.replace("\'", "\'\'") if type_returned in (str, dict, list) else value_typped
+                                    value_typped.replace("\'", "\'\'") if type_returned in (str, dict, list)
+                                    else str(value_typped) if type_returned is bool  # 'True', not 1 (2026-11-24)
+                                    else value_typped
                                 )
                             )
                     conn.commit()
@@ -2188,6 +2212,13 @@ class LayersManagementEngineTask(QgsTask):
                 # and clear immediately so task can be fully cleaned up
                 operations_to_apply = list(self._deferred_layer_variables)
                 self._deferred_layer_variables.clear()
+                # 2026-11-24: a variable the panel writes from now on wins over the value queued here, and the project
+                # is modified when a setting it carries changes
+                try:
+                    from ...infrastructure.utils import layer_settings
+                    queued_at = layer_settings.write_epoch()
+                except ImportError:  # test doubles of the plugin packages
+                    layer_settings, queued_at = None, 0
 
                 # CRASH FIX (v2.4.9): Use QTimer.singleShot(0) to defer operations
                 # to the next event loop cycle. This provides a complete "round-trip"
@@ -2214,6 +2245,11 @@ class LayersManagementEngineTask(QgsTask):
 
                         def _flush_batch(target_layer_id):
                             variables = pending_batches.pop(target_layer_id, None)
+                            changed = False
+                            if variables and layer_settings is not None:
+                                variables = {name: value for name, value in variables.items()
+                                             if not layer_settings.written_since(target_layer_id, name, queued_at)}
+                                changed = layer_settings.settings_change(target_layer_id, variables)
                             if not variables:
                                 return
                             written, ok = safe_set_layer_variables_batch(target_layer_id, variables)
@@ -2221,6 +2257,8 @@ class LayersManagementEngineTask(QgsTask):
                                 logger.debug(f"Could not set {len(variables)} layer variables for {target_layer_id} (layer may be deleted)")
                             elif written:
                                 logger.debug(f"Set {written}/{len(variables)} layer variables for {target_layer_id} (rest unchanged)")
+                                if changed:
+                                    layer_settings.settings_written()
 
                         for layer_id, variable_key, value in operations_to_apply:
                             if variable_key is None:
@@ -2228,9 +2266,10 @@ class LayersManagementEngineTask(QgsTask):
                                     logger.debug("QGIS became unavailable during layer variable loop")
                                     break
                                 _flush_batch(layer_id)
-                                # Clear all layer variables using safe wrapper
-                                if not safe_set_layer_variables(layer_id, {}):
-                                    logger.debug(f"Could not clear layer variables for {layer_id} (layer may be deleted)")
+                                # Clear the variables of FilterMate (2026-11-24: safe_set_layer_variables(id, {})
+                                # did nothing, and a fresh reload found the settings of the project again)
+                                if layer_settings is not None:
+                                    layer_settings.clear_filtermate_variables(layer_id)
                                 continue
                             if layer_id not in pending_batches:
                                 pending_batches[layer_id] = {}
