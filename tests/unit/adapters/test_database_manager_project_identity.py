@@ -89,3 +89,11 @@ class TestProjectRowIdentityIsPreserved:
         m, db = _manager(tmp_path, "u1", "", "", "")
         assert m.save_project_variables({"CURRENT_PROJECT": {"k": 4}}) is True
         assert _row(db, "u1") == ("", "", '{"k": 4}')
+
+    def test_no_project_bound_writes_nothing(self, tmp_path):
+        """2026-11-24: between a project closed and the next one bound (FilterMateApp.unbind_project), the next
+        project's file name reached the row of no project ('None'), or of the project closed before."""
+        m, db = _manager(tmp_path, "u1", "", "", "C:/Users/Simon/next.qgz")
+        m._project_uuid = None
+        assert m.save_project_variables({"CURRENT_PROJECT": {"k": 5}}) is False
+        assert _row(db, "u1") == ("", "", "{}")

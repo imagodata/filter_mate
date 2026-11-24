@@ -410,3 +410,29 @@ def test_fork_passes_clean_expression_through(_fake_filter_mate_modules):
     # The captured expression must have reached from_dict (sanitizer kept it).
     assert captured["expression"] == "\"x\" = 1"
     fav_service.favorites_manager.add_favorite.assert_called_once()
+
+
+# ─── 2026-11-24: a fork while no project is bound ───────────────────────
+
+
+def test_fork_binds_the_project_on_screen_or_refuses():
+    """Project > Close then a fork: the service binds the project on screen first (_bound_for_writing); when none
+    can be bound, nothing is added and the dialog says the fork failed."""
+    from extensions.favorites_sharing.services.fork import FavoritesForkService
+    favorite = types.SimpleNamespace(id="new-id")
+    service = MagicMock()
+    service._bound_for_writing.return_value = False
+    assert FavoritesForkService()._persist(favorite, service) is None
+    service.favorites_manager.add_favorite.assert_not_called()
+    service._bound_for_writing.return_value = True
+    service.favorites_manager.add_favorite.return_value = True
+    assert FavoritesForkService()._persist(favorite, service) == "new-id"
+
+
+def test_fork_refused_by_the_manager_is_a_failure_not_an_error_dialog():
+    from core.domain.exceptions import FavoritesNotInitialized
+    from extensions.favorites_sharing.services.fork import FavoritesForkService
+    service = MagicMock()
+    service._bound_for_writing.return_value = True
+    service.favorites_manager.add_favorite.side_effect = FavoritesNotInitialized("no project bound")
+    assert FavoritesForkService()._persist(types.SimpleNamespace(id="x"), service) is None

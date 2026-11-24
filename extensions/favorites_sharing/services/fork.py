@@ -175,15 +175,24 @@ class FavoritesForkService:
         the rare case where the caller passed a raw FavoritesManager
         without the kwarg.
         """
+        # 2026-11-24: the project on screen first, when none is bound (Project > Close): FavoritesService binds it
+        bound_for_writing = getattr(favorites_service, '_bound_for_writing', None)
+        if callable(bound_for_writing) and not bound_for_writing():
+            logger.warning("Fork failed: no project bound to add the favorite to")
+            return None
         manager = getattr(favorites_service, 'favorites_manager', favorites_service)
         add_fn = getattr(manager, 'add_favorite', None)
         if not callable(add_fn):
             logger.error("Fork failed: manager has no add_favorite()")
             return None
         try:
-            success = add_fn(favorite, preserve_timestamps=True)
-        except TypeError:
-            success = add_fn(favorite)
+            try:
+                success = add_fn(favorite, preserve_timestamps=True)
+            except TypeError:
+                success = add_fn(favorite)
+        except Exception as e:  # FavoritesNotInitialized, FavoritePersistenceError: the dialog says the fork failed
+            logger.warning(f"Fork failed: the favorite was not saved ({e})")
+            return None
         return favorite.id if success else None
 
     def _emit_favorites_changed(self, favorites_service) -> None:

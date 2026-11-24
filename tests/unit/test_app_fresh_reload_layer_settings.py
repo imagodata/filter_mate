@@ -63,7 +63,7 @@ class TestFreshReloadReachesTheRegistration:
         source = ast.get_source_segment(_APP.read_text(encoding="utf-8"), next(
             node for cls in ast.parse(_APP.read_text(encoding="utf-8")).body if isinstance(cls, ast.ClassDef)
             for node in cls.body if isinstance(node, ast.FunctionDef) and node.name == "init_filterMate_db"))
-        assert source.index("self._fresh_reload_pending = bool(fresh_reload)") < source.index("initialize_database(")
+        assert source.index("self._fresh_reload_pending = True") < source.index("initialize_database(")
 
     def test_the_reset_is_used_once(self):
         """Layers removed then added later in the session keep their settings (review of 2026-11-24)."""
