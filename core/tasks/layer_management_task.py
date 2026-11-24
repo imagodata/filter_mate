@@ -303,6 +303,16 @@ class LayersManagementEngineTask(QgsTask):
             self._layer_facts = capture_layer_facts((task_parameters.get("task") or {}).get("layers") or ())
         except Exception:  # nosec B110 - the worker then reads the layers themselves, as before
             pass
+        # The settings the project carries for the layers to register, read here on the main thread (2026-11-24):
+        # once saved, the project is the truth for them, the SQLite of this computer a working copy
+        self._project_settings = {}
+        if task_action == 'add_layers':
+            try:
+                from ...infrastructure.utils.layer_settings import capture_layer_settings
+                task = task_parameters.get("task") or {}
+                self._project_settings = capture_layer_settings(task.get("layers") or (), task.get("project_layers") or {})
+            except Exception as exc:  # catch-all safety net: the SQLite of this computer then gives them, as before
+                logger.warning(f"Settings of the project not read for the layers to register: {exc}")
 
     def _ensure_db_directory_exists(self):
         """
@@ -557,6 +567,33 @@ class LayersManagementEngineTask(QgsTask):
             self._layer_properties_count = actual_count
 
         return existing_layer_variables
+
+    def _apply_project_settings(self, layer, layer_variables):
+        """Put the settings the project carries for ``layer`` over the ones of this computer (2026-11-24).
+
+        Once saved, the project is the truth for the ``exploring`` and ``filtering`` settings of its layers: opened on
+        another computer, or moved, the SQLite here has none of them, or older ones. They were read on the main thread
+        when the task was created (``capture_layer_settings``). Each is queued again as stored, after the value of
+        the SQLite or the default, so a variable already right is not written.
+
+        Args:
+            layer (QgsVectorLayer): Layer being registered
+            layer_variables (dict): Its properties ('infos', 'exploring', 'filtering'), completed in place
+        """
+        settings = (getattr(self, '_project_settings', None) or {}).get(id_of(layer))
+        if not settings:
+            return
+        from ..domain.project_layer_settings import typed_value, variable_name
+
+        def load(text):
+            return self.return_typped_value(text, 'load')[0]
+
+        for group, values in settings.items():
+            target = layer_variables.setdefault(group, {})
+            for key, stored in values.items():
+                target[key] = typed_value(stored, load)
+                self._deferred_layer_variables.append((id_of(layer), variable_name(group, key), stored))
+        logger.debug(f"Layer {id_of(layer)}: settings of the project applied ({sum(map(len, settings.values()))})")
 
     def _persist_verified_geometry_field(self, infos, layer):
         """Replace a stored geometry column that no longer matches the layer URI.
@@ -1131,6 +1168,7 @@ class LayersManagementEngineTask(QgsTask):
         layer_variables = self._load_existing_layer_properties(layer)
 
         if layer_variables:
+            self._apply_project_settings(layer, layer_variables)
             # CRITICAL: Validate PostgreSQL layers don't have virtual_id (legacy bug)
             if provider_key_of(layer) == 'postgres':
                 primary_key = layer_variables.get("infos", {}).get("primary_key_name")
@@ -1172,6 +1210,7 @@ class LayersManagementEngineTask(QgsTask):
 
             layer_variables = self._build_new_layer_properties(layer, result)
             self._set_layer_variables(layer, layer_variables)
+            self._apply_project_settings(layer, layer_variables)
 
         # Update properties count if first layer
         if self._properties_count() == 0:
