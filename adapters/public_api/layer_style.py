@@ -149,7 +149,7 @@ def _enum(owner, scope: str, name: str, legacy: str = ''):
 def _millimetres():
     from qgis.core import Qgis, QgsUnitTypes
     unit = getattr(getattr(Qgis, 'RenderUnit', None), 'Millimeters', None)
-    return unit if unit is not None else QgsUnitTypes.RenderMillimeters
+    return unit if unit is not None else QgsUnitTypes.RenderUnit.RenderMillimeters
 
 
 def _width(value: Any) -> Optional[float]:
