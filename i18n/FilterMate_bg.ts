@@ -12774,6 +12774,11 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>Инструменти за облак от точки</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Project</source>
+        <translation>Проект</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>Филтриране</translation>
@@ -12847,6 +12852,11 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <location filename="../ui/controllers/setup_wizard.py" line="61"/>
         <source>Buttons of the EXPLORING rail for point clouds</source>
         <translation>Бутони на лентата EXPLORING за облаци от точки</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="66"/>
+        <source>Opening a project whose layers carry other FilterMate settings than yours asks which ones to apply</source>
+        <translation>При отваряне на проект, чиито слоеве носят други настройки на FilterMate от вашите, се пита кои да се приложат</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>
@@ -13109,6 +13119,11 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>Редове</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Heights</source>
+        <translation>Височини</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Как панелът изброява своите секции</translation>
@@ -13117,6 +13132,11 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
         <source>How the rows of FILTERING and EXPORTING use the height</source>
         <translation>Как редовете на FILTERING и EXPORTING използват височината</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="60"/>
+        <source>How the panels of the sections taken out of the dock take their height</source>
+        <translation>Как панелите на секциите, изведени от панела FilterMate, получават височината си</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -13142,6 +13162,36 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
         <source>Packed at the top</source>
         <translation>Събрани горе</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="136"/>
+        <source>Fitted by FilterMate</source>
+        <translation>Нагласени от FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="137"/>
+        <source>Sized again when a section leaves, comes back or moves: FILTERING and EXPORTING get the height their rows need, the room left goes to the other sections.</source>
+        <translation>Преоразмеряват се, когато секция излиза, се връща или се премества: FILTERING и EXPORTING получават височината, която редовете им изискват, а останалото място отива за другите секции.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>As QGIS and you leave them</source>
+        <translation>Както ги оставят QGIS и вие</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>The heights QGIS and you set stay.</source>
+        <translation>Височините, зададени от QGIS и от вас, остават.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="141"/>
+        <source>Remember &quot;Do not ask again for this project&quot;</source>
+        <translation>Запомняне на „Не питай отново за този проект“</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="142"/>
+        <source>Unticked, the question is asked at each opening, and the answers remembered are forgotten.</source>
+        <translation>Без отметка въпросът се задава при всяко отваряне, а запомнените отговори се забравят.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
@@ -13222,6 +13272,11 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Мащабиране към запазеното</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="149"/>
+        <source>The map goes to the filtered features of the source layer, after a filter and when a favorite is applied.</source>
+        <translation>Картата се приближава към филтрираните обекти на изходния слой, след филтър и при прилагане на любим.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="92"/>

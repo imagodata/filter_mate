@@ -12774,6 +12774,11 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <translation>Інструменти хмари точок</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Project</source>
+        <translation>Проєкт</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>Фільтрація</translation>
@@ -12847,6 +12852,11 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <location filename="../ui/controllers/setup_wizard.py" line="61"/>
         <source>Buttons of the EXPLORING rail for point clouds</source>
         <translation>Кнопки смуги EXPLORING для хмар точок</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="66"/>
+        <source>Opening a project whose layers carry other FilterMate settings than yours asks which ones to apply</source>
+        <translation>Під час відкриття проєкту, шари якого несуть інші налаштування FilterMate, ніж ваші, запитується, які з них застосувати</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>
@@ -13109,6 +13119,11 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <translation>Рядки</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Heights</source>
+        <translation>Висоти</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Як панель перелічує свої розділи</translation>
@@ -13117,6 +13132,11 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
         <source>How the rows of FILTERING and EXPORTING use the height</source>
         <translation>Як рядки FILTERING і EXPORTING використовують висоту</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="60"/>
+        <source>How the panels of the sections taken out of the dock take their height</source>
+        <translation>Як панелі розділів, винесених з панелі FilterMate, отримують свою висоту</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -13142,6 +13162,36 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
         <source>Packed at the top</source>
         <translation>Зібрані вгорі</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="136"/>
+        <source>Fitted by FilterMate</source>
+        <translation>Підбирає FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="137"/>
+        <source>Sized again when a section leaves, comes back or moves: FILTERING and EXPORTING get the height their rows need, the room left goes to the other sections.</source>
+        <translation>Розмір підбирається заново, коли розділ іде, повертається або переміщується: FILTERING і EXPORTING отримують висоту, потрібну їхнім рядкам, а решта місця віддається іншим розділам.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>As QGIS and you leave them</source>
+        <translation>Як їх залишили QGIS і ви</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>The heights QGIS and you set stay.</source>
+        <translation>Висоти, задані QGIS і вами, зберігаються.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="141"/>
+        <source>Remember &quot;Do not ask again for this project&quot;</source>
+        <translation>Запам'ятовувати «Більше не питати для цього проєкту»</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="142"/>
+        <source>Unticked, the question is asked at each opening, and the answers remembered are forgotten.</source>
+        <translation>Якщо прапорець знято, питання ставиться при кожному відкритті, а запам'ятовані відповіді забуваються.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
@@ -13222,6 +13272,11 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Наблизити до залишеного</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="149"/>
+        <source>The map goes to the filtered features of the source layer, after a filter and when a favorite is applied.</source>
+        <translation>Карта наближається до відфільтрованих об'єктів вихідного шару після фільтра і під час застосування обраного.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="92"/>

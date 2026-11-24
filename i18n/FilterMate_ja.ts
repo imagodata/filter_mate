@@ -12774,6 +12774,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>ポイントクラウドツール</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Project</source>
+        <translation>プロジェクト</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>フィルタ</translation>
@@ -12847,6 +12852,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <location filename="../ui/controllers/setup_wizard.py" line="61"/>
         <source>Buttons of the EXPLORING rail for point clouds</source>
         <translation>ポイントクラウド用の EXPLORING レールのボタン</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="66"/>
+        <source>Opening a project whose layers carry other FilterMate settings than yours asks which ones to apply</source>
+        <translation>レイヤーに自分のものと異なる FilterMate の設定が保存されたプロジェクトを開くと、どれを適用するかを確認します</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>
@@ -13109,6 +13119,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>行</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Heights</source>
+        <translation>高さ</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>パネルがセクションを一覧にする方法</translation>
@@ -13117,6 +13132,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
         <source>How the rows of FILTERING and EXPORTING use the height</source>
         <translation>FILTERING と EXPORTING の行が高さをどう使うか</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="60"/>
+        <source>How the panels of the sections taken out of the dock take their height</source>
+        <translation>FilterMate パネルから出したセクションのパネルの高さの決まり方</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -13142,6 +13162,36 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
         <source>Packed at the top</source>
         <translation>上に詰める</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="136"/>
+        <source>Fitted by FilterMate</source>
+        <translation>FilterMate が調整</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="137"/>
+        <source>Sized again when a section leaves, comes back or moves: FILTERING and EXPORTING get the height their rows need, the room left goes to the other sections.</source>
+        <translation>セクションが出ていく、戻る、移動するたびにサイズを調整し直します。FILTERING と EXPORTING は行に必要な高さになり、残りの領域は他のセクションに回ります。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>As QGIS and you leave them</source>
+        <translation>QGIS とユーザーが設定したまま</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>The heights QGIS and you set stay.</source>
+        <translation>QGIS とユーザーが設定した高さがそのまま残ります。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="141"/>
+        <source>Remember &quot;Do not ask again for this project&quot;</source>
+        <translation>「このプロジェクトでは今後確認しない」を記憶する</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="142"/>
+        <source>Unticked, the question is asked at each opening, and the answers remembered are forgotten.</source>
+        <translation>チェックを外すと、開くたびに確認し、記憶済みの回答は破棄されます。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
@@ -13222,6 +13272,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>残ったものにズーム</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="149"/>
+        <source>The map goes to the filtered features of the source layer, after a filter and when a favorite is applied.</source>
+        <translation>フィルター後およびお気に入りの適用時に、ソースレイヤのフィルター済み地物にズームします。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="92"/>

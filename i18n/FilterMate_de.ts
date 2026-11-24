@@ -12774,6 +12774,11 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <translation>Punktwolken-Werkzeuge</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Project</source>
+        <translation>Projekt</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>Filtern</translation>
@@ -12847,6 +12852,11 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <location filename="../ui/controllers/setup_wizard.py" line="61"/>
         <source>Buttons of the EXPLORING rail for point clouds</source>
         <translation>Schaltflächen der EXPLORING-Leiste für Punktwolken</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="66"/>
+        <source>Opening a project whose layers carry other FilterMate settings than yours asks which ones to apply</source>
+        <translation>Beim Öffnen eines Projekts, dessen Layer andere FilterMate-Einstellungen tragen als Ihre, wird gefragt, welche angewendet werden</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>
@@ -13109,6 +13119,11 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <translation>Zeilen</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Heights</source>
+        <translation>Höhen</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Wie das Bedienfeld seine Bereiche auflistet</translation>
@@ -13117,6 +13132,11 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
         <source>How the rows of FILTERING and EXPORTING use the height</source>
         <translation>Wie die Zeilen von FILTERING und EXPORTING die Höhe nutzen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="60"/>
+        <source>How the panels of the sections taken out of the dock take their height</source>
+        <translation>Wie die Bedienfelder der aus dem FilterMate-Bedienfeld gelösten Bereiche ihre Höhe bekommen</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -13142,6 +13162,36 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
         <source>Packed at the top</source>
         <translation>Oben gruppiert</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="136"/>
+        <source>Fitted by FilterMate</source>
+        <translation>Von FilterMate angepasst</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="137"/>
+        <source>Sized again when a section leaves, comes back or moves: FILTERING and EXPORTING get the height their rows need, the room left goes to the other sections.</source>
+        <translation>Werden neu bemessen, wenn ein Bereich herausgelöst wird, zurückkehrt oder verschoben wird: FILTERING und EXPORTING erhalten die Höhe, die ihre Zeilen brauchen, der übrige Platz geht an die anderen Bereiche.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>As QGIS and you leave them</source>
+        <translation>So, wie QGIS und Sie sie lassen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>The heights QGIS and you set stay.</source>
+        <translation>Die von QGIS und von Ihnen eingestellten Höhen bleiben erhalten.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="141"/>
+        <source>Remember &quot;Do not ask again for this project&quot;</source>
+        <translation>„Für dieses Projekt nicht mehr fragen“ merken</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="142"/>
+        <source>Unticked, the question is asked at each opening, and the answers remembered are forgotten.</source>
+        <translation>Ohne Haken wird bei jedem Öffnen gefragt, und gemerkte Antworten werden vergessen.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
@@ -13222,6 +13272,11 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Auf das Behaltene zoomen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="149"/>
+        <source>The map goes to the filtered features of the source layer, after a filter and when a favorite is applied.</source>
+        <translation>Die Karte zoomt auf die gefilterten Objekte des Quell-Layers, nach einem Filter und wenn ein Favorit angewendet wird.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="92"/>

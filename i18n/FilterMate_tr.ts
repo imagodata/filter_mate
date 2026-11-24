@@ -12774,6 +12774,11 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <translation>Nokta bulutu araçları</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="44"/>
+        <source>Project</source>
+        <translation>Proje</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/setup_wizard.py" line="36"/>
         <source>Filtering</source>
         <translation>Filtreleme</translation>
@@ -12847,6 +12852,11 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <location filename="../ui/controllers/setup_wizard.py" line="61"/>
         <source>Buttons of the EXPLORING rail for point clouds</source>
         <translation>Nokta bulutları için EXPLORING şeridinin düğmeleri</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="66"/>
+        <source>Opening a project whose layers carry other FilterMate settings than yours asks which ones to apply</source>
+        <translation>Katmanları sizinkinden farklı FilterMate ayarları taşıyan bir proje açıldığında hangilerinin uygulanacağı sorulur</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="49"/>
@@ -13109,6 +13119,11 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <translation>Satırlar</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="41"/>
+        <source>Heights</source>
+        <translation>Yükseklikler</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="55"/>
         <source>How the panel lists its sections</source>
         <translation>Panel bölümlerini nasıl listeler</translation>
@@ -13117,6 +13132,11 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <location filename="../../ui/controllers/setup_wizard.py" line="57"/>
         <source>How the rows of FILTERING and EXPORTING use the height</source>
         <translation>FILTERING ve EXPORTING satırları yüksekliği nasıl kullanır</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="60"/>
+        <source>How the panels of the sections taken out of the dock take their height</source>
+        <translation>FilterMate panelinden çıkarılan bölümlerin panellerinin yüksekliklerini nasıl aldığı</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="107"/>
@@ -13142,6 +13162,36 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
         <source>Packed at the top</source>
         <translation>Üstte toplu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="136"/>
+        <source>Fitted by FilterMate</source>
+        <translation>FilterMate ayarlar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="137"/>
+        <source>Sized again when a section leaves, comes back or moves: FILTERING and EXPORTING get the height their rows need, the room left goes to the other sections.</source>
+        <translation>Bir bölüm ayrıldığında, geri döndüğünde veya taşındığında yeniden boyutlandırılır: FILTERING ve EXPORTING satırlarının ihtiyaç duyduğu yüksekliği alır, kalan yer diğer bölümlere gider.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>As QGIS and you leave them</source>
+        <translation>QGIS ve sizin bıraktığınız gibi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="139"/>
+        <source>The heights QGIS and you set stay.</source>
+        <translation>QGIS ve sizin belirlediğiniz yükseklikler kalır.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="141"/>
+        <source>Remember &quot;Do not ask again for this project&quot;</source>
+        <translation>“Bu proje için bir daha sorma” seçimini hatırla</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="142"/>
+        <source>Unticked, the question is asked at each opening, and the answers remembered are forgotten.</source>
+        <translation>İşaret kaldırılırsa soru her açılışta sorulur ve hatırlanan yanıtlar unutulur.</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/setup_wizard.py" line="116"/>
@@ -13222,6 +13272,11 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <location filename="../ui/controllers/setup_wizard.py" line="91"/>
         <source>Zoom to what is kept</source>
         <translation>Kalana yakınlaştır</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/setup_wizard.py" line="149"/>
+        <source>The map goes to the filtered features of the source layer, after a filter and when a favorite is applied.</source>
+        <translation>Harita, bir filtreden sonra ve bir favori uygulandığında kaynak katmanın süzülmüş detaylarına yakınlaşır.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/setup_wizard.py" line="92"/>

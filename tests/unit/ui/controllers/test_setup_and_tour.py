@@ -276,11 +276,13 @@ def test_the_layout_is_asked_with_the_buttons_ticked_as_it_is(world, chat):
     _answer(world, chat)  # features
     _answer(world, chat)  # look
     layout = chat.panel.questions[-1]
-    assert [question.header for question in layout] == ["Layout", "Headers", "Rows", "Buttons"]
+    assert [question.header for question in layout] == ["Layout", "Headers", "Rows", "Heights", "Buttons"]
     assert [option.label for option in layout[1].options if option.selected] == ["A rail of chips"]
     assert [option.label for option in layout[2].options if option.selected] == ["Spread over the height"]
     assert [(option.label, option.description) for option in layout[2].options] == [
         ("Spread over the height", "The rows share the whole height of the section."), ("Packed at the top", "")]
+    assert [(option.label, option.selected) for option in layout[3].options] == [
+        ("Fitted by FilterMate", True), ("As QGIS and you leave them", False)]
     assert [option.label for option in layout[0].options if option.selected] == ["All in the FilterMate panel"]
     assert len(layout[0].options) == 2  # nothing apart: "As they are now" is not a choice
 
@@ -523,6 +525,7 @@ def test_a_panel_without_sections_to_move_asks_the_buttons_alone(world, chat):
     chat.wizard.start()
     _answer(world, chat)
     _answer(world, chat)
+    # nor the heights of the panels of sections that cannot leave the dock
     assert [question.header for question in chat.panel.questions[-1]] == ["Headers", "Rows", "Buttons"]
 
 
@@ -589,7 +592,7 @@ def test_the_tools_are_asked_one_card_a_kind_with_the_buttons_shown_ticked(world
     for _step in range(3):  # features, look, layout: the tools come next
         _answer(world, chat)
     questions = chat.panel.questions[-1]
-    assert [question.header for question in questions] == ["Vector tools", "Raster tools", "Cloud tools"]
+    assert [question.header for question in questions] == ["Vector tools", "Raster tools", "Cloud tools", "Project"]
     assert all(question.multi_select for question in questions)
     vector = questions[0]
     assert [option.label for option in vector.options] == [
@@ -606,7 +609,7 @@ def test_a_kind_of_data_turned_off_is_not_asked(world, chat):
     _answer(world, chat, untick=("Rasters (images, DEMs)", "Point clouds (LiDAR)"))
     for _step in range(2):
         _answer(world, chat)
-    assert [question.header for question in chat.panel.questions[-1]] == ["Vector tools"]
+    assert [question.header for question in chat.panel.questions[-1]] == ["Vector tools", "Project"]
 
 
 def test_answering_the_tools_as_ticked_changes_nothing(world, chat):
@@ -648,3 +651,46 @@ def test_a_model_connected_is_not_offered_by_the_tour(world, chat):
     world.ready = True
     world.tour.WelcomeTour(chat).show()
     assert ("link", "Connect a model") not in chat.panel.said
+
+
+# --- the setup: what is new since 5.1.1 (heights of the panels, the answers kept for a project, the zoom) ------------
+
+
+def test_the_project_question_says_what_it_remembers_and_is_ticked_as_it_is(world, chat):
+    chat.wizard = world.setup.SetupWizard(chat)
+    chat.wizard.start()
+    for _step in range(3):
+        _answer(world, chat)
+    project = chat.panel.questions[-1][-1]
+    assert project.header == "Project" and project.multi_select
+    assert [(option.label, option.selected) for option in project.options] == [
+        ('Remember "Do not ask again for this project"', True)]
+    assert "each opening" in project.options[0].description
+
+
+def test_unticking_the_remembered_answers_is_a_change_and_the_link_puts_it_back(world, chat):
+    card = _run(world, chat, untick=('Remember "Do not ask again for this project"',))
+    assert len(card.lines) == 1 and world.wizard.REMEMBER_ANSWERS in card.lines[0]
+    card.apply_requested.emit()
+    assert world.applied == [{world.wizard.REMEMBER_ANSWERS: False}]
+    assert chat.wizard.revert() is True
+    assert world.applied[-1] == {world.wizard.REMEMBER_ANSWERS: True}
+
+
+def test_the_heights_of_the_panels_are_a_change_and_the_link_puts_it_back(world, chat):
+    card = _run(world, chat, pick=[("Heights", "As QGIS and you leave them")])
+    assert len(card.lines) == 1 and world.wizard.PANEL_SIZING in card.lines[0] and "manual" in card.lines[0]
+    card.apply_requested.emit()
+    assert world.applied == [{world.wizard.PANEL_SIZING: "manual"}]
+    assert chat.wizard.revert() is True
+    assert world.applied[-1] == {world.wizard.PANEL_SIZING: "auto"}
+
+
+def test_the_zoom_after_a_filter_names_the_layer_it_goes_to(world, chat):
+    chat.wizard = world.setup.SetupWizard(chat)
+    chat.wizard.start()
+    while chat.wizard.running and not any(question.header == "Filtering" for question in chat.panel.questions[-1]):
+        _answer(world, chat)
+    after = next(question for question in chat.panel.questions[-1] if question.header == "Filtering")
+    zoom = next(option for option in after.options if option.label == "Zoom to what is kept")
+    assert "source layer" in zoom.description and zoom.selected
