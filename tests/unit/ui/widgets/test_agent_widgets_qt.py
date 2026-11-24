@@ -469,7 +469,7 @@ class TestThread:
         plain = thread.add_confirm_card(texts, "Remove?", False)
         assert plain.always_button is None
         plain.finish("no")  # Stop: the controller closes it
-        assert plain.done and plain.result.text() == "Refused"
+        assert plain.done and plain.result.text() == "Refused" and "Remove?\n   Refused" in thread.toPlainText()
 
     def test_a_long_answer_is_drawn_less_often(self, thread):
         thread.add_text("x" * 12000)

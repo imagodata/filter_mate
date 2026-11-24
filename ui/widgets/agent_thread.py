@@ -263,6 +263,7 @@ class ConfirmCard(QFrame):
     "conversation" or "no"); the card then freezes on the answer. No is the answer of a card taken away."""
 
     answered = pyqtSignal(str)
+    finished = pyqtSignal(str)  # answered, or closed by the controller (Stop): what the transcription keeps
 
     def __init__(self, texts: dict, text: str, with_conversation: bool, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
@@ -334,6 +335,7 @@ class ConfirmCard(QFrame):
         self.result.setText(self._texts.get({"once": "allowed", "conversation": "allowed_always"}.get(answer, "refused"),
                                             ""))
         self.result.setVisible(True)
+        self.finished.emit(answer)
 
     def restyle(self, palette: dict, _dark: bool) -> None:
         _sheet(self, f"QFrame#frame_agent_confirm {{ background: {palette['fm_list']}; border: 1px solid"
@@ -963,7 +965,7 @@ class AgentThread(QScrollArea):
         transcription keeps the question with its answer."""
         card = ConfirmCard(texts, text, with_conversation, self._content)
         item = _Item(card, f"? {text}", "confirm", card.restyle)
-        card.answered.connect(lambda _answer: setattr(item, "plain", f"{item.plain}\n   {card.result.text()}"))
+        card.finished.connect(lambda _answer: setattr(item, "plain", f"{item.plain}\n   {card.result.text()}"))
         self._append(item)
         self.end_answer()
         return card
@@ -1044,7 +1046,11 @@ class AgentThread(QScrollArea):
         palette = self._palette_of()
         colors = {"accent": palette["fm_accent"], "code_bg": palette["fm_group"], "rule": palette["fm_group_border"]}
         try:
-            item.widget.setText(answer_html(item.plain.strip("\n"), getattr(item, "names", ()), colors, breakable))
+            try:
+                shown = answer_html(item.plain.strip("\n"), getattr(item, "names", ()), colors, breakable)
+            except RecursionError:  # never expected (MAX_DEPTH): the answer is shown whole, as plain text
+                shown = f'<p style="white-space: pre-wrap;">{html.escape(breakable(item.plain))}</p>'
+            item.widget.setText(shown)
         except RuntimeError:  # cleared meanwhile
             pass
 

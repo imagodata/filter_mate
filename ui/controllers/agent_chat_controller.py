@@ -3254,14 +3254,14 @@ class AgentChatController(QObject):
             self._asking_external = previous
 
     def _ask_yes_no(self, title: str, text: str) -> bool:
-        answer = self._ask_in_thread(text, with_conversation=False)
+        answer = self._ask_in_thread(title, text, with_conversation=False)
         return ask_plain(self._parent_widget, title, text) if answer is None else answer == ANSWER_ONCE
 
     def _ask_three(self, title: str, text: str) -> str:
-        answer = self._ask_in_thread(text, with_conversation=True)
+        answer = self._ask_in_thread(title, text, with_conversation=True)
         return ask_with_conversation(self._parent_widget, title, text) if answer is None else answer
 
-    def _ask_in_thread(self, text: str, with_conversation: bool) -> Optional[str]:
+    def _ask_in_thread(self, title: str, text: str, with_conversation: bool) -> Optional[str]:
         """A question of the permissions as a card of the thread, while the chat runs a request or a recipe: QGIS
         stays usable and the thread readable while it waits (a dialog of the system stopped both).
 
@@ -3275,7 +3275,9 @@ class AgentChatController(QObject):
             self._show_agent()  # a question nobody sees would hold the turn until Stop
             if not (self.panel.isVisible() and self._agent_shown()):
                 return None
-            texts = {"chip": _tr("Permission"), "heading": _tr("The agent asks before it acts"),
+            # The title of the question when it says more than the name of the agent (a recipe, a live recipe).
+            heading = title if title and title != _tr("FilterMate agent") else _tr("The agent asks before it acts")
+            texts = {"chip": _tr("Permission"), "heading": heading,
                      "yes": _tr("Yes"), "no": _tr("No"), # The words of the dialog it replaces, already translated in its context.
                      "always": QCoreApplication.translate("AgentPanel", "Yes for this conversation"),
                      "always_tip": QCoreApplication.translate(
@@ -3306,9 +3308,12 @@ class AgentChatController(QObject):
 
         card.answered.connect(answered)
         card.destroyed.connect(lambda *_args: refused())
-        forget = on_abort(stopped)
+        # A wait of the chat: its Stop ends it (abort_active(CHAT_WAITS)). The engine asks outside of the waits of its
+        # tools, which are the ones owned by the chat otherwise: unowned, Stop would not reach the card.
+        with owned_by(CHAT_WAITS):
+            forget = on_abort(stopped)
         try:
-            if not card.done:
+            if "answer" not in outcome and not card.done:
                 loop.exec()
         finally:
             forget()

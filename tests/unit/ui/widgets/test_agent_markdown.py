@@ -26,8 +26,8 @@ def test_everything_the_model_wrote_is_escaped():
 
 
 def test_marks_become_tags():
-    shown = md.answer_html("Les **routes** et *les* `rues`, __gras__ _italique_")
-    assert "<b>routes</b>" in shown and "<i>les</i>" in shown and "<b>gras</b>" in shown and "<i>italique</i>" in shown
+    shown = md.answer_html("Les **routes** et *les* `rues`, _italique_")
+    assert "<b>routes</b>" in shown and "<i>les</i>" in shown and "<i>italique</i>" in shown
     assert "font-family: monospace" in shown and ">rues<" in shown and "*" not in shown and "`" not in shown
 
 
@@ -92,3 +92,51 @@ def test_layer_of_link():
 def test_long_words_get_their_places_to_wrap_before_escaping():
     shown = md.answer_html("a<b", breakable=lambda text: text.replace("<", "<​"))
     assert "&lt;​b" in shown
+
+
+@pytest.mark.parametrize("line", ["*.shp **ok** " * 500, "*b* " * 900 + "**a " * 750, "*a " * 4000, "[" * 12000,
+                                  "**a** " * 2000, "_x_ " * 3000])
+def test_a_hostile_line_is_drawn_fast_and_whole(line):
+    import time
+    start = time.perf_counter()
+    shown = md.answer_html(line, ["communes"])  # never a RecursionError: marks inside marks stop at MAX_DEPTH
+    assert time.perf_counter() - start < 1.0 and shown
+
+
+def test_a_mark_inside_a_mark_inside_a_mark_is_plain():
+    shown = md.answer_html("**gras _italique *encore*_**")
+    assert "<b>" in shown and "<i>" in shown and shown.count("<i>") == 1
+
+
+def test_a_list_with_blank_lines_is_numbered_on():
+    shown = md.answer_html("1. **A**\n\n   texte\n\n2. **B**\n\n3. C")
+    assert shown.count("<ol") == 1 and shown.count("<li>") == 3 and "<br/>texte" in shown
+
+
+def test_a_numbered_item_alone_keeps_its_number():
+    assert 'start="3"' in md.answer_html("3. x")
+
+
+def test_a_wide_table_becomes_lines_that_wrap():
+    shown = md.answer_html("| a | b | c | d |\n|---|---|---|---|\n| 1 | 2 | 3 | 4 |")
+    assert "<table" not in shown and "<li><b>a</b> 1 · <b>b</b> 2 · <b>c</b> 3 · <b>d</b> 4</li>" in shown
+
+
+def test_a_cell_past_the_header_is_kept():
+    shown = md.answer_html("| a | b |\n|---|---|\n| 1 | 2 | 3 |")
+    assert ">3</td>" in shown
+
+
+def test_dunder_names_stay_as_they_are():
+    shown = md.answer_html("la méthode __init__ et le __main__")
+    assert "<b>" not in shown and "__init__" in shown
+
+
+def test_a_rule_is_drawn():
+    shown = md.answer_html("a\n\n---\n\nb")
+    assert "<hr/>" in shown and ">a<" in shown and ">b<" in shown
+
+
+def test_two_layers_of_one_name_link_the_first():
+    shown = md.answer_html("routes", ["routes", "routes"])
+    assert 'href="layer:0"' in shown

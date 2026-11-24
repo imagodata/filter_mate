@@ -1457,7 +1457,7 @@ def check_chat(provider, layer, authcfg, work):
     provider.reset((200, {}, text_turn('<img src="http://evil.example/x.png"> <a href="x">lien</a>')))
     ask("montre")
     check("what the model writes stays plain text", '<img src="http://evil.example/x.png">' in panel.thread.toPlainText())
-    drawn = [label.text() for label in panel.thread.findChildren(QLabel) if "evil.example" in label.text()]
+    drawn = [label.text() for label in panel.thread.findChildren(QLabel) if "lien" in label.text()]  # long words get ZWSP
     check("and is drawn escaped: no image, no link of the model", drawn and "<img" not in drawn[-1]
           and "&lt;img" in drawn[-1] and '<a href="x"' not in drawn[-1], drawn)
     check("the conversation goes on", len(provider.requests[0]["body"]["messages"]) >= 7, provider.requests[0]["body"]["messages"])

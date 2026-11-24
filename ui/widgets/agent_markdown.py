@@ -10,9 +10,10 @@ Pure Python, no Qt: the thread gives the colors and the names.
 """
 from __future__ import annotations
 
+import functools
 import html
 import re
-from typing import Callable, Dict, List, Optional, Sequence
+from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 LAYER_SCHEME = "layer:"
 MIN_NAME = 3  # a shorter layer name ("a", "zo") would link every word that happens to be it
@@ -26,10 +27,19 @@ _NUMBERED = re.compile(r"^\s*(\d{1,4})[.)]\s+(.*)$")
 _TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$")
 _TABLE_RULE = re.compile(r"^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$")
 _RULE = re.compile(r"^\s{0,3}([-*_])(\s*\1){2,}\s*$")
-_CODE = re.compile(r"`([^`\n]+)`")
-_STRONG = re.compile(r"(\*\*|__)(?=\S)(.+?)(?<=\S)\1")
-_EMPHASIS = re.compile(r"(?<![\w*])\*(?=[^\s*])(.+?)(?<=[^\s*])\*(?![\w*])|(?<![\w_])_(?=[^\s_])(.+?)(?<=[^\s_])_(?![\w_])")
-_LINK = re.compile(r"\[([^\]\n]+)\]\(([^)\s]+)\)")
+_CODE = re.compile(r"`([^`\n]{1,500})`")
+# One pass over a line, the marks bounded in length: an opener without its closer is given up after MARK_SPAN
+# characters, so a long line costs its length times MARK_SPAN at most (unbounded, ``"*.shp **ok** " * 500`` took
+# seconds of the main thread, 2026-11-24 review).
+MARK_SPAN = 300
+_MARKS = re.compile(
+    r"\[(?P<text>[^\]\n]{1,%(n)d})\]\((?P<url>[^)\s]{1,%(n)d})\)"
+    # Bold is ** only: __init__ or __main__ is a name a model writes, not bold.
+    r"|(?<![\w*])\*\*(?=\S)(?P<strong>.{1,%(n)d}?)(?<=\S)\*\*(?![\w*])"
+    r"|(?<![\w*])\*(?=[^\s*])(?P<em1>.{1,%(n)d}?)(?<=[^\s*])\*(?![\w*])"
+    r"|(?<![\w_])_(?=[^\s_])(?P<em2>.{1,%(n)d}?)(?<=[^\s_])_(?![\w_])" % {"n": MARK_SPAN})
+MAX_DEPTH = 2  # a mark inside a mark is drawn; deeper, the text is plain (no recursion on a hostile line)
+MAX_COLUMNS = 3  # a wider table cannot wrap in the dock: its rows are written as lines "header: value"
 
 Breakable = Callable[[str], str]
 
@@ -38,16 +48,23 @@ def _no_break(text: str) -> str:
     return text
 
 
+@functools.lru_cache(maxsize=8)
+def _names_pattern(names: Tuple[str, ...]) -> Optional["re.Pattern"]:
+    """The whole names, longest first, as one pattern: built once per list of layers, not at each drawing."""
+    return re.compile("|".join(rf"(?<!\w){re.escape(name)}(?!\w)" for name in names)) if names else None
+
+
 class _Inline:
     """The marks inside a line: code, bold, italics, links, and the names of the layers."""
 
     def __init__(self, names: Sequence[str], colors: Dict[str, str], breakable: Breakable) -> None:
-        self._rank = {name: rank for rank, name in enumerate(names) if len(name.strip()) >= MIN_NAME}
-        self._names = sorted(self._rank, key=len, reverse=True)
+        self._rank = {}
+        for rank, name in enumerate(names):  # two layers of one name: the first, as the click picks it
+            if len(name.strip()) >= MIN_NAME:
+                self._rank.setdefault(name, rank)
         self._colors = colors
         self._breakable = breakable
-        self._pattern = (re.compile("|".join(rf"(?<!\w){re.escape(name)}(?!\w)" for name in self._names))
-                         if self._names else None)
+        self._pattern = _names_pattern(tuple(sorted(self._rank, key=len, reverse=True)))
 
     def layer_link(self, name: str, shown: str) -> str:
         return (f'<a href="{LAYER_SCHEME}{self._rank[name]}" style="color: {self._colors.get("accent", "")};'
@@ -80,26 +97,24 @@ class _Inline:
         out.append(self._marks(text[start:]))
         return "".join(out)
 
-    def _marks(self, text: str) -> str:
+    def _marks(self, text: str, depth: int = 0) -> str:
         if not text:
             return ""
-        found = []
-        for pattern in (_LINK, _STRONG, _EMPHASIS):
-            match = pattern.search(text)
-            if match is not None:
-                found.append((match.start(), pattern, match))
-        if not found:
+        if depth >= MAX_DEPTH:
             return self._text(text)
-        _start, pattern, match = min(found, key=lambda entry: entry[0])
-        before, after = text[:match.start()], text[match.end():]
-        if pattern is _LINK:
-            # The text and its address, side by side, both as text: nothing a model writes is clicked through.
-            inner = f"{self._marks(match.group(1))} ({self._text(match.group(2))})"
-        elif pattern is _STRONG:
-            inner = f"<b>{self._marks(match.group(2))}</b>"
-        else:
-            inner = f"<i>{self._marks(match.group(1) or match.group(2))}</i>"
-        return self._text(before) + inner + self._marks(after)
+        out, start = [], 0
+        for match in _MARKS.finditer(text):
+            out.append(self._text(text[start:match.start()]))
+            if match.group("text") is not None:
+                # The text and its address, side by side, both as text: nothing a model writes is clicked through.
+                out.append(f"{self._marks(match.group('text'), depth + 1)} ({self._text(match.group('url'))})")
+            elif match.group("strong") is not None:
+                out.append(f"<b>{self._marks(match.group('strong'), depth + 1)}</b>")
+            else:
+                out.append(f"<i>{self._marks(match.group('em1') or match.group('em2'), depth + 1)}</i>")
+            start = match.end()
+        out.append(self._text(text[start:]))
+        return "".join(out)
 
 
 def _cells(row: str) -> List[str]:
@@ -128,6 +143,7 @@ def answer_html(text: str, names: Sequence[str] = (), colors: Optional[Dict[str,
     paragraph: List[str] = []
     items: List[str] = []
     list_tag = ""
+    list_start = 1
 
     def flush_paragraph() -> None:
         if paragraph:
@@ -135,12 +151,13 @@ def answer_html(text: str, names: Sequence[str] = (), colors: Optional[Dict[str,
             paragraph.clear()
 
     def flush_list() -> None:
-        nonlocal list_tag
+        nonlocal list_tag, list_start
         if items:
-            blocks.append(f'<{list_tag} style="margin-top: 0px; margin-bottom: 6px; -qt-list-indent: 1;">'
+            start = f' start="{list_start}"' if list_tag == "ol" and list_start != 1 else ""
+            blocks.append(f'<{list_tag}{start} style="margin-top: 0px; margin-bottom: 6px; -qt-list-indent: 1;">'
                           + "".join(f"<li>{item}</li>" for item in items) + f"</{list_tag}>")
             items.clear()
-        list_tag = ""
+        list_tag, list_start = "", 1
 
     def flush() -> None:
         flush_paragraph()
@@ -169,12 +186,21 @@ def answer_html(text: str, names: Sequence[str] = (), colors: Optional[Dict[str,
             while index < len(lines) and _TABLE_ROW.match(lines[index]):
                 rows.append(_cells(lines[index]))
                 index += 1
+            width = max([len(header)] + [len(row) for row in rows])
+            header = header + [""] * (width - len(header))  # a cell past the header is kept, not dropped
+            rows = [row + [""] * (width - len(row)) for row in rows]
+            if width > MAX_COLUMNS:  # too wide for the dock: one line per row, "header: value", that wraps
+                for row in rows:
+                    items.append(" · ".join(f"<b>{inline.render(name)}</b> {inline.render(value)}" if name
+                                            else inline.render(value) for name, value in zip(header, row) if value))
+                list_tag, list_start = "ul", 1
+                flush_list()
+                continue
             rule = colors.get("rule", "")
             cell = f'style="padding: 2px 8px 2px 0px; border-bottom: 1px solid {rule};"'
             head = "".join(f"<th align=\"left\" {cell}>{inline.render(value)}</th>" for value in header)
-            body = "".join("<tr>" + "".join(f"<td {cell}>{inline.render(value)}</td>"
-                                            for value in (row + [""] * (len(header) - len(row)))[:len(header)])
-                           + "</tr>" for row in rows)
+            body = "".join("<tr>" + "".join(f"<td {cell}>{inline.render(value)}</td>" for value in row) + "</tr>"
+                           for row in rows)
             blocks.append(f'<table cellspacing="0" cellpadding="0" style="border-collapse: collapse; margin-bottom: 6px;">'
                           f"<tr>{head}</tr>{body}</table>")
             continue
@@ -182,9 +208,15 @@ def answer_html(text: str, names: Sequence[str] = (), colors: Optional[Dict[str,
         bullet = _BULLET.match(line) if not _RULE.match(line) else None
         numbered = _NUMBERED.match(line)
         if not line.strip():
-            flush()
+            flush_paragraph()
+            following = next((later for later in lines[index + 1:] if later.strip()), "")
+            # A list written with blank lines between its items stays one list (numbered on).
+            if not (items and (_BULLET.match(following) or _NUMBERED.match(following)
+                               or following.startswith((" ", "\t")))):
+                flush_list()
         elif _RULE.match(line):
             flush()
+            blocks.append("<hr/>")
         elif heading:
             flush()
             blocks.append(f"{_P}<b>{inline.render(heading.group(1))}</b></p>")
@@ -193,6 +225,8 @@ def answer_html(text: str, names: Sequence[str] = (), colors: Optional[Dict[str,
             tag = "ul" if bullet else "ol"
             if list_tag and list_tag != tag:
                 flush_list()
+            if not items and numbered:
+                list_start = int(numbered.group(1))  # "3. x" alone is numbered 3
             list_tag = tag
             items.append(inline.render(bullet.group(1) if bullet else numbered.group(2)))
         elif items and line.startswith((" ", "\t")):
