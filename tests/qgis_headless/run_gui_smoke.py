@@ -1782,9 +1782,13 @@ def s_custom_matching_nothing_single():
 
 
 def s_custom_matching_nothing_check():
-    check('a custom expression matching nothing does not empty the single selection list once left',
-          not single_picker().filterExpression() and picker_rows() >= 4,
-          f"filter={single_picker().filterExpression()!r} rows={picker_rows()}")
+    # 6 November: the single list was left unfiltered outside the custom group. Asked otherwise on 24 November: with
+    # linking on (the default), a custom expression entered filters both lists whatever the group (FM_ONLY=link).
+    linking = dock().pushButton_checkable_exploring_linking_widgets.isChecked()
+    expected = '"label" = \'nothing matches\'' if linking else ''
+    check('a custom expression matching nothing filters the single selection list with linking on, once left too',
+          single_picker().filterExpression() == expected,
+          f"linking={linking} filter={single_picker().filterExpression()!r} rows={picker_rows()}")
     dock().mFieldExpressionWidget_exploring_custom_selection.setField('label')
 
 
@@ -5117,6 +5121,90 @@ MOUSE_STEPS = [s_section_setup, s_mouse_setup, s_mouse_reorder, s_mouse_reorder_
                s_mouse_tab_check, s_mouse_dock_tab_check]
 
 
+# --- linking with a custom expression (FM_ONLY=link) ------------------------------------------------------------------
+# 2026-11-24, asked: with linking on, a custom expression entered filters both lists, the multiple and the single one,
+# whatever group is in use; features checked in the multiple list are all the single one shows (within that expression).
+
+EAST = "\"name\" LIKE 'east%'"
+
+
+def multiple_widget():
+    return dock().widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+
+
+def multiple_filter():
+    widget, layer_id = multiple_widget(), layer('zones').id()
+    lists = getattr(widget, 'list_widgets', {})
+    return lists[layer_id].getFilterExpression() if layer_id in lists else None
+
+
+def custom_widget():
+    return dock().widgets['EXPLORING']['CUSTOM_SELECTION_EXPRESSION']['WIDGET']
+
+
+def zones_matching(expression):
+    """The zones a list filtered by ``expression`` shows; every zone when it is not filtered."""
+    from qgis.core import QgsFeatureRequest
+    request = QgsFeatureRequest()
+    if expression:
+        request.setFilterExpression(expression)
+    return sorted(feature['name'] for feature in layer('zones').getFeatures(request))
+
+
+def s_link_begin():
+    STATE['link_was'] = dock().pushButton_checkable_exploring_linking_widgets.isChecked()
+    dock().pushButton_checkable_exploring_linking_widgets.setChecked(True)
+    return pick_vector('zones')
+
+
+def s_link_custom():
+    multiple_widget().setCheckedFeatureIds([])
+    custom_widget().setExpression(EAST)
+    return waits(1.5, tasks_idle)
+
+
+def s_link_custom_check():
+    group = dock().current_exploring_groupbox
+    stored = app().PROJECT_LAYERS.get(layer('zones').id(), {}).get('exploring', {})
+    group = f"{group}, stored custom={stored.get('custom_selection_expression')!r}, linking={stored.get('is_linking')}"
+    check('linking: a custom expression filters the multiple selection list',
+          zones_matching(multiple_filter()) == ['east_a', 'east_b'], f"{multiple_filter()!r} in {group}")
+    check('linking: a custom expression filters the single selection picker, whatever the group',
+          zones_matching(single_picker().filterExpression()) == ['east_a', 'east_b'],
+          f"{single_picker().filterExpression()!r} in {group}")
+    east_a = [feature.id() for feature in layer('zones').getFeatures() if feature['name'] == 'east_a']
+    multiple_widget().setCheckedFeatureIds(east_a)
+    return waits(1.0, tasks_idle)
+
+
+def s_link_checked_check():
+    check('linking: the single picker shows only the features checked in the multiple list',
+          zones_matching(single_picker().filterExpression()) == ['east_a'], repr(single_picker().filterExpression()))
+    multiple_widget().setCheckedFeatureIds([])
+    return waits(1.0, tasks_idle)
+
+
+def s_link_unchecked_check():
+    check('linking: nothing checked, the single picker follows the custom expression again',
+          zones_matching(single_picker().filterExpression()) == ['east_a', 'east_b'],
+          repr(single_picker().filterExpression()))
+    custom_widget().setExpression('"name"')  # a field, as by default: no custom expression
+    return waits(1.5, tasks_idle)
+
+
+def s_link_cleared_check():
+    everything = zones_matching(None)
+    check('linking: the custom expression removed, the multiple list shows every feature',
+          zones_matching(multiple_filter()) == everything, repr(multiple_filter()))
+    check('linking: the custom expression removed, the single picker shows every feature',
+          zones_matching(single_picker().filterExpression()) == everything, repr(single_picker().filterExpression()))
+    dock().pushButton_checkable_exploring_linking_widgets.setChecked(STATE.get('link_was', True))
+
+
+LINK_STEPS = [s_link_begin, s_link_custom, s_link_custom_check, s_link_checked_check, s_link_unchecked_check,
+              s_link_cleared_check]
+
+
 # --- the freedom to switch: any layout from any other one, in any order (FM_ONLY=switch) ----------------------------
 #
 # A walk at random (FM_SEED, the same walk for the same seed) through what changes the layout of the dock: where each
@@ -8049,6 +8137,8 @@ if os.environ.get('FM_ONLY') == 'layout':  # everything about the sections, thei
              *EXPLO_STEPS, *SWITCH_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'exploring':  # EXPLORING in its own panel, with its chooser of the current layer
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *EXPLO_STEPS, s_finish]
+if os.environ.get('FM_ONLY') == 'link':  # linking with a custom expression and checked features
+    STEPS = [s_setup, s_open_plugin, s_dock_ready, *LINK_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'switch':  # a walk at random through the layouts (FM_SEED, FM_SWITCHES)
     STEPS = [s_setup, s_open_plugin, s_dock_ready, *SWITCH_STEPS, s_finish]
 if os.environ.get('FM_ONLY') == 'mouse':  # the drags of the sections with a real pointer (XTest)
