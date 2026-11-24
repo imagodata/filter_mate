@@ -1239,6 +1239,11 @@ Jego narzędzia zobaczą z projektu tylko to, co wyśle im agent, a ich odpowied
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer? The turns of the open project stay.</source>
+        <translation>Zapomnieć zapytania wszystkich projektów zachowane na tym komputerze? Tury otwartego projektu zostają.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
         <source>The layer {} is no longer in the project.</source>
         <translation>Warstwy {} nie ma już w projekcie.</translation>
     </message>
@@ -2874,6 +2879,51 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>ten projekt · tury: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>all projects · {} request(s)</source>
+        <translation>wszystkie projekty · zapytania: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>project never saved</source>
+        <translation>projekt nigdy niezapisany</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>this project</source>
+        <translation>ten projekt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>failed</source>
+        <translation>nieudane</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>stopped</source>
+        <translation>zatrzymane</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer; the turns of the open project stay</source>
+        <translation>Zapomnij zapytania wszystkich projektów zachowane na tym komputerze; tury otwartego projektu zostają</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Empty the list</source>
+        <translation>Wyczyść listę</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>All projects</source>
+        <translation>Wszystkie projekty</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>This project</source>
+        <translation>Ten projekt</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="159"/>

@@ -18,7 +18,7 @@ from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, delete_own_key, load_settings, provider_config, read_key, save_settings, store_key,
     target_of, current_provider, read_providers, write_providers, read_mode, write_mode,
 )
-from ...adapters.agent import transcript_store
+from ...adapters.agent import request_log_store, transcript_store
 from ...adapters.agent.memory_store import change_memory, memory_path, project_sources, read_memory
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
@@ -275,6 +275,7 @@ class AgentChatController(QObject):
         self.panel.redo_requested.connect(self._on_redo)
         self.panel.history_requested.connect(self._show_history)
         self.panel.resend_requested.connect(self._on_resend)
+        self.panel.history_clear_requested.connect(self._clear_request_log)
         self.panel.step_undo_requested.connect(self._on_undo_to_step)
         self.panel.compare_requested.connect(self._on_compare)
         self.panel.card_compare_requested.connect(self._on_card_compare)
@@ -557,10 +558,42 @@ class AgentChatController(QObject):
         self._refresh_recipes()
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
         self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
+        self._refresh_global_history()
         history = self._history_panel()
         self.panel.set_can_compare(history is not None and history.can_compare)
         self._show_card_compare()
         self._show_undo_state()
+
+    def _log_request(self, outcome: ChatOutcome) -> None:
+        """The request that just ended, in the log of every project (the tab "All projects" of the history)."""
+        try:
+            changed = self._checkpoint.recorded is not None
+            layers = []
+            if changed:
+                applied = [turn for turn in TurnCheckpoint.turns() if turn.get("applied")]
+                layers = list(applied[-1].get("layers") or ()) if applied else []
+            if outcome.status == OUTCOME_FAILED:
+                ended = "failed"
+            elif outcome.status in (OUTCOME_CANCELLED, OUTCOME_STOPPED) and not changed:
+                ended = "stopped"
+            else:
+                ended = "changed" if changed else "unchanged"
+            request_log_store.record(self._last_request, layers, ended)
+        except Exception:  # the log is a convenience: a request is never failed for it
+            logger.debug("Agent: the request could not be logged", exc_info=True)
+
+    def _refresh_global_history(self) -> None:
+        try:
+            self.panel.set_global_history(request_log_store.load(), QgsProject.instance().fileName() or "")
+        except Exception:
+            logger.debug("Agent: the log of the requests could not be read", exc_info=True)
+
+    def _clear_request_log(self) -> None:
+        if not self._ask_user(_tr("FilterMate agent"), _tr("Forget the requests of every project kept on this "
+                                                           "computer? The turns of the open project stay.")):
+            return
+        request_log_store.clear()
+        self._refresh_global_history()
 
     def _history_panel(self):
         """The history of the project of the dock (``HistoryController``), None when the dock has none: read when
@@ -3723,6 +3756,7 @@ class AgentChatController(QObject):
         self.panel.end_answer()
         self._flush_journal()
         self._save_transcript()
+        self._log_request(outcome)
         self._refresh_history()
         # What a request that broke off did is in the conversation, with a note saying it stopped there
         # (AgentSession.interrupt_request): the project as it is now is no news to the model. A request taken out

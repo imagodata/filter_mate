@@ -1239,6 +1239,11 @@ Uning vositalari loyihangizdan faqat agent o'zlariga yuborganini ko'radi, ularni
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer? The turns of the open project stay.</source>
+        <translation>Ushbu kompyuterda saqlangan barcha loyihalarning so'rovlari unutilsinmi? Ochiq loyihaning navbatlari qoladi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
         <source>The layer {} is no longer in the project.</source>
         <translation>{} qatlami endi loyihada yo'q.</translation>
     </message>
@@ -2874,6 +2879,51 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>bu loyiha · {} navbat</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>all projects · {} request(s)</source>
+        <translation>barcha loyihalar · {} so'rov</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>project never saved</source>
+        <translation>loyiha hech qachon saqlanmagan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>this project</source>
+        <translation>bu loyiha</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>failed</source>
+        <translation>muvaffaqiyatsiz</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>stopped</source>
+        <translation>to'xtatildi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer; the turns of the open project stay</source>
+        <translation>Ushbu kompyuterda saqlangan barcha loyihalarning so'rovlarini unutish; ochiq loyihaning navbatlari qoladi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Empty the list</source>
+        <translation>Ro'yxatni tozalash</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>All projects</source>
+        <translation>Barcha loyihalar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>This project</source>
+        <translation>Bu loyiha</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="159"/>

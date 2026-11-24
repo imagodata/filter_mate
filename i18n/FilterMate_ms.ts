@@ -1239,6 +1239,11 @@ Alatnya hanya akan melihat daripada projek anda apa yang dihantar ejen kepadanya
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer? The turns of the open project stay.</source>
+        <translation>Lupakan permintaan semua projek yang disimpan pada komputer ini? Giliran projek yang dibuka kekal.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
         <source>The layer {} is no longer in the project.</source>
         <translation>Lapisan {} tiada lagi dalam projek.</translation>
     </message>
@@ -2874,6 +2879,51 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>projek ini · {} giliran</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>all projects · {} request(s)</source>
+        <translation>semua projek · {} permintaan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>project never saved</source>
+        <translation>projek tidak pernah disimpan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>this project</source>
+        <translation>projek ini</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>failed</source>
+        <translation>gagal</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>stopped</source>
+        <translation>dihentikan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer; the turns of the open project stay</source>
+        <translation>Lupakan permintaan semua projek yang disimpan pada komputer ini; giliran projek yang dibuka kekal</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Empty the list</source>
+        <translation>Kosongkan senarai</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>All projects</source>
+        <translation>Semua projek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>This project</source>
+        <translation>Projek ini</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="159"/>

@@ -20,7 +20,7 @@ from qgis.PyQt.QtWidgets import (
     QLineEdit, QMenu,
     QButtonGroup, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QRadioButton,
     QScrollArea, QSizePolicy, QSpinBox, QStackedWidget,
-    QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
+    QTabBar, QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
 from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
@@ -67,6 +67,8 @@ _WELCOME_PAGE, _THREAD_PAGE, _HISTORY_PAGE = 0, 1, 2
 _TURN_ROLE = Qt.ItemDataRole.UserRole
 _STEP_ROLE = Qt.ItemDataRole.UserRole + 1
 _RANK_ROLE = Qt.ItemDataRole.UserRole + 2  # the rank of the turn applied in the history of the agent (a step: its turn)
+# The tabs of the history (2026-11-24): the turns of the open project, the requests of every project.
+HISTORY_PROJECT, HISTORY_ALL = 0, 1
 
 PRESET_LABELS = {"anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
 # Only what can be named without going stale: the user can type any model.
@@ -426,6 +428,7 @@ class AgentPanel(QFrame):
     mcp_toggled = pyqtSignal(bool)
     settings_tab_requested = pyqtSignal(str)
     resend_requested = pyqtSignal(str)
+    history_clear_requested = pyqtSignal()  # the list of the tab "All projects" emptied
     step_undo_requested = pyqtSignal(int)
     compare_requested = pyqtSignal(int, int)  # the rank of a turn applied, its step (-1: the whole turn)
     card_compare_requested = pyqtSignal(object)  # the compare_key of a card of the thread (the controller set it)
@@ -658,11 +661,31 @@ class AgentPanel(QFrame):
         header.addStretch(1)
         header.addWidget(self.history_count)
 
+        # Two tabs: the turns of this project (undo, redo, compare act on them), and the requests of every project,
+        # kept from one session to the next (send one again here, or empty the list).
+        self.history_tabs = QTabBar(page)
+        self.history_tabs.setObjectName("tabBar_agent_history")
+        self.history_tabs.setDrawBase(False)
+        self.history_tabs.setExpanding(False)
+        self.history_tabs.addTab(_tr("This project"))
+        self.history_tabs.addTab(_tr("All projects"))
+        self.history_tabs.currentChanged.connect(self._on_history_tab)
+
         self.history_list = QListWidget(page)
         self.history_list.setObjectName("listWidget_agent_history")
         self.history_list.setWordWrap(True)
         self.history_list.setFrameShape(QFrame.Shape.NoFrame)
         self.history_list.itemSelectionChanged.connect(self._on_turn_selected)
+        self.global_list = QListWidget(page)
+        self.global_list.setObjectName("listWidget_agent_history_all")
+        self.global_list.setWordWrap(True)
+        self.global_list.setFrameShape(QFrame.Shape.NoFrame)
+        self.global_list.itemSelectionChanged.connect(self._on_turn_selected)
+        self.history_pages = QStackedWidget(page)
+        self.history_pages.addWidget(self.history_list)
+        self.history_pages.addWidget(self.global_list)
+        self._project_count_text = ""
+        self._global_count_text = ""
 
         self.history_undo_button = QPushButton(_tr("Undo the last"), page)
         self.history_undo_button.setObjectName("pushButton_agent_history_undo")
@@ -688,6 +711,12 @@ class AgentPanel(QFrame):
         self.resend_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.resend_button.setEnabled(False)
         self.resend_button.clicked.connect(self._resend_selected)
+        self.clear_global_button = QPushButton(_tr("Empty the list"), page)
+        self.clear_global_button.setObjectName("pushButton_agent_history_clear")
+        self.clear_global_button.setToolTip(_tr("Forget the requests of every project kept on this computer; the "
+                                                "turns of the open project stay"))
+        self.clear_global_button.setVisible(False)
+        self.clear_global_button.clicked.connect(self.history_clear_requested)
         footer = QWidget(page)
         footer.setObjectName("widget_agent_history_footer")
         buttons = QHBoxLayout(footer)
@@ -698,6 +727,7 @@ class AgentPanel(QFrame):
         buttons.addStretch(1)
         buttons.addWidget(self.compare_button)
         buttons.addWidget(self.step_button)
+        buttons.addWidget(self.clear_global_button)
         buttons.addWidget(self.resend_button)
 
         self.step_button.setVisible(False)
@@ -705,9 +735,49 @@ class AgentPanel(QFrame):
         layout.setContentsMargins(1, 1, 1, 1)
         layout.setSpacing(0)
         layout.addWidget(header_bar)
-        layout.addWidget(self.history_list, 1)
+        layout.addWidget(self.history_tabs)
+        layout.addWidget(self.history_pages, 1)
         layout.addWidget(footer)
         return page
+
+    def _on_history_tab(self, index: int) -> None:
+        """This project: its buttons; all projects: Send again and Empty the list."""
+        self.history_pages.setCurrentIndex(index)
+        project = index == HISTORY_PROJECT
+        for button in (self.history_undo_button, self.history_redo_button):
+            button.setVisible(project)
+        self.clear_global_button.setVisible(not project)
+        self.history_count.setText(self._project_count_text if project else self._global_count_text)
+        self._on_turn_selected()
+
+    def _current_history_list(self) -> QListWidget:
+        return self.global_list if self.history_tabs.currentIndex() == HISTORY_ALL else self.history_list
+
+    def set_global_history(self, entries, project_path: str = "") -> None:
+        """``entries``: the requests of every project (core/agent/request_log.py), oldest first; those of the open
+        project (``project_path``) say so."""
+        dark = self._dark()
+        palette = tokens(dark)
+        self.global_list.clear()
+        words = {"changed": "", "unchanged": _tr("no change"), "stopped": _tr("stopped"), "failed": _tr("failed")}
+        for item_data in entries:
+            moment = time.localtime(item_data.get("time") or 0)
+            when = time.strftime("%d/%m %H:%M", moment)
+            request = item_data.get("request") or _tr("(no request)")
+            here = bool(project_path) and item_data.get("path") == project_path
+            project = _tr("this project") if here else (item_data.get("project") or _tr("project never saved"))
+            layers = ", ".join(item_data.get("layers") or ()) or words.get(item_data.get("outcome"), "")
+            where = " · ".join(part for part in (project, layers) if part)
+            item = QListWidgetItem()
+            item.setData(_TURN_ROLE, item_data.get("request") or "")
+            item.setToolTip(plain_tooltip(f"{time.strftime('%Y-%m-%d %H:%M', moment)}  {request}\n{where}"
+                                          + (f"\n{item_data.get('path')}" if item_data.get("path") else "")))
+            self._history_row(item, when, request, where, "", True, palette, dark, target=self.global_list)
+        self.global_list.scrollToBottom()
+        self._global_count_text = _tr("all projects · {} request(s)").format(len(entries))
+        if self.history_tabs.currentIndex() == HISTORY_ALL:
+            self.history_count.setText(self._global_count_text)
+        self._on_turn_selected()
 
     def show_history(self) -> None:
         self.stack.setCurrentIndex(_HISTORY_PAGE)
@@ -748,17 +818,20 @@ class AgentPanel(QFrame):
                     step.setToolTip(plain_tooltip(label))
                     self._history_row(step, "", f"{number + 1}. {label}", "", "", True, palette, dark, step=True)
         self.history_list.scrollToBottom()
-        self.history_count.setText(_tr("this project · {} turn(s)").format(len(turns)))
+        self._project_count_text = _tr("this project · {} turn(s)").format(len(turns))
+        if self.history_tabs.currentIndex() == HISTORY_PROJECT:
+            self.history_count.setText(self._project_count_text)
         self.history_count.setStyleSheet(f"color: {palette['fm_text_muted']};")
         self.history_undo_button.setEnabled(can_undo and not self._working)
         self.history_redo_button.setEnabled(can_redo and not self._working)
         self._on_turn_selected()
 
     def _history_row(self, item: QListWidgetItem, when: str, request: str, layers: str, state: str, applied: bool,
-                     palette: dict, dark: bool, step: bool = False) -> None:
+                     palette: dict, dark: bool, step: bool = False, target: Optional[QListWidget] = None) -> None:
         """One line of the history: time, request, what it changed, applied or undone; an undone one is dimmed."""
+        target = target if target is not None else self.history_list
         muted = palette["fm_text_muted"]
-        row = QWidget(self.history_list)
+        row = QWidget(target)
         row.setObjectName("widget_agent_history_row")
         row.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)  # the list keeps the selection
         layout = QHBoxLayout(row)
@@ -786,12 +859,12 @@ class AgentPanel(QFrame):
         for label in row.findChildren(QLabel):
             label.setTextFormat(Qt.TextFormat.PlainText)
             label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        self.history_list.addItem(item)
+        target.addItem(item)
         item.setSizeHint(row.sizeHint())
-        self.history_list.setItemWidget(item, row)
+        target.setItemWidget(item, row)
 
     def _on_turn_selected(self) -> None:
-        items = self.history_list.selectedItems()
+        items = self._current_history_list().selectedItems()
         step = items[0].data(_STEP_ROLE) if items else None
         typed_here = (bool(items) and step is None and bool(items[0].data(_TURN_ROLE))
                       and not str(items[0].data(_TURN_ROLE) or "").startswith(EXTERNAL_MARK))
@@ -800,8 +873,9 @@ class AgentPanel(QFrame):
         self.step_button.setVisible(step is not None)  # only on a step: the footer is the mockup's otherwise
         # A turn undone is no longer on the map; while the agent works, the map is changing under the comparison.
         rank = items[0].data(_RANK_ROLE) if items else None
-        self.compare_button.setVisible(self._can_compare)
+        self.compare_button.setVisible(self._can_compare and self.history_tabs.currentIndex() == HISTORY_PROJECT)
         self.compare_button.setEnabled(rank is not None and not self._working)
+        self.clear_global_button.setEnabled(self.global_list.count() > 0 and not self._working)
 
     def set_can_compare(self, possible: bool) -> None:
         """Offer Compare on the turns and steps, and on the cards of the thread: only when the dock has the history of
@@ -824,7 +898,7 @@ class AgentPanel(QFrame):
             self.step_undo_requested.emit(int(step))
 
     def _resend_selected(self) -> None:
-        items = self.history_list.selectedItems()
+        items = self._current_history_list().selectedItems()
         if items and not self._working:
             self.resend_requested.emit(str(items[0].data(_TURN_ROLE) or ""))
 
@@ -977,9 +1051,18 @@ class AgentPanel(QFrame):
             f" {palette['fm_group_border']}; }}"
             f"QWidget#widget_agent_history_footer {{ background: {palette['fm_group']}; border: none; border-top: 1px solid"
             f" {palette['fm_group_border']}; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }}"
-            "QListWidget#listWidget_agent_history { background: transparent; border: none; outline: 0; }"
-            f"QListWidget#listWidget_agent_history::item {{ border-bottom: 1px solid {palette['fm_group']}; }}"
-            f"QListWidget#listWidget_agent_history::item:selected {{ background: {palette['fm_active']}; }}"
+            "QListWidget#listWidget_agent_history, QListWidget#listWidget_agent_history_all { background: transparent;"
+            " border: none; outline: 0; }"
+            f"QListWidget#listWidget_agent_history::item, QListWidget#listWidget_agent_history_all::item {{"
+            f" border-bottom: 1px solid {palette['fm_group']}; }}"
+            f"QListWidget#listWidget_agent_history::item:selected, QListWidget#listWidget_agent_history_all::item:selected"
+            f" {{ background: {palette['fm_active']}; }}"
+            f"QTabBar#tabBar_agent_history {{ background: transparent; }}"
+            f"QTabBar#tabBar_agent_history::tab {{ font-size: 12px; padding: 5px 12px; margin: 0; border: none;"
+            f" border-bottom: 2px solid transparent; background: transparent; color: {muted}; }}"
+            f"QTabBar#tabBar_agent_history::tab:selected {{ color: {palette['fm_text']}; border-bottom-color:"
+            f" {palette['fm_accent']}; font-weight: 600; }}"
+            f"QTabBar#tabBar_agent_history::tab:hover {{ color: {palette['fm_text']}; }}"
             f"QFrame#frame_agent_history QPushButton {{ font-size: 12px; min-height: 0; padding: 4px 10px; }}"
             f"QPushButton#pushButton_agent_resend {{ color: {palette['fm_accent']}; background: transparent; border: none; }}"
             f"QPushButton#pushButton_agent_resend:disabled {{ color: {muted}; }}")

@@ -1239,6 +1239,11 @@ Sen työkalut näkevät projektistasi vain sen, minkä agentti niille lähettä�
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer? The turns of the open project stay.</source>
+        <translation>Unohdetaanko tällä tietokoneella säilytetyt kaikkien projektien pyynnöt? Avoimen projektin kierrokset säilyvät.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
         <source>The layer {} is no longer in the project.</source>
         <translation>Taso {} ei ole enää projektissa.</translation>
     </message>
@@ -2874,6 +2879,51 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>tämä projekti · {} kierros(ta)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>all projects · {} request(s)</source>
+        <translation>kaikki projektit · {} pyyntö(ä)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>project never saved</source>
+        <translation>projektia ei ole koskaan tallennettu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>this project</source>
+        <translation>tämä projekti</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>failed</source>
+        <translation>epäonnistui</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>stopped</source>
+        <translation>pysäytetty</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer; the turns of the open project stay</source>
+        <translation>Unohda tällä tietokoneella säilytetyt kaikkien projektien pyynnöt; avoimen projektin kierrokset säilyvät</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Empty the list</source>
+        <translation>Tyhjennä luettelo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>All projects</source>
+        <translation>Kaikki projektit</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>This project</source>
+        <translation>Tämä projekti</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="159"/>
