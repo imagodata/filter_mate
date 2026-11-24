@@ -227,6 +227,12 @@ class FavoritesService(QObject):
             return 0
         return self._favorites_manager.count
 
+    def get_current_user(self) -> Optional[str]:
+        """Identity that owns the favorites created here (None when unresolved)."""
+        if not self._favorites_manager:
+            return None
+        return self._favorites_manager.get_current_user()
+
     # ─────────────────────────────────────────────────────────────────
     # CRUD Operations
     # ─────────────────────────────────────────────────────────────────
@@ -240,7 +246,8 @@ class FavoritesService(QObject):
         spatial_config: Optional[Dict] = None,
         remote_layers: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
-        description: str = ""
+        description: str = "",
+        layer_id: Optional[str] = None
     ) -> Optional[str]:
         """
         Add a new favorite.
@@ -254,6 +261,7 @@ class FavoritesService(QObject):
             remote_layers: Optional remote layers config
             tags: Optional tags list
             description: Optional description
+            layer_id: Optional id of the layer (kept when a favorite is duplicated)
 
         Returns:
             str: Favorite ID if created, None on error
@@ -268,6 +276,7 @@ class FavoritesService(QObject):
                 name=name,
                 expression=expression,
                 layer_name=layer_name,
+                layer_id=layer_id,
                 layer_provider=layer_provider,
                 spatial_config=spatial_config,
                 remote_layers=remote_layers,
@@ -913,6 +922,26 @@ class FavoritesService(QObject):
         if not self._favorites_manager:
             return []
         return self._favorites_manager.get_global_favorites()
+
+    def remove_global_favorite(self, favorite_id: str) -> bool:
+        """
+        Remove a global favorite.
+
+        Returns:
+            bool: True if a global favorite of this id was removed
+
+        Raises:
+            FavoritesNotInitialized: if the service has no manager attached.
+            FavoritePersistenceError: if the database could not be written.
+        """
+        if not self._favorites_manager:
+            raise FavoritesNotInitialized(
+                "FavoritesService.remove_global_favorite called before manager was attached"
+            )
+        removed = self._favorites_manager.remove_global_favorite(favorite_id)
+        if removed:
+            self.favorites_changed.emit()
+        return removed
 
     def make_favorite_global(self, favorite_id: str) -> bool:
         """

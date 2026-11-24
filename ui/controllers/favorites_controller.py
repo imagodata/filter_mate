@@ -24,6 +24,7 @@ from ...core.domain.exceptions import (
     FavoritesError,
     FavoritesNotInitialized,
 )
+from ...core.domain.global_favorite_copy import project_copy_of_global
 from .base_controller import BaseController
 from .favorites_spatial_helpers import (
     exact_filtered_feature_count,
@@ -50,8 +51,6 @@ from .favorites_menu_builder import (
     ACTION_PUBLISH_SHARING,
     ACTION_QUICK_PUBLISH_SHARING,
     ACTION_MANAGE_SHARING_REPOS,
-    ACTION_BACKUP_TO_PROJECT,
-    ACTION_RESTORE_FROM_PROJECT,
     ACTION_CLEANUP_ORPHANS,
     ACTION_SHOW_STATS,
     ACTION_APPLY,
@@ -537,17 +536,14 @@ class FavoritesController(BaseController):
         self._show_warning(self.tr("Failed to export favorites"))
         return False
 
-    def import_favorites(
-        self,
-        filepath: Optional[str] = None,
-        merge: Optional[bool] = None
-    ) -> int:
+    def import_favorites(self, filepath: Optional[str] = None) -> int:
         """
-        Import favorites from a JSON file.
+        Import favorites from a JSON file, merging them into the existing ones.
+
+        A favorite whose name is already taken is skipped, never replaced.
 
         Args:
             filepath: Path to import file (prompts if not provided)
-            merge: True to merge, False to replace (prompts if not provided)
 
         Returns:
             Number of favorites imported
@@ -563,37 +559,17 @@ class FavoritesController(BaseController):
         if not filepath or not self._favorites_service:
             return 0
 
-        if merge is None:
-            # F11 policy: stays a modal QMessageBox.question. Replace-all
-            # is destructive (drops every existing favorite); the user
-            # must consciously decide before we touch the DB.
-            result = QMessageBox.question(
-                self.dockwidget,
-                self.tr("Import Favorites"),
-                self.tr("Merge with existing favorites?\n\n"
-                         "Yes = Add to existing\n"
-                         "No = Replace all existing"),
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
-            )
-            if result == QMessageBox.StandardButton.Cancel:
-                return 0
-            merge = (result == QMessageBox.StandardButton.Yes)
-
         # FIX 2026-04-21: route through FavoritesService.import_favorites which
         # re-resolves portable signatures against the current project.
         import_fn = getattr(self._favorites_service, 'import_favorites', None)
         if callable(import_fn):
-            # skip_duplicates is the inverse of merge:
-            #   merge=True  -> skip_duplicates=True  (add the rest alongside existing)
-            #   merge=False -> skip_duplicates=False (replace - currently we still
-            #                  skip duplicates because the underlying manager only
-            #                  supports additive import; replace semantics would
-            #                  need a prior remove_all which is out of scope here).
             result = import_fn(filepath, skip_duplicates=True)
             count = getattr(result, 'imported_count', 0)
+            skipped = getattr(result, 'skipped_count', 0)
         else:
             legacy_fn = getattr(self._favorites_service, 'import_from_file', None)
-            count = legacy_fn(filepath, merge=merge) if callable(legacy_fn) else 0
+            count = legacy_fn(filepath, merge=True) if callable(legacy_fn) else 0
+            skipped = 0
 
         if count > 0:
             # FIX 2026-04-22: FavoritesService exposes save() (not save_to_project),
@@ -605,11 +581,19 @@ class FavoritesController(BaseController):
                 save_fn()
             self.favorites_changed.emit()
             self.update_indicator()
-            self._show_success(self.tr("Imported {0} favorites").format(count))
+            self._show_success(self._import_summary(count, skipped))
+        elif skipped > 0:
+            # A warning, not an info: info messages are hidden at the default
+            # feedback level and the user would see nothing happen.
+            self._show_warning(self._import_summary(count, skipped))
         else:
             self._show_warning(self.tr("No favorites imported"))
 
         return count
+
+    def _import_summary(self, imported: int, skipped: int) -> str:
+        """The result line of an import: how many came in, how many were already there."""
+        return self.tr("{0} favorite(s) imported, {1} skipped (already there).").format(imported, skipped)
 
     def show_manager_dialog(self) -> None:
         """Show the favorites manager dialog."""
@@ -619,13 +603,18 @@ class FavoritesController(BaseController):
                 self._show_warning(self.tr("Favorites manager not initialized. Please restart FilterMate."))
                 return
 
-            # FIX 2026-04-23 (LOW-3): when there are no favorites AND the
-            # favorites_sharing extension isn't active, opening an empty
-            # manager is confusing — surface the suggested next step
-            # instead. When sharing IS active we still open the dialog so
-            # the user can reach the "📡 Shared..." button.
-            if self.count == 0 and not self._is_sharing_extension_active():
-                self._show_info(self.tr(
+            # FIX 2026-04-23 (LOW-3): when there are no favorites (of the
+            # project nor global ones) AND the favorites_sharing extension
+            # isn't active, opening an empty manager is confusing — surface
+            # the suggested next step instead. When sharing IS active we still
+            # open the dialog so the user can reach the "Shared..." button.
+            # A warning, not an info: info is hidden at the default feedback level.
+            if (
+                self.count == 0
+                and not self._has_global_favorites()
+                and not self._is_sharing_extension_active()
+            ):
+                self._show_warning(self.tr(
                     "No favorites saved yet — apply a filter then click the "
                     "★ indicator to save your first one."
                 ))
@@ -649,13 +638,21 @@ class FavoritesController(BaseController):
             # session. Disconnect in ``finally`` so the lifetime is
             # bounded by this call.
             dialog.favoriteApplied.connect(self.apply_favorite)
+            dialog.globalFavoriteApplied.connect(self._apply_global_favorite)
             try:
                 dialog.exec()
             finally:
-                try:
-                    dialog.favoriteApplied.disconnect(self.apply_favorite)
-                except (TypeError, RuntimeError):
-                    pass
+                # The dialog is parented to the dock: without this it stays
+                # alive (and answers favorites_changed) after it is closed.
+                dialog.deleteLater()
+                for signal, slot in (
+                    (dialog.favoriteApplied, self.apply_favorite),
+                    (dialog.globalFavoriteApplied, self._apply_global_favorite),
+                ):
+                    try:
+                        signal.disconnect(slot)
+                    except (TypeError, RuntimeError):
+                        pass
             # Refresh after dialog closes
             self.favorites_changed.emit()
             self.update_indicator()
@@ -667,6 +664,17 @@ class FavoritesController(BaseController):
             self._show_warning(self.tr("The favorites manager could not be opened. Details in filtermate.log."))
 
     # === Private Methods ===
+
+    def _has_global_favorites(self) -> bool:
+        """True when at least one global favorite exists (they are listed in every project)."""
+        getter = getattr(self._favorites_service, "get_global_favorites", None)
+        if not callable(getter):
+            return False
+        try:
+            return bool(getter())
+        except Exception as e:
+            logger.debug(f"Global favorites not read: {e}")
+            return False
 
     def _find_indicator_label(self) -> None:
         """Find the favorites indicator label in dockwidget."""
@@ -739,10 +747,6 @@ class FavoritesController(BaseController):
             # covers the "Global · All projects" view; route there
             # rather than maintain a placeholder dialog.
             self.show_manager_dialog()
-        elif action_data == ACTION_BACKUP_TO_PROJECT:
-            self._backup_to_project()
-        elif action_data == ACTION_RESTORE_FROM_PROJECT:
-            self._restore_from_project()
         elif action_data == ACTION_CLEANUP_ORPHANS:
             self._cleanup_orphan_projects()
         elif action_data == ACTION_SHOW_STATS:
@@ -804,6 +808,7 @@ class FavoritesController(BaseController):
         so favorites can be properly restored with full geometric context.
         """
         if not self._favorites_service:
+            self._warn_not_saved()
             return False
 
         try:
@@ -897,6 +902,7 @@ class FavoritesController(BaseController):
                 return True
             else:
                 logger.warning(f"Failed to create favorite '{name}' - add_favorite() returned None")
+            self._warn_not_saved()
             return False
 
         except FavoritePersistenceError as e:
@@ -906,7 +912,12 @@ class FavoritesController(BaseController):
             return False
         except Exception as e:
             logger.error(f"Failed to create favorite: {e}")
+            self._warn_not_saved()
             return False
+
+    def _warn_not_saved(self) -> None:
+        """Tell the user a new favorite was not created (the details are in the log)."""
+        self._show_warning(self.tr("The favorite could not be saved. Details in filtermate.log."))
 
     def _apply_favorite_expression(self, favorite: 'FilterFavorite') -> bool:
         """Apply a favorite by pushing its saved subset strings directly.
@@ -1016,9 +1027,25 @@ class FavoritesController(BaseController):
         return self._favorites_service.get_global_favorites()
 
     def _apply_global_favorite(self, favorite_id: str) -> bool:
-        """Apply a global favorite."""
+        """Apply a global favorite.
+
+        The favorite is imported into the project first, once: applying it
+        again reuses the project favorite of the same name and expression.
+        """
         if not self._favorites_service:
             return False
+
+        global_favorite = next(
+            (f for f in self._favorites_service.get_global_favorites() if f.id == favorite_id),
+            None,
+        )
+        if global_favorite is None:
+            return False
+        existing = project_copy_of_global(
+            global_favorite, self._favorites_service.get_all_favorites()
+        )
+        if existing is not None:
+            return self.apply_favorite(existing.id)
 
         # First, import the global favorite to the current project
         try:
@@ -1052,37 +1079,6 @@ class FavoritesController(BaseController):
 
         self._show_warning(self.tr("Failed to copy to global favorites"))
         return False
-
-    def _backup_to_project(self) -> None:
-        """Backup favorites to the QGIS project file."""
-        if not self._favorites_service:
-            return
-
-        from qgis.core import QgsProject
-        try:
-            success = self._favorites_service.save_to_project_file(QgsProject.instance())
-        except FavoritePersistenceError as e:
-            self._show_error(self.tr(
-                "Could not save favorites to project file: {0}"
-            ).format(e.__cause__ or e))
-            return
-        if success:
-            self._show_success(self.tr("Saved {0} favorite(s) to project file").format(self.count))
-        else:
-            self._show_warning(self.tr("Save failed"))
-
-    def _restore_from_project(self) -> None:
-        """Restore favorites from the QGIS project file."""
-        if not self._favorites_service:
-            return
-
-        from qgis.core import QgsProject
-        count = self._favorites_service.restore_from_project_file(QgsProject.instance())
-        if count > 0:
-            self.update_indicator()
-            self._show_success(self.tr("Restored {0} favorite(s) from project file").format(count))
-        else:
-            self._show_warning(self.tr("No favorites to restore found in project"))
 
     def _build_migration_service(self):
         """Bootstrap a FavoritesMigrationService against the FilterMate db.

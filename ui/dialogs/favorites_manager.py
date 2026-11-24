@@ -4,14 +4,21 @@ FilterMate FavoritesManagerDialog.
 Dialog for managing filter favorites with list, edit, delete, and search capabilities.
 Extracted from filter_mate_dockwidget.py for better modularity.
 """
+import copy
 import logging
+
+from ..styles.favorites_styles import favorites_dialog_stylesheet
+from ..styles.mockup_design import MONO_FAMILY, render_icon
+from .favorite_order import SORT_LAST_USED, SORT_MOST_USED, SORT_NAME, sorted_favorites
+from .favorite_summary import date_text, scope_badge, summary_rows, use_text
+from .favorite_summary_widgets import ExpressionView, text_value
 
 try:
     from qgis.PyQt.QtWidgets import (
-        QButtonGroup, QComboBox, QDialog, QVBoxLayout, QHBoxLayout, QListWidget,
+        QComboBox, QDialog, QVBoxLayout, QHBoxLayout, QListWidget,
         QListWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QMessageBox,
-        QFormLayout, QDialogButtonBox, QRadioButton, QSplitter, QTreeWidget,
-        QTreeWidgetItem, QHeaderView, QTabWidget, QWidget
+        QAbstractItemView, QFormLayout, QFrame, QScrollArea, QSplitter,
+        QTableWidget, QTableWidgetItem, QHeaderView, QTabWidget, QWidget, QMenu
     )
     from qgis.PyQt.QtCore import Qt, pyqtSignal
     HAS_QGIS = True
@@ -30,35 +37,51 @@ except ImportError:
     QTextEdit = object
     QMessageBox = None
     QFormLayout = object
-    QDialogButtonBox = object
-    QButtonGroup = object
     QComboBox = object
-    QRadioButton = object
+    QFrame = object
+    QScrollArea = object
     QSplitter = object
-    QTreeWidget = object
-    QTreeWidgetItem = object
+    QAbstractItemView = object
+    QTableWidget = object
+    QTableWidgetItem = object
     QHeaderView = None
     QTabWidget = object
+    QMenu = object
     Qt = None
 
     def pyqtSignal(*args):
         return None
 
-# Scope badge + label constants — kept close to the UI so copywriter
-# tweaks don't require touching the domain layer.
-_SCOPE_BADGES = {
-    "shared_here":   "👥",   # project=this, owner=NULL
-    "shared_global": "🌐",   # project=GLOBAL, owner=NULL
-    "mine_here":     "🔒",   # project=this, owner=me
-    "mine_global":   "👤",   # project=GLOBAL, owner=me
-    "foreign":       "•",    # someone else's favorite (visible in shared DB)
+try:
+    from qgis.gui import QgsMessageBar
+except ImportError:  # no QGIS GUI module: the dialog falls back to a plain label
+    QgsMessageBar = None
+
+# Scope kinds of ``_favorite_scope_kind`` that apply to every project of this
+# computer; the list shows them with the globe icon instead of the star.
+_GLOBAL_SCOPE_KINDS = frozenset({"shared_global", "mine_global"})
+
+# Scope kinds of the favorites owned by the current user.
+_MINE_SCOPE_KINDS = frozenset({"mine_here", "mine_global"})
+
+# Scope combo entry (``FavoriteScope`` value) -> (kept globally?, mine only?).
+# "Shared" entries list what is kept in the project or in the global list
+# whoever owns it (every favorite is stamped with its owner since the OS user is
+# known, so the owner cannot tell shared ones apart); "Mine" entries also
+# require the owner to be the current user.
+_SCOPE_KEY_FILTERS = {
+    "global_shared": (True, False),
+    "project_shared": (False, False),
+    "global_mine": (True, True),
+    "project_mine": (False, True),
 }
 
 
 def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
     """Classify a favorite for badge/filter purposes.
 
-    Returns one of the keys in ``_SCOPE_BADGES``. "foreign" means the
+    Returns "shared_here", "shared_global", "mine_here", "mine_global" or
+    "foreign". "foreign" means the
     favorite belongs to another user — kept visible because forbidding
     the owner column would be surprising, but flagged so users can tell
     which ones aren't theirs.
@@ -82,20 +105,25 @@ def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
 
 logger = logging.getLogger(__name__)
 
+# Longest expression text shown in a Layers row; the tooltip has the full one.
+_REMOTE_EXPRESSION_CHARS = 200
+
 
 class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
     """
     Dialog for managing filter favorites.
 
     Features:
-    - List all favorites with search/filter
-    - Edit favorite name, description, tags, and expression
+    - List the project favorites then the global ones, with search/filter/sort
+    - Double-click or context menu: apply, rename, duplicate, delete, copy to global/project
+    - Read a summary of each favorite; edit its name, description and tags
     - Delete favorites
     - Apply favorites directly
     - View remote layer details
 
     Signals:
-        favoriteApplied: Emitted when a favorite is applied (favorite_id)
+        favoriteApplied: Emitted when a project favorite is applied (favorite_id)
+        globalFavoriteApplied: Emitted when a global favorite is applied (favorite_id)
         favoriteDeleted: Emitted when a favorite is deleted (favorite_id)
         favoriteUpdated: Emitted when a favorite is updated (favorite_id)
         favoritesChanged: Emitted when favorites list changes
@@ -103,9 +131,12 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     if HAS_QGIS:
         favoriteApplied = pyqtSignal(str)
+        globalFavoriteApplied = pyqtSignal(str)
         favoriteDeleted = pyqtSignal(str)
         favoriteUpdated = pyqtSignal(str)
         favoritesChanged = pyqtSignal()
+
+    _dark = False  # theme of the dialog, set by _setup_ui
 
     def __init__(self, favorites_manager, parent=None, extension_bridge=None):
         """
@@ -127,12 +158,13 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._favorites_service = favorites_manager
         self._extension_bridge = extension_bridge
         self._current_fav_id = None
-        self._all_favorites = []
+        self._all_favorites = []  # the project favorites then the global ones
+        self._global_ids = set()  # ids of the global ones among them
         # FIX 2026-04-22: re-entrancy guard so our own update/delete don't bounce
         # back through the external-change refresh slot.
         self._suppress_external_refresh = False
         # F13 fix 2026-04-27: track the external-change subscription so
-        # closeEvent can disconnect it. Without this the manager keeps a
+        # done() can disconnect it. Without this the manager keeps a
         # hard ref to the dialog through the signal slot — every open/close
         # cycle leaked one dialog instance.
         self._external_change_connected = False
@@ -166,28 +198,63 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         except (RuntimeError, AttributeError) as e:
             logger.debug(f"Could not refresh dialog on external change: {e}")
 
+    def _make_message_bar(self) -> "QWidget":
+        """The bar at the top of the dialog; the main window's bar hides behind a modal dialog.
+
+        A ``QgsMessageBar`` when QGIS provides one, else a plain hidden label
+        (same two entry points: ``pushWarning`` / ``pushCritical`` through
+        ``_push_message``).
+        """
+        if isinstance(QgsMessageBar, type):
+            return QgsMessageBar(self)
+        label = QLabel(self)
+        label.setObjectName("dialogMessageBar")
+        label.setWordWrap(True)
+        label.hide()
+        return label
+
+    def _push_message(self, message: str, critical: bool) -> bool:
+        """Show ``message`` in the dialog's bar. False when there is none (the caller falls back)."""
+        bar = getattr(self, "_message_bar", None)
+        if bar is None:
+            return False
+        if isinstance(QgsMessageBar, type) and isinstance(bar, QgsMessageBar):
+            bar.clearWidgets()
+            (bar.pushCritical if critical else bar.pushWarning)("", message)
+        else:
+            bar.setText(message)
+            bar.show()
+        return True
+
     def _show_error(self, message: str) -> None:
-        """Push a critical/error notification to the QGIS message bar.
+        """Show a critical message at the top of the dialog (the dialog stays usable).
 
-        F11 policy: transactional failures (delete, save) surface via
-        ``infrastructure.feedback.show_error`` rather than a modal
-        ``QMessageBox.warning`` — the dialog stays usable, the toast is
-        visible at the top of the canvas, and the full traceback can be
-        read in View → Panels → Log Messages.
+        F11 policy: transactional failures (delete, save) surface as a message,
+        not a modal ``QMessageBox.warning``. The bar is the dialog's own: the
+        QGIS one is behind a modal dialog. The full traceback can be read in
+        View -> Panels -> Log Messages.
         """
-        try:
-            from ...infrastructure.feedback import show_error
-            show_error(message)
-        except ImportError:
-            logger.error(message)
+        logger.error(message)
+        self._push_message(message, critical=True)
 
-    def closeEvent(self, event):
-        """Disconnect from external signals before Qt destroys the dialog.
+    def _show_warning(self, message: str) -> None:
+        """Show a warning at the top of the dialog (the dialog stays open, the fields keep their text)."""
+        logger.warning(message)
+        self._push_message(message, critical=False)
 
-        F13 fix 2026-04-27: the manager's ``favorites_changed`` signal
-        held a hard ref to ``_on_external_favorites_changed``, keeping
-        every closed dialog alive across Open → Close → Open cycles.
+    def done(self, result):
+        """Disconnect from external signals when the dialog closes (accept, reject, close).
+
+        F13 fix 2026-04-27: the manager's ``favorites_changed`` signal held a
+        hard ref to ``_on_external_favorites_changed``, keeping every closed
+        dialog alive across Open -> Close -> Open cycles. ``accept()`` and
+        ``reject()`` do not go through ``closeEvent``, ``done()`` is what they
+        and the window close button all end in.
         """
+        self._disconnect_external_changes()
+        super().done(result)
+
+    def _disconnect_external_changes(self) -> None:
         if self._external_change_connected and self._favorites_service is not None:
             try:
                 self._favorites_service.favorites_changed.disconnect(
@@ -196,31 +263,35 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             except (TypeError, RuntimeError):
                 pass
             self._external_change_connected = False
-        if HAS_QGIS:
-            super().closeEvent(event)
 
     def _setup_ui(self):
         """Build the dialog UI."""
         self.setWindowTitle(self.tr("FilterMate - Favorites Manager"))
-        self.setMinimumSize(600, 450)
-        self.resize(720, 520)
+        self.setMinimumSize(720, 500)
+        self.resize(900, 620)
         self.setModal(True)
 
-        # Apply FilterMate dialog style
-        self.setStyleSheet(self._get_dialog_stylesheet())
+        # Theme of the plugin, read each time the dialog opens
+        self._dark = self._plugin_theme_is_dark()
+        self.setStyleSheet(favorites_dialog_stylesheet(self._dark))
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(12)
+
+        # Messages of the dialog (refused rename, failed copy ...)
+        self._message_bar = self._make_message_bar()
+        layout.addWidget(self._message_bar)
 
         # Header row with count + optional shared-favorites shortcut
         header_row = QHBoxLayout()
         header_row.setContentsMargins(0, 0, 0, 0)
         header_row.setSpacing(8)
 
+        self._all_favorites = self._load_favorites()
         fav_count = self._favorites_service.count if self._favorites_service else 0
         self._header_label = QLabel(
-            self.tr("<b>Saved Favorites ({0})</b>").format(fav_count)
+            self.tr("<b>Saved Favorites ({0})</b>").format(len(self._all_favorites))
         )
         self._header_label.setObjectName("dialogHeader")
         header_row.addWidget(self._header_label)
@@ -229,7 +300,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # FIX 2026-04-23: discoverable shortcut to the Resource Sharing
         # picker — only shown when the favorites_sharing extension is active
         # so regular users never see a button they can't use.
-        self._shared_btn = QPushButton("📡 " + self.tr("Shared..."))
+        self._shared_btn = QPushButton(self.tr("Shared..."))
         self._shared_btn.setObjectName("sharedBtn")
         self._shared_btn.setToolTip(self.tr(
             "Browse favorites shared via QGIS Resource Sharing collections"
@@ -241,7 +312,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # Publish button — symmetric counterpart that pushes favorites into
         # a Resource Sharing collection. Hidden when the extension is
         # inactive or when there is nothing to publish.
-        self._publish_btn = QPushButton("📤 " + self.tr("Publish..."))
+        self._publish_btn = QPushButton(self.tr("Publish..."))
         self._publish_btn.setObjectName("publishBtn")
         self._publish_btn.setToolTip(self.tr(
             "Publish selected favorites into a Resource Sharing collection"
@@ -257,16 +328,15 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # Search box + scope filter (v5.1)
         search_layout = QHBoxLayout()
         search_layout.setSpacing(8)
-        search_label = QLabel("🔍")
-        search_label.setObjectName("searchIcon")
-        search_layout.addWidget(search_label)
-
         self._search_edit = QLineEdit()
         self._search_edit.setObjectName("searchEdit")
         self._search_edit.setPlaceholderText(
             self.tr("Search by name, expression, tags, or description...")
         )
         self._search_edit.setClearButtonEnabled(True)
+        search_icon = self._theme_icon("/search.svg")
+        if search_icon is not None:
+            self._search_edit.addAction(search_icon, QLineEdit.ActionPosition.LeadingPosition)
         self._search_edit.textChanged.connect(self._on_search_changed)
         search_layout.addWidget(self._search_edit, 1)
 
@@ -281,13 +351,23 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         ))
         # Keep enum keys in sync with FavoriteScope so the lookup is
         # a direct dict access — no parallel mapping to maintain.
-        self._scope_combo.addItem("🔎 " + self.tr("All"), "all")
-        self._scope_combo.addItem("🌐 " + self.tr("Shared · All projects"), "global_shared")
-        self._scope_combo.addItem("👥 " + self.tr("Shared · This project"), "project_shared")
-        self._scope_combo.addItem("👤 " + self.tr("Mine · All projects"), "global_mine")
-        self._scope_combo.addItem("🔒 " + self.tr("Mine · This project"), "project_mine")
+        self._scope_combo.addItem(self.tr("All"), "all")
+        self._scope_combo.addItem(self.tr("Shared · All projects"), "global_shared")
+        self._scope_combo.addItem(self.tr("Shared · This project"), "project_shared")
+        self._scope_combo.addItem(self.tr("Mine · All projects"), "global_mine")
+        self._scope_combo.addItem(self.tr("Mine · This project"), "project_mine")
         self._scope_combo.currentIndexChanged.connect(self._on_scope_changed)
         search_layout.addWidget(self._scope_combo)
+
+        # Sort: by name (default), by last use or by number of uses
+        self._sort_combo = QComboBox()
+        self._sort_combo.setObjectName("sortCombo")
+        self._sort_combo.setToolTip(self.tr("Sort the favorites."))
+        self._sort_combo.addItem(self.tr("Name"), SORT_NAME)
+        self._sort_combo.addItem(self.tr("Last used"), SORT_LAST_USED)
+        self._sort_combo.addItem(self.tr("Most used"), SORT_MOST_USED)
+        self._sort_combo.currentIndexChanged.connect(self._on_sort_changed)
+        search_layout.addWidget(self._sort_combo)
         layout.addLayout(search_layout)
 
         # Main content with splitter
@@ -304,8 +384,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         right_panel = self._create_right_panel()
         splitter.addWidget(right_panel)
 
-        # Set splitter proportions (30% list, 70% details)
-        splitter.setSizes([220, 480])
+        # Set splitter proportions (list 1/3, details 2/3)
+        splitter.setSizes([300, 600])
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 2)
         layout.addWidget(splitter, 1)
@@ -314,210 +394,38 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         button_layout = self._create_buttons()
         layout.addLayout(button_layout)
 
-        # Initial population (handle None favorites_manager)
-        if self._favorites_service:
-            self._all_favorites = self._favorites_service.get_all_favorites()
-        else:
-            self._all_favorites = []
-        self._populate_list(self._all_favorites)
+        # Initial population (the favorites were loaded with the header)
+        self._populate_list(sorted_favorites(self._all_favorites, self._current_sort_key()))
 
         # Select first item
         if self._list_widget.count() > 0:
             self._list_widget.setCurrentRow(0)
 
-    def _get_dialog_stylesheet(self) -> str:
-        """Get FilterMate harmonized stylesheet for the dialog."""
-        return """
-            /* Dialog background */
-            QDialog {
-                background-color: #f8f9fa;
-            }
+    def _plugin_theme_is_dark(self) -> bool:
+        """True when the plugin theme drawn on the dock the dialog belongs to is the dark one."""
+        try:
+            from ..styles.mockup_design import plugin_is_dark
+            return bool(plugin_is_dark(self))
+        except Exception:  # style helpers unavailable: the light theme
+            return False
 
-            /* Header */
-            QLabel#dialogHeader {
-                font-size: 14pt;
-                font-weight: 600;
-                color: #2c3e50;
-                padding: 8px 0px;
-                margin-bottom: 4px;
-            }
+    @staticmethod
+    def _theme_icon(name: str):
+        """QGIS theme icon ``name`` (e.g. ``/mActionFileSave.svg``), None when it is missing."""
+        try:
+            from qgis.core import QgsApplication
+            icon = QgsApplication.getThemeIcon(name)
+        except Exception:
+            return None
+        return None if icon is None or icon.isNull() else icon
 
-            /* Search */
-            QLabel#searchIcon {
-                font-size: 14pt;
-                padding: 4px;
-            }
-            QLineEdit#searchEdit {
-                padding: 8px 12px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                background-color: white;
-                font-size: 10pt;
-            }
-            QLineEdit#searchEdit:focus {
-                border-color: #f39c12;
-                background-color: #fffef5;
-            }
-
-            /* List widget */
-            QListWidget {
-                background-color: white;
-                border: 1px solid #e0e0e0;
-                border-radius: 8px;
-                padding: 4px;
-                font-size: 10pt;
-            }
-            QListWidget::item {
-                padding: 8px 10px;
-                border-radius: 6px;
-                margin: 2px 0px;
-            }
-            QListWidget::item:selected {
-                background-color: #f5b041;
-                color: white;
-            }
-            QListWidget::item:hover:!selected {
-                background-color: #fef5e7;
-            }
-
-            /* Tab widget */
-            QTabWidget::pane {
-                border: 1px solid #e0e0e0;
-                border-radius: 8px;
-                background-color: white;
-                padding: 8px;
-                margin-top: -1px;
-            }
-            QTabBar {
-                qproperty-drawBase: 0;
-            }
-            QTabBar::tab {
-                background-color: #f0f0f0;
-                color: #555555;
-                border: 1px solid #ddd;
-                border-bottom: none;
-                padding: 8px 14px;
-                margin-right: 3px;
-                border-top-left-radius: 6px;
-                border-top-right-radius: 6px;
-                font-size: 10pt;
-                min-width: 70px;
-            }
-            QTabBar::tab:selected {
-                background-color: white;
-                color: #2c3e50;
-                border-bottom: 2px solid #f39c12;
-                font-weight: 600;
-            }
-            QTabBar::tab:hover:!selected {
-                background-color: #fef5e7;
-                color: #34495e;
-            }
-
-            /* Form inputs */
-            QLineEdit, QTextEdit {
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                padding: 6px 10px;
-                background-color: white;
-                font-size: 10pt;
-            }
-            QLineEdit:focus, QTextEdit:focus {
-                border-color: #f39c12;
-                background-color: #fffef5;
-            }
-
-            /* Tree widget */
-            QTreeWidget {
-                background-color: white;
-                border: 1px solid #e0e0e0;
-                border-radius: 6px;
-                alternate-background-color: #fafafa;
-            }
-            QTreeWidget::item {
-                padding: 4px;
-            }
-            QHeaderView::section {
-                background-color: #f5f5f5;
-                padding: 6px 8px;
-                border: none;
-                border-bottom: 1px solid #ddd;
-                font-weight: 500;
-            }
-
-            /* Buttons - FilterMate mousse style */
-            QPushButton {
-                padding: 8px 16px;
-                border-radius: 8px;
-                font-size: 10pt;
-                font-weight: 500;
-                border: none;
-            }
-            QPushButton#applyBtn {
-                background-color: #27ae60;
-                color: white;
-            }
-            QPushButton#applyBtn:hover {
-                background-color: #219a52;
-            }
-            QPushButton#applyBtn:disabled {
-                background-color: #95d5b2;
-                color: #e8e8e8;
-            }
-            QPushButton#saveBtn {
-                background-color: #3498db;
-                color: white;
-            }
-            QPushButton#saveBtn:hover {
-                background-color: #2980b9;
-            }
-            QPushButton#saveBtn:disabled {
-                background-color: #a9cce3;
-                color: #e8e8e8;
-            }
-            QPushButton#deleteBtn {
-                background-color: #e74c3c;
-                color: white;
-            }
-            QPushButton#deleteBtn:hover {
-                background-color: #c0392b;
-            }
-            QPushButton#deleteBtn:disabled {
-                background-color: #f5b7b1;
-                color: #e8e8e8;
-            }
-            QPushButton#closeBtn {
-                background-color: #ecf0f1;
-                color: #2c3e50;
-                border: 1px solid #bdc3c7;
-            }
-            QPushButton#closeBtn:hover {
-                background-color: #d5dbdb;
-            }
-
-            /* Labels */
-            QLabel {
-                color: #34495e;
-            }
-            QLabel#infoLabel {
-                color: #7f8c8d;
-                font-size: 9pt;
-            }
-            QLabel#noRemoteLabel {
-                color: #95a5a6;
-                font-style: italic;
-                padding: 20px;
-            }
-
-            /* Splitter */
-            QSplitter::handle {
-                background-color: #e0e0e0;
-                width: 1px;
-            }
-            QSplitter::handle:hover {
-                background-color: #f39c12;
-            }
-        """
+    def _icon_button(self, text: str, icon_name: str) -> "QPushButton":
+        """Button with the QGIS theme icon ``icon_name``; the text alone when the icon is missing."""
+        button = QPushButton(text)
+        icon = self._theme_icon(icon_name)
+        if icon is not None:
+            button.setIcon(icon)
+        return button
 
     def _create_left_panel(self) -> QWidget:
         """Create the left panel with favorites list."""
@@ -531,10 +439,14 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         left_layout.setSpacing(0)
 
         self._list_widget = QListWidget()
-        self._list_widget.setMinimumWidth(180)
-        self._list_widget.setMaximumWidth(250)
+        self._list_widget.setMinimumWidth(240)
+        # A long name ends with "…" instead of widening the list or scrolling it.
+        self._list_widget.setTextElideMode(Qt.TextElideMode.ElideRight)
+        self._list_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self._list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._list_widget.currentItemChanged.connect(self._on_selection_changed)
+        self._list_widget.itemDoubleClicked.connect(self._on_item_double_clicked)
+        self._list_widget.customContextMenuRequested.connect(self._on_list_context_menu)
 
         left_layout.addWidget(self._list_widget)
         return left_panel
@@ -547,38 +459,68 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         right_layout.setSpacing(0)
 
         self._tab_widget = QTabWidget()
+        # A selected (bold) tab is never cut: no "…", scroll buttons when the tabs do not fit.
+        self._tab_widget.tabBar().setElideMode(Qt.TextElideMode.ElideNone)
+        self._tab_widget.tabBar().setUsesScrollButtons(True)
 
-        # Tab 1: General Info
-        general_tab = self._create_general_tab()
-        self._tab_widget.addTab(general_tab, self.tr("General"))
-
-        # Tab 2: Expression
-        expr_tab = self._create_expression_tab()
-        self._tab_widget.addTab(expr_tab, self.tr("Expression"))
-
-        # Tab 3: Remote Layers
-        remote_tab = self._create_remote_tab()
-        self._tab_widget.addTab(remote_tab, self.tr("Remote"))
+        self._tab_widget.addTab(self._create_summary_tab(), self.tr("Summary"))
+        self._tab_widget.addTab(self._create_remote_tab(), self.tr("Layers"))
 
         right_layout.addWidget(self._tab_widget)
         return right_panel
 
-    def _create_general_tab(self) -> QWidget:
-        """Create the General Info tab."""
-        general_tab = QWidget(self)
-        general_layout = QFormLayout(general_tab)
-        general_layout.setContentsMargins(12, 12, 12, 12)
-        general_layout.setSpacing(10)
-        general_layout.setRowWrapPolicy(QFormLayout.RowWrapPolicy.DontWrapRows)
+    def _create_summary_tab(self) -> QWidget:
+        """Create the Summary tab: what the favorite does, then what can be edited."""
+        summary_tab = QWidget(self)
+        tab_layout = QVBoxLayout(summary_tab)
+        tab_layout.setContentsMargins(0, 0, 0, 0)
+        tab_layout.setSpacing(0)
+
+        # Everything scrolls vertically; the width never grows with a long expression.
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        content = QWidget()
+        content.setObjectName("summaryContent")
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(12, 10, 12, 10)
+        content_layout.setSpacing(10)
+
+        self._scope_badge_label = QLabel("")
+        self._scope_badge_label.setObjectName("scopeBadge")
+        self._scope_badge_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        badge_row = QHBoxLayout()
+        badge_row.setContentsMargins(0, 0, 0, 0)
+        badge_row.addWidget(self._scope_badge_label)
+        badge_row.addStretch()
+        content_layout.addLayout(badge_row)
+
+        # Read-only summary rows (rebuilt on each selection by _show_summary_rows)
+        self._summary_form = QFormLayout()
+        self._summary_form.setContentsMargins(0, 0, 0, 0)
+        self._summary_form.setSpacing(2)
+        self._summary_form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.DontWrapRows)
+        self._summary_form.setLabelAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        content_layout.addLayout(self._summary_form)
+
+        # Editable fields
+        edit_form = QFormLayout()
+        edit_form.setContentsMargins(0, 0, 0, 0)
+        edit_form.setSpacing(8)
+        edit_form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.DontWrapRows)
+        edit_form.setLabelAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
         self._name_edit = QLineEdit()
         self._name_edit.setPlaceholderText(self.tr("Favorite name"))
-        general_layout.addRow(self.tr("Name:"), self._name_edit)
+        edit_form.addRow(self._field_label(self.tr("Name:")), self._name_edit)
 
         self._description_edit = QTextEdit()
-        self._description_edit.setMaximumHeight(70)
+        self._description_edit.setAcceptRichText(False)
+        # 3 lines high (a longer text scrolls inside): the whole tab stays on one screen
+        self._description_edit.setFixedHeight(self._lines_height(self._description_edit, 3))
         self._description_edit.setPlaceholderText(self.tr("Description (auto-generated, editable)"))
-        general_layout.addRow(self.tr("Description:"), self._description_edit)
+        edit_form.addRow(self._field_label(self.tr("Description:")), self._description_edit)
 
         self._tags_edit = QLineEdit()
         self._tags_edit.setPlaceholderText(
@@ -587,123 +529,60 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._tags_edit.setToolTip(
             self.tr("Tags help organize and search favorites.\nSeparate multiple tags with commas.")
         )
-        general_layout.addRow(self.tr("Tags:"), self._tags_edit)
+        edit_form.addRow(self._field_label(self.tr("Tags:")), self._tags_edit)
+        content_layout.addLayout(edit_form)
 
-        self._layer_label = QLabel("-")
-        self._layer_label.setObjectName("infoLabel")
-        self._layer_label.setWordWrap(True)
-        general_layout.addRow(self.tr("Source Layer:"), self._layer_label)
+        # "Used 3 times · created 24/11/2026"
+        self._usage_label = QLabel("-")
+        self._usage_label.setObjectName("infoLabel")
+        self._usage_label.setWordWrap(True)
+        content_layout.addWidget(self._usage_label)
+        content_layout.addStretch()
 
-        self._provider_label = QLabel("-")
-        self._provider_label.setObjectName("infoLabel")
-        general_layout.addRow(self.tr("Provider:"), self._provider_label)
+        scroll.setWidget(content)
+        tab_layout.addWidget(scroll)
+        return summary_tab
 
-        # Stats row
-        stats_layout = QHBoxLayout()
-        stats_layout.setContentsMargins(0, 4, 0, 0)
-        self._use_count_label = QLabel("-")
-        self._created_label = QLabel("-")
-        self._created_label.setObjectName("infoLabel")
-        stats_layout.addWidget(QLabel(self.tr("Used:")))
-        stats_layout.addWidget(self._use_count_label)
-        stats_layout.addStretch()
-        stats_layout.addWidget(QLabel(self.tr("Created:")))
-        stats_layout.addWidget(self._created_label)
-        general_layout.addRow(stats_layout)
+    @staticmethod
+    def _field_label(text: str) -> "QLabel":
+        """Muted label of a form row, the same as the summary labels."""
+        label = QLabel(text)
+        label.setObjectName("summaryKey")
+        label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        return label
 
-        # Scope controls (v5.1) — two independent dimensions: owner (mine
-        # vs shared) and project (this vs all). Each dimension is a pair
-        # of mutually exclusive radios; the combination gives the 4
-        # scopes surfaced in the header filter combo.
-        scope_container = QWidget(general_tab)
-        scope_v = QVBoxLayout(scope_container)
-        scope_v.setContentsMargins(0, 0, 0, 0)
-        scope_v.setSpacing(4)
-
-        owner_row = QHBoxLayout()
-        owner_row.setSpacing(8)
-        self._scope_mine_radio = QRadioButton(self.tr("Mine"))
-        self._scope_shared_radio = QRadioButton(self.tr("Shared"))
-        self._scope_owner_group = QButtonGroup(self)
-        self._scope_owner_group.addButton(self._scope_mine_radio)
-        self._scope_owner_group.addButton(self._scope_shared_radio)
-        owner_row.addWidget(self._scope_mine_radio)
-        owner_row.addWidget(self._scope_shared_radio)
-        owner_row.addStretch()
-        scope_v.addLayout(owner_row)
-
-        project_row = QHBoxLayout()
-        project_row.setSpacing(8)
-        self._scope_proj_here_radio = QRadioButton(self.tr("This project"))
-        self._scope_proj_all_radio = QRadioButton(self.tr("All projects"))
-        # Project dimension is read-only for now: moving a favorite
-        # across projects would require cross-cache bookkeeping that
-        # belongs in a dedicated "move/duplicate" flow. Radios show the
-        # current project scope for transparency but can't be flipped.
-        self._scope_proj_here_radio.setEnabled(False)
-        self._scope_proj_all_radio.setEnabled(False)
-        ro_tip = self.tr(
-            "Project scope is set when the favorite is created. Move it "
-            "via the filtering tab (coming soon) to switch projects."
-        )
-        self._scope_proj_here_radio.setToolTip(ro_tip)
-        self._scope_proj_all_radio.setToolTip(ro_tip)
-        self._scope_project_group = QButtonGroup(self)
-        self._scope_project_group.addButton(self._scope_proj_here_radio)
-        self._scope_project_group.addButton(self._scope_proj_all_radio)
-        project_row.addWidget(self._scope_proj_here_radio)
-        project_row.addWidget(self._scope_proj_all_radio)
-        project_row.addStretch()
-        scope_v.addLayout(project_row)
-
-        # A small owner label showing who currently owns this favorite —
-        # useful when editing someone else's shared favorite so the user
-        # isn't surprised when "Mine" gets auto-selected on save.
-        self._owner_label = QLabel("-")
-        self._owner_label.setObjectName("infoLabel")
-        scope_v.addWidget(self._owner_label)
-
-        general_layout.addRow(self.tr("Visibility:"), scope_container)
-
-        return general_tab
-
-    def _create_expression_tab(self) -> QWidget:
-        """Create the Expression tab."""
-        expr_tab = QWidget(self)
-        expr_layout = QVBoxLayout(expr_tab)
-        expr_layout.setContentsMargins(12, 12, 12, 12)
-        expr_layout.setSpacing(8)
-
-        source_expr_label = QLabel(self.tr("<b>Source Layer Expression:</b>"))
-        expr_layout.addWidget(source_expr_label)
-
-        self._expression_edit = QTextEdit()
-        self._expression_edit.setPlaceholderText(self.tr("Filter expression for source layer"))
-        self._expression_edit.setStyleSheet(
-            "font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 10pt;"
-        )
-        expr_layout.addWidget(self._expression_edit)
-
-        return expr_tab
+    @staticmethod
+    def _lines_height(edit: "QTextEdit", lines: int) -> int:
+        """Height of ``lines`` text lines in ``edit`` (its padding and frame included)."""
+        return int(edit.fontMetrics().lineSpacing() * lines) + 24
 
     def _create_remote_tab(self) -> QWidget:
-        """Create the Remote Layers tab."""
+        """Create the Layers tab: the remote layers the favorite filters."""
         remote_tab = QWidget(self)
         remote_layout = QVBoxLayout(remote_tab)
         remote_layout.setContentsMargins(12, 12, 12, 12)
         remote_layout.setSpacing(8)
 
-        remote_header = QLabel(self.tr("<b>Filtered Remote Layers:</b>"))
-        remote_layout.addWidget(remote_header)
-
-        self._remote_tree = QTreeWidget()
-        self._remote_tree.setHeaderLabels([self.tr("Layer"), self.tr("Features"), self.tr("Expression")])
-        self._remote_tree.setColumnCount(3)
-        self._remote_tree.header().setStretchLastSection(True)
-        self._remote_tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self._remote_tree.header().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        self._remote_tree.setAlternatingRowColors(True)
-        remote_layout.addWidget(self._remote_tree)
+        self._remote_table = QTableWidget(0, 3)
+        self._remote_table.setHorizontalHeaderLabels(
+            [self.tr("Layer"), self.tr("Features"), self.tr("Expression")]
+        )
+        self._remote_table.verticalHeader().setVisible(False)
+        # Rows grow with the wrapped expression and follow the column width
+        self._remote_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self._remote_table.setWordWrap(True)
+        self._remote_table.setTextElideMode(Qt.TextElideMode.ElideNone)
+        self._remote_table.setShowGrid(False)
+        self._remote_table.setAlternatingRowColors(True)
+        self._remote_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self._remote_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
+        self._remote_table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        header = self._remote_table.horizontalHeader()
+        header.setDefaultAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        header.setStretchLastSection(True)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        remote_layout.addWidget(self._remote_table)
 
         self._no_remote_label = QLabel(self.tr("<i>No remote layers in this favorite</i>"))
         self._no_remote_label.setObjectName("noRemoteLabel")
@@ -718,19 +597,19 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         button_layout.setContentsMargins(0, 12, 0, 0)
         button_layout.setSpacing(10)
 
-        self._apply_btn = QPushButton("▶ " + self.tr("Apply"))
+        self._apply_btn = self._icon_button(self.tr("Apply"), "/mActionFilter2.svg")
         self._apply_btn.setObjectName("applyBtn")
         self._apply_btn.setEnabled(False)
         self._apply_btn.setToolTip(self.tr("Apply this favorite filter to the project"))
         self._apply_btn.clicked.connect(self._on_apply)
 
-        self._save_btn = QPushButton("💾 " + self.tr("Save Changes"))
+        self._save_btn = self._icon_button(self.tr("Save Changes"), "/mActionFileSave.svg")
         self._save_btn.setObjectName("saveBtn")
         self._save_btn.setEnabled(False)
         self._save_btn.setToolTip(self.tr("Save modifications to this favorite"))
         self._save_btn.clicked.connect(self._on_save)
 
-        self._delete_btn = QPushButton("🗑️ " + self.tr("Delete"))
+        self._delete_btn = self._icon_button(self.tr("Delete"), "/mActionDeleteSelected.svg")
         self._delete_btn.setObjectName("deleteBtn")
         self._delete_btn.setEnabled(False)
         self._delete_btn.setToolTip(self.tr("Permanently delete this favorite"))
@@ -753,30 +632,19 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         """Populate list widget with given favorites."""
         self._list_widget.clear()
 
-        # Pre-resolve identity / project once — avoids a per-item cascade
+        # Pre-resolve identity once — avoids a per-item cascade
         # lookup that would otherwise fire for every favorite.
         current_user = self._resolve_current_user()
-        project_uuid = getattr(self._favorites_service, "_project_uuid", None)
-        try:
-            from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
-        except Exception:
-            GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
 
         for fav in favorites_to_show:
-            layers_count = fav.get_layers_count() if hasattr(fav, 'get_layers_count') else 1
-
-            kind = _favorite_scope_kind(
-                fav, current_user, project_uuid, GLOBAL_PROJECT_UUID,
-            )
-            badge = _SCOPE_BADGES.get(kind, "")
-            # Layout: "<badge> ★ <name> [<layers>] 🏷️"
-            item_text = (f"{badge} " if badge else "") + f"★ {fav.name}"
-            if layers_count > 1:
-                item_text += f" [{layers_count}]"
-            if fav.tags:
-                item_text += " 🏷️"
-
-            item = QListWidgetItem(item_text)
+            kind = self._scope_kind(fav, current_user)
+            # The scope is the icon (globe: all projects, star: this project);
+            # the text is the name.
+            item = QListWidgetItem(fav.name)
+            is_global = fav.id in self._global_ids or kind in _GLOBAL_SCOPE_KINDS
+            scope_icon = render_icon("projection" if is_global else "star", self._dark)
+            if scope_icon is not None:
+                item.setIcon(scope_icon)
             item.setData(Qt.ItemDataRole.UserRole, fav.id)
 
             owner = getattr(fav, "owner", None)
@@ -812,6 +680,16 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         """Refresh the list when the scope combo changes."""
         self._refresh_filtered_list()
 
+    def _on_sort_changed(self, _index: int = 0):
+        """Refresh the list when the sort combo changes."""
+        self._refresh_filtered_list()
+
+    def _current_sort_key(self) -> str:
+        """Key of the sort combo entry (defaults to the name)."""
+        combo = getattr(self, "_sort_combo", None)
+        data = combo.currentData() if combo is not None else None
+        return str(data) if data else SORT_NAME
+
     def _refresh_filtered_list(self):
         """Recompute and repopulate the list from search × scope state.
 
@@ -838,9 +716,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         else:
             visible = scoped
 
-        self._populate_list(visible)
+        self._populate_list(sorted_favorites(visible, self._current_sort_key()))
+        self._select_favorite(self._current_fav_id, notify=False)
 
-        total = self._favorites_service.count
+        total = len(self._all_favorites)
         if len(visible) == total:
             self._header_label.setText(
                 self.tr("<b>Saved Favorites ({0})</b>").format(total)
@@ -862,29 +741,29 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
         Mirrors ``FavoritesManager.list_by_scope`` but stays in the UI
         layer so the manager cache (already loaded + search-friendly)
-        is reused rather than re-queried. Keeps "foreign" favorites
-        (those owned by another user) visible in the ALL scope so users
-        never get confused about missing rows.
+        is reused rather than re-queried. Favorites owned by another user
+        stay visible in the ALL scope and the "Shared" ones so users never
+        get confused about missing rows.
         """
         if scope_key == "all" or not favorites:
             return list(favorites)
 
         current_user = self._resolve_current_user()
-        project_uuid = getattr(self._favorites_service, "_project_uuid", None)
-        try:
-            from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
-        except Exception:
-            GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
 
-        def _kind(fav):
-            return _favorite_scope_kind(
-                fav, current_user, project_uuid, GLOBAL_PROJECT_UUID,
-            )
-
-        # "shared_*" scopes: owner IS NULL × project dimension
-        # "mine_*" scopes: owner == me × project dimension
-        # "foreign" never matches a filter entry — always only visible in ALL.
-        return [f for f in favorites if _kind(f) == scope_key]
+        # "*_shared" scopes: where the favorite is kept (project or global list),
+        # whoever owns it. "*_mine" scopes: the same, and its owner is the
+        # current user. Favorites of another person show under "*_shared" or "All".
+        wanted = _SCOPE_KEY_FILTERS.get(scope_key)
+        if wanted is None:
+            return []
+        want_global, mine_only = wanted
+        matching = []
+        for fav in favorites:
+            kind = self._scope_kind(fav, current_user)
+            is_global = fav.id in self._global_ids or kind in _GLOBAL_SCOPE_KINDS
+            if is_global == want_global and (not mine_only or kind in _MINE_SCOPE_KINDS):
+                matching.append(fav)
+        return matching
 
     def _resolve_current_user(self):
         """Pull the current user identity from the manager (cached)."""
@@ -899,6 +778,83 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                 return None
         return None
 
+    def _scope_kind(self, fav, current_user=None) -> str:
+        """Scope kind of ``fav`` (see ``_favorite_scope_kind``).
+
+        A favorite of the global list is of the global project whatever the
+        project the manager is pinned to.
+        """
+        try:
+            from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
+        except Exception:
+            GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
+        if fav.id in self._global_ids:
+            project_uuid = GLOBAL_PROJECT_UUID
+        else:
+            project_uuid = getattr(self._favorites_service, "_project_uuid", None)
+        return _favorite_scope_kind(fav, current_user, project_uuid, GLOBAL_PROJECT_UUID)
+
+    def _favorite_is_global(self, fav) -> bool:
+        """True when ``fav`` applies to every project of this computer."""
+        return (
+            fav.id in self._global_ids
+            or self._scope_kind(fav, self._resolve_current_user()) in _GLOBAL_SCOPE_KINDS
+        )
+
+    def _load_favorites(self) -> list:
+        """The project favorites then the global ones; remembers which are global."""
+        service = self._favorites_service
+        if not service:
+            self._global_ids = set()
+            return []
+        favorites = list(service.get_all_favorites())
+        known = {fav.id for fav in favorites}
+        global_favorites = [fav for fav in service.get_global_favorites() if fav.id not in known]
+        self._global_ids = {fav.id for fav in global_favorites}
+        return favorites + global_favorites
+
+    def _find_favorite(self, fav_id):
+        """The favorite of this id among the project and global ones, None when gone."""
+        if fav_id in self._global_ids:
+            return next((fav for fav in self._all_favorites if fav.id == fav_id), None)
+        return self._favorites_service.get_favorite(fav_id) if self._favorites_service else None
+
+    def _select_favorite(self, fav_id, notify: bool = True) -> bool:
+        """Select the row of ``fav_id``; False when it is not listed.
+
+        With ``notify`` False the details panel is left as it is (an edit in
+        progress stays), only the highlighted row follows.
+        """
+        if not fav_id:
+            return False
+        for row in range(self._list_widget.count()):
+            if self._list_widget.item(row).data(Qt.ItemDataRole.UserRole) == fav_id:
+                if notify:
+                    self._list_widget.setCurrentRow(row)
+                else:
+                    self._list_widget.blockSignals(True)
+                    try:
+                        self._list_widget.setCurrentRow(row)
+                    finally:
+                        self._list_widget.blockSignals(False)
+                return True
+        return False
+
+    def _clear_summary_rows(self) -> None:
+        """Remove the read-only rows of the Summary tab."""
+        while self._summary_form.rowCount():
+            self._summary_form.removeRow(0)
+
+    def _show_summary_rows(self, fav) -> None:
+        """Rebuild the read-only rows (Filter / Then / Spatial / Tags) of ``fav``."""
+        self._clear_summary_rows()
+        for label, text in summary_rows(fav, self.tr):
+            key = self._field_label(label)
+            # An expression wraps in a read-only view, every other value in a plain label;
+            # neither is altered, so a selection copies exactly what is stored.
+            value = ExpressionView(text, MONO_FAMILY) if label == self.tr("Filter") else text_value(text)
+            self._summary_form.addRow(key, value)
+
     def _on_selection_changed(self):
         """Handle selection change in list."""
         item = self._list_widget.currentItem()
@@ -906,81 +862,30 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
 
         fav_id = item.data(Qt.ItemDataRole.UserRole)
-        fav = self._favorites_service.get_favorite(fav_id)
+        fav = self._find_favorite(fav_id)
 
         if not fav:
             return
 
         self._current_fav_id = fav_id
+        # A global favorite is read-only here (apply, copy and delete only)
+        editable = fav_id not in self._global_ids
+        for field in (self._name_edit, self._description_edit, self._tags_edit):
+            field.setEnabled(editable)
 
-        # Update General tab
+        # Summary tab
+        self._scope_badge_label.setText(scope_badge(self._favorite_is_global(fav), self.tr))
+        self._show_summary_rows(fav)
         self._name_edit.setText(fav.name)
         self._description_edit.setText(fav.description or "")
         self._tags_edit.setText(", ".join(fav.tags) if fav.tags else "")
-        self._layer_label.setText(fav.layer_name or "-")
-        self._provider_label.setText(fav.layer_provider or "-")
-        self._use_count_label.setText(f"{fav.use_count} times")
-        self._created_label.setText(fav.created_at[:16] if fav.created_at else "-")
+        self._usage_label.setText(self._usage_text(fav))
 
-        # Scope radios — owner dimension
-        current_user = self._resolve_current_user()
-        owner = getattr(fav, "owner", None)
-        # ``blockSignals`` keeps the radios from triggering save-state
-        # side effects while we initialise them from the loaded favorite.
-        for radio in (
-            self._scope_mine_radio, self._scope_shared_radio,
-            self._scope_proj_here_radio, self._scope_proj_all_radio,
-        ):
-            radio.blockSignals(True)
-        try:
-            if owner is None:
-                self._scope_shared_radio.setChecked(True)
-            else:
-                # Mine when the owner matches the resolved current user,
-                # otherwise we still show "Mine" so saving doesn't silently
-                # strip someone else's ownership — the owner label below
-                # disambiguates for the user.
-                self._scope_mine_radio.setChecked(True)
-
-            # Scope radios — project dimension. _load_favorites only ever
-            # loads one project at a time, so there's no per-row info here
-            # — the dialog offers the choice as a "move on save" control.
-            try:
-                from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
-            except Exception:
-                GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
-            project_uuid = getattr(self._favorites_service, "_project_uuid", None)
-            if project_uuid == GLOBAL_PROJECT_UUID:
-                self._scope_proj_all_radio.setChecked(True)
-            else:
-                self._scope_proj_here_radio.setChecked(True)
-        finally:
-            for radio in (
-                self._scope_mine_radio, self._scope_shared_radio,
-                self._scope_proj_here_radio, self._scope_proj_all_radio,
-            ):
-                radio.blockSignals(False)
-
-        # Owner identity label
-        if owner is None:
-            self._owner_label.setText(self.tr("— (shared with everyone)"))
-        elif current_user and owner == current_user:
-            self._owner_label.setText(self.tr("{0} (you)").format(owner))
-        else:
-            # Editing someone else's favorite — highlight it so saving
-            # as "Mine" doesn't feel surreptitious.
-            self._owner_label.setText(self.tr(
-                "{0} — selecting 'Mine' on save will transfer ownership to you"
-            ).format(owner))
-
-        # Update Expression tab
-        self._expression_edit.setText(fav.expression)
-
-        # Update Remote Layers tab
-        self._remote_tree.clear()
+        # Layers tab
+        self._remote_table.setRowCount(0)
         if fav.remote_layers and len(fav.remote_layers) > 0:
             self._no_remote_label.hide()
-            self._remote_tree.show()
+            self._remote_table.show()
 
             for key, layer_data in fav.remote_layers.items():
                 # Handle both new format (dict) and legacy format (string layer_id)
@@ -1000,127 +905,265 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                     feature_count = '?'
                     display = key
                     signature = None
-                tree_item = QTreeWidgetItem([
-                    display,
-                    str(feature_count),
-                    expr[:80] + "..." if len(expr) > 80 else expr
-                ])
+                shown = expr if len(expr) <= _REMOTE_EXPRESSION_CHARS else expr[:_REMOTE_EXPRESSION_CHARS] + "…"
+                row = self._remote_table.rowCount()
+                self._remote_table.insertRow(row)
+                cells = [
+                    QTableWidgetItem(display),
+                    QTableWidgetItem(str(feature_count)),
+                    QTableWidgetItem(shown),
+                ]
+                # The full expression (and the layer signature) in the tooltip
                 tooltip = expr
                 if signature and signature != display:
                     tooltip = f"[{signature}]\n{expr}" if expr else f"[{signature}]"
-                tree_item.setToolTip(0, signature or display)
-                tree_item.setToolTip(2, tooltip)
-                self._remote_tree.addTopLevelItem(tree_item)
+                cells[0].setToolTip(signature or display)
+                cells[2].setToolTip(tooltip)
+                for column, cell in enumerate(cells):
+                    self._remote_table.setItem(row, column, cell)
 
             self._tab_widget.setTabText(
-                2, self.tr("Remote ({0})").format(len(fav.remote_layers))
+                1, self.tr("Layers ({0})").format(len(fav.remote_layers))
             )
         else:
-            self._remote_tree.hide()
+            self._remote_table.hide()
             self._no_remote_label.show()
-            self._tab_widget.setTabText(2, self.tr("Remote"))
+            self._tab_widget.setTabText(1, self.tr("Layers"))
 
         # Enable buttons
         self._apply_btn.setEnabled(True)
-        self._save_btn.setEnabled(True)
+        self._save_btn.setEnabled(editable)
         self._delete_btn.setEnabled(True)
+
+    def _usage_text(self, fav) -> str:
+        """'Used 3 times · created 24/11/2026'."""
+        created = self.tr("created {0}").format(date_text(fav.created_at))
+        return f"{use_text(fav.use_count, getattr(fav, 'last_used_at', None), self.tr)} · {created}"
 
     def _on_apply(self):
         """Apply selected favorite."""
-        if self._current_fav_id:
-            self.favoriteApplied.emit(self._current_fav_id)
-            self.accept()
+        self._apply_favorite(self._current_fav_id)
+
+    def _apply_favorite(self, fav_id) -> None:
+        """Ask for ``fav_id`` to be applied (the signal depends on its scope), then close."""
+        if not fav_id:
+            return
+        if fav_id in self._global_ids:
+            self.globalFavoriteApplied.emit(fav_id)
+        else:
+            self.favoriteApplied.emit(fav_id)
+        self.accept()
+
+    def _on_item_double_clicked(self, item) -> None:
+        """Double-click on a row applies its favorite."""
+        self._apply_favorite(item.data(Qt.ItemDataRole.UserRole))
+
+    def _on_list_context_menu(self, pos) -> None:
+        """Context menu of a row: apply, rename, duplicate, delete, copy to global/project."""
+        item = self._list_widget.itemAt(pos)
+        if item is None:
+            return
+        self._list_widget.setCurrentItem(item)
+        menu = self._build_context_menu(item.data(Qt.ItemDataRole.UserRole))
+        try:
+            menu.exec(self._list_widget.viewport().mapToGlobal(pos))
+        finally:
+            menu.deleteLater()  # parented to the dialog: it would pile up there
+
+    def _build_context_menu(self, fav_id) -> "QMenu":
+        """Menu of the favorite ``fav_id``; a global one cannot be renamed or duplicated."""
+        is_global = fav_id in self._global_ids
+        menu = QMenu(self)
+        menu.addAction(self.tr("Apply")).triggered.connect(lambda: self._apply_favorite(fav_id))
+        rename = menu.addAction(self.tr("Rename"))
+        rename.setEnabled(not is_global)
+        rename.triggered.connect(self._focus_name_edit)
+        duplicate = menu.addAction(self.tr("Duplicate"))
+        duplicate.setEnabled(not is_global)
+        duplicate.triggered.connect(lambda: self._duplicate_favorite(fav_id))
+        menu.addSeparator()
+        menu.addAction(self.tr("Delete")).triggered.connect(self._on_delete)
+        menu.addSeparator()
+        if is_global:
+            menu.addAction(self.tr("Copy to project")).triggered.connect(
+                lambda: self._copy_to_project(fav_id)
+            )
+        else:
+            menu.addAction(self.tr("Copy to global")).triggered.connect(
+                lambda: self._copy_to_global(fav_id)
+            )
+        return menu
+
+    def _focus_name_edit(self) -> None:
+        """Rename: show the Summary tab with the Name field focused and selected."""
+        self._tab_widget.setCurrentIndex(0)
+        self._name_edit.setFocus()
+        self._name_edit.selectAll()
+
+    def _duplicate_favorite(self, fav_id) -> None:
+        """Add a copy of the project favorite ``fav_id`` named '<name> (copy)' and select it."""
+        fav = self._find_favorite(fav_id)
+        if fav is None or fav_id in self._global_ids:
+            return
+        new_id = self._favorites_service.add_favorite(
+            name=self.tr("{0} (copy)").format(fav.name),
+            expression=fav.expression,
+            layer_name=fav.layer_name,
+            layer_id=fav.layer_id,
+            layer_provider=fav.layer_provider,
+            spatial_config=copy.deepcopy(fav.spatial_config),
+            remote_layers=copy.deepcopy(fav.remote_layers),
+            tags=list(fav.tags or []),
+            description=fav.description or "",
+        )
+        if not new_id:
+            self._show_error(self.tr("Could not duplicate '{0}'.").format(fav.name))
+            return
+        self._after_list_change(new_id)
+
+    def _copy_to_global(self, fav_id) -> None:
+        """Copy the project favorite ``fav_id`` to the global favorites and select the copy."""
+        fav = self._find_favorite(fav_id)
+        if fav is None or fav_id in self._global_ids:
+            return
+        from ...core.domain.exceptions import FavoritePersistenceError
+        try:
+            new_id = self._favorites_service.copy_to_global(fav_id)
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr("Could not copy to global: {0}").format(e.__cause__ or e))
+            return
+        if not new_id:
+            self._show_error(self.tr("Could not copy '{0}' to the global favorites.").format(fav.name))
+            return
+        self._after_list_change(new_id)
+
+    def _copy_to_project(self, fav_id) -> None:
+        """Copy the global favorite ``fav_id`` to this project and select the copy.
+
+        A project favorite with the same name and expression is reused, as when
+        the global favorite is applied.
+        """
+        fav = self._find_favorite(fav_id)
+        if fav is None or fav_id not in self._global_ids:
+            return
+        from ...core.domain.exceptions import FavoritePersistenceError
+        from ...core.domain.global_favorite_copy import project_copy_of_global
+        existing = project_copy_of_global(fav, self._favorites_service.get_all_favorites())
+        if existing is not None:
+            self._select_favorite(existing.id)
+            return
+        try:
+            new_id = self._favorites_service.import_global_to_project(fav_id)
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr("Could not copy to project: {0}").format(e.__cause__ or e))
+            return
+        if not new_id:
+            self._show_error(self.tr("Could not copy '{0}' to this project.").format(fav.name))
+            return
+        self._after_list_change(new_id)
+
+    def _after_list_change(self, select_id) -> None:
+        """Reload the list after a favorite was added, select ``select_id``, tell the owner."""
+        self.refresh()
+        self._select_favorite(select_id)
+        self.favoritesChanged.emit()
+
+    def _name_taken_in_scope(self, name: str) -> bool:
+        """True when another favorite of the selected one's scope already has ``name``."""
+        current = self._find_favorite(self._current_fav_id)
+        if current is None:
+            return False
+        is_global = self._favorite_is_global(current)
+        return any(
+            fav.id != self._current_fav_id
+            and self._favorite_is_global(fav) == is_global
+            and (getattr(fav, 'name', '') or '').strip() == name
+            for fav in self._all_favorites
+        )
 
     def _on_save(self):
         """Save changes to selected favorite."""
         if not self._current_fav_id or not self._favorites_service:
             return
+        if self._current_fav_id in self._global_ids:  # read-only here
+            return
 
         new_name = self._name_edit.text().strip()
-        new_expr = self._expression_edit.toPlainText().strip()
         new_desc = self._description_edit.toPlainText().strip()
         new_tags = [
             tag.strip() for tag in self._tags_edit.text().split(',')
             if tag.strip()
         ]
 
-        # Resolve the target owner from the scope radios. "Shared" →
-        # owner NULL; "Mine" → current resolved user. We never write
-        # "Mine" when no identity is resolvable — would produce an
-        # empty-string owner that the scope filter treats as a foreign
-        # user, confusing everyone.
-        desired_owner = None
-        if hasattr(self, "_scope_mine_radio") and self._scope_mine_radio.isChecked():
-            desired_owner = self._resolve_current_user() or None
+        if not new_name:
+            self._show_warning(self.tr("The name cannot be empty."))
+            return
+        if self._name_taken_in_scope(new_name):
+            self._show_warning(self.tr("Another favorite is already named '{0}'.").format(new_name))
+            return
 
-        # Project dimension isn't editable inline (changing project_uuid
-        # would require moving the row across caches, out of scope for
-        # this dialog). The radio stays read-only: enabled visually so
-        # the user sees the current state, but save does not act on it.
+        # F16 phase 4 lazy import: keeps this module importable in
+        # tests that lack the 3-level package nesting needed by a
+        # top-level ``from ...core.domain.exceptions`` statement.
+        from ...core.domain.exceptions import FavoritePersistenceError
+        # FIX 2026-04-22: suppress re-entrant external refresh triggered by
+        # the manager's own favorites_changed emission.
+        self._suppress_external_refresh = True
+        try:
+            self._favorites_service.update_favorite(
+                self._current_fav_id,
+                name=new_name,
+                description=new_desc,
+                tags=new_tags,
+            )
+            self._favorites_service.save()
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr(
+                "Could not save '{0}': {1}"
+            ).format(new_name, e.__cause__ or e))
+            return
+        finally:
+            self._suppress_external_refresh = False
 
-        if new_name:
-            # F16 phase 4 lazy import: keeps this module importable in
-            # tests that lack the 3-level package nesting needed by a
-            # top-level ``from ...core.domain.exceptions`` statement.
-            from ...core.domain.exceptions import FavoritePersistenceError
-            # FIX 2026-04-22: suppress re-entrant external refresh triggered by
-            # the manager's own favorites_changed emission.
-            self._suppress_external_refresh = True
-            try:
-                self._favorites_service.update_favorite(
-                    self._current_fav_id,
-                    name=new_name,
-                    expression=new_expr,
-                    description=new_desc,
-                    tags=new_tags,
-                    owner=desired_owner,
-                )
-                self._favorites_service.save()
-            except FavoritePersistenceError as e:
-                self._show_error(self.tr(
-                    "Could not save '{0}': {1}"
-                ).format(new_name, e.__cause__ or e))
-                return
-            finally:
-                self._suppress_external_refresh = False
+        # FIX 2026-04-22: refresh the local cache so the next search or
+        # populate_list() call reflects the edited name/tags. Without this,
+        # _all_favorites still held the pre-edit FilterFavorite and
+        # clearing the search box silently restored the old display.
+        self._all_favorites = self._load_favorites()
+        # v5.1: re-render the list via the unified refresh so the
+        # scope badge reflects the freshly-persisted owner. The
+        # manual per-item text edit we used to do was out of sync
+        # with the new badge prefix and lost the current scope filter.
+        self._refresh_filtered_list()
+        # The refresh already highlighted the saved row without notifying
+        # (an edit in progress stays on an external change); here the edit is
+        # saved, so rebuild the details from the stored favorite.
+        self._on_selection_changed()
 
-            # FIX 2026-04-22: refresh the local cache so the next search or
-            # populate_list() call reflects the edited name/tags. Without this,
-            # _all_favorites still held the pre-edit FilterFavorite and
-            # clearing the search box silently restored the old display.
-            self._all_favorites = self._favorites_service.get_all_favorites()
-            # v5.1: re-render the list via the unified refresh so the
-            # scope badge reflects the freshly-persisted owner. The
-            # manual per-item text edit we used to do was out of sync
-            # with the new badge prefix and lost the current scope filter.
-            self._refresh_filtered_list()
-            # Re-select the same id after repopulation so the details
-            # pane keeps showing the user's edit.
-            for i in range(self._list_widget.count()):
-                if self._list_widget.item(i).data(Qt.ItemDataRole.UserRole) == self._current_fav_id:
-                    self._list_widget.setCurrentRow(i)
-                    break
-
-            self.favoriteUpdated.emit(self._current_fav_id)
-            self.favoritesChanged.emit()
-            logger.info(f"Favorite updated: {new_name}")
+        self.favoriteUpdated.emit(self._current_fav_id)
+        self.favoritesChanged.emit()
+        logger.info(f"Favorite updated: {new_name}")
 
     def _on_delete(self):
         """Delete selected favorite."""
         if not self._current_fav_id or not self._favorites_service:
             return
 
-        fav = self._favorites_service.get_favorite(self._current_fav_id)
+        fav = self._find_favorite(self._current_fav_id)
         if not fav:
             return
 
         # F11 policy: stays a modal QMessageBox.question because deletion
         # is destructive and a toast confirm would risk silent data loss
         # if missed.
+        question = self.tr("Delete favorite '{0}'?").format(fav.name)
+        if not self._favorite_is_global(fav):
+            # A project favorite travels with the project file: the others see it go.
+            question += "\n\n" + self.tr("It is removed for everyone who opens this project.")
         reply = QMessageBox.question(
             self,
             self.tr("Delete Favorite"),
-            self.tr("Delete favorite '{0}'?").format(fav.name),
+            question,
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
@@ -1128,13 +1171,17 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
 
         deleted_id = self._current_fav_id
+        is_global = deleted_id in self._global_ids
         # F16 phase 4 lazy import — see _on_save for rationale.
         from ...core.domain.exceptions import FavoritePersistenceError
         # FIX 2026-04-22: suppress re-entrant external refresh from manager's
         # own favorites_changed emission during delete + save.
         self._suppress_external_refresh = True
         try:
-            removed = self._favorites_service.remove_favorite(deleted_id)
+            if is_global:
+                removed = self._favorites_service.remove_global_favorite(deleted_id)
+            else:
+                removed = self._favorites_service.remove_favorite(deleted_id)
         except FavoritePersistenceError as e:
             self._show_error(self.tr(
                 "Could not delete '{0}': {1}"
@@ -1161,9 +1208,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             if getattr(f, 'id', None) != deleted_id
         ]
 
-        fav_count = self._favorites_service.count if self._favorites_service else 0
+        self._global_ids.discard(deleted_id)
         self._header_label.setText(
-            self.tr("<b>Saved Favorites ({0})</b>").format(fav_count)
+            self.tr("<b>Saved Favorites ({0})</b>").format(len(self._all_favorites))
         )
 
         # Save changes
@@ -1198,38 +1245,21 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _clear_details(self):
         """Clear all detail fields."""
-        # Tab 1: General
+        # Summary tab
+        self._scope_badge_label.setText("")
+        self._clear_summary_rows()
         self._name_edit.clear()
         self._description_edit.clear()
         self._tags_edit.clear()
-        self._layer_label.setText("-")
-        self._provider_label.setText("-")
-        self._use_count_label.setText("-")
-        self._created_label.setText("-")
-        # Scope radios — reset without firing signals so the next
-        # selection starts from a clean state.
-        for radio in (
-            getattr(self, "_scope_mine_radio", None),
-            getattr(self, "_scope_shared_radio", None),
-            getattr(self, "_scope_proj_here_radio", None),
-            getattr(self, "_scope_proj_all_radio", None),
-        ):
-            if radio is None:
-                continue
-            radio.blockSignals(True)
-            radio.setChecked(False)
-            radio.blockSignals(False)
-        if hasattr(self, "_owner_label") and self._owner_label is not None:
-            self._owner_label.setText("-")
+        for field in (self._name_edit, self._description_edit, self._tags_edit):
+            field.setEnabled(True)
+        self._usage_label.setText("-")
 
-        # Tab 2: Expression
-        self._expression_edit.clear()
-
-        # Tab 3: Remote Layers
-        self._remote_tree.clear()
+        # Layers tab
+        self._remote_table.setRowCount(0)
         self._no_remote_label.show()
-        self._remote_tree.hide()
-        self._tab_widget.setTabText(2, "🗂️ " + self.tr("Remote Layers"))
+        self._remote_table.hide()
+        self._tab_widget.setTabText(1, self.tr("Layers"))
 
     # ─── favorites_sharing integration (optional) ─────────────────────
 
@@ -1297,10 +1327,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         ``_refresh_filtered_list`` so the user's filtering state
         survives ``favorites_changed`` and shared-picker imports.
         """
+        self._all_favorites = self._load_favorites()
         if not self._favorites_service:
-            self._all_favorites = []
             self._populate_list(self._all_favorites)
             self._header_label.setText(self.tr("<b>Saved Favorites (0)</b>"))
             return
-        self._all_favorites = self._favorites_service.get_all_favorites()
         self._refresh_filtered_list()

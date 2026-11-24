@@ -80,18 +80,38 @@ class TestScopeKind:
 
 
 # ---------------------------------------------------------------------------
-# Badge glyphs
+# Global kinds (the list shows them with the globe icon)
 # ---------------------------------------------------------------------------
 
 
-class TestBadges:
-    def test_every_classifier_output_has_a_badge(self):
-        """Guard against a future classifier adding a kind without a badge."""
+class TestGlobalKinds:
+    def test_global_kinds_are_the_classifier_global_outputs(self):
         try:
-            from ui.dialogs.favorites_manager import _SCOPE_BADGES
+            from ui.dialogs.favorites_manager import _GLOBAL_SCOPE_KINDS
         except ImportError as exc:
             pytest.skip(f"UI module not importable: {exc}")
-        for key in ("mine_here", "mine_global",
-                    "shared_here", "shared_global", "foreign"):
-            assert key in _SCOPE_BADGES, f"Missing badge for scope kind {key!r}"
-            assert _SCOPE_BADGES[key], f"Empty badge for scope kind {key!r}"
+        assert _GLOBAL_SCOPE_KINDS == {"shared_global", "mine_global"}
+
+
+
+class TestScopeKeys:
+    def test_every_scope_combo_key_has_a_filter(self):
+        try:
+            from ui.dialogs.favorites_manager import _SCOPE_KEY_FILTERS
+        except ImportError as exc:
+            pytest.skip(f"UI module not importable: {exc}")
+        from core.domain.favorites_manager import FavoriteScope
+        assert set(_SCOPE_KEY_FILTERS) == {scope.value for scope in FavoriteScope} - {"all"}
+
+    def test_shared_entries_follow_where_it_is_kept_and_mine_entries_also_the_owner(self):
+        try:
+            from ui.dialogs.favorites_manager import _SCOPE_KEY_FILTERS
+        except ImportError as exc:
+            pytest.skip(f"UI module not importable: {exc}")
+        # (kept in the global list, owner must be the current user)
+        assert _SCOPE_KEY_FILTERS == {
+            "global_shared": (True, False),
+            "project_shared": (False, False),
+            "global_mine": (True, True),
+            "project_mine": (False, True),
+        }
