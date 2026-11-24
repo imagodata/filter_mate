@@ -1199,8 +1199,11 @@ def check_chat(provider, layer, authcfg, work):
     card_undo = [b for b in panel.thread.findChildren(_Button, "pushButton_agent_card_undo") if b.isVisibleTo(panel)]
     check("undo sits on the change card (mockup)", len(card_undo) == 1 and not panel.undo_button.isVisibleTo(panel), card_undo)
     check("the request is a bubble", panel.thread.findChild(QLabel, "label_agent_request") is not None)
-    check("the steps give way to the cards", "Reading the layers" not in " ".join(
-        label.text() for label in panel.thread.findChildren(QLabel)))
+    # The steps fold into one line above them (2026-11-24): out of view, still there for who opens them.
+    folded = panel.thread.findChildren(_Button, "pushButton_agent_steps")
+    check("the steps fold away under one line", len(folded) == 1 and "Steps:" in folded[0].text() and not any(
+        label.isVisibleTo(panel) for label in panel.thread.findChildren(QLabel) if "Reading the layers" in label.text()),
+        [button.text() for button in folded])
     check("the conversation replaced the welcome", panel.stack.currentIndex() == 1)
     check("the applied filter is listed with its expression", '"pop" > 1000' in panel.thread.toPlainText() and
           "✓" in panel.thread.toPlainText(), panel.thread.toPlainText())

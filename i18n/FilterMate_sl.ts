@@ -2696,6 +2696,46 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Zaprosite za filter…</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>one failed</source>
+        <translation>eden ni uspel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>Steps: {} · {} s</source>
+        <translation>Koraki: {} · {} s</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Start afresh: the agent forgets this conversation, the changes stay</source>
+        <translation>Začnite znova: agent pozabi ta pogovor, spremembe ostanejo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask the agent…</source>
+        <translation>Vprašajte agenta…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Describe what to plan…</source>
+        <translation>Opišite, kaj naj se načrtuje…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask a question about the project…</source>
+        <translation>Postavite vprašanje o projektu…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Filter, find open data, style or map: describe it in your own words. The agent reads the project and shows each step. Each turn can be undone.</source>
+        <translation>Filtrirajte, poiščite odprte podatke, oblikujte sloge ali izdelajte zemljevide: opišite to z lastnimi besedami. Agent prebere projekt in prikaže vsak korak. Vsak krog je mogoče razveljaviti.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>What should the agent do?</source>
+        <translation>Kaj naj naredi agent?</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>Zamenjava ponudnika ali naslova znova zahteva to soglasje.</translation>

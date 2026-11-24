@@ -2696,6 +2696,46 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>ማጣሪያ ይጠይቁ…</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>one failed</source>
+        <translation>አንዱ አልተሳካም</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>Steps: {} · {} s</source>
+        <translation>ደረጃዎች፦ {} · {} s</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Start afresh: the agent forgets this conversation, the changes stay</source>
+        <translation>እንደገና ጀምር፦ ወኪሉ ይህን ውይይት ይረሳል፣ ለውጦቹ ግን ይቀራሉ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask the agent…</source>
+        <translation>ወኪሉን ይጠይቁ…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Describe what to plan…</source>
+        <translation>ምን እንደሚታቀድ ይግለጹ…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask a question about the project…</source>
+        <translation>ስለ ፕሮጀክቱ ጥያቄ ይጠይቁ…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Filter, find open data, style or map: describe it in your own words. The agent reads the project and shows each step. Each turn can be undone.</source>
+        <translation>ማጣራት፣ ክፍት መረጃ መፈለግ፣ ማስዋብ ወይም ካርታ መሥራት፦ በራስዎ ቃላት ይግለጹ። ወኪሉ ፕሮጀክቱን ያነባል እና እያንዳንዱን ደረጃ ያሳያል። እያንዳንዱ ዙር ሊቀለበስ ይችላል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>What should the agent do?</source>
+        <translation>ወኪሉ ምን ማድረግ አለበት?</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>አቅራቢ ወይም አድራሻ መቀየር ይህን ስምምነት እንደገና ይጠይቃል።</translation>

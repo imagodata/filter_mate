@@ -2696,6 +2696,46 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <translation>Minta sebuah filter…</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>one failed</source>
+        <translation>satu gagal</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>Steps: {} · {} s</source>
+        <translation>Langkah: {} · {} s</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Start afresh: the agent forgets this conversation, the changes stay</source>
+        <translation>Mulai dari awal: agen melupakan percakapan ini, perubahan tetap ada</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask the agent…</source>
+        <translation>Tanya agen…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Describe what to plan…</source>
+        <translation>Jelaskan apa yang akan direncanakan…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask a question about the project…</source>
+        <translation>Ajukan pertanyaan tentang proyek…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Filter, find open data, style or map: describe it in your own words. The agent reads the project and shows each step. Each turn can be undone.</source>
+        <translation>Filter, temukan data terbuka, atur gaya, atau buat peta: jelaskan dengan kata-kata Anda sendiri. Agen membaca proyek dan menampilkan setiap langkah. Setiap giliran dapat diurungkan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>What should the agent do?</source>
+        <translation>Apa yang harus dilakukan agen?</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>Mengganti penyedia atau alamat akan meminta persetujuan ini lagi.</translation>

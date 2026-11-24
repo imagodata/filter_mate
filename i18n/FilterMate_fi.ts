@@ -2696,6 +2696,46 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Pyydä suodatinta…</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>one failed</source>
+        <translation>yksi epäonnistui</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>Steps: {} · {} s</source>
+        <translation>Vaiheet: {} · {} s</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Start afresh: the agent forgets this conversation, the changes stay</source>
+        <translation>Aloita alusta: agentti unohtaa tämän keskustelun, muutokset säilyvät</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask the agent…</source>
+        <translation>Kysy agentilta…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Describe what to plan…</source>
+        <translation>Kuvaile, mitä suunnitellaan…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask a question about the project…</source>
+        <translation>Kysy jotain projektista…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Filter, find open data, style or map: describe it in your own words. The agent reads the project and shows each step. Each turn can be undone.</source>
+        <translation>Suodata, etsi avointa dataa, tyylittele tai tee karttoja: kuvaile se omin sanoin. Agentti lukee projektin ja näyttää jokaisen vaiheen. Jokaisen kierroksen voi kumota.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>What should the agent do?</source>
+        <translation>Mitä agentin pitäisi tehdä?</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>Toisen palveluntarjoajan tai osoitteen valinta pyytää tämän suostumuksen uudelleen.</translation>

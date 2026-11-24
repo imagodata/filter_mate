@@ -2676,6 +2676,46 @@ Do you agree to all of them? No runs none of them.</translation>
         <translation>Ask for a filter…</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>one failed</source>
+        <translation>one failed</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>Steps: {} · {} s</source>
+        <translation>Steps: {} · {} s</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Start afresh: the agent forgets this conversation, the changes stay</source>
+        <translation>Start afresh: the agent forgets this conversation, the changes stay</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask the agent…</source>
+        <translation>Ask the agent…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Describe what to plan…</source>
+        <translation>Describe what to plan…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask a question about the project…</source>
+        <translation>Ask a question about the project…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Filter, find open data, style or map: describe it in your own words. The agent reads the project and shows each step. Each turn can be undone.</source>
+        <translation>Filter, find open data, style or map: describe it in your own words. The agent reads the project and shows each step. Each turn can be undone.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>What should the agent do?</source>
+        <translation>What should the agent do?</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>Choosing another provider or address asks for this agreement again.</translation>

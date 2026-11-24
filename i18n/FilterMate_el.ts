@@ -2696,6 +2696,46 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Ζητήστε ένα φίλτρο…</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>one failed</source>
+        <translation>ένα απέτυχε</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>Steps: {} · {} s</source>
+        <translation>Βήματα: {} · {} s</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Start afresh: the agent forgets this conversation, the changes stay</source>
+        <translation>Ξεκινήστε από την αρχή: ο πράκτορας ξεχνά αυτή τη συνομιλία, οι αλλαγές μένουν</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask the agent…</source>
+        <translation>Ρωτήστε τον πράκτορα…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Describe what to plan…</source>
+        <translation>Περιγράψτε τι να σχεδιαστεί…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask a question about the project…</source>
+        <translation>Κάντε μια ερώτηση για το έργο…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Filter, find open data, style or map: describe it in your own words. The agent reads the project and shows each step. Each turn can be undone.</source>
+        <translation>Φιλτράρετε, βρείτε ανοιχτά δεδομένα, δώστε στυλ ή φτιάξτε χάρτες: περιγράψτε το με δικά σας λόγια. Ο πράκτορας διαβάζει το έργο και δείχνει κάθε βήμα. Κάθε γύρος μπορεί να αναιρεθεί.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>What should the agent do?</source>
+        <translation>Τι πρέπει να κάνει ο πράκτορας;</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>Η αλλαγή παρόχου ή διεύθυνσης ζητά ξανά αυτή τη συγκατάθεση.</translation>

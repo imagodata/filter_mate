@@ -2696,6 +2696,46 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>कोई फ़िल्टर माँगें…</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>one failed</source>
+        <translation>एक विफल रहा</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>Steps: {} · {} s</source>
+        <translation>चरण: {} · {} से.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Start afresh: the agent forgets this conversation, the changes stay</source>
+        <translation>नए सिरे से शुरू करें: एजेंट इस बातचीत को भूल जाता है, बदलाव बने रहते हैं</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask the agent…</source>
+        <translation>एजेंट से पूछें…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Describe what to plan…</source>
+        <translation>बताएँ कि क्या योजना बनानी है…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask a question about the project…</source>
+        <translation>प्रोजेक्ट के बारे में कोई सवाल पूछें…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Filter, find open data, style or map: describe it in your own words. The agent reads the project and shows each step. Each turn can be undone.</source>
+        <translation>फ़िल्टर करें, ओपन डेटा खोजें, स्टाइल दें या नक्शा बनाएँ: इसे अपने शब्दों में बताएँ। एजेंट प्रोजेक्ट को पढ़ता है और हर चरण दिखाता है। हर बारी को पूर्ववत किया जा सकता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>What should the agent do?</source>
+        <translation>एजेंट को क्या करना चाहिए?</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>दूसरा प्रदाता या पता चुनने पर यह सहमति फिर से माँगी जाती है।</translation>

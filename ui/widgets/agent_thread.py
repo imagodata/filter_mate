@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import html
 import re
+import time
 from typing import Any, Callable, List, Optional, Sequence
 
 from qgis.PyQt.QtCore import QCoreApplication, QSize, Qt, QTimer, pyqtSignal
@@ -90,6 +91,12 @@ def plain_tooltip(text: str) -> str:
     """``text`` as a tooltip shows it word for word: a tooltip starting with a known tag is taken for rich text (an
     image it names is loaded); escaped in a paragraph that keeps spaces and line breaks, nothing of it is read."""
     return f'<p style="white-space: pre-wrap;">{html.escape(text)}</p>' if text else ""
+
+
+def steps_summary(count: int, seconds: float, failed: bool = False) -> str:
+    """The folded line of the steps of a request: how many, how long, and whether one failed."""
+    words = _tr("Steps: {} · {} s").format(count, max(1, round(seconds)))
+    return words + (" · " + _tr("one failed") if failed else "")
 
 
 def _plain_label(text: str, parent: QWidget, wrap: bool = True) -> QLabel:
@@ -908,6 +915,7 @@ class AgentThread(QScrollArea):
         label = _plain_label(f"◌  {text}…", self._content)  # breakable, as every wrapped label
         item = _Item(label, "", "step")
         item.step_text = text  # type: ignore[attr-defined]
+        item.started = time.monotonic()  # type: ignore[attr-defined]
         item.look = lambda palette, dark: self._look_step(item, palette, dark)
         self._append(item)
 
@@ -932,10 +940,49 @@ class AgentThread(QScrollArea):
                 self._look_step(item, palette, dark)
 
     def clear_steps(self) -> None:
-        """The request is over: its steps give way to its cards and its answer."""
-        for item in [item for item in self._items if item.kind in ("step", "step_done")]:
-            self._drop(item.widget)
-            self._items.remove(item)
+        """The request is over: its steps fold into one line above them, which opens them again.
+
+        They were taken out of the thread until 2026-11-24: what the agent did to reach its answer was gone with
+        them, and only its cards and its answer said it. Folded, they leave the cards and the answer in view.
+        """
+        steps = [item for item in self._items if item.kind in ("step", "step_done")]
+        if not steps:
+            return
+        self.finish_steps()  # the one still running is done: the request is over
+        failed = any(not getattr(item, "step_ok", True) for item in steps)
+        seconds = max(0.0, time.monotonic() - getattr(steps[0], "started", time.monotonic()))
+        for item in steps:
+            item.kind = "step_kept"
+            item.widget.setVisible(False)
+        button = QPushButton(self._content)
+        button.setObjectName("pushButton_agent_steps")
+        button.setFlat(True)
+        button.setCheckable(True)
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
+        button.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        words = steps_summary(len(steps), seconds, failed)
+
+        def show(opened: bool) -> None:
+            button.setText(("▾  " if opened else "▸  ") + words)
+            for step in steps:
+                try:
+                    step.widget.setVisible(opened)
+                except RuntimeError:  # cleared meanwhile
+                    pass
+            self._fit_timer.start()
+
+        def look(palette: dict, dark: bool) -> None:
+            color = palette["fm_danger"] if failed else palette["fm_text_muted"]
+            _sheet(button, f"QPushButton#pushButton_agent_steps {{ font-size: 12px; text-align: left; border: none;"
+                           f" background: transparent; padding: 0; color: {color}; }}"
+                           f"QPushButton#pushButton_agent_steps:hover {{ color: {palette['fm_accent']}; }}")
+
+        button.toggled.connect(show)
+        show(False)
+        summary = _Item(button, "", "steps", look)
+        look(self._palette_of(), self._is_dark())
+        self._items.insert(self._items.index(steps[0]), summary)
+        self._layout.insertWidget(self._layout.indexOf(steps[0].widget), button)
         self._fit_timer.start()
 
     def set_undo_possible(self, possible: bool) -> bool:

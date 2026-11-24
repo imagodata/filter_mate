@@ -2696,6 +2696,46 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>ขอตัวกรอง…</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>one failed</source>
+        <translation>ล้มเหลว 1 ขั้นตอน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_thread.py" line="1"/>
+        <source>Steps: {} · {} s</source>
+        <translation>ขั้นตอน: {} · {} วิ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Start afresh: the agent forgets this conversation, the changes stay</source>
+        <translation>เริ่มใหม่: เอเจนต์จะลืมบทสนทนานี้ แต่การเปลี่ยนแปลงยังคงอยู่</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask the agent…</source>
+        <translation>ถามเอเจนต์…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Describe what to plan…</source>
+        <translation>อธิบายสิ่งที่ต้องการวางแผน…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Ask a question about the project…</source>
+        <translation>ถามคำถามเกี่ยวกับโปรเจกต์…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Filter, find open data, style or map: describe it in your own words. The agent reads the project and shows each step. Each turn can be undone.</source>
+        <translation>กรอง ค้นหาข้อมูลเปิด จัดสไตล์ หรือสร้างแผนที่: อธิบายด้วยคำพูดของคุณเอง เอเจนต์จะอ่านโปรเจกต์และแสดงทุกขั้นตอน ทุกรอบสามารถเลิกทำได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>What should the agent do?</source>
+        <translation>เอเจนต์ควรทำอะไร</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>การเปลี่ยนผู้ให้บริการหรือที่อยู่จะขอความยินยอมนี้อีกครั้ง</translation>
