@@ -126,6 +126,8 @@ Menu favoris ★ → **🌐 Manage Resource Sharing repos…** → **➕ Add**
 | **Branch** | `main` | Vide = HEAD du remote |
 | **Local clone** | (vide) | Auto = `[profil QGIS]/FilterMate/repos/<slug>` |
 | **Collection** | `acme-favorites` | Sous-dossier sous `collections/` |
+| **Bundle file name** | `acme_zones` | Nom du fichier publié (`<nom>.fmfav-pack.json`) : lettres, chiffres, `_` et `-`. Vide = `favorites` |
+| **Commit e-mail** | `sig@acme.example` | E-mail des commits de publication (le nom est l'auteur des métadonnées). Vide = `filter_mate@imagodata.local` |
 | **Authentication** | sélectionner `acme-pat` | Combobox QgsAuthConfigSelect |
 | **Use as default** | ☑ | Facultatif mais permet le Quick Publish |
 
@@ -136,7 +138,7 @@ Bouton **🔌 Test connection** → doit afficher `✔ OK — remote reachable.`
 Menu ★ → **📤 Publish to Resource Sharing…**
 
 1. **Target collection** : sélectionner le repo configuré (apparaît avec 🌐 et le statut)
-2. **Bundle file name** : nom court du fichier (ex. `zones_bruxelles`)
+2. **Bundle file name** : nom court du fichier (ex. `zones_bruxelles`) ; pré-rempli avec le **Bundle file name** du dépôt choisi, un nom saisi à la main est conservé
 3. **Collection metadata** : nom, auteur, licence, tags, homepage, description
    - L'auteur est crucial : c'est ce qui peuplera le filtre auteur côté consommateurs
 4. **Favorites to include** : cocher les favoris à embarquer (bouton "Select all")
@@ -144,6 +146,8 @@ Menu ★ → **📤 Publish to Resource Sharing…**
 6. **📤 Publish**
 
 FilterMate exécute : `clone si besoin → pull --ff-only → écrire le bundle → git add → commit → push`.
+
+Tout vient de l'entrée du dépôt : le clone suit l'URL et la branche configurées (un changement de port, d'hôte ou de branche dans **Manage repos** est pris à la publication suivante), le commit porte l'e-mail du dépôt.
 
 En cas d'erreur (conflit de merge, push refusé, token expiré) : message + bouton **Open clone…** pour résoudre dans tes outils Git habituels. **FilterMate ne fait jamais de force-push ni de rebase auto.**
 
@@ -155,7 +159,9 @@ Apparaît seulement si :
 - Un repo `is_default = true` est configuré
 - Au moins 1 favori existe dans le projet
 
-Confirme une fois → publie **TOUS les favoris du projet** vers le dépôt par défaut, avec les métadonnées par défaut (`default_publish_metadata` dans la config). Bypass complet du dialog.
+Confirme une fois → publie **TOUS les favoris du projet** vers le dépôt par défaut, avec les métadonnées par défaut (`default_publish_metadata` dans la config), sous le **Bundle file name** et avec le **Commit e-mail** de ce dépôt. Bypass complet du dialog.
+
+> Changer le **Bundle file name** d'un dépôt laisse le bundle de l'ancien nom dans le dépôt : le supprimer côté serveur si les abonnés ne doivent pas voir les deux.
 
 Idéal pour les workflows "j'ai modifié 3 favoris, je sync".
 

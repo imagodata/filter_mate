@@ -196,7 +196,9 @@ Each entry in `remote_repos` is a dict:
   "local_clone": "",
   "target_collection": "acme-favorites",
   "is_default": true,
-  "authcfg_id": "qg1xy7w"
+  "authcfg_id": "qg1xy7w",
+  "bundle_name": "acme_zones",
+  "commit_email": "gis@acme.example"
 }
 ```
 
@@ -209,6 +211,8 @@ Each entry in `remote_repos` is a dict:
 | `target_collection` | no | Sub-directory under `collections/`. Empty → repo root *is* the collection. **Validated** with `safe_join_under()` — values that would escape `local_clone` (`../foo`, absolute paths, symlink-out) are rejected with a warning. |
 | `is_default` | no | Picks this repo on dialog open. |
 | `authcfg_id` | no | **Preferred** — id of a QGIS Auth Manager entry. Resolved at exec time. |
+| `bundle_name` | no | File name of the bundle written by the quick publish and pre-filled in the publish dialog (`<bundle_name>.fmfav-pack.json`). Letters, digits, `_` and `-`. Empty → `favorites`. Renaming it leaves the bundle of the former name in the repo: delete it there if subscribers should not see both. |
+| `commit_email` | no | E-mail of the publish commits; the name is the Author of the publish metadata (`FilterMate` when empty). Empty → `filter_mate@imagodata.local`. Only the author is set: the committer stays the machine's git identity when it has one. |
 | `auth_header` | no | **Refused since 5.0** — a plaintext header left by 4.x is never used and is removed from `config.json` when the extensions load, even disabled or missing their dependencies (an error names the repo). |
 
 ### Authentication: use QGIS Auth Manager

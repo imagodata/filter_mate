@@ -42,7 +42,14 @@ except ImportError:  # pragma: no cover - standalone
     HAS_AUTH_SELECT = False
 
 from ..git_resolver import GitSource, resolve_for_extension
-from ..remote_repo_manager import RemoteRepo, RemoteRepoManager
+from ..remote_repo_manager import (
+    DEFAULT_BUNDLE_NAME,
+    DEFAULT_COMMIT_EMAIL,
+    RemoteRepo,
+    RemoteRepoManager,
+    is_valid_bundle_name,
+    is_valid_commit_email,
+)
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.UI.RepoManager')
 
@@ -136,6 +143,18 @@ class RepoEditDialog(QDialog if HAS_QT else object):
         ))
         form.addRow(_tr("Collection:"), self._target_collection_edit)
 
+        self._bundle_name_edit = QLineEdit()
+        self._bundle_name_edit.setPlaceholderText(
+            _tr("Empty = {0}").format(DEFAULT_BUNDLE_NAME)
+        )
+        form.addRow(_tr("Bundle file name:"), self._bundle_name_edit)
+
+        self._commit_email_edit = QLineEdit()
+        self._commit_email_edit.setPlaceholderText(
+            _tr("Empty = {0}").format(DEFAULT_COMMIT_EMAIL)
+        )
+        form.addRow(_tr("Commit e-mail:"), self._commit_email_edit)
+
         # Auth row — prefer the native QGIS Auth Config selector when
         # available (gives the user access to the full create-edit-delete
         # auth manager UI in one click).
@@ -187,6 +206,8 @@ class RepoEditDialog(QDialog if HAS_QT else object):
         self._branch_edit.setText(repo.branch)
         self._clone_edit.setText(repo.local_clone)
         self._target_collection_edit.setText(repo.target_collection)
+        self._bundle_name_edit.setText(repo.bundle_name)
+        self._commit_email_edit.setText(repo.commit_email)
         self._default_check.setChecked(repo.is_default)
         self._set_auth_id(repo.authcfg_id)
 
@@ -222,6 +243,8 @@ class RepoEditDialog(QDialog if HAS_QT else object):
             target_collection=self._target_collection_edit.text().strip(),
             is_default=self._default_check.isChecked(),
             authcfg_id=self._get_auth_id(),
+            bundle_name=self._bundle_name_edit.text().strip(),
+            commit_email=self._commit_email_edit.text().strip(),
             extra=(dict(self._original.extra) if self._original else {}),
         )
 
@@ -301,6 +324,20 @@ class RepoEditDialog(QDialog if HAS_QT else object):
             QMessageBox.warning(
                 self, _tr("Duplicate name"),
                 _tr("A repo named '{0}' already exists.").format(name),
+            )
+            return
+        bundle_name = self._bundle_name_edit.text().strip()
+        if bundle_name and not is_valid_bundle_name(bundle_name):
+            QMessageBox.warning(
+                self, _tr("Invalid bundle file name"),
+                _tr("'{0}': use only letters, digits, '_' and '-'.").format(bundle_name),
+            )
+            return
+        email = self._commit_email_edit.text().strip()
+        if email and not is_valid_commit_email(email):
+            QMessageBox.warning(
+                self, _tr("Invalid commit e-mail"),
+                _tr("'{0}' is not an e-mail address (name@domain).").format(email),
             )
             return
         self.accept()

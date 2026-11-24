@@ -298,7 +298,7 @@ class FavoritesExtensionBridge:
 
         from ...extensions.favorites_sharing.service import CollectionTarget
 
-        bundle_name = "favorites"
+        bundle_name = repo.effective_bundle_name
         metadata = ext.get_default_publish_metadata() if hasattr(
             ext, 'get_default_publish_metadata'
         ) else {}
@@ -324,8 +324,7 @@ class FavoritesExtensionBridge:
                 raise RuntimeError(result.error_message or "bundle write failed")
             return result.bundle_path
 
-        author = (metadata.get('author') or '').strip()
-        commit_author = f"{author} <filter_mate@imagodata.local>" if author else None
+        commit_author = repo.commit_author(metadata.get('author') or '')
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         try:

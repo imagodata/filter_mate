@@ -14,10 +14,14 @@ import types
 import pytest
 
 from extensions.favorites_sharing.remote_repo_manager import (
+    DEFAULT_BUNDLE_NAME,
+    DEFAULT_COMMIT_EMAIL,
     PLAINTEXT_AUTH_REMOVED_IN,
     RemoteRepo,
     RemoteRepoManager,
     RepoStatus,
+    is_valid_bundle_name,
+    is_valid_commit_email,
 )
 
 GIT_AVAILABLE = shutil.which("git") is not None
@@ -148,6 +152,88 @@ class TestRemoteRepoFromConfig:
 # ---------------------------------------------------------------------------
 # Status badges reflect disk state
 # ---------------------------------------------------------------------------
+
+
+class TestPublishSettingsFromTheEntry:
+    """bundle_name and commit_email come from the repo entry, defaults only when empty."""
+
+    def test_entry_fields_are_read_and_not_left_in_extra(self):
+        repo = RemoteRepo.from_config_entry({
+            "name": "Team", "bundle_name": " zones ", "commit_email": " sig@team.example ",
+        })
+        assert repo.bundle_name == "zones"
+        assert repo.commit_email == "sig@team.example"
+        assert "bundle_name" not in repo.extra and "commit_email" not in repo.extra
+
+    def test_defaults_when_the_entry_leaves_them_empty(self):
+        repo = RemoteRepo(name="Team")
+        assert repo.effective_bundle_name == DEFAULT_BUNDLE_NAME
+        assert repo.commit_author() == f"FilterMate <{DEFAULT_COMMIT_EMAIL}>"
+        assert repo.commit_author("Ana") == f"Ana <{DEFAULT_COMMIT_EMAIL}>"
+
+    def test_repo_values_win(self):
+        repo = RemoteRepo(name="Team", bundle_name="zones", commit_email="sig@team.example")
+        assert repo.effective_bundle_name == "zones"
+        assert repo.commit_author(" Ana ") == "Ana <sig@team.example>"
+        assert repo.commit_author() == "FilterMate <sig@team.example>"
+
+    @pytest.mark.parametrize("typed, name", [
+        ("Ana <ana@home.example>", "Ana"),   # the e-mail of the repo wins
+        ("<", "FilterMate"),                 # nothing left for git
+        ("\x01\x02", "FilterMate"),          # control characters only
+        ("  Équipe SIG\n ", "Équipe SIG"),
+    ])
+    def test_author_name_is_cleaned_for_git(self, typed, name):
+        repo = RemoteRepo(name="Team", commit_email="sig@team.example")
+        assert repo.commit_author(typed) == f"{name} <sig@team.example>"
+
+    @pytest.mark.parametrize("value, ok", [
+        ("sig@team.example", True), ("first.last+tag@sub.team-x.org", True), ("a@localhost", True),
+        ("-opt@team.example", False), ("a@b.", False), ("a@-b.org", False), ("a,b@c", False),
+        ("a\x1b@b", False), ("a\u202e@b", False), ('"a"@b', False), ("é@b.org", False), ("a@b@c", False),
+    ])
+    def test_commit_email_rule(self, value, ok):
+        assert is_valid_commit_email(value) is ok
+
+    @pytest.mark.parametrize("value, ok", [
+        ("zones", True), ("zones_2026-11", True), ("équipe", True),
+        ("a/b", False), ("..", False), ("x.fmfav-pack.json", False), ("a b", False), ("", False),
+    ])
+    def test_bundle_name_rule(self, value, ok):
+        assert is_valid_bundle_name(value) is ok
+
+    def test_non_text_values_of_a_hand_edited_config_are_ignored(self, caplog):
+        with caplog.at_level("WARNING"):
+            repo = RemoteRepo.from_config_entry({"name": "Team", "bundle_name": ["x"], "commit_email": 123})
+        assert (repo.bundle_name, repo.commit_email) == ("", "")
+        assert repo.effective_bundle_name == DEFAULT_BUNDLE_NAME
+        assert "bundle_name must be text" in caplog.text and "commit_email must be text" in caplog.text
+
+    @pytest.mark.parametrize("bad", ["not-an-email", "a b@c.d", "x@y>evil", "a@b@c"])
+    def test_invalid_email_from_a_hand_edited_config_is_ignored(self, bad, caplog):
+        repo = RemoteRepo(name="Team", commit_email=bad)
+        with caplog.at_level("WARNING"):
+            assert repo.commit_author("Ana") == f"Ana <{DEFAULT_COMMIT_EMAIL}>"
+        assert "commit_email" in caplog.text
+
+    def test_save_round_trip_keeps_them(self):
+        ext = FakeExtension([])
+        mgr = RemoteRepoManager(ext)
+        assert mgr.save_repos([RemoteRepo(
+            name="Team", git_url="https://example.org/t.git",
+            bundle_name="zones", commit_email="sig@team.example",
+        )])
+        saved = ext.last_set_call[1][0]
+        assert saved["bundle_name"] == "zones"
+        assert saved["commit_email"] == "sig@team.example"
+        repo = mgr.get_by_name("Team")
+        assert (repo.bundle_name, repo.commit_email) == ("zones", "sig@team.example")
+
+    def test_empty_fields_are_not_written(self):
+        ext = FakeExtension([])
+        RemoteRepoManager(ext).save_repos([RemoteRepo(name="Team")])
+        saved = ext.last_set_call[1][0]
+        assert "bundle_name" not in saved and "commit_email" not in saved
 
 
 class TestRepoStatus:
@@ -449,6 +535,24 @@ class TestPublishBundleE2E:
         _run(["git", "clone", "--branch", "main", str(seeded_bare), str(on_main)])
         assert not (on_main / "TEAM.md").exists()
         assert not (on_main / "collections").exists()
+
+    def test_commit_uses_the_email_of_the_repo_entry(self, tmp_path, seeded_bare):
+        mgr = RemoteRepoManager(FakeExtension([{
+            "name": "Acme",
+            "git_url": str(seeded_bare),
+            "branch": "main",
+            "local_clone": str(tmp_path / "clone"),
+            "target_collection": "acme",
+            "commit_email": "sig@acme.example",
+        }]))
+        repo = mgr.get_default()
+        sync = mgr.publish_to_remote(repo, self._write_bundle_fn())
+        assert sync.success, sync.error_message
+        author = subprocess.run(
+            ["git", "log", "-1", "--format=%an <%ae>"],
+            cwd=repo.expanded_local_clone, capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        assert author == "FilterMate <sig@acme.example>"
 
     def test_bundle_write_exception_surfaces_as_error(self, tmp_path, seeded_bare):
         mgr = self._make_manager(tmp_path, seeded_bare)
