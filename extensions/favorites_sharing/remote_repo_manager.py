@@ -539,6 +539,17 @@ class RemoteRepoManager:
                 )
                 client.clone(repo.git_url, branch=repo.branch or None)
             else:
+                # The clone keeps the origin it was cloned from: follow the
+                # git_url of the config (a new port or host) before talking
+                # to the remote, so pull and push reach the configured server.
+                current = client.get_remote_url("origin")
+                if current != repo.git_url:
+                    logger.info(
+                        "Remote origin of %s set to the configured URL %s (was %s)",
+                        repo.expanded_local_clone,
+                        _scrub_text(repo.git_url), _scrub_text(current) or "<none>",
+                    )
+                    client.set_remote_url(repo.git_url, "origin")
                 logger.info("Fast-forward pull on %s", repo.expanded_local_clone)
                 client.pull_fast_forward()
         except GitError as exc:
