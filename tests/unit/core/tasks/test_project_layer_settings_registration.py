@@ -309,3 +309,44 @@ def test_a_value_with_quotes_comes_back_as_written(vector, tmp_path):
     with sqlite3.connect(path) as conn:
         assert conn.execute("SELECT meta_value FROM fm_project_layers_properties WHERE meta_key = 'has_buffer_value'"
                             ).fetchone() == ("True",)
+
+
+def test_a_fresh_reload_clears_every_kind_of_layer_given(vector):
+    """A raster first among the layers of a fresh reload left `layer` unbound (UnboundLocalError: nothing was
+    registered); each layer is cleared by its own id, not the layers of the same name."""
+    class Raster:
+        def id(self):
+            return "ortho_1"
+    task = _task()
+    task.layers = [Raster(), _vector_layer("parcelles_1", "parcelles"), ("routes_1", "x", "y"), object()]
+    task.PROJECT = MagicMock(mapLayersByName=MagicMock(side_effect=AssertionError("read in the worker")))
+    assert task.remove_variables_from_all_layers() is True
+    assert task._deferred_layer_variables == [("ortho_1", None, None), ("parcelles_1", None, None),
+                                              ("routes_1", None, None)]
+
+
+def test_the_legacy_infos_rows_are_written_with_their_id_and_date(vector, tmp_path, monkeypatch):
+    """A layer of an old SQLite without layer_table_name, layer_provider_type, layer_geometry_type: the rows added had
+    no id nor date (NOT NULL), sqlite3.IntegrityError, and the registration of the layer failed."""
+    import sqlite3
+    path = tmp_path / "fm.sqlite"
+    with sqlite3.connect(path) as conn:
+        conn.execute("CREATE TABLE fm_project_layers_properties (id VARYING CHARACTER(255) NOT NULL PRIMARY KEY, "
+                     "_updated_at DATETIME NOT NULL, fk_project TEXT NOT NULL, layer_id TEXT NOT NULL, "
+                     "meta_type TEXT NOT NULL, meta_key TEXT NOT NULL, meta_value TEXT NOT NULL, "
+                     "UNIQUE(fk_project, layer_id, meta_type, meta_key) ON CONFLICT REPLACE)")
+    monkeypatch.setattr(task_mod, "get_source_table_name", lambda layer: "parcelles")
+    monkeypatch.setattr(task_mod, "detect_layer_provider_type", lambda layer: "ogr")
+    monkeypatch.setattr(task_mod, "geometry_type_to_string", lambda layer: "GeometryType.Polygon")
+    task = _task()
+    task.project_uuid = "p-1"
+    task._safe_spatialite_connect = lambda: sqlite3.connect(path)
+    task._persist_verified_geometry_field = MagicMock()
+    task._migrate_legacy_geometry_field = types.MethodType(
+        task_mod.LayersManagementEngineTask._migrate_legacy_geometry_field, task)
+    layer_variables = {"infos": {"primary_key_name": "fid"}, "exploring": {}, "filtering": {}}
+    task._migrate_legacy_geometry_field(layer_variables, _vector_layer("parcelles_1", "parcelles"))
+    with sqlite3.connect(path) as conn:
+        rows = sorted(conn.execute("SELECT meta_key, meta_value FROM fm_project_layers_properties").fetchall())
+    assert rows == [("layer_geometry_type", "GeometryType.Polygon"), ("layer_provider_type", "ogr"),
+                    ("layer_table_name", "parcelles")]

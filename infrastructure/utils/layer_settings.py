@@ -131,16 +131,20 @@ def written_since(layer_id: str, name: str, epoch: int) -> bool:
     return _DIRECT_WRITES.get((layer_id, name), 0) > epoch
 
 
+def filtermate_variable_names(layer: Any) -> list:
+    """The names of the variables of FilterMate ``layer`` carries: ``filterMate_*`` and the legacy ones
+    (``exploring_*``, ``filtering_*``, ``infos_*``)."""
+    return [key[len(VALUES):] for key in layer.customPropertyKeys()
+            if is_settings_property(key) or (isinstance(key, str) and key.startswith(f"{VALUES}{PREFIX}"))]
+
+
 def remove_filtermate_variables(layer: Any, names: Optional[Collection[str]] = None) -> int:
     """Remove variables of FilterMate from ``layer``: ``names``, or all of them. Returns how many were there."""
     removed = 0
-    keys = layer.customPropertyKeys()
-    for key in keys:
-        if not is_settings_property(key) and not (isinstance(key, str) and key.startswith(f"{VALUES}{PREFIX}")):
+    for name in filtermate_variable_names(layer):
+        if names is not None and name not in names:
             continue
-        if names is not None and key[len(VALUES):] not in names:
-            continue
-        layer.removeCustomProperty(key)
+        layer.removeCustomProperty(f"{VALUES}{name}")
         removed += 1
     return removed
 
@@ -251,7 +255,8 @@ def project_layer_ids(project: Any = None) -> Optional[Set[str]]:
         return None
 
 
-__all__ = ['GROUPS', 'LEGACY_GROUPS', 'capture_layer_settings', 'clear_filtermate_variables', 'is_setting_variable',
+__all__ = ['GROUPS', 'LEGACY_GROUPS', 'capture_layer_settings', 'clear_filtermate_variables',
+           'filtermate_variable_names', 'is_setting_variable',
            'layer_is_truth', 'note_direct_write', 'project_file_writable', 'project_layer_ids',
            'remove_filtermate_variables', 'same', 'settings_change', 'settings_written', 'truth_layer_ids',
            'write_epoch', 'written_since']

@@ -79,6 +79,10 @@ except ImportError:  # without the plugin package: the variables are written, no
         def remove_filtermate_variables(layer, names=None):
             return 0
 
+        @staticmethod
+        def filtermate_variable_names(layer):
+            return []
+
 # The id of a row written with its value as is (LayersManagementEngineTask.ROW_AS_IS, 2026-11-24)
 ROW_AS_IS = "v2-"
 
@@ -290,9 +294,8 @@ class VariablesPersistenceManager:
             layer_id = layer.id()
             for name in names if names is not None else list(self._pending_variables.get(layer_id, {})):
                 self._drop_pending(layer_id, name)
-            if names is None:
-                names = [key[len("variableValues/"):] for key in layer.customPropertyKeys()
-                         if isinstance(key, str) and key.startswith("variableValues/filterMate_")]
+            if names is None:  # the legacy names too (exploring_*, filtering_*, infos_*)
+                names = layer_settings.filtermate_variable_names(layer)
             for name in names:  # a registration queued before must not bring it back
                 layer_settings.note_direct_write(layer_id, name)
             removed = layer_settings.remove_filtermate_variables(layer, names)

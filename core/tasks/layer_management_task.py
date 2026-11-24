@@ -781,14 +781,16 @@ class LayersManagementEngineTask(QgsTask):
                 with self._safe_spatialite_connect() as conn:
                     cur = conn.cursor()
                     cur.execute(
+                        # 2026-11-24: with the id and the date (NOT NULL): without them the row was refused
+                        # (sqlite3.IntegrityError) and the registration of the layer failed
                         """INSERT INTO fm_project_layers_properties
-                           (fk_project, layer_id, meta_type, meta_key, meta_value)
-                           VALUES (?, ?, 'infos', 'layer_table_name', ?)""",
-                        (str(self.project_uuid), id_of(layer), source_table_name)
+                           (id, _updated_at, fk_project, layer_id, meta_type, meta_key, meta_value)
+                           VALUES (?, datetime(), ?, ?, 'infos', 'layer_table_name', ?)""",
+                        (f"{ROW_AS_IS}{uuid.uuid4()}", str(self.project_uuid), id_of(layer), source_table_name)
                     )
                     conn.commit()
                     cur.close()
-            except (OSError, RuntimeError) as e:
+            except (OSError, RuntimeError, sqlite3.Error) as e:
                 logger.warning(f"Could not add layer_table_name to database: {e}")
 
         # Add layer_provider_type if missing
@@ -801,14 +803,16 @@ class LayersManagementEngineTask(QgsTask):
                 with self._safe_spatialite_connect() as conn:
                     cur = conn.cursor()
                     cur.execute(
+                        # 2026-11-24: with the id and the date (NOT NULL): without them the row was refused
+                        # (sqlite3.IntegrityError) and the registration of the layer failed
                         """INSERT INTO fm_project_layers_properties
-                           (fk_project, layer_id, meta_type, meta_key, meta_value)
-                           VALUES (?, ?, 'infos', 'layer_provider_type', ?)""",
-                        (str(self.project_uuid), id_of(layer), layer_provider_type)
+                           (id, _updated_at, fk_project, layer_id, meta_type, meta_key, meta_value)
+                           VALUES (?, datetime(), ?, ?, 'infos', 'layer_provider_type', ?)""",
+                        (f"{ROW_AS_IS}{uuid.uuid4()}", str(self.project_uuid), id_of(layer), layer_provider_type)
                     )
                     conn.commit()
                     cur.close()
-            except (OSError, RuntimeError) as e:
+            except (OSError, RuntimeError, sqlite3.Error) as e:
                 logger.warning(f"Could not add layer_provider_type to database: {e}")
 
             # THREAD SAFETY (v2.3.10): Queue for main thread execution
@@ -824,14 +828,16 @@ class LayersManagementEngineTask(QgsTask):
                 with self._safe_spatialite_connect() as conn:
                     cur = conn.cursor()
                     cur.execute(
+                        # 2026-11-24: with the id and the date (NOT NULL): without them the row was refused
+                        # (sqlite3.IntegrityError) and the registration of the layer failed
                         """INSERT INTO fm_project_layers_properties
-                           (fk_project, layer_id, meta_type, meta_key, meta_value)
-                           VALUES (?, ?, 'infos', 'layer_geometry_type', ?)""",
-                        (str(self.project_uuid), id_of(layer), layer_geometry_type)
+                           (id, _updated_at, fk_project, layer_id, meta_type, meta_key, meta_value)
+                           VALUES (?, datetime(), ?, ?, 'infos', 'layer_geometry_type', ?)""",
+                        (f"{ROW_AS_IS}{uuid.uuid4()}", str(self.project_uuid), id_of(layer), layer_geometry_type)
                     )
                     conn.commit()
                     cur.close()
-            except (OSError, RuntimeError) as e:
+            except (OSError, RuntimeError, sqlite3.Error) as e:
                 logger.warning(f"Could not add layer_geometry_type to database: {e}")
 
     def _detect_layer_metadata(self, layer, layer_provider_type):
@@ -1972,19 +1978,18 @@ class LayersManagementEngineTask(QgsTask):
         """
         if len(self.project_layers) == 0:
             if len(self.layers) > 0:
+                # 2026-11-24: each layer given, of any kind (a raster first left `layer` unbound: UnboundLocalError,
+                # nothing registered), by its own id: the layers of the same name, read from the project in this
+                # worker, lost their variables too
                 for layer_obj in self.layers:
-                    if isinstance(layer_obj, tuple) and len(list(layer_obj)) == 3:
-                        layer = layer_obj[0]
-                    elif isinstance(layer_obj, QgsVectorLayer):
-                        layer = layer_obj
-
-                    result_layers = [result_layer for result_layer in self.PROJECT.mapLayersByName(name_of(layer))]
-                    if len(result_layers) > 0:
-                        for result_layer in result_layers:
-                            # THREAD SAFETY (v2.3.10): Queue for main thread execution
-                            self._deferred_layer_variables.append((id_of(result_layer), None, None))
-                            if self.isCanceled():
-                                return False
+                    layer = layer_obj[0] if isinstance(layer_obj, tuple) and len(layer_obj) == 3 else layer_obj
+                    try:
+                        layer_id = layer if isinstance(layer, str) else id_of(layer)
+                    except (AttributeError, RuntimeError):  # not a layer, or deleted
+                        continue
+                    if layer_id:
+                        # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                        self._deferred_layer_variables.append((layer_id, None, None))
                     if self.isCanceled():
                         return False
             else:

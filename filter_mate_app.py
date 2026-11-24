@@ -2586,6 +2586,8 @@ class FilterMateApp:
                 reset_flag = ((_get_option_value(
                     self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("FRESH_RELOAD_FLAG"), False
                 ) or getattr(self, '_fresh_reload_pending', False)) and not has_loaded)
+                if reset_flag:
+                    self._fresh_reload_pending = False  # once: the layers added later keep their settings
                 return self._build_layer_management_params(layers, reset_flag)
 
     def _refresh_layers_and_canvas(self, source_layer):

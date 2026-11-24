@@ -355,3 +355,13 @@ def test_a_setting_removed_by_restore_layer_state_goes_out_of_the_project(env):
     env.manager._get_project_layers = lambda: {"parcelles_1": {"exploring": {}}}  # the key is gone already
     env.manager.remove_variables_from_layer(env.layer, [("exploring", "is_tracking")])
     assert env.layer.props == {"filterMate/settings_version": 2} and [row[0] for row in env.cursor.rows] == ["DELETE"]
+
+
+def test_removing_everything_takes_the_legacy_names_too(env):
+    env.layer.props = {"variableValues/filterMate_exploring_is_tracking": True,
+                       "variableValues/exploring_is_linking": True, "variableValues/infos_layer_name": "p",
+                       "variableValues/my_own": 1}
+    queued_at = layer_settings.write_epoch()
+    env.manager._remove_variables(env.layer)
+    assert env.layer.props == {"variableValues/my_own": 1, "filterMate/settings_version": 2}
+    assert layer_settings.written_since("parcelles_1", "exploring_is_linking", queued_at)
