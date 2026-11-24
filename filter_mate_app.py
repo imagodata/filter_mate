@@ -2955,6 +2955,9 @@ class FilterMateApp:
             self.init_filterMate_db()
         except Exception as e:
             logger.warning(f"FilterMate: database not bound to the current project: {e}")
+        # A database that cannot be initialized is not tried again (nor its error shown again) at each favorite,
+        # layer added or opening of the panel, until the project changes (unbind_project)
+        self._binding_failed = not self.project_uuid
         if keep_clean and project.isDirty():
             project.setDirty(False)
 
@@ -2967,7 +2970,7 @@ class FilterMateApp:
         Returns:
             bool: whether a project is bound.
         """
-        if not self.project_uuid or not self.favorites_manager.is_bound:
+        if (not self.project_uuid or not self.favorites_manager.is_bound) and not getattr(self, '_binding_failed', False):
             self.bind_current_project()
         return bool(self.project_uuid)
 
@@ -2978,6 +2981,9 @@ class FilterMateApp:
         self.project_uuid = None
         if self._database_manager:
             self._database_manager.project_uuid = None
+        self._binding_failed = False  # the next project is tried again
+        # A fresh reload not used by this project (no layer registered) is not the next project's
+        self._fresh_reload_pending = False
 
     def init_filterMate_db(self):
         """Initialize FilterMate Spatialite database with required schema. Delegates to DatabaseManager."""

@@ -109,9 +109,27 @@ class TestEnsureProjectBound:
 
 
 def test_unbind_project_resets_the_app_and_the_database_manager():
-    app = SimpleNamespace(project_uuid="closed", _database_manager=SimpleNamespace(project_uuid="closed"))
+    app = SimpleNamespace(project_uuid="closed", _database_manager=SimpleNamespace(project_uuid="closed"),
+                          _fresh_reload_pending=True, _binding_failed=True)
     _method("unbind_project")(app)
     assert app.project_uuid is None and app._database_manager.project_uuid is None
+    # a fresh reload this project did not use is not the next project's; the next project is tried again
+    assert app._fresh_reload_pending is False and app._binding_failed is False
+
+
+def test_a_database_that_cannot_be_opened_is_not_tried_at_each_favorite():
+    """initialize_database failed: not tried again (nor its error shown again) at each favorite, layer added or
+    opening of the panel, until the project changes."""
+    app = _app(Project())
+    calls = []
+    app.init_filterMate_db = lambda: calls.append(1)  # binds nothing
+    ensure = _method("ensure_project_bound")
+    assert ensure(app) is False and ensure(app) is False
+    assert calls == [1]
+    app._database_manager = None
+    _method("unbind_project")(app)  # the next project (QgsProject.cleared)
+    ensure(app)
+    assert calls == [1, 1]
 
 
 class TestFreshReloadSurvivesASecondBinding:

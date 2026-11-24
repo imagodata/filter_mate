@@ -1164,6 +1164,10 @@ class FilterMate:
             return
 
         try:
+            # 2026-11-24: the debounced layersAdded of the project closed would register layers (and bind a project,
+            # ensure_project_bound) during the event loop QGIS runs between closing a project and reading the next
+            self.app._stop_pending_layer_additions()
+
             # Reset all protection flags
             if hasattr(self.app, '_set_loading_flag'):
                 self.app._set_loading_flag(False)

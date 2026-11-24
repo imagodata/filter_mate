@@ -114,6 +114,8 @@ def purge_stale_projects(cursor, keep_project_uuid: Optional[str] = None,
     if not stale_ids:
         return 0
 
+    cursor.execute("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'fm_favorites_project_files'")
+    has_project_files = bool(cursor.fetchone()[0])
     cursor.execute("SAVEPOINT fm_purge_stale_projects")
     try:
         for chunk_start in range(0, len(stale_ids), 200):
@@ -121,6 +123,8 @@ def purge_stale_projects(cursor, keep_project_uuid: Optional[str] = None,
             placeholders = ",".join("?" * len(chunk))
             cursor.execute(f"DELETE FROM fm_project_layers_properties WHERE fk_project IN ({placeholders})", chunk)  # nosec B608 - placeholders only
             cursor.execute(f"DELETE FROM fm_subset_history WHERE fk_project IN ({placeholders})", chunk)  # nosec B608 - placeholders only
+            if has_project_files:  # the favorite ids their file had (FavoritesManager.remember_file_ids)
+                cursor.execute(f"DELETE FROM fm_favorites_project_files WHERE project_uuid IN ({placeholders})", chunk)  # nosec B608 - placeholders only
             cursor.execute(f"DELETE FROM fm_projects WHERE project_id IN ({placeholders})", chunk)  # nosec B608 - placeholders only
     except Exception:
         cursor.execute("ROLLBACK TO SAVEPOINT fm_purge_stale_projects")
@@ -408,9 +412,16 @@ class DatabaseManager:
         ))
 
         # Set the project UUID for newly initialized database
-        QgsExpressionContextUtils.setProjectVariable(
-            self._project, 'filterMate_db_project_uuid', self._project_uuid
-        )
+        self._keep_uuid_in_project()
+
+    def _keep_uuid_in_project(self) -> None:
+        """Write the id into the project when it has no file, the only case where it is read back
+        (_load_or_create_project). 2026-11-24: written into every project, it marked a .qgz modified at its opening
+        on another computer (each computer writes its own id), panel open or closed."""
+        if not os.path.basename(self._project.absoluteFilePath()) or not self._project.absolutePath():
+            QgsExpressionContextUtils.setProjectVariable(
+                self._project, 'filterMate_db_project_uuid', self._project_uuid
+            )
 
     def _migrate_schema_if_needed(self, cursor) -> bool:
         """
@@ -507,9 +518,11 @@ class DatabaseManager:
             self._project_uuid = result[0]
             logger.info(f"✓ Found existing project in database: UUID={self._project_uuid[:8]}...")
             config_data["CURRENT_PROJECT"] = json.loads(project_settings_str)
-            QgsExpressionContextUtils.setProjectVariable(
-                self._project, 'filterMate_db_project_uuid', self._project_uuid
-            )
+            # 2026-11-24: a project in use is not stale (purge_stale_projects): a project stored in a database, found
+            # by its variable, was purged 30 days after its creation, opened every day or not
+            cursor.execute("UPDATE fm_projects SET _updated_at = datetime() WHERE project_id = ?",
+                           (self._project_uuid,))
+            self._keep_uuid_in_project()
         else:
             self._project_uuid = str(uuid.uuid4())
             logger.info(f"Creating new project entry in database: UUID={self._project_uuid[:8]}...")
@@ -525,9 +538,7 @@ class DatabaseManager:
                 project_file_path,
                 json.dumps(project_settings)
             ))
-            QgsExpressionContextUtils.setProjectVariable(
-                self._project, 'filterMate_db_project_uuid', self._project_uuid
-            )
+            self._keep_uuid_in_project()
 
         return config_data
 

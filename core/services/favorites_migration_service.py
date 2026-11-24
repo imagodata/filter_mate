@@ -328,12 +328,15 @@ class FavoritesMigrationService:
     # Cleanup
     # ─────────────────────────────────────────────────────────────────
 
-    def cleanup_orphan_projects(self, keep_with_favorites: bool = True) -> Tuple[int, List[str]]:
+    def cleanup_orphan_projects(self, keep_with_favorites: bool = True,
+                                current_project_uuid: Optional[str] = None) -> Tuple[int, List[str]]:
         """
         Clean up orphan project entries.
 
         Args:
             keep_with_favorites: If True, don't delete projects that have favorites
+            current_project_uuid: The project FilterMate is bound to: a project with no file yet is not an orphan
+                (2026-11-24: its row went, and its settings were written under an id no row had)
 
         Returns:
             Tuple of (deleted_count, deleted_project_uuids)
@@ -354,15 +357,15 @@ class FavoritesMigrationService:
                     WHERE (p.project_name = '' OR p.project_name IS NULL)
                       AND (p.project_path = '' OR p.project_path IS NULL)
                       AND f.id IS NULL
-                      AND p.project_id != ?
-                """, (GLOBAL_PROJECT_UUID,))
+                      AND p.project_id != ? AND p.project_id != ?
+                """, (GLOBAL_PROJECT_UUID, str(current_project_uuid or '')))
             else:
                 cursor.execute("""
                     SELECT project_id FROM fm_projects
                     WHERE (project_name = '' OR project_name IS NULL)
                       AND (project_path = '' OR project_path IS NULL)
-                      AND project_id != ?
-                """, (GLOBAL_PROJECT_UUID,))
+                      AND project_id != ? AND project_id != ?
+                """, (GLOBAL_PROJECT_UUID, str(current_project_uuid or '')))
 
             orphan_ids = [row[0] for row in cursor.fetchall()]
 

@@ -231,6 +231,8 @@ def test_a_project_closed_unbinds_the_app_and_binds_nothing(qgis):
     plugin._handle_project_cleared = types.MethodType(_extract("_handle_project_cleared"), plugin)
     plugin._handle_project_cleared()
     app.unbind_project.assert_called_once_with()
+    # the debounced layersAdded of the project closed would register layers, and bind, before the next is read
+    app._stop_pending_layer_additions.assert_called_once_with()
     app.bind_current_project.assert_not_called()
     app.init_filterMate_db.assert_not_called()
     assert _FakeTimer.scheduled == []

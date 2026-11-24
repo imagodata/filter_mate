@@ -87,8 +87,8 @@ def report():
 
 
 def clean_after_opening():
-    """Information only: main leaves the project dirty at the opening too (FilterMate writes its project and layer
-    variables then, 2026-11-24); the favorites write nothing when they did not change (unit tests)."""
+    """Information only: False since FilterMate no longer writes its id into a project with a file (True before,
+    2026-11-24); the favorites write nothing when they did not change (unit tests)."""
     print(f"INFO {ROLE} dirty after the opening: {QgsProject.instance().isDirty()}", flush=True)
 
 

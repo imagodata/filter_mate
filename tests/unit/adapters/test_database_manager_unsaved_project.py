@@ -46,7 +46,9 @@ class Variables:
 @pytest.fixture
 def db():
     conn = sqlite3.connect(":memory:")
-    conn.executescript(_DDL + "CREATE TABLE fm_favorites (id TEXT PRIMARY KEY, project_uuid TEXT NOT NULL, name TEXT);")
+    conn.executescript(_DDL + "CREATE TABLE fm_favorites (id TEXT PRIMARY KEY, project_uuid TEXT NOT NULL, name TEXT);"
+                       "CREATE TABLE fm_favorites_project_files (project_uuid TEXT PRIMARY KEY, file_ids TEXT,"
+                       " updated_at TEXT);")
     yield conn
     conn.close()
 
@@ -110,3 +112,47 @@ def test_an_old_unsaved_row_with_favorites_is_kept(db):
     assert dbm.purge_stale_projects(cur, max_age_days=30) == 1
     assert _count(db, "fm_projects", "orphan-with-favorites") == 1
     assert _count(db, "fm_projects", "orphan-empty") == 0
+
+
+def _updated_days_ago(db, uuid):
+    return db.execute("SELECT julianday('now') - julianday(_updated_at) FROM fm_projects WHERE project_id = ?",
+                      (uuid,)).fetchone()[0]
+
+
+def test_a_project_found_again_is_not_stale(db, monkeypatch):
+    """A project stored in a database (no file: found by its variable) kept the _updated_at of its creation and was
+    purged 30 days later, opened every day or not; a saved project is touched too."""
+    dbm = _load_database_manager()
+    _add_project(db.cursor(), "in-a-database", "", "", days_old=60)
+    _add_project(db.cursor(), "saved-row", "travel.qgz", "/work", days_old=60)
+    assert bind(dbm, monkeypatch, db, Project(variables={"filterMate_db_project_uuid": "in-a-database"})) == \
+        "in-a-database"
+    assert bind(dbm, monkeypatch, db, Project("/work/travel.qgz")) == "saved-row"
+    assert _updated_days_ago(db, "in-a-database") < 0.01 and _updated_days_ago(db, "saved-row") < 0.01
+    assert dbm.purge_stale_projects(db.cursor(), max_age_days=30) == 0
+
+
+def test_the_purge_removes_what_was_kept_of_the_files_of_the_projects_purged(db):
+    dbm = _load_database_manager()
+    cur = db.cursor()
+    _add_project(cur, "orphan-empty", "", "", days_old=90)
+    _add_project(cur, "recent", "", "", days_old=1)
+    cur.execute("INSERT INTO fm_favorites_project_files VALUES ('orphan-empty', '[\"f1\"]', '')")
+    cur.execute("INSERT INTO fm_favorites_project_files VALUES ('recent', '[\"f2\"]', '')")
+    assert dbm.purge_stale_projects(cur, max_age_days=30) == 1
+    assert [row[0] for row in db.execute("SELECT project_uuid FROM fm_favorites_project_files")] == ["recent"]
+
+
+def test_the_id_is_written_only_into_a_project_without_a_file(db, monkeypatch):
+    """Read back only there; written into a .qgz, it marked a project from another computer modified at its
+    opening (each computer writes its own id)."""
+    dbm = _load_database_manager()
+    saved = Project("/work/travel.qgz")
+    bind(dbm, monkeypatch, db, saved)
+    assert "filterMate_db_project_uuid" not in saved.variables
+    _add_project(db.cursor(), "saved-row", "other.qgz", "/work", days_old=0)
+    found = Project("/work/other.qgz")
+    bind(dbm, monkeypatch, db, found)
+    assert "filterMate_db_project_uuid" not in found.variables
+    unsaved = Project()
+    assert bind(dbm, monkeypatch, db, unsaved) == unsaved.variables["filterMate_db_project_uuid"]
