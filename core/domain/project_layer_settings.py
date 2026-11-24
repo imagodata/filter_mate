@@ -241,7 +241,8 @@ def settings_to_apply(asks: Asks, groups: Collection[str], held: Mapping[str, Ma
     """``{layer_id: {group: {key: the project's value}}}`` to put in the panel for the groups the user took.
 
     A setting the panel no longer holds as it was at the registration (changed meanwhile by the user, or the layer
-    gone) is left: the latest change wins.
+    gone) is left: the latest change wins. A list of layers is compared without the layers the project does not have
+    (as the panel holds it), and given as the project stores it: the panel leaves them out, in memory only.
 
     Args:
         asks: What the registrations found different.
@@ -259,9 +260,12 @@ def settings_to_apply(asks: Asks, groups: Collection[str], held: Mapping[str, Ma
                 continue
             now = props.get(group) or {}
             for key, (mine, theirs) in keys.items():
-                if key in LAYER_ID_LISTS and layer_ids is not None:  # as the panel holds them
-                    mine, theirs = present_layers(mine, layer_ids), present_layers(theirs, layer_ids)
-                if key in now and same_setting(now[key], mine, load, key) and not same_setting(theirs, mine, load, key):
+                seen_mine, seen_theirs = mine, theirs
+                if key in LAYER_ID_LISTS and layer_ids is not None:  # compared as the panel holds them
+                    seen_mine, seen_theirs = present_layers(mine, layer_ids), present_layers(theirs, layer_ids)
+                if key in now and same_setting(now[key], seen_mine, load, key) \
+                        and not same_setting(seen_theirs, seen_mine, load, key):
+                    # The project's value as stored: its variable holds it already, nothing is written there
                     chosen.setdefault(layer_id, {}).setdefault(group, {})[key] = theirs
     return chosen
 

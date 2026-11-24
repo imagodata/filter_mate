@@ -23,12 +23,14 @@ from typing import Any, Callable, Dict, List, Optional
 
 try:
     from ..core.domain.project_layer_settings import (
-        LAYER_ID_LISTS, answer_decisions, answer_text, asked_groups, merged_asks, settings_to_apply, without_groups)
+        LAYER_ID_LISTS, answer_decisions, answer_text, asked_groups, merged_asks, present_layers, settings_to_apply,
+        without_groups)
     from ..config.config import _get_option_bool
     from ..infrastructure.utils.layer_settings import load
 except ImportError:  # loaded outside the plugin package (unit tests: they give ``load`` and ``_get_option_bool``)
     from core.domain.project_layer_settings import (
-        LAYER_ID_LISTS, answer_decisions, answer_text, asked_groups, merged_asks, settings_to_apply, without_groups)
+        LAYER_ID_LISTS, answer_decisions, answer_text, asked_groups, merged_asks, present_layers, settings_to_apply,
+        without_groups)
     load = None
     _get_option_bool = None
 
@@ -185,6 +187,8 @@ class LayerSettingsQuestion:
         if dialog is not None:
             try:
                 dialog.reject()
+                if hasattr(dialog, "deleteLater"):
+                    dialog.deleteLater()
             except RuntimeError:  # already deleted
                 pass
 
@@ -276,7 +280,14 @@ class LayerSettingsQuestion:
             for group, values in by_group.items():
                 held[layer_id].setdefault(group, {}).update(values)
                 keys += [(group, key) for key in values]
-            self._save_variables(layer, keys)  # the variables hold these values already: nothing written there
+            # The project's values as stored: the variables hold them already, nothing is written there (the SQLite
+            # takes them); then the panel leaves out the layers the project does not have, in memory only
+            self._save_variables(layer, keys)
+            if layer_ids is not None:
+                for group, values in by_group.items():
+                    for key in values:
+                        if key in LAYER_ID_LISTS:
+                            held[layer_id][group][key] = present_layers(held[layer_id][group][key], layer_ids)
             current = getattr(dock, "current_layer", None)
             try:
                 if current is not None and current.id() == layer_id:

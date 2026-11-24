@@ -97,10 +97,13 @@ class TestLogic:
         assert pls.settings_to_apply(ASKS, ["exploring", "filtering"], {}, load) == {}
 
     def test_a_list_of_layers_is_compared_as_the_panel_holds_it(self):
-        """C: the panel left out a layer the project does not have; the project's list is applied without it."""
+        """C: the panel left out a layer the project does not have: compared without it. N1: the project's list is
+        given as stored (its variable holds it: nothing written into the project)."""
         asks = {"parcelles_1": {"filtering": {"layers_to_filter": (["routes_1", "gone"], ["rivers_1", "gone"])}}}
         assert pls.settings_to_apply(asks, ["filtering"], _held(), load, {"parcelles_1", "routes_1", "rivers_1"}) == {
-            "parcelles_1": {"filtering": {"layers_to_filter": ["rivers_1"]}}}
+            "parcelles_1": {"filtering": {"layers_to_filter": ["rivers_1", "gone"]}}}
+        same = {"parcelles_1": {"filtering": {"layers_to_filter": (["routes_1", "gone"], ["routes_1", "other"])}}}
+        assert pls.settings_to_apply(same, ["filtering"], _held(), load, {"parcelles_1", "routes_1"}) == {}
 
     def test_two_lists_of_layers_in_another_order_are_the_same(self):
         assert pls.same_setting(["a", "b"], ["b", "a"], load, "layers_to_filter")
@@ -246,6 +249,19 @@ class TestQuestion:
         assert len(env.dialogs) == 1 and env.dialogs[0].opened
         assert env.dialogs[0].groups == ["exploring", "filtering"] and env.dialogs[0].can_remember
 
+    def test_a_list_of_layers_is_saved_as_the_project_stores_it(self, env):
+        """N1: the SQLite takes the project's list as stored (a layer not loaded yet stays in the project); the panel
+        leaves out the layers the project does not have, in memory only."""
+        saved_values = []
+        env.question._save_variables = lambda layer, keys: saved_values.append(
+            {key: list(env.held[layer.id()][group][key]) for group, key in keys})
+        env.question.receive({"parcelles_1": {"filtering": {
+            "layers_to_filter": (["routes_1"], ["rivers_1", "not_loaded_yet"])}}})
+        env.run()
+        env.dialogs[0].answer(["filtering"])
+        assert saved_values == [{"layers_to_filter": ["rivers_1", "not_loaded_yet"]}]
+        assert env.held["parcelles_1"]["filtering"]["layers_to_filter"] == ["rivers_1"]
+
     def test_filtering_only_keeps_my_exploring_and_writes_nothing_of_it(self, env):
         env.question.receive(_copy(ASKS))
         env.run()
@@ -366,6 +382,7 @@ class TestQuestion:
         env.question.receive(_copy(ASKS))
         env.run()
         env.project.readProject.emit(None)  # another project read meanwhile
+        assert env.dialogs[0].deleted  # G/N4: closed and deleted
         assert env.held == _held() and env.saved == []
         env.dialogs[0].answer(["exploring", "filtering"])  # too late: nothing applied
         assert env.held == _held() and env.saved == []

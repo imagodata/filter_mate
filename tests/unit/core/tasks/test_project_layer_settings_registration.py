@@ -374,4 +374,6 @@ def test_a_difference_of_layers_is_asked_as_the_panel_holds_them(vector):
     task._load_existing_layer_properties = MagicMock(side_effect=lambda layer: _queued_from_sqlite(task, layer, sqlite))
     assert task.add_project_layer(_vector_layer("parcelles_1", "parcelles")) is True
     assert task.project_layers["parcelles_1"]["filtering"]["layers_to_filter"] == ["routes_1"]
-    assert task.settings_to_ask == {"parcelles_1": {"filtering": {"layers_to_filter": (["routes_1"], ["rivers_1"])}}}
+    # N1: kept as stored (a layer not loaded yet when the task was made must not leave the project)
+    assert task.settings_to_ask == {"parcelles_1": {"filtering": {
+        "layers_to_filter": (["routes_1", "gone"], ["rivers_1", "gone_too"])}}}

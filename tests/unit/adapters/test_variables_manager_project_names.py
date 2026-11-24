@@ -375,3 +375,10 @@ def test_a_value_already_held_cancels_no_task_of_the_layer(env):
     assert env.canceled == []
     env.manager.save_single_property(env.layer, env.cursor, "exploring", "is_linking", True)
     assert env.canceled == ["parcelles_1"]
+
+
+def test_the_same_value_in_another_form_cancels_no_task_of_the_layer(env):
+    """K: compared as values (a list stored as such, written again as its JSON text)."""
+    env.layer.props["variableValues/filterMate_filtering_layers_to_filter"] = ["routes_1"]
+    env.manager.save_single_property(env.layer, env.cursor, "filtering", "layers_to_filter", ["routes_1"])
+    assert env.canceled == []
