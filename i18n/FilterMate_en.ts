@@ -2877,6 +2877,26 @@ Do you agree to all of them? No runs none of them.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Put it back in the line</source>
+        <translation>Put it back in the line</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>You can already type the next request: Enter keeps it for when this one ends.</source>
+        <translation>You can already type the next request: Enter keeps it for when this one ends.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Do not send it</source>
+        <translation>Do not send it</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Next: {}</source>
+        <translation>Next: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>all projects · {} request(s)</source>
         <translation>all projects · {} request(s)</translation>
     </message>

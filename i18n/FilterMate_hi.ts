@@ -2882,6 +2882,26 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Put it back in the line</source>
+        <translation>इसे पंक्ति में वापस रखें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>You can already type the next request: Enter keeps it for when this one ends.</source>
+        <translation>आप अगला अनुरोध अभी से लिख सकते हैं: Enter उसे इस अनुरोध के पूरा होने तक रखता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Do not send it</source>
+        <translation>न भेजें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Next: {}</source>
+        <translation>अगला: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>all projects · {} request(s)</source>
         <translation>सभी प्रोजेक्ट · {} अनुरोध</translation>
     </message>

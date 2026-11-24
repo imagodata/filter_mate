@@ -2882,6 +2882,26 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Put it back in the line</source>
+        <translation>Qatorga qaytarish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>You can already type the next request: Enter keeps it for when this one ends.</source>
+        <translation>Keyingi so'rovni hozirdanoq yozishingiz mumkin: Enter uni joriy so'rov tugaguncha saqlab turadi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Do not send it</source>
+        <translation>Yubormaslik</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Next: {}</source>
+        <translation>Keyingisi: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>all projects · {} request(s)</source>
         <translation>barcha loyihalar · {} so'rov</translation>
     </message>

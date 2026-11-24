@@ -2882,6 +2882,26 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Put it back in the line</source>
+        <translation>ወደ መስመሩ መልሰው</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>You can already type the next request: Enter keeps it for when this one ends.</source>
+        <translation>የሚቀጥለውን ጥያቄ አሁኑኑ መጻፍ ይችላሉ፦ Enter ይህ ሲያልቅ እንዲላክ ያቆየዋል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Do not send it</source>
+        <translation>አትላክ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Next: {}</source>
+        <translation>ቀጣይ፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>all projects · {} request(s)</source>
         <translation>ሁሉም ፕሮጀክቶች · {} ጥያቄ(ዎች)</translation>
     </message>

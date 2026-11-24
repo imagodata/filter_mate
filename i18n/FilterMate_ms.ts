@@ -2882,6 +2882,26 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Put it back in the line</source>
+        <translation>Kembalikan ke baris</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>You can already type the next request: Enter keeps it for when this one ends.</source>
+        <translation>Anda sudah boleh menaip permintaan seterusnya: Enter menyimpannya sehingga permintaan ini selesai.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Do not send it</source>
+        <translation>Jangan hantar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Next: {}</source>
+        <translation>Seterusnya: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
         <source>all projects · {} request(s)</source>
         <translation>semua projek · {} permintaan</translation>
     </message>

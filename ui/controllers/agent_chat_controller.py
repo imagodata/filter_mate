@@ -460,6 +460,10 @@ class AgentChatController(QObject):
         """The dock closes: it can reopen on this same conversation. A recipe stops before its next step."""
         abort_active(CHAT_WAITS)  # not the call of another application the MCP server is answering
         self._replay_stop = True
+        try:
+            self.panel.pause_queued()  # the dock closes: a request waiting does not go by itself
+        except RuntimeError:  # the panel is gone
+            pass
         if self._engine is not None:
             self._engine.cancel()
 
