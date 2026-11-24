@@ -1199,6 +1199,13 @@ def check_chat(provider, layer, authcfg, work):
     card_undo = [b for b in panel.thread.findChildren(_Button, "pushButton_agent_card_undo") if b.isVisibleTo(panel)]
     check("undo sits on the change card (mockup)", len(card_undo) == 1 and not panel.undo_button.isVisibleTo(panel), card_undo)
     check("the request is a bubble", panel.thread.findChild(QLabel, "label_agent_request") is not None)
+    # The tab "All projects" of the history (2026-11-24): the request, its project and what it changed.
+    from filter_mate.adapters.agent import request_log_store
+    logged = request_log_store.load()
+    check("the request is logged for every project", logged and "garde les communes" in logged[-1]["request"]
+          and logged[-1]["outcome"] == "changed" and logged[-1]["layers"] == ["communes"]
+          and logged[-1]["path"] == (QgsProject.instance().fileName() or ""), logged[-1:])
+    check("and listed in the tab All projects", panel.global_list.count() == len(logged), panel.global_list.count())
     # The steps fold into one line above them (2026-11-24): out of view, still there for who opens them.
     folded = panel.thread.findChildren(_Button, "pushButton_agent_steps")
     check("the steps fold away under one line", len(folded) == 1 and "Steps:" in folded[0].text() and not any(

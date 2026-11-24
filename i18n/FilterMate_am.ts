@@ -1239,6 +1239,11 @@ Its tools will see of your project only what the agent sends them, and what they
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer? The turns of the open project stay.</source>
+        <translation>በዚህ ኮምፒውተር ላይ የተቀመጡ የሁሉም ፕሮጀክቶች ጥያቄዎች ይረሱ? የተከፈተው ፕሮጀክት ዙሮች ይቀራሉ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
         <source>The layer {} is no longer in the project.</source>
         <translation>ንብርብሩ {} ከአሁን በኋላ በፕሮጀክቱ ውስጥ የለም።</translation>
     </message>
@@ -2874,6 +2879,51 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>ይህ ፕሮጀክት · {} ዙር(ዎች)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>all projects · {} request(s)</source>
+        <translation>ሁሉም ፕሮጀክቶች · {} ጥያቄ(ዎች)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>project never saved</source>
+        <translation>ፕሮጀክት ተቀምጦ አያውቅም</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>this project</source>
+        <translation>ይህ ፕሮጀክት</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>failed</source>
+        <translation>አልተሳካም</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>stopped</source>
+        <translation>ቆሟል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Forget the requests of every project kept on this computer; the turns of the open project stay</source>
+        <translation>በዚህ ኮምፒውተር ላይ የተቀመጡ የሁሉም ፕሮጀክቶች ጥያቄዎችን እርሳ፤ የተከፈተው ፕሮጀክት ዙሮች ይቀራሉ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>Empty the list</source>
+        <translation>ዝርዝሩን አጽዳ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>All projects</source>
+        <translation>ሁሉም ፕሮጀክቶች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1"/>
+        <source>This project</source>
+        <translation>ይህ ፕሮጀክት</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="159"/>
