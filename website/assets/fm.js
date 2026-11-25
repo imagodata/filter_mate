@@ -5,6 +5,81 @@
     const messages = window.FM_I18N || {};
     const tr = (key, fallback) => messages[key] || fallback;
 
+    // ---------------------------------------------------------------- light / dark theme
+    // A manual switch in the nav (persisted in localStorage), falling back to
+    // the OS preference. data-theme on <html> drives the CSS, the footage
+    // below and the Tally forms (which keep their own theme once loaded, so
+    // switching never wipes an answer being typed).
+    const themeStore = 'filtermate-theme';
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const readStoredTheme = () => {
+        try {
+            const value = localStorage.getItem(themeStore);
+            return value === 'light' || value === 'dark' ? value : null;
+        } catch (_) { return null; }
+    };
+    const effectiveTheme = () => readStoredTheme() || (systemDark.matches ? 'dark' : 'light');
+    const tallyThemeOf = (url) => /[?&]theme=dark(?:&|$)/.test(url || '') ? 'dark' : 'light';
+    const withTallyTheme = (url, theme) => {
+        if (/[?&]theme=(light|dark)/.test(url)) return url.replace(/([?&])theme=(light|dark)/, '$1theme=' + theme);
+        return url + (url.indexOf('?') === -1 ? '?' : '&') + 'theme=' + theme;
+    };
+    function paintThemeButton(btn, theme) {
+        const dark = theme === 'dark';
+        const moon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+        const sun = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+        const action = dark
+            ? (french ? 'Passer au thème clair' : 'Switch to light theme')
+            : (french ? 'Passer au thème sombre' : 'Switch to dark theme');
+        btn.setAttribute('aria-pressed', String(dark));
+        btn.setAttribute('aria-label', action);
+        btn.setAttribute('title', action);
+        btn.innerHTML = (dark ? sun : moon)
+            + '<span aria-hidden="true">' + (dark ? (french ? 'Clair' : 'Light') : (french ? 'Sombre' : 'Dark')) + '</span>';
+    }
+    function syncPendingTally(theme) {
+        // Only touch embeds Tally has not loaded yet (no src): loaded ones keep
+        // their theme and their frame colour, so no answer is ever lost.
+        document.querySelectorAll('iframe[data-tally-src]').forEach((frame) => {
+            const box = frame.closest('.cloud-form');
+            if (!frame.getAttribute('src')) {
+                frame.setAttribute('data-tally-src', withTallyTheme(frame.getAttribute('data-tally-src'), theme));
+                if (box) box.setAttribute('data-tally-theme', theme);
+            } else if (box && !box.getAttribute('data-tally-theme')) {
+                box.setAttribute('data-tally-theme', tallyThemeOf(frame.getAttribute('src')));
+            }
+        });
+    }
+    function applyTheme(theme, persist) {
+        document.documentElement.dataset.theme = theme;
+        if (persist) {
+            try { localStorage.setItem(themeStore, theme); } catch (_) { /* Storage is optional. */ }
+        }
+        document.querySelectorAll('.theme-toggle').forEach((btn) => paintThemeButton(btn, theme));
+        syncPendingTally(theme);
+    }
+    (function buildThemeButton() {
+        const bar = document.getElementById('navLinks');
+        if (!bar) return;
+        const item = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'theme-toggle';
+        btn.addEventListener('click', () => {
+            applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true);
+        });
+        paintThemeButton(btn, effectiveTheme());
+        item.appendChild(btn);
+        const install = Array.from(bar.querySelectorAll(':scope > li')).find((li) => li.querySelector('a.btn'));
+        bar.insertBefore(item, install || null);
+    })();
+    applyTheme(effectiveTheme(), false);
+    if (systemDark.addEventListener) {
+        systemDark.addEventListener('change', () => {
+            if (!readStoredTheme()) applyTheme(effectiveTheme(), false);
+        });
+    }
+
     // ---------------------------------------------------------------- navigation
     const nav = document.querySelector('.nav');
     const toggle = document.querySelector('.nav-toggle');
