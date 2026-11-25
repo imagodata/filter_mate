@@ -14,6 +14,10 @@
         services: { en: 'YjGyXz', fr: 'Dqpy9X' }
     };
 
+    // Tally renders these forms with their dashboard theme (LIGHT): the
+    // `theme` query parameter does not override it. Their background is
+    // transparent, so the box always keeps a light background via CSS and the
+    // answers stay readable in the site's light and dark modes alike.
     var lang = (document.documentElement.lang || 'en').slice(0, 2) === 'fr' ? 'fr' : 'en';
     var ref = 'site';
     try {
@@ -38,6 +42,7 @@
         frame.setAttribute('frameborder', '0');
         frame.setAttribute('title', box.getAttribute('data-fm-title') || 'Form');
         box.appendChild(frame);
+        box.setAttribute('data-tally-theme', 'light');
         box.hidden = false;
         var soon = section.querySelector('.fm-form-soon');
         var help = section.querySelector('.fm-form-help');

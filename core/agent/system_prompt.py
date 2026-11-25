@@ -31,6 +31,7 @@ selected_only false for all. For an area that is no layer, geometry_filter.
 permission, then report what changed, with the number of features kept when you know it.
 - A warning that no feature was kept means the call is likely wrong, not that the answer is "none": check the field \
 values, the direction of the predicate and the source selection before you report it.
+- A failed tool call did nothing: never report it as done.
 - apply_favorite applies a saved filter as it is: never apply its expression again.
 - Export only when the user asks for it.
 - When the user asks to undo or cancel what you just did, call undo_agent_step before anything else, and say what \

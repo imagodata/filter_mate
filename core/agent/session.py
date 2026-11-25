@@ -367,8 +367,13 @@ class ExchangeResult:
 
 
 def run_exchange(session: AgentSession, text: str, transport: Transport, executor: ToolExecutor,
-                 confirm: Callable[[ToolCallPart], bool] = lambda call: False, context: str = "") -> ExchangeResult:
-    """Run one user request to its end, tools included, blocking; ``context`` goes with the request."""
+                 confirm: Callable[[ToolCallPart], bool] = lambda call: False, context: str = "",
+                 auto_offer: Optional[Callable[[str], bool]] = None) -> ExchangeResult:
+    """Run one user request to its end, tools included, blocking; ``context`` goes with the request.
+
+    ``auto_offer`` offers a tool the model called before it was offered (held for the token diet), True when
+    offered: the call runs in this turn instead of waiting for the model to load its tools first.
+    """
     result = ExchangeResult()
     session.add_user_text(text, context)
     while True:
@@ -388,13 +393,21 @@ def run_exchange(session: AgentSession, text: str, transport: Transport, executo
         result.decision = decision
         if decision.status != STATUS_RUN_TOOLS:
             return result
-        answers = []
-        for call in decision.calls:
-            result.calls.append(call)
+
+        def run(call: ToolCallPart) -> ToolResultPart:
             if executor.needs_confirmation(call):
                 result.confirmations.append(call)
                 if not confirm(call):
-                    answers.append(executor.declined(call))
-                    continue
-            answers.append(executor.execute(call))
+                    return executor.declined(call)
+            return executor.execute(call)
+
+        answers = []
+        for call in decision.calls:
+            result.calls.append(call)
+            answers.append(run(call))
+        if auto_offer is not None:
+            for index, call in enumerate(decision.calls):
+                if answers[index].is_error and executor.is_held(call.name) and auto_offer(call.name):
+                    # Offered now: run at once, once per call (a call still held afterwards keeps its failure).
+                    answers[index] = run(call)
         session.add_tool_results(answers)

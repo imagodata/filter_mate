@@ -32,6 +32,11 @@ def test_the_instructions_are_shorter():
     assert len(SYSTEM_PROMPT) < 7000, len(SYSTEM_PROMPT)
 
 
+def test_a_failed_tool_is_never_reported_as_done():
+    """2026-11-25: a small model, refused add_elevation held for the token diet, answered the layer was added."""
+    assert "never report it as done" in SYSTEM_PROMPT
+
+
 def test_the_way_of_working_starts_from_the_state_sent_and_the_core():
     """2026-11-16, review of lot 1: list_layers and map_context, out of the core, cost a use_tools round trip each
     time the instructions sent the model to them; the state of the project sent with each request answers."""

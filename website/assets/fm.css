@@ -13,7 +13,8 @@
     --paper: #f3f4ef;
     --paper-2: #e7e9e1;
     --select: #ffd83d;
-    --select-deep: #e0b400;
+    --select-deep: #755c00;
+    --icon-purple: #6d3fb5;
     --qgis: #3f7a22;
     --qgis-bright: #589632;
     --water: #1f66b8;
@@ -50,6 +51,8 @@
         --link: var(--water-light);
         --code-bg: #22333d;
         --qgis: #7fbf5a;
+        --select-deep: #e0b400;
+        --icon-purple: #8a5cc2;
         color-scheme: dark;
     }
 }
@@ -62,6 +65,8 @@
     --link: var(--water-light);
     --code-bg: #22333d;
     --qgis: #7fbf5a;
+    --select-deep: #e0b400;
+    --icon-purple: #8a5cc2;
     color-scheme: dark;
 }
 
@@ -158,6 +163,16 @@ a:hover { text-decoration-thickness: 2px; }
 .nav-links small { white-space: nowrap; font-size: .7em; }
 .lang a[aria-current="true"] { background: var(--select); color: var(--ink); }
 .nav .btn { min-height: 38px; padding: 0.4em 0.9em; }
+/* theme switch: icon + short label, follows the nav colours on every page */
+.theme-toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 38px; padding: 6px 10px;
+    background: none; border: 1px solid currentColor; border-radius: 3px;
+    color: inherit; font: 600 0.85rem/1 var(--body); cursor: pointer;
+    white-space: nowrap;
+}
+.theme-toggle:hover { border-color: var(--select); }
+.theme-toggle svg { width: 18px; height: 18px; flex: none; }
 .nav-toggle {
     display: none; margin-left: auto;
     background: none; border: 0; color: inherit; padding: 8px; cursor: pointer;
@@ -666,7 +681,7 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .workflow-grid li + li { padding-left: 34px; }
 .workflow-grid li:last-child { border-right: 0; }
 .workflow-grid svg { width: 48px; height: 48px; margin: 38px 0 18px; color: var(--water); }
-.step-number { position: absolute; top: 10px; right: 16px; font: 600 2rem/1 var(--display); color: var(--rule); }
+.step-number { position: absolute; top: 10px; right: 16px; font: 600 2rem/1 var(--display); color: var(--text-2); }
 .workflow-grid h3 { margin: 0 0 10px; font: 600 1.65rem/1.1 var(--display); }
 .workflow-grid p { margin: 0; max-width: 34ch; color: var(--text-2); }
 
@@ -904,7 +919,7 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .roadmap .star-label { display: inline-block; font-size: 0.85rem; font-weight: 600; background: var(--select); color: var(--ink); padding: 2px 8px; margin-bottom: 10px; }
 .roadmap .feature-icon { width: 36px; height: 36px; display: grid; place-items: center; margin-bottom: 8px; color: var(--water); }
 .roadmap .feature-icon svg { stroke: currentColor; }
-.roadmap .feature-icon.purple { color: #8a5cc2; }
+.roadmap .feature-icon.purple { color: var(--icon-purple); }
 .roadmap .feature-icon.orange { color: var(--select-deep); }
 .roadmap .feature-icon.green { color: var(--qgis); }
 .roadmap .feature-title { font-weight: 600; font-size: 1.15rem; margin-bottom: 6px; }
@@ -936,6 +951,14 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .cloud .steps { max-width: 70ch; }
 .cloud .cloud-form { margin-top: 8px; max-width: 720px; }
 .cloud .cloud-form iframe { display: block; width: 100%; border: 0; }
+/* The Tally embeds use a transparent background, so the frame behind them
+   decides the contrast. Tally renders these forms LIGHT (dashboard theme, not
+   overridable by URL), so the box is always light — in both site modes the
+   answers read as dark text on white. */
+.cloud .cloud-form[data-tally-theme="light"] {
+    background: #ffffff; color-scheme: light;
+    border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px;
+}
 .cloud .cloud-fallback { color: var(--text-2); margin: 12px 0 0; overflow-wrap: anywhere; }
 .cloud .section-subtitle a { overflow-wrap: anywhere; }
 .feedback .feedback-jump { display: flex; flex-wrap: wrap; gap: 8px 20px; list-style: none; padding: 0; margin: 20px 0 0; }
