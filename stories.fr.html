@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cas d'usage FilterMate — Seize besoins métier traduits en filtres QGIS</title>
-    <meta name="description" content="Seize cas d'usage FilterMate pas à pas : douze récits enregistrés dans QGIS et quatre recettes illustrées pour couvrir les neuf combinaisons vecteur, raster et LiDAR. Dossier communal, NDVI, toitures, points sol et végétation près des lignes électriques : besoins, réglages et résultats.">
+    <meta name="description" content="Seize cas d'usage FilterMate pas à pas, tous enregistrés dans QGIS, qui couvrent les neuf combinaisons vecteur, raster et LiDAR. Dossier communal, NDVI, toitures, points sol et végétation près des lignes électriques : besoins, réglages et résultats.">
     <meta name="keywords" content="QGIS, plugin, FilterMate, cas d'usage, tutoriel, filtre spatial, BD TOPO, GeoPackage, tampon, prédicat, favoris, Processing">
     <meta property="og:title" content="Cas d'usage FilterMate">
     <meta property="og:description" content="Seize besoins métier, seize filtres : les neuf combinaisons de FilterMate 5 pas à pas sur des vecteurs, des rasters et des nuages de points LiDAR.">
@@ -85,9 +85,9 @@
     </div>
     <p class="lead">
         Chaque histoire part d'une question posée dans un service technique, une collectivité ou un bureau d'études, puis la traduit
-        en réglages FilterMate, étape par étape. Les douze premiers récits montrent les enregistrements QGIS et leurs résultats chiffrés,
-        en Haute-Garonne puis sur un kilomètre carré au nord de Toulouse. Quatre recettes illustrées complètent les neuf combinaisons de types de couches, avec les données
-        à préparer, les réglages et le résultat attendu.
+        en réglages FilterMate, étape par étape. Chaque récit montre un enregistrement QGIS et ses résultats chiffrés, en Haute-Garonne,
+        puis sur un kilomètre carré au nord de Toulouse ; le dernier sur un relevé aux lignes électriques classées, près de Wellington.
+        Ensemble, ils couvrent les neuf combinaisons de types de couches.
     </p>
     <div class="cards story-index">
         <a class="card story-card" href="#s1"><span class="story-card-media"><img src="video/export.webp" alt="Saint-Gaudens filtrée et prête à être exportée" loading="lazy" width="1280" height="720"><b aria-hidden="true">01</b></span><div class="story-card-copy"><span class="badge">Bureau d'études</span><h4>Le dossier communal en trois minutes</h4><p>Cadrer 12 couches départementales et livrer un GeoPackage stylé.</p><span class="story-outcome">12 couches · <strong>12 380 bâtiments</strong></span></div></a>
@@ -102,10 +102,10 @@
         <a class="card story-card" href="#s10"><span class="story-card-media"><img src="video/heights.webp" alt="La hauteur du bâti" loading="lazy" width="1280" height="720"><b aria-hidden="true">10</b></span><div class="story-card-copy"><span class="badge">Instruction</span><h4>La hauteur du bâti</h4><p>Classe bâtiment et hauteur au-dessus du MNT, calculée par PDAL.</p><span class="story-outcome"><strong>119 bâtiments</strong> au-dessus de 7 m</span></div></a>
         <a class="card story-card" href="#s11"><span class="story-card-media"><img src="video/pruning.webp" alt="Les routes à élaguer" loading="lazy" width="1280" height="720"><b aria-hidden="true">11</b></span><div class="story-card-copy"><span class="badge">Voirie</span><h4>Les routes à élaguer</h4><p>Végétation haute de plus de 8 m, à 3 m des tronçons.</p><span class="story-outcome"><strong>82 tronçons</strong> sur 376</span></div></a>
         <a class="card story-card" href="#s12"><span class="story-card-media"><img src="video/survey.webp" alt="Le lot de relevé autour d’un bâtiment" loading="lazy" width="1280" height="720"><b aria-hidden="true">12</b></span><div class="story-card-copy"><span class="badge">Énergie</span><h4>Le lot de relevé autour d’un bâtiment</h4><p>Un vecteur découpe un MNT et un nuage, puis tout part dans un ZIP.</p><span class="story-outcome">GeoTIFF + LAZ · <strong>ZIP</strong></span></div></a>
-        <a class="card story-card" href="#s13"><span class="story-card-media"><img src="img/combinations/ndvi.svg" alt="Schéma : un masque de végétation de l’ortho IRC conserve les pixels correspondants de l’ortho RVB" loading="lazy" width="1280" height="720"><b aria-hidden="true">13</b></span><div class="story-card-copy"><span class="badge">Espaces verts</span><h4>La végétation sur une orthophoto RVB</h4><p>Le NDVI de l’image infrarouge devient le masque d’une autre image.</p><span class="story-outcome">Raster → raster · <strong>NDVI &gt; 0,3</strong></span></div></a>
-        <a class="card story-card" href="#s14"><span class="story-card-media"><img src="img/combinations/roofs.svg" alt="Schéma : les toits sélectionnés à la pipette sur une orthophoto découpent le nuage LiDAR" loading="lazy" width="1280" height="720"><b aria-hidden="true">14</b></span><div class="story-card-copy"><span class="badge">Bâtiment</span><h4>Les points LiDAR sous les toits</h4><p>Un objet repéré sur l’orthophoto isole les points à son aplomb.</p><span class="story-outcome">Raster → LiDAR · <strong>pipette objet</strong></span></div></a>
-        <a class="card story-card" href="#s15"><span class="story-card-media"><img src="img/combinations/ground.svg" alt="Schéma : l’empreinte des points de classe sol restreint les pixels du MNT" loading="lazy" width="1280" height="720"><b aria-hidden="true">15</b></span><div class="story-card-copy"><span class="badge">Topographie</span><h4>Le MNT au droit des points sol</h4><p>Les points classés sol définissent où conserver les altitudes du raster.</p><span class="story-outcome">LiDAR → raster · <strong>classe 2</strong></span></div></a>
-        <a class="card story-card" href="#s16"><span class="story-card-media"><img src="img/combinations/wires.svg" alt="Schéma en plan : un tampon autour des points de câble conserve la végétation proche" loading="lazy" width="1280" height="720"><b aria-hidden="true">16</b></span><div class="story-card-copy"><span class="badge">Réseaux</span><h4>La végétation près des lignes électriques</h4><p>Les points de câble découpent un second nuage limité à la végétation haute.</p><span class="story-outcome">LiDAR → LiDAR · <strong>tampon 10 m</strong></span></div></a>
+        <a class="card story-card" href="#s13"><span class="story-card-media"><img src="video/ndvi.webp" alt="L’orthophoto RVB conservée sous le masque NDVI" loading="lazy" width="1280" height="720"><b aria-hidden="true">13</b></span><div class="story-card-copy"><span class="badge">Espaces verts</span><h4>La végétation sur une orthophoto RVB</h4><p>Le NDVI de l’image infrarouge devient le masque d’une autre image.</p><span class="story-outcome">6,0 ha · <strong>NDVI &gt; 0,3</strong></span></div></a>
+        <a class="card story-card" href="#s14"><span class="story-card-media"><img src="video/roofs.webp" alt="Les points LiDAR sous deux toits" loading="lazy" width="1280" height="720"><b aria-hidden="true">14</b></span><div class="story-card-copy"><span class="badge">Bâtiment</span><h4>Les points LiDAR sous les toits</h4><p>Un objet repéré sur l’orthophoto isole les points à son aplomb.</p><span class="story-outcome">2 toits · <strong>29 196 points</strong></span></div></a>
+        <a class="card story-card" href="#s15"><span class="story-card-media"><img src="video/ground.webp" alt="Le MNT découpé aux points sol" loading="lazy" width="1280" height="720"><b aria-hidden="true">15</b></span><div class="story-card-copy"><span class="badge">Topographie</span><h4>Le MNT au droit des points sol</h4><p>Les points classés sol définissent où conserver les altitudes du raster.</p><span class="story-outcome">Classe 2 · <strong>85 % du MNT</strong></span></div></a>
+        <a class="card story-card" href="#s16"><span class="story-card-media"><img src="video/wires.webp" alt="La végétation haute à moins de 10 m des lignes électriques" loading="lazy" width="1280" height="720"><b aria-hidden="true">16</b></span><div class="story-card-copy"><span class="badge">Réseaux</span><h4>La végétation près des lignes électriques</h4><p>Les points de câble découpent un second nuage limité à la végétation haute.</p><span class="story-outcome">10 m · <strong>165 537 points</strong></span></div></a>
     </div>
 </header>
 
@@ -627,115 +627,135 @@ processing.run("filtermate:batch_filter", {
 </section>
 <!-- 13 ------------------------------------------------------------------ -->
 <section id="s13">
-    <div class="band band-diagram">
-        <img src="img/combinations/ndvi-cover.svg" alt="" loading="lazy" width="1280" height="640">
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/ndvi.webp" data-src="video/ndvi.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">13</span><span>La végétation sur une orthophoto RVB</span></h2>
-        <p class="credit">Raster → raster · schéma de principe.</p>
+        <h2><span class="num">13</span>La végétation sur une orthophoto RVB</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: La végétation sur une orthophoto RVB"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">Orthophotos © IGN, Fenouillet et Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Le service des espaces verts prépare une carte de la végétation. Il dispose d’une orthophoto infrarouge couleur pour repérer les couverts végétaux et veut montrer ces zones sur l’<strong>orthophoto RVB</strong>, plus facile à lire pour ses collègues.</p></div>
+        <div><h4>Le besoin</h4><p>Le service des espaces verts de <strong>Fenouillet</strong> prépare une carte de la végétation. Il dispose d’une orthophoto infrarouge couleur pour repérer les couverts végétaux et veut montrer ces zones sur l’<strong>orthophoto RVB</strong>, plus facile à lire pour ses collègues.</p></div>
         <div><h4>La traduction FilterMate</h4><p>L’image <strong>ortho_irc</strong> est la source. Dans EXPLORING, l’expression <strong>NDVI &gt; 0,3</strong> sélectionne les pixels. Leur géométrie découpe la cible <strong>ortho_rvb</strong> avec Intersect : les couleurs de la cible sont conservées dans le masque, les autres pixels passent en NoData.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>ortho_irc</code></dd></div><div><dt>Sélection</dt><dd>NDVI &gt; 0,3</dd></div><div><dt>Cible</dt><dd><code>ortho_rvb</code></dd></div><div><dt>Relation</dt><dd>Intersect, sans tampon</dd></div><div><dt>Résultat attendu</dt><dd>Ortho RVB masquée en VRT</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>ortho_irc</code></dd></div><div><dt>Sélection</dt><dd>NDVI &gt; 0,3</dd></div><div><dt>Cible</dt><dd><code>ortho_rvb</code></dd></div><div><dt>Relation</dt><dd>Intersect, sans tampon</dd></div><div><dt>Résultat</dt><dd><strong>6,0 ha</strong> conservés, 6 % de l’image</dd></div></dl>
     <ol class="steps">
-        <li><strong>Identifier les bandes.</strong> Choisissez <em>ortho_irc</em> comme couche courante. Dans EXPLORING, ouvrez le menu d’un rôle de couleur et choisissez <strong>IRC</strong> si les bandes 1, 2 et 3 sont respectivement le proche infrarouge, le rouge et le vert. Adaptez les rôles si le fichier utilise un autre ordre.</li>
-        <li><strong>Choisir la végétation.</strong> Cochez <strong>RASTER EXPRESSION</strong>, puis <strong>Insert → Vegetation (NDVI &gt; 0.3)</strong>. Pour une image IRC dont le PIR est en bande 1 et le rouge en bande 2, l’expression est :
+        <li><strong>Identifier les bandes.</strong> Cliquez sur <em>ortho_irc</em> dans le panneau Couches. Son fichier annonce rouge, vert et bleu : ouvrez le menu d’une pastille de couleur dans BANDS et choisissez <strong>Every band: IRC</strong>, puisque les bandes 1, 2 et 3 sont le proche infrarouge, le rouge et le vert. Adaptez les rôles si votre fichier utilise un autre ordre.
+            <figure><img src="img/stories/s13-01.webp" alt="Étape 1 : les bandes d’ortho_irc réglées en proche infrarouge, rouge et vert" loading="lazy" width="1600" height="900"><figcaption>Étape 1. Vous seul savez que l’image est infrarouge : les pastilles indiquent NIR, R, G.</figcaption></figure>
+        </li>
+        <li><strong>Choisir la végétation.</strong> Cochez <strong>RASTER EXPRESSION</strong>, puis <strong>Insert → Vegetation (NDVI &gt; 0.3)</strong>. Avec le PIR en bande 1 et le rouge en bande 2, l’expression est :
             <pre><code>("ortho_irc@1" - "ortho_irc@2") / ("ortho_irc@1" + "ortho_irc@2") &gt; 0.3</code></pre>
-            Activez l’aperçu avec le bouton de sélection et ajustez le seuil en comparant les zones retenues avec l’image.</li>
-        <li><strong>Relier à l’autre image.</strong> Dans FILTERING, cochez <em>ortho_rvb</em> dans <strong>Layers to filter</strong>, choisissez <strong>Intersect</strong> et désactivez le tampon. Pour ce premier essai, partez d’une cible non filtrée et laissez la combinaison décochée.</li>
-        <li><strong>Filter, puis exporter.</strong> Masquez la source pour lire la cible seule. EXPORTING peut écrire le résultat en GeoTIFF ou en COG ; <strong>Undo</strong> rétablit l’orthophoto cible entière.</li>
+            Le bouton œil prévisualise les pixels retenus sur la carte : 6,0 % de l’image.
+            <figure><img src="img/stories/s13-02.webp" alt="Étape 2 : l’expression NDVI et son aperçu sur la carte" loading="lazy" width="1600" height="900"><figcaption>Étape 2. Comparez les zones retenues avec l’image avant de déplacer le seuil.</figcaption></figure>
+        </li>
+        <li><strong>Relier à l’autre image.</strong> Dans FILTERING, cochez <em>ortho_rvb</em> dans <strong>Layers to filter</strong>, choisissez <strong>Intersect</strong> et désactivez le tampon. Partez d’une cible non filtrée et laissez la combinaison décochée.
+            <figure><img src="img/stories/s13-03.webp" alt="Étape 3 : cible ortho_rvb, Intersect, sans tampon" loading="lazy" width="1600" height="900"><figcaption>Étape 3. Un raster dans la liste des cibles, comme une couche vecteur.</figcaption></figure>
+        </li>
+        <li><strong>Filter.</strong> Masquez <em>ortho_irc</em> pour lire la cible seule. EXPORTING peut écrire le résultat en GeoTIFF ou en COG ; <strong>Undo</strong> rétablit l’orthophoto entière.
+            <figure><img src="img/stories/s13-04.webp" alt="Étape 4 : l’orthophoto RVB conservée sous le masque de végétation, arbres le long de l’autoroute" loading="lazy" width="1600" height="900"><figcaption>Étape 4. Les couleurs RVB restent là où l’infrarouge a vu de la végétation : houppiers et haies, le long de l’autoroute et dans les jardins.</figcaption></figure>
+        </li>
     </ol>
-    <figure>
-        <img src="img/combinations/ndvi.svg" alt="Schéma source et résultat : les taches de végétation de l’image IRC conservent les pixels RVB au même endroit, avec du NoData ailleurs" loading="lazy" width="1280" height="720">
-        <figcaption>Schéma de principe. La sélection est calculée dans l’infrarouge ; le résultat garde les couleurs de l’image RVB.</figcaption>
-    </figure>
-    <h3>Résultat attendu</h3>
-    <p>Une couche RVB découpée suivant le masque NDVI, avec son style et son identifiant conservés. Le seuil de 0,3 est un point de départ à contrôler selon la saison, les ombres et les caractéristiques des images.</p>
+    <h3>Résultat</h3>
+    <p><strong>6,0 ha</strong> de l’orthophoto RVB conservés, soit 6 % du kilomètre carré (960 607 pixels de 0,25 m sur 15 988 737), dans un VRT qui garde le style et l’identifiant de la couche. Les houppiers et les haies passent ; les champs secs de l’été et les pelouses restent sous le seuil. Le seuil de 0,3 est un point de départ à contrôler selon la saison, les ombres et l’image.</p>
 </section>
 
 <!-- 14 ------------------------------------------------------------------ -->
 <section id="s14">
-    <div class="band band-diagram">
-        <img src="img/combinations/roofs-cover.svg" alt="" loading="lazy" width="1280" height="640">
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/roofs.webp" data-src="video/roofs.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">14</span><span>Les points LiDAR sous les toits</span></h2>
-        <p class="credit">Raster → nuage de points · schéma de principe.</p>
+        <h2><span class="num">14</span>Les points LiDAR sous les toits</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Les points LiDAR sous les toits"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">Orthophotos et LiDAR HD © IGN, Fenouillet et Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Un bureau d’études prépare le relevé de plusieurs toitures reconnaissables sur une orthophoto. Il veut extraire les <strong>points LiDAR à leur aplomb</strong> sans dessiner chaque contour dans une couche vectorielle.</p></div>
+        <div><h4>Le besoin</h4><p>Un bureau d’études prépare le relevé de deux toitures en tuiles d’une <strong>zone d’activités</strong>, reconnaissables sur l’orthophoto. Il veut extraire les <strong>points LiDAR à leur aplomb</strong> sans dessiner chaque contour dans une couche vectorielle.</p></div>
         <div><h4>La traduction FilterMate</h4><p>La source est le raster <strong>ortho_rvb</strong>. La pipette en mode <strong>Clicked object</strong> suit les pixels connexes de couleur similaire au point cliqué. Les objets retenus deviennent la géométrie source ; Intersect découpe le nuage <strong>lhd</strong> dans cette emprise.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>ortho_rvb</code></dd></div><div><dt>Sélection</dt><dd>Pipette, objet cliqué</dd></div><div><dt>Cible</dt><dd><code>lhd</code></dd></div><div><dt>Relation</dt><dd>Intersect, sans tampon</dd></div><div><dt>Résultat attendu</dt><dd>Nuage découpé sous les objets</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>ortho_rvb</code></dd></div><div><dt>Sélection</dt><dd>Pipette, objet cliqué (2 toits)</dd></div><div><dt>Cible</dt><dd><code>lhd</code></dd></div><div><dt>Relation</dt><dd>Intersect, sans tampon</dd></div><div><dt>Résultat</dt><dd><strong>29 196</strong> points</dd></div></dl>
     <ol class="steps">
-        <li><strong>Se placer sur la toiture.</strong> Choisissez <em>ortho_rvb</em> comme couche courante et zoomez sur un toit dont la couleur se distingue de ses abords. Vérifiez les rôles rouge, vert et bleu dans EXPLORING.</li>
-        <li><strong>Détecter l’objet.</strong> Dans la pipette, choisissez <strong>Clicked object</strong>, puis cliquez dans la toiture. Ajustez la tolérance en contrôlant le contour affiché sur la carte. <strong>Ctrl+clic</strong> ajoute un relevé pour une autre partie du toit ou une autre toiture.</li>
-        <li><strong>Relier au nuage.</strong> Dans FILTERING, cochez <em>lhd</em> dans <strong>Layers to filter</strong>. Choisissez <strong>Intersect</strong>, sans tampon. Partez d’un nuage cible non filtré pour conserver tous les retours situés dans l’emprise sélectionnée.</li>
-        <li><strong>Filter et contrôler.</strong> Masquez l’orthophoto pour examiner les points, puis vérifiez leur emprise en réaffichant l’image. EXPORTING permet une livraison LAZ ou COPC ; <strong>Undo</strong> restitue le nuage complet.</li>
+        <li><strong>Se placer sur les toitures.</strong> Cliquez sur <em>ortho_rvb</em> et zoomez sur des toits dont la couleur se distingue de leurs abords. BANDS affiche les rôles rouge, vert et bleu.
+            <figure><img src="img/stories/s14-01.webp" alt="Étape 1 : l’orthophoto RVB zoomée sur les toits de la zone d’activités" loading="lazy" width="1600" height="900"><figcaption>Étape 1. Le nuage est chargé mais masqué : c’est l’image que l’on clique.</figcaption></figure>
+        </li>
+        <li><strong>Détecter les objets.</strong> Cochez <strong>PIPETTE</strong>, choisissez <strong>Clicked object</strong>, puis le détecteur du rail, et cliquez dans la toiture. <strong>Ctrl+clic</strong> ajoute le toit voisin. Ajustez la tolérance si le contour déborde sur le parking.
+            <figure><img src="img/stories/s14-02.webp" alt="Étape 2 : deux toits détourés par la pipette objet" loading="lazy" width="1600" height="900"><figcaption>Étape 2. Deux objets, 2 220 m². Sans le modèle SAM, le moteur couleur fait croître la tache de pixels semblables.</figcaption></figure>
+        </li>
+        <li><strong>Relier au nuage.</strong> Dans FILTERING, cochez <em>lhd</em> dans <strong>Layers to filter</strong>. Choisissez <strong>Intersect</strong>, sans tampon, sur un nuage non filtré.
+            <figure><img src="img/stories/s14-03.webp" alt="Étape 3 : cible lhd, Intersect, sans tampon" loading="lazy" width="1600" height="900"><figcaption>Étape 3.</figcaption></figure>
+        </li>
+        <li><strong>Filter et contrôler.</strong> Affichez le nuage et masquez l’orthophoto pour examiner les points. EXPORTING permet une livraison LAZ ou COPC ; <strong>Undo</strong> restitue le nuage complet.
+            <figure><img src="img/stories/s14-04.webp" alt="Étape 4 : les points LiDAR conservés sous les deux toits" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 29 196 points, toutes classes affichées sauf le bruit.</figcaption></figure>
+        </li>
     </ol>
-    <figure>
-        <img src="img/combinations/roofs.svg" alt="Schéma source et résultat : les contours jaunes de deux toits détectés sur l’orthophoto retiennent les points LiDAR à leur aplomb" loading="lazy" width="1280" height="720">
-        <figcaption>Schéma de principe. Les objets détectés sur l’image déterminent une emprise en plan dans laquelle les points sont conservés.</figcaption>
-    </figure>
-    <h3>Résultat attendu</h3>
-    <p>Un nuage dérivé limité à l’aplomb des pixels retenus. Le filtre est spatial : tous les retours dans cette emprise peuvent rester, y compris des points de sol ou de végétation. Pour ne garder que les points classés bâtiment, appliquez ensuite <code>Classification = 6</code> sur le nuage obtenu.</p>
+    <h3>Résultat</h3>
+    <p><strong>29 196 points LiDAR</strong> à l’aplomb des deux toits (2 220 m²), dans un COPC dérivé. Le filtre est spatial : tous les retours dans cette emprise restent, y compris des points en bord de toit ou de végétation en surplomb. Pour ne garder que les points classés bâtiment, appliquez ensuite <code>Classification = 6</code> sur le nuage obtenu.</p>
     <div class="callout"><strong>Lire le contour.</strong> Une ombre ou un changement de matériau peut séparer une toiture en plusieurs objets. Vérifiez la sélection sur l’image avant le découpage, surtout si les dates de l’orthophoto et du LiDAR diffèrent.</div>
 </section>
 
 <!-- 15 ------------------------------------------------------------------ -->
 <section id="s15">
-    <div class="band band-diagram">
-        <img src="img/combinations/ground-cover.svg" alt="" loading="lazy" width="1280" height="640">
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/ground.webp" data-src="video/ground.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">15</span><span>Le MNT au droit des points sol</span></h2>
-        <p class="credit">Nuage de points → raster · schéma de principe.</p>
+        <h2><span class="num">15</span>Le MNT au droit des points sol</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Le MNT au droit des points sol"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">LiDAR HD © IGN, Fenouillet et Saint-Alban (Haute-Garonne).</p>
     </div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Une géomètre prépare un contrôle du terrain naturel. Elle dispose d’un MNT interpolé et du nuage classé d’origine. Elle veut limiter la lecture du raster aux secteurs où des <strong>points sol</strong> sont présents dans le relevé.</p></div>
+        <div><h4>Le besoin</h4><p>Une géomètre prépare un contrôle du terrain naturel. Elle dispose d’un MNT interpolé à 0,5 m et du nuage classé d’origine. Elle veut limiter la lecture du raster aux secteurs où des <strong>points sol</strong> sont présents dans le relevé.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Le nuage <strong>lhd</strong> est la source. Dans EXPLORING, le préréglage <strong>Ground</strong> retient uniquement la classe 2. L’empreinte de ces points découpe le raster cible <strong>mnt</strong>, avec Intersect et sans tampon.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>lhd</code></dd></div><div><dt>Sélection</dt><dd><code>Classification = 2</code></dd></div><div><dt>Cible</dt><dd><code>mnt</code></dd></div><div><dt>Relation</dt><dd>Intersect, sans tampon</dd></div><div><dt>Résultat attendu</dt><dd>MNT limité à l’empreinte du sol</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>lhd</code></dd></div><div><dt>Sélection</dt><dd><code>Classification = 2</code></dd></div><div><dt>Cible</dt><dd><code>mnt</code></dd></div><div><dt>Relation</dt><dd>Intersect, sans tampon</dd></div><div><dt>Résultat</dt><dd><strong>85 %</strong> des pixels du MNT</dd></div></dl>
     <ol class="steps">
-        <li><strong>Lire la classification.</strong> Choisissez <em>lhd</em> comme couche courante. Dans EXPLORING, ouvrez <strong>CLASSES</strong> et vérifiez que la classe <strong>2 – Ground</strong> comporte des points.</li>
-        <li><strong>Garder le sol.</strong> Dans le menu <strong>Selection</strong>, choisissez <strong>Ground</strong>. Vérifiez que seule la classe 2 est cochée, puis utilisez le bouton de sélection pour prévisualiser les points sur la carte.</li>
-        <li><strong>Relier au MNT.</strong> Cochez <em>mnt</em> dans <strong>Layers to filter</strong>, choisissez <strong>Intersect</strong> et désactivez le tampon. Utilisez une cible non filtrée et laissez la combinaison décochée.</li>
-        <li><strong>Filter, puis lire le raster.</strong> Masquez le nuage pour voir le MNT découpé. EXPORTING écrit le résultat en GeoTIFF ou COG ; <strong>Undo</strong> restaure le MNT entier et l’état précédent de la source.</li>
+        <li><strong>Lire la classification.</strong> Cliquez sur <em>lhd</em> dans le panneau Couches. Dans EXPLORING, <strong>CLASSES</strong> liste les classes avec les couleurs de la carte.
+            <figure><img src="img/stories/s15-01.webp" alt="Étape 1 : les classes du nuage de points dans EXPLORING" loading="lazy" width="1600" height="900"><figcaption>Étape 1. Le sol (en brun) apparaît partout où aucun toit ni arbre ne le cache.</figcaption></figure>
+        </li>
+        <li><strong>Garder le sol.</strong> Dans le menu <strong>Selection</strong>, choisissez <strong>Ground</strong> : seule la classe 2 est cochée. Le bouton œil prévisualise les points sur la carte.
+            <figure><img src="img/stories/s15-02.webp" alt="Étape 2 : le préréglage Ground, classe 2 seule, prévisualisée sur la carte" loading="lazy" width="1600" height="900"><figcaption>Étape 2. Les lacunes du sol sont les bâtiments.</figcaption></figure>
+        </li>
+        <li><strong>Relier au MNT.</strong> Cochez <em>mnt</em> dans <strong>Layers to filter</strong>, choisissez <strong>Intersect</strong> et désactivez le tampon, sur une cible non filtrée.
+            <figure><img src="img/stories/s15-03.webp" alt="Étape 3 : cible mnt, Intersect, sans tampon" loading="lazy" width="1600" height="900"><figcaption>Étape 3.</figcaption></figure>
+        </li>
+        <li><strong>Filter, puis lire le raster.</strong> Masquez le nuage pour voir le MNT découpé. EXPORTING l’écrit en GeoTIFF ou en COG ; <strong>Undo</strong> restaure le MNT entier.
+            <figure><img src="img/stories/s15-04.webp" alt="Étape 4 : le MNT découpé à l’empreinte des points sol, troué sous les bâtiments" loading="lazy" width="1600" height="900"><figcaption>Étape 4. Du NoData là où aucun point sol n’a été mesuré : sous les bâtiments, où le MNT avait été interpolé.</figcaption></figure>
+        </li>
     </ol>
-    <figure>
-        <img src="img/combinations/ground.svg" alt="Schéma source et résultat : les points sol conservent le MNT sous leur empreinte ; les secteurs sans points sol deviennent NoData" loading="lazy" width="1280" height="720">
-        <figcaption>Schéma de principe. Les points sol fournissent le masque ; les altitudes viennent du MNT déjà chargé.</figcaption>
-    </figure>
-    <h3>Résultat attendu</h3>
-    <p>Un VRT du MNT dont les pixels extérieurs à l’empreinte des points sol sont en NoData. Les altitudes existantes sont conservées : cette opération découpe le MNT, elle ne l’interpole pas à nouveau.</p>
+    <h3>Résultat</h3>
+    <p><strong>3 414 020 pixels</strong> du MNT conservés sur 4 000 000 (85 %, 85,4 ha) : les 15 % restants passent en NoData, surtout sous les bâtiments. Les altitudes existantes sont conservées : cette opération découpe le MNT, elle ne l’interpole pas à nouveau.</p>
     <div class="callout"><strong>Résolution de l’empreinte.</strong> Le masque est construit sur une grille, de 2 m par défaut. Il décrit la présence de points sol à cette résolution, sans constituer une mesure de précision altimétrique du MNT.</div>
 </section>
 
 <!-- 16 ------------------------------------------------------------------ -->
 <section id="s16">
-    <div class="band band-diagram">
-        <img src="img/combinations/wires-cover.svg" alt="" loading="lazy" width="1280" height="640">
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/wires.webp" data-src="video/wires.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">16</span><span>La végétation près des lignes électriques</span></h2>
-        <p class="credit">Nuage de points → nuage de points · schéma de principe.</p>
+        <h2><span class="num">16</span>La végétation près des lignes électriques</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: La végétation près des lignes électriques"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">LiDAR © Wellington City Council (CC BY 4.0), via OpenTopography — Wellington, Nouvelle-Zélande.</p>
     </div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Un gestionnaire de réseau prépare une visite des secteurs boisés. À partir d’un relevé où les câbles sont classés, il veut extraire la <strong>végétation haute à proximité des lignes</strong> pour organiser les contrôles.</p></div>
-        <div><h4>La traduction FilterMate</h4><p>Deux couches de nuage ont des rôles distincts : <strong>lhd_reseau</strong> fournit les points de câble (classes 13 et 14) ; <strong>lhd_vegetation</strong> est d’abord filtrée sur la classe 5. Le tampon de <strong>10 m</strong> autour de l’empreinte des câbles découpe ensuite cette cible.</p></div>
+        <div><h4>Le besoin</h4><p>Une exploitante de réseau prépare des visites en zone boisée. À partir d’un relevé dont les câbles sont classés, elle veut extraire la <strong>végétation haute proche des lignes</strong> pour planifier les inspections. Le relevé couvre ici les collines boisées à l’ouest de <strong>Wellington</strong>, en Nouvelle-Zélande, traversées du nord au sud par une ligne.</p></div>
+        <div><h4>La traduction FilterMate</h4><p>Deux couches de nuage ont des rôles distincts : <strong>lhd_reseau</strong> fournit les points de câbles (classe 14 ; ce relevé n’a pas de classe 13) ; <strong>lhd_vegetation</strong> est d’abord filtrée sur la classe 5. Un tampon de <strong>10 m</strong> autour de l’empreinte des câbles découpe ensuite cette cible.</p></div>
     </div>
-    <dl class="recipe"><div><dt>Source</dt><dd><code>lhd_reseau</code></dd></div><div><dt>Sélection</dt><dd>Classes 13 et 14</dd></div><div><dt>Cible</dt><dd><code>lhd_vegetation</code>, classe 5</dd></div><div><dt>Relation</dt><dd>Intersect, tampon 10 m</dd></div><div><dt>Résultat attendu</dt><dd>Végétation du corridor</dd></div></dl>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>lhd_reseau</code></dd></div><div><dt>Sélection</dt><dd>Classe 14 (pas de classe 13 ici)</dd></div><div><dt>Cible</dt><dd><code>lhd_vegetation</code>, classe 5</dd></div><div><dt>Relation</dt><dd>Intersect, tampon 10 m</dd></div><div><dt>Résultat</dt><dd><strong>165 537</strong> points sur 3 051 728</dd></div></dl>
     <ol class="steps">
-        <li><strong>Préparer deux couches.</strong> Chargez le nuage deux fois dans QGIS, ou dupliquez sa couche. Nommez les couches <em>lhd_reseau</em> et <em>lhd_vegetation</em>. Utilisez un SCR métrique pour le tampon de 10 m, par exemple Lambert-93 en France métropolitaine. Vérifiez la présence des classes <strong>13 – Wire – guard</strong> ou <strong>14 – Wire – conductor</strong>, et de la classe <strong>5 – High vegetation</strong>.</li>
-        <li><strong>Préparer la végétation cible.</strong> Laissez « appliquer aux autres dalles du jeu » désactivé sur les deux couches pour conserver leurs sélections indépendantes. Choisissez <em>lhd_vegetation</em> comme couche courante. Dans CLASSES, ne cochez que la classe 5. Décochez <strong>Layers to filter</strong> et cliquez sur <strong>Filter</strong> pour appliquer la sélection à cette couche seule.</li>
-        <li><strong>Choisir les câbles.</strong> Passez sur <em>lhd_reseau</em>. Dans CLASSES, ne cochez que les classes 13 et 14 présentes. Le bouton de sélection permet de contrôler les points qui formeront l’empreinte source.</li>
-        <li><strong>Découper le corridor.</strong> Dans FILTERING, cochez <em>lhd_vegetation</em>, choisissez <strong>Intersect</strong> et réglez <strong>Buffer</strong> sur <strong>10 m</strong>. Cliquez sur <strong>Filter</strong> : le découpage conserve le filtre de classe déjà appliqué à la cible. Masquez la source pour examiner le résultat, puis exportez la cible en LAZ ou COPC.</li>
+        <li><strong>Préparer deux couches.</strong> Chargez deux fois le nuage dans QGIS ou dupliquez sa couche. Nommez-les <em>lhd_reseau</em> et <em>lhd_vegetation</em>. Utilisez un SCR métrique pour le tampon de 10 m : ce relevé est en NZTM 2000 (EPSG:2193), le Lambert-93 conviendrait en France métropolitaine. Vérifiez que les classes <strong>13 – Wire – guard</strong> ou <strong>14 – Wire – conductor</strong>, et la classe <strong>5 – High vegetation</strong>, contiennent des points : ici 18 425 points de conducteurs, aucun câble de garde, 3 051 728 points de végétation haute.
+            <figure><img src="img/stories/s16-01.webp" alt="Étape 1 : le relevé chargé deux fois, les câbles dessinés sur la végétation" loading="lazy" width="1600" height="900"><figcaption>Étape 1. La copie réseau n’affiche que ses câbles (en ambre), la copie végétation tout ce qui dépasse du sol.</figcaption></figure>
+        </li>
+        <li><strong>Préparer la cible végétation.</strong> Laissez « Apply to the other tiles of the dataset » désactivé sur les deux couches pour garder leurs sélections indépendantes. Choisissez <em>lhd_vegetation</em> comme couche courante. Dans CLASSES, <strong>Selection → No class</strong>, puis cochez la classe 5. Décochez <strong>Layers to filter</strong> et cliquez sur <strong>Filter</strong> pour appliquer la sélection à cette seule couche.
+            <figure><img src="img/stories/s16-02.webp" alt="Étape 2 : lhd_vegetation filtrée sur la seule classe 5" loading="lazy" width="1600" height="900"><figcaption>Étape 2. La copie végétation ne garde que la classe 5 ; la copie réseau n’a pas changé.</figcaption></figure>
+        </li>
+        <li><strong>Sélectionner les câbles.</strong> Passez sur <em>lhd_reseau</em>. Dans CLASSES, <strong>No class</strong>, puis cochez la classe 14. Le bouton œil montre les points qui formeront l’empreinte source.
+            <figure><img src="img/stories/s16-03.webp" alt="Étape 3 : la classe 14, les conducteurs, sélectionnée sur lhd_reseau" loading="lazy" width="1600" height="900"><figcaption>Étape 3. La classe 13 figure dans la norme, mais ce relevé n’en contient aucun point.</figcaption></figure>
+        </li>
+        <li><strong>Découper le couloir.</strong> Dans FILTERING, cochez <em>lhd_vegetation</em>, choisissez <strong>Intersect</strong> et réglez <strong>Buffer</strong> sur <strong>10 m</strong>. Cliquez sur <strong>Filter</strong> : le découpage conserve le filtre de classe déjà appliqué à la cible. Exportez la cible en LAZ ou en COPC.
+            <figure><img src="img/stories/s16-04.webp" alt="Étape 4 : la végétation haute à moins de 10 m des câbles" loading="lazy" width="1600" height="900"><figcaption>Étape 4. Les arbres à moins de 10 m de la ligne, de part et d’autre des câbles.</figcaption></figure>
+        </li>
     </ol>
-    <figure>
-        <img src="img/combinations/wires.svg" alt="Schéma en plan : un corridor jaune autour des câbles ne conserve que les points de végétation haute situés dans son emprise" loading="lazy" width="1280" height="720">
-        <figcaption>Schéma de principe. La classe sélectionne les points de végétation ; le tampon autour des câbles limite leur emprise.</figcaption>
-    </figure>
-    <h3>Résultat attendu</h3>
-    <p>Une couche de végétation haute limitée au corridor autour de l’empreinte des points de câble. La distance est calculée <strong>en plan</strong>, à partir d’une empreinte sur grille : elle sert au repérage des secteurs à examiner. La distance réelle en trois dimensions entre les branches et les conducteurs demande une analyse complémentaire du nuage.</p>
-    <div class="callout"><strong>Classification nécessaire.</strong> Les classes 13 et 14 ne sont pas présentes dans tous les relevés. Choisissez un jeu où les câbles sont effectivement classés pour reproduire cette recette.</div>
+    <h3>Résultat</h3>
+    <p><strong>165 537 points de végétation haute</strong>, soit 5,4 % des 3 051 728 du relevé, se trouvent à moins de 10 m de l’empreinte des câbles. La distance est mesurée <strong>en plan</strong>, à partir d’une empreinte sur grille, pour repérer les secteurs à visiter. La distance réelle en trois dimensions entre branches et conducteurs demande une analyse complémentaire du nuage.</p>
+    <div class="callout"><strong>Classification indispensable.</strong> Les classes 13 et 14 ne figurent pas dans tous les relevés ; celui-ci n’a que la classe 14. Choisissez un jeu de données dont les câbles sont classés pour reproduire cette recette. Relevé : Wellington City Council, LINZ (2020), <a href="https://doi.org/10.5069/G9K935QX">Wellington City, New Zealand 2019-2020</a>.</div>
 </section>
 
 <section id="replay">
@@ -745,8 +765,8 @@ processing.run("filtermate:batch_filter", {
         <li><strong>Téléchargez la BD TOPO</strong> de votre département sur la Géoplateforme de l'IGN (thème « Tous thèmes », format GeoPackage, projection Lambert-93). Le fichier est livré avec ses index spatiaux : c'est ce qui rend les cascades rapides.</li>
         <li><strong>Chargez les couches</strong> nommées dans chaque histoire. Les styles embarqués dans le GeoPackage cachent les bâtiments au-delà du 1:25 000 : désactivez la visibilité dépendante de l'échelle dans les propriétés de la couche, ou appliquez vos propres styles.</li>
         <li><strong>Remplacez les noms de communes</strong> par les vôtres. Les champs utilisés (<code>nom_officiel</code>, <code>importance</code>, <code>persistance</code>, <code>usage_1</code>, <code>nature</code>, <code>insee_commune</code>, <code>date_modification</code>) sont ceux de la BD TOPO 3.x, identiques dans tous les départements.</li>
-        <li><strong>Pour reproduire les captures des cas 1 à 8</strong>, le script <code>scripts/recipe_screenshots.py</code> du dépôt pilote QGIS d'un bout à l'autre de chaque histoire, vérifie les effectifs et enregistre une image par étape. Les enregistrements des cas 9 à 12 sont préparés par <code>scripts/site_videos.py</code>.</li>
-        <li><strong>Pour les recettes illustrées 13 à 16</strong>, chargez les couches nommées dans chaque recette et suivez les réglages indiqués. Les schémas représentent les résultats attendus ; les surfaces et les effectifs dépendront de vos données.</li>
+        <li><strong>Pour reproduire les captures des cas 1 à 8</strong>, le script <code>scripts/recipe_screenshots.py</code> du dépôt pilote QGIS d'un bout à l'autre de chaque histoire, vérifie les effectifs et enregistre une image par étape. Les enregistrements des cas 9 à 16 sont préparés par <code>scripts/site_videos.py</code>.</li>
+        <li><strong>Pour les cas 13 à 16</strong>, chargez les couches nommées dans chaque histoire et suivez les réglages indiqués. Les surfaces et les effectifs dépendront de vos données.</li>
     </ol>
     <div class="callout">
         <strong>Vérification.</strong> Les effectifs des histoires 1 à 8 ont été mesurés avec FilterMate 5.0, dont le moteur garde la géométrie source exacte, et ceux des histoires 2, 3 et 4 de nouveau avec FilterMate 5.1.1, cadrage conservé. Les deux séries ont en outre été recalculées indépendamment avec GEOS (sans FilterMate) : les nombres sont identiques. Les versions précédentes de cette page, mesurées avec une source simplifiée jusqu’à 100 m, en différaient (histoire 4 : 1 112 tronçons au lieu de 747).
@@ -754,7 +774,7 @@ processing.run("filtermate:batch_filter", {
 </section>
 
 <footer class="doc-foot">
-    <p>FilterMate 5.1, GPL-3.0, par imagodata. Données des vidéos et des captures : BD TOPO® © IGN, Licence Ouverte 2.0.</p>
+    <p>FilterMate 5.1, GPL-3.0, par imagodata. Données des vidéos et des captures : BD TOPO®, orthophotos et LiDAR HD © IGN, Licence Ouverte 2.0 ; LiDAR de l’histoire 16 © Wellington City Council, CC BY 4.0, via OpenTopography.</p>
     <p><a href="index.fr.html">Accueil</a>, <a href="guide.fr.html">Guide utilisateur</a>, <a href="stories.fr.html">Cas d'usage</a>, <a href="roadmap.fr.html">Feuille de route</a>, <a href="feedback.fr.html?ref=site-footer">Votre avis</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
 </footer>
 

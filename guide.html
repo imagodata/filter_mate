@@ -151,6 +151,12 @@
         <em>Settings &rarr; User Profiles &rarr; Open Active Profile Folder</em> always opens the right place.
     </div>
 
+    <h3 id="first-launch">First launch</h3>
+    <p>
+        Open a project and click the FilterMate button: the panel opens on the layer you select. The first time a new version opens, AGENT offers once to set FilterMate up with a few cards of choices, with no AI model: see <a href="#setup">Set up FilterMate</a>.
+        <small>(5.1.2)</small> The favorites and the settings of each layer belong to the project: <strong>save the project</strong> (Ctrl+S) and they travel with its .qgz file to another computer. Opening a project whose layer settings differ from yours asks once which ones to apply, as described in <a href="#project-settings">Settings that travel with the project</a>.
+    </p>
+
     <h3>Optional: PostgreSQL / PostGIS</h3>
     <p>FilterMate filters PostGIS layers server-side. This needs the <code>psycopg2</code> Python package inside the QGIS Python environment:</p>
     <pre><code>pip install psycopg2-binary</code></pre>
@@ -342,7 +348,7 @@
     </table>
     </div>
     <p>
-        Each layer remembers its own exploring settings in the project, so switching layers and coming back restores your selection.
+        Each layer remembers its own exploring settings in the project, so switching layers and coming back restores your selection. <small>(5.1.2)</small> Once the project is saved, these settings are in its .qgz file and travel with it (<a href="#project-settings">details</a>).
     </p>
     <p>From the next release, right-click the rail to choose the buttons it shows: <em>More</em> always stays, so the rail is never empty. The choice is kept for each kind of layer, and asked by <em>Set up FilterMate</em> too.</p>
     <figure class="narrow">
@@ -512,7 +518,7 @@ AND ST_Intersects("geom",
     <div class="table-wrap">
     <table>
         <tr><th>Button</th><th>Action</th></tr>
-        <tr><td><strong>Filter</strong></td><td>Builds and applies the filter described by the Exploring zone and the Filtering tab.</td></tr>
+        <tr><td><strong>Filter</strong></td><td>Builds and applies the filter described by the Exploring zone and the Filtering tab. <small>(5.1.2)</small> The map then zooms to the filtered extent of the source layer (see <code>auto_zoom_on_filter</code> in <a href="#configuration">section 10</a>).</td></tr>
         <tr><td><strong>Undo</strong></td><td>Restores the previous filter state of the affected layers. The history is per project and survives a restart of QGIS. While AGENT is open, Undo and Redo walk the turns of the agent instead (<a href="#agent">section 14</a>).</td></tr>
         <tr><td><strong>Redo</strong></td><td>Re-applies a filter you just undid.</td></tr>
         <tr><td><strong>Compare</strong> <small>(5.1.1)</small></td><td>Shows the map as it was before the last filter on the left of a line that follows the mouse, and the map as it is on its right: what Undo would bring back. Available when Undo is; click it again to leave. Choosing another map tool, Filter, Undo, Redo, Unfilter, another layer or another project ends the comparison.</td></tr>
@@ -555,23 +561,47 @@ AND ST_Intersects("geom",
                 <li>Saved favorites are listed in the <strong>Quick filtering</strong> section at the top: one click applies them.</li>
                 <li><strong>Manage favorites&hellip;</strong> opens the manager described below.</li>
                 <li><strong>Export&hellip;</strong> / <strong>Import&hellip;</strong> exchange favorites as JSON files between projects or colleagues.</li>
-                <li><strong>Global favorites</strong> lists the favorites shared across all your projects.</li>
+                <li><strong>Global favorites</strong> lists the favorites kept on this computer for all your projects, and <em>Copy to global&hellip;</em> adds a project favorite to them.</li>
                 <li><strong>Maintenance</strong> holds database statistics and cleanup tools.</li>
             </ul>
         </div>
     </div>
 
-    <h3>The favorites manager</h3>
+    <h3 id="favorites-project">Project favorites and global favorites <small>(5.1.2)</small></h3>
+    <p>
+        A favorite is kept in one of two places, and the manager tells which with a badge:
+    </p>
+    <ul>
+        <li><strong>Project &middot; shared</strong>: the favorite is saved in the project. It is written into the .qgz file at each change, so Ctrl+S carries it: a favorite added, changed or deleted on one computer is there on every computer that opens the project, without duplicates. How often and when a favorite was used stays on each computer.</li>
+        <li><strong>Global &middot; this computer</strong>: the favorite stays on this computer and is offered in every project. It is not written into any project.</li>
+    </ul>
+    <p>
+        A favorite made on this computer and not saved yet (QGIS closed without saving the project) stays on this computer. A copy of a project opened on the same computer gets favorites of its own.
+        FilterMate follows the project on screen: closing a project or starting a new one no longer leaves the favorites of the previous one in the list, and a new project without a file starts with none; its favorites go into its .qgz at its first save.
+    </p>
+    <p>
+        When a favorite is replayed, the map zooms to the filtered extent of its source layer, or to its targets when the favorite leaves its source unfiltered <small>(5.1.2)</small>.
+    </p>
+
+    <h3>The favorites manager <small>(5.1.2)</small></h3>
     <figure>
-        <img src="img/guide/favorites-manager.png" alt="The favorites manager dialog with the General tab" loading="lazy" width="1350" height="900">
-        <figcaption>The manager: search and scope filter at the top, favorites on the left, details on the right.</figcaption>
+        <img src="img/guide/favorites-manager.png" alt="The favorites manager dialog" loading="lazy" width="1350" height="900">
+        <figcaption>The manager: search, scope filter and sort order at the top, favorites on the left, details on the right.</figcaption>
     </figure>
     <ul>
-        <li><strong>General</strong>: rename the favorite, add a description and tags, see its source layer, provider and usage count. <em>Visibility</em> switches between <em>This project</em> and <em>All projects</em> (global).</li>
-        <li><strong>Expression</strong>: the exact filter expression, editable for advanced users.</li>
-        <li><strong>Remote</strong>: publishing to a shared git repository. FilterMate uses the QGIS authentication manager for credentials, so a team can maintain a common library of filters. This requires the optional <em>QGIS Resource Sharing</em> plugin.</li>
+        <li><strong>Summary</strong>: the filter (the layer and the expression, which scrolls instead of stretching the dialog), the layers it then filters with their feature counts, its spatial predicates and buffer, its tags, the <em>Project &middot; shared</em> or <em>Global &middot; this computer</em> badge, and one line with how often it was used and when it was created. Below it, the name, the description and the tags stay editable; <strong>Save Changes</strong> stores them and refreshes the summary.</li>
+        <li><strong>Layers (N)</strong>: the other layers the favorite filters, with their expressions.</li>
+        <li><strong>The list</strong>: double-click a favorite to apply it, or right-click it for <em>Apply</em>, <em>Rename</em>, <em>Duplicate</em>, <em>Delete</em>, <em>Copy to global</em> or <em>Copy to project</em>. Sort it by name, last used or most used; the scope filter shows <em>Shared</em> or <em>Mine</em> favorites, of all projects or of this one.</li>
+        <li><strong>Global favorites</strong> are listed with the others. They cannot be edited here; applying one copies it into the project once, and the copy is reused afterwards.</li>
+        <li><strong>Shared&hellip;</strong> and <strong>Publish&hellip;</strong> open the sharing of favorites through a git repository. They appear when the favorites sharing extension is active (it uses the optional <em>QGIS Resource Sharing</em> plugin). FilterMate uses the QGIS authentication manager for credentials, so a team can maintain a common library of filters.</li>
     </ul>
-    <p><strong>Apply</strong> runs the favorite on the current project, <strong>Save Changes</strong> stores your edits, <strong>Delete</strong> removes it. Favorites are stored in FilterMate's own SQLite database in your QGIS profile and, for project-scoped ones, in the project file too.</p>
+    <p>
+        <strong>Apply</strong> runs the favorite on the current project, <strong>Save Changes</strong> stores your edits, <strong>Delete</strong> removes it. Deleting a project favorite warns that it is removed for everyone who opens the project. Messages name the favorite concerned: a name already taken, an empty name or a failed copy is told in the dialog, and an import says how many favorites came in and how many were skipped because their name was already there.
+        FilterMate also keeps a copy of the project favorites in its own SQLite database in your QGIS profile, but once the project is saved, the project file is the reference.
+    </p>
+    <p>
+        <strong>Sharing repos.</strong> <small>(5.1.2)</small> Each repo of <em>Manage repos&hellip; &rarr; Edit</em> sets everything about its publishing: its Git URL, its branch, the file name of its bundle and the e-mail of its commits. Publishing, quick publish or the dialog, follows the entry as it is now: after you change the host or the branch of a repo, the next pull and push go to the new ones. Empty fields keep the former values (<code>favorites</code> for the bundle name); an e-mail that is not of the form <code>name@domain</code> is refused by the editor.
+    </p>
 </section>
 
 <!-- 9 ------------------------------------------------------------------ -->
@@ -643,12 +673,24 @@ AND ST_Intersects("geom",
         <tr><td><code>SECTION_HEIGHT</code></td><td>fill / fit</td><td>Rows of FILTERING and EXPORTING. <em>fill</em> (default): the rows spread over the whole height of the section, as in 5.1.1. <em>fit</em>: each row at its own height, one gap apart, at the top of the section; the room left stays under them and a short section scrolls. Applied at once; also asked by <em>Set up FilterMate</em>.</td></tr>
         <tr><td><code>ACTIVE_THEME</code></td><td>auto / default / dark / light</td><td><em>auto</em> follows the QGIS theme.</td></tr>
         <tr><td><code>feature_picker_limit</code></td><td>number, default 1000</td><td>Maximum rows loaded in the multiple-selection list.</td></tr>
+        <tr><td><code>auto_zoom_on_filter</code> <small>(5.1.2)</small></td><td>true / false, default true</td><td>Under <code>APP.OPTIONS.EXPLORATION</code>. After a filter, and when a favorite is replayed, the map zooms to the filtered extent of the source layer (an attribute filter, a Disjoint or a Contain zooms to the union of the source and the layers filtered with it). A favorite that leaves its source unfiltered zooms to its targets. When off, only the layers whose <strong>Tracking</strong> button is on zoom.</td></tr>
+        <tr><td><code>remember_answers</code> <small>(5.1.2)</small></td><td>true / false, default true</td><td>Under <code>APP.OPTIONS.LAYER_SETTINGS</code>. Keeps the answer given with <em>Do not ask again for this project</em> when a project's layer settings differ from yours. Turned off, the answers kept are forgotten at the next opening and the question is asked at each one.</td></tr>
         <tr><td><code>AGENT</code></td><td>true / false</td><td>Shows the AGENT section (<code>enabled</code> under <code>APP.OPTIONS.AGENT</code>). On by default. Turning it on shows the section the next time the panel opens; turning it off hides it after QGIS restarts.</td></tr>
     </table>
     </div>
     <p>
         <strong>The mouse wheel.</strong> A list or a number box answers the wheel only after you click it. Until then the wheel scrolls the panel, so a value, such as the feature used as the source of the next filter, never changes by accident.
     </p>
+    <h3 id="project-settings">Settings that travel with the project <small>(5.1.2)</small></h3>
+    <p>
+        The settings of the tree above are those of this computer. The FilterMate settings of <strong>each layer</strong> are different: the fields and expressions of the EXPLORING selections, the linking button, the layers to filter, the predicates and the buffer of FILTERING are saved in the project. Once the project is saved, its .qgz file is the reference: a layer set up on one computer is set up the same way on every computer that opens the project, and a change saved on another computer wins over what this computer remembered. The same goes for the favorites of the project (<a href="#favorites-project">section 8</a>).
+    </p>
+    <ul>
+        <li><strong>Save the project.</strong> A change of a layer setting marks the project as modified, so QGIS asks to save it when you close it. Nothing is marked when no setting changes. Update FilterMate on every computer that shares the project: a computer on an earlier version reads only its own memory and may write its values back into the project.</li>
+        <li><strong>Settings that differ from yours.</strong> Opening a project whose layer settings differ from those of this computer asks once for the whole project: <em>This project carries FilterMate settings for its layers that differ from yours. Apply the project's settings for:</em> with <strong>EXPLORING</strong> and <strong>FILTERING</strong> ticked, and the buttons <strong>Apply</strong> and <strong>Keep mine</strong>. A group you keep stays yours, and nothing of it is written into the project until you change that setting in the panel. Nothing is asked when nothing differs, on a computer that has never seen these layers (the project applies), or when the project cannot be the reference (read-only file, no file yet).</li>
+        <li><strong>Do not ask again for this project.</strong> The answer is remembered on this computer, for this project (a project that is moved is asked about again), and used at the next openings. Turn <code>remember_answers</code> off to be asked each time.</li>
+        <li><strong>Not saved in the project.</strong> The settings of raster and point cloud layers stay on each computer. The settings of the Configuration tab, global favorites and the history of filters of this computer are not in the project either.</li>
+    </ul>
     <p>
         The tree also holds performance thresholds (when to switch optimisations on), the expression cache size, export defaults and the
         <strong>Extensions</strong> section (favorites sharing, QFieldCloud). The complete file lives at <code>config/config.json</code> in the plugin folder;
@@ -1011,7 +1053,7 @@ processing.run("filtermate:batch_filter", {
     </p>
 
     <figure class="narrow">
-        <img src="img/guide/agent-chat.png" alt="AGENT open above the folded EXPLORING section: two requests, each with a filter card that gives the features kept" loading="lazy" width="360" height="720">
+        <img src="img/guide/agent-chat.png" alt="AGENT open, EXPLORING beside it in the rail: two requests, each with a filter card that gives the features kept" loading="lazy" width="360" height="644">
         <figcaption>Two requests and their cards: each filter names its layers and gives the features it kept; <em>Undo</em> on the last card takes it back. AGENT shares the upper stack with EXPLORING, folded here.</figcaption>
     </figure>
     <figure class="narrow">
@@ -1031,11 +1073,11 @@ processing.run("filtermate:batch_filter", {
     </p>
 
     <figure class="narrow">
-        <img src="img/guide/agent-question.png" alt="A question card in the AGENT thread: which of two road layers to style, with choices to click and an Other field" loading="lazy" width="360" height="720">
+        <img src="img/guide/agent-question.png" alt="A question card in the AGENT thread: which of two road layers to style, with choices to click and an Other field" loading="lazy" width="360" height="644">
         <figcaption>A request with two possible layers: the agent asks which one before it changes anything.</figcaption>
     </figure>
 
-    <h3>Set up FilterMate <small>(5.1.1)</small></h3>
+    <h3 id="setup">Set up FilterMate <small>(5.1.1)</small></h3>
     <p>
         The first time a new version opens, AGENT offers once to set FilterMate up. The setup needs no AI model and sends nothing anywhere: it asks with cards of choices, ticked as your settings are now.
         Which sections you use and which data you work with, the look of the panel, where the sections go (all in the FilterMate panel, which is the default, or in panels of QGIS) and where their buttons go, then what you filter and export.
@@ -1044,7 +1086,7 @@ processing.run("filtermate:batch_filter", {
     </p>
 
     <figure class="narrow">
-        <img src="img/guide/agent-setup.png" alt="The offer to set FilterMate up with the agent: what it covers, with the Start and Not now buttons" loading="lazy" width="360" height="720">
+        <img src="img/guide/agent-setup.png" alt="The offer to set FilterMate up with the agent: what it covers, with the Start and Not now buttons" loading="lazy" width="360" height="644">
         <figcaption>The offer, shown once per version: <em>Start</em> begins the questions, <em>Not now</em> leaves it to the menu.</figcaption>
     </figure>
 
@@ -1067,7 +1109,7 @@ processing.run("filtermate:batch_filter", {
     </ul>
 
     <figure class="narrow">
-        <img src="img/guide/agent-history.png" alt="The History page of AGENT: four requests, applied or not, the steps of one of them, and the Undo the last, Redo and Send again buttons" loading="lazy" width="360" height="720">
+        <img src="img/guide/agent-history.png" alt="The History page of AGENT: four requests, applied or not, the steps of one of them, and the Undo the last, Redo and Send again buttons" loading="lazy" width="360" height="644">
         <figcaption>The <em>History</em> page: the requests of the project, applied or not, and the steps of the last one that changed something.</figcaption>
     </figure>
 
@@ -1152,6 +1194,9 @@ processing.run("filtermate:batch_filter", {
         <tr><td>Controls look tiny on a 4K screen</td><td>Set <code>UI_PROFILE</code> to <em>hidpi</em>.</td></tr>
         <tr><td>The panel opens in the wrong language</td><td>Set <code>LANGUAGE</code> explicitly instead of <em>auto</em>.</td></tr>
         <tr><td>A filter from an old session is still applied</td><td>Filters live in the project file. Use <strong>Unfilter</strong>, or clear the provider filter in the layer properties.</td></tr>
+        <tr><td>My favorites or my layer settings are not on the other computer <small>(5.1.2)</small></td><td>They travel in the project file: save the project (Ctrl+S) on the first computer, then open that file on the other one, and update FilterMate on both. <em>Global &middot; this computer</em> favorites and the Configuration tab stay on each computer: copy a global favorite to the project to share it. Raster and point cloud settings stay on each computer too.</td></tr>
+        <tr><td>FilterMate asks which settings to apply when I open a project <small>(5.1.2)</small></td><td>The project carries layer settings that differ from yours. <em>Apply</em> takes the project's, <em>Keep mine</em> keeps yours; tick <em>Do not ask again for this project</em> to remember the answer, and see <code>remember_answers</code> in the Configuration tab.</td></tr>
+        <tr><td>The map does not zoom after a filter, or zooms when I do not want it <small>(5.1.2)</small></td><td>Check <code>auto_zoom_on_filter</code> in the Configuration tab. When it is off, only the layers whose <strong>Tracking</strong> button is on zoom.</td></tr>
         <tr><td>The AGENT section is missing</td><td>The <code>AGENT</code> option of the Configuration tab is off. Turn it on and reopen the panel.</td></tr>
         <tr><td>AGENT asks for my own API key</td><td>No key is entered yet. Enter one in the AGENT settings, or choose a local Ollama model.</td></tr>
         <tr><td>A local model gives a timeout</td><td>The network timeout of QGIS applies to the agent (60 s by default). A local model slow to start may need more, and the message says so.</td></tr>

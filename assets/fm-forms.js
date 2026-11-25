@@ -14,6 +14,14 @@
         services: { en: 'YjGyXz', fr: 'Dqpy9X' }
     };
 
+    // The forms follow the site theme (fm.js sets data-theme on <html> just
+    // before this script). Their background is transparent, so the box keeps
+    // the form's own theme colour via CSS and stays readable either way.
+    var forced = document.documentElement.getAttribute('data-theme');
+    var theme = forced === 'dark' || forced === 'light'
+        ? forced
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
     var lang = (document.documentElement.lang || 'en').slice(0, 2) === 'fr' ? 'fr' : 'en';
     var ref = 'site';
     try {
@@ -30,7 +38,7 @@
         if (!id) { continue; }
         var frame = document.createElement('iframe');
         frame.setAttribute('data-tally-src', 'https://tally.so/embed/' + id +
-            '?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1&ref=' +
+            '?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1&theme=' + theme + '&ref=' +
             encodeURIComponent(ref));
         frame.setAttribute('loading', 'lazy');
         frame.setAttribute('width', '100%');
@@ -38,6 +46,7 @@
         frame.setAttribute('frameborder', '0');
         frame.setAttribute('title', box.getAttribute('data-fm-title') || 'Form');
         box.appendChild(frame);
+        box.setAttribute('data-tally-theme', theme);
         box.hidden = false;
         var soon = section.querySelector('.fm-form-soon');
         var help = section.querySelector('.fm-form-help');

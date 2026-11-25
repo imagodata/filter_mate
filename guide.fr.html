@@ -150,6 +150,12 @@
         <em>Préférences &rarr; Profils utilisateurs &rarr; Ouvrir le dossier du profil actif</em> ouvre toujours le bon endroit.
     </div>
 
+    <h3 id="first-launch">Première ouverture</h3>
+    <p>
+        Ouvrez un projet et cliquez sur le bouton FilterMate : le panneau s'ouvre sur la couche que vous sélectionnez. À la première ouverture d'une nouvelle version, AGENT propose une fois de configurer FilterMate avec quelques cartes de choix, sans modèle d'IA : voir <a href="#setup">Configurer FilterMate</a>.
+        <small>(5.1.2)</small> Les favoris et les réglages de chaque couche appartiennent au projet : <strong>enregistrez le projet</strong> (Ctrl+S) et ils voyagent avec son fichier .qgz vers un autre ordinateur. Ouvrir un projet dont les réglages de couches diffèrent des vôtres pose une question, une seule fois, sur ceux à appliquer, comme décrit dans <a href="#project-settings">Les réglages qui voyagent avec le projet</a>.
+    </p>
+
     <h3>Optionnel : PostgreSQL / PostGIS</h3>
     <p>FilterMate filtre les couches PostGIS côté serveur. Cela nécessite le paquet Python <code>psycopg2</code> dans l'environnement Python de QGIS :</p>
     <pre><code>pip install psycopg2-binary</code></pre>
@@ -341,7 +347,7 @@
     </table>
     </div>
     <p>
-        Chaque couche mémorise ses propres réglages d'exploration dans le projet : changer de couche puis y revenir restaure votre sélection.
+        Chaque couche mémorise ses propres réglages d'exploration dans le projet : changer de couche puis y revenir restaure votre sélection. <small>(5.1.2)</small> Une fois le projet enregistré, ces réglages sont dans son fichier .qgz et voyagent avec lui (<a href="#project-settings">détails</a>).
     </p>
     <p>À partir de la prochaine version, un clic droit sur la colonne choisit les boutons qu'elle montre : <em>More</em> reste toujours, la colonne n'est donc jamais vide. Le choix se garde pour chaque type de couche, et <em>Configurer FilterMate</em> le demande aussi.</p>
     <figure class="narrow">
@@ -511,7 +517,7 @@ AND ST_Intersects("geom",
     <div class="table-wrap">
     <table>
         <tr><th>Bouton</th><th>Action</th></tr>
-        <tr><td><strong>Filter</strong></td><td>Construit et applique le filtre décrit par la zone Exploring et l'onglet Filtering.</td></tr>
+        <tr><td><strong>Filter</strong></td><td>Construit et applique le filtre décrit par la zone Exploring et l'onglet Filtering. <small>(5.1.2)</small> La carte zoome ensuite sur l'étendue filtrée de la couche source (voir <code>auto_zoom_on_filter</code> dans la <a href="#configuration">section 10</a>).</td></tr>
         <tr><td><strong>Undo</strong></td><td>Restaure l'état de filtre précédent des couches concernées. L'historique est propre à chaque projet et survit à un redémarrage de QGIS. Tant qu'AGENT est ouvert, Undo et Redo parcourent plutôt les tours de l'agent (<a href="#agent">section 14</a>).</td></tr>
         <tr><td><strong>Redo</strong></td><td>Réapplique un filtre que vous venez d'annuler.</td></tr>
         <tr><td><strong>Compare</strong> <small>(5.1.1)</small></td><td>Montre la carte telle qu'elle était avant le dernier filtre à gauche d'une ligne qui suit la souris, et la carte actuelle à sa droite : ce qu'Undo ramènerait. Disponible quand Undo l'est ; un second clic en sort. Choisir un autre outil de carte, Filter, Undo, Redo, Unfilter, une autre couche ou un autre projet met fin à la comparaison.</td></tr>
@@ -554,23 +560,47 @@ AND ST_Intersects("geom",
                 <li>Les favoris enregistrés sont listés dans la section <strong>Filtrage rapide</strong> en haut : un clic les applique.</li>
                 <li><strong>Manage favorites&hellip;</strong> ouvre le gestionnaire décrit ci-dessous.</li>
                 <li><strong>Export&hellip;</strong> / <strong>Import&hellip;</strong> échangent des favoris sous forme de fichiers JSON entre projets ou collègues.</li>
-                <li><strong>Global favorites</strong> liste les favoris partagés par tous vos projets.</li>
+                <li><strong>Global favorites</strong> liste les favoris gardés sur cet ordinateur pour tous vos projets, et <em>Copy to global&hellip;</em> y ajoute un favori du projet.</li>
                 <li><strong>Maintenance</strong> regroupe les statistiques de la base et les outils de nettoyage.</li>
             </ul>
         </div>
     </div>
 
-    <h3>Le gestionnaire de favoris</h3>
+    <h3 id="favorites-project">Favoris du projet et favoris globaux <small>(5.1.2)</small></h3>
+    <p>
+        Un favori est gardé à l'un de deux endroits, et le gestionnaire dit lequel avec un badge :
+    </p>
+    <ul>
+        <li><strong>Projet &middot; partagé</strong> : le favori est enregistré dans le projet. Il est écrit dans le fichier .qgz à chaque modification, donc Ctrl+S l'emporte : un favori ajouté, modifié ou supprimé sur un ordinateur se retrouve sur tous les ordinateurs qui ouvrent le projet, sans doublons. La fréquence et la date d'utilisation d'un favori restent propres à chaque ordinateur.</li>
+        <li><strong>Global &middot; ce poste</strong> : le favori reste sur cet ordinateur et est proposé dans tous les projets. Il n'est écrit dans aucun projet.</li>
+    </ul>
+    <p>
+        Un favori créé sur cet ordinateur et pas encore enregistré (QGIS fermé sans enregistrer le projet) reste sur cet ordinateur. La copie d'un projet ouverte sur le même ordinateur reçoit des favoris à elle.
+        FilterMate suit le projet affiché : fermer un projet ou en commencer un nouveau ne laisse plus dans la liste les favoris du précédent, et un nouveau projet sans fichier démarre sans favori ; ses favoris entrent dans son .qgz à sa première sauvegarde.
+    </p>
+    <p>
+        Quand un favori est rejoué, la carte zoome sur l'étendue filtrée de sa couche source, ou sur ses cibles quand le favori laisse sa source non filtrée <small>(5.1.2)</small>.
+    </p>
+
+    <h3>Le gestionnaire de favoris <small>(5.1.2)</small></h3>
     <figure>
-        <img src="img/guide/favorites-manager.png" alt="Le gestionnaire de favoris avec l'onglet General" loading="lazy" width="1350" height="900">
-        <figcaption>Le gestionnaire : recherche et filtre de portée en haut, favoris à gauche, détails à droite.</figcaption>
+        <img src="img/guide/favorites-manager.png" alt="Le gestionnaire de favoris" loading="lazy" width="1350" height="900">
+        <figcaption>Le gestionnaire : recherche, filtre de portée et ordre de tri en haut, favoris à gauche, détails à droite.</figcaption>
     </figure>
     <ul>
-        <li><strong>General</strong> : renommer le favori, ajouter une description et des tags, voir sa couche source, son fournisseur et son nombre d'utilisations. <em>Visibility</em> bascule entre <em>This project</em> et <em>All projects</em> (global).</li>
-        <li><strong>Expression</strong> : l'expression de filtre exacte, modifiable par les utilisateurs avancés.</li>
-        <li><strong>Remote</strong> : publication vers un dépôt git partagé. FilterMate utilise le gestionnaire d'authentification de QGIS pour les identifiants, une équipe peut donc entretenir une bibliothèque commune de filtres. Nécessite l'extension optionnelle <em>QGIS Resource Sharing</em>.</li>
+        <li><strong>Résumé</strong> (<em>Summary</em>) : le filtre (la couche et l'expression, qui défile au lieu d'élargir la boîte de dialogue), les couches qu'il filtre ensuite avec leur nombre d'entités, ses prédicats spatiaux et son tampon, ses tags, le badge <em>Projet &middot; partagé</em> ou <em>Global &middot; ce poste</em>, et une ligne indiquant combien de fois il a servi et quand il a été créé. En dessous, le nom, la description et les tags restent modifiables ; <strong>Save Changes</strong> les enregistre et rafraîchit le résumé.</li>
+        <li><strong>Couches (N)</strong> : les autres couches que le favori filtre, avec leurs expressions.</li>
+        <li><strong>La liste</strong> : double-cliquez sur un favori pour l'appliquer, ou faites un clic droit pour <em>Appliquer</em>, <em>Renommer</em>, <em>Dupliquer</em>, <em>Supprimer</em>, <em>Copier en global</em> ou <em>Copier dans le projet</em>. Triez-la par nom, dernière utilisation ou plus utilisés ; le filtre de portée montre les favoris <em>Partagés</em> ou <em>À moi</em>, de tous les projets ou de celui-ci.</li>
+        <li>Les <strong>favoris globaux</strong> sont listés avec les autres. Ils ne se modifient pas ici ; en appliquer un le copie une fois dans le projet, et la copie est ensuite réutilisée.</li>
+        <li><strong>Partagés&hellip;</strong> et <strong>Publier&hellip;</strong> ouvrent le partage de favoris par un dépôt git. Ils apparaissent quand l'extension de partage de favoris est active (elle s'appuie sur l'extension optionnelle <em>QGIS Resource Sharing</em>). FilterMate utilise le gestionnaire d'authentification de QGIS pour les identifiants, une équipe peut donc entretenir une bibliothèque commune de filtres.</li>
     </ul>
-    <p><strong>Apply</strong> exécute le favori sur le projet courant, <strong>Save Changes</strong> enregistre vos modifications, <strong>Delete</strong> le supprime. Les favoris sont stockés dans la base SQLite propre à FilterMate dans votre profil QGIS et, pour ceux limités au projet, dans le fichier de projet aussi.</p>
+    <p>
+        <strong>Apply</strong> exécute le favori sur le projet courant, <strong>Save Changes</strong> enregistre vos modifications, <strong>Delete</strong> le supprime. Supprimer un favori du projet avertit qu'il est retiré pour tous ceux qui ouvrent le projet. Les messages nomment le favori concerné : un nom déjà pris, un nom vide ou une copie qui échoue sont signalés dans la boîte de dialogue, et un import dit combien de favoris sont entrés et combien ont été ignorés parce que leur nom existait déjà.
+        FilterMate garde aussi une copie des favoris du projet dans sa propre base SQLite de votre profil QGIS, mais une fois le projet enregistré, c'est le fichier de projet qui fait foi.
+    </p>
+    <p>
+        <strong>Dépôts de partage.</strong> <small>(5.1.2)</small> Chaque dépôt de <em>Manage repos&hellip; &rarr; Edit</em> règle tout ce qui concerne sa publication : son URL Git, sa branche, le nom du fichier de son lot et l'e-mail de ses commits. La publication, rapide ou par la boîte de dialogue, suit l'entrée telle qu'elle est maintenant : après un changement d'hôte ou de branche d'un dépôt, le pull et le push suivants vont vers les nouveaux. Les champs vides gardent les valeurs d'avant (<code>favorites</code> pour le nom du lot) ; un e-mail qui n'est pas de la forme <code>nom@domaine</code> est refusé par l'éditeur.
+    </p>
 </section>
 
 <!-- 9 ------------------------------------------------------------------ -->
@@ -642,12 +672,24 @@ AND ST_Intersects("geom",
         <tr><td><code>SECTION_HEIGHT</code></td><td>fill / fit</td><td>Lignes de FILTERING et EXPORTING. <em>fill</em> (par défaut) : les lignes réparties sur toute la hauteur de la section, comme en 5.1.1. <em>fit</em> : chaque ligne à sa propre hauteur, un écart entre deux, en haut de la section ; la place restante reste en dessous et une section trop courte défile. Appliqué aussitôt ; demandé aussi par <em>Configurer FilterMate</em>.</td></tr>
         <tr><td><code>ACTIVE_THEME</code></td><td>auto / default / dark / light</td><td><em>auto</em> suit le thème de QGIS.</td></tr>
         <tr><td><code>feature_picker_limit</code></td><td>nombre, 1000 par défaut</td><td>Nombre maximal de lignes chargées dans la liste de sélection multiple.</td></tr>
+        <tr><td><code>auto_zoom_on_filter</code> <small>(5.1.2)</small></td><td>true / false, true par défaut</td><td>Sous <code>APP.OPTIONS.EXPLORATION</code>. Après un filtre, et quand un favori est rejoué, la carte zoome sur l'étendue filtrée de la couche source (un filtre attributaire, un Disjoint ou un Contain zoome sur l'union de la source et des couches filtrées avec elle). Un favori qui laisse sa source non filtrée zoome sur ses cibles. Désactivé, seules les couches dont le bouton <strong>Tracking</strong> est enclenché zooment.</td></tr>
+        <tr><td><code>remember_answers</code> <small>(5.1.2)</small></td><td>true / false, true par défaut</td><td>Sous <code>APP.OPTIONS.LAYER_SETTINGS</code>. Garde la réponse donnée avec <em>Ne plus demander pour ce projet</em> quand les réglages de couches d'un projet diffèrent des vôtres. Désactivé, les réponses gardées sont oubliées à l'ouverture suivante et la question est posée à chacune.</td></tr>
         <tr><td><code>AGENT</code></td><td>true / false</td><td>Affiche la section AGENT (<code>enabled</code> sous <code>APP.OPTIONS.AGENT</code>). Active par défaut. L'activer affiche la section à la prochaine ouverture du panneau ; la désactiver la masque après un redémarrage de QGIS.</td></tr>
     </table>
     </div>
     <p>
         <strong>La molette.</strong> Une liste ou un champ numérique ne répond à la molette qu'après un clic. Tant que ce n'est pas fait, la molette fait défiler le panneau : une valeur, comme l'entité qui servira de source au prochain filtre, ne change jamais par accident.
     </p>
+    <h3 id="project-settings">Les réglages qui voyagent avec le projet <small>(5.1.2)</small></h3>
+    <p>
+        Les réglages de l'arbre ci-dessus sont ceux de cet ordinateur. Les réglages FilterMate de <strong>chaque couche</strong> sont différents : les champs et expressions des sélections d'EXPLORING, le bouton de liaison, les couches à filtrer, les prédicats et le tampon de FILTERING sont enregistrés dans le projet. Une fois le projet enregistré, son fichier .qgz fait foi : une couche réglée sur un ordinateur l'est de la même façon sur tous les ordinateurs qui ouvrent le projet, et un changement enregistré sur un autre ordinateur l'emporte sur ce dont cet ordinateur se souvenait. Il en va de même pour les favoris du projet (<a href="#favorites-project">section 8</a>).
+    </p>
+    <ul>
+        <li><strong>Enregistrez le projet.</strong> Le changement d'un réglage de couche marque le projet comme modifié : QGIS propose donc de l'enregistrer à la fermeture. Rien n'est marqué quand aucun réglage ne change. Mettez FilterMate à jour sur chaque ordinateur qui partage le projet : un ordinateur resté sur une version antérieure ne lit que sa propre mémoire et peut réécrire ses valeurs dans le projet.</li>
+        <li><strong>Des réglages qui diffèrent des vôtres.</strong> Ouvrir un projet dont les réglages de couches diffèrent de ceux de cet ordinateur pose une seule question pour tout le projet : <em>Ce projet contient des réglages FilterMate pour ses couches, différents des vôtres. Appliquer ceux du projet pour :</em> avec <strong>EXPLORING</strong> et <strong>FILTERING</strong> cochés, et les boutons <strong>Appliquer</strong> et <strong>Garder les miens</strong>. Un groupe que vous gardez reste le vôtre, et rien de lui n'est écrit dans le projet tant que vous ne changez pas ce réglage dans le panneau. Rien n'est demandé quand rien ne diffère, sur un ordinateur qui n'a jamais vu ces couches (le projet s'applique), ni quand le projet ne peut pas faire foi (fichier en lecture seule, pas encore de fichier).</li>
+        <li><strong>Ne plus demander pour ce projet.</strong> La réponse est retenue sur cet ordinateur, pour ce projet (un projet déplacé est de nouveau interrogé), et utilisée aux ouvertures suivantes. Désactivez <code>remember_answers</code> pour qu'on vous demande à chaque fois.</li>
+        <li><strong>Pas dans le projet.</strong> Les réglages des couches raster et nuages de points restent sur chaque ordinateur. Les réglages de l'onglet Configuration, les favoris globaux et l'historique des filtres de cet ordinateur ne sont pas non plus dans le projet.</li>
+    </ul>
     <p>
         L'arbre contient aussi les seuils de performance (quand activer les optimisations), la taille du cache d'expressions, les valeurs par défaut d'export et la
         section <strong>Extensions</strong> (partage de favoris, QFieldCloud). Le fichier complet se trouve dans <code>config/config.json</code> du dossier du plugin ;
@@ -1010,7 +1052,7 @@ processing.run("filtermate:batch_filter", {
     </p>
 
     <figure class="narrow">
-        <img src="img/guide/agent-chat-fr.png" alt="AGENT ouvert au-dessus de la section EXPLORING repliée : deux demandes, chacune avec une carte de filtre qui donne les entités gardées" loading="lazy" width="360" height="720">
+        <img src="img/guide/agent-chat-fr.png" alt="AGENT ouvert, EXPLORING à côté dans la barre : deux demandes, chacune avec une carte de filtre qui donne les entités gardées" loading="lazy" width="360" height="644">
         <figcaption>Deux demandes et leurs cartes : chaque filtre nomme ses couches et donne les entités gardées ; <em>Annuler</em> sur la dernière carte la reprend. AGENT partage la pile du haut avec EXPLORING, replié ici.</figcaption>
     </figure>
     <figure class="narrow">
@@ -1030,11 +1072,11 @@ processing.run("filtermate:batch_filter", {
     </p>
 
     <figure class="narrow">
-        <img src="img/guide/agent-question-fr.png" alt="Une carte de questions dans le fil d'AGENT : laquelle de deux couches de routes mettre en valeur, avec des choix à cliquer et un champ Autre" loading="lazy" width="360" height="720">
+        <img src="img/guide/agent-question-fr.png" alt="Une carte de questions dans le fil d'AGENT : laquelle de deux couches de routes mettre en valeur, avec des choix à cliquer et un champ Autre" loading="lazy" width="360" height="644">
         <figcaption>Une demande avec deux couches possibles : l'agent demande laquelle avant de changer quoi que ce soit.</figcaption>
     </figure>
 
-    <h3>Configurer FilterMate <small>(5.1.1)</small></h3>
+    <h3 id="setup">Configurer FilterMate <small>(5.1.1)</small></h3>
     <p>
         À la première ouverture d'une nouvelle version, AGENT propose une fois de configurer FilterMate. La configuration ne demande aucun modèle d'IA et n'envoie rien nulle part : elle pose ses questions avec des cartes de choix, cochées selon vos réglages actuels.
         Les sections que vous utilisez et vos données, l'apparence du panneau, la place des sections (toutes dans le panneau FilterMate, ce qui est le défaut, ou dans des panneaux de QGIS) et celle de leurs boutons, puis ce que vous filtrez et exportez.
@@ -1043,7 +1085,7 @@ processing.run("filtermate:batch_filter", {
     </p>
 
     <figure class="narrow">
-        <img src="img/guide/agent-setup-fr.png" alt="La proposition de configurer FilterMate avec l'agent : ce qu'elle couvre, avec les boutons Démarrer et Plus tard" loading="lazy" width="360" height="720">
+        <img src="img/guide/agent-setup-fr.png" alt="La proposition de configurer FilterMate avec l'agent : ce qu'elle couvre, avec les boutons Démarrer et Plus tard" loading="lazy" width="360" height="644">
         <figcaption>La proposition, montrée une fois par version : <em>Démarrer</em> lance les questions, <em>Plus tard</em> la laisse au menu.</figcaption>
     </figure>
 
@@ -1066,7 +1108,7 @@ processing.run("filtermate:batch_filter", {
     </ul>
 
     <figure class="narrow">
-        <img src="img/guide/agent-history-fr.png" alt="La page Historique d'AGENT : quatre demandes, appliquées ou non, les étapes de l'une d'elles, et les boutons d'annulation, de rétablissement et de renvoi" loading="lazy" width="360" height="720">
+        <img src="img/guide/agent-history-fr.png" alt="La page Historique d'AGENT : quatre demandes, appliquées ou non, les étapes de l'une d'elles, et les boutons d'annulation, de rétablissement et de renvoi" loading="lazy" width="360" height="644">
         <figcaption>La page <em>Historique</em> : les demandes du projet, appliquées ou non, et les étapes de la dernière qui a changé quelque chose.</figcaption>
     </figure>
 
@@ -1151,6 +1193,9 @@ processing.run("filtermate:batch_filter", {
         <tr><td>Les contrôles sont minuscules sur un écran 4K</td><td>Mettez <code>UI_PROFILE</code> sur <em>hidpi</em>.</td></tr>
         <tr><td>Le panneau s'ouvre dans la mauvaise langue</td><td>Fixez <code>LANGUAGE</code> explicitement au lieu d'<em>auto</em>.</td></tr>
         <tr><td>Un filtre d'une ancienne session est toujours appliqué</td><td>Les filtres vivent dans le fichier de projet. Utilisez <strong>Unfilter</strong>, ou effacez le filtre fournisseur dans les propriétés de la couche.</td></tr>
+        <tr><td>Mes favoris ou mes réglages de couches ne sont pas sur l'autre ordinateur <small>(5.1.2)</small></td><td>Ils voyagent dans le fichier de projet : enregistrez le projet (Ctrl+S) sur le premier ordinateur, ouvrez ce fichier sur l'autre, et mettez FilterMate à jour sur les deux. Les favoris <em>Global &middot; ce poste</em> et l'onglet Configuration restent sur chaque ordinateur : copiez un favori global dans le projet pour le partager. Les réglages des rasters et des nuages de points restent aussi sur chaque ordinateur.</td></tr>
+        <tr><td>FilterMate demande quels réglages appliquer à l'ouverture d'un projet <small>(5.1.2)</small></td><td>Le projet contient des réglages de couches différents des vôtres. <em>Appliquer</em> prend ceux du projet, <em>Garder les miens</em> garde les vôtres ; cochez <em>Ne plus demander pour ce projet</em> pour retenir la réponse, et voyez <code>remember_answers</code> dans l'onglet Configuration.</td></tr>
+        <tr><td>La carte ne zoome pas après un filtre, ou zoome quand je ne le veux pas <small>(5.1.2)</small></td><td>Vérifiez <code>auto_zoom_on_filter</code> dans l'onglet Configuration. Désactivé, seules les couches dont le bouton <strong>Tracking</strong> est enclenché zooment.</td></tr>
         <tr><td>La section AGENT est absente</td><td>L'option <code>AGENT</code> de l'onglet Configuration est désactivée. Activez-la et rouvrez le panneau.</td></tr>
         <tr><td>AGENT demande ma propre clé d'API</td><td>Aucune clé n'est encore saisie. Saisissez-en une dans les réglages d'AGENT, ou choisissez un modèle Ollama local.</td></tr>
         <tr><td>Un modèle local donne un délai dépassé</td><td>Le délai réseau de QGIS s'applique à l'agent (60 s par défaut). Un modèle local lent à démarrer peut en demander plus, et le message le dit.</td></tr>
