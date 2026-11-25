@@ -308,6 +308,34 @@ class TestExchange:
     def test_no_turn_at_all_is_an_error(self):
         assert run_exchange(session(), "go", FakeTransport([]), self.executor([])).error.kind == "stream"
 
+    def held_exchange(self, auto_offer):
+        """A model calling a tool held for the token diet (2026-11-25: add_elevation called first)."""
+        seen = []
+        elev = ToolSpec("elev", "Add elevation.", {"type": "object", "properties": {}}, read_only=True)
+        run_elev = lambda a: seen.append("elev") or {"ok": True}
+        executor = ToolExecutor([READ], {"read": lambda a: {"ok": True}, "elev": run_elev})
+        executor.hold({"elev": ["terrain"]})
+        offered = []
+
+        def offer(name):
+            offered.append(name)
+            if auto_offer:
+                executor.offer([elev], {"elev": run_elev})
+            return auto_offer
+
+        chat = session()
+        transport = FakeTransport([turn(STOP_TOOL_USE, call("elev"))], [turn(STOP_END, TextPart("done"))])
+        run_exchange(chat, "go", transport, executor, auto_offer=offer)
+        return seen, offered, chat.messages[2].parts[0]
+
+    def test_held_tool_is_offered_and_rerun(self):
+        seen, offered, answer = self.held_exchange(True)
+        assert seen == ["elev"] and offered == ["elev"] and not answer.is_error
+
+    def test_held_tool_declined_by_the_resolver_keeps_its_failure(self):
+        seen, offered, answer = self.held_exchange(False)
+        assert seen == [] and offered == ["elev"] and answer.is_error
+
 
 class TestExecutor:
     def run(self, handler, the_call):
@@ -319,6 +347,12 @@ class TestExecutor:
 
     def test_unknown_tool(self):
         assert self.run(lambda a: a, call("nope")).is_error
+
+    def test_held_names_are_reported(self):
+        executor = ToolExecutor([READ], {"read": lambda a: {"ok": True}})
+        executor.hold({"elev": ["terrain"]})
+        assert executor.is_held("elev") and not executor.is_held("read")
+        assert not executor.is_held("unknown")
 
     def test_images_go_beside_the_json(self):
         result = self.run(lambda a: WithImages({"width": 3}, (("image/jpeg", "QUJD"),)), call("read", name="x"))

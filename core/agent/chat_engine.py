@@ -117,8 +117,12 @@ class ChatEngine:
                  defer: Callable[[Callable[[], None]], None] = lambda step: step(),
                  policy: Optional[PermissionPolicy] = None,
                  delay: Callable[[float, Callable[[], None]], None] = lambda seconds, step: step(),
-                 released: Callable[[Sequence[str]], None] = lambda names: None) -> None:
+                 released: Callable[[Sequence[str]], None] = lambda names: None,
+                 auto_offer: Optional[Callable[[str], bool]] = None) -> None:
         self._session = session
+        # Offers a tool the model called before it was offered (held for the token diet), True when offered:
+        # the call runs in this turn instead of waiting for the model to load its tools first.
+        self._auto_offer = auto_offer
         # Told the tools a compaction took out of the request (token diet, lot 1): use_tools may add them again.
         self._released = released
         # Read at each call: the user may change the level, or allow a tool, while the conversation goes on.
@@ -277,6 +281,14 @@ class ChatEngine:
         if self._cancelled:  # the calls that ran stay, with their results; the others are answered as not run
             self._interrupt(OUTCOME_CANCELLED, CAUSE_STOPPED, answers)
             return
+        if self._auto_offer is not None:
+            for position, call in enumerate(calls):
+                if self._cancelled:
+                    break
+                if answers[position].is_error and self._executor.is_held(call.name) and self._auto_offer(call.name):
+                    # Offered now: run at once, once per call (a call still held afterwards keeps its failure).
+                    # The panel shows both steps, the failure then the run, so nothing looks silently fixed.
+                    answers[position] = self._run_one(call, answered.get(position))
         self._session.add_tool_results(answers)
         self._defer(lambda: self._request_model(generation))
 
