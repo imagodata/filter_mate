@@ -123,12 +123,13 @@ def test_step_number_does_not_use_rule_colour():
 
 
 @pytest.mark.unit
-def test_tally_embeds_carry_site_theme():
-    """Feedback forms: the embed URL sets theme= and the box keeps its colour."""
-    assert "theme=' + theme" in FM_FORMS_JS or 'theme=" + theme' in FM_FORMS_JS \
-        or "&theme=' + theme" in FM_FORMS_JS
-    assert "data-tally-theme" in FM_FORMS_JS
+def test_tally_embeds_always_framed_light():
+    """Feedback forms: Tally renders LIGHT (dashboard theme, no URL override),
+    so the embed URL carries no theme= and the box is always light."""
+    assert "theme=" not in FM_FORMS_JS.replace("data-tally-theme", "")
+    assert 'setAttribute(\'data-tally-theme\', \'light\')' in FM_FORMS_JS
     assert ".cloud-form[data-tally-theme" in CSS
+    assert "background: #ffffff" in CSS
 
 
 @pytest.mark.unit
@@ -139,5 +140,7 @@ def test_theme_switch_wiring():
     assert "theme-toggle" in FM_JS and ".theme-toggle" in CSS
     assert "aria-pressed" in FM_JS
     assert "prefers-color-scheme" in FM_JS  # OS fallback
-    # Loaded Tally iframes keep their src (switching never wipes an answer).
-    assert "if (!frame.getAttribute('src'))" in FM_JS
+    # Loaded Tally iframes keep their src (switching never wipes an answer):
+    # fm.js only tags the box, it never rewrites an embed URL.
+    assert "setAttribute('data-tally-src'" not in FM_JS
+    assert 'setAttribute(\'data-tally-theme\', \'light\')' in FM_JS
