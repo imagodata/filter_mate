@@ -17,7 +17,7 @@ import pytest
 
 from infrastructure import logging as fm_logging
 from infrastructure.logging.redaction import (
-    SecretMaskingFilter, mask_sensitive_text, mask_uri_secrets, scrub_secrets_in_place)
+    SecretMaskingFilter, mask_home_dir, mask_sensitive_text, mask_uri_secrets, scrub_secrets_in_place)
 
 pytestmark = pytest.mark.unit
 
@@ -398,3 +398,23 @@ class TestScrubSecretsInPlace:
         data = {"x": SOURCE}
         assert scrub_secrets_in_place(data) == 1
         assert scrub_secrets_in_place(data) == 0
+
+
+class TestMaskHomeDir:
+    """Audit of 2026-11-24: the messages of a failed export sent the absolute path of the machine."""
+
+    def test_home_becomes_tilde(self):
+        import os
+        home = os.path.expanduser("~")
+        assert mask_home_dir(f"not written: {home}/out/carte.pdf is a symbolic link") == \
+            "not written: ~/out/carte.pdf is a symbolic link"
+
+    def test_similar_prefix_untouched(self):
+        import os
+        home = os.path.expanduser("~").rstrip(os.path.sep)
+        assert mask_home_dir(f"{home}2/out/x.pdf") == f"{home}2/out/x.pdf"
+        assert mask_home_dir("/tmp/out/x.pdf") == "/tmp/out/x.pdf"
+
+    def test_non_strings_pass_through(self):
+        assert mask_home_dir(None) is None
+        assert mask_home_dir("") == ""

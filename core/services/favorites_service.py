@@ -10,7 +10,8 @@ Pattern: Strangler Fig - Gradual extraction
 """
 
 import logging
-from typing import Dict, List, Optional, Any
+import os
+from typing import Any, Dict, List, Optional, Set
 from dataclasses import dataclass
 
 try:
@@ -29,6 +30,11 @@ from ..domain.favorites_manager import FilterFavorite
 from ..domain.layer_signature import LayerSignatureIndex
 
 logger = logging.getLogger(__name__)
+
+
+def _file_writable(path: str) -> bool:
+    """Whether the project file ``path`` can be written back (a stub for the tests)."""
+    return bool(path) and os.access(path, os.W_OK)
 
 
 @dataclass
@@ -110,8 +116,16 @@ class FavoritesService(QObject):
         # The project whose favorites the SQLite holds once read from its file (sync_with_project): only then are
         # changes written back to it, never into the project of before (2026-11-24).
         self._synced_project_uuid: Optional[str] = None
+        # Ids written into the project entry but not saved yet (the mirror writes at each change): the file does
+        # not hold them, so a sync must not remember them as its own (audit of 2026-11-24 #2: F5 bound the
+        # project again, the sync remembered them, and the favorite made here was dropped as 'removed elsewhere'
+        # at the next opening). Emptied when the file takes them (projectSaved) or another project is read.
+        self._unsaved_entry_ids: Set[str] = set()
         # Binds the current project when none is (set_bind_callback): a favorite added after Project > Close
         self._bind_project = None
+        # Whether the file of the project read cannot be written back (read-only): the mirror then stays out of
+        # it (no dirty project on opening), and the dialog says a change lasts for the session (audit of 2026-11-24).
+        self.project_read_only = False
         self.favorites_changed.connect(self._mirror_to_project)
         self._watch_project()
 
@@ -170,6 +184,7 @@ class FavoritesService(QObject):
 
     def _forget_synced_project(self, *_args) -> None:
         self._synced_project_uuid = None
+        self._unsaved_entry_ids = set()
 
     def _on_project_cleared(self, *_args) -> None:
         """The project is closed (or another one is about to be read): its favorites leave the list, and nothing is
@@ -178,6 +193,7 @@ class FavoritesService(QObject):
         on an empty project), and a favorite added then went to the closed project, then into its .qgz at its next
         opening."""
         self._synced_project_uuid = None
+        self._unsaved_entry_ids = set()
         manager = self._favorites_manager
         if not manager:
             return
@@ -195,6 +211,7 @@ class FavoritesService(QObject):
             manager.remember_file_ids([favorite.id for favorite in manager.get_all_favorites() if favorite.id])
         except Exception as e:
             logger.warning(f"Favorites of the saved project not remembered: {e}")
+        self._unsaved_entry_ids = set()
 
     # ─────────────────────────────────────────────────────────────────
     # Initialization
@@ -392,6 +409,52 @@ class FavoritesService(QObject):
         except Exception as e:
             logger.error(f"Error removing favorite: {e}")
             raise FavoritePersistenceError("remove_favorite", e) from e
+
+    def get_orphan_favorites(self) -> List["FilterFavorite"]:
+        """Favorites of projects never saved, listed nowhere: relisted instead of purged (audit of 2026-11-24,
+        decided with the user). Empty when no manager is attached."""
+        manager = self._favorites_manager
+        if not manager:
+            return []
+        try:
+            return manager.get_orphan_favorites()
+        except Exception as e:
+            logger.warning(f"Orphan favorites not read: {e}")
+            return []
+
+    def adopt_orphan_favorite(self, favorite_id: str) -> Optional[str]:
+        """Move the orphan ``favorite_id`` into this project (it travels with it at the next save).
+
+        None when nothing is attached, nothing is bound, or the id is no orphan.
+        """
+        manager = self._favorites_manager
+        if not manager or not self._bound_for_writing():
+            return None
+        try:
+            if favorite_id not in {favorite.id for favorite in manager.get_orphan_favorites()}:
+                return None
+            if not manager.move_favorite_to_project(favorite_id, getattr(manager, "_project_uuid", None)):
+                return None
+        except Exception as e:
+            logger.warning(f"Orphan favorite not adopted: {e}")
+            return None
+        self.favorites_changed.emit()
+        self._mirror_to_project()
+        return favorite_id
+
+    def delete_orphan_favorite(self, favorite_id: str) -> bool:
+        """Delete the orphan ``favorite_id`` from the SQLite of this computer."""
+        manager = self._favorites_manager
+        if not manager:
+            return False
+        try:
+            deleted = manager.delete_orphan_favorite(favorite_id)
+        except Exception as e:
+            logger.warning(f"Orphan favorite not deleted: {e}")
+            return False
+        if deleted:
+            self.favorites_changed.emit()
+        return deleted
 
     def update_favorite(
         self,
@@ -922,6 +985,7 @@ class FavoritesService(QObject):
         if not manager:
             return 0
         project = self._project(project)
+        self.project_read_only = self.project_file_read_only(project)
         text, _found = project.readEntry(project_favorites.SCOPE, project_favorites.KEY, "")
         stored, authoritative = project_favorites.read_payload(text)
         local = [favorite.to_dict() for favorite in manager.get_all_favorites()]
@@ -932,7 +996,10 @@ class FavoritesService(QObject):
             manager.replace_project_favorites([FilterFavorite.from_dict(dict(row)) for row in wanted])
             logger.info(f"✓ {len(wanted)} favorite(s) taken from the project file")
         if hasattr(manager, "remember_file_ids"):
-            manager.remember_file_ids(project_favorites.file_ids(stored))
+            # Only what the file holds: the ids the mirror wrote but nobody saved yet are this computer's, not
+            # the file's (audit of 2026-11-24 #2).
+            manager.remember_file_ids([row_id for row_id in project_favorites.file_ids(stored)
+                                       if row_id not in self._unsaved_entry_ids])
         self._synced_project_uuid = getattr(manager, "_project_uuid", None)
         self._mirror_to_project(project)
         self.favorites_changed.emit()
@@ -944,6 +1011,21 @@ class FavoritesService(QObject):
         if self._favorites_manager and hasattr(self._favorites_manager, "_load_favorites"):
             self._favorites_manager._load_favorites()
             self.favorites_changed.emit()
+
+    @staticmethod
+    def project_file_read_only(project: Any) -> bool:
+        """Whether the file of ``project`` cannot be written back (read-only): its favorites then live for the
+        session, and nothing is written into it (audit of 2026-11-24). A project never saved has no file: it is
+        not read-only, its entries travel with it when the user saves."""
+        path = getattr(project, "fileName", lambda: "")() or ""
+        if not path:
+            return False
+        try:
+            # A project in a database or at a URI has no file to check: QGIS writes it (project_file_writable).
+            from ...infrastructure.utils.layer_settings import project_file_writable
+            return not project_file_writable(project)
+        except Exception:  # noqa: BLE001 - without it, the file decides
+            return not _file_writable(path)
 
     def _mirror_to_project(self, project: Optional[Any] = None) -> None:
         """Write the favorites into the project when they differ from what it holds (an unchanged project stays
@@ -957,13 +1039,24 @@ class FavoritesService(QObject):
                     or self._synced_project_uuid != getattr(manager, "_project_uuid", None):
                 return
             project = self._project(project)
+            if self.project_file_read_only(project):
+                # A read-only file is never marked dirty for favorites (audit of 2026-11-24).
+                self.project_read_only = True
+                logger.info("Favorites not written into the project: its file is read-only")
+                return
+            self.project_read_only = False
             favorites = [favorite.to_dict() for favorite in manager.get_all_favorites()]
             text, found = project.readEntry(project_favorites.SCOPE, project_favorites.KEY, "")
             if not favorites and not text:
                 return  # a project that never had favorites keeps no entry
             payload = project_favorites.project_payload(favorites)
             if payload != text:
+                before = project_favorites.read_payload(text)[0]
                 project.writeEntry(project_favorites.SCOPE, project_favorites.KEY, payload)
+                after = {str(row["id"]) for row in project_favorites.read_payload(payload)[0] or [] if row.get("id")}
+                introduced = after - {str(row["id"]) for row in before or [] if row.get("id")}
+                if introduced:
+                    self._unsaved_entry_ids |= introduced
                 logger.debug(f"Favorites written into the project ({len(favorites)})")
         except Exception as e:  # a slot of favorites_changed: never an error dialog
             logger.warning(f"Favorites not written into the project: {e}")

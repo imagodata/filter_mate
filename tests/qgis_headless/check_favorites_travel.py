@@ -17,6 +17,11 @@ without it; ``AD`` a copy of the project opened with the panel closed, the panel
 ``AC`` Project > Close, a layer added, a favorite made; ``AT`` a new project from a template with layers (the .sh puts
 the template in the profile; skipped where QGIS lists no template: QGIS 4.3 lists none headless); ``AF`` a project
 that fails to read, a layer added, a favorite made; ``AZ`` the project opened at the end: none of those favorites in it.
+
+Audit of 2026-11-24 (lot 1): ``AC2`` a copy of the project opened then closed without saving, reopened (the next sync
+used to fail on UNIQUE constraint failed: fm_favorites.id and never healed), a favorite added, saved; ``AF5`` a favorite
+added but not saved, F5 (the project is bound again), closed without saving, reopened (the favorite used to be
+dropped as 'removed elsewhere').
 """
 import json
 import os
@@ -306,6 +311,53 @@ def add_if_template(name):
     return maybe
 
 
+COPY2 = os.path.join(WORK, "copy2.qgz")
+
+
+def open_copy_unsaved():
+    """Audit of 2026-11-24 #1: a copy of the project (Save As), opened then closed without saving."""
+    shutil.copy(PROJECT_PATH, COPY2)
+    check("the copy opens", iface.addProject(COPY2))
+    check("the copy lists the favorites", in_db() == ["fav_A2"], f"favorites={in_db()}")
+
+
+def close_without_saving():
+    iface.newProject(False)  # no prompt: the changes not saved are dropped
+
+
+def reopen_copy():
+    check("the copy reopens", iface.addProject(COPY2))
+
+
+def report_copy_reopened():
+    db, qgz = in_db(), in_qgz(COPY2)
+    print(f"FAVS {ROLE} db={db} qgz={qgz}", flush=True)
+    check("a copy closed without saving syncs cleanly at the next opening", db == ["fav_A2"], f"db={db}")
+    check("the copy on disk still carries the original ids", qgz == ["fav_A2"], f"qgz={qgz}")
+
+
+def report_copy_saved():
+    db, copy, qgz = in_db(), in_qgz(COPY2), in_qgz()
+    print(f"FAVS {ROLE} db={db} copy={copy} qgz={qgz}", flush=True)
+    check("a favorite added after the healing lands in the copy",
+          db == ["fav_A2", "made in the copy"] and copy == ["fav_A2", "made in the copy"], f"db={db} copy={copy}")
+    check("the original project is untouched", qgz == ["fav_A2"], f"qgz={qgz}")
+
+
+def reload_layers():
+    """Audit of 2026-11-24 #2: F5 binds the project again (the sync must not take the mirrored-but-unsaved
+    favorites for the file's)."""
+    app().force_reload_layers()
+    print(f"INFO {ROLE} layers reloaded, favorites={in_db()}", flush=True)
+
+
+def report_after_f5():
+    db, qgz = in_db(), in_qgz()
+    print(f"FAVS {ROLE} db={db} qgz={qgz}", flush=True)
+    check("an unsaved favorite survives F5 and a close without saving",
+          db == ["fav_A2", "made before F5"] and qgz == ["fav_A2"], f"db={db} qgz={qgz}")
+
+
 BROKEN = os.path.join(WORK, "broken.qgs")  # a .qgz that fails to unzip takes another path in QGIS
 
 
@@ -356,6 +408,10 @@ STEPS = {
     "AF": [(start_plugin, 8), (open_project, 12), (open_broken, 6), (after_broken, 0), (add_a_layer, 12),
            (bound_by_the_layer_added, 0), (add("made after a failed read"), 1), (report_broken, 0)],
     "AZ": [(start_plugin, 8), (open_project, 12), (report, 0)],
+    "AC2": [(start_plugin, 8), (open_copy_unsaved, 12), (close_without_saving, 6), (reopen_copy, 12),
+            (report_copy_reopened, 0), (add("made in the copy"), 1), (ctrl_s, 3), (report_copy_saved, 0)],
+    "AF5": [(start_plugin, 8), (open_project, 12), (add("made before F5"), 1), (reload_layers, 12),
+            (close_without_saving, 6), (open_project, 12), (report_after_f5, 0)],
 }[ROLE]
 
 

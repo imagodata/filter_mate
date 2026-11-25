@@ -323,6 +323,11 @@ Egyetért?</translation>
         <translation>A beállítások megnyitásához állítsa le a kérést, vagy várja meg a végét.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Már fut egy kérés: várja meg a végét, vagy állítsa le.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>A memóriát nem sikerült menteni: {}</translation>
@@ -2025,6 +2030,16 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Jegyzetek megőrzése egyik projektről a másikra</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Minden projekt kéréseinek megőrzése</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Az előzmények Minden projekt lapja: mit kértek, hol és mikor, ezen a számítógépen tárolva.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Több címkét vesszővel válasszon el.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>A név nem lehet üres.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Ez a projekt csak olvasható: a módosítás csak erre a munkamenetre marad meg.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Mappa: {6}</translation>
         <translation>A szolgáltatást {0:.0f} másodpercig olvasta a program, ez a megengedett legtöbb: a másolat {1} objektumot tartalmaz, és nem teljes.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>A szolgáltatás {0} objektumot jelzett, de csak {1} lett beolvasva: a másolat nem teljes.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>{0} feltételei tiltják a csempéi megőrzését: ez a réteg nem másolható. Más alaptérkép másolható (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Mappa: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>a szolgáltatást nem sikerült végig beolvasni: semmi sem lett megtartva</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>a helyi másolatot nem sikerült írni (a lemez megtelhetett): semmi sem maradt meg</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>a szolgáltatás nem adott át egyetlen elemet sem a látható térkép felett, vagy válasza nem volt olvasható: semmi sem maradt meg</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

@@ -263,6 +263,7 @@ class AgentChatController(QObject):
         self.panel.facts_provider = self._read_welcome_facts
         # The names of the layers become links in the answers; a click makes that layer the active one.
         self.panel.thread.layer_names = self._linked_layer_names
+        self.panel.mention_source = self._layers_in_tree_order
         self.panel.layer_link_clicked.connect(self._on_layer_link)
         self.panel.refresh_examples()  # drawn for an unknown state in the panel: now for the project
         self.panel.send_requested.connect(self._on_send)
@@ -456,7 +457,8 @@ class AgentChatController(QObject):
                 self._header_label = None
         from ...core.agent.local_model import runs_on_this_computer
         self.panel.set_ready(values.ready, "" if self._header_label is not None else destination,
-                             local=runs_on_this_computer(getattr(values, "preset", ""), getattr(values, "base_url", "")))
+                             local=runs_on_this_computer(getattr(values, "preset", ""), getattr(values, "base_url", ""),
+                                                         getattr(values, "model", "")))
 
     def stop(self) -> None:
         """The dock closes: it can reopen on this same conversation. A recipe stops before its next step."""
@@ -573,6 +575,8 @@ class AgentChatController(QObject):
     def _log_request(self, outcome: ChatOutcome) -> None:
         """The request that just ended, in the log of every project (the tab "All projects" of the history)."""
         try:
+            if not load_settings().keep_request_history:  # the user turned the log off: nothing is recorded
+                return
             changed = self._checkpoint.recorded is not None
             layers = []
             if changed:
@@ -1105,7 +1109,8 @@ class AgentChatController(QObject):
                                         tool_families=dialog.tool_families.isChecked(),
                                         autonomy=dialog.chosen_autonomy(),
                                         tool_rules=json.dumps(dialog.chosen_tool_rules()),
-                                        memory=dialog.memory_enabled.isChecked()))
+                                        memory=dialog.memory_enabled.isChecked(),
+                                        keep_request_history=dialog.keep_history.isChecked()))
             memory_changes = dialog.memory_changes()
             try:  # on the file as it is now: another QGIS may have written it since the dialog opened
                 if memory_changes:  # nothing changed: the file is not read, and one that cannot be is not an error here
@@ -1449,8 +1454,10 @@ class AgentChatController(QObject):
         handlers[VIEW_MAP] = self._view_map_tool
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
-        handlers[CREATE_WIDGET] = self._create_widget_tool
-        handlers[REMOVE_WIDGET] = self._remove_widget_tool
+        handlers[CREATE_WIDGET] = lambda arguments: self._create_widget_tool(arguments,
+                                                                                share_values=values.send_values)
+        handlers[REMOVE_WIDGET] = lambda arguments: self._remove_widget_tool(arguments,
+                                                                              share_values=values.send_values)
         handlers[SHOW_CHART] = lambda arguments: self._charts.show_chart(arguments, share_values=values.send_values)
         handlers[RUN_CHART_CODE] = lambda arguments: self._charts.run_chart_code(arguments,
                                                                                  share_values=values.send_values)
@@ -1620,7 +1627,7 @@ class AgentChatController(QObject):
         write_notes(notes)
         return {"notes": [f"{number}. {note}" for number, note in enumerate(notes, 1)]}
 
-    def _create_widget_tool(self, arguments) -> dict:
+    def _create_widget_tool(self, arguments, share_values: bool = True) -> dict:
         """create_widget: a control in the panel, read from the layer, kept in the project."""
         try:
             widget = agent_widgets.create(arguments.get("kind", ""), arguments.get("layer", ""),
@@ -1629,16 +1636,17 @@ class AgentChatController(QObject):
         except WidgetError as exc:
             raise ToolFailure(str(exc)) from None
         self._refresh_widgets()
-        return {"widget": widget_summary([widget])[0], "widgets": widget_summary(agent_widgets.read_widgets())}
+        return {"widget": widget_summary([widget], share_values=share_values)[0],
+                "widgets": widget_summary(agent_widgets.read_widgets(), share_values=share_values)}
 
-    def _remove_widget_tool(self, arguments) -> dict:
+    def _remove_widget_tool(self, arguments, share_values: bool = True) -> dict:
         try:
             widgets = without(agent_widgets.read_widgets(), str(arguments.get("widget_id", "")))
         except WidgetError as exc:
             raise ToolFailure(str(exc)) from None
         agent_widgets.write_widgets(widgets)
         self._refresh_widgets()
-        return {"widgets": widget_summary(widgets)}
+        return {"widgets": widget_summary(widgets, share_values=share_values)}
 
     # --- recipes ----------------------------------------------------------------
 
@@ -2678,6 +2686,12 @@ class AgentChatController(QObject):
                 self._building = False
         if self._engine is None:
             return
+        # Building the engine may have opened the settings dialog (first use, consent withdrawn) and saved it:
+        # that reset the policy to the Autonomy tab, and the tool rules may have changed. The request goes in
+        # the mode it was sent with (audit of 2026-11-24: it went as standard with an Ask note).
+        values = load_settings()
+        self._policy.set_level(level_for(self._request_mode, values.autonomy))
+        self._policy.rules = values.rules
         self._offer_local_copy(values)
         self._last_request = text
         self._request_calls = []
@@ -2787,7 +2801,7 @@ class AgentChatController(QObject):
             notes = ""
         memory = self._memory_part(read)
         try:
-            widgets = widget_summary(agent_widgets.read_widgets())
+            widgets = widget_summary(agent_widgets.read_widgets(), share_values=load_settings().send_values)
         except Exception:  # the request goes without them
             widgets = []
         try:
@@ -3803,6 +3817,10 @@ class AgentChatController(QObject):
                 if kept:
                     detail = _tr("The {} steps before stay, and can be undone.").format(kept) + " " + detail
             self.panel.show_error(message, detail, fix)
+            # A request that failed must not fire the waiting one straight into the same failure (audit of
+            # 2026-11-24: after a provider error the queued request overwrote the returned one and went at
+            # once): it waits for the user, as after Stop (the draft is kept behind it by the panel).
+            self.panel.pause_queued()
             return
         if outcome.status == OUTCOME_CANCELLED:
             if kept:
@@ -3829,10 +3847,14 @@ class AgentChatController(QObject):
         clicked = []
 
         def go() -> None:
-            if clicked or self.chat_busy():
+            if clicked:
+                return
+            if self.chat_busy():
+                # A dead click otherwise (audit of 2026-11-24: Go answered nothing when the send was refused).
+                self.panel.set_status(_tr("A request is already running: wait for its end, or stop it."))
                 return
             clicked.append(True)
-            self._on_send(_tr("Go: carry out the plan above, step by step."), mode=ACT)
+            self._on_send(_tr("Go: carry out the plan above, step by step."), ACT)
 
         self.panel.add_link(_tr("Go"), go)
 
@@ -3877,12 +3899,20 @@ class AgentChatController(QObject):
         self.panel.add_note(_tr("The agent paused after many steps, before the end of the request. What it changed "
                                 "stays and can be undone."))
         clicked = []
+        # In the mode of the paused request: after the Go of a plan that is Act (going on in Plan would write
+        # more plan instead of carrying it out, audit of 2026-11-24), after a paused plan that is Plan.
+        mode = self._request_mode
 
         def go_on() -> None:
-            if clicked or self.chat_busy():
+            if clicked:
+                return
+            if self.chat_busy():
+                # A dead click otherwise (audit of 2026-11-24: Continue answered nothing when the send
+                # was refused).
+                self.panel.set_status(_tr("A request is already running: wait for its end, or stop it."))
                 return
             clicked.append(True)
-            self._on_send(_tr("Go on with what is left of the request."))
+            self._on_send(_tr("Go on with what is left of the request."), mode)
 
         self.panel.add_link(_tr("Continue"), go_on)
 

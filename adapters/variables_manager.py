@@ -279,10 +279,28 @@ class VariablesPersistenceManager:
         keeps them, a quick reopening of the same file does not)."""
         try:
             project = QgsProject.instance()
-            project.cleared.connect(self._forget_pending)
-            project.readProject.connect(self._forget_pending)
+            self._watched_project = project
+            for signal in (project.cleared, project.readProject):
+                try:
+                    signal.disconnect(self._forget_pending)
+                except (RuntimeError, TypeError):
+                    pass
+                signal.connect(self._forget_pending)
         except Exception as e:  # no QGIS project here (some tests)
             logger.debug(f"VariablesPersistenceManager: project signals not watched: {e}")
+
+    def teardown(self) -> None:
+        """Forget the project signals: a reload of the plugin must not leave this instance behind (audit of
+        2026-11-24: one more lived at every reload)."""
+        project = getattr(self, "_watched_project", None)
+        if project is None:
+            return
+        for signal in (project.cleared, project.readProject):
+            try:
+                signal.disconnect(self._forget_pending)
+            except (RuntimeError, TypeError, AttributeError):
+                pass
+        self._watched_project = None
 
     def _forget_pending(self, *_args) -> None:
         self._pending_variables = {}

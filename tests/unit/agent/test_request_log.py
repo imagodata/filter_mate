@@ -9,8 +9,16 @@ pytestmark = pytest.mark.unit
 
 def test_an_entry_is_bounded_and_its_outcome_known():
     item = log.entry(1.5, "x" * 900, "Estavar", "/p/estavar.qgz", [f"l{i}" for i in range(30)], "weird")
-    assert len(item["request"]) == log.MAX_REQUEST and len(item["layers"]) == log.MAX_LAYERS
+    assert item["request"] == "x" * 900 and len(item["layers"]) == log.MAX_LAYERS
     assert item["outcome"] == "unchanged" and item["project"] == "Estavar" and item["time"] == 1.5
+    assert len(log.entry(0, "y" * 9000, "", "", (), "changed")["request"]) == log.MAX_STORED
+
+
+def test_short_shows_the_first_lines_with_an_ellipsis():
+    assert log.short("abc") == "abc"
+    assert log.short("x" * log.MAX_REQUEST) == "x" * log.MAX_REQUEST
+    shown = log.short("x" * (log.MAX_REQUEST + 10))
+    assert shown == "x" * log.MAX_REQUEST + "…" and len(shown) == log.MAX_REQUEST + 1
 
 
 def test_the_oldest_go_beyond_the_limit():

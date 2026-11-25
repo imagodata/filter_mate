@@ -815,6 +815,7 @@ def test_key_list_bound_only_for_ogr_files(provider, storage, bounded):
     ([3.0, "42", None], True, "[3,42]"),                       # integral float, digit string, None dropped
     ([1.5], True, "[1.5]"),                                  # a non-integral number is not truncated
     (["TRON'1", "Ü"], False, '["TRON\'\'1","Ü"]'),
+    (["²", "-²"], True, '["²","-²"]'),                       # Unicode digits: isdigit() lies, int() refuses
 ])
 def test_json_key_clause_keeps_the_values(values, numeric, expected):
     clause = ogr_builder.OGRExpressionBuilder(task_params={})._json_key_clause('"k"', values, numeric)

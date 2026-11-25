@@ -323,6 +323,11 @@ Apakah Anda setuju?</translation>
         <translation>Hentikan permintaan, atau tunggu hingga selesai, untuk membuka pengaturan.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Permintaan sudah berjalan: tunggu hingga selesai, atau hentikan.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Memori tidak dapat disimpan: {}</translation>
@@ -2025,6 +2030,16 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Simpan catatan dari satu proyek ke proyek berikutnya</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Simpan permintaan setiap proyek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Tab Semua proyek pada riwayat: apa yang diminta, di mana dan kapan, disimpan di komputer ini.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Pisahkan beberapa tag dengan koma.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Nama tidak boleh kosong.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Proyek ini hanya-baca: perubahan hanya disimpan untuk sesi ini.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Folder: {6}</translation>
         <translation>Layanan dibaca selama {0:.0f} dtk, batas maksimum: salinan berisi {1} fitur dan tidak lengkap.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Layanan mengumumkan {0} fitur tetapi hanya {1} yang dibaca: salinan tidak lengkap.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Ketentuan {0} melarang penyimpanan tile-nya: lapisan ini tidak disalin. Peta dasar lain bisa disalin (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Folder: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>layanan tidak dapat dibaca sampai akhir: tidak ada yang disimpan</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>salinan lokal tidak dapat ditulis (disk mungkin penuh): tidak ada yang disimpan</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>layanan tidak memberikan fitur apa pun di atas peta yang terlihat, atau jawabannya tidak dapat dibaca: tidak ada yang disimpan</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

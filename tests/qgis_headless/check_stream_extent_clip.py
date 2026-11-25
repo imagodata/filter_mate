@@ -38,6 +38,7 @@ from qgis.core import (  # noqa: E402
 TOTAL = 5000  # points, a row of 100 by 50, 10 m apart, from 0, 0 in Web Mercator
 RESULTS = []
 ASKED = []  # one entry per GetFeature of the WFS server
+REMOVED = set()  # numbers the WFS server no longer holds (a service that changes between two copies)
 REFUSED = []  # the status of every request a server refused: QGIS shows an empty layer for them, and says nothing
 TOO_LONG = []  # the length of every request the type ``strict`` refused on purpose
 # A server stops reading an address at a length of its own: 8 KB for most (Apache, nginx, Tomcat), which is what
@@ -121,6 +122,8 @@ def matching(query):
     list of keys, and ``num < n``. All of them are joined by And in what the checks send.
     """
     kept = list(range(TOTAL))
+    if REMOVED:
+        kept = [n for n in kept if n not in REMOVED]
     if "bbox" in query:
         x1, y1, x2, y2 = (float(value) for value in query["bbox"].split(",")[:4])
         kept = [n for n in kept if x1 <= position(n)[0] <= x2 and y1 <= position(n)[1] <= y2]
@@ -156,7 +159,7 @@ class WfsHandler(BaseHTTPRequestHandler):
         request = query.get("request", "").lower()
         base = f"http://127.0.0.1:{self.server.server_port}/wfs"
         name = (query.get("typenames") or query.get("typename") or "fm:keyed").split(":")[-1]
-        keyed = name in ("keyed", "strict")
+        keyed = name in ("keyed", "strict", "capped", "cached")
         if name == "strict" and request == "getfeature" and len(self.path) > STRICT_MAX:
             TOO_LONG.append(len(self.path))
             self.send_response(414)
@@ -164,7 +167,7 @@ class WfsHandler(BaseHTTPRequestHandler):
             self.end_headers()
             return
         if request == "getcapabilities":
-            body = capabilities(base, ("keyed", "keyless", "strict"))
+            body = capabilities(base, ("keyed", "keyless", "strict", "capped", "cached"))
         elif request == "describefeaturetype":
             body = schema(name, keyed)
         elif request == "getfeature":
@@ -173,6 +176,8 @@ class WfsHandler(BaseHTTPRequestHandler):
             count = int(query.get("count", query.get("maxfeatures", 1000)))
             hits = query.get("resulttype", "") == "hits"
             sent = [] if hits else kept[first:first + count]
+            if name == "capped" and not hits:
+                sent = sent[:50]  # the service cuts the answer short but announces it all (lot 3)
             ASKED.append({"type": name, "filter": query.get("filter", ""), "bbox": query.get("bbox", ""),
                           "hits": hits, "sent": len(sent), "matched": len(kept)})
             members = []
@@ -193,6 +198,9 @@ class WfsHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "text/xml; charset=utf-8")
         self.send_header("Content-Length", str(len(data)))
+        if name == "cached" and request == "getfeature":
+            # No validator, a long freshness: QGIS serves this again without asking (lot 3).
+            self.send_header("Cache-Control", "max-age=3600")
         self.end_headers()
         self.wfile.write(data)
 

@@ -212,7 +212,8 @@ CHAT_ONLY = (
     ToolSpec(
         name=SHOW_CHART, title="Draw a chart in the chat",
         description=("Draw a d3 chart in the thread from a layer as filtered now (FilterMate reads it: never type its "
-                     "values) or from rows you give. bar, pie: field the categories, aggregate of value_field; "
+                     "values) or from rows you give. bar, pie: field the categories, aggregate of value_field (of "
+                     "the values of rows you give, which add up unless aggregate says otherwise); "
                      "histogram: field numeric; line, scatter: field the x, value_field the y. Returns chart_id, "
                      "points, features."),
         input_schema={"type": "object", "properties": {
@@ -257,7 +258,8 @@ CHAT_ONLY = (
         name=EXPORT_CHART, title="Save a chart as an image",
         description=("Write a chart of this conversation (chart_id from show_chart) as PNG, JPG or SVG in a sub-folder "
                      "of the export root, drawn light for paper. A file of the same name there is kept: the new one is "
-                     "named <name>_2... The user is asked first. Returns path (relative to the sub-folder) and bytes."),
+                     "named <name>_2... The user is asked first, unless they allowed it. Returns path (relative to "
+                     "the sub-folder) and bytes."),
         input_schema={"type": "object", "properties": {
             "chart_id": {"type": "string", "minLength": 1, "maxLength": 20},
             "format": {"type": "string", "enum": ["png", "jpg", "svg"], "default": "png"},

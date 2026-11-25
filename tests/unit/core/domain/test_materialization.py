@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from core.domain.materialization import MaterializationLimits, collect_materialization
+from core.domain.materialization import MaterializationLimits, MaterializationOutcome, collect_materialization
 
 pytestmark = pytest.mark.unit
 
@@ -87,3 +87,11 @@ def test_invalid_deadlines_are_rejected(value):
 def test_key_budget_cannot_exceed_the_shared_server_limit():
     with pytest.raises(ValueError):
         MaterializationLimits(key_limit=501)
+
+
+def test_no_announced_total_by_default_but_carried_when_set():
+    """Audit of 2026-11-24 (lot 3): what the service said it holds travels with the outcome."""
+    from dataclasses import replace
+    assert MaterializationOutcome().announced is None
+    outcome = replace(MaterializationOutcome(fetched=50), announced=5000)
+    assert (outcome.fetched, outcome.announced) == (50, 5000)

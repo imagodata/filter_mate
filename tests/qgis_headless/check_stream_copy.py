@@ -310,6 +310,45 @@ def check_wfs(actions, folder):
           record is not None and record.features == 100 and not record.complete and record.notes,
           (task and task.result.error, record))
     options["STREAM_COPY"]["max_features"] = {"value": 200000}
+
+    # Audit of 2026-11-24 (lot 3): a copy the server cuts short is kept, but never called complete.
+    capped = fixture.wfs_layer(server.server_port, "capped")
+    check("a capped WFS layer opens", capped.isValid())
+    _plan, task = copy(actions, capped, area)
+    record = stream_copy.record_of(capped)
+    check("a copy the server cuts short is kept but not called complete",
+          record is not None and record.features == 50 and not record.complete
+          and any("861" in note and "50" in note for note in record.notes),
+          (task and task.result.error, record))
+
+    # A filter set on the copy in the language of the copy does not go back on the service.
+    check("a SQLite filter is set on the copy",
+          capped.setSubsetString('"num" < 100 AND "nom" GLOB \'p*\'') and capped.featureCount() == 100,
+          (capped.subsetString(), capped.featureCount()))
+    copy_file = stream_copy.record_of(capped).path
+    check("back to the service, a filter of the copy stays off it",
+          actions.back_to_stream(capped) and capped.providerType() == "WFS" and capped.subsetString() == "",
+          (capped.providerType(), capped.subsetString()))
+    check("back to the service, the copy file goes (audit of 2026-11-24: never deleted)",
+          copy_file and not os.path.isfile(copy_file), copy_file)
+
+    # "Copy again" reads the service anew, not the network cache of QGIS.
+    cached = fixture.wfs_layer(server.server_port, "cached")
+    check("a cached WFS layer opens", cached.isValid())
+    _plan, task = copy(actions, cached, area)
+    first = stream_copy.record_of(cached)
+    asked = len(fixture.ASKED)
+    gone = fixture.inside(-5, -5, 405, 205)[:5]
+    fixture.REMOVED.update(gone)
+    actions._ask = lambda title, text, buttons: 0  # Copy (copy_again already planned without a dialog)
+    actions.copy_again(cached)
+    wait_for(lambda: cached.id() not in actions._tasks, 180)
+    second = stream_copy.record_of(cached)
+    check("Copy again reads the service anew: a GetFeature went out and the copy changed",
+          second is not None and len(fixture.ASKED) > asked
+          and second.features == first.features - len(gone),
+          (second and (second.features, first.features), len(fixture.ASKED) - asked))
+    actions._ask = lambda title, text, buttons: len(buttons) - 1
     server.shutdown()
 
 

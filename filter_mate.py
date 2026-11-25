@@ -1596,6 +1596,15 @@ class FilterMate:
             except Exception as e:
                 logger.debug(f"FilterMate: dock connections not released on unload: {e}")
 
+        # The variables manager lets go of the project signals, or one instance stays alive at every
+        # reload (audit of 2026-11-24).
+        try:
+            manager = getattr(self.app, "_variables_manager", None)
+            if manager is not None:
+                manager.teardown()
+        except Exception as e:
+            logger.debug(f"FilterMate: variables manager not torn down on unload: {e}")
+
         # Disconnect project change signals using dedicated method
         self._disconnect_auto_activation_signals()
 

@@ -91,6 +91,13 @@ class Signal:
     def connect(self, slot):
         self.slots.append(slot)
 
+    def disconnect(self, slot):
+        # As a Qt signal: disconnecting what was never connected fails (TypeError, caught where watched).
+        try:
+            self.slots.remove(slot)
+        except ValueError:
+            raise TypeError("disconnect() failed: not connected")
+
     def emit(self, *args):
         for slot in self.slots:
             slot(*args)

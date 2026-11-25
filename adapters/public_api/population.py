@@ -16,7 +16,7 @@ import uuid
 from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
 from ...core.agent.elevation import quiet_message
-from ...core.agent.open_data import KIND_POPULATION, megabytes, resolve_platform
+from ...core.agent.open_data import KIND_POPULATION, megabytes, resolve_platform, sweep_empty_data_dirs
 from ...core.agent.population import (
     MAX_VRT_BYTES, NOT_COVERED, PopulationSource, area_problem, covered_share, exact_total_fits,
     extent_note, grid_for, grid_url, known, on_the_grid, resolution_label, snapped, verify_vrt, vrt_geotransform,
@@ -237,6 +237,7 @@ def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs:
     try:
         with running('add_population'):  # from the first request: a call made meanwhile would run nested inside it
             os.makedirs(root, exist_ok=True)
+            sweep_empty_data_dirs(root)
             folder = tempfile.mkdtemp(prefix='population-', dir=root)
             path = os.path.join(folder, f"{source.id}_{factor}.tif")
             read = _in_background('add_population', lambda ended: _read(

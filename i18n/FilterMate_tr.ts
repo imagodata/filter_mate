@@ -323,6 +323,11 @@ Onaylıyor musunuz?</translation>
         <translation>Ayarları açmak için isteği durdurun veya bitmesini bekleyin.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Zaten çalışan bir istek var: bitmesini bekleyin veya durdurun.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Hafıza kaydedilemedi: {}</translation>
@@ -2025,6 +2030,16 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Notları bir projeden diğerine sakla</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Her projenin isteklerini sakla</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Geçmişin Tüm projeler sekmesi: ne soruldu, nerede ve ne zaman, bu bilgisayarda saklanır.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Birden fazla etiketi virgülle ayırın.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Ad boş olamaz.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Bu proje salt okunur: değişiklik yalnızca bu oturum için saklanır.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Klasör: {6}</translation>
         <translation>Hizmet izin verilen en uzun süre olan {0:.0f} sn okundu: kopya {1} nesne içeriyor ve tam değil.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Hizmet {0} nesne duyurdu ancak yalnızca {1} tanesi okundu: kopya tam değil.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>{0} koşulları karolarının saklanmasını yasaklıyor: bu katman kopyalanmaz. Başka bir altlık haritası kopyalanabilir (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Klasör: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>hizmet sonuna kadar okunamadı: hiçbir şey saklanmadı</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>yerel kopya yazılamadı (disk dolu olabilir): hiçbir şey saklanmadı</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>servis görünür harita üzerinde hiç öğe vermedi veya yanıtı okunamadı: hiçbir şey saklanmadı</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

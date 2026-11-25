@@ -143,7 +143,7 @@ class AgentCharts(QObject):
             theme = "dark" if self._is_dark() else "light"
             svg, data, meta, errors = draw(request, theme)
         except (ChartError, chart_renderer.ChartRenderError) as exc:
-            raise ToolFailure(str(exc)) from None
+            raise ToolFailure(str(exc) if share_values else _plain_errors([str(exc)])[0]) from None
         if request.layer and meta.get("layer_id"):
             request = replace(request, layer=meta["layer_id"])  # by id from now on: a layer renamed stays its chart
         chart = self._keep(request, svg, theme, meta, data)
@@ -166,7 +166,10 @@ class AgentCharts(QObject):
             svg, data, meta, errors = draw(source.request, theme, source.data, source.meta, code)
             picture = chart_renderer.image(svg, 1.0, "#ffffff") if share_values else None
         except (ChartError, chart_renderer.ChartRenderError) as exc:
-            raise ToolFailure(str(exc)) from None
+            # The code of the model may have thrown the values of the data (throw new
+            # Error(JSON.stringify(data))): told whole, they reach the model although the user does not share
+            # them (audit of 2026-11-24). As for the errors field below: count, not words.
+            raise ToolFailure(str(exc) if share_values else _plain_errors([str(exc)])[0]) from None
         finally:
             # A page the code ran in may have opened a connection (WebRTC from a frame of its own): it goes with it.
             chart_renderer.drop_page()

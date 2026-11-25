@@ -110,10 +110,14 @@ def _chosen_ids(layer, expression: str, selected_only: bool) -> List[int]:
         ValueError: Neither given (an edit of every feature is asked for explicitly with expression "true"), nothing
             selected, or more than ``MAX_CHANGED``.
     """
-    from qgis.core import QgsFeatureRequest
+    from qgis.core import QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
     if not expression and not selected_only:
         raise ValueError('say which features: an expression, or selected_only (use the expression true for all)')
     request = QgsFeatureRequest().setNoAttributes()
+    context = QgsExpressionContext()
+    # The variables of the project and of the layer, as in introspection (audit of 2026-11-24).
+    context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(layer))
+    request.setExpressionContext(context)
     request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
     if selected_only:
         if not layer.selectedFeatureCount():

@@ -513,11 +513,34 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name, whole_layer=
             passing.append(value)
         elif failing is not None and in_native:
             failing.append(value)
-    subset = hybrid_sql(native_sql, passing, failing, key, numeric, dialect, already_listed=listed_keys)
+    subset = hybrid_sql(native_sql, passing, failing, key, numeric, dialect, already_listed=listed_keys,
+                        json_lists=_hybrid_json_lists(layer, dialect, passing, failing))
     logger.info('Hybrid subset for %s: %d kept, %s excluded by QGIS from the native part (%s)%s', layer.name(),
                 len(passing), 'no native part' if failing is None else len(failing), result.reason,
                 ', read without its subset' if source is not layer else '')
     return subset
+
+
+def _hybrid_json_lists(layer, dialect, passing, failing) -> bool:
+    """Long key lists of a GeoPackage / SQLite subset go as one JSON literal (json_each): a plain IN list of
+    50,000 keys froze the main thread 11 s and slowed every read to seconds (audit of 2026-11-24)."""
+    if dialect != SQLITE:
+        return False
+    try:
+        from ..backends.ogr.expression_builder import KEY_LIST_JSON_THRESHOLD, is_sqlite_storage, json1_available
+    except ImportError:  # plugin root on sys.path in pure unit tests: the plain list, as before
+        return False
+    try:
+        long = len(passing) > KEY_LIST_JSON_THRESHOLD or len(failing or []) > KEY_LIST_JSON_THRESHOLD
+    except TypeError:
+        return False
+    if not long:
+        return False
+    try:
+        return bool(is_sqlite_storage(layer) and json1_available())
+    except Exception:  # the plain list, as before
+        logger.debug('Hybrid JSON key list not probed', exc_info=True)
+        return False
 
 
 def _unfiltered_copy(layer):

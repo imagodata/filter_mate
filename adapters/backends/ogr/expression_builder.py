@@ -179,7 +179,9 @@ def json_key_clause(field_sql: str, values: list, numeric: bool) -> str:
                 items.append(str(value))
             elif isinstance(value, float) and value.is_integer():
                 items.append(str(int(value)))
-            elif isinstance(value, str) and value.lstrip('-').isdigit():
+            elif isinstance(value, str) and value.isascii() and value.lstrip('-').isdigit():
+                # isascii first: isdigit() is true for Unicode digits ('²') that int() refuses (audit of
+                # 2026-11-24: ValueError); those go as JSON strings below, as other texts.
                 items.append(str(int(value)))
             else:
                 items.append(json.dumps(value if isinstance(value, (int, float)) else str(value), ensure_ascii=False))

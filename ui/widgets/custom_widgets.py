@@ -1516,6 +1516,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             return self._populate_features_async(expression, preserve_checked, force_full, search_text)
 
         list_widget = self.list_widgets[self.layer.id()]
+        try:
+            link_filter = (list_widget.getFilterExpression() or "").strip()
+        except (RuntimeError, AttributeError):
+            link_filter = ""
 
         # PERF 2026-09-13: skip a request identical to the one just completed
         # (two full ordered scans of a filtered PostgreSQL road layer cost
@@ -1528,6 +1532,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         signature = (
             self.layer.id(), str(expression), subset_signature,
             self._sort_order, bool(force_full), (search_text or '').strip(),
+            link_filter,
         )
         last_signature, last_time = getattr(self, '_last_populate', (None, 0.0))
         if (signature == last_signature and list_widget.count() > 0
@@ -1543,8 +1548,6 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             saved_checked_fids = self.getCheckedFeatureIds()
             if saved_checked_fids:
                 logger.debug(f"_populate_features_sync: Preserving {len(saved_checked_fids)} checked items")
-
-        list_widget.clear()
 
         identifier_field = self._identifier_field_of_layer(list_widget.getIdentifierFieldName())
         identifier_numeric = bool(getattr(list_widget, 'identifier_field_type_numeric', False))
@@ -1562,13 +1565,21 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             except (TypeError, ValueError):
                 fetch_limit = 0
 
-        # Request features
+        # Request features. The link expression of EXPLORING filters the rows read, ANDed with the text
+        # search (audit of 2026-11-24: the multiple list never applied it). An invalid combination reads
+        # nothing new: the list is left as it is.
         request = QgsFeatureRequest()
         request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
         search_text = (search_text or '').strip()
         display_sql = self._display_expression_sql(expression, list_widget)
-        if search_text:
-            request.setFilterExpression(self._search_expression(display_sql, search_text))
+        search_filter = self._search_expression(display_sql, search_text) if search_text else ""
+        combined = self._combine_filter_expressions(link_filter, search_filter)
+        if combined and not QgsExpression(combined).isValid():
+            logger.warning(f"_populate_features_sync: invalid combined filter left unread: {combined!r}")
+            return
+        if combined:
+            request.setFilterExpression(combined)
+        list_widget.clear()
         server_sorted = False
         if fetch_limit > 0:
             # Sorted by display value so "the first N" is predictable, and one
@@ -1741,6 +1752,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         if lookup_slot is not None:
             lookup_slot.cancel()
         list_widget = self.list_widgets[layer_id]
+        try:
+            link_filter = (list_widget.getFilterExpression() or "").strip()
+        except (RuntimeError, AttributeError):
+            link_filter = ""
         saved = self.getCheckedFeatureIds() if preserve_checked else []
         identifier = self._identifier_field_of_layer(list_widget.getIdentifierFieldName())
         numeric = self._identifier_is_numeric()
@@ -1758,8 +1773,17 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             request.setSubsetOfAttributes(attributes, fields)
         if limit is not None:
             request.setLimit(limit + 1)
-        if search_text:
-            request.setFilterExpression(self._search_expression(self._display_expression_sql(expression, list_widget), search_text))
+        # The link expression of EXPLORING filters the rows read, ANDed with the text search (audit of
+        # 2026-11-24: the multiple list never applied it). It goes through the read refusal below, as any
+        # read of the layer does; an invalid combination reads nothing new.
+        search_filter = self._search_expression(
+            self._display_expression_sql(expression, list_widget), search_text) if search_text else ""
+        combined = self._combine_filter_expressions(link_filter, search_filter)
+        if combined and not QgsExpression(combined).isValid():
+            logger.warning(f"_populate_features_async: invalid combined filter left unread: {combined!r}")
+            return None
+        if combined:
+            request.setFilterExpression(combined)
         if refusal is None:
             from ...adapters.qgis.async_query import read_refusal
             refusal = read_refusal(layer, request)
@@ -1777,7 +1801,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         row_from_feature = type(self)._row_from_feature
         lookup_request = type(self)._build_identifier_lookup_request
         reverse = self._sort_order == 'DESC'
-        signature = (layer_id, str(expression), layer.subsetString() or '', self._sort_order, bool(force_full), search_text)
+        signature = (layer_id, str(expression), layer.subsetString() or '', self._sort_order, bool(force_full),
+                       search_text, link_filter)
         started = time.perf_counter()
 
         def compute(task):
@@ -1811,6 +1836,12 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 return
             if getattr(self, '_requested_search', '') != search_text:
                 return
+            try:
+                landed_link = (list_widget.getFilterExpression() or "").strip()
+            except (RuntimeError, AttributeError):
+                return
+            if landed_link != link_filter:
+                return  # a newer link expression launched its own read meanwhile
             rows, truncated, scanned = result
             if force_full and truncated:
                 from ...infrastructure.feedback import show_warning
@@ -1883,6 +1914,14 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             return expr, context
         context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(self.layer))
         return expr, context
+
+    @staticmethod
+    def _combine_filter_expressions(*parts):
+        """One filter from several: each part kept in parentheses, ANDed. Empty parts are dropped."""
+        kept = [part.strip() for part in parts if part and part.strip()]
+        if not kept:
+            return ""
+        return " AND ".join(f"({part})" for part in kept)
 
     def _search_expression(self, display_sql, search_text):
         """Case-insensitive "contains" filter of the text search.

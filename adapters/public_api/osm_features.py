@@ -16,7 +16,7 @@ import tempfile
 from typing import Any, Callable, Dict, List, Sequence
 from urllib.parse import quote
 
-from ...core.agent.open_data import KIND_OVERPASS, megabytes, resolve_platform
+from ...core.agent.open_data import KIND_OVERPASS, megabytes, resolve_platform, sweep_empty_data_dirs
 from ...core.agent.osm import (
     ANOTHER as _ANOTHER, ATTRIBUTION, GEOMETRIES, LAYER_KINDS, MAX_BYTES, OSM_TYPES, Tag, area_problem, closed_way_is_area,
     columns, cut_problem, default_name, gdal_config, layer_title, matches, overpass_query, read_tags, remark_problem,
@@ -308,6 +308,7 @@ def add_osm_features(platform: str, tags: List[Dict[str, Any]], extent_wkt: str 
                 stream.write(gdal_config(asked))
             unwritten = _NOT_WRITTEN
             os.makedirs(root, exist_ok=True)
+            sweep_empty_data_dirs(root)
             folder = tempfile.mkdtemp(prefix='osm-', dir=root)
             path = os.path.join(folder, 'openstreetmap.gpkg')
             counts = _in_background('add_osm_features',

@@ -130,20 +130,19 @@ def utm(lon: float, lat: float) -> Tuple[str, str]:
         (f"EPSG:{32700 + zone}", f"WGS 84 / UTM zone {zone}S")
 
 
-def _closeness(box: Tuple[float, float, float, float], lon: float, lat: float) -> float:
-    """How well a box suits a point: its distance to the centre of the box in widths and heights of the box, and a
-    little for the size of the box (a country before its continent)."""
-    west, south, east, north = box
-    width, height = max(east - west, 1e-6), max(north - south, 1e-6)
-    distance = math.hypot((lon - (west + east) / 2.0) / width, (lat - (south + north) / 2.0) / height)
-    return distance + 0.1 * math.log10(max(width * height, 1e-6))
-
-
 CONTINENT_AREA = 900.0  # square degrees: beyond, the box of a continent or of a large country
+
+EDGE_HOME = 0.45  # degrees from the edge of a box: nearer is not home, a neighbour's overlap may be
 
 
 def _area(box: Tuple[float, float, float, float]) -> float:
     return (box[2] - box[0]) * (box[3] - box[1])
+
+
+def _edge_margin(box: Tuple[float, float, float, float], lon: float, lat: float) -> float:
+    """How deep the point lies in the box: the smallest distance to its sides, in degrees."""
+    west, south, east, north = box
+    return min(lon - west, east - lon, lat - south, north - lat)
 
 
 def _round(value: float) -> float:
@@ -226,14 +225,16 @@ def suggest(bounds: Sequence[float], purpose: str = "general") -> Dict[str, obje
         return {"scale": "world", "suggestions": found[:MAX_SUGGESTED]}
 
     territories = [territory for territory in TERRITORIES if _inside(box, territory.box)]
-    # Boxes overlap (Toulouse lies in the box of Spain too): the territory whose box is centred nearest the data,
-    # relative to its size, and a country before its continent.
-    territories.sort(key=lambda territory: _closeness(territory.box, lon, lat))
-    # One country (the best one: a neighbour whose box only overlaps is no answer), then the local zones, then the
-    # systems of a continent, then the projections made for the data.
-    national = [territory for territory in territories if _area(territory.box) < CONTINENT_AREA][:1]
+    # Boxes overlap at borders (Toulouse lies in the box of Spain too, Lille in the one of Belgium, Corsica deep
+    # in the one of Italy): the country that holds the data deepest comes first, not the neighbour whose box is
+    # centred nearest (audit of 2026-11-24: Strasbourg, Lille and Corsica came out German, Belgian and Italian,
+    # and EPSG:2154 was missing). A second overlapping country still shows: more than one country may hold data
+    # across a border. Then the local zones, the systems of a continent, the projections made for the data.
+    national = sorted(
+        (territory for territory in territories if _area(territory.box) < CONTINENT_AREA),
+        key=lambda territory: (_edge_margin(territory.box, lon, lat) < EDGE_HOME, -_area(territory.box)))[:2]
     continental = [territory for territory in territories if _area(territory.box) >= CONTINENT_AREA]
-    for territory in national:
+    for territory in national[:1]:
         add(territory.crs, territory.name, territory.keeps,
             f"the official system for {territory.name.split(' (')[0]}")
     if national and national[0].crs == "EPSG:2154" and height <= 1.2:
@@ -243,6 +244,9 @@ def suggest(bounds: Sequence[float], purpose: str = "general") -> Dict[str, obje
     if width <= 6.5 and abs(lat) < 84.0:
         crs, name = utm(lon, lat)
         add(crs, name, CONFORMAL, "the UTM zone of the data: lengths within 0.1 % over 6° of longitude")
+    for territory in national[1:2]:  # across the border: after the zones of the country that holds the data
+        add(territory.crs, territory.name, territory.keeps,
+            f"the official system for {territory.name.split(' (')[0]} too (across the border)")
     for territory in continental:
         add(territory.crs, territory.name, territory.keeps, f"the system for {territory.name.split(' (')[0]}")
     for keeps in (EQUAL_AREA, CONFORMAL, EQUIDISTANT):

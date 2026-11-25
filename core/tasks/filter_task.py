@@ -327,6 +327,7 @@ class FilterEngineTask(QgsTask):
             pass
         # The global, project and layer variables of the source layer, read here on the main thread
         # for the readings of the source selection (2026-11-13, source_refusal.with_layer_context)
+        source_layer = None
         try:
             from ...adapters.backends.source_refusal import SOURCE_CONTEXT_KEY, layer_context
             source_layer = QgsProject.instance().mapLayer(self.task_parameters.get('infos', {}).get('layer_id') or '')
@@ -341,11 +342,12 @@ class FilterEngineTask(QgsTask):
             pass
         # The provider, the source, the id and the name of the layers of the project, read here on the
         # main thread (2026-11-20): the worker asks them to core.domain.layer_facts, not to the layers
-        # (QGIS 4.3 reports providerType() called from another thread than the one the layer lives in)
+        # (QGIS 4.3 reports providerType() called from another thread than the one the layer lives in).
+        # The source layer rides along: it may not be in the project (audit of 2026-11-24).
         self._layer_facts = None
         try:
             from ...infrastructure.utils.layer_facts import capture_layer_facts
-            self._layer_facts = capture_layer_facts()
+            self._layer_facts = capture_layer_facts([source_layer] if source_layer is not None else ())
         except Exception:  # nosec B110 - the worker then reads the layers themselves, as before
             pass
 

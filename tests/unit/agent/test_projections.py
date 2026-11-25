@@ -18,6 +18,19 @@ def test_a_french_department_gets_lambert93_its_cc_zone_and_utm():
     assert crs_of(result)[:3] == ["EPSG:2154", "EPSG:3943", "EPSG:25831"]
 
 
+@pytest.mark.parametrize("bounds, first", [
+    ([7.6, 48.5, 7.9, 48.65], "EPSG:2154"),  # Strasbourg: not Germany
+    ([2.9, 50.55, 3.2, 50.7], "EPSG:2154"),  # Lille: not Belgium
+    ([8.5, 41.3, 9.6, 43.0], "EPSG:2154"),  # Corsica: not Italy
+    ([4.2, 50.75, 4.5, 50.95], "EPSG:3812"),  # Brussels stays Belgian
+])
+def test_a_border_town_gets_its_own_country_first(bounds, first):
+    """Audit of 2026-11-24: Strasbourg, Lille and Corsica came out German, Belgian and Italian, and EPSG:2154
+    was missing from the six."""
+    rows = crs_of(suggest(bounds))
+    assert rows[0] == first and "EPSG:2154" in rows
+
+
 def test_areas_put_an_equal_area_projection_first():
     result = suggest([-5.0, 42.0, 8.0, 51.0], purpose="areas")  # France
     first = result["suggestions"][0]

@@ -35,10 +35,12 @@ def test_the_limit_of_steps_is_a_pause_with_a_button_to_go_on(ctrl_module, contr
     label, go_on = controller.panel.add_link.call_args[0]
     assert label == "Continue"
     sent = []
-    controller._on_send = sent.append
+    controller._on_send = lambda text, mode="": sent.append((text, mode))
     go_on()
     go_on()  # a second click sends nothing more
-    assert sent == ["Go on with what is left of the request."]
+    # Audit of 2026-11-24: Continue goes on in the mode of the paused request, not the picked one (after the Go
+    # of a plan that is Act; going on in Plan would write more plan instead of carrying it out).
+    assert sent == [("Go on with what is left of the request.", controller._request_mode)]
 
 
 def test_the_button_does_nothing_while_a_request_runs(ctrl_module, controller):  # noqa: F811

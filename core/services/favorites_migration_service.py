@@ -8,6 +8,7 @@ Author: FilterMate Team
 Date: January 2026
 """
 
+import json
 import os
 import logging
 from typing import Optional, Dict, List, Tuple, Any
@@ -16,6 +17,31 @@ from datetime import datetime
 from ..domain.schema_constants import GLOBAL_PROJECT_UUID
 
 logger = logging.getLogger('FilterMate.FavoritesMigration')
+
+
+def _canon(value: Any) -> Any:
+    """One form for a JSON column in a dedupe key: NULL, "", {} and [] are the same absence, key order is not a
+    difference, and what is not JSON compares as text."""
+    if value is None:
+        return None
+    text = value if isinstance(value, str) else json.dumps(value, sort_keys=True)
+    if not text.strip() or text.strip() in ("{}", "[]", "null"):
+        return None
+    try:
+        return json.dumps(json.loads(text), sort_keys=True)
+    except ValueError:
+        return text
+
+
+def _dedupe_key(name: Any, expression: Any, layer_name: Any, spatial: Any = None, remote: Any = None) -> Tuple:
+    """Two favorites are the same copy when name, expression, layer AND what they filter with match: two that only
+    differ by buffer lost one, and the deletion went into the .qgz (audit of 2026-11-24)."""
+    return (name, expression, layer_name, _canon(spatial), _canon(remote))
+
+
+def _favorite_columns(cursor: Any) -> List[str]:
+    """The columns fm_favorites has here: older databases lack spatial_config and remote_layers."""
+    return [row[1] for row in cursor.execute("PRAGMA table_info(fm_favorites)")]
 
 
 class FavoritesMigrationService:
@@ -143,22 +169,25 @@ class FavoritesMigrationService:
             conn = sqlite3.connect(self._db_path)
             cursor = conn.cursor()
 
-            # Get orphan favorites
+            columns = _favorite_columns(cursor)
+            extra_here = ", f.spatial_config, f.remote_layers" \
+                if "spatial_config" in columns and "remote_layers" in columns else ""
+            # Get orphan favorites (only fixed column names are interpolated: no user input in the text)
             if source_project_uuid:
                 cursor.execute("""
-                    SELECT f.id, f.name, f.expression, f.layer_name FROM fm_favorites f
+                    SELECT f.id, f.name, f.expression, f.layer_name""" + extra_here + """ FROM fm_favorites f
                     WHERE f.project_uuid = ?
-                """, (source_project_uuid,))
+                """, (source_project_uuid,))  # nosec B608 - fixed columns only
             else:
                 # Not the target itself: a project never saved has the shape of an orphan, and its own favorites
                 # were found identical to themselves and deleted (review of 2026-11-24).
                 cursor.execute("""
-                    SELECT f.id, f.name, f.expression, f.layer_name FROM fm_favorites f
+                    SELECT f.id, f.name, f.expression, f.layer_name""" + extra_here + """ FROM fm_favorites f
                     JOIN fm_projects p ON f.project_uuid = p.project_id
                     WHERE (p.project_name = '' OR p.project_name IS NULL)
                       AND (p.project_path = '' OR p.project_path IS NULL)
                       AND f.project_uuid != ?
-                """, (target_project_uuid,))
+                """, (target_project_uuid,))  # nosec B608 - fixed columns only
             favorites_to_migrate = cursor.fetchall()
 
             if not favorites_to_migrate:
@@ -169,17 +198,22 @@ class FavoritesMigrationService:
             # 2026-09-14: every project open that created a new project row
             # migrated the previous copies again and the .qgz backup restore
             # added one more (five identical "YONNE" favorites in the live
-            # database). An orphan identical (name, expression, layer) to a
-            # favorite already in the target, or to one migrated in this batch,
-            # is dropped instead of moved.
+            # database). An orphan identical to a favorite already in the target, or to one migrated in this
+            # batch, is dropped instead of moved (name, expression, layer AND buffer since the audit of
+            # 2026-11-24: two favorites that only differed by buffer lost one).
+            columns = _favorite_columns(cursor)
+            extra = ", spatial_config, remote_layers" if "spatial_config" in columns and "remote_layers" in columns \
+                else ""
             cursor.execute(
-                "SELECT name, expression, layer_name FROM fm_favorites WHERE project_uuid = ?",
+                "SELECT name, expression, layer_name" + extra + " FROM fm_favorites WHERE project_uuid = ?",
                 (target_project_uuid,)
-            )
-            present = {tuple(row) for row in cursor.fetchall()}
+            )  # nosec B608 - fixed columns only
+            present = {_dedupe_key(*row) for row in cursor.fetchall()}
             favorite_ids, favorite_names, duplicate_ids = [], [], []
-            for fav_id, name, expression, layer_name in favorites_to_migrate:
-                key = (name, expression, layer_name)
+            for row in favorites_to_migrate:
+                fav_id, name, expression, layer_name = row[0], row[1], row[2], row[3]
+                key = _dedupe_key(name, expression, layer_name, *row[4:6]) if extra else _dedupe_key(
+                    name, expression, layer_name)
                 if key in present:
                     duplicate_ids.append(fav_id)
                     continue
@@ -258,7 +292,7 @@ class FavoritesMigrationService:
             return False
 
     def dedupe_project_favorites(self, project_uuid: str) -> int:
-        """Delete the exact copies (same name, expression, layer) of a favorite
+        """Delete the exact copies (same name, expression, layer, buffer and remote layers) of a favorite
         within ``project_uuid``, keeping the most used, then the oldest one.
 
         Returns:
@@ -270,17 +304,21 @@ class FavoritesMigrationService:
             import sqlite3
             conn = sqlite3.connect(self._db_path)
             cursor = conn.cursor()
+            columns = _favorite_columns(cursor)
+            extra = ", spatial_config, remote_layers" if "spatial_config" in columns and "remote_layers" in columns \
+                else ""
             cursor.execute(
-                """SELECT id, name, expression, layer_name FROM fm_favorites
+                """SELECT id, name, expression, layer_name""" + extra + """ FROM fm_favorites
                    WHERE project_uuid = ?
                    ORDER BY use_count DESC, created_at ASC, id ASC""",
                 (project_uuid,)
-            )
+            )  # nosec B608 - fixed columns only
             seen, duplicates = set(), []
-            for fav_id, name, expression, layer_name in cursor.fetchall():
-                key = (name, expression, layer_name)
+            for row in cursor.fetchall():
+                key = _dedupe_key(row[1], row[2], row[3], *row[4:6]) if extra else _dedupe_key(
+                    row[1], row[2], row[3])
                 if key in seen:
-                    duplicates.append(fav_id)
+                    duplicates.append(row[0])
                 else:
                     seen.add(key)
             if duplicates:

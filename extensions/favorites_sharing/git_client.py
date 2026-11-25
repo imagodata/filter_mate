@@ -429,6 +429,10 @@ class GitClient:
         """
         return self._run(["remote", "set-url", "--", remote, git_url])
 
+    def add_remote_url(self, git_url: str, remote: str = "origin") -> GitResult:
+        """``git remote add -- <remote> <url>``: when the clone has no such remote (set-url fails there)."""
+        return self._run(["remote", "add", "--", remote, git_url])
+
     def switch_branch(self, branch: str, remote: str = "origin") -> GitResult:
         """Fetch ``remote`` and check out ``branch``.
 

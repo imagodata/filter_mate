@@ -323,6 +323,11 @@ Do you agree?</source>
         <translation>設定を開くには、リクエストを停止するか、終了するまでお待ちください。</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>リクエストはすでに実行中です。終わるまで待つか、停止してください。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>メモリを保存できませんでした: {}</translation>
@@ -2025,6 +2030,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>プロジェクトをまたいでメモを保持する</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>すべてのプロジェクトのリクエストを保持する</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>履歴のすべてのプロジェクトタブ：何を、いつ、どこで尋ねたかをこのコンピューターに保持します。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Separate multiple tags with commas.</source>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>名前は空にできません。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>このプロジェクトは読み取り専用です。変更はこのセッションでのみ保持されます。</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Folder: {6}</source>
         <translation>サービスを許容される上限の {0:.0f} 秒間読み取りました。コピーには地物が {1} 件あり、不完全です。</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>サービスは地物が {0} 件あると通知しましたが、読み取れたのは {1} 件です。不完全なコピーです。</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>{0} の利用規約ではタイルの保存が禁止されています。このレイヤーはコピーされません。ほかの背景地図（IGN、Carto、OpenTopoMap など）はコピーできます。</translation>
@@ -13837,6 +13862,16 @@ Folder: {6}</source>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>サービスを最後まで読み取れませんでした。何も保持されていません</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>ローカルコピーを書き込めませんでした（ディスクがいっぱいの可能性があります）：何も保持されませんでした</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>サービスは表示中の地図上に地物を返さなかったか、応答を読み取れませんでした：何も保持されませんでした</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

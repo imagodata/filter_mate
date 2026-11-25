@@ -119,17 +119,30 @@ def test_the_arrows_give_the_previous_requests_from_the_first_line():
 
 def test_at_offers_the_layers_and_writes_the_name():
     panel = _panel()
-    panel.thread.layer_names = lambda: ["communes", "troncon_de_route", "batiment"]
+    panel.input.layer_rows = lambda: [("communes_1", "communes", ""), ("troncon_2", "troncon_de_route", ""),
+                                      ("batiment_3", "batiment", "")]
     panel.input.setFocus()
     QtTest.QTest.keyClicks(panel.input, "filtre @tron")
     _run()
     completer = panel.input.completer
     assert completer.popup().isVisible() and completer.currentCompletion() == "troncon_de_route"
-    completer.activated[str].emit("troncon_de_route")
+    completer.activated[QtCore.QModelIndex].emit(completer.popup().currentIndex())
     assert panel.input.text() == "filtre troncon_de_route"
     QtTest.QTest.keyClicks(panel.input, " email@x")  # an "@" inside a word offers nothing
     _run()
     assert not completer.popup().isVisible()
+
+
+def test_at_offers_homonyms_apart_and_writes_the_id():
+    panel = _panel()
+    panel.input.layer_rows = lambda: [("id_est", "communes", "Est"), ("id_ouest", "communes", "Ouest")]
+    panel.input.setFocus()
+    QtTest.QTest.keyClicks(panel.input, "voir @com")
+    _run()
+    completer = panel.input.completer
+    assert completer.popup().isVisible() and completer.currentCompletion() == "communes (Est)"
+    completer.activated[QtCore.QModelIndex].emit(completer.popup().model().index(1, 0))
+    assert panel.input.text() == "voir id_ouest"
 
 
 def test_a_request_sent_while_working_waits_in_view_then_goes():

@@ -153,3 +153,69 @@ def test_the_cleanup_of_orphan_projects_keeps_the_project_on_screen(tmp_path):
     assert [row[0] for row in conn.execute("SELECT project_id FROM fm_projects ORDER BY project_id")] == \
         ["orphan1", "target"]
     conn.close()
+
+
+def _db_spatial(tmp_path):
+    """A database whose fm_favorites carries the spatial columns, as the manager creates it."""
+    path = str(tmp_path / "fm_spatial.sqlite")
+    conn = sqlite3.connect(path)
+    conn.executescript("""
+        CREATE TABLE fm_projects (project_id TEXT PRIMARY KEY, _created_at TEXT, _updated_at TEXT,
+                                  project_name TEXT, project_path TEXT, project_settings TEXT);
+        CREATE TABLE fm_favorites (id TEXT PRIMARY KEY, project_uuid TEXT, name TEXT, expression TEXT,
+                                   layer_name TEXT, layer_id TEXT, layer_provider TEXT, description TEXT,
+                                   tags TEXT, created_at TEXT, updated_at TEXT, use_count INTEGER,
+                                   last_used_at TEXT, remote_layers TEXT, spatial_config TEXT, owner TEXT);
+        INSERT INTO fm_projects VALUES ('target', '', '', 'bdd.qgz', 'C:/Users/Simon', '{}');
+    """)
+    conn.commit()
+    conn.close()
+    return path
+
+
+def _add_spatial(path, fav_id, project, name, expression="\"dep\" = '89'", layer="departement",
+                 spatial=None, remote=None):
+    import json
+    conn = sqlite3.connect(path)
+    conn.execute("INSERT INTO fm_favorites (id, project_uuid, name, expression, layer_name, spatial_config,"
+                 " remote_layers, use_count) VALUES (?,?,?,?,?,?,?,0)",
+                 (fav_id, project, name, expression, layer,
+                  json.dumps(spatial, sort_keys=True) if spatial is not None else None,
+                  json.dumps(remote, sort_keys=True) if remote is not None else None))
+    conn.commit()
+    conn.close()
+
+
+@pytest.mark.unit
+class TestDedupeComparesTheBuffer:
+    """Audit 2026-11-24: the dedupe compared name, expression and layer: two favorites that only differed by
+    buffer lost one, and the deletion went into the .qgz."""
+
+    def test_favorites_that_differ_only_by_buffer_are_kept(self, tmp_path):
+        path = _db_spatial(tmp_path)
+        _add_spatial(path, "f-plain", "target", "zone")
+        _add_spatial(path, "f-buffered", "target", "zone", spatial={"buffer_distance": 50})
+        assert FavoritesMigrationService(path).dedupe_project_favorites("target") == 0
+        conn = sqlite3.connect(path)
+        try:
+            assert sorted(row[0] for row in conn.execute("SELECT id FROM fm_favorites")) == \
+                ["f-buffered", "f-plain"]
+        finally:
+            conn.close()
+
+    def test_favorites_that_differ_only_by_remote_layers_are_kept(self, tmp_path):
+        path = _db_spatial(tmp_path)
+        _add_spatial(path, "f-local", "target", "zone")
+        _add_spatial(path, "f-remote", "target", "zone", remote={"wfs": ["topp:states"]})
+        assert FavoritesMigrationService(path).dedupe_project_favorites("target") == 0
+
+    def test_byte_identical_copies_are_still_dropped(self, tmp_path):
+        path = _db_spatial(tmp_path)
+        _add_spatial(path, "f-1", "target", "zone", spatial={"buffer_distance": 50})
+        _add_spatial(path, "f-2", "target", "zone", spatial={"buffer_distance": 50})
+        assert FavoritesMigrationService(path).dedupe_project_favorites("target") == 1
+        conn = sqlite3.connect(path)
+        try:
+            assert [row[0] for row in conn.execute("SELECT id FROM fm_favorites")] == ["f-1"]
+        finally:
+            conn.close()

@@ -6,7 +6,7 @@
 # this file nor standalone/.
 
 [build-system]
-requires = ["hatchling>=1.27"]  # license-files as a list (PEP 639)
+requires = ["hatchling>=1.27,<2"]  # license-files as a list (PEP 639); a new major builds nothing silently
 build-backend = "hatchling.build"
 
 [project]

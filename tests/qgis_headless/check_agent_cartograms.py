@@ -76,6 +76,7 @@ def main():
     result = project.mapLayer(made["layer_id"])
     check("contiguous: a new layer of every feature, at the top of the tree", result is not None and
           made["features"] == 16 and project.layerTreeRoot().children()[0].layerId() == made["layer_id"], made)
+    check("contiguous: the answer says the layer is temporary", "restart" in made.get("temporary", ""), made)
     # Values from 1 to 100 on squares of 4 vertices: the error falls from 9.2 to below 2 in 12 iterations.
     check("contiguous: the areas come closer to the values", made["error_after"] < made["error_before"] / 3, made)
     check("contiguous: the fields of the layer and the value kept", result is not None and
@@ -119,6 +120,22 @@ def main():
     largest = max(feature.geometry().area() for feature in circles.getFeatures())
     check("dorling of points: circles of a size seen at the scale of the points (a fid of text dropped)",
           largest > 10000.0, largest)
+    # Audit of 2026-11-24 (lot 5): on projected points the centroid of the mini-square was off by kilometres.
+    origins = [feature.geometry().asPoint() for feature in points.getFeatures()]
+    centres = [feature.geometry().centroid().asPoint() for feature in circles.getFeatures()]
+    worst = max(min(origin.distance(centre) for centre in centres) for origin in origins)
+    check("dorling of projected points: circles on their points", worst < 5000.0, worst)
+    # Audit of 2026-11-24 (lot 5): one NULL value must not freeze the contiguous cartogram.
+    first_commune = next(iter(communes.getFeatures()))
+    communes.startEditing()
+    communes.changeAttributeValue(first_commune.id(), communes.fields().lookupField("population"), None)
+    communes.commitChanges()
+    with_null = cartograms.make_cartogram("communes", "population", iterations=8)
+    before = {feature["nom"]: feature.geometry().centroid().asPoint() for feature in communes.getFeatures()}
+    null_layer = project.mapLayer(with_null["layer_id"])
+    after = {feature["nom"]: feature.geometry().centroid().asPoint() for feature in null_layer.getFeatures()}
+    moved = max(before[nom].distance(after[nom]) for nom in before)
+    check("contiguous with a NULL value: the map still moves", moved > 100.0, moved)
     again = cartograms.make_cartogram(circles.id(), "n", kind="noncontiguous")
     check("a cartogram of a cartogram: a value field of its own", again["value_field"] == "cartogram_value_2", again)
     world = QgsVectorLayer("Polygon?crs=EPSG:4326&field=n:double", "monde", "memory")

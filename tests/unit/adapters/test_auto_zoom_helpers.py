@@ -56,24 +56,55 @@ def _install_stubs() -> None:
 
     class _FakeRect:
         def __init__(self, src=None):
+            self._grown = []
             if src is None:
+                self._null = True
                 self._empty = True
                 self._tag = "default"
             elif isinstance(src, _FakeRect):
+                self._null = src._null
                 self._empty = src._empty
                 self._tag = src._tag
             else:
                 # Caller passes a sentinel object — non-empty by default.
+                self._null = False
                 self._empty = False
                 self._tag = repr(src)
 
         def combineExtentWith(self, other):
-            self._empty = self._empty and other._empty
+            if self._null:
+                self._null, self._empty, self._tag = other._null, other._empty, other._tag
+            elif not other._null:
+                self._empty = self._empty and other._empty
 
         def isEmpty(self):
             return self._empty
 
+        def isNull(self):
+            return self._null
+
+        def grow(self, margin):
+            self._grown.append(margin)
+            self._empty = False
+
+        def center(self):
+            return f"center({self._tag})"
+
+    class _FakeCrs:
+        def __init__(self, tag):
+            self._tag = tag
+
+        def __eq__(self, other):
+            return isinstance(other, _FakeCrs) and other._tag == self._tag
+
+        def __hash__(self):
+            return hash(self._tag)
+
+        def __repr__(self):
+            return f"CRS({self._tag})"
+
     sys.modules["qgis.core"].QgsRectangle = _FakeRect
+    sys.modules["qgis.core"].QgsCrs = _FakeCrs
     sys.modules["qgis.core"].QgsVectorLayer = MagicMock
     sys.modules["qgis.utils"].iface = MagicMock()
 
@@ -98,6 +129,7 @@ def _install_stubs() -> None:
     mod.__package__ = f"{_PKG}.adapters"
     sys.modules[full_name] = mod
     spec.loader.exec_module(mod)
+    mod.QgsCrs = sys.modules["qgis.core"].QgsCrs  # the fake CRS, for _make_layer
 
 
 _install_stubs()
@@ -105,20 +137,25 @@ auto_zoom_mod = sys.modules[f"{_PKG}.adapters.auto_zoom"]
 config_mod = sys.modules[f"{_PKG}.config.config"]
 
 
-def _make_layer(layer_id="L1", with_extent=True, raises_extents=False):
+def _make_layer(layer_id="L1", with_extent=True, raises_extents=False, crs="EPSG:2154", degenerate=False):
     layer = MagicMock()
     layer.id.return_value = layer_id
+    layer.crs.return_value = auto_zoom_mod.QgsCrs(crs)
     if raises_extents:
         layer.updateExtents.side_effect = RuntimeError("destroyed")
     else:
         layer.updateExtents = MagicMock()
-    if with_extent:
+    if degenerate:
+        rect = auto_zoom_mod.QgsRectangle()  # null by default: a kept degenerate extent, not "no extent"
+        rect._null = False
+        rect._empty = True
+        rect._tag = f"point({layer_id})"
+        layer.extent.return_value = rect
+    elif with_extent:
         rect = auto_zoom_mod.QgsRectangle(object())  # non-empty
         layer.extent.return_value = rect
     else:
-        empty = auto_zoom_mod.QgsRectangle()
-        empty._empty = True
-        layer.extent.return_value = empty
+        layer.extent.return_value = auto_zoom_mod.QgsRectangle()  # null: no extent
     return layer
 
 
@@ -127,6 +164,8 @@ def fake_iface():
     canvas = MagicMock()
     canvas.zoomToFeatureExtent = MagicMock()
     canvas.refresh = MagicMock()
+    canvas.mapUnitsPerPixel.return_value = 10.0
+    canvas.mapSettings.return_value.destinationCrs.return_value = auto_zoom_mod.QgsCrs("EPSG:2154")
     iface = MagicMock()
     iface.mapCanvas.return_value = canvas
     return iface, canvas
@@ -457,3 +496,101 @@ class TestZoomLayersForFilter:
     def test_nothing_when_nothing_was_filtered(self):
         assert auto_zoom_mod.zoom_layers_for_filter(None, []) == []
         assert auto_zoom_mod.zoom_layers_for_filter(None, None) == []
+
+
+# ---------------------------------------------------------------------------
+# The canvas CRS (audit of 2026-11-24, lot 2): a layer in EPSG:4326 in a
+# project in EPSG:2154 sent the map to (1.4, 43.6) in Lambert-93.
+# ---------------------------------------------------------------------------
+
+
+class TestToCanvasCrs:
+    def test_extent_is_transformed_to_the_canvas_crs(self, fake_iface, monkeypatch):
+        iface, canvas = fake_iface
+        layer = _make_layer("P", crs="EPSG:4326")
+        placed = auto_zoom_mod.QgsRectangle(object())
+        placed._tag = "canvas-crs"
+        calls = []
+
+        class FakeProject:
+            @staticmethod
+            def instance():
+                return FakeProject()
+
+            def transformContext(self):
+                return "ctx"
+
+        class FakeTransform:
+            def __init__(self, src, dst, ctx):
+                calls.append((src, dst, ctx))
+
+            def transformBoundingBox(self, rect):
+                assert rect is layer.extent.return_value
+                return placed
+
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsCoordinateTransform", FakeTransform)
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject", FakeProject)
+        assert auto_zoom_mod.auto_zoom_to_filtered([layer], iface_obj=iface) is True
+        assert calls == [(auto_zoom_mod.QgsCrs("EPSG:4326"), auto_zoom_mod.QgsCrs("EPSG:2154"), "ctx")]
+        (zoomed,), _ = canvas.zoomToFeatureExtent.call_args
+        assert zoomed._tag == "canvas-crs"
+
+    def test_same_crs_needs_no_transform(self, fake_iface, monkeypatch):
+        iface, canvas = fake_iface
+        layer = _make_layer("P", crs="EPSG:2154")
+
+        def boom(*args):
+            raise AssertionError("no transform expected")
+
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsCoordinateTransform", boom)
+        assert auto_zoom_mod.auto_zoom_to_filtered([layer], iface_obj=iface) is True
+        (zoomed,), _ = canvas.zoomToFeatureExtent.call_args
+        assert zoomed._tag == layer.extent.return_value._tag
+
+    def test_untransformable_layer_is_skipped(self, fake_iface, monkeypatch):
+        iface, canvas = fake_iface
+        layer = _make_layer("P", crs="EPSG:4326")
+
+        class FakeProject:
+            @staticmethod
+            def instance():
+                return FakeProject()
+
+            def transformContext(self):
+                return "ctx"
+
+        class FailingTransform:
+            def __init__(self, *args):
+                pass
+
+            def transformBoundingBox(self, rect):
+                raise RuntimeError("cs exception")
+
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsCoordinateTransform", FailingTransform)
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject", FakeProject)
+        assert auto_zoom_mod.auto_zoom_to_filtered([layer], iface_obj=iface) is False
+        canvas.zoomToFeatureExtent.assert_not_called()
+        canvas.refresh.assert_called_once()
+
+
+class TestDegenerateExtents:
+    def test_layer_extent_keeps_a_degenerate_rect(self):
+        ext = auto_zoom_mod._layer_extent(_make_layer("P", degenerate=True))
+        assert ext is not None and ext.isEmpty() and not ext.isNull()
+
+    def test_a_single_point_centers_with_a_pixel_margin(self, fake_iface):
+        iface, canvas = fake_iface  # mapUnitsPerPixel 10
+        assert auto_zoom_mod.auto_zoom_to_filtered(
+            [_make_layer("P", degenerate=True)], iface_obj=iface) is True
+        (zoomed,), _ = canvas.zoomToFeatureExtent.call_args
+        assert zoomed._grown == [250.0] and not zoomed.isEmpty()
+
+    def test_grow_by_enlarges_before_the_empty_check(self, fake_iface):
+        iface, canvas = fake_iface
+        layer = _make_layer("P", degenerate=True)
+        assert auto_zoom_mod.auto_zoom_to_filtered([layer], iface_obj=iface, grow_by=5.0) is True
+        # The buffer margin made the degenerate extent an area (before, it was applied after the empty check,
+        # so the margin never enlarged the view); the cached extent of the layer was left alone.
+        assert layer.extent.return_value._grown == []
+        (zoomed,), _ = canvas.zoomToFeatureExtent.call_args
+        assert not zoomed.isEmpty()

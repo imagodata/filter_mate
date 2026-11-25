@@ -32,6 +32,54 @@ logger = logging.getLogger(__name__)
 _BBOX_PROVIDERS = frozenset(("wfs", "oapif", "arcgisfeatureserver"))
 _PARTIAL_LAYERS = set()
 
+_ANNOUNCED_RE = re.compile(
+    rb'\bnumberMatched="(\d+)"'  # WFS 2.0
+    rb'|\bnumberOfFeatures="(\d+)"'  # WFS 1.x
+    rb'|"numberMatched"\s*:\s*(\d+)'  # OGC API Features (JSON)
+)
+
+
+def announced_from_prefix(prefix: bytes):
+    """What a service reply says it holds in total, None when it says nothing usable.
+
+    Only totals (WFS ``numberMatched`` / ``numberOfFeatures``, OAPIF ``numberMatched``): ``numberReturned`` is
+    what this answer carries, not what the service holds. Pure (unit tests read it without QGIS).
+    """
+    found = None
+    for match in _ANNOUNCED_RE.finditer(prefix or b""):
+        try:
+            told = int(next(group for group in match.groups() if group is not None))
+        except (TypeError, ValueError):
+            continue
+        found = told if found is None else max(found, told)
+    return found
+
+
+def announces_this_read(url_text: str) -> bool:
+    """Whether a reply can announce this read: its request asks for features, not a probe of its own.
+
+    The COUNT=1 a WFS layer sends when it opens, a resultType=hits verdict and an OAPIF limit=1 announce
+    totals of other questions; taking them would mark a full copy incomplete. A POST carries no query to
+    scope by and is left out. The residual risk (another layer of the same service read meanwhile) fails
+    safe: a copy wrongly said incomplete, never a cut copy said complete. Pure (unit tests read it).
+    """
+    try:
+        url = urlsplit(url_text or "")
+    except ValueError:
+        return False
+    query = parse_qsl(url.query.lower())
+    params = {name: value for name, value in query}
+    path = url.path.lower()
+    if path.rstrip("/").endswith("/items"):
+        return params.get("limit", "") != "1"
+    if params.get("request", "") == "getfeature":
+        if params.get("resulttype", "") == "hits":
+            return False
+        if params.get("count", "") == "1" or params.get("maxfeatures", "") == "1":
+            return False
+        return True
+    return False
+
 
 def is_partial_source(layer):
     """Keep provenance across subset normalisation and sip wrapper recreation."""
@@ -384,6 +432,7 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     watcher.start()
     iterator = None
     network_failed = []
+    announced = []  # the totals the observed replies said the service holds (numberMatched)
     provider_warnings = []
     held_wrappers = []  # the reply wrappers held by the observer, all dropped when the read ends
     network = QgsNetworkAccessManager.instance()
@@ -505,6 +554,17 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
                     rb'\s*\{\s*"error"\s*:', prefix
                 ):
                     network_failed.append(True)
+                # What the service says it holds (WFS numberMatched): fewer rows read means it cut the answer
+                # short, even on clean exhaustion (audit of 2026-11-24). Only the requests of this read announce
+                # it (see announces_this_read).
+                try:
+                    scoped = announces_this_read(request.url().toString())
+                except (RuntimeError, AttributeError):
+                    scoped = False
+                if scoped:
+                    told = announced_from_prefix(prefix)
+                    if told is not None:
+                        announced.append(told)
 
             # One step per connection: a retried step never connects a slot twice.
             try:
@@ -586,6 +646,8 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
         outcome = collect_materialization(
             copied_features(), key, consume, replace(limits, timeout_seconds=remaining), cancelled
         )
+        if announced:
+            outcome = replace(outcome, announced=max(announced))
         if cancelled():
             return MaterializationOutcome(fetched=outcome.fetched, reason="cancelled")
         if outcome.reason not in ("", "feature_limit", "timeout"):

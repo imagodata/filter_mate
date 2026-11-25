@@ -123,9 +123,10 @@ def test_a_turn_discarded_with_its_project_is_never_recorded(checkpoint_module):
     assert not history.can_undo(checkpoint_module.HISTORY_KEY)
 
 
-def test_a_recorder_of_the_turn_that_fails_refuses_the_call_but_not_the_one_of_the_step(monkeypatch, checkpoint_module):
-    """A valid call whose capture fails is refused (begin raises): run, it would leave the undo silently incomplete.
-    The recorder of a step only serves "undo back to here": its failure keeps nothing from being made."""
+def test_a_recorder_that_fails_never_refuses_the_call(monkeypatch, checkpoint_module):
+    """2026-11-24 (audit): a failure of before_call refused the tool ("undo point could not be made"), though the
+    filters were recorded. What a call did beside the filters not recorded never keeps it from running, for the
+    recorder of the turn as for the one of the step (which only serves "undo back to here")."""
     class Failing(Effects):
         def before_call(self, call, step=0):
             raise ValueError("not serialisable")
@@ -139,8 +140,7 @@ def test_a_recorder_of_the_turn_that_fails_refuses_the_call_but_not_the_one_of_t
     holder.project = Project([Layer("roads")])
     call = types.SimpleNamespace(name="set_layer_options", arguments={"layers": []})
     monkeypatch.setattr(checkpoint_module, "EffectsRecorder", Failing)
-    with pytest.raises(ValueError):
-        checkpoint_module.TurnCheckpoint().begin(call)
+    checkpoint_module.TurnCheckpoint().begin(call)  # does not raise
     monkeypatch.setattr(checkpoint_module, "EffectsRecorder", FailingStep)
     checkpoint_module.TurnCheckpoint().begin(call)  # does not raise
 

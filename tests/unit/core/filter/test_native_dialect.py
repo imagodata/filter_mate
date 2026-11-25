@@ -224,7 +224,10 @@ def test_ogr_sql_never_writes_a_not_over_an_and():
     assert 'NOT over an AND' in refused(negation(binary('=', col('ratio'), lit(0.5))), OGR_SQL)
     assert full(negation(both), SQLITE) == '(NOT (("pop" > 5) AND ("ratio" < 2)))'
     either = binary('OR', binary('>', col('pop'), lit(5)), binary('<', col('ratio'), lit(2)))
-    assert full(negation(either), OGR_SQL) == '(NOT (("pop" > 5) OR ("ratio" < 2)))'
+    # Audit of 2026-11-24: old GDAL keeps the NULL rows under a NOT (3 rows kept of 2 on GDAL 3.4.1). What may
+    # be NULL is excluded, as QGIS does; the same writing on a recent GDAL, which drops them itself.
+    assert full(negation(either), OGR_SQL) == \
+        ('(NOT (("pop" > 5) OR ("ratio" < 2))) AND "pop" IS NOT NULL AND "ratio" IS NOT NULL')
     assert full(binary('<>', col('ratio'), lit(0.5)), OGR_SQL)  # an OR, no NOT
 
 
@@ -309,9 +312,11 @@ def test_ogr_texts_never_under_a_not_nor_for_a_negation():
     # ordering and mixed types stay refused
     assert not_like(binary('<', col('nom'), lit('m')))
     assert not_like(binary('=', col('code'), lit(10)))
-    # a NOT over a number next to a text outside it
+    # a NOT over a number next to a text outside it (NULL rows excluded: audit of 2026-11-24; AND binds
+    # tighter than OR, so the unparenthesised guards stay with their NOT)
     node = binary('OR', negation(binary('>', col('pop'), lit(5))), binary('=', col('nom'), lit('Route')))
-    assert like(node) == '(NOT ("pop" > 5)) OR ("nom" LIKE \'Route\')'
+    assert like(node) == ("(NOT (\"pop\" > 5)) AND \"pop\" IS NOT NULL"
+                          " OR (\"nom\" LIKE 'Route')")
 
 
 def test_ogr_texts_inside_and_or():
@@ -663,6 +668,45 @@ def test_postgresql_hybrid_lists_keys_without_a_collation():
 def test_hybrid_is_not_written_for_ogr_sql():
     with pytest.raises(Unsupported):
         hybrid_sql('', [1], None, '"fid"', True, OGR_SQL)
+
+
+def test_not_excludes_what_may_be_null_on_ogr_sql_only():
+    """Audit of 2026-11-24: old GDAL keeps the NULL rows under a NOT (3 rows kept of 2 on GDAL 3.4.1)."""
+    assert full(negation(binary('>', col('pop'), lit(5))), OGR_SQL) == \
+        '(NOT ("pop" > 5)) AND "pop" IS NOT NULL'
+    assert full(negation(binary('>', col('pop'), lit(5))), SQLITE) == '(NOT ("pop" > 5))'
+    assert full(in_list(col('pop'), [1, 2], negated=True), OGR_SQL) == \
+        '("pop" NOT IN (1, 2)) AND "pop" IS NOT NULL'
+    # No column, no guard.
+    assert full(negation(binary('>', lit(3), lit(5))), OGR_SQL) == '(NOT (3 > 5))'
+
+
+def test_guarded_not_keeps_the_same_rows_where_nulls_drop():
+    """The guards change nothing where the engine already drops NULLs (SQLite): run both forms."""
+    connection = sqlite3.connect(":memory:")
+    connection.execute("CREATE TABLE t (pop INTEGER)")
+    connection.executemany("INSERT INTO t VALUES (?)", [(7,), (3,), (None,)])
+    guarded = '((NOT ("pop" > 5)) AND "pop" IS NOT NULL)'
+    assert [row[0] for row in connection.execute(f"SELECT pop FROM t WHERE {guarded} ORDER BY pop")] == [3]
+    assert [row[0] for row in connection.execute('SELECT pop FROM t WHERE (NOT ("pop" > 5)) ORDER BY pop')] == [3]
+
+
+def test_hybrid_lists_go_as_json_when_asked():
+    """Audit of 2026-11-24: a plain IN list of 50,000 keys froze the main thread and slowed every read."""
+    assert hybrid_sql('', [1, 2, 3], None, '"fid"', True, json_lists=True) == \
+        '"fid" IS NOT NULL AND "fid" IN (SELECT value FROM json_each(\'[1,2,3]\'))'
+    assert hybrid_sql('"pop" > 5', [1], [9, 8, 7, 6], '"id"', True, json_lists=True) == \
+        '"id" IS NOT NULL AND "id" IN (SELECT value FROM json_each(\'[1]\'))'
+    assert hybrid_sql('"pop" > 5', [1, 3, 6], [9], '"id"', True, json_lists=True) == \
+        '"id" IS NOT NULL AND ("pop" > 5) AND NOT ("id" IN (SELECT value FROM json_each(\'[9]\')))'
+    assert hybrid_sql('"pop" > 5', [1, 3, 6], [9], '"id"', True, json_lists=True) != \
+        hybrid_sql('"pop" > 5', [1, 3, 6], [9], '"id"', True)
+    assert hybrid_sql('', ['a1', "b'2"], None, '"code"', False, json_lists=True) == (
+        '"code" IS NOT NULL AND "code" COLLATE BINARY IN '
+        "(SELECT value FROM json_each('[\"a1\",\"b''2\"]'))")
+    # PostgreSQL keeps the plain list: json_lists is SQLite only.
+    assert hybrid_sql('', [1, 2], None, '"id"', True, POSTGRESQL, json_lists=True) == \
+        '"id" IS NOT NULL AND "id" IN (1, 2)'
 
 
 def test_postgresql_ilike_writes_the_long_s_and_the_kelvin_sign_for_a_utf8_database_only():

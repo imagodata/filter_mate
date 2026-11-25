@@ -4,7 +4,7 @@
 export FM_WORK=${FM_WORK:-/work} QT_QPA_PLATFORM=xcb
 mkdir -p "$FM_WORK"
 status=0
-for role in ${FM_ROLES:-A1 B1 A2 B2 A3 C AX AY AD AC AT AF AZ}; do
+for role in ${FM_ROLES:-A1 B1 A2 B2 A3 C AX AY AD AC AT AF AZ AC2 AF5}; do
   computer=${role:0:1}
   if [ "$role" = AT ]; then  # the "New from Template" menu lists the templates of the profile at QGIS's start
     mkdir -p "$FM_WORK/profiles_A/profiles/default/project_templates"

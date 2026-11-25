@@ -323,6 +323,11 @@ Do you agree?</source>
         <translation>सेटिंग्स खोलने के लिए अनुरोध रोकें या उसके समाप्त होने की प्रतीक्षा करें।</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>एक अनुरोध पहले से चल रहा है: इसके समाप्त होने की प्रतीक्षा करें, या इसे रोकें।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>स्मृति सहेजी नहीं जा सकी: {}</translation>
@@ -2025,6 +2030,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>नोट एक प्रोजेक्ट से दूसरे प्रोजेक्ट तक रखें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>प्रत्येक प्रोजेक्ट के अनुरोध सहेजें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>इतिहास का सभी प्रोजेक्ट टैब: क्या पूछा गया, कहां और कब, इस कंप्यूटर पर रखा गया।</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Separate multiple tags with commas.</source>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>नाम खाली नहीं हो सकता।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>यह प्रोजेक्ट केवल पढ़ने के लिए है: बदलाव केवल इस सत्र के लिए रखा गया है।</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Folder: {6}</source>
         <translation>सेवा को {0:.0f} सेकंड तक पढ़ा गया, जो अधिकतम अनुमत समय है: प्रतिलिपि में {1} फ़ीचर हैं और वह पूरी नहीं है।</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>सेवा ने {0} फ़ीचर बताए लेकिन केवल {1} पढ़े गए: प्रतिलिपि पूरी नहीं है।</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>{0} की शर्तें उसकी टाइलें रखने की अनुमति नहीं देतीं: इस परत की प्रतिलिपि नहीं बनाई जाती। किसी दूसरे आधार मानचित्र की प्रतिलिपि बनाई जा सकती है (IGN, Carto, OpenTopoMap...)।</translation>
@@ -13837,6 +13862,16 @@ Folder: {6}</source>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>सेवा को अंत तक पढ़ा नहीं जा सका: कुछ भी नहीं रखा गया</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>स्थानीय प्रति लिखी नहीं जा सकी (डिस्क भरी हो सकती है): कुछ नहीं रखा गया</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>सेवा ने दृश्य मानचित्र पर कोई फ़ीचर नहीं दिया, या उसका उत्तर पढ़ा नहीं जा सका: कुछ नहीं रखा गया</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

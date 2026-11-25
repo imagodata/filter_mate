@@ -7,6 +7,7 @@ only platforms the user allowed are reachable, and the answers are reduced to wh
 from __future__ import annotations
 
 import ipaddress
+import os
 import re
 import socket
 import threading
@@ -132,6 +133,34 @@ _NOT_PLAIN_HOST = ("this server name is not plain ASCII letters, digits and hyph
                    "ASCII form (xn--...)")
 _NAT64 = ipaddress.ip_network("64:ff9b::/96")  # the gateway reaches the IPv4 address of the last 32 bits
 _LOCAL_NAT64 = ipaddress.ip_network("64:ff9b:1::/48")  # a gateway of the local network, which places the IPv4 itself
+
+
+DATA_PREFIXES = ("elevation-", "population-", "osm-")
+
+
+def sweep_empty_data_dirs(root: str) -> int:
+    """Remove the empty elevation-*/population-*/osm-* folders under ``root``; returns how many went.
+
+    Downloads that failed are removed by their tool; what succeeded may be read by a project saved long ago,
+    so only empty folders go here, when a new download starts (audit of 2026-11-24: never cleaned, and an age
+    would break saved projects). Pure (unit tests read it).
+    """
+    try:
+        names = sorted(os.listdir(root))
+    except OSError:
+        return 0
+    gone = 0
+    for name in names:
+        if not name.startswith(DATA_PREFIXES):
+            continue
+        path = os.path.join(root, name)
+        try:
+            if os.path.isdir(path) and not os.listdir(path):
+                os.rmdir(path)
+                gone += 1
+        except OSError:
+            pass
+    return gone
 
 
 def parse_extra_domains(text: str) -> Dict[str, Tuple[str, str]]:

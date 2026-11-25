@@ -59,8 +59,19 @@ def numpy_finite(ring) -> bool:
     return bool(np.isfinite(ring).all())
 
 
+REMOTE_PROVIDERS = frozenset(("wfs", "oapif", "arcgisfeatureserver"))
+
+
 def _read(layer, field: str, polygons: bool) -> Tuple[List[Dict[str, Any]], List[Any], Any, str]:
     from qgis.core import QgsCoordinateTransform, QgsCsException, QgsFeatureRequest, QgsGeometry, QgsProject, QgsWkbTypes
+    try:
+        provider = (layer.providerType() or "").lower()
+    except (RuntimeError, AttributeError):
+        provider = ""
+    if provider in REMOTE_PROVIDERS:
+        # A service is read bounded and on the main thread here: copy it first (audit of 2026-11-24).
+        raise CartogramError(f"'{layer.name()}' is a web service: make a local copy first (local_copy), then a "
+                             "cartogram of the copy")
     index = layer.fields().lookupField(field)
     if index < 0:
         raise CartogramError(f"no field {field!r} in '{layer.name()}': see describe_layer")
@@ -101,6 +112,10 @@ def _read(layer, field: str, polygons: bool) -> Tuple[List[Dict[str, Any]], List
         sources.append(feature)
     if not features:
         raise CartogramError(f"'{layer.name()}' as filtered now has no feature to draw")
+    if len(features) > MAX_FEATURES:
+        # The count was unknown (-1): the read above was bounded by MAX_FEATURES + 1, enforce it now instead of
+        # working past the ceiling (audit of 2026-11-24).
+        raise CartogramError(f"'{layer.name()}' shows more than {MAX_FEATURES} features: filter it first")
     return features, sources, crs, made_for
 
 
@@ -123,6 +138,8 @@ def make_cartogram(layer: str, field: str, kind: str = "contiguous", iterations:
                    name: str = "") -> Dict[str, Any]:
     """A new layer whose areas show ``field`` of ``layer``: contiguous (borders kept), noncontiguous (each polygon
     scaled), dorling (circles) or demers (squares).
+
+    The layer is temporary (a file of the temporary folder of QGIS): the answer says so, with what keeps it.
 
     Raises:
         ValueError: An unknown layer, field or kind, values that cannot be drawn, too many features.
@@ -199,4 +216,8 @@ def make_cartogram(layer: str, field: str, kind: str = "contiguous", iterations:
         answer["error_after"] = round(history[-1] if history else errors(shaped), 3)
         answer["note"] = ("error: the mean ratio between the area of a feature and the area its value asks for; "
                           "1 is exact")
+    # The file lives in the temporary folder of QGIS: it is gone at restart, and saving the project does not keep
+    # it (audit of 2026-11-24). The model offers an export while it lasts.
+    answer["temporary"] = ("a layer of the temporary folder: export it (export_layers) or save its features "
+                           "elsewhere, it does not survive a restart")
     return answer
