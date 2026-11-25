@@ -2395,10 +2395,23 @@ class AgentChatController(QObject):
         session = AgentSession(provider, tools, prompt, limits, core=CORE if index else ())
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
+
+        def auto_offer_held(name: str) -> bool:
+            """A tool the model called before use_tools offered it: offer its family now so the call runs in
+            this turn. Never a tool the user turned off in the Tools tab, and never a connector (not held)."""
+            if self._policy.turned_off(name):
+                return False
+            later = getattr(self, "_later", None)
+            spec = later.pop(name, None) if later else None
+            if spec is None or self._engine is None:
+                return False
+            self._engine.offer_tools([spec])
+            return True
+
         return ChatEngine(session, executor, QtTransport(self), self,
                           self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy,
                           delay=lambda seconds, step: QTimer.singleShot(int(seconds * 1000), self._again(step)),
-                          released=self._release_tools)
+                          released=self._release_tools, auto_offer=auto_offer_held)
 
     def _release_tools(self, names) -> None:
         """Tools a compaction took out of the request: use_tools may add them again (token diet, lot 1)."""

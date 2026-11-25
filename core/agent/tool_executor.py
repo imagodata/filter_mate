@@ -125,6 +125,10 @@ class ToolExecutor:
             self._tools.pop(name, None)
             self._held[name] = self._skills.get(name, ())
 
+    def is_held(self, name: str) -> bool:
+        """A call the model may make valid by loading its tools first (held for the token diet)."""
+        return name in self._held
+
     def spec(self, name: str) -> Optional[ToolSpec]:
         return self._tools.get(name)
 

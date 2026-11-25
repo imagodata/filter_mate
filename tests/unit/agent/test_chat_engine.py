@@ -713,3 +713,67 @@ def test_a_slow_tool_writes_its_time_in_the_log(monkeypatch, caplog, spent, logg
     lines = [record.getMessage() for record in caplog.records if record.getMessage().startswith("⏱ agent")]
     assert seen == ["read"]
     assert lines == (["⏱ agent read: 300 ms"] if logged else [])
+
+
+# --- a tool called before use_tools offered it runs in the same turn (2026-11-25) -------------------------------
+# A small model called add_elevation first, was told to call use_tools first, then answered the layer was added.
+
+def _held_engine(auto_offer):
+    from core.agent.tool_catalog import ToolSpec
+    elev = ToolSpec("elev", "Add elevation.", {"type": "object"})
+    seen = []
+    run_elev = lambda a: seen.append("elev") or {"ok": True}
+    session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), [READ], "S")
+    executor = ToolExecutor([READ], {READ.name: lambda a: {}, "elev": run_elev})
+    executor.hold({"elev": ["terrain"]})
+    transport, listener = Transport(), Listener()
+    box = {}
+
+    def offer(name):
+        box["offered"].append(name)
+        if auto_offer:
+            box["engine"].offer_tools([elev], {"elev": run_elev})
+        return auto_offer
+
+    box["offered"] = []
+    engine = ChatEngine(session, executor, transport, listener, Checkpoint(), auto_offer=offer)
+    box["engine"] = engine
+    return engine, session, transport, listener, seen, box["offered"]
+
+
+def test_a_held_tool_is_offered_and_runs_in_the_same_turn():
+    engine, session, transport, listener, seen, offered = _held_engine(True)
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("elev")))
+    assert seen == ["elev"] and offered == ["elev"]
+    answers = session.messages[2].parts
+    assert len(answers) == 1 and not answers[0].is_error
+    assert listener.log.count(("start", "elev")) == 2  # the failure then the run: nothing silently fixed
+    transport.emit(turn(STOP_END, TextPart("done")))
+    assert listener.outcomes[0].status == "done" and len(transport.starts) == 2
+
+
+def test_a_held_tool_declined_by_the_resolver_keeps_its_failure():
+    engine, session, transport, _listener, seen, offered = _held_engine(False)
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("elev")))
+    assert seen == [] and offered == ["elev"]
+    assert session.messages[2].parts[0].is_error
+    transport.emit(turn(STOP_END, TextPart("done")))
+
+
+def test_a_tool_still_held_after_the_offer_keeps_its_failure():
+    """The resolver said yes but offered nothing: one run only, no loop, the failure stays."""
+    session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), [READ], "S")
+    executor = ToolExecutor([READ], {READ.name: lambda a: {}})
+    executor.hold({"elev": ["terrain"]})
+    transport, listener = Transport(), Listener()
+    calls = []
+    engine = ChatEngine(session, executor, transport, listener, Checkpoint(),
+                        auto_offer=lambda name: calls.append(name) or True)
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("elev")))
+    assert calls == ["elev"]
+    answer = session.messages[2].parts[0]
+    assert answer.is_error and 'use_tools with "elev" first' in answer.content
+    transport.emit(turn(STOP_END, TextPart("done")))
