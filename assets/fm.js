@@ -7,9 +7,9 @@
 
     // ---------------------------------------------------------------- light / dark theme
     // A manual switch in the nav (persisted in localStorage), falling back to
-    // the OS preference. data-theme on <html> drives the CSS, the footage
-    // below and the Tally forms (which keep their own theme once loaded, so
-    // switching never wipes an answer being typed).
+    // the OS preference. data-theme on <html> drives the CSS and the footage
+    // below. Tally forms always render with their dashboard theme (LIGHT),
+    // so their box always keeps a light background via CSS, in both modes.
     const themeStore = 'filtermate-theme';
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
     const readStoredTheme = () => {
@@ -19,11 +19,6 @@
         } catch (_) { return null; }
     };
     const effectiveTheme = () => readStoredTheme() || (systemDark.matches ? 'dark' : 'light');
-    const tallyThemeOf = (url) => /[?&]theme=dark(?:&|$)/.test(url || '') ? 'dark' : 'light';
-    const withTallyTheme = (url, theme) => {
-        if (/[?&]theme=(light|dark)/.test(url)) return url.replace(/([?&])theme=(light|dark)/, '$1theme=' + theme);
-        return url + (url.indexOf('?') === -1 ? '?' : '&') + 'theme=' + theme;
-    };
     function paintThemeButton(btn, theme) {
         const dark = theme === 'dark';
         const moon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
@@ -37,16 +32,14 @@
         btn.innerHTML = (dark ? sun : moon)
             + '<span aria-hidden="true">' + (dark ? (french ? 'Clair' : 'Light') : (french ? 'Sombre' : 'Dark')) + '</span>';
     }
-    function syncPendingTally(theme) {
-        // Only touch embeds Tally has not loaded yet (no src): loaded ones keep
-        // their theme and their frame colour, so no answer is ever lost.
+    function syncPendingTally() {
+        // Tally forms always render LIGHT (dashboard theme): frame their box
+        // light in both site modes. Never touch a loaded iframe's src, so no
+        // answer is ever lost when the site theme changes.
         document.querySelectorAll('iframe[data-tally-src]').forEach((frame) => {
             const box = frame.closest('.cloud-form');
-            if (!frame.getAttribute('src')) {
-                frame.setAttribute('data-tally-src', withTallyTheme(frame.getAttribute('data-tally-src'), theme));
-                if (box) box.setAttribute('data-tally-theme', theme);
-            } else if (box && !box.getAttribute('data-tally-theme')) {
-                box.setAttribute('data-tally-theme', tallyThemeOf(frame.getAttribute('src')));
+            if (box && !box.getAttribute('data-tally-theme')) {
+                box.setAttribute('data-tally-theme', 'light');
             }
         });
     }
@@ -56,7 +49,7 @@
             try { localStorage.setItem(themeStore, theme); } catch (_) { /* Storage is optional. */ }
         }
         document.querySelectorAll('.theme-toggle').forEach((btn) => paintThemeButton(btn, theme));
-        syncPendingTally(theme);
+        syncPendingTally();
     }
     (function buildThemeButton() {
         const bar = document.getElementById('navLinks');
