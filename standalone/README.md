@@ -3,7 +3,9 @@
 FilterMate explores, filters and exports vector, raster and point-cloud layers. It is a QGIS
 plugin; this package starts **the same dock, unchanged, in a window of its own**: a map, a
 layer panel, and the QGIS libraries as the engine. The QGIS application is not needed, and
-no QGIS profile of yours is read or written.
+no QGIS profile of yours is read or written. The keyring neither: the application keeps its own
+QGIS master password (`auth-password`, mode 0600, under `FILTERMATE_HOME`), so the key of the
+agent is stored without asking and the master password of your QGIS is never read.
 
 ```bash
 pipx install filtermate        # or: pip install filtermate

@@ -25,6 +25,26 @@ from typing import Any, Dict, List, Optional
 from .git_client import GitClient, GitError, _scrub_text
 from .git_resolver import GitResolution, resolve_for_extension
 
+
+def _repo_path(url: str) -> str:
+    """The repository path of a git URL, without scheme, host, port, user or ``.git``: same path, same
+    repository under another address. Pure (unit tests read it)."""
+    from urllib.parse import urlsplit
+    text = (url or "").strip()
+    if not text:
+        return ""
+    path = text
+    if "://" not in text and ":" in text and "/" not in text.split(":")[0]:
+        path = text.split(":", 1)[1]  # scp-like user@host:path first: urlsplit reads it as scheme://host/path
+    else:
+        parsed = urlsplit(text if "://" in text else f"scheme://{text}")
+        if parsed.hostname:
+            path = parsed.path or ""
+    path = path.strip().rstrip("/")
+    if path.lower().endswith(".git"):
+        path = path[:-4]
+    return path.strip("/") or text.strip()
+
 logger = logging.getLogger('FilterMate.FavoritesSharing.RemoteRepo')
 
 # The plaintext ``auth_header`` of FilterMate 4.x repo entries is refused
@@ -624,12 +644,32 @@ class RemoteRepoManager:
                 # git_url of the config (a new port or host) before talking
                 # to the remote, so pull and push reach the configured server.
                 current = client.get_remote_url("origin")
-                if current != repo.git_url:
+                if not current:
+                    # set-url fails with no origin: every publish failed (audit of 2026-11-24, git 2.43).
                     logger.info(
-                        "Remote origin of %s set to the configured URL %s (was %s)",
+                        "Remote origin of %s set to the configured URL %s",
                         repo.expanded_local_clone,
-                        _scrub_text(repo.git_url), _scrub_text(current) or "<none>",
+                        _scrub_text(repo.git_url),
                     )
+                    client.add_remote_url(repo.git_url, "origin")
+                elif current != repo.git_url:
+                    if _repo_path(current) != _repo_path(repo.git_url):
+                        # Another repository, not a new address of this one (a move keeps the path): said
+                        # loudly, not silently (audit of 2026-11-24). The configured URL still wins (a moved
+                        # server must be followed); check it is yours when this warns.
+                        logger.warning(
+                            "Remote origin of %s points to another repository (%s): set to the configured "
+                            "URL %s; fix the address or move the folder if that other repository is not a "
+                            "move of this one",
+                            repo.expanded_local_clone,
+                            _scrub_text(current), _scrub_text(repo.git_url),
+                        )
+                    else:
+                        logger.info(
+                            "Remote origin of %s set to the configured URL %s (was %s)",
+                            repo.expanded_local_clone,
+                            _scrub_text(repo.git_url), _scrub_text(current),
+                        )
                     client.set_remote_url(repo.git_url, "origin")
                 # Same for the branch: pulling the configured branch into
                 # another one would merge them, so switch to it first.

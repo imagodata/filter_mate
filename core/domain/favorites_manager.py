@@ -505,25 +505,7 @@ class FavoritesManager:
             self._favorites.clear()
 
             for row in cursor.fetchall():
-                # Build data dict with defaults for missing columns
-                data = {
-                    'id': row['id'] if 'id' in available_columns else None,
-                    'name': row['name'] if 'name' in available_columns else 'Unnamed',
-                    'expression': row['expression'] if 'expression' in available_columns else '',
-                    'layer_name': row['layer_name'] if 'layer_name' in available_columns else None,
-                    'layer_id': row['layer_id'] if 'layer_id' in available_columns else None,
-                    'layer_provider': row['layer_provider'] if 'layer_provider' in available_columns else None,
-                    'description': row['description'] if 'description' in available_columns else '',
-                    'tags': json.loads(row['tags']) if 'tags' in available_columns and row['tags'] else [],
-                    'created_at': row['created_at'] if 'created_at' in available_columns else datetime.now().isoformat(),
-                    'updated_at': row['updated_at'] if 'updated_at' in available_columns else datetime.now().isoformat(),
-                    'use_count': row['use_count'] if 'use_count' in available_columns else 0,
-                    'last_used_at': row['last_used_at'] if 'last_used_at' in available_columns else None,
-                    'remote_layers': json.loads(row['remote_layers']) if 'remote_layers' in available_columns and row['remote_layers'] else None,
-                    'spatial_config': json.loads(row['spatial_config']) if 'spatial_config' in available_columns and row['spatial_config'] else None,
-                    'owner': row['owner'] if 'owner' in available_columns else None,
-                }
-                favorite = FilterFavorite.from_dict(data)
+                favorite = self._favorite_from_row(row, available_columns)
                 self._favorites[favorite.id] = favorite
 
             conn.close()
@@ -534,6 +516,103 @@ class FavoritesManager:
 
         except Exception as e:
             logger.error(f"Failed to load favorites: {e}")
+
+    @staticmethod
+    def _favorite_from_row(row, available_columns) -> "FilterFavorite":
+        """A row of fm_favorites as a favorite, with defaults for missing columns."""
+        data = {
+            'id': row['id'] if 'id' in available_columns else None,
+            'name': row['name'] if 'name' in available_columns else 'Unnamed',
+            'expression': row['expression'] if 'expression' in available_columns else '',
+            'layer_name': row['layer_name'] if 'layer_name' in available_columns else None,
+            'layer_id': row['layer_id'] if 'layer_id' in available_columns else None,
+            'layer_provider': row['layer_provider'] if 'layer_provider' in available_columns else None,
+            'description': row['description'] if 'description' in available_columns else '',
+            'tags': json.loads(row['tags']) if 'tags' in available_columns and row['tags'] else [],
+            'created_at': row['created_at'] if 'created_at' in available_columns else datetime.now().isoformat(),
+            'updated_at': row['updated_at'] if 'updated_at' in available_columns else datetime.now().isoformat(),
+            'use_count': row['use_count'] if 'use_count' in available_columns else 0,
+            'last_used_at': row['last_used_at'] if 'last_used_at' in available_columns else None,
+            'remote_layers': json.loads(row['remote_layers']) if 'remote_layers' in available_columns and row['remote_layers'] else None,
+            'spatial_config': json.loads(row['spatial_config']) if 'spatial_config' in available_columns and row['spatial_config'] else None,
+            'owner': row['owner'] if 'owner' in available_columns else None,
+        }
+        return FilterFavorite.from_dict(data)
+
+    def get_orphan_favorites(self) -> List["FilterFavorite"]:
+        """Favorites of projects never saved (empty name and path), listed nowhere since 2026-11-24.
+
+        Neither the global list nor this project (its own rows are listed with it, even unsaved): only the
+        favorites another unsaved session left behind. Decided with the user (audit, relist, not purge).
+        """
+        if not self._initialized:
+            return []
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self._db_path)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA table_info(fm_favorites)")
+            available_columns = {row[1] for row in cursor.fetchall()}
+            cursor.execute("""
+                SELECT f.* FROM fm_favorites f
+                JOIN fm_projects p ON f.project_uuid = p.project_id
+                WHERE (p.project_name = '' OR p.project_name IS NULL)
+                  AND (p.project_path = '' OR p.project_path IS NULL)
+                  AND f.project_uuid != ?
+                  AND f.project_uuid != ?
+                ORDER BY f.created_at DESC
+            """, (GLOBAL_PROJECT_UUID, self._project_uuid or ""))
+            favorites = [self._favorite_from_row(row, available_columns) for row in cursor.fetchall()]
+            conn.close()
+            return favorites
+        except Exception as e:
+            logger.error(f"Failed to read the orphan favorites: {e}")
+            return []
+
+    def move_favorite_to_project(self, favorite_id: str, project_uuid: str) -> bool:
+        """Move any favorite under ``project_uuid`` (adopting an orphan into this project).
+
+        Unknown id: False. The live list follows when either side is this project.
+        """
+        if not self._initialized:
+            raise FavoritesNotInitialized("FavoritesManager.move_favorite_to_project called before set_database")
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self._db_path)
+            cursor = conn.cursor()
+            cursor.execute("UPDATE fm_favorites SET project_uuid = ?, updated_at = ? WHERE id = ?",
+                           (project_uuid, datetime.now().isoformat(), favorite_id))
+            moved = cursor.rowcount > 0
+            conn.commit()
+            conn.close()
+            if moved:
+                if self._project_uuid:
+                    self._load_favorites()
+                else:
+                    self._favorites.pop(favorite_id, None)
+            return moved
+        except Exception as e:
+            logger.error(f"Failed to move favorite {favorite_id}: {e}")
+            raise FavoritePersistenceError("move_favorite_to_project", e) from e
+
+    def delete_orphan_favorite(self, favorite_id: str) -> bool:
+        """Delete any favorite by id, whatever project holds it (orphans are in no live list)."""
+        if not self._initialized:
+            raise FavoritesNotInitialized("FavoritesManager.delete_orphan_favorite called before set_database")
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self._db_path)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM fm_favorites WHERE id = ?", (favorite_id,))
+            deleted = cursor.rowcount > 0
+            conn.commit()
+            conn.close()
+            self._favorites.pop(favorite_id, None)
+            return deleted
+        except Exception as e:
+            logger.error(f"Failed to delete favorite {favorite_id}: {e}")
+            raise FavoritePersistenceError("delete_orphan_favorite", e) from e
 
     @property
     def count(self) -> int:
@@ -870,9 +949,11 @@ class FavoritesManager:
             raise FavoritesNotInitialized("FavoritesManager.replace_project_favorites called before set_database")
         import sqlite3
         conn = sqlite3.connect(self._db_path)
+        written = []
         try:
             with conn:
                 conn.execute("DELETE FROM fm_favorites WHERE project_uuid = ?", (self._project_uuid,))
+                seen = set()
                 for favorite in favorites:
                     favorite.id = favorite.id or str(uuid.uuid4())
                     # An id another project of this computer has (a copy of the .qgz, a project saved under another
@@ -883,6 +964,15 @@ class FavoritesManager:
                                          (favorite.id, self._project_uuid)).fetchone()
                     if taken:
                         favorite.id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{self._project_uuid}/{favorite.id}"))
+                    # Two rows for the same id (an unsaved edit of a copy: the stored row derives the id the
+                    # edited local one carries): the first one wins, the saved version of the file. Without this
+                    # the sync failed (UNIQUE constraint failed: fm_favorites.id) and never healed (audit of
+                    # 2026-11-24 #1).
+                    if favorite.id in seen:
+                        logger.warning(f"Favorite {favorite.name!r} not written: another favorite of the project"
+                                       f" already has its id ({favorite.id})")
+                        continue
+                    seen.add(favorite.id)
                     favorite.created_at = favorite.created_at or datetime.now().isoformat()
                     favorite.updated_at = favorite.updated_at or favorite.created_at
                     conn.execute("""
@@ -900,13 +990,14 @@ class FavoritesManager:
                         json.dumps(favorite.spatial_config) if favorite.spatial_config else None,
                         favorite.owner,
                     ))
+                    written.append(favorite)
         except Exception as e:
             logger.error(f"Failed to replace the favorites of the project: {e}")
             raise FavoritePersistenceError("replace_project_favorites", e) from e
         finally:
             conn.close()
-        self._favorites = {favorite.id: favorite for favorite in favorites}
-        logger.info(f"✓ {len(favorites)} favorite(s) of the project file in the database")
+        self._favorites = {favorite.id: favorite for favorite in written}
+        logger.info(f"✓ {len(written)} favorite(s) of the project file in the database")
 
     def known_file_ids(self) -> List[str]:
         """The ids of the favorites the file of the active project held when this computer last read or saved it."""

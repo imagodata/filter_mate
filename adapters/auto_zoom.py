@@ -103,6 +103,12 @@ def zoom_layers_for_filter(source_layer, target_layers=(), source_filtered: bool
 
 
 def _layer_extent(layer: QgsVectorLayer, dockwidget: Any = None) -> Optional[QgsRectangle]:
+    """The extent of ``layer`` in its own CRS, None when it has none.
+
+    A degenerate extent (one point, points on a line: ``isEmpty()`` but not
+    null) is kept: the caller centers on it. Only a null extent (no feature
+    ever gave one) is no extent.
+    """
     try:
         layer.updateExtents()
     except (RuntimeError, AttributeError):
@@ -111,15 +117,44 @@ def _layer_extent(layer: QgsVectorLayer, dockwidget: Any = None) -> Optional[Qgs
     if dockwidget is not None and hasattr(dockwidget, 'get_filtered_layer_extent'):
         try:
             ext = dockwidget.get_filtered_layer_extent(layer)
-            if ext is not None and not ext.isEmpty():
+            if ext is not None and not ext.isNull():
                 return ext
         except (RuntimeError, AttributeError, TypeError):
             pass
 
     try:
         ext = layer.extent()
-        return ext if ext is not None and not ext.isEmpty() else None
+        return ext if ext is not None and not ext.isNull() else None
     except (RuntimeError, AttributeError):
+        return None
+
+
+def _to_canvas_crs(ext: QgsRectangle, layer: QgsVectorLayer, canvas_crs: Any) -> Optional[QgsRectangle]:
+    """The extent in the CRS of the map.
+
+    The canvas zooms in its own CRS: an extent left in the CRS of the layer
+    sends the map off the data as soon as the two differ (audit of 2026-11-24:
+    a layer in EPSG:4326 in a project in EPSG:2154). None when the extent
+    cannot be placed on the map (unreadable CRS, failed transform).
+    """
+    try:
+        layer_crs = layer.crs()
+    except (RuntimeError, AttributeError):
+        return None
+    if canvas_crs is None or layer_crs is None:
+        return ext
+    try:
+        same = layer_crs == canvas_crs
+    except (RuntimeError, AttributeError):
+        same = False
+    if same:
+        return ext
+    try:
+        from qgis.core import QgsCoordinateTransform, QgsProject
+        transform = QgsCoordinateTransform(layer_crs, canvas_crs, QgsProject.instance().transformContext())
+        return transform.transformBoundingBox(ext)
+    except Exception as exc:
+        logger.warning(f"Auto-zoom: extent not transformable to the canvas CRS: {exc}")
         return None
 
 
@@ -150,8 +185,9 @@ def auto_zoom_to_filtered(
             newer subset (typically a favorite apply) already drove the
             canvas to a different extent and this stale zoom would clobber
             it.
-        grow_by: Distance (layer units) to grow the final extent by, e.g. the
-            buffer of a spatial cascade when only the source layer is passed.
+        grow_by: Distance (each layer's own units) to grow each extent by
+            before placing it on the map, e.g. the buffer of a spatial
+            cascade when only the source layer is passed.
 
     Returns:
         True when a zoom was performed or a remote extent read was queued.
@@ -203,6 +239,12 @@ def auto_zoom_to_filtered(
         queue_union_zoom(vectors, canvas, expected_token, grow_by)
         return True  # The cancellable zoom was scheduled.
 
+    try:
+        map_settings = canvas.mapSettings() if hasattr(canvas, "mapSettings") else None
+        canvas_crs = map_settings.destinationCrs() if map_settings is not None else None
+    except (RuntimeError, AttributeError):
+        canvas_crs = None
+
     extents = []
     for layer in valid_layers:
         try:
@@ -212,8 +254,15 @@ def auto_zoom_to_filtered(
 
         if global_enabled or _is_tracking(layer_id, project_layers):
             ext = _layer_extent(layer, dockwidget)
-            if ext is not None:
-                extents.append(ext)
+            if ext is None:
+                continue
+            if grow_by and grow_by > 0:
+                grown = QgsRectangle(ext)  # a copy: the dockwidget may hand out a cached extent
+                grown.grow(grow_by)
+                ext = grown
+            placed = _to_canvas_crs(ext, layer, canvas_crs)
+            if placed is not None:
+                extents.append(placed)
 
     if not extents:
         canvas.refresh()
@@ -224,11 +273,15 @@ def auto_zoom_to_filtered(
         union.combineExtentWith(ext)
 
     if union.isEmpty():
-        canvas.refresh()
-        return False
-
-    if grow_by and grow_by > 0:
-        union.grow(grow_by)
+        # One point, or points on a line: center on it with a pixel margin, as EXPLORING does
+        # (exploring_controller._zoom_canvas_to). Before, there was no zoom at all, and the buffer margin
+        # (grow_by) never enlarged the view: it was applied after this check (audit of 2026-11-24).
+        try:
+            margin = canvas.mapUnitsPerPixel() * 25 if hasattr(canvas, "mapUnitsPerPixel") else 0
+        except (RuntimeError, AttributeError, TypeError):
+            margin = 0
+        if margin and margin > 0:
+            union.grow(margin)
 
     canvas.zoomToFeatureExtent(union)
     logger.debug(

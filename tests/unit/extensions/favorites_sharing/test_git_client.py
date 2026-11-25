@@ -105,6 +105,18 @@ class TestGitClient:
         assert result.ok
         assert "already cloned" in result.stdout
 
+    def test_add_remote_url_where_set_url_fails(self, tmp_path, seeded_remote):
+        """Audit of 2026-11-24: set-url on a clone without origin failed every publish."""
+        dest = tmp_path / "clone"
+        dest.mkdir()
+        _run(["git", "init", str(dest)])
+        client = GitClient(cwd=str(dest))
+        assert client.get_remote_url("origin") == ""
+        with pytest.raises(GitError):
+            client.set_remote_url(str(seeded_remote), "origin")
+        assert client.add_remote_url(str(seeded_remote), "origin").ok
+        assert client.get_remote_url("origin") == str(seeded_remote)
+
     def test_pull_ff_only_on_diverged_history_raises(self, tmp_path, seeded_remote):
         """A fast-forward refusal must surface as GitError (no auto-merge)."""
         # Clone A, make a local divergent commit

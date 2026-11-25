@@ -95,6 +95,44 @@ def main():
         "+lon_0=179" in row["crs"] or "+lon_0=-179" in row["crs"] or "+lon_0=180" in row["crs"] or
         "+lon_0=-180" in row["crs"] for row in islands["suggestions"]), islands["suggestions"])
 
+    # --- audit of 2026-11-24 (lot 5): border towns get their own country first, a visible XYZ base does not
+    # place the data.
+    for name, wkt in (("strasbourg", "POLYGON((7.6 48.5, 7.9 48.5, 7.9 48.65, 7.6 48.65, 7.6 48.5))"),
+                      ("lille", "POLYGON((2.9 50.55, 3.2 50.55, 3.2 50.7, 2.9 50.7, 2.9 50.55))"),
+                      ("corse", "POLYGON((8.5 41.3, 9.6 41.3, 9.6 43.0, 8.5 43.0, 8.5 41.3))")):
+        memory_layer(name, "EPSG:4326", [wkt])
+        project.layerTreeRoot().findLayer(
+            project.mapLayersByName(name)[0].id()).setItemVisibilityChecked(False)
+        got = [row["crs"] for row in project_control.suggest_crs([name])["suggestions"]]
+        check(f"{name}: its own country first, with EPSG:2154", got[0] == "EPSG:2154" and "EPSG:2154" in got,
+              got[:3])
+    import threading
+    import check_stream_extent_clip as backdrops
+    from http.server import ThreadingHTTPServer
+    from qgis.core import QgsRasterLayer
+    tiles = ThreadingHTTPServer(("127.0.0.1", 0), backdrops.MapHandler)
+    threading.Thread(target=tiles.serve_forever, daemon=True).start()
+    fond = QgsRasterLayer(f"type=xyz&url=http://127.0.0.1:{tiles.server_port}/fond/{{z}}/{{x}}/{{y}}.png"
+                          "&zmin=0&zmax=2&crs=EPSG:3857", "fond", "wms")
+    project.addMapLayer(fond)
+    check("the XYZ base is valid with a world extent", fond.isValid() and not fond.extent().isNull(),
+          (fond.isValid(), fond.extent().toString() if fond.isValid() else ""))
+    root = project.layerTreeRoot()
+    hidden = []
+    for name in ("fidji", "strasbourg", "lille", "corse"):
+        for layer in project.mapLayersByName(name):
+            node = root.findLayer(layer.id())
+            if node is not None and node.isVisible():
+                node.setItemVisibilityChecked(False)
+                hidden.append(node)
+    try:
+        shown = [row["crs"] for row in project_control.suggest_crs()["suggestions"]]
+    finally:
+        for node in hidden:
+            node.setItemVisibilityChecked(True)
+    check("a visible XYZ base does not place the data: Toulouse still first", shown[0] == "EPSG:2154", shown[:3])
+    tiles.shutdown()
+
     recorder = EffectsRecorder()
     recorder.before_call(ToolCallPart("p1", "set_project_crs", {"crs": made}))
     answer = project_control.set_project_crs(made)

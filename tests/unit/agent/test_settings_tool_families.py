@@ -62,3 +62,12 @@ def test_families_are_saved_under_the_new_key(fake_qgs_settings):
     assert fake_qgs_settings["filter_mate/agent/offer_tools_by_task"] is False
     assert "filter_mate/agent/tool_families" not in fake_qgs_settings
     assert agent_settings.load_settings().tool_families is False
+
+
+def test_the_request_history_is_kept_by_default_and_turned_off_on_demand(fake_qgs_settings):
+    """2026-11-24: the log of every project is in clear in the settings of QGIS, with no way to turn it off."""
+    assert agent_settings.AgentSettings().keep_request_history is True
+    assert agent_settings.load_settings().keep_request_history is True
+    agent_settings.save_settings(agent_settings.AgentSettings(keep_request_history=False))
+    assert fake_qgs_settings["filter_mate/agent/keep_request_history"] is False
+    assert agent_settings.load_settings().keep_request_history is False

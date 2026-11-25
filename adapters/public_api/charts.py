@@ -15,7 +15,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 from ...core.agent.charts import (
     BAR, HISTOGRAM, LINE, PIE, ChartError, ChartRequest, category_values, histogram_values, line_values,
-    scatter_values,
+    pie_slices, scatter_values,
 )
 
 logger = logging.getLogger("FilterMate.agent")
@@ -111,6 +111,11 @@ def read_data(request: ChartRequest, others: str, empty: str) -> Tuple[List[Dict
         rows = list(_rows(layer, [category, value]))
         data = category_values(rows, request.aggregate, request.limit, request.sort, others, empty)
         meta.update(features=len(rows), points=len(data))
+        if kind == PIE:
+            data, left_out = pie_slices(data)
+            if left_out:
+                meta["dropped"] = True
+                meta["dropped_note"] = (f"{left_out} negative slice(s) left out: a pie draws shares above zero only")
     elif kind == HISTOGRAM:
         number = _index(layer, request.field, numeric=True)
         values = [row[0] for row in _rows(layer, [number])]
@@ -194,8 +199,7 @@ def add_to_layout(layout_name: str, svg: str, arguments: Dict[str, Any], aspect:
     title = arguments.get("title") or arguments.get("kind", "")
     item.setId(f"{ITEM_PREFIX}: {title}"[:100])
     item.setPicturePath(_embedded(svg), _svg_format())
-    item.setResizeMode(QgsLayoutItemPicture.ResizeMode.Zoom if hasattr(QgsLayoutItemPicture, "ResizeMode")
-                       else QgsLayoutItemPicture.Zoom)
+    item.setResizeMode(QgsLayoutItemPicture.ResizeMode.Zoom)
     item.setCustomProperty(PROPERTY, json.dumps(arguments, ensure_ascii=False))
     layout.addLayoutItem(item)
     item.attemptMove(QgsLayoutPoint(left, top, _mm()))

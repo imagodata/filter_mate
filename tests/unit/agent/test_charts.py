@@ -132,3 +132,37 @@ def test_cleaning_leaves_elementtree_as_it_was():
     charts.sanitize_svg(SVG + '<text x="1">a</text></svg>')
     assert dict(ElementTree._namespace_map) == before
     assert charts.sanitize_svg(SVG + "<rect/></svg>").startswith('<svg xmlns="http://www.w3.org/2000/svg"')
+
+
+def test_a_category_called_like_the_nulls_or_the_rest_is_not_merged():
+    pairs = [("(empty)", 5), (None, 7), ("Others", 3), ("b", 1)]
+    bars = charts.category_values(pairs, "sum", 10, "value", "Others", "(empty)")
+    by_label = {bar["label"]: bar["value"] for bar in bars}
+    assert by_label["(empty)"] == 5.0 and by_label['"(empty)"'] == 7.0  # the data verbatim, the NULLs quoted
+    assert by_label["Others"] == 3.0 and not any(bar["others"] for bar in bars if bar["label"] == "Others")
+
+
+def test_the_rest_is_quoted_when_a_category_is_called_like_it():
+    pairs = [("Others", 10), ("a", 9), ("b", 8)]
+    bars = charts.category_values(pairs, "sum", 2, "value", "Others", "(empty)")
+    assert bars[0]["label"] == "Others" and not bars[0]["others"]
+    assert bars[-1] == {"label": '"Others"', "value": 8.0, "others": True}
+
+
+def test_rows_honor_the_aggregate_of_the_request():
+    rows = [{"label": "a", "value": 4}, {"label": "a", "value": 6}, {"label": "b", "value": 100}]
+    summed = charts.rows_data(parse_request({"kind": "bar", "rows": rows}), "O", "E")
+    assert [bar["value"] for bar in summed[0]] == [100.0, 10.0]  # the default adds the values up
+    averaged = charts.rows_data(parse_request({"kind": "bar", "rows": rows, "aggregate": "mean"}), "O", "E")
+    assert [bar["value"] for bar in averaged[0]] == [100.0, 5.0]
+    counted = charts.rows_data(parse_request({"kind": "bar", "rows": rows, "aggregate": "count"}), "O", "E")
+    assert [bar["value"] for bar in counted[0]] == [2.0, 1.0]
+
+
+def test_a_pie_says_which_negative_slices_it_leaves_out():
+    rows = [{"label": "a", "value": 5}, {"label": "b", "value": -2}, {"label": "c", "value": 0}]
+    data, meta = charts.rows_data(parse_request({"kind": "pie", "rows": rows}), "O", "E")
+    assert meta["dropped"] and "1 negative slice(s)" in meta["dropped_note"]
+    assert [bar["label"] for bar in data] == ["a", "c", "b"]  # the data stays whole for the answer
+    with pytest.raises(ChartError, match="no slice is above zero"):
+        charts.rows_data(parse_request({"kind": "pie", "rows": [{"label": "x", "value": -1}]}), "O", "E")

@@ -11,6 +11,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import shutil
 import tempfile
 import zipfile
@@ -123,6 +124,10 @@ def zoom_to(layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: 
     return {'extent_wkt': canvas.extent().asWktPolygon(), 'scale': canvas.scale()}
 
 
+_GRID_ADDRESS = re.compile(r'(?:://|/vsi[a-z]*[/\\]|\\)|=\s*/', re.IGNORECASE)
+"""A CRS definition naming a grid to download (an address, /vsicurl/...) or to read (a file path, a UNC share)."""
+
+
 def crs_definition(crs) -> str:
     """What brings ``crs`` back: its authid, or ``WKT:`` and its WKT for a CRS of its own."""
     return crs.authid() or ('WKT:' + crs.toWkt()) if crs.isValid() else ''
@@ -142,7 +147,8 @@ def set_project_crs(crs: str) -> Dict[str, Any]:
     layer of the project whose CRS is taken.
 
     Raises:
-        ValueError: A CRS QGIS does not know, or a layer with none.
+        ValueError: A CRS QGIS does not know, a layer with none, or a definition naming a grid by its address or
+            its file (give an authid, which downloads nothing and reads no file).
     """
     from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsUnitTypes
     text = str(crs or '').strip()
@@ -152,6 +158,12 @@ def set_project_crs(crs: str) -> Dict[str, Any]:
     if layer is not None:
         target = layer.crs()
     else:
+        if _GRID_ADDRESS.search(text):
+            # A PROJ or WKT definition can name a grid by its address (/vsicurl/https://...) or its file
+            # (+nadgrids=/...): QGIS would download or read it at the first transform, without asking (audit of
+            # 2026-11-24). An authid needs neither.
+            raise ValueError(f"{text[:60]!r} names a grid by its address or its file: give an authid such as "
+                             "EPSG:2154 (Lambert-93) or EPSG:4326 (WGS 84), or a layer of the project")
         target = QgsCoordinateReferenceSystem(f"EPSG:{text}" if text.isdigit() else text)
     if not target.isValid():
         raise ValueError(f"{text!r} is no CRS QGIS knows: give an authid such as EPSG:2154 (Lambert-93) or "
@@ -160,13 +172,40 @@ def set_project_crs(crs: str) -> Dict[str, Any]:
     previous = project.crs()
     project.setCrs(target)
     units = QgsUnitTypes.toString(target.mapUnits())
-    return {'crs': target.authid() or target.description(), 'description': target.description(),
+    # A CRS of its own (a PROJ: string suggest_crs made) has no authid: echo what was asked, never ''.
+    named = target.authid() or target.description() or (text if len(text) <= 80 else text[:80] + '…')
+    return {'crs': named, 'description': target.description(),
             'units': units, 'geographic': bool(target.isGeographic()),
             'previous': previous.authid() or previous.description() if previous.isValid() else '',
             'note': 'The map follows the CRS of the project; layers in other CRS are reprojected on the fly.'}
 
 
 MAX_FEATURES_READ = 20_000  # per layer, for the longitudes of its features; beyond, its extent
+
+
+def _spans_antimeridian(box) -> bool:
+    """Whether the box in degrees touches both -180 and 180: only then are the parts read one by one (a
+    multipart across the antimeridian spans the whole circle: Fiji)."""
+    try:
+        return box.xMinimum() <= -179.0 and box.xMaximum() >= 179.0
+    except (RuntimeError, AttributeError):
+        return True
+
+
+def _is_backdrop(layer) -> bool:
+    """A rendered backdrop (XYZ tiles, WMS/WMTS, vector tiles): its world-wide extent must not place the data
+    (audit of 2026-11-24: a visible XYZ base gave the world, and a layer at Toulouse was offered Robinson)."""
+    try:
+        provider = (layer.providerType() or "").lower()
+    except (RuntimeError, AttributeError):
+        return False
+    if provider in ("wms", "wmts", "vectortile", "xyz", "arcgismapserver"):
+        return True
+    try:
+        source = layer.source() or ""
+    except (RuntimeError, AttributeError):
+        return False
+    return "type=xyz" in source.lower()
 
 
 def longitude_span(intervals: List[Tuple[float, float]]) -> Tuple[float, float]:
@@ -204,8 +243,10 @@ def _bounds_in_degrees(layers: Optional[List[str]] = None) -> Tuple[List[float],
         chosen.append(layer)
     origin = 'layers'
     if not chosen:
-        chosen = [node.layer() for node in project.layerTreeRoot().findLayers()
-                  if node.isVisible() and node.layer() is not None and node.layer().crs().isValid()]
+        shown = [node.layer() for node in project.layerTreeRoot().findLayers()
+                 if node.isVisible() and node.layer() is not None and node.layer().crs().isValid()]
+        data = [layer for layer in shown if not _is_backdrop(layer)]
+        chosen = data or shown  # backdrops alone: their extent is all there is, as the map view would give
         origin = 'layers shown'
     intervals: List[Tuple[float, float]] = []
     south, north = 90.0, -90.0
@@ -223,14 +264,27 @@ def _bounds_in_degrees(layers: Optional[List[str]] = None) -> Tuple[List[float],
             continue
         try:
             transform = QgsCoordinateTransform(layer.crs(), wgs84, project)
-            if isinstance(layer, QgsVectorLayer) and 0 <= layer.featureCount() <= MAX_FEATURES_READ:
+            box = transform.transformBoundingBox(layer.extent())
+            subset, count = "", -1
+            if isinstance(layer, QgsVectorLayer):
+                try:
+                    layer.updateExtents()
+                    box = transform.transformBoundingBox(layer.extent())
+                    subset = layer.subsetString() or ""
+                    count = layer.featureCount()
+                except (RuntimeError, AttributeError):
+                    pass
+            if isinstance(layer, QgsVectorLayer) and 0 <= count <= MAX_FEATURES_READ and (
+                    subset or _spans_antimeridian(box)):
+                # The span of the features kept with a filter, and part by part across the antimeridian.
+                # Otherwise the extent does: reading 20,000 features cost 4.8 s a layer (audit of 2026-11-24).
                 request = QgsFeatureRequest().setNoAttributes().setLimit(MAX_FEATURES_READ)
                 for feature in layer.getFeatures(request):
-                    if feature.hasGeometry():  # part by part: a multipart across the antimeridian spans -180..180
+                    if feature.hasGeometry():
                         for part in feature.geometry().constParts():
                             add(transform.transformBoundingBox(part.boundingBox()))
             else:
-                add(transform.transformBoundingBox(layer.extent()))
+                add(box)
         except Exception:  # nosec B112 - a layer or a feature that cannot be transformed counts for nothing
             continue
     if not intervals:  # nothing with an extent: the view

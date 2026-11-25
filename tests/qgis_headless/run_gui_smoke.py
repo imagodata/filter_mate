@@ -1314,6 +1314,17 @@ def picker_rows():
     return single_picker().findChild(QComboBox).count()
 
 
+def multiple_visible_rows():
+    """Rows the multiple selection list shows. The link expression filters the rows read, not only the stored
+    filter text (audit of 2026-11-24: "name" LIKE 'east%' left the four rows displayed)."""
+    widget = dock().widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+    try:
+        visible = widget.currentVisibleFeatures()
+    except Exception:
+        return None
+    return len(visible) if isinstance(visible, (list, tuple)) else None
+
+
 def picked_fid():
     feature = single_picker().feature()
     return feature.id() if feature.isValid() else None
@@ -1795,6 +1806,9 @@ def s_custom_matching_nothing_check():
     check('a custom expression matching nothing filters the single selection list with linking on, once left too',
           single_picker().filterExpression() == expected,
           f"linking={linking} filter={single_picker().filterExpression()!r} rows={picker_rows()}")
+    if linking:
+        check('a custom expression matching nothing empties the multiple selection list too',
+              multiple_visible_rows() == 0, f"multiple rows={multiple_visible_rows()}")
     dock().mFieldExpressionWidget_exploring_custom_selection.setField('label')
 
 

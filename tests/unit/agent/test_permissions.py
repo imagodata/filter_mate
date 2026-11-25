@@ -103,11 +103,14 @@ class TestLevels:
 
     @pytest.mark.parametrize("level", LEVELS)
     def test_the_agent_own_notes_and_history_run_at_every_level(self, level):
+        """Decided with the user on 2026-11-24 (audit, lot 4): undoing a step, the recipes and the notes of the
+        project are asked in Ask and Plan (the advisor level), run elsewhere. Only ask_user changes nothing."""
         policy = PermissionPolicy(level)
         own = [tool for tool in CHAT_ONLY if tool.name in AGENT_OWN]
         assert {tool.name for tool in own} == AGENT_OWN
         for tool in own:
-            assert policy.verdict(tool) == RUN
+            expected = ASK if level == ADVISOR and tool.name != "ask_user" else RUN
+            assert policy.verdict(tool) == expected, (level, tool.name)
 
     def test_the_expert_code_and_the_image_of_the_map(self):
         tools = {tool.name: tool for tool in CHAT_ONLY}

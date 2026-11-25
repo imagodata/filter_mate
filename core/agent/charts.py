@@ -169,7 +169,9 @@ def parse_request(arguments: Dict[str, Any]) -> ChartRequest:
         raise ChartError("a chart needs a layer (read by FilterMate as filtered now) or rows")
     if len(rows) > MAX_ROWS:
         raise ChartError(f"rows holds {MAX_ROWS} objects at most: draw from the layer instead")
-    aggregate = arguments.get("aggregate") or "count"
+    # Rows already hold the numbers to draw: their values add up unless another aggregate is asked (a count counts
+    # the rows of a label). A layer counts its features unless told otherwise.
+    aggregate = arguments.get("aggregate") or ("sum" if rows else "count")
     if aggregate not in AGGREGATES:
         raise ChartError(f"aggregate is one of {', '.join(AGGREGATES)}")
     sort = arguments.get("sort") or "value"
@@ -259,16 +261,32 @@ def label_of(value: Any, empty: str) -> str:
     return str(value)
 
 
+def unique_label(label: str, taken: Iterable[str]) -> str:
+    """``label``, quoted until it names nothing taken: a category of the data is written as it is, even called what
+    NULLs or the rest are called; the synthetic bar is quoted instead, never merged (audit of 2026-11-24)."""
+    while label in taken:
+        label = f'"{label}"'
+    return label
+
+
 def category_values(pairs: Iterable[Tuple[Any, Any]], aggregate: str, limit: int, sort: str,
                     others: str, empty: str) -> List[Dict[str, Any]]:
     """``(category, number)`` pairs as bars ``{label, value, others}``: the ``limit`` largest, then one for the rest.
 
     The rest is the same aggregate over the features of the other categories (a count or a sum adds up; a mean, a min
-    or a max of the rest is that of their features, never of the bars)."""
-    groups: Dict[str, List[Optional[float]]] = {}
+    or a max of the rest is that of their features, never of the bars). Categories of the data keep their label; the
+    bar of NULLs and the bar of the rest are quoted when a category is called the same.
+    """
+    groups: Dict[Tuple[bool, str], List[Optional[float]]] = {}
     for category, value in pairs:
-        groups.setdefault(label_of(category, empty), []).append(_finite(value))
-    reduced = [(label, _reduce(values, aggregate), values) for label, values in groups.items()]
+        key = (True, empty) if category is None else (False, label_of(category, empty))
+        groups.setdefault(key, []).append(_finite(value))
+    taken = {label for is_null, label in groups if not is_null}
+    displays = {}
+    for is_null, label in groups:
+        displays[(is_null, label)] = unique_label(label, taken) if is_null else label
+        taken.add(displays[(is_null, label)])
+    reduced = [(displays[key], _reduce(values, aggregate), values) for key, values in groups.items()]
     reduced = [item for item in reduced if item[1] is not None]
     reduced.sort(key=lambda item: (-item[1], item[0]))
     kept, rest = reduced[:limit], reduced[limit:]
@@ -282,7 +300,7 @@ def category_values(pairs: Iterable[Tuple[Any, Any]], aggregate: str, limit: int
     if rest:
         value = _reduce([number for _, _, values in rest for number in values], aggregate)
         if value is not None:
-            bars.append({"label": others, "value": value, "others": True})
+            bars.append({"label": unique_label(others, taken), "value": value, "others": True})
     return bars
 
 
@@ -360,9 +378,23 @@ def scatter_values(triples: Sequence[Tuple[Any, Any, Any]], others: str,
         points = [points[int(index * step)] for index in range(MAX_POINTS)]
     names = [label_of(series, empty) if series is not None else "" for _, _, series in points]
     kept, _ = _series_kept(names, MAX_SERIES[SCATTER])
-    dots = [{"x": x, "y": y, "series": name if name in kept else others}
+    # A series of the data called what the left-out series are called keeps its name; the left-out are quoted.
+    left_out = unique_label(others, set(names))
+    dots = [{"x": x, "y": y, "series": name if name in kept else left_out}
             for (x, y, _), name in zip(points, names)]
     return dots, total
+
+
+def pie_slices(bars: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
+    """Bars as the slices of a pie: how many negative ones the template leaves out (a slice needs a share above
+    zero); the data stays as it is, the answer says what the drawing drops (audit of 2026-11-24).
+
+    Raises:
+        ChartError: No slice above zero: nothing to draw.
+    """
+    if not any(bar["value"] > 0 for bar in bars):
+        raise ChartError("no slice is above zero: a pie shows shares of a whole, not losses or nothing")
+    return bars, sum(1 for bar in bars if bar["value"] < 0)
 
 
 def rows_data(request: ChartRequest, others: str, empty: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
@@ -376,9 +408,15 @@ def rows_data(request: ChartRequest, others: str, empty: str) -> Tuple[List[Dict
             if value is None or "label" not in row:
                 raise ChartError("each row of a bar or pie chart holds label and a number value")
             pairs.append((row["label"], value))
-        aggregate = "sum"  # one row per label: its value; two rows of a label add up
-        data = category_values(pairs, aggregate, request.limit, request.sort, others, empty)
-        return data, {"points": len(data)}
+        # The aggregate of the request, not always a sum: two rows of a label add up, average out, and so on.
+        data = category_values(pairs, request.aggregate, request.limit, request.sort, others, empty)
+        meta: Dict[str, Any] = {"points": len(data)}
+        if kind == PIE:
+            data, left_out = pie_slices(data)
+            if left_out:
+                meta["dropped"] = True
+                meta["dropped_note"] = (f"{left_out} negative slice(s) left out: a pie draws shares above zero only")
+        return data, meta
     if kind == HISTOGRAM:
         values = [row.get("value") for row in rows]
         if not any(_finite(value) is not None for value in values):
@@ -577,7 +615,8 @@ def summary(chart: Chart, data: List[Dict[str, Any]], share_values: bool) -> Dic
     if chart.code:
         answer["code"] = True
     if chart.meta.get("dropped"):
-        answer["note"] = "some series or points were left out: the chart shows the largest ones"
+        answer["note"] = chart.meta.get("dropped_note") or \
+            "some series or points were left out: the chart shows the largest ones"
     if share_values and request.layer:
         answer["data"] = data[:40]
     return answer

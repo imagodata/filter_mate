@@ -323,6 +323,11 @@ Do you agree?</source>
         <translation>Σταματήστε το αίτημα ή περιμένετε να ολοκληρωθεί για να ανοίξετε τις ρυθμίσεις.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Ένα αίτημα εκτελείται ήδη: περιμένετε να τελειώσει ή σταματήστε το.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Δεν ήταν δυνατή η αποθήκευση της μνήμης: {}</translation>
@@ -2025,6 +2030,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Να κρατούνται σημειώσεις από το ένα έργο στο επόμενο</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Διατήρηση των αιτημάτων κάθε έργου</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Η καρτέλα Όλα τα έργα του ιστορικού: τι ζητήθηκε, πού και πότε, διατηρείται σε αυτόν τον υπολογιστή.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Separate multiple tags with commas.</source>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Το όνομα δεν μπορεί να είναι κενό.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Αυτό το έργο είναι μόνο για ανάγνωση: η αλλαγή διατηρείται μόνο για αυτήν τη συνεδρία.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Folder: {6}</source>
         <translation>Η υπηρεσία διαβάστηκε για {0:.0f} s, το μέγιστο επιτρεπόμενο: το αντίγραφο περιέχει {1} οντότητες και δεν είναι πλήρες.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Η υπηρεσία ανακοίνωσε {0} οντότητες, αλλά διαβάστηκαν μόνο {1}: το αντίγραφο δεν είναι πλήρες.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Οι όροι του {0} απαγορεύουν τη διατήρηση των πλακιδίων του: αυτό το επίπεδο δεν αντιγράφεται. Άλλος χάρτης υποβάθρου μπορεί να αντιγραφεί (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Folder: {6}</source>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>δεν ήταν δυνατή η ανάγνωση της υπηρεσίας μέχρι το τέλος: δεν κρατήθηκε τίποτα</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>το τοπικό αντίγραφο δεν ήταν δυνατό να γραφτεί (ο δίσκος μπορεί να είναι γεμάτος): δεν κρατήθηκε τίποτα</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>η υπηρεσία δεν έδωσε κανένα στοιχείο πάνω από τον ορατό χάρτη, ή η απάντησή της δεν ήταν δυνατό να διαβαστεί: δεν κρατήθηκε τίποτα</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

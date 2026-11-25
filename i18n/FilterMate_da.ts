@@ -323,6 +323,11 @@ Er du enig?</translation>
         <translation>Stop forespørgslen, eller vent til den er færdig, for at åbne indstillingerne.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>En anmodning kører allerede: vent på, at den slutter, eller stop den.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Hukommelsen kunne ikke gemmes: {}</translation>
@@ -2025,6 +2030,16 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Gem noter fra ét projekt til det næste</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Gem anmodninger fra hvert projekt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Fanen Alle projekter i historikken: hvad der blev spurgt om, hvor og hvornår, gemt på denne computer.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Adskil flere tags med kommaer.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Navnet må ikke være tomt.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Dette projekt er skrivebeskyttet: ændringen gemmes kun for denne session.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Mappe: {6}</translation>
         <translation>Tjenesten blev læst i {0:.0f} s, det maksimalt tilladte: kopien indeholder {1} objekter og er ikke komplet.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Tjenesten meldte {0} objekter, men kun {1} blev læst: kopien er ikke komplet.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Vilkårene for {0} forbyder at gemme dets fliser: dette lag kopieres ikke. Et andet baggrundskort kan kopieres (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Mappe: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>tjenesten kunne ikke læses til ende: intet blev gemt</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>den lokale kopi kunne ikke skrives (disken er muligvis fuld): intet blev gemt</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>tjenesten gav intet objekt over det synlige kort, eller dens svar kunne ikke læses: intet blev gemt</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

@@ -98,11 +98,13 @@ def settings_written(project: Any = None, layer_id: Optional[str] = None, change
     """
     project = _project(project)
     try:
+        if not changed or not project_file_writable(project):
+            # Nothing written: the version stamp stays as it is (writing it would mark the project modified on
+            # opening, audit of 2026-11-24), and a project that cannot be saved is never marked.
+            return False
         layer = project.mapLayer(layer_id) if layer_id else None
         if layer is not None and layer.customProperty(VERSION_PROPERTY) != VERSION:
             layer.setCustomProperty(VERSION_PROPERTY, VERSION)
-        if not changed or not project_file_writable(project):
-            return False
         project.setDirty(True)
     except (RuntimeError, AttributeError, TypeError) as exc:
         logger.debug(f"Project not marked modified: {exc}")
@@ -150,10 +152,17 @@ def remove_filtermate_variables(layer: Any, names: Optional[Collection[str]] = N
 
 
 def settings_change(layer_id: str, variables: Dict[str, Any], project: Any = None) -> bool:
-    """Writing ``variables`` changes a setting the project carries (not only the form it is stored in)."""
+    """Writing ``variables`` changes a setting the project carries (not only the form it is stored in).
+
+    Stamping a layer that carries no setting yet is no change: this version never wrote its settings, so there is
+    nothing it could alter. Without this, opening a project whose layers have no FilterMate settings yet marked it
+    modified, and QGIS asked to save it although the user changed nothing (audit of 2026-11-24).
+    """
     try:
         layer = _project(project).mapLayer(layer_id)
         if layer is None:
+            return False
+        if layer.customProperty(VERSION_PROPERTY, None) is None and not filtermate_variable_names(layer):
             return False
         return any(is_setting_variable(name) and not same(layer.customProperty(f"{VALUES}{name}"), value, name)
                    for name, value in variables.items())

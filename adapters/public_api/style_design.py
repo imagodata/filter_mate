@@ -33,7 +33,7 @@ MAX_ICONS_LISTED = 12
 def _mm():
     from qgis.core import Qgis, QgsUnitTypes
     unit = getattr(getattr(Qgis, "RenderUnit", None), "Millimeters", None)
-    return unit if unit is not None else QgsUnitTypes.RenderMillimeters
+    return unit if unit is not None else QgsUnitTypes.RenderUnit.RenderMillimeters
 
 
 def _qcolor(text: str, alpha: float = 1.0):

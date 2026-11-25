@@ -15,7 +15,12 @@ SORT_MOST_USED = "most_used"
 
 
 def _name_key(favorite: Any) -> str:
-    return (favorite.name or "").casefold()
+    """The name lowercased; a name that is not text (a shared project file) sorts as its words, not as a crash
+    (audit of 2026-11-24)."""
+    name = favorite.name
+    if not isinstance(name, str):
+        name = "" if name is None else str(name)
+    return name.casefold()
 
 
 def sorted_favorites(favorites: Iterable[Any], sort_key: str = SORT_NAME) -> List[Any]:

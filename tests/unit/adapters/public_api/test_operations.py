@@ -26,7 +26,9 @@ def _load():
                        (".core.services", _ROOT / "core" / "services"), (".adapters", _ROOT / "adapters"),
                        (".adapters.public_api", _ROOT / "adapters" / "public_api"),
                        (".adapters.qgis", _ROOT / "adapters" / "qgis"),
-                       (".adapters.qgis.coverage_layers", _ROOT / "adapters" / "qgis" / "coverage_layers")):
+                       (".adapters.qgis.coverage_layers", _ROOT / "adapters" / "qgis" / "coverage_layers"),
+                       (".infrastructure", _ROOT / "infrastructure"),
+                       (".infrastructure.logging", _ROOT / "infrastructure" / "logging")):
         package = types.ModuleType(_PKG + name)
         package.__path__ = [str(path)]
         sys.modules[_PKG + name] = package

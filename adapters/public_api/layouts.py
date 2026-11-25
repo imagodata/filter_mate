@@ -9,9 +9,11 @@ export root: never a path from the model.
 """
 from __future__ import annotations
 
+import html
 import logging
 import math
 import os
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from .operations import resolve_layer
@@ -230,8 +232,18 @@ MAX_ATLAS_PAGES = 200  # one export on the main thread: beyond, filter the cover
 MAX_ITEMS_LISTED = 60
 
 
+_WINDOWS_RESERVED = frozenset({"CON", "PRN", "AUX", "NUL"}
+                              | {f"COM{index}" for index in range(1, 10)}
+                              | {f"LPT{index}" for index in range(1, 10)})
+
+
 def _safe(text: str, fallback: str) -> str:
-    return ''.join(char if char.isalnum() or char in '-_ ' else '_' for char in str(text)).strip() or fallback
+    """A file stem from ``text``: only letters, digits, ``-_ ``, never empty, never a reserved name of Windows
+    (a layout called CON would write where no file can go: audit of 2026-11-24). Pure (unit tests read it)."""
+    stem = ''.join(char if char.isalnum() or char in '-_ ' else '_' for char in str(text)).strip() or fallback
+    if stem.upper() in _WINDOWS_RESERVED:
+        stem += "_"
+    return stem
 
 
 def tiff_available() -> bool:
@@ -345,13 +357,24 @@ def export_layout(name: str, folder: str, file_format: str = 'pdf', dpi: int = 1
     else:
         result = exporter.exportToImage(path, settings)
     if not _ok(result) or not os.path.isfile(path):
-        raise ValueError(f"the layout could not be exported ({exporter.errorMessage() or result})")
+        from ...infrastructure.logging.redaction import mask_home_dir
+        raise ValueError(f"the layout could not be exported ({mask_home_dir(exporter.errorMessage()) or result})")
     files = [candidate for candidate in written(stem) if os.path.isfile(candidate)]
     answer = {'name': layout.name(), 'format': file_format, 'dpi': int(dpi), 'path': path,
               'bytes': sum(os.path.getsize(item) for item in files)}
     if len(files) > 1:
         answer['files'] = len(files)
     return answer
+
+
+def _atlas_filename_expression(original: str, safe: str) -> str:
+    """The file name each atlas page is exported under: the expression of the atlas without any path in it, and
+    the number of the page when it evaluates to nothing (a NULL or empty name wrote beside the folder, uncounted,
+    over a file that may be there: audit of 2026-11-24). Pure (unit tests read it without QGIS)."""
+    fallback = f"'{safe.replace(chr(39), '_')}_' || lpad(@atlas_featurenumber, 3, '0')"
+    named = original or fallback
+    cleaned = f"replace(replace(replace(to_string({named}), '/', '_'), '\\\\', '_'), ':', '_')"
+    return f"coalesce(nullif(trim({cleaned}), ''), {fallback})"
 
 
 def _export_atlas(layout, folder: str, safe: str, file_format: str, settings, single_file: bool) -> Dict[str, Any]:
@@ -369,12 +392,11 @@ def _export_atlas(layout, folder: str, safe: str, file_format: str, settings, si
         target, index = os.path.join(folder, f"{safe}_atlas_{index}"), index + 1
     os.makedirs(target)
     # The name of each file, made of the expression of the atlas, never a path: QGIS joins it to the folder, and a
-    # name with a / or a .. wrote anywhere on the disk (2026-11-22, review). Put back as it was afterwards: an export
-    # changes nothing of the layout.
+    # name with a / or a .. wrote anywhere on the disk (2026-11-22, review). A name evaluating to nothing for a
+    # page wrote beside the folder, uncounted, over a file that may be there (audit of 2026-11-24): it falls back
+    # to the number of the page. Put back as it was afterwards: an export changes nothing of the layout.
     original = atlas.filenameExpression()
-    named = original or f"'{safe.replace(chr(39), '_')}_' || lpad(@atlas_featurenumber, 3, '0')"
-    atlas.setFilenameExpression(
-        f"replace(replace(replace(to_string({named}), '/', '_'), '\\\\', '_'), ':', '_')")
+    atlas.setFilenameExpression(_atlas_filename_expression(original, safe))
     try:
         return _write_atlas(atlas, target, safe, file_format, settings, single_file, count)
     finally:
@@ -710,6 +732,30 @@ def _check_text(text: str) -> None:
         raise ValueError(f"text: {problem}")
 
 
+_EXPRESSION_PART = re.compile(r"\[%.*?%\]", re.DOTALL)
+
+
+def _label_text(item, text: str) -> str:
+    """The text for a label: outside the [% ... %] the project evaluates, tags and scripts show literally.
+
+    setText reads HTML (scripts included, run under QGIS 3.22 with a request going out unasked) in a label in
+    HTML mode; in a plain one the text goes as it is (audit of 2026-11-24).
+    """
+    try:
+        html_mode = item.mode() in (getattr(type(item), "ModeHtml", 1), 1)
+    except (AttributeError, RuntimeError):
+        html_mode = False
+    if not html_mode:
+        return text
+    parts, cursor = [], 0
+    for match in _EXPRESSION_PART.finditer(text):
+        parts.append(html.escape(text[cursor:match.start()]))
+        parts.append(match.group(0))
+        cursor = match.end()
+    parts.append(html.escape(text[cursor:]))
+    return "".join(parts)
+
+
 def _layers_of(change: Dict[str, Any]) -> List[Any]:
     chosen = []
     for reference in change.get('layers') or []:
@@ -766,7 +812,7 @@ def _edit(layout, change: Dict[str, Any]) -> Dict[str, Any]:
         if do == 'set_text':
             if not isinstance(item, QgsLayoutItemLabel):
                 raise ValueError(f"{ref!r} is not a text")
-            item.setText(_text_of(change))
+            item.setText(_label_text(item, _text_of(change)))
             _font(item, _number(change, 'font_size', 4, 200))
             item.refresh()
             return {'do': do, 'ref': ref}
@@ -940,10 +986,68 @@ def layout_xml(layout) -> str:
     return document.toString()
 
 
+def _finger_map(item) -> list:
+    """What a map shows, as the designer holds it: its layers when it keeps its own set (following the tree is
+    not an edit of the layout), what it frames unless the atlas drives it, its frame and its background."""
+    shown: list = []
+    try:
+        keep = bool(item.keepLayerSet())
+    except (RuntimeError, AttributeError):
+        return shown
+    if keep:
+        try:
+            shown.append(sorted(layer.id() for layer in item.layers()))
+        except (RuntimeError, AttributeError, TypeError):
+            shown.append(None)
+    else:
+        shown.append('tree')
+    try:
+        driven = bool(item.atlasDriven())
+    except (RuntimeError, AttributeError):
+        driven = False
+    if not driven:
+        try:
+            box = item.extent()
+            shown.append([round(value, 4) for value in
+                          (box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum())])
+        except (RuntimeError, AttributeError, TypeError):
+            shown.append(None)
+    try:
+        shown.append(bool(item.frameEnabled()))
+    except (RuntimeError, AttributeError):
+        pass
+    try:
+        if bool(item.backgroundEnabled()):
+            shown.append(item.backgroundColor().name())
+        else:
+            shown.append(False)
+    except (RuntimeError, AttributeError):
+        pass
+    return shown
+
+
+def _finger_text(item) -> list:
+    """What a text holds besides its words: its mode (HTML or not) and its font, which set_text writes."""
+    shown: list = []
+    try:
+        shown.append(int(item.mode()))
+    except (RuntimeError, AttributeError, TypeError, ValueError):
+        pass
+    try:
+        font = item.font()
+        shown.append([str(font.family()), round(float(font.pointSizeF()), 1), bool(font.bold()),
+                      bool(font.italic()), bool(font.underline())])
+    except (RuntimeError, AttributeError, TypeError, ValueError):
+        pass
+    return shown
+
+
 def fingerprint(layout) -> str:
     """What a user changes of a layout in the designer, in a form that a write and a read of its XML keep: each item
-    (uuid, kind, page, place and size to the tenth of a millimetre, its text) and the atlas. Two writes of the XML
-    of one layout differ once it went through readXml (2026-11-22): the XML cannot tell a change of the user."""
+    (uuid, kind, page, place and size to the tenth of a millimetre, its text, and since the audit of 2026-11-24 its
+    frame, the layers a map shows, what it frames, its background, and the mode and font of a text) and the atlas.
+    Two writes of the XML of one layout differ once it went through readXml (2026-11-22): the XML cannot tell a
+    change of the user."""
     import json
     rows = []
     for item in layout_items(layout):
@@ -953,9 +1057,14 @@ def fingerprint(layout) -> str:
         kind = _kind(item)
         # A frame of a table takes the width of its columns again when it is read: its place only.
         sized = kind not in ('table', 'frame')
+        extra: list = []
+        if kind == 'map':
+            extra = _finger_map(item)
+        elif kind == 'text':
+            extra = _finger_text(item)
         rows.append([item.uuid(), kind, item.page(), round(point.x(), 1), round(point.y(), 1),
                      round(size.width(), 1) if sized else None, round(size.height(), 1) if sized else None,
-                     str(text)])
+                     str(text), extra])
     atlas = layout.atlas() if hasattr(layout, 'atlas') else None
     state = []
     if atlas is not None:

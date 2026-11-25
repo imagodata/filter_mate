@@ -323,6 +323,11 @@ Do you agree?</source>
         <translation>Зупиніть запит або дочекайтеся його завершення, щоб відкрити налаштування.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Запит уже виконується: дочекайтеся його завершення або зупиніть його.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Не вдалося зберегти пам'ять: {}</translation>
@@ -2025,6 +2030,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Зберігати нотатки від проєкту до проєкту</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Зберігати запити кожного проєкту</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Вкладка Усі проєкти історії: що запитували, де і коли, зберігається на цьому комп'ютері.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Separate multiple tags with commas.</source>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Назва не може бути порожньою.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Цей проєкт лише для читання: зміна зберігається лише для цього сеансу.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Folder: {6}</source>
         <translation>Сервіс читався {0:.0f} с, це максимально дозволений час: копія містить {1} об'єктів і неповна.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Сервіс заявив {0} об'єктів, але прочитано лише {1}: копія неповна.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Умови {0} забороняють зберігати його тайли: цей шар не копіюється. Іншу підкладку копіювати можна (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Folder: {6}</source>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>не вдалося прочитати сервіс до кінця: нічого не збережено</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>локальну копію не вдалося записати (можливо, диск заповнений): нічого не збережено</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>сервіс не дав жодного об'єкта над видимою картою, або його відповідь не вдалося прочитати: нічого не збережено</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

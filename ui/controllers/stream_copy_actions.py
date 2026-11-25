@@ -362,10 +362,12 @@ class StreamCopyActions:
     @staticmethod
     def _still_the_service(layer, plan) -> bool:
         """Whether ``layer`` is still the service the copy was planned on (main thread, at its end)."""
+        from ...adapters.qgis import stream_copy
         from ...adapters.qgis.coverage_layers.snapshots import registry
         try:
-            return (not registry().is_derived(layer.id())
-                    and layer.providerType().lower() == (plan.provider or '').lower())
+            if registry().is_derived(layer.id()):
+                return False
+            return stream_copy.same_service(layer.source(), layer.providerType(), plan.source, plan.provider)
         except RuntimeError:
             return False
 

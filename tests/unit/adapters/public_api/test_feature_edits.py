@@ -213,6 +213,9 @@ class _Request:
     def setFilterExpression(self, expression):
         return self
 
+    def setExpressionContext(self, context):
+        return self
+
 
 @pytest.fixture(autouse=True)
 def qgis(monkeypatch):
@@ -225,6 +228,8 @@ def qgis(monkeypatch):
         "QgsFeature": _Feature,
         "QgsFeatureRequest": _Request,
         "QgsExpression": lambda text: SimpleNamespace(hasParserError=lambda: False),
+        "QgsExpressionContext": lambda scopes=None: SimpleNamespace(appendScopes=lambda scopes: None),
+        "QgsExpressionContextUtils": SimpleNamespace(globalProjectLayerScopes=lambda layer: []),
         "QgsCoordinateReferenceSystem": lambda text: CRS,
         "QgsCoordinateTransform": lambda *args: None,
         "QgsProject": SimpleNamespace(instance=lambda: None),

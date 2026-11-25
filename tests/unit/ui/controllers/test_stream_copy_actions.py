@@ -48,7 +48,18 @@ class FakeCopy(types.ModuleType):
 
     def plan_copy(self, layer, *args):
         return SimpleNamespace(refusal=self.refusal, summary=lambda: "1000 x 800 pixels", layer_id=layer.id(),
-                               layer_name=layer.name(), folder="/w/etude_filtermate_local", provider="wms")
+                               layer_name=layer.name(), folder="/w/etude_filtermate_local", provider="wms",
+                               source="url=https://tiles.example.org/wms")
+
+    @staticmethod
+    def same_service(current_source, current_provider, planned_source, planned_provider):
+        """The real one compares the endpoint; here a non-text source (a MagicMock layer) carries none, and the
+        provider decides, as there (audit of 2026-11-24)."""
+        if (current_provider or '').lower() != (planned_provider or '').lower():
+            return False
+        current = current_source if isinstance(current_source, str) else ''
+        planned = planned_source if isinstance(planned_source, str) else ''
+        return not current or not planned or current == planned
 
     def recopy_plan(self, layer):
         self.copies.discard(layer.id())
@@ -218,6 +229,21 @@ def test_notes_of_the_copy_are_a_warning(env):
     task.result.record = SimpleNamespace(notes=("3 request(s) of the service were not answered",))
     task.callback(task)
     assert env.said[-1][0] == "warning" and "not answered" in env.said[-1][1]
+
+
+def test_a_copy_of_a_layer_turned_to_another_service_is_not_used(env):
+    """2026-11-24: the copy of the former service was applied when the source changed to another service of the
+    same kind during the copy."""
+    stream = layer(env, "S")
+    stream.source.return_value = "url=https://tiles.example.org/wms"
+    env.fake.streams.add("S")
+    env.actions.copy(stream, confirm=False)
+    stream.source.return_value = "url=https://other.example.org/wms"  # another service, meanwhile
+    task = env.fake.tasks[0]
+    task.result.record = SimpleNamespace(notes=(), path="/w/new.tif")
+    task.callback(task)
+    assert not env.fake.switched and env.fake.discarded == ["/w/new.tif"]
+    assert "changed during its copy" in env.said[-1][1]
 
 
 @pytest.mark.parametrize("answer, back, again", [(0, ["C"], 0), (1, ["C"] * 0, 1), (2, [], 0)])

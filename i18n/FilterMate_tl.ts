@@ -323,6 +323,11 @@ Sumasang-ayon po ba kayo?</translation>
         <translation>Ihinto ang kahilingan, o hintayin itong matapos, para buksan ang mga setting.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>May kahilingan nang tumatakbo: hintayin itong matapos, o ihinto ito.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Hindi ma-save ang memorya: {}</translation>
@@ -2025,6 +2030,16 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Magtabi ng mga tala mula sa isang proyekto patungo sa susunod</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Panatilihin ang mga kahilingan ng bawat project</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Ang tab na Lahat ng project ng history: kung ano ang hiniling, saan at kailan, pinananatili sa computer na ito.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Paghiwalayin ang maraming tag gamit ang kuwit.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Hindi maaaring walang laman ang pangalan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Ang project na ito ay read-only: ang pagbabago ay pinapanatili para sa session na ito lamang.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Folder: {6}</translation>
         <translation>Binasa ang serbisyo sa loob ng {0:.0f} s, ang pinakamatagal na pinapayagan: may {1} feature ang kopya at hindi ito kumpleto.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Nag-anunsyo ang serbisyo ng {0} feature pero {1} lang ang nabasa: hindi kumpleto ang kopya.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Ipinagbabawal ng mga tuntunin ng {0} ang pag-iingat ng mga tile nito: hindi kinokopya ang layer na ito. Maaaring kopyahin ang ibang basemap (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Folder: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>hindi nabasa hanggang dulo ang serbisyo: walang naitago</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>hindi masulat ang lokal na kopya (maaaring puno ang disk): walang naitago</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>hindi nagbigay ng feature ang serbisyo sa nakikitang mapa, o hindi mabasa ang sagot nito: walang naitago</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

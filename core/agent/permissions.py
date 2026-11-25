@@ -348,6 +348,11 @@ class PermissionPolicy:
         if spec.name.startswith(CONNECTOR_PREFIX):
             return self._connector_verdict(spec.name)
         if spec.name in AGENT_OWN:
+            # Decided with the user on 2026-11-24 (audit, lot 4): undoing a step, the recipes and the notes of
+            # the project change something (history, files, project), so in Ask and Plan (the advisor level)
+            # they are asked, not run. Only ask_user truly changes nothing and runs at every level.
+            if spec.name != "ask_user" and self.level == ADVISOR:
+                return ASK
             return RUN
         rule = self.rules.get(spec.name)
         if rule == RULE_NEVER:

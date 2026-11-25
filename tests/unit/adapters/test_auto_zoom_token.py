@@ -55,7 +55,7 @@ def _install_stubs() -> None:
     for name, m in qgis_mocks.items():
         sys.modules.setdefault(name, m)
 
-    # QgsRectangle stub: combineExtentWith / isEmpty have to behave.
+    # QgsRectangle stub: combineExtentWith / isEmpty / isNull have to behave.
     class _FakeRect:
         def __init__(self, src=None):
             if src is None:
@@ -70,6 +70,9 @@ def _install_stubs() -> None:
 
         def isEmpty(self):
             return self._empty
+
+        def isNull(self):
+            return False
 
     sys.modules["qgis.core"].QgsRectangle = _FakeRect
     sys.modules["qgis.core"].QgsVectorLayer = MagicMock
@@ -107,11 +110,15 @@ bump_subset_change_token = auto_zoom_mod.bump_subset_change_token
 current_subset_change_token = auto_zoom_mod.current_subset_change_token
 auto_zoom_to_filtered = auto_zoom_mod.auto_zoom_to_filtered
 
+# One shared CRS for layer and canvas: the zoom is placed on the map without transform (lot 2 compares them).
+_SAME_CRS = object()
+
 
 @pytest.fixture
 def fake_layer():
     layer = MagicMock()
     layer.id.return_value = "L1"
+    layer.crs.return_value = _SAME_CRS
     rect = auto_zoom_mod.QgsRectangle(object())  # non-empty
     layer.extent.return_value = rect
     layer.updateExtents = MagicMock()
@@ -123,6 +130,7 @@ def fake_iface_with_canvas():
     canvas = MagicMock()
     canvas.zoomToFeatureExtent = MagicMock()
     canvas.refresh = MagicMock()
+    canvas.mapSettings.return_value.destinationCrs.return_value = _SAME_CRS
     iface = MagicMock()
     iface.mapCanvas.return_value = canvas
     return iface, canvas

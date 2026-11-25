@@ -432,6 +432,39 @@ def hybrid_path(label, layer, provider_type):
 HYBRID_PROVIDERS = ('spatialite', 'postgresql')  # the plugin's provider types of the SQLite and PostgreSQL sources
 
 
+def long_key_lists(work):
+    """Audit of 2026-11-24 (lot 7): 50,000 keys of a GeoPackage go as one JSON literal, not a plain IN list
+    (11.1 s of freeze of the main thread, then 3.75 s a read, 0.02 s as JSON)."""
+    from filter_mate.core.tasks.executors.attribute_filter_executor import AttributeFilterExecutor
+    path = os.path.join(work, 'foules.gpkg')
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(2154)
+    source = ogr.GetDriverByName('GPKG').CreateDataSource(path)
+    layer_def = source.CreateLayer('foules', srs, ogr.wkbPoint)
+    for name, kind in (('id', ogr.OFTInteger), ('nom', ogr.OFTString)):
+        layer_def.CreateField(ogr.FieldDefn(name, kind))
+    for number in range(1, 50001):
+        feature = ogr.Feature(layer_def.GetLayerDefn())
+        feature.SetField('id', number)
+        feature.SetField('nom', f"R{number}" if number % 2 == 0 else f"P{number}")
+        point = ogr.Geometry(ogr.wkbPoint)
+        point.AddPoint_2D(700000.0 + number, 6600000.0)
+        feature.SetGeometry(point)
+        layer_def.CreateFeature(feature)
+    source = None
+    layer = QgsVectorLayer(f'{path}|layername=foules', 'foules', 'ogr')
+    text = 'regexp_match("nom", \'^R\') > 0'
+    executor = AttributeFilterExecutor(layer=layer, provider_type='spatialite', primary_key='fid')
+    processed, _ = executor.process_qgis_expression(text)
+    written = processed in executor.native_origins
+    accepted = bool(processed) and executor.apply_filter(processed)
+    got = keys(layer) if accepted else None
+    layer.setSubsetString('')
+    expected = list(range(2, 50001, 2))
+    report('PASS' if written and 'json_each' in (processed or '') and got == expected else 'FAIL',
+           'foules long keys', f"subset={str(processed)[:120]!r} kept={len(got or [])} of 25000")
+
+
 def selected_path(label, layer, provider_type):
     """is_selected() in a second filter that replaces a list, read on the copy of the layer without its subset.
 
@@ -908,6 +941,11 @@ def main():
         except Exception as exc:
             traceback.print_exc()
             report('FAIL', f"{label} raised {type(exc).__name__}: {exc}")
+    try:
+        long_key_lists(work)
+    except Exception as exc:
+        traceback.print_exc()
+        report('FAIL', f"long keys raised {type(exc).__name__}: {exc}")
     QgsExpressionContextUtils.removeGlobalVariable('fm_gv')
 
     failed = results.count('FAIL')

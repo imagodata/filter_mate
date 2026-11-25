@@ -4,7 +4,7 @@ import pytest
 
 from core.agent.open_data import (
     base_url, display_source, parse_extra_domains, parse_results, platforms_available, resolve_platform, search_url,
-    source_problem,
+    source_problem, sweep_empty_data_dirs,
 )
 
 pytestmark = pytest.mark.unit
@@ -372,3 +372,17 @@ def test_a_hostile_geocoder_answers_no_place_that_breaks_the_map():
     assert [item["extent_wkt"] for item in places[:3]] == [around] * 3  # an extent that is not around the point is not kept
     assert places[3]["extent_wkt"].startswith("POLYGON((0.500000 42.000000, 2.000000 42.000000,")
     assert geocode_url("https://h.example.org/search?key=1#frag", "a", 1) == "https://h.example.org/search?key=1&q=a&limit=1"
+
+
+def test_sweep_removes_only_empty_data_dirs(tmp_path):
+    """Audit of 2026-11-24: the folders were never cleaned (failures already go; what succeeded may be read by
+    a saved project, so an age would break it)."""
+    import os
+    (tmp_path / "elevation-empty").mkdir()
+    full = tmp_path / "population-full"
+    full.mkdir()
+    (full / "grid.tif").write_bytes(b"0")
+    (tmp_path / "something-else").mkdir()
+    assert sweep_empty_data_dirs(str(tmp_path)) == 1
+    assert sorted(path.name for path in tmp_path.iterdir()) == ["population-full", "something-else"]
+    assert sweep_empty_data_dirs(str(tmp_path / "missing")) == 0

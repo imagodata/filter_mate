@@ -160,6 +160,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._current_fav_id = None
         self._all_favorites = []  # the project favorites then the global ones
         self._global_ids = set()  # ids of the global ones among them
+        self._orphan_ids = set()  # ids of unsaved sessions, relisted read-only (audit of 2026-11-24)
         # FIX 2026-04-22: re-entrancy guard so our own update/delete don't bounce
         # back through the external-change refresh slot.
         self._suppress_external_refresh = False
@@ -241,6 +242,13 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         """Show a warning at the top of the dialog (the dialog stays open, the fields keep their text)."""
         logger.warning(message)
         self._push_message(message, critical=False)
+
+    def _note_read_only_session(self) -> None:
+        """A project favorite changed while the project file is read-only: it lasts for the session, said once
+        per change (audit of 2026-11-24: a change reverted without a message)."""
+        service = self._favorites_service
+        if service is not None and getattr(service, "project_read_only", False):
+            self._show_warning(self.tr("This project is read-only: the change is kept for this session only."))
 
     def done(self, result):
         """Disconnect from external signals when the dialog closes (accept, reject, close).
@@ -654,6 +662,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                 f"Used: {fav.use_count} times",
                 owner_line,
             ]
+            if fav.id in self._orphan_ids:
+                tooltip_lines.append("Unsaved project: adopt it (Copy to project) or delete it")
             if fav.tags:
                 tooltip_lines.append(f"Tags: {', '.join(fav.tags)}")
             if fav.description:
@@ -712,6 +722,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                 or query in (f.expression or "").lower()
                 or any(query in (t or "").lower() for t in (f.tags or []))
                 or query in (f.description or "").lower()
+                or (f.id in self._orphan_ids and "unsaved" in query)
             ]
         else:
             visible = scoped
@@ -747,6 +758,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         """
         if scope_key == "all" or not favorites:
             return list(favorites)
+        # Orphans of unsaved sessions show under All only: they belong to no scope of the combo.
+        favorites = [fav for fav in favorites if fav.id not in self._orphan_ids]
+        if not favorites:
+            return []
 
         current_user = self._resolve_current_user()
 
@@ -802,20 +817,30 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         )
 
     def _load_favorites(self) -> list:
-        """The project favorites then the global ones; remembers which are global."""
+        """The project favorites, the global ones, then the orphans of unsaved sessions; remembers which."""
         service = self._favorites_service
         if not service:
             self._global_ids = set()
+            self._orphan_ids = set()
             return []
         favorites = list(service.get_all_favorites())
         known = {fav.id for fav in favorites}
         global_favorites = [fav for fav in service.get_global_favorites() if fav.id not in known]
         self._global_ids = {fav.id for fav in global_favorites}
-        return favorites + global_favorites
+        known |= self._global_ids
+        get_orphans = getattr(service, "get_orphan_favorites", None)
+        orphans = []
+        if callable(get_orphans):
+            try:
+                orphans = [fav for fav in get_orphans() or [] if fav.id not in known]
+            except Exception:
+                orphans = []
+        self._orphan_ids = {fav.id for fav in orphans}
+        return favorites + global_favorites + orphans
 
     def _find_favorite(self, fav_id):
-        """The favorite of this id among the project and global ones, None when gone."""
-        if fav_id in self._global_ids:
+        """The favorite of this id among the project, global and orphan ones, None when gone."""
+        if fav_id in self._global_ids or fav_id in self._orphan_ids:
             return next((fav for fav in self._all_favorites if fav.id == fav_id), None)
         return self._favorites_service.get_favorite(fav_id) if self._favorites_service else None
 
@@ -868,8 +893,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
 
         self._current_fav_id = fav_id
-        # A global favorite is read-only here (apply, copy and delete only)
-        editable = fav_id not in self._global_ids
+        # A global favorite is read-only here (apply, copy and delete only); an orphan one too (adopt it first)
+        editable = fav_id not in self._global_ids and fav_id not in self._orphan_ids
         for field in (self._name_edit, self._description_edit, self._tags_edit):
             field.setEnabled(editable)
 
@@ -951,8 +976,27 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         if fav_id in self._global_ids:
             self.globalFavoriteApplied.emit(fav_id)
         else:
+            if fav_id in self._orphan_ids and not self._adopt_orphan(fav_id):
+                return
             self.favoriteApplied.emit(fav_id)
         self.accept()
+
+    def _adopt_orphan(self, fav_id) -> bool:
+        """Move the orphan ``fav_id`` into this project so it can be applied, saved or renamed."""
+        adopt = getattr(self._favorites_service, "adopt_orphan_favorite", None)
+        if not callable(adopt):
+            return False
+        try:
+            adopted = adopt(fav_id)
+        except Exception:
+            adopted = None
+        if not adopted:
+            fav = self._find_favorite(fav_id)
+            self._show_error(self.tr("Could not copy '{0}' to this project.").format(
+                fav.name if fav else fav_id))
+            return False
+        self._after_list_change(adopted)
+        return True
 
     def _on_item_double_clicked(self, item) -> None:
         """Double-click on a row applies its favorite."""
@@ -971,20 +1015,22 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             menu.deleteLater()  # parented to the dialog: it would pile up there
 
     def _build_context_menu(self, fav_id) -> "QMenu":
-        """Menu of the favorite ``fav_id``; a global one cannot be renamed or duplicated."""
+        """Menu of the favorite ``fav_id``; a global one cannot be renamed or duplicated, an orphan one is
+        adopted (Copy to project) or deleted, and applies by adoption."""
         is_global = fav_id in self._global_ids
+        is_orphan = fav_id in self._orphan_ids
         menu = QMenu(self)
         menu.addAction(self.tr("Apply")).triggered.connect(lambda: self._apply_favorite(fav_id))
         rename = menu.addAction(self.tr("Rename"))
-        rename.setEnabled(not is_global)
+        rename.setEnabled(not is_global and not is_orphan)
         rename.triggered.connect(self._focus_name_edit)
         duplicate = menu.addAction(self.tr("Duplicate"))
-        duplicate.setEnabled(not is_global)
+        duplicate.setEnabled(not is_global and not is_orphan)
         duplicate.triggered.connect(lambda: self._duplicate_favorite(fav_id))
         menu.addSeparator()
         menu.addAction(self.tr("Delete")).triggered.connect(self._on_delete)
         menu.addSeparator()
-        if is_global:
+        if is_global or is_orphan:
             menu.addAction(self.tr("Copy to project")).triggered.connect(
                 lambda: self._copy_to_project(fav_id)
             )
@@ -1003,7 +1049,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
     def _duplicate_favorite(self, fav_id) -> None:
         """Add a copy of the project favorite ``fav_id`` named '<name> (copy)' and select it."""
         fav = self._find_favorite(fav_id)
-        if fav is None or fav_id in self._global_ids:
+        if fav is None or fav_id in self._global_ids or fav_id in self._orphan_ids:
             return
         new_id = self._favorites_service.add_favorite(
             name=self.tr("{0} (copy)").format(fav.name),
@@ -1019,6 +1065,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         if not new_id:
             self._show_error(self.tr("Could not duplicate '{0}'.").format(fav.name))
             return
+        self._note_read_only_session()
         self._after_list_change(new_id)
 
     def _copy_to_global(self, fav_id) -> None:
@@ -1041,10 +1088,15 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         """Copy the global favorite ``fav_id`` to this project and select the copy.
 
         A project favorite with the same name and expression is reused, as when
-        the global favorite is applied.
+        the global favorite is applied. An orphan is adopted instead: it moves, it is not copied.
         """
         fav = self._find_favorite(fav_id)
-        if fav is None or fav_id not in self._global_ids:
+        if fav is None:
+            return
+        if fav_id in self._orphan_ids:
+            self._adopt_orphan(fav_id)
+            return
+        if fav_id not in self._global_ids:
             return
         from ...core.domain.exceptions import FavoritePersistenceError
         from ...core.domain.global_favorite_copy import project_copy_of_global
@@ -1086,6 +1138,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         if not self._current_fav_id or not self._favorites_service:
             return
         if self._current_fav_id in self._global_ids:  # read-only here
+            return
+        if self._current_fav_id in self._orphan_ids:  # adopt it first
             return
 
         new_name = self._name_edit.text().strip()
@@ -1142,6 +1196,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
         self.favoriteUpdated.emit(self._current_fav_id)
         self.favoritesChanged.emit()
+        self._note_read_only_session()
         logger.info(f"Favorite updated: {new_name}")
 
     def _on_delete(self):
@@ -1157,7 +1212,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # is destructive and a toast confirm would risk silent data loss
         # if missed.
         question = self.tr("Delete favorite '{0}'?").format(fav.name)
-        if not self._favorite_is_global(fav):
+        if self._current_fav_id in self._orphan_ids:
+            pass  # an orphan travels with no project: nobody else sees it go.
+        elif not self._favorite_is_global(fav):
             # A project favorite travels with the project file: the others see it go.
             question += "\n\n" + self.tr("It is removed for everyone who opens this project.")
         reply = QMessageBox.question(
@@ -1172,6 +1229,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
         deleted_id = self._current_fav_id
         is_global = deleted_id in self._global_ids
+        is_orphan = deleted_id in self._orphan_ids
         # F16 phase 4 lazy import — see _on_save for rationale.
         from ...core.domain.exceptions import FavoritePersistenceError
         # FIX 2026-04-22: suppress re-entrant external refresh from manager's
@@ -1180,6 +1238,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         try:
             if is_global:
                 removed = self._favorites_service.remove_global_favorite(deleted_id)
+            elif is_orphan:
+                removed = self._favorites_service.delete_orphan_favorite(deleted_id)
             else:
                 removed = self._favorites_service.remove_favorite(deleted_id)
         except FavoritePersistenceError as e:
@@ -1215,6 +1275,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
         # Save changes
         self._favorites_service.save()
+        if not is_global and not is_orphan:
+            self._note_read_only_session()
 
         # FIX 2026-04-23: after takeItem, Qt may auto-advance selection to the
         # next row and fire currentItemChanged. Resetting _current_fav_id=None

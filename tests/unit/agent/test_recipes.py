@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from core.agent.permissions import AGENT_OWN, PermissionPolicy, RUN
+from core.agent.permissions import AGENT_OWN, ASK, PermissionPolicy, RUN
 from core.agent.recipes import (
     HEADER, LIVE_TOOLS, MAX_ARGUMENT_DEPTH, MAX_MADE, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find,
     fingerprint,
@@ -166,11 +166,14 @@ class TestStore:
 
 class TestTools:
     def test_the_tools_are_in_the_chat_and_run_at_every_level(self):
+        """Decided with the user on 2026-11-24 (audit, lot 4): the recipes are asked in Ask and Plan (the
+        advisor level), run elsewhere."""
         tools = _tools()
         for name in (SAVE_RECIPE, REMOVE_RECIPE):
             assert name in tools and tools[name].chat_only and name in AGENT_OWN
             for level in ("advisor", "careful", "standard", "autonomous"):
-                assert PermissionPolicy(level).verdict(tools[name]) == RUN
+                expected = ASK if level == "advisor" else RUN
+                assert PermissionPolicy(level).verdict(tools[name]) == expected, (name, level)
         assert {SAVE_RECIPE, REMOVE_RECIPE} <= {tool.name for tool in CHAT_ONLY}
 
     def test_the_prompt_says_when_to_keep_one(self):

@@ -19,7 +19,7 @@ from ...adapters.public_api.map_images import handlers as image_handlers
 from ...core.agent.json_schema import validate
 from ...core.agent.mcp_server import EXTERNAL_MARK, HttpResponse, McpPrompt, McpProtocol, McpResource, RequestHead
 from ...core.agent.messages import ToolCallPart, ToolResultPart
-from ...core.agent.permissions import ASK, RULE_ALLOW, TURNED_OFF, PermissionPolicy
+from ...core.agent.permissions import ASK, LEVELS, REFUSE, RULE_ALLOW, TURNED_OFF, PermissionPolicy
 from ...core.agent.tool_catalog import LOAD_SKILL, MCP_ONLY, ToolSpec, with_skill_tool
 from ...core.agent.tool_executor import ToolExecutor
 
@@ -123,13 +123,18 @@ class AgentMcpBridge:
         except Exception:
             logger.exception("MCP call could not be shown")
 
-    @staticmethod
-    def _policy() -> PermissionPolicy:
-        """The standard level (the level of autonomy is the chat's) under the rules of the Tools tab, read at each
-        call: always ask asks, never refuses. Always allow does not take a confirmation away from another
-        application."""
+    def _policy(self) -> PermissionPolicy:
+        """The level of autonomy of the chat under the rules of the Tools tab, read at each call: always ask
+        asks, never refuses. Always allow does not take a confirmation away from another application.
+
+        Decided with the user (audit of 2026-11-24): the server ran at the standard level whatever the level
+        of the chat (Ask and Plan ask here too now). Falls back to standard when the chat has no level yet.
+        """
         rules = {name: rule for name, rule in load_settings().rules.items() if rule != RULE_ALLOW}
-        return PermissionPolicy(rules=rules)
+        chat_level = getattr(getattr(self._host, "_policy", None), "level", None)
+        if chat_level not in LEVELS:
+            return PermissionPolicy(rules=rules)
+        return PermissionPolicy(chat_level, rules)
 
     def _unavailable(self, call: ToolCallPart):
         """Why a change, or a question to the user, cannot happen now; None when it can."""
@@ -165,7 +170,9 @@ class AgentMcpBridge:
             return refused
         policy = self._policy()
         verdict = self._executor.verdict(call, policy)
-        if verdict == TURNED_OFF:
+        if verdict in (TURNED_OFF, REFUSE):
+            # REFUSE was unreachable while the server ran at the standard level, and fell through to the
+            # execution below (audit of 2026-11-24: the level is the chat's now, so it refuses too).
             refused = self._executor.refused(call, policy)
             self._journal(call, refused, client)
             return refused

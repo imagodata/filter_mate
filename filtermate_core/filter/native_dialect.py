@@ -582,12 +582,21 @@ class _Writer:
                 return self._like(node, depth)
         if kind == 'unary' and node.value == 'NOT':
             before = self.ands
+            before_columns = set(self.columns)
             self.connectives += 1
             self.negations += 1
             operand = self.predicate(node.children[0], depth + 1)
             self.negations -= 1
             if self.dialect == OGR_SQL and self.ands != before:
                 raise Unsupported('OGR SQL gives FALSE to TRUE AND NULL, so a NOT over an AND would keep it')
+            if self.dialect == OGR_SQL:
+                nullables = sorted(set(self.columns) - before_columns)
+                if nullables:
+                    # Old GDAL keeps the NULL rows under a NOT ("x" > 5 keeps 3 rows of 2 on GDAL 3.4.1, right
+                    # on 3.12): what may be NULL is excluded, as QGIS does. The same writing on a recent GDAL,
+                    # which drops them itself (the outer parentheses go in _strip_outer_parentheses).
+                    guards = ' AND '.join('"{}" IS NOT NULL'.format(column) for column in nullables)
+                    return '(NOT {}) AND {}'.format(operand, guards)
             return '(NOT {})'.format(operand)
         if kind == 'in':
             return self._in(node, depth)
@@ -664,6 +673,7 @@ class _Writer:
     def _in(self, node: Node, depth: int) -> str:
         if len(node.children) < 2:
             raise Unsupported('Empty IN list')
+        before_columns = set(self.columns)
         left, left_type = self.value(node.children[0], depth + 1)
         items = []
         for child in node.children[1:]:
@@ -681,8 +691,15 @@ class _Writer:
             if len(items) > 1:
                 self.connectives += 1
             return '({})'.format(' OR '.join(self._ogr_text_match(left, child) for child in node.children[1:]))
-        return '({} {}IN ({}))'.format(self._binary_text(left, left_type), 'NOT ' if node.value else '',
-                                      ', '.join(items))
+        written = '({} {}IN ({}))'.format(self._binary_text(left, left_type), 'NOT ' if node.value else '',
+                                          ', '.join(items))
+        if node.value and self.dialect == OGR_SQL:
+            nullables = sorted(set(self.columns) - before_columns)
+            if nullables:
+                # Old GDAL keeps the NULL rows under a NOT IN, as under a NOT (audit of 2026-11-24).
+                guards = ' AND '.join('"{}" IS NOT NULL'.format(column) for column in nullables)
+                return '{} AND {}'.format(written, guards)
+        return written
 
     def _between(self, node: Node, depth: int) -> str:
         value_node, low_node, high_node = node.children
@@ -960,8 +977,33 @@ def key_reference(name: str) -> str:
     return '"' + name + '"'
 
 
+def _json_keys_literal(values, numeric: bool) -> str:
+    """``'[...]'`` for ``json_each``: numbers as JSON numbers, texts as JSON strings.
+
+    The same form as ``adapters/backends/ogr/expression_builder.json_key_clause`` (which the caller probes for:
+    json_each needs the JSON1 of the SQLite of GDAL). A plain IN list of 50,000 keys froze the main thread 11 s
+    and slowed every read to seconds; the JSON form reads in hundredths (audit of 2026-11-24).
+    """
+    import json
+    items = []
+    for value in values:
+        if numeric:
+            if isinstance(value, bool):
+                items.append(json.dumps(str(value)))
+            elif isinstance(value, int):
+                items.append(str(value))
+            elif isinstance(value, float) and value.is_integer():
+                items.append(str(int(value)))
+            else:
+                items.append(json.dumps(value if isinstance(value, (int, float)) else str(value),
+                                        ensure_ascii=False))
+        else:
+            items.append(json.dumps(str(value), ensure_ascii=False))
+    return "'" + ('[' + ','.join(items) + ']').replace("'", "''") + "'"
+
+
 def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, dialect: str = SQLITE,
-               already_listed: int = 0) -> str:
+               already_listed: int = 0, json_lists: bool = False) -> str:
     """Subset of a PARTIAL / NONE translation from the keys QGIS evaluated (SQLite, PostgreSQL).
 
     The subset keeps the same features as the expression (a TRUE / not TRUE
@@ -985,6 +1027,8 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, diale
             in the subset it is combined with: they count with the new list
             against ``HYBRID_MAX_KEYS`` (the provider's ``setSubsetString`` is
             quadratic in the number of keys of the whole subset, not of one list).
+        json_lists: SQLite only, when the caller probed json_each: the key
+            lists go as one JSON literal instead of a plain IN list.
 
     Returns:
         The native part alone when nothing else excludes a feature, else the
@@ -997,12 +1041,12 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, diale
         if len(values) + already_listed > HYBRID_MAX_KEYS:
             raise Unsupported('{} keys ({} listed already), more than the {} listed in a subset'.format(
                 len(values), already_listed, HYBRID_MAX_KEYS))
-        literals = []
         for value in values:
             if is_null_value(value):
                 raise Unsupported('A NULL key cannot be listed')
-            literals.append(format_key_literal(value, numeric, SQL))
-        return ', '.join(literals)
+        if json_lists and dialect == SQLITE:
+            return 'IN (SELECT value FROM json_each({}))'.format(_json_keys_literal(list(values), numeric))
+        return 'IN ({})'.format(', '.join(format_key_literal(value, numeric, SQL) for value in values))
 
     if dialect not in (SQLITE, POSTGRESQL):
         raise Unsupported('Hybrid subsets are written for SQLite and PostgreSQL only')
@@ -1011,10 +1055,10 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, diale
         if not failing:
             return native_sql
         if len(failing) < len(passing):
-            return '{} IS NOT NULL AND ({}) AND NOT ({} IN ({}))'.format(key, native_sql, column, listed(failing))
+            return '{} IS NOT NULL AND ({}) AND NOT ({} {})'.format(key, native_sql, column, listed(failing))
     if not passing:
         return '{0} <> {0}'.format(key)  # FALSE or NULL on every row
-    return '{} IS NOT NULL AND {} IN ({})'.format(key, column, listed(passing))
+    return '{} IS NOT NULL AND {} {}'.format(key, column, listed(passing))
 
 
 __all__ = ['DIALECTS', 'NativeTranslation', 'OGR_SQL', 'POSTGRESQL', 'SQLITE', 'translate_native',

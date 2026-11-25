@@ -323,6 +323,11 @@ Quý vị có đồng ý không?</translation>
         <translation>Dừng yêu cầu, hoặc chờ nó kết thúc, để mở phần cài đặt.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Một yêu cầu đang chạy: hãy chờ nó xong, hoặc dừng nó lại.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Không thể lưu trí nhớ: {}</translation>
@@ -2025,6 +2030,16 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Giữ ghi chú từ dự án này sang dự án khác</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Giữ lại các yêu cầu của mọi dự án</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Thẻ Mọi dự án của lịch sử: nội dung đã hỏi, ở đâu và khi nào, được giữ trên máy tính này.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Phan cach nhieu the bang dau phay.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Tên không được để trống.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Dự án này ở chế độ chỉ đọc: thay đổi chỉ được giữ cho phiên này.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Thư mục: {6}</translation>
         <translation>Dịch vụ đã được đọc trong {0:.0f} giây, mức tối đa cho phép: bản sao có {1} đối tượng và chưa đầy đủ.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Dịch vụ đã thông báo {0} đối tượng nhưng chỉ đọc được {1}: bản sao chưa đầy đủ.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Điều khoản của {0} cấm lưu giữ các ô bản đồ của nó: lớp này không được sao chép. Có thể sao chép bản đồ nền khác (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Thư mục: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>không đọc được dịch vụ đến hết: không giữ lại gì</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>không thể ghi bản sao cục bộ (đĩa có thể đã đầy): không giữ lại gì</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>dịch vụ không trả về đối tượng nào trên bản đồ hiển thị, hoặc không đọc được câu trả lời: không giữ lại gì</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

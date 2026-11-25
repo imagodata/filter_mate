@@ -13,6 +13,7 @@ import pytest
 
 from core.domain import project_favorites
 from core.domain.favorites_manager import FavoritesManager, FilterFavorite
+from core.services import favorites_service as service_module
 from core.services.favorites_service import FavoritesService
 
 pytestmark = pytest.mark.unit
@@ -319,3 +320,134 @@ def test_the_project_no_longer_calls_an_unloaded_service(monkeypatch):
     assert [len(signal.slots) for signal in (project.cleared, project.readProject, project.projectSaved)] == [0, 0, 0]
     assert service._bind_project is None
     service.teardown()  # twice: nothing to disconnect, no error
+
+
+def test_a_copy_closed_without_saving_syncs_cleanly_at_the_next_opening(tmp_path):
+    """Audit 2026-11-24 #1: a copy opened then closed without saving failed the next sync (UNIQUE constraint
+    failed: fm_favorites.id) and never healed: the favorites added later never reached the .qgz, only the log
+    said it."""
+    original = Project()
+    a = computer(tmp_path, "a", original, project_uuid="original-uuid")
+    add(a, "fav_A1")
+    a._on_project_saved()
+    saved = dict(original.entries)
+    copy = Project(saved)  # Save As, opened on the same computer
+    c = computer(tmp_path, "a", copy, project_uuid="copy-uuid")
+    assert names(c) == ["fav_A1"]
+    reopened = Project(saved)  # closed without saving: the file still carries the original ids
+    c._project = staticmethod(lambda _project: reopened)
+    c.set_database(str(tmp_path / "a.sqlite"), "copy-uuid")
+    assert names(c) == ["fav_A1"]  # one row, not the stored one plus its derived double
+    assert c._synced_project_uuid == "copy-uuid"
+    add(c, "fav_C2")
+    assert reopened.favorites() == ["fav_A1", "fav_C2"]
+
+
+def test_an_unsaved_favorite_survives_a_second_binding_before_any_save(tmp_path):
+    """Audit 2026-11-24 #2: F5 binds the project again; the sync then remembered the mirrored-but-unsaved ids as
+    the file's, so a favorite made here was dropped as 'removed elsewhere' at the next opening."""
+    on_disk = Project()
+    a = computer(tmp_path, "a", on_disk)
+    add(a, "fav_A1")
+    a._on_project_saved()
+    saved = dict(on_disk.entries)
+    add(a, "made, not saved")
+    a.set_database(str(tmp_path / "a.sqlite"), PROJECT_UUID)  # F5: the project is bound again
+    a._on_project_cleared()  # closed without saving
+    reopened = Project(saved)  # the file as it was saved
+    a._project = staticmethod(lambda _project: reopened)
+    a.set_database(str(tmp_path / "a.sqlite"), PROJECT_UUID)
+    assert names(a) == ["fav_A1", "made, not saved"]
+
+
+def _project_rows(db_path):
+    """fm_projects as the application holds them: the unsaved session without a name, the saved project."""
+    conn = sqlite3.connect(db_path)
+    conn.execute("CREATE TABLE IF NOT EXISTS fm_projects (project_id TEXT PRIMARY KEY, _created_at TEXT,"
+                 " _updated_at TEXT, project_name TEXT, project_path TEXT, project_settings TEXT)")
+    conn.execute("INSERT OR REPLACE INTO fm_projects VALUES ('unsaved-uuid', '', '', '', '', '{}')")
+    conn.execute("INSERT OR REPLACE INTO fm_projects VALUES ('uuid-p', '', '', 'p.qgz', '/tmp', '{}')")
+    conn.commit()
+    conn.close()
+
+
+def test_orphans_relisted_adopted_and_deleted(tmp_path):
+    """Audit of 2026-11-24, decided with the user: favorites of a session without a saved project stay in the
+    SQLite, listed nowhere. They are relisted (not purged): adopted they travel, deleted they go."""
+    unsaved = Project()
+    a = computer(tmp_path, "a", unsaved, project_uuid="unsaved-uuid")
+    add(a, "made with no project file")
+    _project_rows(str(tmp_path / "a.sqlite"))
+    on_disk = Project()
+    p = computer(tmp_path, "a", on_disk, project_uuid="uuid-p")
+    add(p, "fav_P1")
+    p._on_project_saved()
+    orphans = p.get_orphan_favorites()
+    assert [favorite.name for favorite in orphans] == ["made with no project file"]
+    assert names(p) == ["fav_P1"]  # the project list holds none of it
+    assert p.adopt_orphan_favorite("no-such-id") is None
+    assert p.delete_orphan_favorite("no-such-id") is False
+    assert p.adopt_orphan_favorite(orphans[0].id) == orphans[0].id
+    assert names(p) == ["fav_P1", "made with no project file"]
+    assert on_disk.favorites() == ["fav_P1", "made with no project file"]
+    assert p.get_orphan_favorites() == []
+    add(a, "doomed")
+    [doomed] = [favorite for favorite in p.get_orphan_favorites() if favorite.name == "doomed"]
+    assert p.delete_orphan_favorite(doomed.id) is True
+    assert [favorite.name for favorite in p.get_orphan_favorites()] == []
+
+
+def test_own_unsaved_project_is_not_an_orphan(tmp_path):
+    """The rows of the unsaved project on screen are its favorites, not orphans."""
+    unsaved = Project()
+    a = computer(tmp_path, "a", unsaved, project_uuid="unsaved-uuid")
+    add(a, "mine, not saved yet")
+    _project_rows(str(tmp_path / "a.sqlite"))
+    assert a.get_orphan_favorites() == []
+    assert names(a) == ["mine, not saved yet"]
+
+
+def test_an_unsaved_edit_of_a_copy_does_not_break_the_next_sync(tmp_path):
+    """The stored row and the edited local one derive the same id: the sync keeps the saved version of the file
+    instead of failing on UNIQUE constraint failed: fm_favorites.id."""
+    original = Project()
+    a = computer(tmp_path, "a", original, project_uuid="original-uuid")
+    add(a, "fav_A1")
+    a._on_project_saved()
+    saved = dict(original.entries)
+    copy = Project(saved)
+    c = computer(tmp_path, "a", copy, project_uuid="copy-uuid")
+    [favorite] = c.get_all_favorites()
+    c._favorites_manager.update_favorite(favorite.id, expression='"rank" < 99')
+    c._mirror_to_project()
+    reopened = Project(saved)  # closed without saving the edit
+    c._project = staticmethod(lambda _project: reopened)
+    c.set_database(str(tmp_path / "a.sqlite"), "copy-uuid")
+    assert c._synced_project_uuid == "copy-uuid"
+    [kept] = c.get_all_favorites()
+    assert (kept.name, kept.expression) == ("fav_A1", '"rank" < 6')
+
+
+def test_a_read_only_project_is_neither_written_nor_dirtied(monkeypatch, tmp_path):
+    """2026-11-24: opening a read-only project marked it modified for favorites, and a change reverted silently."""
+    monkeypatch.setattr(service_module, "_file_writable", lambda path: False)
+    project = Project()
+    project.fileName = lambda: "/projects/shared.qgz"  # noqa: E731 - the QGIS name on the stand-in
+    a = computer(tmp_path, "a", project)
+    a.sync_with_project()
+    assert a.project_read_only
+    writes = project.writes
+    favorite_id = add(a, "fav_RO1")
+    assert names(a) == ["fav_RO1"] and favorite_id  # the session has it
+    assert project.writes == writes and project.favorites() is None  # the file does not
+
+
+def test_a_writable_project_still_takes_the_mirror(monkeypatch, tmp_path):
+    monkeypatch.setattr(service_module, "_file_writable", lambda path: True)
+    project = Project()
+    project.fileName = lambda: "/projects/mine.qgz"  # noqa: E731 - the QGIS name on the stand-in
+    a = computer(tmp_path, "a", project)
+    a.sync_with_project()
+    assert not a.project_read_only
+    add(a, "fav_W1")
+    assert project.favorites() == ["fav_W1"]

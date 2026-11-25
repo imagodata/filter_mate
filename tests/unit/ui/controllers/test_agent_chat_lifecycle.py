@@ -650,6 +650,19 @@ def test_the_memory_goes_with_the_context_of_a_request(ctrl_module, controller, 
     assert controller._memory_part(None) == ""  # the request goes without it; the Memory tab says why
 
 
+def test_the_range_selection_goes_with_the_context_when_values_are_shared(ctrl_module, controller, monkeypatch):
+    """The bounds a range widget holds go with the request; without shared values they stay out (2026-11-25: an
+    UnboundLocalError emptied the widgets of the request silently, the try/except hiding it)."""
+    stub = sys.modules[f"{_PKG}.adapters.agent.agent_widgets"]
+    model = sys.modules[f"{_PKG}.core.agent.widgets"]
+    widget = model.make([], "range", "L1", "communes", "", field="pop", minimum=0, maximum=10)
+    monkeypatch.setattr(stub, "read_widgets", lambda project=None: [widget])
+    assert '"high": 10' in controller._project_context(full=True)
+    monkeypatch.setattr(ctrl_module, "load_settings", lambda: types.SimpleNamespace(memory=True, send_values=False))
+    assert '"high": 10' not in controller._project_context(full=True)
+    monkeypatch.setattr(ctrl_module, "load_settings", lambda: SETTINGS)
+
+
 # --- 9: a controller half built, a shutdown that goes on -------------------------------------------------------
 
 

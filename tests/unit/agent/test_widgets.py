@@ -208,6 +208,14 @@ class TestStore:
                            "low": 0, "high": 1000}
         assert rows[1]["values"] == 3 and rows[1]["ticked"] == 3 and "09" not in json.dumps(rows)
 
+    def test_summary_unshared_hides_the_range_selection(self):
+        widgets = [a_range(title="Pop")]
+        widgets.append(some_values(widgets))
+        rows = summary(widgets, share_values=False)
+        assert "low" not in rows[0] and "high" not in rows[0]
+        assert rows[0]["kind"] == "range" and rows[0]["widget_id"] == "w1"  # still listed, removable
+        assert "1000" not in json.dumps(rows)
+
     def test_without_and_replaced(self):
         widgets = [a_range()]
         widgets.append(some_values(widgets))

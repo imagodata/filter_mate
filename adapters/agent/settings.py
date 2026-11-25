@@ -85,6 +85,10 @@ class AgentSettings:
     # The notes kept from one project to the next (core/agent/memory.py) go with the requests. On by default: empty,
     # it sends nothing, and nothing enters it that the user did not write or accept (decided 2026-11-22).
     memory: bool = True
+    # The requests of every project, kept on this computer for the tab "All projects" of the history
+    # (core/agent/request_log.py). Off: nothing is recorded any more (audit of 2026-11-24: the log is in clear in
+    # the settings of QGIS, with no way to turn it off).
+    keep_request_history: bool = True
 
     @property
     def rules(self) -> dict:
@@ -170,7 +174,8 @@ def load_settings() -> AgentSettings:
         autonomy=level_or_default(str(settings.value(_PREFIX + "autonomy", DEFAULT_LEVEL) or "")),
         tool_rules=str(settings.value(_PREFIX + "tool_rules", "{}") or "{}"),
         tool_families=settings.value(_PREFIX + "offer_tools_by_task", True, type=bool),
-        memory=settings.value(_PREFIX + "memory", True, type=bool))
+        memory=settings.value(_PREFIX + "memory", True, type=bool),
+        keep_request_history=settings.value(_PREFIX + "keep_request_history", True, type=bool))
 
 
 def save_settings(values: AgentSettings) -> None:
@@ -194,6 +199,7 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "autonomy", level_or_default(values.autonomy))
     settings.setValue(_PREFIX + "tool_rules", json.dumps(values.rules, sort_keys=True))
     settings.setValue(_PREFIX + "memory", values.memory)
+    settings.setValue(_PREFIX + "keep_request_history", values.keep_request_history)
 
 
 def _auth_manager():
