@@ -2680,8 +2680,15 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     if layers_to_export is not None:
                         has_layers = len(layers_to_export) > 0
                         exporting = self.project_props.setdefault('EXPORTING', {})
-                        if list(exporting.get('LAYERS_TO_EXPORT', [])) != list(layers_to_export):
-                            exporting['LAYERS_TO_EXPORT'] = list(layers_to_export)
+                        if success:
+                            if list(exporting.get('LAYERS_TO_EXPORT', [])) != list(layers_to_export):
+                                exporting['LAYERS_TO_EXPORT'] = list(layers_to_export)
+                        elif exporting.get('LAYERS_TO_EXPORT'):
+                            # The combobox was not populated: its (empty) state says nothing, so the stored
+                            # list is kept (2026-11-26: a failed populate wiped a saved export selection).
+                            logger.warning("⚠️ Export combobox not populated: kept stored LAYERS_TO_EXPORT")
+                            layers_to_export = list(exporting.get('LAYERS_TO_EXPORT', []))
+                            has_layers = len(layers_to_export) > 0
                         current_has_layers = exporting.get('HAS_LAYERS_TO_EXPORT', False)
 
                         if has_layers != current_has_layers:
