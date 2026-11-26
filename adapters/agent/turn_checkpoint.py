@@ -113,7 +113,11 @@ class TurnCheckpoint:
                 # (audit of 2026-11-24: any failure here refused the tool with "undo point could not be made")
                 self._effects.before_call(call, len(self._steps) - 1)
             except Exception:  # noqa: BLE001
-                logger.debug("Agent undo: what the call did beside the filters not recorded", exc_info=True)
+                # ... but the gap stays visible where operators look: an undo restores the filters recorded
+                # above, not what this call did beside them (2026-11-26: debug only, an incomplete undo
+                # looked complete).
+                logger.warning("Agent undo: what %s did beside the filters not recorded: undo restores the "
+                               "filters, not that", self._label(call), exc_info=True)
             try:  # what a step did is for "undo back to here" only: it never keeps a change from being made
                 self._step_recorder.before_call(call)
             except Exception:  # noqa: BLE001

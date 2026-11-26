@@ -145,6 +145,23 @@ def test_a_recorder_that_fails_never_refuses_the_call(monkeypatch, checkpoint_mo
     checkpoint_module.TurnCheckpoint().begin(call)  # does not raise
 
 
+def test_an_unrecorded_call_is_warned_where_operators_look(monkeypatch, checkpoint_module, caplog):
+    """2026-11-26: the recorder failing no longer refuses the tool, but the gap must stay visible: an undo
+    restores the recorded filters, not what the call did beside them, and a debug-only line made an
+    incomplete undo look complete."""
+    class Failing(Effects):
+        def before_call(self, call, step=0):
+            raise ValueError("not serialisable")
+
+    holder = checkpoint_module._test_holder
+    holder.project = Project([Layer("roads")])
+    monkeypatch.setattr(checkpoint_module, "EffectsRecorder", Failing)
+    with caplog.at_level("WARNING", logger="FilterMate.agent"):
+        checkpoint_module.TurnCheckpoint().begin(
+            types.SimpleNamespace(name="set_layer_options", arguments={}))
+    assert "set_layer_options" in caplog.text and "undo restores the filters" in caplog.text
+
+
 def test_a_turn_kept_open_is_recorded(checkpoint_module):
     holder, history = checkpoint_module._test_holder, checkpoint_module._test_service.history
     layer = Layer("roads")
