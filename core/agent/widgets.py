@@ -247,8 +247,12 @@ def layer_filter(widgets: Sequence[Dict[str, Any]], layer_id: str, quote_field: 
     return " AND ".join(f"({part})" for part in parts)
 
 
-def summary(widgets: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """The widgets as the model sees them: what they are, not every value they hold."""
+def summary(widgets: Sequence[Dict[str, Any]], share_values: bool = True) -> List[Dict[str, Any]]:
+    """The widgets as the model sees them: what they are, not every value they hold.
+
+    ``share_values`` False: the range selection stays out (on creation it is the field extremes, audit of
+    2026-11-24), as chart data does; the widget stays listed so the model can still remove it.
+    """
     rows = []
     for widget in widgets:
         row = {"widget_id": widget["id"], "kind": widget["kind"], "layer": widget["layer_name"],
@@ -256,7 +260,9 @@ def summary(widgets: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
         if widget["field"]:
             row["field"] = widget["field"]
         if widget["kind"] == RANGE:
-            row.update(low=widget["low"], high=widget["high"])
+            if share_values:
+                # Unshared, the selection stays out: on creation it is the field extremes (audit of 2026-11-24).
+                row.update(low=widget["low"], high=widget["high"])
         elif widget["kind"] == VALUES:
             row.update(values=len(widget["values"]), ticked=len(widget["chosen"]))
         elif widget["kind"] == CHART:

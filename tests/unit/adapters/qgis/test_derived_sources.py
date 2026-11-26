@@ -27,8 +27,13 @@ def _load():
         package.__path__ = [str(path)]
         sys.modules[_PKG + name] = package
     # restore_snapshot sets subsets through sql_utils: the plain setSubsetString here.
-    for name in (".infrastructure", ".infrastructure.database"):
+    for name in (".infrastructure.database",):
         sys.modules[_PKG + name] = types.ModuleType(_PKG + name)
+    for name, path in ((".infrastructure", _ROOT / "infrastructure"),
+                       (".infrastructure.logging", _ROOT / "infrastructure" / "logging")):
+        package = types.ModuleType(_PKG + name)
+        package.__path__ = [str(path)]
+        sys.modules[_PKG + name] = package
     sql_utils = types.ModuleType(_PKG + ".infrastructure.database.sql_utils")
     sql_utils.safe_set_subset_string = lambda layer, subset: layer.setSubsetString(subset)
     sys.modules[sql_utils.__name__] = sql_utils

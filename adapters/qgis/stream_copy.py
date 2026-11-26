@@ -118,6 +118,18 @@ def stream_base(source: str, provider: str) -> str:
     return uri.uri(False)
 
 
+def same_service(current_source: str, current_provider: str, planned_source: str, planned_provider: str) -> bool:
+    """Whether a layer still reads the service a copy was planned on: the same provider and endpoint, not another
+    service of the same kind (audit of 2026-11-24: the copy of the former service was applied). A filter of the
+    layer does not count: it is not in the endpoint. Without an endpoint on either side, the provider decides."""
+    if (current_provider or '').lower() != (planned_provider or '').lower():
+        return False
+    from qgis.core import QgsDataSourceUri
+    endpoint = QgsDataSourceUri(current_source or '').param('url') or ''
+    planned = QgsDataSourceUri(planned_source or '').param('url') or ''
+    return not endpoint or not planned or endpoint == planned
+
+
 def stream_source_with(base: str, provider: str, subset: str) -> str:
     """The source a project file holds for the service filtered by ``subset``, as QGIS writes it itself."""
     if not subset or (provider or '').lower() not in _FILTER_IN_SOURCE:
@@ -452,15 +464,19 @@ class StreamCopyTask(QgsTask):
             message = writer.errorMessage() if writer is not None else ''
             writer = None
             raise RuntimeError(_tr("the GeoPackage could not be written: {0}").format(message[:200]))
+        # collect_materialization swallows what keep raises: a refused addFeature is flagged here instead, and read
+        # once the read ended (audit of 2026-11-24: a full disk accused the service).
         written = [0]
+        unwritten = []
         total = max(1, plan.limits.max_features)
 
         def keep(feature) -> bool:
-            if not writer.addFeature(feature):
-                raise ValueError('write')
-            written[0] += 1
-            if written[0] % 500 == 0:
-                self.setProgress(min(99.0, 100.0 * written[0] / total))
+            if writer.addFeature(feature):
+                written[0] += 1
+                if written[0] % 500 == 0:
+                    self.setProgress(min(99.0, 100.0 * written[0] / total))
+            else:
+                unwritten.append(True)
             return False  # nothing to collect: the feature is in the file
 
         try:
@@ -472,8 +488,13 @@ class StreamCopyTask(QgsTask):
             writer = None  # flushed and closed here, in this thread
         if outcome.reason == 'cancelled' or self._canceled():
             raise RuntimeError(_tr("the copy was canceled"))
+        if unwritten:
+            # The service answered: the disk (full, unwritable) is at fault, not it (audit of 2026-11-24).
+            raise RuntimeError(_tr("the local copy could not be written (the disk may be full): nothing was kept"))
         if outcome.reason == 'unverified_filter' and not written[0]:
-            raise RuntimeError(_tr("the service gave no feature over the visible map: nothing was copied"))
+            # Nothing arrived and the read could not be verified: a cut answer reads the same as no feature.
+            raise RuntimeError(_tr("the service gave no feature over the visible map, or its answer could not be "
+                                   "read: nothing was kept"))
         if outcome.reason not in ('', 'feature_limit', 'timeout', 'unverified_filter'):
             raise RuntimeError(_tr("the service could not be read to the end: nothing was kept"))
         notes = []
@@ -483,8 +504,15 @@ class StreamCopyTask(QgsTask):
         elif outcome.reason == 'timeout':
             notes.append(_tr("The service was read for {0:.0f} s, the most allowed: the copy holds {1} features and "
                              "is not complete.").format(plan.limits.timeout_seconds, written[0]))
-        return self._record(complete=outcome.reason in ('', 'unverified_filter'), features=written[0],
-                            notes=tuple(notes))
+        complete = outcome.reason in ('', 'unverified_filter')
+        told = outcome.announced
+        if told is not None and written[0] < told and complete:
+            # The service said it holds more than it gave (audit of 2026-11-24: 50 rows read of 5 000
+            # announced, called complete): the copy is kept, but not called complete.
+            complete = False
+            notes.append(_tr("The service announced {0} features but only {1} were read: the copy is not "
+                             "complete.").format(told, written[0]))
+        return self._record(complete=complete, features=written[0], notes=tuple(notes))
 
     def finished(self, result: bool) -> None:  # main thread
         _RESERVED.discard(self.plan.path)
@@ -588,6 +616,135 @@ def switch_to_copy(layer, record: rules.LocalCopy, subset: Optional[str] = None,
     return notes
 
 
+def service_keeps_subset(subset: str) -> bool:
+    """Whether a filter set on the local copy can go back on the service.
+
+    A filter written for the GeoPackage of the copy (``json_each``, a ``fid`` list, SQLite constructs) is not
+    QGIS and the service does not read it: put back as it is, the layer reads everything with the filter text
+    still displayed (audit of 2026-11-24). Only what parses as QGIS goes back; the rest is filtered again.
+    Pure apart from the QGIS parse (the bench reads it in QGIS).
+    """
+    if not subset:
+        return True
+    try:
+        from qgis.core import QgsExpression
+        return bool(QgsExpression(subset).isValid())
+    except (RuntimeError, AttributeError):
+        return False
+
+
+PROFILE_COPY_MAX_AGE_DAYS = 30
+_COPY_GRACE_SECONDS = 60.0  # a file being written is not pruned, even unreferenced
+_COPY_EXTENSIONS = (".gpkg", ".tif", ".tiff", ".vrt", ".ovr", ".aux.xml", ".qmd", ".qlr", ".qml")
+
+
+def _is_managed_copy_name(name: str) -> bool:
+    """Whether the prune may touch this file: only what a copy is made of, never a foreign file."""
+    return (name or "").lower().endswith(_COPY_EXTENSIONS)
+
+
+def _delete_copy_files(path: str) -> None:
+    """Remove a copy and its sidecars (.ovr, .aux.xml, .qmd, after the full name as GDAL writes them); failures
+    are logged, never raised."""
+    for candidate in [path] + ([path + suffix for suffix in (".ovr", ".aux.xml", ".qmd")] if path else []):
+        try:
+            if candidate and os.path.isfile(candidate):
+                os.remove(candidate)
+        except OSError as exc:
+            logger.warning(f"FilterMate local copy: {candidate} not removed: {exc}")
+
+
+def prune_copies(project=None) -> int:
+    """Delete the copies no layer reads any more; returns how many files went.
+
+    The rule, decided with the user (audit of 2026-11-24): a copy is deleted when its layer goes back to its
+    service; what is left (layer removed, copy interrupted, snapshot restored) is pruned when a project opens.
+    In the folder of the project, what no layer of the project references goes; in the profile, what no loaded
+    layer references and older than ``PROFILE_COPY_MAX_AGE_DAYS`` goes (a missing copy falls back to its
+    service, so nothing is lost). Files written less than a minute ago are never touched.
+    """
+    from qgis.core import QgsApplication, QgsProject
+    project = project or QgsProject.instance()
+    referenced = set()
+    for layer in list(project.mapLayers().values()):
+        try:
+            record = record_of(layer)
+        except Exception:
+            continue
+        if record is not None and record.path:
+            referenced.add(os.path.normcase(os.path.abspath(record.path)))
+            stem, _extension = os.path.splitext(os.path.abspath(record.path))
+            referenced.add(os.path.normcase(stem))
+    now = 0.0
+    try:
+        import time
+        now = time.time()
+    except Exception:
+        pass
+
+    def _stale(path: str, folder: str, by_age: bool) -> bool:
+        key = os.path.normcase(os.path.abspath(path))
+        if key in referenced or os.path.normcase(os.path.splitext(key)[0]) in referenced:
+            return False
+        if now and now - os.path.getmtime(path) < _COPY_GRACE_SECONDS:
+            return False
+        if not by_age:
+            return True
+        try:
+            age_days = (now - os.path.getmtime(path)) / 86400.0 if now else 0.0
+        except OSError:
+            return False
+        return age_days > PROFILE_COPY_MAX_AGE_DAYS
+
+    def _prune_folder(folder: str, by_age: bool) -> int:
+        gone = 0
+        try:
+            names = sorted(os.listdir(folder))
+        except OSError:
+            return 0
+        for name in names:
+            if not _is_managed_copy_name(name):
+                continue
+            path = os.path.join(folder, name)
+            try:
+                if not os.path.isfile(path) or not _stale(path, folder, by_age):
+                    continue
+                os.remove(path)
+                gone += 1
+            except OSError as exc:
+                logger.warning(f"FilterMate local copy: {path} not pruned: {exc}")
+        return gone
+
+    deleted = 0
+    try:
+        folder = copy_folder(project)
+    except Exception:
+        folder = ""
+    if folder:
+        deleted += _prune_folder(folder, by_age=False)
+    try:
+        root = os.path.join(QgsApplication.qgisSettingsDirPath(), *rules.PROFILE_PARTS)
+    except Exception:
+        root = ""
+    if root:
+        try:
+            tags = sorted(os.listdir(root))
+        except OSError:
+            tags = []
+        for tag in tags:
+            tag_dir = os.path.join(root, tag)
+            if os.path.isdir(tag_dir):
+                deleted += _prune_folder(tag_dir, by_age=True)
+                try:
+                    if not os.listdir(tag_dir):
+                        os.rmdir(tag_dir)
+                except OSError:
+                    pass
+    if deleted:
+        logger.info(f"FilterMate local copies: {deleted} file(s) no layer reads pruned")
+    return deleted
+
+
 def switch_to_stream(layer, keep_record: bool = False) -> List[str]:
     """``layer`` reads its service again; the file of the copy is left where it is. Returns notes.
 
@@ -603,14 +760,27 @@ def switch_to_stream(layer, keep_record: bool = False) -> List[str]:
     if _editing(layer):
         raise RuntimeError(_tr("This layer is being edited: save or discard the edits, then go back to its service."))
     subset = layer.subsetString() if hasattr(layer, 'subsetString') else ''
-    # The service without a filter of its own: the filter the layer has now goes on it, or none.
+    # The service without a filter of its own: the filter the layer has now goes on it, or none. A filter set
+    # on the copy in the language of the copy (json_each, fid) does not go: the service would read everything
+    # with the filter text still displayed (audit of 2026-11-24).
+    if not service_keeps_subset(subset):
+        subset = ''
+        dropped = True
+    else:
+        dropped = False
     if not swap_source(layer, stream_base(record.stream_source, record.stream_provider), record.stream_provider):
         raise RuntimeError(_tr("The service could not be opened: the layer still reads its copy."))
     notes = []
+    if dropped:
+        # The existing string: from the layer's side the filter is not back on the service either way.
+        notes.append(_tr("Its filter could not be put back on the service: filter it again."))
     if hasattr(layer, 'setSubsetString') and layer.subsetString() != subset:
         if not layer.setSubsetString(subset):
             notes.append(_tr("Its filter could not be put back on the service: filter it again."))
     if not keep_record:
+        # The file is read by nothing any more: it goes now, not at the next opening (audit of 2026-11-24:
+        # copies were never deleted). On unload (keep_record) it stays for the reattach.
+        _delete_copy_files(record.path)
         layer.removeCustomProperty(rules.PROPERTY)
     layer.triggerRepaint()
     return notes
@@ -750,7 +920,35 @@ def reattach_project(project=None) -> Tuple[int, List[str]]:
             _MISSING.add(layer.id())
     if reattached or missing:
         logger.info(f"FilterMate local copies: {reattached} found again, missing for {missing}")
+    try:
+        prune_copies(project)
+    except Exception as exc:
+        logger.warning(f"FilterMate local copies not pruned: {exc}")
     return reattached, missing
+
+
+def evict_service_cache() -> bool:
+    """Forget what QGIS cached of the services, so that reading one again reads it anew.
+
+    "Copy again" was served by the network cache of QGIS when the server sends no cache headers: no GetFeature
+    went out and the old data came back with today's date (audit of 2026-11-24). The disk cache has no
+    per-endpoint eviction, so the whole cache goes; a copy made again is an explicit read anew, worth it.
+    Main thread (the copy task has not started yet).
+    """
+    try:
+        from qgis.core import QgsNetworkAccessManager
+        manager = QgsNetworkAccessManager.instance()
+        cache = manager.cache() if manager is not None else None
+    except (RuntimeError, AttributeError):
+        return False
+    if cache is None:
+        return False
+    try:
+        cache.clear()
+    except (RuntimeError, AttributeError):
+        return False
+    logger.info("FilterMate local copy: the network cache was forgotten before reading the service again")
+    return True
 
 
 def recopy_plan(layer) -> Tuple[CopyPlan, Optional[rules.LocalCopy]]:
@@ -775,6 +973,10 @@ def recopy_plan(layer) -> Tuple[CopyPlan, Optional[rules.LocalCopy]]:
     plan = plan_copy(layer, area, crs, width)
     if plan.refusal:
         back_to(layer, record)
+        return plan, record
+    # After the plan read the service (snapshots, counts) and before the task does: the task must read the
+    # service anew, not the cache.
+    evict_service_cache()
     return plan, record
 
 

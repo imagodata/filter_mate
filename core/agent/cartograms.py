@@ -40,8 +40,12 @@ def _np():
 
 
 def ring_area(ring) -> float:
-    """Signed area of a ring (shoelace)."""
+    """Signed area of a ring (shoelace), from a local origin: large projected coordinates cancel otherwise
+    (audit of 2026-11-24: the centroid of a mini-square at Lambert-93 came out kilometres away)."""
     x, y = ring[:, 0], ring[:, 1]
+    if len(x) == 0:
+        return 0.0
+    x, y = x - x[0], y - y[0]
     return 0.5 * float((x[:-1] * y[1:] - x[1:] * y[:-1]).sum())
 
 
@@ -62,12 +66,16 @@ def centroid(parts: Sequence[Sequence[Any]]) -> Tuple[float, float]:
     for polygon in parts:
         for index, ring in enumerate(polygon):
             x, y = ring[:, 0], ring[:, 1]
+            if len(x) == 0:
+                continue
+            ox, oy = x[0], y[0]  # local origin: the centroid is translation-equivariant, the cancellation is not
+            x, y = x - ox, y - oy
             cross = x[:-1] * y[1:] - x[1:] * y[:-1]
             signed = 0.5 * float(cross.sum())
             if abs(signed) < 1e-12:
                 continue
-            ring_x = float(((x[:-1] + x[1:]) * cross).sum()) / (6.0 * signed)  # whatever the winding
-            ring_y = float(((y[:-1] + y[1:]) * cross).sum()) / (6.0 * signed)
+            ring_x = float(((x[:-1] + x[1:]) * cross).sum()) / (6.0 * signed) + ox  # whatever the winding
+            ring_y = float(((y[:-1] + y[1:]) * cross).sum()) / (6.0 * signed) + oy
             weight = abs(signed) if index == 0 else -abs(signed)
             sum_x += weight * ring_x
             sum_y += weight * ring_y
@@ -110,9 +118,12 @@ def errors(features: Sequence[Dict[str, Any]]) -> float:
     return sum(ratios) / len(ratios)
 
 
-def contiguous(features: Sequence[Dict[str, Any]], iterations: int = DEFAULT_ITERATIONS
-               ) -> Tuple[List[Dict[str, Any]], List[float]]:
-    """The features with their rings moved, and the mean error after each iteration (the first is before any)."""
+def contiguous(features: Sequence[Dict[str, Any]], iterations: int = DEFAULT_ITERATIONS,
+               is_canceled=None) -> Tuple[List[Dict[str, Any]], List[float]]:
+    """The features with their rings moved, and the mean error after each iteration (the first is before any).
+
+    ``is_canceled``: called before each iteration (a long run on the main thread cannot be stopped otherwise:
+    audit of 2026-11-24, 7.2 s without cancellation)."""
     np = _np()
     values = _values(features)
     if not 1 <= iterations <= MAX_ITERATIONS:
@@ -146,6 +157,8 @@ def contiguous(features: Sequence[Dict[str, Any]], iterations: int = DEFAULT_ITE
         return made
 
     for _ in range(iterations):
+        if is_canceled is not None and is_canceled():
+            raise CartogramError("the cartogram was canceled")
         current = shaped()
         areas = np.array([area(feature["parts"]) for feature in current])
         centres = np.array([centroid(feature["parts"]) for feature in current])
@@ -154,7 +167,11 @@ def contiguous(features: Sequence[Dict[str, Any]], iterations: int = DEFAULT_ITE
         safe_areas, safe_wanted = np.maximum(areas, 1e-9), np.maximum(wanted, 1e-9)
         ratio = np.maximum(safe_areas, safe_wanted) / np.minimum(safe_areas, safe_wanted)
         history.append(float(ratio.mean()))
-        reduction = 1.0 / (1.0 + float(ratio.mean()))
+        # A polygon showing nothing (value 0 or missing) shrinks away, but its wanted area of 0 makes its ratio
+        # astronomical: in the mean it froze every step to ~0 and nothing moved (audit of 2026-11-24). Only the
+        # polygons showing something drive the step size.
+        showing = wanted > 0
+        reduction = 1.0 / (1.0 + (float(ratio[showing].mean()) if showing.any() else 0.0))
         radius = np.sqrt(safe_areas / math.pi)
         mass = np.sqrt(safe_wanted / math.pi) - radius
         shift = np.zeros_like(points)
@@ -191,10 +208,11 @@ def noncontiguous(features: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 
 def symbols(features: Sequence[Dict[str, Any]], squares: bool = False, steps: int = SYMBOL_STEPS,
-            total_area: Optional[float] = None) -> List[Tuple[float, float, float]]:
+            total_area: Optional[float] = None, is_canceled=None) -> List[Tuple[float, float, float]]:
     """``(x, y, size)`` per feature: a circle (size its radius) or a square (size half its side) whose area is its
     value, moved apart until none overlap and pulled back towards its feature. ``total_area``: what the symbols
-    share (``SYMBOL_SHARE`` of it); the area of the polygons by default, the extent of points for points."""
+    share (``SYMBOL_SHARE`` of it); the area of the polygons by default, the extent of points for points.
+    ``is_canceled``: called before each step, as in :func:`contiguous`."""
     np = _np()
     values = np.array(_values(features))
     if len(features) > MAX_SYMBOLS:
@@ -211,6 +229,8 @@ def symbols(features: Sequence[Dict[str, Any]], squares: bool = False, steps: in
     count = len(features)
     if count > 1:
         for _ in range(steps):
+            if is_canceled is not None and is_canceled():
+                raise CartogramError("the cartogram was canceled")
             delta = positions[:, None, :] - positions[None, :, :]
             reach = sizes[:, None] + sizes[None, :]
             np.fill_diagonal(reach, 0.0)

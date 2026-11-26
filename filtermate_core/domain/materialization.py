@@ -6,7 +6,7 @@ This module owns no QGIS objects and never formats a key literal.
 import math
 import time
 from dataclasses import dataclass
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple
 
 from .source_capability import REMOTE_KEY_LIST_LIMIT
 
@@ -36,12 +36,17 @@ class MaterializationOutcome:
 
     ``feature_limit`` and ``timeout`` may carry partial keys. Cancellation,
     errors and key overflow carry no keys and must never change a subset.
+    ``announced`` is what the service said it holds (WFS ``numberMatched``):
+    fewer rows read means the service cut the answer short, even on clean
+    exhaustion (audit of 2026-11-24: 50 rows read of 5 000 announced, called
+    complete).
     """
 
     keys: Tuple[Any, ...] = ()
     complete: bool = False
     fetched: int = 0
     reason: str = ""
+    announced: Optional[int] = None
 
 
 def collect_materialization(features, key, matches, limits, is_cancelled=lambda: False, clock=time.monotonic):

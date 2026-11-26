@@ -274,6 +274,46 @@ def main():
           not project.layoutManager().layoutByName("Carte").atlas().enabled(), off)
     check("export: an atlas turned off is refused", refused(lambda: layouts.export_layout("Carte", folder, atlas=True)))
 
+    # --- audit of 2026-11-24 (lot 6): created layouts undone by fingerprint, empty atlas names, HTML texts.
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("n1", "create_layout", {"layout": "Brouillon"}))
+    layouts.create_layout("Brouillon", title="Brouillon", extent_layer="communes")
+    effects = recorder.finish()
+    check("a created layout is an effect of the turn", [effect[0] for effect in effects] == ["layout"],
+          [effect[0] for effect in effects])
+    done, left = apply_effects(effects, undo=True)
+    check("undo: a layout the turn made and nobody touched goes",
+          not left and project.layoutManager().layoutByName("Brouillon") is None, (done, left))
+    apply_effects(effects, undo=False)
+    check("redo: a layout taken away comes back",
+          project.layoutManager().layoutByName("Brouillon") is not None)
+    from qgis.core import QgsLayoutItemLabel
+    touched = project.layoutManager().layoutByName("Brouillon")
+    next(item for item in touched.items() if isinstance(item, QgsLayoutItemLabel)).setText("retouché en atelier")
+    done, left = apply_effects(effects, undo=True)
+    check("undo: a layout the user retouched stays, and is said",
+          left == ["Brouillon"] and project.layoutManager().layoutByName("Brouillon") is not None, (done, left))
+
+    layouts.set_atlas("Carte", "communes", filter_expression="\"pop\" > 300",
+                      file_name="if(\"pop\" > 1000000, \"nom\", '')")
+    empties = layouts.export_layout("Carte", folder, "pdf", dpi=72, atlas=True, single_file=False)
+    listed = sorted(os.listdir(empties["path"]))
+    check("atlas: a page with an empty file name stays in the folder, counted",
+          empties["files"] == empties["pages"] == 4
+          and listed == [f"Carte_{number:03d}.pdf" for number in range(1, 5)], (empties, listed))
+
+    html_label = next(item for item in project.layoutManager().layoutByName("Carte").items()
+                      if isinstance(item, QgsLayoutItemLabel))
+    ModeHtml = getattr(QgsLayoutItemLabel, "ModeHtml",
+                       getattr(getattr(QgsLayoutItemLabel, "Mode", None), "ModeHtml", 1))
+    html_label.setMode(ModeHtml)
+    check("the bench label is in HTML mode", html_label.mode() == ModeHtml, html_label.mode())
+    layouts.edit_layout("Carte", [{"do": "set_text", "ref": layouts.item_ref(html_label),
+                                   "text": "<script>alert(1)</script>Suite [% \"nom\" %]"}])
+    stored = html_label.text()
+    check("set_text on an HTML label: scripts show literally, expressions still evaluate",
+          "<script" not in stored and '[% "nom" %]' in stored, stored[:160])
+
 
 if __name__ == "__main__":
     app = QgsApplication([b"check_agent_layouts"], False)

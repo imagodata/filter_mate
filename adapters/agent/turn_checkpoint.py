@@ -109,7 +109,11 @@ class TurnCheckpoint:
         self._calls.append(call)
         self._step_recorder = EffectsRecorder(settings=False)
         if call is not None:
-            self._effects.before_call(call, len(self._steps) - 1)
+            try:  # the filters are recorded above; what a call did beside them never keeps it from running
+                # (audit of 2026-11-24: any failure here refused the tool with "undo point could not be made")
+                self._effects.before_call(call, len(self._steps) - 1)
+            except Exception:  # noqa: BLE001
+                logger.debug("Agent undo: what the call did beside the filters not recorded", exc_info=True)
             try:  # what a step did is for "undo back to here" only: it never keeps a change from being made
                 self._step_recorder.before_call(call)
             except Exception:  # noqa: BLE001

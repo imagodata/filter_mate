@@ -24,6 +24,8 @@ Favorite = Dict[str, Any]
 
 EMPTY = (None, "", [], {})
 
+VOLATILE = ("id", "created_at", "updated_at")
+
 
 def _portable(favorite: Favorite) -> Favorite:
     """What of a favorite the project carries: no usage, no empty value (the SQLite gives None where a favorite made
@@ -58,6 +60,13 @@ def read_payload(text: Optional[str]) -> Tuple[Optional[List[Favorite]], bool]:
     return rows, data.get("authoritative") is True
 
 
+def identity(favorite: Favorite) -> Favorite:
+    """What makes two rows the same favorite under two ids: everything the project carries but the id and the
+    dates (a copy of the project opened on this computer derives new ids, and another computer stamps its own
+    dates, for the same filter)."""
+    return {key: value for key, value in _portable(favorite).items() if key not in VOLATILE}
+
+
 def file_ids(stored: Optional[List[Favorite]]) -> List[str]:
     """The ids a project file carries: what this computer remembers of it, to tell a favorite removed elsewhere from
     one made here and never saved."""
@@ -81,19 +90,33 @@ def reconcile(local: List[Favorite], stored: Optional[List[Favorite]], authorita
     by_id = {row.get("id"): row for row in local if row.get("id")}
     if authoritative:
         result = []
+        remembered = set(known or [])
+        stored_ids = {row.get("id") for row in stored}
+        # Favorites made here the file never had (not saved yet, or a project this computer cannot write): they
+        # stay, unless a row of the file is the same favorite under another id. A copy of the project opened on
+        # this computer derives new ids at the previous opening; without this the stored row and its derived
+        # double were both kept and the next sync failed (UNIQUE constraint failed: fm_favorites.id, audit of
+        # 2026-11-24 #1). The row of the file then adopts the local one, whose id and usage stay.
+        unmatched = [dict(row) for row in local
+                     if row.get("id") not in stored_ids and row.get("id") not in remembered]
         for row in stored:
             row = dict(row)
             row["id"] = row.get("id") or str(uuid.uuid4())
             mine = by_id.get(row["id"])
+            if mine is None:
+                match = next((candidate for candidate in unmatched
+                              if identity(candidate) == identity(row)), None)
+                if match is not None:
+                    unmatched.remove(match)
+                    result.append(match)
+                    continue
             for key in LOCAL_ONLY:
                 if mine is not None and key in mine:
                     row[key] = mine[key]
                 else:
                     row.pop(key, None)
             result.append(row)
-        stored_ids = {row["id"] for row in result}
-        remembered = set(known or [])
-        result += [dict(row) for row in local if row.get("id") not in stored_ids and row.get("id") not in remembered]
+        result.extend(unmatched)
         return result
     result = [dict(row) for row in local]
     for row in stored:

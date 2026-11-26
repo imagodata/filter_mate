@@ -81,6 +81,38 @@ def mask_sensitive_text(text: Any) -> Any:
     return _mask_urls(masked)
 
 
+def _home_folders() -> list:
+    """The folders that name this machine's user: the home folder and its Windows variants."""
+    import os
+    candidates = [os.path.expanduser("~")]
+    for variable in ("HOME", "USERPROFILE"):
+        value = os.environ.get(variable, "")
+        if value:
+            candidates.append(value)
+    drive, path = os.environ.get("HOMEDRIVE", ""), os.environ.get("HOMEPATH", "")
+    if drive or path:
+        candidates.append(drive + path)
+    folders = sorted({os.path.normcase(os.path.abspath(value)) for value in candidates if value}, key=len,
+                     reverse=True)
+    return [folder for folder in folders if folder and folder not in (os.path.sep, "", ".")]
+
+
+def mask_home_dir(text: Any) -> Any:
+    """Replace the home folder with ``~``: failure messages reach the model, usernames must not (audit of
+    2026-11-24: the messages of a failed export sent the absolute path of the machine). Pure (unit tests)."""
+    import os
+    import re
+    if not isinstance(text, str):
+        return text
+    for folder in _home_folders():
+        pattern = re.escape(folder.rstrip(os.path.sep))
+        if not pattern:
+            continue
+        flags = re.IGNORECASE if os.name == "nt" else 0
+        text = re.sub(pattern + r"(?=[\\/]|$)", "~", text, flags=flags)
+    return text
+
+
 def mask_uri_secrets(text: Any) -> Any:
     """Replace the password of a connection string / URI found in a text by ``***``.
 

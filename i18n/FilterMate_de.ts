@@ -323,6 +323,11 @@ Sind Sie einverstanden?</translation>
         <translation>Stoppen Sie die Anfrage oder warten Sie ihr Ende ab, um die Einstellungen zu öffnen.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Eine Anfrage läuft bereits: Warten Sie ihr Ende ab, oder stoppen Sie sie.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Das Gedächtnis konnte nicht gespeichert werden: {}</translation>
@@ -2025,6 +2030,16 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Notizen von einem Projekt zum nächsten behalten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Die Anfragen aller Projekte behalten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Die Registerkarte Alle Projekte des Verlaufs: was gefragt wurde, wo und wann, auf diesem Computer gespeichert.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Mehrere Tags durch Kommas trennen.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Der Name darf nicht leer sein.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Dieses Projekt ist schreibgeschützt: die Änderung gilt nur für diese Sitzung.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Ordner: {6}</translation>
         <translation>Der Dienst wurde {0:.0f} s lang gelesen, dem erlaubten Maximum: Die Kopie enthält {1} Objekte und ist nicht vollständig.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Der Dienst gab {0} Objekte an, aber nur {1} wurden gelesen: Die Kopie ist nicht vollständig.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Die Nutzungsbedingungen von {0} verbieten das Aufbewahren seiner Kacheln: Dieser Layer wird nicht kopiert. Eine andere Hintergrundkarte kann kopiert werden (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Ordner: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>der Dienst konnte nicht bis zum Ende gelesen werden: Nichts wurde behalten</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>die lokale Kopie konnte nicht geschrieben werden (die Festplatte ist möglicherweise voll): nichts wurde behalten</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>der Dienst lieferte kein Objekt über der sichtbaren Karte, oder seine Antwort konnte nicht gelesen werden: nichts wurde behalten</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

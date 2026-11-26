@@ -91,6 +91,39 @@ def main():
     check("QGIS writes its profile there too",
           _path(QgsApplication.qgisSettingsDirPath()).startswith(profile), QgsApplication.qgisSettingsDirPath())
     check("Processing is initialised", QgsApplication.processingRegistry().algorithmById("native:buffer") is not None)
+    check("caches go to the application's folders, not ~/.cache",
+          _path(os.environ.get("XDG_CACHE_HOME", "")).startswith(_path(os.environ.get("FILTERMATE_HOME", "")))
+          and bool(os.environ.get("FILTERMATE_HOME")), os.environ.get("XDG_CACHE_HOME", ""))
+    check("GRASS keeps its files in the profile, not ~/.grass8",
+          _path(os.environ.get("GISRC", "")).startswith(profile), os.environ.get("GISRC", ""))
+    check("no .grass8 was written beside the home folder",
+          not os.path.exists(os.path.join(os.path.expanduser("~"), ".grass8")))
+
+    # --- the keyring (audit of 2026-11-24, lot 8): the application's own master password, not the wallet's,
+    # so the key of the agent is stored without asking.
+    password_file = os.environ.get("QGIS_AUTH_PASSWORD_FILE", "")
+    home = _path(os.environ.get("FILTERMATE_HOME", ""))
+    check("the master password comes from the application's own file",
+          bool(password_file) and bool(home) and _path(password_file).startswith(home), password_file)
+    if password_file and os.path.isfile(password_file):
+        if os.name != "nt":
+            import stat
+            mode = stat.S_IMODE(os.stat(password_file).st_mode)
+            check("the master password file is readable by its owner only", mode == 0o600, oct(mode))
+        stored = None
+        try:
+            from filter_mate.adapters.agent.settings import delete_key, read_key, store_key
+            stored = store_key("bench-key")
+            read = read_key(stored)
+            check("the key of the agent is stored without asking", read == "bench-key")
+        except Exception as exc:
+            check("the key of the agent is stored without asking", False, f"{type(exc).__name__}: {exc}")
+        finally:
+            try:
+                if stored is not None:
+                    delete_key(stored)
+            except Exception:
+                pass
 
     # --- the plugin, loaded as QGIS loads it --------------------------------------------------------------------
     if not check("FilterMate is registered in qgis.utils.plugins", plugin is not None):

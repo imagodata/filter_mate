@@ -323,6 +323,11 @@ Do you agree?</source>
         <translation>설정을 열려면 요청을 중지하거나 끝날 때까지 기다리세요.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>요청이 이미 실행 중입니다. 끝날 때까지 기다리거나 중지하세요.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>메모리를 저장할 수 없습니다: {}</translation>
@@ -2025,6 +2030,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>프로젝트 간에 메모 유지</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>모든 프로젝트의 요청 유지</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>기록의 모든 프로젝트 탭: 무엇을, 어디서, 언제 요청했는지 이 컴퓨터에 보관됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Separate multiple tags with commas.</source>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>이름은 비워 둘 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>이 프로젝트는 읽기 전용입니다. 변경 사항은 이 세션에만 유지됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Folder: {6}</source>
         <translation>서비스를 허용된 최대 시간인 {0:.0f}초 동안 읽었습니다. 복사본에는 피처 {1}개가 있으며 완전하지 않습니다.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>서비스에서 피처 {0}개를 알렸지만 {1}개만 읽었습니다. 복사본이 완전하지 않습니다.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>{0}의 약관은 타일 보관을 금지합니다. 이 레이어는 복사되지 않습니다. 다른 배경 지도(IGN, Carto, OpenTopoMap 등)는 복사할 수 있습니다.</translation>
@@ -13837,6 +13862,16 @@ Folder: {6}</source>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>서비스를 끝까지 읽을 수 없어 아무것도 보관하지 않았습니다</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>로컬 복사본을 쓸 수 없습니다(디스크가 가득 찼을 수 있음): 아무것도 유지되지 않았습니다</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>서비스가 보이는 지도 위에 피처를 제공하지 않았거나 응답을 읽을 수 없습니다: 아무것도 유지되지 않았습니다</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

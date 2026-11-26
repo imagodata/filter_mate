@@ -323,6 +323,11 @@ Gaat u akkoord?</translation>
         <translation>Stop het verzoek, of wacht tot het klaar is, om de instellingen te openen.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Er loopt al een verzoek: wacht tot het klaar is, of stop het.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Het geheugen kon niet worden opgeslagen: {}</translation>
@@ -2025,6 +2030,16 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Notities van het ene project naar het volgende bewaren</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>De verzoeken van elk project bewaren</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Het tabblad Alle projecten van de geschiedenis: wat er is gevraagd, waar en wanneer, bewaard op deze computer.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Scheid meerdere tags met komma's.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>De naam mag niet leeg zijn.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Dit project is alleen-lezen: de wijziging wordt alleen voor deze sessie bewaard.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Map: {6}</translation>
         <translation>De dienst is {0:.0f} s lang gelezen, het toegestane maximum: de kopie bevat {1} objecten en is niet volledig.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>De dienst meldde {0} objecten aan, maar er zijn er slechts {1} gelezen: de kopie is niet volledig.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>De voorwaarden van {0} verbieden het bewaren van de tegels: deze laag wordt niet gekopieerd. Een andere achtergrondkaart kan wel worden gekopieerd (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Map: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>de dienst kon niet tot het einde worden gelezen: er is niets bewaard</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>de lokale kopie kon niet worden geschreven (de schijf is mogelijk vol): er is niets bewaard</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>de dienst gaf geen object over de zichtbare kaart, of het antwoord kon niet worden gelezen: er is niets bewaard</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

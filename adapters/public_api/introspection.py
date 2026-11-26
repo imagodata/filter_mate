@@ -458,8 +458,13 @@ def _checked_expression(layer, expression: str) -> str:
 
 def _request(layer, attributes: List[int], geometry: bool, selected_only: bool, expression: str = ''):
     """A request for these attributes only, of the selected features or of those matching ``expression``."""
-    from qgis.core import QgsFeatureRequest
+    from qgis.core import QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
     request = QgsFeatureRequest()
+    context = QgsExpressionContext()
+    # The variables of the project and of the layer ($area and $x need none, but what the guard allows tomorrow
+    # might): without them a variable of the project reads empty (audit of 2026-11-24).
+    context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(layer))
+    request.setExpressionContext(context)
     request.setSubsetOfAttributes(attributes)
     if not geometry:
         request.setFlags(QgsFeatureRequest.Flag.NoGeometry)

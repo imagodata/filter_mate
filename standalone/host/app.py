@@ -27,12 +27,25 @@ def prepare_environment(options) -> str:
     profile = os.path.abspath(os.path.expanduser(options.profile or os.environ.get("FILTERMATE_PROFILE") or paths.profile_dir()))
     os.makedirs(profile, exist_ok=True)
     os.environ["QGIS_CUSTOM_CONFIG_PATH"] = profile
+    # The application's own master password (its keyring entry): without it QGIS would read the master
+    # password of the real QGIS from the wallet of the system, or ask for one through a password box that is
+    # not installed here, so the key of the agent could never be stored (audit of 2026-11-24).
+    try:
+        os.environ["QGIS_AUTH_PASSWORD_FILE"] = paths.auth_password_file()
+    except OSError as exc:
+        print(f"FilterMate standalone: the master password file cannot be written ({exc}): the keyring of "
+              f"the system will be used instead", file=sys.stderr)
     if not os.environ.get("FILTERMATE_LOG_DIR"):
         os.environ["FILTERMATE_LOG_DIR"] = paths.log_dir()
     try:
         os.makedirs(os.environ["FILTERMATE_LOG_DIR"], exist_ok=True)
     except OSError:
         pass
+    # Processing (GRASS) and the Qt libraries write beside $HOME (~/.grass8, ~/.cache): keep them in the
+    # application's folders instead (audit of 2026-11-24). Only when the user did not choose: an explicit
+    # XDG_CACHE_HOME, GISRC or GRASS session keeps working as it does.
+    os.environ.setdefault("XDG_CACHE_HOME", paths.cache_dir())
+    os.environ.setdefault("GISRC", paths.grassrc_file())
     return profile
 
 

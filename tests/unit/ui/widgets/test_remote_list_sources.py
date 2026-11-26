@@ -48,6 +48,9 @@ class Expression:
     def isField(self):
         return True
 
+    def isValid(self):
+        return True
+
     def referencedColumns(self):
         return {self.text}
 
@@ -55,7 +58,7 @@ class Expression:
         return False
 
 
-def _method(name):
+def _method(name, extra=None):
     tree = ast.parse(PATH.read_text())
     cls = next(node for node in tree.body if isinstance(node, ast.ClassDef)
                and node.name == 'QgsCheckableComboBoxFeaturesListPickerWidget')
@@ -63,6 +66,8 @@ def _method(name):
     namespace = {'__name__': 'filter_mate.ui.widgets.custom_widgets', '__package__': 'filter_mate.ui.widgets',
                  'is_layer_valid': lambda layer: True, 'QgsFeatureRequest': Request, 'QgsExpression': Expression,
                  'feature_picker_limit': lambda: 1000, 'time': time}
+    if extra:
+        namespace.update(extra)
     exec(compile(ast.Module(body=[node], type_ignores=[]), str(PATH), 'exec'), namespace)
     return namespace[name]
 
@@ -96,9 +101,11 @@ def widget(monkeypatch):
         rows_widget.getLimit.return_value = 1000
         rows_widget.getIdentifierFieldName.return_value = 'id'
         rows_widget.getDisplayExpression.return_value = 'name'
+        rows_widget.getFilterExpression.return_value = ''
         widget_class = type('Widget', (), {
             '_row_from_feature': staticmethod(lambda feature, identifier, expression, expr, context: ('row', feature)),
-            '_build_identifier_lookup_request': staticmethod(lambda *args: Request())})
+            '_build_identifier_lookup_request': staticmethod(lambda *args: Request()),
+            '_combine_filter_expressions': staticmethod(_method('_combine_filter_expressions'))})
         state = widget_class()
         state.__dict__.update(
             layer=layer, list_widgets={'layer': rows_widget}, _sort_order='ASC', tr=lambda text: text,
@@ -106,7 +113,8 @@ def widget(monkeypatch):
             _identifier_is_numeric=lambda: True, _make_display_evaluator=MagicMock(return_value=(None, None)),
             _row_attributes=lambda expression, identifier: ['id', 'name'], _population_loading=MagicMock(),
             _search_expression=MagicMock(), _display_expression_sql=MagicMock(),
-            _apply_population=MagicMock(), _recover_remote_rows=MagicMock(), select_all=MagicMock())
+            _apply_population=MagicMock(), _recover_remote_rows=MagicMock(), select_all=MagicMock(),
+            _defer_populate_while_canvas_draws=lambda *args: False, _orders_server_side=lambda: True)
         state._populate = MethodType(_method('_populate_features_async'), state)
         return SimpleNamespace(state=state, submit=async_query.submit_query, warning=feedback.show_warning,
                                rows=rows_widget)
@@ -171,3 +179,50 @@ def test_an_invalid_display_expression_is_listed_in_a_task(widget, service):
     env.state._populate('"removed_field"')
     env.submit.assert_called_once()
     env.warning.assert_not_called()
+
+
+LINK = '"name" LIKE \'east%\''
+
+
+def test_the_link_expression_filters_the_rows_read(widget):
+    """Audit of 2026-11-24: the multiple list of EXPLORING never applied the custom expression of the link
+    ("name" LIKE 'east%' left the four rows displayed)."""
+    env = widget(service=False, rows=4)
+    env.rows.getFilterExpression.return_value = LINK
+    env.state._populate('name')
+    compute = env.submit.call_args.args[4]
+    seen = []
+    task = SimpleNamespace(features=lambda request: seen.append(request) or iter([0, 1]), isCanceled=lambda: False)
+    rows, truncated, scanned = compute(task)
+    assert seen[0].expression == f"({LINK})"
+    assert [fid for _, fid in rows] == [0, 1]
+
+
+def test_the_link_expression_combines_with_the_search(widget):
+    env = widget(service=False, rows=4)
+    env.rows.getFilterExpression.return_value = LINK
+    env.state._populate('name', search_text='eastern')
+    compute = env.submit.call_args.args[4]
+    seen = []
+    task = SimpleNamespace(features=lambda request: seen.append(request) or iter([]), isCanceled=lambda: False)
+    compute(task)
+    assert LINK in seen[0].expression and 'AND' in seen[0].expression
+
+
+def test_the_link_expression_filters_the_rows_read_synchronously(widget, monkeypatch):
+    """The same through the synchronous path, taken by the local layers of the audit."""
+    import types as _types
+    env = widget(service=False, rows=4)
+    probe = _types.ModuleType('filter_mate.adapters.qgis.source_capability_probe')
+    probe.counts_cheaply = lambda layer: True
+    monkeypatch.setitem(sys.modules, probe.__name__, probe)
+    env.rows.getFilterExpression.return_value = LINK
+    env.rows.getLimit.return_value = 0
+    env.rows.count.return_value = 0
+    seen = []
+    populate_sync = MethodType(
+        _method('_populate_features_sync', {'safe_iterate_features': lambda layer, request: seen.append(request)
+                                            or iter([0, 1, 2, 3]), 'POPULATE_DEDUPE_SECONDS': 3.0}), env.state)
+    populate_sync('name')
+    assert seen[0].expression == f"({LINK})"
+    env.state._apply_population.assert_called_once()

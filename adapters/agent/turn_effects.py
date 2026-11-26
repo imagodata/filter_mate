@@ -976,12 +976,19 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                 else:
                     done.append(effect[4])
             elif kind == "layout":
+                from ..public_api.layouts import fingerprint, fingerprint_of_xml
                 manager = project.layoutManager()
                 layout = manager.layoutByName(effect[4])
                 if undo:
-                    if layout is not None:
+                    if layout is None:
+                        done.append(effect[4])  # the user removed it meanwhile: nothing to take away
+                    elif fingerprint(layout) != fingerprint_of_xml(effect[2]):
+                        # Retouched in the designer, or another layout of the same name made since the turn made
+                        # it (audit of 2026-11-24): their work stays, named among what is left as it is.
+                        left.append(effect[4])
+                    else:
                         manager.removeLayout(layout)
-                    done.append(effect[4])
+                        done.append(effect[4])
                 elif layout is None:
                     from ..public_api.layouts import layout_from_xml
                     (done if layout_from_xml(effect[2]) else left).append(effect[4])

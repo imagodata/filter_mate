@@ -323,6 +323,11 @@ Hi esteu d'acord?</translation>
         <translation>Atureu la sol·licitud, o espereu que acabi, per obrir la configuració.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Ja hi ha una sol·licitud en curs: espereu que acabi, o atureu-la.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>No s'ha pogut desar la memòria: {}</translation>
@@ -2025,6 +2030,16 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Conserva notes d'un projecte a l'altre</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Conserva les sol·licituds de cada projecte</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>La pestanya Tots els projectes de l'historial: què s'ha demanat, on i quan, guardat en aquest ordinador.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Separeu múltiples etiquetes amb comes.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>El nom no pot estar buit.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Aquest projecte és de només lectura: el canvi es conserva només en aquesta sessió.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Carpeta: {6}</translation>
         <translation>El servei s'ha llegit durant {0:.0f} s, el màxim permès: la còpia conté {1} entitats i no està completa.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>El servei va anunciar {0} entitats, però només se n'han llegit {1}: la còpia no està completa.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Les condicions de {0} prohibeixen conservar-ne les tessel·les: aquesta capa no es copia. Un altre mapa base sí que es pot copiar (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Carpeta: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>no s'ha pogut llegir el servei fins al final: no s'ha conservat res</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>no s'ha pogut escriure la còpia local (el disc pot estar ple): no s'ha conservat res</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>el servei no ha retornat cap entitat sobre el mapa visible, o la seva resposta no s'ha pogut llegir: no s'ha conservat res</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

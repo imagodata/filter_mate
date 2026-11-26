@@ -20,9 +20,23 @@ from extensions.favorites_sharing.remote_repo_manager import (
     RemoteRepo,
     RemoteRepoManager,
     RepoStatus,
+    _repo_path,
     is_valid_bundle_name,
     is_valid_commit_email,
 )
+
+
+@pytest.mark.parametrize("first, second, same", [
+    ("https://git.example/groupe/favs.git", "https://other.example:8443/groupe/favs.git", True),
+    ("git@example:groupe/favs.git", "https://example/groupe/favs", True),
+    ("https://git.example/groupe/favs.git", "https://other.example/autre.git", False),
+    ("/srv/git/favs.git", "/srv/git/favs", True),
+    ("", "https://git.example/groupe/favs.git", False),
+])
+def test_repo_path_compares_repositories_not_addresses(first, second, same):
+    """Audit of 2026-11-24: the origin of a clone of another repository was rewritten without warning."""
+    assert (_repo_path(first) == _repo_path(second)) == same
+    assert _repo_path(first) != "" or first == ""
 
 GIT_AVAILABLE = shutil.which("git") is not None
 

@@ -11,15 +11,22 @@ import json
 from typing import Any, Dict, List, Sequence
 
 MAX_ENTRIES = 300
-MAX_REQUEST = 500  # characters of a request kept
+MAX_REQUEST = 500  # characters of a request shown in the history
+MAX_STORED = 4000  # characters of a request kept: "Send again" resends what was asked, not its first lines
 MAX_LAYERS = 12
 OUTCOMES = ("changed", "unchanged", "stopped", "failed")
+
+
+def short(request: str) -> str:
+    """A request as the history shows it: the first lines, with an ellipsis when the rest stays out of sight."""
+    text = str(request or "")
+    return text if len(text) <= MAX_REQUEST else text[:MAX_REQUEST] + "…"
 
 
 def entry(when: float, request: str, project: str, path: str, layers: Sequence[str], outcome: str) -> Dict[str, Any]:
     """One request: when (seconds since the epoch), the request, the project (its name and its file), the layers it
     changed, and how it ended (one of OUTCOMES)."""
-    return {"time": float(when), "request": str(request)[:MAX_REQUEST], "project": str(project), "path": str(path),
+    return {"time": float(when), "request": str(request)[:MAX_STORED], "project": str(project), "path": str(path),
             "layers": [str(name) for name in list(layers)[:MAX_LAYERS]],
             "outcome": outcome if outcome in OUTCOMES else "unchanged"}
 

@@ -621,7 +621,8 @@ def _nice(value: float) -> float:
     return next(step * power for step in (1, 2, 5, 10) if step * power >= value * (1 - 1e-9))
 
 
-def _dot_density(layer, field: str, color, per_dot: Optional[float], dot: Optional[float]):
+def _dot_density(layer, field: str, color, per_dot: Optional[float], dot: Optional[float],
+               share_values: bool = True):
     """Dots spread at random in each polygon, one for every ``per_dot`` of ``field``: a count shown over areas of
     any size. The dots keep their places from one drawing to the next.
 
@@ -641,7 +642,9 @@ def _dot_density(layer, field: str, color, per_dot: Optional[float], dot: Option
     per_dot = float(per_dot)
     if float(_number(per_dot)) <= 0:  # 1e-18 was written 0 in the expression: no dot drawn (2026-11-22, review)
         raise ValueError('per_dot is too small to be written: give a larger one')
-    if top / per_dot > MAX_DOTS:
+    if top / per_dot > MAX_DOTS and share_values:
+        # Shared only: the refusal is an oracle on the largest value (audit of 2026-11-24: dichotomy). Unshared,
+        # the expression below caps at MAX_DOTS anyway, and the answer says to give per_dot.
         raise ValueError(f"one dot for {per_dot:g} puts more than {MAX_DOTS} dots in a polygon: give a larger per_dot")
     count = QgsProperty.fromExpression(
         f"max(0, min(floor(coalesce({QgsExpression.quotedColumnRef(name)}, 0) / {_number(per_dot)}), {MAX_DOTS}))")
@@ -770,7 +773,8 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
             answer['field'] = _field_name(found, field)
         elif mode == 'dot_density':
             given = per_dot is not None
-            renderer, told = _dot_density(found, field, _color(color) if color else None, per_dot, _width(width))
+            renderer, told = _dot_density(found, field, _color(color) if color else None, per_dot, _width(width),
+                                           share_values)
             answer['field'] = _field_name(found, field)
             if given or share_values:
                 answer['per_dot'] = told

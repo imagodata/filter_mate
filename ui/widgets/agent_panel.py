@@ -13,7 +13,8 @@ import time
 from typing import Callable, List, Optional, Sequence, Tuple
 
 from qgis.PyQt.QtCore import (
-    QByteArray, QCoreApplication, QEvent, QLocale, QSettings, QSize, QStringListModel, Qt, QTimer, QUrl, pyqtSignal,
+    QByteArray, QCoreApplication, QEvent, QLocale, QModelIndex, QSettings, QSize, QStringListModel, Qt, QTimer, QUrl,
+    pyqtSignal,
 )
 from qgis.PyQt.QtGui import QColor, QDesktopServices, QFont, QTextCursor, QTextOption
 from qgis.PyQt.QtWidgets import (
@@ -29,7 +30,9 @@ from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.example_prompts import (
     CATALOG as EXAMPLE_CATALOG, Facts, SHOWN as EXAMPLES_SHOWN, adjust as adjust_examples, pick as pick_examples,
 )
+from ...core.agent.mentions import mention_rows
 from ...core.agent.modes import ACT, ASK, PLAN, mode_or_default
+from ...core.agent.request_log import short as short_request
 from ...core.agent.memory import (
     ADD, EDIT, MAX_NOTES, MAX_SOURCE_NOTES, MAX_USER_NOTES, REMOVE, SCOPE_SOURCE, SCOPE_USER, Memory, Note,
     chosen as memory_chosen,
@@ -270,7 +273,8 @@ class AgentInput(QPlainTextEdit):
         self._history = []
         self._position = 0
         self._draft = ""
-        self.layer_names: Callable[[], Sequence[str]] = lambda: ()  # the panel sets it: the names "@" offers
+        # (id, name, qualifier) of the layers, for "@" rows that tell homonyms apart; the panel sets it.
+        self.layer_rows: Callable[[], Sequence[tuple]] = lambda: ()
         self.setTabChangesFocus(True)
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -282,7 +286,8 @@ class AgentInput(QPlainTextEdit):
         self.completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.completer.setFilterMode(Qt.MatchFlag.MatchContains)
         self.completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
-        self.completer.activated[str].connect(self._insert_name)
+        self._mention_rows: list = []  # (label shown, text written) of the "@" popup, in its order
+        self.completer.activated[QModelIndex].connect(self._insert_row)
         self.textChanged.connect(self._fit)
         self._fit()
 
@@ -381,13 +386,14 @@ class AgentInput(QPlainTextEdit):
             self.completer.popup().hide()
             return
         try:
-            names = sorted({name for name in self.layer_names() if name}, key=str.lower)
+            rows = mention_rows(self.layer_rows())
         except Exception:  # a project closing
-            names = []
-        if not names:
+            rows = []
+        if not rows:
             self.completer.popup().hide()
             return
-        self._names_model.setStringList(names)
+        self._mention_rows = rows
+        self._names_model.setStringList([label for label, _insert in rows])
         self.completer.setCompletionPrefix(typed)
         if self.completer.completionCount() == 0:
             self.completer.popup().hide()
@@ -396,6 +402,12 @@ class AgentInput(QPlainTextEdit):
         rect.setWidth(max(160, self.completer.popup().sizeHintForColumn(0)
                           + self.completer.popup().verticalScrollBar().sizeHint().width()))
         self.completer.complete(rect)
+
+    def _insert_row(self, index: QModelIndex) -> None:
+        """The "@..." typed becomes the row chosen: a name, or the id of one layer among homonyms."""
+        if not index.isValid() or not 0 <= index.row() < len(self._mention_rows):
+            return
+        self._insert_name(self._mention_rows[index.row()][1])
 
     def _insert_name(self, name: str) -> None:
         """The "@..." typed becomes the name chosen, as the model reads it."""
@@ -661,7 +673,8 @@ class AgentPanel(QFrame):
         self.input.setObjectName("lineEdit_agent_input")
         self.input.setPlaceholderText(_tr("Ask for a filter…"))
         self.input.returnPressed.connect(self._on_send)
-        self.input.layer_names = lambda: self.thread.layer_names()  # read when "@" is typed: the controller sets it
+        self.input.layer_rows = lambda: self._layer_rows()  # (id, name, qualifier): the controller sets the layers
+        self.mention_source: Callable[[], Sequence] = lambda: ()  # the controller sets it: the layers "@" offers
         self.input.escape_pressed.connect(self._on_escape)
 
         self.send_button = QToolButton(self)
@@ -779,6 +792,31 @@ class AgentPanel(QFrame):
         self.set_ready(False)
         self.set_working(False)
         self._refresh_look()
+
+    def _layer_rows(self) -> list:
+        """(id, name, group) of the layers "@" offers: the group tells layers of the same name apart."""
+        try:
+            layers = list(self.mention_source())
+        except Exception:  # a project closing
+            return []
+        try:
+            from qgis.core import QgsProject
+            root = QgsProject.instance().layerTreeRoot()
+        except Exception:  # without a tree every layer stands by its name
+            root = None
+        rows = []
+        for layer in layers:
+            try:
+                qualifier = ""
+                if root is not None:
+                    node = root.findLayer(layer.id())
+                    parent = node.parent() if node is not None else None
+                    if parent is not None and parent is not root:
+                        qualifier = parent.name() or ""
+                rows.append((layer.id(), layer.name(), qualifier))
+            except Exception:  # one unreadable layer hides no other
+                continue
+        return rows
 
     def _build_history(self) -> QWidget:
         """The turns of this project: what was asked, what changed, applied or undone."""
@@ -913,11 +951,12 @@ class AgentPanel(QFrame):
             project = _tr("this project") if here else (item_data.get("project") or _tr("project never saved"))
             layers = ", ".join(item_data.get("layers") or ()) or words.get(item_data.get("outcome"), "")
             where = " · ".join(part for part in (project, layers) if part)
+            shown = short_request(request)  # the row shows the first lines; "Send again" resends the whole request
             item = QListWidgetItem()
             item.setData(_TURN_ROLE, item_data.get("request") or "")
-            item.setToolTip(plain_tooltip(f"{time.strftime('%Y-%m-%d %H:%M', moment)}  {request}\n{where}"
+            item.setToolTip(plain_tooltip(f"{time.strftime('%Y-%m-%d %H:%M', moment)}  {shown}\n{where}"
                                           + (f"\n{item_data.get('path')}" if item_data.get("path") else "")))
-            self._history_row(item, when, request, where, "", True, palette, dark, target=self.global_list)
+            self._history_row(item, when, shown, where, "", True, palette, dark, target=self.global_list)
         self.global_list.scrollToBottom()
         self._global_count_text = _tr("all projects · {} request(s)").format(len(entries))
         if self.history_tabs.currentIndex() == HISTORY_ALL:
@@ -1167,7 +1206,8 @@ class AgentPanel(QFrame):
             f" min-height: {INPUT_HEIGHT - 2}px; max-height: {INPUT_HEIGHT - 2}px; border: 1px solid"
             f" {palette['fm_field_border']}; border-radius: 6px; background: {palette['fm_field']}; }}"
             f"QToolButton#toolButton_agent_more:disabled {{ background: {palette['fm_group']}; }}"
-            f"QToolButton#toolButton_agent_mode {{ min-width: 0; max-width: 16777215px; min-height: 20px;"
+            f"QToolButton#toolButton_agent_mode {{ min-width: 0; min-height: 20px;"  # no max-width: 16777215px warns
+            # under Qt6 (QWidget::setMaximumSize), and it is the default anyway
             f" max-height: 22px; padding: 0 8px; border: 1px solid {palette['fm_field_border']}; border-radius: 10px;"
             f" background: {palette['fm_field']}; color: {palette['fm_text']}; font-size: 11px; }}"
             f"QToolButton#toolButton_agent_mode:hover {{ border-color: {palette['fm_accent']}; }}"
@@ -1585,11 +1625,16 @@ class AgentPanel(QFrame):
         text = self.input.text().strip()
         if not text:
             return
-        if self._working:  # it waits for the request under way: one at a time, the last one typed
-            self._queued, self._queue_paused = text, False
+        if self._working:  # it waits for the request under way: one at a time
+            if self._queued and not self._queue_paused:
+                # A second Enter while one waits joins it, in sight: replacing it lost the first one
+                # without a trace (audit of 2026-11-24).
+                self._queued = f"{self._queued}\n{text}"
+            else:
+                self._queued, self._queue_paused = text, False
             self.input.clear()
-            self.queue_label.set_full_text(_tr("Next: {}").format(" ".join(text.split())))
-            self.queue_label.setToolTip(plain_tooltip(text))
+            self.queue_label.set_full_text(_tr("Next: {}").format(" ".join(self._queued.split())))
+            self.queue_label.setToolTip(plain_tooltip(self._queued))
             self.queue_row.setVisible(True)
             return
         self.send_requested.emit(text)
@@ -1617,7 +1662,8 @@ class AgentPanel(QFrame):
 
     def _send_queued(self) -> None:
         """The request under way ended: the one waiting goes, from the line (the controller empties it once sent;
-        refused, it stays there)."""
+        refused, it stays there). What was typed meanwhile waits behind it, not in the bin (audit of 2026-11-24:
+        the waiting request overwrote the draft, and after a provider error the returned request too)."""
         if getattr(self, "_queue_paused", False):
             return  # stopped: it waits for the user
         text, self._queued = self._queued, ""
@@ -1626,8 +1672,14 @@ class AgentPanel(QFrame):
             self._queued = text or self._queued
             self.queue_row.setVisible(bool(self._queued))
             return
+        draft = self.input.text()
         self.input.setText(text)
         self.send_requested.emit(text)
+        if draft.strip():
+            self._queued = draft
+            self.queue_label.set_full_text(_tr("Next: {}").format(" ".join(draft.split())))
+            self.queue_label.setToolTip(plain_tooltip(draft))
+            self.queue_row.setVisible(True)
 
     def _on_send_or_stop(self) -> None:
         if self._working:
@@ -2149,6 +2201,11 @@ class AgentSettingsDialog(QDialog):
         self.memory_enabled = QCheckBox(_tr("Keep notes from one project to the next"), page)
         self.memory_enabled.setObjectName("checkBox_agent_memory")
         self.memory_enabled.setChecked(bool(getattr(values, "memory", True)))
+        self.keep_history = QCheckBox(_tr("Keep the requests of every project"), page)
+        self.keep_history.setObjectName("checkBox_agent_keep_history")
+        self.keep_history.setChecked(bool(getattr(values, "keep_request_history", True)))
+        self.keep_history.setToolTip(_tr("The tab All projects of the history: what was asked, where and when, "
+                                         "kept on this computer"))
         note = QLabel(_tr(
             "Notes you write here stay in a file of this computer (agent_memory.json, in the FilterMate folder of the "
             "QGIS profile). They are sent to your provider with a request: those for every project always, those of a "
@@ -2206,6 +2263,7 @@ class AgentSettingsDialog(QDialog):
         self.memory_status.setTextFormat(Qt.TextFormat.PlainText)  # it may quote why the file is not read
         self.memory_status.setWordWrap(True)
         layout.addWidget(self.memory_enabled)
+        layout.addWidget(self.keep_history)
         layout.addWidget(note)
         layout.addWidget(self.memory_notes, 1)
         layout.addLayout(add_row)

@@ -1102,7 +1102,9 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
                 if style:
                     _style_beside(report, layer, label, path, style)
             else:
-                report.failed[label] = message or "export failed"
+                # Failure messages reach the model: the absolute path of the machine stays home (audit of
+                # 2026-11-24). The log above keeps it whole.
+                report.failed[label] = _for_model(message) if message else "export failed"
             if feedback is not None:
                 feedback.setProgress(100.0 * (index + 1) / total)
         if in_gpkg:
@@ -1188,10 +1190,16 @@ def _pack(report: OperationReport, staging: str, folder: str, stem: str) -> None
     report.package = path
 
 
+def _for_model(message: str) -> str:
+    """A failure message for the model: no absolute path of this machine (audit of 2026-11-24)."""
+    from ...infrastructure.logging.redaction import mask_home_dir
+    return mask_home_dir(message)
+
+
 def _discard(report: OperationReport, reason: str) -> None:
     """The layers done are failed for ``reason``: the files of the zip they went to are gone."""
     for label in report.done.values():
-        report.failed[label] = reason
+        report.failed[label] = _for_model(reason)
     report.done.clear()
     report.outputs.clear()
     report.tables.clear()

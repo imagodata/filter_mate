@@ -24,7 +24,7 @@ CHANNEL = "conda-forge"
 # draco: QGIS 4.2.3 of conda-forge links libdraco.so.9, which draco 1.5.9 no longer has (November 2026); the
 # probe after the install says it when a pin like this one is needed again. qgis 3.44 is not offered: it is
 # solved with Python 3.14, for which conda-forge has no PyQt5.
-PACKAGES = ("qgis>=4.2", "draco<1.5.9")
+PACKAGES = ("qgis>=4.2,<5", "draco<1.5.9")
 # Free space asked before starting: the environment and the package cache beside it.
 NEEDED_BYTES = 8 * 1024 ** 3
 # conda-forge mirrors stall now and then (a package below 30 bytes/s for a minute ends micromamba).

@@ -323,6 +323,11 @@ Sunteți de acord?</translation>
         <translation>Opriți cererea sau așteptați să se termine pentru a deschide setările.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>O solicitare este deja în curs: așteptați finalul ei sau opriți-o.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Memoria nu a putut fi salvată: {}</translation>
@@ -2025,6 +2030,16 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Păstrează note de la un proiect la altul</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Păstrează cererile fiecărui proiect</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Fila Toate proiectele din istoric: ce s-a cerut, unde și când, păstrat pe acest computer.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Separați mai multe etichete cu virgule.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Numele nu poate fi gol.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Acest proiect este doar pentru citire: modificarea este păstrată numai pentru această sesiune.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Dosar: {6}</translation>
         <translation>Serviciul a fost citit timp de {0:.0f} s, maximul permis: copia conține {1} entități și nu este completă.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Serviciul a anunțat {0} entități, dar au fost citite doar {1}: copia nu este completă.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Condițiile {0} interzic păstrarea tile-urilor sale: acest strat nu este copiat. O altă hartă de bază poate fi copiată (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Dosar: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>serviciul nu a putut fi citit până la capăt: nu s-a păstrat nimic</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>copia locală nu a putut fi scrisă (discul poate fi plin): nu s-a păstrat nimic</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>serviciul nu a dat nicio entitate peste harta vizibilă, sau răspunsul său nu a putut fi citit: nu s-a păstrat nimic</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

@@ -323,6 +323,11 @@ Do you agree?</source>
         <translation>หยุดคำขอ หรือรอให้เสร็จสิ้น เพื่อเปิดการตั้งค่า</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>มีคำขอทำงานอยู่แล้ว โปรดรอให้เสร็จ หรือหยุดมัน</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>ไม่สามารถบันทึกความจำได้: {}</translation>
@@ -2025,6 +2030,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>เก็บโน้ตไว้ใช้ข้ามโครงการ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>เก็บคำขอของทุกโปรเจกต์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>แท็บโปรเจกต์ทั้งหมดของประวัติ: สิ่งที่ถูกถาม ที่ไหน และเมื่อไร เก็บไว้ในคอมพิวเตอร์เครื่องนี้</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Separate multiple tags with commas.</source>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>ชื่อต้องไม่ว่างเปล่า</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>โปรเจกต์นี้เป็นแบบอ่านอย่างเดียว: การเปลี่ยนแปลงจะถูกเก็บไว้สำหรับเซสชันนี้เท่านั้น</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Folder: {6}</source>
         <translation>อ่านบริการเป็นเวลา {0:.0f} วินาที ซึ่งเป็นเวลาสูงสุดที่อนุญาต สำเนามี {1} ฟีเจอร์และยังไม่สมบูรณ์</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>บริการแจ้งว่ามี {0} ฟีเจอร์ แต่อ่านได้เพียง {1} รายการ สำเนาจึงยังไม่สมบูรณ์</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>เงื่อนไขของ {0} ห้ามเก็บไทล์ไว้ จึงไม่คัดลอกเลเยอร์นี้ แต่สามารถคัดลอกแผนที่ฐานอื่นได้ (IGN, Carto, OpenTopoMap...)</translation>
@@ -13837,6 +13862,16 @@ Folder: {6}</source>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>ไม่สามารถอ่านบริการจนจบ จึงไม่ได้เก็บอะไรไว้</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>ไม่สามารถเขียนสำเนาในเครื่องได้ (ดิสก์อาจเต็ม): ไม่ได้เก็บอะไรไว้</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>บริการไม่ส่งคืนฟีเจอร์ใดๆ บนแผนที่ที่มองเห็น หรือไม่สามารถอ่านคำตอบได้: ไม่ได้เก็บอะไรไว้</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

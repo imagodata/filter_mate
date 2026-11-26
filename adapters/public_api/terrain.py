@@ -22,7 +22,7 @@ from ...core.agent.elevation import (
     MAX_CONTOUR_PIXELS, NO_DATA, ElevationSource, contour_problem, empty_note, gdal_srs, is_index, known, metric_grid,
     quiet_message, resolution_for, tile_url, tiles_for, tiles_for_grid, utm_authid,
 )
-from ...core.agent.open_data import KIND_ELEVATION, megabytes, resolve_platform
+from ...core.agent.open_data import KIND_ELEVATION, megabytes, resolve_platform, sweep_empty_data_dirs
 from ...core.domain.layer_kind import LayerKind
 from ..agent.bounded_http import STOPPED as HTTP_STOPPED, HttpFailure, fetch_together, on_abort
 from .operations import layer_kind, resolve_layer, running
@@ -506,6 +506,7 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
             if not urls:
                 raise ValueError(f"{source.title} {_NO_TILE}")
             os.makedirs(root, exist_ok=True)
+            sweep_empty_data_dirs(root)
             folder = tempfile.mkdtemp(prefix='elevation-', dir=root)
             path = os.path.join(folder, f"{source.id}_{size:g}m.tif")
             crs_text = gdal_srs(grid_crs.authid(), grid_crs.toWkt)

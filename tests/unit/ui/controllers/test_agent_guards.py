@@ -229,6 +229,15 @@ class TestMcpBridgeFollowsTheToolsTab:
         result = server._run(tools["remove_layers"], {"layers": ["a"]}, "Claude")
         assert result.is_error and server._host.asked == ["remove_layers"] and ran == []
 
+    def test_the_server_inherits_the_level_of_the_chat(self, bridge):
+        """Audit of 2026-11-24, decided with the user: the server ran at the standard level whatever the level
+        of the chat (Ask and Plan ask here too now)."""
+        server, tools, ran = bridge({})
+        server._host._policy = SimpleNamespace(level="advisor")
+        result = server._run(tools["remove_layers"], {"layers": ["a"]}, "Claude")
+        assert result.is_error and "advise only" in result.content
+        assert server._host.asked == [] and ran == []
+
     def test_no_question_while_the_chat_works_or_a_dialog_is_open_even_for_a_read(self, bridge, monkeypatch):
         server, tools, ran = bridge({"list_layers": "ask"}, answer=True)
         server._host.chat_busy = lambda: True

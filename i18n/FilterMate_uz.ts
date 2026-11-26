@@ -323,6 +323,11 @@ Rozimisiz?</translation>
         <translation>Sozlamalarni ochish uchun so‘rovni to‘xtating yoki uning tugashini kuting.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>So'rov allaqachon ishlamoqda: tugashini kuting yoki uni to'xtating.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Xotirani saqlab bo'lmadi: {}</translation>
@@ -2025,6 +2030,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Eslatmalarni loyihadan loyihaga saqlash</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Har bir loyihaning so'rovlarini saqlash</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Tarixning Barcha loyihalar yorlig'i: nima so'ralgani, qayerda va qachon, shu kompyuterda saqlanadi.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Bir nechta teglarni vergul bilan ajrating.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Nom bo'sh bo'lishi mumkin emas.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Bu loyiha faqat o'qish uchun: o'zgarish faqat shu sessiya uchun saqlanadi.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Papka: {6}</translation>
         <translation>Xizmat ruxsat etilgan eng ko'p {0:.0f} soniya o'qildi: nusxada {1} ta obyekt bor va u to'liq emas.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Xizmat {0} ta obyekt borligini aytdi, lekin faqat {1} tasi o'qildi: nusxa to'liq emas.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>{0} shartlari uning plitkalarini saqlashni taqiqlaydi: bu qatlam nusxalanmaydi. Boshqa asos xaritani nusxalash mumkin (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Papka: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>xizmatni oxirigacha o'qib bo'lmadi: hech narsa saqlanmadi</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>mahalliy nusxa yozib bo'lmadi (disk to'la bo'lishi mumkin): hech narsa saqlanmadi</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>xizmat ko'rinadigan xarita bo'yicha hech qanday obyekt bermadi yoki uning javobini o'qib bo'lmadi: hech narsa saqlanmadi</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

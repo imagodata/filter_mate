@@ -323,6 +323,11 @@ Se strinjate?</translation>
         <translation>Ustavite zahtevo ali počakajte, da se konča, da odprete nastavitve.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3847"/>
+        <source>A request is already running: wait for its end, or stop it.</source>
+        <translation>Zahteva se že izvaja: počakajte, da se konča, ali jo ustavite.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1001"/>
         <source>The memory could not be saved: {}</source>
         <translation>Spomina ni bilo mogoče shraniti: {}</translation>
@@ -2025,6 +2030,16 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1737"/>
         <source>Keep notes from one project to the next</source>
         <translation>Ohrani opombe iz enega projekta v drugega</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2201"/>
+        <source>Keep the requests of every project</source>
+        <translation>Ohrani zahteve vsakega projekta</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="2206"/>
+        <source>The tab All projects of the history: what was asked, where and when, kept on this computer</source>
+        <translation>Zavihek Vsi projekti zgodovine: kaj je bilo zahtevano, kje in kdaj, shranjeno v tem računalniku.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1741"/>
@@ -5177,6 +5192,11 @@ Več oznak ločite z vejicami.</translation>
         <location filename="../ui/dialogs/favorites_manager.py" line="1050"/>
         <source>The name cannot be empty.</source>
         <translation>Ime ne sme biti prazno.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/dialogs/favorites_manager.py" line="251"/>
+        <source>This project is read-only: the change is kept for this session only.</source>
+        <translation>Ta projekt je samo za branje: sprememba se ohrani samo za to sejo.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1113"/>
@@ -13739,6 +13759,11 @@ Mapa: {6}</translation>
         <translation>Storitev se je brala {0:.0f} s, kar je dovoljeni maksimum: kopija vsebuje {1} objektov in ni popolna.</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="492"/>
+        <source>The service announced {0} features but only {1} were read: the copy is not complete.</source>
+        <translation>Storitev je napovedala {0} objektov, prebranih pa je bilo le {1}: kopija ni popolna.</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/stream_copy.py" line="268"/>
         <source>The terms of {0} forbid keeping its tiles: this layer is not copied. Another basemap can be (IGN, Carto, OpenTopoMap...).</source>
         <translation>Pogoji storitve {0} prepovedujejo hrambo njenih ploščic: ta plast se ne kopira. Drugo podlago je mogoče kopirati (IGN, Carto, OpenTopoMap...).</translation>
@@ -13837,6 +13862,16 @@ Mapa: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="475"/>
         <source>the service could not be read to the end: nothing was kept</source>
         <translation>storitve ni bilo mogoče prebrati do konca: nič ni bilo ohranjeno</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="478"/>
+        <source>the local copy could not be written (the disk may be full): nothing was kept</source>
+        <translation>lokalne kopije ni bilo mogoče zapisati (disk je morda poln): nič ni bilo ohranjeno</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/qgis/stream_copy.py" line="481"/>
+        <source>the service gave no feature over the visible map, or its answer could not be read: nothing was kept</source>
+        <translation>storitev ni vrnila nobenega objekta nad vidnim zemljevidom, ali njenega odgovora ni bilo mogoče prebrati: nič ni bilo ohranjeno</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/stream_copy.py" line="473"/>

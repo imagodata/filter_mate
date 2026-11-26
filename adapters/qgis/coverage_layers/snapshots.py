@@ -54,7 +54,14 @@ def _supports_subset(layer: QgsMapLayer) -> bool:
 
 
 def _redacted_source(source: str) -> str:
-    return re.sub(r'https?://[^\s\"<>]+', '[remote source]', source, flags=re.IGNORECASE)
+    """A source for the log: no address, no password.
+
+    The address goes ([remote source]); ``password='...'`` of a WFS or WMS URI lives beside its URL, not in
+    it, so the address mask alone left it in clear (audit of 2026-11-24). The central URI masking takes it
+    (and ``scheme://user:x@host``); the log handlers mask it again.
+    """
+    from ....infrastructure.logging.redaction import mask_uri_secrets
+    return re.sub(r'https?://[^\s\"<>]+', '[remote source]', mask_uri_secrets(source), flags=re.IGNORECASE)
 
 
 def _same_source(a: str, b: str) -> bool:

@@ -236,11 +236,13 @@ class TestSettingsWritten:
         assert layer_settings.settings_written(project, "parcelles_1") is True
         assert project.dirty and layer.props == MARKED
 
-    def test_without_change_the_layer_says_it_and_the_project_stays(self, saved):
+    def test_without_change_nothing_is_written_and_the_project_stays(self, saved):
+        """2026-11-24 (audit): stamping the version without a change marked the project modified on opening (in
+        QGIS a layer write dirties it). Without a change, neither the stamp nor the flag."""
         layer = Layer("parcelles_1")
         project = Project(str(saved), layers=[layer])
         assert layer_settings.settings_written(project, "parcelles_1", changed=False) is False
-        assert not project.dirty and layer.props == MARKED
+        assert not project.dirty and layer.props == {} and layer.writes == []
 
     def test_nothing_modified_in_a_read_only_project(self, saved):
         saved.chmod(0o444)
@@ -265,6 +267,21 @@ class TestSettingsWritten:
         assert change("parcelles_1", {"filterMate_exploring_is_linking": False}, project)
         assert change("parcelles_1", {"filterMate_filtering_layers_to_filter": "[]"}, project)
         assert not change("parcelles_1", {"filterMate_infos_layer_name": "other"}, project)  # infos: not carried
+
+    def test_stamping_a_layer_that_carries_no_setting_is_no_change(self, saved):
+        """Audit 2026-11-24: opening a project whose layers have no FilterMate settings yet marked it modified
+        (QGIS asked to save although the user changed nothing)."""
+        layer = Layer("parcelles_1")  # pristine: no stamp, no setting
+        project = Project(str(saved), layers=[layer])
+        assert layer_settings.settings_change(
+            "parcelles_1", {"filterMate_exploring_is_linking": True}, project) is False
+        assert not project.dirty
+
+    def test_a_real_change_of_a_stamped_layer_is_a_change(self, saved):
+        layer = Layer("parcelles_1", dict(MARKED))
+        project = Project(str(saved), layers=[layer])
+        assert layer_settings.settings_change(
+            "parcelles_1", {"filterMate_exploring_is_linking": True}, project) is True
 
 
 def test_a_direct_write_since_a_registration_wins():

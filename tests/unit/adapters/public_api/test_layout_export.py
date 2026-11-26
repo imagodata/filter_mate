@@ -20,7 +20,9 @@ _PKG = "fm_layout_export_test"
 
 def _load():
     for name, path in (("", _ROOT), (".adapters", _ROOT / "adapters"),
-                       (".adapters.public_api", _ROOT / "adapters" / "public_api")):
+                       (".adapters.public_api", _ROOT / "adapters" / "public_api"),
+                       (".infrastructure", _ROOT / "infrastructure"),
+                       (".infrastructure.logging", _ROOT / "infrastructure" / "logging")):
         package = types.ModuleType(_PKG + name)
         package.__path__ = [str(path)]
         sys.modules[_PKG + name] = package
