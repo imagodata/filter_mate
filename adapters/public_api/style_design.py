@@ -16,7 +16,7 @@ import os
 from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent import palettes as palette_engine
-from .layer_style import _geometry, _layer, _read_values_guard, _refresh
+from .layer_style import _enum, _geometry, _layer, _read_values_guard, _refresh
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -33,7 +33,10 @@ MAX_ICONS_LISTED = 12
 def _mm():
     from qgis.core import Qgis, QgsUnitTypes
     unit = getattr(getattr(Qgis, "RenderUnit", None), "Millimeters", None)
-    return unit if unit is not None else QgsUnitTypes.RenderUnit.RenderMillimeters
+    if unit is not None:
+        return unit
+    # As layer_style._millimetres: scoped first, flat last (3.22 floor), string-based for the enum scan.
+    return _enum(QgsUnitTypes, "RenderUnit", "RenderMillimeters", "RenderMillimeters")
 
 
 def _qcolor(text: str, alpha: float = 1.0):

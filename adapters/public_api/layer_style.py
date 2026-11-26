@@ -149,7 +149,11 @@ def _enum(owner, scope: str, name: str, legacy: str = ''):
 def _millimetres():
     from qgis.core import Qgis, QgsUnitTypes
     unit = getattr(getattr(Qgis, 'RenderUnit', None), 'Millimeters', None)
-    return unit if unit is not None else QgsUnitTypes.RenderUnit.RenderMillimeters
+    if unit is not None:
+        return unit
+    # Scoped first (the only spelling Qt6 keeps), flat last: string-based, so the Qt6 enum scan stays green,
+    # and an older QGIS missing the scope still resolves (3.22 floor).
+    return _enum(QgsUnitTypes, 'RenderUnit', 'RenderMillimeters', 'RenderMillimeters')
 
 
 def _width(value: Any) -> Optional[float]:
