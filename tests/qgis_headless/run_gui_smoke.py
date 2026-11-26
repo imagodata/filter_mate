@@ -7393,22 +7393,31 @@ def s_tools_live():
     check('tools: a tool put on the map is put down before its button goes', on and not zone.isChecked()
           and not zone.isVisibleTo(d.widget_exploring_keys) and not extras.zone_tool_on(),
           f"on={on} checked={zone.isChecked()} tool on map={extras.zone_tool_on()}")
-    # a mode is turned off with its button, and nothing turns it on again meanwhile
+    # a mode keeps its state while its button is hidden (audit 24/11 #10): hiding a button is display-only,
+    # it writes nothing to the layer nor to the project, and showing it again finds the mode as left
     link.setChecked(True)
+    pump(100)
     apply_settings({TOOLS_PATH.format('vector'): 'link'})
     pump(150)
-    check('tools: a mode (link) is turned off when its button is hidden', not link.isChecked()
-          and not link.isVisibleTo(d.widget_exploring_keys), f"checked={link.isChecked()}")
+    kept = link.isChecked() and not link.isVisibleTo(d.widget_exploring_keys) \
+        and d.PROJECT_LAYERS[d.current_layer.id()]['exploring'].get('is_linking') is True
+    apply_settings({TOOLS_PATH.format('vector'): ''})
+    pump(150)
+    check('tools: a mode (link) keeps its state while its button is hidden, and shown again is still on',
+          kept and link.isChecked() and link.isVisibleTo(d.widget_exploring_keys),
+          f"kept={kept} checked={link.isChecked()}")
     sync = d.pushButton_checkable_exploring_selecting
-    sync.setChecked(True)
+    sync.setChecked(False)
     apply_settings({TOOLS_PATH.format('vector'): 'sync'})
     pump(150)
-    off = not sync.isChecked() and not sync.isVisibleTo(d.widget_exploring_keys)
+    hidden = not sync.isVisibleTo(d.widget_exploring_keys)
     from qgis.core import QgsGeometry
     extras._on_vector_zone_drawn(QgsGeometry.fromRect(d.current_layer.extent()))
     pump(100)
-    check('tools: a mode (sync) is turned off with its button, and the zone does not turn it on again',
-          off and not sync.isChecked(), f"off={off} after the zone={sync.isChecked()}")
+    check('tools: the zone does not turn (sync) on while its button is hidden',
+          hidden and not sync.isChecked(), f"hidden={hidden} after the zone={sync.isChecked()}")
+    apply_settings({TOOLS_PATH.format('vector'): ''})
+    pump(150)
     return waits(0.3)
 
 
@@ -7418,7 +7427,7 @@ def s_tools_layer_modes_add():
 
 
 def s_tools_layer_modes():
-    """A layer that was left with a mode on, shown again while its button is hidden: the mode is not on."""
+    """A layer that was left with a mode on, shown again while its button is hidden: the mode stays on."""
     d = dock()
     d.PROJECT_LAYERS[layer('zones_again').id()].setdefault('exploring', {})['is_selecting'] = True
     apply_settings({TOOLS_PATH.format('vector'): 'sync'})
@@ -7428,8 +7437,8 @@ def s_tools_layer_modes():
 def s_tools_layer_modes_check():
     d = dock()
     sync = d.pushButton_checkable_exploring_selecting
-    check('tools: a layer left with the mode on comes back with it off while its button is hidden',
-          settles(lambda: not sync.isChecked() and not sync.isVisibleTo(d.widget_exploring_keys), 2.0),
+    check('tools: a layer left with the mode on keeps it on while its button is hidden',
+          settles(lambda: sync.isChecked() and not sync.isVisibleTo(d.widget_exploring_keys), 2.0),
           f"checked={sync.isChecked()} visible={sync.isVisibleTo(d.widget_exploring_keys)}")
     apply_settings({TOOLS_PATH.format('vector'): ''})
     project.removeMapLayer(layer('zones_again').id())

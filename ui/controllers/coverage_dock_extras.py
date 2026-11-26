@@ -1049,10 +1049,12 @@ class CoverageDockExtras(QObject):
         Called when a layer is shown (after the kind's own buttons were set) and when the setting changes, so the
         rail is laid out again at once (the spreader of mockup_layout follows every show / hide: no gap is left).
         A tool put on the map is put down before its button goes (a tool with no button to see would stay on the
-        map), and so is a mode of the layer (sync, follow, link, preview): turned off, and not turned on again by
-        another way while its button is hidden (the zone, the "more" menu).
+        map). A mode of the layer (sync, follow, link, preview) keeps its state while its button is hidden: hiding
+        a button is display-only, it writes nothing to the layer nor to the project (audit 24/11 #10: hiding link
+        turned the linkage off and saved it into the .qgz, and showing it again did not turn it back on). Nothing
+        turns a tool or a mode on again by another way while its button is hidden (the zone, the "more" menu).
         """
-        from .exploring_tool_choice import BUTTONS, MAP_TOOLS, MODES
+        from .exploring_tool_choice import BUTTONS, MAP_TOOLS
         self._guarded(self._connect_rail_menu)
         kind = self._rail_kind
         hidden = self.hidden_tools(kind)
@@ -1061,14 +1063,14 @@ class CoverageDockExtras(QObject):
             if button is None:
                 continue
             if key in hidden:
-                if key in MAP_TOOLS or key in MODES:
+                if key in MAP_TOOLS:
                     self._guarded(self._put_tool_down, kind, key, button)
                 self._guarded(button.setVisible, False)
             else:
                 self._guarded(button.setVisible, True)
 
     def _put_tool_down(self, kind: str, key: str, button: Any) -> None:
-        """The tool, or the mode, of a button about to be hidden is put down."""
+        """The map tool of a button about to be hidden leaves the map (modes keep their state, see above)."""
         controller = self._controller
         if kind == 'point_cloud' and key == 'identify':  # the class pipette: its button is not a toggle
             if controller._tool_on_map(controller._class_tool) and controller._pc_pick_mode == 'class':

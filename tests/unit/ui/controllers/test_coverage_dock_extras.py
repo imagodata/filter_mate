@@ -958,7 +958,9 @@ class TestToolsPutDown:
         ("vector", "follow", "pushButton_checkable_exploring_tracking"),
         ("vector", "link", "pushButton_checkable_exploring_linking_widgets"),
         ("raster", "link", "pushButton_checkable_exploring_raster_link")])
-    def test_a_mode_is_turned_off_when_its_button_goes(self, rail, kind, key, name):
+    def test_a_mode_keeps_its_state_when_its_button_goes(self, rail, kind, key, name):
+        """Audit 24/11 #10: hiding a button is display-only; the state slot never runs, so nothing is written
+        to the layer nor to the project."""
         released = []
         button = rail.buttons[name]
         button.slot = released.append
@@ -966,7 +968,19 @@ class TestToolsPutDown:
         rail.dock.dockwidget.CONFIG_DATA = _config(**{kind: key})
         rail.dock._rail_kind = kind
         rail.dock.apply_tool_choice()
-        assert released == [False] and not button.checked and not button.visible
+        assert released == [] and button.checked and not button.visible
+
+    def test_a_mode_hidden_then_shown_again_is_still_on(self, rail):
+        """Audit 24/11 #10: showing the link button again finds the linkage as left (never turned off)."""
+        button = rail.buttons["pushButton_checkable_exploring_linking_widgets"]
+        button.checked = True
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="link")
+        rail.dock._rail_kind = "vector"
+        rail.dock.apply_tool_choice()
+        assert button.checked and not button.visible
+        rail.dock.dockwidget.CONFIG_DATA = _config(vector="")
+        rail.dock.apply_tool_choice()
+        assert button.checked and button.visible
 
     def test_a_mode_whose_button_is_kept_is_left_on(self, rail):
         preview = rail.buttons["pushButton_checkable_exploring_selecting"]
