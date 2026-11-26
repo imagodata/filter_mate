@@ -61,6 +61,12 @@ def _setup():
         sys.modules['core'] = sys.modules[f'{ROOT}.core']
     sys.modules['core.export'] = sys.modules[f'{ROOT}.core.export']
     sys.modules['core.tasks'] = sys.modules[f'{ROOT}.core.tasks']
+    # Names this file does not stub (core.agent, ...) still resolve to the real package on disk: without a
+    # __path__, a run collecting this directory first broke every `from core.agent...` import of the other
+    # test directories with ModuleNotFoundError (2026-11-26). sys.modules keeps precedence for the stubbed
+    # names above, so the export tests still exercise their file-loaded modules.
+    if not getattr(sys.modules['core'], '__path__', None):
+        sys.modules['core'].__path__ = [os.path.join(project_root, 'core')]
 
     # Mock leaf modules the handler imports indirectly
     _ensure_package(f'{ROOT}.infrastructure', parent=ROOT)
