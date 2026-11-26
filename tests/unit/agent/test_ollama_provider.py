@@ -70,12 +70,17 @@ class TestRequest:
         request = ollama().build_request("S", [Message(ROLE_USER, (TextPart("bonjour"),))], [])
         assert "tools" not in json.loads(request.body)
 
-    def test_every_tool_asks_for_32k_the_filtering_ones_for_16k(self):
-        """The system prompt and every tool of the chat: about 73,000 characters, well past Ollama's 4096 tokens."""
+    def test_every_tool_asks_for_64k_the_filtering_ones_for_16k(self):
+        """The system prompt and every tool of the chat: about 103,000 characters, well past Ollama's 4096 tokens.
+
+        2026-11-26: the five visible-automation tools (+3,200 characters) tip the worst case past the 32k step
+        (32,759 tokens used of 32,768 before them). Default requests are unaffected: skill-gated tools are held
+        back (default_setup), and the default stays at the 16k step.
+        """
         hello = [Message(ROLE_USER, (TextPart("bonjour"),))]
         request = ollama().build_request(SYSTEM_PROMPT, hello, chat_tools())
         assert len(request.body) > 60_000
-        assert json.loads(request.body)["options"]["num_ctx"] == 32_768
+        assert json.loads(request.body)["options"]["num_ctx"] == 65_536
         request = ollama().build_request(SYSTEM_PROMPT + FILTERING_NOTE, hello, filtering_only(chat_tools()))
         assert json.loads(request.body)["options"]["num_ctx"] == 16_384
 

@@ -980,6 +980,21 @@ Pozostają w buforze edycji, dopóki nie zapiszesz edycji warstwy, a cofnięcie 
         <translation>Wydruk {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3138"/>
+        <source>Flashing {}</source>
+        <translation>Migotanie {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3139"/>
+        <source>Active layer: {}</source>
+        <translation>Aktywna warstwa: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3140"/>
+        <source>Message: {}</source>
+        <translation>Wiadomość: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
         <source>Layout {} exported</source>
         <translation>Wydruk {} wyeksportowany</translation>

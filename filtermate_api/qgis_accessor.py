@@ -37,7 +37,10 @@ from .accessor import (
     OsmResult,
     PopulationResult,
     Favorite,
+    FavoriteNameTakenError,
+    FavoriteSaveError,
     FavoritesUnavailable,
+    NoActiveFilterError,
     AlgorithmDescription,
     ProjectCrs,
     LayerTreeChange,
@@ -1061,6 +1064,57 @@ class QGISFilterMateAccessor:
                 raise FavoritesUnavailable(str(exc)) from exc
             return []
         return [self._favorite_from(entry) for entry in entries]
+
+    def save_favorite(self, name: str, description: str = "") -> Favorite:
+        return run_on_main_thread(self._save_favorite_main_thread, name, description)
+
+    def _save_favorite_main_thread(self, name: str, description: str = "") -> Favorite:
+        name = (name or "").strip()
+        if not name:
+            raise FavoriteSaveError("A name is needed to keep the current filter as a favorite")
+        favorites_service = self._favorites_service()
+        try:
+            if favorites_service.get_favorite_by_name(name) is not None:
+                raise FavoriteNameTakenError(name)
+        except FavoriteNameTakenError:
+            raise
+        except FavoritesUnavailable:
+            raise
+        except Exception as exc:
+            if type(exc).__name__ == "FavoritesNotInitialized":
+                raise FavoritesUnavailable(str(exc)) from exc
+            raise
+        controller = self._favorites_controller()
+        if controller is None:
+            raise FavoritesUnavailable("FavoritesController not mounted on the dock")
+        try:
+            favorite_id = controller.create_favorite_from_current(name, description)
+        except FavoritesUnavailable:
+            raise
+        except Exception as exc:
+            if type(exc).__name__ == "FavoritesNotInitialized":
+                raise FavoritesUnavailable(str(exc)) from exc
+            raise FavoriteSaveError(f"Favorite {name!r} could not be saved: {exc}") from exc
+        if favorite_id is None:
+            # The controller re-checked after us: blank or taken (a favorite
+            # saved under this name since), or no filter is active.
+            try:
+                taken = favorites_service.get_favorite_by_name(name) is not None
+            except Exception:
+                taken = False
+            if taken:
+                raise FavoriteNameTakenError(name)
+            raise NoActiveFilterError("No active filter to save: filter a layer first")
+        entry = favorites_service.get_favorite(favorite_id)
+        if entry is None:  # removed between the save and this read: report the save, not a failure
+            return Favorite(favorite_id=favorite_id, name=name, description=description)
+        return self._favorite_from(entry)
+
+    def _favorites_controller(self):
+        """The dock's FavoritesController, through its integration registry (None when not set up)."""
+        dock = getattr(getattr(self._plugin, "app", None), "dockwidget", None)
+        integration = getattr(dock, "_controller_integration", None) if dock is not None else None
+        return getattr(integration, "favorites_controller", None) if integration is not None else None
 
     def apply_favorite(self, favorite_id: str) -> Optional[HistoryStep]:
         return run_on_main_thread(self._apply_favorite_main_thread, favorite_id)

@@ -1153,6 +1153,21 @@ Elles restent dans le tampon d'édition tant que vous n'enregistrez pas les modi
         <translation>Mise en page {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3138"/>
+        <source>Flashing {}</source>
+        <translation>Flash sur {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3139"/>
+        <source>Active layer: {}</source>
+        <translation>Couche active : {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3140"/>
+        <source>Message: {}</source>
+        <translation>Message : {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
         <source>Layout {} exported</source>
         <translation>Mise en page {} exportée</translation>

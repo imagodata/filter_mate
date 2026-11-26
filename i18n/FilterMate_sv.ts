@@ -980,6 +980,21 @@ De ligger kvar i redigeringsbufferten tills du sparar lagrets redigeringar, och 
         <translation>Layout {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3138"/>
+        <source>Flashing {}</source>
+        <translation>Blinkning på {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3139"/>
+        <source>Active layer: {}</source>
+        <translation>Aktivt lager: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3140"/>
+        <source>Message: {}</source>
+        <translation>Meddelande: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
         <source>Layout {} exported</source>
         <translation>Layout {} exporterad</translation>

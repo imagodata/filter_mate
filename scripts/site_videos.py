@@ -2229,6 +2229,95 @@ AGENT = boot(['epci', 'commune', 'surface_hydrographique'], 'commune', '"nom_off
     (0, cam('full', dur=1.4)), hold(2500)] + ending(['commune'])
 
 
+# ------------------------------------------------------------------ urumea: flood screening of the Urumea (teaser)
+# Six agent requests, one per take (the 7th take is the D3 end card, off QGIS).
+# Recorded with: FM_AGENT_KEY=<revocable Claude key> scripts/site_videos_headless.sh clip urumea
+# The key travels in the environment only; store_key() puts it in the container's auth
+# database, never in a file. Needs network in the container (Overpass, Copernicus DEM,
+# api.anthropic.com) and a foot-routing path for take 5 (QNEAT3 in the image, or the agent's
+# fallback: verify hors camera, adapt the caption if the take falls back to buffer rings).
+URUMEA_PLACE = os.environ.get('FM_URUMEA_PLACE', 'San Sebastián')
+URUMEA_MODEL = os.environ.get('FM_AGENT_MODEL', 'claude-haiku-5-5')
+URUMEA_KEY = os.environ.get('FM_AGENT_KEY', '')
+URUMEA_SOURCES = ('overpass_fr', 'copernicus_dem', 'photon')
+URUMEA_TAKES = [
+    (f'Bring the buildings, roads, bridges and the Urumea river around {URUMEA_PLACE}, Spain, '
+     'from OpenStreetMap, and the 30 m Copernicus terrain.',
+     'One sentence. Buildings, roads, bridges, river, terrain.', 'canvas'),
+    ('Compute the altitude of every building and color the buildings by mean altitude.',
+     'Height, then mean height per building.', 'canvas'),
+    ('Export the visible layers to a GeoPackage with the project embedded.',
+     "Temporary files don't survive. Export keeps all.", 'dock'),
+    ('Keep the buildings under 5 meters within 200 meters of the river, '
+     'and the roads and bridges within 300 meters around them.',
+     'Under 5 m by the river. Roads and bridges within 300 m.', 'canvas'),
+    ('Compute 10-minute foot-evacuation isochrones around the exposed buildings.',
+     'Foot-evacuation isochrones around exposed buildings.', 'canvas'),
+    ('Save this filter as the favorite Flood <5 m: evacuation, access, bridges.',
+     'One favorite. Replayed in one click.', 'dock'),
+]
+
+
+def urumea_empty():
+    canvas = prepare_window()
+    for lyr in list(QgsProject.instance().mapLayers().values()):
+        QgsProject.instance().removeMapLayer(lyr.id())
+    canvas.refresh()
+
+
+def urumea_agent_setup():
+    from qgis.core import QgsApplication, QgsSettings
+    from filter_mate.adapters.agent.settings import (
+        AgentSettings, save_settings, load_settings, store_key)
+    agent_chat()
+    QgsSettings().setValue('FilterMate/agent/setup_offered_version', agent_chat().plugin_version())
+    # Headless take: set the auth database password programmatically (as check_agent_chat.py
+    # does), so no wallet prompt can stall the recording. Throwaway password of the container.
+    QgsApplication.authManager().setMasterPassword("fm-video-take", True)
+    authcfg = store_key(URUMEA_KEY) if URUMEA_KEY else ''
+    # Headless take: no one clicks the per-tool questions, so the outside tools the six
+    # requests need run pre-approved (a code tool could not be: still asked at every run).
+    allowed = {"add_osm_features": "allow", "add_elevation": "allow", "run_algorithm": "allow"}
+    save_settings(AgentSettings(preset='anthropic', model=URUMEA_MODEL, consent=True,
+                                consent_target='https://api.anthropic.com',
+                                authcfg=authcfg,
+                                key_target='https://api.anthropic.com' if authcfg else '',
+                                enabled_sources=URUMEA_SOURCES, autonomy='autonomous',
+                                tool_rules=json.dumps(allowed)))
+    agent_chat()._settings_dialog = lambda: False
+    agent_chat().open_settings = lambda: False
+    agent_chat()._refresh_ready()
+    agent_chat().new_conversation()
+    log(f'urumea settings {load_settings()}')
+
+
+def urumea_note():
+    names = sorted(lyr.name() for lyr in QgsProject.instance().mapLayers().values())
+    log(f'urumea layers {names}')
+
+
+def urumea_take(request, caption_en, view):
+    steps = [(800, agent_open), (1500, wait_idle())]
+    steps += act(lambda: agent_panel().input, lambda: agent_panel().input.setFocus())
+    steps += type_into(lambda: agent_panel().input, request, per_char=55)
+    steps += [hold(500)]
+    steps += act(lambda: agent_panel().send_button, lambda: agent_panel().send_button.click())
+    steps += [(500, speed(6.0)), (1500, agent_done()), (300, speed(1.0)),
+              (0, urumea_note), (0, cam(view, dur=1.6)), hold(2500), caption(caption_en)]
+    return steps
+
+
+URUMEA_OPEN = [(1000, urumea_empty), (3000, open_plugin), (8000, size_dock), (1500, wait_idle()),
+               (500, fit_window(('FILTERING',))), (2500, wait_idle())]
+
+URUMEA = URUMEA_OPEN + [(500, urumea_agent_setup), (500, rec_start),
+                        (0, cam('full', dur=0, drift=1.03)),
+                        title('Urumea flood screening, one sentence per take')]
+for _take in URUMEA_TAKES:
+    URUMEA += urumea_take(*_take)
+URUMEA += ending()
+
+
 def zip_edit():
     return dock().lineEdit_exporting_zip
 
@@ -3584,7 +3673,7 @@ CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'la
          'explore': EXPLORE, 'buffer': BUFFER2, 'noise': NOISE2, 'bridges': BRIDGES2, 'brush': BRUSH,
          'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT2, 'processing': PROCESSING,
          'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY,
-         'ndvi': NDVI, 'roofs': ROOFS, 'ground': GROUND, 'wires': WIRES,
+         'ndvi': NDVI, 'roofs': ROOFS, 'ground': GROUND, 'wires': WIRES, 'urumea': URUMEA,
          # the first cut of the four stories told again with the buttons of EXPLORING, Undo / Redo and the walk
          # through a result (the teaser was edited from them)
          'noise_plain': NOISE, 'buffer_plain': BUFFER, 'bridges_plain': BRIDGES, 'export_plain': EXPORT}

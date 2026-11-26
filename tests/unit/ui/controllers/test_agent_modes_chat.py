@@ -73,3 +73,32 @@ def test_the_go_of_a_plan_keeps_the_mode_picked_for_later(ctrl_module, controlle
     controller.panel.input.text.return_value = ""
     controller._on_send("carry it out", mode="act")
     assert controller._request_mode == "act" and controller._mode == "plan"
+
+
+def test_answer_reads_and_propose_shows_each_change_first(ctrl_module, controller):  # noqa: F811
+    controller._on_posture_changed("respond")
+    assert controller._mode == "ask"
+    _send(ctrl_module, controller)
+    assert controller._policy.level == _permissions().ADVISOR
+    controller._on_posture_changed("propose")
+    assert controller._mode == "plan"
+    _send(ctrl_module, controller)
+    assert controller._policy.level == _permissions().CAREFUL
+
+
+def test_act_keeps_the_level_of_the_autonomy_tab(ctrl_module, controller):  # noqa: F811
+    controller._on_posture_changed("act")
+    assert controller._mode == "act"
+    _send(ctrl_module, controller)
+    level = sys.modules[f"{_PKG}.ui.controllers.agent_chat_controller"].load_settings().autonomy
+    assert controller._policy.level == _permissions().level_or_default(level)
+
+
+def test_the_go_of_a_propose_plan_runs_at_the_saved_level(ctrl_module, controller):  # noqa: F811
+    controller._on_posture_changed("propose")
+    _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("carry it out", mode="act")
+    level = sys.modules[f"{_PKG}.ui.controllers.agent_chat_controller"].load_settings().autonomy
+    assert controller._request_mode == "act"
+    assert controller._policy.level == _permissions().level_or_default(level)

@@ -102,6 +102,12 @@ carto_light_nolabels under layers that have their own labels, osm_tiles for a st
 photographs anywhere, ign_plan or ign_ortho in France. When none is enabled, say that one can be ticked in the
 settings of the agent, Sources tab.
 
+## Showing the user
+
+While the user watches, point at what you mean instead of only telling it. In the chat, flash_features flashes the
+features an expression keeps (selecting nothing), set_active_layer makes a layer active and shows it unfolded in the
+tree, and show_message tells something in the bar of QGIS (never a question: ask_user asks it instead).
+
 ## Layouts
 
 1. Set the map first: filters, style, zoom_to.

@@ -223,6 +223,9 @@ Rules worth keeping:
   user finishes it in the layout designer; undoing the turn removes it (a `layout` effect keeps its XML, redoing
   reads it again). `export_layout` writes one as PDF or PNG into a sub-folder of the export root, never a path
   of the model, and is confirmed by the user like `export_layers`. `map_context` lists the layouts.
+  `open_layout` opens one in the layout designer, in front, for the user to finish; `preview_atlas` turns the
+  pages of its atlas preview (first, previous, next, last), turning the preview on in its open designer. Both
+  are tools of the chat alone (a window is needed) and change nothing of the project.
 - **Project CRS**: `set_project_crs` takes an authid, an EPSG code alone or a layer of the project, and sets the
   CRS of the project, which the map follows (layers in other CRS are reprojected on the fly, no data changes).
   The turn keeps the CRS before (its authid, or its WKT for a CRS of its own) and undoing the turn sets it back.
@@ -268,6 +271,11 @@ Rules worth keeping:
   Claude gets the image in the `tool_result`; an OpenAI-compatible server, whose tool messages hold text only, in
   a user message right after. An image goes with the request it was taken in only: before the next request it
   is replaced by a line saying it was there. A model that reads no image may refuse the request.
+- **Showing the user** (`adapters/public_api/gui_control.py`): `flash_features`, `set_active_layer` and
+  `show_message`, tools of the chat alone, point at what the agent means while the user watches: features
+  matching an expression blink on the map (selecting nothing, 500 at most), a layer becomes active and is shown
+  unfolded in the tree, a short message lands in the bar of QGIS (never a question: `ask_user` asks it instead).
+  View class, no undo point, refused without a window.
 - **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
   message, so the cached prefix does not change. Three levels:
   - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer
@@ -298,7 +306,7 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 | Class | Tools | Undone |
 |---|---|---|
 | read | every `read_only` tool, open data searches included | nothing to undo |
-| view | `zoom_to`, `select_features`, `set_layers_visibility`, `group_layers`, `map_theme`, `bookmark` | with the turn |
+| view | `zoom_to`, `select_features`, `set_layers_visibility`, `group_layers`, `map_theme`, `bookmark`, `open_layout`, `flash_features`, `set_active_layer`, `show_message`, `preview_atlas` | with the turn (a zoom, an opened designer, a flash, the active layer, a message or a turned atlas page is view state: it stays) |
 | project | filters, style, Processing, layouts, CRS, SAM layers, any other change | with the turn |
 | edit buffer | `update_features`, `add_features`, `add_field` | with the turn, until the user saves |
 | irreversible | `destructive` tools: `delete_features`, `export_layers`, `export_layout`, `remove_layers` | not always |
@@ -428,6 +436,10 @@ nothing is sent, nothing is paid, and it works with no provider set up. `core/ag
   recipes were changed from the menu since: those are left as they are. From the menu, removing asks first and is not
   a step of the history.
 - The MCP servers do not offer these tools: recipes live in the panel of the dock. The model cannot run a recipe.
+- A favorite, unlike a recipe, the agent can also keep: `save_favorite` stores the current filter of the project
+  under the name the user gives (as the star of the dock does, with its remote layers and clips), through the chat,
+  `POST /favorites` and both MCP servers. Refused when nothing is filtered or when the name is taken; never replayed
+  by a recipe (it would keep a duplicate); kept when the turn is undone, and said so.
 
 ### Live recipes
 

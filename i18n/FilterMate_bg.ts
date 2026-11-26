@@ -980,6 +980,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
         <translation>Оформление {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3138"/>
+        <source>Flashing {}</source>
+        <translation>Мигане на {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3139"/>
+        <source>Active layer: {}</source>
+        <translation>Активен слой: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="3140"/>
+        <source>Message: {}</source>
+        <translation>Съобщение: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
         <source>Layout {} exported</source>
         <translation>Оформлението {} е експортирано</translation>

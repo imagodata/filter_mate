@@ -311,6 +311,17 @@ class ChatEngine:
                  if self._executor.verdict(call, self._policy) == ASK
                  and not asked_alone(call.name, connector_gate(call) or self._executor.spec(call.name))
                  ][:MAX_ASKED_TOGETHER]
+        # One tick per action when the listener offers it (the thread asks Allow or Refuse of each):
+        # None means it could not ask, and the grouped question below takes over; {} refuses everything.
+        confirm_each = getattr(self._listener, "confirm_each", None)
+        if len(asked) >= 2 and confirm_each is not None:
+            try:
+                each = confirm_each([call for _position, call in asked])
+            except Exception:
+                logger.exception("Agent confirmation failed")
+                each = None
+            if each is not None:
+                return {position: bool(each.get(index, False)) for index, (position, _call) in enumerate(asked)}
         confirm_many = getattr(self._listener, "confirm_many", None)
         if len(asked) < 2 or confirm_many is None:
             return {}

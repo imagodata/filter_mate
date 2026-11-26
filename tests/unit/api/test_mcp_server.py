@@ -22,7 +22,8 @@ from .mcp_session import McpSession, _env, is_error, text_of, wire  # noqa: E402
 ROOT = Path(__file__).resolve().parents[3]
 EXPECTED_TOOLS = {
     "list_layers", "apply_filter", "filter_status", "undo_filter", "redo_filter", "cross_filter", "geometry_filter",
-    "point_cloud_filter", "clear_filters", "filter_state", "list_favorites", "apply_favorite", "export_layers",
+    "point_cloud_filter", "clear_filters", "filter_state", "list_favorites", "apply_favorite", "save_favorite",
+    "export_layers",
     "describe_layer", "field_values", "preview_filter", "map_context",
     "layer_statistics", "sample_features", "identify_at", "find_algorithms", "describe_algorithm", "run_algorithm",
     "set_layer_style", "set_labels", "update_features", "delete_features", "add_features",
@@ -250,6 +251,18 @@ def test_apply_favorite_quotes_the_id(mcp, fake_api):
     assert (request["method"], request["path"]) == ("POST", "/favorites/fav-1/apply")
     mcp.call("apply_favorite", {"favorite_id": "a b?c#d"})
     assert last(fake_api)["path"] == "/favorites/a%20b%3Fc%23d/apply"
+
+
+def test_save_favorite_posts_name_and_description(mcp, fake_api):
+    saved = {"favorite_id": "fav-9", "name": "Kept", "description": "big ones",
+             "layer_name": "communes", "expression": '"population" > 10000'}
+    fake_api.respond("POST", "/favorites", saved)
+    result = mcp.call("save_favorite", {"name": "Kept", "description": "big ones"})
+    assert not is_error(result)
+    assert json.loads(text_of(result)) == saved
+    request = last(fake_api)
+    assert (request["method"], request["path"], request["body"]) == (
+        "POST", "/favorites", {"name": "Kept", "description": "big ones"})
 
 
 def test_export_layers(mcp, fake_api):

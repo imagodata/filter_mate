@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Issue #32 — GET /favorites and POST /favorites/{id}/apply contract tests."""
+"""Issue #32 — GET /favorites and POST /favorites/{id}/apply contract tests.
+
+POST /favorites — the agent keeps the current filter as a favorite.
+"""
 from __future__ import annotations
 
 
@@ -64,3 +67,48 @@ class TestApplyFavorite:
         client.post("/favorites/fav-roads-major/apply")
         status = client.get("/filters/status").json()
         assert status["last_applied_source"] == "favorite:fav-roads-major"
+
+
+class TestSaveFavorite:
+    def test_saves_the_active_filter_under_a_name(self, client):
+        client.post("/favorites/fav-communes-large/apply")
+
+        response = client.post("/favorites", json={"name": "Kept", "description": "big ones"})
+
+        assert response.status_code == 201
+        body = response.json()
+        assert body["name"] == "Kept" and body["description"] == "big ones"
+        assert body["layer_name"] == "communes" and body["expression"] == '"population" > 10000'
+        assert body["favorite_id"]
+        names = {item["name"] for item in client.get("/favorites").json()}
+        assert "Kept" in names
+
+    def test_a_saved_favorite_survives_undo_of_the_filters(self, client):
+        # A save is meant to persist: undoing the turn's filters must not
+        # drop the favorite kept during it.
+        client.post("/favorites/fav-communes-large/apply")
+        client.post("/favorites", json={"name": "Kept"})
+
+        client.post("/filters/undo")
+
+        names = {item["name"] for item in client.get("/favorites").json()}
+        assert "Kept" in names
+
+    def test_duplicate_name_is_a_conflict(self, client):
+        client.post("/favorites/fav-communes-large/apply")
+
+        response = client.post("/favorites", json={"name": "Large communes"})
+
+        assert response.status_code == 409
+
+    def test_nothing_filtered_is_unprocessable(self, client):
+        response = client.post("/favorites", json={"name": "Kept"})
+
+        assert response.status_code == 422
+
+    def test_blank_name_is_unprocessable(self, client):
+        client.post("/favorites/fav-communes-large/apply")
+
+        response = client.post("/favorites", json={"name": "   "})
+
+        assert response.status_code == 422

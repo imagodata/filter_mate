@@ -1530,6 +1530,46 @@
   ],
   "type": "object"
  },
+ "export_infographic": {
+  "additionalProperties": false,
+  "properties": {
+   "dpi": {
+    "default": 192,
+    "maximum": 600,
+    "minimum": 72,
+    "type": "integer"
+   },
+   "format": {
+    "default": "html",
+    "enum": [
+     "html",
+     "png",
+     "jpg",
+     "svg"
+    ],
+    "type": "string"
+   },
+   "infographic_id": {
+    "maxLength": 20,
+    "minLength": 1,
+    "type": "string"
+   },
+   "name": {
+    "maxLength": 100,
+    "type": "string"
+   },
+   "subfolder": {
+    "default": "infographics",
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "infographic_id"
+  ],
+  "type": "object"
+ },
  "export_layers": {
   "properties": {
    "crs": {
@@ -1762,6 +1802,32 @@
   },
   "required": [
    "query"
+  ],
+  "type": "object"
+ },
+ "flash_features": {
+  "additionalProperties": false,
+  "properties": {
+   "expression": {
+    "maxLength": 2000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "limit": {
+    "default": 500,
+    "maximum": 500,
+    "minimum": 1,
+    "type": "integer"
+   }
+  },
+  "required": [
+   "layer",
+   "expression"
   ],
   "type": "object"
  },
@@ -2285,6 +2351,20 @@
   ],
   "type": "object"
  },
+ "open_layout": {
+  "additionalProperties": false,
+  "properties": {
+   "name": {
+    "maxLength": 100,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "name"
+  ],
+  "type": "object"
+ },
  "point_cloud_filter": {
   "properties": {
    "criteria": {
@@ -2389,6 +2469,34 @@
   "required": [
    "layers",
    "criteria"
+  ],
+  "type": "object"
+ },
+ "preview_atlas": {
+  "additionalProperties": false,
+  "properties": {
+   "action": {
+    "default": "next",
+    "enum": [
+     "first",
+     "previous",
+     "next",
+     "last"
+    ],
+    "type": "string"
+   },
+   "layout": {
+    "maxLength": 100,
+    "minLength": 1,
+    "type": "string"
+   },
+   "preview": {
+    "default": true,
+    "type": "boolean"
+   }
+  },
+  "required": [
+   "layout"
   ],
   "type": "object"
  },
@@ -2677,6 +2785,24 @@
   ],
   "type": "object"
  },
+ "save_favorite": {
+  "properties": {
+   "description": {
+    "default": "",
+    "maxLength": 500,
+    "type": "string"
+   },
+   "name": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "name"
+  ],
+  "type": "object"
+ },
  "save_recipe": {
   "additionalProperties": false,
   "properties": {
@@ -2831,6 +2957,24 @@
     "maxLength": 1000,
     "minLength": 1,
     "type": "string"
+   }
+  },
+  "required": [
+   "layer"
+  ],
+  "type": "object"
+ },
+ "set_active_layer": {
+  "additionalProperties": false,
+  "properties": {
+   "layer": {
+    "maxLength": 1000,
+    "minLength": 1,
+    "type": "string"
+   },
+   "reveal": {
+    "default": true,
+    "type": "boolean"
    }
   },
   "required": [
@@ -3756,7 +3900,10 @@
      "pie",
      "histogram",
      "line",
-     "scatter"
+     "scatter",
+     "kpi",
+     "treemap",
+     "area"
     ],
     "type": "string"
    },
@@ -3820,6 +3967,69 @@
   },
   "required": [
    "kind"
+  ],
+  "type": "object"
+ },
+ "show_infographic": {
+  "additionalProperties": false,
+  "properties": {
+   "caption": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "charts": {
+    "items": {
+     "maxLength": 20,
+     "minLength": 1,
+     "type": "string"
+    },
+    "maxItems": 4,
+    "minItems": 1,
+    "type": "array"
+   },
+   "source": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "title": {
+    "maxLength": 80,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "title",
+   "charts"
+  ],
+  "type": "object"
+ },
+ "show_message": {
+  "additionalProperties": false,
+  "properties": {
+   "duration": {
+    "default": 5,
+    "maximum": 60,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "level": {
+    "default": "info",
+    "enum": [
+     "info",
+     "success",
+     "warning",
+     "critical"
+    ],
+    "type": "string"
+   },
+   "text": {
+    "maxLength": 500,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "text"
   ],
   "type": "object"
  },

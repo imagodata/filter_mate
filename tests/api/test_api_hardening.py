@@ -45,6 +45,9 @@ class _UnavailableFavoritesAccessor(InMemoryAccessor):
     def apply_favorite(self, favorite_id):  # type: ignore[override]
         raise FavoritesUnavailable("plugin still booting")
 
+    def save_favorite(self, name, description=""):  # type: ignore[override]
+        raise FavoritesUnavailable("plugin still booting")
+
 
 class TestFavoritesUnavailableAt503:
     def _client(self) -> TestClient:
@@ -70,6 +73,11 @@ class TestFavoritesUnavailableAt503:
 
     def test_apply_favorite_returns_503_with_retry_after(self):
         response = self._client().post("/favorites/any-id/apply")
+        assert response.status_code == 503
+        assert "retry-after" in {k.lower() for k in response.headers}
+
+    def test_save_favorite_returns_503_with_retry_after(self):
+        response = self._client().post("/favorites", json={"name": "Kept"})
         assert response.status_code == 503
         assert "retry-after" in {k.lower() for k in response.headers}
 

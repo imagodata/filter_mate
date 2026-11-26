@@ -1286,3 +1286,39 @@ class TestCombinedFilters:
         refused = make_client(accessor).post("/filters/apply", json={
             "layer_name": "communes", "expression": "1=1; DROP TABLE x", "operator": "AND"})
         assert refused.status_code == 400
+
+
+class TestSaveFavoriteTool:
+    def test_saves_the_active_filter_under_a_name(self, tmp_path):
+        accessor = Accessor()
+        accessor.apply_filter("communes", '"pop" > 10', source="test")
+
+        error, answer = run(accessor, tmp_path, "save_favorite", name="Big", description="big ones")
+
+        assert not error, answer
+        assert answer["favorite"]["name"] == "Big"
+        assert answer["favorite"]["layer_name"] == "communes"
+        assert answer["favorite"]["expression"] == '"pop" > 10'
+        assert answer["favorite"]["favorite_id"]
+
+    def test_without_an_active_filter_it_fails(self, tmp_path):
+        error, message = run(Accessor(), tmp_path, "save_favorite", name="Big")
+
+        assert error and "filter" in str(message)
+
+    def test_a_duplicate_name_fails(self, tmp_path):
+        accessor = Accessor()
+        accessor.apply_filter("communes", '"pop" > 10', source="test")
+        run(accessor, tmp_path, "save_favorite", name="Big")
+
+        error, message = run(accessor, tmp_path, "save_favorite", name="Big")
+
+        assert error and "already" in str(message)
+
+    def test_a_blank_name_fails(self, tmp_path):
+        accessor = Accessor()
+        accessor.apply_filter("communes", '"pop" > 10', source="test")
+
+        error, message = run(accessor, tmp_path, "save_favorite", name="   ")
+
+        assert error and "name" in str(message)

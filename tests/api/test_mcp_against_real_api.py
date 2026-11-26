@@ -87,6 +87,15 @@ def test_filters_and_clear(mcp):
     assert not is_error(mcp.call("apply_favorite", {"favorite_id": "fav-1"}))
 
 
+def test_save_favorite(mcp):
+    assert not is_error(mcp.call("apply_filter", {"layer_name": "batiment", "expression": '"a" = 1'}))
+    result = mcp.call("save_favorite", {"name": "Kept by the agent"})
+    assert not is_error(result), text_of(result)
+    assert "Kept by the agent" in text_of(mcp.call("list_favorites"))
+    again = mcp.call("save_favorite", {"name": "Kept by the agent"})
+    assert is_error(again) and "already exists" in text_of(again)
+
+
 def test_export_writes_below_the_export_root(mcp):
     result = mcp.call("export_layers", {"layers": ["mnt"], "subfolder": "controle/2026-10"})
     assert not is_error(result), text_of(result)

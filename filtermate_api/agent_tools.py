@@ -14,7 +14,15 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
 from urllib.parse import urlsplit
 
-from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected, LayerProtected
+from .accessor import (
+    FavoriteNameTakenError,
+    FavoriteSaveError,
+    FavoritesUnavailable,
+    FilterMateAccessor,
+    FilterRejected,
+    LayerProtected,
+    NoActiveFilterError,
+)
 from .export_root import ExportRootError, prepare_export_root, resolve_export_folder, resolve_exported_file
 from .filter_combine import combined
 from .layer_listing import select_layers, short_filter
@@ -350,6 +358,19 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         step = _found(accessor.apply_favorite(args["favorite_id"]), "Favorite not found.")
         return {"step": asdict(step), "active_filters": _active_after_change()}
 
+    def save_favorite(args: Dict[str, Any]) -> Dict[str, Any]:
+        name = str(args.get("name") or "").strip()
+        if not name:
+            raise ToolFailure("A name is needed to keep the current filter as a favorite.")
+        try:
+            favorite = accessor.save_favorite(name, description=str(args.get("description") or ""))
+        except FavoriteNameTakenError:
+            raise ToolFailure(f"A favorite named {name!r} already exists: list_favorites shows the names taken, "
+                              "ask the user with ask_user whether to use another name.") from None
+        except (NoActiveFilterError, FavoriteSaveError) as exc:
+            raise ToolFailure(str(exc)) from None
+        return {"favorite": asdict(favorite)}
+
     def zoom_to(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.zoom_to(layer=args.get("layer"), extent_wkt=args.get("extent_wkt"), crs=args.get("crs"),
                                        selected_only=args["selected_only"]))
@@ -648,7 +669,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "bookmark": bookmark,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
-        "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,
+        "clear_filters": clear_filters, "apply_favorite": apply_favorite, "save_favorite": save_favorite,
+        "export_layers": export_layers,
         "zoom_to": zoom_to, "select_features": select_features, "set_layers_visibility": set_layers_visibility,
         "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
         "add_service_layer": add_service_layer, "add_basemap": add_basemap, "find_place": find_place, "search_imagery": search_imagery,

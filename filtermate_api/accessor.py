@@ -22,6 +22,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
+from uuid import uuid4
 
 
 class FavoritesUnavailable(RuntimeError):
@@ -34,6 +35,22 @@ class FavoritesUnavailable(RuntimeError):
     with a ``Retry-After`` hint so callers don't get a silent ``[]``
     that misleads them into "no favorites configured".
     """
+
+
+class FavoriteSaveError(ValueError):
+    """The current filter state was not kept as a favorite; the message goes to the model or the user."""
+
+
+class FavoriteNameTakenError(FavoriteSaveError):
+    """A favorite already holds ``name``: pick another name (409)."""
+
+    def __init__(self, name: str):
+        super().__init__(f"A favorite named {name!r} already exists")
+        self.name = name
+
+
+class NoActiveFilterError(FavoriteSaveError):
+    """No layer is filtered right now: nothing to keep (422)."""
 
 
 class FilterRejected(ValueError):
@@ -1024,6 +1041,16 @@ class FilterMateAccessor(Protocol):
         """
         ...
 
+    def save_favorite(self, name: str, description: str = "") -> Favorite:
+        """Keep the current filter state as a favorite called ``name``.
+
+        Raises :class:`FavoriteNameTakenError` when a favorite already
+        holds the name, :class:`NoActiveFilterError` when no layer is
+        filtered. A save persists: undoing the filters later does not
+        drop the favorite kept.
+        """
+        ...
+
     def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
                      buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
                      selected_only: bool = True, raster_selection: Optional[Dict] = None,
@@ -1708,6 +1735,23 @@ class InMemoryAccessor:
 
     def list_favorites(self) -> List[Favorite]:
         return list(self.favorites)
+
+    def save_favorite(self, name: str, description: str = "") -> Favorite:
+        name = (name or "").strip()
+        if not name:
+            raise FavoriteSaveError("A name is needed to keep the current filter as a favorite")
+        if any(favorite.name == name for favorite in self.favorites):
+            raise FavoriteNameTakenError(name)
+        layer = self._last_applied_layer if self._last_applied_layer in self._active else None
+        if layer is None and len(self._active) == 1:
+            layer = next(iter(self._active))
+        expression = self._active.get(layer, "") if layer is not None else ""
+        if not expression:
+            raise NoActiveFilterError("No active filter to save: filter a layer first")
+        favorite = Favorite(favorite_id=f"fav-{uuid4().hex[:8]}", name=name, description=description,
+                            layer_name=layer or "", expression=expression)
+        self.favorites.append(favorite)
+        return favorite
 
     def apply_favorite(self, favorite_id: str) -> Optional[HistoryStep]:
         fav = next((f for f in self.favorites if f.favorite_id == favorite_id), None)

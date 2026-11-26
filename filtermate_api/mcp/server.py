@@ -579,6 +579,21 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", f"/favorites/{quote_segment(favorite_id)}/apply")
 
+    @mcp.tool(annotations=_write("Save a favorite", idempotent=False))
+    async def save_favorite(
+        name: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "Name under which the current filter is kept"))],
+        description: Annotated[str, Field(max_length=500, description=(
+            "What the favorite keeps, in a few words"))] = "",
+    ) -> Dict[str, Any]:
+        """Keep the current filter of the project as a favorite, as the dock's star does.
+
+        Only when the user asks to keep, save or reuse the filter (a favorite to find again). Refused when no
+        layer is filtered, and when a favorite already holds the name: list_favorites shows the names taken.
+        A favorite stays when the turn is undone. Returns the favorite (favorite_id, name, layer_name, expression).
+        """
+        return await call("POST", "/favorites", _body(name=name, description=description))
+
     # -- driving QGIS ----------------------------------------------------------
 
     @mcp.tool(annotations=_write("Zoom the map", idempotent=True))

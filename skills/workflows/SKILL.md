@@ -3,7 +3,7 @@ name: workflows
 title: Chain the steps of a request
 description: requests of several steps (distances, places, counts, population, criteria) in the fewest calls
 metadata:
-  version: 5
+  version: 6
   plugin_min: 5.1.1
   audience: chat, mcp
   tools: list_layers, describe_layer, field_values, layer_statistics, sample_features, map_context, preview_filter, apply_filter, cross_filter, geometry_filter, clear_filters, select_features, zoom_to, set_layers_visibility, export_layers, find_place, search_open_data, add_layer, add_service_layer, add_osm_features, add_population, set_layer_style, add_field, set_labels, create_layout, export_layout, run_algorithm
@@ -133,6 +133,9 @@ relief, the contours, a look at the result) and the values to choose when the us
 
 - "Start again", "show everything": clear_filters on the layers you filtered, in one call.
 - "Keep the result": export_layers writes the layers as filtered now, only when the user asks for files.
+- "Keep the chain": when two or more run_algorithm steps worked in this session, propose once, as an option, to
+  save them as a reusable Processing model (the processing-models skill builds it on a yes). Never build it
+  unasked.
 
 ## What never to do
 

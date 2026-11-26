@@ -839,6 +839,37 @@ def test_a_recipe_asks_a_remote_source_alone_with_its_address(ctrl_module, contr
     assert "Parks" not in together
 
 
+def test_a_confirm_card_names_the_layers_and_how_reversible_they_are(ctrl_module, controller):  # noqa: F811
+    call = sys.modules[f"{_PKG}.core.agent.messages"].ToolCallPart
+    deleted = call("1", "delete_features", {"layer": "parcels", "expression": '"owner" = 7'})
+    assert controller._confirm_layers(deleted) == ["parcels"]
+    assert "saved" in controller._reversibility_text(deleted)
+    assert controller._confirm_text(deleted).count("edit buffer") == 1  # own wording, no duplicate line
+    removed = call("2", "remove_layers", {"layers": ["A", "B", "A"]})
+    assert controller._confirm_layers(removed) == ["A", "B"]
+    assert "Final" in controller._reversibility_text(removed)
+    assert "Final" in controller._confirm_text(removed)
+    filtered = call("3", "apply_filter", {"layer_name": "roads", "expression": '"kind" = 1'})
+    assert controller._confirm_layers(filtered) == ["roads"]
+    assert "Undo" in controller._reversibility_text(filtered)
+
+
+def test_no_card_asks_each_action_while_nothing_runs(ctrl_module, controller):  # noqa: F811
+    call = sys.modules[f"{_PKG}.core.agent.messages"].ToolCallPart
+    assert controller.confirm_each([call("1", "remove_layers", {"layers": ["A"]})]) is None
+
+
+def test_the_error_card_sends_the_last_request_again(ctrl_module, controller, monkeypatch):  # noqa: F811
+    sent = []
+    monkeypatch.setattr(controller, "_on_resend", sent.append)
+    controller._last_request = ""
+    controller._resend_last()
+    assert sent == []
+    controller._last_request = "filter the parcels"
+    controller._resend_last()
+    assert sent == ["filter the parcels"]
+
+
 def test_the_question_for_several_actions_shows_their_arguments(ctrl_module, dock):
     """As the single question does for a tool without words of its own: the arguments as they are."""
     asked = []

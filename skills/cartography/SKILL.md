@@ -6,7 +6,7 @@ metadata:
   version: 6
   plugin_min: 5.1.0
   audience: chat, mcp
-  tools: set_layer_style, set_labels, list_style_presets, apply_style_preset, describe_layer, field_values, layer_statistics, create_layout, export_layout, set_project_crs, group_layers, rename_layer, map_theme, bookmark, zoom_to, map_context, view_map, add_basemap, duplicate_layer
+  tools: set_layer_style, set_labels, list_style_presets, apply_style_preset, describe_layer, field_values, layer_statistics, create_layout, export_layout, set_project_crs, group_layers, rename_layer, map_theme, bookmark, zoom_to, map_context, view_map, flash_features, set_active_layer, show_message, ask_user, add_basemap, duplicate_layer
   risk: change
   trust: builtin
 ---
@@ -105,6 +105,12 @@ add_basemap puts a web basemap the user enabled under every layer: carto_light f
 carto_light_nolabels under layers that have their own labels, osm_tiles for a street map, google_satellite for
 photographs anywhere, ign_plan or ign_ortho in France. When none is enabled, say that one can be ticked in the
 settings of the agent, Sources tab.
+
+## Showing the user
+
+While the user watches, point at what you mean instead of only telling it. In the chat, flash_features flashes the
+features an expression keeps (selecting nothing), set_active_layer makes a layer active and shows it unfolded in the
+tree, and show_message tells something in the bar of QGIS (never a question: ask_user asks it instead).
 
 ## Layouts
 

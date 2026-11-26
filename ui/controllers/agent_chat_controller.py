@@ -7,7 +7,7 @@ import logging
 import os
 import time
 from dataclasses import asdict, replace
-from typing import Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QObject, QTimer
@@ -52,8 +52,11 @@ from ...core.agent.sources import (
     database_sources, model_name, platform_aliases, platform_domains, platform_name,
 )
 from ...core.agent.modes import ACT, PLAN, level_for, mode_note, mode_or_default
+from ...core.agent.postures import PROPOSE, RESPOND, posture_from_mode, posture_level, posture_or_default, \
+    posture_to_mode
 from ...core.agent.permissions import (
-    ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, RULE_NEVER, RUN, STANDARD, TURNED_OFF, PermissionPolicy,
+    ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, BUFFER, LOCAL, MAX_ASKED_TOGETHER, OUTSIDE, PROJECT, PROTECTED, REFUSE,
+    RULE_NEVER, RUN, STANDARD, TURNED_OFF, PermissionPolicy,
     asked_alone, level_note, risk_of,
 )
 from ...adapters.agent.protected_layers import ProjectProtection, read_ids as read_protected, write_ids as write_protected
@@ -79,10 +82,12 @@ from ...core.agent.session import (
 )
 from ...core.agent.memory import UnreadableMemory, chosen as memory_chosen, memory_block
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
-from ...core.agent.questions import answers_payload, parse_questions
+from ...core.agent.questions import Option, Question, answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
-    ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CHART_TOOLS, CREATE_WIDGET, EXPORT_CHART, RUN_CHART_CODE, SHOW_CHART,
-    LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
+    ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CHART_TOOLS, CREATE_WIDGET, EXPORT_CHART, EXPORT_INFOGRAPHIC,
+    RUN_CHART_CODE, SHOW_CHART, SHOW_INFOGRAPHIC,
+    FLASH_FEATURES, LIST_TABLES, OPEN_LAYOUT, PREVIEW_ATLAS, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON,
+    SAVE_RECIPE, SET_ACTIVE_LAYER, SHOW_MESSAGE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
     TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
@@ -270,8 +275,12 @@ class AgentChatController(QObject):
         self.panel.send_requested.connect(self._on_send)
         self._mode = read_mode()  # Ask, Plan or Act, kept from one session to the next (core/agent/modes.py)
         self._request_mode = self._mode
+        # One posture under the line sets the mode and the level together (core/agent/postures.py): Answer reads,
+        # Propose shows each change before applying it, Act runs at the level of the Autonomy tab.
+        self._posture = posture_from_mode(self._mode)
         self.panel.set_mode(self._mode)
         self.panel.mode_changed.connect(self._on_mode_changed)
+        self.panel.posture_changed.connect(self._on_posture_changed)
         self.panel.stop_requested.connect(self._on_stop)
         self.panel.undo_requested.connect(self._on_undo)
         self.panel.redo_requested.connect(self._on_redo)
@@ -605,6 +614,7 @@ class AgentChatController(QObject):
         self._refresh_widgets()  # an undo or a redo may have brought widgets back or taken them away
         self._refresh_recipes()
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
+        self.panel.set_can_redo(TurnCheckpoint.can_redo())
         self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
         self._refresh_global_history()
         history = self._history_panel()
@@ -806,6 +816,11 @@ class AgentChatController(QObject):
         if text and not self.chat_busy() and not text.startswith(EXTERNAL_MARK):
             self.panel.show_thread()
             self._on_send(text)
+
+    def _resend_last(self) -> None:
+        """The error card sends the last request again (it waits in the line since the failure)."""
+        if self._last_request:
+            self._on_resend(self._last_request)
 
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
@@ -1492,6 +1507,11 @@ class AgentChatController(QObject):
         handlers[UNDO_AGENT_STEP] = self._undo_tool
         handlers[RUN_PYTHON] = self._python_tool
         handlers[VIEW_MAP] = self._view_map_tool
+        handlers[OPEN_LAYOUT] = self._open_layout_tool
+        handlers[FLASH_FEATURES] = self._flash_features_tool
+        handlers[SET_ACTIVE_LAYER] = self._set_active_layer_tool
+        handlers[SHOW_MESSAGE] = self._show_message_tool
+        handlers[PREVIEW_ATLAS] = self._preview_atlas_tool
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
         handlers[CREATE_WIDGET] = lambda arguments: self._create_widget_tool(arguments,
@@ -1503,6 +1523,10 @@ class AgentChatController(QObject):
                                                                                  share_values=values.send_values)
         handlers[EXPORT_CHART] = lambda arguments: self._charts.export_chart(arguments, _default_export_root())
         handlers[CHART_TO_LAYOUT] = lambda arguments: self._charts.add_to_layout(arguments)
+        handlers[SHOW_INFOGRAPHIC] = lambda arguments: self._charts.show_infographic(
+            arguments, share_values=values.send_values)
+        handlers[EXPORT_INFOGRAPHIC] = lambda arguments: self._charts.export_infographic(
+            arguments, _default_export_root())
         handlers[SAVE_RECIPE] = self._save_recipe_tool
         handlers[REMOVE_RECIPE] = self._remove_recipe_tool
         handlers[ASK_USER] = self._ask_user_tool
@@ -1599,6 +1623,54 @@ class AgentChatController(QObject):
         from ...adapters.agent.expert_python import run_code
         try:
             return run_code(arguments.get("code", ""), arguments.get("purpose", ""))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+
+    @staticmethod
+    def _open_layout_tool(arguments) -> dict:
+        """open_layout: a print layout shown in the layout designer, in front."""
+        from ...adapters.public_api.gui_control import open_layout
+        try:
+            return open_layout(arguments.get("name", ""))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+
+    @staticmethod
+    def _flash_features_tool(arguments) -> dict:
+        """flash_features: features blinked on the map, selecting nothing."""
+        from ...adapters.public_api.gui_control import flash_features
+        try:
+            return flash_features(arguments.get("layer", ""), arguments.get("expression", ""),
+                                  limit=arguments.get("limit", 500))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+
+    @staticmethod
+    def _set_active_layer_tool(arguments) -> dict:
+        """set_active_layer: a layer made active, shown unfolded in the layer tree."""
+        from ...adapters.public_api.gui_control import set_active_layer
+        try:
+            return set_active_layer(arguments.get("layer", ""), reveal=bool(arguments.get("reveal", True)))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+
+    @staticmethod
+    def _show_message_tool(arguments) -> dict:
+        """show_message: a short message in the bar of QGIS."""
+        from ...adapters.public_api.gui_control import show_message
+        try:
+            return show_message(arguments.get("text", ""), level=arguments.get("level", "info"),
+                                duration=arguments.get("duration", 5))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+
+    @staticmethod
+    def _preview_atlas_tool(arguments) -> dict:
+        """preview_atlas: a page of an atlas preview turned, in its open designer when there is one."""
+        from ...adapters.public_api.gui_control import preview_atlas
+        try:
+            return preview_atlas(arguments.get("layout", ""), action=arguments.get("action", "next"),
+                                 preview=bool(arguments.get("preview", True)))
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
 
@@ -1994,6 +2066,7 @@ class AgentChatController(QObject):
                 self._record("user", title)
             self.panel.set_working(True)
             self.panel.set_can_undo(False)
+            self.panel.set_can_redo(False)
             self._show_undo_state()
             # The steps the user would be asked about, asked together when there are several: one yes for the recipe.
             asked = []  # (number of the step, its call)
@@ -2714,10 +2787,28 @@ class AgentChatController(QObject):
 
     # --- what the user does -----------------------------------------------------
 
+    def _on_posture_changed(self, posture: str) -> None:
+        """The posture picked under the line: the mode and the level of the next requests."""
+        self._posture = posture_or_default(posture)
+        self._mode = posture_to_mode(self._posture)
+        write_mode(self._mode)
+
     def _on_mode_changed(self, mode: str) -> None:
         """The mode picked under the line: for the next request (one under way keeps the mode it was sent with)."""
         self._mode = mode_or_default(mode)
+        self._posture = posture_from_mode(self._mode)
         write_mode(self._mode)
+
+    def _request_level(self, values) -> str:
+        """The level of autonomy a request runs at: the posture's, or the saved one (Act).
+
+        A request sent with an explicit mode (the Go of a plan runs in Act) follows that mode,
+        not the posture picked under the line.
+        """
+        posture = getattr(self, "_request_posture", None) or getattr(self, "_posture", ACT)
+        if posture in (RESPOND, PROPOSE):
+            return posture_level(posture)
+        return level_for(self._request_mode, values.autonomy)
 
     def _on_send(self, text: str, mode: str = "") -> None:
         """Send ``text`` in the mode picked under the line, or in ``mode`` (the Go of a plan runs in Act)."""
@@ -2728,8 +2819,10 @@ class AgentChatController(QObject):
             return
         values = load_settings()  # however the settings were saved
         self._request_mode = mode_or_default(mode or self._mode)
-        # Ask and Plan run at the advisor level: only the tools that read run, whatever the Autonomy tab says.
-        self._policy.set_level(level_for(self._request_mode, values.autonomy))
+        # An explicit mode (the Go of a plan) carries its posture; otherwise the one under the line rules.
+        self._request_posture = posture_from_mode(self._request_mode) if mode else self._posture
+        # Answer reads only, Propose shows each change first, Act runs at the saved level.
+        self._policy.set_level(self._request_level(values))
         self._policy.rules = values.rules
         if self._engine is None:
             self._building = True
@@ -2748,7 +2841,7 @@ class AgentChatController(QObject):
         # that reset the policy to the Autonomy tab, and the tool rules may have changed. The request goes in
         # the mode it was sent with (audit of 2026-11-24: it went as standard with an Ask note).
         values = load_settings()
-        self._policy.set_level(level_for(self._request_mode, values.autonomy))
+        self._policy.set_level(self._request_level(values))
         self._policy.rules = values.rules
         self._offer_local_copy(values)
         self._last_request = text
@@ -2762,6 +2855,7 @@ class AgentChatController(QObject):
         self.panel.set_status(_tr("Thinking…"))
         self.panel.set_working(True)
         self.panel.set_can_undo(False)
+        self.panel.set_can_redo(False)
         summarized = self._engine.summarized
         self._usage_before = self._engine.usage
         # With the first request of the conversation only; a request that goes nowhere takes it out of the
@@ -3044,6 +3138,11 @@ class AgentChatController(QObject):
             "describe_layout": lambda: _tr("Reading the layout {}").format(args.get("name", "")),
             "set_atlas": lambda: _tr("Atlas of {}").format(args.get("layout", "")),
             "edit_layout": lambda: _tr("Layout {} changed").format(args.get("layout", "")),
+            OPEN_LAYOUT: lambda: _tr("Layout {}").format(args.get("name", "")),
+            PREVIEW_ATLAS: lambda: _tr("Atlas of {}").format(args.get("layout", "")),
+            FLASH_FEATURES: lambda: _tr("Flashing {}").format(layer),
+            SET_ACTIVE_LAYER: lambda: _tr("Active layer: {}").format(layer),
+            SHOW_MESSAGE: lambda: _tr("Message: {}").format(one_line(str(args.get("text", "")), 100)),
             SHOW_CHART: lambda: _tr("Chart: {}").format(args.get("title") or args.get("field") or layer
                                                         or args.get("kind", "")),
             EXPORT_CHART: lambda: _tr("Chart {} saved as {}").format(args.get("chart_id", ""),
@@ -3051,6 +3150,9 @@ class AgentChatController(QObject):
             RUN_CHART_CODE: lambda: _tr("Chart {} drawn with d3 code (expert)").format(args.get("chart_id", "")),
             CHART_TO_LAYOUT: lambda: _tr("Chart {} put in the layout {}").format(args.get("chart_id", ""),
                                                                                   args.get("layout", "")),
+            SHOW_INFOGRAPHIC: lambda: _tr("Infographic: {}").format(args.get("title", "")),
+            EXPORT_INFOGRAPHIC: lambda: _tr("Infographic {} saved as {}").format(
+                args.get("infographic_id", ""), str(args.get("format") or "html").upper()),
             RUN_PYTHON: lambda: _tr("Python code (expert, not undone)"),
             ADD_NOTE: lambda: _tr("Note kept for this project"),
             REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
@@ -3078,6 +3180,7 @@ class AgentChatController(QObject):
             "point_cloud_filter": lambda: _tr("Filter on the points of {}").format(self._names(args.get("layers"))),
             "clear_filters": lambda: _tr("Filters removed from {}").format(self._names(args.get("layers"))),
             "apply_favorite": lambda: _tr("Favorite applied"),
+            "save_favorite": lambda: _tr("Favorite kept: {}").format(args.get("name", "")),
             "export_layers": lambda: _tr("Export of {}").format(self._names(args.get("layers"))),
             "zoom_to": lambda: _tr("Zoom on {}").format(layer or (_tr("an area") if args.get("extent_wkt") else _tr("everything"))),
             "select_features": lambda: (_tr("Selection cleared on {}") if args.get("clear") else _tr("Selection on {}")).format(layer),
@@ -3139,7 +3242,7 @@ class AgentChatController(QObject):
             "set_layer_options": lambda: _tr("Panel options of: {}").format(", ".join(
                 str(item.get("layer", "")) for item in (args.get("layers") or []) if isinstance(item, dict))),
             "set_export_options": lambda: _tr("Export options of the panel"),
-            "set_exploring": lambda: _tr("EXPLORING: {}").format(self._exploring_words(args)),
+            "set_exploring": lambda: _tr("Linked preview: {}").format(self._exploring_words(args)),
         }.get(call.name, lambda: call.name.replace("_", " "))()
 
     @staticmethod
@@ -3211,7 +3314,9 @@ class AgentChatController(QObject):
         self._layers_before = tuple(self._project_layers())
         if self._abandoned:
             return
-        self.panel.set_status(self._describe(call) + "…")
+        # The step number of this turn (S5, P6): long turns read as progress, not as a stall.
+        step = _tr("Step {} · {}…").format(len(self._request_calls) + 1, self._describe(call))
+        self.panel.set_status(step)
         self.panel.add_step(self._describe(call))
 
     def on_tool_end(self, call: ToolCallPart, result: ToolResultPart) -> None:
@@ -3222,6 +3327,7 @@ class AgentChatController(QObject):
         self.panel.finish_steps(not result.is_error)
         self._log_action(call, result, self._describe(call))
         self._show_chart_card(call, result)
+        self._show_infographic_card(call, result)
         self._offer_exploring(call, result)
         made = [] if result.is_error else made_layers(self._layers_before, self._project_layers())
         self._request_calls.append((call.name, call.arguments, result.is_error, self.describe_call(call), made))
@@ -3250,6 +3356,52 @@ class AgentChatController(QObject):
                              on_layout=lambda button, chart_id=chart.chart_id: self._chart_layout_menu(chart_id,
                                                                                                       button))
         self._record("note", _tr("Chart: {}").format(request.title or request.kind))
+
+    def _show_infographic_card(self, call: ToolCallPart, result: ToolResultPart) -> None:
+        """An infographic show_infographic stacked, in a card of the thread; the transcript keeps its title."""
+        infographic, self._charts.pending_infographic = self._charts.pending_infographic, None
+        if call.name != SHOW_INFOGRAPHIC or result.is_error or infographic is None:
+            return
+        request = infographic.request
+        caption = request.caption or _tr("{} charts as composed").format(len(request.chart_ids))
+        if request.source:
+            caption += " · " + request.source
+        self._flush_answer()
+        self.panel.add_chart(request.title, infographic.svg, caption,
+                             on_save=lambda file_format, infographic_id=infographic.infographic_id:
+                             self._save_infographic(infographic_id, file_format),
+                             on_layout=None)
+        self._record("note", _tr("Infographic: {}").format(request.title))
+
+    def _save_infographic(self, infographic_id: str, file_format: str) -> None:
+        """PNG, JPG or SVG of an infographic card: where the user chooses."""
+        from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox
+        from qgis.core import QgsSettings
+        try:
+            infographic = self._charts.infographic(infographic_id)
+        except ToolFailure as exc:
+            QMessageBox.warning(self.panel, _tr("Infographic"), str(exc))
+            return
+        settings = QgsSettings()
+        folder = settings.value("FilterMate/agent/chart_folder", str(_default_export_root()), type=str)
+        names = {"png": _tr("PNG image (*.png)"), "jpg": _tr("JPEG image (*.jpg *.jpeg)"),
+                 "svg": _tr("SVG drawing (*.svg)")}
+        default = os.path.join(folder, f"{file_stem(infographic.request.title or infographic_id)}.{file_format}")
+        path, _ = QFileDialog.getSaveFileName(self.panel, _tr("Save the infographic"), default,
+                                              names[file_format])
+        if not path:
+            return
+        if not os.path.splitext(path)[1]:
+            path += "." + file_format
+        try:
+            self._charts.save_infographic_as(infographic_id, path)
+        except Exception as exc:
+            logger.warning("Infographic not saved: %s", exc)
+            QMessageBox.warning(self.panel, _tr("Infographic"),
+                                _tr("The infographic could not be saved: {}").format(exc))
+            return
+        settings.setValue("FilterMate/agent/chart_folder", os.path.dirname(path))
+        self.panel.add_note(_tr("Infographic saved: {}").format(os.path.basename(path)))
 
     def _save_chart(self, chart_id: str, file_format: str) -> None:
         """PNG, JPG or SVG of a card: where the user chooses."""
@@ -3380,15 +3532,15 @@ class AgentChatController(QObject):
         finally:
             self._asking_external = previous
 
-    def _ask_yes_no(self, title: str, text: str) -> bool:
-        answer = self._ask_in_thread(title, text, with_conversation=False)
+    def _ask_yes_no(self, title: str, text: str, call=None) -> bool:
+        answer = self._ask_in_thread(title, text, with_conversation=False, call=call)
         return ask_plain(self._parent_widget, title, text) if answer is None else answer == ANSWER_ONCE
 
-    def _ask_three(self, title: str, text: str) -> str:
-        answer = self._ask_in_thread(title, text, with_conversation=True)
+    def _ask_three(self, title: str, text: str, call=None) -> str:
+        answer = self._ask_in_thread(title, text, with_conversation=True, call=call)
         return ask_with_conversation(self._parent_widget, title, text) if answer is None else answer
 
-    def _ask_in_thread(self, title: str, text: str, with_conversation: bool) -> Optional[str]:
+    def _ask_in_thread(self, title: str, text: str, with_conversation: bool, call=None) -> Optional[str]:
         """A question of the permissions as a card of the thread, while the chat runs a request or a recipe: QGIS
         stays usable and the thread readable while it waits (a dialog of the system stopped both).
 
@@ -3405,6 +3557,8 @@ class AgentChatController(QObject):
             # The title of the question when it says more than the name of the agent (a recipe, a live recipe).
             heading = title if title and title != _tr("FilterMate agent") else _tr("The agent asks before it acts")
             texts = {"chip": _tr("Permission"), "heading": heading,
+                     "layers": self._confirm_layers(call) if call is not None else [],
+                     "reversibility": self._reversibility_text(call) if call is not None else "",
                      "yes": _tr("Yes"), "no": _tr("No"), # The words of the dialog it replaces, already translated in its context.
                      "always": QCoreApplication.translate("AgentPanel", "Yes for this conversation"),
                      "always_tip": QCoreApplication.translate(
@@ -3512,6 +3666,65 @@ class AgentChatController(QObject):
                    "them.").format(len(calls), "\n".join(lines))
         return bool(self._ask_user(title or _tr("FilterMate agent"), text))
 
+    def confirm_each(self, calls) -> Optional[Dict[int, bool]]:
+        """One tick per action of a turn, in the thread (S3): Allow or Refuse each, then Answer.
+
+        Returns ``{position in calls: yes}``; None when no card can ask (another application asks,
+        nothing runs, the panel is closed): the engine falls back to ``confirm_many``. ✕ or Stop
+        refuses everything.
+        """
+        if self._asking_external or not self.chat_busy() or not self._card_questions:
+            return None
+        allow = _tr("Allow")
+        questions = []
+        for number, call in enumerate(calls, 1):
+            detail = one_line(self._run_detail(call), 300) or one_line(
+                json.dumps(call.arguments, ensure_ascii=False, default=str), 300)
+            reversible = self._reversibility_text(call)
+            description = " · ".join(part for part in (detail, reversible) if part)
+            questions.append(Question(header=f"{number}/{len(calls)}",
+                                      question=one_line(self._describe(call), 160),
+                                      options=(Option(allow, description), Option(_tr("Refuse"), ""))))
+        texts = {"other": _tr("Other"), "answer": _tr("Answer"), "no_answer": _tr("No answer"),
+                 "close": _tr("Close without answering")}
+        try:
+            self._show_agent()  # a question nobody sees would hold the turn until Stop
+            if not (self.panel.isVisible() and self._agent_shown()):
+                return None
+            card = self.panel.add_question_card(texts, questions, free_other=False)
+        except RuntimeError:  # the panel is gone: the grouped question asks
+            return None
+        loop = QEventLoop()
+        outcome = {}
+
+        def answered(chosen) -> None:
+            outcome["each"] = {position: allow in selected
+                               for position, (selected, _other) in enumerate(chosen)}
+            loop.quit()
+
+        def declined() -> None:
+            outcome.setdefault("each", {})
+            loop.quit()
+
+        def stopped() -> None:
+            try:
+                card.finish(False)
+            except RuntimeError:  # the card went with the panel
+                pass
+            declined()
+
+        card.answered.connect(answered)
+        card.declined.connect(declined)
+        card.destroyed.connect(lambda *_args: declined())
+        with owned_by(CHAT_WAITS):
+            forget = on_abort(stopped)
+        try:
+            if "each" not in outcome and not card.done:
+                loop.exec()
+        finally:
+            forget()
+        return outcome.get("each")
+
     def confirm(self, call: ToolCallPart) -> bool:
         """A call of the chat the level of autonomy does not let run alone; the user may allow the tool for the
         rest of the conversation."""
@@ -3551,7 +3764,10 @@ class AgentChatController(QObject):
         if spec is None or not self._policy.grantable(spec):  # code is read in its own dialog, at every run
             return bool(self._confirm(call, title))
         text = self._confirm_text(call)
-        answer = self._ask_choice(title, text)
+        if self._card_questions:  # the card shows the layers and how reversible the call is
+            answer = self._ask_three(title, text, call)
+        else:
+            answer = self._ask_choice(title, text)
         if answer == ANSWER_CONVERSATION:
             self._policy.grant(call.name, call.arguments)  # add_layer: for that host; delete_features: that layer
         return answer in (ANSWER_ONCE, ANSWER_CONVERSATION)
@@ -3573,6 +3789,8 @@ class AgentChatController(QObject):
                        "anything QGIS and your account can, and undoing the turn does not take it back.\n\nWhat for: "
                        "{}\n\nRun it?").format(one_line(str(call.arguments.get("purpose", "")), 300))
             return bool(self._ask_code(title, text, str(call.arguments.get("code", ""))))
+        if self._card_questions:  # the card shows the layers and how reversible the call is
+            return self._ask_yes_no(title, self._confirm_text(call), call)
         return self._ask_user(title, self._confirm_text(call))
 
     def _database_title(self, identifier) -> str:
@@ -3666,6 +3884,36 @@ class AgentChatController(QObject):
                    "service is read in the background: the copy can be cancelled. Do you agree?").format(
             shown, one_line(detail, 600))
 
+    @staticmethod
+    def _confirm_layers(call: ToolCallPart) -> List[str]:
+        """The layers a call would change, as the user knows them (at most a few, for the chips of its card)."""
+        arguments = call.arguments if isinstance(call.arguments, dict) else {}
+        names: List[str] = []
+        for key in ("layer", "layer_name", "layers", "target_layers", "parent_layer", "child_layer"):
+            value = arguments.get(key)
+            if isinstance(value, str) and value.strip():
+                names.append(value.strip())
+            elif isinstance(value, (list, tuple)):
+                names.extend(str(item).strip() for item in value if str(item).strip())
+        seen = list(dict.fromkeys(names))
+        return seen[:5] + ([f"+{len(seen) - 5}"] if len(seen) > 5 else [])
+
+    def _reversibility_text(self, call: ToolCallPart) -> str:
+        """How reversible a call is, in one line for its card (S3): from its risk class, not its wording."""
+        spec = self._tools.get(call.name) if getattr(self, "_tools", None) else None
+        if call.name == "delete_features":
+            return _tr("↩ Undoable until the layer edits are saved.")  # staged in the edit buffer, as its text says
+        risk = risk_of(spec) if spec is not None else OUTSIDE
+        if risk == PROJECT:
+            return _tr("↩ Undoable: Undo this turn takes it back.")
+        if risk == BUFFER:
+            return _tr("↩ Undoable until the layer edits are saved.")
+        if risk == LOCAL:
+            return _tr("⚠ Final: cannot be undone here.")
+        if risk >= OUTSIDE:
+            return _tr("⚠ Reaches outside QGIS (network, file or code).")
+        return ""
+
     def _confirm_text(self, call: ToolCallPart) -> str:
         names = [one_line(layer, 100) for layer in (call.arguments.get("layers") or [])]
         layers = "\n".join(names[:MAX_LISTED]) + (f"\n(+{len(names) - MAX_LISTED})" if len(names) > MAX_LISTED else "")
@@ -3727,6 +3975,10 @@ class AgentChatController(QObject):
                 json.dumps(call.arguments, ensure_ascii=False, default=str), 300)
             text = _tr("The agent wants to do this:\n{}\n{}\n\nDo you agree?").format(
                 one_line(self._describe(call), 200), detail)
+        if call.name != "delete_features":  # its own wording already says the edit buffer
+            reversible = self._reversibility_text(call)
+            if reversible:
+                text = f"{text}\n\n{reversible}"
         return text
 
     def _propose_settings(self, call: ToolCallPart, rows, left_out) -> None:
@@ -3875,7 +4127,10 @@ class AgentChatController(QObject):
                     else _tr("The request is back in the line below: send it again when you are ready.")
                 if kept:
                     detail = _tr("The {} steps before stay, and can be undone.").format(kept) + " " + detail
-            self.panel.show_error(message, detail, fix)
+            # The card sends the returned request again (S5): one click, no copy back and forth with the line.
+            self.panel.show_error(message, detail, fix,
+                                  "" if fix else _tr("Send it again"),
+                                  None if fix else self._resend_last)
             # A request that failed must not fire the waiting one straight into the same failure (audit of
             # 2026-11-24: after a provider error the queued request overwrote the returned one and went at
             # once): it waits for the user, as after Stop (the draft is kept behind it by the panel).

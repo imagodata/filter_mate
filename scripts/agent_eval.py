@@ -508,6 +508,19 @@ class SimulatedProject:
             self.filters[favorite["layer_name"]] = favorite["expression"]
             return {"step": {"layer_name": favorite["layer_name"]}, "active_filters": dict(self.filters)}
 
+        def save_favorite(args):
+            name = (args.get("name") or "").strip()
+            if not name:
+                raise ToolFailure("A name is needed to keep the current filter as a favorite.")
+            if any(item["name"] == name for item in FAVORITES):
+                raise ToolFailure(f"A favorite named {name!r} already exists.")
+            if not self.filters:
+                raise ToolFailure("No active filter to save: filter a layer first.")
+            layer, expression = next(iter(self.filters.items()))
+            return {"favorite": {"favorite_id": "fav-kept", "name": name,
+                                 "description": args.get("description") or "",
+                                 "layer_name": layer, "expression": expression}}
+
         def export_layers(args):
             done = self._targets(args["layers"])
             return {"done": done, "outputs": {name: f"/exports/{name}.gpkg" for name in done}}
@@ -697,7 +710,7 @@ class SimulatedProject:
                 "description": "2026-10-31 · cloud cover 2.1 %", "page": "", "resources": [
                     {"title": "visual", "format": "visual", "url": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/TCI.tif"}]}]},
             "filter_state": filter_state, "list_favorites": lambda _: {"favorites": FAVORITES},
-            "apply_favorite": apply_favorite,
+            "apply_favorite": apply_favorite, "save_favorite": save_favorite,
             "update_features": lambda args: {"layer_name": self._layer(args["layer"])[0], "changed": 3, "deleted": 0,
                                              "added": 0, "editing": True, "unsaved": True, "note": "not saved"},
             "delete_features": lambda args: {"layer_name": self._layer(args["layer"])[0], "changed": 0, "deleted": 1,
@@ -774,6 +787,11 @@ class SimulatedProject:
             "show_chart": lambda args: {"chart_id": "c1", "kind": args["kind"], "title": args.get("title", ""),
                                         "source": "rows" if args.get("rows") else "layer", "points": 8,
                                         "features": 412},
+            "show_infographic": lambda args: {"infographic_id": "i1", "title": args.get("title", ""),
+                                              "charts": args.get("charts", []), "caption": args.get("caption", ""),
+                                              "source": args.get("source", ""), "width": 640, "height": 663},
+            "export_infographic": lambda args: {"path": f"infographic.{args.get('format', 'html')}",
+                                                "bytes": 12000, "format": args.get("format", "html")},
             "export_chart": lambda args: {"path": f"chart.{args.get('format', 'png')}", "bytes": 48000,
                                           "format": args.get("format", "png")},
             "add_chart_to_layout": lambda args: {"layout": args["layout"], "item": "FilterMate chart", "x_mm": 177.0,

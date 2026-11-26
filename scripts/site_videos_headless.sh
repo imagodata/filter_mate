@@ -29,6 +29,13 @@
 #   FM5_SURVEY_EXPR="\"usage_1\" = 'Commercial et services'" FM5_SURVEY_RECT=571230,6289080,571600,6289450 \
 #   scripts/site_videos_headless.sh clip metropole bridges explore heights survey compare favorites export processing sam
 #   FM_DOCKER_ARGS="--network host" FM_AGENT_MODEL=qwen3.5:4b scripts/site_videos_headless.sh clip agent
+# The teaser of the Urumea flood (clip urumea in scripts/site_videos.py, six agent requests, no BD TOPO
+# needed: the data comes live from Overpass and Copernicus). The Claude key travels in the environment
+# only, into the container's auth database, never in a file:
+#   FM_AGENT_KEY=<revocable key> FM_AGENT_MODEL=claude-haiku-5-5 scripts/site_videos_headless.sh clip urumea
+# The key needs a working secrets service: /tmp/.cache is owned by root in the image, so mount a
+# writable one (FM_DOCKER_ARGS="-v /tmp/fm-cache:/tmp/.cache"); the login keyring is created unlocked
+# inside the session bus before QGIS starts (outside the bus it conflicts and hangs the setup).
 # Stories 13 to 15 (ndvi, roofs, ground) use the square of FM5_DATA (ortho_irc.tif too); story 16 (wires) a LiDAR
 # survey with classified wires, wellington_lines.copc.laz, mounted read-only:
 #   FM_DOCKER_ARGS="-v <its folder>:/wires:ro" FM_SIZE=1280x720 FM_CRF=30 scripts/site_videos_headless.sh clip wires
@@ -66,6 +73,9 @@ seed_profile() {
     fi
     sed -i -e '/^panels\\/d' -e '/^sections\\/d' "$dir/QGIS/QGIS4.ini"
     rm -f "$dir/FilterMate/config.json"
+    # A previous take may have left its auth database with another master password: the next
+    # take would then prompt instead of using its own, hanging headless. Fresh wallet each take.
+    rm -f "$dir/QGIS/qgis-auth.db"*
 }
 
 sync_code() {

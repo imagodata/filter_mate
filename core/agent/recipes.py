@@ -44,7 +44,8 @@ MAX_ARGUMENT_DEPTH = 16
 # Never kept: their effect belongs to the conversation (notes, widgets, history), to the user's own reading of code
 # at each run, or to an application that may not be there next time (connectors, named mcp_...).
 NOT_KEPT = frozenset({
-    "undo_agent_step", "run_pyqgis", "add_project_note", "remove_project_note", "view_map", "create_widget",
+    "undo_agent_step", "run_pyqgis", "add_project_note", "remove_project_note", "view_map", "open_layout",
+    "flash_features", "set_active_layer", "show_message", "preview_atlas", "create_widget",
     "remove_widget", "save_recipe", "remove_recipe",
     # The settings of FilterMate belong to this machine, not to a project: a recipe from another .qgz never sets them.
     "change_settings", "export_settings_profile", "apply_settings_profile",
@@ -55,6 +56,10 @@ NOT_KEPT = frozenset({
     "list_database_tables", "add_database_table",
     # A chart belongs to its conversation (its id), and its file or its place in a layout to the user's question.
     "show_chart", "export_chart", "add_chart_to_layout", "run_chart_code",
+    # An infographic stacks charts of the conversation: replaying it would answer other charts.
+    "show_infographic", "export_infographic",
+    # A saved favorite persists in the project: replaying the save would keep a duplicate under the same name.
+    "save_favorite",
 })
 CONNECTOR_PREFIX = "mcp_"
 

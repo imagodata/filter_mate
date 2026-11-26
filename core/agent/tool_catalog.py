@@ -66,6 +66,11 @@ UNDO_AGENT_STEP = "undo_agent_step"
 ADD_NOTE = "add_project_note"
 REMOVE_NOTE = "remove_project_note"
 VIEW_MAP = "view_map"
+OPEN_LAYOUT = "open_layout"
+FLASH_FEATURES = "flash_features"
+SET_ACTIVE_LAYER = "set_active_layer"
+SHOW_MESSAGE = "show_message"
+PREVIEW_ATLAS = "preview_atlas"
 RUN_PYTHON = "run_pyqgis"
 CREATE_WIDGET = "create_widget"
 REMOVE_WIDGET = "remove_widget"
@@ -74,6 +79,9 @@ EXPORT_CHART = "export_chart"
 CHART_TO_LAYOUT = "add_chart_to_layout"
 RUN_CHART_CODE = "run_chart_code"
 CHART_TOOLS = (SHOW_CHART, EXPORT_CHART, CHART_TO_LAYOUT, RUN_CHART_CODE)
+SHOW_INFOGRAPHIC = "show_infographic"
+EXPORT_INFOGRAPHIC = "export_infographic"
+INFOGRAPHIC_TOOLS = (SHOW_INFOGRAPHIC, EXPORT_INFOGRAPHIC)
 SAVE_RECIPE = "save_recipe"
 REMOVE_RECIPE = "remove_recipe"
 SHOW_SETTINGS_LINK = "show_settings_link"
@@ -182,6 +190,67 @@ CHAT_ONLY = (
             "additionalProperties": False},
         read_only=True, chat_only=True),
     ToolSpec(
+        name=OPEN_LAYOUT, title="Open a print layout",
+        description=("Open a print layout of the project in the layout designer of QGIS, in front, for the user to "
+                     "see and finish (create_layout makes one, edit_layout changes it, export_layout writes it). "
+                     "It changes nothing: opening it is not undone with the turn. Returns name and opened."),
+        input_schema={"type": "object", "properties": {
+            "name": {"type": "string", "minLength": 1, "maxLength": 100,
+                     "description": "A layout of the project (map_context lists them)"}},
+            "required": ["name"], "additionalProperties": False},
+        chat_only=True),
+    ToolSpec(
+        name=FLASH_FEATURES, title="Flash features on the map",
+        description=("Flash the features of a vector layer matching a QGIS expression (not SQL) on the map, a few "
+                     "red blinks, selecting nothing: to point at what you mean while the user watches. Only plain "
+                     "conditions, as select_features accepts them. At most 500 flash (more is a selection or a "
+                     "zoom instead). It changes nothing. Returns layer and flashed."),
+        input_schema={"type": "object", "properties": {
+            "layer": {"type": "string", "minLength": 1, "maxLength": 1000, "description": "Vector layer, name or id"},
+            "expression": {"type": "string", "minLength": 1, "maxLength": 2000,
+                           "description": "QGIS expression the features flashed must match"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 500, "default": 500,
+                      "description": "At most this many features flash"}},
+            "required": ["layer", "expression"], "additionalProperties": False},
+        chat_only=True),
+    ToolSpec(
+        name=SET_ACTIVE_LAYER, title="Make a layer the active one",
+        description=("Make a layer of the project the active one, and show it unfolded in the layer tree, so the "
+                     "user sees which layer you mean and the tools of QGIS act on it. It changes nothing of the "
+                     "project. Returns layer, active and revealed."),
+        input_schema={"type": "object", "properties": {
+            "layer": {"type": "string", "minLength": 1, "maxLength": 1000, "description": "Layer, name or id"},
+            "reveal": {"type": "boolean", "default": True,
+                       "description": "Also unfold its groups in the tree and scroll to it"}},
+            "required": ["layer"], "additionalProperties": False},
+        chat_only=True),
+    ToolSpec(
+        name=SHOW_MESSAGE, title="Show a message in QGIS",
+        description=("Show a short message in the bar of QGIS, as FilterMate does for its own warnings: to tell the "
+                     "user something where they look, while you go on. Never for a question (ask_user asks it with "
+                     "choices instead). It changes nothing. Returns shown and level."),
+        input_schema={"type": "object", "properties": {
+            "text": {"type": "string", "minLength": 1, "maxLength": 500, "description": "The message, one line"},
+            "level": {"type": "string", "enum": ["info", "success", "warning", "critical"], "default": "info"},
+            "duration": {"type": "integer", "minimum": 1, "maximum": 60, "default": 5,
+                         "description": "Seconds the message stays"}},
+            "required": ["text"], "additionalProperties": False},
+        chat_only=True),
+    ToolSpec(
+        name=PREVIEW_ATLAS, title="Turn an atlas page",
+        description=("Turn a page of the atlas preview of a print layout (its atlas set by set_atlas): first, "
+                     "previous, next or last feature; in the designer showing the layout, the preview is turned on "
+                     "so the user sees the page change. The atlas itself is unchanged. Returns layout, action, page "
+                     "(1-based) and pages."),
+        input_schema={"type": "object", "properties": {
+            "layout": {"type": "string", "minLength": 1, "maxLength": 100,
+                       "description": "A layout of the project (map_context lists them)"},
+            "action": {"type": "string", "enum": ["first", "previous", "next", "last"], "default": "next"},
+            "preview": {"type": "boolean", "default": True,
+                        "description": "Turn the preview on in its open designer, when there is one"}},
+            "required": ["layout"], "additionalProperties": False},
+        chat_only=True),
+    ToolSpec(
         name=CREATE_WIDGET, title="Make a widget for the user",
         description=("Make a control that stays in the AGENT panel, saved with the project, for the user to explore "
                      "a vector layer alone: range (two bounds on a number over its histogram, filters), values "
@@ -212,12 +281,13 @@ CHAT_ONLY = (
     ToolSpec(
         name=SHOW_CHART, title="Draw a chart in the chat",
         description=("Draw a d3 chart in the thread from a layer as filtered now (FilterMate reads it: never type its "
-                     "values) or from rows you give. bar, pie: field the categories, aggregate of value_field (of "
-                     "the values of rows you give, which add up unless aggregate says otherwise); "
-                     "histogram: field numeric; line, scatter: field the x, value_field the y. Returns chart_id, "
-                     "points, features."),
+                     "values) or from rows you give. bar, pie, kpi, treemap: field the categories, aggregate of "
+                     "value_field (of the values of rows you give, which add up unless aggregate says otherwise); "
+                     "histogram: field numeric; line, scatter, area: field the x, value_field the y. Returns "
+                     "chart_id, points, features."),
         input_schema={"type": "object", "properties": {
-            "kind": {"type": "string", "enum": ["bar", "pie", "histogram", "line", "scatter"]},
+            "kind": {"type": "string", "enum": ["bar", "pie", "histogram", "line", "scatter",
+                                                "kpi", "treemap", "area"]},
             "title": {"type": "string", "maxLength": 80},
             "layer": {"type": "string", "maxLength": 1000},
             "field": {"type": "string", "maxLength": 200},
@@ -286,6 +356,43 @@ CHAT_ONLY = (
             "width": {"type": "number", "minimum": 10, "maximum": 2000, "description": "mm; the height follows"}},
             "required": ["chart_id", "layout"], "additionalProperties": False},
         chat_only=True),
+    ToolSpec(
+        name=SHOW_INFOGRAPHIC, title="Stack charts into an infographic",
+        description=("Stack charts of this conversation into one infographic: a title, the charts in order, a "
+                     "caption and a source. Draw each part with show_chart first (a kpi strip for the big numbers, "
+                     "then the chart that tells the story) and pass their chart_ids. Only when the user asks for an "
+                     "infographic, a figure that sums up, or something to share. Always light, made to be shared; "
+                     "it stays as composed when the filters change. Returns infographic_id, title, charts, caption "
+                     "and source."),
+        input_schema={"type": "object", "properties": {
+            "title": {"type": "string", "minLength": 1, "maxLength": 80,
+                      "description": "What the infographic says, in the words of the user"},
+            "charts": {"type": "array", "minItems": 1, "maxItems": 4, "items": {
+                "type": "string", "minLength": 1, "maxLength": 20},
+                "description": "chart_ids from show_chart, in order, 4 at most"},
+            "caption": {"type": "string", "maxLength": 200,
+                        "description": "How to read it, in one sentence"},
+            "source": {"type": "string", "maxLength": 200,
+                       "description": "Where the numbers come from"}},
+            "required": ["title", "charts"], "additionalProperties": False},
+        read_only=True, chat_only=True),
+    ToolSpec(
+        name=EXPORT_INFOGRAPHIC, title="Save an infographic as a file",
+        description=("Write an infographic of this conversation (infographic_id from show_infographic) as a "
+                     "standalone HTML page (offline: it opens out of QGIS), PNG, JPG or SVG, in a sub-folder of "
+                     "the export root. A file of the same name there is kept: the new one is named <name>_2... "
+                     "The user is asked first, unless they allowed it. Returns path (relative to the sub-folder), "
+                     "bytes and format."),
+        input_schema={"type": "object", "properties": {
+            "infographic_id": {"type": "string", "minLength": 1, "maxLength": 20},
+            "format": {"type": "string", "enum": ["html", "png", "jpg", "svg"], "default": "html"},
+            "dpi": {"type": "integer", "minimum": 72, "maximum": 600, "default": 192,
+                    "description": "png, jpg: 96 is the size of the infographic"},
+            "name": {"type": "string", "maxLength": 100, "description": "File name; default: the title"},
+            "subfolder": {"type": "string", "minLength": 1, "maxLength": 200, "default": "infographics",
+                          "description": "Sub-folder of the export root (a/b allowed, no ..)"}},
+            "required": ["infographic_id"], "additionalProperties": False},
+        destructive=True, chat_only=True),
     ToolSpec(
         name=SAVE_RECIPE, title="Keep what was just done as a recipe",
         description=("Keep the changes of a request as a recipe of this project, under a name: the user runs it again "
@@ -559,8 +666,8 @@ def chat_tools(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
 FILTERING_TOOLS = frozenset({
     "list_layers", "filter_state", "list_favorites", "describe_layer", "field_values", "layer_statistics",
     "sample_features", "preview_filter", "map_context", "apply_filter", "cross_filter", "geometry_filter",
-    "point_cloud_filter", "clear_filters", "apply_favorite", "zoom_to", "select_features", "set_layers_visibility",
-    "export_layers", "undo_agent_step", "save_recipe", "add_project_note", "ask_user",
+    "point_cloud_filter", "clear_filters", "apply_favorite", "save_favorite", "zoom_to", "select_features",
+    "set_layers_visibility", "export_layers", "undo_agent_step", "save_recipe", "add_project_note", "ask_user",
 })
 FILTERING_NOTE = ("\n\nOnly the tools for reading and filtering the project are offered with this local model. For "
                   "styles, Processing, editing, layouts, layers to add or remove, widgets: say so, and that the user can "
@@ -570,6 +677,90 @@ FILTERING_NOTE = ("\n\nOnly the tools for reading and filtering the project are 
 def filtering_only(tools) -> Tuple[ToolSpec, ...]:
     """``tools`` without what a local model is not offered by default."""
     return tuple(tool for tool in tools if tool.name in FILTERING_TOOLS)
+
+
+# The families of the chat tools (S4): six groups the Tools tab and the cards read instead of a flat list of
+# seventy. Assigned by name, by what the tool mainly does: a network lookup that creates a layer is data
+# (it ends on the map like add_layer), a pure lookup is outside; the settings of FilterMate live outside QGIS
+# files and project, with the network and the code. Unknown tools (a connector ``mcp_*``, a tool added since)
+# fall outside too: cautiously grouped, as ``asked_alone`` cautiously asks them alone.
+FAMILY_READ = "read"
+FAMILY_FILTER = "filter"
+FAMILY_STYLE = "style"
+FAMILY_DATA = "data"
+FAMILY_LAYOUT = "layout"
+FAMILY_OUTSIDE = "outside"
+TOOL_FAMILIES = (FAMILY_READ, FAMILY_FILTER, FAMILY_STYLE, FAMILY_DATA, FAMILY_LAYOUT, FAMILY_OUTSIDE)
+
+FAMILY_TITLES = {
+    FAMILY_READ: "Read",
+    FAMILY_FILTER: "Filter",
+    FAMILY_STYLE: "Style",
+    FAMILY_DATA: "Layers and data",
+    FAMILY_LAYOUT: "Layouts and charts",
+    FAMILY_OUTSIDE: "Outside QGIS",
+}
+
+_FAMILY_OF = {}
+for _name in ("list_layers", "filter_state", "list_favorites", "describe_layer", "field_values", "layer_statistics",
+              "sample_features", "identify_at", "map_context", "find_algorithms", "describe_algorithm",
+              "layer_options", "export_options", "describe_layout", "suggest_crs", "list_style_presets",
+              "list_palettes", "list_database_tables", "filter_status", "view_map"):
+    _FAMILY_OF[_name] = FAMILY_READ
+for _name in ("preview_filter", "apply_filter", "undo_filter", "redo_filter", "cross_filter", "geometry_filter",
+              "point_cloud_filter", "clear_filters", "apply_favorite", "save_favorite", "set_exploring",
+              "set_layer_options", "zoom_to", "select_features", "set_layers_visibility", "undo_agent_step",
+              "ask_user"):
+    _FAMILY_OF[_name] = FAMILY_FILTER
+for _name in ("set_layer_style", "set_labels", "apply_style_preset", "design_style", "make_cartogram",
+              "create_widget", "remove_widget"):
+    _FAMILY_OF[_name] = FAMILY_STYLE
+for _name in ("update_features", "delete_features", "add_features", "add_field", "join_layers", "set_form",
+              "relations", "group_layers", "rename_layer", "duplicate_layer", "local_copy", "remove_layers",
+              "run_algorithm", "contour_lines", "segment_objects", "similar_objects", "add_layer",
+              "add_service_layer", "add_basemap", "add_elevation", "add_population", "add_osm_features",
+              "add_database_table", "export_layers", "add_project_note", "remove_project_note", "save_recipe",
+              "remove_recipe", "bookmark", "map_theme", "set_project_crs", "flash_features", "set_active_layer",
+              "show_message"):
+    _FAMILY_OF[_name] = FAMILY_DATA
+for _name in ("create_layout", "export_layout", "edit_layout", "set_atlas", "open_layout", "preview_atlas",
+              "add_chart_to_layout", "show_chart", "export_chart"):
+    _FAMILY_OF[_name] = FAMILY_LAYOUT
+for _name in ("search_open_data", "search_imagery", "find_place", "run_pyqgis", "run_chart_code", "load_skill",
+              "change_settings", "apply_settings_profile", "turn_on_agent_options", "describe_settings",
+              "get_setting", "diagnose_performance", "export_settings_profile"):
+    _FAMILY_OF[_name] = FAMILY_OUTSIDE
+del _name
+
+
+def family_of(name: str) -> str:
+    """The family of a tool (one of ``TOOL_FAMILIES``); connectors and unknown tools fall outside."""
+    text = str(name or "")
+    if text.startswith("mcp_"):
+        return FAMILY_OUTSIDE
+    return _FAMILY_OF.get(text, FAMILY_OUTSIDE)
+
+
+def family_title(family: str) -> str:
+    """The English title of a family, for the Tools tab and the cards."""
+    return FAMILY_TITLES.get(str(family or ""), str(family or FAMILY_OUTSIDE))
+
+
+# The tools whose catalog title puzzles users, shown with plainer words in the Tools tab and the cards (S4).
+# Keys are tool names, values the display titles (English source, translated where shown).
+TOOL_DISPLAY_NAMES = {
+    "set_exploring": "Linked preview",
+    "cross_filter": "Cross-layer filter",
+    "local_copy": "Local copy (detaches from the service)",
+    "segment_objects": "AI object selection",
+    "similar_objects": "Similar objects (AI)",
+    "set_layer_options": "Layer panel options",
+}
+
+
+def display_title(name: str, title: str = "") -> str:
+    """The title of a tool as the user reads it: the plainer words when it has some, else its catalog title."""
+    return TOOL_DISPLAY_NAMES.get(str(name or ""), title or str(name or ""))
 
 
 MAP_IMAGE = "map_image"

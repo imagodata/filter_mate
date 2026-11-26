@@ -800,7 +800,34 @@ class FavoritesController(BaseController):
 
         return True
 
-    def _create_favorite(self, name: str, expression: str) -> bool:
+    def create_favorite_from_current(self, name: str, description: str = "") -> Optional[str]:
+        """Keep the current filter state as a favorite, without any dialog.
+
+        Headless counterpart of :meth:`add_current_to_favorites` for the
+        agent and the API: the name is taken as is (no prompt), a taken
+        name is refused (no replace question), nothing pops up.
+
+        Returns the favorite id, or None when the name is blank or taken,
+        or when no filter is active. Raises on persistence failures.
+        """
+        name = (name or "").strip()
+        if not name or not self._favorites_service:
+            return None
+        expression = self.get_current_filter_expression()
+        if not expression and not self._capture_coverage_layers():
+            return None
+        if self._favorites_service.get_favorite_by_name(name) is not None:
+            logger.info(f"Favorite '{name}' not created: name already taken")
+            return None
+        favorite_id = self._persist_current_favorite(name, expression, description)
+        if not favorite_id:
+            raise RuntimeError(f"Favorite '{name}' could not be saved (details in filtermate.log)")
+        self.favorite_added.emit(name)
+        self.favorites_changed.emit()
+        self.update_indicator()
+        return favorite_id
+
+    def _create_favorite(self, name: str, expression: str, description: str = "") -> bool:
         """
         Create a new favorite.
 
@@ -810,6 +837,28 @@ class FavoritesController(BaseController):
         if not self._favorites_service:
             self._warn_not_saved()
             return False
+
+        try:
+            favorite_id = self._persist_current_favorite(name, expression, description)
+            if favorite_id:
+                return True
+            logger.warning(f"Failed to create favorite '{name}' - add_favorite() returned None")
+            self._warn_not_saved()
+            return False
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr(
+                "Could not save '{0}': {1}"
+            ).format(name, e.__cause__ or e))
+            return False
+        except Exception as e:
+            logger.error(f"Failed to create favorite: {e}")
+            self._warn_not_saved()
+            return False
+
+    def _persist_current_favorite(self, name: str, expression: str, description: str = "") -> Optional[str]:
+        """Capture the live filter state and add it as a favorite. Returns the id, None when not added."""
+        if not self._favorites_service:
+            return None
 
         try:
             # Get layer info
@@ -891,7 +940,8 @@ class FavoritesController(BaseController):
                 layer_name=layer_name,
                 layer_provider=layer_provider,
                 remote_layers=remote_layers if remote_layers else None,
-                spatial_config=spatial_config
+                spatial_config=spatial_config,
+                description=description,
             )
 
             if favorite_id:
@@ -899,21 +949,15 @@ class FavoritesController(BaseController):
                 # save() is a no-op but we call it for consistency
                 logger.debug(f"Favorite '{name}' created successfully (ID: {favorite_id})")
                 self._favorites_service.save()  # No-op, already persisted
-                return True
-            else:
-                logger.warning(f"Failed to create favorite '{name}' - add_favorite() returned None")
-            self._warn_not_saved()
-            return False
+                return favorite_id
+            logger.warning(f"Failed to create favorite '{name}' - add_favorite() returned None")
+            return None
 
-        except FavoritePersistenceError as e:
-            self._show_error(self.tr(
-                "Could not save '{0}': {1}"
-            ).format(name, e.__cause__ or e))
-            return False
+        except FavoritePersistenceError:
+            raise
         except Exception as e:
             logger.error(f"Failed to create favorite: {e}")
-            self._warn_not_saved()
-            return False
+            raise
 
     def _warn_not_saved(self) -> None:
         """Tell the user a new favorite was not created (the details are in the log)."""

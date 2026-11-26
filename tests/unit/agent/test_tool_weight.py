@@ -105,4 +105,7 @@ def test_the_fixed_part_is_under_21600(bench):
     # 2026-11-22 (forms): set_form and relations in the index and the skill forms in load_skill add 140: 21,257.
     # 2026-11-22: design_style and list_palettes with the skill styles, then list_style_presets and
     # apply_style_preset in the index (+108): measured below, the bound set just above.
-    assert fixed < 21600, fixed
+    # 2026-11-26 (save_favorite): the index line, the filtering set and the "only when the user asks" words (+91).
+    # 2026-11-26 (visible automation): the index lines of open_layout, preview_atlas, flash_features,
+    # set_active_layer and show_message (+275); the system prompt names favorites kept on request (+117).
+    assert fixed < 22200, fixed

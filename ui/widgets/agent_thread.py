@@ -266,7 +266,12 @@ class ConfirmCard(QFrame):
     """A question of the permissions in the thread (2026-11-24; a dialog of the system until then, which stopped
     QGIS, did not take the theme and hid the thread): what the agent wants to do, then Yes, Yes for this
     conversation when the action can be allowed so, and No. The controller waits for ``answered`` ("once",
-    "conversation" or "no"); the card then freezes on the answer. No is the answer of a card taken away."""
+    "conversation" or "no"); the card then freezes on the answer. No is the answer of a card taken away.
+
+    Fixed layout (S3): the title, the layers it touches (``texts["layers"]``), what it says, how reversible
+    it is (``texts["reversibility"]``), then Refuse first, Allow, and "for this conversation" last.
+    Both entries are optional: a card without them reads as before.
+    """
 
     answered = pyqtSignal(str)
     finished = pyqtSignal(str)  # answered, or closed by the controller (Stop): what the transcription keeps
@@ -290,22 +295,41 @@ class ConfirmCard(QFrame):
         head.addWidget(self.chip, 0, Qt.AlignmentFlag.AlignTop)
         head.addWidget(self.heading, 1)
         column.addLayout(head)
+        self._layer_chips: List[QLabel] = []
+        for name in list(texts.get("layers") or ()):
+            layer_chip = QLabel(str(name), self)
+            layer_chip.setObjectName("label_agent_confirm_layer")
+            layer_chip.setTextFormat(Qt.TextFormat.PlainText)
+            self._layer_chips.append(layer_chip)
+        if self._layer_chips:
+            chips_row = QHBoxLayout()
+            chips_row.setContentsMargins(0, 0, 0, 0)
+            chips_row.setSpacing(4)
+            for layer_chip in self._layer_chips:
+                chips_row.addWidget(layer_chip, 0, Qt.AlignmentFlag.AlignTop)
+            chips_row.addStretch(1)
+            column.addLayout(chips_row)
         self.body = _plain_label(text, self)
         self.body.setObjectName("label_agent_confirm_text")
         self.body.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         column.addWidget(self.body)
+        self.reversibility = _plain_label(str(texts.get("reversibility") or ""), self)
+        self.reversibility.setObjectName("label_agent_confirm_reversibility")
+        self.reversibility.setVisible(bool(texts.get("reversibility")))
+        column.addWidget(self.reversibility)
         buttons = QHBoxLayout()
         buttons.setContentsMargins(0, 0, 0, 0)
         buttons.setSpacing(6)
+        self.no_button = QPushButton(texts["no"], self)
+        self.no_button.setObjectName("pushButton_agent_confirm_no")
         self.yes_button = QPushButton(texts["yes"], self)
         self.yes_button.setObjectName("pushButton_agent_confirm_yes")
         self.always_button = ElidedButton(texts["always"], self) if with_conversation else None  # a narrow dock elides it
         if self.always_button is not None:
             self.always_button.setObjectName("pushButton_agent_confirm_always")
             self.always_button.setToolTip(texts["always_tip"])
-        self.no_button = QPushButton(texts["no"], self)
-        self.no_button.setObjectName("pushButton_agent_confirm_no")
-        for button, answer in ((self.yes_button, "once"), (self.always_button, "conversation"), (self.no_button, "no")):
+        for button, answer in ((self.no_button, "no"), (self.yes_button, "once"),
+                               (self.always_button, "conversation")):
             if button is None:
                 continue
             button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -351,6 +375,11 @@ class ConfirmCard(QFrame):
                           " padding: 1px 6px; font-size: 11px; font-weight: 600;")
         _sheet(self.heading, f"font-size: 12px; font-weight: 600; color: {palette['fm_text']};")
         _sheet(self.body, f"font-size: 12px; color: {palette['fm_text']};")
+        for layer_chip in getattr(self, "_layer_chips", ()):
+            _sheet(layer_chip, f"background: {palette['fm_group']}; color: {palette['fm_text']};"
+                               f" border: 1px solid {palette['fm_group_border']}; border-radius: 4px;"
+                               " padding: 1px 6px; font-size: 11px; font-weight: 600;")
+        _sheet(self.reversibility, f"font-size: 11px; color: {palette['fm_text_muted']};")
         _sheet(self.result, f"font-size: 11px; color: {palette['fm_text_muted']};")
         _sheet(self.yes_button, f"QPushButton {{ font-size: 12px; font-weight: 600; padding: 4px 14px; border: none;"
                                 f" border-radius: 6px; background: {palette['fm_accent']}; color: white; }}")
@@ -715,6 +744,8 @@ class ChartCard(QFrame):
             button.setToolTip(plain_tooltip(_tr("Save the chart as {}").format(label)))
             if on_save is not None:
                 button.clicked.connect(lambda _checked=False, file_format=file_format: on_save(file_format))
+            else:
+                button.setVisible(False)  # an infographic without a file action: no dead button
             self._buttons.append(button)
             row.addWidget(button)
         layout_button = QPushButton(_tr("Add to a layout"), self)
@@ -723,6 +754,8 @@ class ChartCard(QFrame):
                                                    "when the filter of its layer changes")))
         if on_layout is not None:
             layout_button.clicked.connect(lambda _checked=False: on_layout(layout_button))
+        else:
+            layout_button.setVisible(False)  # an infographic goes to a file, never to a layout
         self._buttons.append(layout_button)
         row.addWidget(layout_button)
         row.addStretch(1)

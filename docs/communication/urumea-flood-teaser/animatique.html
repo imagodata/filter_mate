@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Teaser crue Urumea — animatique previz 53 s</title>
+<style>
+  body { background:#121820; color:#f5f5f0; font-family:sans-serif; display:flex;
+         flex-direction:column; align-items:center; margin:0; padding:24px; }
+  #stage { width:960px; max-width:94vw; aspect-ratio:16/9; background:#1d2428;
+           border:1px solid #444; position:relative; display:flex; align-items:center;
+           justify-content:center; text-align:center; }
+  #cap { font-size:30px; font-weight:bold; padding:0 60px; }
+  #sub { position:absolute; bottom:18px; width:100%; font-size:18px; color:#f0a040; }
+  #previz { position:absolute; top:12px; right:14px; font-size:13px; color:#888;
+            border:1px solid #888; padding:2px 8px; }
+  #take { position:absolute; top:12px; left:14px; font-size:13px; color:#888; }
+  #bar { width:960px; max-width:94vw; height:8px; background:#333; margin-top:12px; }
+  #fill { height:100%; width:0; background:#f0a040; }
+  #ctl { margin-top:10px; font-size:14px; color:#aaa; }
+  button { background:#333; color:#eee; border:1px solid #666; padding:4px 14px; cursor:pointer; }
+</style>
+</head>
+<body>
+<h2>Crue de l'Urumea — animatique 53 s (previz, pas des captures QGIS)</h2>
+<div id="stage">
+  <div id="previz">PREVIZ — NON TOURNÉ</div>
+  <div id="take"></div>
+  <div id="cap"></div>
+  <div id="sub"></div>
+</div>
+<div id="bar"><div id="fill"></div></div>
+<div id="ctl"><button id="btn">Pause</button> <span id="tc">0:00 / 0:53</span></div>
+<script>
+const TAKES = [
+  {d:8, en:"One sentence. Buildings, roads, bridges, river, terrain.",
+      fr:"Une phrase. Bâtiments, routes, ponts, rivière, relief."},
+  {d:8, en:"Height, then mean height per building.",
+      fr:"L'altitude, puis l'altitude moyenne par bâtiment."},
+  {d:7, en:"Temporary files don't survive. Export keeps all.",
+      fr:"Le temporaire ne survit pas. L'export garde tout."},
+  {d:7, en:"Under 5 m by the river. Roads and bridges within 300 m.",
+      fr:"Moins de 5 m près de la rivière. Routes et ponts à 300 m."},
+  {d:7, en:"Foot-evacuation isochrones around exposed buildings.",
+      fr:"Isochrones d'évacuation à pied autour des bâtiments exposés."},
+  {d:8, en:"One favorite. Replayed in one click.",
+      fr:"Un favori. Rejoué en un clic."},
+  {d:8, en:"Same rule, three layers, replayable. Screening at 30 m.",
+      fr:"Même règle, trois couches, rejouable. Tri à 30 m."},
+];
+const TOTAL = TAKES.reduce((s,t)=>s+t.d,0); // 53
+let t = 0, playing = true, last = null;
+const cap = document.getElementById('cap'), sub = document.getElementById('sub'),
+      take = document.getElementById('take'), fill = document.getElementById('fill'),
+      tc = document.getElementById('tc'), btn = document.getElementById('btn');
+function fmt(s){ return Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,'0'); }
+function frame(ts){
+  if(last!==null && playing) t = Math.min(TOTAL, t+(ts-last)/1000);
+  last = ts;
+  let acc=0, i=0;
+  while(i<TAKES.length-1 && t>=acc+TAKES[i].d){ acc+=TAKES[i].d; i++; }
+  cap.textContent = "\u201C"+TAKES[i].en+"\u201D";
+  sub.textContent = "\u00AB "+TAKES[i].fr+" \u00BB";
+  take.textContent = "Prise "+(i+1)+"/7 · "+fmt(acc)+"–"+fmt(acc+TAKES[i].d);
+  fill.style.width = (100*t/TOTAL)+"%";
+  tc.textContent = fmt(t)+" / "+fmt(TOTAL);
+  if(t>=TOTAL) playing=false, btn.textContent="Rejouer";
+  requestAnimationFrame(frame);
+}
+btn.onclick = ()=>{
+  if(t>=TOTAL){ t=0; playing=true; btn.textContent="Pause"; }
+  else { playing=!playing; btn.textContent=playing?"Pause":"Lecture"; }
+};
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

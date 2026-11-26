@@ -1,8 +1,8 @@
-"""GET /favorites and POST /favorites/{id}/apply — issue #32.
+"""GET /favorites, POST /favorites and POST /favorites/{id}/apply — issue #32.
 
-Read-mostly endpoints that surface the FilterMate favorites store to
-external clients (Narractive). The mutating side (create / delete) is
-deferred — the plugin's own UI owns favorite authorship for now.
+Endpoints that surface the FilterMate favorites store to external
+clients (Narractive): reads, applying a favorite, and keeping the
+current filter as a favorite (the agent's save_favorite).
 """
 
 from __future__ import annotations
@@ -12,7 +12,15 @@ from typing import Dict, List
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
-from ..accessor import Favorite, FavoritesUnavailable, FilterMateAccessor, HistoryStep
+from ..accessor import (
+    Favorite,
+    FavoriteNameTakenError,
+    FavoriteSaveError,
+    FavoritesUnavailable,
+    FilterMateAccessor,
+    HistoryStep,
+    NoActiveFilterError,
+)
 from .filters import active_filters_after_change
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
@@ -43,6 +51,28 @@ def list_favorites(request: Request) -> List[Favorite]:
     """Return every favorite the FilterMate session knows about."""
     try:
         return _accessor(request).list_favorites()
+    except FavoritesUnavailable:
+        raise _favorites_unavailable_response()
+
+
+class SaveFavoriteRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=200, description="Name under which the current filter is kept")
+    description: str = Field(default="", max_length=500, description="What the favorite keeps, in a few words")
+
+
+@router.post("", response_model=Favorite, status_code=status.HTTP_201_CREATED)
+def save_favorite(body: SaveFavoriteRequest, request: Request) -> Favorite:
+    """Keep the current filter state as a favorite called ``body.name``."""
+    name = body.name.strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="A name is needed")
+    accessor = _accessor(request)
+    try:
+        return accessor.save_favorite(name, description=body.description)
+    except FavoriteNameTakenError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    except (NoActiveFilterError, FavoriteSaveError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
     except FavoritesUnavailable:
         raise _favorites_unavailable_response()
 

@@ -129,6 +129,9 @@ relief, the contours, a look at the result) and the values to choose when the us
 
 - "Start again", "show everything": clear_filters on the layers you filtered, in one call.
 - "Keep the result": export_layers writes the layers as filtered now, only when the user asks for files.
+- "Keep the chain": when two or more run_algorithm steps worked in this session, propose once, as an option, to
+  save them as a reusable Processing model (the processing-models skill builds it on a yes). Never build it
+  unasked.
 
 ## What never to do
 

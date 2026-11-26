@@ -13,8 +13,8 @@ import time
 from typing import Callable, List, Optional, Sequence, Tuple
 
 from qgis.PyQt.QtCore import (
-    QByteArray, QCoreApplication, QEvent, QLocale, QModelIndex, QSettings, QSize, QStringListModel, Qt, QTimer, QUrl,
-    pyqtSignal,
+    QByteArray, QCoreApplication, QEvent, QLocale, QModelIndex, QPoint, QSettings, QSize, QStringListModel, Qt, QTimer,
+    QUrl, pyqtSignal,
 )
 from qgis.PyQt.QtGui import QColor, QDesktopServices, QFont, QTextCursor, QTextOption
 from qgis.PyQt.QtWidgets import (
@@ -31,8 +31,11 @@ from ...core.agent.example_prompts import (
     CATALOG as EXAMPLE_CATALOG, Facts, SHOWN as EXAMPLES_SHOWN, adjust as adjust_examples, pick as pick_examples,
 )
 from ...core.agent.mentions import mention_rows
-from ...core.agent.modes import ACT, ASK, PLAN, mode_or_default
+from ...core.agent.modes import ACT, ASK, PLAN
+from ...core.agent.postures import ACT as POSTURE_ACT
+from ...core.agent.postures import PROPOSE, RESPOND, posture_from_mode, posture_or_default, posture_to_mode
 from ...core.agent.request_log import short as short_request
+from ...core.agent.tool_catalog import TOOL_FAMILIES, display_title, family_of, family_title
 from ...core.agent.memory import (
     ADD, EDIT, MAX_NOTES, MAX_SOURCE_NOTES, MAX_USER_NOTES, REMOVE, SCOPE_SOURCE, SCOPE_USER, Memory, Note,
     chosen as memory_chosen,
@@ -544,6 +547,7 @@ class AgentPanel(QFrame):
 
     send_requested = pyqtSignal(str)
     mode_changed = pyqtSignal(str)  # Ask, Plan or Act, picked under the line (core/agent/modes.py)
+    posture_changed = pyqtSignal(str)  # respond, propose or act (core/agent/postures.py)
     stop_requested = pyqtSignal()
     undo_requested = pyqtSignal()
     settings_requested = pyqtSignal()
@@ -639,7 +643,13 @@ class AgentPanel(QFrame):
         self.undo_button = QPushButton(_tr("Undo this turn"), self)
         self.undo_button.setObjectName("pushButton_agent_undo")
         self.undo_button.clicked.connect(self.undo_requested)
+        # Redo beside Undo (S2): one action bar under the thread instead of Undo here and Redo in the history only.
+        self.redo_button = QPushButton(_tr("Redo"), self)
+        self.redo_button.setObjectName("pushButton_agent_redo")
+        self.redo_button.setToolTip(_tr("Do again the turn Undone last"))
+        self.redo_button.clicked.connect(self.redo_requested)
         self.set_can_undo(False)
+        self.set_can_redo(False)
 
         actions = QHBoxLayout()
         actions.setContentsMargins(0, 0, 0, 0)
@@ -647,10 +657,11 @@ class AgentPanel(QFrame):
         actions.addWidget(self.status, 1)
         actions.addWidget(self.fix_button)
         actions.addWidget(self.undo_button)
+        actions.addWidget(self.redo_button)
 
         # A request sent while the agent works waits here, in view, and goes when the request under way ends
         # (2026-11-24: Enter did nothing then, and the text stayed in the line).
-        self._queued = ""
+        self._queue = []
         self._queue_paused = False
         self.queue_row = QFrame(self)
         self.queue_row.setObjectName("frame_agent_queued")
@@ -751,15 +762,17 @@ class AgentPanel(QFrame):
         mode_menu = QMenu(self.mode_button)
         mode_menu.setObjectName("menu_agent_mode")
         self._mode_actions = {}
-        for mode, label, words in ((ASK, _tr("Ask"), _tr("answers and reads, changes nothing")),
-                                   (PLAN, _tr("Plan"), _tr("writes the steps, waits for your Go")),
-                                   (ACT, _tr("Act"), _tr("does it, step by step"))):
+        for posture, label, words in (
+                (RESPOND, _tr("Answer"), _tr("answers and reads, changes nothing")),
+                (PROPOSE, _tr("Propose"), _tr("writes the steps, shows each change before applying it")),
+                (POSTURE_ACT, _tr("Act"), _tr("does it, asking only what cannot be undone"))):
             action = mode_menu.addAction(f"{label} \u2014 {words}")
             action.setCheckable(True)
-            action.triggered.connect(lambda _checked=False, chosen=mode: self._pick_mode(chosen))
-            self._mode_actions[mode] = (action, label)
+            action.triggered.connect(lambda _checked=False, chosen=posture: self._pick_mode(chosen))
+            self._mode_actions[posture] = (action, label)
         self.mode_button.setMenu(mode_menu)
         self._mode = ""
+        self._posture = ""
         self.set_mode(ACT)
 
         under = QHBoxLayout()
@@ -775,6 +788,22 @@ class AgentPanel(QFrame):
         self.new_button.setToolTip(_tr("Start afresh: the agent forgets this conversation, the changes stay"))
         self.new_button.clicked.connect(self.new_conversation_requested)
         self.new_button.setVisible(False)
+        # History and Recipes out of the menu "⋯" (S2): what was done and what runs again without the model,
+        # next to the new conversation, always in view.
+        self.history_button = QPushButton(_tr("History"), self)
+        self.history_button.setObjectName("pushButton_agent_history")
+        self.history_button.setFlat(True)
+        self.history_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.history_button.setToolTip(_tr("What was asked, what changed, applied or undone"))
+        self.history_button.clicked.connect(self.history_requested)
+        self.recipes_button = QPushButton(_tr("Recipes \u25be"), self)
+        self.recipes_button.setObjectName("pushButton_agent_recipes")
+        self.recipes_button.setFlat(True)
+        self.recipes_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.recipes_button.setToolTip(_tr("Run again the changes of a request, without the model"))
+        self.recipes_button.clicked.connect(self._popup_recipes)
+        under.addWidget(self.history_button, 0, Qt.AlignmentFlag.AlignRight)
+        under.addWidget(self.recipes_button, 0, Qt.AlignmentFlag.AlignRight)
         under.addWidget(self.new_button, 0, Qt.AlignmentFlag.AlignRight)
 
         layout = QVBoxLayout(self)
@@ -791,7 +820,32 @@ class AgentPanel(QFrame):
         layout.addLayout(under)
         self.set_ready(False)
         self.set_working(False)
+        self._setup_accessibility()
         self._refresh_look()
+
+    def _setup_accessibility(self) -> None:
+        """Names the controls for screen readers, and orders Tab from the line outward (S5)."""
+        self.input.setAccessibleName(_tr("Request to the agent"))
+        self.input.setAccessibleDescription(self.input.placeholderText())
+        self.send_button.setAccessibleName(_tr("Send the request"))
+        self.send_button.setAccessibleDescription(_tr("Send (Enter). While the agent works, stops it (Esc)."))
+        self.more_button.setAccessibleName(_tr("More actions"))
+        self.mode_button.setAccessibleName(_tr("What the agent may do"))
+        self.history_button.setAccessibleName(_tr("Show the history"))
+        self.recipes_button.setAccessibleName(_tr("Show the recipes"))
+        self.new_button.setAccessibleName(_tr("Start a new conversation"))
+        self.undo_button.setAccessibleName(_tr("Undo this turn"))
+        self.redo_button.setAccessibleName(_tr("Redo the undone turn"))
+        self.queue_cancel.setAccessibleName(_tr("Take the waiting requests back to the line"))
+        self.setTabOrder(self.input, self.send_button)
+        self.setTabOrder(self.send_button, self.more_button)
+        self.setTabOrder(self.more_button, self.mode_button)
+        self.setTabOrder(self.mode_button, self.history_button)
+        self.setTabOrder(self.history_button, self.recipes_button)
+        self.setTabOrder(self.recipes_button, self.new_button)
+        self.setTabOrder(self.new_button, self.undo_button)
+        self.setTabOrder(self.undo_button, self.redo_button)
+        self.setTabOrder(self.redo_button, self.queue_cancel)
 
     def _layer_rows(self) -> list:
         """(id, name, group) of the layers "@" offers: the group tells layers of the same name apart."""
@@ -1211,9 +1265,10 @@ class AgentPanel(QFrame):
             f" max-height: 22px; padding: 0 8px; border: 1px solid {palette['fm_field_border']}; border-radius: 10px;"
             f" background: {palette['fm_field']}; color: {palette['fm_text']}; font-size: 11px; }}"
             f"QToolButton#toolButton_agent_mode:hover {{ border-color: {palette['fm_accent']}; }}"
-            # Act changes the project: its chip is drawn in the accent; Ask and Plan, which change nothing, stay plain.
+            # Act changes the project: its chip is drawn in the accent; Answer and Propose, which change nothing
+            # without being shown first, stay plain.
             + (f"QToolButton#toolButton_agent_mode {{ border-color: {palette['fm_accent']}; color: {palette['fm_accent']};"
-               " font-weight: 600; }" if self._mode == ACT else "") +
+               " font-weight: 600; }" if getattr(self, "_posture", POSTURE_ACT) == POSTURE_ACT else "") +
             # The frame alone paints the background: a viewport or a page with one of its own squares the corners.
             "QScrollArea#scrollArea_agent_welcome > QWidget#qt_scrollarea_viewport, QWidget#widget_agent_welcome"
             " { background: transparent; }"
@@ -1231,10 +1286,13 @@ class AgentPanel(QFrame):
             f"QPushButton#pushButton_agent_setup {{ padding: 8px 16px; border: 1px solid {palette['fm_group_border']};"
             f" border-radius: 6px; background: {palette['fm_group']}; color: {palette['fm_text']}; }}"
             f"QPushButton#pushButton_agent_setup:hover {{ border-color: {palette['fm_active_border']}; }}"
-            f"QPushButton#pushButton_agent_new {{ padding: 0 2px; font-size: 11px; font-weight: 500; border: none;"
-            f" background: transparent; color: {palette['fm_accent']}; min-height: 0; }}"
-            f"QPushButton#pushButton_agent_new:hover {{ text-decoration: underline; }}"
-            f"QPushButton#pushButton_agent_new:disabled {{ color: {muted}; }}"
+            f"QPushButton#pushButton_agent_new, QPushButton#pushButton_agent_history,"
+            f" QPushButton#pushButton_agent_recipes {{ padding: 0 2px; font-size: 11px; font-weight: 500;"
+            f" border: none; background: transparent; color: {palette['fm_accent']}; min-height: 0; }}"
+            f"QPushButton#pushButton_agent_new:hover, QPushButton#pushButton_agent_history:hover,"
+            f" QPushButton#pushButton_agent_recipes:hover {{ text-decoration: underline; }}"
+            f"QPushButton#pushButton_agent_new:disabled, QPushButton#pushButton_agent_history:disabled,"
+            f" QPushButton#pushButton_agent_recipes:disabled {{ color: {muted}; }}"
             f"QPushButton#pushButton_agent_tour, QPushButton#pushButton_agent_testers,"
             f" QPushButton#pushButton_agent_reconfigure {{ padding: 4px 0; font-size: 12px;"
             f" font-weight: 500; border: none; background: transparent; color: {palette['fm_accent']}; text-align: left; }}"
@@ -1555,35 +1613,55 @@ class AgentPanel(QFrame):
         self.input.setFocus()
 
     def set_mode(self, mode: str) -> None:
-        """Show ``mode`` as the one picked, without telling anyone (the controller restores the saved one)."""
-        self._mode = mode_or_default(mode)
+        """Show ``mode`` as the one picked, without telling anyone (the controller restores the saved one).
+
+        Takes a posture (``respond``/``propose``/``act``) or a legacy mode (``ask``/``plan``/``act``,
+        core/agent/postures.py): the chip shows the posture, ``mode()`` still reads the legacy mode.
+        """
+        text = str(mode or "").strip().lower()
+        if text == ASK:
+            posture = RESPOND
+        elif text == PLAN:
+            posture = PROPOSE
+        else:
+            posture = posture_or_default(text)
+        self._posture = posture
+        self._mode = posture_to_mode(posture)
         for each, (action, _label) in self._mode_actions.items():
-            action.setChecked(each == self._mode)
-        label = self._mode_actions[self._mode][1]
+            action.setChecked(each == self._posture)
+        label = self._mode_actions[self._posture][1]
         self.mode_button.setText(f"{label} \u25be")
-        self.mode_button.setToolTip(_tr("Mode of the agent: Ask answers and changes nothing, Plan writes the steps "
-                                        "and waits for your Go, Act does it."))
+        self.mode_button.setToolTip(_tr("What the agent may do: Answer reads and changes nothing, Propose writes "
+                                        "the steps and shows each change before applying it, Act does it."))
         self._refresh_placeholder()
         if hasattr(self, "thread"):
-            self._refresh_look()  # the chip takes the color of its mode
+            self._refresh_look()  # the chip takes the color of its posture
 
     def _refresh_placeholder(self) -> None:
-        """The line to ask says what the next request may do: the mode picked under it (2026-11-24)."""
+        """The line to ask says what the next request may do: the posture picked under it (2026-11-24)."""
         if not hasattr(self, "input"):
             return
         if not self._ready:
             self.input.setPlaceholderText(_tr("Connect a provider to start"))
             return
-        self.input.setPlaceholderText({ASK: _tr("Ask a question about the project…"),
-                                       PLAN: _tr("Describe what to plan…")}.get(self._mode, _tr("Ask the agent…")))
+        self.input.setPlaceholderText({RESPOND: _tr("Ask a question about the project…"),
+                                       PROPOSE: _tr("Describe what to plan…")}.get(
+                                           self._posture, _tr("Ask the agent…")))
+        if hasattr(self, "send_button"):  # screen readers hear what the line now takes (S5)
+            self.input.setAccessibleDescription(self.input.placeholderText())
 
     def mode(self) -> str:
         return self._mode
 
+    def posture(self) -> str:
+        """The posture picked under the line (``respond``/``propose``/``act``, core/agent/postures.py)."""
+        return self._posture or posture_from_mode(self._mode)
+
     def _pick_mode(self, mode: str) -> None:
-        changed = mode_or_default(mode) != self._mode
+        before = (self._posture, self._mode)
         self.set_mode(mode)  # also checks the action again when the one already picked is clicked
-        if changed:
+        if (self._posture, self._mode) != before:
+            self.posture_changed.emit(self._posture)
             self.mode_changed.emit(self._mode)
 
     def set_working(self, working: bool) -> None:
@@ -1593,13 +1671,18 @@ class AgentPanel(QFrame):
         self.more_button.setEnabled(not working)
         self.history_undo_button.setEnabled(self.history_undo_button.isEnabled() and not working)
         self.history_redo_button.setEnabled(self.history_redo_button.isEnabled() and not working)
+        if hasattr(self, "history_button"):
+            self.redo_button.setEnabled(getattr(self, "_redo_possible", False) and not working)
+            self.history_button.setEnabled(not working)
+            self.recipes_button.setEnabled(not working)
         self._on_turn_selected()
         self.thread.set_compare_possible(self._can_compare and not working)  # the map changes under the comparison
         self.send_button.setToolTip(_tr("Stop (Esc)") if working else _tr("Send (Enter)"))
+        self.send_button.setAccessibleName(_tr("Stop the agent") if working else _tr("Send the request"))
         self.send_button.setEnabled(self._ready or working)
         self.thread.set_hint(_tr("You can already type the next request: Enter keeps it for when this one ends.")
                              if working else "")
-        if not working and self._queued and not getattr(self, "_queue_paused", False):
+        if not working and self._queue and not getattr(self, "_queue_paused", False):
             QTimer.singleShot(0, self._send_queued)  # once the engine let go of the request that ended
         self._refresh_new_button()
         self._refresh_look()
@@ -1614,6 +1697,12 @@ class AgentPanel(QFrame):
     def undo_offered(self) -> bool:
         return getattr(self, "_undo_possible", False)
 
+    def set_can_redo(self, possible: bool) -> None:
+        """Redo beside Undo: no card holds it, so the button shows whenever a turn waits to be done again."""
+        self.redo_button.setEnabled(bool(possible) and not self._working)
+        self.redo_button.setVisible(bool(possible))
+        self._redo_possible = bool(possible)
+
     def set_status(self, text: str, error: bool = False, offer_settings: bool = False) -> None:
         danger = tokens(self._dark())["fm_danger"]
         self.status.setStyleSheet(f"color: {danger};" if error else "")
@@ -1625,61 +1714,70 @@ class AgentPanel(QFrame):
         text = self.input.text().strip()
         if not text:
             return
-        if self._working:  # it waits for the request under way: one at a time
-            if self._queued and not self._queue_paused:
-                # A second Enter while one waits joins it, in sight: replacing it lost the first one
-                # without a trace (audit of 2026-11-24).
-                self._queued = f"{self._queued}\n{text}"
-            else:
-                self._queued, self._queue_paused = text, False
+        if self._working:  # each one waits its turn, in sight, in order (S5: a real pile, not one joined text)
+            self._queue.append(text)
             self.input.clear()
-            self.queue_label.set_full_text(_tr("Next: {}").format(" ".join(self._queued.split())))
-            self.queue_label.setToolTip(plain_tooltip(self._queued))
-            self.queue_row.setVisible(True)
+            self._refresh_queue_row()
             return
         self.send_requested.emit(text)
 
     @property
     def queued(self) -> str:
-        return self._queued
+        return "\n".join(self._queue)
+
+    def _refresh_queue_row(self) -> None:
+        """The pile waiting, numbered once there are several: the first line of each, in order."""
+        queue = list(getattr(self, "_queue", ()))
+        if not queue:
+            self.queue_row.setVisible(False)
+            return
+        firsts = [" ".join(request.split()) for request in queue]
+        if len(queue) == 1:
+            self.queue_label.set_full_text(_tr("Next: {}").format(firsts[0]))
+        else:
+            shown = " · ".join(f"{number}. {first}" for number, first in enumerate(firsts, 1))
+            self.queue_label.set_full_text(_tr("Next ({}): {}").format(len(queue), shown))
+        self.queue_label.setToolTip(plain_tooltip("\n".join(f"{number}. {request}"
+                                                            for number, request in enumerate(queue, 1))))
+        self.queue_row.setVisible(True)
 
     def pause_queued(self) -> None:
-        """Stop halts the agent: the request waiting stays in view and does not go by itself (the one stopped comes
-        back in the line); ✕ puts it in the line."""
-        if self._queued:
+        """Stop halts the agent: the requests waiting stay in view and do not go by themselves (the one stopped comes
+        back in the line); ✕ puts them in the line."""
+        if self._queue:
             self._queue_paused = True
-            self.queue_cancel.setToolTip(_tr("Put it back in the line"))
+            self.queue_cancel.setToolTip(_tr("Put them back in the line"))
 
     def cancel_queued(self) -> None:
-        """The request waiting goes back to the line, after what is there, to be changed or sent later."""
-        text, self._queued = self._queued, ""
+        """The requests waiting go back to the line, after what is there, to be changed or sent later."""
+        queue, self._queue = list(self._queue), []
         self._queue_paused = False
-        self.queue_cancel.setToolTip(_tr("Do not send it"))
+        self.queue_cancel.setToolTip(_tr("Do not send them"))
         self.queue_row.setVisible(False)
-        if text:
+        if queue:
             typed = self.input.text().rstrip()
-            self.input.setText(f"{typed}\n{text}" if typed else text)
+            back = "\n".join(queue)
+            self.input.setText(f"{typed}\n{back}" if typed else back)
 
     def _send_queued(self) -> None:
-        """The request under way ended: the one waiting goes, from the line (the controller empties it once sent;
-        refused, it stays there). What was typed meanwhile waits behind it, not in the bin (audit of 2026-11-24:
-        the waiting request overwrote the draft, and after a provider error the returned request too)."""
+        """The request under way ended: the first one waiting goes, from the line (the controller empties it once
+        sent; refused, it stays there). What was typed meanwhile waits behind the pile, not in the bin (audit of
+        2026-11-24: the waiting request overwrote the draft, and after a provider error the returned request too)."""
         if getattr(self, "_queue_paused", False):
-            return  # stopped: it waits for the user
-        text, self._queued = self._queued, ""
+            return  # stopped: they wait for the user
+        queue = list(getattr(self, "_queue", ()))
+        self._queue = []
         self.queue_row.setVisible(False)
-        if not text or self._working:
-            self._queued = text or self._queued
-            self.queue_row.setVisible(bool(self._queued))
+        if not queue or self._working:
+            self._queue = queue
+            self._refresh_queue_row()
             return
+        text, rest = queue[0], queue[1:]
         draft = self.input.text()
         self.input.setText(text)
         self.send_requested.emit(text)
-        if draft.strip():
-            self._queued = draft
-            self.queue_label.set_full_text(_tr("Next: {}").format(" ".join(draft.split())))
-            self.queue_label.setToolTip(plain_tooltip(draft))
-            self.queue_row.setVisible(True)
+        self._queue = [*rest, draft] if draft.strip() else list(rest)
+        self._refresh_queue_row()
 
     def _on_send_or_stop(self) -> None:
         if self._working:
@@ -1697,11 +1795,12 @@ class AgentPanel(QFrame):
         self.input.clear()
 
     def clear_thread(self) -> None:
-        self._queued = ""  # a new conversation, another project: what waited for the old one does not go
+        self._queue = []  # a new conversation, another project: what waited for the old one does not go
         self._queue_paused = False
         self.queue_row.setVisible(False)
         self.thread.clear()
         self.set_can_undo(False)
+        self.set_can_redo(False)
         self._in_answer = False
         self.set_status("")
         if hasattr(self, "example_buttons"):
@@ -1730,6 +1829,13 @@ class AgentPanel(QFrame):
             self.new_button.setVisible(not self.thread.is_empty() or self.stack.currentIndex() == _THREAD_PAGE)
             self.new_button.setEnabled(not self._working)
 
+    def _popup_recipes(self) -> None:
+        """The Recipes menu under its link: the same menu as in "⋯", without opening it first."""
+        try:
+            self.recipes_menu.popup(self.recipes_button.mapToGlobal(QPoint(0, self.recipes_button.height())))
+        except RuntimeError:  # the panel went with its dock
+            pass
+
     def add_user(self, text: str) -> None:
         """A request of the user, in a tinted bubble on the right."""
         self.input.remember(text)
@@ -1756,11 +1862,17 @@ class AgentPanel(QFrame):
         self._in_answer = False
         return card
 
-    def show_error(self, title: str, detail: str = "", offer_settings: bool = False) -> None:
-        """A request that failed, as a card in the thread (mockup: Error board)."""
+    def show_error(self, title: str, detail: str = "", offer_settings: bool = False, action: str = "",
+                   on_action=None) -> None:
+        """A request that failed, as a card in the thread (mockup: Error board).
+
+        Every error carries its recourse (S5): opening the settings, or ``action`` running ``on_action``
+        (sending the returned request again), never bare text.
+        """
         self._show_conversation()
-        self.thread.add_error(title, detail, _tr("Open the settings") if offer_settings else "",
-                              self.settings_requested.emit if offer_settings else None)
+        label = _tr("Open the settings") if offer_settings else action
+        callback = self.settings_requested.emit if offer_settings else on_action
+        self.thread.add_error(title, detail, label, callback)
         self._in_answer = False
 
     def begin_step(self) -> None:
@@ -2153,7 +2265,7 @@ class AgentSettingsDialog(QDialog):
         self.tool_rules.setObjectName("treeWidget_agent_tool_rules")
         self.tool_rules.setColumnCount(3)
         self.tool_rules.setHeaderLabels([_tr("Tool"), _tr("Kind"), _tr("Rule")])
-        self.tool_rules.setRootIsDecorated(False)
+        self.tool_rules.setRootIsDecorated(True)
         self._rule_boxes = {}
         kinds = {0: _tr("reads"), 1: _tr("view"), 2: _tr("project"), 3: _tr("edit buffer"), 4: _tr("irreversible"),
                  5: _tr("outside")}
@@ -2161,18 +2273,26 @@ class AgentSettingsDialog(QDialog):
         settings_kind = QCoreApplication.translate("AgentChat", "settings of FilterMate")
         choices = [("", _tr("As the level says")), ("ask", _tr("Always ask")), ("allow", _tr("Always allow")),
                    ("never", _tr("Never"))]
-        for name, title, risk in sorted(self._tools, key=lambda row: (row[2], row[1].lower())):
-            kind = settings_kind if name in ("change_settings", "apply_settings_profile") else kinds.get(risk, "")
-            item = QTreeWidgetItem(self.tool_rules, [title, kind, ""])
-            item.setToolTip(0, name)
-            box = QComboBox(self.tool_rules)
-            for value, label in choices:
-                if value == "allow" and name == "run_pyqgis":
-                    continue  # code is confirmed at every run
-                box.addItem(label, value)
-            box.setCurrentIndex(max(box.findData(rules.get(name, "")), 0))
-            self.tool_rules.setItemWidget(item, 2, box)
-            self._rule_boxes[name] = box
+        # Six families instead of a flat list (S4, core/agent/tool_catalog.py): what the tools mainly do.
+        families = [family for family in TOOL_FAMILIES
+                    if any(family_of(row[0]) == family for row in self._tools)]
+        for family in families:
+            parent = QTreeWidgetItem(self.tool_rules, [_tr(family_title(family)), "", ""])
+            parent.setExpanded(True)
+            rows = sorted((row for row in self._tools if family_of(row[0]) == family),
+                          key=lambda row: (row[2], display_title(row[0], row[1]).lower()))
+            for name, title, risk in rows:
+                kind = settings_kind if name in ("change_settings", "apply_settings_profile") else kinds.get(risk, "")
+                item = QTreeWidgetItem(parent, [display_title(name, title), kind, ""])
+                item.setToolTip(0, name)
+                box = QComboBox(self.tool_rules)
+                for value, label in choices:
+                    if value == "allow" and name == "run_pyqgis":
+                        continue  # code is confirmed at every run
+                    box.addItem(label, value)
+                box.setCurrentIndex(max(box.findData(rules.get(name, "")), 0))
+                self.tool_rules.setItemWidget(item, 2, box)
+                self._rule_boxes[name] = box
         self.tool_rules.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         layout.addWidget(hint)
         layout.addWidget(self.tool_rules, 1)

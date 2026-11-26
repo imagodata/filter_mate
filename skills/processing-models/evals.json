@@ -1,0 +1,70 @@
+{
+ "cases": [
+  {
+   "id": "model_buffer_chain",
+   "expert": true,
+   "prompt": "Garde cette chaîne en modèle réutilisable nommé tampons_routes : un buffer de 500 m sur les routes, puis les centroïdes du résultat.",
+   "expect": [
+    [
+     {
+      "tool": "run_pyqgis",
+      "args": {
+       "code": {
+        "contains": [
+         "QgsProcessingModelAlgorithm",
+         "native:buffer",
+         "tampons_routes"
+        ]
+       }
+      },
+      "call_args": {
+       "purpose": "Enregistrer la chaîne buffer puis centroïdes en modèle tampons_routes.model3",
+       "code": "model = QgsProcessingModelAlgorithm()\nmodel.setName('tampons_routes')\nmodel.addModelParameter(QgsProcessingModelParameter(QgsProcessingModelParameterDataType.VectorLayer, 'routes'), 'routes')\nchild = QgsProcessingModelChildAlgorithm()\nchild.setAlgorithmId('native:buffer')\nmodel.addChildAlgorithm(child)\nmodel.toFile('/tmp/tampons_routes.model3')"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "remove_layers",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "model_clip_chain",
+   "expert": true,
+   "prompt": "Transforme les traitements de cette session (buffer sur les routes puis clip par les communes) en un modèle partageable.",
+   "expect": [
+    [
+     {
+      "tool": "run_pyqgis",
+      "args": {
+       "code": {
+        "contains": [
+         "QgsProcessingModelAlgorithm",
+         "native:clip"
+        ]
+       }
+      },
+      "call_args": {
+       "purpose": "Enregistrer la chaîne buffer puis clip en modèle Processing",
+       "code": "model = QgsProcessingModelAlgorithm()\nchild = QgsProcessingModelChildAlgorithm()\nchild.setAlgorithmId('native:clip')\nmodel.addChildAlgorithm(child)\nmodel.toFile('/tmp/chaine_buffer_clip.model3')"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "remove_layers"
+   ]
+  },
+  {
+   "id": "model_filters_are_not_steps",
+   "expert": true,
+   "trap": true,
+   "prompt": "Mets les filtres actuels des bâtiments dans un modèle Processing.",
+   "expect": [],
+   "forbid": [
+    "run_pyqgis"
+   ]
+  }
+ ]
+}

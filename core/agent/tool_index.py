@@ -10,8 +10,10 @@ from typing import Sequence
 
 MAX_SUMMARY = 60
 # Every tool of the chat (the worst case): 4,322 on 2026-11-16 (lot 2), 3,100 for the default settings; on 2026-11-22
-# the layouts, projections, cartograms, forms, styles and official styles of the agent brought it near 5,000.
-MAX_INDEX = 5100
+# the layouts, projections, cartograms, forms, styles and official styles of the agent brought it near 5,000; on
+# 2026-11-26 the five visible-automation tools (open_layout, preview_atlas, flash_features, set_active_layer and
+# show_message) bring it near 5,300.
+MAX_INDEX = 5500
 INDEX_TITLE = ("\n\nTools you can add with use_tools. Before saying a thing cannot be done, look here; add in one call "
                "every tool the request needs:")
 
@@ -35,6 +37,7 @@ SUMMARIES = {
     "point_cloud_filter": "Keep points by class, elevation, intensity, return",
     "clear_filters": "Remove the filters of layers",
     "apply_favorite": "Apply a favorite as it is",
+    "save_favorite": "Keep the current filter as a favorite",
     "export_layers": "Write layers, as filtered, to files",
     "undo_agent_step": "Undo the last request of the agent",
     # the map and the layer tree
@@ -110,7 +113,14 @@ SUMMARIES = {
     "remove_widget": "Remove a widget",
     "show_chart": "A d3 chart in the chat",
     "export_chart": "A chart as PNG, JPG or SVG",
+    "show_infographic": "Charts stacked into an infographic",
+    "export_infographic": "An infographic as HTML, PNG, JPG or SVG",
     "describe_layout": "Read a layout",
+    "open_layout": "Open a layout in its designer",
+    "preview_atlas": "Turn the pages of the atlas preview",
+    "flash_features": "Flash features on the map, selecting nothing",
+    "set_active_layer": "Make a layer active and show it in the tree",
+    "show_message": "Show a message in the bar of QGIS",
     "set_atlas": "Atlas of a layout",
     "suggest_crs": "Projections suited to the data",
     "design_style": "A style from a validated palette",

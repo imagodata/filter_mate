@@ -84,7 +84,8 @@ _RUNS_ALONE = {ADVISOR: READ, CAREFUL: VIEW, STANDARD: BUFFER, AUTONOMOUS: LOCAL
 # of the class project, as set_layer_options: follow and link are options of the layer, the preview of a point cloud is
 # its filter, that of a raster its rendering (the panel refuses them on a protected layer itself).
 VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "group_layers", "map_theme",
-                        "bookmark"})
+                        "bookmark", "open_layout", "flash_features", "set_active_layer", "show_message",
+                        "preview_atlas"})
 BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
 CODE_TOOLS = frozenset({"run_pyqgis", "run_chart_code"})
@@ -103,7 +104,7 @@ SETTINGS_TOOLS = frozenset({"change_settings", "apply_settings_profile", "turn_o
 # before and after (a card, applied by the user). Each is asked alone, in its own words, as code is.
 ASKED_ALONE = CODE_TOOLS | SETTINGS_TOOLS | frozenset({
     "add_layer", "add_service_layer", "add_basemap", "add_elevation", "add_population", "add_osm_features",
-    "add_database_table", "delete_features", "export_layout", "local_copy", "export_chart"})
+    "add_database_table", "delete_features", "export_layout", "local_copy", "export_chart", "export_infographic"})
 
 
 # How many actions one question lists. A yes is for what the question shows: past this number the actions are

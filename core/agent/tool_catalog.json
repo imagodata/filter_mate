@@ -1113,6 +1113,35 @@
    }
   },
   {
+   "name": "save_favorite",
+   "title": "Save a favorite",
+   "description": "Keep the current filter of the project as a favorite, as the dock's star does. Only when the user asks to keep, save or reuse the filter (a favorite to find again). Refused when no layer is filtered, and when a favorite already holds the name: list_favorites shows the names taken. A favorite stays when the turn is undone. Returns the favorite (favorite_id, name, layer_name, expression).",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "name": {
+      "description": "Name under which the current filter is kept",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "default": "",
+      "description": "What the favorite keeps, in a few words",
+      "maxLength": 500,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "zoom_to",
    "title": "Zoom the map",
    "description": "Zoom the map to a layer, its selection, a WKT extent, or everything (no argument); only the view changes. Returns extent_wkt and scale. Fails without a map window.",

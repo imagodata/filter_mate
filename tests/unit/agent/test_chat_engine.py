@@ -762,6 +762,57 @@ def test_a_held_tool_declined_by_the_resolver_keeps_its_failure():
     transport.emit(turn(STOP_END, TextPart("done")))
 
 
+def test_each_action_is_allowed_or_refused_on_its_own():
+    """confirm_each ticks every action of a turn one by one: the allowed one runs, the refused one declines."""
+
+    class EachListener(Listener):
+        def confirm_each(self, calls):
+            assert [call.name for call in calls] == ["export", "write"]
+            return {0: True}  # the export only; refusing is the default
+
+    from core.agent.permissions import PermissionPolicy
+
+    tools = [READ, WRITE, EXPORT]
+    session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), tools, "S")
+    seen = []
+    handlers = {tool.name: (lambda name: lambda a: seen.append(name) or {"ok": True})(tool.name) for tool in tools}
+    transport, listener = Transport(), EachListener()
+    engine = ChatEngine(session, ToolExecutor(tools, handlers), transport, listener, Checkpoint(),
+                        policy=PermissionPolicy(level="careful"))
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("export"), call("write", "c2")))
+    assert seen == ["export"]
+    declined = session.messages[2].parts[1]
+    assert declined.is_error and "export" not in declined.content
+    transport.emit(turn(STOP_END, TextPart("done")))
+
+
+def test_no_per_action_answer_falls_back_to_the_grouped_question():
+    """confirm_each answering None (no card could ask) asks the grouped question instead."""
+
+    class SilentListener(Listener):
+        def confirm_each(self, calls):
+            return None
+
+        def confirm_many(self, calls):
+            self.log.append(("many", len(calls)))
+            return True
+
+    from core.agent.permissions import PermissionPolicy
+
+    tools = [READ, WRITE, EXPORT]
+    session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), tools, "S")
+    seen = []
+    handlers = {tool.name: (lambda name: lambda a: seen.append(name) or {"ok": True})(tool.name) for tool in tools}
+    transport, listener = Transport(), SilentListener()
+    engine = ChatEngine(session, ToolExecutor(tools, handlers), transport, listener, Checkpoint(),
+                        policy=PermissionPolicy(level="careful"))
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("export"), call("write", "c2")))
+    assert ("many", 2) in listener.log and seen == ["export", "write"]
+    transport.emit(turn(STOP_END, TextPart("done")))
+
+
 def test_a_tool_still_held_after_the_offer_keeps_its_failure():
     """The resolver said yes but offered nothing: one run only, no loop, the failure stays."""
     session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), [READ], "S")
