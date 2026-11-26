@@ -131,6 +131,19 @@ def _enabled_sources(settings) -> Tuple[str, ...]:
     return tuple(str(item) for item in value) if isinstance(value, list) else ()
 
 
+def sources_configured() -> bool:
+    """Whether the Sources tab was ever saved (the ``enabled_sources`` key written).
+
+    The REST/MCP source gate (``filtermate_api.source_gate``) only refuses unticked sources once the user
+    configured them: until then the previous behavior (open data reachable) is kept, so existing setups keep
+    working until they opt in.
+    """
+    try:
+        return bool(QgsSettings().contains(_PREFIX + "enabled_sources"))
+    except Exception:
+        return False
+
+
 def _port(value) -> int:
     try:
         port = int(value)

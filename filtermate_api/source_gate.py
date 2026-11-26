@@ -30,9 +30,13 @@ def open_data_refusal(required_kind: str, label: str) -> Optional[str]:
     """
     try:
         try:
-            from ..adapters.agent.settings import load_settings
+            from ..adapters.agent.settings import load_settings, sources_configured
         except ImportError:
-            from adapters.agent.settings import load_settings
+            from adapters.agent.settings import load_settings, sources_configured
+        if not sources_configured():
+            # The Sources tab was never saved: keep the previous behavior (open data reachable) until the
+            # user configures it, so existing REST/MCP setups keep working until they opt in (2026-11-26).
+            return None
         try:
             from ..core.agent.sources import all_sources, custom_from_json, enabled
         except ImportError:
