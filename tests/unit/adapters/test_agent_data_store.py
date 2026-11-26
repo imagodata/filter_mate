@@ -122,3 +122,47 @@ def test_asset_names_cannot_choose_a_disk_location(storage):
     store = module.AgentDataStore()
     path = store.new_path("../../folder\\roads.geojson")
     assert path.startswith(store.root + "/") and path.endswith("/roads.geojson")
+
+
+@pytest.mark.parametrize("encoding", ["utf-8", "utf-16", "utf-16-be"])
+@pytest.mark.parametrize("tag", ["SourceDataset", "SourceFilename"])
+def test_vrt_dependencies_and_portable_rewrites_keep_escaped_paths(storage, monkeypatch, tmp_path, encoding, tag):
+    module, _ = storage
+    source = module.PREFIX + "project/asset/café & terrain.tif"
+    xml = (f'<VRTDataset><{tag} relativeToVRT="0">'
+           f'{source.replace("&", "&amp;")}</{tag}></VRTDataset>').encode(encoding)
+    monkeypatch.setattr(module, "read_bytes", lambda path: xml)
+    assert module._dependencies(module.PREFIX + "project/vrt/filter.vrt") == [source]
+
+    vrt_path = tmp_path / "filter.vrt"
+    vrt_path.write_bytes(xml)
+    destination = tmp_path / "sources" / "café & terrain.tif"
+    module._rewrite_vrt(str(vrt_path), {source: str(destination)})
+    document = module.ET.fromstring(vrt_path.read_bytes())
+    node = document.find(tag)
+    assert node.text == "sources/café & terrain.tif"
+    assert node.get("relativeToVRT") == "1"
+
+
+@pytest.mark.parametrize("encoding", ["utf-8", "utf-16", "utf-16-be"])
+@pytest.mark.parametrize("reader", ["memory", "disk"])
+@pytest.mark.parametrize("doctype", [
+    '<!DOCTYPE VRTDataset>',
+    '<!DOCTYPE VRTDataset [<!ENTITY source "expanded">]>',
+    '<!DOCTYPE VRTDataset SYSTEM "file:///untrusted-vrt.dtd">',
+    '<!DOCTYPE VRTDataset [<!ENTITY source SYSTEM "file:///untrusted-source">]>',
+    '<!DOCTYPE VRTDataset [<!ENTITY % external SYSTEM "file:///untrusted-vrt.dtd">%external;]>',
+])
+def test_vrt_readers_refuse_dtds_before_entities_expand(storage, monkeypatch, tmp_path, encoding, reader, doctype):
+    module, _ = storage
+    xml = (doctype + '<VRTDataset><SourceFilename>&source;</SourceFilename></VRTDataset>').encode(encoding)
+    if reader == "memory":
+        monkeypatch.setattr(module, "read_bytes", lambda path: xml)
+        with pytest.raises(ValueError, match="must not contain a DTD"):
+            module._dependencies(module.PREFIX + "project/asset/filter.vrt")
+    else:
+        vrt_path = tmp_path / "filter.vrt"
+        vrt_path.write_bytes(xml)
+        with pytest.raises(ValueError, match="must not contain a DTD"):
+            module._rewrite_vrt(str(vrt_path), {})
+        assert vrt_path.read_bytes() == xml

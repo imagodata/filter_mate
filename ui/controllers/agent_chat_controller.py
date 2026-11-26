@@ -4252,7 +4252,6 @@ class AgentChatController(QObject):
         if layer is None:
             return ""
         try:
-            import os
             from ...adapters.qgis.stream_copy import copy_text, record_of
             from ...core.agent.open_data import megabytes
             record = record_of(layer)

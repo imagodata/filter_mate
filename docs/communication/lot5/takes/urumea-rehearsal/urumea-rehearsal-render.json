@@ -1,0 +1,33 @@
+{
+  "source_recording": "/tmp/fm-video/out/urumea",
+  "source_meta_sha256": "31d9d844e2b325dcfc68fbe9831885d8dbc625ea3f728333c3c2cb854770cc3e",
+  "renderer_sha256": "ca36d18afaef49c07200e3884fbbb4aa763ed4952d297dd47f55ef5b5f04bba2",
+  "source_frames": 3153,
+  "raw_duration_s": 209.2441,
+  "edit": "Original camera, synthetic cursor and recorded accelerations; diagnostic French captions; no closing loop crossfade. Original recording unchanged.",
+  "scenario_status": "rehearsal_not_validated",
+  "publication": "none",
+  "video_name": "urumea-rehearsal.mp4",
+  "video_sha256": "8968ec5bdcb6e2d33cb3de90c3cd3b66e912ee7e021ec9029b00ca7c633f3d67",
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "25/1"
+      }
+    ],
+    "format": {
+      "duration": "111.400000",
+      "size": "8448926"
+    }
+  },
+  "full_decode_check": "passed",
+  "audio": "none",
+  "favorite_final_observation": "Initial save refused; final visible tool card confirms a partial favorite for Buildings altitude only. No replay or restoration of all layers shown.",
+  "caption_correction": "End caption reflects the successful partial save visible in the final frame; the earlier audit stopped at the initial refusal."
+}

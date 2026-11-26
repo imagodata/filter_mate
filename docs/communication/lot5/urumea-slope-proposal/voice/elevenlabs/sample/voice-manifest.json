@@ -1,0 +1,21 @@
+{
+  "provider": "elevenlabs",
+  "voice_name": "Benjamin - Clear and Engaging",
+  "voice_id": "F9KUTOne5xOKqAbIU7yg",
+  "model_id": "eleven_v4",
+  "publication": "not_published",
+  "lines": [
+    {
+      "id": "urumea-benjamin-fr-extrait",
+      "text": "À Saint-Sébastien, on part du relief. On calcule la pente, puis on garde les bâtiments situés à moins de cinq cents mètres de l’Urumea.",
+      "file": "urumea-benjamin-fr-extrait.mp3",
+      "request_sha256": "eb95226111e5115bfc6636e20d76d7023ad2470d3ff7aa1c8d712015be54499b",
+      "sha256": "15a33180d84191e0e116c126322ae51331fc9f74fe12ee6d971bce852b0afbc2",
+      "duration_s": 8.0,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    }
+  ]
+}

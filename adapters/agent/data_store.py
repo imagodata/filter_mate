@@ -16,7 +16,7 @@ import threading
 import uuid
 import json
 import dataclasses
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405 - both VRT readers use _VrtTreeBuilder to reject DTDs
 from contextlib import contextmanager
 from typing import Dict
 
@@ -202,16 +202,25 @@ def _layer_sources(layer):
     return [source for source in sources if memory_path(source)]
 
 
+class _VrtTreeBuilder(ET.TreeBuilder):
+    """VRTs need no DTD: reject it before an entity can be expanded, in any XML encoding."""
+
+    def doctype(self, name, pubid, system):
+        raise ValueError("VRT documents must not contain a DTD")
+
+
 def _dependencies(path):
     if path.lower().endswith('.vrt'):
-        document = ET.fromstring(read_bytes(path))
+        parser = ET.XMLParser(target=_VrtTreeBuilder())  # nosec B314 - custom target rejects DTDs and entity declarations
+        document = ET.fromstring(read_bytes(path), parser=parser)  # nosec B314 - parser rejects all DTDs
         return [memory_path(node.text) for node in document.iter()
                 if node.tag in ('SourceDataset', 'SourceFilename') and memory_path(node.text)]
     return []
 
 
 def _rewrite_vrt(path, copied):
-    document = ET.parse(path)
+    parser = ET.XMLParser(target=_VrtTreeBuilder())  # nosec B314 - custom target rejects DTDs and entity declarations
+    document = ET.parse(path, parser=parser)  # nosec B314 - parser rejects all DTDs
     for node in document.iter():
         if node.tag in ('SourceDataset', 'SourceFilename') and memory_path(node.text) in copied:
             source = memory_path(node.text)

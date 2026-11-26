@@ -1,0 +1,23 @@
+{
+  "provider": "elevenlabs",
+  "requests": [
+    {
+      "id": "urumea-benjamin-fr-extrait",
+      "text": "À Saint-Sébastien, on part du relief. On calcule la pente, puis on garde les bâtiments situés à moins de cinq cents mètres de l’Urumea.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[calm, conversational, unhurried] À Saint-Sébastien, on part du relief. On calcule la pente, puis on garde les bâtiments situés à moins de cinq cents mètres de l’Urumea.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "eb95226111e5115bfc6636e20d76d7023ad2470d3ff7aa1c8d712015be54499b"
+    }
+  ]
+}
