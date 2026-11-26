@@ -756,11 +756,25 @@ It covers most countries, not all: China, Russia, Iran and North Korea are left 
   the address of a tile is built from whole degrees. Ticked alone it opens neither `search_open_data` nor the web
   to `add_layer`. A surface model: buildings and trees are in it, which the tool says with its answer.
 - **Basemaps** (`core/agent/basemaps.py`): XYZ tiles (OpenStreetMap, Carto, IGN Plan and aerial photographs through
-  the WMTS of the Géoplateforme, Google Satellite, OpenTopoMap) and any XYZ address the user adds. `add_basemap` puts one under every
-  layer after asking its server for a tile (where the map is, then a quarter of the world: a server of one country
-  has none for the world). A model names a basemap of the list, never an address: one the user added goes by its id
+  the WMTS of the Géoplateforme, Google Satellite, OpenTopoMap, Esri Light Gray, Dark Gray, World Imagery, World Topographic Map and World
+  Street Map) and any XYZ address the user adds. `add_basemap` puts one under every
+  layer after asking its server for a tile (where the map is, then a known covered point for a regional source,
+  or a quarter of the world for other sources). Checking a regional source does not move the map. An empty response, redirect or error page does not pass the test: at least one sample
+  must be an image. A redirect asks the user to enter the final tile template in Sources. A model names a basemap of the list, never an address: one the user added goes by its id
   (`sources.model_name`), since its address may hold the key of an account. A basemap ticked alone does not open the
   web to `add_layer`. Limits: an address the user adds is https on port 443, without a comma, and gets zoom 19 at most.
+  The Esri alternatives are separate sources to tick, subject to Esri's terms; detail varies by area. Their service
+  metadata lists the attribution and available scales: [imagery](https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer),
+  [topographic](https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer),
+  [streets](https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer).
+  CARTO's [current access policy](https://www.carto.com/basemaps/apikey/) requires a personal key. Without it the
+  server returns an HTTP 200 image saying "API KEY REQUIRED": this is refused before adding a layer. The four
+  built-in CARTO entries are marked as requiring a key. To use your own key, add a custom XYZ source with its
+  `?key=...` parameter in Sources; its custom id, rather than the keyed URL, is sent to the model. Otherwise tick
+  `esri_light_gray`, `esri_dark_gray`, `esri_streets`, `esri_topo` or `esri_imagery`. The grey bases are available
+  [light](https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer) and
+  [dark](https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer).
+  An existing CARTO notice layer in the project must be hidden in the Layers panel: a new background goes below it.
 - **MCP connectors** (`core/agent/mcp_client.py`, `adapters/agent/mcp_connection.py`): any Streamable HTTP server, public
   https or on this machine. Their tools join the conversation as `mcp_<server>__<tool>`, bounded in number and size.
   A plugin starts no process: a stdio-only server has to be run in HTTP mode by the user, as IGN's geocontext can be.
@@ -772,7 +786,9 @@ tool is a call outside even when the server declares it read-only (asked at ever
 that does not answer is left out of the conversation and said so.
 
 Anything fetched from these servers goes through `adapters/agent/bounded_http.py`: redirects are not followed, total time and
-size are capped, Stop works, and a 401 or a TLS error is a failure rather than a QGIS dialog worded by the server. Layers
+size are capped, Stop works, and a 401 or a TLS error is a failure rather than a QGIS dialog worded by the server.
+Proxy selection delegates to QGIS, including system proxies, custom factories and URL exclusions; no global network
+setting is changed. Layers
 opened by GDAL have their redirects checked first and its own HTTP time limits. Connector descriptions and schemas are
 reduced to well-formed, bounded JSON. `readOnlyHint` is what a server declares about itself: the thread shows these calls
 after the fact, with their arguments.
@@ -781,6 +797,36 @@ The built-in list favours the countries where QGIS plugins are downloaded most (
 plugins-analytics.qgis.org, 30 days to 2026-11-09: United States 26 %, Brazil 11 %, France 10 %, then Singapore, Germany,
 Hong Kong, Poland, United Kingdom, Netherlands, Spain, Italy, Japan). The dashboard has no figure for one given plugin.
 Each entry was checked to answer without an account; `tests/qgis_headless/check_agent_sources_live.py` checks them again.
+
+## Regional basemaps and local backgrounds
+
+The `basemaps` skill selects a background for the project area, searches enabled open data and service catalogs,
+and distinguishes regional services from raster files on the computer. These additional public sources were
+checked on 26 November 2026, without a key, against their official capabilities and rendered over covered places:
+
+| Territory / official producer | Available backgrounds | Source ids |
+|---|---|---|
+| [Brittany / GéoBretagne](https://tile.geobretagne.fr/photo/demo/) | Orthophotography | `geobretagne_ortho` |
+| [Basque Country / geoEuskadi](https://www.geo.euskadi.eus/servicios-estandar/webgeo00-content/es/) | Topographic map, orthophotography | `euskadi_map`, `euskadi_ortho` |
+| [Spain / IGN](https://www.ign.es/web/ign/portal/ide-area-nodo-ide-ign) | National topographic map, PNOA orthophotography | `ign_es_map`, `ign_es_ortho` |
+| [Switzerland / swisstopo](https://docs.geo.admin.ch/visualize-data/xyz.html) | National map, grey map, SWISSIMAGE | `swisstopo_map`, `swisstopo_gray`, `swisstopo_ortho` |
+| [Austria / basemap.at](https://basemap.at/en/) | Standard, grey, orthophotography | `basemap_at`, `basemap_at_gray`, `basemap_at_ortho` |
+| [Netherlands / PDOK](https://www.pdok.nl/achtergrondkaarten1) | BRT standard, grey, pastel, current orthophotography | `pdok_brt`, `pdok_brt_gray`, `pdok_brt_pastel`, `pdok_ortho` |
+| [Japan / GSI](https://maps.gsi.go.jp/development/ichiran.html) | Standard, pale, seamless orthophotography | `gsi_map`, `gsi_pale`, `gsi_ortho` |
+| [United States / USGS](https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer) | The National Map topographic background | `usgs_topo` |
+
+They are separate sources to enable in **Agent settings > Sources > Basemaps**, subject to their producers' terms
+and attribution. Coverage, detail and imagery dates vary: the connection test does not establish coverage of the
+current map. It tries at most two tiles, the current view when available and a catalogued covered point.
+
+For another region or a survey year, the skill searches the portals the user enabled and the layers of configured
+WMS/WMTS services. The native chat has no general internet search unless an enabled connector provides it; the
+skill explains that limit instead of inventing a search or a service address. Its exported MCP version also guides
+external clients with web search toward official regional geoportals and GetCapabilities documents.
+
+For files already on disk, it reuses project rasters or opens a user-provided raster GeoTIFF, MBTiles or GeoPackage.
+It does not treat vector MBTiles as a raster or claim to have scanned folders. A permitted `local_copy` of a web
+background remains an image of an area at one resolution; its notes and saving requirements determine persistence.
 
 ## Tools
 

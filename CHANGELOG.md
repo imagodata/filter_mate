@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent basemaps: 19 official regional backgrounds join the five Esri alternatives: GéoBretagne, geoEuskadi, IGN Spain, swisstopo, basemap.at, PDOK, GSI Japan and USGS. Regional connection checks can use a known covered point without moving the map. The new `basemaps` skill guides regional catalog searches, source selection, local raster files and offline-copy limits; its MCP export and six evaluation cases are included.
+
+- Agent basemaps: CARTO now requires an API key and returns an "API KEY REQUIRED" image even with HTTP 200. Its built-in entries say so and refuse to add this notice as a map; a custom XYZ source with the user's key remains possible. Five Esri alternatives provide neutral light/dark grey, satellite, topographic and street backgrounds without a key, with attribution and source opt-in preserved. Connection checks also respect QGIS's complete proxy policy; empty responses and redirects no longer report a successful test.
+
 ## [5.1.3] - 2026-11-26
 
 - Agent: an optional reasoning-effort menu appears only for recognized models that support it. It offers the model's supported levels and an Automatic default, remembers the choice per model and server, and applies it to the next request without clearing the conversation. Unsupported models receive no effort parameter. Anthropic, OpenAI, Mistral and Ollama use their respective request formats; Mistral's thinking chunks stay out of the displayed answer.

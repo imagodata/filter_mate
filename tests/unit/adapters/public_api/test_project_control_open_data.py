@@ -233,13 +233,29 @@ def _tiles(monkeypatch, status=200, content=_PNG):
 
 def test_a_basemap_of_the_list_goes_under_the_layers_with_its_attribution(basemap_project, monkeypatch):
     asked = _tiles(monkeypatch)
-    assert project_control.add_basemap("carto_light_nolabels") == {"name": "Carto Light (neutral, no names)"}
-    assert asked == ["https://basemaps.cartocdn.com/light_nolabels/1/0/0.png"]
+    assert project_control.add_basemap("esri_light_gray") == {"name": "Esri Light Gray (neutral)"}
+    assert asked == ["https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/1/0/0"]
     (layer, in_tree), = basemap_project.registered
     assert in_tree is False and basemap_project.tree == [layer]  # appended to the tree: below every other layer
     assert layer.provider == "wms" and layer.source == (
-        "type=xyz&url=https://basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png&zmax=20&zmin=0")
-    assert layer.rights == ["© OpenStreetMap contributors © CARTO"]
+        "type=xyz&url=https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}&zmax=23&zmin=0")
+    assert layer.rights == ["Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community"]
+
+
+@pytest.mark.parametrize("platform", ["carto_light", "carto_light_nolabels", "carto_dark", "carto_voyager"])
+def test_carto_requires_a_key_before_any_notice_image_can_be_added(basemap_project, monkeypatch, platform):
+    fetched = _tiles(monkeypatch)
+    with pytest.raises(ValueError, match="API key"):
+        project_control.add_basemap(platform)
+    assert fetched == [] and basemap_project.registered == []
+
+
+def test_a_carto_template_with_the_users_key_can_be_added(basemap_project, monkeypatch):
+    _tiles(monkeypatch)
+    address = "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png?key=example-user-key"
+    project_control.add_basemap(address, extra_domains=f"{address}:xyz")
+    assert len(basemap_project.registered) == 1
+    assert "?key%3Dexample-user-key" in basemap_project.registered[0][0].source
 
 
 def test_a_basemap_the_user_added_is_named_after_its_server(basemap_project, monkeypatch):
@@ -295,10 +311,44 @@ def test_a_server_of_one_country_is_asked_where_the_map_is(basemap_project, monk
     assert asked[-1] == "https://tiles.example.org/1/0/0.png"
 
 
-@pytest.mark.parametrize("status", [204, 302])
-def test_a_server_that_sends_elsewhere_or_has_nothing_there_is_taken_as_answering(basemap_project, monkeypatch, status):
+def test_a_listed_regional_source_can_be_checked_from_outside_its_coverage(basemap_project, monkeypatch):
+    replies = iter([SimpleNamespace(status=404, content=b""), SimpleNamespace(status=200, content=_PNG)])
+    asked = []
+
+    def fetch(url, **options):
+        asked.append(url)
+        return next(replies)
+
+    monkeypatch.setattr(project_control, "fetch", fetch)
+    monkeypatch.setattr(project_control, "_map_place", lambda: (0.0, 0.0))
+    project_control.add_basemap("swisstopo_map")
+    assert len(asked) == 2 and asked[0].endswith("/10/512/512.jpeg")
+    assert asked[1].endswith("/10/533/360.jpeg")
+    assert project_control._map_place() == (0.0, 0.0)
+    assert len(basemap_project.registered) == 1
+
+
+@pytest.mark.parametrize("status", [204, 301, 302, 303, 307, 308])
+def test_an_empty_answer_or_redirect_does_not_add_a_blank_basemap(basemap_project, monkeypatch, status):
     _tiles(monkeypatch, status, b"")
+    with pytest.raises(ValueError, match="not with an image|redirects"):
+        project_control.add_basemap("osm_tiles")
+    assert basemap_project.registered == [] and basemap_project.tree == []
+
+
+@pytest.mark.parametrize("status", [204, 302, 404])
+def test_an_unavailable_local_tile_still_tries_the_world_tile(basemap_project, monkeypatch, status):
+    replies = iter([SimpleNamespace(status=status, content=b""), SimpleNamespace(status=200, content=_PNG)])
+    asked = []
+
+    def fetch(url, **options):
+        asked.append(url)
+        return next(replies)
+
+    monkeypatch.setattr(project_control, "fetch", fetch)
+    monkeypatch.setattr(project_control, "_map_place", lambda: (1.444, 43.604))
     project_control.add_basemap("osm_tiles")
+    assert asked == ["https://tile.openstreetmap.org/10/516/373.png", "https://tile.openstreetmap.org/1/0/0.png"]
     assert len(basemap_project.registered) == 1
 
 

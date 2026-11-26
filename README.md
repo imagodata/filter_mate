@@ -102,10 +102,16 @@ the original source back, and project files are always saved with the original s
   section by section; a team can give it its own skills, a `SKILL.md` you read and allow first. When the
   project has no such layer, it brings in what a request needs: the elevation of an area (a relief map with its
   contours in one sentence), OpenStreetMap features by tags, the population of an area, the natural risks of France. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: web basemaps (OpenStreetMap, Carto, IGN,
-  Google Satellite), a geocoder, the tables of a PostgreSQL connection of QGIS, open data portals, WFS, WMS and WMTS
+  Google Satellite, OpenTopoMap, Esri light/dark grey / imagery / topographic / street maps), a geocoder, the tables of a PostgreSQL connection of QGIS, open data portals, WFS, WMS and WMTS
   services (IGN, Géorisques), Sentinel-2 scenes, Copernicus elevation, OpenStreetMap (Overpass),
   a population grid, remote MCP connectors. A built-in MCP server lets Claude Code or another client on
   your computer use the same tools ([docs/AGENT_MODE.md](docs/AGENT_MODE.md)).
+  CARTO now requires a [personal API key](https://www.carto.com/basemaps/apikey/); use a custom XYZ source with your
+  key, or enable an Esri alternative in **Agent settings > Sources > Basemaps**. Hide an existing CARTO notice layer
+  in QGIS's Layers panel before adding another background below it.
+  The **basemaps** skill also finds official regional backgrounds (Brittany, Basque Country, Spain, Switzerland,
+  Austria, Netherlands, Japan, United States), searches enabled local catalogs and reuses local raster files.
+  See the [regional source list](docs/AGENT_MODE.md#regional-basemaps-and-local-backgrounds).
 - 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster, a value condition
   on a point cloud attribute.
 - 🧩 **Objects drawn by SAM** (experimental): on an orthophoto, a click or a box and the SAM 2.1 model draws the object,

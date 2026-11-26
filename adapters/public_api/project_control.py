@@ -19,7 +19,9 @@ from contextlib import contextmanager
 import math
 from typing import Any, Dict, List, Optional, Tuple
 
-from ...core.agent.basemaps import DEFAULT_ZMAX, default_title, is_image, known, sample_tiles, template_problem, xyz_uri
+from ...core.agent.basemaps import (
+    DEFAULT_ZMAX, access_problem, default_title, is_image, known, sample_tiles, template_problem, xyz_uri,
+)
 from ...core.agent.open_data import (
     KIND_GEOCODER, KIND_STAC, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ, RemoteFile, archive_member, follow_redirects, gdal_source, is_point_cloud, is_web_page,
     megabytes, geocode_url, parse_places,
@@ -42,7 +44,6 @@ MAX_PAYLOAD = 5 * 1024 * 1024
 SEARCH_TIMEOUTS_MS = (20_000, 45_000)
 _OVERLOADED = (502, 503, 504)
 BASEMAP_TIMEOUT_MS = 15_000
-_TILE_ELSEWHERE = (204, 301, 302, 303, 307, 308)  # nothing to draw there, or sent to another address
 _ELSEWHERE = ". It was asked twice: search another platform of the list rather than this one again."
 # A file its server only gives whole is copied to the QGIS profile first: what a layer may cost in disk and in time.
 MAX_DOWNLOAD = 512 * 1024 * 1024
@@ -694,7 +695,7 @@ def _basemap_template(platform: str, extra_domains: str) -> str:
         raise ValueError(f"{platform!r} is not a basemap of the list") from None
     if kind != KIND_XYZ:
         raise ValueError(f"{platform} is not a basemap: it is searched with search_open_data")
-    problem = template_problem(template)
+    problem = template_problem(template) or access_problem(template)
     if problem:
         raise ValueError(problem)
     return template
@@ -718,8 +719,9 @@ def _map_place() -> Optional[Tuple[float, float]]:
 def check_basemap(platform: str, extra_domains: str = '') -> Dict[str, Any]:
     """Ask the server of a basemap the user allowed for a tile: QGIS opens an XYZ layer without asking anything.
 
-    The tile where the map is, then a quarter of the world: the first one that comes is enough. A server that
-    sends elsewhere or has nothing to draw there is taken as answering: QGIS follows it, and only an image tells more.
+    The tile where the map is, then a known covered point for regional sources or a quarter of the world. An image
+    is required. An empty answer or a redirect
+    does not prove a tile can be drawn, and must not turn a connection test green or add an unverified layer.
 
     Raises:
         ValueError: The server gave no tile; the message says what it answered.
@@ -727,15 +729,20 @@ def check_basemap(platform: str, extra_domains: str = '') -> Dict[str, Any]:
     template = _basemap_template(platform, extra_domains)
     listed = known(template)
     problem = ''
-    for url in sample_tiles(template, _map_place(), listed.zmax if listed is not None else DEFAULT_ZMAX):
+    for url in sample_tiles(template, _map_place(), listed.zmax if listed is not None else DEFAULT_ZMAX,
+                            listed.sample_place if listed is not None else None):
         try:
             reply = fetch(url, max_bytes=MAX_PAYLOAD, timeout_ms=BASEMAP_TIMEOUT_MS)
         except HttpFailure as exc:
             raise ValueError(f"the server of this basemap did not answer: {exc}") from None
-        if reply.status in _TILE_ELSEWHERE or (reply.status == 200 and is_image(reply.content)):
+        if reply.status == 200 and is_image(reply.content):
             return {'platform': platform, 'status': reply.status}
-        problem = (f"the server of this basemap answered with an error ({reply.status})" if reply.status != 200
-                   else "the server of this basemap answers, but not with an image")
+        if reply.status in (301, 302, 303, 307, 308):
+            problem = "the server of this basemap redirects: use the final tile template in Sources"
+        elif reply.status in (200, 204):
+            problem = "the server of this basemap answers, but not with an image"
+        else:
+            problem = f"the server of this basemap answered with an error ({reply.status})"
     raise ValueError(problem + ": check its address, or move the map over the area it covers")
 
 

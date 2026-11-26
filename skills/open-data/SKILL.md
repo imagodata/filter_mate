@@ -1,9 +1,9 @@
 ---
 name: open-data
 title: Bring data in, take layers out
-description: bring data in (OpenStreetMap, open data platforms, a file, a URL, WFS, satellite, basemap, elevation, population) or remove layers
+description: add or remove data: portals, files, OSM, WFS/WMTS, imagery, elevation, population
 metadata:
-  version: 5
+  version: 6
   plugin_min: 5.1.1
   audience: chat, mcp
   tools: search_open_data, add_layer, add_service_layer, search_imagery, add_basemap, add_elevation, add_population, add_osm_features, find_place, remove_layers, list_layers, local_copy
@@ -70,9 +70,11 @@ one. Prefer few clouds when the user does not say.
 
 ## Web basemaps
 
-add_basemap puts a basemap the user enabled under every layer: osm_tiles for a street map, carto_light for a neutral
-background, carto_light_nolabels under layers that have their own labels, carto_dark under bright symbols,
-google_satellite for photographs anywhere, ign_plan or ign_ortho in France, opentopomap for relief. A basemap is an
+For finding a background, a local authority's orthophotos, an offline raster or a broken tile map, load the
+basemaps skill. add_basemap puts a source the user enabled under every layer: osm_tiles or esri_streets for roads,
+esri_light_gray or esri_dark_gray for a neutral background, esri_imagery for photographs, ign_plan or ign_ortho
+in France, and official regional sources where available. CARTO now requires a personal key; never suggest its
+keyless predefined entries as working backgrounds. A basemap is an
 image: it has no values to filter nor read (local_copy keeps it next to the project). A filter between layers can still cut it to an area: it is
 then a still image at one resolution (the warning of the filter says which), and clearing the filter gives the
 live service back. When none is enabled, say that one can be ticked in the settings of the agent, Sources tab.

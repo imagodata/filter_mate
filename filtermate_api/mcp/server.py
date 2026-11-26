@@ -1262,11 +1262,12 @@ def build_server(client: FilterMateClient) -> Any:
                                           idempotentHint=False, openWorldHint=True))
     async def add_basemap(
         platform: Annotated[str, Field(min_length=1, max_length=2000, description=(
-            "A basemap the user allowed: osm_tiles (OpenStreetMap), carto_light (neutral light grey), "
-            "carto_light_nolabels (the same with no place names, under layers that have labels), carto_dark, "
-            "carto_voyager, ign_plan and ign_ortho (France: map and aerial photographs), google_satellite (worldwide "
-            "satellite and aerial photographs), opentopomap (relief), or one the user added, by the name the chat "
-            "lists it under"))],
+            "A basemap the user allowed: osm_tiles (OpenStreetMap), esri_light_gray / esri_dark_gray (neutral), "
+            "esri_streets, esri_topo, esri_imagery (satellite), ign_plan / ign_ortho (France), google_satellite, "
+            "opentopomap (relief), or a custom source by its listed name. CARTO now requires a key: its built-in "
+            "carto_light, carto_light_nolabels, carto_dark and carto_voyager cannot be used without one. "
+            "Use a custom keyed source or ask the user to enable an Esri equivalent; never invent or request a key "
+            "in the conversation"))],
         name: Annotated[str, Field(max_length=200, description="Name of the layer in the project (default: its title)")] = "",
     ) -> Dict[str, Any]:
         """Add a web basemap (XYZ tiles) to the project, under every other layer.

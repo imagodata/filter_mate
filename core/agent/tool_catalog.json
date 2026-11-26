@@ -3710,7 +3710,7 @@
    "input_schema": {
     "properties": {
      "platform": {
-      "description": "A basemap the user allowed: osm_tiles (OpenStreetMap), carto_light (neutral light grey), carto_light_nolabels (the same with no place names, under layers that have labels), carto_dark, carto_voyager, ign_plan and ign_ortho (France: map and aerial photographs), google_satellite (worldwide satellite and aerial photographs), opentopomap (relief), or one the user added, by the name the chat lists it under",
+      "description": "A basemap the user allowed: osm_tiles (OpenStreetMap), esri_light_gray / esri_dark_gray (neutral), esri_streets, esri_topo, esri_imagery (satellite), ign_plan / ign_ortho (France), google_satellite, opentopomap (relief), or a custom source by its listed name. CARTO now requires a key: its built-in carto_light, carto_light_nolabels, carto_dark and carto_voyager cannot be used without one. Use a custom keyed source or ask the user to enable an Esri equivalent; never invent or request a key in the conversation",
       "maxLength": 2000,
       "minLength": 1,
       "type": "string"

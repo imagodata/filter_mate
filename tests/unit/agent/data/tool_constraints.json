@@ -2244,6 +2244,7 @@
    "name": {
     "enum": [
      "analysis",
+     "basemaps",
      "cartograms",
      "cartography",
      "configuration",

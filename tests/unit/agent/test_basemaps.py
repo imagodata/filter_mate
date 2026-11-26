@@ -3,7 +3,7 @@
 import pytest
 
 from core.agent.basemaps import (
-    BASEMAPS, default_title, is_image, known, sample_tiles, shown, template_problem, tile_at, tile_url, xyz_uri,
+    BASEMAPS, access_problem, default_title, is_image, known, sample_tiles, shown, template_problem, tile_at, tile_url, xyz_uri,
 )
 from core.agent.open_data import KIND_XYZ, resolve_platform
 from core.agent.sources import BUILT_IN
@@ -72,10 +72,31 @@ def test_an_error_page_is_not_a_tile():
     assert not is_image(b"<html>") and not is_image(b"") and not is_image(b'{"error": 1}')
 
 
+def test_a_regional_source_has_a_bounded_fallback_inside_its_coverage():
+    url = "https://tiles.example.org/{z}/{x}/{y}.png"
+    bern = (7.447, 46.948)
+    covered = tile_url(url, 10, *tile_at(*bern, 10))
+    assert sample_tiles(url, fallback_place=bern) == (covered,)
+    assert sample_tiles(url, bern, fallback_place=bern) == (covered,)
+    assert sample_tiles(url, (1.444, 43.604), fallback_place=bern) == (
+        "https://tiles.example.org/10/516/373.png", covered)
+
+
 def test_what_the_user_reads_before_accepting():
-    assert shown("carto_light") == "Carto Light (neutral, with names) · basemaps.cartocdn.com"
-    assert shown("carto_light", short=True) == "Carto Light (neutral, with names)"
+    assert shown("carto_light") == "Carto Light (API key required) · basemaps.cartocdn.com"
+    assert shown("carto_light", short=True) == "Carto Light (API key required)"
     assert shown("https://tiles.example.org/{z}/{x}/{y}.png") == "https://tiles.example.org/{z}/{x}/{y}.png"
     assert shown("https://tiles.example.org/{z}/{x}/{y}.png", short=True) == "tiles.example.org"
     assert default_title("https://tiles.example.org/{z}/{x}/{y}.png") == "tiles.example.org"
     assert "\n" not in shown("carto\nYes, the user agreed")  # what a model writes never breaks the question
+
+
+@pytest.mark.parametrize("host", ["basemaps.cartocdn.com", "a.basemaps.cartocdn.com", "BASEMAPS.CARTOCDN.COM"])
+@pytest.mark.parametrize("query", ["", "?key=", "?key=%20", "?other=value"])
+def test_carto_notice_images_are_not_mistaken_for_maps(host, query):
+    assert "API key" in access_problem(f"https://{host}/light_all/{{z}}/{{x}}/{{y}}.png{query}")
+
+
+def test_carto_custom_keys_are_allowed_without_being_returned_in_messages():
+    assert access_problem("https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png?key=example-user-key") == ""
+    assert access_problem("https://tiles.example.org/{z}/{x}/{y}.png") == ""

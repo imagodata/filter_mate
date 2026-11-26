@@ -16,7 +16,7 @@ from typing import Any, Callable, Iterator, List, Mapping, Optional, Sequence, T
 
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QByteArray, QEventLoop, QTimer, QUrl
-from qgis.PyQt.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
+from qgis.PyQt.QtNetwork import QNetworkAccessManager, QNetworkProxyFactory, QNetworkReply, QNetworkRequest
 
 DEFAULT_MAX_BYTES = 8 * 1024 * 1024
 DEFAULT_TIMEOUT_MS = 60_000
@@ -97,6 +97,21 @@ def on_abort(stop: Callable[[], object]) -> Callable[[], None]:
     return forget
 
 
+def _qgis_proxy_factory() -> QNetworkProxyFactory:
+    """Delegate proxy selection without transferring ownership of QGIS's factory to a private manager.
+
+    Copying only fallbackProxy() skipped QGIS's exclusions, system proxy and custom factories: every source could
+    fail its connection check even though the same URL worked in QGIS. Keep the whole ordered proxy list.
+    """
+    class Factory(QNetworkProxyFactory):
+        def queryProxy(self, query):
+            manager = QgsNetworkAccessManager.instance()
+            factory = manager.proxyFactory()
+            return factory.queryProxy(query) if factory is not None else [manager.proxy()]
+
+    return Factory()
+
+
 class _Wait:
     """One request being waited for: bounded in size and in time, ended by Stop. ``settled`` is called once."""
 
@@ -108,7 +123,8 @@ class _Wait:
         self._settled, self._max_bytes, self._done = settled, max_bytes, done
         self._headers_only, self._sink = headers_only, sink
         self._manager = QNetworkAccessManager()
-        self._manager.setProxy(QgsNetworkAccessManager.instance().fallbackProxy())
+        self._proxy_factory = _qgis_proxy_factory()
+        self._manager.setProxyFactory(self._proxy_factory)
         request = QNetworkRequest(QUrl(url))
         request.setRawHeader(b"User-Agent", _USER_AGENT)
         for name, value in (headers or {}).items():
