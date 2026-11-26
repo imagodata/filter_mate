@@ -670,6 +670,15 @@ def prune_copies(project=None) -> int:
         try:
             record = record_of(layer)
         except Exception:
+            # Fail closed per layer (2026-11-26): an unreadable layer may still read a copy, and skipping it
+            # would leave its file unreferenced for the prune below. What its own source names stays kept.
+            try:
+                source = layer.source() or ""
+            except Exception:
+                source = ""
+            if isinstance(source, str) and source:
+                referenced.add(os.path.normcase(os.path.abspath(source)))
+                referenced.add(os.path.normcase(os.path.splitext(os.path.abspath(source))[0]))
             continue
         if record is not None and record.path:
             referenced.add(os.path.normcase(os.path.abspath(record.path)))
@@ -847,14 +856,18 @@ def rewrite_saved_layer(project, layer, element, document) -> None:
                 layer.removeCustomProperty(rules.PROPERTY)
                 _remove_custom_property(element, rules.PROPERTY)
             return
-        subset = layer.subsetString() if hasattr(layer, 'subsetString') and record_of(layer) is not None else ''
+        wanted = layer.subsetString() if hasattr(layer, 'subsetString') and record_of(layer) is not None else ''
+        # A filter set on the copy in the language of the copy (json_each, fid, SQLite constructs) never goes on
+        # the service in the project file either: the layer would read everything with the filter text still
+        # displayed (audit of 2026-11-24). The service is written without it; the record keeps it for the copy.
+        subset = wanted if service_keeps_subset(wanted) else ''
         base = stream_base(record.stream_source, record.stream_provider)
         source = stream_source_with(base, record.stream_provider, subset)
         _set_text(element, document, 'datasource', source)
         _set_text(element, document, 'provider', record.stream_provider)
         _set_tree_layer_source(document, layer.id(), source, record.stream_provider)
         opacity = _opacity(layer) if record.kind == rules.KIND_IMAGE else -1.0
-        current = record.replaced(subset=subset, opacity=opacity if opacity >= 0 else record.opacity)
+        current = record.replaced(subset=wanted, opacity=opacity if opacity >= 0 else record.opacity)
         if record_of(layer) is not None:
             layer.setCustomProperty(rules.PROPERTY, current.to_json())  # the record in memory follows the layer
         stored = current.with_path(project.pathResolver().writePath(record.path))
@@ -911,8 +924,15 @@ def reattach_project(project=None) -> Tuple[int, List[str]]:
             continue
         try:
             # Its filter as the project wrote it: in the source of a WFS (a project written with FilterMate off holds
-            # the filter set then), in the record for a service that does not write it there.
-            subset = layer.subsetString() if record.stream_provider.lower() in _FILTER_IN_SOURCE else record.subset
+            # the filter set then), in the record for a service that does not write it there, and in the record as
+            # well for a filter set on the copy that the service does not read (json_each, SQLite): the project holds
+            # the service without it, the copy reads it again from the record (audit of 2026-11-24).
+            if record.stream_provider.lower() in _FILTER_IN_SOURCE:
+                subset = layer.subsetString()
+                if not subset and record.subset and not service_keeps_subset(record.subset):
+                    subset = record.subset
+            else:
+                subset = record.subset
             switch_to_copy(layer, record, subset=subset, look_of_record=True)
             reattached += 1
         except RuntimeError:
