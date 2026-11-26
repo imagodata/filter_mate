@@ -472,6 +472,46 @@ def remote_expression_is_safe(expression, fields=None):
     return expression_refusal(expression, fields) is None
 
 
+# The variables QgsExpression::initGeomCalculator reads for $area, $length and $perimeter (transform()
+# reads _project_transform_context too): texts, a CRS and a transform context, values a worker can hold.
+_MEASURE_VARIABLES = ('project_ellipsoid', '_layer_crs', '_project_transform_context',
+                      'project_distance_units', 'project_area_units')
+_PLAIN_VALUES = (bool, int, float, str)
+
+
+def worker_expression_context(layer, expression):
+    """The context a worker evaluates ``expression`` of ``layer`` in; None when only the main thread can.
+
+    Read on the main thread, it holds values only, never a layer or another
+    project object: the variables the expression reads (NULL, booleans,
+    numbers, texts) and those of the measures. A worker then keeps the
+    features the main thread keeps in the global, project and layer scopes
+    (2026-11-13: ``$area > 500000`` kept nothing on a layer in degrees, the
+    measure being planar without the ellipsoid of the project).
+
+    None for a function outside _SAFE_FUNCTIONS (aggregates, is_selected(),
+    get_feature(), var() and the like: they read the live layer or project) or
+    a variable holding another kind of value (@layer...).
+    """
+    from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextScope, QgsExpressionContextUtils
+    expr = QgsExpression(expression or '')
+    if not set(expr.referencedFunctions()).issubset(_SAFE_FUNCTIONS):
+        return None
+    source = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer))
+    scope = QgsExpressionContextScope()
+    for name in sorted(expr.referencedVariables()):
+        value = source.variable(name)
+        if value is not None and not isinstance(value, _PLAIN_VALUES):
+            return None
+        scope.setVariable(name, value)
+    for name in _MEASURE_VARIABLES:
+        if source.hasVariable(name):
+            scope.setVariable(name, source.variable(name))
+    context = QgsExpressionContext()
+    context.appendScope(scope)
+    return context
+
+
 def refusal_message(reason):
     """The translated message of a refusal reason (SYNTAX, UNSAFE or VIRTUAL_FIELD)."""
     from qgis.PyQt.QtCore import QCoreApplication

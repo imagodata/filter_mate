@@ -34,9 +34,6 @@ from qgis.core import (
     QgsFeature,
     QgsFeatureRequest,
     QgsExpression,
-    QgsExpressionContext,
-    QgsExpressionContextScope,
-    QgsExpressionContextUtils,
 )
 from qgis.PyQt.QtCore import pyqtSignal, QObject
 
@@ -68,24 +65,30 @@ class ExpressionEvaluationSignals(QObject):
     cancelled = pyqtSignal(str)
 
 
-def scalar_variables(layer, expression) -> dict:
-    """The values of the variables ``expression`` reads, from the global, project and layer scopes.
+# QgsFeatureRequest::ALL_ATTRIBUTES, in referencedColumns() of attributes() / $currentfeature.
+_ALL_ATTRIBUTES = '#!allattributes!#'
 
-    Read on the main thread. A request has no context of its own: without it
-    ``"id" > @seuil`` read the variable as NULL and kept nothing (2026-11-12).
-    Only NULL, booleans, numbers and texts are handed to a worker (never a
-    layer or another project object).
+
+def needs_the_layer(layer, provider, expression, request_fields=None) -> bool:
+    """Whether only the layer itself, not the snapshot of its provider, evaluates ``expression`` as QGIS does.
+
+    Read on the main thread. The worker reads the provider: a joined or
+    virtual field it does not have, or the unsaved edits of the layer, would
+    give other features than the synchronous reading (2026-11-13).
     """
-    names = QgsExpression(expression or '').referencedVariables()
-    if not names:
-        return {}
-    context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer))
-    values = {}
-    for name in names:
-        value = context.variable(name)
-        if value is None or isinstance(value, (bool, int, float, str)):
-            values[name] = value
-    return values
+    if layer.isModified():
+        return True
+    provider_fields = provider.fields()
+    layer_fields = layer.fields()
+    # The returned features must match too, even if the filter itself reads
+    # only provider fields. A provider source cannot return joined/virtual fields.
+    returned_fields = request_fields or [field.name() for field in layer_fields]
+    if any(provider_fields.lookupField(name) < 0 for name in returned_fields):
+        return True
+    columns = QgsExpression(expression or '').referencedColumns()
+    if _ALL_ATTRIBUTES in columns and layer_fields.count() != provider_fields.count():
+        return True
+    return any(name != _ALL_ATTRIBUTES and provider_fields.lookupField(name) < 0 for name in columns)
 
 
 class ExpressionEvaluationTask(QgsTask):
@@ -100,6 +103,8 @@ class ExpressionEvaluationTask(QgsTask):
     Thread Safety:
     - Uses layer.dataProvider().featureSource() for thread-safe iteration
     - Does NOT modify layer (no setSubsetString in background thread)
+    - Evaluates in a context of values read on the main thread; an expression that
+      needs the layer itself is read on the main thread instead (_prepare_context)
     - Results are passed via signals for main thread processing
 
     Example:
@@ -159,8 +164,10 @@ class ExpressionEvaluationTask(QgsTask):
         self._total_count = 0
         # The layer's fields, read on the main thread with the feature source (2026-10-17)
         self._fields = None
-        # The values of the variables the expression reads, on the main thread too (2026-11-12)
-        self._variables = {}
+        # The context of the worker (values only), read on the main thread too (2026-11-13)
+        self._context = None
+        # The features, when only the main thread can read them (2026-11-13, _prepare_context)
+        self._main_thread_features = None
 
         # Parsed expression cached between _validate_inputs and _build_feature_request
         self._qgs_expr: Optional[QgsExpression] = None
@@ -194,10 +201,53 @@ class ExpressionEvaluationTask(QgsTask):
                     self._feature_source = provider.featureSource()
                     self._total_count = provider.featureCount()
                     self._fields = self.layer.fields()
-                    self._variables = scalar_variables(self.layer, self.expression_string)
+                    self._prepare_context(provider)
             except (RuntimeError, AttributeError) as e:
                 logger.warning(f"Could not prepare feature source for {self.layer_name}: {e}")
                 self._feature_source = None
+
+    def _prepare_context(self, provider):
+        """The context of the worker, or the features read now when only the main thread can (main thread).
+
+        2026-11-13: the worker evaluated with the variables of the expression
+        only, so the same custom selection gave other features above
+        async_expression_threshold: ``$area`` planar, ``is_selected()``,
+        ``mean("pop")`` and the other functions reading the layer without it.
+        A worker now gets the variables and measure settings as values
+        (worker_expression_context). An expression that needs the layer
+        itself is read here, as the synchronous EXPLORING reads it: no layer
+        or project object is ever handed to the worker.
+        """
+        if not self.expression_string or QgsExpression(self.expression_string).hasParserError():
+            return  # run() reports it
+        from ...adapters.qgis.async_query import worker_expression_context
+        self._context = worker_expression_context(self.layer, self.expression_string)
+        if self._context is not None and not needs_the_layer(
+                self.layer, provider, self.expression_string, self.request_fields):
+            return
+        from ...adapters.backends.source_refusal import with_layer_context
+        logger.debug(f"Expression of '{self.layer_name}' read on the main thread: it needs the layer")
+        request = self._options(QgsFeatureRequest().setFilterExpression(self.expression_string))
+        iterator = None
+        try:
+            iterator = self.layer.getFeatures(with_layer_context(request, self.layer))
+            self._main_thread_features = list(iterator)
+        except Exception as e:  # reported by run(), as an error of the worker
+            self.exception = e
+        finally:
+            if iterator is not None:
+                iterator.close()
+
+    def _options(self, request: QgsFeatureRequest) -> QgsFeatureRequest:
+        """``request`` with the limit, the fields and the geometry flag of this evaluation."""
+        if self.limit > 0:
+            request.setLimit(self.limit)
+        if self.request_fields:
+            # read on the main thread: never self.layer from the worker
+            request.setSubsetOfAttributes(self.request_fields, self._fields)
+        if not self.include_geometry:
+            request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
+        return request
 
     def run(self) -> bool:
         """
@@ -209,6 +259,13 @@ class ExpressionEvaluationTask(QgsTask):
         self._start_time = time.time()
 
         try:
+            if getattr(self, '_main_thread_features', None) is not None:
+                # read on the main thread when the task was created (_prepare_context)
+                self.result_features = self._main_thread_features
+                return True
+            if self.exception is not None:
+                return False  # the main thread failed to read it (_prepare_context)
+
             # 2026-10-17: the feature source prepared on the main thread is used as is. The
             # v2.6.7 refresh here read the layer and its provider from the worker thread
             # (QgsVectorLayer is not thread-safe). The task is created right before it is
@@ -267,31 +324,12 @@ class ExpressionEvaluationTask(QgsTask):
         """
         try:
             qgs_expr = self._qgs_expr if self._qgs_expr is not None else QgsExpression(self.expression_string)
-            request = QgsFeatureRequest(qgs_expr)
+            # limit, fields (read on the main thread) and geometry flag
+            request = self._options(QgsFeatureRequest(qgs_expr))
 
-            # Set limit if specified
-            if self.limit > 0:
-                request.setLimit(self.limit)
-
-            # Optimize field loading if specific fields requested
-            if self.request_fields:
-                request.setSubsetOfAttributes(
-                    self.request_fields,
-                    self._fields  # read on the main thread: never self.layer from the worker
-                )
-
-            # Geometry flag (can save memory/time if not needed)
-            if not self.include_geometry:
-                request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
-
-            variables = getattr(self, '_variables', None)
-            if variables:
-                # values read on the main thread (_read_variables): a scope of plain values in the worker
-                scope = QgsExpressionContextScope()
-                for name, value in variables.items():
-                    scope.setVariable(name, value)
-                context = QgsExpressionContext()
-                context.appendScope(scope)
+            context = getattr(self, '_context', None)
+            if context is not None:
+                # values read on the main thread (_prepare_context): variables and measure settings
                 request.setExpressionContext(context)
 
             return request

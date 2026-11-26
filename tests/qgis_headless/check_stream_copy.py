@@ -115,9 +115,9 @@ def check_tiles(actions, folder, port):
     if again is None:
         return
     copied = again.source()
-    check("tiles: back to the service, the file is kept", actions.back_to_stream(again)
+    check("tiles: back to the service, the unused file is removed", actions.back_to_stream(again)
           and again.providerType() == "wms" and not stream_copy.is_local_copy(again)
-          and again.customProperty(rules.PROPERTY) is None and os.path.isfile(copied),
+          and again.customProperty(rules.PROPERTY) is None and not os.path.isfile(copied),
           (again.providerType(), again.source()[:120]))
     check("tiles: back on the service, the layer draws it", again.isValid() and "127.0.0.1" in again.source()
           and (again.source() == stream_source or "tiles" in again.source()))
@@ -322,8 +322,11 @@ def check_wfs(actions, folder):
           (task and task.result.error, record))
 
     # A filter set on the copy in the language of the copy does not go back on the service.
+    copy_nums = sorted(feature["num"] for feature in capped.getFeatures())
+    filtered_nums = [num for num in copy_nums if num < 100]
     check("a SQLite filter is set on the copy",
-          capped.setSubsetString('"num" < 100 AND "nom" GLOB \'p*\'') and capped.featureCount() == 100,
+          capped.setSubsetString('"num" < 100 AND "nom" GLOB \'p*\'')
+          and sorted(feature["num"] for feature in capped.getFeatures()) == filtered_nums,
           (capped.subsetString(), capped.featureCount()))
     copy_file = stream_copy.record_of(capped).path
     check("back to the service, a filter of the copy stays off it",
@@ -331,6 +334,39 @@ def check_wfs(actions, folder):
           (capped.providerType(), capped.subsetString()))
     check("back to the service, the copy file goes (audit of 2026-11-24: never deleted)",
           copy_file and not os.path.isfile(copy_file), copy_file)
+
+    # A filter set on the copy in the language of the copy never reaches the service in the project file either:
+    # the project holds the service without it, the record keeps it, the copy reads it again when read.
+    copy(actions, capped, area)
+    filtered_nums = sorted(feature["num"] for feature in capped.getFeatures() if feature["num"] < 100)
+    check("a SQLite filter is set on the copy again",
+          capped.setSubsetString('"num" < 100 AND "nom" GLOB \'p*\'')
+          and sorted(feature["num"] for feature in capped.getFeatures()) == filtered_nums,
+          (capped.subsetString(), capped.featureCount()))
+    project.write(path)
+    from xml.etree import ElementTree
+    written = next((element for element in ElementTree.fromstring(project_xml(path)).iter("maplayer")
+                    if element.findtext("id") == capped.id()), None)
+    datasource = written.findtext("datasource") if written is not None else ""
+    check("the project file holds the service without the filter of the copy",
+          "127.0.0.1" in datasource and "GLOB" not in datasource, datasource[-160:])
+    layer_id = capped.id()
+    project.clear()
+    project.read(path)
+    again = project.mapLayer(layer_id)
+    check("read again, the copy reads its filter from the record",
+          again is not None and stream_copy.is_local_copy(again)
+          and again.subsetString() == '"num" < 100 AND "nom" GLOB \'p*\''
+          and sorted(feature["num"] for feature in again.getFeatures()) == filtered_nums,
+          again and (again.providerType(), again.subsetString()))
+    project.write(path)
+    project.clear()
+    project.read(path)
+    again = project.mapLayer(layer_id)
+    check("a second save and reopen keep the SQLite filter and the same features",
+          again is not None and stream_copy.is_local_copy(again)
+          and again.subsetString() == '"num" < 100 AND "nom" GLOB \'p*\''
+          and sorted(feature["num"] for feature in again.getFeatures()) == filtered_nums)
 
     # "Copy again" reads the service anew, not the network cache of QGIS.
     cached = fixture.wfs_layer(server.server_port, "cached")

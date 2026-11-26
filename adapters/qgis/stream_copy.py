@@ -984,8 +984,12 @@ def recopy_plan(layer) -> Tuple[CopyPlan, Optional[rules.LocalCopy]]:
     record = record_of(layer)
     if record is None:
         return plan_copy(layer), None
+    if hasattr(layer, 'subsetString'):
+        record = record.replaced(subset=layer.subsetString())
     from qgis.core import QgsCoordinateReferenceSystem, QgsRectangle
-    switch_to_stream(layer)
+    # This is a temporary return: cancellation or failure still needs the old
+    # file, and a new plan must choose another path even within the same second.
+    switch_to_stream(layer, keep_record=True)
     crs = QgsCoordinateReferenceSystem(record.crs) if record.crs else layer.crs()
     area = QgsRectangle(*record.extent)
     # A WMS draws at any resolution: twice the detail of a screen as wide as the first copy gives its resolution.
@@ -1021,7 +1025,7 @@ def back_to(layer, record: rules.LocalCopy) -> None:
     """``layer`` reads ``record`` again (a new copy that was not made); a copy that cannot be opened leaves it on
     its service."""
     try:
-        switch_to_copy(layer, record)
+        switch_to_copy(layer, record, subset=record.subset)
     except RuntimeError as exc:
         logger.warning(f"FilterMate local copy of '{layer.name()}' not read again: {exc}")
 

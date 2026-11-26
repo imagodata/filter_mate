@@ -295,6 +295,8 @@ class TestParseCacheRegression:
         fake.include_geometry = True
         fake._qgs_expr = None
         fake.exception = None
+        fake._options = lambda request: ExpressionEvaluationTask._options(fake, request)
+        fake._prepare_context = MagicMock()
         return fake
 
     def test_validate_inputs_populates_parsed_expression_cache(self):
@@ -406,35 +408,134 @@ class TestThreadSafety:
 
 
 # ---------------------------------------------------------------------------
-# 2026-11-12: the variables of the project and the layer, read on the main thread
+# 2026-11-13: the worker evaluates as the main thread does, or the main thread reads
 # ---------------------------------------------------------------------------
 
-class TestVariables:
+class TestContext:
+    """2026-11-13: above async_expression_threshold the same custom selection kept other features: the
+    worker had the variables of the expression only ($area planar on a layer in degrees, is_selected() and
+    mean("pop") without their layer). It now gets the variables and measure settings as values, read on the
+    main thread; an expression that needs the layer itself is read on the main thread."""
 
-    def test_prepare_reads_the_scalar_variables_of_the_expression_on_the_main_thread(self):
-        fake = TestParseCacheRegression()._make_fake_self()
-        fake.expression_string = '"id" > @seuil AND @layer IS NOT NULL'
-        fake.layer.isValid.return_value = True
-        context = MagicMock()
-        context.variable.side_effect = lambda name: {'seuil': '1500', 'layer': object()}[name]
-        with patch.object(_EET_MODULE, 'QgsExpression') as mock_expr_cls, \
-             patch.object(_EET_MODULE, 'QgsExpressionContext', return_value=context), \
-             patch.object(_EET_MODULE, 'QgsExpressionContextUtils') as utils:
-            mock_expr_cls.return_value.referencedVariables.return_value = {'seuil', 'layer'}
-            ExpressionEvaluationTask._prepare_feature_source(fake)
-        utils.globalProjectLayerScopes.assert_called_once_with(fake.layer)
-        assert fake._variables == {'seuil': '1500'}  # a layer object is never handed to the worker
+    @staticmethod
+    def _prepare(fake, worker_context, needs_layer=False, features=()):
+        """Run _prepare_context with the adapters it imports replaced; returns the with_layer_context mock."""
+        import types
+        fake._options = lambda request: ExpressionEvaluationTask._options(fake, request)
+        iterator = MagicMock()
+        iterator.__iter__.return_value = iter(features)
+        fake.layer.getFeatures.return_value = iterator
+        with_layer_context = MagicMock(side_effect=lambda request, layer: request)
+        modules = {
+            'filter_mate.adapters.qgis.async_query': types.SimpleNamespace(
+                worker_expression_context=MagicMock(return_value=worker_context)),
+            'filter_mate.adapters.backends.source_refusal': types.SimpleNamespace(
+                with_layer_context=with_layer_context),
+        }
+        with patch.dict(sys.modules, modules), \
+                patch.object(_EET_MODULE, 'QgsExpression') as mock_expr_cls, \
+                patch.object(_EET_MODULE, 'QgsFeatureRequest') as mock_req_cls, \
+                patch.object(_EET_MODULE, 'needs_the_layer', return_value=needs_layer):
+            mock_expr_cls.return_value.hasParserError.return_value = False
+            mock_req_cls.return_value.setFilterExpression.return_value = mock_req_cls.return_value
+            ExpressionEvaluationTask._prepare_context(fake, MagicMock(name='provider'))
+        return with_layer_context
 
-    def test_the_worker_request_holds_the_variables_read_before(self):
+    def test_a_worker_gets_the_context_of_values_read_on_the_main_thread(self):
         fake = TestParseCacheRegression()._make_fake_self()
-        fake._variables = {'seuil': '1500'}
+        fake.expression_string = '$area > 500000 AND "pop" > @seuil'
+        context = MagicMock(name='values')
+        with_layer_context = self._prepare(fake, context)
+        assert fake._context is context
+        assert getattr(fake, '_main_thread_features', None) is None
+        fake.layer.getFeatures.assert_not_called()  # the worker reads the provider snapshot
+        with_layer_context.assert_not_called()
+
+    def test_the_worker_request_holds_the_context(self):
+        fake = TestParseCacheRegression()._make_fake_self()
+        fake._context = MagicMock(name='values')
         with patch.object(_EET_MODULE, 'QgsExpression'), \
-             patch.object(_EET_MODULE, 'QgsFeatureRequest') as mock_req_cls, \
-             patch.object(_EET_MODULE, 'QgsExpressionContextScope') as scope_cls, \
-             patch.object(_EET_MODULE, 'QgsExpressionContext') as context_cls:
+             patch.object(_EET_MODULE, 'QgsFeatureRequest') as mock_req_cls:
             ExpressionEvaluationTask._build_feature_request(fake)
-        scope_cls.return_value.setVariable.assert_called_once_with('seuil', '1500')
-        context_cls.return_value.appendScope.assert_called_once_with(scope_cls.return_value)
-        mock_req_cls.return_value.setExpressionContext.assert_called_once_with(context_cls.return_value)
+        mock_req_cls.return_value.setExpressionContext.assert_called_once_with(fake._context)
         fake.layer.fields.assert_not_called()
 
+    @pytest.mark.parametrize('worker_context, needs_layer', [
+        (None, False),  # is_selected(), mean("pop"), @layer...: no context of values
+        (MagicMock(name='values'), True),  # a virtual field, unsaved edits
+    ])
+    def test_an_expression_needing_the_layer_is_read_on_the_main_thread(self, worker_context, needs_layer):
+        fake = TestParseCacheRegression()._make_fake_self()
+        fake.expression_string = 'is_selected() = false'
+        kept = [MagicMock(name='f1'), MagicMock(name='f2')]
+        with_layer_context = self._prepare(fake, worker_context, needs_layer, kept)
+        assert fake._main_thread_features == kept
+        fake.layer.getFeatures.return_value.close.assert_called_once_with()
+        assert with_layer_context.call_args.args[1] is fake.layer  # the full context of the layer, as EXPLORING
+        fake._validate_inputs = MagicMock()
+        assert ExpressionEvaluationTask.run(fake) is True
+        assert fake.result_features == kept
+        fake._validate_inputs.assert_not_called()  # the worker reads nothing
+
+    def test_a_failed_reading_on_the_main_thread_is_an_error_of_the_task(self):
+        fake = TestParseCacheRegression()._make_fake_self()
+        fake.layer.getFeatures.side_effect = RuntimeError('layer deleted')
+        self._prepare(fake, None)
+        assert isinstance(fake.exception, RuntimeError)
+        fake._validate_inputs = MagicMock()
+        assert ExpressionEvaluationTask.run(fake) is False
+        fake._validate_inputs.assert_not_called()
+
+    def test_an_expression_that_does_not_parse_is_left_to_run(self):
+        fake = TestParseCacheRegression()._make_fake_self()
+        fake._context = None
+        with patch.object(_EET_MODULE, 'QgsExpression') as mock_expr_cls:
+            mock_expr_cls.return_value.hasParserError.return_value = True
+            ExpressionEvaluationTask._prepare_context(fake, MagicMock())
+        assert fake._context is None and getattr(fake, '_main_thread_features', None) is None
+        fake.layer.getFeatures.assert_not_called()
+
+
+class TestNeedsTheLayer:
+
+    @staticmethod
+    def _fields(names):
+        fields = MagicMock()
+        fields.lookupField.side_effect = lambda name: names.index(name) if name in names else -1
+        fields.count.return_value = len(names)
+        attributes = []
+        for name in names:
+            field = MagicMock()
+            field.name.return_value = name
+            attributes.append(field)
+        fields.__iter__.side_effect = lambda: iter(attributes)
+        return fields
+
+    def _check(self, columns, layer_names=('id', 'pop'), modified=False, request_fields=None):
+        layer, provider = MagicMock(), MagicMock()
+        layer.isModified.return_value = modified
+        layer.fields.return_value = self._fields(list(layer_names))
+        provider.fields.return_value = self._fields(['id', 'pop'])
+        with patch.object(_EET_MODULE, 'QgsExpression') as mock_expr_cls:
+            mock_expr_cls.return_value.referencedColumns.return_value = set(columns)
+            return _EET_MODULE.needs_the_layer(layer, provider, 'expression', request_fields)
+
+    def test_fields_of_the_provider_are_read_by_the_worker(self):
+        assert self._check({'pop'}) is False
+        assert self._check(set()) is False
+
+    def test_a_virtual_or_joined_field_needs_the_layer(self):
+        assert self._check({'pop', 'density'}, ('id', 'pop', 'density')) is True
+
+    def test_all_attributes_need_the_layer_only_with_fields_beyond_the_provider(self):
+        assert self._check({'#!allattributes!#'}) is False
+        assert self._check({'#!allattributes!#'}, ('id', 'pop', 'density')) is True
+
+    def test_unsaved_edits_need_the_layer(self):
+        assert self._check({'pop'}, modified=True) is True
+
+    def test_a_virtual_field_returned_but_not_used_by_the_filter_needs_the_layer(self):
+        assert self._check({'pop'}, ('id', 'pop', 'density')) is True
+
+    def test_only_provider_fields_requested_can_use_the_worker(self):
+        assert self._check({'pop'}, ('id', 'pop', 'density'), request_fields=['pop']) is False

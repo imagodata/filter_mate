@@ -689,3 +689,78 @@ def test_a_read_on_the_gui_thread_never_raises_into_its_slot(module, monkeypatch
     layer.getFeatures.side_effect = None
     layer.getFeatures.return_value = [1, 2]
     assert module.read_now(layer, lambda task: list(task.features(MagicMock()))) == (True, [1, 2])
+
+
+class _Scope:
+    def __init__(self, variables=None):
+        self.variables = dict(variables or {})
+
+    def setVariable(self, name, value):
+        self.variables[name] = value
+
+
+class _Context:
+    """A QgsExpressionContext over scopes (the last one wins), as QGIS reads a variable."""
+
+    def __init__(self, scopes=()):
+        self.scopes = list(scopes)
+
+    def appendScope(self, scope):
+        self.scopes.append(scope)
+
+    def _merged(self):
+        merged = {}
+        for scope in self.scopes:
+            merged.update(scope.variables)
+        return merged
+
+    def hasVariable(self, name):
+        return name in self._merged()
+
+    def variable(self, name):
+        return self._merged().get(name)
+
+
+def _layer_scopes(monkeypatch, module, **variables):
+    import sys
+    from types import SimpleNamespace
+    core = sys.modules['qgis.core']
+    monkeypatch.setattr(core, 'QgsExpressionContextScope', _Scope, raising=False)
+    monkeypatch.setattr(core, 'QgsExpressionContext', _Context, raising=False)
+    monkeypatch.setattr(core, 'QgsExpressionContextUtils', SimpleNamespace(
+        globalProjectLayerScopes=lambda layer: [_Scope(variables)]), raising=False)
+
+
+def test_a_worker_context_holds_the_variables_and_measure_settings_as_values(module, monkeypatch):
+    """2026-11-13: $area kept nothing in the worker on a layer in degrees (planar measure), "pop" > @seuil too."""
+    crs, transform_context, live_layer = object(), object(), object()
+    _layer_scopes(monkeypatch, module, seuil='5', project_ellipsoid='EPSG:7019', _layer_crs=crs,
+                  _project_transform_context=transform_context, project_distance_units='meters',
+                  project_area_units='hectares', layer=live_layer, project_title='Routes')
+    _expression(monkeypatch, module, functions={'$area'}, variables={'seuil'})
+    context = module.worker_expression_context(MagicMock(), '$area > 50 AND "pop" > @seuil')
+    assert context is not None and len(context.scopes) == 1
+    assert context.scopes[0].variables == {
+        'seuil': '5', 'project_ellipsoid': 'EPSG:7019', '_layer_crs': crs, '_project_transform_context':
+        transform_context, 'project_distance_units': 'meters', 'project_area_units': 'hectares'}
+    assert live_layer not in context.scopes[0].variables.values()  # never a layer or project object
+
+
+@pytest.mark.parametrize('functions,variables', [
+    ({'is_selected'}, set()),
+    ({'mean'}, set()),
+    ({'aggregate'}, set()),
+    ({'var'}, set()),
+    (set(), {'layer'}),  # an object, not a value
+])
+def test_no_worker_context_for_what_reads_the_layer(module, monkeypatch, functions, variables):
+    _layer_scopes(monkeypatch, module, layer=object(), seuil='5')
+    _expression(monkeypatch, module, functions=functions, variables=variables)
+    assert module.worker_expression_context(MagicMock(), 'expression') is None
+
+
+def test_an_unknown_variable_is_null_in_the_worker_as_on_the_main_thread(module, monkeypatch):
+    _layer_scopes(monkeypatch, module)
+    _expression(monkeypatch, module, variables={'inconnue'})
+    context = module.worker_expression_context(MagicMock(), '"pop" > @inconnue')
+    assert context.scopes[0].variables == {'inconnue': None}
