@@ -781,6 +781,8 @@ class SimulatedProject:
             "change_settings": self._change_settings,
             "load_skill": lambda args: load_skill(args["name"], self.offered),
             "run_pyqgis": lambda args: {"ok": True, "printed": "", "result": None},
+            "open_model": lambda args: {"opened": True, "saved": False,
+                                         "name": (args.get('definition') or {}).get('name', args.get('algorithm_id', 'model'))},
             "create_widget": lambda args: {"widget": {"id": "w1", "kind": args["kind"], "layer": args["layer"],
                                                       "field": args.get("field", "")}, "widgets": []},
             "remove_widget": lambda args: {"widgets": []},

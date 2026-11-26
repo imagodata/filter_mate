@@ -1,86 +1,76 @@
 ---
 name: processing-models
-title: Save a workflow as a Processing model
-description: Keep, reuse or share a chain of Processing treatments run in this session as a .model3 model
+title: Processing models and designer
+description: reusable Processing chains and their QGIS editor
 metadata:
-  version: 2
-  plugin_min: 5.1.2
+  version: 3
+  plugin_min: 5.1.3
   audience: chat
-  tools: list_layers, describe_layer, find_algorithms, describe_algorithm, run_algorithm
+  tools: open_model, find_algorithms, describe_algorithm, run_algorithm, describe_layer
   risk: change
   trust: builtin
-  requires: run_pyqgis
+  requires: open_model
 ---
 
 # Processing models
 
-## Propose it as an option
+## Open, inspect and run
 
-This skill is offered only in the built-in chat with expert mode enabled (run_pyqgis available). It has no MCP
-export: external clients cannot call run_pyqgis. When it is unavailable, explain that the user enables expert mode
-in the agent settings; never offer to bypass the restriction.
+- open_model with no arguments opens a blank QGIS graphical model designer.
+- find_algorithms with query model finds registered models, including project and installed provider models.
+  Search a provider name (GDAL, GRASS, SAGA, PDAL) and task words for its algorithms.
+- describe_algorithm gives the real parameter names, provider, model steps and requires_disk. Never invent ids,
+  parameter names or output names. Missing providers and unsupported steps are not executable through the agent.
+- open_model with algorithm_id opens a copy in the native editor. Opening it neither runs its steps nor changes
+  the original file. Save asks for a location; Save in project embeds it in the current project.
+- run_algorithm runs a registered model like an ordinary algorithm. Inputs are project layers by name or id,
+  and plain values. Outputs are added to the project and undone with the turn.
+- Native outputs and intermediate layers stay in memory. A file-only provider (also inside a model) requires the
+  user to choose Save project and layers in the agent menu first. Its outputs and working files then use that
+  chosen data folder; never choose a profile or operating-system temporary folder for the user.
 
-After a chain of two or more run_algorithm steps that works, or when the user says keep, reuse, share, automate
-or replay: propose once, in one sentence, to save the chain as a reusable Processing model. Build it only on an
-explicit yes. Never build it unasked, and never propose it twice for the same chain.
+## Build a reusable chain
 
-## Collect the chain
+Build only when the user asks for a model, or accepts an offer to keep a working chain. A request to open the
+editor alone needs no definition. Creating a draft executes nothing and writes no file. Expert mode is not needed.
 
-1. Read the run_algorithm calls of this conversation: each algorithm_id with its parameters and outputs. What
-   list_layers, describe_layer or describe_algorithm answered still holds: do not ask again.
-2. When the session holds tries besides the final chain, ask which steps to keep. Drop exploratory and failed
-   calls: the model keeps the working chain only.
-3. describe_algorithm for each kept algorithm whose parameters are unclear: never guess a parameter name or
-   a value.
+1. Keep the working Processing steps of the conversation; exclude exploratory or failed calls. Ask which chain
+   when several are possible. Filters and styles outside Processing stay outside the model: say so when relevant.
+2. describe_algorithm for any step whose inputs or outputs are unclear.
+3. open_model with definition containing name, optional group, inputs, steps and outputs.
+4. The user reviews the graph in QGIS and saves it to a chosen .model3 location or in the project. Do not report a
+   saved model before that user action. File saves appear as clickable outputs in the chat; saved models are
+   available through find_algorithms for the project session. Running it needs its own user request.
 
-## Map the session to model inputs
+Definition format (no source code or file paths):
 
-- Each project layer used as an input becomes one model input of the matching kind (vector or raster), named
-  after the layer.
-- Each literal (a distance, a number, a field name, a choice) becomes one model input of the matching kind
-  (number, string, field, enum), with the session value as its default.
-- A model holds Processing steps only: filters and styles applied in the session stay outside it. Say so when
-  the user expects them inside.
+```json
+{
+  "name": "buffer_centroids",
+  "inputs": [
+    {"name": "INPUT", "step": "buffer", "parameter": "INPUT", "description": "Input features"},
+    {"name": "DISTANCE", "step": "buffer", "parameter": "DISTANCE", "default": 500}
+  ],
+  "steps": [
+    {"id": "buffer", "algorithm_id": "native:buffer", "parameters": {
+      "INPUT": {"input": "INPUT"}, "DISTANCE": {"input": "DISTANCE"}, "SEGMENTS": 5
+    }},
+    {"id": "centroids", "algorithm_id": "native:centroids", "parameters": {
+      "INPUT": {"step": "buffer", "output": "OUTPUT"}, "ALL_PARTS": false
+    }}
+  ],
+  "outputs": [
+    {"name": "RESULT", "step": "centroids", "output": "OUTPUT", "description": "Centroids of buffers"}
+  ]
+}
+```
 
-## Build it with run_pyqgis
-
-run_pyqgis runs your code in the QGIS of the user, with their rights. They read all of it and say yes at every
-run, and it is NOT undone with the turn. Say in purpose, in one sentence of the user's language, what the code
-does and what file it writes.
-
-1. Ask the file name and where to write it (next to the project file by default, as .model3). Never overwrite
-   an existing file: check first and ask for another name.
-2. Write the code with QgsProcessingModelAlgorithm: one model input per mapped input, one child per kept step,
-   each child parameter wired to a model input or to an output of an earlier child. Keep the values the session
-   tested.
-   Resolve the final layer ids back to the outputs that produced them: do not embed a temporary session layer id
-   or a temporary output path. Use QgsProcessingModelChildParameterSource for model parameters and child outputs,
-   and QgsProcessingModelOutput for the final outputs. Give every child a stable, unique id.
-   Use child.addParameterSources(name, [source]) for each parameter: setParameterSources has incompatible Python
-   bindings in some QGIS builds. scripts/build_processing_models.py and tests/qgis_headless/check_processing_models.py
-   show the version-compatible construction API.
-3. Write the file with the model save call, read it back, and report: the file, its inputs, its steps in order,
-   and how to run it from the Processing toolbox. Test the version and pick the API the running QGIS has, from
-   QGIS 3.22 to 4.x.
-   Check that toFile succeeds and fromFile reads the saved model, then validate it with the current Processing
-   registry. Do not report success for a partial model, missing algorithm, disconnected input or missing final
-   output. Creating the model never runs its algorithms; a test run needs its own request and confirmation.
-   Read destinationParameterDefinitions() after reloading to obtain the actual output parameter names; QGIS may
-   derive them from output descriptions rather than child ids.
-
-## What never to do
-
-- Never build a model without an explicit yes to the proposal.
-- Never overwrite a file of the user: ask for another name first.
-- Never guess an algorithm parameter: describe_algorithm says it.
-- Never put filters or styles in the model: it holds Processing steps only.
-- No network, no files outside what the user asked for, no subprocess, no package installed, nothing read from
-  the authentication database or the keys.
-- No modal dialog, no new dock or window. No endless loop, no sleep: the code runs on the main thread and QGIS
-  is frozen meanwhile.
-- Never use code to get around a refusal or a question.
-
-## Where to look
-
-- The shipped examples: processing/models/*.model3 of the plugin.
-- The analysis skill for choosing and checking algorithms; the pyqgis skill for version-safe code.
+- Each model input clones its referenced step parameter, preserving its type and options. Choose layers when
+  running: no layer ids or paths as defaults. Numeric, field and option inputs may have checked defaults.
+- A step parameter is a plain value, {"input": "NAME"}, or {"step": "earlier_id", "output": "OUTPUT_NAME"}.
+  Layers must be connected; never embed a session layer id. An input can feed several compatible steps.
+- Names start with a letter and contain only letters, digits or underscores. Step ids and output names are unique.
+- Destinations belong in outputs, never in step parameters. QGIS derives the runnable model output names:
+  describe_algorithm after saving gives the actual names.
+- Up to 30 steps, 60 inputs and 30 outputs. Unsupported parameters, extra command-line options, SQL, recursive
+  dependencies and missing algorithms are refused. Never bypass a refusal with code.

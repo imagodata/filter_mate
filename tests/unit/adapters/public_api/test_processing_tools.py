@@ -8,6 +8,8 @@ import importlib
 import pathlib
 import sys
 import types
+import os
+import tempfile
 from types import SimpleNamespace
 
 import pytest
@@ -56,7 +58,8 @@ def project(monkeypatch):
 def definition(name, kind, optional=False):
     return SimpleNamespace(name=lambda: name, type=lambda: kind, description=lambda: name.lower(),
                            flags=lambda: OPTIONAL if optional else 0, defaultValue=lambda: None,
-                           createByDefault=lambda: True, defaultFileExtension=lambda: "tif")
+                           createByDefault=lambda: True, defaultFileExtension=lambda: "tif",
+                           clone=lambda: definition(name, kind, optional))
 
 
 INTERPOLATION = definition("INTERPOLATION_DATA", "idw_interpolation_data")
@@ -123,7 +126,7 @@ class TestTypesNotKnownAsSafe:
         algorithm = SimpleNamespace(
             id=lambda: "qgis:idwinterpolation", displayName=lambda: "IDW", group=lambda: "Interpolation",
             shortHelpString=lambda: "", shortDescription=lambda: "", flags=lambda: 0,
-            provider=lambda: SimpleNamespace(id=lambda: "qgis"), outputDefinitions=lambda: [],
+            provider=lambda: SimpleNamespace(id=lambda: "qgis", name=lambda: 'QGIS', isActive=lambda: True), outputDefinitions=lambda: [],
             parameterDefinitions=lambda: [INTERPOLATION, definition("OPERATION", "coordinateoperation", optional=True),
                                           definition("OUTPUT", "rasterDestination")])
         monkeypatch.setattr(tools, "_registry", lambda: SimpleNamespace(algorithmById=lambda _id: algorithm))
@@ -142,7 +145,7 @@ class TestValuesSetByFilterMate:
         return SimpleNamespace(
             id=lambda: "native:mergevectorlayers", displayName=lambda: "Merge", group=lambda: "Vector general",
             shortHelpString=lambda: "", shortDescription=lambda: "", flags=lambda: 0,
-            provider=lambda: SimpleNamespace(id=lambda: "native"), outputDefinitions=lambda: [],
+            provider=lambda: SimpleNamespace(id=lambda: "native", name=lambda: 'QGIS', isActive=lambda: True), outputDefinitions=lambda: [],
             parameterDefinitions=lambda: definitions)
 
     @pytest.mark.parametrize("given", [{"LAYERS": ["points"]}, {"LAYERS": ["points"], "ADD_SOURCE_FIELDS": True}])
@@ -155,3 +158,41 @@ class TestValuesSetByFilterMate:
         monkeypatch.setattr(tools, "_registry", lambda: SimpleNamespace(algorithmById=lambda _id: self._merge()))
         answer = tools.describe_algorithm("native:mergevectorlayers")
         assert [row["name"] for row in answer["parameters"]] == ["LAYERS", "OUTPUT"]
+
+
+def test_stored_model_layer_defaults_cannot_open_a_file(project):
+    source = definition('INPUT', 'source')
+    source.defaultValue = lambda: '/private/not_a_project_layer.gpkg'
+    algorithm = SimpleNamespace(id=lambda: 'model:example', parameterDefinitions=lambda: [source])
+    with pytest.raises(ValueError, match='not a layer of the project'):
+        tools._parameters(algorithm, {})
+
+
+def test_extra_command_line_options_are_never_forwarded(project):
+    algorithm = SimpleNamespace(id=lambda: 'gdal:example', parameterDefinitions=lambda: [
+        definition('EXTRA', 'string', optional=True)])
+    with pytest.raises(ValueError, match='command-line'):
+        tools._parameters(algorithm, {'EXTRA': '-sql dangerous'})
+    assert tools._parameters(algorithm, {})[0] == {'EXTRA': None}
+
+
+def test_inactive_and_unavailable_providers_are_not_executable(project):
+    provider = SimpleNamespace(id=lambda: 'custom', isActive=lambda: False)
+    algorithm = SimpleNamespace(id=lambda: 'custom:example', provider=lambda: provider, flags=lambda: 0,
+                                parameterDefinitions=lambda: [definition('OUTPUT', 'sink')])
+    assert 'not active' in tools._why_not(algorithm)
+    provider.isActive = lambda: True
+    algorithm.canExecute = lambda: (False, 'Missing external executable')
+    assert tools._why_not(algorithm) == 'Missing external executable'
+
+
+def test_provider_scratch_environment_is_restored_after_failure(tmp_path):
+    previous = {key: os.environ.get(key) for key in ('TMPDIR', 'TMP', 'TEMP')}
+    previous_python = tempfile.tempdir
+    with pytest.raises(RuntimeError, match='provider failure'):
+        with tools._working_folder(str(tmp_path)):
+            assert tempfile.gettempdir() == str(tmp_path)
+            assert all(os.environ[key] == str(tmp_path) for key in previous)
+            raise RuntimeError('provider failure')
+    assert tempfile.tempdir == previous_python
+    assert {key: os.environ.get(key) for key in previous} == previous

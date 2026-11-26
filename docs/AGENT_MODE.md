@@ -614,8 +614,8 @@ Eight calls and about 6 s of tools on Lyon (373 x 380 pixels, 0.4 MB read).
   and at each block, and a server gone mute is given up after 8 s (measured: a Stop pressed 1 s into a tile that
   stalls is answered after 8.0 s). When QGIS closes meanwhile, the work is told to end and waited for, without
   turning on an event loop that no longer waits. The other operations of FilterMate are refused meanwhile.
-- The Processing algorithms of GDAL stay refused (`core/agent/processing_policy.py`): they build a command line,
-  and these tools give GDAL values this code builds, never a text of the model. A CRS is an authid, never a
+- GDAL Processing algorithms can also run through `run_algorithm` with checked parameters and storage in the
+  data folder chosen by the user. Additional command-line options and SQL stay refused. A CRS is an authid, never a
   definition (which can name a grid by its address). What GDAL says of a failure goes to the model without an
   address nor a folder of this machine (`elevation.quiet_message`), and a refusal names no height of a raster of
   the user when the values are not shared.
@@ -1069,8 +1069,8 @@ in the extent of the map, with COUNT of the limit plus one; the server sends fou
 Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/processing_policy.py`):
 
 - `find_algorithms` and `describe_algorithm` list only what may run; `run_algorithm` runs it on layers of the project;
-- what may run is a list of what is accepted: the providers `native` and `qgis` (GDAL, GRASS, SAGA, PDAL, scripts
-  and models start other programs or run code nobody here has read), and an algorithm that makes at least one layer
+- registered, active providers are supported, including GDAL, GRASS, SAGA, PDAL, installed scripts and models;
+  dependencies must be available. Algorithms make at least one layer
   or only answers values (statistics). Selection, style, projection, index, truncation, import into a database,
   upload and download make no layer: that alone leaves them out. Executors of SQL or Python, the network
   requests that make a layer and the geocoder that sends addresses to Nominatim are refused by name. The types of
@@ -1085,12 +1085,31 @@ Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/proce
   are written again, each source the id of a vector layer of the project and the rest integers. Expressions go through a list a little wider than the one of
   `select_features` (math, text, geometry functions that only compute; nothing that reads another layer, a file or
   the environment, and no `eval`). Raster calculator expressions have their own parser and are not checked;
-- each vector or raster layer an algorithm makes is held in GDAL virtual memory (GeoPackage, GeoTIFF) and added to the project: the
+- `find_algorithms` searches provider names too; query `model` lists models. Results identify `provider`,
+  `provider_name`, `is_model` and `requires_disk`. Model descriptions include child steps. Active dependencies
+  are checked recursively; a model cannot hide a refused algorithm or an unsafe parameter source;
+- native outputs and model intermediate layers stay in memory (context-owned vector sinks and GDAL virtual files): the
   turn checkpoint sees it as added, so undoing the turn removes it and redoing it opens the file again. A temporary
   file goes when the project closes; Save project and layers or `export_layers` keeps a layer;
+- file-only providers require Save project and layers first; outputs, input snapshots and the Processing context's
+  working folder use that chosen data folder (QGIS 3.32+ for the per-context folder). External executables cannot
+  read another process' `/vsimem`, so vector inputs are copied with their filters/selections and virtual rasters
+  are copied before running. Original layers retain their source and state;
 - it runs in a `QgsProcessingAlgRunnerTask` while the event loop turns, busy for the other operations, and Stop
   cancels it. An algorithm flagged `NoThreading` (geometry checks) holds QGIS while it runs;
 - without attribute values shared, what an algorithm answers besides its layers (statistics) is left out.
+
+Model editor (`adapters/public_api/processing_models.py`):
+
+- the agent menu's **Processing model designer…** opens QGIS' native graphical editor directly;
+- the chat-only `open_model` opens a blank designer, a copy of a registered model, or a validated declarative
+  chain (`definition`: inputs cloned from step parameters, ordered steps, connections and final outputs).
+  No source code or file paths are needed; expert mode is not required. Creation executes no algorithm;
+- drafts stay in the editor until the user saves. Save asks for a `.model3` location instead of defaulting to the
+  QGIS profile; Save in project uses QGIS' built-in project model provider. File saves add a clickable output and
+  register the model for the project session, even outside the profile. Closing the project releases this registration;
+- the `processing-models` skill describes the format and the review/save workflow. Opening a designer is a view
+  action, left outside turn undo and saved recipes; running a model uses ordinary turn undo.
 
 Style (`adapters/public_api/layer_style.py`): `set_layer_style` (vector: single, categorized on a field of 100 values
 at most, graduated in 2 to 12 classes by quantile, equal interval, Jenks, pretty breaks or standard deviation, or

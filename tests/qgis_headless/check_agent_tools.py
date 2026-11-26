@@ -937,11 +937,11 @@ def check_processing(project, gpkg):
     everything = set()
     for word in ("select", "sql", "truncate", "import", "download", "upload", "style", "projection", "index", "package"):
         everything |= {row["id"] for row in tools.find_algorithms(word, limit=50)["algorithms"]}
-    leaked = sorted(item for item in everything | listed if item.split(":")[0] not in ("native", "qgis")
-                    or any(word in item for word in ("selectby", "executesql", "truncate", "importinto", "download",
+    leaked = sorted(item for item in everything | listed
+                    if any(word in item for word in ("selectby", "executesql", "truncate", "importinto", "download",
                                                     "setstyle", "definecurrentprojection", "createspatialindex",
                                                     "package", "python")))
-    check("processing: nothing that acts in place, runs code or leaves QGIS is listed", not leaked, leaked)
+    check("processing: nothing that acts in place or takes model-written code is listed", not leaked, leaked)
     described = tools.describe_algorithm("native:buffer")
     names = [row["name"] for row in described["parameters"]]
     check("processing: describe", names[0] == "INPUT" and "OUTPUT" in names and "destination" in

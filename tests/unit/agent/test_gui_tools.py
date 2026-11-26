@@ -11,7 +11,7 @@ from core.agent.skills import names as skill_names
 
 pytestmark = pytest.mark.unit
 
-NAMES = ("open_layout", "flash_features", "set_active_layer", "show_message", "preview_atlas")
+NAMES = ("open_layout", "flash_features", "set_active_layer", "show_message", "preview_atlas", "open_model")
 
 
 def test_visible_tools_only_show_and_are_asked_like_a_view():
@@ -40,9 +40,10 @@ def test_gui_tools_are_unlocked_by_their_skills_and_never_exported():
     assert bringing([tool for tool in tools if tool.name != "flash_features"], SKILLS.values()).get("flash_features") is None
 
 
-def test_processing_models_requires_expert_mode_and_has_no_mcp_export():
+def test_processing_models_uses_the_editor_without_expert_mode_and_has_no_mcp_export():
     offered = {tool.name for tool in chat_tools()}
     assert "processing-models" in skill_names(offered)
-    assert "processing-models" not in skill_names(offered - {"run_pyqgis"})
+    assert "processing-models" in skill_names(offered - {"run_pyqgis"})
+    assert "processing-models" not in skill_names(offered - {"open_model"})
     assert "processing-models" not in skill_names(offered, audience="mcp")
-    assert set(SKILLS["processing-models"].requires) == {"run_pyqgis"}
+    assert set(SKILLS["processing-models"].requires) == {"open_model"}

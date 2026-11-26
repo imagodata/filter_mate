@@ -2381,6 +2381,20 @@
   ],
   "type": "object"
  },
+ "open_model": {
+  "additionalProperties": false,
+  "properties": {
+   "algorithm_id": {
+    "default": "",
+    "maxLength": 200,
+    "type": "string"
+   },
+   "definition": {
+    "type": "object"
+   }
+  },
+  "type": "object"
+ },
  "point_cloud_filter": {
   "properties": {
    "criteria": {

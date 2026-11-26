@@ -18,6 +18,7 @@ SOURCES = \
     ../adapters/backends/ogr/expression_builder.py \
     ../adapters/backends/ogr/filter_executor.py \
     ../adapters/public_api/operations.py \
+    ../adapters/public_api/processing_models.py \
     ../adapters/qgis/async_query.py \
     ../adapters/qgis/python_dependencies.py \
     ../adapters/qgis/coverage_layers/favorites_bridge.py \
@@ -72,6 +73,8 @@ SOURCES = \
     ../adapters/agent/settings.py \
     ../adapters/qgis/coverage_layers/point_cloud_footprint.py \
     ../ui/controllers/agent_chat_controller.py \
+    ../ui/controllers/agent_data.py \
+    ../ui/controllers/agent_outputs.py \
     ../ui/controllers/agent_charts.py \
     ../adapters/agent/turn_effects.py \
     ../adapters/agent/agent_widgets.py \

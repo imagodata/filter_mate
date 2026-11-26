@@ -293,7 +293,7 @@ class IdentifyResult:
 class AlgorithmList:
     """Processing algorithms the agent may run, found by words."""
     query: str
-    # {"id", "name", "group", "summary"}
+    # {"id", "name", "group", "summary", "provider", "provider_name", "is_model", "requires_disk"}
     algorithms: List[Dict[str, Any]] = field(default_factory=list)
     total: int = 0
     note: str = ""
@@ -314,6 +314,12 @@ class AlgorithmDescription:
     # Parameters that cannot be given (files, folders, connections): they stay unset.
     left_out: List[str] = field(default_factory=list)
     note: str = ""
+    provider: str = ""
+    provider_name: str = ""
+    is_model: bool = False
+    requires_disk: bool = False
+    storage_note: str = ""
+    steps: List[Dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

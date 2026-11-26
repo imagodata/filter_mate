@@ -67,6 +67,7 @@ ADD_NOTE = "add_project_note"
 REMOVE_NOTE = "remove_project_note"
 VIEW_MAP = "view_map"
 OPEN_LAYOUT = "open_layout"
+OPEN_MODEL = "open_model"
 FLASH_FEATURES = "flash_features"
 SET_ACTIVE_LAYER = "set_active_layer"
 SHOW_MESSAGE = "show_message"
@@ -97,6 +98,17 @@ SETTINGS_TABS = ("provider", "sources", "autonomy", "tools", "memory", "other_ap
 FEEDBACK_FORMS = ("usage", "feature", "testers", "services")
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
+    ToolSpec(
+        name=OPEN_MODEL, title="Open the Processing model designer",
+        description=("Open a registered model by algorithm_id, a new declarative definition, or a blank QGIS model "
+                     "designer when both are omitted. Never executes steps or saves a file: the user chooses Save "
+                     "or Save in project in the editor. Load processing-models for the definition format."),
+        input_schema={"type": "object", "properties": {
+            "algorithm_id": {"type": "string", "maxLength": 200, "default": "",
+                             "description": "Existing model id from find_algorithms with query model"},
+            "definition": {"type": "object", "description": "New draft: name, inputs, steps, outputs; see processing-models"}},
+            "additionalProperties": False},
+        manages_history=True, chat_only=True),
     # The PostgreSQL connections of QGIS the user ticked. Of the chat alone: another application (REST, MCP) holds
     # a key of FilterMate, not the databases of the user.
     ToolSpec(
@@ -725,7 +737,7 @@ for _name in ("set_layer_style", "set_labels", "apply_style_preset", "design_sty
     _FAMILY_OF[_name] = FAMILY_STYLE
 for _name in ("update_features", "delete_features", "add_features", "add_field", "join_layers", "set_form",
               "relations", "group_layers", "rename_layer", "duplicate_layer", "local_copy", "remove_layers",
-              "run_algorithm", "contour_lines", "segment_objects", "similar_objects", "add_layer",
+              "run_algorithm", "open_model", "contour_lines", "segment_objects", "similar_objects", "add_layer",
               "add_service_layer", "add_basemap", "add_elevation", "add_population", "add_osm_features",
               "add_database_table", "export_layers", "add_project_note", "remove_project_note", "save_recipe",
               "remove_recipe", "bookmark", "map_theme", "set_project_crs", "flash_features", "set_active_layer",

@@ -18,9 +18,11 @@ def test_an_algorithm_of_qgis_that_makes_a_layer_runs():
     assert refusal("native:rastercalc", "native", [("LAYERS", "multilayer", False), ("OUTPUT", "rasterDestination", False)]) == ""
 
 
-@pytest.mark.parametrize("provider", ["gdal", "grass", "saga", "pdal", "script", "model", "filtermate", ""])
-def test_other_providers_are_refused(provider):
-    assert "only the algorithms of QGIS" in refusal(f"{provider}:x", provider, BUFFER)
+@pytest.mark.parametrize("provider", ["gdal", "grass", "saga", "pdal", "script", "model", "project", "filtermate"])
+def test_registered_providers_use_the_same_parameter_and_output_rules(provider):
+    assert refusal(f"{provider}:x", provider, BUFFER) == ''
+    assert 'makes no layer' in refusal(f"{provider}:x", provider, [("INPUT", "source", False)])
+    assert 'provider' in refusal('x', '', BUFFER)
 
 
 def test_what_makes_no_layer_is_refused():
@@ -154,3 +156,10 @@ def test_formulas_that_read_or_write_elsewhere(formula):
 
 def test_the_selection_list_stays_narrower():
     assert expression_problem("sqrt($area)") and not processing_expression_problem("sqrt($area)")
+
+
+def test_model_expressions_only_gain_their_declared_variables():
+    assert processing_expression_problem('@DISTANCE * 2')
+    assert not processing_expression_problem('@DISTANCE * 2', variables={'@DISTANCE'})
+    assert processing_expression_problem("env('HOME')", variables={'@DISTANCE'})
+    assert processing_expression_problem('@project_path', variables={'@DISTANCE'})

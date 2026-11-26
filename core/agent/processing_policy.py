@@ -4,16 +4,15 @@
 Plain Python: the caller reads the registry of QGIS and passes what it found. The rule is a list of what is
 accepted, not of what is refused:
 
-- the algorithms of QGIS itself (``native``, ``qgis``), which run inside QGIS. GDAL, GRASS, SAGA, PDAL and the
-  scripts and models of the user start other programs or run code that nobody here has read;
-- an algorithm that makes at least one layer, written by FilterMate to a temporary file and added to the project
+- registered algorithms, including installed providers and models (whose children the adapter checks);
+- an algorithm that makes at least one layer, stored by FilterMate and added to the project
   (undoing the turn removes it), or one of a few that only answer values (statistics). What acts on the project or
   on a data source in place (selection, style, projection, index, truncation, import into a database, upload,
   download) makes no layer, and is left out by this rule alone;
 - only parameters of a type known here: layers of the project, an extent, a point, a CRS, a formula, an option, the
   rows of an interpolation (each a layer of the project), and plain values. Any other type (a file or a folder, a
   database connection, a layout, a map theme, a PROJ operation, which names a grid by path or URL, or a type this
-  list does not know) is refused when required and stays unset when optional. An output is a temporary layer;
+  list does not know) is refused when required and stays unset when optional. Outputs use managed storage;
 - the few algorithms that make a layer from code or SQL a model would write, or send data out, are refused by name;
 - a parameter that would write the sources of the layers in the output is set by FilterMate, never by the model.
 """
@@ -21,8 +20,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, Optional, Sequence, Tuple
 
-PROVIDERS = ("native", "qgis")
-# What makes a layer: FilterMate gives each a temporary file, never a path from the model.
+# Known in-process raster writers. Other providers' vector memory capability is read from their provider flag.
+MEMORY_PROVIDERS = frozenset({"native", "qgis"})
+# What makes a layer: FilterMate gives each a managed destination, never a path from the model.
 LAYER_DESTINATIONS = frozenset({"sink", "vectorDestination", "rasterDestination", "pointCloudDestination"})
 # What writes a file or a folder of the model's choosing: refused when required, left unset when optional.
 FILE_DESTINATIONS = frozenset({"fileDestination", "folderDestination", "vectorTileDestination"})
@@ -72,7 +72,10 @@ DENIED: Dict[str, str] = {
     "native:openurl": "it hands a URL or a file to the system",
     "native:zonalstatistics": "it adds fields to the source of its input, in place",
     "native:exportlayersinformation": _SOURCES,  # audit of 12/11/2026
+    "gdal:executesql": _CODE, "gdal:rastercalculator": _CODE,
 }
+# Command-line escape hatches are not plain text parameters. The provider still chooses all its normal options.
+COMMAND_PARAMETERS = frozenset({"EXTRA", "OPTIONS", "ADDITIONAL_OPTIONS", "COMMAND", "COMMAND_LINE", "SQL"})
 # Set by FilterMate whatever the model gives, and not offered to it. An algorithm is refused where QGIS has no such
 # parameter. native:mergevectorlayers adds "layer" and "path" (the source of each layer) to its output unless
 # ADD_SOURCE_FIELDS is off (seen in QGIS 3.44 on 13/11/2026; older versions always add them).
@@ -85,9 +88,8 @@ Parameter = Tuple[str, str, bool]  # name, type, optional
 
 def refusal(algorithm_id: str, provider_id: str, parameters: Sequence[Parameter], deprecated: bool = False) -> str:
     """Why a model may not run this algorithm; "" when it may."""
-    if provider_id not in PROVIDERS:
-        return (f"only the algorithms of QGIS itself (providers {', '.join(PROVIDERS)}) can be run, not those of "
-                f"'{provider_id}'")
+    if not provider_id:
+        return "it has no registered Processing provider"
     if algorithm_id in DENIED:
         return DENIED[algorithm_id]
     if any(name not in {given for given, _, _ in parameters} for name in forced_values(algorithm_id)):

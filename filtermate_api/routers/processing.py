@@ -1,7 +1,7 @@
 """/processing — find, describe and run the Processing algorithms the agent may run.
 
-What may run is decided in ``core/agent/processing_policy.py``: algorithms of QGIS itself that make layers, on
-layers of the project, their outputs written to temporary files and added to the project.
+What may run is decided in ``core/agent/processing_policy.py``: registered algorithms and checked models that
+make layers, on layers of the project. File-only providers use the project data folder chosen by the user.
 """
 
 from __future__ import annotations

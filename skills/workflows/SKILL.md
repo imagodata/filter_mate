@@ -3,7 +3,7 @@ name: workflows
 title: Chain the steps of a request
 description: requests of several steps (distances, places, counts, population, criteria) in the fewest calls
 metadata:
-  version: 6
+  version: 7
   plugin_min: 5.1.1
   audience: chat, mcp
   tools: list_layers, describe_layer, field_values, layer_statistics, sample_features, map_context, preview_filter, apply_filter, cross_filter, geometry_filter, clear_filters, select_features, zoom_to, set_layers_visibility, export_layers, save_favorite, find_place, search_open_data, add_layer, add_service_layer, add_osm_features, add_population, set_layer_style, add_field, set_labels, create_layout, export_layout, run_algorithm
@@ -137,8 +137,8 @@ relief, the contours, a look at the result) and the values to choose when the us
   only on request. It refuses an empty state and an existing name; ask for another name, never replace silently.
   A saved favorite persists when the turn is undone and is not replayed as a recipe step.
 - "Keep the chain": when two or more run_algorithm steps worked in this session, propose once, as an option, to
-  save them as a reusable Processing model only when load_skill lists processing-models (expert mode). Load that
-  skill on a yes. Never build it unasked. This expert-only skill is available in the built-in chat.
+  open them as a reusable Processing model in QGIS when load_skill lists processing-models. Load that skill on a yes.
+  Never build it unasked. The built-in chat opens a draft; the user saves it in the editor, with no expert mode.
 
 ## What never to do
 

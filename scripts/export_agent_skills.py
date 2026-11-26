@@ -8,7 +8,7 @@ folder is removed.
 
     python scripts/export_agent_skills.py [--check]
 """
-import importlib.util
+import importlib
 import shutil
 import sys
 from pathlib import Path
@@ -18,12 +18,9 @@ OUTPUT = ROOT / "skills" / "export"
 
 
 def _module():
-    """``core/agent/skills.py`` alone: ``core`` imports its domain package on import."""
-    spec = importlib.util.spec_from_file_location("agent_skills", ROOT / "core" / "agent" / "skills.py")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module  # dataclasses look their module up there
-    spec.loader.exec_module(module)
-    return module
+    """Import the plain-Python agent package without core/__init__.py, which requires QGIS."""
+    sys.path.insert(0, str(ROOT / 'core'))
+    return importlib.import_module('agent.skills')
 
 
 def main(argv) -> int:

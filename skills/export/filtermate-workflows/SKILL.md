@@ -133,8 +133,8 @@ relief, the contours, a look at the result) and the values to choose when the us
   only on request. It refuses an empty state and an existing name; ask for another name, never replace silently.
   A saved favorite persists when the turn is undone and is not replayed as a recipe step.
 - "Keep the chain": when two or more run_algorithm steps worked in this session, propose once, as an option, to
-  save them as a reusable Processing model only when load_skill lists processing-models (expert mode). Load that
-  skill on a yes. Never build it unasked. This expert-only skill is available in the built-in chat.
+  open them as a reusable Processing model in QGIS when load_skill lists processing-models. Load that skill on a yes.
+  Never build it unasked. The built-in chat opens a draft; the user saves it in the editor, with no expert mode.
 
 ## What never to do
 

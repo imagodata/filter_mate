@@ -915,6 +915,10 @@ L'exécuter ?</translation>
         <translation>Traitement : {}</translation>
     </message>
     <message>
+        <source>Opening the Processing model designer</source>
+        <translation>Ouverture de l’éditeur de modèles Processing</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
         <source>Style of {}</source>
         <translation>Style de {}</translation>
@@ -3526,6 +3530,10 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Enregistrer le projet et les couches…</translation>
     </message>
     <message>
+        <source>Processing model designer…</source>
+        <translation>Éditeur de modèles Processing…</translation>
+    </message>
+    <message>
         <source>Show in the Layers panel: {}</source>
         <translation>Afficher dans le panneau Couches : {}</translation>
     </message>
@@ -4155,6 +4163,16 @@ Do you agree to all of them? No runs none of them.</source>
         <source>Clear the zone</source>
         <translation>Effacer la zone</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="491"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer</source>
+        <translation>Copie locale : conserver ce que ce service web affiche dans la zone visible de la carte dans un fichier de cet ordinateur</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="493"/>
+        <source>Local copy</source>
+        <translation>Copie locale</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -4673,6 +4691,19 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>Couches PostgreSQL détectées mais psycopg2 n'est pas installé. Utilisation du backend Spatialite local. Pour de meilleures performances sur des jeux de données volumineux, installez psycopg2.</translation>
+    </message>
+</context>
+<context>
+    <name>Designer</name>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Save Model</source>
+        <translation>Enregistrer le modèle</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Processing models (*.model3)</source>
+        <translation>Modèles de traitement (*.model3)</translation>
     </message>
 </context>
 <context>
@@ -10581,6 +10612,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
 Exemples : emprises de bâtiments redessinées sur une orthophoto récente (un sam_iou faible signale un bâtiment qui a changé) ; points d'arbres ou de mares transformés en contours.
 
 Le raster est dessiné comme sur la carte, avec son style. SAM s'installe une fois depuis le groupe PIPETTE du dock FilterMate ; il tourne sur le processeur, quelques secondes par fenêtre de 1024 pixels.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="178"/>
+        <source>Canceled while the objects were read</source>
+        <translation>Annulé pendant la lecture des objets</translation>
     </message>
 </context>
 <context>

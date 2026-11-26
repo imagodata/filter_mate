@@ -45,7 +45,7 @@ MAX_ARGUMENT_DEPTH = 16
 # at each run, or to an application that may not be there next time (connectors, named mcp_...).
 NOT_KEPT = frozenset({
     "undo_agent_step", "run_pyqgis", "add_project_note", "remove_project_note", "view_map", "open_layout",
-    "flash_features", "set_active_layer", "show_message", "preview_atlas", "create_widget",
+    "flash_features", "set_active_layer", "show_message", "preview_atlas", "create_widget", "open_model",
     "remove_widget", "save_recipe", "remove_recipe",
     # The settings of FilterMate belong to this machine, not to a project: a recipe from another .qgz never sets them.
     "change_settings", "export_settings_profile", "apply_settings_profile",

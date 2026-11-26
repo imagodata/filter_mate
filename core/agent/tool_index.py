@@ -59,6 +59,7 @@ SUMMARIES = {
     "export_layout": "A print layout to PDF or PNG",
     # data and analysis
     "find_algorithms": "Find a Processing algorithm by words",
+    "open_model": "Processing model editor",
     "describe_algorithm": "Parameters of a Processing algorithm",
     "run_algorithm": "Run a Processing algorithm (buffer, clip...)",
     "add_field": "Add a field filled by an expression",

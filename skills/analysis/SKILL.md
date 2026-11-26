@@ -3,7 +3,7 @@ name: analysis
 title: Analyse with Processing, fields and joins
 description: new layers with Processing (buffer, clip, join by location...), computed fields, joined tables
 metadata:
-  version: 2
+  version: 3
   plugin_min: 5.1.0
   audience: chat, mcp
   tools: find_algorithms, describe_algorithm, run_algorithm, add_field, join_layers, apply_filter, layer_statistics, describe_layer, export_layers
@@ -22,13 +22,18 @@ intersection, points to a heatmap, a slope. To answer "how many" or "how long", 
 ## Processing
 
 1. The algorithm: one of the list below by its id, or find_algorithms with English words (buffer, centroid,
-   dissolve, clip, intersection, join attributes by location, heatmap, slope) for anything else.
+   dissolve, clip, intersection, join attributes by location, heatmap, slope) for anything else. Search a provider
+   name (GDAL, GRASS, SAGA, PDAL) or model for registered models; installed providers are included.
 2. describe_algorithm for its parameters: never guess a parameter name or a value.
 3. run_algorithm with the layers by name or id and plain values; give names to the outputs the user will see.
 
-The layers it makes are added to the project and undone with the turn. The data stay in memory until the project closes. The panel offers Save project and layers, where the user
+The layers it makes are added to the project and undone with the turn. describe_algorithm says requires_disk for
+file-only providers: ask the user to use Save project and layers to choose their storage folder first. Other
+outputs stay in memory until the project closes. The panel offers Save project and layers, where the user
 chooses a destination. export_layers also keeps a layer when explicitly requested. Distances are in the units of the layer's CRS
 (describe_layer says it): a geographic CRS counts in degrees, so reproject or say so.
+
+For a reusable chain or the graphical model editor, load processing-models when offered.
 
 ## Which algorithm
 

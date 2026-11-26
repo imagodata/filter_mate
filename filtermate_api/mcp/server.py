@@ -380,11 +380,11 @@ def build_server(client: FilterMateClient) -> Any:
             "voronoi, heatmap, slope..."))],
         limit: Annotated[int, Field(ge=1, le=50, description="At most this many algorithms")] = 20,
     ) -> Dict[str, Any]:
-        """Find the Processing algorithms of QGIS the agent may run, by words of their id, name, group or tags.
+        """Find registered Processing algorithms and models, by words of their id, name, provider, group or tags.
 
-        Only the algorithms of QGIS itself that make layers, or answer statistics, are listed: none that runs SQL
-        or code, writes to a data source or a file, or reaches the network. Returns algorithms [{id, name, group,
-        summary}] and total. Then describe_algorithm gives the parameters of one.
+        Search model for models, or a provider such as GDAL, GRASS, SAGA or PDAL. Lists only available algorithms
+        that make layers or answer statistics. Returns algorithms [{id, name, group, summary, provider,
+        provider_name, is_model, requires_disk}] and total. describe_algorithm gives the parameters and model steps.
         """
         return await call("GET", "/processing/algorithms?" + urlencode({"query": query, "limit": limit}))
 
@@ -398,8 +398,9 @@ def build_server(client: FilterMateClient) -> Any:
 
         Returns help, parameters [{name, type, description, optional, default, options (an enum: give the index or
         the text), parent (the layer a field or a distance belongs to), minimum, maximum, value (how to give it),
-        destination (an output: FilterMate writes it to a temporary layer)}] and outputs. left_out names parameters
-        that cannot be given (files, folders, connections).
+        destination (storage chosen by FilterMate)}], outputs, provider, is_model, steps and requires_disk.
+        File-only providers need Save project and layers first, in the folder chosen by the user. left_out names
+        parameters that cannot be given (files, folders, connections, extra command-line options).
         """
         return await call("GET", "/processing/algorithm?" + urlencode({"id": algorithm_id}))
 
@@ -416,8 +417,9 @@ def build_server(client: FilterMateClient) -> Any:
     ) -> Dict[str, Any]:
         """Run a Processing algorithm of QGIS on layers of the project; the layers it makes are added to the project.
 
-        Output layers stay in memory until the user chooses Save project and layers in the agent menu, or asks for export_layers. In the chat of FilterMate, undoing
-        the turn removes them. Returns layers [{output, layer_id, name, layer_kind, feature_count}], values (what the
+        Runs models and installed providers too. Outputs stay in memory where supported; file-only providers need
+        Save project and layers first and use that chosen folder. Undoing the turn removes output layers.
+        Returns layers [{output, layer_id, name, layer_kind, feature_count}], values (what the
         algorithm answers besides layers: statistics...), not_made and messages (its warnings). Inputs are layers
         of the project only, never a path or a URL; expressions take the functions of select_features and math,
         text and geometry ones.

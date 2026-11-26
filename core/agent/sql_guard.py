@@ -133,9 +133,9 @@ def text_expressions_problem(text: str) -> str:
     return ""
 
 
-def processing_expression_problem(expression: str) -> str:
+def processing_expression_problem(expression: str, variables=()) -> str:
     """Why ``expression`` cannot be accepted as a Processing formula written by a model; "" when it can."""
-    return _problem(expression, PROCESSING_FUNCTIONS, EXPRESSION_VARIABLES)
+    return _problem(expression, PROCESSING_FUNCTIONS, EXPRESSION_VARIABLES | frozenset(value.casefold() for value in variables))
 
 
 def _problem(expression: str, functions: frozenset, variables: frozenset) -> str:

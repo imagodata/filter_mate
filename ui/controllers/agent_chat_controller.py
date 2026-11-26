@@ -314,6 +314,7 @@ class AgentChatController(QObject):
         self.panel.feedback_requested.connect(self._open_feedback)
         self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
+        self.panel.model_designer_requested.connect(self._open_model_designer)
         self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
         self._opened = {}  # range widget id -> (what it was read for, its field read wide open): see _range_bars
         self._readings = {}  # (layer id, field, bounds, subset, changes) -> its field read then: see _range_bars
@@ -1037,6 +1038,13 @@ class AgentChatController(QObject):
         """The same once Qt has laid the panels out: a section that just moved still reads as where it was."""
         QTimer.singleShot(150, self._show_agent)
 
+    def _open_model_designer(self) -> None:
+        from ...adapters.public_api.processing_models import open_model
+        try:
+            open_model(on_saved=self._outputs.show)
+        except ValueError as exc:
+            self.panel.set_status(str(exc))
+
     def _on_panel_shown(self) -> None:
         """The AGENT section opens, or its panel comes forward: an offer that waited in it is in view. Not when
         the panel is shown behind another tab (as QGIS restores it): nobody saw the offer yet."""
@@ -1576,6 +1584,11 @@ class AgentChatController(QObject):
                for tool in tools):
             from ...adapters.public_api.gui_control import chat_handlers as gui_handlers
             handlers.update(gui_handlers())
+        if any(tool.name == 'open_model' for tool in tools):
+            def model_tool(arguments):
+                from ...adapters.public_api.processing_models import chat_handlers as model_handlers
+                return model_handlers(on_saved=lambda path: self._outputs.show(path))['open_model'](arguments)
+            handlers['open_model'] = model_tool
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
         handlers[CREATE_WIDGET] = lambda arguments: self._create_widget_tool(arguments,
@@ -3496,6 +3509,7 @@ class AgentChatController(QObject):
             "find_algorithms": lambda: _tr("Looking for a Processing algorithm"),
             "describe_algorithm": lambda: _tr("Reading the algorithm {}").format(args.get("algorithm_id", "")),
             "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),
+            "open_model": lambda: _tr("Opening the Processing model designer"),
             "set_layer_style": lambda: _tr("Style of {}").format(layer),
             "set_labels": lambda: _tr("Labels of {}").format(layer),
             "list_style_presets": lambda: _tr("Looking for an official style"),
