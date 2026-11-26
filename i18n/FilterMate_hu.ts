@@ -1621,6 +1621,324 @@ Do you agree to all of them? No runs none of them.</source>
 
 Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1816"/>
+        <source>A note is kept on this computer, in the Memory tab of the settings of the agent. It goes to the provider you chose with the requests of a project it concerns.</source>
+        <translation>A jegyzet ezen a számítógépen, az ügynök beállításainak Memória lapján marad. Az érintett projektek kéréseivel együtt elküldjük a választott szolgáltatónak.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4068"/>
+        <source>Allow</source>
+        <translation>Engedélyezés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>Do not keep</source>
+        <translation>Ne őrizze meg</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1826"/>
+        <source>Every project</source>
+        <translation>Minden projekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3508"/>
+        <source>Favorite kept: {}</source>
+        <translation>Kedvenc mentve: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3505"/>
+        <source>Flash features of {}</source>
+        <translation>A(z) {} elemeinek felvillantása</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Forget</source>
+        <translation>Elfelejtés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2095"/>
+        <source>Forgotten: {}</source>
+        <translation>Elfelejtve: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3768"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3785"/>
+        <source>Infographic</source>
+        <translation>Infografika</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3789"/>
+        <source>Infographic saved: {}</source>
+        <translation>Infografika mentve: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3540"/>
+        <source>Infographic {} saved as {}</source>
+        <translation>A(z) {} infografika mentve ezen a néven: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3539"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3759"/>
+        <source>Infographic: {}</source>
+        <translation>Infografika: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Keep</source>
+        <translation>Megőrzés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1898"/>
+        <source>Kept for every project: {}</source>
+        <translation>Megőrizve minden projekthez: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1902"/>
+        <source>Kept for the source of {}: {}</source>
+        <translation>Megőrizve a(z) {} forrásához: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1920"/>
+        <source>Kept for this project only: {}</source>
+        <translation>Csak ehhez a projekthez megőrizve: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2098"/>
+        <source>Kept: {}</source>
+        <translation>Megőrizve: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3245"/>
+        <source>Linked preview: {}</source>
+        <translation>Kapcsolt előnézet: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3507"/>
+        <source>Message in QGIS</source>
+        <translation>Üzenet a QGIS-ben</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1984"/>
+        <source>Not kept: no answer.</source>
+        <translation>Nem lett megőrizve: nincs válasz.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1928"/>
+        <source>Not kept: {}</source>
+        <translation>Nem lett megőrizve: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1965"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2090"/>
+        <source>Nothing to take back: the note changed since.</source>
+        <translation>Nincs mit visszavonni: a jegyzet azóta megváltozott.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3773"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3805"/>
+        <source>PDF document (*.pdf)</source>
+        <translation>PDF-dokumentum (*.pdf)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4077"/>
+        <source>Refuse</source>
+        <translation>Elutasítás</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3775"/>
+        <source>Save the infographic</source>
+        <translation>Infografika mentése</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4528"/>
+        <source>Send it again</source>
+        <translation>Újraküldés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3701"/>
+        <source>Step {} · {}…</source>
+        <translation>{}. lépés · {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1969"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1973"/>
+        <source>Taken back: {}</source>
+        <translation>Visszavonva: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>The agent proposes to forget a note</source>
+        <translation>Az ügynök egy jegyzet elfelejtését javasolja</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <source>The agent proposes to keep a note</source>
+        <translation>Az ügynök egy jegyzet megőrzését javasolja</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3786"/>
+        <source>The infographic could not be saved: {}</source>
+        <translation>Az infografika nem menthető: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="413"/>
+        <source>The linked layer could not be shown in the Layers panel.</source>
+        <translation>A kapcsolt réteg nem jeleníthető meg a Rétegek panelen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="406"/>
+        <source>The linked layer is no longer available in the project.</source>
+        <translation>A kapcsolt réteg már nem érhető el a projektben.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1834"/>
+        <source>This list is full: remove a note in the Memory tab of the settings of the agent first.</source>
+        <translation>A lista megtelt: előbb távolítson el egy jegyzetet az ügynök beállításainak Memória lapján.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>This project only</source>
+        <translation>Csak ez a projekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1828"/>
+        <source>This source ({})</source>
+        <translation>Ez a forrás ({})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>Undo</source>
+        <translation>Visszavonás</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1909"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1945"/>
+        <source>Wait for the end of the request, then click again.</source>
+        <translation>Várja meg a kérés végét, majd kattintson újra.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4522"/>
+        <source>Your draft stays in the line below. The failed request stays in the conversation.</source>
+        <translation>A piszkozat az alábbi mezőben marad. A sikertelen kérés a beszélgetésben marad.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3751"/>
+        <source>{} charts as composed</source>
+        <translation>{} diagram az összeállításban</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4296"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4301"/>
+        <source>↩ Undoable until the layer edits are saved.</source>
+        <translation>↩ A rétegmódosítások mentéséig visszavonható.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4299"/>
+        <source>↩ Undoable: Undo this turn takes it back.</source>
+        <translation>↩ Visszavonható: a kör visszavonása visszaállítja a korábbi állapotot.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4303"/>
+        <source>⚠ Final: cannot be undone here.</source>
+        <translation>⚠ Végleges: itt nem vonható vissza.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4305"/>
+        <source>⚠ Reaches outside QGIS (network, file or code).</source>
+        <translation>⚠ A QGIS-en kívül hat (hálózat, fájl vagy kód).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3512"/>
+        <source>Opening the Processing model designer</source>
+        <translation>A feldolgozási modelltervező megnyitása</translation>
+    </message>
+</context>
+<context>
+    <name>AgentData</name>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="56"/>
+        <source>Choose where to save the project and its layers.</source>
+        <translation>Válassza ki a projekt és rétegei mentési helyét.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Continue in memory</source>
+        <translation>Folytatás a memóriában</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Data</source>
+        <translation>Adatok</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="149"/>
+        <source>Data still in memory</source>
+        <translation>Az adatok még a memóriában vannak</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="59"/>
+        <source>Downloaded data and results are held in memory. Save the project together with its layers to keep them after closing QGIS.</source>
+        <translation>A letöltött adatok és eredmények a memóriában vannak. Mentse a projektet a rétegeivel együtt, hogy a QGIS bezárása után is megmaradjanak.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Keep this work?</source>
+        <translation>Megőrzi ezt a munkát?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="89"/>
+        <source>Project and layers saved: {}</source>
+        <translation>Projekt és rétegek mentve: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="94"/>
+        <source>Project data</source>
+        <translation>Projektadatok</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="74"/>
+        <source>QGIS project (*.qgz *.qgs)</source>
+        <translation>QGIS-projekt (*.qgz *.qgs)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="73"/>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save project and layers</source>
+        <translation>Projekt és rétegek mentése</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Save project and layers…</source>
+        <translation>Projekt és rétegek mentése…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save the downloaded data and results beside this project?
+{}
+
+If you choose No, these data stay in memory and will be lost when the project closes.</source>
+        <translation>Menti a letöltött adatokat és eredményeket a projekt mellé?
+{}
+
+Ha a Nemet választja, az adatok a memóriában maradnak, és a projekt bezárásakor elvesznek.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="57"/>
+        <source>The data stay in memory until this project is closed.</source>
+        <translation>Az adatok a projekt bezárásáig a memóriában maradnak.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="85"/>
+        <source>The project and its layers could not be saved.</source>
+        <translation>A projekt és rétegei nem menthetők.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="70"/>
+        <source>Wait for the current request to finish before saving its data.</source>
+        <translation>Az adatok mentése előtt várja meg az aktuális kérés végét.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -3145,6 +3463,237 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <source>view</source>
         <translation>nézet</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <source>Answer</source>
+        <translation>Válasz</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Automatic</source>
+        <translation>Automatikus</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="664"/>
+        <source>Do again the turn Undone last</source>
+        <translation>A legutóbb visszavont kör megismétlése</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1919"/>
+        <source>Do not send them</source>
+        <translation>Ne küldje el őket</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>High</source>
+        <translation>Magas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Low</source>
+        <translation>Alacsony</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Maximum</source>
+        <translation>Maximum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Medium</source>
+        <translation>Közepes</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Minimal</source>
+        <translation>Minimális</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="861"/>
+        <location filename="../ui/widgets/agent_panel.py" line="887"/>
+        <source>More actions</source>
+        <translation>További műveletek</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1501"/>
+        <source>More effort can take longer and use more tokens.</source>
+        <translation>A nagyobb erőfeszítés tovább tarthat és több tokent használhat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1903"/>
+        <source>Next ({}): {}</source>
+        <translation>Következő ({}): {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open file: {}</source>
+        <translation>Fájl megnyitása: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1195"/>
+        <source>Open folder</source>
+        <translation>Mappa megnyitása</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open folder: {}</source>
+        <translation>Mappa megnyitása: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1298"/>
+        <source>Open in browser: {}</source>
+        <translation>Megnyitás böngészőben: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>Propose</source>
+        <translation>Javaslat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1913"/>
+        <source>Put them back in the line</source>
+        <translation>Visszahelyezés a beviteli mezőbe</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="804"/>
+        <source>Reasoning effort</source>
+        <translation>Gondolkodási erőfeszítés</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1500"/>
+        <source>Reasoning effort: {}</source>
+        <translation>Gondolkodási erőfeszítés: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="830"/>
+        <source>Recipes ▾</source>
+        <translation>Receptek ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="893"/>
+        <source>Redo the undone turn</source>
+        <translation>A visszavont kör megismétlése</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="883"/>
+        <source>Request to the agent</source>
+        <translation>Kérés az ügynöknek</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <source>Run again the changes of a request, without the model</source>
+        <translation>Egy kérés módosításainak újbóli végrehajtása a modell nélkül</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="725"/>
+        <source>Save project and layers…</source>
+        <translation>Projekt és rétegek mentése…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <source>Send (Enter). While the agent works, stops it (Esc).</source>
+        <translation>Küldés (Enter). Munka közben leállítja az ügynököt (Esc).</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="885"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Send the request</source>
+        <translation>Kérés küldése</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1292"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1301"/>
+        <source>Show in the Layers panel: {}</source>
+        <translation>Megjelenítés a Rétegek panelen: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="889"/>
+        <source>Show the history</source>
+        <translation>Előzmények megjelenítése</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="890"/>
+        <source>Show the recipes</source>
+        <translation>Receptek megjelenítése</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="891"/>
+        <source>Start a new conversation</source>
+        <translation>Új beszélgetés indítása</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Stop the agent</source>
+        <translation>Ügynök leállítása</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="894"/>
+        <source>Take the waiting requests back to the line</source>
+        <translation>A várakozó kérések visszahelyezése a beviteli mezőbe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="116"/>
+        <source>This output could not be opened: {}</source>
+        <translation>Ez a kimenet nem nyitható meg: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="112"/>
+        <source>This output is no longer available: {}</source>
+        <translation>Ez a kimenet már nem érhető el: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Very high</source>
+        <translation>Nagyon magas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="888"/>
+        <source>What the agent may do</source>
+        <translation>Mit tehet az ügynök</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1636"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act does it.</source>
+        <translation>Mit tehet az ügynök: a Válasz olvas és semmit sem módosít, a Javaslat leírja a lépéseket és minden módosítást bemutat az alkalmazása előtt, a Cselekvés elvégzi őket.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1797"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act follows the saved permissions.</source>
+        <translation>Mit tehet az ügynök: a Válasz olvas és semmit sem módosít, a Javaslat leírja a lépéseket és minden módosítást bemutat az alkalmazása előtt, a Cselekvés követi a mentett engedélyeket.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="828"/>
+        <source>What was asked, what changed, applied or undone</source>
+        <translation>Kérések, módosítások és alkalmazott vagy visszavont műveletek</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="768"/>
+        <source>does it, asking only what cannot be undone</source>
+        <translation>végrehajtja, és csak a visszavonhatatlan műveletekről kérdez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="787"/>
+        <source>follows the permissions saved in the settings</source>
+        <translation>követi a beállításokban mentett engedélyeket</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>shows each change before applying it</source>
+        <translation>minden módosítást bemutat az alkalmazása előtt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <source>writes the steps, shows each change before applying it</source>
+        <translation>leírja a lépéseket és minden módosítást bemutat az alkalmazása előtt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
+        <source>Processing model designer…</source>
+        <translation>Feldolgozási modelltervező…</translation>
+    </message>
 </context>
 <context>
     <name>AgentWidgets</name>
@@ -3742,6 +4291,16 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <source>Clear the zone</source>
         <translation>Terület törlése</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="491"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer</source>
+        <translation>Helyi másolat: a webszolgáltatás látható térképen megjelenített tartalmának mentése a számítógép egy fájljába</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="493"/>
+        <source>Local copy</source>
+        <translation>Helyi másolat</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -4260,6 +4819,19 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL rétegek észlelve, de a psycopg2 nincs telepítve. A helyi Spatialite háttér használatban. Jobb teljesítményért nagy adathalmazoknál telepítse a psycopg2-t.</translation>
+    </message>
+</context>
+<context>
+    <name>Designer</name>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Save Model</source>
+        <translation>Modell mentése</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Processing models (*.model3)</source>
+        <translation>Feldolgozási modellek (*.model3)</translation>
     </message>
 </context>
 <context>
@@ -10157,6 +10729,11 @@ Példák: épületalaprajzok újrarajzolva egy friss ortofotón (az alacsony sam
 
 A raszter úgy kerül megrajzolásra, mint a térképen, a saját stílusával. A SAM egyszer telepíthető a FilterMate panel PIPETTA csoportjából; processzoron fut, ablakonként néhány másodperc 1024 pixeles méretben.</translation>
     </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="178"/>
+        <source>Canceled while the objects were read</source>
+        <translation>Megszakítva az objektumok olvasása közben</translation>
+    </message>
 </context>
 <context>
     <name>PublishFavoritesDialog</name>
@@ -13902,6 +14479,21 @@ Mappa: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="421"/>
         <source>{0} request(s) of the service were not answered: the image may have holes.</source>
         <translation>A szolgáltatás {0} kérésére nem érkezett válasz: a képen lyukak lehetnek.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="233"/>
+        <source>Copy in memory: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests, {5:.0f} MB at most. Save the project and its layers to keep it.</source>
+        <translation>Másolat a memóriában: {0} x {1} képpont, képpontonként {2:.3g} {3}, {4} kérés, legfeljebb {5:.0f} MB. Megőrzéséhez mentse a projektet és rétegeit.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="243"/>
+        <source>Copy of the visible features in memory, {0} at most. Save the project and its layers to keep it.</source>
+        <translation>A látható elemek másolata a memóriában, legfeljebb {0}. Megőrzéséhez mentse a projektet és rétegeit.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="228"/>
+        <source>Memory; save the project and its layers to keep the copy</source>
+        <translation>Memória; a másolat megőrzéséhez mentse a projektet és rétegeit</translation>
     </message>
 </context>
 <context>

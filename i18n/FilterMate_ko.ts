@@ -1621,6 +1621,324 @@ Do you agree to all of them? No runs none of them.</source>
 
 모두 동의하시나요? 아니요를 누르면 하나도 실행되지 않습니다.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1816"/>
+        <source>A note is kept on this computer, in the Memory tab of the settings of the agent. It goes to the provider you chose with the requests of a project it concerns.</source>
+        <translation>메모는 이 컴퓨터의 에이전트 설정에 있는 메모리 탭에 보관됩니다. 관련 프로젝트의 요청과 함께 선택한 제공업체로 전송됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4068"/>
+        <source>Allow</source>
+        <translation>허용</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>Do not keep</source>
+        <translation>보관하지 않기</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1826"/>
+        <source>Every project</source>
+        <translation>모든 프로젝트</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3508"/>
+        <source>Favorite kept: {}</source>
+        <translation>즐겨찾기 저장됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3505"/>
+        <source>Flash features of {}</source>
+        <translation>{}의 피처를 깜박여 표시</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Forget</source>
+        <translation>잊기</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2095"/>
+        <source>Forgotten: {}</source>
+        <translation>잊음: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3768"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3785"/>
+        <source>Infographic</source>
+        <translation>인포그래픽</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3789"/>
+        <source>Infographic saved: {}</source>
+        <translation>인포그래픽 저장됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3540"/>
+        <source>Infographic {} saved as {}</source>
+        <translation>인포그래픽 {}을(를) {}(으)로 저장함</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3539"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3759"/>
+        <source>Infographic: {}</source>
+        <translation>인포그래픽: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Keep</source>
+        <translation>보관</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1898"/>
+        <source>Kept for every project: {}</source>
+        <translation>모든 프로젝트용으로 보관됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1902"/>
+        <source>Kept for the source of {}: {}</source>
+        <translation>{}의 데이터 소스용으로 보관됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1920"/>
+        <source>Kept for this project only: {}</source>
+        <translation>이 프로젝트 전용으로 보관됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2098"/>
+        <source>Kept: {}</source>
+        <translation>보관됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3245"/>
+        <source>Linked preview: {}</source>
+        <translation>연결된 미리보기: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3507"/>
+        <source>Message in QGIS</source>
+        <translation>QGIS 메시지</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1984"/>
+        <source>Not kept: no answer.</source>
+        <translation>보관되지 않음: 답변 없음.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1928"/>
+        <source>Not kept: {}</source>
+        <translation>보관되지 않음: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1965"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2090"/>
+        <source>Nothing to take back: the note changed since.</source>
+        <translation>철회할 항목 없음: 그사이 메모가 변경되었습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3773"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3805"/>
+        <source>PDF document (*.pdf)</source>
+        <translation>PDF 문서 (*.pdf)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4077"/>
+        <source>Refuse</source>
+        <translation>거부</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3775"/>
+        <source>Save the infographic</source>
+        <translation>인포그래픽 저장</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4528"/>
+        <source>Send it again</source>
+        <translation>다시 보내기</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3701"/>
+        <source>Step {} · {}…</source>
+        <translation>단계 {} · {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1969"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1973"/>
+        <source>Taken back: {}</source>
+        <translation>철회됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>The agent proposes to forget a note</source>
+        <translation>에이전트가 메모를 잊도록 제안합니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <source>The agent proposes to keep a note</source>
+        <translation>에이전트가 메모 보관을 제안합니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3786"/>
+        <source>The infographic could not be saved: {}</source>
+        <translation>인포그래픽을 저장할 수 없습니다: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="413"/>
+        <source>The linked layer could not be shown in the Layers panel.</source>
+        <translation>연결된 레이어를 레이어 패널에 표시할 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="406"/>
+        <source>The linked layer is no longer available in the project.</source>
+        <translation>연결된 레이어를 프로젝트에서 더 이상 사용할 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1834"/>
+        <source>This list is full: remove a note in the Memory tab of the settings of the agent first.</source>
+        <translation>목록이 가득 찼습니다. 먼저 에이전트 설정의 메모리 탭에서 메모를 삭제하세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>This project only</source>
+        <translation>이 프로젝트만</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1828"/>
+        <source>This source ({})</source>
+        <translation>이 소스 ({})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>Undo</source>
+        <translation>실행 취소</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1909"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1945"/>
+        <source>Wait for the end of the request, then click again.</source>
+        <translation>요청이 끝날 때까지 기다린 후 다시 클릭하세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4522"/>
+        <source>Your draft stays in the line below. The failed request stays in the conversation.</source>
+        <translation>초안은 아래 입력란에 남습니다. 실패한 요청은 대화에 남습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3751"/>
+        <source>{} charts as composed</source>
+        <translation>구성대로 배치된 차트 {}개</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4296"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4301"/>
+        <source>↩ Undoable until the layer edits are saved.</source>
+        <translation>↩ 레이어 편집 내용을 저장하기 전까지 실행 취소할 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4299"/>
+        <source>↩ Undoable: Undo this turn takes it back.</source>
+        <translation>↩ 실행 취소 가능: 이 턴 실행 취소로 이전 상태로 돌아갑니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4303"/>
+        <source>⚠ Final: cannot be undone here.</source>
+        <translation>⚠ 최종 작업: 여기서 실행 취소할 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4305"/>
+        <source>⚠ Reaches outside QGIS (network, file or code).</source>
+        <translation>⚠ QGIS 외부에 영향을 줍니다(네트워크, 파일 또는 코드).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3512"/>
+        <source>Opening the Processing model designer</source>
+        <translation>처리 모델 디자이너 여는 중</translation>
+    </message>
+</context>
+<context>
+    <name>AgentData</name>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="56"/>
+        <source>Choose where to save the project and its layers.</source>
+        <translation>프로젝트와 레이어를 저장할 위치를 선택하세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Continue in memory</source>
+        <translation>메모리에서 계속</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Data</source>
+        <translation>데이터</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="149"/>
+        <source>Data still in memory</source>
+        <translation>아직 메모리에 있는 데이터</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="59"/>
+        <source>Downloaded data and results are held in memory. Save the project together with its layers to keep them after closing QGIS.</source>
+        <translation>다운로드한 데이터와 결과는 메모리에 있습니다. QGIS를 닫은 뒤에도 보관하려면 프로젝트와 레이어를 함께 저장하세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Keep this work?</source>
+        <translation>이 작업을 보관할까요?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="89"/>
+        <source>Project and layers saved: {}</source>
+        <translation>프로젝트 및 레이어 저장됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="94"/>
+        <source>Project data</source>
+        <translation>프로젝트 데이터</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="74"/>
+        <source>QGIS project (*.qgz *.qgs)</source>
+        <translation>QGIS 프로젝트 (*.qgz *.qgs)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="73"/>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save project and layers</source>
+        <translation>프로젝트 및 레이어 저장</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Save project and layers…</source>
+        <translation>프로젝트 및 레이어 저장…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save the downloaded data and results beside this project?
+{}
+
+If you choose No, these data stay in memory and will be lost when the project closes.</source>
+        <translation>다운로드한 데이터와 결과를 이 프로젝트 옆에 저장할까요?
+{}
+
+아니요를 선택하면 데이터는 메모리에 남아 있다가 프로젝트를 닫을 때 사라집니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="57"/>
+        <source>The data stay in memory until this project is closed.</source>
+        <translation>데이터는 이 프로젝트를 닫을 때까지 메모리에 남습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="85"/>
+        <source>The project and its layers could not be saved.</source>
+        <translation>프로젝트와 레이어를 저장할 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="70"/>
+        <source>Wait for the current request to finish before saving its data.</source>
+        <translation>현재 요청이 끝난 뒤 데이터를 저장하세요.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -3145,6 +3463,237 @@ Do you agree to all of them? No runs none of them.</source>
         <source>view</source>
         <translation>보기</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <source>Answer</source>
+        <translation>답변</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Automatic</source>
+        <translation>자동</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="664"/>
+        <source>Do again the turn Undone last</source>
+        <translation>마지막으로 취소한 턴 다시 실행</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1919"/>
+        <source>Do not send them</source>
+        <translation>보내지 않기</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>High</source>
+        <translation>높음</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Low</source>
+        <translation>낮음</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Maximum</source>
+        <translation>최대</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Medium</source>
+        <translation>중간</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Minimal</source>
+        <translation>최소</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="861"/>
+        <location filename="../ui/widgets/agent_panel.py" line="887"/>
+        <source>More actions</source>
+        <translation>추가 작업</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1501"/>
+        <source>More effort can take longer and use more tokens.</source>
+        <translation>추론 노력을 높이면 시간이 더 걸리고 토큰을 더 사용할 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1903"/>
+        <source>Next ({}): {}</source>
+        <translation>다음 ({}): {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open file: {}</source>
+        <translation>파일 열기: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1195"/>
+        <source>Open folder</source>
+        <translation>폴더 열기</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open folder: {}</source>
+        <translation>폴더 열기: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1298"/>
+        <source>Open in browser: {}</source>
+        <translation>브라우저에서 열기: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>Propose</source>
+        <translation>제안</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1913"/>
+        <source>Put them back in the line</source>
+        <translation>입력란에 다시 넣기</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="804"/>
+        <source>Reasoning effort</source>
+        <translation>추론 노력</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1500"/>
+        <source>Reasoning effort: {}</source>
+        <translation>추론 노력: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="830"/>
+        <source>Recipes ▾</source>
+        <translation>레시피 ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="893"/>
+        <source>Redo the undone turn</source>
+        <translation>취소한 턴 다시 실행</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="883"/>
+        <source>Request to the agent</source>
+        <translation>에이전트에게 요청</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <source>Run again the changes of a request, without the model</source>
+        <translation>모델 없이 요청의 변경 사항 다시 실행</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="725"/>
+        <source>Save project and layers…</source>
+        <translation>프로젝트 및 레이어 저장…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <source>Send (Enter). While the agent works, stops it (Esc).</source>
+        <translation>보내기(Enter). 에이전트 작업 중에는 중지(Esc).</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="885"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Send the request</source>
+        <translation>요청 보내기</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1292"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1301"/>
+        <source>Show in the Layers panel: {}</source>
+        <translation>레이어 패널에 표시: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="889"/>
+        <source>Show the history</source>
+        <translation>기록 표시</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="890"/>
+        <source>Show the recipes</source>
+        <translation>레시피 표시</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="891"/>
+        <source>Start a new conversation</source>
+        <translation>새 대화 시작</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Stop the agent</source>
+        <translation>에이전트 중지</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="894"/>
+        <source>Take the waiting requests back to the line</source>
+        <translation>대기 중인 요청을 입력란에 다시 넣기</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="116"/>
+        <source>This output could not be opened: {}</source>
+        <translation>이 출력을 열 수 없습니다: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="112"/>
+        <source>This output is no longer available: {}</source>
+        <translation>이 출력을 더 이상 사용할 수 없습니다: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Very high</source>
+        <translation>매우 높음</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="888"/>
+        <source>What the agent may do</source>
+        <translation>에이전트가 할 수 있는 작업</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1636"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act does it.</source>
+        <translation>에이전트가 할 수 있는 작업: 답변은 읽기만 하고 변경하지 않으며, 제안은 단계를 설명하고 적용 전 각 변경 사항을 보여 주며, 실행은 작업을 수행합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1797"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act follows the saved permissions.</source>
+        <translation>에이전트가 할 수 있는 작업: 답변은 읽기만 하고 변경하지 않으며, 제안은 단계를 설명하고 적용 전 각 변경 사항을 보여 주며, 실행은 저장된 권한을 따릅니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="828"/>
+        <source>What was asked, what changed, applied or undone</source>
+        <translation>요청, 변경 사항, 적용하거나 취소한 작업</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="768"/>
+        <source>does it, asking only what cannot be undone</source>
+        <translation>실행하며 되돌릴 수 없는 작업만 확인합니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="787"/>
+        <source>follows the permissions saved in the settings</source>
+        <translation>설정에 저장된 권한을 따릅니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>shows each change before applying it</source>
+        <translation>적용 전 각 변경 사항을 보여 줍니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <source>writes the steps, shows each change before applying it</source>
+        <translation>단계를 설명하고 적용 전 각 변경 사항을 보여 줍니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
+        <source>Processing model designer…</source>
+        <translation>처리 모델 디자이너…</translation>
+    </message>
 </context>
 <context>
     <name>AgentWidgets</name>
@@ -3742,6 +4291,16 @@ Do you agree to all of them? No runs none of them.</source>
         <source>Clear the zone</source>
         <translation>영역 지우기</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="491"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer</source>
+        <translation>로컬 사본: 이 웹 서비스가 보이는 지도에 표시하는 내용을 이 컴퓨터의 파일에 저장</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="493"/>
+        <source>Local copy</source>
+        <translation>로컬 사본</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -4260,6 +4819,19 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL 레이어가 감지되었지만 psycopg2가 설치되어 있지 않습니다. 로컬 Spatialite 백엔드를 사용합니다. 대용량 데이터셋에서 더 나은 성능을 위해 psycopg2를 설치하세요.</translation>
+    </message>
+</context>
+<context>
+    <name>Designer</name>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Save Model</source>
+        <translation>모델 저장</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Processing models (*.model3)</source>
+        <translation>처리 모델 (*.model3)</translation>
     </message>
 </context>
 <context>
@@ -10157,6 +10729,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
 
 래스터는 스타일을 포함해 지도와 같은 방식으로 그려집니다. SAM은 FilterMate 패널의 스포이트 그룹에서 한 번만 설치하며, CPU에서 실행되고 1024픽셀 창 하나당 몇 초가 걸립니다.</translation>
     </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="178"/>
+        <source>Canceled while the objects were read</source>
+        <translation>객체를 읽는 중 취소됨</translation>
+    </message>
 </context>
 <context>
     <name>PublishFavoritesDialog</name>
@@ -13902,6 +14479,21 @@ Folder: {6}</source>
         <location filename="../adapters/qgis/stream_copy.py" line="421"/>
         <source>{0} request(s) of the service were not answered: the image may have holes.</source>
         <translation>서비스 요청 {0}건에 응답이 없었습니다. 이미지에 빈 곳이 있을 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="233"/>
+        <source>Copy in memory: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests, {5:.0f} MB at most. Save the project and its layers to keep it.</source>
+        <translation>메모리의 사본: {0} x {1} 픽셀, 픽셀당 {2:.3g} {3}, 요청 {4}회, 최대 {5:.0f} MB. 보관하려면 프로젝트와 레이어를 저장하세요.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="243"/>
+        <source>Copy of the visible features in memory, {0} at most. Save the project and its layers to keep it.</source>
+        <translation>메모리에 있는 보이는 피처의 사본, 최대 {0}개. 보관하려면 프로젝트와 레이어를 저장하세요.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="228"/>
+        <source>Memory; save the project and its layers to keep the copy</source>
+        <translation>메모리; 사본을 보관하려면 프로젝트와 레이어를 저장하세요</translation>
     </message>
 </context>
 <context>

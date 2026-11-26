@@ -1621,6 +1621,324 @@ Do you agree to all of them? No runs none of them.</source>
 
 是否全部同意？选“否”则一项都不执行。</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1816"/>
+        <source>A note is kept on this computer, in the Memory tab of the settings of the agent. It goes to the provider you chose with the requests of a project it concerns.</source>
+        <translation>笔记保存在此计算机上，可在智能体设置的“记忆”选项卡中查看。与相关项目的请求一起发送给您选择的服务提供商。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4068"/>
+        <source>Allow</source>
+        <translation>允许</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>Do not keep</source>
+        <translation>不保留</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1826"/>
+        <source>Every project</source>
+        <translation>所有项目</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3508"/>
+        <source>Favorite kept: {}</source>
+        <translation>已保存收藏：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3505"/>
+        <source>Flash features of {}</source>
+        <translation>闪烁显示 {} 的要素</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Forget</source>
+        <translation>忘记</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2095"/>
+        <source>Forgotten: {}</source>
+        <translation>已忘记：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3768"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3785"/>
+        <source>Infographic</source>
+        <translation>信息图</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3789"/>
+        <source>Infographic saved: {}</source>
+        <translation>信息图已保存：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3540"/>
+        <source>Infographic {} saved as {}</source>
+        <translation>信息图 {} 已另存为 {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3539"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3759"/>
+        <source>Infographic: {}</source>
+        <translation>信息图：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Keep</source>
+        <translation>保留</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1898"/>
+        <source>Kept for every project: {}</source>
+        <translation>已为所有项目保留：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1902"/>
+        <source>Kept for the source of {}: {}</source>
+        <translation>已为 {} 的数据源保留：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1920"/>
+        <source>Kept for this project only: {}</source>
+        <translation>已仅为此项目保留：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2098"/>
+        <source>Kept: {}</source>
+        <translation>已保留：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3245"/>
+        <source>Linked preview: {}</source>
+        <translation>关联预览：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3507"/>
+        <source>Message in QGIS</source>
+        <translation>QGIS 消息</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1984"/>
+        <source>Not kept: no answer.</source>
+        <translation>未保留：没有回答。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1928"/>
+        <source>Not kept: {}</source>
+        <translation>未保留：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1965"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2090"/>
+        <source>Nothing to take back: the note changed since.</source>
+        <translation>无需撤回：笔记此后已被修改。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3773"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3805"/>
+        <source>PDF document (*.pdf)</source>
+        <translation>PDF 文档 (*.pdf)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4077"/>
+        <source>Refuse</source>
+        <translation>拒绝</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3775"/>
+        <source>Save the infographic</source>
+        <translation>保存信息图</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4528"/>
+        <source>Send it again</source>
+        <translation>重新发送</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3701"/>
+        <source>Step {} · {}…</source>
+        <translation>步骤 {} · {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1969"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1973"/>
+        <source>Taken back: {}</source>
+        <translation>已撤回：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>The agent proposes to forget a note</source>
+        <translation>智能体建议忘记一条笔记</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <source>The agent proposes to keep a note</source>
+        <translation>智能体建议保留一条笔记</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3786"/>
+        <source>The infographic could not be saved: {}</source>
+        <translation>无法保存信息图：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="413"/>
+        <source>The linked layer could not be shown in the Layers panel.</source>
+        <translation>无法在“图层”面板中显示关联图层。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="406"/>
+        <source>The linked layer is no longer available in the project.</source>
+        <translation>关联图层在项目中已不可用。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1834"/>
+        <source>This list is full: remove a note in the Memory tab of the settings of the agent first.</source>
+        <translation>此列表已满：请先在智能体设置的“记忆”选项卡中删除一条笔记。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>This project only</source>
+        <translation>仅此项目</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1828"/>
+        <source>This source ({})</source>
+        <translation>此数据源（{}）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>Undo</source>
+        <translation>撤销</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1909"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1945"/>
+        <source>Wait for the end of the request, then click again.</source>
+        <translation>请等待请求结束，然后再次点击。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4522"/>
+        <source>Your draft stays in the line below. The failed request stays in the conversation.</source>
+        <translation>您的草稿保留在下方输入框中。失败的请求保留在对话中。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3751"/>
+        <source>{} charts as composed</source>
+        <translation>按组合方式排列的 {} 张图表</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4296"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4301"/>
+        <source>↩ Undoable until the layer edits are saved.</source>
+        <translation>↩ 在保存图层编辑之前可撤销。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4299"/>
+        <source>↩ Undoable: Undo this turn takes it back.</source>
+        <translation>↩ 可撤销：“撤销此轮”可恢复先前状态。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4303"/>
+        <source>⚠ Final: cannot be undone here.</source>
+        <translation>⚠ 最终操作：无法在此撤销。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4305"/>
+        <source>⚠ Reaches outside QGIS (network, file or code).</source>
+        <translation>⚠ 影响 QGIS 外部（网络、文件或代码）。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3512"/>
+        <source>Opening the Processing model designer</source>
+        <translation>正在打开处理模型设计器</translation>
+    </message>
+</context>
+<context>
+    <name>AgentData</name>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="56"/>
+        <source>Choose where to save the project and its layers.</source>
+        <translation>选择项目及其图层的保存位置。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Continue in memory</source>
+        <translation>继续保存在内存中</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Data</source>
+        <translation>数据</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="149"/>
+        <source>Data still in memory</source>
+        <translation>数据仍在内存中</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="59"/>
+        <source>Downloaded data and results are held in memory. Save the project together with its layers to keep them after closing QGIS.</source>
+        <translation>下载的数据和结果保存在内存中。请将项目与其图层一起保存，以便在关闭 QGIS 后保留它们。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Keep this work?</source>
+        <translation>保留此工作？</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="89"/>
+        <source>Project and layers saved: {}</source>
+        <translation>项目和图层已保存：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="94"/>
+        <source>Project data</source>
+        <translation>项目数据</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="74"/>
+        <source>QGIS project (*.qgz *.qgs)</source>
+        <translation>QGIS 项目 (*.qgz *.qgs)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="73"/>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save project and layers</source>
+        <translation>保存项目和图层</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Save project and layers…</source>
+        <translation>保存项目和图层…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save the downloaded data and results beside this project?
+{}
+
+If you choose No, these data stay in memory and will be lost when the project closes.</source>
+        <translation>将下载的数据和结果保存到此项目旁边？
+{}
+
+如果选择“否”，这些数据将保留在内存中，并在项目关闭时丢失。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="57"/>
+        <source>The data stay in memory until this project is closed.</source>
+        <translation>数据将保留在内存中，直到此项目关闭。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="85"/>
+        <source>The project and its layers could not be saved.</source>
+        <translation>无法保存项目及其图层。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="70"/>
+        <source>Wait for the current request to finish before saving its data.</source>
+        <translation>请等待当前请求结束后再保存其数据。</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -3145,6 +3463,237 @@ Do you agree to all of them? No runs none of them.</source>
         <source>view</source>
         <translation>视图</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <source>Answer</source>
+        <translation>回答</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Automatic</source>
+        <translation>自动</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="664"/>
+        <source>Do again the turn Undone last</source>
+        <translation>重做上次撤销的一轮</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1919"/>
+        <source>Do not send them</source>
+        <translation>不发送</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>High</source>
+        <translation>高</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Low</source>
+        <translation>低</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Maximum</source>
+        <translation>最大值</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Medium</source>
+        <translation>中</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Minimal</source>
+        <translation>最低</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="861"/>
+        <location filename="../ui/widgets/agent_panel.py" line="887"/>
+        <source>More actions</source>
+        <translation>更多操作</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1501"/>
+        <source>More effort can take longer and use more tokens.</source>
+        <translation>更高的推理强度可能需要更长时间并消耗更多词元。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1903"/>
+        <source>Next ({}): {}</source>
+        <translation>下一个（{}）：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open file: {}</source>
+        <translation>打开文件：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1195"/>
+        <source>Open folder</source>
+        <translation>打开文件夹</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open folder: {}</source>
+        <translation>打开文件夹：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1298"/>
+        <source>Open in browser: {}</source>
+        <translation>在浏览器中打开：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>Propose</source>
+        <translation>建议</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1913"/>
+        <source>Put them back in the line</source>
+        <translation>放回输入框</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="804"/>
+        <source>Reasoning effort</source>
+        <translation>推理强度</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1500"/>
+        <source>Reasoning effort: {}</source>
+        <translation>推理强度：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="830"/>
+        <source>Recipes ▾</source>
+        <translation>配方 ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="893"/>
+        <source>Redo the undone turn</source>
+        <translation>重做已撤销的一轮</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="883"/>
+        <source>Request to the agent</source>
+        <translation>向智能体发出请求</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <source>Run again the changes of a request, without the model</source>
+        <translation>不调用模型，重新执行请求中的更改</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="725"/>
+        <source>Save project and layers…</source>
+        <translation>保存项目和图层…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <source>Send (Enter). While the agent works, stops it (Esc).</source>
+        <translation>发送（Enter）。智能体工作时，停止智能体（Esc）。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="885"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Send the request</source>
+        <translation>发送请求</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1292"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1301"/>
+        <source>Show in the Layers panel: {}</source>
+        <translation>在“图层”面板中显示：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="889"/>
+        <source>Show the history</source>
+        <translation>显示历史</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="890"/>
+        <source>Show the recipes</source>
+        <translation>显示配方</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="891"/>
+        <source>Start a new conversation</source>
+        <translation>开始新对话</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Stop the agent</source>
+        <translation>停止智能体</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="894"/>
+        <source>Take the waiting requests back to the line</source>
+        <translation>将等待中的请求放回输入框</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="116"/>
+        <source>This output could not be opened: {}</source>
+        <translation>无法打开此输出：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="112"/>
+        <source>This output is no longer available: {}</source>
+        <translation>此输出已不可用：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Very high</source>
+        <translation>很高</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="888"/>
+        <source>What the agent may do</source>
+        <translation>智能体可执行的操作</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1636"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act does it.</source>
+        <translation>智能体可执行的操作：“回答”只读取而不更改，“建议”描述步骤并在应用前显示每项更改，“执行”实施操作。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1797"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act follows the saved permissions.</source>
+        <translation>智能体可执行的操作：“回答”只读取而不更改，“建议”描述步骤并在应用前显示每项更改，“执行”遵循已保存的权限。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="828"/>
+        <source>What was asked, what changed, applied or undone</source>
+        <translation>请求、更改以及已应用或已撤销的操作</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="768"/>
+        <source>does it, asking only what cannot be undone</source>
+        <translation>执行操作，仅对无法撤销的操作询问确认</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="787"/>
+        <source>follows the permissions saved in the settings</source>
+        <translation>遵循设置中已保存的权限</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>shows each change before applying it</source>
+        <translation>在应用前显示每项更改</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <source>writes the steps, shows each change before applying it</source>
+        <translation>描述步骤并在应用前显示每项更改</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
+        <source>Processing model designer…</source>
+        <translation>处理模型设计器…</translation>
+    </message>
 </context>
 <context>
     <name>AgentWidgets</name>
@@ -3742,6 +4291,16 @@ Do you agree to all of them? No runs none of them.</source>
         <source>Clear the zone</source>
         <translation>清除区域</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="491"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer</source>
+        <translation>本地副本：将此 Web 服务在可见地图范围内显示的内容保存在此计算机的文件中</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="493"/>
+        <source>Local copy</source>
+        <translation>本地副本</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -4260,6 +4819,19 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>检测到 PostgreSQL 图层，但未安装 psycopg2。正在使用本地 Spatialite 后端。若要获得更大数据集的更好性能，请安装 psycopg2。</translation>
+    </message>
+</context>
+<context>
+    <name>Designer</name>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Save Model</source>
+        <translation>保存模型</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Processing models (*.model3)</source>
+        <translation>处理模型 (*.model3)</translation>
     </message>
 </context>
 <context>
@@ -10157,6 +10729,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
 
 栅格按其样式，与地图中一样绘制。SAM 只需从 FilterMate 面板的“拾取器”组安装一次；它在 CPU 上运行，每个 1024 像素的窗口需要几秒钟。</translation>
     </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="178"/>
+        <source>Canceled while the objects were read</source>
+        <translation>读取对象时已取消</translation>
+    </message>
 </context>
 <context>
     <name>PublishFavoritesDialog</name>
@@ -13902,6 +14479,21 @@ Folder: {6}</source>
         <location filename="../adapters/qgis/stream_copy.py" line="421"/>
         <source>{0} request(s) of the service were not answered: the image may have holes.</source>
         <translation>有 {0} 个对服务的请求未得到响应：图像可能有空洞。</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="233"/>
+        <source>Copy in memory: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests, {5:.0f} MB at most. Save the project and its layers to keep it.</source>
+        <translation>内存中的副本：{0} x {1} 像素，每像素 {2:.3g} {3}，{4} 次请求，最多 {5:.0f} MB。请保存项目及其图层以保留副本。</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="243"/>
+        <source>Copy of the visible features in memory, {0} at most. Save the project and its layers to keep it.</source>
+        <translation>内存中可见要素的副本，最多 {0} 个。请保存项目及其图层以保留副本。</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="228"/>
+        <source>Memory; save the project and its layers to keep the copy</source>
+        <translation>内存；请保存项目及其图层以保留副本</translation>
     </message>
 </context>
 <context>

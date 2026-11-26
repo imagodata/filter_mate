@@ -1621,6 +1621,324 @@ Do you agree to all of them? No runs none of them.</source>
 
 Godkänner du alla? Nej kör ingen av dem.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1816"/>
+        <source>A note is kept on this computer, in the Memory tab of the settings of the agent. It goes to the provider you chose with the requests of a project it concerns.</source>
+        <translation>En anteckning sparas på den här datorn, på fliken Minne i agentens inställningar. Den skickas till vald leverantör med förfrågningar om projekt som den berör.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4068"/>
+        <source>Allow</source>
+        <translation>Tillåt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>Do not keep</source>
+        <translation>Spara inte</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1826"/>
+        <source>Every project</source>
+        <translation>Alla projekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3508"/>
+        <source>Favorite kept: {}</source>
+        <translation>Favorit sparad: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3505"/>
+        <source>Flash features of {}</source>
+        <translation>Låt objekten i {} blinka</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Forget</source>
+        <translation>Glöm</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2095"/>
+        <source>Forgotten: {}</source>
+        <translation>Glömt: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3768"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3785"/>
+        <source>Infographic</source>
+        <translation>Infografik</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3789"/>
+        <source>Infographic saved: {}</source>
+        <translation>Infografik sparad: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3540"/>
+        <source>Infographic {} saved as {}</source>
+        <translation>Infografik {} sparad som {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3539"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3759"/>
+        <source>Infographic: {}</source>
+        <translation>Infografik: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Keep</source>
+        <translation>Spara</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1898"/>
+        <source>Kept for every project: {}</source>
+        <translation>Sparat för alla projekt: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1902"/>
+        <source>Kept for the source of {}: {}</source>
+        <translation>Sparat för källan till {}: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1920"/>
+        <source>Kept for this project only: {}</source>
+        <translation>Sparat endast för detta projekt: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2098"/>
+        <source>Kept: {}</source>
+        <translation>Sparat: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3245"/>
+        <source>Linked preview: {}</source>
+        <translation>Länkad förhandsvisning: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3507"/>
+        <source>Message in QGIS</source>
+        <translation>Meddelande i QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1984"/>
+        <source>Not kept: no answer.</source>
+        <translation>Inte sparat: inget svar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1928"/>
+        <source>Not kept: {}</source>
+        <translation>Inte sparat: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1965"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2090"/>
+        <source>Nothing to take back: the note changed since.</source>
+        <translation>Inget att ta tillbaka: anteckningen har ändrats sedan dess.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3773"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3805"/>
+        <source>PDF document (*.pdf)</source>
+        <translation>PDF-dokument (*.pdf)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4077"/>
+        <source>Refuse</source>
+        <translation>Neka</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3775"/>
+        <source>Save the infographic</source>
+        <translation>Spara infografiken</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4528"/>
+        <source>Send it again</source>
+        <translation>Skicka igen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3701"/>
+        <source>Step {} · {}…</source>
+        <translation>Steg {} · {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1969"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1973"/>
+        <source>Taken back: {}</source>
+        <translation>Tillbakadraget: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>The agent proposes to forget a note</source>
+        <translation>Agenten föreslår att glömma en anteckning</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <source>The agent proposes to keep a note</source>
+        <translation>Agenten föreslår att spara en anteckning</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3786"/>
+        <source>The infographic could not be saved: {}</source>
+        <translation>Infografiken kunde inte sparas: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="413"/>
+        <source>The linked layer could not be shown in the Layers panel.</source>
+        <translation>Det länkade lagret kunde inte visas i lagerpanelen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="406"/>
+        <source>The linked layer is no longer available in the project.</source>
+        <translation>Det länkade lagret är inte längre tillgängligt i projektet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1834"/>
+        <source>This list is full: remove a note in the Memory tab of the settings of the agent first.</source>
+        <translation>Listan är full: ta först bort en anteckning på fliken Minne i agentens inställningar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>This project only</source>
+        <translation>Endast detta projekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1828"/>
+        <source>This source ({})</source>
+        <translation>Den här källan ({})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>Undo</source>
+        <translation>Ångra</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1909"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1945"/>
+        <source>Wait for the end of the request, then click again.</source>
+        <translation>Vänta tills förfrågan är klar och klicka igen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4522"/>
+        <source>Your draft stays in the line below. The failed request stays in the conversation.</source>
+        <translation>Ditt utkast finns kvar i fältet nedan. Den misslyckade förfrågan finns kvar i samtalet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3751"/>
+        <source>{} charts as composed</source>
+        <translation>{} diagram i kompositionen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4296"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4301"/>
+        <source>↩ Undoable until the layer edits are saved.</source>
+        <translation>↩ Kan ångras tills lagerändringarna sparas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4299"/>
+        <source>↩ Undoable: Undo this turn takes it back.</source>
+        <translation>↩ Kan ångras: Ångra denna omgång återställer ändringarna.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4303"/>
+        <source>⚠ Final: cannot be undone here.</source>
+        <translation>⚠ Slutgiltigt: kan inte ångras här.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4305"/>
+        <source>⚠ Reaches outside QGIS (network, file or code).</source>
+        <translation>⚠ Verkar utanför QGIS (nätverk, fil eller kod).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3512"/>
+        <source>Opening the Processing model designer</source>
+        <translation>Öppnar modellbyggaren för Processing</translation>
+    </message>
+</context>
+<context>
+    <name>AgentData</name>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="56"/>
+        <source>Choose where to save the project and its layers.</source>
+        <translation>Välj var projektet och dess lager ska sparas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Continue in memory</source>
+        <translation>Fortsätt i minnet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Data</source>
+        <translation>Data</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="149"/>
+        <source>Data still in memory</source>
+        <translation>Data finns fortfarande i minnet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="59"/>
+        <source>Downloaded data and results are held in memory. Save the project together with its layers to keep them after closing QGIS.</source>
+        <translation>Hämtade data och resultat ligger i minnet. Spara projektet med dess lager för att behålla dem när QGIS stängs.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Keep this work?</source>
+        <translation>Behålla detta arbete?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="89"/>
+        <source>Project and layers saved: {}</source>
+        <translation>Projekt och lager sparade: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="94"/>
+        <source>Project data</source>
+        <translation>Projektdata</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="74"/>
+        <source>QGIS project (*.qgz *.qgs)</source>
+        <translation>QGIS-projekt (*.qgz *.qgs)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="73"/>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save project and layers</source>
+        <translation>Spara projekt och lager</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Save project and layers…</source>
+        <translation>Spara projekt och lager…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save the downloaded data and results beside this project?
+{}
+
+If you choose No, these data stay in memory and will be lost when the project closes.</source>
+        <translation>Spara hämtade data och resultat bredvid detta projekt?
+{}
+
+Om du väljer Nej ligger dessa data kvar i minnet och försvinner när projektet stängs.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="57"/>
+        <source>The data stay in memory until this project is closed.</source>
+        <translation>Data ligger kvar i minnet tills detta projekt stängs.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="85"/>
+        <source>The project and its layers could not be saved.</source>
+        <translation>Projektet och dess lager kunde inte sparas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="70"/>
+        <source>Wait for the current request to finish before saving its data.</source>
+        <translation>Vänta tills den aktuella förfrågan är klar innan du sparar dess data.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -3145,6 +3463,237 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <source>view</source>
         <translation>vy</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <source>Answer</source>
+        <translation>Svara</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Automatic</source>
+        <translation>Automatisk</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="664"/>
+        <source>Do again the turn Undone last</source>
+        <translation>Gör om den senast ångrade omgången</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1919"/>
+        <source>Do not send them</source>
+        <translation>Skicka dem inte</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>High</source>
+        <translation>Hög</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Low</source>
+        <translation>Låg</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Maximum</source>
+        <translation>Maximum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Medium</source>
+        <translation>Medel</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Minimal</source>
+        <translation>Minimal</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="861"/>
+        <location filename="../ui/widgets/agent_panel.py" line="887"/>
+        <source>More actions</source>
+        <translation>Fler åtgärder</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1501"/>
+        <source>More effort can take longer and use more tokens.</source>
+        <translation>Större ansträngning kan ta längre tid och använda fler token.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1903"/>
+        <source>Next ({}): {}</source>
+        <translation>Nästa ({}): {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open file: {}</source>
+        <translation>Öppna fil: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1195"/>
+        <source>Open folder</source>
+        <translation>Öppna mapp</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open folder: {}</source>
+        <translation>Öppna mapp: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1298"/>
+        <source>Open in browser: {}</source>
+        <translation>Öppna i webbläsaren: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>Propose</source>
+        <translation>Föreslå</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1913"/>
+        <source>Put them back in the line</source>
+        <translation>Flytta tillbaka dem till inmatningsfältet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="804"/>
+        <source>Reasoning effort</source>
+        <translation>Resonemangsansträngning</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1500"/>
+        <source>Reasoning effort: {}</source>
+        <translation>Resonemangsansträngning: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="830"/>
+        <source>Recipes ▾</source>
+        <translation>Recept ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="893"/>
+        <source>Redo the undone turn</source>
+        <translation>Gör om den ångrade omgången</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="883"/>
+        <source>Request to the agent</source>
+        <translation>Förfrågan till agenten</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <source>Run again the changes of a request, without the model</source>
+        <translation>Utför ändringarna i en förfrågan igen utan modellen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="725"/>
+        <source>Save project and layers…</source>
+        <translation>Spara projekt och lager…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <source>Send (Enter). While the agent works, stops it (Esc).</source>
+        <translation>Skicka (Retur). Stoppar agenten medan den arbetar (Esc).</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="885"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Send the request</source>
+        <translation>Skicka förfrågan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1292"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1301"/>
+        <source>Show in the Layers panel: {}</source>
+        <translation>Visa i lagerpanelen: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="889"/>
+        <source>Show the history</source>
+        <translation>Visa historiken</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="890"/>
+        <source>Show the recipes</source>
+        <translation>Visa recepten</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="891"/>
+        <source>Start a new conversation</source>
+        <translation>Starta ett nytt samtal</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Stop the agent</source>
+        <translation>Stoppa agenten</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="894"/>
+        <source>Take the waiting requests back to the line</source>
+        <translation>Flytta väntande förfrågningar tillbaka till inmatningsfältet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="116"/>
+        <source>This output could not be opened: {}</source>
+        <translation>Denna utdata kunde inte öppnas: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="112"/>
+        <source>This output is no longer available: {}</source>
+        <translation>Denna utdata är inte längre tillgänglig: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Very high</source>
+        <translation>Mycket hög</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="888"/>
+        <source>What the agent may do</source>
+        <translation>Vad agenten får göra</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1636"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act does it.</source>
+        <translation>Vad agenten får göra: Svara läser utan att ändra något, Föreslå beskriver stegen och visar varje ändring innan den tillämpas, Utför utför dem.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1797"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act follows the saved permissions.</source>
+        <translation>Vad agenten får göra: Svara läser utan att ändra något, Föreslå beskriver stegen och visar varje ändring innan den tillämpas, Agera följer de sparade behörigheterna.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="828"/>
+        <source>What was asked, what changed, applied or undone</source>
+        <translation>Förfrågningar, ändringar och tillämpade eller ångrade åtgärder</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="768"/>
+        <source>does it, asking only what cannot be undone</source>
+        <translation>utför och frågar bara om det som inte kan ångras</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="787"/>
+        <source>follows the permissions saved in the settings</source>
+        <translation>följer behörigheterna som sparats i inställningarna</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>shows each change before applying it</source>
+        <translation>visar varje ändring innan den tillämpas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <source>writes the steps, shows each change before applying it</source>
+        <translation>beskriver stegen och visar varje ändring innan den tillämpas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
+        <source>Processing model designer…</source>
+        <translation>Modellbyggare för Processing…</translation>
+    </message>
 </context>
 <context>
     <name>AgentWidgets</name>
@@ -3742,6 +4291,16 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <source>Clear the zone</source>
         <translation>Rensa zonen</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="491"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer</source>
+        <translation>Lokal kopia: spara det webbtjänsten visar på den synliga kartan i en fil på den här datorn</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="493"/>
+        <source>Local copy</source>
+        <translation>Lokal kopia</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -4260,6 +4819,19 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL-lager upptäckta men psycopg2 är inte installerat. Använder det lokala Spatialite-backendet. Installera psycopg2 för bättre prestanda med stora datamängder.</translation>
+    </message>
+</context>
+<context>
+    <name>Designer</name>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Save Model</source>
+        <translation>Spara modell</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Processing models (*.model3)</source>
+        <translation>Processing-modeller (*.model3)</translation>
     </message>
 </context>
 <context>
@@ -10157,6 +10729,11 @@ Exempel: byggnadsavtryck ritade om på ett nytt ortofoto (ett lågt sam_iou mark
 
 Rastret ritas som på kartan, med sin stil. SAM installeras en gång från gruppen PIPETT i FilterMate-panelen; det körs på CPU:n, några sekunder per fönster på 1024 pixlar.</translation>
     </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="178"/>
+        <source>Canceled while the objects were read</source>
+        <translation>Avbrutet under läsning av objekten</translation>
+    </message>
 </context>
 <context>
     <name>PublishFavoritesDialog</name>
@@ -13902,6 +14479,21 @@ Mapp: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="421"/>
         <source>{0} request(s) of the service were not answered: the image may have holes.</source>
         <translation>{0} förfrågning(ar) till tjänsten fick inget svar: bilden kan ha hål.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="233"/>
+        <source>Copy in memory: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests, {5:.0f} MB at most. Save the project and its layers to keep it.</source>
+        <translation>Kopia i minnet: {0} x {1} pixlar, {2:.3g} {3} per pixel, {4} förfrågningar, högst {5:.0f} MB. Spara projektet och dess lager för att behålla den.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="243"/>
+        <source>Copy of the visible features in memory, {0} at most. Save the project and its layers to keep it.</source>
+        <translation>Kopia av de synliga objekten i minnet, högst {0}. Spara projektet och dess lager för att behålla den.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="228"/>
+        <source>Memory; save the project and its layers to keep the copy</source>
+        <translation>Minne; spara projektet och dess lager för att behålla kopian</translation>
     </message>
 </context>
 <context>

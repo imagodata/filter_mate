@@ -1621,6 +1621,324 @@ Do you agree to all of them? No runs none of them.</source>
 
 Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1816"/>
+        <source>A note is kept on this computer, in the Memory tab of the settings of the agent. It goes to the provider you chose with the requests of a project it concerns.</source>
+        <translation>Qayd shu kompyuterda, agent sozlamalarining Xotira bo'limida saqlanadi. U tegishli loyihalarning so'rovlari bilan tanlangan provayderga yuboriladi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4068"/>
+        <source>Allow</source>
+        <translation>Ruxsat berish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>Do not keep</source>
+        <translation>Saqlamaslik</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1826"/>
+        <source>Every project</source>
+        <translation>Barcha loyihalar</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3508"/>
+        <source>Favorite kept: {}</source>
+        <translation>Sevimli saqlandi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3505"/>
+        <source>Flash features of {}</source>
+        <translation>{} obyektlarini miltillatish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Forget</source>
+        <translation>Unutish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2095"/>
+        <source>Forgotten: {}</source>
+        <translation>Unutildi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3768"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3785"/>
+        <source>Infographic</source>
+        <translation>Infografika</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3789"/>
+        <source>Infographic saved: {}</source>
+        <translation>Infografika saqlandi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3540"/>
+        <source>Infographic {} saved as {}</source>
+        <translation>{} infografikasi {} sifatida saqlandi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3539"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3759"/>
+        <source>Infographic: {}</source>
+        <translation>Infografika: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2067"/>
+        <source>Keep</source>
+        <translation>Saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1898"/>
+        <source>Kept for every project: {}</source>
+        <translation>Barcha loyihalar uchun saqlandi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1902"/>
+        <source>Kept for the source of {}: {}</source>
+        <translation>{} manbasi uchun saqlandi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1920"/>
+        <source>Kept for this project only: {}</source>
+        <translation>Faqat shu loyiha uchun saqlandi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2098"/>
+        <source>Kept: {}</source>
+        <translation>Saqlandi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3245"/>
+        <source>Linked preview: {}</source>
+        <translation>Bog'langan ko'rib chiqish: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3507"/>
+        <source>Message in QGIS</source>
+        <translation>QGIS xabari</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1984"/>
+        <source>Not kept: no answer.</source>
+        <translation>Saqlanmadi: javob yo'q.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1928"/>
+        <source>Not kept: {}</source>
+        <translation>Saqlanmadi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1965"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2090"/>
+        <source>Nothing to take back: the note changed since.</source>
+        <translation>Qaytarib olinadigan narsa yo'q: qayd keyinroq o'zgartirilgan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3773"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3805"/>
+        <source>PDF document (*.pdf)</source>
+        <translation>PDF hujjati (*.pdf)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4077"/>
+        <source>Refuse</source>
+        <translation>Rad etish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3775"/>
+        <source>Save the infographic</source>
+        <translation>Infografikani saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4528"/>
+        <source>Send it again</source>
+        <translation>Qayta yuborish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3701"/>
+        <source>Step {} · {}…</source>
+        <translation>{}-qadam · {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1969"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1973"/>
+        <source>Taken back: {}</source>
+        <translation>Qaytarib olindi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>The agent proposes to forget a note</source>
+        <translation>Agent qaydni unutishni taklif qilmoqda</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <source>The agent proposes to keep a note</source>
+        <translation>Agent qaydni saqlashni taklif qilmoqda</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3786"/>
+        <source>The infographic could not be saved: {}</source>
+        <translation>Infografikani saqlab bo'lmadi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="413"/>
+        <source>The linked layer could not be shown in the Layers panel.</source>
+        <translation>Bog'langan qatlamni Qatlamlar panelida ko'rsatib bo'lmadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="406"/>
+        <source>The linked layer is no longer available in the project.</source>
+        <translation>Bog'langan qatlam loyihada endi mavjud emas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1834"/>
+        <source>This list is full: remove a note in the Memory tab of the settings of the agent first.</source>
+        <translation>Bu ro'yxat to'la: avval agent sozlamalarining Xotira bo'limidan bir qaydni o'chiring.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1832"/>
+        <source>This project only</source>
+        <translation>Faqat shu loyiha</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1828"/>
+        <source>This source ({})</source>
+        <translation>Bu manba ({})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1836"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="2066"/>
+        <source>Undo</source>
+        <translation>Bekor qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1909"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1945"/>
+        <source>Wait for the end of the request, then click again.</source>
+        <translation>So'rov tugashini kuting, keyin yana bosing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4522"/>
+        <source>Your draft stays in the line below. The failed request stays in the conversation.</source>
+        <translation>Qoralamangiz quyidagi maydonda qoladi. Muvaffaqiyatsiz so'rov suhbatda qoladi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3751"/>
+        <source>{} charts as composed</source>
+        <translation>Kompozitsiyadagi {} ta diagramma</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4296"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4301"/>
+        <source>↩ Undoable until the layer edits are saved.</source>
+        <translation>↩ Qatlam tahrirlari saqlanguncha bekor qilish mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4299"/>
+        <source>↩ Undoable: Undo this turn takes it back.</source>
+        <translation>↩ Bekor qilish mumkin: Bu navbatni bekor qilish avvalgi holatni tiklaydi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4303"/>
+        <source>⚠ Final: cannot be undone here.</source>
+        <translation>⚠ Yakuniy: bu yerda bekor qilib bo'lmaydi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4305"/>
+        <source>⚠ Reaches outside QGIS (network, file or code).</source>
+        <translation>⚠ QGIS tashqarisiga ta'sir qiladi (tarmoq, fayl yoki kod).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3512"/>
+        <source>Opening the Processing model designer</source>
+        <translation>Qayta ishlash modeli konstruktori ochilmoqda</translation>
+    </message>
+</context>
+<context>
+    <name>AgentData</name>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="56"/>
+        <source>Choose where to save the project and its layers.</source>
+        <translation>Loyiha va uning qatlamlarini qayerga saqlashni tanlang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Continue in memory</source>
+        <translation>Xotirada davom etish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Data</source>
+        <translation>Ma'lumot</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="149"/>
+        <source>Data still in memory</source>
+        <translation>Ma'lumotlar hali xotirada</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="59"/>
+        <source>Downloaded data and results are held in memory. Save the project together with its layers to keep them after closing QGIS.</source>
+        <translation>Yuklab olingan ma'lumotlar va natijalar xotirada saqlanadi. QGIS yopilgandan keyin ham saqlab qolish uchun loyihani qatlamlari bilan birga saqlang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="54"/>
+        <source>Keep this work?</source>
+        <translation>Bu ish saqlansinmi?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="89"/>
+        <source>Project and layers saved: {}</source>
+        <translation>Loyiha va qatlamlar saqlandi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="94"/>
+        <source>Project data</source>
+        <translation>Loyiha ma'lumotlari</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="74"/>
+        <source>QGIS project (*.qgz *.qgs)</source>
+        <translation>QGIS loyihasi (*.qgz *.qgs)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="73"/>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save project and layers</source>
+        <translation>Loyiha va qatlamlarni saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="55"/>
+        <source>Save project and layers…</source>
+        <translation>Loyiha va qatlamlarni saqlash…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="115"/>
+        <source>Save the downloaded data and results beside this project?
+{}
+
+If you choose No, these data stay in memory and will be lost when the project closes.</source>
+        <translation>Yuklab olingan ma'lumotlar va natijalar shu loyiha yoniga saqlansinmi?
+{}
+
+Yo'q tanlansa, bu ma'lumotlar xotirada qoladi va loyiha yopilganda yo'qoladi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="57"/>
+        <source>The data stay in memory until this project is closed.</source>
+        <translation>Ma'lumotlar shu loyiha yopilguncha xotirada qoladi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="85"/>
+        <source>The project and its layers could not be saved.</source>
+        <translation>Loyiha va uning qatlamlarini saqlab bo'lmadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="70"/>
+        <source>Wait for the current request to finish before saving its data.</source>
+        <translation>Ma'lumotlarini saqlashdan oldin joriy so'rov tugashini kuting.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -3145,6 +3463,237 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <source>view</source>
         <translation>ko'rinish</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <source>Answer</source>
+        <translation>Javob berish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Automatic</source>
+        <translation>Avtomatik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="664"/>
+        <source>Do again the turn Undone last</source>
+        <translation>Oxirgi bekor qilingan navbatni takrorlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1919"/>
+        <source>Do not send them</source>
+        <translation>Ularni yubormaslik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>High</source>
+        <translation>Yuqori</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Low</source>
+        <translation>Past</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1471"/>
+        <source>Maximum</source>
+        <translation>Maksimum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Medium</source>
+        <translation>O'rtacha</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1469"/>
+        <source>Minimal</source>
+        <translation>Eng kam</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="861"/>
+        <location filename="../ui/widgets/agent_panel.py" line="887"/>
+        <source>More actions</source>
+        <translation>Boshqa amallar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1501"/>
+        <source>More effort can take longer and use more tokens.</source>
+        <translation>Ko'proq urinish ko'proq vaqt va token talab qilishi mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1903"/>
+        <source>Next ({}): {}</source>
+        <translation>Keyingi ({}): {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open file: {}</source>
+        <translation>Faylni ochish: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1195"/>
+        <source>Open folder</source>
+        <translation>Jildni ochish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1188"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1296"/>
+        <source>Open folder: {}</source>
+        <translation>Jildni ochish: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1298"/>
+        <source>Open in browser: {}</source>
+        <translation>Brauzerda ochish: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>Propose</source>
+        <translation>Taklif qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1913"/>
+        <source>Put them back in the line</source>
+        <translation>Kiritish maydoniga qaytarish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="804"/>
+        <source>Reasoning effort</source>
+        <translation>Fikrlash darajasi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1500"/>
+        <source>Reasoning effort: {}</source>
+        <translation>Fikrlash darajasi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="830"/>
+        <source>Recipes ▾</source>
+        <translation>Retseptlar ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="893"/>
+        <source>Redo the undone turn</source>
+        <translation>Bekor qilingan navbatni takrorlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="883"/>
+        <source>Request to the agent</source>
+        <translation>Agentga so'rov</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <source>Run again the changes of a request, without the model</source>
+        <translation>So'rov o'zgarishlarini modelsiz qayta bajarish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="725"/>
+        <source>Save project and layers…</source>
+        <translation>Loyiha va qatlamlarni saqlash…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <source>Send (Enter). While the agent works, stops it (Esc).</source>
+        <translation>Yuborish (Enter). Agent ishlayotganda uni to'xtatadi (Esc).</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="885"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Send the request</source>
+        <translation>So'rovni yuborish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="1292"/>
+        <location filename="../ui/widgets/agent_thread.py" line="1301"/>
+        <source>Show in the Layers panel: {}</source>
+        <translation>Qatlamlar panelida ko'rsatish: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="889"/>
+        <source>Show the history</source>
+        <translation>Tarixni ko'rsatish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="890"/>
+        <source>Show the recipes</source>
+        <translation>Retseptlarni ko'rsatish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="891"/>
+        <source>Start a new conversation</source>
+        <translation>Yangi suhbat boshlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1845"/>
+        <source>Stop the agent</source>
+        <translation>Agentni to'xtatish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="894"/>
+        <source>Take the waiting requests back to the line</source>
+        <translation>Kutayotgan so'rovlarni kiritish maydoniga qaytarish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="116"/>
+        <source>This output could not be opened: {}</source>
+        <translation>Bu natijani ochib bo'lmadi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_outputs.py" line="112"/>
+        <source>This output is no longer available: {}</source>
+        <translation>Bu natija endi mavjud emas: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1470"/>
+        <source>Very high</source>
+        <translation>Juda yuqori</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="888"/>
+        <source>What the agent may do</source>
+        <translation>Agent nima qila oladi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1636"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act does it.</source>
+        <translation>Agent nima qila oladi: Javob berish o'qiydi va hech narsani o'zgartirmaydi, Taklif qilish qadamlarni tushuntiradi va har bir o'zgarishni qo'llashdan oldin ko'rsatadi, Bajarish ularni amalga oshiradi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1797"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act follows the saved permissions.</source>
+        <translation>Agent nima qila oladi: Javob berish o'qiydi va hech narsani o'zgartirmaydi, Taklif qilish qadamlarni tushuntiradi va har bir o'zgarishni qo'llashdan oldin ko'rsatadi, Bajarish saqlangan ruxsatlarga amal qiladi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="828"/>
+        <source>What was asked, what changed, applied or undone</source>
+        <translation>So'rovlar, o'zgarishlar va qo'llangan yoki bekor qilingan amallar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="768"/>
+        <source>does it, asking only what cannot be undone</source>
+        <translation>bajaradi va faqat bekor qilib bo'lmaydigan amallar haqida so'raydi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="787"/>
+        <source>follows the permissions saved in the settings</source>
+        <translation>sozlamalarda saqlangan ruxsatlarga amal qiladi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>shows each change before applying it</source>
+        <translation>har bir o'zgarishni qo'llashdan oldin ko'rsatadi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <source>writes the steps, shows each change before applying it</source>
+        <translation>qadamlarni tushuntiradi va har bir o'zgarishni qo'llashdan oldin ko'rsatadi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
+        <source>Processing model designer…</source>
+        <translation>Qayta ishlash modeli konstruktori…</translation>
+    </message>
 </context>
 <context>
     <name>AgentWidgets</name>
@@ -3742,6 +4291,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <source>Clear the zone</source>
         <translation>Zonani tozalash</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="491"/>
+        <source>Local copy: keep what this web service shows over the visible map in a file of this computer</source>
+        <translation>Mahalliy nusxa: bu veb-xizmat ko'rinadigan xaritada ko'rsatgan narsalarni shu kompyuterdagi faylga saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="493"/>
+        <source>Local copy</source>
+        <translation>Mahalliy nusxa</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -4260,6 +4819,19 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL qatlamlari aniqlandi, lekin psycopg2 oʻrnatilmagan. Mahalliy Spatialite backendi ishlatilmoqda. Katta maʼlumotlar majmuasi bilan yaxshiroq ishlash uchun psycopg2 oʻrnating.</translation>
+    </message>
+</context>
+<context>
+    <name>Designer</name>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Save Model</source>
+        <translation>Modelni saqlash</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/processing_models.py" line="223"/>
+        <source>Processing models (*.model3)</source>
+        <translation>Qayta ishlash modellari (*.model3)</translation>
     </message>
 </context>
 <context>
@@ -10157,6 +10729,11 @@ Misollar: yangi ortofotoda qayta chizilgan binolar izi (past sam_iou o'zgargan b
 
 Raster xaritadagidek, o'z uslubi bilan chiziladi. SAM FilterMate panelining TANLAGICH guruhidan bir marta o'rnatiladi; u protsessorda ishlaydi, 1024 pikselli har bir oyna uchun bir necha soniya.</translation>
     </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="178"/>
+        <source>Canceled while the objects were read</source>
+        <translation>Obyektlarni o'qish paytida bekor qilindi</translation>
+    </message>
 </context>
 <context>
     <name>PublishFavoritesDialog</name>
@@ -13902,6 +14479,21 @@ Papka: {6}</translation>
         <location filename="../adapters/qgis/stream_copy.py" line="421"/>
         <source>{0} request(s) of the service were not answered: the image may have holes.</source>
         <translation>Xizmatga yuborilgan {0} ta so'rovga javob berilmadi: tasvirda bo'shliqlar bo'lishi mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="233"/>
+        <source>Copy in memory: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests, {5:.0f} MB at most. Save the project and its layers to keep it.</source>
+        <translation>Xotiradagi nusxa: {0} x {1} piksel, har pikselga {2:.3g} {3}, {4} so'rov, ko'pi bilan {5:.0f} MB. Saqlab qolish uchun loyiha va qatlamlarini saqlang.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="243"/>
+        <source>Copy of the visible features in memory, {0} at most. Save the project and its layers to keep it.</source>
+        <translation>Ko'rinadigan obyektlarning xotiradagi nusxasi, ko'pi bilan {0} ta. Saqlab qolish uchun loyiha va qatlamlarini saqlang.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/stream_copy.py" line="228"/>
+        <source>Memory; save the project and its layers to keep the copy</source>
+        <translation>Xotira; nusxani saqlab qolish uchun loyiha va qatlamlarini saqlang</translation>
     </message>
 </context>
 <context>
