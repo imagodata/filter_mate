@@ -365,8 +365,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         try:
             favorite = accessor.save_favorite(name, description=str(args.get("description") or ""))
         except FavoriteNameTakenError:
-            raise ToolFailure(f"A favorite named {name!r} already exists: list_favorites shows the names taken, "
-                              "ask the user with ask_user whether to use another name.") from None
+            raise ToolFailure(f"A favorite named {name!r} already exists: list_favorites shows the names taken. "
+                              "Ask the user for another name.") from None
         except (NoActiveFilterError, FavoriteSaveError) as exc:
             raise ToolFailure(str(exc)) from None
         return {"favorite": asdict(favorite)}

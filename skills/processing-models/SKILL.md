@@ -3,7 +3,7 @@ name: processing-models
 title: Save a workflow as a Processing model
 description: Keep, reuse or share a chain of Processing treatments run in this session as a .model3 model
 metadata:
-  version: 1
+  version: 2
   plugin_min: 5.1.2
   audience: chat
   tools: list_layers, describe_layer, find_algorithms, describe_algorithm, run_algorithm
@@ -15,6 +15,10 @@ metadata:
 # Processing models
 
 ## Propose it as an option
+
+This skill is offered only in the built-in chat with expert mode enabled (run_pyqgis available). It has no MCP
+export: external clients cannot call run_pyqgis. When it is unavailable, explain that the user enables expert mode
+in the agent settings; never offer to bypass the restriction.
 
 After a chain of two or more run_algorithm steps that works, or when the user says keep, reuse, share, automate
 or replay: propose once, in one sentence, to save the chain as a reusable Processing model. Build it only on an
@@ -49,9 +53,20 @@ does and what file it writes.
 2. Write the code with QgsProcessingModelAlgorithm: one model input per mapped input, one child per kept step,
    each child parameter wired to a model input or to an output of an earlier child. Keep the values the session
    tested.
+   Resolve the final layer ids back to the outputs that produced them: do not embed a temporary session layer id
+   or a temporary output path. Use QgsProcessingModelChildParameterSource for model parameters and child outputs,
+   and QgsProcessingModelOutput for the final outputs. Give every child a stable, unique id.
+   Use child.addParameterSources(name, [source]) for each parameter: setParameterSources has incompatible Python
+   bindings in some QGIS builds. scripts/build_processing_models.py and tests/qgis_headless/check_processing_models.py
+   show the version-compatible construction API.
 3. Write the file with the model save call, read it back, and report: the file, its inputs, its steps in order,
    and how to run it from the Processing toolbox. Test the version and pick the API the running QGIS has, from
    QGIS 3.22 to 4.x.
+   Check that toFile succeeds and fromFile reads the saved model, then validate it with the current Processing
+   registry. Do not report success for a partial model, missing algorithm, disconnected input or missing final
+   output. Creating the model never runs its algorithms; a test run needs its own request and confirmation.
+   Read destinationParameterDefinitions() after reloading to obtain the actual output parameter names; QGIS may
+   derive them from output descriptions rather than child ids.
 
 ## What never to do
 

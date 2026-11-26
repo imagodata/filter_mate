@@ -1,7 +1,7 @@
 """What the user watches while the agent works, in a real (headless) QGIS.
 
-Without a window every tool that needs one is refused cleanly; what needs none (names, expressions, atlas
-pages) really runs: the blink itself and the opened designer need QGIS on screen.
+Without a window every GUI tool is refused cleanly. Atlas navigation also runs against real QGIS objects with
+a stand-in interface; the blink itself and the opened designer need QGIS on screen.
 
     docker run --rm -v "$PWD":/src -e QT_QPA_PLATFORM=offscreen qgis/qgis:ltr \\
         python3 /src/tests/qgis_headless/check_agent_gui.py
@@ -94,7 +94,7 @@ def main():
     check("message: a text is refused for its window, not its reading",
           refused(lambda: gui_control.show_message("hello"), "no window"))
 
-    # --- preview_atlas: pages turn for real, even headless; the preview flag finds no designer
+    # --- preview_atlas
     check("atlas: refuses an unknown layout", refused(
         lambda: gui_control.preview_atlas("nope"), "no print layout"))
     check("atlas: refuses a layout with no atlas", refused(
@@ -102,14 +102,30 @@ def main():
     layouts.set_atlas("Carte", "communes", page_name='"nom"')
     check("atlas: refuses a bad action", refused(
         lambda: gui_control.preview_atlas("Carte", action="back"), "action is one of"))
-    turned = gui_control.preview_atlas("Carte", action="next")
+    atlas = project.layoutManager().layoutByName("Carte").atlas()
+    initial_page = atlas.currentFeatureNumber()
+    check("atlas: refuses without a window", refused(
+        lambda: gui_control.preview_atlas("Carte"), "no window"))
+    check("atlas: no page changed by the refusal", atlas.currentFeatureNumber() == initial_page)
+    check("atlas: preview false still needs a window", refused(
+        lambda: gui_control.preview_atlas("Carte", preview=False), "no window"))
+
+    class Window:
+        def openLayoutDesigners(self):
+            return []
+
+    face = Window()
+    turned = gui_control.preview_atlas("Carte", action="next", iface_obj=face)
     check("atlas: next turns to page 2 of 5, with no designer",
           (turned["page"], turned["pages"], turned["preview"]) == (2, 5, False), turned)
-    turned = gui_control.preview_atlas("Carte", action="last")
+    turned = gui_control.preview_atlas("Carte", action="next", iface_obj=face)
+    check("atlas: a second next turns to page 3", turned["page"] == 3, turned)
+    turned = gui_control.preview_atlas("Carte", action="last", iface_obj=face)
     check("atlas: last turns to page 5", turned["page"] == 5, turned)
     check("atlas: no next page past the last one", refused(
-        lambda: gui_control.preview_atlas("Carte", action="next"), "no next page"))
-    turned = gui_control.preview_atlas("Carte", action="first")
+        lambda: gui_control.preview_atlas("Carte", action="next", iface_obj=face), "no next page"))
+    check("atlas: refusal keeps the last page", atlas.currentFeatureNumber() == 4)
+    turned = gui_control.preview_atlas("Carte", action="first", iface_obj=face)
     check("atlas: first turns back to page 1", turned["page"] == 1, turned)
 
 

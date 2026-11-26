@@ -17,7 +17,7 @@ from .messages import (
     StreamFailure, TextDelta, ToolCallPart, ToolResultPart, TurnComplete,
 )
 from .providers.base import HttpRequest
-from .session import CAUSE_FAILED, CAUSE_STOPPED, STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
+from .session import CAUSE_FAILED, CAUSE_STOPPED, NOT_RUN, STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
 from .permissions import ASK, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, TURNED_OFF, PermissionPolicy, asked_alone
 from .tool_executor import Handler, ToolExecutor, connector_gate
 
@@ -319,9 +319,11 @@ class ChatEngine:
                 each = confirm_each([call for _position, call in asked])
             except Exception:
                 logger.exception("Agent confirmation failed")
-                each = None
+                each = {}
             if each is not None:
-                return {position: bool(each.get(index, False)) for index, (position, _call) in enumerate(asked)}
+                if not isinstance(each, dict):
+                    each = {}
+                return {position: each.get(index) is True for index, (position, _call) in enumerate(asked)}
         confirm_many = getattr(self._listener, "confirm_many", None)
         if len(asked) < 2 or confirm_many is None:
             return {}
@@ -333,11 +335,17 @@ class ChatEngine:
         return {position: yes for position, _call in asked}
 
     def _run_one(self, call: ToolCallPart, answered: Optional[bool] = None) -> ToolResultPart:
+        generation = self._generation
         verdict = self._executor.verdict(call, self._policy)
         if verdict in (REFUSE, PROTECTED, TURNED_OFF):
             return self._executor.refused(call, self._policy)
         if verdict == ASK and not (answered if answered is not None else self._confirmed(call)):
             return self._executor.declined(call, self._policy)
+        if self._cancelled or generation != self._generation:
+            return ToolResultPart(call.call_id, NOT_RUN, is_error=True)
+        verdict_now = self._executor.verdict(call, self._policy)
+        if verdict_now in (REFUSE, PROTECTED, TURNED_OFF):
+            return self._executor.refused(call, self._policy)
         spec = self._executor.spec(call.name)
         began = spec is not None and not spec.read_only and not spec.manages_history
         if began:
@@ -347,7 +355,8 @@ class ChatEngine:
                 logger.exception("Agent undo point failed")
                 return ToolResultPart(call.call_id, _NO_UNDO_POINT, is_error=True)
         self._notify(self._listener.on_tool_start, call)
-        generation = self._generation
+        if self._cancelled or generation != self._generation:
+            return ToolResultPart(call.call_id, NOT_RUN, is_error=True)
         started = time.monotonic()
         result = self._executor.execute(call)
         spent = (time.monotonic() - started) * 1000

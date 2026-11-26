@@ -813,15 +813,16 @@ class FavoritesController(BaseController):
         name = (name or "").strip()
         if not name or not self._favorites_service:
             return None
-        expression = self.get_current_filter_expression()
-        if not expression and not self._capture_coverage_layers():
-            return None
         if self._favorites_service.get_favorite_by_name(name) is not None:
             logger.info(f"Favorite '{name}' not created: name already taken")
             return None
-        favorite_id = self._persist_current_favorite(name, expression, description)
+        layer = self.dockwidget.current_layer
+        expression = ""
+        if layer is not None and not self._is_coverage_layer(layer) and hasattr(layer, "subsetString"):
+            expression = layer.subsetString() or ""
+        favorite_id = self._persist_current_favorite(name, expression, description, require_active=True)
         if not favorite_id:
-            raise RuntimeError(f"Favorite '{name}' could not be saved (details in filtermate.log)")
+            return None
         self.favorite_added.emit(name)
         self.favorites_changed.emit()
         self.update_indicator()
@@ -855,7 +856,8 @@ class FavoritesController(BaseController):
             self._warn_not_saved()
             return False
 
-    def _persist_current_favorite(self, name: str, expression: str, description: str = "") -> Optional[str]:
+    def _persist_current_favorite(self, name: str, expression: str, description: str = "",
+                                  require_active: bool = False) -> Optional[str]:
         """Capture the live filter state and add it as a favorite. Returns the id, None when not added."""
         if not self._favorites_service:
             return None
@@ -927,11 +929,14 @@ class FavoritesController(BaseController):
                 if spatial_config is None:
                     spatial_config = {}
                 spatial_config['source_layer_signature'] = layer_signature_for(layer)
-            coverage_layers = self._capture_coverage_layers()
+            coverage_layers = self._capture_coverage_layers(strict=True) if require_active else self._capture_coverage_layers()
             if coverage_layers:
                 if spatial_config is None:
                     spatial_config = {}
                 spatial_config['coverage_layers'] = coverage_layers
+
+            if require_active and not expression.strip() and not remote_layers and not coverage_layers:
+                return None
 
             # Use FavoritesService.add_favorite() with individual parameters
             favorite_id = self._favorites_service.add_favorite(
@@ -942,6 +947,7 @@ class FavoritesController(BaseController):
                 remote_layers=remote_layers if remote_layers else None,
                 spatial_config=spatial_config,
                 description=description,
+                layer_id=source_layer_id,
             )
 
             if favorite_id:
@@ -951,6 +957,8 @@ class FavoritesController(BaseController):
                 self._favorites_service.save()  # No-op, already persisted
                 return favorite_id
             logger.warning(f"Failed to create favorite '{name}' - add_favorite() returned None")
+            if require_active:
+                raise RuntimeError(f"Favorite '{name}' could not be saved (details in filtermate.log)")
             return None
 
         except FavoritePersistenceError:
@@ -1006,11 +1014,13 @@ class FavoritesController(BaseController):
             return False
 
     @staticmethod
-    def _capture_coverage_layers() -> list:
+    def _capture_coverage_layers(strict: bool = False) -> list:
         try:
             from ...adapters.qgis.coverage_layers.favorites_bridge import capture
             return capture()
         except Exception as e:
+            if strict:
+                raise
             logger.debug(f"Raster / point cloud states not captured: {e}")
             return []
 

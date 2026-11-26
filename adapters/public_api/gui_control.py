@@ -138,7 +138,8 @@ def set_active_layer(layer: str, reveal: bool = True, iface_obj: Any = None) -> 
     if not callable(setter):
         raise ValueError("this QGIS cannot set the active layer")
     try:
-        setter(found)
+        if setter(found) is False:
+            raise ValueError(f"'{found.name()}' could not be made active")
     except (RuntimeError, AttributeError, TypeError) as exc:
         raise ValueError(f"'{found.name()}' could not be made active ({exc})") from None
     revealed = _reveal(face, found) if reveal else False
@@ -207,8 +208,9 @@ def show_message(text: str, level: str = "info", duration: int = 5,
     if bar is None:
         raise ValueError("QGIS has no message bar here (no window)")
     from qgis.core import Qgis
-    qgis_level = {"info": Qgis.Info, "success": Qgis.Success,
-                  "warning": Qgis.Warning, "critical": Qgis.Critical}[kind]
+    levels = getattr(Qgis, "MessageLevel", Qgis)
+    qgis_level = {"info": levels.Info, "success": levels.Success,
+                  "warning": levels.Warning, "critical": levels.Critical}[kind]
     try:
         bar.pushMessage("FilterMate", text, qgis_level, seconds)
     except (RuntimeError, AttributeError, TypeError) as exc:
@@ -221,7 +223,7 @@ def preview_atlas(layout: str, action: str = "next", preview: bool = True,
     """Turn a page of the atlas preview of a print layout: first, previous, next or last feature.
 
     ``preview`` also turns the atlas preview on in the designer showing the layout, so the user sees the page
-    change there; without an open designer the page still turns (export_layout with atlas writes it). The atlas
+    change there; a QGIS window is required even without an open designer. The atlas
     itself is unchanged (set_atlas sets it): undoing the turn of the chat leaves the page where it is. Answers
     the page turned to (1-based) and the pages of the atlas.
     """
@@ -232,28 +234,25 @@ def preview_atlas(layout: str, action: str = "next", preview: bool = True,
     move_name = str(action or "next").lower()
     if move_name not in ATLAS_ACTIONS:
         raise ValueError(f"action is one of {', '.join(ATLAS_ACTIONS)}")
+    face = _window(iface_obj)
+    previous_page = max(0, int(atlas.currentFeatureNumber()))
     try:
         count = int(atlas.updateFeatures())
     except (RuntimeError, AttributeError, TypeError) as exc:
         raise ValueError(f"the atlas of {target.name()!r} could not be read ({exc})") from None
     if count <= 0:
         raise ValueError("the atlas has no page: its coverage layer, as filtered now, keeps no feature")
-    move = {"first": atlas.first, "previous": atlas.previous, "next": atlas.next, "last": atlas.last}[move_name]
+    page = {"first": 0, "previous": previous_page - 1, "next": previous_page + 1, "last": count - 1}[move_name]
+    if not 0 <= page < count:
+        atlas.seekTo(min(previous_page, count - 1))
+        raise ValueError(f"the atlas has no {move_name} page from page {previous_page + 1} of {count}")
+    shown = _enable_preview(face, target) if preview else False
     try:
-        began = bool(atlas.beginRender())
-        try:
-            turned = bool(move())
-        finally:
-            if began:
-                try:
-                    atlas.endRender()
-                except (RuntimeError, AttributeError):
-                    pass
+        turned = bool(atlas.seekTo(page))
     except (RuntimeError, AttributeError, TypeError) as exc:
         raise ValueError(f"the atlas of {target.name()!r} could not turn {move_name} ({exc})") from None
     if not turned:
         raise ValueError(f"the atlas has no {move_name} page from page {atlas.currentFeatureNumber() + 1} of {count}")
-    shown = _enable_preview(iface_obj, target) if preview else False
     try:
         target.refresh()
     except (RuntimeError, AttributeError):
@@ -287,3 +286,28 @@ def _enable_preview(iface_obj: Any, layout: Any) -> bool:
             return False
         return True
     return False
+
+
+def chat_handlers() -> Dict[str, Any]:
+    """Dispatch the chat-only window tools, translating refusals for the agent executor."""
+    from ...core.agent.tool_executor import ToolFailure
+
+    def guarded(callback):
+        def run(arguments):
+            try:
+                return callback(arguments)
+            except ValueError as exc:
+                raise ToolFailure(str(exc)) from None
+        return run
+
+    return {
+        "open_layout": guarded(lambda arguments: open_layout(arguments["name"])),
+        "flash_features": guarded(lambda arguments: flash_features(
+            arguments["layer"], arguments["expression"], limit=arguments.get("limit", MAX_FLASH))),
+        "set_active_layer": guarded(lambda arguments: set_active_layer(
+            arguments["layer"], reveal=arguments.get("reveal", True))),
+        "show_message": guarded(lambda arguments: show_message(
+            arguments["text"], level=arguments.get("level", "info"), duration=arguments.get("duration", 5))),
+        "preview_atlas": guarded(lambda arguments: preview_atlas(
+            arguments["layout"], action=arguments.get("action", "next"), preview=arguments.get("preview", True))),
+    }

@@ -481,6 +481,9 @@ def test_a_failure_after_steps_says_they_stay_and_keeps_the_request_out_of_the_l
     detail = controller.panel.show_error.call_args[0][1]
     assert "stopped midway. Steps already done" in detail and "): 1." in detail and "go on" in detail
     controller.panel.input.setText.assert_not_called()
+    assert controller.panel.show_error.call_args[0][3] == "Continue"
+    controller.panel.show_error.call_args[0][4]()
+    assert controller._last_request == "Go on with what is left of the request."
 
 
 @pytest.mark.parametrize("kind", ["auth", "quota", "bad_request"])
@@ -629,15 +632,15 @@ def test_the_memory_goes_with_the_context_of_a_request(ctrl_module, controller, 
     kept, _note = core_memory.added(kept, "aérien = type_infra 'AER'", "source", "ogr::troncons", with_values=True)
     store.held, store.sources = kept, ([("ogr::troncons", "Tronçons")], "ogr::troncons")
     block = controller._memory_part(([{"layer_id": "t1"}], [], {"active_layer_id": "t1"}))
-    assert block.splitlines() == [core_memory.HEADER, core_memory.USER_TITLE, "- MRO = zone de mutualisation",
-                                  "For the layer Tronçons:", "- aérien = type_infra 'AER'"]
+    assert block.splitlines() == [core_memory.HEADER, core_memory.USER_TITLE, "- m1: MRO = zone de mutualisation",
+                                  "For the layer Tronçons:", "- m2: aérien = type_infra 'AER'"]
     assert block in controller._project_context(full=True)
     controller._context_memory.sent()
     monkeypatch.setattr(controller, "_seen", {}, raising=False)  # an answer ended: the next request says what changed
     monkeypatch.setattr(controller, "_read_project", lambda: None)
     assert core_memory.HEADER not in controller._project_context(full=False)  # sent once, then when it changed
     store.held, _note = core_memory.added(kept, "réponds en mètres")
-    assert "- réponds en mètres" in controller._project_context(full=False)
+    assert "- m3: réponds en mètres" in controller._project_context(full=False)
     monkeypatch.setattr(ctrl_module, "load_settings", lambda: types.SimpleNamespace(memory=True, send_values=False))
     assert "- aérien" not in controller._memory_part(([{"layer_id": "t1"}], [], {}))  # values no longer shared
     monkeypatch.setattr(ctrl_module, "load_settings", lambda: types.SimpleNamespace(memory=False, send_values=True))
@@ -861,13 +864,18 @@ def test_no_card_asks_each_action_while_nothing_runs(ctrl_module, controller):  
 
 def test_the_error_card_sends_the_last_request_again(ctrl_module, controller, monkeypatch):  # noqa: F811
     sent = []
-    monkeypatch.setattr(controller, "_on_resend", sent.append)
-    controller._last_request = ""
-    controller._resend_last()
-    assert sent == []
-    controller._last_request = "filter the parcels"
-    controller._resend_last()
-    assert sent == ["filter the parcels"]
+    monkeypatch.setattr(controller, "_on_send", lambda text, mode="", queued=False: sent.append((text, mode, queued)))
+    controller.panel.input.text.return_value = "unfinished draft"
+    request, generation = controller._memory_request, controller._memory_generation
+    controller._retry_failed("filter the parcels", "propose", request, generation)
+    assert sent == [("filter the parcels", "propose", True)]
+    controller._memory_request += 1
+    controller._retry_failed("filter the parcels", "act", request, generation)
+    assert len(sent) == 1
+    controller._memory_request = request
+    controller._memory_generation += 1
+    controller._retry_failed("filter the parcels", "act", request, generation)
+    assert len(sent) == 1
 
 
 def test_the_question_for_several_actions_shows_their_arguments(ctrl_module, dock):

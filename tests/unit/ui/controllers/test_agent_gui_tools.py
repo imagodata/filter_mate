@@ -43,27 +43,29 @@ def test_labels_say_what_the_user_will_see(controller):  # noqa: F811
     calls = _messages().ToolCallPart
     assert controller._describe(calls("c1", "open_layout", {"name": "Carte"})) == "Layout Carte"
     assert controller._describe(calls("c2", "preview_atlas", {"layout": "Carte"})) == "Atlas of Carte"
-    assert controller._describe(calls("c3", "flash_features", {"layer": "communes"})) == "Flashing communes"
+    assert controller._describe(calls("c3", "flash_features", {"layer": "communes"})) == "Flash features of communes"
     assert controller._describe(calls("c4", "set_active_layer", {"layer": "communes"})) == "Active layer: communes"
-    assert controller._describe(calls("c5", "show_message", {"text": "Filtre appliqué."})) == "Message: Filtre appliqué."
+    assert controller._describe(calls("c5", "show_message", {"text": "Filtre appliqué."})) == "Message in QGIS"
 
 
 def test_handlers_answer_what_the_window_did(controller, monkeypatch):  # noqa: F811
     controls = _controls(monkeypatch)
+    handlers = controls.chat_handlers()
     monkeypatch.setattr(controls, "open_layout", lambda name: {"name": name, "opened": True})
     monkeypatch.setattr(controls, "flash_features", lambda layer, expression, limit=500: {"flashed": 2})
     monkeypatch.setattr(controls, "set_active_layer", lambda layer, reveal=True: {"active": True})
     monkeypatch.setattr(controls, "show_message", lambda text, level="info", duration=5: {"shown": True})
     monkeypatch.setattr(controls, "preview_atlas", lambda layout, action="next", preview=True: {"page": 2})
-    assert controller._open_layout_tool({"name": "Carte"}) == {"name": "Carte", "opened": True}
-    assert controller._flash_features_tool({"layer": "c", "expression": '"a" = 1'}) == {"flashed": 2}
-    assert controller._set_active_layer_tool({"layer": "c"}) == {"active": True}
-    assert controller._show_message_tool({"text": "hi"}) == {"shown": True}
-    assert controller._preview_atlas_tool({"layout": "Carte"}) == {"page": 2}
+    assert handlers["open_layout"]({"name": "Carte"}) == {"name": "Carte", "opened": True}
+    assert handlers["flash_features"]({"layer": "c", "expression": '"a" = 1'}) == {"flashed": 2}
+    assert handlers["set_active_layer"]({"layer": "c"}) == {"active": True}
+    assert handlers["show_message"]({"text": "hi"}) == {"shown": True}
+    assert handlers["preview_atlas"]({"layout": "Carte"}) == {"page": 2}
 
 
 def test_handlers_refuse_as_tool_failures(controller, monkeypatch):  # noqa: F811
     controls = _controls(monkeypatch)
+    handlers = controls.chat_handlers()
 
     def refuse(*args, **kwargs):
         raise ValueError("QGIS has no window here")
@@ -75,12 +77,12 @@ def test_handlers_refuse_as_tool_failures(controller, monkeypatch):  # noqa: F81
     monkeypatch.setattr(controls, "preview_atlas", refuse)
     ToolFailure = _failures()
     with pytest.raises(ToolFailure, match="no window"):
-        controller._open_layout_tool({"name": "Carte"})
+        handlers["open_layout"]({"name": "Carte"})
     with pytest.raises(ToolFailure, match="no window"):
-        controller._flash_features_tool({"layer": "c", "expression": '"a" = 1'})
+        handlers["flash_features"]({"layer": "c", "expression": '"a" = 1'})
     with pytest.raises(ToolFailure, match="no window"):
-        controller._set_active_layer_tool({"layer": "c"})
+        handlers["set_active_layer"]({"layer": "c"})
     with pytest.raises(ToolFailure, match="no window"):
-        controller._show_message_tool({"text": "hi"})
+        handlers["show_message"]({"text": "hi"})
     with pytest.raises(ToolFailure, match="no window"):
-        controller._preview_atlas_tool({"layout": "Carte"})
+        handlers["preview_atlas"]({"layout": "Carte"})

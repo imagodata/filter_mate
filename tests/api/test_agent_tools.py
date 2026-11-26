@@ -1289,6 +1289,27 @@ class TestCombinedFilters:
 
 
 class TestSaveFavoriteTool:
+    def test_native_mcp_saves_favorites_without_exposing_chat_only_tools(self, tmp_path):
+        from core.agent.mcp_server import McpProtocol, RequestHead
+        accessor = Accessor()
+        accessor.apply_filter("communes", '"pop" > 10', source="test")
+        tools = tuple(tool for tool in chat_tools() if not tool.chat_only)
+        executor = ToolExecutor(tools, build_handlers(accessor, tmp_path))
+        protocol = McpProtocol(lambda: tools, lambda spec, arguments, client: executor.execute(
+            ToolCallPart("mcp", spec.name, arguments)), "FilterMate", "test")
+
+        def request(method, params):
+            body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}).encode()
+            return json.loads(protocol.handle(RequestHead("POST", "/mcp", {}, 0, len(body)), body).body)["result"]
+
+        listed = {tool["name"] for tool in request("tools/list", {})["tools"]}
+        assert "save_favorite" in listed
+        assert not ({"open_layout", "preview_atlas", "flash_features", "set_active_layer", "show_message"} & listed)
+        result = request("tools/call", {"name": "save_favorite", "arguments": {"name": "Kept externally"}})
+        assert not result["isError"]
+        saved = json.loads(result["content"][0]["text"])["favorite"]
+        assert saved["name"] == "Kept externally" and saved["expression"] == '"pop" > 10'
+
     def test_saves_the_active_filter_under_a_name(self, tmp_path):
         accessor = Accessor()
         accessor.apply_filter("communes", '"pop" > 10', source="test")

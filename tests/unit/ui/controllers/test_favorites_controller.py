@@ -1479,6 +1479,106 @@ def _make_message_controller(service):
     return ctrl
 
 
+class TestCreateFavoriteFromCurrent:
+    @pytest.fixture
+    def capture(self, monkeypatch):
+        service = MagicMock()
+        service.get_favorite_by_name.return_value = None
+        service.add_favorite.return_value = "saved-id"
+        ctrl = _make_message_controller(service)
+        source = MagicMock()
+        source.id.return_value = "source-id"
+        source.name.return_value = "Source"
+        source.providerType.return_value = "ogr"
+        source.subsetString.return_value = '"population" > 1000'
+        ctrl._dockwidget.current_layer = source
+        ctrl.get_current_filter_expression = lambda: '"draft_not_applied" = 1'
+        ctrl._spatial_instance.capture_spatial_config.return_value = {"predicates": ["Intersect"], "buffer": 25}
+        ctrl._capture_coverage_layers = MagicMock(return_value=[])
+        ctrl._is_coverage_layer = lambda layer: False
+        project = MagicMock()
+        project.mapLayers.return_value = {"source-id": source}
+        monkeypatch.setattr(favorites_controller, "QgsProject", MagicMock(instance=lambda: project))
+        monkeypatch.setattr(favorites_controller, "layer_signature_for", lambda layer: "ogr::" + layer.id())
+        monkeypatch.setattr(favorites_controller, "exact_filtered_feature_count", lambda layer: 7)
+        return ctrl, service, source, project
+
+    def test_saves_applied_state_and_identity_instead_of_an_unapplied_widget(self, capture):
+        ctrl, service, source, project = capture
+        remote = MagicMock()
+        remote.id.return_value = "remote-id"
+        remote.name.return_value = "Target"
+        remote.providerType.return_value = "postgres"
+        remote.subsetString.return_value = '"height" > 12'
+        project.mapLayers.return_value["remote-id"] = remote
+        coverage = [{"layer_id": "raster-id", "selection": {"minimum": 10}},
+                    {"layer_id": "cloud-id", "criteria": {"classes": [2, 6]}}]
+        ctrl._capture_coverage_layers.return_value = coverage
+
+        assert ctrl.create_favorite_from_current("  Kept  ", "All filters") == "saved-id"
+
+        saved = service.add_favorite.call_args.kwargs
+        assert saved["name"] == "Kept" and saved["description"] == "All filters"
+        assert saved["expression"] == source.subsetString() and saved["layer_id"] == "source-id"
+        assert saved["layer_name"] == "Source" and saved["layer_provider"] == "ogr"
+        assert saved["remote_layers"] == {"ogr::remote-id": {
+            "expression": '"height" > 12', "feature_count": 7, "layer_id": "remote-id",
+            "layer_signature": "ogr::remote-id", "display_name": "Target", "provider": "postgres"}}
+        assert saved["spatial_config"] == {"predicates": ["Intersect"], "buffer": 25,
+                                            "source_layer_signature": "ogr::source-id", "coverage_layers": coverage}
+        ctrl.favorite_added.emit.assert_called_once_with("Kept")
+        ctrl.favorites_changed.emit.assert_called_once_with()
+        ctrl._capture_coverage_layers.assert_called_once_with(strict=True)
+
+    def test_an_unapplied_expression_does_not_create_a_favorite(self, capture):
+        ctrl, service, source, project = capture
+        source.subsetString.return_value = ""
+        assert ctrl.create_favorite_from_current("Kept") is None
+        service.add_favorite.assert_not_called()
+        ctrl.favorite_added.emit.assert_not_called()
+
+    def test_a_remote_filter_is_kept_when_the_current_layer_has_none(self, capture):
+        ctrl, service, source, project = capture
+        remote = MagicMock()
+        remote.id.return_value = "remote-id"
+        remote.name.return_value = "Target"
+        remote.subsetString.return_value = '"height" > 12'
+        source.subsetString.return_value = ""
+        project.mapLayers.return_value["remote-id"] = remote
+        assert ctrl.create_favorite_from_current("Kept") == "saved-id"
+        saved = service.add_favorite.call_args.kwargs
+        assert saved["expression"] == "" and saved["remote_layers"]["ogr::remote-id"]["expression"] == '"height" > 12'
+
+    def test_a_coverage_clip_can_be_saved_without_a_current_vector_layer(self, capture):
+        ctrl, service, source, project = capture
+        project.mapLayers.return_value = {}
+        ctrl._dockwidget.current_layer = None
+        coverage = [{"layer_id": "cloud-id", "criteria": {"classes": [2]}}]
+        ctrl._capture_coverage_layers.return_value = coverage
+        assert ctrl.create_favorite_from_current("Kept") == "saved-id"
+        assert service.add_favorite.call_args.kwargs["spatial_config"]["coverage_layers"] == coverage
+
+    def test_a_taken_or_blank_name_does_not_replace_anything(self, capture):
+        ctrl, service, source, project = capture
+        assert ctrl.create_favorite_from_current("  ") is None
+        service.get_favorite_by_name.return_value = object()
+        assert ctrl.create_favorite_from_current("Kept") is None
+        service.add_favorite.assert_not_called()
+        ctrl.favorites_changed.emit.assert_not_called()
+
+    @pytest.mark.parametrize("failure", ["capture", "persist"])
+    def test_capture_and_persistence_failures_never_report_success(self, capture, failure):
+        ctrl, service, source, project = capture
+        if failure == "capture":
+            ctrl._capture_coverage_layers.side_effect = RuntimeError("coverage state unreadable")
+        else:
+            service.add_favorite.return_value = None
+        with pytest.raises(RuntimeError):
+            ctrl.create_favorite_from_current("Kept")
+        ctrl.favorite_added.emit.assert_not_called()
+        ctrl.favorites_changed.emit.assert_not_called()
+
+
 @pytest.mark.usefixtures("_empty_project")
 class TestAddCurrentToFavorites:
     def test_add_failure_is_said(self):

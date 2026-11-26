@@ -20,8 +20,8 @@ def test_the_parts_read_as_before():
     assert protected_part(["Communes"]) == ("Layers the user protected from the agent (read them, use them as a "
                                             'source, never change them): ["Communes"]')
     assert protected_part([]) == ""
-    assert decided_part(["a: yes", "b: no"]) == ("Settings changes you proposed, as the user decided them in the "
-                                                 "thread: a: yes; b: no")
+    assert decided_part(["a: yes", "b: no"]) == ("What you proposed on a card, as the user decided it in the "
+                                               "thread: a: yes; b: no")
     assert decided_part([]) == ""
 
 

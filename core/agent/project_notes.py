@@ -62,6 +62,17 @@ def removed(notes: Sequence[str], number: int) -> List[str]:
     return kept
 
 
+def rebased(now: Sequence[str], start: Sequence[str], end: Sequence[str]) -> List[str]:
+    """The notes of the project when a turn that took them from ``start`` to ``end`` is undone (or redone): what the
+    turn added goes, what it removed comes back, and a note kept since by the user (a card of the memory, the Memory
+    tab) stays. Unchanged since the turn: ``end`` exactly, in its order."""
+    now, start, end = list(now), list(start), list(end)
+    if now == start:
+        return end
+    kept = [note for note in now if not (note in start and note not in end)]
+    return kept + [note for note in end if note not in start and note not in kept]
+
+
 def notes_block(notes: Sequence[str]) -> str:
     """The notes as the request carries them; empty without notes."""
     if not notes:

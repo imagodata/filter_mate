@@ -3,7 +3,7 @@
   {
    "id": "model_buffer_chain",
    "expert": true,
-   "prompt": "Garde cette chaîne en modèle réutilisable nommé tampons_routes : un buffer de 500 m sur les routes, puis les centroïdes du résultat.",
+   "prompt": "Garde cette chaîne en modèle réutilisable nommé tampons_routes, à côté du projet enregistré : un buffer de 500 m sur les routes, puis les centroïdes du résultat.",
    "expect": [
     [
      {
@@ -13,13 +13,18 @@
         "contains": [
          "QgsProcessingModelAlgorithm",
          "native:buffer",
-         "tampons_routes"
+         "tampons_routes",
+         "QgsProcessingModelChildParameterSource",
+         "QgsProcessingModelOutput",
+         "toFile",
+         "fromFile",
+         "validate"
         ]
        }
       },
       "call_args": {
-       "purpose": "Enregistrer la chaîne buffer puis centroïdes en modèle tampons_routes.model3",
-       "code": "model = QgsProcessingModelAlgorithm()\nmodel.setName('tampons_routes')\nmodel.addModelParameter(QgsProcessingModelParameter(QgsProcessingModelParameterDataType.VectorLayer, 'routes'), 'routes')\nchild = QgsProcessingModelChildAlgorithm()\nchild.setAlgorithmId('native:buffer')\nmodel.addChildAlgorithm(child)\nmodel.toFile('/tmp/tampons_routes.model3')"
+       "purpose": "Enregistrer tampons_routes.model3 à côté du projet, sans écraser ni exécuter les traitements.",
+       "code": "from pathlib import Path\nfrom qgis.core import (QgsProject, QgsProcessingModelAlgorithm, QgsProcessingModelParameter,\n    QgsProcessingParameterFeatureSource, QgsProcessingParameterNumber, QgsProcessingModelChildAlgorithm,\n    QgsProcessingModelChildParameterSource, QgsProcessingModelOutput)\nproject_file = QgsProject.instance().fileName()\nif not project_file:\n    raise ValueError(\"Save the project or choose a model path first\")\nmodel_path = Path(project_file).resolve().parent / \"tampons_routes.model3\"\nif model_path.exists():\n    raise FileExistsError(str(model_path))\nmodel = QgsProcessingModelAlgorithm()\nmodel.setName(\"tampons_routes\")\nmodel.setGroup(\"FilterMate\")\ndefinitions = [QgsProcessingParameterFeatureSource(\"INPUT\", \"Routes\"),\n    QgsProcessingParameterNumber(\"DISTANCE\", \"Distance\", defaultValue=500)]\nfor definition in definitions:\n    component = QgsProcessingModelParameter()\n    component.setParameterName(definition.name())\n    model.addModelParameter(definition, component)\nsource = QgsProcessingModelChildParameterSource\nbuffer = QgsProcessingModelChildAlgorithm(\"native:buffer\")\nbuffer.setChildId(\"buffer\")\nfor parameter, values in {\n    \"INPUT\": [source.fromModelParameter(\"INPUT\")],\n    \"DISTANCE\": [source.fromModelParameter(\"DISTANCE\")],\n    \"SEGMENTS\": [source.fromStaticValue(5)], \"END_CAP_STYLE\": [source.fromStaticValue(0)],\n    \"JOIN_STYLE\": [source.fromStaticValue(0)], \"MITER_LIMIT\": [source.fromStaticValue(2)],\n    \"DISSOLVE\": [source.fromStaticValue(False)], \"OUTPUT\": [source.fromStaticValue(\"TEMPORARY_OUTPUT\")],\n}.items():\n    buffer.addParameterSources(parameter, values)\nmodel.addChildAlgorithm(buffer)\nfinal = QgsProcessingModelChildAlgorithm(\"native:centroids\")\nfinal.setChildId(\"final\")\nfinal.addParameterSources(\"INPUT\", [source.fromChildOutput(\"buffer\", \"OUTPUT\")])\nfinal.addParameterSources(\"ALL_PARTS\", [source.fromStaticValue(False)])\noutput = QgsProcessingModelOutput()\noutput.setName(\"RESULT\")\noutput.setDescription(\"Final result\")\noutput.setChildId(\"final\")\noutput.setChildOutputName(\"OUTPUT\")\nfinal.setModelOutputs({\"RESULT\": output})\nmodel.addChildAlgorithm(final)\nmodel.updateDestinationParameters()\nvalid, issues = model.validate()\nif not valid:\n    raise ValueError(str(issues))\nif model_path.exists():\n    raise FileExistsError(str(model_path))\nif not model.toFile(str(model_path)):\n    raise RuntimeError(\"Model could not be saved\")\nrestored = QgsProcessingModelAlgorithm()\nif not restored.fromFile(str(model_path)):\n    raise RuntimeError(\"Saved model could not be read\")\nvalid, issues = restored.validate()\nif not valid:\n    raise ValueError(str(issues))\nresult = {\"path\": str(model_path), \"inputs\": [p.name() for p in restored.parameterDefinitions()],\n    \"outputs\": [p.name() for p in restored.destinationParameterDefinitions()],\n    \"steps\": [\"buffer\", \"final\"]}\n"
       }
      }
     ]
@@ -32,7 +37,7 @@
   {
    "id": "model_clip_chain",
    "expert": true,
-   "prompt": "Transforme les traitements de cette session (buffer sur les routes puis clip par les communes) en un modèle partageable.",
+   "prompt": "Transforme les traitements validés de cette session (buffer de 500 m sur les routes puis clip par les communes) en un modèle nommé tampons_communes, à côté du projet enregistré.",
    "expect": [
     [
      {
@@ -41,13 +46,18 @@
        "code": {
         "contains": [
          "QgsProcessingModelAlgorithm",
-         "native:clip"
+         "native:clip",
+         "QgsProcessingModelChildParameterSource",
+         "QgsProcessingModelOutput",
+         "toFile",
+         "fromFile",
+         "validate"
         ]
        }
       },
       "call_args": {
-       "purpose": "Enregistrer la chaîne buffer puis clip en modèle Processing",
-       "code": "model = QgsProcessingModelAlgorithm()\nchild = QgsProcessingModelChildAlgorithm()\nchild.setAlgorithmId('native:clip')\nmodel.addChildAlgorithm(child)\nmodel.toFile('/tmp/chaine_buffer_clip.model3')"
+       "purpose": "Enregistrer tampons_communes.model3 à côté du projet, sans écraser ni exécuter les traitements.",
+       "code": "from pathlib import Path\nfrom qgis.core import (QgsProject, QgsProcessingModelAlgorithm, QgsProcessingModelParameter,\n    QgsProcessingParameterFeatureSource, QgsProcessingParameterNumber, QgsProcessingModelChildAlgorithm,\n    QgsProcessingModelChildParameterSource, QgsProcessingModelOutput)\nproject_file = QgsProject.instance().fileName()\nif not project_file:\n    raise ValueError(\"Save the project or choose a model path first\")\nmodel_path = Path(project_file).resolve().parent / \"tampons_communes.model3\"\nif model_path.exists():\n    raise FileExistsError(str(model_path))\nmodel = QgsProcessingModelAlgorithm()\nmodel.setName(\"tampons_communes\")\nmodel.setGroup(\"FilterMate\")\ndefinitions = [QgsProcessingParameterFeatureSource(\"INPUT\", \"Routes\"),\n    QgsProcessingParameterNumber(\"DISTANCE\", \"Distance\", defaultValue=500)]\ndefinitions.append(QgsProcessingParameterFeatureSource(\"OVERLAY\", \"Communes\"))\nfor definition in definitions:\n    component = QgsProcessingModelParameter()\n    component.setParameterName(definition.name())\n    model.addModelParameter(definition, component)\nsource = QgsProcessingModelChildParameterSource\nbuffer = QgsProcessingModelChildAlgorithm(\"native:buffer\")\nbuffer.setChildId(\"buffer\")\nfor parameter, values in {\n    \"INPUT\": [source.fromModelParameter(\"INPUT\")],\n    \"DISTANCE\": [source.fromModelParameter(\"DISTANCE\")],\n    \"SEGMENTS\": [source.fromStaticValue(5)], \"END_CAP_STYLE\": [source.fromStaticValue(0)],\n    \"JOIN_STYLE\": [source.fromStaticValue(0)], \"MITER_LIMIT\": [source.fromStaticValue(2)],\n    \"DISSOLVE\": [source.fromStaticValue(False)], \"OUTPUT\": [source.fromStaticValue(\"TEMPORARY_OUTPUT\")],\n}.items():\n    buffer.addParameterSources(parameter, values)\nmodel.addChildAlgorithm(buffer)\nfinal = QgsProcessingModelChildAlgorithm(\"native:clip\")\nfinal.setChildId(\"final\")\nfinal.addParameterSources(\"INPUT\", [source.fromChildOutput(\"buffer\", \"OUTPUT\")])\nfinal.addParameterSources(\"OVERLAY\", [source.fromModelParameter(\"OVERLAY\")])\noutput = QgsProcessingModelOutput()\noutput.setName(\"RESULT\")\noutput.setDescription(\"Final result\")\noutput.setChildId(\"final\")\noutput.setChildOutputName(\"OUTPUT\")\nfinal.setModelOutputs({\"RESULT\": output})\nmodel.addChildAlgorithm(final)\nmodel.updateDestinationParameters()\nvalid, issues = model.validate()\nif not valid:\n    raise ValueError(str(issues))\nif model_path.exists():\n    raise FileExistsError(str(model_path))\nif not model.toFile(str(model_path)):\n    raise RuntimeError(\"Model could not be saved\")\nrestored = QgsProcessingModelAlgorithm()\nif not restored.fromFile(str(model_path)):\n    raise RuntimeError(\"Saved model could not be read\")\nvalid, issues = restored.validate()\nif not valid:\n    raise ValueError(str(issues))\nresult = {\"path\": str(model_path), \"inputs\": [p.name() for p in restored.parameterDefinitions()],\n    \"outputs\": [p.name() for p in restored.destinationParameterDefinitions()],\n    \"steps\": [\"buffer\", \"final\"]}\n"
       }
      }
     ]
@@ -61,6 +71,16 @@
    "expert": true,
    "trap": true,
    "prompt": "Mets les filtres actuels des bâtiments dans un modèle Processing.",
+   "expect": [],
+   "forbid": [
+    "run_pyqgis"
+   ]
+  },
+  {
+   "id": "model_expert_mode_unavailable",
+   "expert": false,
+   "trap": true,
+   "prompt": "Garde cette chaîne en modèle Processing réutilisable sans activer le mode expert.",
    "expect": [],
    "forbid": [
     "run_pyqgis"

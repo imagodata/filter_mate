@@ -336,6 +336,19 @@
  "add_project_note": {
   "additionalProperties": false,
   "properties": {
+   "layer": {
+    "maxLength": 200,
+    "type": "string"
+   },
+   "scope": {
+    "default": "project",
+    "enum": [
+     "project",
+     "user",
+     "source"
+    ],
+    "type": "string"
+   },
    "text": {
     "maxLength": 300,
     "minLength": 1,
@@ -1502,7 +1515,7 @@
    "dpi": {
     "default": 192,
     "maximum": 600,
-    "minimum": 72,
+    "minimum": 48,
     "type": "integer"
    },
    "format": {
@@ -1510,7 +1523,8 @@
     "enum": [
      "png",
      "jpg",
-     "svg"
+     "svg",
+     "pdf"
     ],
     "type": "string"
    },
@@ -1536,7 +1550,7 @@
    "dpi": {
     "default": 192,
     "maximum": 600,
-    "minimum": 72,
+    "minimum": 48,
     "type": "integer"
    },
    "format": {
@@ -1545,7 +1559,8 @@
      "html",
      "png",
      "jpg",
-     "svg"
+     "svg",
+     "pdf"
     ],
     "type": "string"
    },
@@ -2587,15 +2602,17 @@
  "remove_project_note": {
   "additionalProperties": false,
   "properties": {
+   "memory": {
+    "maxLength": 14,
+    "pattern": "^m[1-9][0-9]{0,12}$",
+    "type": "string"
+   },
    "number": {
     "maximum": 20,
     "minimum": 1,
     "type": "integer"
    }
   },
-  "required": [
-   "number"
-  ],
   "type": "object"
  },
  "remove_recipe": {
@@ -3861,7 +3878,6 @@
   "additionalProperties": false,
   "properties": {
    "aggregate": {
-    "default": "count",
     "enum": [
      "count",
      "sum",
@@ -3980,12 +3996,13 @@
    "charts": {
     "items": {
      "maxLength": 20,
-     "minLength": 1,
+     "pattern": "^c[1-9][0-9]*$",
      "type": "string"
     },
     "maxItems": 4,
     "minItems": 1,
-    "type": "array"
+    "type": "array",
+    "uniqueItems": true
    },
    "source": {
     "maxLength": 200,

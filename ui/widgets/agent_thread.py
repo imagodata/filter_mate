@@ -19,6 +19,7 @@ from qgis.PyQt.QtWidgets import (
     QScrollArea, QSizePolicy, QStyle, QStyleOptionButton, QVBoxLayout, QWidget,
 )
 
+from ...core.agent.project_notes import MAX_NOTE_CHARS
 from ...core.agent.questions import MAX_OTHER
 from .agent_markdown import answer_html, layer_of_link
 
@@ -391,6 +392,113 @@ class ConfirmCard(QFrame):
                 _sheet(button, secondary)
 
 
+class MemoryCard(QFrame):
+    """A note the agent proposes to keep from one project to the next, or to forget (core/agent/memory.py, lot 2).
+
+    Nothing is written until the user clicks: ``chosen`` gives the key of the button and the text as it stands (the
+    user may correct it first when ``editable``); the controller writes it, then ``finish`` freezes the card with what
+    was done and an Undo button (``undo_requested``). ``buttons``: ``(key, label, enabled)``, the proposed one first."""
+
+    chosen = pyqtSignal(str, str)
+    undo_requested = pyqtSignal()
+
+    def __init__(self, texts: dict, text: str, editable: bool, buttons: Sequence, notes: Sequence[str] = (),
+                 parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self.setObjectName("frame_agent_memory")
+        self._texts = texts
+        self._done = False
+        column = QVBoxLayout(self)
+        column.setContentsMargins(10, 10, 10, 10)
+        column.setSpacing(6)
+        self.heading = _plain_label(texts["heading"], self)
+        column.addWidget(self.heading)
+        self.text = QLineEdit(text, self)
+        self.text.setObjectName("lineEdit_agent_memory_card")
+        self.text.setMaxLength(MAX_NOTE_CHARS)
+        self.text.setReadOnly(not editable)
+        self.text.setCursorPosition(0)
+        column.addWidget(self.text)
+        self.notes = [_plain_label(line, self) for line in notes if line]
+        for label in self.notes:
+            column.addWidget(label)
+        self.buttons = {}
+        row = None
+        for rank, (key, label, enabled) in enumerate(buttons):
+            if rank % 2 == 0:  # two buttons a row: a dock of 380 px holds them, whatever the language
+                if row is not None:
+                    row.addStretch(1)
+                row = QHBoxLayout()
+                row.setContentsMargins(0, 0, 0, 0)
+                row.setSpacing(6)
+                column.addLayout(row)
+            button = QPushButton(label, self)
+            button.setObjectName("pushButton_agent_memory_" + key)
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            button.setEnabled(bool(enabled))
+            button.setToolTip(label)
+            button.clicked.connect(lambda _checked=False, key=key: self._choose(key))
+            row.addWidget(button)
+            self.buttons[key] = button
+        if row is not None:
+            row.addStretch(1)
+        self.result = _plain_label("", self)
+        self.result.setVisible(False)
+        self.undo_button = QPushButton(texts["undo"], self)
+        self.undo_button.setObjectName("pushButton_agent_memory_undo")
+        self.undo_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.undo_button.setVisible(False)
+        self.undo_button.clicked.connect(lambda: self.undo_requested.emit())
+        result_row = QHBoxLayout()
+        result_row.setContentsMargins(0, 0, 0, 0)
+        result_row.addWidget(self.result, 1)
+        result_row.addWidget(self.undo_button)
+        column.addLayout(result_row)
+
+    @property
+    def done(self) -> bool:
+        return self._done
+
+    def current_text(self) -> str:
+        return " ".join(self.text.text().split())
+
+    # Their text is the one proposed, whatever the line says: they need none.
+    TEXTLESS = ("decline", "forget", "keep")
+
+    def _choose(self, key: str) -> None:
+        if not self._done and (self.current_text() or key in self.TEXTLESS):
+            self.chosen.emit(key, self.current_text())
+
+    def finish(self, result: str, can_undo: bool = False) -> None:
+        """Decided (or left without an answer): the buttons go, the text is frozen, ``result`` says what was done."""
+        self._done = True
+        for button in self.buttons.values():
+            button.setVisible(False)
+        self.text.setReadOnly(True)
+        self.result.setText(result)
+        self.result.setVisible(True)
+        self.undo_button.setVisible(can_undo)
+
+    def restyle(self, palette: dict, _dark: bool) -> None:
+        _sheet(self, f"QFrame#frame_agent_memory {{ background: {palette['fm_list']}; border: 1px solid"
+                     f" {palette['fm_accent']}; border-radius: 6px; }} QFrame#frame_agent_memory QLabel {{"
+                     " background: transparent; border: none; padding: 0px; }")
+        _sheet(self.heading, f"font-weight: 600; color: {palette['fm_text']};")
+        _sheet(self.text, f"QLineEdit {{ font-size: 12px; padding: 3px 6px; border: 1px solid"
+                          f" {palette['fm_group_border']}; border-radius: 4px; background: {palette['fm_list']};"
+                          f" color: {palette['fm_text']}; }}")
+        for label in self.notes + [self.result]:
+            _sheet(label, f"font-size: 11px; color: {palette['fm_text_muted']};")
+        for rank, button in enumerate(list(self.buttons.values()) + [self.undo_button]):
+            strong = rank == 0 and button is not self.undo_button
+            _sheet(button, "QPushButton { font-size: 12px; padding: 4px 10px; border-radius: 6px;"
+                           + (f" font-weight: 600; border: none; background: {palette['fm_accent']}; color: white; }}"
+                              if strong else
+                              f" border: 1px solid {palette['fm_group_border']}; background: {palette['fm_list']};"
+                              f" color: {palette['fm_text']}; }}")
+                           + f" QPushButton:disabled {{ color: {palette['fm_text_muted']}; }}")
+
+
 class QuestionCard(QFrame):
     """The questions of ``ask_user`` in the thread: choices to click (one, or several when the question says so),
     a free "Other" the panel always adds, and Answer once each question has one. The controller waits for
@@ -738,14 +846,14 @@ class ChartCard(QFrame):
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(10)
         self._buttons: List[QPushButton] = []
-        for label, file_format in (("PNG", "png"), ("JPG", "jpg"), ("SVG", "svg")):
+        for label, file_format in (("PNG", "png"), ("JPG", "jpg"), ("SVG", "svg"), ("PDF", "pdf")):
             button = QPushButton(label, self)
             button.setObjectName("pushButton_agent_chart_" + file_format)
             button.setToolTip(plain_tooltip(_tr("Save the chart as {}").format(label)))
             if on_save is not None:
                 button.clicked.connect(lambda _checked=False, file_format=file_format: on_save(file_format))
             else:
-                button.setVisible(False)  # an infographic without a file action: no dead button
+                button.setVisible(False)
             self._buttons.append(button)
             row.addWidget(button)
         layout_button = QPushButton(_tr("Add to a layout"), self)
@@ -755,7 +863,7 @@ class ChartCard(QFrame):
         if on_layout is not None:
             layout_button.clicked.connect(lambda _checked=False: on_layout(layout_button))
         else:
-            layout_button.setVisible(False)  # an infographic goes to a file, never to a layout
+            layout_button.setVisible(False)
         self._buttons.append(layout_button)
         row.addWidget(layout_button)
         row.addStretch(1)
@@ -984,6 +1092,13 @@ class AgentThread(QScrollArea):
         card = SettingsCard(texts, lines, reason, self._content)
         plain = "\n".join([texts["heading"], *(f"   {line}" for line in lines)] + ([f"   {reason}"] if reason else []))
         self._append(_Item(card, plain, "settings", card.restyle))
+        self.end_answer()
+        return card
+
+    def add_memory_card(self, texts: dict, text: str, editable: bool, buttons, notes=()) -> "MemoryCard":
+        """A note proposed to keep from one project to the next, or to forget (MemoryCard)."""
+        card = MemoryCard(texts, text, editable, buttons, notes, self._content)
+        self._append(_Item(card, "\n".join([texts["heading"], f"   {text}"]), "memory", card.restyle))
         self.end_answer()
         return card
 

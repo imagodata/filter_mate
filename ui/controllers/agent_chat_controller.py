@@ -19,7 +19,7 @@ from ...adapters.agent.settings import (
     target_of, current_provider, read_providers, write_providers, read_mode, write_mode,
 )
 from ...adapters.agent import request_log_store, session_store, transcript_store
-from ...adapters.agent.memory_store import change_memory, memory_path, project_sources, read_memory
+from ...adapters.agent.memory_store import change_memory, memory_path, project_sources, read_memory, source_signature
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
 from ...adapters.agent import plugin_settings
@@ -51,8 +51,8 @@ from ...core.agent.sources import (
     KIND_MCP, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, all_sources, custom_from_json, enabled,
     database_sources, model_name, platform_aliases, platform_domains, platform_name,
 )
-from ...core.agent.modes import ACT, PLAN, level_for, mode_note, mode_or_default
-from ...core.agent.postures import PROPOSE, RESPOND, posture_from_mode, posture_level, posture_or_default, \
+from ...core.agent.modes import ACT, level_for, mode_note, mode_or_default
+from ...core.agent.postures import PROPOSE, PROPOSE_NOTE, RESPOND, posture_from_mode, posture_level, posture_or_default, \
     posture_to_mode
 from ...core.agent.permissions import (
     ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, BUFFER, LOCAL, MAX_ASKED_TOGETHER, OUTSIDE, PROJECT, PROTECTED, REFUSE,
@@ -80,14 +80,16 @@ from ...core.agent.messages import request_usage
 from ...core.agent.session import (
     REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentLimits, AgentSession, history_budget, tools_weight,
 )
-from ...core.agent.memory import UnreadableMemory, chosen as memory_chosen, memory_block
+from ...core.agent.memory import (
+    ADD as MEMORY_ADD, DECLINE as MEMORY_DECLINE, DECLINED as MEMORY_DECLINED, EXPECT as MEMORY_EXPECT, FULL as MEMORY_FULL,
+    KEPT as MEMORY_KEPT, REMOVE as MEMORY_REMOVE, RESTORE as MEMORY_RESTORE, SCOPE_SOURCE, SCOPE_USER,
+    UNDECLINE as MEMORY_UNDECLINE, UnreadableMemory, chosen as memory_chosen, memory_block, note_of, proposal_problem,
+)
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
-from ...core.agent.questions import Option, Question, answers_payload, parse_questions
+from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
-    ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CHART_TOOLS, CREATE_WIDGET, EXPORT_CHART, EXPORT_INFOGRAPHIC,
-    RUN_CHART_CODE, SHOW_CHART, SHOW_INFOGRAPHIC,
-    FLASH_FEATURES, LIST_TABLES, OPEN_LAYOUT, PREVIEW_ATLAS, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON,
-    SAVE_RECIPE, SET_ACTIVE_LAYER, SHOW_MESSAGE, UNDO_AGENT_STEP,
+    ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CREATE_WIDGET, EXPORT_CHART, RUN_CHART_CODE, SHOW_CHART,
+    LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
     TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
 )
@@ -235,6 +237,10 @@ class AgentChatController(QObject):
         # A change of the settings is proposed in the thread (SettingsCard) unless a test answers the questions.
         self._card_questions = ask_user is None
         self._settings_cards = []  # the cards of the thread, kept alive with it
+        self._memory_cards = []
+        self._memory_proposed = 0
+        self._memory_request = 0
+        self._memory_generation = 0
         self._setup_offer = ""  # the version whose setup offer nobody has seen yet
         self._setup_card = None  # its card, while it waits for an answer
         from .setup_wizard import SetupWizard
@@ -273,6 +279,7 @@ class AgentChatController(QObject):
         self.panel.layer_link_clicked.connect(self._on_layer_link)
         self.panel.refresh_examples()  # drawn for an unknown state in the panel: now for the project
         self.panel.send_requested.connect(self._on_send)
+        self.panel.queued_send_requested.connect(self._on_queued_send)
         self._mode = read_mode()  # Ask, Plan or Act, kept from one session to the next (core/agent/modes.py)
         self._request_mode = self._mode
         # One posture under the line sets the mode and the level together (core/agent/postures.py): Answer reads,
@@ -585,6 +592,8 @@ class AgentChatController(QObject):
 
     def _restore_transcript(self) -> None:
         """Show again what this project's conversation looked like; the model takes it up again when it can."""
+        self._leave_memory_cards()
+        self._memory_generation += 1
         self._transcript_key = transcript_store.project_key()
         self._transcript = transcript_store.load(self._transcript_key)
         self._recap_from = 0  # the thread shown again is what the next conversation is told of
@@ -815,12 +824,12 @@ class AgentChatController(QObject):
     def _on_resend(self, text: str) -> None:
         if text and not self.chat_busy() and not text.startswith(EXTERNAL_MARK):
             self.panel.show_thread()
-            self._on_send(text)
+            self._on_send(text, queued=self.panel.input.text().strip() != text.strip())
 
-    def _resend_last(self) -> None:
-        """The error card sends the last request again (it waits in the line since the failure)."""
-        if self._last_request:
-            self._on_resend(self._last_request)
+    def _retry_failed(self, text: str, posture: str, request: int, generation: int) -> None:
+        if generation != self._memory_generation or request != self._memory_request:
+            return
+        self._on_send(text, posture, queued=self.panel.input.text().strip() != text.strip())
 
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
@@ -1438,8 +1447,8 @@ class AgentChatController(QObject):
         if not values.expert_python:
             left_out.update((RUN_PYTHON, RUN_CHART_CODE))
         from ...adapters.agent.chart_renderer import available as charts_available
-        if not charts_available():  # QGIS 3, a QGIS 4 without PyQt QtWebEngine: no chart tool, no skill charts
-            left_out.update(CHART_TOOLS)
+        if not charts_available():
+            left_out.add(RUN_CHART_CODE)
         if not values.send_values:
             left_out.add(VIEW_MAP)  # an image of the map shows its labels and symbols: a value as much as a field
         if not kinds - {KIND_MCP, KIND_STAC, *NO_DATA_KINDS} and not searched:
@@ -1507,11 +1516,10 @@ class AgentChatController(QObject):
         handlers[UNDO_AGENT_STEP] = self._undo_tool
         handlers[RUN_PYTHON] = self._python_tool
         handlers[VIEW_MAP] = self._view_map_tool
-        handlers[OPEN_LAYOUT] = self._open_layout_tool
-        handlers[FLASH_FEATURES] = self._flash_features_tool
-        handlers[SET_ACTIVE_LAYER] = self._set_active_layer_tool
-        handlers[SHOW_MESSAGE] = self._show_message_tool
-        handlers[PREVIEW_ATLAS] = self._preview_atlas_tool
+        if any(tool.name in ("open_layout", "preview_atlas", "flash_features", "set_active_layer", "show_message")
+               for tool in tools):
+            from ...adapters.public_api.gui_control import chat_handlers as gui_handlers
+            handlers.update(gui_handlers())
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
         handlers[CREATE_WIDGET] = lambda arguments: self._create_widget_tool(arguments,
@@ -1523,10 +1531,9 @@ class AgentChatController(QObject):
                                                                                  share_values=values.send_values)
         handlers[EXPORT_CHART] = lambda arguments: self._charts.export_chart(arguments, _default_export_root())
         handlers[CHART_TO_LAYOUT] = lambda arguments: self._charts.add_to_layout(arguments)
-        handlers[SHOW_INFOGRAPHIC] = lambda arguments: self._charts.show_infographic(
+        handlers["show_infographic"] = lambda arguments: self._charts.show_infographic(
             arguments, share_values=values.send_values)
-        handlers[EXPORT_INFOGRAPHIC] = lambda arguments: self._charts.export_infographic(
-            arguments, _default_export_root())
+        handlers["export_infographic"] = lambda arguments: self._charts.export_infographic(arguments, _default_export_root())
         handlers[SAVE_RECIPE] = self._save_recipe_tool
         handlers[REMOVE_RECIPE] = self._remove_recipe_tool
         handlers[ASK_USER] = self._ask_user_tool
@@ -1626,63 +1633,289 @@ class AgentChatController(QObject):
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
 
-    @staticmethod
-    def _open_layout_tool(arguments) -> dict:
-        """open_layout: a print layout shown in the layout designer, in front."""
-        from ...adapters.public_api.gui_control import open_layout
-        try:
-            return open_layout(arguments.get("name", ""))
-        except ValueError as exc:
-            raise ToolFailure(str(exc)) from None
-
-    @staticmethod
-    def _flash_features_tool(arguments) -> dict:
-        """flash_features: features blinked on the map, selecting nothing."""
-        from ...adapters.public_api.gui_control import flash_features
-        try:
-            return flash_features(arguments.get("layer", ""), arguments.get("expression", ""),
-                                  limit=arguments.get("limit", 500))
-        except ValueError as exc:
-            raise ToolFailure(str(exc)) from None
-
-    @staticmethod
-    def _set_active_layer_tool(arguments) -> dict:
-        """set_active_layer: a layer made active, shown unfolded in the layer tree."""
-        from ...adapters.public_api.gui_control import set_active_layer
-        try:
-            return set_active_layer(arguments.get("layer", ""), reveal=bool(arguments.get("reveal", True)))
-        except ValueError as exc:
-            raise ToolFailure(str(exc)) from None
-
-    @staticmethod
-    def _show_message_tool(arguments) -> dict:
-        """show_message: a short message in the bar of QGIS."""
-        from ...adapters.public_api.gui_control import show_message
-        try:
-            return show_message(arguments.get("text", ""), level=arguments.get("level", "info"),
-                                duration=arguments.get("duration", 5))
-        except ValueError as exc:
-            raise ToolFailure(str(exc)) from None
-
-    @staticmethod
-    def _preview_atlas_tool(arguments) -> dict:
-        """preview_atlas: a page of an atlas preview turned, in its open designer when there is one."""
-        from ...adapters.public_api.gui_control import preview_atlas
-        try:
-            return preview_atlas(arguments.get("layout", ""), action=arguments.get("action", "next"),
-                                 preview=bool(arguments.get("preview", True)))
-        except ValueError as exc:
-            raise ToolFailure(str(exc)) from None
-
-    @staticmethod
-    def _add_note_tool(arguments) -> dict:
-        """add_project_note: a fact kept in the project file for the next conversations."""
+    def _add_note_tool(self, arguments) -> dict:
+        """add_project_note: a fact kept in the project file for the next conversations (scope project); for every
+        project or for a source (scope user or source), a card the user decides on: nothing is written by the model."""
+        scope = str(arguments.get("scope") or "project")
+        if scope in (SCOPE_USER, SCOPE_SOURCE):
+            return self._propose_memory(arguments, scope)
+        if scope != "project":
+            raise ToolFailure("scope is project, user or source.")
         try:
             notes = note_added(read_notes(), arguments.get("text", ""))
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
         write_notes(notes)
         return {"notes": [f"{number}. {note}" for number, note in enumerate(notes, 1)]}
+
+    # --- the memory kept from one project to the next: proposed by the model, decided by the user (lot 2) ---------
+
+    MAX_MEMORY_PROPOSALS = 2  # in one request
+    MEMORY_CARD_SEEN_KEY = "filter_mate/agent/memory_card_seen"
+
+    @staticmethod
+    def _memory_or_failure():
+        """The memory, when the option is on and the file can be read; ``ToolFailure`` saying why not otherwise."""
+        if not getattr(load_settings(), "memory", True):
+            raise ToolFailure("The user turned off the notes kept from one project to the next (Memory tab of the "
+                              "settings of the agent): do not propose any; a note for this project (scope project) "
+                              "still works when they ask.")
+        try:
+            return read_memory()
+        except UnreadableMemory as exc:
+            raise ToolFailure(f"The file of the notes kept from one project to the next cannot be read ({exc}): the "
+                              "user corrects it in the Memory tab of the settings of the agent.") from None
+
+    @staticmethod
+    def _memory_layer(reference):
+        """The layer a model named for a note of its source: by id, else by a name only one layer has; None."""
+        reference = str(reference or "").strip()
+        if not reference:
+            return None
+        project = QgsProject.instance()
+        layer = project.mapLayer(reference)
+        if layer is not None:
+            return layer
+        named = project.mapLayersByName(reference)
+        return named[0] if len(named) == 1 else None
+
+    def _count_proposal(self) -> None:
+        if self._memory_proposed >= self.MAX_MEMORY_PROPOSALS:
+            raise ToolFailure(f"{self.MAX_MEMORY_PROPOSALS} notes are proposed in this request already: let the user "
+                              "decide on them first.")
+        self._memory_proposed += 1
+
+    def _propose_memory(self, arguments, scope: str) -> dict:
+        memory = self._memory_or_failure()
+        text = " ".join(str(arguments.get("text") or "").split())
+        signature, label = "", ""
+        if scope == SCOPE_SOURCE:
+            layer = self._memory_layer(arguments.get("layer"))
+            if layer is None:
+                raise ToolFailure("scope source needs layer: a layer of the project, by its id or its exact name.")
+            try:
+                from ...adapters.qgis.coverage_layers.snapshots import registry
+                derived = registry()
+            except Exception:  # before the registry exists
+                derived = None
+            signature, label = source_signature(layer, derived), layer.name()
+            if not signature:
+                raise ToolFailure(f"The layer {one_line(label, 100)} has no source told again in another project (a "
+                                  "layer in memory or made here, a raster, a point cloud, a web service): propose "
+                                  "scope user, naming the layer in the text.")
+        try:
+            problem, kept = proposal_problem(memory, text, scope, signature)
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        if problem == MEMORY_KEPT:
+            return {"kept_already": kept}
+        if problem == MEMORY_DECLINED:
+            return {"declined_before": True,
+                    "note": "The user chose once not to keep this note: do not propose it again."}
+        if any(not card.done and card.current_text().casefold() == text.casefold() for card in self._live_cards()):
+            return {"proposed_already": True, "note": "A card in the thread proposes it already."}
+        self._count_proposal()
+        try:
+            self._memory_keep_card(memory, text, scope, signature, label,
+                                   with_values=bool(getattr(load_settings(), "send_values", True)))
+        except RuntimeError:  # the panel is gone: nobody to decide
+            self._memory_proposed -= 1
+            raise ToolFailure("The panel of the agent is closed: nobody can decide on the note now.") from None
+        answer = {"proposed": True, "scope": scope,
+                  "note": "The user decides on a card in the thread; the next request says what they chose."}
+        if problem == MEMORY_FULL:
+            answer["full"] = ("That list is full: the user can keep it elsewhere, or remove a note in the Memory "
+                              "tab first.")
+        return answer
+
+    def _live_cards(self) -> list:
+        """The cards of the memory still on screen."""
+        alive = []
+        for card in self._memory_cards:
+            try:
+                card.objectName()
+                alive.append(card)
+            except RuntimeError:
+                continue
+        return alive
+
+    def _memory_first_note(self) -> str:
+        """Said on the first card ever shown: where a note is kept and where it goes (marked seen once shown)."""
+        from qgis.core import QgsSettings
+        if QgsSettings().value(self.MEMORY_CARD_SEEN_KEY, False, type=bool):
+            return ""
+        return _tr("A note is kept on this computer, in the Memory tab of the settings of the agent. It goes to the "
+                   "provider you chose with the requests of a project it concerns.")
+
+    def _memory_keep_card(self, memory, text: str, scope: str, signature: str, label: str,
+                          with_values: bool) -> None:
+        """The card of a note proposed: its text to correct, where to keep it (the place proposed first), or not.
+
+        Raises:
+            RuntimeError: The panel is gone.
+        """
+        places = [(SCOPE_USER, _tr("Every project"))]
+        if signature:
+            places.append((SCOPE_SOURCE, _tr("This source ({})").format(one_line(label, 24))))
+        places.sort(key=lambda place: place[0] != scope)
+        full = {key: proposal_problem(memory, text, key, signature)[0] == MEMORY_FULL for key, _words in places}
+        buttons = [(key, words, not full[key]) for key, words in places]
+        buttons += [("project", _tr("This project only"), True), ("decline", _tr("Do not keep"), True)]
+        first = self._memory_first_note()
+        notes = [_tr("This list is full: remove a note in the Memory tab of the settings of the agent first.")
+                 if any(full.values()) else "", first]
+        texts = {"heading": _tr("The agent proposes to keep a note"), "undo": _tr("Undo")}
+        self._show_agent()
+        card = self.panel.add_memory_card(texts, text, True, buttons, notes)
+        card.request = self._memory_request
+        if first:
+            from qgis.core import QgsSettings
+            QgsSettings().setValue(self.MEMORY_CARD_SEEN_KEY, True)
+        state = {"text": text, "signature": signature, "label": label, "with_values": with_values,
+                 "generation": self._memory_generation}
+        card.chosen.connect(lambda key, now: self._memory_keep_chosen(card, key, now, state))
+        card.undo_requested.connect(lambda: self._memory_undo(card, state))
+        self._memory_cards.append(card)
+
+    def _memory_snapshot(self):
+        try:
+            return read_memory()
+        except (ValueError, OSError) as exc:
+            self._say(_tr("The memory could not be saved: {}").format(exc), error=True)
+            return None
+
+    def _memory_current(self, state: dict) -> bool:
+        return state.get("generation") == self._memory_generation
+
+    def _memory_write(self, changes, expected=None):
+        """The memory after ``changes``; None when they could not be written (said in the thread)."""
+        try:
+            if not getattr(load_settings(), "memory", True):
+                raise ValueError("The user turned off memory in the agent settings.")
+            return change_memory([(MEMORY_EXPECT, expected), *changes] if expected is not None else changes)
+        except (ValueError, OSError) as exc:  # UnreadableMemory is a ValueError: the card waits for another click
+            self._say(_tr("The memory could not be saved: {}").format(exc), error=True)
+            return None
+
+    def _memory_decided(self, card, said: str, told: str, can_undo: bool = True) -> None:
+        card.finish(said, can_undo)
+        self._settings_outcomes.append(told)
+        self._record("note", said)
+        self._memory_cards = [other for other in self._memory_cards if other is not card]
+
+    def _memory_keep_chosen(self, card, key: str, text: str, state: dict) -> None:
+        """A click on the card of a note proposed: written as chosen, and told to the model with the next request.
+
+        Undo on the card takes back only what this click wrote: a note that was kept already stays."""
+        if not self._memory_current(state) or card.done:
+            return
+        with_values = state["with_values"]
+        quoted = json.dumps(text, ensure_ascii=False)
+        if key in (SCOPE_USER, SCOPE_SOURCE):
+            signature = state["signature"] if key == SCOPE_SOURCE else ""
+            before = self._memory_snapshot()
+            if before is None:
+                return
+            after = self._memory_write([(MEMORY_ADD, key, signature, state["label"] if signature else "", text,
+                                         with_values)], expected=before)
+            if after is None:
+                return
+            note = next((note for note in after.notes if note.text.casefold() == text.casefold()
+                         and note.scope == key and note.signature == signature), None)
+            kept = note.id if note is not None else ""
+            new = bool(kept) and note_of(before, kept) is None
+            state.update(done=key, id=kept if new else "", final=text, note=note)
+            if key == SCOPE_USER:
+                said = _tr("Kept for every project: {}").format(text)
+                told = f"memory note {kept} kept by the user for every project: {quoted}"
+            else:
+                layer = json.dumps(state["label"], ensure_ascii=False)
+                said = _tr("Kept for the source of {}: {}").format(one_line(state["label"], 60), text)
+                told = f"memory note {kept} kept by the user for the source of layer {layer}: {quoted}"
+            self._memory_decided(card, said, told, can_undo=new)
+            return
+        if key == "project":
+            # Written outside the turn, so that undoing the turn leaves it (turn_effects.rebased_notes).
+            if self.chat_busy() or self._mcp.busy:
+                self._say(_tr("Wait for the end of the request, then click again."), error=True)
+                return
+            notes = read_notes()
+            new = not any(note.casefold() == text.casefold() for note in notes)
+            if new:
+                try:
+                    write_notes(note_added(notes, text))
+                except (ValueError, OSError) as exc:
+                    self._say(str(exc), error=True)
+                    return
+            state.update(done=key, final=text if new else "")
+            self._memory_decided(card, _tr("Kept for this project only: {}").format(text),
+                                 f"note kept by the user for this project only: {quoted}", can_undo=new)
+            return
+        before = self._memory_snapshot()
+        if before is None or self._memory_write([(MEMORY_DECLINE, state["text"])], expected=before) is None:
+            return
+        state.update(done=key, final=state["text"])
+        proposed = json.dumps(state["text"], ensure_ascii=False)
+        self._memory_decided(card, _tr("Not kept: {}").format(state["text"]),
+                             f"memory note not kept by the user, do not propose it again: {proposed}")
+
+    def _memory_undo(self, card, state: dict) -> None:
+        """Undo on a card decided: what the click did is taken back (undoing the turn does not: it was the user's)."""
+        if not self._memory_current(state) or state.get("undone"):
+            return
+        done, final = state.get("done"), state.get("final", "")
+        memory = self._memory_snapshot() if done != "project" else None
+        if done != "project" and memory is None:
+            return
+        changes = []
+        if done in (SCOPE_USER, SCOPE_SOURCE):
+            ok = note_of(memory, state.get("id")) == state.get("note") and bool(state.get("id"))
+            changes = [(MEMORY_REMOVE, state["id"])] if ok else []
+        elif done == "project":
+            if self.chat_busy() or self._mcp.busy:
+                self._say(_tr("Wait for the end of the request, then click again."), error=True)
+                return
+            notes = read_notes()
+            ok = final in notes
+            if ok:
+                try:
+                    write_notes([note for note in notes if note != final])
+                except (ValueError, OSError) as exc:
+                    self._say(str(exc), error=True)
+                    return
+        elif done == "decline":
+            ok = final.casefold() in {text.casefold() for text in memory.declined}
+            changes = [(MEMORY_UNDECLINE, final)] if ok else []
+        elif done == "forget":
+            restored = state.get("note")
+            ok = restored is not None and note_of(memory, restored.id) is None
+            changes = [(MEMORY_RESTORE, restored)] if ok else []
+        else:
+            return
+        if not ok:
+            card.finish(_tr("Nothing to take back: the note changed since."), False)
+            return
+        if changes and self._memory_write(changes, expected=memory) is None:
+            return
+        card.finish(_tr("Taken back: {}").format(final), False)
+        state["undone"] = True
+        self._settings_outcomes.append("the user took back their choice on the card of the note "
+                                       + json.dumps(final, ensure_ascii=False))
+        self._record("note", _tr("Taken back: {}").format(final))
+
+    def _leave_memory_cards(self, request=None) -> None:
+        """The cards still waiting (another conversation, another project; with ``request``, those of that request:
+        stopped, or its turn undone): left as not kept, without counting as a choice."""
+        kept = []
+        for card in getattr(self, "_memory_cards", []):
+            try:
+                if request is not None and getattr(card, "request", None) != request:
+                    kept.append(card)
+                elif not card.done:
+                    card.finish(_tr("Not kept: no answer."), False)
+            except RuntimeError:  # it went with the thread
+                pass
+        self._memory_cards = kept
 
     def _ask_user_tool(self, arguments) -> dict:
         """ask_user: questions with choices in the thread; the answer comes back in this same turn.
@@ -1730,14 +1963,72 @@ class AgentChatController(QObject):
             forget()
         return outcome.get("payload", {"declined": True})
 
-    @staticmethod
-    def _remove_note_tool(arguments) -> dict:
+    def _remove_note_tool(self, arguments) -> dict:
+        """remove_project_note: a note of this project by its number; a note kept from one project to the next by its
+        id (memory): a card the user decides on."""
+        if arguments.get("memory"):
+            return self._propose_forget(str(arguments.get("memory")))
+        if not arguments.get("number"):
+            raise ToolFailure("Name the note: number for a note of this project, memory for a note kept from one "
+                              "project to the next.")
         try:
             notes = note_removed(read_notes(), arguments.get("number", 0))
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
         write_notes(notes)
         return {"notes": [f"{number}. {note}" for number, note in enumerate(notes, 1)]}
+
+    def _propose_forget(self, note_id: str) -> dict:
+        memory = self._memory_or_failure()
+        note = note_of(memory, note_id)
+        # Only a note the requests of this project carry: the model knows no other, and must not learn which exist.
+        read = self._read_project()
+        layers, _selections, view = read if read is not None else ([], [], {})
+        sources, active = project_sources([row.get("layer_id", "") for row in layers],
+                                          str(view.get("active_layer_id") or ""))
+        selection = memory_chosen(memory, sources, active, share_values=load_settings().send_values)
+        sent = {line.split(":", 1)[0][2:] for line in memory_block(selection).splitlines() if line.startswith("- m")}
+        if note is None or note.id not in sent:
+            raise ToolFailure(f"No note {one_line(note_id, 20)} is among those sent with this project.")
+        if any(not card.done and card.text.isReadOnly() and card.current_text() == note.text
+               for card in self._live_cards()):  # a card to forget it waits already
+            return {"proposed_already": True, "note": "A card in the thread proposes it already."}
+        self._count_proposal()
+        texts = {"heading": _tr("The agent proposes to forget a note"), "undo": _tr("Undo")}
+        buttons = [("forget", _tr("Forget"), True), ("keep", _tr("Keep"), True)]
+        try:
+            self._show_agent()
+            card = self.panel.add_memory_card(texts, note.text, False, buttons, ())
+        except RuntimeError:
+            self._memory_proposed -= 1
+            raise ToolFailure("The panel of the agent is closed: nobody can decide on the note now.") from None
+        card.request = self._memory_request
+        state = {"id": note.id, "note": note, "generation": self._memory_generation}
+        card.chosen.connect(lambda key, _text: self._memory_forget_chosen(card, key, note.text, state))
+        card.undo_requested.connect(lambda: self._memory_undo(card, state))
+        self._memory_cards.append(card)
+        return {"proposed": True, "note": "The user decides on a card in the thread; the next request says what they "
+                                         "chose."}
+
+    def _memory_forget_chosen(self, card, key: str, text: str, state: dict) -> None:
+        if not self._memory_current(state) or card.done:
+            return
+        if key == "forget":
+            before = self._memory_snapshot()
+            if before is None:
+                return
+            if note_of(before, state["id"]) != state["note"]:
+                card.finish(_tr("Nothing to take back: the note changed since."), False)
+                return
+            if self._memory_write([(MEMORY_REMOVE, state["id"])], expected=before) is None:
+                return
+            state.update(done="forget", final=text)
+            self._memory_decided(card, _tr("Forgotten: {}").format(text),
+                                 f"memory note {state['id']} forgotten by the user")
+        else:
+            self._memory_decided(card, _tr("Kept: {}").format(text),
+                                 f"memory note {state['id']} kept by the user, do not propose to forget it again",
+                                 can_undo=False)
 
     def _create_widget_tool(self, arguments, share_values: bool = True) -> dict:
         """create_widget: a control in the panel, read from the layer, kept in the project."""
@@ -2765,6 +3056,8 @@ class AgentChatController(QObject):
         self._context_memory.forget()
 
     def _reset_view(self) -> None:
+        self._leave_memory_cards()
+        self._memory_generation += 1
         self._restart_engine()
         self._policy.forget()  # another conversation, or another project: what was allowed is asked again
         # What came before was said to another provider, or under other settings: the next conversation is not told.
@@ -2810,19 +3103,25 @@ class AgentChatController(QObject):
             return posture_level(posture)
         return level_for(self._request_mode, values.autonomy)
 
-    def _on_send(self, text: str, mode: str = "") -> None:
+    def _on_queued_send(self, text: str, posture: str) -> None:
+        generation = self._memory_generation
+        if not self._on_send(text, posture, queued=True) and generation == self._memory_generation:
+            self.panel.restore_queued(text, posture)
+
+    def _on_send(self, text: str, mode: str = "", queued: bool = False) -> bool:
         """Send ``text`` in the mode picked under the line, or in ``mode`` (the Go of a plan runs in Act)."""
         if self.chat_busy():
-            return  # connecting to a connector lets the event loop run
+            return False
         if self._mcp.busy:
             self._say(_tr("Another application is changing the project: try again in a moment."))
-            return
+            return False
         values = load_settings()  # however the settings were saved
-        self._request_mode = mode_or_default(mode or self._mode)
+        self._request_mode = posture_to_mode(mode) if mode in (RESPOND, PROPOSE) else mode_or_default(mode or self._mode)
         # An explicit mode (the Go of a plan) carries its posture; otherwise the one under the line rules.
-        self._request_posture = posture_from_mode(self._request_mode) if mode else self._posture
+        self._request_posture = posture_from_mode(self._request_mode)
         # Answer reads only, Propose shows each change first, Act runs at the saved level.
         self._policy.set_level(self._request_level(values))
+        self._policy.set_posture(self._request_posture)
         self._policy.rules = values.rules
         if self._engine is None:
             self._building = True
@@ -2836,19 +3135,23 @@ class AgentChatController(QObject):
             finally:
                 self._building = False
         if self._engine is None:
-            return
+            return False
         # Building the engine may have opened the settings dialog (first use, consent withdrawn) and saved it:
         # that reset the policy to the Autonomy tab, and the tool rules may have changed. The request goes in
         # the mode it was sent with (audit of 2026-11-24: it went as standard with an Ask note).
         values = load_settings()
         self._policy.set_level(self._request_level(values))
+        self._policy.set_posture(self._request_posture)
         self._policy.rules = values.rules
         self._offer_local_copy(values)
         self._last_request = text
         self._request_calls = []
+        self._memory_proposed = 0
+        self._memory_request += 1
         self._exploring_offered = False
         self._checkpoint.label = text
-        self.panel.clear_input()
+        if not queued and self.panel.input.text().strip() == text.strip():
+            self.panel.clear_input()
         self.panel.show_thread()
         self.panel.add_user(text)
         self._record("user", text)
@@ -2869,6 +3172,7 @@ class AgentChatController(QObject):
             note = _tr("The oldest requests of this conversation are now summed up in a few lines, to keep it short.")
             self.panel.add_note(note)
             self._record("note", note)
+        return True
 
     def _read_project(self):
         """``(layers, selections, view)`` now, as plain dicts; None when they cannot be read."""
@@ -2974,6 +3278,8 @@ class AgentChatController(QObject):
     def _level_part(self) -> str:
         """What the model is told of the level of the request: the note of its mode for Ask and Plan (they run at the
         advisor level, which the user did not pick in the Autonomy tab), the note of the level for Act."""
+        if getattr(self, "_request_posture", "") == PROPOSE:
+            return PROPOSE_NOTE
         return mode_note(self._request_mode) or level_note(self._policy.level)
 
     @staticmethod
@@ -3017,6 +3323,8 @@ class AgentChatController(QObject):
         self._seen = None if read is None else project_state(*read, previous=self._seen)
 
     def _on_stop(self) -> None:
+        self.panel.pause_queued()
+        self._leave_memory_cards(self._memory_request)
         abort_active(CHAT_WAITS)  # a connector or a platform the chat waits for, not a call of another application
         if self._replaying:  # a recipe stops before its next step
             self._replay_stop = True
@@ -3033,6 +3341,8 @@ class AgentChatController(QObject):
         applied = [turn for turn in TurnCheckpoint.turns() if turn.get("applied")]
         undone = applied[-1].get("request") or "" if applied else ""
         restored, skipped = self._checkpoint.undo()
+        if restored:
+            self._leave_memory_cards(self._memory_request)
         self._forget_undone_steps(undone)
         message = _tr("Restored: {}.").format(", ".join(restored)) if restored else _tr("Nothing to restore.")
         if skipped:
@@ -3118,6 +3428,12 @@ class AgentChatController(QObject):
             "sample_features": lambda: _tr("Reading features of {}").format(layer),
             "identify_at": lambda: _tr("Reading the map at a point"),
             VIEW_MAP: lambda: _tr("Looking at the map"),
+            "open_layout": lambda: _tr("Layout {}").format(args.get("name", "")),
+            "preview_atlas": lambda: _tr("Atlas of {}").format(args.get("layout", "")),
+            "flash_features": lambda: _tr("Flash features of {}").format(layer),
+            "set_active_layer": lambda: _tr("Active layer: {}").format(layer),
+            "show_message": lambda: _tr("Message in QGIS"),
+            "save_favorite": lambda: _tr("Favorite kept: {}").format(args.get("name", "")),
             "find_algorithms": lambda: _tr("Looking for a Processing algorithm"),
             "describe_algorithm": lambda: _tr("Reading the algorithm {}").format(args.get("algorithm_id", "")),
             "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),
@@ -3138,11 +3454,6 @@ class AgentChatController(QObject):
             "describe_layout": lambda: _tr("Reading the layout {}").format(args.get("name", "")),
             "set_atlas": lambda: _tr("Atlas of {}").format(args.get("layout", "")),
             "edit_layout": lambda: _tr("Layout {} changed").format(args.get("layout", "")),
-            OPEN_LAYOUT: lambda: _tr("Layout {}").format(args.get("name", "")),
-            PREVIEW_ATLAS: lambda: _tr("Atlas of {}").format(args.get("layout", "")),
-            FLASH_FEATURES: lambda: _tr("Flashing {}").format(layer),
-            SET_ACTIVE_LAYER: lambda: _tr("Active layer: {}").format(layer),
-            SHOW_MESSAGE: lambda: _tr("Message: {}").format(one_line(str(args.get("text", "")), 100)),
             SHOW_CHART: lambda: _tr("Chart: {}").format(args.get("title") or args.get("field") or layer
                                                         or args.get("kind", "")),
             EXPORT_CHART: lambda: _tr("Chart {} saved as {}").format(args.get("chart_id", ""),
@@ -3150,11 +3461,11 @@ class AgentChatController(QObject):
             RUN_CHART_CODE: lambda: _tr("Chart {} drawn with d3 code (expert)").format(args.get("chart_id", "")),
             CHART_TO_LAYOUT: lambda: _tr("Chart {} put in the layout {}").format(args.get("chart_id", ""),
                                                                                   args.get("layout", "")),
-            SHOW_INFOGRAPHIC: lambda: _tr("Infographic: {}").format(args.get("title", "")),
-            EXPORT_INFOGRAPHIC: lambda: _tr("Infographic {} saved as {}").format(
-                args.get("infographic_id", ""), str(args.get("format") or "html").upper()),
             RUN_PYTHON: lambda: _tr("Python code (expert, not undone)"),
             ADD_NOTE: lambda: _tr("Note kept for this project"),
+            "show_infographic": lambda: _tr("Infographic: {}").format(args.get("title", "")),
+            "export_infographic": lambda: _tr("Infographic {} saved as {}").format(
+                args.get("infographic_id", ""), str(args.get("format") or "html").upper()),
             REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
             "add_field": lambda: _tr("Field {} added to {} (not saved)").format(args.get("name", ""), layer),
             "join_layers": lambda: _tr("{} joined to {}").format(args.get("join_layer", ""), layer),
@@ -3180,7 +3491,6 @@ class AgentChatController(QObject):
             "point_cloud_filter": lambda: _tr("Filter on the points of {}").format(self._names(args.get("layers"))),
             "clear_filters": lambda: _tr("Filters removed from {}").format(self._names(args.get("layers"))),
             "apply_favorite": lambda: _tr("Favorite applied"),
-            "save_favorite": lambda: _tr("Favorite kept: {}").format(args.get("name", "")),
             "export_layers": lambda: _tr("Export of {}").format(self._names(args.get("layers"))),
             "zoom_to": lambda: _tr("Zoom on {}").format(layer or (_tr("an area") if args.get("extent_wkt") else _tr("everything"))),
             "select_features": lambda: (_tr("Selection cleared on {}") if args.get("clear") else _tr("Selection on {}")).format(layer),
@@ -3242,7 +3552,7 @@ class AgentChatController(QObject):
             "set_layer_options": lambda: _tr("Panel options of: {}").format(", ".join(
                 str(item.get("layer", "")) for item in (args.get("layers") or []) if isinstance(item, dict))),
             "set_export_options": lambda: _tr("Export options of the panel"),
-            "set_exploring": lambda: _tr("Linked preview: {}").format(self._exploring_words(args)),
+            "set_exploring": lambda: _tr("EXPLORING: {}").format(self._exploring_words(args)),
         }.get(call.name, lambda: call.name.replace("_", " "))()
 
     @staticmethod
@@ -3359,8 +3669,10 @@ class AgentChatController(QObject):
 
     def _show_infographic_card(self, call: ToolCallPart, result: ToolResultPart) -> None:
         """An infographic show_infographic stacked, in a card of the thread; the transcript keeps its title."""
+        if call.name != "show_infographic":
+            return
         infographic, self._charts.pending_infographic = self._charts.pending_infographic, None
-        if call.name != SHOW_INFOGRAPHIC or result.is_error or infographic is None:
+        if result.is_error or infographic is None:
             return
         request = infographic.request
         caption = request.caption or _tr("{} charts as composed").format(len(request.chart_ids))
@@ -3385,7 +3697,7 @@ class AgentChatController(QObject):
         settings = QgsSettings()
         folder = settings.value("FilterMate/agent/chart_folder", str(_default_export_root()), type=str)
         names = {"png": _tr("PNG image (*.png)"), "jpg": _tr("JPEG image (*.jpg *.jpeg)"),
-                 "svg": _tr("SVG drawing (*.svg)")}
+                 "svg": _tr("SVG drawing (*.svg)"), "pdf": _tr("PDF document (*.pdf)")}
         default = os.path.join(folder, f"{file_stem(infographic.request.title or infographic_id)}.{file_format}")
         path, _ = QFileDialog.getSaveFileName(self.panel, _tr("Save the infographic"), default,
                                               names[file_format])
@@ -3415,7 +3727,7 @@ class AgentChatController(QObject):
         settings = QgsSettings()
         folder = settings.value("FilterMate/agent/chart_folder", str(_default_export_root()), type=str)
         names = {"png": _tr("PNG image (*.png)"), "jpg": _tr("JPEG image (*.jpg *.jpeg)"),
-                 "svg": _tr("SVG drawing (*.svg)")}
+                 "svg": _tr("SVG drawing (*.svg)"), "pdf": _tr("PDF document (*.pdf)")}
         default = os.path.join(folder, f"{file_stem(chart.request.title or chart_id)}.{file_format}")
         path, _ = QFileDialog.getSaveFileName(self.panel, _tr("Save the chart"), default, names[file_format])
         if not path:
@@ -4112,6 +4424,7 @@ class AgentChatController(QObject):
             self._remember_project()
         kept = outcome.kept_steps
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
+            self._leave_memory_cards(self._memory_request)
             message = self._error_message(outcome.error)
             fix = outcome.error.kind in FIXED_IN_SETTINGS
             self._say("")
@@ -4122,21 +4435,27 @@ class AgentChatController(QObject):
                 detail = _tr("The request stopped midway. Steps already done, which stay in place (Undo takes "
                              "them back): {}. Ask the agent to go on when you are ready.").format(kept)
             else:
-                self._give_back_request()
+                returned = self._give_back_request()
                 detail = _tr("The request is back in the line below: fix the settings, then send it again.") if fix \
                     else _tr("The request is back in the line below: send it again when you are ready.")
+                if not returned:
+                    detail = _tr("Your draft stays in the line below. The failed request stays in the conversation.")
                 if kept:
                     detail = _tr("The {} steps before stay, and can be undone.").format(kept) + " " + detail
             # The card sends the returned request again (S5): one click, no copy back and forth with the line.
-            self.panel.show_error(message, detail, fix,
-                                  "" if fix else _tr("Send it again"),
-                                  None if fix else self._resend_last)
+            retry = _tr("Go on with what is left of the request.") if known else self._last_request
+            can_retry = not fix and (not kept or known)
+            action = (_tr("Continue") if known else _tr("Send it again")) if can_retry else ""
+            request, generation, posture = self._memory_request, self._memory_generation, self._request_posture
+            self.panel.show_error(message, detail, fix, action,
+                                  (lambda: self._retry_failed(retry, posture, request, generation)) if can_retry else None)
             # A request that failed must not fire the waiting one straight into the same failure (audit of
             # 2026-11-24: after a provider error the queued request overwrote the returned one and went at
             # once): it waits for the user, as after Stop (the draft is kept behind it by the panel).
             self.panel.pause_queued()
             return
         if outcome.status == OUTCOME_CANCELLED:
+            self._leave_memory_cards(self._memory_request)
             if kept:
                 self._say(_tr("Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. "
                               "Ask the agent to go on if you want the rest.").format(kept))
@@ -4145,6 +4464,7 @@ class AgentChatController(QObject):
             self._say(_tr("Stopped."))
             return
         if outcome.status == OUTCOME_STOPPED:
+            self.panel.pause_queued()
             self._say("")
             if outcome.reason == REASON_TURN_LIMIT:
                 self._offer_to_go_on()
@@ -4152,8 +4472,6 @@ class AgentChatController(QObject):
             self.panel.show_error(*self._stop_words(outcome.reason, kept))
             return
         self._say(self._usage_words())  # the cards of the turn say what changed (mockup)
-        if self._request_mode == PLAN:
-            self._offer_to_carry_out()
 
     def _offer_to_carry_out(self) -> None:
         """A plan was written (the Plan mode): one click carries it out, in Act, with the plan in the conversation.
@@ -4242,11 +4560,13 @@ class AgentChatController(QObject):
             return _tr("The model declined this request."), done + _tr("Nothing more was done. Ask it differently.")
         return _tr("The agent stopped before the end ({}).").format(reason), ""
 
-    def _give_back_request(self) -> None:
+    def _give_back_request(self) -> bool:
         """A request that went nowhere can be sent again without retyping it."""
         self._recap = getattr(self, "_recap_sent", "") or getattr(self, "_recap", "")
         if not self.panel.input.text():
             self.panel.input.setText(self._last_request)
+            return True
+        return self.panel.input.text().strip() == self._last_request.strip()
 
     @staticmethod
     def _error_message(error) -> str:

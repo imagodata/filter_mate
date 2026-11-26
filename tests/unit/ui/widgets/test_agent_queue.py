@@ -54,13 +54,15 @@ class Panel:
         self._working = False
         self._queue = []
         self._queue_paused = False
+        self._posture = "act"
         self.queue_label = SimpleNamespace(full="", set_full_text=lambda text: setattr(self.queue_label, "full", text),
                                            setToolTip=lambda text: None)
         self.queue_row = SimpleNamespace(visible=False, setVisible=lambda visible: setattr(
             self.queue_row, "visible", visible))
         self.queue_cancel = SimpleNamespace(setToolTip=lambda text: None)
         self.send_requested = SimpleNamespace(emit=self.sent.append)
-        for name in ("_on_send", "_send_queued", "_refresh_queue_row", "pause_queued", "cancel_queued"):
+        self.queued_send_requested = SimpleNamespace(emit=lambda text, posture: self.sent.append((text, posture)))
+        for name in ("_on_send", "_send_queued", "_refresh_queue_row", "pause_queued", "cancel_queued", "restore_queued"):
             setattr(self, name, MethodType(_method(name), self))
 
 
@@ -77,14 +79,14 @@ def send(panel, text):
 def test_first_enter_queues(panel):
     panel._working = True
     send(panel, "first")
-    assert panel._queue == ["first"] and panel.input.text() == "" and panel.queue_row.visible
+    assert panel._queue == [("first", "act")] and panel.input.text() == "" and panel.queue_row.visible
 
 
 def test_second_enter_stacks_behind_in_sight(panel):
     panel._working = True
     send(panel, "first")
     send(panel, "second")
-    assert panel._queue == ["first", "second"]
+    assert panel._queue == [("first", "act"), ("second", "act")]
     assert "first" in panel.queue_label.full and "second" in panel.queue_label.full
     assert "2" in panel.queue_label.full
 
@@ -95,7 +97,7 @@ def test_each_one_goes_alone_in_order(panel):
     send(panel, "second")
     panel._working = False
     panel._send_queued()
-    assert panel.sent == ["first"] and panel._queue == ["second"] and panel.queue_row.visible
+    assert panel.sent == [("first", "act")] and panel._queue == [("second", "act")] and panel.queue_row.visible
 
 
 def test_draft_typed_meanwhile_waits_behind(panel):
@@ -104,9 +106,11 @@ def test_draft_typed_meanwhile_waits_behind(panel):
     panel._working = False
     panel.input.setText("draft")
     panel._send_queued()
-    assert panel.sent == ["waiting"]
-    assert panel._queue == ["draft"] and panel.queue_row.visible
-    assert "draft" in panel.queue_label.full
+    assert panel.sent == [("waiting", "act")]
+    assert panel._queue == [] and not panel.queue_row.visible
+    assert panel.input.text() == "draft"
+    panel._send_queued()
+    assert panel.sent == [("waiting", "act")]
 
 
 def test_nothing_typed_nothing_queued_behind(panel):
@@ -114,7 +118,7 @@ def test_nothing_typed_nothing_queued_behind(panel):
     send(panel, "waiting")
     panel._working = False
     panel._send_queued()
-    assert panel.sent == ["waiting"] and panel._queue == [] and not panel.queue_row.visible
+    assert panel.sent == [("waiting", "act")] and panel._queue == [] and not panel.queue_row.visible
 
 
 def test_stopped_queue_does_not_go_by_itself(panel):
@@ -123,4 +127,25 @@ def test_stopped_queue_does_not_go_by_itself(panel):
     panel.pause_queued()
     panel._working = False
     panel._send_queued()
-    assert panel.sent == [] and panel._queue == ["waiting"]
+    assert panel.sent == [] and panel._queue == [("waiting", "act")]
+
+
+def test_waiting_requests_keep_the_posture_they_were_sent_with(panel):
+    panel._working = True
+    panel._posture = "respond"
+    send(panel, "read only")
+    panel._posture = "act"
+    send(panel, "make a map")
+    panel._working = False
+    panel._send_queued()
+    panel._send_queued()
+    assert panel.sent == [("read only", "respond"), ("make a map", "act")]
+
+
+def test_a_request_that_cannot_start_waits_again_without_losing_the_draft(panel):
+    panel.input.setText("unfinished draft")
+    panel.queued_send_requested.emit = panel.restore_queued
+    panel._queue = [("waiting", "propose")]
+    panel._send_queued()
+    assert panel._queue == [("waiting", "propose")] and panel._queue_paused
+    assert panel.input.text() == "unfinished draft"

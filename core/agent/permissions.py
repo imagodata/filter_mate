@@ -84,8 +84,8 @@ _RUNS_ALONE = {ADVISOR: READ, CAREFUL: VIEW, STANDARD: BUFFER, AUTONOMOUS: LOCAL
 # of the class project, as set_layer_options: follow and link are options of the layer, the preview of a point cloud is
 # its filter, that of a raster its rendering (the panel refuses them on a protected layer itself).
 VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "group_layers", "map_theme",
-                        "bookmark", "open_layout", "flash_features", "set_active_layer", "show_message",
-                        "preview_atlas"})
+                        "bookmark", "open_layout", "preview_atlas", "flash_features", "set_active_layer",
+                        "show_message"})
 BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
 CODE_TOOLS = frozenset({"run_pyqgis", "run_chart_code"})
@@ -297,6 +297,14 @@ class PermissionPolicy:
         self._declined: Set[str] = set()
         self.protector = protector
         self.rules = clean_rules(rules or {})
+        self.posture = ""
+
+    def set_posture(self, posture: str) -> None:
+        from .postures import posture_or_default
+        posture = posture_or_default(posture)
+        if posture != self.posture:
+            self._granted.clear()
+        self.posture = posture
 
     def turned_off(self, name: str) -> bool:
         return self.rules.get(name) == RULE_NEVER
@@ -348,6 +356,17 @@ class PermissionPolicy:
         """``RUN``, ``ASK`` or ``REFUSE`` for a call of the tool ``spec`` with ``arguments``."""
         if spec.name.startswith(CONNECTOR_PREFIX):
             return self._connector_verdict(spec.name)
+        if self.turned_off(spec.name):
+            return TURNED_OFF
+        proposal = (spec.name == "add_project_note" and (arguments or {}).get("scope") in ("user", "source")
+                    or spec.name == "remove_project_note" and bool((arguments or {}).get("memory")))
+        if proposal:
+            return RUN
+        if not spec.read_only and spec.name != "ask_user":
+            if self.posture == "respond":
+                return REFUSE
+            if self.posture == "propose":
+                return ASK
         if spec.name in AGENT_OWN:
             # Decided with the user on 2026-11-24 (audit, lot 4): undoing a step, the recipes and the notes of
             # the project change something (history, files, project), so in Ask and Plan (the advisor level)
@@ -407,6 +426,7 @@ class PermissionPolicy:
         """Can the user allow this tool for the rest of the conversation? Never code, nor a tool always asked (a
         tool of a connector at the advisor level among them)."""
         return (spec.name not in CODE_TOOLS and spec.name not in SETTINGS_TOOLS
+                and self.posture != "propose"
                 and self.rules.get(spec.name) != RULE_ASK and not self._advisor_connector_tool(spec.name))
 
     def grant(self, name: str, arguments: Optional[Dict[str, Any]] = None) -> None:

@@ -248,7 +248,14 @@ class _Atlas:
         return self._coverage
 
     def updateFeatures(self):
+        self.current = -1
         return self._pages
+
+    def seekTo(self, page):
+        if not 0 <= page < self._pages:
+            return False
+        self.current = page
+        return True
 
     def beginRender(self):
         self.rendered += 1
@@ -411,7 +418,53 @@ def test_preview_atlas_turns_a_page_and_previews_it():
     face = _Face(designers=[_Designer(layout)])
     answer = gui_control.preview_atlas("Carte", action="next", iface_obj=face)
     assert answer == {"layout": "Carte", "action": "next", "page": 2, "pages": 4, "preview": True}
-    assert layout._atlas.rendered == layout._atlas.ended == 1 and layout.refreshed == 1
+    assert layout._atlas.rendered == layout._atlas.ended == 0 and layout.refreshed == 1
+
+
+def test_preview_atlas_keeps_its_position_across_calls_and_refusals():
+    layout = _Layout(atlas=_Atlas(pages=4))
+    _Project.layouts = _Layouts([layout])
+    face = _Face(designers=[_Designer(layout)])
+    assert gui_control.preview_atlas("Carte", action="next", iface_obj=face)["page"] == 2
+    assert gui_control.preview_atlas("Carte", action="next", iface_obj=face)["page"] == 3
+    assert gui_control.preview_atlas("Carte", action="last", iface_obj=face)["page"] == 4
+    with pytest.raises(ValueError, match="no next page"):
+        gui_control.preview_atlas("Carte", action="next", iface_obj=face)
+    assert layout._atlas.currentFeatureNumber() == 3
+    assert gui_control.preview_atlas("Carte", action="previous", iface_obj=face)["page"] == 3
+
+
+@pytest.mark.parametrize("preview", [True, False])
+def test_preview_atlas_needs_a_window_before_changing_the_page(preview):
+    layout = _Layout(atlas=_Atlas(pages=4))
+    _Project.layouts = _Layouts([layout])
+    with pytest.raises(ValueError, match="no window"):
+        gui_control.preview_atlas("Carte", preview=preview)
+    assert layout._atlas.currentFeatureNumber() == 0
+
+
+def test_flash_needs_a_window():
+    with pytest.raises(ValueError, match="no window"):
+        gui_control.flash_features("communes", '"pop" > 100')
+
+
+def test_chat_dispatch_translates_window_refusals(monkeypatch):
+    error_module = importlib.import_module(_PKG + ".core.agent.tool_executor")
+    handlers = gui_control.chat_handlers()
+    expected = {"open_layout", "preview_atlas", "flash_features", "set_active_layer", "show_message"}
+    assert set(handlers) == expected
+
+    def refused(*arguments, **keywords):
+        raise ValueError("QGIS has no window")
+
+    for name, arguments in (
+        ("open_layout", {"name": "Carte"}), ("preview_atlas", {"layout": "Carte"}),
+        ("flash_features", {"layer": "communes", "expression": '"pop" > 0'}),
+        ("set_active_layer", {"layer": "communes"}), ("show_message", {"text": "hello"}),
+    ):
+        monkeypatch.setattr(gui_control, name, refused)
+        with pytest.raises(error_module.ToolFailure, match="no window"):
+            handlers[name](arguments)
 
 
 def test_preview_atlas_without_a_designer_still_turns():

@@ -186,10 +186,10 @@ def test_the_notes_of_this_project_only():
     selection = chosen(memory, PROJECT)
     assert (selection.sent, selection.left_out, selection.held_back, selection.concerned) == (3, 0, 0, 3)
     assert memory_block(selection).splitlines() == [
-        HEADER, USER_TITLE, "- MRO = zone de mutualisation",
-        "For the layer Communes:", "- dept est un texte",
-        "For the layers Tronçons, Tronçons (copie):", "- aérien = type_infra 'AER'"]
-    assert memory_block(chosen(memory)).splitlines() == [HEADER, USER_TITLE, "- MRO = zone de mutualisation"]
+        HEADER, USER_TITLE, "- m1: MRO = zone de mutualisation",
+        "For the layer Communes:", "- m4: dept est un texte",
+        "For the layers Tronçons, Tronçons (copie):", "- m2: aérien = type_infra 'AER'"]
+    assert memory_block(chosen(memory)).splitlines() == [HEADER, USER_TITLE, "- m1: MRO = zone de mutualisation"]
     assert memory_block(chosen(Memory(), PROJECT)) == ""
     only_elsewhere = _memory((SCOPE_SOURCE, "ogr::parcelles", "idu est la clé"))
     assert memory_block(chosen(only_elsewhere, PROJECT)) == ""
@@ -211,13 +211,17 @@ def test_past_the_budget_the_active_layer_first_then_every_project_and_the_lates
     selection = chosen(memory, PROJECT, active=ROADS)
     block = memory_block(selection)
     assert len(block) <= MAX_MEMORY_BLOCK
-    assert sum(1 for line in block.splitlines() if line.startswith("- road")) == 4  # the active layer, whole
-    kept = [line.split()[2] for line in block.splitlines() if line.startswith("- user")]
+
+    def notes(prefix):
+        return [line.split(": ", 1)[1] for line in block.splitlines() if line.startswith("- m")
+                and line.split(": ", 1)[1].startswith(prefix)]
+    assert len(notes("road")) == 4  # the active layer, whole
+    kept = [text.split()[1] for text in notes("user")]
     assert kept and kept == sorted(kept) and kept[-1] == "7"  # the latest of them, shown in their order
-    assert "- town" not in block and selection.left_out == 16 - selection.sent
+    assert not notes("town") and selection.left_out == 16 - selection.sent
     assert block.splitlines()[-1] == f"Not sent: {selection.left_out} more for lack of room."
     other = memory_block(chosen(memory, PROJECT, active=TOWNS))
-    assert sum(1 for line in other.splitlines() if line.startswith("- town")) == 4 and "- road" not in other
+    assert other.count(": town ") == 4 and ": road " not in other
 
 
 def test_the_block_never_passes_its_budget():
@@ -266,3 +270,81 @@ def test_the_memory_goes_once_then_when_it_changed():
     assert gone == "S4\n\n" + REMOVED["memory"]
     sent.sent()
     assert compose(sent.delta(ContextParts(summary="S5", notes="N", memory="M2"), full=True)) == "S5\n\nN\n\nM2"
+
+
+# --- lot 2: what the model proposes, what the user declined ------------------------------------------------------------
+
+def test_a_proposal_says_why_no_card_is_shown():
+    from core.agent.memory import DECLINED, FULL, KEPT, proposal_problem
+    memory = _memory((SCOPE_USER, "", "MRO = zone de mutualisation"), (SCOPE_SOURCE, ROADS, "aérien = 'AER'"))
+    assert proposal_problem(memory, "mro = ZONE de mutualisation", SCOPE_USER) == (KEPT, "m1")
+    assert proposal_problem(memory, "aérien = 'AER'", SCOPE_SOURCE, ROADS) == (KEPT, "m2")
+    assert proposal_problem(memory, "aérien = 'AER'", SCOPE_USER) == ("", "")  # another place
+    declined = applied(memory, [("decline", "  POP =  point de présence ")])
+    assert declined.declined == ("POP = point de présence",)
+    assert proposal_problem(declined, "pop = point de présence", SCOPE_USER) == (DECLINED, "")
+    assert proposal_problem(declined, "pop = point de présence", SCOPE_SOURCE, TOWNS) == (DECLINED, "")
+    full = Memory()
+    for rank in range(MAX_SOURCE_NOTES):
+        full, _note = added(full, f"n{rank}", SCOPE_SOURCE, ROADS)
+    assert proposal_problem(full, "one more", SCOPE_SOURCE, ROADS) == (FULL, "")
+    assert proposal_problem(full, "one more", SCOPE_USER) == ("", "")
+    with pytest.raises(ValueError):
+        proposal_problem(memory, "x" * 301, SCOPE_USER)
+
+
+def test_a_decline_is_remembered_once_taken_back_and_bounded():
+    from core.agent.memory import DECLINE, UNDECLINE
+    memory = applied(Memory(), [(DECLINE, "a"), (DECLINE, "A"), (DECLINE, "b")])
+    assert memory.declined == ("A", "b")  # the same text once, the latest wording
+    assert applied(memory, [(UNDECLINE, " a ")]).declined == ("b",)
+    many = applied(Memory(), [(DECLINE, f"t{rank}") for rank in range(MAX_DECLINED + 5)])
+    assert len(many.declined) == MAX_DECLINED and many.declined[0] == "t5"
+    assert parse(dump(many)) == many
+
+
+def test_a_note_a_model_proposed_keeps_whether_it_could_read_values():
+    memory = applied(Memory(), [(ADD, SCOPE_SOURCE, ROADS, "Tronçons", "aérien = 'AER'", True),
+                                (ADD, SCOPE_USER, "", "", "MRO = zone", False)])
+    assert [note.with_values for note in memory.notes] == [True, False]
+    assert applied(Memory(), [(ADD, SCOPE_USER, "", "", "a", "yes")]).notes[0].with_values is False
+
+
+def test_note_of():
+    from core.agent.memory import note_of
+    memory = _memory((SCOPE_USER, "", "a"))
+    assert note_of(memory, "m1").text == "a" and note_of(memory, "m2") is None and note_of(memory, None) is None
+
+
+def test_a_note_forgotten_comes_back_as_it_was():
+    from core.agent.memory import RESTORE, note_of
+    memory = applied(Memory(), [(ADD, SCOPE_SOURCE, ROADS, "Tronçons", "aérien = 'AER'", True)], today="2026-11-01")
+    note = memory.notes[0]
+    gone = removed(memory, "m1")
+    back = applied(gone, [(RESTORE, note)])
+    assert note_of(back, "m1") == note and back.next == 2  # its id, its date, with_values
+    assert applied(back, [(RESTORE, note)]) == back  # its id taken: nothing
+    later = applied(Memory(next=1), [(RESTORE, note)])
+    assert later.next == 2 and parse(dump(later)) == later
+
+
+def test_a_card_write_refuses_a_concurrent_change_under_the_store_lock():
+    from core.agent.memory import EXPECT
+
+    before = Memory()
+    later, _note = added(before, "kept by another QGIS")
+    with pytest.raises(ValueError, match="changed since"):
+        applied(later, [(EXPECT, before), (ADD, SCOPE_USER, "", "", "from the card")])
+    assert [note.text for note in later.notes] == ["kept by another QGIS"]
+
+
+def test_restoring_a_forgotten_note_respects_the_current_capacity():
+    from core.agent.memory import RESTORE
+
+    original, note = added(Memory(), "forgotten")
+    memory = removed(original, note.id)
+    for rank in range(MAX_USER_NOTES):
+        memory, _kept = added(memory, f"new {rank}")
+    with pytest.raises(ValueError, match="list is full"):
+        applied(memory, [(RESTORE, note)])
+    assert parse(dump(memory)) == memory

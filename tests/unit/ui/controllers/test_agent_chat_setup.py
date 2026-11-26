@@ -43,11 +43,9 @@ GOLDEN = {  # (length, sha256 of the UTF-8 text); 2026-11-16, lot 1 of the token
     # paragraphs that described a tool one by one (12,076 characters before for the default); then the way of working
     # starts from the state of the project sent, not from list_layers and map_context (review of lot 1); lot 2: the
     # sources not ticked in one paragraph, a shorter way of working.
-    # 2026-11-26: retaken. They already failed at HEAD (committed prompt drift, +59 in every config, taken without
-    # a retake); this take adds the save_favorite sentence (+40 in every config: a favorite is kept only when asked).
-    "default": (4098, "43c5225a68a5656611fe542e7907c31784f98871be8933fe395507e54f3d190e"),
-    "no_values_local": (4582, "0e13d9cc2a5770938b83b30458984ca194b7241183bb940738345397be3e10f9"),
-    "every_source": (5616, "c2a3f14fc62db69b31acbd60e06458503fb3d37967471a20e1b37ae85f615f83"),
+    "default": (4042, "e3cfcfd6a57983993447b60a1898c9e5a9c3c507cc93242813393b79f32d8485"),
+    "no_values_local": (4526, "9c83ee2c7faa6627a78aea2e568837f47d577a96f69e74d18b11c6645174e7be"),
+    "every_source": (5560, "556f92ed39638faa43c3ea9b9324f987be0f6d56619f12a8c03db48d5bfe170a"),
 }
 _EVERY = tuple(source.id for source in sources.BUILT_IN)
 CONFIGS = {

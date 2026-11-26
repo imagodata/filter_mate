@@ -471,6 +471,60 @@ class TestServicesOnThePluginApp:
         app.history_manager.undo.assert_called_once()
 
 
+class TestSaveFavorite:
+    @pytest.fixture
+    def saving(self, public_api, monkeypatch):
+        import filtermate_api.qgis_accessor as module
+        service = MagicMock()
+        service.get_favorite_by_name.return_value = None
+        entry = types.SimpleNamespace(id="kept-id", name="Kept", description="whole state",
+                                      layer_name="communes", expression='"pop" > 10')
+        service.get_favorite.return_value = entry
+        controller = MagicMock()
+        controller.create_favorite_from_current.return_value = "kept-id"
+        integration = types.SimpleNamespace(favorites_controller=controller)
+        dock = types.SimpleNamespace(_controller_integration=integration)
+        plugin = types.SimpleNamespace(app=types.SimpleNamespace(favorites_manager=service, dockwidget=dock))
+        accessor = QGISFilterMateAccessor(public_api=public_api, plugin=plugin)
+        spy = _MainThreadSpy()
+        monkeypatch.setattr(module, "run_on_main_thread", spy)
+        service.get_favorite_by_name.side_effect = spy.guard(None)
+        return accessor, service, controller, spy
+
+    def test_saving_uses_the_live_controller_on_the_main_thread(self, saving):
+        accessor, service, controller, spy = saving
+        result = accessor.save_favorite("  Kept  ", "whole state")
+        assert result.favorite_id == "kept-id" and result.expression == '"pop" > 10'
+        assert spy.calls == 1
+        controller.create_favorite_from_current.assert_called_once_with("Kept", "whole state")
+
+    def test_a_duplicate_never_calls_the_controller(self, saving):
+        from filtermate_api.accessor import FavoriteNameTakenError
+        accessor, service, controller, spy = saving
+        service.get_favorite_by_name.side_effect = spy.guard(object())
+        with pytest.raises(FavoriteNameTakenError):
+            accessor.save_favorite("Kept")
+        controller.create_favorite_from_current.assert_not_called()
+
+    def test_no_active_filter_is_distinct_from_a_persistence_failure(self, saving):
+        from filtermate_api.accessor import FavoriteSaveError, NoActiveFilterError
+        accessor, service, controller, spy = saving
+        controller.create_favorite_from_current.return_value = None
+        with pytest.raises(NoActiveFilterError):
+            accessor.save_favorite("Kept")
+        controller.create_favorite_from_current.side_effect = RuntimeError("disk full")
+        with pytest.raises(FavoriteSaveError, match="disk full") as caught:
+            accessor.save_favorite("Kept")
+        assert not isinstance(caught.value, NoActiveFilterError)
+
+    def test_a_missing_controller_is_unavailable(self, saving, monkeypatch):
+        from filtermate_api.accessor import FavoritesUnavailable
+        accessor, service, controller, spy = saving
+        monkeypatch.setattr(accessor, "_favorites_controller", lambda: None)
+        with pytest.raises(FavoritesUnavailable):
+            accessor.save_favorite("Kept")
+
+
 class _MainThreadSpy:
     """Stand-in for run_on_main_thread: records that QGIS is only touched inside it."""
 

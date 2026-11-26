@@ -17,8 +17,11 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-QtWidgets = pytest.importorskip("PyQt5.QtWidgets")
-from PyQt5 import QtCore, QtGui  # noqa: E402
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+except ImportError:
+    QtWidgets = pytest.importorskip("PyQt5.QtWidgets")
+    from PyQt5 import QtCore, QtGui
 
 _ROOT = pathlib.Path(__file__).resolve().parents[4]
 _PKG = "fm_agent_panel_ux_test"

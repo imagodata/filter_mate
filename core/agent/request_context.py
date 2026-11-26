@@ -42,7 +42,7 @@ def protected_part(names: Sequence[str]) -> str:
 
 
 def decided_part(outcomes: Sequence[str]) -> str:
-    return ("Settings changes you proposed, as the user decided them in the thread: " + "; ".join(outcomes)
+    return ("What you proposed on a card, as the user decided it in the thread: " + "; ".join(outcomes)
             if outcomes else "")
 
 

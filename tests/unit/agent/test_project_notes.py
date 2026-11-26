@@ -51,3 +51,14 @@ def test_the_tools_belong_to_the_chat_alone():
     assert all(tool.chat_only for tool in CHAT_ONLY)
     assert not tools[ADD_NOTE].read_only and not tools[ADD_NOTE].requires_confirmation
     assert tools[ADD_NOTE].input_schema["properties"]["text"]["maxLength"] == MAX_NOTE_CHARS
+
+
+def test_a_turn_undone_leaves_the_notes_kept_since():
+    """Lot 2 of the memory: a note the user kept on a card after the turn stays when the turn is undone."""
+    from core.agent.project_notes import rebased
+    before, after = ["a", "b"], ["a", "b", "added by the turn"]
+    assert rebased(after, after, before) == ["a", "b"]  # unchanged since: exactly as before
+    assert rebased(after + ["kept by a click"], after, before) == ["a", "b", "kept by a click"]
+    removed = ["a"]  # the turn removed b
+    assert rebased(["a", "c"], removed, ["a", "b"]) == ["a", "c", "b"]
+    assert rebased(["a", "b", "c"], ["a", "b"], ["a", "b", "c", "d"]) == ["a", "b", "c", "d"]  # a redo

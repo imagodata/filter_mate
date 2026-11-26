@@ -5,9 +5,8 @@ Ask/Plan/Act (``modes``) and the Autonomy tab (``permissions``) made two axes th
 nobody knew why a confirmation was asked. A posture is one choice that sets both at once:
 
 - ``RESPOND`` (Répondre): answers and reads, changes nothing (Ask at the advisor level);
-- ``PROPOSE`` (Proposer): writes the plan, then shows each change before applying it
-  (Plan, at the careful level: every change of the project is asked first);
-- ``ACT`` (Agir): does it, asking only what cannot be undone (Act at the saved level).
+- ``PROPOSE`` (Proposer): shows each change before applying it, even an allowed tool;
+- ``ACT`` (Agir): follows the level and the tool rules saved in the settings.
 
 Pure: no QGIS. The legacy mode strings (``ask``/``plan``/``act``) are still what the settings
 store, so an older version reads the same key: ``posture_from_mode`` migrates them on load.
@@ -23,6 +22,11 @@ PROPOSE = "propose"
 ACT = "act"
 POSTURES = (RESPOND, PROPOSE, ACT)
 DEFAULT_POSTURE = ACT
+
+PROPOSE_NOTE = ("Posture chosen by the user for this request: Propose. Read what the request needs, describe each "
+                "change before calling its tool, and let the confirmation card ask the user for each action. "
+                "A refusal changes nothing: respect it and do not try another tool to do the same thing. "
+                "Do not wait for a separate Go: each change is approved separately before it runs.")
 
 # The legacy mode each posture runs the request with (core/agent/modes.py).
 _POSTURE_MODES = {RESPOND: ASK, PROPOSE: PLAN, ACT: MODE_ACT}

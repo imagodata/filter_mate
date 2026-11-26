@@ -14,7 +14,9 @@ metadata:
 # Print layouts and atlases
 
 A print layout is a page of the project the user opens in the layout designer of QGIS: the agent makes it, puts in
-it what is asked, and exports it when asked. Everything is undone with the turn.
+it what is asked, and exports it when asked. Layout changes are undone with the turn; opening the designer and
+turning preview pages are not. open_layout and preview_atlas require a QGIS window and belong to the built-in
+chat only, never to external MCP clients.
 
 ## Method
 

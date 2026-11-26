@@ -162,6 +162,56 @@ def test_export_is_confirmed(setup, accept):
     assert session.messages[2].parts[0].is_error is (not accept)
 
 
+def test_stop_while_confirming_runs_no_action(setup):
+    engine, _session, transport, listener, checkpoint, seen = setup
+
+    def confirm(_call):
+        engine.cancel()
+        return True
+
+    listener.confirm = confirm
+    engine.send("export")
+    transport.emit(turn(STOP_TOOL_USE, call("export")))
+    assert seen == [] and checkpoint.begins == 0
+    assert listener.outcomes[0].status == "cancelled"
+
+
+def test_stop_before_a_tool_starts_runs_nothing(setup):
+    engine, _session, transport, listener, _checkpoint, seen = setup
+    listener.hook = engine.cancel
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("write")))
+    assert seen == []
+    assert listener.outcomes[0].status == "cancelled"
+
+
+def test_a_layer_protected_while_confirming_is_checked_again(setup):
+    from core.agent.permissions import CAREFUL
+
+    engine, session, transport, listener, checkpoint, seen = setup
+    protected = []
+
+    class Protection:
+        def name_of(self, reference):
+            return reference if reference in protected else None
+
+    tool = ToolSpec("apply_filter", "Filter a layer", {"type": "object", "properties": {
+        "layer_name": {"type": "string"}}})
+    engine._executor.offer([tool], {tool.name: lambda arguments: seen.append(arguments) or {}})
+    engine._policy.set_level(CAREFUL)
+    engine._policy.protector = Protection()
+
+    def confirm(_call):
+        protected.append("roads")
+        return True
+
+    listener.confirm = confirm
+    engine.send("filter roads")
+    transport.emit(turn(STOP_TOOL_USE, ToolCallPart("c1", tool.name, {"layer_name": "roads"})))
+    assert seen == [] and checkpoint.begins == 0
+    assert session.messages[2].parts[0].is_error
+
+
 def test_failure_forgets_the_request(setup):
     engine, session, transport, listener, _, _ = setup
     engine.send("go")
@@ -204,7 +254,12 @@ def test_an_event_of_an_earlier_request_is_ignored(setup):
 
 def test_cancel_during_a_tool_waits_for_it_and_runs_no_other(setup):
     engine, session, transport, listener, _, seen = setup
-    listener.hook = engine.cancel  # a tool spins the event loop, the user clicks Stop
+    def write(arguments):
+        seen.append("write")
+        engine.cancel()
+        return {"ok": True}
+
+    engine._executor._handlers["write"] = write
     engine.send("go")
     transport.emit(turn(STOP_TOOL_USE, call("write", "1"), call("write", "2")))
     assert seen == ["write"]
@@ -396,7 +451,12 @@ def test_a_failure_at_the_second_turn_keeps_the_first_and_the_next_request_is_va
 @pytest.mark.parametrize("kind", sorted(PROVIDERS))
 def test_a_stop_during_a_tool_leaves_a_valid_conversation(kind):
     engine, session, transport, listener, seen = _engine(PROVIDERS[kind])
-    listener.hook = engine.cancel
+    def write(arguments):
+        seen.append("write")
+        engine.cancel()
+        return {"ok": True}
+
+    engine._executor._handlers["write"] = write
     engine.send("go")
     transport.emit(turn(STOP_TOOL_USE, call("write", "1"), call("export", "2"), call("read", "3")))
     assert seen == ["write"] and listener.outcomes[0].kept_steps == 1

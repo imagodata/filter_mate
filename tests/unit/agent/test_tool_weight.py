@@ -91,7 +91,7 @@ def test_a_source_ticked_leaves_the_paragraph():
     assert "find_place (" not in text and "add_basemap (" not in text and "add_elevation (" in text
 
 
-def test_the_fixed_part_is_under_21600(bench):
+def test_the_fixed_part_is_under_22200(bench):
     """Instructions with the index, and the tools of the core, as the default settings send them."""
     instructions, tools, _held = bench.default_setup()
     fixed = len(instructions) + sum(weight_of(tool) for tool in tools)
@@ -107,5 +107,5 @@ def test_the_fixed_part_is_under_21600(bench):
     # apply_style_preset in the index (+108): measured below, the bound set just above.
     # 2026-11-26 (save_favorite): the index line, the filtering set and the "only when the user asks" words (+91).
     # 2026-11-26 (visible automation): the index lines of open_layout, preview_atlas, flash_features,
-    # set_active_layer and show_message (+275); the system prompt names favorites kept on request (+117).
+    # set_active_layer and show_message (+275).
     assert fixed < 22200, fixed

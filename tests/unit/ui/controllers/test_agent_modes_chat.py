@@ -45,17 +45,12 @@ def test_act_runs_at_the_level_of_the_autonomy_tab(ctrl_module, controller):  # 
     assert controller._level_part() == _permissions().level_note(controller._policy.level)
 
 
-def test_a_plan_ends_with_go_that_carries_it_out_in_act(ctrl_module, controller):  # noqa: F811
+def test_propose_uses_per_action_confirmation_without_a_second_go(ctrl_module, controller):
     controller._mode = "plan"
     starts = _send(ctrl_module, controller, "make a map of the island")
     starts[0](_end_turn(ctrl_module))
-    label, go = controller.panel.add_link.call_args[0]
-    assert label == "Go"
-    sent = []
-    controller._on_send = lambda text, mode="": sent.append((text, mode))
-    go()
-    go()  # once
-    assert sent == [("Go: carry out the plan above, step by step.", "act")]
+    controller.panel.add_link.assert_not_called()
+    assert controller._level_part() == ctrl_module.PROPOSE_NOTE
 
 
 def test_no_go_after_an_answer_in_ask_or_act(ctrl_module, controller):  # noqa: F811

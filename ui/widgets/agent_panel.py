@@ -35,7 +35,6 @@ from ...core.agent.modes import ACT, ASK, PLAN
 from ...core.agent.postures import ACT as POSTURE_ACT
 from ...core.agent.postures import PROPOSE, RESPOND, posture_from_mode, posture_or_default, posture_to_mode
 from ...core.agent.request_log import short as short_request
-from ...core.agent.tool_catalog import TOOL_FAMILIES, display_title, family_of, family_title
 from ...core.agent.memory import (
     ADD, EDIT, MAX_NOTES, MAX_SOURCE_NOTES, MAX_USER_NOTES, REMOVE, SCOPE_SOURCE, SCOPE_USER, Memory, Note,
     chosen as memory_chosen,
@@ -546,6 +545,7 @@ class AgentPanel(QFrame):
     """Widgets only: the controller decides what happens."""
 
     send_requested = pyqtSignal(str)
+    queued_send_requested = pyqtSignal(str, str)
     mode_changed = pyqtSignal(str)  # Ask, Plan or Act, picked under the line (core/agent/modes.py)
     posture_changed = pyqtSignal(str)  # respond, propose or act (core/agent/postures.py)
     stop_requested = pyqtSignal()
@@ -764,8 +764,8 @@ class AgentPanel(QFrame):
         self._mode_actions = {}
         for posture, label, words in (
                 (RESPOND, _tr("Answer"), _tr("answers and reads, changes nothing")),
-                (PROPOSE, _tr("Propose"), _tr("writes the steps, shows each change before applying it")),
-                (POSTURE_ACT, _tr("Act"), _tr("does it, asking only what cannot be undone"))):
+                (PROPOSE, _tr("Propose"), _tr("shows each change before applying it")),
+                (POSTURE_ACT, _tr("Act"), _tr("follows the permissions saved in the settings"))):
             action = mode_menu.addAction(f"{label} \u2014 {words}")
             action.setCheckable(True)
             action.triggered.connect(lambda _checked=False, chosen=posture: self._pick_mode(chosen))
@@ -1632,7 +1632,7 @@ class AgentPanel(QFrame):
         label = self._mode_actions[self._posture][1]
         self.mode_button.setText(f"{label} \u25be")
         self.mode_button.setToolTip(_tr("What the agent may do: Answer reads and changes nothing, Propose writes "
-                                        "the steps and shows each change before applying it, Act does it."))
+                                        "the steps and shows each change before applying it, Act follows the saved permissions."))
         self._refresh_placeholder()
         if hasattr(self, "thread"):
             self._refresh_look()  # the chip takes the color of its posture
@@ -1715,7 +1715,7 @@ class AgentPanel(QFrame):
         if not text:
             return
         if self._working:  # each one waits its turn, in sight, in order (S5: a real pile, not one joined text)
-            self._queue.append(text)
+            self._queue.append((text, self._posture))
             self.input.clear()
             self._refresh_queue_row()
             return
@@ -1723,7 +1723,7 @@ class AgentPanel(QFrame):
 
     @property
     def queued(self) -> str:
-        return "\n".join(self._queue)
+        return "\n".join(text for text, _posture in self._queue)
 
     def _refresh_queue_row(self) -> None:
         """The pile waiting, numbered once there are several: the first line of each, in order."""
@@ -1731,14 +1731,14 @@ class AgentPanel(QFrame):
         if not queue:
             self.queue_row.setVisible(False)
             return
-        firsts = [" ".join(request.split()) for request in queue]
+        firsts = [" ".join(request.split()) for request, _posture in queue]
         if len(queue) == 1:
             self.queue_label.set_full_text(_tr("Next: {}").format(firsts[0]))
         else:
             shown = " · ".join(f"{number}. {first}" for number, first in enumerate(firsts, 1))
             self.queue_label.set_full_text(_tr("Next ({}): {}").format(len(queue), shown))
         self.queue_label.setToolTip(plain_tooltip("\n".join(f"{number}. {request}"
-                                                            for number, request in enumerate(queue, 1))))
+                                                            for number, (request, _posture) in enumerate(queue, 1))))
         self.queue_row.setVisible(True)
 
     def pause_queued(self) -> None:
@@ -1756,7 +1756,7 @@ class AgentPanel(QFrame):
         self.queue_row.setVisible(False)
         if queue:
             typed = self.input.text().rstrip()
-            back = "\n".join(queue)
+            back = "\n".join(text for text, _posture in queue)
             self.input.setText(f"{typed}\n{back}" if typed else back)
 
     def _send_queued(self) -> None:
@@ -1765,18 +1765,15 @@ class AgentPanel(QFrame):
         2026-11-24: the waiting request overwrote the draft, and after a provider error the returned request too)."""
         if getattr(self, "_queue_paused", False):
             return  # stopped: they wait for the user
-        queue = list(getattr(self, "_queue", ()))
-        self._queue = []
-        self.queue_row.setVisible(False)
-        if not queue or self._working:
-            self._queue = queue
-            self._refresh_queue_row()
+        if not self._queue or self._working:
             return
-        text, rest = queue[0], queue[1:]
-        draft = self.input.text()
-        self.input.setText(text)
-        self.send_requested.emit(text)
-        self._queue = [*rest, draft] if draft.strip() else list(rest)
+        text, posture = self._queue.pop(0)
+        self._refresh_queue_row()
+        self.queued_send_requested.emit(text, posture)
+
+    def restore_queued(self, text: str, posture: str) -> None:
+        self._queue.insert(0, (text, posture))
+        self.pause_queued()
         self._refresh_queue_row()
 
     def _on_send_or_stop(self) -> None:
@@ -1882,6 +1879,13 @@ class AgentPanel(QFrame):
         """A change of the settings of FilterMate asked in the thread, with Apply and Cancel (agent_thread)."""
         self._show_conversation()
         card = self.thread.add_settings_card(texts, lines, reason)
+        self._in_answer = False
+        return card
+
+    def add_memory_card(self, texts: dict, text: str, editable: bool, buttons, notes=()):
+        """A note the agent proposes to keep from one project to the next, or to forget (agent_thread.MemoryCard)."""
+        self._show_conversation()
+        card = self.thread.add_memory_card(texts, text, editable, buttons, notes)
         self._in_answer = False
         return card
 
@@ -2273,26 +2277,18 @@ class AgentSettingsDialog(QDialog):
         settings_kind = QCoreApplication.translate("AgentChat", "settings of FilterMate")
         choices = [("", _tr("As the level says")), ("ask", _tr("Always ask")), ("allow", _tr("Always allow")),
                    ("never", _tr("Never"))]
-        # Six families instead of a flat list (S4, core/agent/tool_catalog.py): what the tools mainly do.
-        families = [family for family in TOOL_FAMILIES
-                    if any(family_of(row[0]) == family for row in self._tools)]
-        for family in families:
-            parent = QTreeWidgetItem(self.tool_rules, [_tr(family_title(family)), "", ""])
-            parent.setExpanded(True)
-            rows = sorted((row for row in self._tools if family_of(row[0]) == family),
-                          key=lambda row: (row[2], display_title(row[0], row[1]).lower()))
-            for name, title, risk in rows:
-                kind = settings_kind if name in ("change_settings", "apply_settings_profile") else kinds.get(risk, "")
-                item = QTreeWidgetItem(parent, [display_title(name, title), kind, ""])
-                item.setToolTip(0, name)
-                box = QComboBox(self.tool_rules)
-                for value, label in choices:
-                    if value == "allow" and name == "run_pyqgis":
-                        continue  # code is confirmed at every run
-                    box.addItem(label, value)
-                box.setCurrentIndex(max(box.findData(rules.get(name, "")), 0))
-                self.tool_rules.setItemWidget(item, 2, box)
-                self._rule_boxes[name] = box
+        for name, title, risk in sorted(self._tools, key=lambda row: (row[2], row[1].lower())):
+            kind = settings_kind if name in ("change_settings", "apply_settings_profile") else kinds.get(risk, "")
+            item = QTreeWidgetItem(self.tool_rules, [title, kind, ""])
+            item.setToolTip(0, name)
+            box = QComboBox(self.tool_rules)
+            for value, label in choices:
+                if value == "allow" and name == "run_pyqgis":
+                    continue  # code is confirmed at every run
+                box.addItem(label, value)
+            box.setCurrentIndex(max(box.findData(rules.get(name, "")), 0))
+            self.tool_rules.setItemWidget(item, 2, box)
+            self._rule_boxes[name] = box
         self.tool_rules.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         layout.addWidget(hint)
         layout.addWidget(self.tool_rules, 1)

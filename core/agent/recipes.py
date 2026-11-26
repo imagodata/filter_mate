@@ -56,7 +56,6 @@ NOT_KEPT = frozenset({
     "list_database_tables", "add_database_table",
     # A chart belongs to its conversation (its id), and its file or its place in a layout to the user's question.
     "show_chart", "export_chart", "add_chart_to_layout", "run_chart_code",
-    # An infographic stacks charts of the conversation: replaying it would answer other charts.
     "show_infographic", "export_infographic",
     # A saved favorite persists in the project: replaying the save would keep a duplicate under the same name.
     "save_favorite",

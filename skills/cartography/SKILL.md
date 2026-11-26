@@ -13,7 +13,8 @@ metadata:
 
 # Cartography
 
-All of this changes how the project shows, never its data, and is undone with the turn.
+Styles and layouts change how the project shows, never its data, and are undone with the turn. The view tools
+below only change what the window shows and are not undone.
 
 ## Styles
 
@@ -111,6 +112,8 @@ settings of the agent, Sources tab.
 While the user watches, point at what you mean instead of only telling it. In the chat, flash_features flashes the
 features an expression keeps (selecting nothing), set_active_layer makes a layer active and shows it unfolded in the
 tree, and show_message tells something in the bar of QGIS (never a question: ask_user asks it instead).
+These three tools require a QGIS window and belong to the built-in chat only; external MCP clients do not expose
+them. Use them only when they are offered in this conversation.
 
 ## Layouts
 

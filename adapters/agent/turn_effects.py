@@ -1116,8 +1116,10 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                 if outcome:  # "" when the panel is already as wanted: nothing done, nothing to say
                     (done if outcome == "done" else left).append(_exploring_label())
             elif kind == "notes":
-                from .project_notes_store import write_notes
-                write_notes(list(effect[2] if undo else effect[3]), project)
+                from .project_notes_store import read_notes, write_notes
+                from ...core.agent.project_notes import rebased as rebased_notes
+                write_notes(rebased_notes(read_notes(project), effect[3] if undo else effect[2],
+                                          effect[2] if undo else effect[3]), project)
                 done.append(_notes_label())
             elif kind == "form":
                 layer = project.mapLayer(layer_id)
