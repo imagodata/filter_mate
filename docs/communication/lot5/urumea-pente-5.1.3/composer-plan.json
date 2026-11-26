@@ -1,0 +1,36 @@
+{
+  "status": "planned_not_filmed; no new Urumea counts yet",
+  "focus": ["FilterMate filtering engine", "FilterMate exports", "agent acquisition and project-save proposal"],
+  "duration_target_s": 180,
+  "start": {"project_filename": "", "loaded_layers": 0, "agent_and_sources_configured": true, "record_before_first_prompt": true},
+  "camera": {
+    "frame_px": [1920, 1080],
+    "qgis_window_px": [0, 0, 1920, 990],
+    "caption_band_px": [0, 990, 1920, 90],
+    "filtermate_reserved_px": [1450, 130, 470, 860],
+    "layers_reserved_px": [0, 130, 300, 860],
+    "floating_windows_px": [315, 145, 1115, 800],
+    "lens_max_bounds_px": [315, 165, 1100, 720],
+    "full_qgis_context_visible": true,
+    "map_only_fullscreen": false,
+    "capture_isolated_desktop_with_auxiliary_windows": true,
+    "zoom_targets": ["sent prompt", "source targets predicate buffer", "result counts and map", "D3 charts", "composer design", "export options and real files", "project-save proposal"],
+    "zoom_hold_s": [2, 4]
+  },
+  "page": {"format": "A3", "orientation": "landscape", "width_mm": 420, "height_mm": 297, "margin_mm": 12},
+  "boxes_mm": {
+    "header": [12, 12, 396, 22],
+    "map": [12, 42, 246, 210],
+    "kpi": [270, 42, 138, 34],
+    "progression": [270, 85, 138, 80],
+    "slope_histogram": [270, 176, 138, 76],
+    "sources": [12, 263, 396, 22]
+  },
+  "palette": {"paper": "#ffffff", "ink": "#143145", "selected": "#22577a", "river": "#1fa9bc", "context": "#c7cdd4", "panel": "#f2f6f8"},
+  "charts": [
+    {"id": "progression", "engine": "D3.js via run_chart_code", "kind": "horizontal_bar", "title": "Effet des filtres", "unit": "unique building objects", "stages": ["all acquired in study extent", "within 500 m corridor", "corridor AND chosen URA zone"], "populations_are_nested": true},
+    {"id": "slope_histogram", "engine": "D3.js via run_chart_code", "kind": "histogram", "title": "Pentes du terrain sous les bâtiments retenus", "unit": "%", "source": "zonal means derived from true MNT", "missing_values": "count and disclose; never replace with zero"}
+  ],
+  "outputs": ["urumea_resultats.gpkg", "MNT and slope GeoTIFFs", "urumea_synthese.pdf", "urumea_projet.qgz plus data/resources folder"],
+  "verification": ["initial layers count zero", "sources acquired through actual agent tools", "native save-project proposal visible", "unique building ids and stage counts agree", "D3 actually executed, not merely a standard Python chart", "PDF reopened and inspected", "GeoPackage counts checked", "project folder copied and QGZ reopened with relative data and embedded SVGs"]
+}
