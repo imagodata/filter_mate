@@ -822,6 +822,12 @@ def test_json_key_clause_keeps_the_values(values, numeric, expected):
     assert clause == f"\"k\" IN (SELECT value FROM json_each('{expected}'))"
 
 
+def test_json_key_clause_huge_digit_string_is_left_as_text():
+    huge = "9" * 5000  # Python 3.11+ reads no such integer (int max str digits): no ValueError
+    clause = ogr_builder.OGRExpressionBuilder(task_params={})._json_key_clause('"k"', [huge, 7], numeric=True)
+    assert clause == f"\"k\" IN (SELECT value FROM json_each('[\"{huge}\",7]'))"
+
+
 # ---------------------------------------------------------------------------
 # Stable key and web-service guards (2026-10-17)
 # ---------------------------------------------------------------------------

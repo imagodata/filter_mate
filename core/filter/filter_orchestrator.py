@@ -490,8 +490,11 @@ class FilterOrchestrator:
         anywhere in the subset is enough. Clearing such subsets queued an
         empty subset that was applied on the main thread AFTER the worker
         had set the new filter: every PostgreSQL target ended unfiltered.
+        2026-11-24 (lot 7): a value may hold the text ``__source``
+        (``"name" = '__source'``): only the code outside the single-quoted
+        literals decides, so such a subset is kept.
         """
-        if not subset or '__source' not in subset.lower():
+        if not subset or '__source' not in re.sub(r"'(?:''|[^'])*'", '', subset).lower():
             return False
         return not contains_well_formed_exists(subset)
 

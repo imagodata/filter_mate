@@ -182,7 +182,12 @@ def json_key_clause(field_sql: str, values: list, numeric: bool) -> str:
             elif isinstance(value, str) and value.isascii() and value.lstrip('-').isdigit():
                 # isascii first: isdigit() is true for Unicode digits ('²') that int() refuses (audit of
                 # 2026-11-24: ValueError); those go as JSON strings below, as other texts.
-                items.append(str(int(value)))
+                try:
+                    items.append(str(int(value)))
+                except ValueError:
+                    # More than ~4,300 digits: Python 3.11+ reads no such integer (as the native
+                    # translation of 2026-11-13); the text is left as it is, a JSON string.
+                    items.append(json.dumps(value, ensure_ascii=False))
             else:
                 items.append(json.dumps(value if isinstance(value, (int, float)) else str(value), ensure_ascii=False))
         payload = "[" + ",".join(items) + "]"
