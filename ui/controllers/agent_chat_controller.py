@@ -18,7 +18,7 @@ from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, delete_own_key, load_settings, provider_config, read_key, save_settings, store_key,
     target_of, current_provider, read_providers, write_providers, read_mode, write_mode,
 )
-from ...adapters.agent import request_log_store, transcript_store
+from ...adapters.agent import request_log_store, session_store, transcript_store
 from ...adapters.agent.memory_store import change_memory, memory_path, project_sources, read_memory
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
@@ -94,6 +94,7 @@ from ...core.domain.layer_kind import LayerKind
 from ...adapters.agent import agent_widgets
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure, connector_gate
 from ...core.agent.transcript import entry as transcript_entry, recap as transcript_recap
+from ...core.agent.session_io import dump as session_dump, parse as session_parse, resumable as session_resumable
 from ...filtermate_api.agent_tools import build_handlers
 from ...filtermate_api.accessor import FilterRejected
 from ...filtermate_api.config import _default_export_root
@@ -515,6 +516,7 @@ class AgentChatController(QObject):
             self._transcript_key = key
             if self._transcript:  # empty while a project opens: what is stored for it must stay
                 self._save_transcript()
+                self._save_session()
 
     def _on_project_read(self, *_args) -> None:
         """Another project is open: its own transcript comes back."""
@@ -535,8 +537,45 @@ class AgentChatController(QObject):
         if self._transcript_key:
             transcript_store.save(self._transcript_key, self._transcript)
 
+    def _save_session(self) -> None:
+        """Keep the real conversation for this project, so the discussion can be taken up again after the project
+        reopens or QGIS restarts. Under the model it talked to: resumed only for the same destination."""
+        if not self._transcript_key or self._engine is None:
+            return
+        try:
+            preset, model = getattr(self, "_engine_identity", ("", ""))
+            session = self._engine.session
+            session_store.save(self._transcript_key,
+                               session_dump(session.messages, session.usage, session.summarized, preset, model))
+        except Exception:  # keeping is a convenience: a request is never failed for it
+            logger.debug("Agent: the conversation could not be kept", exc_info=True)
+
+    def _resume_session(self, session: AgentSession, values) -> None:
+        """Take up the conversation kept for this project, when it talked to the same model; else the next request
+        is told the recap of the thread, as before. Only into a session that sent nothing yet."""
+        if not self._transcript_key:
+            return
+        try:
+            text = session_store.load(self._transcript_key)
+            if not session_resumable(text, values.preset, values.model):
+                return
+            saved = session_parse(text)
+            if saved is not None:
+                session.restore_history(saved.messages, saved.usage, saved.summarized)
+        except Exception:  # a kept conversation that cannot be read is simply not resumed
+            logger.debug("Agent: the kept conversation could not be taken up again", exc_info=True)
+
+    def _resume_available(self) -> bool:
+        """A conversation kept for this project, for the model of the settings: the next request takes it up again."""
+        try:
+            values = load_settings()
+            return session_resumable(session_store.load(self._transcript_key), values.preset, values.model)
+        except Exception:
+            logger.debug("Agent: the kept conversation could not be read", exc_info=True)
+            return False
+
     def _restore_transcript(self) -> None:
-        """Show again what this project's conversation looked like; the model does not remember it."""
+        """Show again what this project's conversation looked like; the model takes it up again when it can."""
         self._transcript_key = transcript_store.project_key()
         self._transcript = transcript_store.load(self._transcript_key)
         self._recap_from = 0  # the thread shown again is what the next conversation is told of
@@ -558,7 +597,8 @@ class AgentChatController(QObject):
                 self.panel.end_answer()
             else:
                 self.panel.add_note(item["text"])
-        self.panel.add_note(_tr("Earlier conversation: the agent starts afresh from here."))
+        if not self._resume_available():
+            self.panel.add_note(_tr("Earlier conversation: the agent starts afresh from here."))
 
     def _refresh_history(self) -> None:
         self._charts.watch_layers()  # an undo or a redo may have brought a chart of a layout back
@@ -2401,6 +2441,8 @@ class AgentChatController(QObject):
         limits = AgentLimits(max_history_chars=history_budget(kind, len(prompt) + tools_weight(tools)),
                              shrinks_with_tools=kind == "ollama")
         session = AgentSession(provider, tools, prompt, limits, core=CORE if index else ())
+        self._resume_session(session, values)
+        self._engine_identity = (values.preset, values.model)
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
 
@@ -2637,8 +2679,9 @@ class AgentChatController(QObject):
 
     def _restart_engine(self) -> None:
         """Other sources or tools under the same provider: the next request starts another conversation with the
-        model, which is told what the thread holds (the recap of ``_on_send``). The thread and what the user allowed
-        for the conversation stay."""
+        model, which takes up the conversation kept (``_resume_session``) or is told what the thread holds (the
+        recap of ``_on_send``). The thread and what the user allowed for the conversation stay."""
+        self._save_session()
         self._drop_engine()
         for name in self._connector_labels:  # the tools of the connectors it loaded went with it
             self._tools.pop(name, None)
@@ -2667,6 +2710,7 @@ class AgentChatController(QObject):
         self.panel.input.forget()
         self._charts.forget()
         self._save_transcript()
+        session_store.save(self._transcript_key, "")
 
     # --- what the user does -----------------------------------------------------
 
@@ -2692,8 +2736,9 @@ class AgentChatController(QObject):
             try:
                 with owned_by(CHAT_WAITS):
                     self._engine = self._build_engine()
-                # A conversation that starts with a thread already shown: the model is told what it asked and did.
-                self._recap = "" if self._engine is None else transcript_recap(
+                # A conversation taken up again remembers: no recap of the thread. One that starts with a thread
+                # already shown is told what it asked and did.
+                self._recap = "" if self._engine is None or self._engine.session.messages else transcript_recap(
                     self._transcript[getattr(self, "_recap_from", 0):], with_actions=values.send_values)
             finally:
                 self._building = False
@@ -3805,6 +3850,7 @@ class AgentChatController(QObject):
         self.panel.end_answer()
         self._flush_journal()
         self._save_transcript()
+        self._save_session()
         self._log_request(outcome)
         self._refresh_history()
         # What a request that broke off did is in the conversation, with a note saying it stopped there

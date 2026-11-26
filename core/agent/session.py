@@ -154,6 +154,26 @@ class AgentSession:
     def messages(self) -> Tuple[Message, ...]:
         return tuple(self._messages)
 
+    def restore_history(self, messages: Sequence[Message], usage: Optional[Usage] = None,
+                        summarized: int = 0) -> bool:
+        """Take up a conversation kept earlier (``core/agent/session_io.py``); False when there is nothing to take up.
+
+        Only into a session that sent nothing yet: resuming never mixes two conversations. The next request carries
+        the whole project state again (``rewritten``): the project may have changed while the conversation was kept.
+        """
+        from .compaction import is_request
+        kept = [message for message in messages if isinstance(message, Message) and message.parts]
+        if self._messages or not kept:
+            return False
+        self._messages = list(kept)
+        self.usage = usage if isinstance(usage, Usage) else Usage()
+        self.summarized = summarized if isinstance(summarized, int) and summarized >= 0 else 0
+        self._requests = sum(1 for message in kept if is_request(message))
+        self._request_start = len(kept)
+        self._turns = 0
+        self.rewritten = True
+        return True
+
     @property
     def system(self) -> str:
         """The instructions ``next_request`` sends."""

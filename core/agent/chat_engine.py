@@ -152,6 +152,11 @@ class ChatEngine:
         self._executor.offer(tools, handlers)
 
     @property
+    def session(self) -> AgentSession:
+        """The conversation, to keep it from one project session to the next (``core/agent/session_io.py``)."""
+        return self._session
+
+    @property
     def usage(self):
         """Tokens of the conversation so far, as the providers counted them."""
         return self._session.usage
