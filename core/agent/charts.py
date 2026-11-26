@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Charts of the agent drawn with d3: what a request asks, its data shaped for a template, and the page that draws it.
+"""Charts of the agent: what a request asks, its data shaped for a template, and the page that draws d3 code.
 
-Plain Python. ``show_chart`` asks for a chart in data (a kind, a layer and its fields, or rows the agent gives); the
-templates of ``resources/charts/fm_charts.js`` draw it in a page of QtWebEngine FilterMate keeps hidden
-(``adapters/agent/chart_renderer.py``), which hands back an SVG: shown in the chat, written as PNG, JPG or SVG, put in a
-print layout and drawn again there when the filter of its layer changes (``adapters/public_api/charts.py``).
+Plain Python. ``show_chart`` asks for a chart in data (a kind, a layer and its fields, or rows the agent gives);
+``chart_render.render`` draws its spec (``chart_spec``) as SVG, on every QGIS: shown in the chat, written as PNG, JPG,
+SVG or PDF, put in a print layout and drawn again there when the filter of its layer changes
+(``adapters/public_api/charts.py``). The templates of ``resources/charts/fm_charts.js`` drew them in QtWebEngine before
+(2026-11-22); they stay what code of the expert mode starts from.
 
-In the expert mode alone, the agent may draw a chart again with d3 code it writes (run_chart_code), asked to the user
+In the expert mode alone (QGIS 4), the agent may draw a chart again with d3 code it writes (run_chart_code), asked to
+the user
 at each run as Python is: a web page may still reach the network (WebRTC from a frame of its own, which neither the
 Content-Security-Policy nor the interceptor of requests sees); the page reaches no file, and the SVG it hands back is
 cleaned of every image and outside reference before QGIS reads it (``sanitize_svg``).
@@ -29,16 +31,18 @@ D3_FILE = "d3.v7.min.js"
 TEMPLATES_FILE = "fm_charts.js"
 
 BAR, HISTOGRAM, PIE, LINE, SCATTER = "bar", "histogram", "pie", "line", "scatter"
-KINDS = (BAR, HISTOGRAM, PIE, LINE, SCATTER)
+KPI, TREEMAP, AREA = "kpi", "treemap", "area"
+KINDS = (BAR, HISTOGRAM, PIE, LINE, SCATTER, KPI, TREEMAP, AREA)
 AGGREGATES = ("count", "sum", "mean", "min", "max")
 SORTS = ("value", "label")
 X_TYPES = ("number", "time")
-FORMATS = ("png", "jpg", "svg")
+FORMATS = ("png", "jpg", "svg", "pdf")
 
 DEFAULT_SIZE = (640, 400)
 MIN_SIZE, MAX_SIZE = (280, 200), (1600, 1200)
-DEFAULT_LIMIT = {BAR: 10, PIE: 6}
+DEFAULT_LIMIT = {BAR: 10, PIE: 6, KPI: 4, TREEMAP: 8}
 MAX_LIMIT = 30
+MAX_KPI_CARDS = 8  # past two rows of four the cards no longer hold their numbers
 DEFAULT_BINS, MAX_BINS = 12, 50
 MAX_ROWS = 500  # rows the agent gives
 MAX_SERIES = {LINE: 8, SCATTER: 3}  # the categorical hues that stay apart (all pairs for a scatter): past, "others"
@@ -106,12 +110,13 @@ class ChartRequest:
         for key in ("layer", "field", "value_field", "series_field", "x_type", "x_label", "y_label"):
             if getattr(self, key):
                 answer[key] = getattr(self, key)
-        if self.kind in (BAR, PIE, LINE):
+        if self.kind in (BAR, PIE, LINE, KPI, TREEMAP, AREA):
             answer["aggregate"] = self.aggregate
-        if self.kind in (BAR, PIE):
+        if self.kind in (BAR, PIE, KPI, TREEMAP):
             answer["limit"] = self.limit
-        if self.kind == BAR:
+        if self.kind in (BAR, KPI, TREEMAP):
             answer["sort"] = self.sort
+        if self.kind == BAR:
             if self.horizontal is not None:
                 answer["horizontal"] = self.horizontal
         if self.kind == PIE:
@@ -187,7 +192,8 @@ def parse_request(arguments: Dict[str, Any]) -> ChartRequest:
         kind=kind, title=_text(arguments, "title", MAX_TITLE), layer=layer,
         field=_text(arguments, "field", 200), value_field=_text(arguments, "value_field", 200),
         series_field=_text(arguments, "series_field", 200), aggregate=aggregate,
-        limit=_whole(arguments, "limit", DEFAULT_LIMIT.get(kind, 10), 1, MAX_LIMIT),
+        limit=_whole(arguments, "limit", DEFAULT_LIMIT.get(kind, 10), 1,
+                   MAX_KPI_CARDS if kind == KPI else MAX_LIMIT),
         bins=_whole(arguments, "bins", DEFAULT_BINS, 2, MAX_BINS), sort=sort, horizontal=horizontal,
         donut=arguments.get("donut") is not False, x_type=x_type,
         x_label=_text(arguments, "x_label", MAX_LABEL), y_label=_text(arguments, "y_label", MAX_LABEL),
@@ -219,13 +225,15 @@ def _check_layer_fields(request: ChartRequest) -> None:
     if not request.field:
         raise ChartError({BAR: "field: the categories of the bars", PIE: "field: the categories of the slices",
                           HISTOGRAM: "field: the numbers to count by class", LINE: "field: the x of the line",
-                          SCATTER: "field: the x of the dots"}[kind] + " is needed")
-    if kind in (BAR, PIE, LINE) and request.aggregate != "count" and not request.value_field:
+                          SCATTER: "field: the x of the dots", KPI: "field: the categories of the numbers",
+                          TREEMAP: "field: the categories of the rectangles",
+                          AREA: "field: the x of the area"}[kind] + " is needed")
+    if kind in (BAR, PIE, LINE, KPI, TREEMAP, AREA) and request.aggregate != "count" and not request.value_field:
         raise ChartError(f"value_field: the numbers to {request.aggregate} is needed (or aggregate count)")
     if kind == SCATTER and not request.value_field:
         raise ChartError("value_field: the y of the dots is needed")
-    if kind == LINE and not request.value_field and request.aggregate != "count":
-        raise ChartError("value_field: the y of the line is needed")
+    if kind in (LINE, AREA) and not request.value_field and request.aggregate != "count":
+        raise ChartError(f"value_field: the y of the {kind} is needed")
 
 
 # --- data ---------------------------------------------------------------------------------------------------------
@@ -385,38 +393,47 @@ def scatter_values(triples: Sequence[Tuple[Any, Any, Any]], others: str,
     return dots, total
 
 
-def pie_slices(bars: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
-    """Bars as the slices of a pie: how many negative ones the template leaves out (a slice needs a share above
+def pie_slices(bars: List[Dict[str, Any]], whole: str = "a pie") -> Tuple[List[Dict[str, Any]], int]:
+    """Bars as the shares of a whole: how many negative ones the template leaves out (a share needs a value above
     zero); the data stays as it is, the answer says what the drawing drops (audit of 2026-11-24).
 
     Raises:
-        ChartError: No slice above zero: nothing to draw.
+        ChartError: No share above zero: nothing to draw.
     """
     if not any(bar["value"] > 0 for bar in bars):
-        raise ChartError("no slice is above zero: a pie shows shares of a whole, not losses or nothing")
+        raise ChartError(f"no slice is above zero: {whole} shows shares of a whole, not losses or nothing")
     return bars, sum(1 for bar in bars if bar["value"] < 0)
+
+
+def category_data(request: ChartRequest, pairs: Iterable[Tuple[Any, Any]], others: str,
+                  empty: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """Aggregate categories once for both layer and row charts, with room for the KPI remainder card."""
+    pairs = list(pairs)
+    data = category_values(pairs, request.aggregate, request.limit, request.sort, others, empty)
+    if request.kind == KPI and len(data) > request.limit:
+        data = category_values(pairs, request.aggregate, request.limit - 1, request.sort, others, empty)
+    meta: Dict[str, Any] = {"points": len(data)}
+    if request.kind in (PIE, TREEMAP):
+        whole = "a pie" if request.kind == PIE else "a treemap"
+        data, left_out = pie_slices(data, whole)
+        if left_out:
+            meta.update(dropped=True, dropped_note=f"{left_out} negative slice(s) left out: "
+                        f"{whole} draws shares above zero only")
+    return data, meta
 
 
 def rows_data(request: ChartRequest, others: str, empty: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     """The data of a chart from the rows the agent gave, as the templates take it; and what to say of it."""
     rows = request.rows
     kind = request.kind
-    if kind in (BAR, PIE):
+    if kind in (BAR, PIE, KPI, TREEMAP):
         pairs = []
         for row in rows:
             value = _finite(row.get("value"))
             if value is None or "label" not in row:
-                raise ChartError("each row of a bar or pie chart holds label and a number value")
+                raise ChartError(f"each row of a {kind} chart holds label and a number value")
             pairs.append((row["label"], value))
-        # The aggregate of the request, not always a sum: two rows of a label add up, average out, and so on.
-        data = category_values(pairs, request.aggregate, request.limit, request.sort, others, empty)
-        meta: Dict[str, Any] = {"points": len(data)}
-        if kind == PIE:
-            data, left_out = pie_slices(data)
-            if left_out:
-                meta["dropped"] = True
-                meta["dropped_note"] = (f"{left_out} negative slice(s) left out: a pie draws shares above zero only")
-        return data, meta
+        return category_data(request, pairs, others, empty)
     if kind == HISTOGRAM:
         values = [row.get("value") for row in rows]
         if not any(_finite(value) is not None for value in values):
@@ -428,10 +445,10 @@ def rows_data(request: ChartRequest, others: str, empty: str) -> Tuple[List[Dict
         raise ChartError("x is either numbers or dates (ISO text), not both in one chart")
     x_type = request.x_type or ("time" if texts else "number")
     triples = [(row.get("x"), row.get("y"), row.get("series")) for row in rows]
-    if kind == LINE:
-        data, dropped = line_values(triples, "sum", x_type, empty, others)
+    if kind in (LINE, AREA):
+        data, dropped = line_values(triples, request.aggregate, x_type, empty, others)
         if not data:
-            raise ChartError("each row of a line holds x and a number y")
+            raise ChartError(f"each row of a {kind} holds x and a number y")
         return data, {"points": len(data), "x_type": x_type, "dropped": dropped}
     data, total = scatter_values(triples, others, empty)
     if not data:
@@ -496,14 +513,14 @@ SVG_NS = "http://www.w3.org/2000/svg"
 XLINK_NS = "http://www.w3.org/1999/xlink"
 # Never kept: what loads something (a file of this machine through QtSvg, a page), runs, or holds HTML.
 _DROPPED = {"image", "foreignObject", "script", "iframe", "object", "embed", "audio", "video", "style", "a", "use",
-            "feImage", "handler", "listener"}
+            "feImage", "handler", "listener", "animate", "animateMotion", "animateTransform", "set"}
 
 
 def _local(tag: str) -> str:
     return tag.rsplit("}", 1)[-1]
 
 
-def sanitize_svg(svg: str) -> str:
+def sanitize_svg(svg: str, max_side: Optional[int] = None) -> str:
     """``svg`` (from the page) with only shapes and text: no image, no element that loads or runs anything, no
     reference outside the document, no DTD. ChartError when it is no SVG.
 
@@ -519,7 +536,7 @@ def sanitize_svg(svg: str) -> str:
         raise ChartError(f"the SVG of the chart could not be read ({exc})") from None
     if root.tag != "{%s}svg" % SVG_NS:
         raise ChartError("the chart is no SVG")
-    _check_size(root)
+    _check_size(root, max_side or MAX_SVG_SIDE)
     # Walked without recursion, every element of the namespace of SVG kept only (2026-11-22, second review: a tree
     # 3,000 levels deep raised RecursionError), and the attributes of no namespace only.
     stack, seen = [(root, 0)], 0
@@ -573,7 +590,7 @@ def _local_urls(value: str) -> bool:
     return all(target.strip().startswith("#") for target in _URL.findall(value))
 
 
-def _check_size(root) -> None:
+def _check_size(root, max_side: int = MAX_SVG_SIDE) -> None:
     """A chart is a few hundred pixels: a side of millions makes a card or a layout item of millions too."""
     for key in ("width", "height"):
         text = str(root.attrib.get(key, "") or "").strip().lower().replace("px", "")
@@ -583,8 +600,16 @@ def _check_size(root) -> None:
             size = float(text)
         except ValueError:
             raise ChartError(f"the {key} of the chart is no number of pixels") from None
-        if not math.isfinite(size) or not 1 <= size <= MAX_SVG_SIDE:
-            raise ChartError(f"the {key} of the chart goes from 1 to {MAX_SVG_SIDE} pixels")
+        if not math.isfinite(size) or not 1 <= size <= max_side:
+            raise ChartError(f"the {key} of the chart goes from 1 to {max_side} pixels")
+    if "viewBox" in root.attrib:
+        try:
+            box = [float(value) for value in root.attrib["viewBox"].replace(",", " ").split()]
+        except ValueError:
+            raise ChartError("the viewBox of the chart holds four numbers") from None
+        if len(box) != 4 or not all(math.isfinite(value) for value in box) \
+                or not all(1 <= value <= max_side for value in box[2:]):
+            raise ChartError(f"the viewBox of the chart needs a size from 1 to {max_side} pixels")
 
 
 # --- what the model is told ----------------------------------------------------------------------------------------

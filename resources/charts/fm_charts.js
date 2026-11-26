@@ -289,7 +289,109 @@
     return root;
   }
 
-  var KINDS = {bar: bar, histogram: histogram, pie: pie, line: line, scatter: scatter};
+  // kpi: [{label, value, others}]; big numbers in cards, four to a row, the rest wrapped below.
+  function kpi(spec) {
+    var data = spec.data, palette = spec.palette, root = svgRoot(spec);
+    var f = frame(root, spec, {left: 12, right: 12, bottom: 12});
+    var cols = Math.min(4, data.length), rows = Math.ceil(data.length / cols);
+    var gap = 12, cardWidth = (f.width - gap * (cols - 1)) / cols;
+    var cardHeight = Math.max(60, Math.min(96, (f.height - gap * (rows - 1)) / rows));
+    data.forEach(function (d, i) {
+      var col = i % cols, row = Math.floor(i / cols);
+      var x = f.x + col * (cardWidth + gap), y = f.y + row * (cardHeight + gap);
+      var card = root.append("g").attr("transform", "translate(" + x + "," + y + ")");
+      card.append("rect").attr("width", cardWidth).attr("height", cardHeight).attr("rx", 6)
+        .attr("fill", palette.background === "#ffffff" || !palette.background ? "#f4f3ef" : "#262625");
+      card.append("text").attr("x", 12).attr("y", 36).attr("font-size", 26).attr("font-weight", 700)
+        .attr("fill", d.others ? palette.muted : palette.text).text(number(d.value));
+      card.append("text").attr("x", 12).attr("y", 56).attr("font-size", 11)
+        .attr("fill", palette.muted).text(short(d.label, Math.max(8, Math.floor(cardWidth / 6.2))));
+    });
+    return root;
+  }
+
+  // treemap: [{label, value, others}]; shares as nested rectangles, the label in the ones that hold it.
+  function treemap(spec) {
+    var data = spec.data.filter(function (d) { return d.value > 0; }), palette = spec.palette, root = svgRoot(spec);
+    var f = frame(root, spec, {left: 12, right: 12, bottom: 12});
+    var leaves = d3.treemap().size([f.width, f.height]).padding(3).round(true)(
+      d3.hierarchy({children: data}).sum(function (d) { return d.value; }).sort(function (a, b) {
+        return b.value - a.value;
+      })).leaves();
+    var color = function (d, i) { return d.others ? palette.other : palette.series[i % palette.series.length]; };
+    // White or ink on a tile, whichever reads on its hue.
+    var inkOn = function (hex) {
+      var rgb = String(hex || "").replace("#", "");
+      if (rgb.length === 3) rgb = rgb[0] + rgb[0] + rgb[1] + rgb[1] + rgb[2] + rgb[2];
+      var c = [0, 2, 4].map(function (i) {
+        var v = parseInt(rgb.slice(i, i + 2), 16) / 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+      return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) < 0.35 ? "#ffffff" : "#0b0b0b";
+    };
+    var total = d3.sum(data, function (d) { return d.value; }) || 1;
+    var tiles = root.append("g").attr("transform", "translate(" + f.x + "," + f.y + ")")
+      .selectAll("g").data(leaves).join("g")
+      .attr("transform", function (d) { return "translate(" + d.x0 + "," + d.y0 + ")"; });
+    tiles.append("rect").attr("width", function (d) { return Math.max(0.5, d.x1 - d.x0); })
+      .attr("height", function (d) { return Math.max(0.5, d.y1 - d.y0); }).attr("rx", 3)
+      .attr("fill", function (d, i) { return color(d.data, i); });
+    tiles.append("text").attr("x", 7).attr("y", 16).attr("font-size", 11).attr("font-weight", 600)
+      .attr("fill", function (d, i) { return inkOn(color(d.data, i)); }).text(function (d) {
+        return (d.x1 - d.x0) > 44 && (d.y1 - d.y0) > 18
+          ? short(d.data.label, Math.floor((d.x1 - d.x0 - 14) / 6.2)) : "";
+      });
+    tiles.append("text").attr("x", 7).attr("y", 31).attr("font-size", 10)
+      .attr("fill", function (d, i) { return inkOn(color(d.data, i)); })
+      .attr("fill-opacity", 0.85).text(function (d) {
+        return (d.x1 - d.x0) > 44 && (d.y1 - d.y0) > 34
+          ? number(100 * d.data.value / total, ".2~f") + " %" : "";
+      });
+    return root;
+  }
+
+  // area: [{x, y, series}], as line with the ground filled; one area per series, overlapping.
+  function area(spec) {
+    var palette = spec.palette, root = svgRoot(spec), time = spec.x_type === "time";
+    var utc = function (text) { return new Date(/T\d\d:\d\d(:\d\d(\.\d+)?)?$/.test(text) ? text + "Z" : text); };
+    var data = spec.data.map(function (d) { return {x: time ? utc(d.x) : d.x, y: d.y, series: d.series || ""}; })
+      .filter(function (d) { return d.x !== null && !(time && isNaN(d.x)) && d.y !== null && isFinite(d.y); });
+    var groups = d3.groups(data, function (d) { return d.series; });
+    var several = groups.length > 1;
+    var f = frame(root, spec, {left: 52, right: several ? 110 : 20, bottom: spec.x_label ? 46 : 34});
+    var x = (time ? d3.scaleUtc() : d3.scaleLinear()).domain(d3.extent(data, function (d) { return d.x; })).range([f.x, f.x + f.width]);
+    var lo = d3.min(data, function (d) { return d.y; }), hi = d3.max(data, function (d) { return d.y; });
+    var y = d3.scaleLinear().domain([Math.min(0, lo), Math.max(0, hi)]).nice().range([f.y + f.height, f.y]);
+    var gy = root.append("g").attr("transform", "translate(" + f.x + ",0)")
+      .call(d3.axisLeft(y).ticks(Math.max(2, Math.floor(f.height / 50))).tickSize(-f.width).tickFormat(function (v) { return number(v); }));
+    gy.select("path.domain").remove();
+    styleAxis(gy, palette, true);
+    var axis = d3.axisBottom(x).ticks(Math.max(2, Math.floor(f.width / 90)));
+    if (!time) axis.tickFormat(function (v) { return number(v); });
+    var gx = root.append("g").attr("transform", "translate(0," + (f.y + f.height) + ")").call(axis);
+    styleAxis(gx, palette, false);
+    var ground = y(0);
+    var fill = d3.area().x(function (d) { return x(d.x); }).y0(ground).y1(function (d) { return y(d.y); });
+    var path = d3.line().x(function (d) { return x(d.x); }).y(function (d) { return y(d.y); });
+    groups.forEach(function (group, i) {
+      var points = group[1].slice().sort(function (a, b) { return a.x - b.x; });
+      var color = palette.series[i % palette.series.length];
+      root.append("path").attr("d", fill(points)).attr("fill", color).attr("fill-opacity", 0.22);
+      root.append("path").attr("d", path(points)).attr("fill", "none").attr("stroke", color)
+        .attr("stroke-width", 2).attr("stroke-linejoin", "round").attr("stroke-linecap", "round");
+      if (several) {
+        var last = points[points.length - 1];
+        root.append("text").attr("x", f.x + f.width + 6).attr("y", y(last.y) + 4).attr("font-size", 10)
+          .attr("fill", palette.text).text(short(group[0], 16));
+      }
+    });
+    axisTitle(root, spec, spec.x_label, f.x + f.width / 2, spec.height - 8, false);
+    axisTitle(root, spec, spec.y_label, 12, f.y + f.height / 2, true);
+    return root;
+  }
+
+  var KINDS = {bar: bar, histogram: histogram, pie: pie, line: line, scatter: scatter,
+               kpi: kpi, treemap: treemap, area: area};
 
   // What QtSvg reads of a look, written on each element as an attribute.
   var LOOK = ["fill", "fill-opacity", "stroke", "stroke-width", "stroke-opacity", "stroke-dasharray", "stroke-linecap",

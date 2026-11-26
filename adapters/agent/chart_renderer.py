@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-"""The page of QtWebEngine that draws the d3 charts of the agent, kept hidden, and what is made of its SVG.
+"""The page of QtWebEngine that draws the d3 code of the agent (run_chart_code), kept hidden, and what is made of the
+SVG of a chart (an image, a file, a PDF).
 
-Main thread only. One page, made the first time a chart is drawn (QtWebEngine starts in about a second) and kept: each
-chart loads its own HTML (``core/agent/charts.page_html``) and hands back its SVG, its look written on each element.
+Main thread only. The kinds of show_chart are drawn in Python (``core/agent/chart_render.py``); the page draws only
+code of the expert mode. One page, made the first time code is drawn (QtWebEngine starts in about a second) and kept:
+each run loads its own HTML (``core/agent/charts.page_html``) and hands back its SVG, its look written on each element.
 The page reaches nothing: an off-the-record profile, a Content-Security-Policy in the HTML, and an interceptor that
 refuses every request but the page itself; no window, no storage, no clipboard. Code of the model (expert mode) that
 never ends is stopped by a delay, and the page is dropped with it.
 
 QtWebEngine is in the Python of QGIS 4 (PyQt6.QtWebEngineCore); QGIS 3 has only QtWebKit, too old for d3 7:
-``available()`` is False there and the tools say so.
+``available()`` is False there and run_chart_code is not offered.
 """
 from __future__ import annotations
 
@@ -265,13 +267,19 @@ def image(svg: str, scale: float = 1.0, background: Optional[str] = None):
     return picture
 
 
-def write(svg: str, path: str, file_format: str, dpi: int = 192) -> int:
-    """Write the chart to ``path`` as png, jpg or svg; returns its size in bytes. ``dpi`` sets the pixels of an image
-    (96: the size of the chart)."""
+def write(svg: str, path: str, file_format: str, dpi: int = 192, title: str = "") -> int:
+    """Write the chart to ``path`` as png, jpg, svg or pdf; returns its size in bytes. ``dpi`` sets the pixels of an
+    image (96: the size of the chart); a PDF is drawn in vectors, one page the size of the chart."""
     import os
+    if file_format not in ("png", "jpg", "svg", "pdf"):
+        raise ChartRenderError("format is one of png, jpg, svg, pdf")
+    if isinstance(dpi, bool) or not isinstance(dpi, int) or not 48 <= dpi <= 600:
+        raise ChartRenderError("dpi is a whole number from 48 to 600")
     if file_format == "svg":
         with open(path, "w", encoding="utf-8") as handle:
             handle.write('<?xml version="1.0" encoding="UTF-8"?>\n' + svg)
+    elif file_format == "pdf":
+        _write_pdf(svg, path, title)
     else:
         scale = max(0.5, min(dpi, 600) / 96.0)
         # A JPEG has no transparency: white under it, as on paper.
@@ -283,3 +291,27 @@ def write(svg: str, path: str, file_format: str, dpi: int = 192) -> int:
         if not picture.save(path, "JPG" if jpeg else "PNG", JPEG_QUALITY if jpeg else -1):
             raise ChartRenderError("the image could not be written")
     return os.path.getsize(path)
+
+
+def _write_pdf(svg: str, path: str, title: str) -> None:
+    """One page of the size of the chart (a pixel of the chart is 0.75 point, as at 96 dpi), no margin; the shapes
+    and the text stay vectors (QPdfWriter, in QtGui on Qt 5 and Qt 6: no QPrinter)."""
+    from qgis.PyQt.QtCore import QMarginsF, QRectF, QSizeF
+    from qgis.PyQt.QtGui import QPageLayout, QPageSize, QPainter, QPdfWriter
+    renderer = svg_renderer(svg)
+    size = renderer.defaultSize()
+    writer = QPdfWriter(path)
+    writer.setCreator("FilterMate")
+    if title:
+        writer.setTitle(title)
+    writer.setResolution(96)
+    page = QPageSize(QSizeF(size.width() * 0.75, size.height() * 0.75), QPageSize.Unit.Point, "",
+                     QPageSize.SizeMatchPolicy.ExactMatch)
+    writer.setPageLayout(QPageLayout(page, QPageLayout.Orientation.Portrait, QMarginsF(0, 0, 0, 0)))
+    painter = QPainter()
+    if not painter.begin(writer):
+        raise ChartRenderError("the PDF could not be written")
+    try:
+        renderer.render(painter, QRectF(0, 0, writer.width(), writer.height()))
+    finally:
+        painter.end()

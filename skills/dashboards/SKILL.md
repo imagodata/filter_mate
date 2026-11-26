@@ -3,7 +3,7 @@ name: dashboards
 title: Build a dashboard of widgets
 description: a dashboard in the AGENT panel to explore a layer (sliders, values, numbers, charts)
 metadata:
-  version: 2
+  version: 4
   plugin_min: 5.1.0
   audience: chat
   tools: create_widget, remove_widget, apply_filter, describe_layer, field_values, layer_statistics, list_layers
@@ -22,15 +22,21 @@ write code (run_pyqgis) to make a window or a panel: widgets are the interface t
 1. Know the layer: describe_layer for its fields and types, field_values for the values a field takes,
    layer_statistics for the range of a number. Never guess a field.
 2. Plan a few widgets, in this order, and tell the user what each one does:
-   - a stat with count first (the number of features shown, kept up to date);
+   - a stat with count first (the number of features shown, kept up to date); a sum or a mean of the key number
+     next to it when the user follows one;
    - a chart of the field that matters most (the 8 most frequent values and the others, or a histogram of 10
      classes for a number);
    - a range on the key numeric field (two bounds over a histogram of that field: dragging its handles
      or typing a bound filters the layer, the bars outside the bounds stay to widen it again);
    - values on a field with few values (50 at most; unticking filters the layer).
+   Start from the question: the key field first; three or four widgets answer most requests.
 3. Titles in the user's words, short.
 4. Then say how to use them: the widgets of one layer narrow it together, after the filter it had when its first
-   widget was made; a chart or a stat filters nothing.
+   widget was made; a chart or a stat filters nothing. For a chart in the thread, a file or a page instead of the
+   panel, load the skill charts: it offers KPI, treemap and area alongside the standard kinds on both
+   QGIS 3/Qt5 and QGIS 4/Qt6, plus compositions of up to four chart snapshots, exported as offline HTML, images,
+   SVG or vector PDF. These snapshots keep their values when dashboard filters change; charts placed
+   in print layouts can follow their source layer's filter.
 
 ## Limits
 

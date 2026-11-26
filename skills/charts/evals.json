@@ -51,6 +51,87 @@
         ]
       ],
       "forbid": ["run_pyqgis", "layer_statistics"]
+    },
+    {
+      "id": "chart_kpi_big_numbers",
+      "prompt": "Montre en grands chiffres la population totale des communes de chaque département.",
+      "expect": [
+        [
+          {
+            "tool": "show_chart",
+            "args": {"kind": "kpi", "layer": "communes", "field": "dept", "value_field": "population",
+                     "aggregate": "sum"},
+            "call_args": {"kind": "kpi", "layer": "communes", "field": "dept", "value_field": "population",
+                          "aggregate": "sum", "title": "Communes en chiffres"}
+          }
+        ]
+      ],
+      "forbid": ["run_pyqgis", "create_widget"]
+    },
+    {
+      "id": "infographic_stack_and_share",
+      "prompt": "Résume les communes en une infographie à partager : les grands chiffres puis les parts par département.",
+      "expect": [
+        [
+          {
+            "tool": "show_chart", "any": true,
+            "args": {"kind": "kpi", "layer": "communes", "field": "dept"},
+            "call_args": {"kind": "kpi", "layer": "communes", "field": "dept", "aggregate": "count",
+                          "title": "Communes en chiffres"}
+          },
+          {
+            "tool": "show_chart", "any": true,
+            "args": {"kind": "pie", "layer": "communes", "field": "dept"},
+            "call_args": {"kind": "pie", "layer": "communes", "field": "dept", "aggregate": "count",
+                          "title": "Communes par département"}
+          },
+          {
+            "tool": "show_infographic",
+            "args": {"title": "Les communes", "charts": ["c1", "c2"]},
+            "call_args": {"title": "Les communes", "charts": ["c1", "c2"]}
+          },
+          {
+            "tool": "export_infographic",
+            "args": {"infographic_id": "i1", "format": "html"},
+            "call_args": {"infographic_id": "i1", "format": "html"}
+          }
+        ]
+      ],
+      "forbid": ["run_pyqgis", "run_chart_code"]
+    },
+    {
+      "id": "chart_treemap_shares",
+      "prompt": "Représente en treemap les parts de population des communes par département.",
+      "expect": [[{
+        "tool": "show_chart",
+        "args": {"kind": "treemap", "layer": "communes", "field": "dept", "value_field": "population", "aggregate": "sum"},
+        "call_args": {"kind": "treemap", "layer": "communes", "field": "dept", "value_field": "population", "aggregate": "sum"}
+      }]],
+      "forbid": ["run_pyqgis", "run_chart_code"]
+    },
+    {
+      "id": "chart_area_numeric_axis",
+      "prompt": "Trace une aire de la hauteur moyenne des bâtiments selon leur nombre d'étages.",
+      "expect": [[{
+        "tool": "show_chart",
+        "args": {"kind": "area", "layer": "batiments", "field": "etages", "value_field": "hauteur", "aggregate": "mean"},
+        "call_args": {"kind": "area", "layer": "batiments", "field": "etages", "value_field": "hauteur", "aggregate": "mean"}
+      }]],
+      "forbid": ["run_pyqgis", "run_chart_code"]
+    },
+    {
+      "id": "chart_vector_pdf",
+      "prompt": "Dessine le nombre de bâtiments par usage et exporte le graphique en PDF vectoriel.",
+      "expect": [[{
+        "tool": "show_chart",
+        "args": {"kind": "bar", "layer": "batiments", "field": "usage"},
+        "call_args": {"kind": "bar", "layer": "batiments", "field": "usage"}
+      }, {
+        "tool": "export_chart",
+        "args": {"chart_id": "c1", "format": "pdf"},
+        "call_args": {"chart_id": "c1", "format": "pdf"}
+      }]],
+      "forbid": ["run_pyqgis", "run_chart_code"]
     }
   ]
 }

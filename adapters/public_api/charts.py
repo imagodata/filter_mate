@@ -14,8 +14,8 @@ import logging
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 from ...core.agent.charts import (
-    BAR, HISTOGRAM, LINE, PIE, ChartError, ChartRequest, category_values, histogram_values, line_values,
-    pie_slices, scatter_values,
+    AREA, BAR, HISTOGRAM, KPI, LINE, PIE, TREEMAP, ChartError, ChartRequest, category_data, histogram_values,
+    line_values, scatter_values,
 )
 
 logger = logging.getLogger("FilterMate.agent")
@@ -105,23 +105,18 @@ def read_data(request: ChartRequest, others: str, empty: str) -> Tuple[List[Dict
     layer = _layer(request.layer)
     kind = request.kind
     meta: Dict[str, Any] = {"layer_id": layer.id(), "layer_name": layer.name()}
-    if kind in (BAR, PIE):
+    if kind in (BAR, PIE, KPI, TREEMAP):
         category = _index(layer, request.field)
         value = _index(layer, request.value_field, numeric=True) if request.aggregate != "count" else -1
         rows = list(_rows(layer, [category, value]))
-        data = category_values(rows, request.aggregate, request.limit, request.sort, others, empty)
-        meta.update(features=len(rows), points=len(data))
-        if kind == PIE:
-            data, left_out = pie_slices(data)
-            if left_out:
-                meta["dropped"] = True
-                meta["dropped_note"] = (f"{left_out} negative slice(s) left out: a pie draws shares above zero only")
+        data, details = category_data(request, rows, others, empty)
+        meta.update(features=len(rows), **details)
     elif kind == HISTOGRAM:
         number = _index(layer, request.field, numeric=True)
         values = [row[0] for row in _rows(layer, [number])]
         data = histogram_values(values, request.bins)
         meta.update(features=len(values), points=len(data))
-    elif kind == LINE:
+    elif kind in (LINE, AREA):
         x_index = _index(layer, request.field)
         x_type = request.x_type or ("time" if _is_time(layer, x_index) else "number")
         if x_type == "number" and not layer.fields().at(x_index).isNumeric():

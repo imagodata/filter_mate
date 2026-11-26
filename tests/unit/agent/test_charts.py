@@ -166,3 +166,55 @@ def test_a_pie_says_which_negative_slices_it_leaves_out():
     assert [bar["label"] for bar in data] == ["a", "c", "b"]  # the data stays whole for the answer
     with pytest.raises(ChartError, match="no slice is above zero"):
         charts.rows_data(parse_request({"kind": "pie", "rows": [{"label": "x", "value": -1}]}), "O", "E")
+
+
+def test_new_kinds_parse_like_their_shape():
+    kpi = parse_request({"kind": "kpi", "layer": "communes", "field": "dept"})
+    assert kpi.kind == "kpi" and kpi.limit == 4
+    treemap = parse_request({"kind": "treemap", "rows": [{"label": "a", "value": 3}]})
+    assert treemap.kind == "treemap" and treemap.limit == 8
+    area = parse_request({"kind": "area", "layer": "rivieres", "field": "date", "value_field": "debit"})
+    assert area.kind == "area"
+    for arguments in ({"kind": "kpi", "layer": "a"},
+                      {"kind": "kpi", "rows": [{"label": "a", "value": 1}], "limit": 9},
+                      {"kind": "treemap", "layer": "a"},
+                      {"kind": "area", "layer": "a", "field": "x",
+                       "aggregate": "sum"}):
+        with pytest.raises(ChartError):
+            parse_request(arguments)
+    with pytest.raises(ChartError):
+        charts.rows_data(parse_request({"kind": "kpi", "rows": [{"x": 1, "y": 2}]}), "O", "E")
+    with pytest.raises(ChartError):
+        charts.rows_data(parse_request({"kind": "area", "rows": [{"label": "a", "value": 1}]}), "O", "E")
+
+
+def test_kpi_rows_are_big_numbers():
+    request = parse_request({"kind": "kpi", "rows": [{"label": "Habitants", "value": 45200},
+                                                     {"label": "Logements", "value": 21000}]})
+    data, meta = charts.rows_data(request, "O", "E")
+    assert [(bar["label"], bar["value"]) for bar in data] == [("Habitants", 45200.0), ("Logements", 21000.0)]
+    assert meta["points"] == 2
+
+
+def test_treemap_leaves_negative_slices_out_like_a_pie():
+    rows = [{"label": "a", "value": 5}, {"label": "b", "value": -2}]
+    data, meta = charts.rows_data(parse_request({"kind": "treemap", "rows": rows}), "O", "E")
+    assert meta["dropped"] and [bar["label"] for bar in data] == ["a", "b"]
+    with pytest.raises(ChartError, match="no slice is above zero"):
+        charts.rows_data(parse_request({"kind": "treemap", "rows": [{"label": "x", "value": -1}]}), "O", "E")
+
+
+def test_area_rows_are_shaped_like_a_line():
+    request = parse_request({"kind": "area",
+                             "rows": [{"x": 1, "y": 2}, {"x": 2, "y": 3}, {"x": 3, "y": 1}]})
+    data, meta = charts.rows_data(request, "O", "E")
+    assert [(point["x"], point["y"]) for point in data] == [(1.0, 2.0), (2.0, 3.0), (3.0, 1.0)]
+    assert meta["x_type"] == "number"
+
+
+def test_new_kinds_round_trip_through_arguments():
+    for arguments in ({"kind": "kpi", "layer": "a", "field": "f", "aggregate": "sum", "value_field": "v"},
+                      {"kind": "treemap", "layer": "a", "field": "f", "limit": 5},
+                      {"kind": "area", "layer": "a", "field": "x", "value_field": "y"}):
+        request = parse_request(arguments)
+        assert parse_request(request.as_arguments()).as_arguments() == request.as_arguments()
