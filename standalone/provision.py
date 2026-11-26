@@ -19,7 +19,10 @@ from typing import Callable, List, Optional
 
 from . import paths
 
-RELEASES = "https://github.com/mamba-org/micromamba-releases/releases/latest/download/"
+# Pinned, not `latest`: what `setup` installs is fixed (audit of 2026-11-24). The release process
+# moves this with the tag, after checking the new micromamba still creates the environment below.
+MICROMAMBA_VERSION = "2.10.0-0"
+RELEASES = f"https://github.com/mamba-org/micromamba-releases/releases/download/{MICROMAMBA_VERSION}/"
 CHANNEL = "conda-forge"
 # draco: QGIS 4.2.3 of conda-forge links libdraco.so.9, which draco 1.5.9 no longer has (November 2026); the
 # probe after the install says it when a pin like this one is needed again. qgis 3.44 is not offered: it is
