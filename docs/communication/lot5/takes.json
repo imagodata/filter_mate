@@ -62,11 +62,25 @@
       "raw_duration_s": 209.2441,
       "blocking": [
         "blank map in sampled frames",
-        "favorite refused: no active filter",
+        "favorite saved for Buildings altitude only; no multi-layer replay shown",
         "no embedded project or raster in exported GPKG",
         "walking algorithm/network not archived"
       ],
-      "evidence": "urumea-export-audit.json"
+      "evidence": "urumea-export-audit.json",
+      "rehearsal_video": {
+        "path": "docs/communication/lot5/takes/urumea-rehearsal/urumea-rehearsal.mp4",
+        "sha256": "8968ec5bdcb6e2d33cb3de90c3cd3b66e912ee7e021ec9029b00ca7c633f3d67",
+        "bytes": 8448926,
+        "duration_s": 111.4,
+        "size": [
+          1920,
+          1080
+        ],
+        "fps": 25,
+        "audio": "none",
+        "full_decode_check": "passed",
+        "captions": "French observations; partial favorite save visible at the end; rehearsal remains unvalidated."
+      }
     },
     {
       "id": "solar",

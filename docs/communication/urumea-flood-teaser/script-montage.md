@@ -21,7 +21,8 @@ Repères bruts des fins de requête : 47,610 / 69,376 / 89,826 / 125,563 /
 181,119 / 204,664 s, d'après les événements `speed` et `camera` de `meta.json`.
 Ne pas découper automatiquement à 8/16/23/30/37 s. La répétition reste non validée :
 carte blanche sur les images examinées, export incomplet par rapport au scénario,
-favori refusé. Ses légendes anciennes ne sont pas des preuves.
+favori d’abord refusé puis sauvegardé partiellement pour une seule couche.
+Aucun rejeu complet n’est montré. Ses légendes anciennes ne sont pas des preuves.
 
 `animatique.html` est une prévisualisation textuelle hors ligne, pas une capture de QGIS.
 `presentation.html` est une carte finale illustrative imprimable depuis le navigateur ;

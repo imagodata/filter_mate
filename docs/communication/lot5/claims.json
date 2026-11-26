@@ -28,7 +28,7 @@
       "id": "U4",
       "claim": "Active FilterMate filter on DEM<5 m / river200 m / buildings300 m",
       "status": "unverified",
-      "observation": "Legacy layer names/buffers do not prove the source/target relationship; favorite tool subsequently reports no active filter.",
+      "observation": "The first favorite attempt reports no active filter. At the end the agent activates Buildings altitude and saves only its subset; the multi-layer source/target relationship and distances are still not verified.",
       "evidence": "/tmp/fm-video/out/urumea/frames/003000.jpg"
     },
     {
@@ -42,8 +42,8 @@
       "id": "U6",
       "claim": "Favorite saved and replayed by a colleague in one click",
       "status": "rejected",
-      "observation": "Visible error: No active filter to save: filter a layer first. No replay or second project shown.",
-      "evidence": "/tmp/fm-video/out/urumea/frames/003000.jpg"
+      "observation": "Initial refusal: No active filter to save. Final visible tool card confirms a partial favorite for Buildings altitude only. No replay, roads/bridges restoration or second project is shown.",
+      "evidence": "/tmp/fm-video/out/urumea/frames/003152.jpg"
     },
     {
       "id": "U7",

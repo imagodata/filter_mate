@@ -72,7 +72,8 @@ conformément au dépôt. Aucun téléchargement solaire/Urumea supplémentaire 
   dans [takes.json](takes.json), planche et trois résultats dans `takes/sarlat/`.
 - Urumea existant : `/tmp/fm-video/out/urumea/`, 209,2441 s, 3 153 images.
   **Répétition non validée**, pas un teaser final : carte blanche sur les plans
-  examinés, favori refusé faute de filtre actif, GPKG sans projet ni raster.
+  examinés, favori initialement refusé puis enregistré partiellement pour une seule couche,
+  GPKG sans projet ni raster.
   Le nom d'une couche « isochrone » ne valide pas son algorithme.
 
 Le brut Sarlat contient des messages GDAL `unable to open database file` lors de
@@ -139,3 +140,9 @@ filmer sans WSL, définir `FM_CLIP=ln`, `FM_SARLAT_DIR` sur les données Windows
 Initialiser ce profil de tournage une fois avant la prise. Le wrapper historique
 `site_videos.sh` n'est pas repris depuis l'ancienne branche ; les outils de voix et
 rendu se lancent directement avec le Python QGIS.
+
+Rendu Urumea de répétition disponible : `takes/urumea-rehearsal/urumea-rehearsal.mp4`,
+111,4 s, 1920×1080/25 ips, muet, 8,45 Mo, décodage intégral PASS. Les légendes
+rapportent les observations : le favori est d’abord refusé puis sauvegardé pour
+`Buildings altitude` seulement. Aucun rejeu complet n’est montré. La prise reste
+non validée comme teaser final ; les images sources ne sont pas modifiées.

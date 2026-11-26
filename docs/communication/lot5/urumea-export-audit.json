@@ -47,8 +47,13 @@
   "raster_exported": false,
   "project_embedded": false,
   "observed_altitude_field": "alt_mean",
-  "favorite_saved": false,
-  "favorite_failure": "No active filter to save: filter a layer first",
+  "favorite_saved": true,
   "rendered_map": "blank in inspected frames",
-  "validated_as_final": false
+  "validated_as_final": false,
+  "favorite_saved_partially": true,
+  "favorite_scope": "Buildings altitude only",
+  "favorite_replayed": false,
+  "multi_layer_restore_verified": false,
+  "favorite_initial_failure": "No active filter to save: filter a layer first",
+  "final_favorite_evidence": "/tmp/fm-video/out/urumea/frames/003152.jpg"
 }
