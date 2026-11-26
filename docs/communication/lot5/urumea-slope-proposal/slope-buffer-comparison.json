@@ -1,0 +1,98 @@
+{
+  "dataset": "same 3073 raw OSM buildings and same Copernicus DSM as the previous film",
+  "source_crs": "EPSG:32630",
+  "raster_pixel_m": [
+    30.0,
+    30.0
+  ],
+  "slope_units": "percent",
+  "method": "GDAL Horn slope in percent with computeEdges, native QGIS zonal mean, metric geometry distance to river",
+  "total_buildings": 3073,
+  "valid_means": 3073,
+  "mean_slope_min": 0.21441610157489774,
+  "mean_slope_max": 60.448097229003906,
+  "results": [
+    {
+      "mean_slope_below_percent": 5,
+      "river_distance_m": 200,
+      "buildings": 183
+    },
+    {
+      "mean_slope_below_percent": 5,
+      "river_distance_m": 300,
+      "buildings": 314
+    },
+    {
+      "mean_slope_below_percent": 5,
+      "river_distance_m": 500,
+      "buildings": 456
+    },
+    {
+      "mean_slope_below_percent": 5,
+      "river_distance_m": 750,
+      "buildings": 493
+    },
+    {
+      "mean_slope_below_percent": 10,
+      "river_distance_m": 200,
+      "buildings": 410
+    },
+    {
+      "mean_slope_below_percent": 10,
+      "river_distance_m": 300,
+      "buildings": 693
+    },
+    {
+      "mean_slope_below_percent": 10,
+      "river_distance_m": 500,
+      "buildings": 1080
+    },
+    {
+      "mean_slope_below_percent": 10,
+      "river_distance_m": 750,
+      "buildings": 1202
+    },
+    {
+      "mean_slope_below_percent": 15,
+      "river_distance_m": 200,
+      "buildings": 550
+    },
+    {
+      "mean_slope_below_percent": 15,
+      "river_distance_m": 300,
+      "buildings": 921
+    },
+    {
+      "mean_slope_below_percent": 15,
+      "river_distance_m": 500,
+      "buildings": 1451
+    },
+    {
+      "mean_slope_below_percent": 15,
+      "river_distance_m": 750,
+      "buildings": 1651
+    },
+    {
+      "mean_slope_below_percent": 20,
+      "river_distance_m": 200,
+      "buildings": 627
+    },
+    {
+      "mean_slope_below_percent": 20,
+      "river_distance_m": 300,
+      "buildings": 1045
+    },
+    {
+      "mean_slope_below_percent": 20,
+      "river_distance_m": 500,
+      "buildings": 1653
+    },
+    {
+      "mean_slope_below_percent": 20,
+      "river_distance_m": 750,
+      "buildings": 1925
+    }
+  ],
+  "status": "preflight_not_new_filmed_behavior",
+  "slope_only_below_10_percent": 1463
+}

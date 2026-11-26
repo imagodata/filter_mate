@@ -1,0 +1,89 @@
+{
+  "engine": "kokoro-onnx",
+  "engine_version": "0.6.1",
+  "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+  "voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+  "spec_sha256": "33d6d17363bc3627f543667db9aa768ab6b515912244d6436db8b8853066ee44",
+  "settings": {
+    "voice": "ff_siwis",
+    "speed": 0.88,
+    "lang": "fr-fr",
+    "sentence_pause": 0.55,
+    "clause_pause": 0.15
+  },
+  "status": "audition_only_not_final_video",
+  "lines": [
+    {
+      "id": "01-intro",
+      "text": "À Saint-Sébastien, cherchons des bâtiments proches de la rivière, dans des secteurs peu pentus.",
+      "file": "01-intro.wav",
+      "duration_s": 5.784666666666666,
+      "sample_rate": 24000,
+      "channels": 1,
+      "sha256": "1ef2ac996fab11e35bb35d4f21f24488efbebb26bc398a8fdc30971908208c72"
+    },
+    {
+      "id": "02-pente",
+      "text": "On part du relief et on en tire une carte de pente. Les couleurs font ressortir les zones les plus douces.",
+      "file": "02-pente.wav",
+      "duration_s": 7.048666666666667,
+      "sample_rate": 24000,
+      "channels": 1,
+      "sha256": "359d904797a9e4194c62cb0d8a69bb0cc56c69f8a7b6ec2ef8f0244d8bc6b444"
+    },
+    {
+      "id": "03-moyenne",
+      "text": "Pour chaque bâtiment, on récupère la pente moyenne dans ce modèle. On pourra ainsi filtrer directement les bâtiments.",
+      "file": "03-moyenne.wav",
+      "duration_s": 7.538,
+      "sample_rate": 24000,
+      "channels": 1,
+      "sha256": "fb860f1bfc1e1c2be6c4570a61ce6293389f53a0fa2ec512889c6ff4e3bd85dd"
+    },
+    {
+      "id": "04-seuil",
+      "text": "Gardons ceux dont la pente moyenne est inférieure à dix pour cent. Voilà notre premier critère.",
+      "file": "04-seuil.wav",
+      "duration_s": 6.336,
+      "sample_rate": 24000,
+      "channels": 1,
+      "sha256": "53adbbf12ee4e95803fece3b599bdfa5a894551bde7479132ef74c5a6a5a5b0f"
+    },
+    {
+      "id": "05-riviere",
+      "text": "J’ajoute un second critère : rester à moins de cinq cents mètres de l’Urumea. Le résultat se concentre autour de la rivière.",
+      "file": "05-riviere.wav",
+      "duration_s": 9.170666666666667,
+      "sample_rate": 24000,
+      "channels": 1,
+      "sha256": "82eaa54964d637ee38e065667b85247ebdf9fddb0dabfbe6534ca974aafa2554"
+    },
+    {
+      "id": "06-reseau",
+      "text": "Autour de ces bâtiments, on garde aussi les routes et les ponts dans un rayon de trois cents mètres.",
+      "file": "06-reseau.wav",
+      "duration_s": 5.945333333333333,
+      "sample_rate": 24000,
+      "channels": 1,
+      "sha256": "09b37a71a1463be8c9855424801c534c3143fb2f12195d3f2f4f48b07bbaf6aa"
+    },
+    {
+      "id": "07-favori",
+      "text": "J’enregistre le filtre. On revient à la carte complète… puis on rejoue le favori. On retrouve les mêmes bâtiments, les mêmes routes et les mêmes ponts.",
+      "file": "07-favori.wav",
+      "duration_s": 10.076625,
+      "sample_rate": 24000,
+      "channels": 1,
+      "sha256": "7103291e1caf752ca62fc31be5422341133b77989a13a576cfcdce775e311615"
+    },
+    {
+      "id": "08-fin",
+      "text": "Les résultats peuvent être exportés. Ici, on montre une méthode de tri, pas une prévision de crue.",
+      "file": "08-fin.wav",
+      "duration_s": 7.009291666666667,
+      "sample_rate": 24000,
+      "channels": 1,
+      "sha256": "3edb22ad2005440261dfbfa4ffdfb2983e202df6094ba9b35306ec9730112048"
+    }
+  ]
+}

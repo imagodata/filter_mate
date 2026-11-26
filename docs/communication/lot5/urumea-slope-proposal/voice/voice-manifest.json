@@ -1,0 +1,26 @@
+{
+  "engine": "kokoro-onnx",
+  "engine_version": "0.6.1",
+  "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+  "voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+  "spec_sha256": "120c428aebe5ea1886813c4f2e43bf94aaa93bdb2c951feab1f78bd357accf95",
+  "settings": {
+    "voice": "ff_siwis",
+    "speed": 0.88,
+    "lang": "fr-fr",
+    "sentence_pause": 0.55,
+    "clause_pause": 0.15
+  },
+  "status": "audition_only_not_final_video",
+  "lines": [
+    {
+      "id": "urumea-kokoro-fr-extrait",
+      "text": "À Saint-Sébastien, on part du relief. On calcule la pente, puis on garde les bâtiments situés à moins de cinq cents mètres de l’Urumea.",
+      "file": "urumea-kokoro-fr-extrait.wav",
+      "duration_s": 9.988666666666667,
+      "sample_rate": 24000,
+      "channels": 1,
+      "sha256": "363f9713f6d19c1b36ae50f19eaaabab806e2af9a32bf231d17f947056e8b410"
+    }
+  ]
+}

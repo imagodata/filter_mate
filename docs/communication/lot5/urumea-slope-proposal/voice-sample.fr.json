@@ -1,0 +1,14 @@
+{
+  "engine": "kokoro-onnx",
+  "voice": "ff_siwis",
+  "language": "fr-fr",
+  "speed": 0.88,
+  "sentence_pause": 0.55,
+  "clause_pause": 0.15,
+  "lines": [
+    {
+      "id": "urumea-kokoro-fr-extrait",
+      "text": "À Saint-Sébastien, on part du relief. On calcule la pente, puis on garde les bâtiments situés à moins de cinq cents mètres de l’Urumea."
+    }
+  ]
+}

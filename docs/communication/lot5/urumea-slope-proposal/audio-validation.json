@@ -1,0 +1,87 @@
+{
+  "status": "audio_decode_pass_not_listening_approval",
+  "files": [
+    {
+      "file": "voice/narration/01-intro.wav",
+      "duration_s": 5.784667,
+      "codec_name": "pcm_s16le",
+      "sample_rate": "24000",
+      "channels": 1,
+      "full_decode_ok": true,
+      "decode_errors": ""
+    },
+    {
+      "file": "voice/narration/02-pente.wav",
+      "duration_s": 7.048667,
+      "codec_name": "pcm_s16le",
+      "sample_rate": "24000",
+      "channels": 1,
+      "full_decode_ok": true,
+      "decode_errors": ""
+    },
+    {
+      "file": "voice/narration/03-moyenne.wav",
+      "duration_s": 7.538,
+      "codec_name": "pcm_s16le",
+      "sample_rate": "24000",
+      "channels": 1,
+      "full_decode_ok": true,
+      "decode_errors": ""
+    },
+    {
+      "file": "voice/narration/04-seuil.wav",
+      "duration_s": 6.336,
+      "codec_name": "pcm_s16le",
+      "sample_rate": "24000",
+      "channels": 1,
+      "full_decode_ok": true,
+      "decode_errors": ""
+    },
+    {
+      "file": "voice/narration/05-riviere.wav",
+      "duration_s": 9.170667,
+      "codec_name": "pcm_s16le",
+      "sample_rate": "24000",
+      "channels": 1,
+      "full_decode_ok": true,
+      "decode_errors": ""
+    },
+    {
+      "file": "voice/narration/06-reseau.wav",
+      "duration_s": 5.945333,
+      "codec_name": "pcm_s16le",
+      "sample_rate": "24000",
+      "channels": 1,
+      "full_decode_ok": true,
+      "decode_errors": ""
+    },
+    {
+      "file": "voice/narration/07-favori.wav",
+      "duration_s": 10.076625,
+      "codec_name": "pcm_s16le",
+      "sample_rate": "24000",
+      "channels": 1,
+      "full_decode_ok": true,
+      "decode_errors": ""
+    },
+    {
+      "file": "voice/narration/08-fin.wav",
+      "duration_s": 7.009292,
+      "codec_name": "pcm_s16le",
+      "sample_rate": "24000",
+      "channels": 1,
+      "full_decode_ok": true,
+      "decode_errors": ""
+    },
+    {
+      "file": "voice/urumea-kokoro-fr-extrait.wav",
+      "duration_s": 9.988667,
+      "codec_name": "pcm_s16le",
+      "sample_rate": "24000",
+      "channels": 1,
+      "full_decode_ok": true,
+      "decode_errors": ""
+    }
+  ],
+  "total_narration_duration_s": 58.909
+}
