@@ -1,0 +1,111 @@
+{
+  "stage": "moyenne",
+  "layers": [
+    {
+      "name": "Bâtiments",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 3073,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Bâtiments pente",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 3073,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags",
+        "pente_mean"
+      ]
+    },
+    {
+      "name": "Copernicus 30 m",
+      "valid": true,
+      "crs": "EPSG:32630"
+    },
+    {
+      "name": "Pente (%)",
+      "valid": true,
+      "crs": "EPSG:32630"
+    },
+    {
+      "name": "Ponts lignes",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 158,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Ponts polygones",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 8,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "man_made",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Routes",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 701,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "highway",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Urumea",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 2,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "waterway",
+        "other_tags"
+      ]
+    }
+  ],
+  "filters": {},
+  "replay_comparison": null,
+  "render_flag": true,
+  "thread": "Projet et couches enregistrés : /w/out/take05/urumea/session/urumea-pente.qgz\nurumea-pente.qgz\nLe modèle de surface « Copernicus 30 m » est déjà chargé. Calcule sa pente en POURCENTAGE avec gdal:slope : AS_PERCENT=true, COMPUTE_EDGES=true, SCALE=1, ZEVENBERGEN=false. Nomme le raster « Pente (%) », donne-lui une légende de couleurs lisible et affiche-le sous les vecteurs. Ne change pas le cadrage.\n\n\n\n\n\n✓ Traitement : gdal:slope\n   INPUT=\"Copernicus 30 m\", BAND=1, SCALE=1, AS_PERCENT=true, COMPUTE_EDGES=true, ZEVENBERGEN=false\n\n\n✓ Style de Pente (%)\n   pseudocolor · YlOrRd · 6\n\n✓ Couches rangées dans le haut de l'arbre\nLe raster **[Pente (%)](layer:Pente_____b5828c27_a7c1_45ae_b1f4_e06bb20503d1)** est calculé avec `gdal:slope` (pourcentage, bords calculés, échelle 1, formule de Horn) à partir de « Copernicus 30 m ».\n\n- **Légende :** 6 classes de couleurs discrètes (palette YlOrRd, du jaune au rouge foncé), de 0 à environ 53 %.\n- **Ordre :** la couche est placée juste au-dessus de « Copernicus 30 m », donc sous tous les vecteurs.\n- **Cadrage :** inchangé.\nCalcule uniquement la moyenne du raster « Pente (%) » par emprise de « Bâtiments », avec native:zonalstatisticsfb, préfixe pente_ et statistique moyenne. Nomme la sortie « Bâtiments pente », colore-la par pente_mean et masque la couche originale « Bâtiments ». Aucun filtre pour le moment.\n\n\n\n✓ Traitement : native:zonalstatisticsfb  ·  3,073\n   INPUT=\"Bâtiments\", INPUT_RASTER=\"Pente (%)\", RASTER_BAND=1, COLUMN_PREFIX=\"pente_\", STATISTICS=[2]\n\n✓ Style de Bâtiments pente\n   graduated · pente_mean · YlOrRd · 5\n\n✓ Masqué : Bâtiments\nJ'ai calculé la moyenne de pente (`pente_mean`) pour les 3 073 bâtiments avec `native:zonalstatisticsfb` et le préfixe `pente_`, ce qui donne la couche [Bâtiments pente](layer:B_timents_pente_953fb89e_8f3a_4427_bf3c_28f5f8e9889c).\n\n- **Couleur :** dégradé YlOrRd en 5 classes (quantiles) sur `pente_mean`.\n- **Couche d'origine :** [Bâtiments](layer:) masquée (décochée, pas supprimée). Aucun filtre n'a été appliqué.\n? Les données téléchargées et les résultats restent en mémoire. Enregistrez le projet avec ses couches pour les conserver après la fermeture de QGIS."
+}

@@ -1,0 +1,14 @@
+{
+  "voice_id": "F9KUTOne5xOKqAbIU7yg",
+  "name": "Benjamin - Clear and Engaging",
+  "language": "fr",
+  "accent": "standard",
+  "gender": "male",
+  "age": "middle_aged",
+  "description": "A highly versatile French voice-over by an actor. Professional, clean recording.\nPerfectly suited for corporate films, corporate films, documentaries, adult and children's audiobooks, newspaper and magazine articles, audio guides, podcasts, and voice-overs of all kinds.",
+  "preview_url": "https://api.us.elevenlabs.io/v1/voices/F9KUTOne5xOKqAbIU7yg/previews/audio?payload=eyJ2b2ljZV9zb3VyY2UiOiJjdXN0b20iLCJ3b3Jrc3BhY2VfaWQiOiJiMzM1MzRmM2JlNWI0ZTdjYWUwOGFlY2ZiZTcxMjVjZiIsImZpbGVuYW1lIjoiWHNTRjF4aVhXTWl4N1FmdW1PNUcubXAzIiwidGltZXN0YW1wIjoxNzk1NzMwNDAwMDAwMDAwfQ%3D%3D",
+  "free_users_allowed": true,
+  "rate": 1.0,
+  "source": "https://api.elevenlabs.io/v1/shared-voices?search=Benjamin&language=fr",
+  "selected_for": "Urumea French narration; user selected Benjamin fr"
+}

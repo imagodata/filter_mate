@@ -1,0 +1,7 @@
+OpenStreetMap contributors — ODbL
+https://www.openstreetmap.org/copyright
+
+produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved
+https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM
+
+The MNS working edit derives a slope raster from Copernicus. The proposed MNT/URA scenario has not been filmed and is not covered by these data-source credits.

@@ -1,0 +1,55 @@
+{
+  "engine": "elevenlabs",
+  "voice_name": "Benjamin - Clear and Engaging",
+  "voice_id": "F9KUTOne5xOKqAbIU7yg",
+  "model_id": "eleven_v4",
+  "language_code": "fr",
+  "direction": "[slowly] ",
+  "voice_settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.75
+  },
+  "status": "generated; analysis-only edit omits 07-favori",
+  "lines": [
+    {
+      "id": "01-intro",
+      "text": "À Saint-Sébastien, cherchons des bâtiments proches de la rivière, dans des secteurs peu pentus.",
+      "tts_text": "[slowly] À Saint-Sébastien, cherchons des bâtiments proches de la rivière, dans des secteurs peu pentus."
+    },
+    {
+      "id": "02-pente",
+      "text": "On part du relief et on en tire une carte de pente. Les couleurs font ressortir les zones les plus douces.",
+      "tts_text": "[slowly] On part du relief et on en tire une carte de pente. [pause] Les couleurs font ressortir les zones les plus douces."
+    },
+    {
+      "id": "03-moyenne",
+      "text": "Pour chaque bâtiment, on récupère la pente moyenne dans ce modèle. On pourra ainsi filtrer directement les bâtiments.",
+      "tts_text": "[slowly] Pour chaque bâtiment, on récupère la pente moyenne dans ce modèle. [pause] On pourra ainsi filtrer directement les bâtiments."
+    },
+    {
+      "id": "04-seuil",
+      "text": "Gardons ceux dont la pente moyenne est inférieure à dix pour cent. Voilà notre premier critère.",
+      "tts_text": "[slowly] Gardons ceux dont la pente moyenne est inférieure à dix pour cent. [pause] Voilà notre premier critère."
+    },
+    {
+      "id": "05-riviere",
+      "text": "J’ajoute un second critère : rester à moins de cinq cents mètres de l’Urumea. Le résultat se concentre autour de la rivière.",
+      "tts_text": "[slowly] J’ajoute un second critère : rester à moins de cinq cents mètres de l’Urumea. [pause] Le résultat se concentre autour de la rivière."
+    },
+    {
+      "id": "06-reseau",
+      "text": "Autour de ces bâtiments, on garde aussi les routes et les ponts dans un rayon de trois cents mètres.",
+      "tts_text": "[slowly] Autour de ces bâtiments, on garde aussi les routes et les ponts dans un rayon de trois cents mètres."
+    },
+    {
+      "id": "07-favori",
+      "text": "J’enregistre le filtre. On revient à la carte complète… puis on rejoue le favori. On retrouve les mêmes bâtiments, les mêmes routes et les mêmes ponts.",
+      "tts_text": "[slowly] J’enregistre le filtre. [pause] On revient à la carte complète… puis on rejoue le favori. [pause] On retrouve les mêmes bâtiments, les mêmes routes et les mêmes ponts."
+    },
+    {
+      "id": "08-fin",
+      "text": "Les résultats peuvent être exportés. Ici, on montre une méthode de tri, pas une prévision de crue.",
+      "tts_text": "[slowly] Les résultats peuvent être exportés. [pause] Ici, on montre une méthode de tri, pas une prévision de crue."
+    }
+  ]
+}

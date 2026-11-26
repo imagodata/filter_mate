@@ -1,0 +1,149 @@
+{
+  "provider": "elevenlabs",
+  "requests": [
+    {
+      "id": "01-intro",
+      "text": "À Saint-Sébastien, cherchons des bâtiments proches de la rivière, dans des secteurs peu pentus.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] À Saint-Sébastien, cherchons des bâtiments proches de la rivière, dans des secteurs peu pentus.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "8b7773c3543df23930635a0e2eb22b52810166317bc739d1c9d4e2462088d25e"
+    },
+    {
+      "id": "02-pente",
+      "text": "On part du relief et on en tire une carte de pente. Les couleurs font ressortir les zones les plus douces.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] On part du relief et on en tire une carte de pente. [pause] Les couleurs font ressortir les zones les plus douces.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "496ef2a0c0147255786f2ad1c7fc8b700809da39128fb942669cfe39bd68dda2"
+    },
+    {
+      "id": "03-moyenne",
+      "text": "Pour chaque bâtiment, on récupère la pente moyenne dans ce modèle. On pourra ainsi filtrer directement les bâtiments.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] Pour chaque bâtiment, on récupère la pente moyenne dans ce modèle. [pause] On pourra ainsi filtrer directement les bâtiments.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "b4883d01c03fe211faea4b76b9553b52fb3dcb51d5204104d4c0e63760039cb9"
+    },
+    {
+      "id": "04-seuil",
+      "text": "Gardons ceux dont la pente moyenne est inférieure à dix pour cent. Voilà notre premier critère.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] Gardons ceux dont la pente moyenne est inférieure à dix pour cent. [pause] Voilà notre premier critère.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "3e75544bf376df1270eeaddab2dc6020f9fb9474659bad832342dc39eccb9503"
+    },
+    {
+      "id": "05-riviere",
+      "text": "J’ajoute un second critère : rester à moins de cinq cents mètres de l’Urumea. Le résultat se concentre autour de la rivière.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] J’ajoute un second critère : rester à moins de cinq cents mètres de l’Urumea. [pause] Le résultat se concentre autour de la rivière.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "99257a409d75e227d6566d74b29538bb4526f5f240cdfb7068c29532fa6a3253"
+    },
+    {
+      "id": "06-reseau",
+      "text": "Autour de ces bâtiments, on garde aussi les routes et les ponts dans un rayon de trois cents mètres.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] Autour de ces bâtiments, on garde aussi les routes et les ponts dans un rayon de trois cents mètres.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "cc3d3e54db6313e79f12375b15bd8cd1deaa3abf72225e335db5a4983ea8457e"
+    },
+    {
+      "id": "07-favori",
+      "text": "J’enregistre le filtre. On revient à la carte complète… puis on rejoue le favori. On retrouve les mêmes bâtiments, les mêmes routes et les mêmes ponts.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] J’enregistre le filtre. [pause] On revient à la carte complète… puis on rejoue le favori. [pause] On retrouve les mêmes bâtiments, les mêmes routes et les mêmes ponts.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "bc7e3e197926ae368f498d89dda6e213359cb698cd797e674c58010f9514c0ec"
+    },
+    {
+      "id": "08-fin",
+      "text": "Les résultats peuvent être exportés. Ici, on montre une méthode de tri, pas une prévision de crue.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] Les résultats peuvent être exportés. [pause] Ici, on montre une méthode de tri, pas une prévision de crue.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "3c412bac9cd5f45734192674af39fb83b2163fb7a77311861ea3daece4790449"
+    }
+  ]
+}

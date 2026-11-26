@@ -1,0 +1,31 @@
+{
+  "status": "favorite_replay_failed_not_used_in_final_film",
+  "source_take": "/tmp/fm-urumea-pente-513/out/take03/urumea",
+  "raw_status": "failed",
+  "failure": "Traceback (most recent call last):\n  File \"/w/scripts/urumea_linkedin_capture.py\", line 214, in tick_steps\n    try:again=fn() is True\n              ~~^^\n  File \"<string>\", line 83, in check\n  File \"/w/scripts/urumea_linkedin_capture.py\", line 151, in step\n    raise RuntimeError('Favorite did not restore all counts: '+json.dumps(comparison,ensure_ascii=False))\nRuntimeError: Favorite did not restore all counts: {\"Bâtiments pente\": {\"before\": 1079, \"after\": null}, \"Ponts lignes\": {\"before\": 130, \"after\": 130}, \"Ponts polygones\": {\"before\": 8, \"after\": 8}, \"Routes\": {\"before\": 587, \"after\": 587}}\n",
+  "observed_filter_state_after_replay": [
+    {
+      "name": "Couloir Urumea 500 m",
+      "subset_length": 5849,
+      "subset_prefix": "(\"pente_mean\" < 10) AND (\"fid\" IN (SELECT value FROM json_each('[10,27,63,67,71,72,73,74,7"
+    },
+    {
+      "name": "Ponts lignes",
+      "subset_length": 638,
+      "subset_prefix": "\"fid\" IN (1, 2, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 45, 59, 60, 62, 78, 101, 1"
+    },
+    {
+      "name": "Ponts polygones",
+      "subset_length": 38,
+      "subset_prefix": "\"fid\" IN (1, 2, 3, 40, 41, 42, 43, 44)"
+    },
+    {
+      "name": "Routes",
+      "subset_length": 3265,
+      "subset_prefix": "\"fid\" IN (3, 4, 11, 13, 14, 18, 20, 21, 22, 23, 24, 26, 29, 30, 31, 32, 33, 34, 36, 37, 38"
+    }
+  ],
+  "diagnosis": "Processing outputs share portable signature ogr::output; favorite signature lookup chooses corridor instead of buildings.",
+  "reported_to": "consolidation session 01a2195a-3ad5-7522-8c59-09943914814a",
+  "plugin_changed_for_workaround": false
+}

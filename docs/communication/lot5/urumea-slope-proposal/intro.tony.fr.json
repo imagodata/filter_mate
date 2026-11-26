@@ -1,0 +1,19 @@
+{
+  "engine": "elevenlabs",
+  "voice_name": "Tony - Punchy Ad & Social",
+  "voice_id": "fsYODoWLWYJ5ai6CAN3M",
+  "model_id": "eleven_v4",
+  "language_code": "fr",
+  "direction": "[confident, warm] ",
+  "voice_settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.75
+  },
+  "lines": [
+    {
+      "id": "00-intro-imagodata",
+      "text": "Imagodata présente… FilterMate.",
+      "tts_text": "[confident, warm] Imagodata présente… [pause] Filter Mate."
+    }
+  ]
+}

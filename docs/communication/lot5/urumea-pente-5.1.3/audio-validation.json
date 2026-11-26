@@ -1,0 +1,80 @@
+{
+  "status": "full_audio_decode_passed",
+  "voice_body": "Benjamin - Clear and Engaging",
+  "voice_intro": "Tony - Punchy Ad & Social",
+  "tracks": [
+    {
+      "file": "voice/body/01-intro.mp3",
+      "duration_s": 6.0,
+      "codec_name": "mp3",
+      "sample_rate": "44100",
+      "channels": 1,
+      "full_decode": "passed"
+    },
+    {
+      "file": "voice/body/02-pente.mp3",
+      "duration_s": 7.44,
+      "codec_name": "mp3",
+      "sample_rate": "44100",
+      "channels": 1,
+      "full_decode": "passed"
+    },
+    {
+      "file": "voice/body/03-moyenne.mp3",
+      "duration_s": 7.76,
+      "codec_name": "mp3",
+      "sample_rate": "44100",
+      "channels": 1,
+      "full_decode": "passed"
+    },
+    {
+      "file": "voice/body/04-seuil.mp3",
+      "duration_s": 6.8,
+      "codec_name": "mp3",
+      "sample_rate": "44100",
+      "channels": 1,
+      "full_decode": "passed"
+    },
+    {
+      "file": "voice/body/05-riviere.mp3",
+      "duration_s": 8.56,
+      "codec_name": "mp3",
+      "sample_rate": "44100",
+      "channels": 1,
+      "full_decode": "passed"
+    },
+    {
+      "file": "voice/body/06-reseau.mp3",
+      "duration_s": 5.6,
+      "codec_name": "mp3",
+      "sample_rate": "44100",
+      "channels": 1,
+      "full_decode": "passed"
+    },
+    {
+      "file": "voice/body/07-favori.mp3",
+      "duration_s": 10.56,
+      "codec_name": "mp3",
+      "sample_rate": "44100",
+      "channels": 1,
+      "full_decode": "passed"
+    },
+    {
+      "file": "voice/body/08-fin.mp3",
+      "duration_s": 7.44,
+      "codec_name": "mp3",
+      "sample_rate": "44100",
+      "channels": 1,
+      "full_decode": "passed"
+    },
+    {
+      "file": "voice/intro/00-intro-imagodata.mp3",
+      "duration_s": 3.04,
+      "codec_name": "mp3",
+      "sample_rate": "44100",
+      "channels": 1,
+      "full_decode": "passed"
+    }
+  ],
+  "unused_track_in_analysis_only_film": "07-favori.mp3"
+}

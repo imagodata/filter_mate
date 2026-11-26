@@ -1,0 +1,31 @@
+{
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "25/1"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "102.400000",
+      "size": "7829138"
+    }
+  },
+  "audio_levels_db": {
+    "mean_volume": -24.0,
+    "max_volume": -4.4
+  },
+  "clipping": false
+}
