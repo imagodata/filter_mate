@@ -1,0 +1,48 @@
+{
+  "language": "fr",
+  "voice": "fr-FR-HenriNeural",
+  "rate": "-2%",
+  "lines": [
+    {
+      "id": "hook",
+      "text": "Un filtre géographique, que l’on peut rejouer."
+    },
+    {
+      "id": "place",
+      "text": "À Saint-Sébastien, partons des bâtiments, des routes et des ponts autour de l’Urumea."
+    },
+    {
+      "id": "relief",
+      "text": "L’agent ajoute le relief Copernicus à trente mètres. La carte reste visible pendant les calculs."
+    },
+    {
+      "id": "altitude",
+      "text": "Il calcule la moyenne du modèle sur chaque emprise, puis représente les valeurs par des couleurs."
+    },
+    {
+      "id": "filtre",
+      "text": "Moins de cinq mètres dans le modèle, à deux cents mètres de la rivière : un filtre illustratif. Les routes et les ponts suivent, à trois cents mètres des bâtiments retenus."
+    },
+    {
+      "id": "favori",
+      "text": "Je garde l’état des filtres en favori."
+    },
+    {
+      "id": "reset",
+      "text": "On efface les filtres : la carte complète revient."
+    },
+    {
+      "id": "rejeu",
+      "text": "Puis on rejoue le favori. Les mêmes couches retrouvent les mêmes résultats."
+    },
+    {
+      "id": "export",
+      "text": "Les données filtrées et le relief sont exportés pour être réutilisés."
+    },
+    {
+      "id": "fin",
+      "text": "FilterMate cinq point un point trois, dans QGIS. Un premier tri avec un modèle de surface, pas une évaluation du risque.",
+      "caption": "FilterMate 5.1.3, dans QGIS. Un premier tri avec un modèle de surface, pas une évaluation du risque."
+    }
+  ]
+}

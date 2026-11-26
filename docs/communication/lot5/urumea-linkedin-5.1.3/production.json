@@ -1,0 +1,78 @@
+{
+  "base_commit": "6e7cc031",
+  "plugin_package": "package.json",
+  "plugin_integrity": "package-integrity.json",
+  "raw_take": "/tmp/fm-urumea-linkedin-513/out/take03/urumea",
+  "recording": "153.4 s, 2304 real QGIS window frames",
+  "capture_scripts": {
+    "urumea_linkedin_capture.py": "af2bfdba5493b6d9feed46206f7b9e0f22a581012d34f29ae19e7fe1d518f240",
+    "urumea_linkedin_render.py": "0cbb42f7157d308f7dc44a07da965a99fbf4aa458703125f040432e390e4fd09",
+    "urumea_prepare_data.py": "3514a3f4cab0a8b7eaa5e5677a55a128c9a2e2c8ef3610ca1b43ce79adcb74d8",
+    "urumea_verify_take.py": "85193d541ec5df9c2b74a51d7b0e7f47b66dc49a7b0d80ab1b77c9d1cd85bc3c",
+    "urumea_linkedin_voice.py": "f95647897cef56bc74af493093178dfd67f887834416efaf7f21e198cb37b478"
+  },
+  "verified_stages": [
+    "DEM imported and visible",
+    "zonal mean field and graduated renderer",
+    "active filters on four vector layers",
+    "favorite saved",
+    "all four filters cleared",
+    "favorite alone restores identical filters and counts",
+    "GeoPackage and separate GeoTIFF reopened"
+  ],
+  "settings": {
+    "posture": "act",
+    "autonomy": "autonomous",
+    "tool_families": false,
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5",
+    "voice": "fr-FR-HenriNeural"
+  },
+  "outside_this_film": [
+    "walking network/service area",
+    "sharing/replay on a second workstation",
+    "project embedded in GeoPackage"
+  ],
+  "publication": "none",
+  "base_helper_sha256_at_capture": "0d5572d97f6056bd4aaf87c250932864cfb2bb5d508bd7ad6353c13bdfe81caf",
+  "final_video": {
+    "filename": "urumea-linkedin-5.1.3-fr.mp4",
+    "sha256": "e45cbe1d486086b3e129fce5e92da7225127c7be6b01536de3ee94371c445c9b",
+    "duration_s": 64.32,
+    "bytes": 4925998,
+    "full_decode_check": "passed"
+  },
+  "raw_archive": "raw/frames with raw/meta.json",
+  "audio_validation": {
+    "codec": "AAC",
+    "sample_rate": 48000,
+    "channels": 2,
+    "mean_volume_db": -20.6,
+    "max_volume_db": -4.4,
+    "clipping": false
+  },
+  "raw_meta_sha256": "fc32b7466fab1a5fea4a0fccd75bbf2a664e21c32efc66cd0859486f5a88886d",
+  "narration_tracks": {
+    "favori.mp3": "ed4ba4bf61f4f6701790c2f3ea9872ed65dd0d99e666350aac72cfbb59835bbb",
+    "reset.mp3": "98484a1f4dd0a5e22aa162e3947adbf8616848c5166f773f240e6160acc112fc",
+    "relief.mp3": "bbeb65a3bb282e3c2d854f52760515600048a9e59523a2dec010264bc0a9153d",
+    "rejeu.mp3": "19e6b227f9a0b74dcc80aaf9dd2c4afd0d1a9f0f28230f4c043666e2c34721f3",
+    "fin.mp3": "fe8537a458c361e8f3b83197b26ba8f52d5e3b085be24474242e4bb9874f4e93",
+    "altitude.mp3": "1d6dea40c7ec7b07cd8a8aed5e1093a878b1fca7f2fcca6433768ec8cc5ad97b",
+    "filtre.mp3": "397d062d2667199a371354cf08a18561bd45b8d4e85b95689a9611c89e0f2dae",
+    "export.mp3": "d3f50d971709e899e11f5d0fd03e234c2bdb247874c1bbdb2bd01dff2beb8aa7",
+    "place.mp3": "91c0166a5a41f9034cca925ec4835c6712ee03060d9c52eb6adf7c8c9a6651fd",
+    "hook.mp3": "465605f0f037988d123c2c81d7ceac993f7cd08f272ebf6f367ae754a1332db6"
+  },
+  "checks": {
+    "unit_tests": 13,
+    "unit_result": "passed",
+    "script_compilation": "passed",
+    "live_qgis_capture": "passed",
+    "independent_sql_and_export_reopen": "passed",
+    "zip_integrity_files": 833,
+    "full_video_audio_decode": "passed",
+    "audio_mean_db": -20.6,
+    "audio_peak_db": -4.4
+  }
+}

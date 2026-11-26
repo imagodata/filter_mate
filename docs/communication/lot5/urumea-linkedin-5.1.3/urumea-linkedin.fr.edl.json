@@ -1,0 +1,111 @@
+{
+  "package": {
+    "version": "5.1.3",
+    "zip": "/home/simon/dev/filter_mate/dist/filter_mate_v5.1.3.zip",
+    "sha256": "5ac5cdde9970e31c64a3b79ed3cfb9408e3d5850c3619e1ea46e02c3c6357625",
+    "plugin_modified": false
+  },
+  "segments": [
+    {
+      "id": "hook",
+      "text": "Un filtre géographique, que l’on peut rejouer.",
+      "start_s": 0,
+      "duration_s": 4.24
+    },
+    {
+      "id": "place",
+      "text": "À Saint-Sébastien, partons des bâtiments, des routes et des ponts autour de l’Urumea.",
+      "start_s": 4.24,
+      "duration_s": 6.0
+    },
+    {
+      "id": "relief",
+      "text": "L’agent ajoute le relief Copernicus à trente mètres. La carte reste visible pendant les calculs.",
+      "start_s": 10.24,
+      "duration_s": 7.64,
+      "source_start_s": 9.952,
+      "source_action_end_s": 23.748,
+      "source_hold_s": 26.747
+    },
+    {
+      "id": "altitude",
+      "text": "Il calcule la moyenne du modèle sur chaque emprise, puis représente les valeurs par des couleurs.",
+      "start_s": 17.88,
+      "duration_s": 6.52,
+      "source_start_s": 38.645,
+      "source_action_end_s": 51.28,
+      "source_hold_s": 54.264
+    },
+    {
+      "id": "filtre",
+      "text": "Moins de cinq mètres dans le modèle, à deux cents mètres de la rivière : un filtre illustratif. Les routes et les ponts suivent, à trois cents mètres des bâtiments retenus.",
+      "start_s": 24.4,
+      "duration_s": 10.6,
+      "source_start_s": 65.862,
+      "source_action_end_s": 77.23299999999999,
+      "source_hold_s": 80.222
+    },
+    {
+      "id": "favori",
+      "text": "Je garde l’état des filtres en favori.",
+      "start_s": 35.0,
+      "duration_s": 3.64,
+      "source_start_s": 88.658,
+      "source_action_end_s": 92.696,
+      "source_hold_s": 95.702
+    },
+    {
+      "id": "reset",
+      "text": "On efface les filtres : la carte complète revient.",
+      "start_s": 38.64,
+      "duration_s": 4.24,
+      "source_start_s": 103.932,
+      "source_action_end_s": 108.13799999999999,
+      "source_hold_s": 111.129
+    },
+    {
+      "id": "rejeu",
+      "text": "Puis on rejoue le favori. Les mêmes couches retrouvent les mêmes résultats.",
+      "start_s": 42.88,
+      "duration_s": 6.0,
+      "source_start_s": 119.811,
+      "source_action_end_s": 123.803,
+      "source_hold_s": 126.794
+    },
+    {
+      "id": "export",
+      "text": "Les données filtrées et le relief sont exportés pour être réutilisés.",
+      "start_s": 48.88,
+      "duration_s": 5.12,
+      "source_start_s": 137.791,
+      "source_action_end_s": 145.468,
+      "source_hold_s": 148.457
+    },
+    {
+      "id": "fin",
+      "text": "FilterMate 5.1.3, dans QGIS. Un premier tri avec un modèle de surface, pas une évaluation du risque.",
+      "start_s": 54.0,
+      "duration_s": 10.32
+    }
+  ],
+  "duration_s": 64.32,
+  "frame_source": "real QGIS capture; waits edited and results held; plugin unchanged",
+  "replay_comparison": {
+    "Bâtiments altitude": {
+      "before": 63,
+      "after": 63
+    },
+    "Routes": {
+      "before": 304,
+      "after": 304
+    },
+    "Ponts lignes": {
+      "before": 92,
+      "after": 92
+    },
+    "Ponts polygones": {
+      "before": 6,
+      "after": 6
+    }
+  }
+}

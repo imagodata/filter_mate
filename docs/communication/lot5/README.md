@@ -1,9 +1,16 @@
 # Lot 5 — démonstrations, livraison locale du 26 novembre 2026
 
+**Nouvelle vidéo Urumea finalisée avec le ZIP 5.1.3 de `dist`** :
+[vidéo, narration française et preuves de rejeu](urumea-linkedin-5.1.3/README.md).
+Le MP4 dure 64,32 s ; la carte et ses changements sont visibles, avec voix et
+sous-titres français. Il est prêt à être téléversé sur LinkedIn. La répétition
+historique `urumea-rehearsal` reste distincte et non validée comme film final.
+
+
 Travail isolé : `/tmp/filter_mate-lot5`, branche `codex/lot5-demonstrations`,
 base `8fbd62c5`. Intégration dans main centralisée par la session de consolidation,
-à la demande « merger au fur et à mesure ». Aucun push, publication ou envoi de
-voix à un service externe. Les fichiers communs des lots 1–3 et 7 ne sont pas modifiés.
+à la demande « merger au fur et à mesure ». Aucun push ni publication externe. La voix de la nouvelle vidéo Urumea est
+générée avec la voix de synthèse française `fr-FR-HenriNeural`. Les fichiers communs des lots 1–3 et 7 ne sont pas modifiés.
 
 ## Sources réconciliées
 
@@ -103,7 +110,8 @@ FM_VOICE_ENGINE=none FM_LANG=fr scripts/site_videos_headless.sh render-ln ln
 pas des livrables : ils contiennent potentiellement une base d'authentification.
 Pour une voix humaine enregistrée, placer les pistes aux chemins attendus puis
 calculer les durées avec `fm5_clip_voice.py ROOT ffprobe ln --durations-only`.
-La synthèse `edge-tts`/`elevenlabs` est disponible dans le script mais n'a pas été exécutée.
+La synthèse Sarlat n'a pas été exécutée. Pour la nouvelle vidéo Urumea, les pistes
+françaises ont été générées avec Edge TTS puis mixées dans le MP4.
 
 Préflight, avec le Python QGIS et `QT_QPA_PLATFORM=offscreen` :
 
@@ -118,10 +126,11 @@ python3 scripts/demo_take_check.py /chemin/FM_WORK/out/ln
 1. Après lots 1–3 intégrés : prise agent simple et `report` (Processing, deux
    graphiques, mise en page/PDF). Comparer appels, réponses, couches, graphiques
    et fichier PDF réellement ouvert. Pas de promesse d'atlas implicite.
-2. Urumea : DSM et réseau piéton complets, filtre FilterMate actif, vrai calcul de
-   réseau, export rouvert, favori réellement rejoué et liaison dans un second
-   projet. Puis tourner/remonter les sept plans et remplacer les chiffres de la
-   maquette par ceux de la prise. Les anciens chiffres et légendes sont refusés.
+2. Urumea : le DSM, le filtre actif, les exports rouverts et le rejeu des quatre
+   couches sont désormais vérifiés dans le nouveau film 5.1.3. La desserte sur un
+   réseau piéton complet et la liaison/reprise sur un second poste restent hors
+   de ce montage ; elles nécessitent une démonstration séparée avant toute promesse.
+   La maquette historique avec chiffres illustratifs ne sert pas au film final.
 3. Solaire : acquisition de toutes les données, pente du MNS en **%**, contrôle
    NoData, filtres, desserte, export/favori, sept prises et narration EN finale.
 4. Sarlat : contrôle final du montage, voix FR/EN, mixage et validation après écoute.

@@ -1,0 +1,106 @@
+{
+  "stage": "reset",
+  "layers": [
+    {
+      "name": "Bâtiments",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 3073,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Bâtiments altitude",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 3073,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags",
+        "alt_mean"
+      ]
+    },
+    {
+      "name": "Copernicus 30 m",
+      "valid": true,
+      "crs": "EPSG:32630"
+    },
+    {
+      "name": "Ponts lignes",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 158,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Ponts polygones",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 8,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "man_made",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Routes",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 701,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "highway",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Urumea",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 2,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "waterway",
+        "other_tags"
+      ]
+    }
+  ],
+  "filters": {},
+  "replay_comparison": null,
+  "render_flag": true,
+  "thread": "Ajoute le modèle de surface Copernicus à 30 m sur l'emprise visible de l'Urumea à Saint-Sébastien, en EPSG:32630. Nomme-le « Copernicus 30 m » et affiche-le en ombrage sous les vecteurs. Les couches OSM sont déjà chargées.\n\n\n✓ Couche ajoutée : Copernicus 30 m\n\n✓ Style de Copernicus 30 m\n   hillshade\n\n\nJ'ai ajouté la couche « Copernicus 30 m » : le modèle d'élévation Copernicus à 30 m, en EPSG:32630, sur l'emprise visible de la carte. Elle est en ombrage (relief multidirectionnel) et placée sous toutes les couches vectorielles.\n\nLa zone couvre environ 163 × 132 pixels, avec des altitudes de 0 à 205 m (moyenne 45 m). Ce modèle est une surface : les bâtiments et la végétation y figurent, donc les zones urbaines et boisées sont surélevées. Aucune donnée vectorielle n'a été modifiée.\nCalcule la moyenne du DEM par emprise de bâtiment avec les statistiques zonales sur « Bâtiments ». Crée une couche « Bâtiments altitude » avec un champ alt_mean, conserve les NoData et colore-la par altitude moyenne. Il s'agit d'un modèle de surface, pas d'une hauteur de bâtiment. Masque la couche originale « Bâtiments ».\n\n\n\n\n✓ Traitement : native:zonalstatisticsfb  ·  3,073\n   INPUT=\"Bâtiments\", INPUT_RASTER=\"Copernicus 30 m\", RASTER_BAND=1, COLUMN_PREFIX=\"alt_\", STATISTICS=[2]\n\n\n✓ Masqué : Bâtiments\n\n✓ Style de Bâtiments altitude\n   graduated · alt_mean · Viridis · 5\n\nLa couche « Bâtiments altitude » est créée : les 3 073 bâtiments y portent le champ `alt_mean`, moyenne du modèle Copernicus sur chaque emprise. Elle est colorée en Viridis par classes de quantiles, de 0,04 m à 118,5 m (moyenne 33,2 m). Aucune valeur NoData n'est apparue : chaque bâtiment a reçu une moyenne, donc aucune entité n'a été écartée.\n\nLa couche originale « Bâtiments » est masquée, pas supprimée ni modifiée. Comme le DEM est un modèle de surface, `alt_mean` est une altitude moyenne du sol et des bâtiments, pas une hauteur de bâtiment.\nDans « Bâtiments altitude », garde alt_mean < 5 m à moins de 200 m de la couche « Urumea ». Filtre « Routes », « Ponts lignes » et « Ponts polygones » à moins de 300 m des bâtiments retenus, avec les distances en mètres. Garde ces filtres actifs, ne modifie pas les données et ne change pas le cadrage.\n\n\n\n✓ Filtre sur Bâtiments altitude  ·  89 / 3,073\n   \"alt_mean\" < 5\n\n✓ Filtre sur Bâtiments altitude par Urumea  ·  63\n\n✓ Filtre sur Routes, Ponts lignes, Ponts polygones par Bâtiments altitude  ·  402\nLes filtres sont en place ; aucune donnée modifiée, cadrage inchangé.\n\n- **Bâtiments altitude** : `alt_mean < 5` puis moins de 200 m de « Urumea ». Il reste **63 bâtiments** sur 3 073 (sur 89 avec la seule condition d'altitude).\n- **Routes** : **304** entités sur 701 à moins de 300 m des bâtiments retenus.\n- **Ponts lignes** : **92** entités sur 158.\n- **Ponts polygones** : **6** entités sur 8.\n\nLes distances sont en mètres (la couche est en EPSG:32630). Les filtres sont actifs et restent en place jusqu'à ce que vous les retiriez.\n\nSi vous voulez ajuster le seuil d'altitude (5 m) ou la distance, je peux vous proposer un curseur ou un réglage dans le panneau EXPLORING.\nEnregistre l'état actuel des filtres du projet comme favori « Urumea — seuils illustratifs ». Réponds uniquement « Favori enregistré » lorsque le succès est confirmé.\n\n\n✓ Favori enregistré : Urumea — seuils illustratifs\nFavori enregistré\nEfface maintenant les filtres des couches du projet, sans supprimer les couches ni le favori. Nous allons comparer la carte complète avant de rejouer le favori.\n\n\n✓ Filtres retirés de Bâtiments altitude, Routes, Ponts lignes, Ponts polygones\nLes filtres sont effacés sur « Bâtiments altitude », « Routes », « Ponts lignes » et « Ponts polygones ». Les couches et le favori « Urumea — seuils illustratifs » sont conservés."
+}

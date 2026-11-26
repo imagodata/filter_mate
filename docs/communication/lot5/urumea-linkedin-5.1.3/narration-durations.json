@@ -1,0 +1,62 @@
+{
+  "hook": {
+    "duration_s": 3.456,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  },
+  "place": {
+    "duration_s": 5.232,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  },
+  "relief": {
+    "duration_s": 6.864,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  },
+  "altitude": {
+    "duration_s": 5.736,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  },
+  "filtre": {
+    "duration_s": 9.84,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  },
+  "favori": {
+    "duration_s": 2.88,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  },
+  "reset": {
+    "duration_s": 3.48,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  },
+  "rejeu": {
+    "duration_s": 5.232,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  },
+  "export": {
+    "duration_s": 4.368,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  },
+  "fin": {
+    "duration_s": 8.856,
+    "codec_name": "mp3",
+    "sample_rate": "24000",
+    "channels": 1
+  }
+}
