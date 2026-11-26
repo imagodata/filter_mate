@@ -2,7 +2,7 @@
 
 **🧭 Explore, 🔍 filter and 📦 export vector 🗺️, raster 🏔️ and LiDAR point cloud ☁️ layers in QGIS, from one panel.**
 
-[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.1.2-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
+[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.1.3-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
 [![QGIS 3.22 → 4.x](https://img.shields.io/badge/QGIS-3.22%20%E2%86%92%204.x%20%C2%B7%20Qt5%20%2F%20Qt6-589632)](https://plugins.qgis.org/plugins/filter_mate)
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![QGIS headless](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml)
@@ -43,6 +43,25 @@ exports from a request, with the model you choose.
 
 ---
 
+## ✨ New in 5.1.3
+
+- **Consistent selections and local copies.** Background expressions use the project's variables, measurement units,
+  CRS and ellipsoid. GeoPackage copies keep their SQLite filters when a project reopens; a cancelled or failed
+  copy-again operation restores the previous copy and its filter.
+- **Respond, Propose or Act.** Read without changing the project, approve each proposed change, or follow the
+  permissions saved in the settings. Memory proposals stay yours to accept or refuse.
+- **Conversations that resume.** The project's conversation is taken up again with the same server, account and
+  attribute-sharing choice. New conversation clears the saved history. Long conversations save faster, and choosing
+  a layer with `@` inserts the layer selected in the completion list.
+- **Reasoning effort when supported.** An optional menu offers the levels supported by the selected model, with
+  **Automatic** keeping the provider's default. The choice is remembered per model and server and applies to the next
+  request without clearing the conversation.
+- **Charts and clearer navigation.** Standard charts render in QGIS 3 and 4; combine them into vector infographics
+  and export them as images, PDF, SVG or an offline HTML page. Navigation icons follow the theme, long model names
+  stay readable in tooltips, and EXPLORING keeps its source-layer chooser when FILTERING is hidden.
+
+See [the 5.1.3 release notes](CHANGELOG.md#513---2026-11-26) for the full list of fixes.
+
 ## ⚙️ How it works
 
 The panel has five sections in two stacks, one section open at a time in each: 🤖 AGENT and 🧭 EXPLORING above the
@@ -75,8 +94,8 @@ the original source back, and project files are always saved with the original s
 - 🌐 **Web services and remote files** (WFS, OGC API Features, ArcGIS, WMS / WMTS / XYZ, WCS, vector tiles, remote COPC / EPT): filtered and explored with bounded, cancellable reads, never on the main thread, and with an explicit refusal rather than a silently partial result. A WMS, a WMTS or a tile basemap can itself be a layer to filter: captured over the area, then cut like a local raster.
 - 🤖 **AGENT** (experimental): a chat in the panel that drives FilterMate and QGIS from a sentence, Processing algorithms included, with Claude, Mistral,
   OpenAI or any compatible server, a local Ollama model (the settings help to install it and to download a model). Filters apply at once
-  and each step can be undone; exports and added or removed layers are confirmed in the thread, without stopping QGIS, and its history keeps the requests of every project. You choose how far it goes alone
-  (four levels of autonomy, a rule per tool, layers it must never change). Recipes keep a request in the project and run
+  and each step can be undone; exports and added or removed layers are confirmed in the thread, without stopping QGIS, and its history keeps the requests of every project. Choose Respond, Propose or Act;
+  Act follows the saved autonomy level, the rules per tool and the layers it must never change. Recipes keep a request in the project and run
   it again without any model, or by themselves each time the edits of their source are saved. When a choice is yours
   it asks with choices to click; *Set up FilterMate* asks the main settings with a few choices, with no model at all
   (offered once per version, and from the menu Vector > FilterMate), and *How FilterMate works* tells the panel

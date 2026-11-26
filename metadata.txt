@@ -18,7 +18,7 @@ about=FilterMate filters several layers at once, from one panel. Select somethin
     📦 EXPORTING: save the filtered layers (GeoPackage, Shapefile, GeoTIFF, LAZ...).
     ↩️ Undo and redo every filter, keep favorites, compare the map before and after.
 
-    🤖 AGENT (experimental, optional): ask in plain words, for example "buildings above 1200 m in the selected commune". It filters, selects, styles, brings data in (OpenStreetMap, elevation, population, WMS), draws charts, makes print layouts and atlases, and exports, step by step, and asks before anything it cannot undo. Use your own key for Claude, Mistral or OpenAI, or a local Ollama model that keeps everything on your computer. No account, no telemetry. What is sent and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
+    🤖 AGENT (experimental, optional): ask in plain words, for example "buildings above 1200 m in the selected commune". It filters, selects, styles, brings data in (OpenStreetMap, elevation, population, WMS), draws charts, makes print layouts and atlases, and exports, step by step. Choose Respond, Propose or Act to control changes, resume the conversation of a project, and choose reasoning effort when your model supports it. Use your own key for Claude, Mistral or OpenAI, or a local Ollama model that keeps everything on your computer. No account, no telemetry. What is sent and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
 
     Works with PostGIS, GeoPackage, Spatialite, files, WFS, WMS and tile basemaps; a web layer can be copied next to the project to work offline. QGIS 3.22 to 4.x, 34 languages, light and dark themes. Processing algorithms and a Python API for automation.
     Optional, installed only if you agree: psycopg2 for PostgreSQL, PDAL for heights above the ground, onnxruntime to draw objects on images with SAM.
@@ -48,10 +48,13 @@ tags=filter,spatial filter,multi-layer,subset,definition query,query,selection,b
 # that key only names other QGIS plugins.
 python_dependencies=onnxruntime
 
-changelog=5.1.3: steadier expressions, local copies and agent workflows
+changelog=5.1.3: steadier filters, resumable conversations and model controls
     - Expression evaluation keeps the same project and layer variables, measurement units, CRS and ellipsoid in the foreground and in background tasks.
     - GeoPackage copies keep their SQLite filters when a project is saved and reopened, without sending them to WFS. A cancelled copy-again operation restores the previous copy and its filter.
     - Agent workflows: Respond, Propose or Act, individual action confirmations, clearer tool families, GUI previews, and saving the current filter as a favorite from the chat or the API.
+    - Conversations resume only for the same server, account and attribute-sharing choice. New conversation clears the saved history, and choosing a layer with @ inserts the selected layer correctly.
+    - Optional reasoning effort for supported models, remembered per model and server; Automatic keeps the provider default. Compact navigation icons follow the theme and long model names stay readable in tooltips.
+    - EXPLORING keeps its source-layer chooser when FILTERING is hidden. Long conversation saves are faster, standalone REST imports work without QGIS, and the compiled French catalog includes the new interface labels.
     - Charts rendered in Python, vector infographics, and fixes to favorites, zooming, exports and project persistence.
     5.1.2: the AGENT becomes a full GIS partner
     - Ask, Plan or Act: choose how far the AGENT goes before it touches your project.
