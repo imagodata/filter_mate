@@ -124,8 +124,12 @@ def zoom_to(layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: 
     return {'extent_wkt': canvas.extent().asWktPolygon(), 'scale': canvas.scale()}
 
 
-_GRID_ADDRESS = re.compile(r'(?:://|/vsi[a-z]*[/\\]|\\)|=\s*/', re.IGNORECASE)
-"""A CRS definition naming a grid to download (an address, /vsicurl/...) or to read (a file path, a UNC share)."""
+_GRID_ADDRESS = re.compile(r'(?:://|/vsi[a-z]*[/\\]|\\)', re.IGNORECASE)
+"""A CRS definition reaching the network (an address, /vsicurl/...) or a shared drive (a UNC path)."""
+_GRID_FILE = re.compile(r'\+[a-z_]*(?:nadgrids|geoidgrids|grids?)\s*=\s*[^,\s]*[/\\]', re.IGNORECASE)
+"""A grid named by its file in a PROJ definition (+nadgrids=/..., +geoidgrids=C:\\...)."""
+_GRID_QUOTED = re.compile(r'parameterfile\s*\[\s*"[^"]*(?:[/\\]|://)', re.IGNORECASE)
+"""A grid named by its file or address in WKT (PARAMETERFILE["/..."], PARAMETERFILE["https://..."])."""
 
 
 def crs_definition(crs) -> str:
@@ -158,10 +162,11 @@ def set_project_crs(crs: str) -> Dict[str, Any]:
     if layer is not None:
         target = layer.crs()
     else:
-        if _GRID_ADDRESS.search(text):
+        if _GRID_ADDRESS.search(text) or _GRID_FILE.search(text) or _GRID_QUOTED.search(text):
             # A PROJ or WKT definition can name a grid by its address (/vsicurl/https://...) or its file
-            # (+nadgrids=/...): QGIS would download or read it at the first transform, without asking (audit of
-            # 2026-11-24). An authid needs neither.
+            # (+nadgrids=/..., PARAMETERFILE["/..."]): QGIS would download or read it at the first transform,
+            # without asking (audit of 2026-11-24). An authid needs neither. A bare "= /" outside a grid
+            # parameter is descriptive text, not a grid (2026-11-26).
             raise ValueError(f"{text[:60]!r} names a grid by its address or its file: give an authid such as "
                              "EPSG:2154 (Lambert-93) or EPSG:4326 (WGS 84), or a layer of the project")
         target = QgsCoordinateReferenceSystem(f"EPSG:{text}" if text.isdigit() else text)
