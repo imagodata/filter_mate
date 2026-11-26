@@ -1314,15 +1314,52 @@ def picker_rows():
     return single_picker().findChild(QComboBox).count()
 
 
-def multiple_visible_rows():
-    """Rows the multiple selection list shows. The link expression filters the rows read, not only the stored
-    filter text (audit of 2026-11-24: "name" LIKE 'east%' left the four rows displayed)."""
+def multiple_list_widget():
     widget = dock().widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+    lists = getattr(widget, 'list_widgets', {})
+    return lists.get(layer('zones').id())
+
+
+def multiple_visible_rows():
+    """Rows the multiple selection list shows. Counts the rows actually displayed in the QListWidget (not
+    hidden by the text filter), not the stored filter text (audit of 2026-11-24: "name" LIKE 'east%' left the
+    four rows displayed)."""
     try:
-        visible = widget.currentVisibleFeatures()
+        list_widget = multiple_list_widget()
+        if list_widget is None:
+            return None
+        shown = 0
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
+            if item is not None and not item.isHidden():
+                shown += 1
+        return shown
     except Exception:
         return None
-    return len(visible) if isinstance(visible, (list, tuple)) else None
+
+
+def multiple_visible_names():
+    """Display names of the rows the multiple selection list shows, sorted."""
+    try:
+        list_widget = multiple_list_widget()
+        if list_widget is None:
+            return None
+        names = {feature.id(): feature['name'] for feature in layer('zones').getFeatures()}
+        shown = []
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
+            if item is not None and not item.isHidden():
+                # data(3) is the row fid: feature.id() (int) or an identifier field value (str).
+                name = names.get(item.data(3))
+                if name is None:
+                    try:
+                        name = names.get(int(item.data(3)))
+                    except (TypeError, ValueError):
+                        name = None
+                shown.append(name if name is not None else item.text())
+        return sorted(shown)
+    except Exception:
+        return None
 
 
 def picked_fid():
@@ -5189,6 +5226,9 @@ def s_link_custom_check():
     group = f"{group}, stored custom={stored.get('custom_selection_expression')!r}, linking={stored.get('is_linking')}"
     check('linking: a custom expression filters the multiple selection list',
           zones_matching(multiple_filter()) == ['east_a', 'east_b'], f"{multiple_filter()!r} in {group}")
+    check('linking: a custom expression filters the rows the multiple selection list shows',
+          multiple_visible_names() == ['east_a', 'east_b'],
+          f"shown={multiple_visible_names()} stored={multiple_filter()!r} in {group}")
     check('linking: a custom expression filters the single selection picker, whatever the group',
           zones_matching(single_picker().filterExpression()) == ['east_a', 'east_b'],
           f"{single_picker().filterExpression()!r} in {group}")
@@ -5216,6 +5256,8 @@ def s_link_cleared_check():
     everything = zones_matching(None)
     check('linking: the custom expression removed, the multiple list shows every feature',
           zones_matching(multiple_filter()) == everything, repr(multiple_filter()))
+    check('linking: the custom expression removed, the multiple list displays every feature',
+          multiple_visible_names() == everything, repr(multiple_visible_names()))
     check('linking: the custom expression removed, the single picker shows every feature',
           zones_matching(single_picker().filterExpression()) == everything, repr(single_picker().filterExpression()))
     dock().pushButton_checkable_exploring_linking_widgets.setChecked(STATE.get('link_was', True))

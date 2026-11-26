@@ -158,6 +158,27 @@ def _to_canvas_crs(ext: QgsRectangle, layer: QgsVectorLayer, canvas_crs: Any) ->
         return None
 
 
+def _grow_degenerate(ext: QgsRectangle, canvas: Any, pixels: float = 25.0) -> QgsRectangle:
+    """Grow a degenerate (one point, points on a line) extent to a pixel margin.
+
+    A copy is grown: callers may hand out a cached extent. Shared by the
+    synchronous union zoom below and the asynchronous ``queue_union_zoom``
+    delivery — a single retained point zoomed nowhere on either path (audit
+    of 2026-11-24), the same margin EXPLORING uses
+    (``exploring_controller._zoom_canvas_to``). When the canvas reports no
+    scale yet, the extent is returned unchanged.
+    """
+    try:
+        margin = canvas.mapUnitsPerPixel() * pixels if hasattr(canvas, "mapUnitsPerPixel") else 0
+    except (RuntimeError, AttributeError, TypeError):
+        margin = 0
+    if margin and margin > 0:
+        grown = QgsRectangle(ext)
+        grown.grow(margin)
+        return grown
+    return ext
+
+
 def auto_zoom_to_filtered(
     layers: Iterable[QgsVectorLayer],
     project_layers: Optional[Mapping[str, Any]] = None,
@@ -276,12 +297,7 @@ def auto_zoom_to_filtered(
         # One point, or points on a line: center on it with a pixel margin, as EXPLORING does
         # (exploring_controller._zoom_canvas_to). Before, there was no zoom at all, and the buffer margin
         # (grow_by) never enlarged the view: it was applied after this check (audit of 2026-11-24).
-        try:
-            margin = canvas.mapUnitsPerPixel() * 25 if hasattr(canvas, "mapUnitsPerPixel") else 0
-        except (RuntimeError, AttributeError, TypeError):
-            margin = 0
-        if margin and margin > 0:
-            union.grow(margin)
+        union = _grow_degenerate(union, canvas)
 
     canvas.zoomToFeatureExtent(union)
     logger.debug(

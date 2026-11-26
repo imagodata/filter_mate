@@ -350,6 +350,11 @@ def queue_union_zoom(layers, canvas, expected_token=None, grow_by=0):
             if fingerprint != (layer.id(), layer.source(), layer.subsetString()):
                 return
         if extent is not None:
+            if extent.isEmpty():
+                # One point, or points on a line: same pixel margin as the
+                # synchronous path, else no zoom at all (audit of 2026-11-24).
+                from ..auto_zoom import _grow_degenerate
+                extent = _grow_degenerate(extent, canvas)
             canvas.zoomToFeatureExtent(extent)
         canvas.refresh()
 

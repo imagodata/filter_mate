@@ -573,6 +573,30 @@ class TestToCanvasCrs:
         canvas.refresh.assert_called_once()
 
 
+class TestGrowDegenerate:
+    def test_grows_a_copy_by_twenty_five_pixels(self, fake_iface):
+        _iface, canvas = fake_iface  # mapUnitsPerPixel 10
+        point = auto_zoom_mod.QgsRectangle()
+        point._null = False
+        point._empty = True
+        grown = auto_zoom_mod._grow_degenerate(point, canvas)
+        assert grown is not point
+        assert grown._grown == [250.0] and not grown.isEmpty()
+        assert point._grown == [] and point.isEmpty()  # the cached extent is left alone
+
+    def test_no_scale_yet_returns_the_extent_unchanged(self):
+        canvas = MagicMock()
+        canvas.mapUnitsPerPixel.return_value = 0
+        point = auto_zoom_mod.QgsRectangle()
+        point._null = False
+        assert auto_zoom_mod._grow_degenerate(point, canvas) is point
+
+    def test_canvas_without_scale_returns_the_extent_unchanged(self):
+        point = auto_zoom_mod.QgsRectangle()
+        point._null = False
+        assert auto_zoom_mod._grow_degenerate(point, object()) is point
+
+
 class TestDegenerateExtents:
     def test_layer_extent_keeps_a_degenerate_rect(self):
         ext = auto_zoom_mod._layer_extent(_make_layer("P", degenerate=True))
