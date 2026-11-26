@@ -30,7 +30,7 @@
 
 `APP.DOCKWIDGET.EXPLORING_TOOLS`
 
-The tool buttons of the EXPLORING rail, for each kind of layer: the names of the buttons to hide, separated by commas (empty: all of them are shown). A tool hidden is not on the rail and is put down; a mode (sync, follow, link, preview) is turned off when its button is hidden, and no other way turns it on again meanwhile; the '...' button (more) is always shown. Right-click the rail to choose them with check boxes
+The tool buttons of the EXPLORING rail, for each kind of layer: the names of the buttons to hide, separated by commas (empty: all of them are shown). A tool hidden is not on the rail: a tool put on the map is put down before its button goes, while a mode (sync, follow, link, preview) keeps its state (hiding a button changes no layer and writes nothing to the project); no other way turns one on again meanwhile; the '...' button (more) is always shown. Right-click the rail to choose them with check boxes
 
 | Setting | Default | Allowed | Description |
 |---|---|---|---|

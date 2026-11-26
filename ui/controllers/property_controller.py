@@ -1084,7 +1084,9 @@ class PropertyController(BaseController):
                 project_layers[layer_id][property_path[0]][property_path[1]] = widget.expression()
 
             elif widget_type == 'QgsDoubleSpinBox':
-                widget.clearValue()
+                # Audit 24/11 #9: clearValue() reads the clear value, it resets nothing. The widget kept the
+                # previous layer's buffer, which was then stored (and persisted) for the next layer.
+                widget.setValue(0.0)
                 project_layers[layer_id][property_path[0]][property_path[1]] = widget.value()
 
             elif widget_type == 'LineEdit':
@@ -1148,7 +1150,8 @@ class PropertyController(BaseController):
                 project_props[key_upper][prop_upper] = widget.currentText()
 
             elif widget_type == 'QgsDoubleSpinBox':
-                widget.clearValue()
+                # Audit 24/11 #9: clearValue() reads the clear value, it resets nothing (see above).
+                widget.setValue(0.0)
                 project_props[key_upper][prop_upper] = widget.value()
 
             elif widget_type == 'LineEdit':

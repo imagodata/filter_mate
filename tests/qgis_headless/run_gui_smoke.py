@@ -1314,15 +1314,52 @@ def picker_rows():
     return single_picker().findChild(QComboBox).count()
 
 
-def multiple_visible_rows():
-    """Rows the multiple selection list shows. The link expression filters the rows read, not only the stored
-    filter text (audit of 2026-11-24: "name" LIKE 'east%' left the four rows displayed)."""
+def multiple_list_widget():
     widget = dock().widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+    lists = getattr(widget, 'list_widgets', {})
+    return lists.get(layer('zones').id())
+
+
+def multiple_visible_rows():
+    """Rows the multiple selection list shows. Counts the rows actually displayed in the QListWidget (not
+    hidden by the text filter), not the stored filter text (audit of 2026-11-24: "name" LIKE 'east%' left the
+    four rows displayed)."""
     try:
-        visible = widget.currentVisibleFeatures()
+        list_widget = multiple_list_widget()
+        if list_widget is None:
+            return None
+        shown = 0
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
+            if item is not None and not item.isHidden():
+                shown += 1
+        return shown
     except Exception:
         return None
-    return len(visible) if isinstance(visible, (list, tuple)) else None
+
+
+def multiple_visible_names():
+    """Display names of the rows the multiple selection list shows, sorted."""
+    try:
+        list_widget = multiple_list_widget()
+        if list_widget is None:
+            return None
+        names = {feature.id(): feature['name'] for feature in layer('zones').getFeatures()}
+        shown = []
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
+            if item is not None and not item.isHidden():
+                # data(3) is the row fid: feature.id() (int) or an identifier field value (str).
+                name = names.get(item.data(3))
+                if name is None:
+                    try:
+                        name = names.get(int(item.data(3)))
+                    except (TypeError, ValueError):
+                        name = None
+                shown.append(name if name is not None else item.text())
+        return sorted(shown)
+    except Exception:
+        return None
 
 
 def picked_fid():
@@ -5189,6 +5226,9 @@ def s_link_custom_check():
     group = f"{group}, stored custom={stored.get('custom_selection_expression')!r}, linking={stored.get('is_linking')}"
     check('linking: a custom expression filters the multiple selection list',
           zones_matching(multiple_filter()) == ['east_a', 'east_b'], f"{multiple_filter()!r} in {group}")
+    check('linking: a custom expression filters the rows the multiple selection list shows',
+          multiple_visible_names() == ['east_a', 'east_b'],
+          f"shown={multiple_visible_names()} stored={multiple_filter()!r} in {group}")
     check('linking: a custom expression filters the single selection picker, whatever the group',
           zones_matching(single_picker().filterExpression()) == ['east_a', 'east_b'],
           f"{single_picker().filterExpression()!r} in {group}")
@@ -5216,6 +5256,8 @@ def s_link_cleared_check():
     everything = zones_matching(None)
     check('linking: the custom expression removed, the multiple list shows every feature',
           zones_matching(multiple_filter()) == everything, repr(multiple_filter()))
+    check('linking: the custom expression removed, the multiple list displays every feature',
+          multiple_visible_names() == everything, repr(multiple_visible_names()))
     check('linking: the custom expression removed, the single picker shows every feature',
           zones_matching(single_picker().filterExpression()) == everything, repr(single_picker().filterExpression()))
     dock().pushButton_checkable_exploring_linking_widgets.setChecked(STATE.get('link_was', True))
@@ -7351,22 +7393,31 @@ def s_tools_live():
     check('tools: a tool put on the map is put down before its button goes', on and not zone.isChecked()
           and not zone.isVisibleTo(d.widget_exploring_keys) and not extras.zone_tool_on(),
           f"on={on} checked={zone.isChecked()} tool on map={extras.zone_tool_on()}")
-    # a mode is turned off with its button, and nothing turns it on again meanwhile
+    # a mode keeps its state while its button is hidden (audit 24/11 #10): hiding a button is display-only,
+    # it writes nothing to the layer nor to the project, and showing it again finds the mode as left
     link.setChecked(True)
+    pump(100)
     apply_settings({TOOLS_PATH.format('vector'): 'link'})
     pump(150)
-    check('tools: a mode (link) is turned off when its button is hidden', not link.isChecked()
-          and not link.isVisibleTo(d.widget_exploring_keys), f"checked={link.isChecked()}")
+    kept = link.isChecked() and not link.isVisibleTo(d.widget_exploring_keys) \
+        and d.PROJECT_LAYERS[d.current_layer.id()]['exploring'].get('is_linking') is True
+    apply_settings({TOOLS_PATH.format('vector'): ''})
+    pump(150)
+    check('tools: a mode (link) keeps its state while its button is hidden, and shown again is still on',
+          kept and link.isChecked() and link.isVisibleTo(d.widget_exploring_keys),
+          f"kept={kept} checked={link.isChecked()}")
     sync = d.pushButton_checkable_exploring_selecting
-    sync.setChecked(True)
+    sync.setChecked(False)
     apply_settings({TOOLS_PATH.format('vector'): 'sync'})
     pump(150)
-    off = not sync.isChecked() and not sync.isVisibleTo(d.widget_exploring_keys)
+    hidden = not sync.isVisibleTo(d.widget_exploring_keys)
     from qgis.core import QgsGeometry
     extras._on_vector_zone_drawn(QgsGeometry.fromRect(d.current_layer.extent()))
     pump(100)
-    check('tools: a mode (sync) is turned off with its button, and the zone does not turn it on again',
-          off and not sync.isChecked(), f"off={off} after the zone={sync.isChecked()}")
+    check('tools: the zone does not turn (sync) on while its button is hidden',
+          hidden and not sync.isChecked(), f"hidden={hidden} after the zone={sync.isChecked()}")
+    apply_settings({TOOLS_PATH.format('vector'): ''})
+    pump(150)
     return waits(0.3)
 
 
@@ -7376,7 +7427,7 @@ def s_tools_layer_modes_add():
 
 
 def s_tools_layer_modes():
-    """A layer that was left with a mode on, shown again while its button is hidden: the mode is not on."""
+    """A layer that was left with a mode on, shown again while its button is hidden: the mode stays on."""
     d = dock()
     d.PROJECT_LAYERS[layer('zones_again').id()].setdefault('exploring', {})['is_selecting'] = True
     apply_settings({TOOLS_PATH.format('vector'): 'sync'})
@@ -7386,8 +7437,8 @@ def s_tools_layer_modes():
 def s_tools_layer_modes_check():
     d = dock()
     sync = d.pushButton_checkable_exploring_selecting
-    check('tools: a layer left with the mode on comes back with it off while its button is hidden',
-          settles(lambda: not sync.isChecked() and not sync.isVisibleTo(d.widget_exploring_keys), 2.0),
+    check('tools: a layer left with the mode on keeps it on while its button is hidden',
+          settles(lambda: sync.isChecked() and not sync.isVisibleTo(d.widget_exploring_keys), 2.0),
           f"checked={sync.isChecked()} visible={sync.isVisibleTo(d.widget_exploring_keys)}")
     apply_settings({TOOLS_PATH.format('vector'): ''})
     project.removeMapLayer(layer('zones_again').id())
