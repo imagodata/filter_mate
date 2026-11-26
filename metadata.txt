@@ -6,7 +6,7 @@
 name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
-description=Filter all the layers of a project at once by their relation to a selection: vector, raster and LiDAR point clouds, with undo, favorites, export and an optional AI assistant.
+description=Filter vector, raster and LiDAR layers together, with undo, favorites, export and an optional AI assistant with Processing models and microphone dictation.
 version=5.1.3
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
@@ -18,9 +18,13 @@ about=FilterMate filters several layers at once, from one panel. Select somethin
     📦 EXPORTING: save the filtered layers (GeoPackage, Shapefile, GeoTIFF, LAZ...).
     ↩️ Undo and redo every filter, keep favorites, compare the map before and after.
 
-    🤖 AGENT (experimental, optional): ask in plain words, for example "buildings above 1200 m in the selected commune". It filters, selects, styles, brings data in (OpenStreetMap, elevation, population, WMS), draws charts, makes print layouts and atlases, and exports, step by step. Choose Respond, Propose or Act to control changes, resume the conversation of a project, and choose reasoning effort when your model supports it. Use your own key for Claude, Mistral or OpenAI, or a local Ollama model that keeps everything on your computer. No account, no telemetry. What is sent and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
+    🤖 AGENT (experimental, optional): type or dictate a request, for example "buildings above 1200 m in the selected commune". It filters, selects, styles, brings data in (OpenStreetMap, elevation, population, WMS), draws charts, makes print layouts and atlases, and exports, step by step. Choose Respond, Propose or Act to control changes, resume the conversation of a project, and choose reasoning effort when your model supports it. Use your own key for Claude, Mistral or OpenAI, or a local Ollama model for the chat. No FilterMate account, no telemetry. What is sent and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
 
-    Works with PostGIS, GeoPackage, Spatialite, files, WFS, WMS and tile basemaps; a web layer can be copied next to the project to work offline. QGIS 3.22 to 4.x, 34 languages, light and dark themes. Processing algorithms and a Python API for automation.
+    💾 Agent data stay in project memory where possible. Save project and layers asks where to keep the project and its in-memory datasets; file-only providers use that chosen folder. Click layer links to reveal them in the Layers panel, or output actions to open files and folders.
+    🧩 Processing: discover compatible algorithms from installed active providers and run registered models. Open QGIS's graphical model designer, or let the agent prepare a draft chain without expert Python. Choose a model file location or save it in the project. Agent Processing runs that require files need QGIS 3.32 or later.
+    🎙️ Dictation: choose a microphone and a local compatible transcription service, OpenAI or Mistral in Microphone settings, independently of the chat model. Audio stays in RAM for up to two minutes and the recognized text goes into the draft for review before Send. Cloud transcription sends audio only to the chosen service; its key stays in the QGIS authentication database. Qt Multimedia is required for microphone input.
+
+    Works with PostGIS, GeoPackage, Spatialite, files, WFS, WMS and tile basemaps. The dock can save a web-layer copy beside the project for offline use; agent copies follow the memory and chosen-folder workflow above. QGIS 3.22 to 4.x, Qt5 and Qt6, 34 languages, light and dark themes. Processing algorithms and a Python API for automation.
     Optional, installed only if you agree: psycopg2 for PostgreSQL, PDAL for heights above the ground, onnxruntime to draw objects on images with SAM.
 
     📖 Guide: https://imagodata.github.io/filter_mate/guide.html
@@ -41,14 +45,22 @@ deprecated=False
 server=False
 
 # Comma separated, spaces allowed inside a tag. Words people search the plugin list with.
-tags=filter,spatial filter,multi-layer,subset,definition query,query,selection,buffer,vector,raster,point cloud,lidar,las,laz,copc,dem,postgis,postgresql,geopackage,spatialite,wfs,wms,export,processing,favorites,undo,ai,agent,llm,ollama,mcp,sam,segmentation,open data
+tags=filter,spatial filter,multi-layer,subset,definition query,query,selection,buffer,vector,raster,point cloud,lidar,las,laz,copc,dem,postgis,postgresql,geopackage,spatialite,wfs,wms,export,processing,models,favorites,undo,ai,agent,llm,ollama,mcp,sam,segmentation,open data,microphone,dictation,speech to text
 
 # Python packages FilterMate installs when this Python lacks them and the user agrees,
 # into the QGIS profile (adapters/qgis/python_dependencies.py). Not plugin_dependencies:
 # that key only names other QGIS plugins.
 python_dependencies=onnxruntime
 
-changelog=5.1.3: steadier filters, resumable conversations and model controls
+changelog=5.1.3: agent data in memory, Processing models and microphone dictation
+    - Agent downloads and outputs stay in project memory where possible. Save project and layers asks for their destination; file-only providers use the chosen data folder.
+    - Clickable layer names reveal their layer in the tree. Exports and model saves provide file and folder actions; web links open on click.
+    - Compatible installed Processing providers and registered models can run through the agent. The native model designer opens existing models or draft chains without expert Python; file-based agent runs require QGIS 3.32 or later.
+    - Optional microphone dictation through a local compatible service, OpenAI or Mistral. Two-minute recordings stay in RAM and fill an editable draft; the user reviews and sends it. Device, model and language are configured separately from the chat provider.
+    - Agent menus stay open while toggling sources, the plugin MCP server and live recipes, so several choices can be changed in one visit with the mouse or keyboard.
+    - Loaded skills are reused and recent instructions remain available when tool results are trimmed. Shared notes detect updates from other QGIS sessions.
+    - Recent agent actions are translated in all 34 languages, with French microphone labels and errors. VRT persistence rejects DTDs while preserving escaped and relative raster paths.
+    - Official regional basemaps and five Esri alternatives join source discovery. CARTO requires a personal API key; connection checks respect QGIS proxy settings and reject empty or redirected responses.
     - Expression evaluation keeps the same project and layer variables, measurement units, CRS and ellipsoid in the foreground and in background tasks.
     - GeoPackage copies keep their SQLite filters when a project is saved and reopened, without sending them to WFS. A cancelled copy-again operation restores the previous copy and its filter.
     - Agent workflows: Respond, Propose or Act, individual action confirmations, clearer tool families, GUI previews, and saving the current filter as a favorite from the chat or the API.

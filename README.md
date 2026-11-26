@@ -15,7 +15,7 @@ Pick a layer, select what matters on it, and FilterMate filters every other laye
 that selection: buildings near main roads, parcels on steep slopes, LiDAR points beneath rooftops, a DTM
 clipped around a church. The filters stay on the existing project layers, keep their styles, can be undone, saved as favorites, exported,
 and replayed from Processing or a script. Or ask for them in a sentence: the AGENT section filters, selects and
-exports from a request, with the model you choose.
+exports from a typed or dictated request, with the model you choose.
 
 <p align="center">
   <img src="website/img/guide/fm5_filtering_targets.png?v=1" alt="FilterMate panel with a vector layer: a building chosen, then the layers to filter, a LiDAR point cloud and a DTM among them" width="260">
@@ -45,6 +45,22 @@ exports from a request, with the model you choose.
 
 ## ✨ New in 5.1.3
 
+- **Agent data in memory.** Downloaded and generated layers stay in project memory where possible.
+  **⋯ → Save project and layers…** asks where to save the project and its in-memory agent datasets.
+  Closing the project releases unsaved memory datasets. Providers that need files use the chosen folder for
+  their outputs and working files.
+- **Links to the result.** Click a layer name to reveal it in QGIS's Layers panel. Open exported files,
+  their containing folders and web sources directly from the conversation.
+- **Processing models and providers.** Discover and run compatible algorithms from installed providers, including
+  GDAL, GRASS, SAGA and PDAL, and registered models. **⋯ → Processing model designer…** opens QGIS's native editor;
+  the agent can prepare a reusable chain there without expert mode. You choose where to save the model.
+- **Microphone dictation.** Click the microphone beside the input to record, then click again to transcribe.
+  **⋯ → Microphone settings…** offers a local OpenAI-compatible service, OpenAI or Mistral, independently of the
+  chat provider. Recordings stay in RAM for up to two minutes; the text goes into the draft for review before Send.
+- **Lighter agent context.** Loaded skills are reused, recent instructions survive tool-result trimming, and shared
+  notes refresh when another QGIS session changes them. Recent agent actions are translated in all 34 languages;
+  the new microphone controls and errors include French translations.
+
 - **Consistent selections and local copies.** Background expressions use the project's variables, measurement units,
   CRS and ellipsoid. GeoPackage copies keep their SQLite filters when a project reopens; a cancelled or failed
   copy-again operation restores the previous copy and its filter.
@@ -60,7 +76,7 @@ exports from a request, with the model you choose.
   and export them as images, PDF, SVG or an offline HTML page. Navigation icons follow the theme, long model names
   stay readable in tooltips, and EXPLORING keeps its source-layer chooser when FILTERING is hidden.
 
-See [the 5.1.3 release notes](CHANGELOG.md#513---2026-11-26) for the full list of fixes.
+See [the 5.1.3 release notes](CHANGELOG.md#513---2026-11-27) and [the agent documentation](docs/AGENT_MODE.md) for details.
 
 ## ⚙️ How it works
 
@@ -69,7 +85,7 @@ splitter handle, 🔍 FILTERING, 📦 EXPORTING and 🔧 CONFIGURATION below.
 
 | Section | What you do there |
 |---|---|
-| 🤖 **AGENT** (experimental) | Ask in a sentence: "buildings above 1200 m in the selected commune". The agent reads the project, filters, selects, zooms, styles and labels layers, edits features (in the edit buffer: you save them), makes print layouts, sets the CRS of the project, brings in the elevation, the OpenStreetMap features, the population or the natural risks (France) of an area, adds web basemaps and open data, runs Processing algorithms of QGIS, draws objects with SAM and exports; each step can be undone. It also organizes the layer tree, makes sliders and charts under the conversation, helps set FilterMate up, asks with choices to click when the decision is yours, and keeps a request as a recipe you run again without any model. See [docs/AGENT_MODE.md](docs/AGENT_MODE.md). |
+| 🤖 **AGENT** (experimental) | Type or dictate a request: "buildings above 1200 m in the selected commune". The agent reads the project, filters, selects, zooms, styles and labels layers, edits features (in the edit buffer: you save them), makes print layouts, sets the CRS of the project, brings in the elevation, the OpenStreetMap features, the population or the natural risks (France) of an area, adds web basemaps and open data, runs compatible Processing algorithms and models, draws objects with SAM and exports; each step can be undone. It also organizes the layer tree, makes sliders and charts under the conversation, helps set FilterMate up, asks with choices to click when the decision is yours, and keeps a request as a recipe you run again without calling the chat model. See [docs/AGENT_MODE.md](docs/AGENT_MODE.md). |
 | 🧭 **EXPLORING** | Select on the current layer. Vector: one feature, several, or an expression. Raster: a band, a pixel value (picked on the map), a value range on a live histogram, classes of a paletted raster, a raster calculator expression. Point cloud: ASPRS / LiDAR HD classes, Z, intensity and return ranges, chained attribute conditions, height above a DTM. |
 | 🔍 **FILTERING** | Choose the layers to filter and how they relate to the selection: geometric predicates (intersects, within, disjoint…), a buffer, AND / OR with existing filters, a minimum coverage for polygons. |
 | 📦 **EXPORTING** | Write the filtered layers as they are: vector formats, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds, or a GeoPackage with an embedded QGIS project. |
@@ -112,6 +128,15 @@ the original source back, and project files are always saved with the original s
   The **basemaps** skill also finds official regional backgrounds (Brittany, Basque Country, Spain, Switzerland,
   Austria, Netherlands, Japan, United States), searches enabled local catalogs and reuses local raster files.
   See the [regional source list](docs/AGENT_MODE.md#regional-basemaps-and-local-backgrounds).
+- 💾 **Agent data and result links.** Keep downloaded and generated data in memory, then choose where to save the
+  project and its agent datasets. Layer links reveal the exact layer in the tree; output actions open the file or
+  its folder. Sources on the web open only when you click their links.
+- 🧩 **Processing models and providers.** The agent searches installed providers and registered models, describes
+  their parameters and steps, and runs compatible treatments on project layers. Build a draft chain or open a model
+  in QGIS's graphical designer without enabling expert Python; save it to a chosen `.model3` file or inside the project.
+- 🎙️ **Microphone dictation.** Transcribe through a local compatible service, OpenAI or Mistral. Choose the device,
+  service and language in **⋯ → Microphone settings…**. Click again to transcribe, or press Esc to discard or cancel.
+  Audio stays in memory; recognized text is inserted in the editable draft. You press Send yourself.
 - 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster, a value condition
   on a point cloud attribute.
 - 🧩 **Objects drawn by SAM** (experimental): on an orthophoto, a click or a box and the SAM 2.1 model draws the object,
@@ -172,7 +197,9 @@ administrator rights (`filtermate setup`). A Docker image serves it in a browser
 | ☁️ PDAL (optional) | PDAL 2.4+ (`pdal` command, shipped with QGIS on Windows) for the height above a DTM and direct COPC writing. Without it, point clouds are clipped by the QGIS exporter. |
 | 🌐 REST API (optional) | `pip install -r requirements-api.txt` (FastAPI, Uvicorn, Pydantic). |
 | 🧩 SAM (optional) | `onnxruntime`, installed into your QGIS profile after one confirmation, and the model (62 MB), downloaded on request. |
-| 🤖 AGENT | An API key of a provider (kept in the QGIS authentication database), or a local Ollama model. Nothing else to install. |
+| 🤖 AGENT | An API key of a provider (kept in the QGIS authentication database), or a local Ollama model. No provider SDK is required. |
+| 🧩 Agent Processing providers (optional) | The provider and its dependencies must be installed and active in QGIS. Agent runs that require files need QGIS 3.32+ to keep working files in the chosen project-data folder. |
+| 🎙️ Microphone dictation (optional) | Qt Multimedia for the Qt version used by QGIS, plus a running local OpenAI-compatible transcription server or an OpenAI/Mistral API key. The speech service is configured separately from the chat model. |
 
 ## 🤖 Automation in two lines
 

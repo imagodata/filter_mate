@@ -1,7 +1,7 @@
 # AI and data
 
-What the AGENT section of FilterMate sends, to whom, and when. Everything else in FilterMate (filtering, exploring,
-export, favorites, segmentation) runs on your computer and sends nothing.
+What the AGENT section of FilterMate sends, to whom, and when. Filtering, exploring, export, favorites and
+segmentation run locally in QGIS; connections to your remote data sources still operate as usual.
 
 ## In short
 
@@ -10,7 +10,8 @@ export, favorites, segmentation) runs on your computer and sends nothing.
   local Ollama model. FilterMate never ships or holds a key.
 - **Nothing leaves before you agree.** The chat asks for consent the first time you use a provider, and asks again
   when you change the provider or its address.
-- **With a local model, nothing leaves your computer.**
+- **A local chat model keeps chat inference on your computer.** Optional remote data sources, connectors and cloud
+  microphone transcription still contact the services you choose. Local dictation uses a service on localhost.
 
 ## What a request sends to the provider you chose
 
@@ -31,13 +32,33 @@ The provider's own terms apply to what it receives: check whether it keeps or tr
 
 - **The memory of the agent** is one file, `agent_memory.json`, in the `FilterMate` folder of your QGIS profile. You write its notes yourself in the Memory tab of the AGENT settings, where you correct and remove them; you can open the file, copy it to another computer or delete it. FilterMate has no server to send it to. A note goes to the provider you chose only as the table above says.
 - **The conversation** of each project is kept in the settings of QGIS until you start a new one.
+- **Microphone recordings** stay in RAM for at most two minutes. After transcription or cancellation, the recording
+  is discarded; FilterMate creates no audio file in the profile or a temporary folder. Recognized text is inserted
+  into the draft and enters the conversation only when you press Send.
+
+## Microphone transcription
+
+The microphone records only after you click it. Click again to stop and transcribe; Esc or Cancel dictation discards
+the recording or aborts its upload. It never submits an agent request by itself.
+
+**⋯ → Microphone settings…** chooses the device, service, model and language independently of the chat provider:
+
+- **Local:** a running OpenAI-compatible transcription service on localhost receives the audio. These requests
+  bypass network proxies; no cloud transcription fallback is used.
+- **OpenAI or Mistral:** enabling audio transmission to the selected service sends the recording to that address
+  for transcription. Its terms and charges apply, even when your chat uses a local Ollama model or another provider.
+
+Transcription requests contain only the audio, selected model and optional language hint. They contain no layers,
+project summary or conversation. The service's key is stored in QGIS's authentication database, and a chat key can
+be reused only when you choose it for the same provider and exact address. Audio uploads never follow redirects.
 
 ## What is never sent
 
 - Your API key, except to the server you typed it for. It is kept in the QGIS authentication database, never in a
   settings file.
 - Database addresses and credentials: the model names a connection by an id, and the address stays in QGIS.
-- Whole layers or files: the agent reads them through QGIS and sends what a tool returns.
+- Whole GIS layers or datasets: the chat reads them through QGIS and sends what a tool returns. Microphone audio
+  uses the separate transcription flow described above.
 
 ## Other network calls, only when you ask for them
 

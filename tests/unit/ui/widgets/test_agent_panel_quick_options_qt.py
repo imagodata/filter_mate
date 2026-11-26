@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Sources, model and the MCP server in the menu "⋯" of the AGENT panel, on real Qt widgets (PyQt5, offscreen): one
+"""Sources, model and the MCP server in the menu "⋯" of the AGENT panel, on real Qt5/Qt6 widgets (offscreen): one
 submenu per group of sources, a tick per source, the providers set up with the current one checked (2026-11-16).
 
-Loaded under a private package with ``qgis.PyQt`` pointing at PyQt5 for the import only (the root conftest mocks Qt
-for the other tests), and ``qgis.core`` mocked. Skipped without PyQt5 (run it in a qgis/qgis image).
+Loaded under a private package with ``qgis.PyQt`` pointing at the installed binding for the import only (the root
+conftest mocks Qt for the other tests), and ``qgis.core`` mocked. Skipped without Qt (run in a qgis/qgis image).
 """
 import importlib
 import os
@@ -16,8 +16,11 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-QtWidgets = pytest.importorskip("PyQt5.QtWidgets")
-from PyQt5 import QtCore, QtGui  # noqa: E402
+try:
+    from PyQt6 import QtCore, QtGui, QtTest, QtWidgets
+except ImportError:
+    QtWidgets = pytest.importorskip("PyQt5.QtWidgets")
+    from PyQt5 import QtCore, QtGui, QtTest
 
 _ROOT = pathlib.Path(__file__).resolve().parents[4]
 _PKG = "fm_agent_panel_quick_options_test"
@@ -50,6 +53,17 @@ def _load():
 
 
 _APP, panel_module = _load()
+
+
+@pytest.fixture(autouse=True)
+def real_qt_icons(monkeypatch):
+    qt_svg = importlib.import_module(QtWidgets.__package__ + ".QtSvg")
+    for name, module in (("QtCore", QtCore), ("QtGui", QtGui), ("QtWidgets", QtWidgets), ("QtSvg", qt_svg)):
+        monkeypatch.setitem(sys.modules, "qgis.PyQt." + name, module)
+    yield
+    for widget in _APP.topLevelWidgets():
+        if isinstance(widget, QtWidgets.QMenu):
+            widget.hide()
 
 
 GROUPS = [("Open data platforms", [("datagouv", "data.gouv.fr", True), ("ign_wfs", "IGN (WFS)", False)]),
@@ -111,3 +125,99 @@ def test_options_are_asked_when_the_menu_opens():
     panel.options_requested.connect(lambda: asked.append(True))
     panel.more_button.menu().aboutToShow.emit()
     assert asked == [True]
+
+
+def _open_group(panel):
+    root = panel.more_button.menu()
+    root.popup(QtCore.QPoint(20, 20))
+    root.setActiveAction(panel.sources_menu.menuAction())
+    panel.sources_menu.popup(root.mapToGlobal(root.actionGeometry(panel.sources_menu.menuAction()).topRight()))
+    group = next(action.menu() for action in panel.sources_menu.actions() if action.menu() is not None)
+    panel.sources_menu.setActiveAction(group.menuAction())
+    group.popup(panel.sources_menu.mapToGlobal(panel.sources_menu.actionGeometry(group.menuAction()).topRight()))
+    _APP.processEvents()
+    return root, group
+
+
+def _click(menu, action):
+    QtTest.QTest.mouseClick(menu, QtCore.Qt.MouseButton.LeftButton, pos=menu.actionGeometry(action).center())
+    _APP.processEvents()
+
+
+def test_several_sources_can_be_checked_and_unchecked_without_closing_the_menu_chain():
+    panel = _filled()
+    seen = []
+    panel.source_toggled.connect(lambda source_id, on: seen.append((source_id, on)))
+    root, group = _open_group(panel)
+    first, second = group.actions()
+    _click(group, second)
+    _click(group, first)
+    _click(group, second)
+    assert seen == [("ign_wfs", True), ("datagouv", False), ("ign_wfs", False)]
+    assert not first.isChecked() and not second.isChecked()
+    assert all(menu.isVisible() for menu in (root, panel.sources_menu, group))
+
+
+@pytest.mark.parametrize("key", [QtCore.Qt.Key.Key_Space, QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter])
+def test_source_toggles_stay_open_with_the_keyboard(key):
+    panel = _filled()
+    seen = []
+    panel.source_toggled.connect(lambda source_id, on: seen.append((source_id, on)))
+    root, group = _open_group(panel)
+    group.setActiveAction(group.actions()[1])
+    QtTest.QTest.keyClick(group, key)
+    group.setActiveAction(group.actions()[0])
+    QtTest.QTest.keyClick(group, key)
+    assert seen == [("ign_wfs", True), ("datagouv", False)]
+    assert root.isVisible() and group.isVisible()
+
+
+def test_escape_closes_the_source_submenu():
+    panel = _filled()
+    _root, group = _open_group(panel)
+    QtTest.QTest.keyClick(group, QtCore.Qt.Key.Key_Escape)
+    assert not group.isVisible()
+
+
+def test_clicking_outside_closes_the_menu_chain():
+    panel = _filled()
+    root, group = _open_group(panel)
+    QtTest.QTest.mouseClick(group, QtCore.Qt.MouseButton.LeftButton, pos=QtCore.QPoint(-10, -10))
+    assert not group.isVisible() and not root.isVisible()
+
+
+def test_the_mcp_toggle_stays_open_but_opening_settings_closes_the_menu():
+    panel = _filled()
+    toggles, settings = [], []
+    panel.mcp_toggled.connect(toggles.append)
+    panel.settings_requested.connect(lambda: settings.append(True))
+    root = panel.more_button.menu()
+    root.popup(QtCore.QPoint(20, 20))
+    _click(root, panel.mcp_action)
+    _click(root, panel.mcp_action)
+    assert root.isVisible() and toggles == [True, False]
+    _click(root, panel.settings_action)
+    assert not root.isVisible() and settings == [True]
+
+
+def test_refreshing_live_recipes_preserves_the_open_menu_and_does_not_emit_another_toggle():
+    panel = _filled()
+    recipe = {"id": "r1", "name": "Roads & buildings", "steps": [{"label": "Filter"}], "live": False}
+    panel.set_recipes([recipe], True)
+    seen = []
+
+    def refresh(ident, on):
+        seen.append((ident, on))
+        panel.set_recipes([dict(recipe, live=on)], True)
+
+    panel.recipe_live_toggled.connect(refresh)
+    entry = panel._recipe_menus[0]
+    action = panel.recipe_live["r1"]
+    entry.popup(QtCore.QPoint(20, 20))
+    _click(entry, action)
+    assert entry.isVisible() and panel._recipe_menus[0] is entry
+    assert panel.recipe_live["r1"] is action and action.isChecked()
+    assert entry.title() == "Roads && buildings (1 steps) · live"
+    _click(entry, action)
+    assert entry.isVisible() and not action.isChecked()
+    assert seen == [("r1", True), ("r1", False)]

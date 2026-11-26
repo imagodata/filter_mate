@@ -107,6 +107,34 @@ def _tr(text: str) -> str:
     return QCoreApplication.translate("AgentPanel", text)
 
 
+class _MultiSelectMenu(QMenu):
+    """Keep independent checkboxes open; commands and exclusive choices follow normal menu behavior."""
+
+    @staticmethod
+    def _can_toggle(action) -> bool:
+        if action is None or not action.isEnabled() or not action.isCheckable() or action.menu() is not None:
+            return False
+        group = action.actionGroup()
+        return group is None or not group.isExclusive()
+
+    def mouseReleaseEvent(self, event) -> None:  # noqa: N802 - Qt name
+        action = self.actionAt(event.pos())
+        if event.button() == Qt.MouseButton.LeftButton and self._can_toggle(action):
+            action.trigger()
+            event.accept()
+            return
+        super().mouseReleaseEvent(event)
+
+    def keyPressEvent(self, event) -> None:  # noqa: N802 - Qt name
+        action = self.activeAction()
+        if event.key() in (Qt.Key.Key_Space, Qt.Key.Key_Return, Qt.Key.Key_Enter) and self._can_toggle(action):
+            if not event.isAutoRepeat():
+                action.trigger()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+
 def _belongs_to_another(model: str, preset: str) -> bool:
     """Is ``model`` a model of a provider other than ``preset``, one the dialog knows (suggested, or a Claude name)?"""
     if not model:
@@ -727,7 +755,7 @@ class AgentPanel(QFrame):
         self.more_button.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
         self.more_button.setToolTip(_tr("More"))
         self.more_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-        menu = QMenu(self.more_button)
+        menu = _MultiSelectMenu(self.more_button)
         # Three groups (2026-11-24): the conversation, the agent, help. New conversation comes first, and is also a
         # link under the line once something was asked.
         self.new_action = menu.addAction(_tr("New conversation"))
@@ -1566,7 +1594,8 @@ class AgentPanel(QFrame):
         for title, rows in groups:
             if not rows:
                 continue
-            submenu = self.sources_menu.addMenu(title.replace("&", "&&"))  # names come from the user or QGIS
+            submenu = _MultiSelectMenu(title.replace("&", "&&"), self.sources_menu)  # user/QGIS names
+            self.sources_menu.addMenu(submenu)
             self._option_menus.append(submenu)
             for source_id, name, on in rows:
                 action = submenu.addAction(name.replace("&", "&&"))
@@ -1600,7 +1629,16 @@ class AgentPanel(QFrame):
 
     def set_recipes(self, recipes, can_save: bool) -> None:
         """The recipes of the project in the menu, each with its steps in view before it runs; save the last request."""
-        self._recipes, self._can_save_recipe = list(recipes), bool(can_save)
+        recipes = list(recipes)
+        same_entries = [(recipe["id"], recipe["name"], recipe["steps"]) for recipe in recipes] == [
+            (recipe["id"], recipe["name"], recipe["steps"]) for recipe in self._recipes]
+        self._recipes, self._can_save_recipe = recipes, bool(can_save)
+        if same_entries and hasattr(self, "save_recipe_action"):
+            # Toggling live refreshes recipes synchronously: keep the open submenu and its action alive.
+            self.save_recipe_action.setEnabled(self._can_save_recipe)
+            for recipe, entry in zip(self._recipes, self._recipe_menus):
+                self._refresh_recipe_menu(recipe, entry)
+            return
         menu = self.recipes_menu
         for submenu in getattr(self, "_recipe_menus", ()):  # clear() leaves the submenus alive: they would pile up
             submenu.deleteLater()
@@ -1616,11 +1654,8 @@ class AgentPanel(QFrame):
             return
         menu.addSeparator()
         for recipe in self._recipes:
-            # "&" would make a shortcut of the next letter; the name comes from the project file.
-            title = _tr("{} ({} steps)").format(recipe["name"], len(recipe["steps"]))
-            if recipe.get("live"):
-                title = _tr("{} · live").format(title)
-            entry = menu.addMenu(title.replace("&", "&&"))
+            entry = _MultiSelectMenu(menu)
+            menu.addMenu(entry)
             self._recipe_menus.append(entry)
             for number, step in enumerate(recipe["steps"][:MAX_RECIPE_STEPS_SHOWN], 1):
                 line = entry.addAction(f"{number}. {step['label']}".replace("&", "&&"))
@@ -1634,20 +1669,30 @@ class AgentPanel(QFrame):
             run.triggered.connect(lambda _checked=False, recipe_id=recipe["id"]: self.recipe_run_requested.emit(recipe_id))
             live = entry.addAction(_tr("Run again when its source is saved"))
             live.setCheckable(True)
-            live.setChecked(bool(recipe.get("live")))
-            problem = recipe.get("live_problem", "")
-            live.setEnabled(not problem or bool(recipe.get("live")))
-            live.setToolTip(_tr("Not possible: {}").format(problem) if problem else _tr(
-                "The targets follow the source: each time the edits of a source layer of this recipe are saved, the "
-                "recipe runs again by itself, as one turn you can undo."))
             live.toggled.connect(lambda on, recipe_id=recipe["id"]: self.recipe_live_toggled.emit(recipe_id, on))
             self.recipe_live[recipe["id"]] = live
+            self._refresh_recipe_menu(recipe, entry)
             entry.setToolTipsVisible(True)
             remove = entry.addAction(_tr("Remove"))
             remove.triggered.connect(
                 lambda _checked=False, recipe_id=recipe["id"]: self.recipe_remove_requested.emit(recipe_id))
             self.recipe_actions[recipe["id"]] = (run, remove)
         self._refresh_action_icons(self._dark())
+
+    def _refresh_recipe_menu(self, recipe, menu) -> None:
+        title = _tr("{} ({} steps)").format(recipe["name"], len(recipe["steps"]))
+        if recipe.get("live"):
+            title = _tr("{} · live").format(title)
+        menu.setTitle(title.replace("&", "&&"))  # project names must not become shortcuts
+        live = self.recipe_live[recipe["id"]]
+        blocked = live.blockSignals(True)
+        live.setChecked(bool(recipe.get("live")))
+        live.blockSignals(blocked)
+        problem = recipe.get("live_problem", "")
+        live.setEnabled(not problem or bool(recipe.get("live")))
+        live.setToolTip(_tr("Not possible: {}").format(problem) if problem else _tr(
+            "The targets follow the source: each time the edits of a source layer of this recipe are saved, the "
+            "recipe runs again by itself, as one turn you can undo."))
 
     @property
     def recipes(self):

@@ -1403,6 +1403,7 @@ class AgentChatController(QObject):
     def _on_mcp_toggled(self, on: bool) -> None:
         from ...core.agent.agent_options import Change
         self._click_option(Change(mcp_server=bool(on)))
+        self.panel.mcp_action.setChecked(bool(self._mcp.listening))  # stays open even if the server could not start
 
     def _options_sources(self, values: AgentSettings):
         return list(all_sources(custom_from_json(values.custom_sources))) + list(qgis_databases())

@@ -263,6 +263,16 @@ def test_an_mcp_server_that_fails_is_unticked(host):
     assert host.store["values"].mcp_enabled is False
 
 
+@pytest.mark.parametrize("on, listening, error", [(True, True, ""), (True, False, "port taken"), (False, False, "")])
+def test_the_open_menu_mcp_checkbox_follows_the_server_result(host, on, listening, error):
+    host._mcp = SimpleNamespace(listening=listening, error=error)
+    host.panel.mcp_action = MagicMock()
+    host._click_option = lambda change: Controller._click_option(host, change)
+    Controller._on_mcp_toggled(host, on)
+    host.panel.mcp_action.setChecked.assert_called_once_with(listening)
+    assert host.store["values"].mcp_enabled is listening
+
+
 def _call(arguments):
     from core.agent.messages import ToolCallPart
     return ToolCallPart("c1", "turn_on_agent_options", arguments)
