@@ -1,0 +1,54 @@
+{
+  "source": "/tmp/fm-video/profiles/profiles/fmvideo/FilterMate/exports/export/san_sebastian_visible.gpkg",
+  "snapshot": "docs/communication/lot5/data/urumea/legacy-vectors.gpkg",
+  "sha256": "02cab2afe7d977cafd56a2a40b3eb3e16b844ab5220c8ff694f6743cff4fc877",
+  "bytes": 12619776,
+  "contents": [
+    [
+      "Urumea river",
+      "features",
+      4326
+    ],
+    [
+      "Bridges San Sebastián (lines)",
+      "features",
+      4326
+    ],
+    [
+      "Bridges San Sebastián (polygons)",
+      "features",
+      4326
+    ],
+    [
+      "Roads San Sebastián",
+      "features",
+      4326
+    ],
+    [
+      "Buildings altitude",
+      "features",
+      4326
+    ],
+    [
+      "Buildings San Sebastián",
+      "features",
+      4326
+    ]
+  ],
+  "counts": {
+    "Urumea river": 10,
+    "Bridges San Sebastián (lines)": 741,
+    "Bridges San Sebastián (polygons)": 51,
+    "Roads San Sebastián": 2598,
+    "Buildings altitude": 16638,
+    "Buildings San Sebastián": 16638
+  },
+  "embedded_projects": [],
+  "raster_exported": false,
+  "project_embedded": false,
+  "observed_altitude_field": "alt_mean",
+  "favorite_saved": false,
+  "favorite_failure": "No active filter to save: filter a layer first",
+  "rendered_map": "blank in inspected frames",
+  "validated_as_final": false
+}

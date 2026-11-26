@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "date": "2026-11-26",
+  "policy": "No claim is certified by a caption or layer name alone. Observed counts are specific to the take. No external publication.",
+  "claims": [
+    {
+      "id": "U1",
+      "claim": "OSM buildings/roads/bridges/Urumea and Copernicus layer added",
+      "status": "partial",
+      "observation": "Legacy transcript lists layers; sampled map frames are blank. Network has only major roads.",
+      "evidence": "/tmp/fm-video/out/urumea/capture.log"
+    },
+    {
+      "id": "U2",
+      "claim": "Mean DEM elevation over each footprint, not building height or bare-earth ground elevation",
+      "status": "unverified",
+      "observation": "alt_mean exists in exported table; raw algorithm trace and NoData statistics missing.",
+      "evidence": "urumea-export-audit.json"
+    },
+    {
+      "id": "U3",
+      "claim": "GeoPackage export embeds project and all data",
+      "status": "rejected",
+      "observation": "Six feature tables, zero raster contents, no qgis_projects table. Revised script requests separate raster and checks files.",
+      "evidence": "urumea-export-audit.json"
+    },
+    {
+      "id": "U4",
+      "claim": "Active FilterMate filter on DEM<5 m / river200 m / buildings300 m",
+      "status": "unverified",
+      "observation": "Legacy layer names/buffers do not prove the source/target relationship; favorite tool subsequently reports no active filter.",
+      "evidence": "/tmp/fm-video/out/urumea/frames/003000.jpg"
+    },
+    {
+      "id": "U5",
+      "claim": "Ten-minute walking network service area",
+      "status": "unverified",
+      "observation": "Layers called Evacuation network / isochrone exist; no archived algorithm/parameters or complete foot network. Radial fallback must not be narrated as a network result.",
+      "evidence": "/tmp/fm-video/out/urumea/capture.log"
+    },
+    {
+      "id": "U6",
+      "claim": "Favorite saved and replayed by a colleague in one click",
+      "status": "rejected",
+      "observation": "Visible error: No active filter to save: filter a layer first. No replay or second project shown.",
+      "evidence": "/tmp/fm-video/out/urumea/frames/003000.jpg"
+    },
+    {
+      "id": "U7",
+      "claim": "Final dashboard numbers measured from take",
+      "status": "rejected",
+      "observation": "HTML uses illustrative values; not an agent output. Browser printing is not QGIS layout export.",
+      "evidence": "../urumea-flood-teaser/presentation.html"
+    },
+    {
+      "id": "U-mode",
+      "claim": "The filmed interaction is Plan mode",
+      "status": "rejected",
+      "observation": "Legacy capture shows Act/autonomous; automated settings pre-authorize three tools.",
+      "evidence": "/tmp/fm-video/out/urumea/frames/003000.jpg"
+    },
+    {
+      "id": "S1-7",
+      "claim": "Solar seven-shot scenario",
+      "status": "prepared_not_observed",
+      "observation": "Storyboard and requests only; solar data, slope-percent calculation, network/favorite tests not run.",
+      "evidence": "../solar-san-sebastian-teaser/storyboard.md"
+    },
+    {
+      "id": "L0",
+      "claim": "Sarlat files load in QGIS4 and nine boulevard segments exist",
+      "status": "observed",
+      "observation": "QGIS4.2.3 offline preflight; 1528 buildings,1561 parcels,553 roads,9 boulevard segments. Orthophoto CRS assigned from documented extent.",
+      "evidence": "sarlat-preflight.json"
+    },
+    {
+      "id": "L1",
+      "claim": "50m corridor gives113 buildings and106 parcels",
+      "status": "independently_verified_for_this_dataset",
+      "observation": "Badge at raw44.016s; map still48.292s; output counts match legacy expected values. Independent QGIS/GDAL geometry and pixel-mask check reproduces the count without FilterMate.",
+      "evidence": "/tmp/fm-lot5-sarlat/out/ln/meta.json",
+      "independent_evidence": "sarlat-independent-check.json"
+    },
+    {
+      "id": "L2",
+      "claim": "Raster<=136m, coverage>=50% gives182 parcels and187 buildings",
+      "status": "independently_verified_for_this_dataset",
+      "observation": "Badge83.339s; map still87.498s. This is footprint coverage, not each building mean elevation. Independent QGIS/GDAL geometry and pixel-mask check reproduces the count without FilterMate.",
+      "evidence": "/tmp/fm-lot5-sarlat/out/ln/meta.json",
+      "independent_evidence": "sarlat-independent-check.json"
+    },
+    {
+      "id": "L3",
+      "claim": "Class6 and HeightAboveGround>=9m combined with AND yields100 buildings",
+      "status": "observed",
+      "observation": "Badge176.016s; still180.292s; frame002740.jpg shows attributes, HAG>=9,AND and coverage>=50%. Old more-than100 narration removed.",
+      "evidence": "/tmp/fm-lot5-sarlat/out/ln/frames/002740.jpg"
+    },
+    {
+      "id": "R1-3",
+      "claim": "Agent Processing + charts + A4 layout and PDF",
+      "status": "pending_lots_1_2_3",
+      "observation": "report requests reconciled; not filmed on the unstable lots. No validated agent-report take found in inspected source folders.",
+      "evidence": "../../../../scripts/site_videos.py"
+    }
+  ]
+}

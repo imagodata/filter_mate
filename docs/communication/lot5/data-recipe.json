@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "offline_sarlat": {
+    "status": "checked_in_qgis4",
+    "crs": "EPSG:2154",
+    "extent": [
+      559000,
+      6422000,
+      560000,
+      6423000
+    ],
+    "files": [
+      "sarlat.gpkg",
+      "mnt_1m.tif",
+      "ortho_rvb.tif",
+      "ortho_irc.tif",
+      "lidar_hd_sarlat.copc.laz"
+    ],
+    "orthophoto_crs": "Not tagged in TIFF; EPSG:2154 assigned in QGIS using the identical extent in the existing data audit."
+  },
+  "urumea": {
+    "status": "legacy_vectors_only",
+    "source_proof": "urumea-export-audit.json",
+    "metric_crs": "EPSG:32630",
+    "geocoder": "photon",
+    "sources": [
+      "overpass_fr",
+      "copernicus_dem"
+    ],
+    "osm_requirements": [
+      "building polygons",
+      "Urumea river selected by name",
+      "all walkable road classes, paths and access tags",
+      "bridge lines and polygons without double-counting the same OSM object"
+    ],
+    "missing": [
+      "persisted Copernicus DSM",
+      "complete walkable network",
+      "validated project",
+      "active FilterMate filter and favorite"
+    ],
+    "dem_model": "surface, not bare-earth terrain",
+    "mean_field": "alt_mean in legacy export, provenance of computation not certified"
+  },
+  "solar": {
+    "status": "acquisition_not_run",
+    "metric_crs": "EPSG:32630",
+    "sources": [
+      "overpass_fr",
+      "copernicus_dem",
+      "photon"
+    ],
+    "osm_requirements": [
+      "meadow polygons",
+      "homes",
+      "roads",
+      "power lines"
+    ],
+    "slope_units": "percent; gdal:slope AS_PERCENT=true",
+    "mean_threshold_percent": 10,
+    "distance_m": 300,
+    "missing": [
+      "all solar datasets and derived results"
+    ],
+    "requests": "../solar-san-sebastian-teaser/requests.json"
+  }
+}

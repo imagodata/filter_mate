@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "date": "2026-11-26",
+  "publication": "none",
+  "takes": [
+    {
+      "id": "sarlat-overview",
+      "status": "observed_valid_source_overview",
+      "raw": "/tmp/fm-lot5-overview/out/sarlat-overview",
+      "raw_frames": 124,
+      "duration_s": 8.1,
+      "video": {
+        "path": "/tmp/fm-lot5-overview/out/site/sarlat-overview.mp4",
+        "bytes": 3968625,
+        "sha256": "6f897e2b82f0a814e49ffa5ad4069390cbf70393b26bba67edf60a4689382f73"
+      }
+    },
+    {
+      "id": "sarlat-ln",
+      "status": "observed_raw_and_silent_fr_edit",
+      "raw": "/tmp/fm-lot5-sarlat/out/ln",
+      "raw_frames": 2835,
+      "raw_duration_s": 188.3,
+      "video": {
+        "path": "docs/communication/lot5/takes/sarlat/ln-fr-silent.mp4",
+        "bytes": 102382479,
+        "sha256": "dd9258cb982d36404bc98869017683e2069d472e56b3b85fdc41d4a7290e6157"
+      },
+      "edited_duration_s": 151.28,
+      "video_codec": "h264",
+      "video_size": [
+        1920,
+        1200
+      ],
+      "fps": 25,
+      "audio_streams": 0,
+      "chapter_counts": [
+        {
+          "Buildings": 113,
+          "Parcels": 106
+        },
+        {
+          "Parcels": 182,
+          "Buildings": 187
+        },
+        {
+          "Buildings": 100
+        }
+      ],
+      "independent_geometry_check": "sarlat-independent-check.json",
+      "not_checked": [
+        "voice FR/EN",
+        "independent LiDAR recomputation"
+      ],
+      "warning": "GDAL temporary count queries log unable to open database file; final counts match independent checks for chapters1/2."
+    },
+    {
+      "id": "urumea-rehearsal",
+      "status": "rejected_as_final",
+      "raw": "/tmp/fm-video/out/urumea",
+      "raw_frames": 3153,
+      "raw_duration_s": 209.2441,
+      "blocking": [
+        "blank map in sampled frames",
+        "favorite refused: no active filter",
+        "no embedded project or raster in exported GPKG",
+        "walking algorithm/network not archived"
+      ],
+      "evidence": "urumea-export-audit.json"
+    },
+    {
+      "id": "solar",
+      "status": "not_shot",
+      "dependency": "data acquisition and stable lots1-3"
+    },
+    {
+      "id": "agent-report",
+      "status": "not_shot",
+      "dependency": "stable lots1-3"
+    },
+    {
+      "id": "final-control",
+      "status": "capture_and_render_passed",
+      "raw": "/tmp/fm-lot5-final-check/out/sarlat-overview",
+      "raw_frames": 123,
+      "raw_duration_s": 8.1,
+      "video": {
+        "path": "docs/communication/lot5/takes/final-control/sarlat-overview.mp4",
+        "bytes": 3960885,
+        "sha256": "9e57bd3e13cb338dbb54cebb6ec3a5808b2a204913583072946f4725d92ece90"
+      },
+      "provenance": "takes/final-control/provenance.json",
+      "notes": "Final reconciled script and wrapper, disposable profile, writable cache, code fingerprints and Docker image ID recorded."
+    }
+  ],
+  "checks": {
+    "unit_tests": 13,
+    "unit_status": "passed",
+    "qgis_preflight": "passed",
+    "independent_corridor_and_raster": "passed",
+    "final_wrapper_capture_and_render": "passed",
+    "windows_host": "not_run",
+    "cloud_agent_takes": "pending_lots1-3"
+  }
+}

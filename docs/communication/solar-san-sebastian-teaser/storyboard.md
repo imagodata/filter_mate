@@ -1,28 +1,32 @@
-# Teaser solaire San Sebastián — storyboard 53 s, 7 prises (previz, rien tourné)
+# San Sebastián solaire — storyboard prêt pour répétition, 53 s
 
-Scénario : premier tri (« screening », pas « study ») de sites pour une centrale solaire autour de
-San Sebastián / Donostia. Relief 30 m → tri grossier seulement.
-Données : prairies, habitations, routes, lignes électriques (OpenStreetMap) ; relief Copernicus 30 m.
-Projet partagé : GeoPackage de l'export dans un dossier commun (même projet d'un bout à l'autre).
-Modèle : clé d'API du spectateur (pas de modèle local dans le teaser ; la mention
-« nothing leaves your computer » reste dans l'article, hors teaser). Undo sorti faute de place.
+État : aucun tournage solaire retrouvé. Acquisition et calculs non exécutés ;
+prises agent après stabilisation des lots 1 à 3. Les prompts de
+[requests.json](requests.json) préparent une exécution manuelle : le lanceur ne
+possède pas encore de scène `solar`.
 
-Tranche filtrée : une seule, prairies à moins de 10 % de pente. Isochrones calculés via
-Processing (QNEAT3 / outils natifs) autour de cette tranche. Un favori :
-« Solar <10%: isochrones, access, grid ».
+Sujet : tri géographique illustratif de prairies OSM. Copernicus GLO-30 est un
+**modèle de surface** incluant végétation et constructions, pas un MNT de sol nu.
+La pente dérivée est celle de ce modèle ; elle ne démontre ni potentiel énergétique,
+ni aptitude d'une parcelle, ni coût de raccordement. [Source Copernicus](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM).
 
-| Prise | Temps | Image / interaction | Légende EN | Légende FR |
-|---|---|---|---|---|
-| 1 Apporter | 0:00–0:08 | Projet vide, mode Plan, une phrase. L'agent apporte prairies, habitations, routes, lignes (OSM) + relief Copernicus. | “One sentence. Meadows, homes, roads, grid, terrain.” | « Une phrase. Prairies, maisons, routes, réseau, relief. » |
-| 2 Transformer | 0:08–0:16 | L'agent calcule la pente (Processing), puis la pente moyenne par prairie (statistiques zonales). Les prairies se colorent par pente. | “Slope, then mean slope per meadow.” | « La pente, puis la pente moyenne par prairie. » |
-| 3 Exporter | 0:16–0:23 | Fichiers temporaires, perdus à la fermeture. Export GeoPackage avec projet embarqué, panneau face à agent. | “Temporary files don't survive. Export keeps all.” | « Le temporaire ne survit pas. L'export garde tout. » |
-| 4 Filtrer | 0:23–0:30 | Prairies à moins de 10 % : la sélection. À 300 m autour : habitations, routes, lignes. Panneau face à agent. | “Under 10% slope. Neighbours, access, grid within 300 m.” | « Moins de 10 % de pente. Voisins, accès, réseau à 300 m. » |
-| 5 Isochrones | 0:30–0:37 | L'agent calcule les isochrones (Processing QNEAT3/natif) autour de la tranche <10 % : l'accès réel, pas le cercle. | “Isochrones around the <10% tranche: real access.” | « Isochrones autour de la tranche <10 % : l'accès réel. » |
-| 6 Partager | 0:37–0:45 | Le filtre devient le favori « Solar <10%: isochrones, access, grid ». Un collègue le rejoue en un clic ; curseur de pente sous le fil. | “One favorite. Replayed in one click.” | « Un favori. Rejoué en un clic. » |
-| 7 Carte fin | 0:45–0:53 | 3 raisons : la règle d'équipe, 3 couches d'un coup (riverains, accès, raccordement), rejouable quand les données changent. Limite 30 m. | “Same rule, three layers, replayable. Screening at 30 m.” | « Même règle, trois couches, rejouable. Tri à 30 m. » |
+| Plan | Durée | Interaction et légende FR / EN | Contrôle avant prise |
+|---|---:|---|---|
+| S1 | 8 s | Apporter prairies, habitations, routes, lignes électriques, DSM. « OSM et surface 30 m. » / “OSM and a 30 m surface model.” | Emprise/date/sources figées, couches valides et visibles. |
+| S2 | 8 s | Reprojeter en EPSG:32630, calculer pente en **%**, moyenne zonale par prairie. « Pente du modèle, moyenne par prairie. » / “Model slope, mean per meadow.” | `gdal:slope` avec `AS_PERCENT=true`, ou conversion explicite degrés → %. 10 % ≈ 5,71°, pas 10°. NoData et champ/unités contrôlés. |
+| S3 | 7 s | Exporter les vecteurs en GPKG, rasters séparés, projet QGZ explicite. « Exporter puis rouvrir. » / “Export, then reopen.” | Réouverture ; ne pas annoncer de projet embarqué sans preuve. |
+| S4 | 7 s | Moyenne de pente <10 %, voisinage 300 m. « Seuils illustratifs, trois cibles. » / “Illustrative thresholds, three targets.” | Pente et distances exactes ; trois cibles = habitations, routes et lignes. Proximité d'une ligne ne signifie pas raccordabilité. |
+| S5 | 7 s | Desserte sur réseau, mode/vitesse/durée affichés. « Desserte sur le réseau enregistré. » / “Service area on the recorded network.” | Algorithme, réseau, origines et temps archivés ; pas de tampon présenté comme isochrone. |
+| S6 | 8 s | Enregistrer, dérégler puis rejouer le favori. « Favori enregistré puis rejoué. » / “Favorite saved, then replayed.” | Filtre actif, succès, mêmes comptes après rejeu ; second projet pour annoncer le partage. |
+| S7 | 8 s | Carte finale des résultats de la prise. « Tri illustratif, modèle de surface 30 m. » / “Illustrative screening, 30 m surface model.” | Comptes réellement obtenus, limites et crédits ; aucun chiffre d'Urumea réutilisé. |
 
-## Règles tenues
-- « screening », jamais « study » (relief 30 m = premier tri).
-- L'agent tourne avec la clé d'API du spectateur ; rien sur le local dans le teaser.
-- Comptes et emprises = ceux de la prise (exemple, pas de promesse générale).
-- Crédits à l'écran : © OpenStreetMap contributors (ODbL), Copernicus DEM.
+Voix FR de travail : « Des prairies et leur voisinage depuis OSM. On calcule la
+pente du modèle de surface, en pourcentage, puis sa moyenne par prairie. On exporte
+les résultats et on vérifie leur réouverture. Moins de dix pour cent : un seuil
+illustratif. Les routes et lignes voisines sont montrées dans trois couches cibles.
+La desserte se calcule sur le réseau enregistré. Le favori est enregistré puis
+rejoué. Ce premier tri ne constitue pas une étude de faisabilité solaire. »
+
+Mode Act/autonome si les réglages Urumea sont réutilisés ; Plan exige une prise
+spécifique. Fournisseur distant = ne pas annoncer que tout reste sur le poste.
+Crédits : © OpenStreetMap contributors (ODbL), Copernicus DEM.

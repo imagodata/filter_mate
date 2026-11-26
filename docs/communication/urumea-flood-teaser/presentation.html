@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Crue de l'Urumea — screening (previz, chiffres illustratifs)</title>
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
 <style>
   :root { --bg:#121820; --ink:#f5f5f0; --accent:#f0a040; --red:#d64545; --teal:#36a98a; --dim:#9aa0a6; }
   body { background:var(--bg); color:var(--ink); font-family:sans-serif; margin:0; padding:28px; }
@@ -40,49 +40,47 @@
   <h1>Crue de l'Urumea — premier tri (screening)</h1>
   <span class="flag">PREVIZ — CHIFFRES ILLUSTRATIFS, NON TOURNÉ</span>
 </header>
-<p class="sub">San Sebastián / Donostia · Bâtiments OSM × Copernicus DEM 30 m · Seuils illustratifs : &lt;5 m, &lt;200 m de la rivière, 300 m autour.</p>
+<p class="sub">San Sebastián / Donostia · Emprises OSM × modèle de surface Copernicus 30 m · Seuils illustratifs : &lt;5 m, &lt;200 m de la rivière, 300 m autour.</p>
 <p class="noprint"><button id="printBtn" onclick="window.print()">Exporter PDF (A4 paysage)</button></p>
 <div id="kpis"></div>
 <div id="charts">
   <div class="panel"><h2>Bâtiments par tranche d'altitude</h2><div id="bars"></div></div>
-  <div class="panel"><h2>Part exposée</h2><div id="donut"></div></div>
+  <div class="panel"><h2>Part sous les seuils fictifs</h2><div id="donut"></div></div>
 </div>
 <footer>
-  Favori rejouable : « Flood &lt;5 m: evacuation, access, bridges » — même règle pour l'équipe, trois couches
-  d'un coup, rejouable quand les données changent.<br>
+  Favori et rejeu à valider dans une nouvelle prise ; cette page est une maquette indépendante de l'agent.<br>
   Tri à 30 m : pas une évaluation du risque ni une consigne d'évacuation.
   Crédits : © OpenStreetMap contributors (ODbL), Copernicus DEM.
 </footer>
 <script>
 const DATA = { bands: [["<3 m", 74], ["3–5 m", 112], ["5–10 m", 402], [">10 m", 660]], exposed: 186, total: 1248 };
-const KPIS = [["1 248", "bâtiments analysés"], ["186", "exposés (<5 m, <200 m)"], ["3", "ponts dans 300 m"], ["10 min", "isochrone d'évacuation à pied"]];
+const KPIS = [["1 248", "bâtiments fictifs"], ["186", "sous les seuils (fictif)"], ["3", "ponts dans 300 m"], ["10 min", "desserte réseau à valider"]];
 
-if (typeof d3 === "undefined") {
-  document.getElementById("bars").textContent = "D3.js non chargé (hors ligne ?) — graphiques indisponibles.";
-} else {
-  d3.select("#kpis").selectAll("div").data(KPIS).join("div").attr("class", "kpi")
-    .html(d => "<b>" + d[0] + "</b><span>" + d[1] + "</span>");
-
-  const W = 640, H = 300, M = {t: 10, r: 10, b: 40, l: 60};
-  const svg = d3.select("#bars").append("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%");
-  const x = d3.scaleBand().domain(DATA.bands.map(d => d[0])).range([M.l, W - M.r]).padding(0.25);
-  const y = d3.scaleLinear().domain([0, d3.max(DATA.bands, d => d[1])]).nice().range([H - M.b, M.t]);
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - M.b})`).call(d3.axisBottom(x));
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${M.l},0)`).call(d3.axisLeft(y));
-  svg.selectAll("rect").data(DATA.bands).join("rect")
-    .attr("x", d => x(d[0])).attr("y", d => y(d[1]))
-    .attr("width", x.bandwidth()).attr("height", d => H - M.b - y(d[1]))
-    .attr("fill", (d, i) => i < 2 ? "#d64545" : "#36a98a");
-
-  const R = 120, pie = d3.pie().value(d => d[1])([["Exposés", DATA.exposed], ["Reste", DATA.total - DATA.exposed]]);
-  const arc = d3.arc().innerRadius(R * 0.55).outerRadius(R);
-  const g = d3.select("#donut").append("svg").attr("viewBox", "0 0 300 260").attr("width", "100%")
-    .append("g").attr("transform", "translate(150,130)");
-  g.selectAll("path").data(pie).join("path").attr("d", arc)
-    .attr("fill", (d, i) => i === 0 ? "#d64545" : "#3a4550");
-  g.append("text").attr("text-anchor", "middle").attr("dy", 8).attr("font-size", 30)
-    .attr("fill", "#f5f5f0").text(Math.round(100 * DATA.exposed / DATA.total) + " %");
+// Native SVG: this local document makes no CDN or network request.
+const node = (name, attributes, parent) => {
+  const item = document.createElementNS("http://www.w3.org/2000/svg", name);
+  for (const [key, value] of Object.entries(attributes)) item.setAttribute(key, value);
+  parent.appendChild(item); return item;
+};
+for (const [value, label] of KPIS) {
+  const card = document.createElement("div"); card.className = "kpi";
+  const number = document.createElement("b"); number.textContent = value;
+  const text = document.createElement("span"); text.textContent = label;
+  card.append(number, text); document.getElementById("kpis").appendChild(card);
 }
+const bars = node("svg", {viewBox:"0 0 640 300", width:"100%", role:"img", "aria-label":"Répartition fictive des bâtiments"}, document.getElementById("bars"));
+DATA.bands.forEach(([label, count], i) => {
+  const height = count / 700 * 230, x = 42 + i * 150;
+  node("rect", {x, y:250-height, width:95, height, fill:i<2?"#d64545":"#36a98a"}, bars);
+  node("text", {x:x+48, y:274, fill:"#9aa0a6", "text-anchor":"middle"}, bars).textContent=label;
+  node("text", {x:x+48, y:240-height, fill:"#f5f5f0", "text-anchor":"middle"}, bars).textContent=count;
+});
+const donut = node("svg", {viewBox:"0 0 300 260", width:"100%", role:"img", "aria-label":"Part fictive sous les seuils"}, document.getElementById("donut"));
+node("circle", {cx:150, cy:130, r:84, fill:"none", stroke:"#3a4550", "stroke-width":44}, donut);
+const fraction = DATA.exposed / DATA.total, length = 2 * Math.PI * 84;
+node("circle", {cx:150, cy:130, r:84, fill:"none", stroke:"#d64545", "stroke-width":44,
+  "stroke-dasharray":`${length*fraction} ${length*(1-fraction)}`, transform:"rotate(-90 150 130)"}, donut);
+node("text", {x:150, y:140, fill:"#f5f5f0", "font-size":30, "text-anchor":"middle"}, donut).textContent=Math.round(fraction*100)+" %";
 </script>
 </body>
 </html>

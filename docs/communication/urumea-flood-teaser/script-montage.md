@@ -1,59 +1,34 @@
-# Teaser crue de l'Urumea — voix, montage, checklist (previz)
+# Urumea — narration et montage de travail
 
-## Voix EN (53 s lues à ~150 mots/min ≈ 130 mots)
-1. “One sentence in Plan mode: buildings, roads, bridges, the Urumea, and the terrain.”
-2. “The agent derives height, then the mean height of every building. They color by exposure.”
-3. “These results are temporary files. The export to a GeoPackage keeps the project with them.”
-4. “Buildings under five meters by the river become the selection. Roads and bridges, within three
-hundred meters.”
-5. “Foot-evacuation isochrones around the exposed buildings: real escape, not a circle.”
-6. “The filter becomes a favorite. A colleague replays it in one click, and tunes the height slider.”
-7. “Same rule for the team, three layers at once, replayable when data change. A screening, at
-thirty meters — not a risk assessment.”
+Le storyboard réconcilié fait foi. Aucune des phrases conditionnelles ci-dessous
+ne devient une affirmation validée avant le contrôle de sa prise.
 
-## Voix FR (même minutage)
-1. « Une phrase en mode Plan : bâtiments, routes, ponts, l'Urumea et le relief. »
-2. « L'agent calcule l'altitude, puis l'altitude moyenne de chaque bâtiment. Ils se colorent par exposition. »
-3. « Ces résultats sont des fichiers temporaires. L'export GeoPackage garde le projet avec eux. »
-4. « Les bâtiments sous cinq mètres près de la rivière deviennent la sélection. Routes et ponts,
-dans un rayon de trois cents mètres. »
-5. « Les isochrones d'évacuation à pied autour des bâtiments exposés : la vraie fuite, pas un cercle. »
-6. « Le filtre devient un favori. Un collègue le rejoue en un clic, et règle le curseur d'altitude. »
-7. « Même règle pour l'équipe, trois couches d'un coup, rejouable quand les données changent.
-Un premier tri, à trente mètres — pas une évaluation du risque. »
+| Plan | Voix FR proposée | Voice EN |
+|---|---|---|
+| U1 | « L'agent apporte les couches OSM et le modèle de surface à trente mètres. » | “The agent brings in OSM layers and a thirty metre surface model.” |
+| U2 | « Il calcule la moyenne du DEM sur chaque emprise de bâtiment. » | “It computes mean DEM elevation over each building footprint.” |
+| U3 | « Les vecteurs sont exportés en GeoPackage, le relief dans un fichier séparé. Vérifions leur réouverture. » | “Vectors go to a GeoPackage, elevation to a separate file. Check that both reopen.” |
+| U4 | « Moins de cinq mètres dans le DEM, près de la rivière : des seuils illustratifs pour filtrer plusieurs couches. » | “Below five metres in the DEM, near the river: illustrative thresholds for filtering several layers.” |
+| U5 | « Le réseau enregistré sert à calculer une desserte piétonne de dix minutes, à vitesse fixée. » | “The recorded network supports a ten minute walking service area at a stated speed.” |
+| U6 | « On enregistre le favori, puis on le rejoue et on compare les résultats. » | “Save the favorite, replay it, and compare the results.” |
+| U7 | « Un premier tri sur un modèle de surface. Les seuils ne décrivent ni une crue ni un trajet sûr. » | “A first screening on a surface model. These thresholds describe neither a flood nor a safe route.” |
 
-## SEGMENTS pour scripts/teaser_compose.py (prises à tourner sous ces noms)
-# Montage : une seule prise 'urumea' (clip scripts/site_videos.py), 7 segments aux durées du
-# storyboard (8, 8, 7, 7, 7, 8, 8), starts à relever au urumea-sheet.jpg après
-# `scripts/site_videos_headless.sh clip urumea`, puis carte de fin presentation.html.
-# SEGMENTS = [
-#     ('urumea', 0.0, 8.0, ('One sentence. Buildings, roads, bridges, river, terrain.', ...)),
-#     ('urumea', 8.0, 8.0, ('Height, then mean height per building.', ...)),
-#     ('urumea', 16.0, 7.0, ('Temporary files don\'t survive. Export keeps all.', ...)),
-#     ('urumea', 23.0, 7.0, ('Under 5 m by the river. Roads and bridges within 300 m.', ...)),
-#     ('urumea', 30.0, 7.0, ('Foot-evacuation isochrones around exposed buildings.', ...)),
-#     ('urumea', 37.0, 8.0, ('One favorite. Replayed in one click.', ...)),
-#     ('card:end', 0, 8.0, ('FilterMate\nFree and open source · QGIS 3.22 to 4.x\nimagodata.github.io/filter_mate', ...)),
-# ] (starts 8/16/23/30/37 provisoires : les caler sur la prise réelle, total 53 s)
+La durée de voix est à mesurer ; aucune piste audio finale n'est livrée pour Urumea.
+Les durées 8/8/7/7/7/8/8 s totalisent 53 s, mais ne sont pas des repères du brut.
 
-## Rendu previz (MP4 de travail, PAS le teaser final)
-- `previz-teaser-53s.mp4` : 53,0 s, 25 im/s, 1920×1080, H.264 + faststart, 7 schémas de synthèse
-  filigranés « PREVIZ — NON TOURNÉ », légendes du storyboard. Vérifié : 1325 images, 6 coupes franches.
-- Re-rendre : venv + `pillow imageio imageio-ffmpeg` (binaire ffmpeg statique), script scratch
-  `/tmp/render_previz.py` (non versionné, à recopier dans `scripts/` s'il doit devenir un outil).
-- Le MP4 final exigera les vraies prises QGIS (cf. checklist) montées via `scripts/teaser_compose.py`.
+Répétition retrouvée : `/tmp/fm-video/out/urumea/` (209,2441 s, 3 153 images).
+Repères bruts des fins de requête : 47,610 / 69,376 / 89,826 / 125,563 /
+181,119 / 204,664 s, d'après les événements `speed` et `camera` de `meta.json`.
+Ne pas découper automatiquement à 8/16/23/30/37 s. La répétition reste non validée :
+carte blanche sur les images examinées, export incomplet par rapport au scénario,
+favori refusé. Ses légendes anciennes ne sont pas des preuves.
 
-## Fin : présentation (`presentation.html`, chiffres illustratifs)
-- 4 KPI + barres par tranche d'altitude + donut de la part exposée, filigrane PREVIZ.
-- Bouton « Exporter PDF » (print A4 paysage, fond blanc) : le livrable papier du tri.
-- Au tournage, remplacer les chiffres par ceux de la prise ; garder les mentions seuils
-  illustratifs / pas une évaluation du risque.
+`animatique.html` est une prévisualisation textuelle hors ligne, pas une capture de QGIS.
+`presentation.html` est une carte finale illustrative imprimable depuis le navigateur ;
+son PDF ne doit pas être présenté comme un export de mise en page par l'agent.
+La mention de l'ancien MP4 previz 53 s n'est pas une livraison : ce fichier n'a pas
+été retrouvé dans les sources inspectées et son script temporaire n'est pas disponible.
 
-## Checklist hors caméra (4 points, adaptés Urumea)
-1. Bâtiments OSM : assez de bâtiments sous 5 m près de l'Urumea dans l'emprise, sinon élargir
-   (Amara, Loiola, Martutene) ou changer d'emprise.
-2. Chaîne de l'agent : du lieu jusqu'au style des bâtiments, ~10 appels d'outils, avec le token
-   API Claude en modèle Haiku (variable d'environnement du poste de tournage, jamais dans le plan).
-3. Favori : garde ses trois couches (bâtiments, routes+ponts, isochrones) et ses distances
-   d'un poste à l'autre via le GeoPackage du dossier commun.
-4. Export par l'agent : vérifié qu'il embarque le projet dans le GeoPackage.
+Après validation des vrais plans, relever les entrées/sorties dans une liste de
+montage séparée et employer `scripts/teaser_compose.py`. Ne pas remplacer ses
+segments existants tant qu'Urumea n'a pas de prise validée.

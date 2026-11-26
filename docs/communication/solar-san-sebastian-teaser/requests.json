@@ -1,0 +1,21 @@
+{
+  "status": "prepared_not_run",
+  "mode": "act",
+  "durations_s": [
+    8,
+    8,
+    7,
+    7,
+    7,
+    8,
+    8
+  ],
+  "requests": [
+    "Bring OSM meadows, homes, roads including local streets and footways, and power lines around San Sebastián / Donostia, Spain, plus Copernicus GLO-30. Save source metadata and zoom to the shared extent.",
+    "Reproject the elevation surface to EPSG:32630, derive slope in PERCENT, and compute mean percent slope for each meadow using zonal statistics. Color meadows by this field. Record the algorithm, parameters, units and NoData. This is a surface model, not bare-earth terrain.",
+    "Export the visible vectors to one GeoPackage, the derived rasters to separate files, and explicitly save a QGIS project with relative data paths if available. List what was actually saved; do not claim a project embedded in the GeoPackage.",
+    "Use an active FilterMate filter to retain meadows with mean slope below 10 percent, and homes, roads and power lines within 300 m of those meadows. Use EPSG:32630 for distances. Zoom to the result and report counts.",
+    "Compute a 10-minute walking service area at 5 km/h around representative points of those meadows on a walkable road network. State the network, origins, algorithm, speed and cost. Do not substitute radial buffers.",
+    "Save the active filter as Solar <10%: service area, access, grid. Then replay it after changing the filter, and compare the counts. Do not claim sharing across computers without a second project test."
+  ]
+}

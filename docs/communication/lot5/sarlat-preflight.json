@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "data": "/work/docs/communication/lot5/data/sarlat",
+  "files": {
+    "sarlat.gpkg": {
+      "bytes": 2301952,
+      "sha256": "37e707776c8a62450c8d6029289015776069b4011b8c856bb152e5d40a97bfa8"
+    },
+    "mnt_1m.tif": {
+      "bytes": 8276386,
+      "sha256": "7fa4be93d0c8fdd673d75db92c3a4fabafb74d1f915c61b4a06b2edb890409c2"
+    },
+    "ortho_rvb.tif": {
+      "bytes": 8158188,
+      "sha256": "79cfac2e8fe947e79a09f679b438ed3a32d39a7243dcabf1fb95cf777aa6e6b1"
+    },
+    "ortho_irc.tif": {
+      "bytes": 8060201,
+      "sha256": "4fec00f3739a04c838bf4406819682d7d75014e6801a71a781523f0d1a1ff24f"
+    },
+    "lidar_hd_sarlat.copc.laz": {
+      "bytes": 132127793,
+      "sha256": "b05119880ac69a0cc13fb178bac0b8f3e308271d5213eeb35f19476b72466e37"
+    }
+  },
+  "errors": [],
+  "gpkg": {
+    "contents": [
+      [
+        "batiment",
+        "features",
+        2154
+      ],
+      [
+        "troncon_de_route",
+        "features",
+        2154
+      ],
+      [
+        "parcelle",
+        "features",
+        2154
+      ]
+    ],
+    "counts": {
+      "batiment": 1528,
+      "troncon_de_route": 553,
+      "parcelle": 1561
+    },
+    "embedded_projects": []
+  },
+  "qgis": "4.2.3-Belém do Pará",
+  "qt": "6.10.2",
+  "pdal": "/usr/local/bin/pdal",
+  "layers": [
+    {
+      "name": "Buildings",
+      "valid": true,
+      "crs": "EPSG:2154",
+      "count": 1528
+    },
+    {
+      "name": "Parcels",
+      "valid": true,
+      "crs": "EPSG:2154",
+      "count": 1561
+    },
+    {
+      "name": "Road segments",
+      "valid": true,
+      "crs": "EPSG:2154",
+      "count": 553
+    },
+    {
+      "name": "DTM — 1 m",
+      "valid": true,
+      "crs": "EPSG:2154",
+      "width": 1000,
+      "height": 1000,
+      "bands": 1,
+      "pixel_m": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "RGB orthophoto",
+      "valid": true,
+      "crs": "",
+      "width": 4000,
+      "height": 4000,
+      "bands": 3,
+      "pixel_m": [
+        0.25,
+        0.25
+      ]
+    },
+    {
+      "name": "CIR orthophoto",
+      "valid": true,
+      "crs": "",
+      "width": 4000,
+      "height": 4000,
+      "bands": 3,
+      "pixel_m": [
+        0.25,
+        0.25
+      ]
+    },
+    {
+      "name": "LiDAR HD",
+      "valid": true,
+      "crs": "EPSG:2154"
+    }
+  ],
+  "boulevard_segments": 9,
+  "project": "/work/docs/communication/lot5/data/sarlat/sarlat-ready.qgz",
+  "ok": true
+}

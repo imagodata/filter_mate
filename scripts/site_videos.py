@@ -66,6 +66,8 @@ FPS = 15
 WINDOW = (1760, 990)  # 16:9 client area, 2640x1485 frames at 150 % scaling
 # The dock at the least width its normal profile allows (ui/config: min_width 380): the map gets the rest.
 DOCK_WIDTH = int(os.environ.get('FM_DOCK_WIDTH', '380'))
+IS_LN = CLIP in ('ln', 'sarlat-overview')
+LN_DOCK = int(os.environ.get('FM_LN_DOCK', '470'))
 # The window no taller than the dock needs (fit_window): FM_FIT=0 keeps the 1760 x 990 of the first takes.
 FIT = os.environ.get('FM_FIT', '1') != '0'
 MIN_WINDOW_HEIGHT = 720
@@ -87,6 +89,7 @@ STYLE = {  # layer name: (color, line/stroke width or point size, fill opacity)
     'troncon_de_route': ('#3b3b3b', 0.6, 1.0),
     'troncon_de_voie_ferree': ('#7b4f2e', 1.0, 1.0),
     'troncon_hydrographique': ('#2e7bd6', 1.1, 1.0),
+    'cours_d_eau': ('#2e7bd6', 1.6, 1.0),
     'construction_lineaire': ('#b03fb0', 1.8, 1.0),
     'erp': ('#f2c200', 2.6, 1.0),
     'parcelle': ('#2b3a42', 0.45, 0.0),
@@ -214,6 +217,8 @@ class Recorder:
         self.queue.put(None)
         self.thread.join()
         meta = {'clip': CLIP, 'theme': THEME, 'dpr': self.dpr, 'size': self.size, 'fps': FPS,
+                'status': STATE.get('capture_status', 'complete'),
+                'error': STATE.get('capture_error'),
                 'frames': self.times, 'events': self.events}
         with open(self.meta_path, 'w', encoding='utf-8') as f:
             json.dump(meta, f, indent=1)
@@ -297,7 +302,9 @@ def click(target, fn=None):
 
 def act(target, fn=None, lead=900, after=900):
     """Cursor travels to a widget, clicks it, then runs fn."""
-    return [(after, point(target)), (lead, click(target, fn))]
+    steps = [(after, point(target)), (lead, click(target, fn))]
+    scroll = globals().get('reveal') if IS_LN else None
+    return [(0, scroll(target))] + steps if scroll else steps
 
 
 def speed(factor):
@@ -461,8 +468,12 @@ def prepare_window():
     # remember it so quit_when_idle() can put it back.
     STATE['ui'] = (mw.saveGeometry(), mw.saveState(), mw.isMaximized())
     mw.showNormal()
-    mw.resize(*WINDOW)
-    mw.move(0, 0)
+    if IS_LN:
+        mw.setGeometry(QApplication.primaryScreen().geometry())
+        mw.showFullScreen()
+    else:
+        mw.resize(*WINDOW)
+        mw.move(0, 0)
     for d in mw.findChildren(QDockWidget):
         if d.objectName() in ('MessageLog', 'Browser', 'Browser2', 'ProcessingToolbox'):
             d.hide()
@@ -2210,7 +2221,7 @@ def agent_done():
     def _s():
         busy = agent_chat().chat_busy() or agent_panel()._working
         if not busy:
-            log('agent thread: ' + agent_panel().thread.toPlainText().replace('\n', ' | ')[:900])
+            log('agent thread tail: ' + agent_panel().thread.toPlainText().replace('\n', ' | ')[-3000:])
         return busy
     _s.max_tries = 1600
     return _s
@@ -2234,27 +2245,31 @@ AGENT = boot(['epci', 'commune', 'surface_hydrographique'], 'commune', '"nom_off
 # Recorded with: FM_AGENT_KEY=<revocable Claude key> scripts/site_videos_headless.sh clip urumea
 # The key travels in the environment only; store_key() puts it in the container's auth
 # database, never in a file. Needs network in the container (Overpass, Copernicus DEM,
-# api.anthropic.com) and a foot-routing path for take 5 (QNEAT3 in the image, or the agent's
-# fallback: verify hors camera, adapt the caption if the take falls back to buffer rings).
+# api.anthropic.com). A network service area must never be replaced by a radial buffer.
 URUMEA_PLACE = os.environ.get('FM_URUMEA_PLACE', 'San Sebastián')
-URUMEA_MODEL = os.environ.get('FM_AGENT_MODEL', 'claude-haiku-5-5')
+URUMEA_MODEL = os.environ.get('FM_AGENT_MODEL', '')  # exact id from the provider's live model list
 URUMEA_KEY = os.environ.get('FM_AGENT_KEY', '')
 URUMEA_SOURCES = ('overpass_fr', 'copernicus_dem', 'photon')
 URUMEA_TAKES = [
     (f'Bring the buildings, roads, bridges and the Urumea river around {URUMEA_PLACE}, Spain, '
-     'from OpenStreetMap, and the 30 m Copernicus terrain.',
+     'from OpenStreetMap, including walkable local streets and footways, and the 30 m Copernicus DSM. ',
      'One sentence. Buildings, roads, bridges, river, terrain.', 'canvas'),
-    ('Compute the altitude of every building and color the buildings by mean altitude.',
-     'Height, then mean height per building.', 'canvas'),
-    ('Export the visible layers to a GeoPackage with the project embedded.',
-     "Temporary files don't survive. Export keeps all.", 'dock'),
-    ('Keep the buildings under 5 meters within 200 meters of the river, '
-     'and the roads and bridges within 300 meters around them.',
+    ('Using zonal statistics on the Copernicus DSM, compute mean DEM surface elevation in metres for each '
+     'building footprint. This is a surface model, including trees and buildings. Color by mean DEM elevation.',
+     'Mean DEM elevation per footprint (surface model).', 'canvas'),
+    ('Export the visible vector layers to one GeoPackage and the terrain to a separate raster file. '
+     'Report exactly what was saved and whether a QGIS project was saved.',
+     'Exported vectors and terrain: inspect the saved files.', 'dock'),
+    ('Keep the footprints with mean DEM elevation below 5 m, within 200 m of the Urumea, '
+     'and the roads and bridges within 300 meters of those buildings. Use a FilterMate filter '
+     'so that it can be saved as a favorite. Use EPSG:32630 for distances. Zoom to the results.',
      'Under 5 m by the river. Roads and bridges within 300 m.', 'canvas'),
-    ('Compute 10-minute foot-evacuation isochrones around the exposed buildings.',
-     'Foot-evacuation isochrones around exposed buildings.', 'canvas'),
+    ('Compute a 10-minute walking service area on a walkable road network, at 5 km/h, '
+     'from representative points of the filtered buildings. Report the algorithm, speed, '
+     'origins and network used. Do not substitute a radial buffer or call it a safe evacuation route.',
+     '10-minute walking service area on the recorded network.', 'canvas'),
     ('Save this filter as the favorite Flood <5 m: evacuation, access, bridges.',
-     'One favorite. Replayed in one click.', 'dock'),
+     'Save the active filter as a favorite.', 'dock'),
 ]
 
 
@@ -2265,10 +2280,53 @@ def urumea_empty():
     canvas.refresh()
 
 
+def install_demo_trace(scene):
+    """Keep tool results and whole transcripts: a layer name alone is not a proof of a calculation."""
+    from filter_mate.infrastructure.logging.redaction import mask_sensitive_text, mask_uri_secrets
+    chat = agent_chat()
+    original = chat.on_tool_end
+
+    def clean(value):
+        text = json.dumps(value, ensure_ascii=False, default=str)
+        if URUMEA_KEY:
+            text = text.replace(URUMEA_KEY, '[REDACTED]')
+        return json.loads(mask_sensitive_text(mask_uri_secrets(text)))
+
+    def logged_end(call, result):
+        entry = clean({'request': STATE.get('demo_request'), 'tool': call.name,
+                       'arguments': call.arguments, 'is_error': bool(result.is_error),
+                       'content': result.content})
+        with open(os.path.join(OUT, 'tools.jsonl'), 'a', encoding='utf-8') as stream:
+            stream.write(json.dumps(entry, ensure_ascii=False) + '\n')
+        return original(call, result)
+
+    chat.on_tool_end = logged_end
+    STATE['demo_clean'] = clean
+
+
+def demo_snapshot(scene):
+    clean = STATE['demo_clean']
+    project = QgsProject.instance()
+    layers = []
+    for item in project.mapLayers().values():
+        entry = {'id': item.id(), 'name': item.name(), 'valid': item.isValid(),
+                 'provider': item.providerType(), 'crs': item.crs().authid()}
+        if isinstance(item, QgsVectorLayer):
+            entry.update(count=item.featureCount(), subset=item.subsetString(),
+                         fields=[f.name() for f in item.fields()])
+        layers.append(entry)
+    path = os.path.join(OUT, f'{scene}-observations.jsonl')
+    with open(path, 'a', encoding='utf-8') as stream:
+        stream.write(json.dumps(clean({'request': STATE.get('demo_request'), 'layers': layers,
+                                      'thread': agent_panel().thread.toPlainText()}), ensure_ascii=False) + '\n')
+
+
 def urumea_agent_setup():
     from qgis.core import QgsApplication, QgsSettings
     from filter_mate.adapters.agent.settings import (
         AgentSettings, save_settings, load_settings, store_key)
+    if not URUMEA_MODEL or not URUMEA_KEY:
+        raise RuntimeError('urumea requires FM_AGENT_MODEL and FM_AGENT_KEY; no model id is guessed')
     agent_chat()
     QgsSettings().setValue('FilterMate/agent/setup_offered_version', agent_chat().plugin_version())
     # Headless take: set the auth database password programmatically (as check_agent_chat.py
@@ -2288,16 +2346,18 @@ def urumea_agent_setup():
     agent_chat().open_settings = lambda: False
     agent_chat()._refresh_ready()
     agent_chat().new_conversation()
-    log(f'urumea settings {load_settings()}')
+    install_demo_trace('urumea')
+    log(f'urumea model={URUMEA_MODEL}, sources={URUMEA_SOURCES}, autonomy=autonomous')
 
 
 def urumea_note():
     names = sorted(lyr.name() for lyr in QgsProject.instance().mapLayers().values())
     log(f'urumea layers {names}')
+    demo_snapshot('urumea')
 
 
 def urumea_take(request, caption_en, view):
-    steps = [(800, agent_open), (1500, wait_idle())]
+    steps = [(0, lambda: STATE.update(demo_request=request)), (800, agent_open), (1500, wait_idle())]
     steps += act(lambda: agent_panel().input, lambda: agent_panel().input.setFocus())
     steps += type_into(lambda: agent_panel().input, request, per_char=55)
     steps += [hold(500)]
@@ -2316,6 +2376,128 @@ URUMEA = URUMEA_OPEN + [(500, urumea_agent_setup), (500, rec_start),
 for _take in URUMEA_TAKES:
     URUMEA += urumea_take(*_take)
 URUMEA += ending()
+
+
+# report (article of 2026-11-25): three requests typed in AGENT, answered by a local Ollama model with the tools
+# offered by task (the default settings): layers made with Processing, two charts, a print layout and its PDF. The
+# question of the export is answered Yes on screen. Nothing is scripted but the requests: the calls of each turn are
+# logged, with what they answered, for the numbers the article quotes. Charts need QtWebEngine in the image.
+REPORT_REQUESTS = [r.strip() for r in os.environ.get('FM_REPORT_REQUESTS', '').split('|') if r.strip()] or [
+    'Trace une zone de 300 m autour de la Garonne dans la commune de Muret, puis fais une couche des bâtiments '
+    'situés dans cette zone.',
+    'Montre la répartition de ces bâtiments par usage, puis la distribution de leurs hauteurs.',
+    'Fais une mise en page A4 avec la carte et les deux graphiques, titrée « Muret : les bâtiments à 300 m de la '
+    'Garonne », et exporte-la en PDF.',
+]
+REPORT_FAST = float(os.environ.get('FM_REPORT_FAST', '8'))
+
+
+def report_setup():
+    from qgis.core import QgsSettings
+    from filter_mate.adapters.agent.settings import AgentSettings, save_settings, load_settings
+    chat = agent_chat()
+    QgsSettings().setValue('FilterMate/agent/setup_offered_version', chat.plugin_version())
+    save_settings(AgentSettings(preset='ollama', model=AGENT_MODEL, consent=True,
+                                consent_target='http://localhost:11434'))
+    chat._settings_dialog = lambda: False
+    chat.open_settings = lambda: False
+    install_demo_trace('report')
+    chat._refresh_ready()
+    chat.new_conversation()
+    log(f'agent settings {load_settings()}')
+
+
+def report_turn(n):
+    """Re-armed while the agent works on request ``n``. A question of the permissions (the export writes a file) is
+    shown at normal speed and answered Yes with the cursor; a question of the model itself is logged."""
+    seen, state = set(), {'ticks': 0, 'pause': 0}
+
+    def _s():
+        from filter_mate.ui.widgets.agent_thread import ConfirmCard, QuestionCard
+        chat, panel = agent_chat(), agent_panel()
+        STATE['report_request'] = n
+        state['ticks'] += 1
+        if state['pause'] > 0:  # the question is being read, then answered
+            state['pause'] -= 1
+            return True
+        for card in panel.thread.findChildren(ConfirmCard):
+            if card.done or id(card) in seen or not card.isVisible():
+                continue
+            seen.add(id(card))
+            log(f'report question {n}: ' + card.body.text().replace('\n', ' | ')[:600])
+            REC.event('speed', factor=1.0)
+            REC.event('camera', rect=box(resolve(agent_panel).adjusted(-12, -12, 12, 12)), dur=1.0, drift=1.0)
+
+            def point_at(card=card):
+                r = resolve(card.yes_button)
+                REC.event('point', x=r.center().x(), y=r.center().y())
+
+            def yes(card=card):
+                r = resolve(card.yes_button)
+                REC.event('click', x=r.center().x(), y=r.center().y())
+                card.yes_button.click()
+            QTimer.singleShot(2200, point_at)
+            QTimer.singleShot(3400, yes)
+            QTimer.singleShot(4600, lambda: REC.event('speed', factor=REPORT_FAST))
+            state['pause'] = 20
+            return True
+        for card in panel.thread.findChildren(QuestionCard):
+            if id(card) not in seen and card.isVisible():
+                seen.add(id(card))
+                log(f'report {n}: the model asks the user: ' + panel.thread.toPlainText().replace('\n', ' | ')[-500:])
+        busy = chat.chat_busy() or panel._working
+        if busy and state['ticks'] % 120 == 0:
+            log(f'report {n} working: ' + panel.thread.toPlainText().replace('\n', ' | ')[-240:])
+        if not busy:
+            log(f'report {n} thread: ' + panel.thread.toPlainText().replace('\n', ' | ')[-3000:])
+        return busy
+    _s.max_tries = int(os.environ.get('FM_REPORT_TRIES', '4800'))
+    return _s
+
+
+def report_ask(n, request):
+    return ([(0, lambda: STATE.update(demo_request=n)), (0, cam(agent_panel, dur=1.2, pad=12))]
+            + act(lambda: agent_panel().input, lambda: agent_panel().input.setFocus())
+            + type_into(lambda: agent_panel().input, request, per_char=36) + [hold(700)]
+            + act(lambda: agent_panel().send_button, lambda: agent_panel().send_button.click())
+            + [(400, cam('full', dur=1.4)), (300, speed(REPORT_FAST)), (1500, report_turn(n)), (300, speed(1.0))])
+
+
+def report_log():
+    """What the take made: every call, the layers and layouts of the project, the files written (copied beside
+    the frames)."""
+    import glob
+    import shutil
+    demo_snapshot('report')
+    for vl in QgsProject.instance().mapLayers().values():
+        try:
+            count = vl.featureCount()
+        except Exception:
+            count = '-'
+        log(f'report layer {vl.name()!r} {vl.providerType()} features={count}')
+    log(f'report layouts {[item.name() for item in QgsProject.instance().layoutManager().layouts()]}')
+    root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'FilterMate', 'exports')
+    for path in glob.glob(os.path.join(root, '**', '*.*'), recursive=True):
+        log(f'report file {path} {os.path.getsize(path)} bytes')
+        shutil.copy(path, OUT)
+
+
+REPORT = boot(['commune', 'batiment', 'cours_d_eau'], 'commune', '"nom_officiel" = \'Muret\'') + [
+    (500, report_setup), (800, agent_open), (1500, wait_idle()), (500, rec_start),
+    title('Trois demandes, du calcul au PDF'),
+    (0, cam('full', dur=0, drift=1.03)), hold(1500),
+    caption('1 · Des couches calculées avec Processing'),
+] + report_ask(1, REPORT_REQUESTS[0]) + [
+    hold(1200), (0, cam('canvas', dur=1.4, drift=1.03)), still('report-01'), hold(3600),
+    (0, cam(agent_panel, dur=1.3, pad=12)), hold(3200),
+    caption('2 · Deux graphiques lus sur la couche'),
+] + report_ask(2, REPORT_REQUESTS[1]) + [
+    (0, cam(agent_panel, dur=1.3, pad=12)), hold(1500), still('report-02'), hold(4500),
+    caption('3 · La mise en page et son PDF'),
+] + report_ask(3, REPORT_REQUESTS[2]) + [
+    (0, cam(agent_panel, dur=1.3, pad=12)), hold(1500), still('report-03'), hold(4200), (0, report_log),
+    caption(''),
+] + ending()
 
 
 def zip_edit():
@@ -3668,8 +3850,669 @@ SURVEY = texted(SURVEY, 'A survey package around one building', [
 ])
 
 
+# ------------------------------------------------------------------ Sarlat clips for LinkedIn (ln1 .. ln5)
+# The five scenarios of the article (docs/communication, Sarlat-la-Canéda), driven through the real dock.
+# The window fills the width of the primary screen (16:9). Voice-over lines come from
+# sarlat_narration.json: say() logs a line, said() waits for its duration (the longest of the languages,
+# narration_durations.json) so both voices fit the same picture. The result counts are logged as 'badge'
+# events; scripts/fm5_clip_render.py draws the captions, the badge and the end card, and mixes the voice.
+SARLAT = os.environ.get('FM_SARLAT_DIR', os.path.join(ROOT, 'sarlat'))
+SARLAT_GPKG = os.path.join(SARLAT, 'sarlat.gpkg')
+BLD, ROADS, PARCELS = 'Buildings', 'Road segments', 'Parcels'
+RGB, CIR, DTM, LIDAR = 'RGB orthophoto', 'CIR orthophoto', 'DTM — 1 m', 'LiDAR HD'
+CORRIDOR = 'Boulevard Henri Arlet — road segments'
+BOULEVARD = '"nom_collaboratif_gauche" = \'BD HENRI ARLET\''
+SARLAT_TILE = (559000, 6422000, 560000, 6423000)
+DISPLAY[BLD] = "CASE WHEN \"nature\" = 'Eglise' THEN 'Church' ELSE \"nature\" || ' ' || \"cleabs\" END"
+DISPLAY[PARCELS] = '"section" || \' \' || "numero"'
+DISPLAY[ROADS] = 'coalesce("nom_collaboratif_gauche", "nature") || \' \' || "cleabs"'
+
+
+def _scripts_json(name):
+    try:
+        with open(os.path.join(ROOT, 'scripts', name), encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        log(f'no {name}: {traceback.format_exc().splitlines()[-1]}')
+        return {}
+
+
+DURATIONS = _scripts_json('narration_durations.json')
+SAID = {}
+
+
+def say(key):
+    """A voice-over line starts here."""
+    def _s():
+        SAID[key] = time.perf_counter()
+        REC.event('say', key=key)
+    return (0, _s)
+
+
+def said(key, extra=0.5):
+    """Wait until the voice-over line has been spoken."""
+    def _s():
+        return time.perf_counter() - SAID.get(key, 0.0) < DURATIONS.get(CLIP, {}).get(key, 5.0) + extra
+    return (0, _s)
+
+
+def chapter(n):
+    """A new chapter of the film starts here (title chip of the edit)."""
+    return (0, lambda: REC.event('chapter', n=n))
+
+
+def badge(n, *names):
+    """The result counts of the filtered layers, quoted by the badge of chapter n."""
+    return (0, lambda: REC.event('badge', n=n, counts=counts(names)))
+
+
+def ln_show(*names):
+    """Only these layers are checked in the Layers panel."""
+    def _s():
+        for node in QgsProject.instance().layerTreeRoot().findLayers():
+            node.setItemVisibilityChecked(node.layer().name() in names)
+    return (0, _s)
+
+
+def balance_dock():
+    """EXPLORING and FILTERING share the height of the dock 50/50 (EXPLORING scrolls when needed)."""
+    sp = dock().main_splitter
+    total = sum(sp.sizes())
+    sp.setSizes([total // 2, total - total // 2])
+
+
+def size_ln_dock():
+    d = dock()
+    d.setMinimumWidth(0)
+    iface.mainWindow().resizeDocks([d], [LN_DOCK], Qt.Orientation.Horizontal)
+    QTimer.singleShot(400, balance_dock)
+
+
+def features_where(name, expr=None):
+    req = QgsFeatureRequest(QgsExpression(expr)) if expr else QgsFeatureRequest()
+    return list(layer(name).getFeatures(req))
+
+
+def box_of(features, margin):
+    box = QgsRectangle()
+    box.setMinimal()
+    for f in features:
+        box.combineExtentWith(f.geometry().boundingBox())
+    box.grow(margin)
+    return box
+
+
+def zoom_box(get_box):
+    """Frame a map rectangle and keep it as the scene framing."""
+    def _s():
+        STATE['scene_rect'] = QgsRectangle(get_box())
+        set_extent(STATE['scene_rect'])
+    return (0, _s)
+
+
+def tile_box(scale=1.0):
+    """The tile, cut to the aspect of the canvas so that it fills it (no empty bands)."""
+    box = QgsRectangle(*SARLAT_TILE)
+    box.scale(scale)
+    canvas = iface.mapCanvas()
+    ratio = canvas.height() / max(canvas.width(), 1)
+    if box.height() / box.width() > ratio:
+        mid = box.center().y()
+        half = box.width() * ratio / 2
+        return QgsRectangle(box.xMinimum(), mid - half, box.xMaximum(), mid + half)
+    mid = box.center().x()
+    half = box.height() / ratio / 2
+    return QgsRectangle(mid - half, box.yMinimum(), mid + half, box.yMaximum())
+
+
+def view_box(box):
+    """A rectangle widened to the canvas aspect and moved inside the tile (no empty band around the map)."""
+    tile = QgsRectangle(*SARLAT_TILE)
+    canvas = iface.mapCanvas()
+    ratio = canvas.height() / max(canvas.width(), 1)
+    w, h = box.width(), box.height()
+    if h / max(w, 1e-9) < ratio:
+        h = w * ratio
+    else:
+        w = h / ratio
+    if w > tile.width():
+        w, h = tile.width(), tile.width() * ratio
+    if h > tile.height():
+        w, h = tile.height() / ratio, tile.height()
+    cx = min(max(box.center().x(), tile.xMinimum() + w / 2), tile.xMaximum() - w / 2)
+    cy = min(max(box.center().y(), tile.yMinimum() + h / 2), tile.yMaximum() - h / 2)
+    return QgsRectangle(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)
+
+
+LOW_GROUND = 136.0  # m: about the lowest 8 % of the tile
+
+
+def hot_parcels(width=2.6, alpha=70):
+    layer(PARCELS).renderer().setSymbol(vivid_fill('#00e5ff', alpha, '#00e5ff', width))
+    layer(PARCELS).triggerRepaint()
+
+
+def vivid_fill(color, alpha, outline, width):
+    from qgis.core import QgsFillSymbol
+    return QgsFillSymbol.createSimple({'color': f'{QColor(color).red()},{QColor(color).green()},{QColor(color).blue()},{alpha}',
+                                       'outline_color': outline, 'outline_width': str(width)})
+
+
+def lidar_style(colors, size=2.2):
+    """Classified rendering of only the given {class: colour} (the others are hidden)."""
+    from qgis.core import QgsPointCloudClassifiedRenderer
+    pc = layer(LIDAR)
+    renderer = QgsPointCloudClassifiedRenderer('Classification', QgsPointCloudClassifiedRenderer.defaultCategories())
+    categories = renderer.categories()
+    for category in categories:
+        wanted = category.value() in colors
+        category.setRenderState(wanted)
+        if wanted:
+            category.setColor(QColor(colors[category.value()]))
+    renderer.setCategories(categories)
+    renderer.setPointSize(size)
+    pc.setRenderer(renderer)
+    pc.triggerRepaint()
+
+
+def uniform_pixels(rl, colour, opacity=0.8):
+    """The kept pixels of a raster in one vivid colour (the alpha band of FilterMate's preview is kept)."""
+    from qgis.core import QgsColorRampShader, QgsRasterShader, QgsSingleBandPseudoColorRenderer
+    old = rl.renderer()
+    fn = QgsColorRampShader()
+    fn.setColorRampType(QgsColorRampShader.Type.Interpolated)
+    fn.setColorRampItemList([QgsColorRampShader.ColorRampItem(-10000, QColor(colour)),
+                             QgsColorRampShader.ColorRampItem(10000, QColor(colour))])
+    shader = QgsRasterShader()
+    shader.setRasterShaderFunction(fn)
+    renderer = QgsSingleBandPseudoColorRenderer(rl.dataProvider(), 1, shader)
+    if old is not None and old.alphaBand() > 0:
+        renderer.setAlphaBand(old.alphaBand())
+    renderer.setOpacity(opacity)
+    rl.setRenderer(renderer)
+    rl.triggerRepaint()
+
+
+def setup_ln(corridor=False):
+    """Sarlat layers (bottom to top) on a dark canvas: dimmed imagery, vivid results."""
+    def _s():
+        from qgis.core import QgsFeature, QgsLineSymbol, QgsPointCloudLayer, QgsRasterLayer, QgsSimpleLineSymbolLayer
+        canvas = prepare_window()
+        canvas.setCanvasColor(QColor('#0f1519'))
+        canvas.setSelectionColor(QColor(255, 214, 10, 235))
+        project = QgsProject.instance()
+        for name, tif in ((RGB, 'ortho_rvb.tif'), (CIR, 'ortho_irc.tif'), (DTM, 'mnt_1m.tif')):
+            rl = QgsRasterLayer(os.path.join(SARLAT, tif), name, 'gdal')
+            if not rl.crs().isValid() and name in (RGB, CIR):
+                from qgis.core import QgsCoordinateReferenceSystem
+                rl.setCrs(QgsCoordinateReferenceSystem('EPSG:2154'))
+                log(f'layer {name}: EPSG:2154 assigned from the Sarlat data audit')
+            if not rl.isValid():
+                raise RuntimeError(f'invalid raster {name}')
+            log(f'layer {name} valid={rl.isValid()}')
+            if name != DTM:
+                rl.renderer().setOpacity(0.62)
+            project.addMapLayer(rl)
+        pc = QgsPointCloudLayer(os.path.join(SARLAT, 'lidar_hd_sarlat.copc.laz'), LIDAR, 'copc')
+        if not pc.isValid():
+            raise RuntimeError('invalid Sarlat point cloud')
+        log(f'layer {LIDAR} valid={pc.isValid()}')
+        project.addMapLayer(pc)
+        styles = {
+            PARCELS: vivid_fill('#00e5ff', 40, '#00e5ff', 1.0),
+            BLD: vivid_fill('#ff6a00', 235, '#ffffff', 0.3),
+        }
+        for key, name in (('parcelle', PARCELS), ('batiment', BLD), ('troncon_de_route', ROADS)):
+            vl = QgsVectorLayer(f'{SARLAT_GPKG}|layername={key}', name, 'ogr')
+            if not vl.isValid():
+                raise RuntimeError(f'invalid vector {name}')
+            log(f'layer {name} valid={vl.isValid()}')
+            vl.setLabelsEnabled(False)
+            if name in styles:
+                vl.renderer().setSymbol(styles[name])
+            else:  # roads: a dark casing under a light line, readable on the dimmed imagery
+                sym = QgsLineSymbol.createSimple({'color': '#101418', 'width': '2.4'})
+                sym.appendSymbolLayer(QgsSimpleLineSymbolLayer(QColor('#f4f4ef'), 1.3))
+                vl.renderer().setSymbol(sym)
+            project.addMapLayer(vl)
+        if corridor:  # the nine segments of the boulevard as an explicit candidate layer (a target of its own)
+            src = layer(ROADS)
+            mem = QgsVectorLayer('MultiLineString?crs=EPSG:2154', CORRIDOR, 'memory')
+            mem.dataProvider().addAttributes(src.fields())
+            mem.updateFields()
+            mem.dataProvider().addFeatures([QgsFeature(f) for f in src.getFeatures(QgsFeatureRequest(QgsExpression(BOULEVARD)))])
+            mem.updateExtents()
+            sym = QgsLineSymbol.createSimple({'color': '#101418', 'width': '3.4'})
+            sym.appendSymbolLayer(QgsSimpleLineSymbolLayer(QColor('#ff7a00'), 2.2))
+            mem.renderer().setSymbol(sym)
+            project.addMapLayer(mem)
+            STATE['corridor_total'] = mem.featureCount()
+        for node in project.layerTreeRoot().findLayers():
+            node.setExpanded(False)
+        project.layerTreeRoot().findLayer(layer(DTM).id()).setItemVisibilityChecked(False)
+        STATE['scene_rect'] = tile_box()
+        set_extent(STATE['scene_rect'])
+        canvas.setRenderFlag(True)
+    return _s
+
+
+def boot_ln(corridor=False):
+    return [(1000, setup_ln(corridor)), (3000, open_plugin), (8000, size_ln_dock), (1500, wait_idle()),
+            (800, balance_dock)]
+
+
+def ln_scene(*visible):
+    """Start recording on the whole tile, the title and the hook line."""
+    return [(500, wait_idle()), ln_show(*visible), zoom_box(tile_box), (800, wait_idle()), (500, rec_start),
+            (0, cam('full', dur=0, drift=1.02))]
+
+
+UNTIL = int(os.environ.get('FM_UNTIL', '0') or 0)
+log(f'FM_UNTIL={UNTIL}')
+
+
+def until(n):
+    """FM_UNTIL=n: the film ends here (the result of chapter n is on screen)."""
+    def _s():
+        if UNTIL == n:
+            i = RUN['at']
+            STEPS[i + 1:] = ending()
+    return (0, _s)
+
+
+def result_view(n, ms=4200):
+    return [(0, quiet_message_bar), (0, cam('canvas', dur=1.6, drift=1.03)), hold(ms), still(f'result{n}'), hold(300)]
+
+
+def to_tile(*visible):
+    """Back to the whole tile, only these layers checked."""
+    return [zoom_box(tile_box), ln_show(*visible), (0, cam('full', dur=1.6))]
+
+
+# ---- interactions that look at the state of the widgets first ----------------------------------
+def maybe(need, steps):
+    """The steps run only if need() is true when this step is reached: a widget already in the wanted
+    state (a checked push button, the same value) is not clicked or typed again."""
+    def _s():
+        try:
+            wanted = need()
+        except Exception:
+            log(traceback.format_exc())
+            wanted = True
+        log(f'maybe {getattr(need, "__name__", "need")} -> {wanted}')
+        if wanted:
+            i = RUN['at']
+            STEPS[i + 1:i + 1] = list(steps)
+    return (0, _s)
+
+
+def dynamic(factory):
+    """Steps computed when the step is reached (they depend on the data)."""
+    def _s():
+        i = RUN['at']
+        STEPS[i + 1:i + 1] = list(factory())
+    return (0, _s)
+
+
+def widget_of(target):
+    try:
+        if callable(target):
+            target = target()
+        if isinstance(target, QWidget):
+            return target
+        if isinstance(target, str) and isinstance(getattr(dock(), target, None), QWidget):
+            return getattr(dock(), target)
+    except Exception:
+        pass
+    return None
+
+
+def reveal(target, margin=28):
+    """Scroll the areas holding a widget until it is fully in view. The scroll bar moves (550 ms)."""
+    state = {}
+
+    def _s():
+        from qgis.PyQt.QtCore import QAbstractAnimation, QPropertyAnimation
+        from qgis.PyQt.QtWidgets import QScrollArea
+        if 'anim' in state:
+            if state['anim'].state() != QAbstractAnimation.State.Stopped:
+                return True
+            del state['anim']
+        w = widget_of(target)
+        if w is None or not w.isVisible():
+            return None
+        p = w.parentWidget()
+        while p is not None:
+            if isinstance(p, QScrollArea) and p.verticalScrollBar().maximum() > 0:
+                sb = p.verticalScrollBar()
+                top = w.mapTo(p.widget(), QPoint(0, 0)).y()
+                view, value = p.viewport().height(), sb.value()
+                if w.height() + 2 * margin > view or top - margin < value:
+                    goal = max(top - margin, 0)
+                elif top + w.height() + margin > value + view:
+                    goal = min(top + w.height() + margin - view, sb.maximum())
+                else:
+                    goal = value
+                if abs(goal - value) > 2:
+                    anim = QPropertyAnimation(sb, b'value')
+                    anim.setDuration(550)
+                    anim.setStartValue(value)
+                    anim.setEndValue(goal)
+                    anim.start()
+                    state['anim'] = anim
+                    log(f'scroll {w.objectName() or type(w).__name__}: {value} -> {goal}')
+                    return True
+            p = p.parentWidget()
+        return None
+    _s.max_tries = 40
+    return _s
+
+
+def zone(names, dur=1.4, pad=40):
+    """Scroll every widget of the zone into view, then frame it."""
+    return [(0, reveal(n)) for n in reversed(names)] + [(0, cam(names, dur=dur, pad=pad))]
+
+
+def combo_checked(name):
+    model = getattr(dock(), name).model()
+    return sorted(model.item(i).text().lower() for i in range(model.rowCount())
+                  if model.item(i).checkState() == Qt.CheckState.Checked)
+
+
+def combo_wanted(name, texts):
+    model = getattr(dock(), name).model()
+    return sorted(model.item(i).text().lower() for i in range(model.rowCount())
+                  if any(t.lower() in model.item(i).text().lower() for t in texts))
+
+
+def ln_targets(names):
+    def targets_differ():
+        return (combo_checked(TARGETS) != combo_wanted(TARGETS, names)
+                or not dock().pushButton_checkable_filtering_layers_to_filter.isChecked())
+    return [maybe(targets_differ, targets(names))]
+
+
+def ln_predicates(names):
+    def predicates_differ():
+        return (combo_checked(PREDICATES) != combo_wanted(PREDICATES, names)
+                or not dock().pushButton_checkable_filtering_geometric_predicates.isChecked())
+    return [maybe(predicates_differ, predicates(names))]
+
+
+def ln_buffer(value):
+    """Buffer of `value` m (0 or None: off), clicking and typing only what is not already so."""
+    btn = lambda: dock().pushButton_checkable_filtering_buffer_value  # noqa: E731
+    if not value:
+        return [maybe(lambda: btn().isChecked(), act('pushButton_checkable_filtering_buffer_value',
+                                                     lambda: btn().setChecked(False)))]
+    return [maybe(lambda: not btn().isChecked(), act('pushButton_checkable_filtering_buffer_value', buffer_value(0))),
+            maybe(lambda: abs(dock().mQgsDoubleSpinBox_filtering_buffer_value.value() - value) > 1e-6, typed_buffer(value))]
+
+
+def ln_coverage(value):
+    return [maybe(lambda: abs(coverage_spin().value() - value) > 1e-6, typed_spin(coverage_spin, value, per_char=250))]
+
+
+def ln_and():
+    def not_and_yet():
+        d = dock()
+        return (not d.pushButton_checkable_filtering_current_layer_combine_operator.isChecked()
+                or d.comboBox_filtering_other_layers_combine_operator.currentText().upper() != 'AND')
+    return [maybe(not_and_yet, and_targets())]
+
+
+def ln_selecting(on=True):
+    """The push button of the selection preview: clicked only when it is not already in the wanted state."""
+    btn = lambda: dock().pushButton_checkable_exploring_selecting  # noqa: E731
+    return [maybe(lambda: btn().isChecked() != on, act('pushButton_checkable_exploring_selecting',
+                                                       lambda: btn().setChecked(on)))]
+
+
+def multi_filter_edit():
+    for edit in multi_widget()[0].findChildren(QLineEdit):
+        if edit.placeholderText().lower().startswith('type'):
+            return edit
+    return multi_widget()[0].findChild(QLineEdit)
+
+
+def visible_multi_checks(per_item=500):
+    """Tick, one click each, the rows of the multiple selection list that the filter text left visible."""
+    picker, lw = multi_widget()
+    steps = []
+    for row in range(lw.count()):
+        if lw.item(row).isHidden():
+            continue
+
+        def rect(row=row):
+            r = lw.visualItemRect(lw.item(row))
+            return to_main(lw.viewport(), QRect(r.x(), r.y(), 28, r.height()))
+
+        def check(row=row):
+            lw.item(row).setCheckState(Qt.CheckState.Checked)
+            picker._emit_checked_items_update()
+        steps += act(rect, check, lead=450, after=per_item - 450)
+    log(f'multi rows to tick: {len(steps) // 2}')
+    return steps
+
+
+def boulevard_texts():
+    """The picker texts of the nine boulevard segments (the display expression of the roads)."""
+    from qgis.core import QgsExpressionContext, QgsExpressionContextUtils
+    expression = QgsExpression(DISPLAY[ROADS])
+    context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer(ROADS)))
+    out = []
+    for f in features_where(ROADS, BOULEVARD):
+        context.setFeature(f)
+        out.append(str(expression.evaluate(context)))
+    return out
+
+
+def ln_class_condition(code, hag):
+    """ATTRIBUTES group: "Classification = code" AND height above the DTM >= hag (PDAL), clicked only when needed."""
+    group = lambda: pc_panel()._ranges_group  # noqa: E731
+    row = lambda: pc_panel()._condition_rows[-1]  # noqa: E731
+
+    def set_condition():
+        from filter_mate.core.domain.point_cloud_attributes import OP_EQUAL, JOIN_AND
+        row().set_condition({'attribute': 'Classification', 'op': OP_EQUAL, 'low': float(code), 'high': None,
+                             'join': JOIN_AND})
+        pc_panel()._changed()
+        log(f'condition {row().condition()}')
+
+    return (act(group_check(group), open_group(group)) + [
+        hold(500), (0, reveal(lambda: pc_panel()._add_condition_button)), hold(300),
+        (0, cam(group, dur=1.2, pad=30)),
+    ] + act(lambda: pc_panel()._add_condition_button, lambda: pc_panel()._add_condition_button.click()) + [hold(700)]
+        + act(lambda: row()._attribute_combo, set_condition, lead=800) + [hold(1200)] + ln_selecting(True)
+        + [(300, speed(2.0)), (800, wait_idle()), (300, speed(1.0)),
+           (0, lambda: lidar_style({6: '#ff4d4d'}, 0.9)), ln_show(RGB, LIDAR),
+           zoom_box(tile_box), (0, cam('canvas', dur=1.6, drift=1.03)), hold(2200),
+           (0, reveal(lambda: pc_panel()._hag_spin)), (0, cam(group, dur=1.2, pad=30))]
+        + act(lambda: pc_panel()._hag_check, lambda: pc_panel()._hag_check.setChecked(True))
+        + typed_spin(lambda: pc_panel()._hag_spin, hag)
+        + act(lambda: pc_panel()._hag_layer_combo, lambda: pc_panel()._hag_layer_combo.setLayer(layer(DTM)))
+        + [hold(1200), (0, lambda: log(f'hag settings {pc_panel().hag_settings()}'))])
+
+
+def hot_buildings():
+    layer(BLD).renderer().setSymbol(vivid_fill('#ff6a00', 240, '#ffffff', 0.5))
+    layer(BLD).triggerRepaint()
+
+
+def uniform_when_ready(name, colour, opacity):
+    """The kept pixels in one vivid colour, once FilterMate's preview has set its alpha band (before that, every
+    pixel of the raster would be coloured)."""
+    def _s():
+        renderer = layer(name).renderer()
+        if renderer is not None and renderer.alphaBand() > 0:
+            uniform_pixels(layer(name), colour, opacity)
+            return None
+        return True
+    _s.max_tries = 48
+    return (0, _s)
+
+
+def preview_on_map(colour, opacity, name, visible, ms=3000):
+    """The selection preview of a raster on the map: kept pixels in one vivid colour (shown before filtering)."""
+    colouring = [uniform_when_ready(name, colour, opacity)] if colour else []  # None: FilterMate's own preview colours
+    return [(300, speed(2.0)), (800, wait_idle()), (300, speed(1.0))] + colouring + [
+            ln_show(*visible), zoom_box(tile_box), (0, cam('canvas', dur=1.6, drift=1.03)), hold(ms)]
+
+
+# One continuous film, three chapters; each result stays and the next step builds on it.
+def largest_building():
+    return max(features_where(BLD), key=lambda f: f.geometry().area())
+
+def largest_parcel():
+    return max(features_where(PARCELS), key=lambda f: f.geometry().area())
+
+def terrain_ramp(rl, opacity=0.9):
+    """The DTM (clipped or not) in a hypsometric ramp over its own min..max."""
+    from qgis.core import QgsColorRampShader, QgsRasterShader, QgsSingleBandPseudoColorRenderer
+    stats = rl.dataProvider().bandStatistics(1)
+    lo, hi = stats.minimumValue, stats.maximumValue
+    colors = ['#2f4b9a', '#2fa7a0', '#c6e05a', '#f5b83d', '#d9482b']
+    fn = QgsColorRampShader(lo, hi)
+    fn.setColorRampItemList([QgsColorRampShader.ColorRampItem(lo + (hi - lo) * i / 4, QColor(c), f'{lo + (hi - lo) * i / 4:.0f}')
+                             for i, c in enumerate(colors)])
+    shader = QgsRasterShader()
+    shader.setRasterShaderFunction(fn)
+    renderer = QgsSingleBandPseudoColorRenderer(rl.dataProvider(), 1, shader)
+    renderer.setOpacity(opacity)
+    rl.setRenderer(renderer)
+    rl.triggerRepaint()
+
+def church_focus():
+    churches = [f for f in features_where(BLD, '"nature" = \'Eglise\'') if f.hasGeometry()]
+    STATE['focus_layer'] = BLD
+    STATE['focus_fid'] = max(churches, key=lambda f: f.geometry().area()).id()
+    STATE['church'] = box_of([layer(BLD).getFeature(STATE['focus_fid'])], 0)
+
+def church_outline():
+    """The selected church as a yellow outline of its own (the buildings stay hidden)."""
+    from qgis.core import QgsFeature, QgsGeometry
+    mem = QgsVectorLayer('MultiPolygon?crs=EPSG:2154', 'Selected church', 'memory')
+    f = QgsFeature()
+    f.setGeometry(QgsGeometry(layer(BLD).getFeature(STATE['focus_fid']).geometry()))
+    mem.dataProvider().addFeatures([f])
+    mem.renderer().setSymbol(vivid_fill('#ffea00', 0, '#ffea00', 1.4))
+    QgsProject.instance().addMapLayer(mem)
+
+def result_two_stage(n, ms1=3200, ms2=4200):
+    """The pixel preview first, then the parcels alone on the imagery, framed on where they are."""
+    return [(0, quiet_message_bar), (0, cam('canvas', dur=1.6, drift=1.03)), hold(ms1),
+            (0, hot_parcels), ln_show(RGB, PARCELS),
+            zoom_box(lambda: view_box(box_of(features_where(PARCELS), 70))), hold(ms2), still(f'result{n}'), hold(300)]
+
+def corridor_style():
+    terrain_ramp(layer(DTM), 0.8)
+    lidar_style({3: '#7dff4f', 4: '#3ddc3d', 5: '#16a34a', 6: '#ff4d4d', 9: '#4d9cff'}, 1.3)
+
+def class_5_only():
+    panel = pc_panel()
+    state = dict(panel.state())
+    state.update({'classes_enabled': True, 'classes': [5], 'checked_classes': [5]})
+    panel.restore_state(state)
+    lidar_style({5: '#39ff14'}, 1.5)
+
+def rail_tool(name):
+    return coverage()._extras._tools[name]
+
+def pool_box(margin):
+    from qgis.core import QgsPointXY
+    pt = QgsPointXY(*POOL)
+    return QgsRectangle(pt.x() - margin, pt.y() - margin, pt.x() + margin, pt.y() + margin)
+
+def map_pixel(pt):
+    """Where a map point is, in coordinates of the main window."""
+    canvas = iface.mapCanvas()
+    px = canvas.getCoordinateTransform().transform(pt)
+    origin = rect_of(canvas).topLeft()
+    return origin.x() + px.x(), origin.y() + px.y()
+
+def click_map(x, y, extend=False):
+    """The cursor goes to a point of the map and the pipette picks there."""
+    from qgis.core import QgsPointXY
+    pt = QgsPointXY(x, y)
+
+    def go():
+        px, py = map_pixel(pt)
+        REC.event('point', x=px, y=py)
+
+    def pick():
+        px, py = map_pixel(pt)
+        REC.event('click', x=px, y=py)
+        coverage()._on_pixel_picked(pt, extend)
+    return [(300, go), (1000, pick)]
+
+def detected_log(label):
+    return (0, lambda: log(f'detected {label}: {raster_panel().detected_objects()} kept {raster_panel().kept_ratio()}'))
+
+def access_roads_style():
+    from qgis.core import QgsLineSymbol, QgsSimpleLineSymbolLayer
+    sym = QgsLineSymbol.createSimple({'color': '#101418', 'width': '3.8'})
+    sym.appendSymbolLayer(QgsSimpleLineSymbolLayer(QColor('#ffd60a'), 2.4))
+    layer(ROADS).renderer().setSymbol(sym)
+    layer(ROADS).triggerRepaint()
+
+def set_coverage_value(value):
+    coverage_spin().setValue(value)
+
+POOL = (559866.5, 6422888.8)
+DETECTOR = 'pushButton_checkable_exploring_raster_detector'
+
+LN_FILM = boot_ln() + ln_scene(RGB) + [say('i'), said('i')] + [
+    # 1. vector -> vector + raster + point cloud: the boulevard (selected in the list) and 50 m
+    chapter(1), say('1a')] + pick_layer(ROADS) + [(0, balance_dock)] + zone(EXPLORE_ZONE, pad=30) \
+    + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode) + [hold(500)] \
+    + act(multi_filter_edit, lambda: multi_filter_edit().setFocus()) \
+    + type_into(multi_filter_edit, 'HENRI ARLET', per_char=90, clear=False) + [
+    hold(500), dynamic(lambda: visible_multi_checks(500)), hold(500),
+] + ln_selecting(True) + [
+    (0, lambda: layer(ROADS).selectByExpression(BOULEVARD)), ln_show(RGB, ROADS),
+    zoom_box(lambda: view_box(box_of(features_where(ROADS, BOULEVARD), 90))), (0, cam('full', dur=1.4)), hold(1200),
+    said('1a'), say('1b'),
+] + zone(FILTER_ZONE) + ln_targets(['buildings', 'parcels', 'dtm', 'lidar']) + ln_predicates(['intersect']) \
+    + ln_buffer(50) + [
+    (0, cam(['pushButton_checkable_filtering_buffer_value', 'mQgsDoubleSpinBox_filtering_buffer_value'], dur=1.2, pad=30)),
+    hold(1800), said('1b'), say('1c'),
+] + zone(ACTION_ZONE, dur=1.2) + run_filter() + [
+    (0, corridor_style), ln_show(RGB, DTM, LIDAR, PARCELS, BLD, ROADS), badge(1, BLD, PARCELS),
+] + result_view(1) + [until(1), said('1c'), say('1t')] + act('pushButton_action_unfilter', click_unfilter) + [ln_show(RGB)] + settle() + [
+    (0, quiet_message_bar), (0, lambda: layer(ROADS).removeSelection()),
+] + to_tile(RGB) + [said('1t'),
+    # 2. raster (DTM, pixel value <= 136 m) -> parcels and buildings in the low ground
+    chapter(2), say('2a')] + to_exploring(DTM) + [(0, balance_dock),
+    maybe(lambda: not raster_panel()._range_group.isChecked(),
+          act(group_check(lambda: raster_panel()._range_group), open_group(lambda: raster_panel()._range_group))),
+    (0, lambda: raster_panel()._range_group.setCollapsed(False)), hold(400),
+    (0, reveal(lambda: raster_panel()._max_spin)), (0, cam(lambda: raster_panel()._range_group, dur=1.2, pad=30)),
+    maybe(lambda: abs(raster_panel()._max_spin.value() - LOW_GROUND) > 1e-6,
+          typed_spin(lambda: raster_panel()._max_spin, LOW_GROUND)),
+    hold(700), said('2a'), say('2b'),
+] + ln_selecting(True) + preview_on_map(None, 0.6, DTM, (RGB, DTM), ms=2600) \
+    + zone(FILTER_ZONE) + ln_targets(['parcels', 'buildings']) + ln_predicates(['intersect']) + ln_buffer(0) \
+    + ln_coverage(50) + [hold(400), said('2b'), say('2c')] + zone(ACTION_ZONE, dur=1.2) + run_filter() + [
+    (0, lambda: hot_parcels(0.9, 22)), (0, hot_buildings),
+    ln_show(RGB, DTM, PARCELS, BLD), zoom_box(lambda: view_box(box_of(features_where(BLD), 60))), badge(2, PARCELS, BLD),
+] + result_view(2) + [until(2), said('2c'), say('2t')] + to_exploring(LIDAR) + [
+    # 3. + tall buildings from the LiDAR (class 6, height above the DTM), combined with AND
+    (0, balance_dock), said('2t'), chapter(3), say('3a'),
+] + ln_class_condition(6, 9) + [said('3a'), say('3b')] + zone(FILTER_ZONE) + ln_targets(['buildings']) \
+    + ln_predicates(['intersect']) + ln_buffer(0) + ln_and() + ln_coverage(50) + [
+    hold(400), said('3b'), say('3c')] + zone(ACTION_ZONE, dur=1.2) + run_filter_long(300.0) + [
+    (0, hot_buildings), ln_show(RGB, BLD), zoom_box(tile_box), (0, refocus), badge(3, BLD),
+] + result_view(3) + [said('3c'), say('3d'), said('3d')] + ending([BLD])
+
+
+SARLAT_OVERVIEW = boot_ln() + ln_scene(RGB, BLD, ROADS) + [
+    title('Sarlat · vector, raster and LiDAR sources'),
+    (0, lambda: counts([BLD, PARCELS, ROADS])), still('sarlat-overview'), hold(6000),
+] + ending()
+
+
 CLIPS = {'hero': HERO, 'panels': PANELS, 'exploring-panel': EXPLORING_PANEL, 'layout': LAYOUT, 'setup': SETUP,
-         'metropole': METROPOLE, 'compare': COMPARE, 'sam': SAM, 'agent': AGENT, 'postgis': POSTGIS,
+         'metropole': METROPOLE, 'compare': COMPARE, 'sam': SAM, 'agent': AGENT, 'report': REPORT, 'ln': LN_FILM, 'sarlat-overview': SARLAT_OVERVIEW, 'postgis': POSTGIS,
          'explore': EXPLORE, 'buffer': BUFFER2, 'noise': NOISE2, 'bridges': BRIDGES2, 'brush': BRUSH,
          'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT2, 'processing': PROCESSING,
          'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY,
@@ -3695,12 +4538,27 @@ def run_steps(i=0, tries=0):
         try:
             again = fn() is True
         except Exception:
-            log(traceback.format_exc())
-        if again and tries < getattr(fn, 'max_tries', 400):
+            capture_failed(traceback.format_exc())
+            return
+        if again:
+            if tries >= getattr(fn, 'max_tries', 400):
+                capture_failed(f'timeout at step {i}: {getattr(fn, "__name__", fn)}')
+                return
             run_steps(i, tries + 1)
         else:
             run_steps(i + 1)
     QTimer.singleShot(delay if tries == 0 else 250, go)
+
+
+def capture_failed(error):
+    """Stop on the first failed step; never edit the rest of a broken interaction as a success."""
+    STATE.update(capture_status='failed', capture_error=error)
+    log('CAPTURE FAILED: ' + error)
+    with open(os.path.join(OUT, 'failure.json'), 'w', encoding='utf-8') as stream:
+        json.dump({'status': 'failed', 'step': RUN['at'], 'error': error}, stream, indent=2)
+    if REC.running:
+        stop_recording()
+    QTimer.singleShot(500, quit_when_idle)
 
 
 log(f'clip {CLIP}, {len(STEPS)} steps')

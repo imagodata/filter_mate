@@ -1,0 +1,32 @@
+19:39:19 no narration_durations.json: FileNotFoundError: [Errno 2] No such file or directory: '/w/out/scripts/narration_durations.json'
+19:39:19 FM_UNTIL=0
+19:39:19 clip sarlat-overview, 18 steps
+19:39:35 --- step 0 _s
+19:39:36 layer RGB orthophoto valid=True
+19:39:36 layer CIR orthophoto valid=True
+19:39:36 layer DTM — 1 m valid=True
+19:39:36 layer LiDAR HD valid=True
+19:39:36 layer Parcels valid=True
+19:39:36 layer Buildings valid=True
+19:39:36 layer Road segments valid=True
+19:39:39 --- step 1 open_plugin
+19:39:48 --- step 2 size_ln_dock
+19:39:50 --- step 3 <lambda>
+19:39:51 --- step 4 balance_dock
+19:39:51 --- step 5 <lambda>
+19:39:51 --- step 6 _s
+19:39:51 --- step 7 _s
+19:39:52 --- step 8 <lambda>
+19:39:52 --- step 9 rec_start
+19:39:53 recording (1920, 1200) dpr=1.0
+19:39:53 --- step 10 _s
+19:39:53 --- step 11 _s
+19:39:53 --- step 12 <lambda>
+19:39:53 counts {'Buildings': 1528, 'Parcels': 1561, 'Road segments': 553}
+19:39:53 --- step 13 _s
+19:39:58 --- step 14 noop
+19:39:58 --- step 15 _s
+19:40:01 --- step 16 stop_recording
+19:40:01 stopped: 124 frames in 8.1 s (15.2 fps), 4 events
+19:40:01 layout at the end: window 1920x1200, dock 470x1036, empty band 232, sections apart (), rows fill
+19:40:01 --- step 17 quit_when_idle

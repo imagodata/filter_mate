@@ -1,32 +1,31 @@
-# Teaser crue de l'Urumea — storyboard 53 s, 7 prises (previz, rien tourné)
+# Urumea — storyboard réconcilié, 53 s à monter
 
-Scénario : premier tri (« screening », pas « study ») des bâtiments exposés à la crue autour de
-l'Urumea à San Sebastián / Donostia. Relief 30 m → tri grossier seulement.
-Données : bâtiments, routes, ponts, rivière Urumea (OpenStreetMap) ; relief Copernicus 30 m.
-Projet partagé : GeoPackage de l'export dans un dossier commun (même projet d'un bout à l'autre).
-Modèle : token API Claude du spectateur, modèle Haiku (pas de modèle local dans le teaser ;
-la mention « nothing leaves your computer » reste dans l'article, hors teaser).
-Undo sorti faute de place.
+État au 26/11/2026 : répétition réelle existante, **non validée comme teaser final**.
+Les nouveaux plans agent attendent les lots 1 à 3 stabilisés. Les 53 s sont une cible
+éditoriale ; les attentes seront accélérées et les coupes calées sur les prises réelles.
 
-Tranche filtrée : une seule, bâtiments sous 5 m d'altitude (seuil illustratif, pas une norme)
-à moins de 200 m de la rivière (illustratif). Isochrones d'évacuation à pied calculés via
-Processing (QNEAT3 / outils natifs) autour des bâtiments exposés. Un favori :
-« Flood <5 m: evacuation, access, bridges ».
+Le sujet est une démonstration de tri géographique avec des seuils illustratifs.
+Copernicus GLO-30 est un **modèle de surface (MNS/DSM)** : bâtiments et végétation
+sont inclus. Une moyenne sur l'emprise d'un bâtiment n'est ni son altitude au sol,
+ni sa hauteur, ni une hauteur d'eau. Ne pas présenter ces résultats comme des
+bâtiments inondés, un calcul de risque ou des itinéraires d'évacuation sûrs.
+Référence : [description officielle Copernicus DEM](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM).
 
-| Prise | Temps | Image / interaction | Légende EN | Légende FR |
-|---|---|---|---|---|
-| 1 Apporter | 0:00–0:08 | Projet vide, mode Plan, une phrase. L'agent apporte bâtiments, routes, ponts, rivière (OSM) + relief Copernicus. | “One sentence. Buildings, roads, bridges, river, terrain.” | « Une phrase. Bâtiments, routes, ponts, rivière, relief. » |
-| 2 Transformer | 0:08–0:16 | L'agent calcule altitude et pente (Processing), puis l'altitude moyenne par bâtiment (statistiques zonales). Les bâtiments se colorent par exposition. | “Height, then mean height per building.” | « L'altitude, puis l'altitude moyenne par bâtiment. » |
-| 3 Exporter | 0:16–0:23 | Fichiers temporaires, perdus à la fermeture. Export GeoPackage avec projet embarqué, panneau face à agent. | “Temporary files don't survive. Export keeps all.” | « Le temporaire ne survit pas. L'export garde tout. » |
-| 4 Filtrer | 0:23–0:30 | Bâtiments sous 5 m près de la rivière : la sélection. Routes et ponts autour à 300 m. Panneau face à agent. | “Under 5 m by the river. Roads and bridges within 300 m.” | « Moins de 5 m près de la rivière. Routes et ponts à 300 m. » |
-| 5 Isochrones | 0:30–0:37 | L'agent calcule les isochrones d'évacuation à pied (Processing QNEAT3/natif) autour des bâtiments exposés. | “Foot-evacuation isochrones around exposed buildings.” | « Isochrones d'évacuation à pied autour des bâtiments exposés. » |
-| 6 Partager | 0:37–0:45 | Le filtre devient le favori « Flood <5 m: evacuation, access, bridges ». Un collègue le rejoue en un clic ; curseur d'altitude sous le fil. | “One favorite. Replayed in one click.” | « Un favori. Rejoué en un clic. » |
-| 7 Carte fin | 0:45–0:53 | Fin sur la présentation D3 (`presentation.html`) : 3 raisons (règle d'équipe, 3 couches, rejouable), limite 30 m. Bouton Exporter PDF (A4 paysage). | “Same rule, three layers, replayable. Screening at 30 m.” | « Même règle, trois couches, rejouable. Tri à 30 m. » |
+| Plan | Durée | Action prévue et légende FR / EN | Preuve requise avant validation |
+|---|---:|---|---|
+| U1 — Sources | 8 s | Apporter bâtiments, routes piétonnes, ponts, Urumea et DSM. « OSM et modèle de surface 30 m. » / “OSM and a 30 m surface model.” | Couches valides, emprise commune, carte visible, sources/date/SCR archivés. La répétition ne comprend que les grands axes : les rues locales et chemins sont à acquérir. |
+| U2 — Transformer | 8 s | Statistiques zonales sur les emprises. « Moyenne du DEM par emprise. » / “Mean DEM elevation per footprint.” | Algorithme et paramètres, champ de moyenne, NoData, nombres de valeurs valides et style vérifiés. Le champ `alt_mean` existe dans l'export de répétition ; son calcul n'est pas certifié par ce seul constat. |
+| U3 — Pérenniser | 7 s | Exporter les vecteurs dans un GPKG et le DSM séparément. « Vérifier les fichiers exportés. » / “Inspect the exported files.” | Réouverture des fichiers sur un projet neuf. Un `.qgz` doit être sauvegardé explicitement si nécessaire ; **aucun projet embarqué n'est démontré**. |
+| U4 — Filtrer | 7 s | Moyenne DEM <5 m, à 200 m de l'Urumea ; routes/ponts à 300 m des emprises retenues. « Seuils illustratifs, filtre actif. » / “Illustrative thresholds, active filter.” | SCR métrique EPSG:32630, source et distances exactes, filtre FilterMate actif, comptes et géométries contrôlés. Un simple sous-ensemble QGIS ne prouve pas l'existence d'un favori. |
+| U5 — Accès | 7 s | Aire de desserte piétonne 10 min, vitesse explicitée. « Desserte sur le réseau enregistré. » / “Service area on the recorded network.” | Algorithme réellement utilisé, origines, coût/temps/vitesse, réseau marchable et exclusions archivés. Pas de tampon présenté comme isochrone ; pas de promesse d'évacuation. Si seul un réseau de lignes est produit, le montrer comme tel. |
+| U6 — Favori | 8 s | Enregistrer **puis réappliquer** le favori. « Favori enregistré, puis rejoué. » / “Favorite saved, then replayed.” | Succès d'enregistrement, modification volontaire de l'état, rejeu visible, mêmes comptes. Le partage avec un collègue exige un second projet/poste et le test de liaison du lot 1. |
+| U7 — Fin | 8 s | Carte de synthèse de la prise. « Tri illustratif sur un modèle de surface 30 m. » / “Illustrative screening on a 30 m surface model.” | Chiffres de la prise uniquement ; crédits. La présentation HTML actuelle est une maquette avec chiffres fictifs, distincte d'une sortie de l'agent. |
 
-## Règles tenues
-- « screening », jamais « study » (relief 30 m = premier tri).
-- Seuils 5 m / 200 m / 300 m dits illustratifs, pas des normes (même discipline que le 18 % de Katmandou).
-- L'agent tourne avec le token API Claude du spectateur, modèle Haiku ; rien sur le local dans le teaser.
-- Comptes et emprises = ceux de la prise (exemple, pas de promesse générale).
-- Crédits à l'écran : © OpenStreetMap contributors (ODbL), Copernicus DEM.
-- Ne pas présenter comme une évaluation du risque ni une consigne d'évacuation.
+Dans la répétition, l'agent est en **Act/autonome**, pas en Plan. Ne pas annoncer
+« une phrase en mode Plan » sur ces images. Les six requêtes sont visibles ;
+l'acquisition n'est pas un calcul instantané. La configuration automatisée
+préautorise trois outils réseau/Processing et doit être mentionnée dans la fiche de prise.
+
+Les intitulés historiques du favori et des couches peuvent contenir « evacuation » :
+ce sont des noms de travail, pas une qualification du résultat.
+Voir [audit des affirmations](../lot5/claims.json) et [fiche de tournage](fiche-prise-agent.md).

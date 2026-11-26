@@ -1,0 +1,27 @@
+{
+  "method": "independent QGIS geometry intersection and GDAL polygonization; no FilterMate calls",
+  "boulevard_segments": 9,
+  "corridor_m": 50,
+  "raster_max_m_inclusive": 136,
+  "raster_min_footprint_fraction": 0.5,
+  "corridor": {
+    "batiment": 113,
+    "parcelle": 106
+  },
+  "raster": {
+    "batiment": 187,
+    "parcelle": 182
+  },
+  "expected": {
+    "corridor": {
+      "batiment": 113,
+      "parcelle": 106
+    },
+    "raster": {
+      "batiment": 187,
+      "parcelle": 182
+    }
+  },
+  "ok": true,
+  "lidar": "not independently recomputed here; inspect the take"
+}

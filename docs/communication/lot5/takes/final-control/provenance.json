@@ -1,0 +1,16 @@
+{
+  "plugin_tree_sha256": "25b8e1759368f29a9778ef55da8716e20342f27cf95e694ac7458abf56d28fc0",
+  "image": "fm-video",
+  "image_id": "sha256:fcf29ce2f6a014efd5117e222a467643b8aa3a47ccd8ffd7614fb92a1c296626",
+  "plugin_commit": "8fbd62c51271fd4120b060137c371c7f6ab4f1b6",
+  "plugin_dirty": true,
+  "scripts": {
+    "fm5_clip_voice.py": "a163d47886ad9b6c4e68645352edaad268952718eaffa1bcab3e44b394d57c06",
+    "site_stills.json": "085614240976962f3c4308d7ae53cf8c9c516b4c321273e7af4f91d0bf44ee0f",
+    "sarlat_narration.json": "c327998e532f2e38c5135245ea241287491e2da6ca2d57cb5a07c91d556e4015",
+    "site_videos.py": "0d5572d97f6056bd4aaf87c250932864cfb2bb5d508bd7ad6353c13bdfe81caf",
+    "fm5_clip_render.py": "30ee1716cbd1d2c90ee2a87623208a8e71e89e4cf003e10a47b96791172da8b8",
+    "site_video_render.py": "ca36d18afaef49c07200e3884fbbb4aa763ed4952d297dd47f55ef5b5f04bba2",
+    "demo_take_check.py": "86326899350bd9b8fdebd69419789d22c63ad9bd4cb36282afbf556172da1cd7"
+  }
+}

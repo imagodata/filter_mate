@@ -32,10 +32,8 @@
 # The teaser of the Urumea flood (clip urumea in scripts/site_videos.py, six agent requests, no BD TOPO
 # needed: the data comes live from Overpass and Copernicus). The Claude key travels in the environment
 # only, into the container's auth database, never in a file:
-#   FM_AGENT_KEY=<revocable key> FM_AGENT_MODEL=claude-haiku-5-5 scripts/site_videos_headless.sh clip urumea
-# The key needs a working secrets service: /tmp/.cache is owned by root in the image, so mount a
-# writable one (FM_DOCKER_ARGS="-v /tmp/fm-cache:/tmp/.cache"); the login keyring is created unlocked
-# inside the session bus before QGIS starts (outside the bus it conflicts and hangs the setup).
+#   FM_AGENT_KEY=<revocable key> FM_AGENT_MODEL=<id from provider> scripts/site_videos_headless.sh clip urumea
+# Each take uses its own disposable profile and writable cache. Never reuse a personal QGIS profile.
 # Stories 13 to 15 (ndvi, roofs, ground) use the square of FM5_DATA (ortho_irc.tif too); story 16 (wires) a LiDAR
 # survey with classified wires, wellington_lines.copc.laz, mounted read-only:
 #   FM_DOCKER_ARGS="-v <its folder>:/wires:ro" FM_SIZE=1280x720 FM_CRF=30 scripts/site_videos_headless.sh clip wires
@@ -68,19 +66,18 @@ seed_profile() {
             '[rendering]' 'main-canvas-preview-jobs=true' '' '[FilterMate]' 'discord_welcome_dismissed=true' \
             'whats_new_seen=99' "agent\\setup_offered_version=$(sed -n 's/^version=//p' "$REPO/metadata.txt")" '' \
             '[locale]' 'userLocale=en' > "$dir/QGIS/QGIS4.ini"
-        if [ "$1" = fmvideo-dark ]; then printf '%s\n' '' '[UI]' 'UITheme=Night Mapping' >> "$dir/QGIS/QGIS4.ini"; fi
+        if [[ "$1" == fmvideo-dark-* ]]; then printf '%s\n' '' '[UI]' 'UITheme=Night Mapping' >> "$dir/QGIS/QGIS4.ini"; fi
         cp "$dir/QGIS/QGIS4.ini" "$dir/QGIS/QGIS3.ini"
     fi
     sed -i -e '/^panels\\/d' -e '/^sections\\/d' "$dir/QGIS/QGIS4.ini"
     rm -f "$dir/FilterMate/config.json"
-    # A previous take may have left its auth database with another master password: the next
-    # take would then prompt instead of using its own, hanging headless. Fresh wallet each take.
-    rm -f "$dir/QGIS/qgis-auth.db"*
 }
 
 sync_code() {
-    mkdir -p "$WORK/plugins" "$WORK/out" "$WORK/scripts" "$DATA"
-    cp "$REPO/scripts/site_videos.py" "$REPO/scripts/site_video_render.py" "$REPO/scripts/site_stills.json" "$WORK/scripts/"
+    mkdir -p "$WORK/plugins" "$WORK/out" "$WORK/scripts" "$WORK/cache" "$WORK/profiles/profiles" "$DATA"
+    cp "$REPO/scripts/site_videos.py" "$REPO/scripts/site_video_render.py" "$REPO/scripts/site_stills.json" \
+        "$REPO/scripts/fm5_clip_render.py" "$REPO/scripts/fm5_clip_voice.py" \
+        "$REPO/scripts/sarlat_narration.json" "$REPO/scripts/demo_take_check.py" "$WORK/scripts/"
     rsync -a --delete \
         --exclude .git --exclude .github --exclude .claude --exclude .serena --exclude _bmad --exclude _bmad-output \
         --exclude tests --exclude website --exclude docs --exclude scripts --exclude knowledge --exclude logs \
@@ -90,36 +87,99 @@ sync_code() {
 
 passed_env() {
     # every FM_* / FM5_* variable of this shell, except the ones this script sets itself
-    env | grep -E '^(FM_|FM5_)' | grep -vE '^(FM_WORK|FM_IMAGE|FM_GPKG_DIR|FM_GPKG_NAME|FM5_DATA|FM_DOCKER_ARGS|FM_PLUGIN_SRC|FM_SIZE|FM_TIMEOUT)=' \
+    env | grep -E '^(FM_|FM5_)' | grep -vE '^(FM_WORK|FM_IMAGE|FM_GPKG_DIR|FM_GPKG_NAME|FM5_DATA|FM_DOCKER_ARGS|FM_PLUGIN_SRC|FM_SIZE|FM_TIMEOUT|FM_LANG)=' \
         | while IFS='=' read -r name _; do printf -- '-e\n%s\n' "$name"; done
 }
 
 run() {
     # shellcheck disable=SC2086
     docker run --rm --init ${FM_DOCKER_ARGS:-} --user "$(id -u):$(id -g)" -e HOME=/tmp \
-        -v "$WORK:/w" -v "$GPKG_DIR:/bd" -v "$DATA:/data" "$@"
+        -e XDG_CACHE_HOME=/w/cache -v "$WORK:/w" -v "$GPKG_DIR:/bd" -v "$DATA:/data" "$@"
 }
 
 cmd="${1:-}"; shift || true
 case "$cmd" in
+    list)
+        python3 - "$REPO/scripts/site_videos.py" <<'PY'
+import ast, sys
+tree = ast.parse(open(sys.argv[1], encoding='utf-8').read())
+for node in tree.body:
+    if isinstance(node, ast.Assign) and any(getattr(t, 'id', '') == 'CLIPS' for t in node.targets):
+        print('\n'.join(k.value for k in node.value.keys))
+PY
+        ;;
     image)
         docker build -t "$IMAGE" -f "$REPO/scripts/docker/site_videos.Dockerfile" "$REPO"
         ;;
     clip)
+        [ "$#" -gt 0 ] || { echo 'clip requires at least one scene' >&2; exit 2; }
+        for c in "$@"; do
+            [[ "$c" =~ ^[a-z0-9-]+$ ]] || { echo "invalid clip: $c" >&2; exit 2; }
+            "$0" list | grep -Fxq -- "${c%-dark}" || { echo "unknown clip: $c" >&2; exit 2; }
+            [ ! -e "$WORK/out/$c/meta.json" ] || { echo "take exists: $c; choose another FM_WORK" >&2; exit 2; }
+        done
+        if [[ " ${*//-dark/} " == *' urumea '* ]]; then
+            [ -n "${FM_AGENT_KEY:-}" ] && [ -n "${FM_AGENT_MODEL:-}" ] || {
+                echo 'urumea requires FM_AGENT_KEY and the exact FM_AGENT_MODEL id' >&2; exit 2;
+            }
+        fi
+        mkdir -p "$WORK"
+        exec 9>"$WORK/.capture.lock"
+        flock -n 9 || { echo "another take uses $WORK" >&2; exit 2; }
         sync_code
         mapfile -t extra < <(passed_env)
         for c in "$@"; do
             echo "== clip $c"
             scene="${c%-dark}"; theme=light; profile=fmvideo
             if [ "$scene" != "$c" ]; then theme=dark; profile=fmvideo-dark; fi
+            profile=$(basename "$(mktemp -d "$WORK/profiles/profiles/$profile-XXXXXX")")
             seed_profile "$profile"
-            run --name "fmvideo_$c" -e FILTERMATE_NO_FEEDBACK_INVITE=1 -e QGIS_PLUGINPATH=/w/plugins -e FM_VIDEO_OUT=/w/out -e FM_CLIP="$scene" \
-                -e FM5_DIR=/data -e FM_GPKG="/bd/$GPKG_NAME" "${extra[@]}" -e FM_THEME="$theme" "$IMAGE" bash -c \
-                "timeout ${FM_TIMEOUT:-1500} dbus-run-session -- xvfb-run -a -s '-screen 0 1920x1200x24' qgis --nologo --noversioncheck --lang en --profiles-path /w/profiles --profile $profile --code /w/scripts/site_videos.py" \
-                > "$WORK/out/$c.stdout.txt" 2>&1 || echo "  clip $c ended with $?"
+            mkdir -p "$WORK/out/$c"
+            python3 - "$WORK" "$c" "${FM_PLUGIN_SRC:-$REPO}" "$IMAGE" <<'PY'
+import hashlib, json, pathlib, subprocess, sys
+work, clip, source, image = sys.argv[1:]
+root = pathlib.Path(work)
+digest = hashlib.sha256()
+for path in sorted((root / 'plugins/filter_mate').rglob('*')):
+    if path.is_file() and path.suffix in ('.py', '.js', '.json', '.ui', '.txt'):
+        digest.update(str(path.relative_to(root / 'plugins/filter_mate')).encode())
+        digest.update(path.read_bytes())
+try:
+    commit = subprocess.check_output(['git', '-C', source, 'rev-parse', 'HEAD'], text=True, stderr=subprocess.DEVNULL).strip()
+    dirty = bool(subprocess.check_output(['git', '-C', source, 'status', '--porcelain'], text=True))
+except subprocess.CalledProcessError:
+    commit, dirty = None, None  # FM_PLUGIN_SRC can also be an unpacked plugin
+provenance = {'plugin_tree_sha256': digest.hexdigest(), 'image': image,
+              'image_id': subprocess.check_output(['docker', 'image', 'inspect', '--format', '{{.Id}}', image], text=True).strip(),
+              'plugin_commit': commit, 'plugin_dirty': dirty,
+              'scripts': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (root / 'scripts').glob('*') if p.is_file()}}
+(root / 'out' / clip / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+PY
+            run --name "fmvideo_${c}_${profile}" -e FILTERMATE_NO_FEEDBACK_INVITE=1 -e QGIS_PLUGINPATH=/w/plugins -e FM_VIDEO_OUT=/w/out -e FM_CLIP="$scene" \
+                -e FM5_DIR=/data -e FM_GPKG="/bd/$GPKG_NAME" "${extra[@]}" -e FM_THEME="$theme" "$IMAGE" \
+                timeout "${FM_TIMEOUT:-1500}" dbus-run-session -- xvfb-run -a -s '-screen 0 1920x1200x24' \
+                qgis --nologo --noversioncheck --lang "${FM_LANG:-en}" --profiles-path /w/profiles \
+                --profile "$profile" --code /w/scripts/site_videos.py \
+                > "$WORK/out/$c.stdout.txt" 2>&1 || { echo "clip $c failed; see $WORK/out/$c.stdout.txt" >&2; exit 1; }
+            python3 "$REPO/scripts/demo_take_check.py" "$WORK/out/$c"
             grep -n 'stopped\|Traceback\|counts' "$WORK/out/$c/capture.log" | cut -c1-300 | tail -3 || true
+            [ "$scene" != ln ] || continue  # voiced/rough edit: render-ln, once narration is available
             run -e FM_VIDEO_OUT=/w/out -e FM_SIZE="${FM_SIZE:-1920x1080}" -e FM_CRF="${FM_CRF:-23}" "$IMAGE" \
                 python3 /w/scripts/site_video_render.py "$c" 2>&1 | tail -1
+        done
+        ;;
+    render-ln)
+        [ "$#" -gt 0 ] || { echo 'render-ln requires a scene' >&2; exit 2; }
+        mkdir -p "$WORK"
+        exec 9>"$WORK/.capture.lock"
+        flock -n 9 || { echo "another take uses $WORK" >&2; exit 2; }
+        sync_code
+        for c in "$@"; do
+            python3 "$REPO/scripts/demo_take_check.py" "$WORK/out/$c"
+            run -e FM_VIDEO_OUT=/w/out -e FM_LANG="${FM_LANG:-en}" \
+                -e FM_VOICE_ENGINE="${FM_VOICE_ENGINE:-edge-tts}" -e FM_SIZE="${FM_SIZE:-1920x1200}" \
+                -e FM_CRF="${FM_CRF:-23}" "$IMAGE" \
+                python3 /w/scripts/fm5_clip_render.py "$c"
         done
         ;;
     publish)

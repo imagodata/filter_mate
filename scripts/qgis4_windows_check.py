@@ -1,40 +1,52 @@
 # -*- coding: utf-8 -*-
-"""Controle rapide du poste Windows / QGIS 4 pour le teaser crue de l'Urumea.
+"""Contrôle en lecture seule du poste Windows / QGIS 4.
 
-Usage :
-  1. Copier ce fichier sur le poste Windows.
-  2. Dans QGIS 4 : Extensions > Console Python > Editeur, ouvrir le fichier, Executer.
-  3. Renvoyer tout le texte affiche dans la console.
-
-Ne modifie rien : lecture seule (versions, couches du projet courant).
+Dans l'éditeur de la console Python QGIS, ouvrir puis exécuter ce fichier.
+Le JSON imprimé ne contient ni clé, ni URI de connexion. Ne charge aucun plugin,
+source réseau ou modèle. La présence d'un algorithme ne valide pas une prise.
 """
-from qgis.core import Qgis, QgsProject
-from qgis.utils import plugins
+import json
+import platform
 
-print("=== QGIS ===")
-print("version :", Qgis.QGIS_VERSION)
 
-print("=== FilterMate ===")
-print("charge :", "filter_mate" in plugins)
-if "filter_mate" in plugins:
-    fm = plugins["filter_mate"]
-    print("classe :", type(fm).__name__)
-    app = getattr(fm, "app", None)
-    print("app :", type(app).__name__ if app is not None else "absente")
+def collect():
+    from qgis.core import Qgis, QgsApplication, QgsProject, QgsRasterLayer, QgsVectorLayer
+    from qgis.PyQt.QtCore import QT_VERSION_STR
+    from qgis.utils import plugins, pluginMetadata
 
-print("=== Projet courant ===")
-prj = QgsProject.instance()
-print("fichier :", prj.fileName() or "(non enregistre)")
-print("SCR :", prj.crs().authid())
-for layer in prj.mapLayers().values():
-    if layer.type().name == "VectorLayer" if hasattr(layer.type(), "name") else True:
-        try:
-            kind = {0: "point", 1: "ligne", 2: "polygone"}.get(layer.geometryType(), "?")
-            print(f"- {layer.name()} [{kind}] : {layer.featureCount()} entites | {layer.crs().authid()}")
-        except Exception as exc:  # noqa: BLE001
-            print(f"- {layer.name()} : illisible ({exc})")
+    project = QgsProject.instance()
+    loaded = 'filter_mate' in plugins
+    report = {'schema': 1, 'platform': platform.system(), 'python': platform.python_version(),
+              'qgis': Qgis.QGIS_VERSION, 'qt': QT_VERSION_STR,
+              'filtermate_loaded': loaded, 'filtermate_version': pluginMetadata('filter_mate', 'version') if loaded else None,
+              'project_saved': bool(project.fileName()), 'project_crs': project.crs().authid(), 'layers': []}
+    for layer in project.mapLayers().values():
+        item = {'name': layer.name(), 'valid': layer.isValid(), 'provider': layer.providerType(),
+                'crs': layer.crs().authid(), 'type': type(layer).__name__}
+        if isinstance(layer, QgsVectorLayer):
+            item.update(features=layer.featureCount(), geometry=int(layer.geometryType()),
+                        subset=layer.subsetString(), fields=[f.name() for f in layer.fields()])
+        elif isinstance(layer, QgsRasterLayer):
+            item.update(width=layer.width(), height=layer.height(), bands=layer.bandCount(),
+                        pixel_in_crs_units=[layer.rasterUnitsPerPixelX(), layer.rasterUnitsPerPixelY()])
+        report['layers'].append(item)
+    registry = QgsApplication.processingRegistry()
+    report['algorithms'] = {key: registry.algorithmById(key) is not None for key in (
+        'native:serviceareafromlayer', 'native:serviceareafrompoint',
+        'native:zonalstatisticsfb', 'qgis:zonalstatisticsfb', 'gdal:slope')}
+    report['qneat_algorithms'] = [a.id() for a in registry.algorithms() if 'qneat' in a.id().lower()]
+    if loaded:
+        from filter_mate.adapters.agent.settings import load_settings
+        settings = load_settings()
+        report['agent'] = {key: getattr(settings, key, None) for key in (
+            'preset', 'model', 'consent', 'autonomy', 'enabled_sources', 'local_filtering_only', 'tool_families')}
+    report['checks'] = {'windows': platform.system() == 'Windows', 'qgis4': Qgis.QGIS_VERSION_INT >= 40000,
+                        'filtermate_loaded': loaded, 'has_layers': bool(report['layers']),
+                        'all_current_layers_valid': all(x['valid'] for x in report['layers'])}
+    report['environment_ready'] = all(report['checks'].values())
+    report['scenario_validated'] = False
+    return report
 
-print("=== Teaser : attendus ===")
-print(" couches OSM : batiments, routes, ponts, riviere Urumea + MNT Copernicus 30 m")
-print(" agent : token API Claude + modele Haiku (variable d'environnement du poste)")
-print("OK = QGIS 4.x, FilterMate charge, couches presentes.")
+
+if __name__ in ('__main__', '__console__'):
+    print(json.dumps(collect(), ensure_ascii=False, indent=2))

@@ -32,20 +32,20 @@
 <div id="ctl"><button id="btn">Pause</button> <span id="tc">0:00 / 0:53</span></div>
 <script>
 const TAKES = [
-  {d:8, en:"One sentence. Buildings, roads, bridges, river, terrain.",
-      fr:"Une phrase. Bâtiments, routes, ponts, rivière, relief."},
-  {d:8, en:"Height, then mean height per building.",
-      fr:"L'altitude, puis l'altitude moyenne par bâtiment."},
-  {d:7, en:"Temporary files don't survive. Export keeps all.",
-      fr:"Le temporaire ne survit pas. L'export garde tout."},
+  {d:8, en:"OSM and a 30 m surface model.",
+      fr:"OSM et modèle de surface 30 m."},
+  {d:8, en:"Mean DEM elevation per footprint (surface model).",
+      fr:"Moyenne du DEM par emprise (modèle de surface)."},
+  {d:7, en:"Inspect the exported files.",
+      fr:"Vérifier les fichiers exportés."},
   {d:7, en:"Under 5 m by the river. Roads and bridges within 300 m.",
       fr:"Moins de 5 m près de la rivière. Routes et ponts à 300 m."},
-  {d:7, en:"Foot-evacuation isochrones around exposed buildings.",
-      fr:"Isochrones d'évacuation à pied autour des bâtiments exposés."},
-  {d:8, en:"One favorite. Replayed in one click.",
-      fr:"Un favori. Rejoué en un clic."},
-  {d:8, en:"Same rule, three layers, replayable. Screening at 30 m.",
-      fr:"Même règle, trois couches, rejouable. Tri à 30 m."},
+  {d:7, en:"Walking service area on the recorded network.",
+      fr:"Desserte piétonne sur le réseau enregistré."},
+  {d:8, en:"Favorite saved, then replayed (to verify).",
+      fr:"Favori enregistré, puis rejoué (à vérifier)."},
+  {d:8, en:"Illustrative screening, 30 m surface model.",
+      fr:"Tri illustratif, modèle de surface 30 m."},
 ];
 const TOTAL = TAKES.reduce((s,t)=>s+t.d,0); // 53
 let t = 0, playing = true, last = null;

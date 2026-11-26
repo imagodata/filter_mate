@@ -1,0 +1,65 @@
+{
+  "base_commit": "8fbd62c51271fd4120b060137c371c7f6ab4f1b6",
+  "sources": {
+    "/home/simon/dev/filter_mate/scripts/site_videos.py": {
+      "sha256": "46f21e9c14a14877b0ecf995332b2da13572f8f3f8858816c6d6fd2d3a1c90b9",
+      "bytes": 170629
+    },
+    "/home/simon/dev/filter_mate/scripts/site_videos_headless.sh": {
+      "sha256": "dc9c490ec53653e24173d45a97c6cd8e0e317795e3e96abd3c03bceadd67e6e2",
+      "bytes": 9860
+    },
+    "/home/simon/dev/filter_mate/scripts/qgis4_windows_check.py": {
+      "sha256": "e2847e6b154174123bbea2865f96527c50b080d23d3e13ba2aafbbbd8feffd43",
+      "bytes": 1652
+    },
+    "/home/simon/dev/filter_mate/docs/communication/urumea-flood-teaser/animatique.html": {
+      "sha256": "73e542d8948ec9bbba594d48d6543ea87ce047ee232e34d67e641b306e00e375",
+      "bytes": 3665
+    },
+    "/home/simon/dev/filter_mate/docs/communication/urumea-flood-teaser/fiche-prise-agent.md": {
+      "sha256": "f44c4641067893c2f7c89875347fb17cbf3961cebd7fe7a3c3365d15a26f23ad",
+      "bytes": 1389
+    },
+    "/home/simon/dev/filter_mate/docs/communication/urumea-flood-teaser/previz-teaser-53s.mp4": {
+      "sha256": "d299eaee89c4e4d3148857390e63df33691bc76adaec9fcdb44ddc2d6437bcc2",
+      "bytes": 557206
+    },
+    "/home/simon/dev/filter_mate/docs/communication/urumea-flood-teaser/presentation.html": {
+      "sha256": "b567c4f960679644fedb45159db2ed1d8d8c4a02ddf1a28a6a1374ca8f9f9c32",
+      "bytes": 4954
+    },
+    "/home/simon/dev/filter_mate/docs/communication/urumea-flood-teaser/script-montage.md": {
+      "sha256": "bae2d73ca263a8888547125f8c1f4e0e2b2c2fff074571eced9171e8d308284a",
+      "bytes": 4399
+    },
+    "/home/simon/dev/filter_mate/docs/communication/urumea-flood-teaser/storyboard.md": {
+      "sha256": "d1b6e4486141be26e89a983612795a7958e7feae110fc09d3ef919b88ac8bf44",
+      "bytes": 3563
+    },
+    "/home/simon/dev/filter_mate/docs/communication/solar-san-sebastian-teaser/storyboard.md": {
+      "sha256": "51da5747ae3e0e21fd0c81e08a9cba8cf783a1dc66a8b0b584ca6bec6c25a81d",
+      "bytes": 3162
+    },
+    "/home/simon/dev/filter_mate-clips/scripts/fm5_clip_render.py": {
+      "sha256": "23d01518cc45f45f2a9af3b2dba5682edbe2ca83ce0003661c4c80484d2ed54d",
+      "bytes": 17270
+    },
+    "/home/simon/dev/filter_mate-clips/scripts/fm5_clip_voice.py": {
+      "sha256": "09599ad31036fd14030e8303c5709568a5dd8c410feabde7a99ec2e5d25824ea",
+      "bytes": 4143
+    },
+    "/home/simon/dev/filter_mate-clips/scripts/sarlat_narration.json": {
+      "sha256": "7cb0c88a9c42b3870a9b78dd6dd57d0755b9f63429d94b911d6b23f7f3380e4d",
+      "bytes": 5898
+    },
+    "/home/simon/dev/filter_mate-agent-report/scripts/site_videos.py": {
+      "sha256": "7e1354aca48dfc373f7cee6faa384b35f48301f7157b1b1adaf3dbfcf8936f4c",
+      "bytes": 172738
+    },
+    "/home/simon/dev/filter_mate-clips/scripts/site_videos.py": {
+      "sha256": "232bfc48d0a0820b90dc8833ab791d79223ff8c17b6bb2a7d51c68e5bc2b3dda",
+      "bytes": 105131
+    }
+  }
+}

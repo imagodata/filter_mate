@@ -1,0 +1,114 @@
+{
+  "voices": {
+    "en": "en-GB-RyanNeural",
+    "fr": "fr-FR-HenriNeural"
+  },
+  "outro": {
+    "en": "FilterMate 5 · free and open source · github.com/imagodata/filter_mate",
+    "fr": "FilterMate 5 · gratuit et open source · github.com/imagodata/filter_mate"
+  },
+  "credits": {
+    "en": "Sarlat-la-Canéda · BD TOPO®, orthophotos and LiDAR HD © IGN · cadastre © DGFiP/Etalab · QGIS version in capture provenance",
+    "fr": "Sarlat-la-Canéda · BD TOPO®, orthophotos et LiDAR HD © IGN · cadastre © DGFiP/Etalab · version QGIS dans la fiche de prise"
+  },
+  "clips": {
+    "ln": {
+      "cover": {
+        "kicker": {
+          "en": "QGIS · FILTERMATE 5",
+          "fr": "QGIS · FILTERMATE 5"
+        },
+        "headline": {
+          "en": "Sarlat. Vectors, raster and LiDAR in QGIS.",
+          "fr": "Sarlat. Vecteurs, raster et LiDAR dans QGIS."
+        },
+        "sub": {
+          "en": "Vectors + raster + LiDAR in one panel",
+          "fr": "Vecteurs + raster + LiDAR dans un seul panneau"
+        }
+      },
+      "chapters": [
+        {
+          "en": "One street, four target layers",
+          "fr": "Une rue, quatre couches cibles"
+        },
+        {
+          "en": "Low ground, from a raster",
+          "fr": "Le terrain bas, depuis un raster"
+        },
+        {
+          "en": "AND: tall buildings, from the LiDAR",
+          "fr": "ET : bâtiments hauts, depuis le LiDAR"
+        }
+      ],
+      "badges": {
+        "1": {
+          "en": "{Buildings} buildings · {Parcels} parcels · DTM + LiDAR clipped",
+          "fr": "{Buildings} bâtiments · {Parcels} parcelles · MNT + LiDAR découpés"
+        },
+        "2": {
+          "en": "{Parcels} parcels · {Buildings} buildings · ≥50% footprint on pixels ≤136 m",
+          "fr": "{Parcels} parcelles · {Buildings} bâtiments · ≥50 % sur les pixels ≤136 m"
+        },
+        "3": {
+          "en": "{Buildings} buildings ≥ 9 m on low ground (AND)",
+          "fr": "{Buildings} bâtiments ≥ 9 m en terrain bas (ET)"
+        }
+      },
+      "lines": {
+        "i": {
+          "en": "One analysis, three steps, three kinds of data. FilterMate 5 chains vectors, rasters and LiDAR in a single panel in QGIS.",
+          "fr": "Une analyse, trois étapes, trois types de données. FilterMate 5 enchaîne vecteurs, rasters et LiDAR dans un seul panneau de QGIS."
+        },
+        "1a": {
+          "en": "We start with a works dossier on Boulevard Henri Arlet. Its nine road segments are picked in the multiple selection list.",
+          "fr": "On commence par un dossier de travaux sur le boulevard Henri Arlet. Ses neuf tronçons sont choisis dans la liste de sélection multiple."
+        },
+        "1b": {
+          "en": "Four targets of three kinds: buildings, parcels, the terrain model, and the LiDAR point cloud. Intersect, with a fifty metre buffer.",
+          "fr": "Quatre cibles de trois natures : bâtiments, parcelles, le modèle de terrain et le nuage LiDAR. Intersect, tampon de cinquante mètres."
+        },
+        "1c": {
+          "en": "The buildings and parcels in the corridor are kept. The terrain and point cloud use the same corridor. The counts on screen come from this take.",
+          "fr": "Les bâtiments et parcelles du couloir sont conservés. Le terrain et le nuage utilisent ce même couloir. Les comptes à l’écran viennent de cette prise."
+        },
+        "1t": {
+          "en": "Now let's leave the street, reset, and look at the whole tile.",
+          "fr": "Quittons la rue : on réinitialise et on regarde toute la tuile."
+        },
+        "2a": {
+          "en": "Now the whole tile. Which parcels and buildings sit on low ground? The source is the terrain model, and the value is the elevation.",
+          "fr": "Maintenant toute la tuile. Quelles parcelles et quels bâtiments sont en terrain bas ? La source est le modèle de terrain, la valeur est l'altitude."
+        },
+        "2b": {
+          "en": "Set the maximum to one hundred and thirty-six metres, and the kept pixels are previewed on the map. Target the parcels and the buildings, with at least fifty percent coverage.",
+          "fr": "Maximum cent trente-six mètres, et les pixels retenus sont prévisualisés sur la carte. Cibles : parcelles et bâtiments, avec au moins cinquante pour cent de couverture."
+        },
+        "2c": {
+          "en": "These parcels and buildings overlap the low terrain pixels on at least half of their footprint. The counts on screen are measured after filtering.",
+          "fr": "Ces parcelles et bâtiments recouvrent les pixels de terrain bas sur au moins la moitié de leur emprise. Les comptes à l’écran sont relevés après filtrage."
+        },
+        "2t": {
+          "en": "Now keep those buildings, and look at their height.",
+          "fr": "On garde ces bâtiments, et on regarde leur hauteur."
+        },
+        "3a": {
+          "en": "The source is the LiDAR cloud: class six, building points, at least nine metres above the terrain model. FilterMate computes height above this terrain model.",
+          "fr": "La source est le nuage LiDAR : classe six, points de bâtiments, à au moins neuf mètres au-dessus du modèle de terrain. FilterMate calcule la hauteur au-dessus de ce modèle."
+        },
+        "3b": {
+          "en": "The buildings are the target, combined with AND, so the new filter applies on top of the low ground result.",
+          "fr": "La cible : les bâtiments, combinés avec ET : le nouveau filtre s'applique sur le résultat du terrain bas."
+        },
+        "3c": {
+          "en": "The remaining buildings pass the low terrain filter and the LiDAR filter. Read their measured count on screen.",
+          "fr": "Les bâtiments restants satisfont le filtre de terrain bas et le filtre LiDAR. Leur compte mesuré est affiché à l’écran."
+        },
+        "3d": {
+          "en": "From a street to the tall buildings of the low ground: vector, raster and LiDAR, chained in one panel.",
+          "fr": "D'une rue aux bâtiments hauts du terrain bas : vecteur, raster et LiDAR, enchaînés dans un seul panneau."
+        }
+      }
+    }
+  }
+}
