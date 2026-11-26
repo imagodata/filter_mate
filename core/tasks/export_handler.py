@@ -59,6 +59,10 @@ class ExportHandler:
         # SHP DBF pre-flight warnings (B3) and per-layer batch failures only
         # reached the log file.
         self._last_warnings: List[str] = []
+        # Detail of the most recent validate_export_parameters() failure.
+        # execute_exporting() surfaces it so the message bar no longer shows
+        # only the generic "Export configuration validation failed".
+        self._last_validation_error: Optional[str] = None
 
     def _collect_warnings(self, result: Any) -> None:
         """Extract user-relevant warnings from an export result object.
@@ -93,6 +97,7 @@ class ExportHandler:
 
         result = validate_export_parameters(task_parameters, ENV_VARS)
         if result.valid:
+            self._last_validation_error = None
             return {
                 'layers': result.layers,
                 'projection': result.projection,
@@ -105,6 +110,7 @@ class ExportHandler:
                 'preserve_groups': result.preserve_groups,
             }
         else:
+            self._last_validation_error = result.error_message
             logger.error(result.error_message)
             return None
 
@@ -220,6 +226,9 @@ class ExportHandler:
         # Validate parameters
         export_config = self.validate_export_parameters(task_parameters)
         if not export_config:
+            detail = getattr(self, '_last_validation_error', None)
+            if detail:
+                return False, f'Export configuration validation failed: {detail}', None
             return False, 'Export configuration validation failed', None
 
         layers = export_config['layers']

@@ -2672,18 +2672,20 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 else:
                     logger.warning("⚠️ Controller populate_export_combobox returned False")
 
-                # FIX 2026-01-22: Sync HAS_LAYERS_TO_EXPORT after loading project
+                # FIX 2026-01-22: Sync LAYERS_TO_EXPORT after loading project
                 # If layers are already checked in the widget (from saved project state),
-                # we need to update HAS_LAYERS_TO_EXPORT accordingly
+                # we need to update the list + HAS_LAYERS_TO_EXPORT accordingly
                 try:
                     layers_to_export = self.get_layers_to_export()
-                    current_has_layers = self.project_props.get('EXPORTING', {}).get('HAS_LAYERS_TO_EXPORT', False)
-
-                    if layers_to_export:
+                    if layers_to_export is not None:
                         has_layers = len(layers_to_export) > 0
+                        exporting = self.project_props.setdefault('EXPORTING', {})
+                        if list(exporting.get('LAYERS_TO_EXPORT', [])) != list(layers_to_export):
+                            exporting['LAYERS_TO_EXPORT'] = list(layers_to_export)
+                        current_has_layers = exporting.get('HAS_LAYERS_TO_EXPORT', False)
 
                         if has_layers != current_has_layers:
-                            self.project_props['EXPORTING']['HAS_LAYERS_TO_EXPORT'] = has_layers
+                            exporting['HAS_LAYERS_TO_EXPORT'] = has_layers
                             # Update button widget
                             has_layers_widget = self.widgets.get('EXPORTING', {}).get('HAS_LAYERS_TO_EXPORT', {}).get('WIDGET')
                             if has_layers_widget and hasattr(has_layers_widget, 'setChecked'):
@@ -7555,16 +7557,21 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if not self.widgets_initialized or not self.current_layer:
                 return
 
-            # FIX 2026-01-22 v4.3.7: Sync HAS_LAYERS_TO_EXPORT JUST-IN-TIME before export
-            # Qt restores widget states without emitting signals - sync flag to match UI
+            # FIX 2026-01-22 v4.3.7: Sync LAYERS_TO_EXPORT JUST-IN-TIME before export
+            # Qt restores widget states without emitting signals - sync list + flag to match UI.
+            # build_export_params() reads project_props['EXPORTING']['LAYERS_TO_EXPORT']:
+            # syncing only the flag left a stale/empty list -> "Empty layers list for export".
             layers_to_export = None
             try:
                 layers_to_export = self.get_layers_to_export()
-                if layers_to_export:
+                if layers_to_export is not None:
                     has_layers = len(layers_to_export) > 0
-                    current_has_layers = self.project_props.get('EXPORTING', {}).get('HAS_LAYERS_TO_EXPORT', False)
+                    exporting = self.project_props.setdefault('EXPORTING', {})
+                    if list(exporting.get('LAYERS_TO_EXPORT', [])) != list(layers_to_export):
+                        exporting['LAYERS_TO_EXPORT'] = list(layers_to_export)
+                    current_has_layers = exporting.get('HAS_LAYERS_TO_EXPORT', False)
                     if has_layers != current_has_layers:
-                        self.project_props['EXPORTING']['HAS_LAYERS_TO_EXPORT'] = has_layers
+                        exporting['HAS_LAYERS_TO_EXPORT'] = has_layers
                         has_layers_widget = self.widgets.get('EXPORTING', {}).get('HAS_LAYERS_TO_EXPORT', {}).get('WIDGET')
                         if has_layers_widget and hasattr(has_layers_widget, 'setChecked'):
                             with SignalBlocker(has_layers_widget):
@@ -7577,65 +7584,78 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             try:
                 exporting_props = self.project_props.get('EXPORTING', {})
 
-                # Sync HAS_DATATYPE_TO_EXPORT
+                # Sync HAS_DATATYPE_TO_EXPORT (value too: the user may have switched
+                # format after the flag was already on, e.g. SHP -> GPKG)
                 datatype_widget = self.widgets.get('EXPORTING', {}).get('DATATYPE_TO_EXPORT', {}).get('WIDGET')
                 if datatype_widget:
                     current_datatype = datatype_widget.currentText()
-                    if current_datatype and current_datatype.strip() and not exporting_props.get('HAS_DATATYPE_TO_EXPORT', False):
-                        self.project_props['EXPORTING']['HAS_DATATYPE_TO_EXPORT'] = True
-                        self.project_props['EXPORTING']['DATATYPE_TO_EXPORT'] = current_datatype
-                        has_datatype_widget = self.widgets.get('EXPORTING', {}).get('HAS_DATATYPE_TO_EXPORT', {}).get('WIDGET')
-                        if has_datatype_widget and hasattr(has_datatype_widget, 'setChecked'):
-                            with SignalBlocker(has_datatype_widget):
-                                has_datatype_widget.setChecked(True)
+                    if current_datatype and current_datatype.strip():
+                        stored_datatype = exporting_props.get('DATATYPE_TO_EXPORT', '')
+                        if not exporting_props.get('HAS_DATATYPE_TO_EXPORT', False) or stored_datatype != current_datatype:
+                            self.project_props['EXPORTING']['HAS_DATATYPE_TO_EXPORT'] = True
+                            self.project_props['EXPORTING']['DATATYPE_TO_EXPORT'] = current_datatype
+                            has_datatype_widget = self.widgets.get('EXPORTING', {}).get('HAS_DATATYPE_TO_EXPORT', {}).get('WIDGET')
+                            if has_datatype_widget and hasattr(has_datatype_widget, 'setChecked'):
+                                with SignalBlocker(has_datatype_widget):
+                                    has_datatype_widget.setChecked(True)
 
-                # Sync HAS_OUTPUT_FOLDER_TO_EXPORT
+                # Sync HAS_OUTPUT_FOLDER_TO_EXPORT (value too: a new .gpkg path
+                # picked after the flag was on must replace the stored one)
                 output_folder_widget = self.widgets.get('EXPORTING', {}).get('OUTPUT_FOLDER_TO_EXPORT', {}).get('WIDGET')
                 if output_folder_widget:
                     current_folder = output_folder_widget.text() if hasattr(output_folder_widget, 'text') else ''
-                    if current_folder and current_folder.strip() and not exporting_props.get('HAS_OUTPUT_FOLDER_TO_EXPORT', False):
-                        self.project_props['EXPORTING']['HAS_OUTPUT_FOLDER_TO_EXPORT'] = True
-                        self.project_props['EXPORTING']['OUTPUT_FOLDER_TO_EXPORT'] = current_folder
-                        has_folder_widget = self.widgets.get('EXPORTING', {}).get('HAS_OUTPUT_FOLDER_TO_EXPORT', {}).get('WIDGET')
-                        if has_folder_widget and hasattr(has_folder_widget, 'setChecked'):
-                            with SignalBlocker(has_folder_widget):
-                                has_folder_widget.setChecked(True)
+                    if current_folder and current_folder.strip():
+                        stored_folder = exporting_props.get('OUTPUT_FOLDER_TO_EXPORT', '')
+                        if not exporting_props.get('HAS_OUTPUT_FOLDER_TO_EXPORT', False) or stored_folder != current_folder:
+                            self.project_props['EXPORTING']['HAS_OUTPUT_FOLDER_TO_EXPORT'] = True
+                            self.project_props['EXPORTING']['OUTPUT_FOLDER_TO_EXPORT'] = current_folder
+                            has_folder_widget = self.widgets.get('EXPORTING', {}).get('HAS_OUTPUT_FOLDER_TO_EXPORT', {}).get('WIDGET')
+                            if has_folder_widget and hasattr(has_folder_widget, 'setChecked'):
+                                with SignalBlocker(has_folder_widget):
+                                    has_folder_widget.setChecked(True)
 
                 # Sync HAS_ZIP_TO_EXPORT (FilterMate 5: a ZIP path typed without the toggle counts too)
                 zip_widget = self.widgets.get('EXPORTING', {}).get('ZIP_TO_EXPORT', {}).get('WIDGET')
                 if zip_widget:
                     current_zip = zip_widget.text() if hasattr(zip_widget, 'text') else ''
-                    if current_zip and current_zip.strip() and not exporting_props.get('HAS_ZIP_TO_EXPORT', False):
-                        self.project_props['EXPORTING']['HAS_ZIP_TO_EXPORT'] = True
-                        self.project_props['EXPORTING']['ZIP_TO_EXPORT'] = current_zip
-                        has_zip_widget = self.widgets.get('EXPORTING', {}).get('HAS_ZIP_TO_EXPORT', {}).get('WIDGET')
-                        if has_zip_widget and hasattr(has_zip_widget, 'setChecked'):
-                            with SignalBlocker(has_zip_widget):
-                                has_zip_widget.setChecked(True)
+                    if current_zip and current_zip.strip():
+                        stored_zip = exporting_props.get('ZIP_TO_EXPORT', '')
+                        if not exporting_props.get('HAS_ZIP_TO_EXPORT', False) or stored_zip != current_zip:
+                            self.project_props['EXPORTING']['HAS_ZIP_TO_EXPORT'] = True
+                            self.project_props['EXPORTING']['ZIP_TO_EXPORT'] = current_zip
+                            has_zip_widget = self.widgets.get('EXPORTING', {}).get('HAS_ZIP_TO_EXPORT', {}).get('WIDGET')
+                            if has_zip_widget and hasattr(has_zip_widget, 'setChecked'):
+                                with SignalBlocker(has_zip_widget):
+                                    has_zip_widget.setChecked(True)
 
                 # Sync HAS_PROJECTION_TO_EXPORT
                 projection_widget = self.widgets.get('EXPORTING', {}).get('PROJECTION_TO_EXPORT', {}).get('WIDGET')
                 if projection_widget and hasattr(projection_widget, 'crs'):
                     crs = projection_widget.crs()
-                    if crs and crs.isValid() and not exporting_props.get('HAS_PROJECTION_TO_EXPORT', False):
-                        self.project_props['EXPORTING']['HAS_PROJECTION_TO_EXPORT'] = True
-                        self.project_props['EXPORTING']['PROJECTION_TO_EXPORT'] = crs.toWkt()
-                        has_proj_widget = self.widgets.get('EXPORTING', {}).get('HAS_PROJECTION_TO_EXPORT', {}).get('WIDGET')
-                        if has_proj_widget and hasattr(has_proj_widget, 'setChecked'):
-                            with SignalBlocker(has_proj_widget):
-                                has_proj_widget.setChecked(True)
+                    if crs and crs.isValid():
+                        current_wkt = crs.toWkt()
+                        stored_wkt = exporting_props.get('PROJECTION_TO_EXPORT', '')
+                        if not exporting_props.get('HAS_PROJECTION_TO_EXPORT', False) or stored_wkt != current_wkt:
+                            self.project_props['EXPORTING']['HAS_PROJECTION_TO_EXPORT'] = True
+                            self.project_props['EXPORTING']['PROJECTION_TO_EXPORT'] = current_wkt
+                            has_proj_widget = self.widgets.get('EXPORTING', {}).get('HAS_PROJECTION_TO_EXPORT', {}).get('WIDGET')
+                            if has_proj_widget and hasattr(has_proj_widget, 'setChecked'):
+                                with SignalBlocker(has_proj_widget):
+                                    has_proj_widget.setChecked(True)
 
                 # Sync HAS_STYLES_TO_EXPORT
                 styles_widget = self.widgets.get('EXPORTING', {}).get('STYLES_TO_EXPORT', {}).get('WIDGET')
                 if styles_widget:
                     current_style = styles_widget.currentText() if hasattr(styles_widget, 'currentText') else ''
-                    if current_style and current_style.strip() and not exporting_props.get('HAS_STYLES_TO_EXPORT', False):
-                        self.project_props['EXPORTING']['HAS_STYLES_TO_EXPORT'] = True
-                        self.project_props['EXPORTING']['STYLES_TO_EXPORT'] = current_style
-                        has_styles_widget = self.widgets.get('EXPORTING', {}).get('HAS_STYLES_TO_EXPORT', {}).get('WIDGET')
-                        if has_styles_widget and hasattr(has_styles_widget, 'setChecked'):
-                            with SignalBlocker(has_styles_widget):
-                                has_styles_widget.setChecked(True)
+                    if current_style and current_style.strip():
+                        stored_style = exporting_props.get('STYLES_TO_EXPORT', '')
+                        if not exporting_props.get('HAS_STYLES_TO_EXPORT', False) or stored_style != current_style:
+                            self.project_props['EXPORTING']['HAS_STYLES_TO_EXPORT'] = True
+                            self.project_props['EXPORTING']['STYLES_TO_EXPORT'] = current_style
+                            has_styles_widget = self.widgets.get('EXPORTING', {}).get('HAS_STYLES_TO_EXPORT', {}).get('WIDGET')
+                            if has_styles_widget and hasattr(has_styles_widget, 'setChecked'):
+                                with SignalBlocker(has_styles_widget):
+                                    has_styles_widget.setChecked(True)
             except Exception as e:
                 logger.warning(f"Failed to sync export flags: {e}")
 

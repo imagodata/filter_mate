@@ -2085,3 +2085,58 @@ class TestFormatRegistry:
         assert get_extension_for_format('TAB') == '.tab'
         # Unknown driver still falls back gracefully
         assert get_extension_for_format('Some_Unknown_Format') == '.some_unknown_format'
+
+
+# ---------------------------------------------------------------------------
+# Validation failure must surface its cause (multi-layer GPKG report:
+# only "Export configuration validation failed" reached the message bar)
+# ---------------------------------------------------------------------------
+
+class TestValidationFailureSurfacesDetail:
+    """The handler used to discard the validator's error_message and return
+    only the generic 'Export configuration validation failed', leaving users
+    with no hint (stale LAYERS_TO_EXPORT list, missing datatype, ...)."""
+
+    @pytest.fixture(autouse=True)
+    def setup_handler(self):
+        with patch('core.tasks.export_handler.StreamingExporter'), \
+             patch('core.tasks.export_handler.StreamingConfig'):
+            from core.tasks.export_handler import ExportHandler
+            self.handler = ExportHandler()
+
+    def _params_stale_layers_list(self):
+        # HAS_LAYERS True but the layers list the builder resolved is empty:
+        # exactly what a stale project_props['EXPORTING']['LAYERS_TO_EXPORT']
+        # produces when the just-in-time widget sync is missing.
+        return {
+            "task": {
+                "EXPORTING": {
+                    "HAS_LAYERS_TO_EXPORT": True,
+                    "HAS_DATATYPE_TO_EXPORT": True,
+                    "DATATYPE_TO_EXPORT": "GPKG",
+                    "HAS_OUTPUT_FOLDER_TO_EXPORT": True,
+                    "OUTPUT_FOLDER_TO_EXPORT": "/tmp/out.gpkg",
+                    "HAS_STYLES_TO_EXPORT": False,
+                },
+                "layers": [],
+            },
+        }
+
+    def test_empty_layers_list_reason_reported(self):
+        from core.export.export_validator import validate_export_parameters
+        result = validate_export_parameters(self._params_stale_layers_list())
+        assert result.valid is False
+        assert "Empty layers list" in (result.error_message or "")
+
+    def test_handler_message_contains_validator_detail(self):
+        success, message, _ = self.handler.execute_exporting(
+            task_parameters=self._params_stale_layers_list(),
+            project=MagicMock(),
+            set_progress=MagicMock(), set_description=MagicMock(),
+            is_canceled=MagicMock(return_value=False),
+        )
+        assert success is False
+        assert "validation failed" in message.lower()
+        # The regression: the specific cause must travel with the message.
+        assert "Empty layers list" in message
+        assert self.handler._last_validation_error is not None
