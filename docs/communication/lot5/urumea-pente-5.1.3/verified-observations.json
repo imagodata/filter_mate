@@ -1,0 +1,34 @@
+{
+  "verified": true,
+  "expected_counts_from_real_filter_tools": {
+    "Bâtiments pente": 1079,
+    "Ponts lignes": 130,
+    "Ponts polygones": 8,
+    "Routes": 587
+  },
+  "exported_counts": {
+    "Bâtiments pente": 1079,
+    "Routes": 587,
+    "Ponts lignes": 130,
+    "Ponts polygones": 8,
+    "Urumea": 2,
+    "Couloir Urumea 500 m": 1
+  },
+  "replay_operations": [],
+  "identical_filters_after_replay": null,
+  "favorite_scope": "not_in_this_take",
+  "independent_building_ids_match": true,
+  "independent_building_count": 1079,
+  "independent_sql_counts": {
+    "Routes": 587,
+    "Ponts lignes": 130,
+    "Ponts polygones": 8
+  },
+  "slope_raster_max_abs_difference_percent": 0.0,
+  "mean_slope_max_abs_difference_percent": 0.0,
+  "buffer_m": 500,
+  "buffer_segments": 5,
+  "slope_threshold_percent": 10,
+  "tool_errors": [],
+  "scope": "Real QGIS results, tool arguments and reopened exports; agent prose is not evidence."
+}

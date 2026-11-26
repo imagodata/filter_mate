@@ -1,6 +1,8 @@
 # Urumea : proposition de reprise avec la pente et une nouvelle voix
 
-Proposition préparée après le retour sur le montage de 64,32 s. Le film existant
+Proposition préparée après le retour sur le montage de 64,32 s. La reprise et les
+choix vocaux définitifs sont documentés dans [la livraison pente/ElevenLabs](../urumea-pente-5.1.3/README.md).
+Le film existant
 reste disponible dans `../urumea-linkedin-5.1.3/`. Cette reprise n'est pas encore
 tournée : les nombres ci-dessous sont des calculs préparatoires sur les mêmes
 données, et non des résultats observés dans une nouvelle conversation de l'agent.

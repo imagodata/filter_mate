@@ -1,0 +1,149 @@
+{
+  "video": "urumea-pente-5.1.3-fr.mp4",
+  "duration_s": 102.4,
+  "sha256": "69b63dc5359a9bf45fc706dd68d278301c29469180d3e00115c7eabaea58ba19",
+  "full_decode_check": "passed",
+  "intro_voice": "Tony - Punchy Ad & Social",
+  "body_voice": "Benjamin - Clear and Engaging",
+  "package": {
+    "file": "filter_mate_v5.1.3.zip",
+    "version": "5.1.3",
+    "sha256": "df06807d0aa706d1e49bea22839b4ea1eb0ba683d623b0477fec83e6b14a048a",
+    "source": "latest dist snapshot at capture preparation; ZIP changed since previous film"
+  },
+  "take": "/w/out/take05/urumea",
+  "segments": [
+    {
+      "stage": "intro",
+      "voice": "00-intro-imagodata",
+      "start_s": 0,
+      "duration_s": 5.52,
+      "voice_offset_s": 0
+    },
+    {
+      "stage": "place",
+      "voice": "01-intro",
+      "start_s": 5.52,
+      "duration_s": 10.72,
+      "voice_offset_s": 0.7
+    },
+    {
+      "stage": "pente",
+      "voice": "02-pente",
+      "start_s": 16.240000000000002,
+      "duration_s": 17.0,
+      "voice_offset_s": 0.7
+    },
+    {
+      "stage": "moyenne",
+      "voice": "03-moyenne",
+      "start_s": 33.24,
+      "duration_s": 16.0,
+      "voice_offset_s": 0.7
+    },
+    {
+      "stage": "seuil",
+      "voice": "04-seuil",
+      "start_s": 49.24,
+      "duration_s": 12.0,
+      "voice_offset_s": 0.7
+    },
+    {
+      "stage": "filtre",
+      "voice": "05-riviere",
+      "start_s": 61.24,
+      "duration_s": 17.0,
+      "voice_offset_s": 0.7
+    },
+    {
+      "stage": "reseau",
+      "voice": "06-reseau",
+      "start_s": 78.24000000000001,
+      "duration_s": 12.0,
+      "voice_offset_s": 0.7
+    },
+    {
+      "stage": "export",
+      "voice": "08-fin",
+      "start_s": 90.24000000000001,
+      "duration_s": 12.16,
+      "voice_offset_s": 0.7
+    }
+  ],
+  "verification": {
+    "verified": true,
+    "expected_counts_from_real_filter_tools": {
+      "Bâtiments pente": 1079,
+      "Ponts lignes": 130,
+      "Ponts polygones": 8,
+      "Routes": 587
+    },
+    "exported_counts": {
+      "Bâtiments pente": 1079,
+      "Routes": 587,
+      "Ponts lignes": 130,
+      "Ponts polygones": 8,
+      "Urumea": 2,
+      "Couloir Urumea 500 m": 1
+    },
+    "replay_operations": [],
+    "identical_filters_after_replay": null,
+    "favorite_scope": "not_in_this_take",
+    "independent_building_ids_match": true,
+    "independent_building_count": 1079,
+    "independent_sql_counts": {
+      "Routes": 587,
+      "Ponts lignes": 130,
+      "Ponts polygones": 8
+    },
+    "slope_raster_max_abs_difference_percent": 0.0,
+    "mean_slope_max_abs_difference_percent": 0.0,
+    "buffer_m": 500,
+    "buffer_segments": 5,
+    "slope_threshold_percent": 10,
+    "tool_errors": [],
+    "scope": "Real QGIS results, tool arguments and reopened exports; agent prose is not evidence."
+  },
+  "publication": "not_published",
+  "delivery_status": "working_MNS_edit; MNT/official-zoning scenario proposed separately",
+  "raw_frames": 2440,
+  "raw_archive": "raw/frames with raw/meta.json",
+  "source_scripts_sha256": {
+    "urumea_slope_capture.py": "13373822760489c334e9e7617e7cd166f96ba5cd998adf9e266b9cd4737a4ad2",
+    "urumea_slope_verify.py": "6a4e8b6ad4e1aa789886ba515d152902d48327d364c3e162f7c00b25658f3521",
+    "urumea_slope_render.py": "485fa2c41125d23c821232e24aa420762912660912bf95147fa66454f3c4d896",
+    "urumea_voice_elevenlabs.py": "e7aac5482d49156db0a7253494c1557ec587135bf40e70d32db430b9170fcdd2"
+  },
+  "later_dist_snapshot_observed": "86a5712ef34cfe43f8594a4f24f61fdb367519c31472261a2eba77c3aefe05c7",
+  "av_validation": {
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "25/1"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2,
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "format": {
+        "duration": "102.400000",
+        "size": "7829138"
+      }
+    },
+    "audio_levels_db": {
+      "mean_volume": -24.0,
+      "max_volume": -4.4
+    },
+    "clipping": false
+  }
+}

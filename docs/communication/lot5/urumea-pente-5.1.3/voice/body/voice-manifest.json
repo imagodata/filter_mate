@@ -1,0 +1,105 @@
+{
+  "provider": "elevenlabs",
+  "voice_name": "Benjamin - Clear and Engaging",
+  "voice_id": "F9KUTOne5xOKqAbIU7yg",
+  "model_id": "eleven_v4",
+  "publication": "not_published",
+  "lines": [
+    {
+      "id": "01-intro",
+      "text": "À Saint-Sébastien, cherchons des bâtiments proches de la rivière, dans des secteurs peu pentus.",
+      "file": "01-intro.mp3",
+      "request_sha256": "8b7773c3543df23930635a0e2eb22b52810166317bc739d1c9d4e2462088d25e",
+      "sha256": "5aea5aacdb584f6e973e9258f8f46ffd2b6acb1bc98006b986510c3e0bf30bf1",
+      "duration_s": 6.0,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "02-pente",
+      "text": "On part du relief et on en tire une carte de pente. Les couleurs font ressortir les zones les plus douces.",
+      "file": "02-pente.mp3",
+      "request_sha256": "496ef2a0c0147255786f2ad1c7fc8b700809da39128fb942669cfe39bd68dda2",
+      "sha256": "49fb6dc359adb5385a05557bcda83e6e27978366932cf5b38c4fcc2b73ea7090",
+      "duration_s": 7.44,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "03-moyenne",
+      "text": "Pour chaque bâtiment, on récupère la pente moyenne dans ce modèle. On pourra ainsi filtrer directement les bâtiments.",
+      "file": "03-moyenne.mp3",
+      "request_sha256": "b4883d01c03fe211faea4b76b9553b52fb3dcb51d5204104d4c0e63760039cb9",
+      "sha256": "2e43d55332a1f98f20b5ae4c989216093a15a875bbc03916e906d83ca7a3b151",
+      "duration_s": 7.76,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "04-seuil",
+      "text": "Gardons ceux dont la pente moyenne est inférieure à dix pour cent. Voilà notre premier critère.",
+      "file": "04-seuil.mp3",
+      "request_sha256": "3e75544bf376df1270eeaddab2dc6020f9fb9474659bad832342dc39eccb9503",
+      "sha256": "9ffa3491a01c725f8189334687136c6108ad2bd88ec70f7d7175d8a69c936729",
+      "duration_s": 6.8,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "05-riviere",
+      "text": "J’ajoute un second critère : rester à moins de cinq cents mètres de l’Urumea. Le résultat se concentre autour de la rivière.",
+      "file": "05-riviere.mp3",
+      "request_sha256": "99257a409d75e227d6566d74b29538bb4526f5f240cdfb7068c29532fa6a3253",
+      "sha256": "fb693f38e9764fcfcd869aa33d75690ebaa0f234fa0f32d1c2a9310b6f5602bf",
+      "duration_s": 8.56,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "06-reseau",
+      "text": "Autour de ces bâtiments, on garde aussi les routes et les ponts dans un rayon de trois cents mètres.",
+      "file": "06-reseau.mp3",
+      "request_sha256": "cc3d3e54db6313e79f12375b15bd8cd1deaa3abf72225e335db5a4983ea8457e",
+      "sha256": "c902614873efcc84cb7e29dc4ce8ac73bbac5360ff5f4824b2f5df058d503b0a",
+      "duration_s": 5.6,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "07-favori",
+      "text": "J’enregistre le filtre. On revient à la carte complète… puis on rejoue le favori. On retrouve les mêmes bâtiments, les mêmes routes et les mêmes ponts.",
+      "file": "07-favori.mp3",
+      "request_sha256": "bc7e3e197926ae368f498d89dda6e213359cb698cd797e674c58010f9514c0ec",
+      "sha256": "6e94dbebcf6880bed294510589afc4b7fc09faac43050edc5420c1745a13d60f",
+      "duration_s": 10.56,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "08-fin",
+      "text": "Les résultats peuvent être exportés. Ici, on montre une méthode de tri, pas une prévision de crue.",
+      "file": "08-fin.mp3",
+      "request_sha256": "3c412bac9cd5f45734192674af39fb83b2163fb7a77311861ea3daece4790449",
+      "sha256": "8bb7446b1e787f56b207c257ee76d40c63383c1f3acb4904873bcc36a9462abf",
+      "duration_s": 7.44,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    }
+  ]
+}

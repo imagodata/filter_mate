@@ -1,0 +1,59 @@
+1
+00:00:00,000 --> 00:00:02,027
+Imagodata présente…
+
+2
+00:00:02,027 --> 00:00:03,040
+FilterMate.
+
+3
+00:00:06,220 --> 00:00:12,220
+À Saint-Sébastien, cherchons des bâtiments proches de la rivière, dans des secteurs peu pentus.
+
+4
+00:00:16,940 --> 00:00:21,191
+On part du relief et on en tire une carte de pente.
+
+5
+00:00:21,191 --> 00:00:24,380
+Les couleurs font ressortir les zones les plus douces.
+
+6
+00:00:33,940 --> 00:00:38,682
+Pour chaque bâtiment, on récupère la pente moyenne dans ce modèle.
+
+7
+00:00:38,682 --> 00:00:41,700
+On pourra ainsi filtrer directement les bâtiments.
+
+8
+00:00:49,940 --> 00:00:55,040
+Gardons ceux dont la pente moyenne est inférieure à dix pour cent.
+
+9
+00:00:55,040 --> 00:00:56,740
+Voilà notre premier critère.
+
+10
+00:01:01,940 --> 00:01:03,885
+J’ajoute un second critère :
+
+11
+00:01:03,885 --> 00:01:07,387
+rester à moins de cinq cents mètres de l’Urumea.
+
+12
+00:01:07,387 --> 00:01:10,500
+Le résultat se concentre autour de la rivière.
+
+13
+00:01:18,940 --> 00:01:24,540
+Autour de ces bâtiments, on garde aussi les routes et les ponts dans un rayon de trois cents mètres.
+
+14
+00:01:30,940 --> 00:01:33,128
+Les résultats peuvent être exportés.
+
+15
+00:01:33,128 --> 00:01:38,380
+Ici, on montre une méthode de tri, pas une prévision de crue.
