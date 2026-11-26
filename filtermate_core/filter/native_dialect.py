@@ -1045,7 +1045,7 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, diale
             if is_null_value(value):
                 raise Unsupported('A NULL key cannot be listed')
         if json_lists and dialect == SQLITE:
-            return 'IN (SELECT value FROM json_each({}))'.format(_json_keys_literal(list(values), numeric))
+            return 'IN (SELECT value FROM json_each({}))'.format(_json_keys_literal(list(values), numeric))  # nosec B608 - _json_keys_literal escapes SQL quotes
         return 'IN ({})'.format(', '.join(format_key_literal(value, numeric, SQL) for value in values))
 
     if dialect not in (SQLITE, POSTGRESQL):

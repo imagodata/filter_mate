@@ -174,15 +174,17 @@ class FavoritesMigrationService:
                 if "spatial_config" in columns and "remote_layers" in columns else ""
             # Get orphan favorites (only fixed column names are interpolated: no user input in the text)
             if source_project_uuid:
-                cursor.execute("""
-                    SELECT f.id, f.name, f.expression, f.layer_name""" + extra_here + """ FROM fm_favorites f
+                cursor.execute(
+                    "SELECT f.id, f.name, f.expression, f.layer_name" + extra_here +  # nosec B608 - fixed columns; values are bound
+                    """ FROM fm_favorites f
                     WHERE f.project_uuid = ?
                 """, (source_project_uuid,))  # nosec B608 - fixed columns only
             else:
                 # Not the target itself: a project never saved has the shape of an orphan, and its own favorites
                 # were found identical to themselves and deleted (review of 2026-11-24).
-                cursor.execute("""
-                    SELECT f.id, f.name, f.expression, f.layer_name""" + extra_here + """ FROM fm_favorites f
+                cursor.execute(
+                    "SELECT f.id, f.name, f.expression, f.layer_name" + extra_here +  # nosec B608 - fixed columns; values are bound
+                    """ FROM fm_favorites f
                     JOIN fm_projects p ON f.project_uuid = p.project_id
                     WHERE (p.project_name = '' OR p.project_name IS NULL)
                       AND (p.project_path = '' OR p.project_path IS NULL)
@@ -205,7 +207,7 @@ class FavoritesMigrationService:
             extra = ", spatial_config, remote_layers" if "spatial_config" in columns and "remote_layers" in columns \
                 else ""
             cursor.execute(
-                "SELECT name, expression, layer_name" + extra + " FROM fm_favorites WHERE project_uuid = ?",
+                "SELECT name, expression, layer_name" + extra + " FROM fm_favorites WHERE project_uuid = ?",  # nosec B608 - fixed columns; UUID bound
                 (target_project_uuid,)
             )  # nosec B608 - fixed columns only
             present = {_dedupe_key(*row) for row in cursor.fetchall()}
@@ -308,7 +310,8 @@ class FavoritesMigrationService:
             extra = ", spatial_config, remote_layers" if "spatial_config" in columns and "remote_layers" in columns \
                 else ""
             cursor.execute(
-                """SELECT id, name, expression, layer_name""" + extra + """ FROM fm_favorites
+                "SELECT id, name, expression, layer_name" + extra +  # nosec B608 - fixed columns; UUID bound
+                """ FROM fm_favorites
                    WHERE project_uuid = ?
                    ORDER BY use_count DESC, created_at ASC, id ASC""",
                 (project_uuid,)

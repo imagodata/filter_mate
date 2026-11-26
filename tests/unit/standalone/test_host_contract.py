@@ -93,7 +93,7 @@ NOT_IN_WHEEL = {
     ".claude", ".dockerignore", ".flake8", ".gitattributes", ".github", ".gitignore", ".mcp.json", ".serena", ".vscode", "CLAUDE.md",
     "CONTRIBUTING.md", "_bmad", "_bmad-output", "docs", "knowledge", "logs", "pyproject.toml", "pytest.ini",
     "requirements-api.txt", "requirements-mcp.txt", "requirements-test-api.txt", "requirements-test.txt", "scripts",
-    "setup.cfg", "tests", "website",
+    "setup.cfg", "tests", "website", "reports", "research_notes",
 }
 
 

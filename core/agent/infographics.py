@@ -104,7 +104,8 @@ def svg_size(svg: str) -> Tuple[int, int]:
 
 
 def _part(svg: str, position: int, left: int, top: int, width: int, height: int) -> str:
-    root = ElementTree.fromstring(svg)
+    svg = sanitize_svg(svg, max_side=MAX_INFOGRAPHIC_SIDE)
+    root = ElementTree.fromstring(svg)  # nosec B314 - sanitize_svg rejects DTDs and entities before parsing
     ids = {element.attrib["id"]: f"part{position}_{element.attrib['id']}"
            for element in root.iter() if "id" in element.attrib}
     for element in root.iter():

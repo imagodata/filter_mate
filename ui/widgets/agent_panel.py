@@ -869,6 +869,8 @@ class AgentPanel(QFrame):
                         qualifier = parent.name() or ""
                 rows.append((layer.id(), layer.name(), qualifier))
             except Exception:  # one unreadable layer hides no other
+                import logging
+                logging.getLogger(__name__).debug("Layer omitted from agent mentions: unreadable layer", exc_info=True)
                 continue
         return rows
 

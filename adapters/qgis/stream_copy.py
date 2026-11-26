@@ -688,8 +688,8 @@ def prune_copies(project=None) -> int:
     try:
         import time
         now = time.time()
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("FilterMate local copy: current time unavailable for pruning: %s", exc)
 
     def _stale(path: str, folder: str, by_age: bool) -> bool:
         key = os.path.normcase(os.path.abspath(path))

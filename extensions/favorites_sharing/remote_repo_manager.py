@@ -45,6 +45,7 @@ def _repo_path(url: str) -> str:
         path = path[:-4]
     return path.strip("/") or text.strip()
 
+
 logger = logging.getLogger('FilterMate.FavoritesSharing.RemoteRepo')
 
 # The plaintext ``auth_header`` of FilterMate 4.x repo entries is refused

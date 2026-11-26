@@ -99,6 +99,10 @@ rsync -a --quiet ${FILES_FROM[@]+"${FILES_FROM[@]}"} \
     --exclude='scripts' \
     --exclude='scripts/**' \
     --exclude='knowledge' \
+    --exclude='/reports' \
+    --exclude='/reports/**' \
+    --exclude='/research_notes' \
+    --exclude='/research_notes/**' \
     --exclude='/skills/export' \
     --exclude='/skills/export/**' \
     --exclude='knowledge/**' \

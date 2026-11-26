@@ -941,6 +941,8 @@ L'exécuter ?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1698"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3688"/>
         <source>Answer</source>
         <translation>Répondre</translation>
     </message>
@@ -1625,6 +1627,94 @@ Do you agree to all of them? No runs none of them.</source>
 {}
 
 Êtes-vous d'accord pour toutes ? Non n'en exécute aucune.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3678"/>
+        <source>Allow</source>
+        <translation>Autoriser</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3183"/>
+        <source>Favorite kept: {}</source>
+        <translation>Favori enregistré : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3383"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3400"/>
+        <source>Infographic</source>
+        <translation>Infographie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3404"/>
+        <source>Infographic saved: {}</source>
+        <translation>Infographie enregistrée : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3154"/>
+        <source>Infographic {} saved as {}</source>
+        <translation>Infographie {} enregistrée dans {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3153"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3374"/>
+        <source>Infographic: {}</source>
+        <translation>Infographie : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3245"/>
+        <source>Linked preview: {}</source>
+        <translation>Aperçu lié : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3687"/>
+        <source>Refuse</source>
+        <translation>Refuser</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3390"/>
+        <source>Save the infographic</source>
+        <translation>Enregistrer l’infographie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4132"/>
+        <source>Send it again</source>
+        <translation>Renvoyer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3318"/>
+        <source>Step {} · {}…</source>
+        <translation>Étape {} · {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3401"/>
+        <source>The infographic could not be saved: {}</source>
+        <translation>L’infographie n’a pas pu être enregistrée : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3366"/>
+        <source>{} charts as composed</source>
+        <translation>{} graphiques dans la composition</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3905"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3910"/>
+        <source>↩ Undoable until the layer edits are saved.</source>
+        <translation>↩ Annulable tant que les modifications de la couche ne sont pas enregistrées.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3908"/>
+        <source>↩ Undoable: Undo this turn takes it back.</source>
+        <translation>↩ Annulable : « Annuler ce tour » rétablit l’état précédent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3912"/>
+        <source>⚠ Final: cannot be undone here.</source>
+        <translation>⚠ Définitif : cette action ne peut pas être annulée ici.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3914"/>
+        <source>⚠ Reaches outside QGIS (network, file or code).</source>
+        <translation>⚠ Agit hors de QGIS (réseau, fichier ou code).</translation>
     </message>
 </context>
 <context>
@@ -2566,7 +2656,7 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="122"/>
-        <source>Count the active layer's features by type</source>
+        <source>Count the active layer&apos;s features by type</source>
         <translation>Compter les entités de la couche active par type</translation>
     </message>
     <message>
@@ -2656,7 +2746,7 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="151"/>
-        <source>A slider over a number field's histogram</source>
+        <source>A slider over a number field&apos;s histogram</source>
         <translation>Un curseur sur l'histogramme d'un champ</translation>
     </message>
     <message>
@@ -3154,6 +3244,122 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="1072"/>
         <source>view</source>
         <translation>vue</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="766"/>
+        <source>Answer</source>
+        <translation>Répondre</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="649"/>
+        <source>Do again the turn Undone last</source>
+        <translation>Rétablir le dernier tour annulé</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>Do not send them</source>
+        <translation>Ne pas les envoyer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="832"/>
+        <source>More actions</source>
+        <translation>Plus d’actions</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1741"/>
+        <source>Next ({}): {}</source>
+        <translation>Ensuite ({}) : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <source>Propose</source>
+        <translation>Proposer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1751"/>
+        <source>Put them back in the line</source>
+        <translation>Les replacer dans le champ de saisie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="799"/>
+        <source>Recipes ▾</source>
+        <translation>Recettes ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="838"/>
+        <source>Redo the undone turn</source>
+        <translation>Rétablir le tour annulé</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="828"/>
+        <source>Request to the agent</source>
+        <translation>Demande à l’agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Run again the changes of a request, without the model</source>
+        <translation>Réexécuter les modifications d’une demande, sans appeler le modèle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="831"/>
+        <source>Send (Enter). While the agent works, stops it (Esc).</source>
+        <translation>Envoyer (Entrée). Pendant le travail de l’agent, l’arrêter (Échap).</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="830"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1683"/>
+        <source>Send the request</source>
+        <translation>Envoyer la demande</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <source>Show the history</source>
+        <translation>Afficher l’historique</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="835"/>
+        <source>Show the recipes</source>
+        <translation>Afficher les recettes</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="836"/>
+        <source>Start a new conversation</source>
+        <translation>Commencer une nouvelle conversation</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1683"/>
+        <source>Stop the agent</source>
+        <translation>Arrêter l’agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="839"/>
+        <source>Take the waiting requests back to the line</source>
+        <translation>Replacer les demandes en attente dans le champ de saisie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="833"/>
+        <source>What the agent may do</source>
+        <translation>Ce que l’agent peut faire</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1636"/>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act does it.</source>
+        <translation>Ce que l’agent peut faire : Répondre lit sans rien modifier, Proposer décrit les étapes et montre chaque modification avant de l’appliquer, Agir exécute les actions.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
+        <source>What was asked, what changed, applied or undone</source>
+        <translation>Les demandes, les modifications et les actions appliquées ou annulées</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="768"/>
+        <source>does it, asking only what cannot be undone</source>
+        <translation>exécute les actions et demande confirmation pour celles qui ne peuvent pas être annulées</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <source>writes the steps, shows each change before applying it</source>
+        <translation>décrit les étapes et montre chaque modification avant de l’appliquer</translation>
     </message>
 </context>
 <context>
@@ -5245,22 +5451,22 @@ Séparez les tags par des virgules.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="971"/>
-        <source>Could not duplicate '{0}'.</source>
+        <source>Could not duplicate &apos;{0}&apos;.</source>
         <translation>Impossible de dupliquer '{0}'.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="987"/>
-        <source>Could not copy '{0}' to the global favorites.</source>
+        <source>Could not copy &apos;{0}&apos; to the global favorites.</source>
         <translation>Impossible de copier '{0}' vers les favoris globaux.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1012"/>
-        <source>Could not copy '{0}' to this project.</source>
+        <source>Could not copy &apos;{0}&apos; to this project.</source>
         <translation>Impossible de copier '{0}' vers ce projet.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1053"/>
-        <source>Another favorite is already named '{0}'.</source>
+        <source>Another favorite is already named &apos;{0}&apos;.</source>
         <translation>Un autre favori s'appelle déjà '{0}'.</translation>
     </message>
     <message>
@@ -5639,17 +5845,17 @@ Cliquez sur l'indicateur ★ et sélectionnez « Ajouter le filtre actuel aux fa
     </message>
     <message>
         <location filename="../../filter_mate.py" line="1900"/>
-        <source>What's new in FilterMate</source>
+        <source>What&apos;s new in FilterMate</source>
         <translation>Nouveautés de FilterMate</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="1906"/>
-        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;A rail lists the sections of FilterMate, a section can be a panel of QGIS, and the setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;A rail of sections&lt;/b&gt; in each stack of the panel: click a chip to open its section, drag it to put the sections in another order.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;, when you ask for it (by default they all stay in the FilterMate panel): right-click the chip of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Un rail liste les sections de FilterMate, une section peut devenir un panneau de QGIS, et la configuration ne demande aucun modèle d'IA.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Configurer FilterMate&lt;/b&gt; pose quelques choix : les sections que vous utilisez, vos données, l'apparence, la place des sections et de leurs boutons. Elle montre chaque réglage avant et après, et n'envoie rien nulle part.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Un rail de sections&lt;/b&gt; dans chaque pile du panneau : cliquez sur une pastille pour ouvrir sa section, faites-la glisser pour mettre les sections dans un autre ordre.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections en panneaux&lt;/b&gt;, quand vous le demandez (par défaut elles restent toutes dans le panneau FilterMate) : faites un clic droit sur la pastille d'AGENT, FILTERING, EXPORTING ou CONFIGURATION pour l'ouvrir dans son propre panneau de QGIS. Faites un clic droit sur le titre d'un panneau pour le regrouper avec un autre, en onglets, ou pour le fusionner dans FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Boutons sous chaque section&lt;/b&gt;, et FILTERING ou EXPORTING désactivés quand vous ne vous en servez pas.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtre, met en forme et fait venir des données à partir d'une phrase, avec votre propre clé d'API ou un modèle Ollama local. &lt;b&gt;Comment fonctionne FilterMate&lt;/b&gt;, dans son menu, reprend chaque section.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
         <location filename="../../filter_mate.py" line="1906"/>
-        <source>&lt;p style='font-size:13px;'&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
+        <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;The sections of FilterMate can be panels of QGIS, and its setup needs no AI model.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;Set up FilterMate&lt;/b&gt; asks a few choices: the sections you use, your data, the look, where the sections and their buttons go. It shows every setting before and after, and sends nothing anywhere.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections as panels&lt;/b&gt;: right-click the header of AGENT, FILTERING, EXPORTING or CONFIGURATION to open it in its own panel of QGIS. Right-click the title of a panel to group it with another one, as tabs, or to merge it back into FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Buttons under each section&lt;/b&gt;, and FILTERING or EXPORTING turned off when you do not use them.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filters, styles and brings in data from a sentence, with your own API key or a local Ollama model. &lt;b&gt;How FilterMate works&lt;/b&gt;, in its menu, tells each section again.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Les sections de FilterMate peuvent devenir des panneaux de QGIS, et sa configuration ne demande aucun modèle d'IA.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;Configurer FilterMate&lt;/b&gt; pose quelques choix : les sections que vous utilisez, vos données, l'apparence, la place des sections et de leurs boutons. Elle montre chaque réglage avant et après, et n'envoie rien nulle part.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Sections en panneaux&lt;/b&gt; : faites un clic droit sur l'en-tête d'AGENT, FILTERING, EXPORTING ou CONFIGURATION pour l'ouvrir dans son propre panneau de QGIS. Faites un clic droit sur le titre d'un panneau pour le regrouper avec un autre, en onglets, ou pour le fusionner dans FilterMate.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Boutons sous chaque section&lt;/b&gt;, et FILTERING ou EXPORTING désactivés quand vous ne vous en servez pas.&lt;/li&gt;&lt;li&gt;&lt;b&gt;AGENT&lt;/b&gt; filtre, met en forme et fait venir des données à partir d'une phrase, avec votre propre clé d'API ou un modèle Ollama local. &lt;b&gt;Comment fonctionne FilterMate&lt;/b&gt;, dans son menu, reprend chaque section.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
@@ -6314,7 +6520,7 @@ What would you like to do?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/compare_controller.py" line="82"/>
-        <source>Pinned {} (before the agent's request)</source>
+        <source>Pinned {} (before the agent&apos;s request)</source>
         <translation>Épinglée à {} (avant la demande à l'agent)</translation>
     </message>
     <message>
@@ -7771,7 +7977,7 @@ Résolu depuis : {1}</translation>
     </message>
     <message>
         <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="332"/>
-        <source>'{0}' is not an e-mail address (name@domain).</source>
+        <source>&apos;{0}&apos; is not an e-mail address (name@domain).</source>
         <translation>« {0} » n'est pas une adresse e-mail (nom@domaine).</translation>
     </message>
     <message>
@@ -7781,7 +7987,7 @@ Résolu depuis : {1}</translation>
     </message>
     <message>
         <location filename="../../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="333"/>
-        <source>'{0}': use only letters, digits, '_' and '-'.</source>
+        <source>&apos;{0}&apos;: use only letters, digits, &apos;_&apos; and &apos;-&apos;.</source>
         <translation>« {0} » : utilisez seulement des lettres, des chiffres, '_' et '-'.</translation>
     </message>
     <message>
@@ -8468,7 +8674,7 @@ Résolu depuis : {1}</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/layer_settings_dialog.py" line="42"/>
-        <source>This project carries FilterMate settings for its layers that differ from yours. Apply the project's settings for:</source>
+        <source>This project carries FilterMate settings for its layers that differ from yours. Apply the project&apos;s settings for:</source>
         <translation>Ce projet contient des réglages FilterMate pour ses couches, différents des vôtres. Appliquer ceux du projet pour :</translation>
     </message>
     <message>
@@ -13800,12 +14006,12 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
     <name>SourceSelection</name>
     <message>
         <location filename="../adapters/backends/source_refusal.py" line="44"/>
-        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <source>The selection of &apos;{0}&apos; cannot be evaluated: nothing was filtered.</source>
         <translation>La sélection de « {0} » ne peut pas être évaluée : rien n'a été filtré.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/source_refusal.py" line="48"/>
-        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <source>The selection of &apos;{0}&apos; keeps no feature: nothing was filtered.</source>
         <translation>La sélection de « {0} » ne garde aucune entité : rien n'a été filtré.</translation>
     </message>
 </context>
