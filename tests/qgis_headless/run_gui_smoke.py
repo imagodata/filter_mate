@@ -1314,10 +1314,11 @@ def picker_rows():
     return single_picker().findChild(QComboBox).count()
 
 
-def multiple_list_widget():
+def multiple_list_widget(target=None):
     widget = dock().widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
     lists = getattr(widget, 'list_widgets', {})
-    return lists.get(layer('zones').id())
+    target = layer('zones') if target is None else target
+    return lists.get(target.id())
 
 
 def multiple_visible_rows():
@@ -1325,7 +1326,7 @@ def multiple_visible_rows():
     hidden by the text filter), not the stored filter text (audit of 2026-11-24: "name" LIKE 'east%' left the
     four rows displayed)."""
     try:
-        list_widget = multiple_list_widget()
+        list_widget = multiple_list_widget(dock().current_layer)
         if list_widget is None:
             return None
         shown = 0
@@ -1832,6 +1833,13 @@ def s_custom_matching_nothing():
 
 def s_custom_matching_nothing_single():
     dock().mGroupBox_exploring_single_selection.setChecked(True)
+    return waits(1.5, tasks_idle)
+
+
+def s_custom_matching_nothing_multiple():
+    # Materialize this layer's multiple list before inspecting its rows: this scenario also runs on
+    # late_pick, whereas the earlier link checks used zones and could leave this list uncreated.
+    dock().mGroupBox_exploring_multiple_selection.setChecked(True)
     return waits(1.5, tasks_idle)
 
 
@@ -7427,9 +7435,20 @@ def s_tools_layer_modes_add():
 
 
 def s_tools_layer_modes():
-    """A layer that was left with a mode on, shown again while its button is hidden: the mode stays on."""
+    return tools_pick('zones_again', coverage_page=False)
+
+
+def s_tools_layer_modes_leave():
+    """Leave a layer with sync really on, as a user does; returning must restore its saved mode."""
     d = dock()
-    d.PROJECT_LAYERS[layer('zones_again').id()].setdefault('exploring', {})['is_selecting'] = True
+    d.pushButton_checkable_exploring_selecting.setChecked(True)
+    check('tools: the layer is left with sync on',
+          d.PROJECT_LAYERS[layer('zones_again').id()]['exploring'].get('is_selecting') is True)
+    return tools_pick('zones', coverage_page=False)
+
+
+def s_tools_layer_modes_return():
+    """The button is hidden while another layer is shown, then the saved layer comes back."""
     apply_settings({TOOLS_PATH.format('vector'): 'sync'})
     return tools_pick('zones_again', coverage_page=False)
 
@@ -7577,6 +7596,7 @@ def s_tools_startup_check():
 
 TOOLS_STEPS = [s_tools_begin, s_tools_vector_check, s_tools_raster_check, s_tools_cloud_check, s_tools_groups_begin, s_tools_groups_raster,
                s_tools_groups_cloud, s_tools_live, s_tools_layer_modes_add, s_tools_layer_modes,
+               s_tools_layer_modes_leave, s_tools_layer_modes_return,
                s_tools_layer_modes_check, s_tools_layer_modes_back, s_tools_menu,
                s_tools_wizard, s_tools_wizard_apply, s_tools_wizard_check, s_tools_end]
 
@@ -8061,7 +8081,8 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_partial_undo_setup, s_partial_undo_source, s_partial_undo_select, s_partial_undo_filter,
          s_partial_undo_on_source, s_partial_undo_on_source_check, s_partial_undo_on_target,
          s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
-         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
+         s_custom_matching_nothing, s_custom_matching_nothing_multiple, s_custom_matching_nothing_single,
+         s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel,
          *PANEL_STEPS, *OPTION_STEPS, *SECTION_STEPS, *WELCOME_STEPS, *AUDIT_STEPS, *HEADER_STEPS, *EXPLO_STEPS,
          *SWITCH_STEPS, *ROWS_STEPS, *LIKE_STEPS, *REFILTER_STEPS, *SIZING_STEPS, s_finish]
 

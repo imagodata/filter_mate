@@ -19,6 +19,7 @@ from ...core.agent.permissions import DEFAULT_LEVEL, clean_rules, level_or_defau
 from ...core.agent.providers import PRESETS
 from ...core.agent.providers.ollama_chat import native_base
 from ...core.agent.providers.base import ProviderConfig
+from ...core.agent.providers.effort import valid_effort
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -302,7 +303,38 @@ def delete_own_key(authcfg: str) -> bool:
 def provider_config(values: AgentSettings, key: Optional[str]) -> ProviderConfig:
     kind, base_url = PRESETS[values.preset]
     return ProviderConfig(kind=kind, model=values.model, base_url=values.base_url or base_url, api_key=key or "",
-                          max_tokens=MAX_TOKENS)
+                          max_tokens=MAX_TOKENS, effort=read_effort(values) or None)
+
+
+def _effort_key(values: AgentSettings) -> str:
+    target = target_of(values.preset, getattr(values, 'base_url', ''))
+    return json.dumps([values.preset, target, values.model], separators=(',', ':'))
+
+
+def _effort_preferences() -> dict:
+    try:
+        value = json.loads(str(QgsSettings().value(_PREFIX + 'effort_by_model', '{}') or '{}'))
+        return value if isinstance(value, dict) else {}
+    except (ValueError, RecursionError):
+        return {}
+
+
+def read_effort(values: AgentSettings) -> str:
+    """The effort chosen for this model and server, independent of other provider settings."""
+    return valid_effort(values.preset, values.model, _effort_preferences().get(_effort_key(values), ''))
+
+
+def write_effort(values: AgentSettings, effort: str) -> None:
+    """Keep a supported choice, or remove it to restore the provider default."""
+    if effort and valid_effort(values.preset, values.model, effort) != effort:
+        raise ValueError('Unsupported reasoning effort for this model')
+    preferences = _effort_preferences()
+    key = _effort_key(values)
+    if effort:
+        preferences[key] = effort
+    else:
+        preferences.pop(key, None)
+    QgsSettings().setValue(_PREFIX + 'effort_by_model', json.dumps(preferences, ensure_ascii=False))
 
 
 # --- The providers the user set up (2026-11-16): the menu of the AGENT panel and the agent switch between them ------

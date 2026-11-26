@@ -93,6 +93,30 @@ def test_resume_only_for_the_same_destination():
     assert not resumable(dump([]), "anthropic", "m")
 
 
+def test_resume_requires_the_same_server_account_and_sharing_context():
+    text = dump(exchange(), preset="anthropic", model="m", context="server-a/account-a/values-on")
+    assert resumable(text, "anthropic", "m", context="server-a/account-a/values-on")
+    for context in ("server-b/account-a/values-on", "server-a/account-b/values-on",
+                    "server-a/account-a/values-off"):
+        assert not resumable(text, "anthropic", "m", context=context)
+    # Older sessions cannot prove which server/account received their contents.
+    assert not resumable(dump(exchange(), preset="anthropic", model="m"), "anthropic", "m",
+                         context="server-a/account-a/values-on")
+
+
+def test_storage_limit_includes_unicode_and_session_metadata(monkeypatch):
+    from core.agent import session_io
+    messages = [user("old request"), Message(ROLE_ASSISTANT, (TextPart("ancienne réponse"),)),
+                user("dernière demande éà漢字"), Message(ROLE_ASSISTANT, (TextPart("réponse finale"),))]
+    full = dump(messages, preset="anthropic", model="m", context="adresse/compte/partage")
+    monkeypatch.setattr(session_io, "MAX_STORED_CHARS", len(full) - 1)
+    text = dump(messages, preset="anthropic", model="m", context="adresse/compte/partage")
+    saved = parse(text)
+    assert len(text) <= session_io.MAX_STORED_CHARS
+    assert saved.messages == tuple(messages[-2:])
+    assert saved.context == "adresse/compte/partage"
+
+
 def test_a_resumed_session_goes_on_like_the_original():
     first = make_session()
     accept(first, exchange())

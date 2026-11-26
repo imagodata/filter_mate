@@ -126,7 +126,8 @@ def test_at_offers_the_layers_and_writes_the_name():
     _run()
     completer = panel.input.completer
     assert completer.popup().isVisible() and completer.currentCompletion() == "troncon_de_route"
-    completer.activated[QtCore.QModelIndex].emit(completer.popup().currentIndex())
+    # QCompleter can display its first completion without selecting a current popup row.
+    completer.activated[QtCore.QModelIndex].emit(completer.popup().model().index(0, 0))
     assert panel.input.text() == "filtre troncon_de_route"
     QtTest.QTest.keyClicks(panel.input, " email@x")  # an "@" inside a word offers nothing
     _run()
@@ -148,7 +149,7 @@ def test_at_offers_homonyms_apart_and_writes_the_id():
 def test_a_request_sent_while_working_waits_in_view_then_goes():
     panel = _panel()
     sent = []
-    panel.send_requested.connect(sent.append)
+    panel.queued_send_requested.connect(lambda text, posture: sent.append((text, posture)))
     panel.set_working(True)
     panel.input.setText("et les bâtiments")
     QtTest.QTest.keyClick(panel.input, Qt.Key_Return)
@@ -156,8 +157,8 @@ def test_a_request_sent_while_working_waits_in_view_then_goes():
     assert panel.queue_row.isVisibleTo(panel) and "Next: et les bâtiments" in panel.queue_label.toolTip() + panel.queue_label._full
     panel.set_working(False)
     _run()
-    assert sent == ["et les bâtiments"] and panel.queued == "" and not panel.queue_row.isVisibleTo(panel)
-    assert panel.input.text() == "et les bâtiments"  # the controller empties the line once it sent it
+    assert sent == [("et les bâtiments", "act")] and panel.queued == "" and not panel.queue_row.isVisibleTo(panel)
+    assert panel.input.text() == ""  # dispatch carries the posture without replacing the user's next draft
 
 
 def test_a_request_waiting_can_be_taken_back():

@@ -47,6 +47,106 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>A note is kept on this computer, in the Memory tab of the settings of the agent. It goes to the provider you chose with the requests of a project it concerns.</source>
+        <translation>Une note est gardée sur cet ordinateur, dans l'onglet Mémoire des paramètres de l'agent. Elle est envoyée au fournisseur choisi avec les demandes des projets qu'elle concerne.</translation>
+    </message>
+    <message>
+        <source>Do not keep</source>
+        <translation>Ne pas garder</translation>
+    </message>
+    <message>
+        <source>Every project</source>
+        <translation>Tous les projets</translation>
+    </message>
+    <message>
+        <source>Flash features of {}</source>
+        <translation>Faire clignoter les entités de {}</translation>
+    </message>
+    <message>
+        <source>Forget</source>
+        <translation>Oublier</translation>
+    </message>
+    <message>
+        <source>Forgotten: {}</source>
+        <translation>Oublié : {}</translation>
+    </message>
+    <message>
+        <source>Keep</source>
+        <translation>Garder</translation>
+    </message>
+    <message>
+        <source>Kept for every project: {}</source>
+        <translation>Gardé pour tous les projets : {}</translation>
+    </message>
+    <message>
+        <source>Kept for the source of {}: {}</source>
+        <translation>Gardé pour la source de {} : {}</translation>
+    </message>
+    <message>
+        <source>Kept for this project only: {}</source>
+        <translation>Gardé pour ce projet seulement : {}</translation>
+    </message>
+    <message>
+        <source>Kept: {}</source>
+        <translation>Gardé : {}</translation>
+    </message>
+    <message>
+        <source>Message in QGIS</source>
+        <translation>Message dans QGIS</translation>
+    </message>
+    <message>
+        <source>Not kept: no answer.</source>
+        <translation>Non gardé : aucune réponse.</translation>
+    </message>
+    <message>
+        <source>Not kept: {}</source>
+        <translation>Non gardé : {}</translation>
+    </message>
+    <message>
+        <source>Nothing to take back: the note changed since.</source>
+        <translation>Rien à retirer : la note a été modifiée depuis.</translation>
+    </message>
+    <message>
+        <source>PDF document (*.pdf)</source>
+        <translation>Document PDF (*.pdf)</translation>
+    </message>
+    <message>
+        <source>Taken back: {}</source>
+        <translation>Retiré : {}</translation>
+    </message>
+    <message>
+        <source>The agent proposes to forget a note</source>
+        <translation>L'agent propose d'oublier une note</translation>
+    </message>
+    <message>
+        <source>The agent proposes to keep a note</source>
+        <translation>L'agent propose de garder une note</translation>
+    </message>
+    <message>
+        <source>This list is full: remove a note in the Memory tab of the settings of the agent first.</source>
+        <translation>Cette liste est pleine : retirez d'abord une note dans l'onglet Mémoire des paramètres de l'agent.</translation>
+    </message>
+    <message>
+        <source>This project only</source>
+        <translation>Ce projet seulement</translation>
+    </message>
+    <message>
+        <source>This source ({})</source>
+        <translation>Cette source ({})</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Annuler</translation>
+    </message>
+    <message>
+        <source>Wait for the end of the request, then click again.</source>
+        <translation>Attendez la fin de la demande, puis cliquez à nouveau.</translation>
+    </message>
+    <message>
+        <source>Your draft stays in the line below. The failed request stays in the conversation.</source>
+        <translation>Votre brouillon reste dans la zone ci-dessous. La demande qui a échoué reste dans la conversation.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="636"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="638"/>
         <source>Undone: {}</source>
@@ -1719,6 +1819,58 @@ Do you agree to all of them? No runs none of them.</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>Automatic</source>
+        <translation>Automatique</translation>
+    </message>
+    <message>
+        <source>High</source>
+        <translation>Élevé</translation>
+    </message>
+    <message>
+        <source>Low</source>
+        <translation>Faible</translation>
+    </message>
+    <message>
+        <source>Maximum</source>
+        <translation>Maximum</translation>
+    </message>
+    <message>
+        <source>Medium</source>
+        <translation>Moyen</translation>
+    </message>
+    <message>
+        <source>Minimal</source>
+        <translation>Minimal</translation>
+    </message>
+    <message>
+        <source>More effort can take longer and use more tokens.</source>
+        <translation>Un effort plus important peut prendre plus de temps et utiliser davantage de jetons.</translation>
+    </message>
+    <message>
+        <source>Reasoning effort</source>
+        <translation>Effort de raisonnement</translation>
+    </message>
+    <message>
+        <source>Reasoning effort: {}</source>
+        <translation>Effort de raisonnement : {}</translation>
+    </message>
+    <message>
+        <source>Very high</source>
+        <translation>Très élevé</translation>
+    </message>
+    <message>
+        <source>What the agent may do: Answer reads and changes nothing, Propose writes the steps and shows each change before applying it, Act follows the saved permissions.</source>
+        <translation>Ce que l'agent peut faire : Répondre lit sans rien modifier, Proposer décrit les étapes et montre chaque modification avant de l'appliquer, Agir suit les autorisations enregistrées.</translation>
+    </message>
+    <message>
+        <source>follows the permissions saved in the settings</source>
+        <translation>suit les autorisations enregistrées dans les paramètres</translation>
+    </message>
+    <message>
+        <source>shows each change before applying it</source>
+        <translation>montre chaque modification avant de l'appliquer</translation>
+    </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>

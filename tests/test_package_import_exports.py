@@ -21,7 +21,8 @@ import pytest
 
 _ROOT = Path(__file__).resolve().parents[1]
 _SKIP_PARTS = {'tests', 'dist', '_bmad', '_bmad-output',
-               '.git', 'website', '__pycache__', 'filtermate_api', 'knowledge', 'scripts'}
+               '.git', '.claude', '.agents', '.codex', '.venv', 'venv', 'node_modules', 'build',
+               'website', '__pycache__', 'filtermate_api', 'knowledge', 'scripts'}
 
 
 def _names_provided_by(init_path: Path) -> set:

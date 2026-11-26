@@ -17,11 +17,15 @@ from qgis.PyQt.QtCore import (
     QUrl, pyqtSignal,
 )
 from qgis.PyQt.QtGui import QColor, QDesktopServices, QFont, QTextCursor, QTextOption
+try:
+    from qgis.PyQt.QtGui import QActionGroup
+except ImportError:  # Qt5 keeps actions in QtWidgets
+    from qgis.PyQt.QtWidgets import QActionGroup
 from qgis.PyQt.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QCompleter, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QMenu,
     QButtonGroup, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QRadioButton,
-    QScrollArea, QSizePolicy, QSpinBox, QStackedWidget,
+    QScrollArea, QSizePolicy, QSpinBox, QStackedWidget, QStyle,
     QTabBar, QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
@@ -67,6 +71,8 @@ _MENTION = re.compile(r"(?:^|(?<=\s))@([^\s@]*)$")  # "@" at the start of a word
 THREAD_MIN_HEIGHT = 60  # the dock has to stay usable on small screens
 BUTTON_SIZE = 26
 ICON_SIZE = 16
+ACTION_BUTTON_SIZE = 30
+ACTION_ICON_SIZE = 18
 PROGRESS_HEIGHT = 3
 STATUS_MAX_HEIGHT = 48
 WELCOME_ICON_SIZE = 36
@@ -407,9 +413,15 @@ class AgentInput(QPlainTextEdit):
 
     def _insert_row(self, index: QModelIndex) -> None:
         """The "@..." typed becomes the row chosen: a name, or the id of one layer among homonyms."""
-        if not index.isValid() or not 0 <= index.row() < len(self._mention_rows):
+        if not index.isValid():
             return
-        self._insert_name(self._mention_rows[index.row()][1])
+        # QCompleter emits an index of its filtered completion model, whose row is not the row of
+        # _mention_rows: choosing the first "tron..." completion inserted the first layer, "batiment".
+        selected = index.data(Qt.ItemDataRole.DisplayRole)
+        for label, inserted in self._mention_rows:
+            if label == selected:
+                self._insert_name(inserted)
+                return
 
     def _insert_name(self, name: str) -> None:
         """The "@..." typed becomes the name chosen, as the model reads it."""
@@ -548,6 +560,7 @@ class AgentPanel(QFrame):
     queued_send_requested = pyqtSignal(str, str)
     mode_changed = pyqtSignal(str)  # Ask, Plan or Act, picked under the line (core/agent/modes.py)
     posture_changed = pyqtSignal(str)  # respond, propose or act (core/agent/postures.py)
+    effort_changed = pyqtSignal(str)  # empty: provider default, otherwise a supported reasoning level
     stop_requested = pyqtSignal()
     undo_requested = pyqtSignal()
     settings_requested = pyqtSignal()
@@ -746,7 +759,7 @@ class AgentPanel(QFrame):
         ask.addWidget(self.send_button, 0, Qt.AlignmentFlag.AlignBottom)  # at the last line of a request that grew
         ask.addWidget(self.more_button, 0, Qt.AlignmentFlag.AlignBottom)
 
-        self.destination = QLabel(self)
+        self.destination = ElidedLabel("", self)
         self.destination.setObjectName("label_agent_destination")
         self.destination.setTextFormat(Qt.TextFormat.PlainText)
         self.destination.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
@@ -775,10 +788,22 @@ class AgentPanel(QFrame):
         self._posture = ""
         self.set_mode(ACT)
 
+        self.effort_button = QToolButton(self)
+        self.effort_button.setObjectName("toolButton_agent_effort")
+        self.effort_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.effort_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.effort_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        self.effort_button.setIconSize(QSize(ACTION_ICON_SIZE, ACTION_ICON_SIZE))
+        self.effort_button.setFixedSize(ACTION_BUTTON_SIZE, ACTION_BUTTON_SIZE)
+        self.effort_button.setAccessibleName(_tr("Reasoning effort"))
+        self._effort_levels, self._effort, self._effort_actions = (), "", {}
+        self.set_effort_options((), "")
+
         under = QHBoxLayout()
         under.setContentsMargins(0, 0, 0, 0)
         under.setSpacing(6)
         under.addWidget(self.mode_button, 0, Qt.AlignmentFlag.AlignLeft)  # at the left also when the label is hidden
+        under.addWidget(self.effort_button)
         under.addWidget(self.destination, 1)
         # A new conversation in one click once something was asked (2026-11-24: it was in the menu "⋯" only).
         self.new_button = QPushButton(_tr("New conversation"), self)
@@ -787,12 +812,12 @@ class AgentPanel(QFrame):
         self.new_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.new_button.setToolTip(_tr("Start afresh: the agent forgets this conversation, the changes stay"))
         self.new_button.clicked.connect(self.new_conversation_requested)
-        self.new_button.setVisible(False)
         # History and Recipes out of the menu "⋯" (S2): what was done and what runs again without the model,
         # next to the new conversation, always in view.
         self.history_button = QPushButton(_tr("History"), self)
         self.history_button.setObjectName("pushButton_agent_history")
         self.history_button.setFlat(True)
+        self.history_button.setCheckable(True)
         self.history_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.history_button.setToolTip(_tr("What was asked, what changed, applied or undone"))
         self.history_button.clicked.connect(self.history_requested)
@@ -805,6 +830,30 @@ class AgentPanel(QFrame):
         under.addWidget(self.history_button, 0, Qt.AlignmentFlag.AlignRight)
         under.addWidget(self.recipes_button, 0, Qt.AlignmentFlag.AlignRight)
         under.addWidget(self.new_button, 0, Qt.AlignmentFlag.AlignRight)
+
+        # Icon-only actions keep the input usable in a narrow dock. Their labels
+        # stay in tooltips and accessible names, with the same actions in the menu.
+        for button, title in ((self.history_button, _tr("History")),
+                              (self.recipes_button, _tr("Recipes")),
+                              (self.new_button, _tr("New conversation")),
+                              (self.undo_button, _tr("Undo this turn")),
+                              (self.redo_button, _tr("Redo")),
+                              (self.history_undo_button, _tr("Undo the last")),
+                              (self.history_redo_button, _tr("Redo")),
+                              (self.step_button, _tr("Undo back to here")),
+                              (self.compare_button, _tr("Compare")),
+                              (self.resend_button, _tr("Send again")),
+                              (self.clear_global_button, _tr("Empty the list"))):
+            detail = button.toolTip()
+            button.setToolTip(f"{title}\n{detail}" if detail and detail != title else title)
+            button.setText("")
+            button.setAccessibleName(title)
+            button.setProperty("fm_agent_action", True)
+            button.setFixedSize(ACTION_BUTTON_SIZE, ACTION_BUTTON_SIZE)
+            button.setIconSize(QSize(ACTION_ICON_SIZE, ACTION_ICON_SIZE))
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.more_button.setToolTip(_tr("More actions"))
+        self.stack.currentChanged.connect(self._refresh_new_button)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -840,7 +889,8 @@ class AgentPanel(QFrame):
         self.setTabOrder(self.input, self.send_button)
         self.setTabOrder(self.send_button, self.more_button)
         self.setTabOrder(self.more_button, self.mode_button)
-        self.setTabOrder(self.mode_button, self.history_button)
+        self.setTabOrder(self.mode_button, self.effort_button)
+        self.setTabOrder(self.effort_button, self.history_button)
         self.setTabOrder(self.history_button, self.recipes_button)
         self.setTabOrder(self.recipes_button, self.new_button)
         self.setTabOrder(self.new_button, self.undo_button)
@@ -1262,8 +1312,12 @@ class AgentPanel(QFrame):
             f" min-height: {INPUT_HEIGHT - 2}px; max-height: {INPUT_HEIGHT - 2}px; border: 1px solid"
             f" {palette['fm_field_border']}; border-radius: 6px; background: {palette['fm_field']}; }}"
             f"QToolButton#toolButton_agent_more:disabled {{ background: {palette['fm_group']}; }}"
-            f"QToolButton#toolButton_agent_mode {{ min-width: 0; min-height: 20px;"  # no max-width: 16777215px warns
-            # under Qt6 (QWidget::setMaximumSize), and it is the default anyway
+            f"QToolButton#toolButton_agent_effort {{ min-width: {ACTION_BUTTON_SIZE}px; max-width: {ACTION_BUTTON_SIZE}px;"
+            f" min-height: {ACTION_BUTTON_SIZE}px; max-height: {ACTION_BUTTON_SIZE}px; border: 1px solid transparent;"
+            " border-radius: 6px; background: transparent; }"
+            f"QToolButton#toolButton_agent_effort:hover {{ background: {palette['fm_hover']}; }}"
+            f"QToolButton#toolButton_agent_effort:focus {{ border-color: {palette['fm_accent']}; }}"
+            f"QToolButton#toolButton_agent_mode {{ min-width: 0; max-width: 240px; min-height: 20px;"
             f" max-height: 22px; padding: 0 8px; border: 1px solid {palette['fm_field_border']}; border-radius: 10px;"
             f" background: {palette['fm_field']}; color: {palette['fm_text']}; font-size: 11px; }}"
             f"QToolButton#toolButton_agent_mode:hover {{ border-color: {palette['fm_accent']}; }}"
@@ -1288,13 +1342,16 @@ class AgentPanel(QFrame):
             f"QPushButton#pushButton_agent_setup {{ padding: 8px 16px; border: 1px solid {palette['fm_group_border']};"
             f" border-radius: 6px; background: {palette['fm_group']}; color: {palette['fm_text']}; }}"
             f"QPushButton#pushButton_agent_setup:hover {{ border-color: {palette['fm_active_border']}; }}"
-            f"QPushButton#pushButton_agent_new, QPushButton#pushButton_agent_history,"
-            f" QPushButton#pushButton_agent_recipes {{ padding: 0 2px; font-size: 11px; font-weight: 500;"
-            f" border: none; background: transparent; color: {palette['fm_accent']}; min-height: 0; }}"
-            f"QPushButton#pushButton_agent_new:hover, QPushButton#pushButton_agent_history:hover,"
-            f" QPushButton#pushButton_agent_recipes:hover {{ text-decoration: underline; }}"
-            f"QPushButton#pushButton_agent_new:disabled, QPushButton#pushButton_agent_history:disabled,"
-            f" QPushButton#pushButton_agent_recipes:disabled {{ color: {muted}; }}"
+            f"QFrame#{PANEL_NAME} QPushButton[fm_agent_action=\"true\"] {{ padding: 0; margin: 0; border: 1px solid transparent;"
+            f" border-radius: 6px; background: transparent; min-width: {ACTION_BUTTON_SIZE}px;"
+            f" max-width: {ACTION_BUTTON_SIZE}px; min-height: {ACTION_BUTTON_SIZE}px;"
+            f" max-height: {ACTION_BUTTON_SIZE}px; }}"
+            f"QFrame#{PANEL_NAME} QPushButton[fm_agent_action=\"true\"]:hover {{ background: {palette['fm_hover']};"
+            f" border-color: {palette['fm_field_border']}; }}"
+            f"QFrame#{PANEL_NAME} QPushButton[fm_agent_action=\"true\"]:checked {{ background: {palette['fm_active']};"
+            f" border-color: {palette['fm_active_border']}; }}"
+            f"QFrame#{PANEL_NAME} QPushButton[fm_agent_action=\"true\"]:focus {{ border-color: {palette['fm_accent']}; }}"
+            f"QFrame#{PANEL_NAME} QPushButton[fm_agent_action=\"true\"]:disabled {{ background: transparent; border-color: transparent; }}"
             f"QPushButton#pushButton_agent_tour, QPushButton#pushButton_agent_testers,"
             f" QPushButton#pushButton_agent_reconfigure {{ padding: 4px 0; font-size: 12px;"
             f" font-weight: 500; border: none; background: transparent; color: {palette['fm_accent']}; text-align: left; }}"
@@ -1338,12 +1395,54 @@ class AgentPanel(QFrame):
         more = render_icon("more", dark)
         if more is not None:
             self.more_button.setIcon(more)
+        self._refresh_action_icons(dark)
         back = render_icon("undo", dark)
         if back is not None:
             self.back_button.setIcon(back)
         welcome = render_icon("agent", dark, palette["fm_accent"])
         if welcome is not None:
             self.welcome_icon.setPixmap(welcome.pixmap(WELCOME_ICON_SIZE, WELCOME_ICON_SIZE))
+
+    def _refresh_action_icons(self, dark: bool) -> None:
+        """One icon language for the toolbar, menus and recipe actions, in either theme."""
+        if hasattr(self, "effort_button"):
+            self._refresh_effort_button()
+        for name, key, fallback in (
+                ("history_button", "history", QStyle.StandardPixmap.SP_FileDialogDetailedView),
+                ("recipes_button", "recipes", QStyle.StandardPixmap.SP_FileIcon),
+                ("new_button", "new_conversation", QStyle.StandardPixmap.SP_FileDialogNewFolder),
+                ("undo_button", "undo", QStyle.StandardPixmap.SP_ArrowBack),
+                ("redo_button", "redo", QStyle.StandardPixmap.SP_ArrowForward)):
+            button = getattr(self, name, None)
+            if button is not None:
+                icon = render_icon(key, dark)
+                button.setIcon(icon if icon is not None else self.style().standardIcon(fallback))
+        for name, key in (("new_action", "new_conversation"), ("history_action", "history"),
+                          ("recipes_menu", "recipes"), ("sources_menu", "projection"),
+                          ("models_menu", "agent"), ("mcp_action", "link"),
+                          ("settings_action", "settings"), ("setup_action", "settings"),
+                          ("tour_action", "help"), ("feedback_menu", "agent"),
+                          ("save_recipe_action", "save"), ("history_undo_button", "undo"),
+                          ("history_redo_button", "redo"), ("resend_button", "refresh"),
+                          ("step_button", "undo"), ("compare_button", "compare"),
+                          ("clear_global_button", "trash")):
+            target = getattr(self, name, None)
+            icon = render_icon(key, dark)
+            if target is not None and icon is not None:
+                target.setIcon(icon)
+        for menu in getattr(self, "_recipe_menus", ()):
+            icon = render_icon("recipes", dark)
+            if icon is not None:
+                menu.setIcon(icon)
+        for run, remove in getattr(self, "recipe_actions", {}).values():
+            for action, key in ((run, "play"), (remove, "trash")):
+                icon = render_icon(key, dark)
+                if icon is not None:
+                    action.setIcon(icon)
+        for action in getattr(self, "recipe_live", {}).values():
+            icon = render_icon("refresh", dark)
+            if icon is not None:
+                action.setIcon(icon)
 
     def changeEvent(self, event) -> None:  # noqa: N802 - Qt name
         super().changeEvent(event)
@@ -1358,6 +1457,58 @@ class AgentPanel(QFrame):
         self.shown.emit()
 
     # --- state ----------------------------------------------------------------
+
+    @staticmethod
+    def _effort_label(value: str) -> str:
+        return {"": _tr("Automatic"), "none": _tr("Minimal"), "low": _tr("Low"),
+                "medium": _tr("Medium"), "high": _tr("High"), "xhigh": _tr("Very high"),
+                "max": _tr("Maximum")}.get(value, _tr("Automatic"))
+
+    def set_effort_options(self, levels, current: str = "") -> None:
+        """Show only this model's supported controls; opening the menu never changes its default."""
+        known = {"none", "low", "medium", "high", "xhigh", "max"}
+        self._effort_levels = tuple(dict.fromkeys(level for level in levels if level in known))
+        self._effort = current if current in self._effort_levels else ""
+        menu = QMenu(self.effort_button)
+        menu.setObjectName("menu_agent_effort")
+        self._effort_action_group = QActionGroup(menu)
+        self._effort_action_group.setExclusive(True)
+        self._effort_actions = {}
+        for level in ("",) + self._effort_levels:
+            action = menu.addAction(self._effort_label(level))
+            action.setCheckable(True)
+            self._effort_action_group.addAction(action)
+            action.triggered.connect(lambda _checked=False, chosen=level: self._pick_effort(chosen))
+            self._effort_actions[level] = action
+        previous = self.effort_button.menu()
+        self.effort_button.setMenu(menu)
+        if previous is not None:
+            previous.deleteLater()
+        self.effort_button.setVisible(bool(self._effort_levels))
+        self.effort_button.setEnabled(bool(self._effort_levels) and not self._working)
+        self._refresh_effort_button()
+
+    def _refresh_effort_button(self) -> None:
+        for level, action in self._effort_actions.items():
+            action.setChecked(level == self._effort)
+        tooltip = _tr("Reasoning effort: {}").format(self._effort_label(self._effort))
+        tooltip += "\n" + _tr("More effort can take longer and use more tokens.")
+        self.effort_button.setToolTip(tooltip)
+        self.effort_button.setAccessibleDescription(tooltip)
+        dark = self._dark()
+        color = tokens(dark)["fm_accent" if self._effort else "fm_icon"]
+        icon = render_icon("effort", dark, color)
+        self.effort_button.setIcon(icon if icon is not None else self.style().standardIcon(
+            QStyle.StandardPixmap.SP_ComputerIcon))
+
+    def _pick_effort(self, value: str) -> None:
+        if self._working or (value and value not in self._effort_levels):
+            self._refresh_effort_button()
+            return
+        before, self._effort = self._effort, value
+        self._refresh_effort_button()
+        if before != value:
+            self.effort_changed.emit(value)
 
     def fill_options(self, groups, providers, mcp_on: bool) -> None:
         """The menu of the options: ``groups`` ``[(title, [(source id, name, ticked)])]``, ``providers`` ``[(label,
@@ -1412,6 +1563,7 @@ class AgentPanel(QFrame):
         self.save_recipe_action = menu.addAction(_tr("Save the last request as a recipe…"))
         self.save_recipe_action.setEnabled(self._can_save_recipe)
         self.save_recipe_action.triggered.connect(self.recipe_save_requested)
+        self._refresh_action_icons(self._dark())
         if not self._recipes:
             empty = menu.addAction(_tr("No recipe in this project yet"))
             empty.setEnabled(False)
@@ -1449,6 +1601,7 @@ class AgentPanel(QFrame):
             remove.triggered.connect(
                 lambda _checked=False, recipe_id=recipe["id"]: self.recipe_remove_requested.emit(recipe_id))
             self.recipe_actions[recipe["id"]] = (run, remove)
+        self._refresh_action_icons(self._dark())
 
     @property
     def recipes(self):
@@ -1486,7 +1639,9 @@ class AgentPanel(QFrame):
             if ready:
                 self._examples_on_screen()  # the welcome may be there: its requests come in sight
         if hasattr(self, "destination"):
-            self.destination.setText(_tr("Sent to: {}").format(destination) if ready and destination else "")
+            text = _tr("Sent to: {}").format(destination) if ready and destination else ""
+            self.destination.set_full_text(text)
+            self.destination.setAccessibleName(text)
             self.destination.setVisible(bool(ready and destination))
 
     def _read_facts(self) -> Facts:
@@ -1671,6 +1826,7 @@ class AgentPanel(QFrame):
         self._working = working
         self.progress.setVisible(working)
         self.more_button.setEnabled(not working)
+        self.effort_button.setEnabled(bool(self._effort_levels) and not working)
         self.history_undo_button.setEnabled(self.history_undo_button.isEnabled() and not working)
         self.history_redo_button.setEnabled(self.history_redo_button.isEnabled() and not working)
         if hasattr(self, "history_button"):
@@ -1822,11 +1978,13 @@ class AgentPanel(QFrame):
         self._refresh_new_button()
 
     def _refresh_new_button(self) -> None:
-        """The link to a new conversation: once the thread holds something, and not while the agent works."""
+        """Keep navigation in place; a fresh conversation is offered once there is something to clear."""
         if hasattr(self, "new_button"):
             # The thread page is shown before its first line is added (_show_conversation).
-            self.new_button.setVisible(not self.thread.is_empty() or self.stack.currentIndex() == _THREAD_PAGE)
-            self.new_button.setEnabled(not self._working)
+            has_conversation = not self.thread.is_empty() or self.stack.currentIndex() == _THREAD_PAGE
+            self.new_button.setEnabled(has_conversation and not self._working)
+            self.new_action.setEnabled(has_conversation and not self._working)
+            self.history_button.setChecked(self.history_shown)
 
     def _popup_recipes(self) -> None:
         """The Recipes menu under its link: the same menu as in "⋯", without opening it first."""

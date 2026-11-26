@@ -145,6 +145,17 @@ ICON_BODIES: Dict[str, str] = {
     'agent': '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
     'agent_send': '<path d="M4 12l16-8-6 16-3-6z"/><path d="M11 14l9-10"/>',
     'agent_stop': '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>',
+    'history': '<path d="M3 10a9 9 0 1 1 1.8 7.4M3 4v6h6"/><path d="M12 7v5l3 2"/>',
+    'effort': '<path d="M4 19a9 9 0 1 1 16 0M12 4v2M5.6 7l1.5 1.5M18.4 7l-1.5 1.5M3 13h2M19 13h2"/>'
+              '<path d="M12 13l4-4"/><circle cx="12" cy="13" r="1.5"/>',
+    'new_conversation': '<path d="M12 4H4v16l5-4h11v-5"/><path d="M17 2v8M13 6h8"/>',
+    'recipes': '<path d="M4 4h16v16H7a3 3 0 0 1 0-6h13M4 4v13"/><path d="M10 7l5 2.5-5 2.5z"/>',
+    'save': '<path d="M4 3h13l4 4v14H3V3z"/><path d="M7 3v6h10V3M7 21v-8h10v8"/>',
+    'play': '<path d="M8 4l12 8-12 8z"/>',
+    'refresh': '<path d="M20 7v5h-5M4 17v-5h5M5.2 7a8 8 0 0 1 13.2-1L20 8M4 16l1.6 2a8 8 0 0 0 13.2-1"/>',
+    'trash': '<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>',
+    'help': '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.8 2.1c-1.3.8-1.3 1.4-1.3 2.4M12 17h0"/>',
+    'compare': '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 2v20M6 12l3-3M6 16l3-3M15 8h3M15 12h3M15 16h3"/>',
     'more': '<circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/>'
             '<circle cx="19" cy="12" r="1.4" fill="currentColor"/>',
     'settings': '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/>'

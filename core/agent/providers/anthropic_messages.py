@@ -92,8 +92,10 @@ class AnthropicProvider:
                           for tool in tools]} if tools else {}),  # an empty list is refused by some servers
             "messages": _wire_messages(messages),
         }
-        if config.effort:
-            body["output_config"] = {"effort": config.effort}
+        from .effort import valid_effort
+        effort = valid_effort('anthropic', config.model, config.effort)
+        if effort:
+            body["output_config"] = {"effort": effort}
         headers = {"content-type": "application/json", "accept": "text/event-stream", "anthropic-version": API_VERSION}
         if self._uses_fallback():
             body["fallbacks"] = "default"

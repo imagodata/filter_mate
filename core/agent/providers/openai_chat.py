@@ -12,6 +12,7 @@ from ..messages import (
 from ..tool_catalog import ToolSpec
 from ..tool_schema import for_model
 from .base import HttpRequest, ProviderConfig, SseDecoder, check_base_url, encode_json, parse_tool_arguments
+from .effort import valid_effort
 
 _STOP_REASONS = {"stop": STOP_END, "tool_calls": STOP_TOOL_USE, "function_call": STOP_TOOL_USE,
                  "length": STOP_MAX_TOKENS, "content_filter": STOP_REFUSAL}
@@ -70,6 +71,10 @@ class OpenAIChatProvider:
             "stream": True,
             "messages": _wire_messages(system, messages),
         }
+        effort = valid_effort('openai', config.model, config.effort) or valid_effort(
+            'mistral', config.model, config.effort)
+        if effort:
+            body['reasoning_effort'] = effort
         if tools:  # OpenAI answers 400 (empty_array) to an empty list
             body["tools"] = [{"type": "function", "function": {
                 "name": tool.name, "description": tool.description, "parameters": for_model(tool.input_schema)}}
@@ -148,6 +153,11 @@ class OpenAIStreamParser:
         for choice in (payload.get("choices") or [])[:1]:
             delta = choice.get("delta") or {}
             text = delta.get("content")
+            if isinstance(text, list):
+                # Mistral reasoning replies use typed chunks. Only final text
+                # belongs in the answer; thinking chunks are never displayed.
+                text = ''.join(part['text'] for part in text if isinstance(part, dict)
+                               and part.get('type') == 'text' and isinstance(part.get('text'), str))
             if isinstance(text, str) and text:
                 self._text.append(text)
                 events.append(TextDelta(text))

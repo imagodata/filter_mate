@@ -4,6 +4,12 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: an optional reasoning-effort menu appears only for recognized models that support it. It offers the model's supported levels and an Automatic default, remembers the choice per model and server, and applies it to the next request without clearing the conversation. Unsupported models receive no effort parameter. Anthropic, OpenAI, Mistral and Ollama use their respective request formats; Mistral's thinking chunks stay out of the displayed answer.
+
+- Agent: resuming a conversation checks its server, account and attribute-sharing setting; resetting the thread forgets the saved conversation too. Saving long conversations sizes each message once instead of repeatedly encoding the growing history. Choosing a layer in the filtered `@` completion inserts the selected layer rather than the layer at the same row of the unfiltered list. The French catalog and its compiled `.qm` gain 38 missing memory, posture, reasoning-effort and interface strings.
+- REST API: importing the standalone server no longer initializes the QGIS-dependent core just to read four source-kind names.
+- Agent: compact icon actions with tooltips and accessible names for History, Recipes, New conversation and history controls. Icons follow the light and dark themes and also appear in the menus; the active history page stays highlighted. New conversation keeps its place and is disabled while empty or busy. Long model names are shortened with an ellipsis and remain readable in a tooltip.
+
 ## [5.1.3] - 2026-11-26
 
 - Engine: asynchronous expression evaluation uses the same project and layer variables, measurement units, CRS and ellipsoid as synchronous reads. Expressions depending on the live layer, virtual or joined fields, and unsaved edits are evaluated on the main thread so that returned features match too.

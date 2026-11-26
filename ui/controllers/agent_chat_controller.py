@@ -70,6 +70,8 @@ from ...core.agent.messages import (
     TextPart, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
+from ...core.agent.providers.effort import effort_levels
+from ...adapters.agent.settings import read_effort, write_effort
 from ...core.agent.providers.base import HttpRequest, encode_json, error_from_response, without_key
 from ...core.agent.providers.model_list import listing_url, models_from_listing
 from ...core.agent.project_summary import project_state, project_summary, project_update
@@ -86,7 +88,7 @@ from ...core.agent.memory import (
     UNDECLINE as MEMORY_UNDECLINE, UnreadableMemory, chosen as memory_chosen, memory_block, note_of, proposal_problem,
 )
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
-from ...core.agent.questions import answers_payload, parse_questions
+from ...core.agent.questions import Option, Question, answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
     ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CREATE_WIDGET, EXPORT_CHART, RUN_CHART_CODE, SHOW_CHART,
     LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
@@ -288,6 +290,7 @@ class AgentChatController(QObject):
         self.panel.set_mode(self._mode)
         self.panel.mode_changed.connect(self._on_mode_changed)
         self.panel.posture_changed.connect(self._on_posture_changed)
+        self.panel.effort_changed.connect(self._on_effort_changed)
         self.panel.stop_requested.connect(self._on_stop)
         self.panel.undo_requested.connect(self._on_undo)
         self.panel.redo_requested.connect(self._on_redo)
@@ -476,6 +479,19 @@ class AgentChatController(QObject):
         self.panel.set_ready(values.ready, "" if self._header_label is not None else destination,
                              local=runs_on_this_computer(getattr(values, "preset", ""), getattr(values, "base_url", ""),
                                                          getattr(values, "model", "")))
+        self.panel.set_effort_options(effort_levels(values.preset, values.model) if values.ready else (),
+                                      read_effort(values))
+
+    def _on_effort_changed(self, value: str) -> None:
+        """Apply to the next request, preserving the conversation and any turn already under way."""
+        values = load_settings()
+        if self.chat_busy() or (value and value not in effort_levels(values.preset, values.model)):
+            self._refresh_ready()
+            return
+        if value != read_effort(values):
+            write_effort(values, value)
+            self._restart_engine()  # the saved session resumes with the new provider configuration
+        self._refresh_ready()
 
     def stop(self) -> None:
         """The dock closes: it can reopen on this same conversation. A recipe stops before its next step."""
@@ -553,6 +569,12 @@ class AgentChatController(QObject):
         if self._transcript_key:
             transcript_store.save(self._transcript_key, self._transcript)
 
+    @staticmethod
+    def _session_context(values) -> str:
+        """The server, account and sharing choice this conversation belongs to; never the API key itself."""
+        target = str(getattr(values, "base_url", "") or PRESETS[values.preset][1]).strip().rstrip("/")
+        return json.dumps([target, getattr(values, "authcfg", ""), bool(values.send_values)], ensure_ascii=False)
+
     def _save_session(self) -> None:
         """Keep the real conversation for this project, so the discussion can be taken up again after the project
         reopens or QGIS restarts. Under the model it talked to: resumed only for the same destination."""
@@ -562,7 +584,8 @@ class AgentChatController(QObject):
             preset, model = getattr(self, "_engine_identity", ("", ""))
             session = self._engine.session
             session_store.save(self._transcript_key,
-                               session_dump(session.messages, session.usage, session.summarized, preset, model))
+                               session_dump(session.messages, session.usage, session.summarized, preset, model,
+                                            context=getattr(self, "_engine_context", "")))
         except Exception:  # keeping is a convenience: a request is never failed for it
             logger.debug("Agent: the conversation could not be kept", exc_info=True)
 
@@ -573,7 +596,7 @@ class AgentChatController(QObject):
             return
         try:
             text = session_store.load(self._transcript_key)
-            if not session_resumable(text, values.preset, values.model):
+            if not session_resumable(text, values.preset, values.model, context=self._session_context(values)):
                 return
             saved = session_parse(text)
             if saved is not None:
@@ -585,7 +608,8 @@ class AgentChatController(QObject):
         """A conversation kept for this project, for the model of the settings: the next request takes it up again."""
         try:
             values = load_settings()
-            return session_resumable(session_store.load(self._transcript_key), values.preset, values.model)
+            return session_resumable(session_store.load(self._transcript_key), values.preset, values.model,
+                                     context=self._session_context(values))
         except Exception:
             logger.debug("Agent: the kept conversation could not be read", exc_info=True)
             return False
@@ -2807,6 +2831,7 @@ class AgentChatController(QObject):
         session = AgentSession(provider, tools, prompt, limits, core=CORE if index else ())
         self._resume_session(session, values)
         self._engine_identity = (values.preset, values.model)
+        self._engine_context = self._session_context(values)
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
 
@@ -2964,7 +2989,7 @@ class AgentChatController(QObject):
                     return False, _tr("Enter your API key first."), ()
             # Without a model the provider is only asked for its headers (the key's, the version's): never sent to.
             config = replace(provider_config(AgentSettings(preset=preset, model=model or "-", base_url=base_url), key),
-                             max_tokens=PROVIDER_TEST_TOKENS)
+                             max_tokens=PROVIDER_TEST_TOKENS, effort=None)
             provider = create_provider(config)
             ask = Message(ROLE_USER, (TextPart(PROVIDER_TEST_ASK),))
             chat = provider.build_request("A connection test.", [ask], [])
@@ -3059,6 +3084,7 @@ class AgentChatController(QObject):
         self._leave_memory_cards()
         self._memory_generation += 1
         self._restart_engine()
+        session_store.save(self._transcript_key, "")  # a reset must not resurrect the conversation just saved
         self._policy.forget()  # another conversation, or another project: what was allowed is asked again
         # What came before was said to another provider, or under other settings: the next conversation is not told.
         self._recap_from = len(self._transcript)

@@ -33,6 +33,7 @@ class SavedSession:
     messages: Tuple[Message, ...] = ()
     usage: Usage = Usage()
     summarized: int = 0
+    context: str = ""
 
 
 def _part_to_dict(part: Any) -> Optional[Dict[str, Any]]:
@@ -111,26 +112,30 @@ def _usage_from_dict(item: Any) -> Usage:
     return Usage(*values)
 
 
-def _trim(messages: List[Message], usage: Usage, summarized: int, preset: str, model: str) -> List[Message]:
+def _trim(messages: List[Message], usage: Usage, summarized: int, preset: str, model: str,
+          context: str) -> List[Message]:
     """The newest messages whose JSON fits, whole; the oldest go first (never half a request: cuts fall where the
     in-memory compaction cuts them, before a request of the user)."""
     from .compaction import is_request
-    kept: List[Message] = []
+    size = len(json.dumps({"version": VERSION, "preset": preset, "model": model, "messages": [],
+                           "usage": _usage_to_dict(usage), "summarized": summarized,
+                           "context": context}, ensure_ascii=False))
+    start = len(messages)
     for message in reversed(messages):
-        candidate = [message] + kept
-        text = json.dumps({"version": VERSION, "preset": preset, "model": model,
-                           "messages": [_message_to_dict(item) for item in candidate],
-                           "usage": _usage_to_dict(usage), "summarized": summarized}, ensure_ascii=False)
-        if len(text) > MAX_STORED_CHARS:
+        # Serialize each message once for sizing. Re-encoding the growing suffix at every step froze the
+        # main thread for over a second on a conversation of 2,000 short messages (quadratic work).
+        extra = len(json.dumps(_message_to_dict(message), ensure_ascii=False)) + (2 if start < len(messages) else 0)
+        if size + extra > MAX_STORED_CHARS:
             break
-        kept = candidate
-    while kept and not is_request(kept[0]):
-        kept.pop(0)
-    return kept
+        size += extra
+        start -= 1
+    while start < len(messages) and not is_request(messages[start]):
+        start += 1
+    return messages[start:]
 
 
 def dump(messages: Sequence[Message], usage: Optional[Usage] = None, summarized: int = 0,
-         preset: str = "", model: str = "") -> str:
+         preset: str = "", model: str = "", context: str = "") -> str:
     """The conversation as JSON to keep; "" when it holds nothing to resume."""
     kept = [item for item in (_message_to_dict(message) for message in messages) if item is not None]
     if not kept:
@@ -139,12 +144,14 @@ def dump(messages: Sequence[Message], usage: Optional[Usage] = None, summarized:
     messages = tuple(item for item in live if item is not None)
     usage = usage or Usage()
     summarized = summarized if isinstance(summarized, int) and summarized >= 0 else 0
-    trimmed = _trim(list(messages), usage, summarized, preset, model)
+    preset, model, context = str(preset), str(model), str(context)
+    trimmed = _trim(list(messages), usage, summarized, preset, model, context)
     if not trimmed:
         return ""
     return json.dumps({"version": VERSION, "preset": str(preset), "model": str(model),
                        "messages": [_message_to_dict(message) for message in trimmed],
-                       "usage": _usage_to_dict(usage), "summarized": summarized}, ensure_ascii=False)
+                       "usage": _usage_to_dict(usage), "summarized": summarized,
+                       "context": context}, ensure_ascii=False)
 
 
 def parse(text: str) -> Optional[SavedSession]:
@@ -162,18 +169,21 @@ def parse(text: str) -> Optional[SavedSession]:
     if not messages:
         return None
     summarized = data.get("summarized")
-    preset, model = data.get("preset"), data.get("model")
+    preset, model, context = data.get("preset"), data.get("model"), data.get("context")
     return SavedSession(preset if isinstance(preset, str) else "", model if isinstance(model, str) else "",
                         messages, _usage_from_dict(data.get("usage")),
-                        summarized if isinstance(summarized, int) and summarized >= 0 else 0)
+                        summarized if isinstance(summarized, int) and summarized >= 0 else 0,
+                        context if isinstance(context, str) else "")
 
 
-def resumable(text: str, preset: str = "", model: str = "") -> bool:
+def resumable(text: str, preset: str = "", model: str = "", context: Optional[str] = None) -> bool:
     """Whether ``text`` holds a conversation worth resuming for this provider and model.
 
     Only for the same destination the data already went to: opaque blocks only their provider understands, and tool
-    calls only make sense under the settings that offered them. Anything else falls back to the recap of the thread.
+    calls only make sense under the settings that offered them. ``context`` identifies the server, account and
+    value-sharing choice; a legacy session without it cannot prove it belongs to that destination. Anything else
+    falls back to the recap of the thread.
     """
     saved = parse(text)
     return saved is not None and bool(saved.messages) and (not preset or saved.preset in ("", preset)) \
-        and (not model or saved.model in ("", model))
+        and (not model or saved.model in ("", model)) and (context is None or saved.context == context)

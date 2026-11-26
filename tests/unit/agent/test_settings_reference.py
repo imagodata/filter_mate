@@ -66,7 +66,8 @@ def test_describe_lists_sections_without_arguments_and_caps_the_rows(default):
     assert any(item["section"] == "APP.OPTIONS.QUERY_CACHE" for item in answer["sections"])
     capped = describe(rows, section="APP.OPTIONS", limit=3)
     assert len(capped["settings"]) == 3 and capped["matched"] > 3 and "more" in capped
-    assert describe(rows, query="zzzz nothing")["settings"] == []
+    # Search falls back to partial matches: "nothing" is now in the tool-visibility descriptions.
+    assert describe(rows, query="zzzzzzzz qqqqqqqq")["settings"] == []
 
 
 def test_changed_only(default):

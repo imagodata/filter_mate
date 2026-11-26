@@ -17,11 +17,6 @@ from ..export_root import ExportRootError, resolve_exported_file
 from ..source_gate import open_data_refusal
 from .filters import LayerName
 
-try:
-    from ...core.agent.open_data import KIND_ELEVATION, KIND_OVERPASS, KIND_POPULATION, KIND_XYZ
-except ImportError:  # repo root on sys.path
-    from core.agent.open_data import KIND_ELEVATION, KIND_OVERPASS, KIND_POPULATION, KIND_XYZ
-
 router = APIRouter(tags=["project"])
 _MAX_NAME = 1000
 
@@ -246,7 +241,9 @@ class AddBasemapBody(BaseModel):
 @router.post("/layers/add-basemap", response_model=LayerSummary)
 def add_basemap(payload: AddBasemapBody, request: Request) -> LayerSummary:
     """Add a web basemap the user allowed, under the layers of the project."""
-    refused = open_data_refusal(KIND_XYZ, "basemap")
+    # Source kind names are the gate's protocol: importing core.agent here also initializes the QGIS-dependent
+    # core package and breaks standalone REST/MCP startup. The gate reads the agent settings lazily.
+    refused = open_data_refusal("xyz", "basemap")
     if refused is not None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=refused)
     try:
@@ -269,7 +266,7 @@ class AddElevationBody(BaseModel):
 @router.post("/layers/add-elevation", response_model=ElevationResult)
 def add_elevation(payload: AddElevationBody, request: Request) -> ElevationResult:
     """Add the elevation of an area, read from an elevation model the user allowed, as a raster layer."""
-    refused = open_data_refusal(KIND_ELEVATION, "elevation")
+    refused = open_data_refusal("elevation", "elevation")
     if refused is not None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=refused)
     try:
@@ -293,7 +290,7 @@ class AddPopulationBody(BaseModel):
 @router.post("/layers/add-population", response_model=PopulationResult)
 def add_population(payload: AddPopulationBody, request: Request) -> PopulationResult:
     """Add the people of an area, read from a population grid the user allowed, as a raster of people per pixel."""
-    refused = open_data_refusal(KIND_POPULATION, "population")
+    refused = open_data_refusal("population", "population")
     if refused is not None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=refused)
     try:
@@ -325,7 +322,7 @@ class AddOsmBody(BaseModel):
 @router.post("/layers/add-osm", response_model=OsmResult)
 def add_osm_features(payload: AddOsmBody, request: Request) -> OsmResult:
     """Add the OpenStreetMap features that carry given tags in an area, read from an Overpass server."""
-    refused = open_data_refusal(KIND_OVERPASS, "Overpass")
+    refused = open_data_refusal("overpass", "Overpass")
     if refused is not None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=refused)
     try:

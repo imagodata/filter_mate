@@ -111,6 +111,10 @@ class OllamaChatProvider:
             "stream": True,
             "messages": _wire_messages(system, messages),
         }
+        from .effort import valid_effort
+        effort = valid_effort('ollama', config.model, config.effort)
+        if effort:
+            body['think'] = effort
         if tools:
             body["tools"] = [{"type": "function", "function": {
                 "name": tool.name, "description": tool.description, "parameters": wire_schema(tool.input_schema)}}

@@ -13,7 +13,7 @@ import pytest
 
 PLUGIN_ROOT = Path(__file__).resolve().parent.parent
 EXCLUDED_DIRS = {
-    "tests", ".git", "__pycache__",
+    "tests", ".git", ".claude", ".agents", ".codex", ".venv", "venv", "node_modules", "__pycache__",
     "_bmad", "_bmad-output", "website", "docs", "knowledge", "dist", "build", "scripts",
 }
 # Signals owned by QGIS objects (QgsProject, QgsMapLayerStore, QgisInterface,

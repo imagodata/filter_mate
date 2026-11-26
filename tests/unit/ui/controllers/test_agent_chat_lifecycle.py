@@ -1087,6 +1087,52 @@ def test_other_tools_under_the_same_provider_keep_the_thread(controller):
     assert controller._recap_from == len(controller._transcript)
 
 
+@pytest.fixture
+def saved_conversations(ctrl_module, controller, monkeypatch):
+    stored = {}
+    monkeypatch.setattr(ctrl_module, "session_store", types.SimpleNamespace(
+        load=lambda key: stored.get(key, ""), save=lambda key, text: stored.__setitem__(key, text)))
+    controller._transcript_key = "project-a"
+    return stored
+
+
+def test_reset_view_cannot_restore_the_conversation_it_just_left(ctrl_module, controller, saved_conversations):
+    engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    engine.session.add_user_text("private context of the previous conversation")
+    controller._engine_identity = (SETTINGS.preset, SETTINGS.model)
+    controller._engine_context = controller._session_context(SETTINGS)
+    controller._reset_view()  # provider/account changed, even if preset and model still match
+    next_engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller._resume_session(next_engine.session, SETTINGS)
+    assert next_engine.session.messages == ()
+
+
+@pytest.mark.parametrize("changes", [{"base_url": "https://another-server.example/v1"},
+                                      {"authcfg": "another-account"}, {"send_values": False}])
+def test_stored_conversation_does_not_cross_server_account_or_sharing_settings(
+        ctrl_module, controller, saved_conversations, changes):
+    engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    engine.session.add_user_text("private context of this destination")
+    controller._engine_identity = (SETTINGS.preset, SETTINGS.model)
+    controller._engine_context = controller._session_context(SETTINGS)
+    controller._save_session()
+    assert saved_conversations["project-a"]
+    next_engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller._resume_session(next_engine.session, types.SimpleNamespace(**(vars(SETTINGS) | changes)))
+    assert next_engine.session.messages == ()
+
+
+def test_same_destination_resumes_after_tools_restart(ctrl_module, controller, saved_conversations):
+    engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    engine.session.add_user_text("keep working on these communes")
+    controller._engine_identity = (SETTINGS.preset, SETTINGS.model)
+    controller._engine_context = controller._session_context(SETTINGS)
+    controller._restart_engine()
+    next_engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller._resume_session(next_engine.session, SETTINGS)
+    assert [message.text for message in next_engine.session.messages] == ["keep working on these communes"]
+
+
 # --- the context of a request taken out of the conversation is sent again ----------------------------------------
 
 ROW = {"layer_id": "c1", "name": "communes", "layer_kind": "vector", "feature_count": 10,

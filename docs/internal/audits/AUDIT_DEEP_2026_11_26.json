@@ -1,0 +1,359 @@
+{
+  "date": "2026-11-26",
+  "baseline_commit": "8453883a",
+  "head_at_report": "21632b646c71735147c3767a5463565b66b648f1",
+  "scope": "Working tree audit; concurrent edits retained; GUI prefix ends before s_config_search.",
+  "general_suite": {
+    "tests": 12763,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 41
+  },
+  "general_suite_note": "Only failure was the French runtime-catalog guard after concurrent effort labels were added. Corrected and included in the successful affected-suite replay.",
+  "affected_suite_replay": {
+    "tests": 4635,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "qt6_ux_isolated": {
+    "passed": 17,
+    "failed": 0
+  },
+  "concurrent_effort_first_replay": {
+    "passed": 39,
+    "failed": 0
+  },
+  "gdal_suites": [
+    {
+      "tests": 302,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "tests": 199,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "qgis_checks": [
+    {
+      "image": "3_22",
+      "check": "check_expression_context",
+      "counts": {
+        "PASS": 32,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "32/32 passed (QGIS 3.22.16-Białowieża)"
+      ]
+    },
+    {
+      "image": "3_22",
+      "check": "check_charts_lot2",
+      "counts": {
+        "PASS": 55,
+        "FAIL": 0,
+        "SKIP": 1,
+        "XFAIL": 0
+      },
+      "summary": [
+        "RESULT 55/55 passed"
+      ]
+    },
+    {
+      "image": "3_22",
+      "check": "check_agent_gui",
+      "counts": {
+        "PASS": 26,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "26/26 passed"
+      ]
+    },
+    {
+      "image": "3_22",
+      "check": "check_processing_models",
+      "counts": {
+        "PASS": 1,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": []
+    },
+    {
+      "image": "3_22",
+      "check": "check_stream_copy",
+      "counts": {
+        "PASS": 31,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "31/31 passed"
+      ]
+    },
+    {
+      "image": "ltr",
+      "check": "check_expression_context",
+      "counts": {
+        "PASS": 32,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "32/32 passed (QGIS 3.44.15-Solothurn)"
+      ]
+    },
+    {
+      "image": "ltr",
+      "check": "check_charts_lot2",
+      "counts": {
+        "PASS": 55,
+        "FAIL": 0,
+        "SKIP": 1,
+        "XFAIL": 0
+      },
+      "summary": [
+        "RESULT 55/55 passed"
+      ]
+    },
+    {
+      "image": "ltr",
+      "check": "check_agent_gui",
+      "counts": {
+        "PASS": 26,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "26/26 passed"
+      ]
+    },
+    {
+      "image": "ltr",
+      "check": "check_processing_models",
+      "counts": {
+        "PASS": 1,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": []
+    },
+    {
+      "image": "ltr",
+      "check": "check_stream_copy",
+      "counts": {
+        "PASS": 49,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "49/49 passed"
+      ]
+    },
+    {
+      "image": "ltr",
+      "check": "run_smoke",
+      "counts": {
+        "PASS": 162,
+        "FAIL": 0,
+        "SKIP": 2,
+        "XFAIL": 1
+      },
+      "summary": [
+        "162 passed, 0 failed, 2 skipped, 1 known failures in 8.1s (QGIS 3.44.15-Solothurn)"
+      ]
+    },
+    {
+      "image": "ltr",
+      "check": "run_lifecycle_check",
+      "counts": {
+        "PASS": 44,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "44 passed, 0 failed in 306.5s (QGIS 3.44.15-Solothurn, lifecycle)"
+      ]
+    },
+    {
+      "image": "ltr",
+      "check": "prefix-final",
+      "counts": {
+        "PASS": 134,
+        "FAIL": 0,
+        "SKIP": 1,
+        "XFAIL": 0
+      },
+      "summary": [
+        "134 passed, 0 failed, 1 skipped, 0 known failures in 179.2s (QGIS 3.44.15-Solothurn, dock)"
+      ]
+    },
+    {
+      "image": "stable",
+      "check": "check_expression_context",
+      "counts": {
+        "PASS": 32,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "32/32 passed (QGIS 4.2.3-Belém do Pará)"
+      ]
+    },
+    {
+      "image": "stable",
+      "check": "check_charts_lot2",
+      "counts": {
+        "PASS": 55,
+        "FAIL": 0,
+        "SKIP": 1,
+        "XFAIL": 0
+      },
+      "summary": [
+        "RESULT 55/55 passed"
+      ]
+    },
+    {
+      "image": "stable",
+      "check": "check_agent_gui",
+      "counts": {
+        "PASS": 26,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "26/26 passed"
+      ]
+    },
+    {
+      "image": "stable",
+      "check": "check_processing_models",
+      "counts": {
+        "PASS": 1,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": []
+    },
+    {
+      "image": "stable",
+      "check": "check_stream_copy",
+      "counts": {
+        "PASS": 49,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "49/49 passed"
+      ]
+    },
+    {
+      "image": "stable",
+      "check": "run_smoke",
+      "counts": {
+        "PASS": 162,
+        "FAIL": 0,
+        "SKIP": 2,
+        "XFAIL": 1
+      },
+      "summary": [
+        "162 passed, 0 failed, 2 skipped, 1 known failures in 9.2s (QGIS 4.2.3-Belém do Pará)"
+      ]
+    },
+    {
+      "image": "stable",
+      "check": "run_lifecycle_check",
+      "counts": {
+        "PASS": 44,
+        "FAIL": 0,
+        "SKIP": 0,
+        "XFAIL": 0
+      },
+      "summary": [
+        "44 passed, 0 failed in 305.3s (QGIS 4.2.3-Belém do Pará, lifecycle)"
+      ]
+    },
+    {
+      "image": "stable",
+      "check": "prefix-final",
+      "counts": {
+        "PASS": 134,
+        "FAIL": 0,
+        "SKIP": 1,
+        "XFAIL": 0
+      },
+      "summary": [
+        "134 passed, 0 failed, 1 skipped, 0 known failures in 179.8s (QGIS 4.2.3-Belém do Pará, dock)"
+      ]
+    }
+  ],
+  "webengine": {
+    "qgis": "4.2.3",
+    "qt": "6.10.2",
+    "passed": 69,
+    "failed": 0
+  },
+  "benchmark": {
+    "baseline": "8453883a",
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "repetitions": 3,
+    "results": [
+      {
+        "messages": 100,
+        "serialized_chars": 7937,
+        "before_median_ms": 3.68,
+        "after_median_ms": 0.341,
+        "speedup": 10.8
+      },
+      {
+        "messages": 500,
+        "serialized_chars": 39337,
+        "before_median_ms": 93.669,
+        "after_median_ms": 1.592,
+        "speedup": 58.8
+      },
+      {
+        "messages": 1000,
+        "serialized_chars": 78587,
+        "before_median_ms": 364.702,
+        "after_median_ms": 4.047,
+        "speedup": 90.1
+      },
+      {
+        "messages": 2000,
+        "serialized_chars": 158087,
+        "before_median_ms": 1515.289,
+        "after_median_ms": 6.861,
+        "speedup": 220.9
+      }
+    ]
+  },
+  "french_runtime_strings_added": 38,
+  "limits": [
+    "Full GUI sizing campaign reached the 480-second local timeout; functional prefix and lifecycle completed separately.",
+    "No live PostgreSQL DSN; some cloud clips require PDAL; real SAM ONNX weights unavailable.",
+    "Qt5 and Qt6 mixed in one replay process aborted natively; Qt6 UX passed in isolation and the remaining affected suites passed separately.",
+    "Release ZIP not rebuilt."
+  ],
+  "logs": "/tmp/filtermate-audit-20261126*"
+}
