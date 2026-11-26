@@ -571,6 +571,9 @@ class AgentPanel(QFrame):
     new_conversation_requested = pyqtSignal()
     save_project_requested = pyqtSignal()
     model_designer_requested = pyqtSignal()
+    microphone_requested = pyqtSignal()
+    microphone_cancel_requested = pyqtSignal()
+    microphone_settings_requested = pyqtSignal()
     redo_requested = pyqtSignal()
     history_requested = pyqtSignal()
     # The options of the agent from the menu "⋯" (2026-11-16): the controller fills them when the menu opens.
@@ -595,6 +598,7 @@ class AgentPanel(QFrame):
         super().__init__(parent)
         self.setObjectName(PANEL_NAME)
         self._working = False
+        self._speech_state = 'idle'
         self._can_compare = False  # the dock has Compare and the history of the project
         self._in_answer = False
         self._ready = False
@@ -709,6 +713,14 @@ class AgentPanel(QFrame):
         self.send_button.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
         self.send_button.clicked.connect(self._on_send_or_stop)
 
+        self.microphone_button = QToolButton(self)
+        self.microphone_button.setObjectName('toolButton_agent_microphone')
+        self.microphone_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.microphone_button.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
+        self.microphone_button.clicked.connect(self.microphone_requested)
+        self.microphone_button.setToolTip(_tr('Dictate with the microphone'))
+        self.microphone_button.setAccessibleName(_tr('Dictate with the microphone'))
+
         self.more_button = QToolButton(self)
         self.more_button.setObjectName("toolButton_agent_more")
         self.more_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -745,6 +757,8 @@ class AgentPanel(QFrame):
         menu.aboutToShow.connect(self.options_requested)
         self.settings_action = menu.addAction(_tr("Agent settings"))
         self.settings_action.triggered.connect(self.settings_requested)
+        self.microphone_settings_action = menu.addAction(_tr('Microphone settings…'))
+        self.microphone_settings_action.triggered.connect(self.microphone_settings_requested)
         menu.addSeparator()
         self.setup_action = menu.addAction(_tr("Set up FilterMate…"))
         self.setup_action.triggered.connect(self.setup_requested)
@@ -762,8 +776,23 @@ class AgentPanel(QFrame):
         ask.setContentsMargins(0, 0, 0, 0)
         ask.setSpacing(6)
         ask.addWidget(self.input, 1)
+        ask.addWidget(self.microphone_button, 0, Qt.AlignmentFlag.AlignBottom)
         ask.addWidget(self.send_button, 0, Qt.AlignmentFlag.AlignBottom)  # at the last line of a request that grew
         ask.addWidget(self.more_button, 0, Qt.AlignmentFlag.AlignBottom)
+
+        self.speech_row = QFrame(self)
+        self.speech_row.setObjectName('frame_agent_speech')
+        speech_layout = QHBoxLayout(self.speech_row)
+        speech_layout.setContentsMargins(2, 0, 0, 0)
+        self.speech_label = ElidedLabel('', self.speech_row)
+        self.speech_label.setObjectName('label_agent_speech')
+        self.speech_label.setTextFormat(Qt.TextFormat.PlainText)
+        self.speech_cancel = QPushButton(_tr('Cancel dictation'), self.speech_row)
+        self.speech_cancel.setFlat(True)
+        self.speech_cancel.clicked.connect(self.microphone_cancel_requested)
+        speech_layout.addWidget(self.speech_label, 1)
+        speech_layout.addWidget(self.speech_cancel)
+        self.speech_row.setVisible(False)
 
         self.destination = ElidedLabel("", self)
         self.destination.setObjectName("label_agent_destination")
@@ -872,6 +901,7 @@ class AgentPanel(QFrame):
         layout.addLayout(actions)
         layout.addWidget(self.queue_row)
         layout.addLayout(ask)
+        layout.addWidget(self.speech_row)
         layout.addLayout(under)
         self.set_ready(False)
         self.set_working(False)
@@ -892,7 +922,8 @@ class AgentPanel(QFrame):
         self.undo_button.setAccessibleName(_tr("Undo this turn"))
         self.redo_button.setAccessibleName(_tr("Redo the undone turn"))
         self.queue_cancel.setAccessibleName(_tr("Take the waiting requests back to the line"))
-        self.setTabOrder(self.input, self.send_button)
+        self.setTabOrder(self.input, self.microphone_button)
+        self.setTabOrder(self.microphone_button, self.send_button)
         self.setTabOrder(self.send_button, self.more_button)
         self.setTabOrder(self.more_button, self.mode_button)
         self.setTabOrder(self.mode_button, self.effort_button)
@@ -1293,6 +1324,7 @@ class AgentPanel(QFrame):
         muted = palette["fm_text_muted"]
         self.destination.setStyleSheet(f"color: {muted};")
         send_color = palette["fm_danger"] if self._working else palette["fm_accent"]
+        mic_color = palette['fm_danger'] if self._speech_state != 'idle' else palette['fm_text']
         sheet = (
             # The dock pads every frame by 6 px: the panel and its pages sit on the edges of the section headers.
             f"QFrame#{PANEL_NAME}, QStackedWidget#stackedWidget_agent {{ padding: 0px; margin: 0px; border: none;"
@@ -1318,6 +1350,11 @@ class AgentPanel(QFrame):
             f" min-height: {INPUT_HEIGHT - 2}px; max-height: {INPUT_HEIGHT - 2}px; border: 1px solid"
             f" {palette['fm_field_border']}; border-radius: 6px; background: {palette['fm_field']}; }}"
             f"QToolButton#toolButton_agent_more:disabled {{ background: {palette['fm_group']}; }}"
+            f"QToolButton#toolButton_agent_microphone {{ min-width: {INPUT_HEIGHT - 2}px; max-width: {INPUT_HEIGHT - 2}px;"
+            f" min-height: {INPUT_HEIGHT - 2}px; max-height: {INPUT_HEIGHT - 2}px; border: 1px solid {mic_color};"
+            f" border-radius: 6px; background: {palette['fm_field']}; }}"
+            f"QToolButton#toolButton_agent_microphone:focus {{ border-color: {palette['fm_accent']}; }}"
+            f"QLabel#label_agent_speech {{ color: {mic_color}; }}"
             f"QToolButton#toolButton_agent_effort {{ min-width: {ACTION_BUTTON_SIZE}px; max-width: {ACTION_BUTTON_SIZE}px;"
             f" min-height: {ACTION_BUTTON_SIZE}px; max-height: {ACTION_BUTTON_SIZE}px; border: 1px solid transparent;"
             " border-radius: 6px; background: transparent; }"
@@ -1398,6 +1435,9 @@ class AgentPanel(QFrame):
         send = render_icon("agent_stop" if self._working else "agent_send", dark, palette["fm_accent_text"])
         if send is not None:
             self.send_button.setIcon(send)
+        microphone = render_icon('agent_microphone' if self._speech_state == 'idle' else 'agent_stop', dark, mic_color)
+        if microphone is not None:
+            self.microphone_button.setIcon(microphone)
         more = render_icon("more", dark)
         if more is not None:
             self.more_button.setIcon(more)
@@ -1637,7 +1677,8 @@ class AgentPanel(QFrame):
         if hasattr(self, "send_button"):
             self.input.setEnabled(ready)
             self._refresh_placeholder()
-            self.send_button.setEnabled(ready or self._working)
+            self.send_button.setEnabled((ready or self._working) and (self._speech_state == 'idle' or self._working))
+            self.microphone_button.setEnabled(ready and not self._working)
         if hasattr(self, "try_label"):
             self.try_label.setVisible(ready)
         if hasattr(self, "example_buttons"):
@@ -1827,9 +1868,36 @@ class AgentPanel(QFrame):
             self.posture_changed.emit(self._posture)
             self.mode_changed.emit(self._mode)
 
+    def set_speech_state(self, state: str, text: str = '') -> None:
+        self._speech_state = state
+        self.speech_row.setVisible(state != 'idle')
+        self.speech_label.setText(text)
+        title = {'recording': _tr('Stop recording and transcribe'),
+                 'transcribing': _tr('Cancel transcription')}.get(state, _tr('Dictate with the microphone'))
+        self.microphone_button.setToolTip(title)
+        self.microphone_button.setAccessibleName(title)
+        self.send_button.setEnabled((self._ready or self._working) and (state == 'idle' or self._working))
+        self._refresh_look()
+
+    def insert_transcription(self, text: str) -> None:
+        """Insert plain text at the caret, preserving any selection, draft edits and the input undo history."""
+        cursor = self.input.textCursor()
+        cursor.clearSelection()
+        previous, following = QTextCursor(cursor), QTextCursor(cursor)
+        previous.movePosition(QTextCursor.MoveOperation.PreviousCharacter, QTextCursor.MoveMode.KeepAnchor)
+        following.movePosition(QTextCursor.MoveOperation.NextCharacter, QTextCursor.MoveMode.KeepAnchor)
+        left = ' ' if previous.selectedText() and not previous.selectedText().isspace() else ''
+        right = ' ' if following.selectedText() and not following.selectedText().isspace() else ''
+        cursor.insertText(left + text + right)
+        self.input.setTextCursor(cursor)
+        self.input.setFocus()
+
     def set_working(self, working: bool) -> None:
         """While the agent works the next request can be typed, and the button stops it."""
         self._working = working
+        if working and self._speech_state != 'idle':
+            self.microphone_cancel_requested.emit()
+        self.microphone_button.setEnabled(self._ready and not working)
         self.progress.setVisible(working)
         self.more_button.setEnabled(not working)
         self.effort_button.setEnabled(bool(self._effort_levels) and not working)
@@ -1843,7 +1911,7 @@ class AgentPanel(QFrame):
         self.thread.set_compare_possible(self._can_compare and not working)  # the map changes under the comparison
         self.send_button.setToolTip(_tr("Stop (Esc)") if working else _tr("Send (Enter)"))
         self.send_button.setAccessibleName(_tr("Stop the agent") if working else _tr("Send the request"))
-        self.send_button.setEnabled(self._ready or working)
+        self.send_button.setEnabled((self._ready or working) and (self._speech_state == 'idle' or working))
         self.thread.set_hint(_tr("You can already type the next request: Enter keeps it for when this one ends.")
                              if working else "")
         if not working and self._queue and not getattr(self, "_queue_paused", False):
@@ -1875,6 +1943,8 @@ class AgentPanel(QFrame):
         self.fix_button.setVisible(offer_settings)
 
     def _on_send(self) -> None:
+        if self._speech_state != 'idle':
+            return  # dictation is always reviewed in the draft before it can be sent
         text = self.input.text().strip()
         if not text:
             return
@@ -1948,6 +2018,9 @@ class AgentPanel(QFrame):
             self._on_send()
 
     def _on_escape(self) -> None:
+        if self._speech_state != 'idle':
+            self.microphone_cancel_requested.emit()
+            return
         if self._working:
             self.pause_queued()
             self.stop_requested.emit()
@@ -1956,6 +2029,8 @@ class AgentPanel(QFrame):
         self.input.clear()
 
     def clear_thread(self) -> None:
+        if self._speech_state != 'idle':
+            self.microphone_cancel_requested.emit()
         self._queue = []  # a new conversation, another project: what waited for the old one does not go
         self._queue_paused = False
         self.queue_row.setVisible(False)

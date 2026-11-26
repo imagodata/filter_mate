@@ -315,6 +315,10 @@ class AgentChatController(QObject):
         self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self.panel.model_designer_requested.connect(self._open_model_designer)
+        self._speech = None  # multimedia is optional and loaded only when dictation/settings are opened
+        self.panel.microphone_requested.connect(lambda: self._speech_controller().toggle())
+        self.panel.microphone_cancel_requested.connect(self._cancel_speech)
+        self.panel.microphone_settings_requested.connect(lambda: self._speech_controller().settings())
         self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
         self._opened = {}  # range widget id -> (what it was read for, its field read wide open): see _range_bars
         self._readings = {}  # (layer id, field, bounds, subset, changes) -> its field read then: see _range_bars
@@ -544,6 +548,7 @@ class AgentChatController(QObject):
         for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._unfollow_welcome_facts,
                      self._disconnect_project, self._charts.unwatch_all, self._drop_chart_page,
                      lambda: self._data.close(),
+                     lambda: self._speech.close() if getattr(self, '_speech', None) is not None else None,
                      lambda: plugin_settings.clear_applier(self._settings_applier)):
             try:
                 step()
@@ -1037,6 +1042,16 @@ class AgentChatController(QObject):
     def _show_agent_soon(self) -> None:
         """The same once Qt has laid the panels out: a section that just moved still reads as where it was."""
         QTimer.singleShot(150, self._show_agent)
+
+    def _speech_controller(self):
+        if self._speech is None:
+            from .agent_speech import AgentSpeechController
+            self._speech = AgentSpeechController(self)
+        return self._speech
+
+    def _cancel_speech(self):
+        if getattr(self, '_speech', None) is not None:
+            self._speech.cancel()
 
     def _open_model_designer(self) -> None:
         from ...adapters.public_api.processing_models import open_model

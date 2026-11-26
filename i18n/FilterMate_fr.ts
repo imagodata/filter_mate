@@ -3561,6 +3561,26 @@ Do you agree to all of them? No runs none of them.</source>
         <source>This output could not be opened: {}</source>
         <translation>Impossible d’ouvrir cette sortie : {}</translation>
     </message>
+    <message>
+        <source>Dictate with the microphone</source>
+        <translation>Dicter avec le microphone</translation>
+    </message>
+    <message>
+        <source>Microphone settings…</source>
+        <translation>Paramètres du microphone…</translation>
+    </message>
+    <message>
+        <source>Cancel dictation</source>
+        <translation>Annuler la dictée</translation>
+    </message>
+    <message>
+        <source>Stop recording and transcribe</source>
+        <translation>Arrêter l’enregistrement et transcrire</translation>
+    </message>
+    <message>
+        <source>Cancel transcription</source>
+        <translation>Annuler la transcription</translation>
+    </message>
 </context>
 <context>
     <name>AgentWidgets</name>
@@ -15028,6 +15048,213 @@ Si vous choisissez Non, ces données resteront en mémoire et seront perdues à 
     <message>
         <source>Project data</source>
         <translation>Données du projet</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>L’audio reste en mémoire puis est supprimé après la transcription. Le texte est inséré dans le brouillon ; relisez-le puis cliquez sur Envoyer.</translation>
+    </message>
+    <message>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Automatique, ou un code de langue : fr, en…</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Choisissez un modèle de transcription (200 caractères maximum).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Choisissez un service de transcription.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Indiquez si vous souhaitez envoyer l’audio enregistré à ce service de transcription.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>Configurez le service du microphone avant d’enregistrer.</translation>
+    </message>
+    <message>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Dictée ajoutée au brouillon. Relisez-la puis cliquez sur Envoyer.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>La langue est un code ISO comme fr ou en ; laissez vide pour la détection automatique.</translation>
+    </message>
+    <message>
+        <source>Local service</source>
+        <translation>Service local</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>L’accès au microphone a été refusé. Autorisez-le dans les paramètres de confidentialité du système.</translation>
+    </message>
+    <message>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Microphone configuré. Cliquez sur le micro pour dicter.</translation>
+    </message>
+    <message>
+        <source>Microphone settings</source>
+        <translation>Paramètres du microphone</translation>
+    </message>
+    <message>
+        <source>Microphone: {}</source>
+        <translation>Microphone : {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Aucun son n’a été enregistré. Vérifiez le microphone puis réessayez.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Aucun microphone disponible. Vérifiez le périphérique dans les paramètres du microphone.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Aucune parole reconnue. Essayez d’enregistrer à nouveau.</translation>
+    </message>
+    <message>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Microphone précédemment sélectionné (indisponible)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia est indisponible dans cette installation de QGIS.</translation>
+    </message>
+    <message>
+        <source>Recording… {} · {}</source>
+        <translation>Enregistrement… {} · {}</translation>
+    </message>
+    <message>
+        <source>Remove stored transcription key</source>
+        <translation>Supprimer la clé de transcription enregistrée</translation>
+    </message>
+    <message>
+        <source>Requesting microphone access…</source>
+        <translation>Demande d’accès au microphone…</translation>
+    </message>
+    <message>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Envoyer l’audio enregistré à ce service pour le transcrire</translation>
+    </message>
+    <message>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Démarrez d’abord votre serveur local de transcription compatible OpenAI. L’audio ne quitte pas cet ordinateur.</translation>
+    </message>
+    <message>
+        <source>Stored key</source>
+        <translation>Clé enregistrée</translation>
+    </message>
+    <message>
+        <source>System default microphone</source>
+        <translation>Microphone par défaut du système</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>La clé API contient un caractère invalide.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>Le fournisseur du chat n’a pas de clé enregistrée pour cette adresse de transcription.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>Le service local de transcription doit fonctionner sur cet ordinateur (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>Le format audio du microphone n’est pas pris en charge.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>Impossible de démarrer le microphone. Vérifiez les autorisations et les paramètres d’entrée audio.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>Le microphone s’est arrêté de façon inattendue. Vérifiez le périphérique d’entrée sélectionné.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>L’audio enregistré est vide ou dépasse la limite de dictée.</translation>
+    </message>
+    <message>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>Le service sélectionné reçoit l’audio enregistré et peut facturer la transcription. Les clés sont conservées dans la base d’authentification de QGIS.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>La clé de transcription enregistrée correspond à une autre adresse de service.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>La transcription est trop longue pour une dictée.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>La réponse de transcription est trop volumineuse.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>Le service de transcription est injoignable. Vérifiez son adresse et la connexion.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>Le service de transcription n’a pas renvoyé de transcription au format JSON.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>Le service de transcription a redirigé la requête. Vérifiez son adresse dans les paramètres du microphone.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>Le service de transcription a mis trop de temps à répondre.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Ce service de transcription nécessite une clé API.</translation>
+    </message>
+    <message>
+        <source>Transcribing…</source>
+        <translation>Transcription…</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Utilisez une adresse de service sans identifiants, paramètres de requête ni fragment.</translation>
+    </message>
+    <message>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Utiliser la clé du fournisseur du chat pour cette même adresse</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Serveur local (compatible OpenAI)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Service de transcription</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Adresse du service</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Modèle de transcription</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Langue</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Microphone</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Clé API</translation>
     </message>
 </context>
 </TS>

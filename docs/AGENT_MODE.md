@@ -1099,6 +1099,27 @@ Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/proce
   cancels it. An algorithm flagged `NoThreading` (geometry checks) holds QGIS while it runs;
 - without attribute values shared, what an algorithm answers besides its layers (statistics) is left out.
 
+Microphone dictation:
+
+- the microphone beside the input records only after a click; click again to stop and transcribe. Esc or
+  Cancel dictation discards the recording or aborts the pending request. A new conversation and plugin shutdown
+  cancel it too. The text is inserted at the caret in the existing draft, with input undo preserved. Enter and
+  Send cannot submit while dictation is active; the user reviews the text and sends it afterwards;
+- **More actions → Microphone settings…** chooses the input device, transcription service, address, model and
+  language (empty: automatic). Local mode requires a running OpenAI-compatible transcription server on localhost
+  (default `http://127.0.0.1:8000/v1`, model `whisper-1`). No model or service is installed automatically;
+- OpenAI and Mistral are available independently of the chat provider, including when the chat uses Claude or
+  Ollama. Their API key stays in the QGIS authentication database. Reusing the chat key is explicit and requires
+  the same provider and exact address. Selecting a cloud service explicitly enables sending audio to that address;
+- audio stays in RAM: Qt Multimedia captures PCM, normalized to mono 16-bit/16 kHz WAV, up to 120 seconds. Nothing
+  is written in the profile or a temporary audio file, and no audio enters the transcript or request history.
+  Requests carry only audio, model and optional language; no layer data or conversation is included;
+- local requests bypass proxies, and uploads never follow redirects. Cloud requests use QGIS' TLS/proxy settings.
+  Cancellation, a total timeout, bounded responses, missing devices and permissions all return to the editable draft;
+- capture supports Qt5 and Qt6, with lazy Multimedia imports and the Qt6 microphone permission API when available.
+  A QGIS build without Multimedia can still use the text chat. Runtime integration checks use deterministic PCM
+  and a loopback HTTP service; an actual microphone and paid transcription services are not exercised by CI.
+
 Model editor (`adapters/public_api/processing_models.py`):
 
 - the agent menu's **Processing model designer…** opens QGIS' native graphical editor directly;
