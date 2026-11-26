@@ -68,6 +68,8 @@ REMOVE_NOTE = "remove_project_note"
 VIEW_MAP = "view_map"
 OPEN_LAYOUT = "open_layout"
 OPEN_MODEL = "open_model"
+# The model designer integration is unstable: never expose it through the agent or its settings in 5.1.3.
+DISABLED_TOOLS = frozenset({OPEN_MODEL})
 FLASH_FEATURES = "flash_features"
 SET_ACTIVE_LAYER = "set_active_layer"
 SHOW_MESSAGE = "show_message"

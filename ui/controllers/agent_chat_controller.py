@@ -93,7 +93,7 @@ from ...core.agent.tool_catalog import (
     ADD_NOTE, ADD_TABLE, ASK_USER, CHART_TO_LAYOUT, CREATE_WIDGET, EXPORT_CHART, RUN_CHART_CODE, SHOW_CHART,
     LIST_TABLES, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, USE_TOOLS, VIEW_MAP, chat_tools, filtering_only, skill_tool, with_skill_tool, AGENT_OPTIONS,
-    TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK,
+    TURN_OFF_OPTIONS, TURN_ON_OPTIONS, SHOW_SETTINGS_LINK, DISABLED_TOOLS,
 )
 from ...core.agent.widgets import (
     CHART, RANGE, SHOWING, STAT, WidgetError, range_counts, range_reading_holds, replaced as widget_replaced,
@@ -314,7 +314,6 @@ class AgentChatController(QObject):
         self.panel.feedback_requested.connect(self._open_feedback)
         self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
-        self.panel.model_designer_requested.connect(self._open_model_designer)
         self._speech = None  # multimedia is optional and loaded only when dictation/settings are opened
         self.panel.microphone_requested.connect(lambda: self._speech_controller().toggle())
         self.panel.microphone_cancel_requested.connect(self._cancel_speech)
@@ -1053,13 +1052,6 @@ class AgentChatController(QObject):
         if getattr(self, '_speech', None) is not None:
             self._speech.cancel()
 
-    def _open_model_designer(self) -> None:
-        from ...adapters.public_api.processing_models import open_model
-        try:
-            open_model(on_saved=self._outputs.show)
-        except ValueError as exc:
-            self.panel.set_status(str(exc))
-
     def _on_panel_shown(self) -> None:
         """The AGENT section opens, or its panel comes forward: an offer that waited in it is in view. Not when
         the panel is shown behind another tab (as QGIS restores it): nobody saw the offer yet."""
@@ -1206,7 +1198,7 @@ class AgentChatController(QObject):
                                      memory=memory, memory_error=memory_error, memory_sources=memory_sources,
                                      memory_active=memory_active, memory_file=str(memory_path() or ""),
                                      tools=[(tool.name, tool.title or tool.name, risk_of(tool))
-                                            for tool in chat_tools() if tool.name not in AGENT_OWN])
+                                            for tool in chat_tools() if tool.name not in AGENT_OWN | DISABLED_TOOLS])
         if tab:
             dialog.select_tab(tab)
         try:
@@ -1521,7 +1513,7 @@ class AgentChatController(QObject):
         searched = [name for name, kind in configured_kinds.items() if kind not in (KIND_STAC,) + NO_DATA_KINDS]
         data_sources = [source for source in active if not source.is_connector and source.kind != KIND_DATABASE]
         databases = {source.id: source.address for source in active if source.kind == KIND_DATABASE}
-        left_out = {name for name, rule in values.rules.items() if rule == "never"}  # turned off in the Tools tab
+        left_out = {name for name, rule in values.rules.items() if rule == "never"} | DISABLED_TOOLS
         if not values.send_values:
             left_out.update(VALUES_TOOLS)
         if not values.expert_python:
@@ -1600,11 +1592,6 @@ class AgentChatController(QObject):
                for tool in tools):
             from ...adapters.public_api.gui_control import chat_handlers as gui_handlers
             handlers.update(gui_handlers())
-        if any(tool.name == 'open_model' for tool in tools):
-            def model_tool(arguments):
-                from ...adapters.public_api.processing_models import chat_handlers as model_handlers
-                return model_handlers(on_saved=lambda path: self._outputs.show(path))['open_model'](arguments)
-            handlers['open_model'] = model_tool
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
         handlers[CREATE_WIDGET] = lambda arguments: self._create_widget_tool(arguments,

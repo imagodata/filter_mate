@@ -1120,17 +1120,9 @@ Microphone dictation:
   A QGIS build without Multimedia can still use the text chat. Runtime integration checks use deterministic PCM
   and a loopback HTTP service; an actual microphone and paid transcription services are not exercised by CI.
 
-Model editor (`adapters/public_api/processing_models.py`):
-
-- the agent menu's **Processing model designer…** opens QGIS' native graphical editor directly;
-- the chat-only `open_model` opens a blank designer, a copy of a registered model, or a validated declarative
-  chain (`definition`: inputs cloned from step parameters, ordered steps, connections and final outputs).
-  No source code or file paths are needed; expert mode is not required. Creation executes no algorithm;
-- drafts stay in the editor until the user saves. Save asks for a `.model3` location instead of defaulting to the
-  QGIS profile; Save in project uses QGIS' built-in project model provider. File saves add a clickable output and
-  register the model for the project session, even outside the profile. Closing the project releases this registration;
-- the `processing-models` skill describes the format and the review/save workflow. Opening a designer is a view
-  action, left outside turn undo and saved recipes; running a model uses ordinary turn undo.
+Model editor integration (`adapters/public_api/processing_models.py`) is disabled in 5.1.3 because it is unstable.
+The agent menu entry and `open_model` handler are removed, the `processing-models` skill is not offered, and agent
+settings cannot enable this integration. Registered models can still be discovered and run through Processing.
 
 Style (`adapters/public_api/layer_style.py`): `set_layer_style` (vector: single, categorized on a field of 100 values
 at most, graduated in 2 to 12 classes by quantile, equal interval, Jenks, pretty breaks or standard deviation, or

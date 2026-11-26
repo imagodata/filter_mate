@@ -21,7 +21,7 @@ about=FilterMate filters several layers at once, from one panel. Select somethin
     🤖 AGENT (experimental, optional): type or dictate a request, for example "buildings above 1200 m in the selected commune". It filters, selects, styles, brings data in (OpenStreetMap, elevation, population, WMS), draws charts, makes print layouts and atlases, and exports, step by step. Choose Respond, Propose or Act to control changes, resume the conversation of a project, and choose reasoning effort when your model supports it. Use your own key for Claude, Mistral or OpenAI, or a local Ollama model for the chat. No FilterMate account, no telemetry. What is sent and when: https://github.com/imagodata/filter_mate/blob/main/docs/AI_AND_DATA.md
 
     💾 Agent data stay in project memory where possible. Save project and layers asks where to keep the project and its in-memory datasets; file-only providers use that chosen folder. Click layer links to reveal them in the Layers panel, or output actions to open files and folders.
-    🧩 Processing: discover compatible algorithms from installed active providers and run registered models. Open QGIS's graphical model designer, or let the agent prepare a draft chain without expert Python. Choose a model file location or save it in the project. Agent Processing runs that require files need QGIS 3.32 or later.
+    🧩 Processing: discover compatible algorithms from installed active providers and run registered models. Agent Processing runs that require files need QGIS 3.32 or later.
     🎙️ Dictation: choose a microphone and a local compatible transcription service, OpenAI or Mistral in Microphone settings, independently of the chat model. Audio stays in RAM for up to two minutes and the recognized text goes into the draft for review before Send. Cloud transcription sends audio only to the chosen service; its key stays in the QGIS authentication database. Qt Multimedia is required for microphone input.
 
     Works with PostGIS, GeoPackage, Spatialite, files, WFS, WMS and tile basemaps. The dock can save a web-layer copy beside the project for offline use; agent copies follow the memory and chosen-folder workflow above. QGIS 3.22 to 4.x, Qt5 and Qt6, 34 languages, light and dark themes. Processing algorithms and a Python API for automation.
@@ -54,8 +54,8 @@ python_dependencies=onnxruntime
 
 changelog=5.1.3: agent data in memory, Processing models and microphone dictation
     - Agent downloads and outputs stay in project memory where possible. Save project and layers asks for their destination; file-only providers use the chosen data folder.
-    - Clickable layer names reveal their layer in the tree. Exports and model saves provide file and folder actions; web links open on click.
-    - Compatible installed Processing providers and registered models can run through the agent. The native model designer opens existing models or draft chains without expert Python; file-based agent runs require QGIS 3.32 or later.
+    - Clickable layer names reveal their layer in the tree. Exports provide file and folder actions; web links open on click.
+    - Compatible installed Processing providers and registered models can run through the agent; file-based agent runs require QGIS 3.32 or later. The unstable model designer integration is disabled and removed from the agent menu.
     - Optional microphone dictation through a local compatible service, OpenAI or Mistral. Two-minute recordings stay in RAM and fill an editable draft; the user reviews and sends it. Device, model and language are configured separately from the chat provider.
     - Agent menus stay open while toggling sources, the plugin MCP server and live recipes, so several choices can be changed in one visit with the mouse or keyboard.
     - Loaded skills are reused and recent instructions remain available when tool results are trimmed. Shared notes detect updates from other QGIS sessions.

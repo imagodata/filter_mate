@@ -52,8 +52,7 @@ exports from a typed or dictated request, with the model you choose.
 - **Links to the result.** Click a layer name to reveal it in QGIS's Layers panel. Open exported files,
   their containing folders and web sources directly from the conversation.
 - **Processing models and providers.** Discover and run compatible algorithms from installed providers, including
-  GDAL, GRASS, SAGA and PDAL, and registered models. **⋯ → Processing model designer…** opens QGIS's native editor;
-  the agent can prepare a reusable chain there without expert mode. You choose where to save the model.
+  GDAL, GRASS, SAGA and PDAL, and registered models.
 - **Microphone dictation.** Click the microphone beside the input to record, then click again to transcribe.
   **⋯ → Microphone settings…** offers a local OpenAI-compatible service, OpenAI or Mistral, independently of the
   chat provider. Recordings stay in RAM for up to two minutes; the text goes into the draft for review before Send.
@@ -132,8 +131,7 @@ the original source back, and project files are always saved with the original s
   project and its agent datasets. Layer links reveal the exact layer in the tree; output actions open the file or
   its folder. Sources on the web open only when you click their links.
 - 🧩 **Processing models and providers.** The agent searches installed providers and registered models, describes
-  their parameters and steps, and runs compatible treatments on project layers. Build a draft chain or open a model
-  in QGIS's graphical designer without enabling expert Python; save it to a chosen `.model3` file or inside the project.
+  their parameters and steps, and runs compatible treatments on project layers.
 - 🎙️ **Microphone dictation.** Transcribe through a local compatible service, OpenAI or Mistral. Choose the device,
   service and language in **⋯ → Microphone settings…**. Click again to transcribe, or press Esc to discard or cancel.
   Audio stays in memory; recognized text is inserted in the editable draft. You press Send yourself.

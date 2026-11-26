@@ -127,6 +127,13 @@ def test_options_are_asked_when_the_menu_opens():
     assert asked == [True]
 
 
+def test_the_unstable_processing_model_designer_is_not_offered_in_the_menu():
+    panel = _filled()
+    entries = _texts(panel.more_button.menu())
+    assert "Processing model designer…" not in entries
+    assert "Save project and layers…" in entries and "Microphone settings…" in entries
+
+
 def _open_group(panel):
     root = panel.more_button.menu()
     root.popup(QtCore.QPoint(20, 20))

@@ -4,6 +4,7 @@ instructions, the same tools offered, the same tools held back for their skill. 
 conftest; the controller is loaded for real under a synthetic package."""
 import importlib
 import importlib.util
+import json
 import pathlib
 import sys
 import types
@@ -91,3 +92,15 @@ def test_families_off_offers_every_tool_without_index(plugin_tools):
     assert [tool.name for tool in kept] == [tool.name for tool in tools] and not held and not host._index_tools
     assert "use_tools" not in [tool.name for tool in kept]
     assert "use_tools" not in Controller._prompt(values, active, [], [tool.name for tool in tools], host._index_tools)
+
+
+@pytest.mark.parametrize("for_chat", [True, False])
+@pytest.mark.parametrize("rules", [{}, {"open_model": "ask"}, {"open_model": "never"}])
+def test_the_model_designer_cannot_be_activated_by_agent_settings(plugin_tools, for_chat, rules):
+    values = agent_settings.AgentSettings(preset="anthropic", model="m", expert_python=True, tool_rules=json.dumps(rules))
+    tools, handlers, _active = Controller.tools_and_handlers(_Host(), values, for_chat=for_chat)
+    offered = {tool.name for tool in tools}
+    assert "open_model" not in offered and "open_model" not in handlers
+    assert {"find_algorithms", "describe_algorithm", "run_algorithm"} <= offered
+    skills = next(tool for tool in tools if tool.name == "load_skill").input_schema["properties"]["name"]["enum"]
+    assert "processing-models" not in skills
