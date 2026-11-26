@@ -5,6 +5,16 @@ zonage officiel est dans [scenario-v2.md](scenario-v2.md) ; elle n'est pas encor
 tournée. Cette version conserve les éléments validés de rythme, d'habillage et
 de voix.
 
+Le scénario de reprise vise désormais **environ 3 minutes**, depuis un projet
+vide : acquisition par prompts, proposition native de sauvegarde, filtres du
+moteur FilterMate, graphiques D3.js, composition, export PDF et projet réouvrable.
+La fenêtre QGIS et le panneau du plugin restent visibles, avec loupes ponctuelles.
+La [maquette A3](composer-maquette.png), le [plan](composer-plan.json) et la
+[relecture du parcours de sauvegarde](agent-save-flow.md) préparent ces prises.
+Le [prévol technique](preflight-composer/preflight.json) valide D3 → SVG intégré
+au composeur → PDF et QGZ déplacé/rouvert sur données fictives ; il ne valide
+pas encore l'acquisition MNT/URA ni la portabilité du futur projet complet.
+
 Reprise du film Urumea : la pente remplace le seuil d'altitude, le tampon
 rivière passe à 500 m, et les résultats restent plus longtemps visibles.
 Le montage utilise uniquement des captures de la vraie fenêtre QGIS et une
