@@ -22,9 +22,14 @@ import os
 import re
 import stat
 import unicodedata
+from collections import OrderedDict
 from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Sequence, Tuple
+
+if TYPE_CHECKING:
+    from .messages import Message, ToolCallPart, ToolResultPart
 
 logger = logging.getLogger("FilterMate.agent")
 SKILLS_DIR = Path(__file__).resolve().parents[2] / "skills"
@@ -40,6 +45,73 @@ MAX_TITLE = 100  # what the question to the user shows of it, and what the model
 MAX_DESCRIPTION = 300
 CONNECTOR_PREFIX = "connector-"  # the names of the entries of load_skill for the MCP connectors (core/agent/connectors.py)
 MAX_BODY = 9000  # characters, about 2,300 tokens: what one load_skill costs a request
+MAX_ACTIVE_SKILLS = 3  # keep the latest instructions during result trimming, within a bounded working set
+
+
+def loaded_skill_key(call: ToolCallPart, result: ToolResultPart) -> Optional[Tuple[str, ...]]:
+    """Identify complete skill instructions, only from a successful, matching load_skill call."""
+    if call.name != "load_skill" or result.is_error or call.parse_error:
+        return None
+    name = call.arguments.get("name")
+    if not isinstance(name, str) or name.startswith(CONNECTOR_PREFIX):
+        return None
+    try:
+        value = json.loads(result.content)
+    except (ValueError, RecursionError):
+        return None
+    if not isinstance(value, dict) or value.get("skill") != name or value.get("truncated"):
+        return None
+    body = value.get("instructions")
+    title, trust = value.get("title", ""), value.get("from", "builtin")
+    if not isinstance(body, str) or not body or not isinstance(title, str) or not isinstance(trust, str):
+        return None
+    return name, title, trust, body
+
+
+def loaded_skills(messages: Sequence[Message]) -> Dict[str, Tuple[Tuple[int, int], Tuple[str, ...]]]:
+    """The last full instructions of each skill still in the history, with their message/part positions.
+
+    Call ids may repeat across turns (Ollama), so only the immediately preceding assistant turn owns a result.
+    A short 'already loaded' answer never counts as the instructions themselves.
+    """
+    # The exporter also loads this file on its own, without a package; message types are needed only at run time.
+    from .messages import ROLE_ASSISTANT, ToolResultPart
+    found = {}
+    for index, message in enumerate(messages):
+        if not index or messages[index - 1].role != ROLE_ASSISTANT:
+            continue
+        calls = messages[index - 1].tool_calls
+        if not any(call.name == "load_skill" for call in calls):
+            continue
+        ids = [call.call_id for call in calls]
+        rank = 0
+        for position, part in enumerate(message.parts):
+            if not isinstance(part, ToolResultPart):
+                continue
+            call = calls[ids.index(part.call_id)] if ids.count(part.call_id) == 1 else (
+                calls[rank] if rank < len(calls) else None)
+            rank += 1
+            key = loaded_skill_key(call, part) if call is not None else None
+            if key is not None:
+                found.pop(key[0], None)
+                found[key[0]] = ((index, position), key)
+            elif call is not None and call.name == "load_skill" and not call.parse_error and not part.is_error:
+                name = call.arguments.get("name")
+                if not isinstance(name, str) or name not in found:
+                    continue
+                try:
+                    value = json.loads(part.content)
+                except (ValueError, RecursionError):
+                    continue
+                previous = found[name]
+                if (isinstance(value, dict) and value.get("already_loaded") is True
+                        and value.get("skill") == name and "instructions" not in value
+                        and value.get("title", "") == previous[1][1]
+                        and value.get("from", "builtin") == previous[1][2]):
+                    # Reuse makes a skill recent again, while its full body stays at its original position.
+                    found.pop(name)
+                    found[name] = previous
+    return found
 
 
 class SkillError(ValueError):
@@ -160,6 +232,7 @@ MAX_FILE = 64 * 1024  # a SKILL.md of a skill from elsewhere is read up to this 
 # far. Every entry counts, files too: 60,000 files and folders "_x" were looked at, each with its own read (2026-11-13).
 MAX_EXTRA = 20
 MAX_ENTRIES = 200
+_file_cache: OrderedDict = OrderedDict()
 
 # Characters the dialog draws with no width, where the user reads a skill from elsewhere, and that a model reads.
 # Default_Ignorable_Code_Point of Unicode (DerivedCoreProperties.txt): the tags U+E0000 to U+E0FFF, which spell
@@ -284,16 +357,44 @@ def _read_skill_file(source: str, elsewhere: bool) -> Optional[str]:
         raise SkillError("SKILL.md is a link: a skill is a folder of its own, with its own SKILL.md")
     if not stat.S_ISREG(info.st_mode):
         return None
+    revision = (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+    if elsewhere and info.st_size > MAX_FILE:
+        raise SkillError(f"SKILL.md is over {MAX_FILE // 1024} KB")
+    cached = _file_cache.get(source) if elsewhere else None
+    if cached is not None and cached[0] == revision:
+        _file_cache.move_to_end(source)
+        return cached[1]
     # Opened without following a link and without waiting, then checked again: a link or a pipe put there since lstat
     # (a pipe held the main thread of QGIS until someone wrote into it). Windows has neither flag.
     flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0)
     with os.fdopen(os.open(source, flags), "rb") as stream:
-        if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+        opened = os.fstat(stream.fileno())
+        if not stat.S_ISREG(opened.st_mode):
             return None
         data = stream.read(MAX_FILE + 1)  # never more than the limit, even when the file grew since lstat
+        finished = os.fstat(stream.fileno())
     if elsewhere and len(data) > MAX_FILE:
         raise SkillError(f"SKILL.md is over {MAX_FILE // 1024} KB")
-    return data.decode("utf-8")
+    text = data.decode("utf-8")
+    # Recheck the open file: a replacement or an edit during the read never creates a reusable cache entry.
+    if elsewhere and all((item.st_dev, item.st_ino, item.st_size, item.st_mtime_ns, item.st_ctime_ns) == revision
+                         for item in (opened, finished)):
+        _file_cache[source] = (revision, text)
+        _file_cache.move_to_end(source)
+        while len(_file_cache) > 2 * MAX_EXTRA:
+            _file_cache.popitem(last=False)
+    return text
+
+
+@lru_cache(maxsize=2 * MAX_EXTRA)
+def _checked_skill(text: str, folder: Path, trust: str) -> Skill:
+    """Validate unchanged content once, separately for each origin. File/link checks still run at every refresh."""
+    if trust != "builtin":
+        text = readable(text.lstrip("\ufeff").replace("\r\n", "\n"))
+        hidden = hidden_character(text)
+        if hidden:
+            raise SkillError(f"SKILL.md holds a character that does not show ({hidden})")
+    return parse(text, folder, trust)
 
 
 def read_folder(folder: Path, trust: str = "builtin", errors: Optional[List[str]] = None,
@@ -343,12 +444,7 @@ def read_folder(folder: Path, trust: str = "builtin", errors: Optional[List[str]
             text = _read_skill_file(os.path.join(entry.path, "SKILL.md"), elsewhere)
             if text is None:
                 continue
-            if elsewhere:
-                text = readable(text.lstrip("\ufeff").replace("\r\n", "\n"))
-                hidden = hidden_character(text)
-                if hidden:
-                    raise SkillError(f"SKILL.md holds a character that does not show ({hidden})")
-            skill = parse(text, Path(entry.path), trust)
+            skill = _checked_skill(text, Path(entry.path), trust)
             if skill.name != name:
                 raise SkillError(f"its SKILL.md is named {skill.name!r}: the folder and the name are the same")
             if elsewhere and skill.name in reserved:

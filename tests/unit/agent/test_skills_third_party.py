@@ -42,6 +42,43 @@ def test_a_skill_from_a_project_is_project_whatever_its_header_says(tmp_path):
     assert found["naming"].trust == "project"
 
 
+def test_unchanged_skills_are_not_reopened_or_revalidated(tmp_path, monkeypatch):
+    _write(tmp_path, "naming")
+    from unittest.mock import Mock
+    opened, parsed = Mock(wraps=skills.os.open), Mock(wraps=skills.parse)
+    monkeypatch.setattr(skills.os, "open", opened)
+    monkeypatch.setattr(skills, "parse", parsed)
+    first = skills.read_folder(tmp_path, trust="user", errors=[])
+    second = skills.read_folder(tmp_path, trust="user", errors=[])
+    assert first == second and opened.call_count == parsed.call_count == 1
+    path = tmp_path / "naming" / "SKILL.md"
+    path.write_text(SKILL.format(name="naming", requires="").replace("Theme", "Subject") + "Changed.\n", encoding="utf-8")
+    changed = skills.read_folder(tmp_path, trust="user", errors=[])
+    assert skills.fingerprint(changed["naming"]) != skills.fingerprint(first["naming"])
+    assert opened.call_count == parsed.call_count == 2
+
+
+def test_a_warm_skill_cache_still_refuses_a_link_or_hidden_instructions(tmp_path):
+    _write(tmp_path, "naming")
+    assert "naming" in skills.read_folder(tmp_path, trust="project", errors=[])
+    path = tmp_path / "naming" / "SKILL.md"
+    path.write_text(SKILL.format(name="naming", requires="") + "hidden\u200btext", encoding="utf-8")
+    errors = []
+    assert skills.read_folder(tmp_path, trust="project", errors=errors) == {}
+    assert "does not show" in errors[0]
+    path.write_text(SKILL.format(name="naming", requires=""), encoding="utf-8")
+    assert "naming" in skills.read_folder(tmp_path, trust="project", errors=[])
+    target = tmp_path / "target.md"
+    path.rename(target)
+    try:
+        path.symlink_to(target)
+    except OSError:
+        pytest.skip("no symbolic link on this system")
+    errors = []
+    assert skills.read_folder(tmp_path, trust="project", errors=errors) == {}
+    assert "link" in errors[0]
+
+
 def test_a_wrong_skill_from_elsewhere_is_left_out_and_the_others_kept(tmp_path):
     _write(tmp_path, "naming")
     _write(tmp_path, "broken", text="no header at all")

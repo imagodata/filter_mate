@@ -142,6 +142,20 @@ def test_resume_never_mixes_two_conversations():
     assert session.restore_history([]) is False
 
 
+def test_a_resumed_session_refreshes_context_once_even_without_compaction():
+    session = make_session()
+    session.restore_history(exchange())
+    full_flags = []
+
+    def context(full):
+        full_flags.append(full)
+        return "current shared memory and project state" if full else "changes"
+
+    session.add_user_text("continue", context)
+    session.add_user_text("next", context)
+    assert full_flags == [True, False]
+
+
 def test_dump_keeps_the_newest_requests_whole_when_too_long():
     messages = []
     for number in range(30):

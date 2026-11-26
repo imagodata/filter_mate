@@ -3313,7 +3313,7 @@ class AgentChatController(QObject):
         except Exception:  # the request goes without them
             logger.debug("Agent: project notes not read", exc_info=True)
             notes = ""
-        memory = self._memory_part(read)
+        memory = self._memory_part(read, query=getattr(self, "_last_request", ""))
         try:
             widgets = widget_summary(agent_widgets.read_widgets(), share_values=load_settings().send_values)
         except Exception:  # the request goes without them
@@ -3341,7 +3341,7 @@ class AgentChatController(QObject):
         return mode_note(self._request_mode) or level_note(self._policy.level)
 
     @staticmethod
-    def _memory_part(read) -> str:
+    def _memory_part(read, query: str = "") -> str:
         """The notes kept from one project to the next that are for this project (core/agent/memory.py): those for
         every project, and those of the sources of its layers. "" when the option is off, when none is kept, or when
         the file cannot be read (the Memory tab of the settings says why): the request goes without them.
@@ -3356,9 +3356,10 @@ class AgentChatController(QObject):
             if not memory.notes:
                 return ""
             layers, _selections, view = read if read is not None else ([], [], {})
-            sources, active = project_sources([row.get("layer_id", "") for row in layers],
-                                              str(view.get("active_layer_id") or ""))
-            return memory_block(memory_chosen(memory, sources, active, share_values=values.send_values))
+            sources, active = (project_sources([row.get("layer_id", "") for row in layers],
+                                               str(view.get("active_layer_id") or ""))
+                               if any(note.scope == SCOPE_SOURCE for note in memory.notes) else ([], ""))
+            return memory_block(memory_chosen(memory, sources, active, share_values=values.send_values, query=query))
         except Exception:  # the request goes without them
             logger.debug("Agent: memory not read", exc_info=True)
             return ""

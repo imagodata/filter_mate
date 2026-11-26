@@ -41,6 +41,77 @@ def test_no_file_is_an_empty_memory(tmp_path):
     assert not (tmp_path / "agent_memory.json").exists()  # reading writes nothing
 
 
+def test_unchanged_shared_memory_is_parsed_once_but_another_session_invalidates_it(tmp_path, monkeypatch):
+    path = tmp_path / "agent_memory.json"
+    path.write_text('{"notes": [{"text": "first fact"}]}', encoding="utf-8")
+    parses = []
+    original = store.parse
+
+    def count(text):
+        parses.append(text)
+        return original(text)
+
+    monkeypatch.setattr(store, "parse", count)
+    first = store.read_memory(path)
+    assert store.read_memory(path) is first and len(parses) == 1
+    # A different session replaces the file atomically. It may preserve its size and modification time.
+    previous = path.stat()
+    replacement = tmp_path / "from_other_session.json"
+    replacement.write_text('{"notes": [{"text": "other fact"}]}', encoding="utf-8")
+    os.utime(replacement, ns=(previous.st_atime_ns, previous.st_mtime_ns))
+    os.replace(replacement, path)
+    second = store.read_memory(path)
+    assert second.notes[0].text == "other fact" and len(parses) == 2
+    assert store.read_memory(path) is second
+    # Deletion and a broken manual edit must never revive the cached facts.
+    path.unlink()
+    assert store.read_memory(path) == Memory()
+    path.write_text("broken JSON", encoding="utf-8")
+    with pytest.raises(UnreadableMemory):
+        store.read_memory(path)
+
+
+def test_an_in_place_edit_with_unchanged_mtime_invalidates_shared_memory(tmp_path):
+    path = tmp_path / "agent_memory.json"
+    path.write_text('{"notes": [{"text": "first fact"}]}', encoding="utf-8")
+    store.read_memory(path)
+    before = path.stat()
+    path.write_text('{"notes": [{"text": "other fact"}]}', encoding="utf-8")
+    os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+    assert store.read_memory(path).notes[0].text == "other fact"
+
+
+def test_a_cached_read_never_loses_another_sessions_notes_on_write(tmp_path):
+    path = tmp_path / "agent_memory.json"
+    store.change_memory([(ADD, SCOPE_USER, "", "", "first")], path)
+    store.read_memory(path)
+    other = tmp_path / "other.json"
+    other.write_text('{"notes": [{"id": "m1", "text": "first"}, {"id": "m2", "text": "other session"}]}',
+                     encoding="utf-8")
+    os.replace(other, path)
+    kept = store.change_memory([(ADD, SCOPE_USER, "", "", "third")], path)
+    assert [note.text for note in kept.notes] == ["first", "other session", "third"]
+
+
+def test_shared_memory_cache_is_bounded_and_separates_profiles(tmp_path, monkeypatch):
+    from collections import OrderedDict
+    monkeypatch.setattr(store, "_read_cache", OrderedDict())
+    monkeypatch.setattr(store, "MAX_CACHED_FILES", 2)
+    for rank in range(3):
+        path = tmp_path / f"profile{rank}.json"
+        path.write_text(json.dumps({"notes": [{"text": f"profile {rank}"}]}), encoding="utf-8")
+        assert store.read_memory(path).notes[0].text == f"profile {rank}"
+    assert len(store._read_cache) == 2
+
+
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="FIFO is POSIX only")
+def test_a_memory_pipe_is_refused_without_waiting(tmp_path):
+    path = tmp_path / "agent_memory.json"
+    os.mkfifo(path)
+    with pytest.raises(UnreadableMemory, match="regular file"):
+        store.read_memory(path)
+
+
 def test_a_change_is_written_and_read_back(tmp_path):
     path = tmp_path / "FilterMate" / "agent_memory.json"  # the folder is made with the first note
     memory = store.change_memory([(ADD, SCOPE_USER, "", "", "MRO = zone de mutualisation"),

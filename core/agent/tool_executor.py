@@ -11,7 +11,7 @@ from .json_schema import validate
 from .mcp_client import PREFIX as CONNECTOR_TOOL_PREFIX
 from .messages import ToolCallPart, ToolResultPart
 from .permissions import ADVISOR_REFUSAL, ASK, CONNECTOR_DECLINED, PROTECTED, REFUSE, RUN, TURNED_OFF, PermissionPolicy
-from .skills import CONNECTOR_PREFIX
+from .skills import CONNECTOR_PREFIX, MAX_BODY
 from .tool_catalog import LOAD_SKILL, ToolSpec
 
 logger = logging.getLogger("FilterMate.agent")
@@ -19,6 +19,7 @@ logger = logging.getLogger("FilterMate.agent")
 Handler = Callable[[Dict[str, Any]], Any]
 
 MAX_RESULT_CHARS = 8_000  # lot 3 of the token diet (20,000 before): the truncated mark says how to ask the rest
+MAX_SKILL_RESULT_CHARS = 20_000  # a valid 9,000-character skill must fit, including JSON escaping and provenance
 DECLINED = "The user declined this action. Nothing was done; do not try again unless they ask."
 # A tool of a connector the conversation has not loaded (the model remembers it from an earlier one, or guesses).
 # A tool of the index not added yet (core/agent/families.py, token diet lot 1).
@@ -198,7 +199,12 @@ class ToolExecutor:
             value = handler(_with_defaults(call.arguments, tool.input_schema))
             if isinstance(value, WithImages):
                 return ToolResultPart(call.call_id, bounded_json(value.answer), images=tuple(value.images))
-            return ToolResultPart(call.call_id, bounded_json(value))
+            limit = MAX_RESULT_CHARS
+            if (call.name == LOAD_SKILL and not str(call.arguments.get("name", "")).startswith(CONNECTOR_PREFIX)
+                    and isinstance(value, dict) and isinstance(value.get("instructions"), str)
+                    and len(value["instructions"]) <= MAX_BODY + 1000):
+                limit = MAX_SKILL_RESULT_CHARS
+            return ToolResultPart(call.call_id, bounded_json(value, limit))
         except ToolFailure as exc:
             return failure(str(exc))
         except Exception:  # the text of an unexpected exception may hold paths or SQL: it stays in the log

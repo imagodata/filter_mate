@@ -201,6 +201,38 @@ def test_under_the_budget_the_active_layer_changes_nothing():
         == memory_block(chosen(memory, PROJECT))
 
 
+def test_an_older_business_fact_matching_the_request_wins_over_recent_notes():
+    memory = _memory((SCOPE_USER, "", "MRO = zone de mutualisation. " + "a" * 265))
+    for rank in range(12):
+        memory, _note = added(memory, f"Other fact {rank}: " + "b" * 280, today="2026-11-26")
+    recent = chosen(memory, budget=900)
+    relevant = chosen(memory, budget=900, query="Affiche les MRO")
+    assert "m1" not in {note.id for note in recent.user}
+    assert relevant.user[0].id == "m1"
+    assert relevant.concerned == len(memory.notes)
+    assert len(memory_block(relevant)) <= 900
+
+
+def test_keyword_recall_handles_accents_and_short_abbreviations_without_broadening_the_scope():
+    memory = _memory((SCOPE_SOURCE, ROADS, "RD = route départementale, aérien. " + "a" * 260),
+                     (SCOPE_SOURCE, "ogr::private", "RD aérien only in another project"))
+    for rank in range(10):
+        memory, _note = added(memory, f"Other fact {rank}: " + "b" * 280)
+    for query in ("RD", "aerien", "AÉRIEN"):
+        selection = chosen(memory, PROJECT, budget=900, query=query)
+        assert selection.sources[0][1][0].id == "m1"
+        assert "only in another project" not in memory_block(selection)
+    assert memory_block(chosen(memory, PROJECT, query="MRO")) == memory_block(chosen(memory, PROJECT))
+
+
+def test_relevance_never_sends_a_note_whose_values_are_held_back():
+    memory, _note = added(Memory(), "MRO = a sensitive attribute", with_values=True)
+    memory, _note = added(memory, "Answer in metres")
+    selection = chosen(memory, share_values=False, query="MRO sensitive attribute")
+    assert [note.id for note in selection.user] == ["m2"] and selection.held_back == 1
+    assert "sensitive attribute" not in memory_block(selection)
+
+
 def test_past_the_budget_the_active_layer_first_then_every_project_and_the_latest():
     memory = Memory()
     for rank in range(8):

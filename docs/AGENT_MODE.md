@@ -161,15 +161,19 @@ Rules worth keeping:
 - HTTP(S) links open in the browser only on a click, with the full destination in the hover tooltip. File links
   resolve only to registered outputs; arbitrary local files and application URI schemes stay plain text. A deleted
   layer or missing output gives a status message. Links are also accessible from the keyboard.
-- A conversation does not survive a change of project or of provider, but the model is told what came before: with
-  the first request of a conversation that starts under a thread already shown (the project opened again, another
-  provider), a few lines say what the last six requests asked and which actions the panel showed for each
-  (`transcript.recap`). The answers are left out: they may hold values of the data, read under other settings.
+- **Conversations resume across sessions** (`core/agent/session_io.py`, `adapters/agent/session_store.py`): the real
+  model history is stored separately for each saved project in the QGIS settings, for the latest 20 projects.
+  Reopening a project or restarting QGIS resumes it only for the same provider, model, server, account and value
+  sharing choice. The first request after restoring always refreshes the project context and shared memory; later
+  requests send changes. When the destination differs, the first request receives a recap of the last six requests
+  and panel actions (`transcript.recap`), without earlier answers that may contain attribute values.
 - **A long conversation is summed up** (`core/agent/compaction.py`): every request sends the whole conversation
-  again, so past 120 000 characters (about 30 000 tokens) the oldest requests are dropped, whole, before a new
+  again, so past the history budget (60,000 characters remotely; derived from the context size for Ollama) the oldest requests are dropped, whole, before a new
   one, and the first request kept starts with a few lines saying what each asked, which tools changed what, and
   how its answer ended. Written here, without asking a model. A cut falls only before a request of the user: no
-  tool call loses its result. The prompt cache misses once, then holds again. The thread says so in a note.
+  tool call loses its result. Older tool results are trimmed first, keeping the three most recently used skill
+  bodies. Repeated skill loads omit instructions still in the history; compaction names skills to reload when
+  their requests are dropped. The prompt cache misses once, then holds again. The thread says so in a note.
 - **Project notes** (`core/agent/project_notes.py`, `adapters/agent/project_notes_store.py`): `add_project_note`
   and `remove_project_note`, tools of the chat alone (not served by the MCP servers), keep up to 20 facts of 300
   characters in an entry of the project (`FilterMateAgent/notes`), saved in the `.qgz`. They go with each request
@@ -191,14 +195,20 @@ Rules worth keeping:
   part of the context of the request (`request_context.ContextParts.memory`), under a header saying they are
   data: with the first request of a conversation, after a compaction, and when they changed; never in the
   instructions, so the start of a request is the same for everyone. 3,000 characters at most
-  (`MAX_MEMORY_BLOCK`): past it the notes of the active layer go first, then those for every project, then the
-  other sources, the latest first, and a last line says how many were left. Measured with
+  (`MAX_MEMORY_BLOCK`): past it keyword matches to the current request go first (including French accents and
+  short business abbreviations), then the active layer, notes for every project and other sources, the latest
+  first within each priority. The displayed order stays stable when everything fits. Each block replaces earlier
+  memory blocks, so a correction or removal in another session supersedes the earlier facts. A last line says how
+  many were left. Measured with
   `scripts/agent_request_weight.py --conversation --memory`: an empty memory weighs nothing; a full one costs the
   conversation of the bench +9.6 % (+2.2 % for 643 characters). A note a model proposed while it read attribute
   values (`with_values`, lot 2) is held back once the user no longer shares them. The file is JSON a person can
   correct; one that cannot be read whole, a key this version does not know included, is never written (the tab
   says why): nothing is dropped or corrected in silence. A write holds a lock file, is made on the file as it is at
-  that time, then replaces it in one move (through a link, with its permissions). The option `filter_mate/agent/memory` (on by default) stops
+  that time, then replaces it in one move (through a link, with its permissions). Reads cache immutable memory for
+  up to eight files; identity, size, modification and change times are checked every time. Another session's edit,
+  atomic replacement or deletion invalidates the cache. Reads are bounded to 1 MB and refuse non-regular files.
+  The option `filter_mate/agent/memory` (on by default) stops
   the sending. `scripts/agent_eval.py` plays four words of the trade without and with their note (`vocab_*` and
   `vocab_*_memory`) and prints, for each, how often it passed and the median of the requests sent to the model.
   Measured on 2026-11-22 with `--live --provider ollama --model qwen3.5:4b --families --repeat 3` (a small local

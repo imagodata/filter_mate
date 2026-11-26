@@ -13,6 +13,7 @@ import json
 from typing import List, Sequence, Tuple
 
 from .messages import ROLE_ASSISTANT, ROLE_USER, Message, TextPart, ToolCallPart, ToolResultPart
+from .skills import MAX_ACTIVE_SKILLS, loaded_skills
 
 SUMMARY_HEADER = ("Earlier in this conversation, shortened to keep it short (the project state sent with the "
                   "request below is what holds now):")
@@ -66,10 +67,13 @@ def _own_text(message: Message) -> str:
 def _line(exchange: Sequence[Message], writes: Sequence[str]) -> str:
     request = _cut(_own_text(exchange[0]), MAX_REQUEST_CHARS)
     changes: List[str] = []
+    skills: List[str] = []
     answer = ""
     for message in exchange[1:]:
         if message.role == ROLE_ASSISTANT:
             for call in message.tool_calls:
+                if call.name == "load_skill" and isinstance(call.arguments.get("name"), str):
+                    skills.append(_cut(call.arguments["name"], 40))
                 if call.name in writes:
                     target = call.arguments.get("layer_name") or call.arguments.get("layer") or \
                         call.arguments.get("algorithm_id") or ", ".join(map(str, call.arguments.get("layers") or ()))
@@ -82,6 +86,8 @@ def _line(exchange: Sequence[Message], writes: Sequence[str]) -> str:
         line += f" | changed: {'; '.join(shown)}"
     if answer:
         line += f" | answered: {_cut(answer, MAX_ANSWER_CHARS)}"
+    if skills:
+        line += f" | skills requested (reload if needed): {', '.join(dict.fromkeys(skills))}"
     return line
 
 
@@ -132,6 +138,7 @@ def trim_results(messages: Sequence[Message], keep: int = 2) -> Tuple[List[Messa
     if len(starts) <= keep:
         return messages, 0
     limit = starts[-keep]
+    retained = {position for position, _key in list(loaded_skills(messages).values())[-MAX_ACTIVE_SKILLS:]}
     count = 0
     for index in range(limit):
         message = messages[index]
@@ -143,14 +150,15 @@ def trim_results(messages: Sequence[Message], keep: int = 2) -> Tuple[List[Messa
         ids = [call.call_id for call in calls]
         parts = []
         rank = 0
-        for part in message.parts:
+        for position, part in enumerate(message.parts):
             if isinstance(part, ToolResultPart):
                 if ids.count(part.call_id) == 1:
                     name = calls[ids.index(part.call_id)].name
                 else:
                     name = calls[rank].name if rank < len(calls) else "the tool"
                 rank += 1
-                if len(part.content) > MIN_TRIMMED and not part.content.startswith(_TRIMMED_START):
+                if ((index, position) not in retained and len(part.content) > MIN_TRIMMED
+                        and not part.content.startswith(_TRIMMED_START)):
                     part = ToolResultPart(part.call_id, TRIMMED.format(len(part.content), name), part.is_error)
                     count += 1
             parts.append(part)

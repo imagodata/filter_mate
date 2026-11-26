@@ -65,6 +65,22 @@ comma separated. Any other key is refused.
 - A skill gives no right: the tools it names stay under the levels of autonomy, the rules of the Tools tab and the
   protected layers.
 
+## Context and reuse
+
+`load_skill` sends a valid skill in full, including its origin, even when its instructions exceed the usual
+8,000-character tool-result limit. Loading the same instructions again keeps any newly offered tools in the answer
+and returns `already_loaded` instead of repeating the body. Approval is still checked by the handler on every load.
+This uses the conversation itself: a restored session can reuse instructions it kept; one whose history no longer
+holds them receives them in full again.
+
+When old tool results are trimmed, the full bodies of the three most recently used skills are kept. Reusing a skill
+makes it recent again. Compaction can still drop whole old requests to respect the conversation budget; its summary
+names the skills requested so they can be loaded again when needed.
+
+Skills from the profile and project folders use bounded file and validation caches. Every refresh checks file
+identity, size, modification and change times, and still refuses links. Changes invalidate the cached content and
+the approval fingerprint follows the new text. A cache does not grant approval or carry a skill into another project.
+
 ## evals.json
 
 For a skill of the chat: `{"cases": [...]}` in the format of `scripts/agent_eval_cases.json`, three cases at least,

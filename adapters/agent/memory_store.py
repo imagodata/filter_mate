@@ -16,6 +16,7 @@ import os
 import stat
 import tempfile
 import time
+from collections import OrderedDict
 from datetime import date
 from pathlib import Path
 from typing import Any, Iterator, List, Optional, Sequence, Tuple
@@ -38,6 +39,13 @@ LOCK_SUFFIX = ".lock"
 LOCK_WAIT_SECONDS = 2.0
 LOCK_STALE_SECONDS = 30.0  # a QGIS that died while it wrote: its lock is taken over
 TEMPORARY_PREFIX = ".agent_memory."
+MAX_CACHED_FILES = 8  # independent QGIS profiles or explicit paths; never keep an unbounded history
+_read_cache: OrderedDict = OrderedDict()
+
+
+def _revision(info: os.stat_result) -> tuple:
+    """An atomic replacement or an edit by another session invalidates the cached immutable memory."""
+    return info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns
 
 
 def memory_path() -> Optional[Path]:
@@ -53,15 +61,44 @@ def read_memory(path: Optional[Path] = None) -> Memory:
         UnreadableMemory: The file cannot be read as a memory. It is left as it is.
     """
     path = path if path is not None else memory_path()
-    if path is None or not path.exists():
+    if path is None:
         return Memory()
     try:
-        if path.stat().st_size > MAX_FILE_BYTES:
+        path = Path(path)
+        info = path.stat()
+        revision = _revision(info)
+        cached = _read_cache.get(path)
+        if cached is not None and cached[0] == revision:
+            _read_cache.move_to_end(path)
+            return cached[1]
+        if info.st_size > MAX_FILE_BYTES:
             raise UnreadableMemory("it is larger than 1 MB")
-        stored = path.read_text(encoding="utf-8-sig")  # a text editor of Windows may add the mark
+        if not stat.S_ISREG(info.st_mode):
+            raise UnreadableMemory("it is not a regular file")
+        flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0)
+        with os.fdopen(os.open(str(path), flags), "rb") as stream:
+            opened_info = os.fstat(stream.fileno())
+            if not stat.S_ISREG(opened_info.st_mode):
+                raise UnreadableMemory("it is not a regular file")
+            opened = _revision(opened_info)
+            data = stream.read(MAX_FILE_BYTES + 1)
+            finished = _revision(os.fstat(stream.fileno()))
+        if len(data) > MAX_FILE_BYTES:
+            raise UnreadableMemory("it is larger than 1 MB")
+        stored = data.decode("utf-8-sig")  # a text editor of Windows may add the mark
+    except FileNotFoundError:
+        _read_cache.pop(path, None)
+        return Memory()
     except (OSError, UnicodeDecodeError) as exc:
+        _read_cache.pop(path, None)
         raise UnreadableMemory(str(exc)) from None
-    return parse(stored)
+    memory = parse(stored)
+    if revision == opened == finished:
+        _read_cache[path] = (revision, memory)
+        _read_cache.move_to_end(path)
+        while len(_read_cache) > MAX_CACHED_FILES:
+            _read_cache.popitem(last=False)
+    return memory
 
 
 @contextlib.contextmanager

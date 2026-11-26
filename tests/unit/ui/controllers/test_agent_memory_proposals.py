@@ -71,6 +71,41 @@ def test_proposing_writes_nothing_until_the_user_keeps_it(controller, memory_set
     assert state.memory.notes == () and not card.can_undo
 
 
+def test_the_current_request_recalls_an_older_shared_fact(controller, memory_setup):
+    state, memory = memory_setup
+    state.memory, _note = memory.added(state.memory, "MRO = zone de mutualisation. " + "a" * 260)
+    for rank in range(20):
+        state.memory, _note = memory.added(state.memory, f"Other fact {rank}: " + "b" * 280)
+    controller._last_request = "Affiche les MRO"
+    sent = controller._project_context(full=True)
+    assert "- m1: MRO = zone de mutualisation" in sent
+    assert state.writes == 0
+
+
+def test_a_shared_memory_change_from_another_session_is_sent_in_the_next_context(controller, memory_setup):
+    state, memory = memory_setup
+    state.memory, _note = memory.added(state.memory, "First fact")
+    state.memory, _note = memory.added(state.memory, "Second fact")
+    assert "First fact" in controller._project_context(full=True)
+    controller._context_memory.sent()
+    controller._seen = {}
+    state.memory = memory.removed(state.memory, "m1")  # another session edited the shared file
+    sent = controller._project_context(full=False)
+    assert "Second fact" in sent and "First fact" not in sent
+    assert "replaces earlier memory blocks" in sent
+
+
+def test_user_only_memory_does_not_inspect_layer_sources(controller, ctrl_module, memory_setup, monkeypatch):
+    state, memory = memory_setup
+    state.memory, _note = memory.added(state.memory, "Answer in metres")
+
+    def no_sources(*args):
+        pytest.fail("Shared user notes do not need any layer source lookup")
+
+    monkeypatch.setattr(ctrl_module, "project_sources", no_sources)
+    assert "Answer in metres" in controller._memory_part(([], [], {}))
+
+
 def test_a_declined_note_is_not_proposed_again_unless_the_user_undoes_the_choice(controller, memory_setup):
     state, _memory = memory_setup
     arguments = {"scope": "user", "text": "RD = route départementale"}

@@ -7,7 +7,7 @@ drive it from signals. :func:`run_exchange` is the blocking way, for the evaluat
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Callable, Collection, Dict, List, Optional, Protocol, Sequence, Tuple, Union
 
 from .compaction import _size, compact, trim_results
@@ -17,6 +17,7 @@ from .messages import (
     TextPart, ToolCallPart, ToolResultPart, TurnComplete, Usage,
 )
 from .providers.base import HttpRequest, Provider
+from .skills import loaded_skill_key, loaded_skills
 from .tool_catalog import ToolSpec
 from .tool_executor import ToolExecutor
 from .tool_schema import for_model
@@ -149,6 +150,7 @@ class AgentSession:
         # Requests summed up so far, to say so in the interface.
         self.summarized = 0
         self.rewritten = False
+        self._restored = False
 
     @property
     def messages(self) -> Tuple[Message, ...]:
@@ -172,6 +174,7 @@ class AgentSession:
         self._request_start = len(kept)
         self._turns = 0
         self.rewritten = True
+        self._restored = True
         return True
 
     @property
@@ -206,7 +209,7 @@ class AgentSession:
 
         A conversation past ``max_history_chars`` first loses its oldest requests, summed up in their place.
         """
-        first = not self._messages
+        first = not self._messages or self._restored
         self._messages = [_without_images(message) for message in self._messages]
         writes = list(self._writers)
         trimmed = 0
@@ -231,6 +234,7 @@ class AgentSession:
         self._request_start = len(self._messages)
         parts = (TextPart(text),) + ((TextPart(context),) if context else ())
         self._messages.append(Message(ROLE_USER, parts))
+        self._restored = False
         self._turns = 0
 
     def offer(self, tools: Sequence[ToolSpec]) -> None:
@@ -355,6 +359,26 @@ class AgentSession:
 
     def add_tool_results(self, results: Sequence[ToolResultPart]) -> None:
         """Answer every call of the last turn, in one message; near the limit, with a note saying so."""
+        calls = self._messages[-1].tool_calls if self._messages else ()
+        if any(call.name == "load_skill" for call in calls):
+            # The handler still runs and checks approval. Only identical instructions already visible to the model
+            # are omitted; after trimming, compaction or restart the history itself remains the source of truth.
+            seen = {name: key for name, (_position, key) in loaded_skills(self._messages).items()}
+            ids = [call.call_id for call in calls]
+            shortened = []
+            for rank, result in enumerate(results):
+                call = calls[ids.index(result.call_id)] if ids.count(result.call_id) == 1 else (
+                    calls[rank] if rank < len(calls) else None)
+                key = loaded_skill_key(call, result) if call is not None else None
+                if key is not None:
+                    if seen.get(key[0]) == key:
+                        answer = json.loads(result.content)
+                        answer.pop("instructions")
+                        answer.update(already_loaded=True, note="The instructions are already in this conversation.")
+                        result = replace(result, content=json.dumps(answer, ensure_ascii=False))
+                    seen[key[0]] = key
+                shortened.append(result)
+            results = shortened
         parts = tuple(results)
         left = self._limits.max_model_turns - self._turns
         if 0 < left <= self._limits.warn_turns_left:
