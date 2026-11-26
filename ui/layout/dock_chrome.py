@@ -436,10 +436,10 @@ class DockSections(QObject):
         return "exploring" not in self.detached and "filtering" not in self.detached
 
     def _place_layer_mirror(self) -> None:
-        """A second chooser of the current layer at the top of EXPLORING while it is away from FILTERING
-        (ui/widgets/layer_chooser_mirror.py). Not with FILTERING turned off: its own chooser is moved to EXPLORING
-        then (``_move_source_layer``). Nothing in the classic dock."""
-        wanted = not self.together() and self._shown.get("filtering", True)
+        """A second chooser at the top of EXPLORING while FILTERING is elsewhere or folded
+        (ui/widgets/layer_chooser_mirror.py). With FILTERING turned off, its own chooser is moved to EXPLORING
+        instead (``_move_source_layer``). With both sections open in the dock, its chooser is enough."""
+        wanted = self._shown.get("filtering", True) and (not self.together() or self.bottom_key() != "filtering")
         mirror = getattr(self, "_layer_mirror", None)
         if not wanted:
             if mirror is not None:
@@ -773,6 +773,7 @@ class DockSections(QObject):
             # (it may be behind a tab on purpose), and AGENT stays open beside FILTERING.
             self._open_top("exploring")
         self.bottom_rail.set_current(self.bottom_key())
+        self._place_layer_mirror()
         self._fit()
         self._told_open()
 

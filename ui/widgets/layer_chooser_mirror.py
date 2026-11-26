@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""A second chooser of the current layer, for EXPLORING away from FILTERING.
+"""A second chooser of the current layer, for EXPLORING without FILTERING in view.
 
-The current layer is chosen in FILTERING (``comboBox_filtering_current_layer``). When EXPLORING and FILTERING are no
-longer in the same panel (one of them is in its own panel of QGIS, ui/layout/section_panels.py), EXPLORING shows
+The current layer is chosen in FILTERING (``comboBox_filtering_current_layer``). When FILTERING is folded, another
+section is open below, or the two sections are in different panels (ui/layout/section_panels.py), EXPLORING shows
 this chooser at its top: the same list, the same choice. It is a second view of the list of the first chooser (its
 model), so the layers offered, their order and their icons are never two things to keep in step; only the choice
 is carried from one to the other. It shows each layer as that list does, with its CRS (the first chooser, made
