@@ -2,21 +2,21 @@
 """OpenStreetMap features for the agent: what carries the tags asked in an area, brought in as layers.
 
 Main thread only, plain dicts out. The query is written by ``core/agent/osm.py`` from tags checked one by one, sent
-to an Overpass server the user allowed, and its answer (OpenStreetMap XML) is copied to a temporary file, bounded in
-size and in time and ended by Stop. GDAL reads that file in a worker thread and the features that carry one of the
-tags are written to a GeoPackage of the QGIS profile, one layer per kind of geometry. Each layer made is added to the
+to an Overpass server the user allowed, and its answer (OpenStreetMap XML) is held in memory, bounded in
+size and in time and ended by Stop. GDAL reads it in a worker thread and the features that carry one of the
+tags are kept in a GeoPackage in project memory, one layer per kind of geometry. Each layer made is added to the
 project, so undoing the turn of the chat removes it (``adapters/agent/turn_effects.py``).
 """
 from __future__ import annotations
 
 import logging
+import io
 import os
-import shutil
-import tempfile
 from typing import Any, Callable, Dict, List, Sequence
 from urllib.parse import quote
 
-from ...core.agent.open_data import KIND_OVERPASS, megabytes, resolve_platform, sweep_empty_data_dirs
+from ...core.agent.open_data import KIND_OVERPASS, megabytes, resolve_platform
+from ..agent import data_store
 from ...core.agent.osm import (
     ANOTHER as _ANOTHER, ATTRIBUTION, GEOMETRIES, LAYER_KINDS, MAX_BYTES, OSM_TYPES, Tag, area_problem, closed_way_is_area,
     columns, cut_problem, default_name, gdal_config, layer_title, matches, overpass_query, read_tags, remark_problem,
@@ -33,8 +33,8 @@ REQUEST_TIMEOUT_MS = 90_000  # the server may think for 60 s, then sends its ans
 CHECK_TIMEOUT_MS = 20_000
 _ORDER = ('polygons', 'lines', 'points')  # added in this order: the points end on top, the areas under the lines
 _FORM = {'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/osm3s+xml, application/xml'}
-_NOT_WRITTEN = "the features could not be written in the QGIS profile folder"
-_TEMPORARY = "the answer could not be written to the temporary folder of this machine"
+_NOT_WRITTEN = "the features could not be held in memory"
+_TEMPORARY = "the answer could not be held in memory"
 
 
 def _server(platform: str, extra_domains: str) -> str:
@@ -60,9 +60,10 @@ def _ask(platform: str, url: str, query: str, path: str) -> None:
             the model did, never its address.
     """
     received = [0]
-    with open(path, 'wb') as out:
+    virtual = data_store.is_memory(path)
+    with (data_store.store_for().writer(path) if virtual else open(path, 'wb')) as out:
         def keep(chunk: bytes) -> None:
-            out.write(chunk)
+            (out if virtual else out.write)(chunk)
             received[0] += len(chunk)
         try:
             reply = fetch(url, body=b'data=' + quote(query, safe='').encode('ascii'), headers=_FORM,
@@ -81,7 +82,7 @@ def _ask(platform: str, url: str, query: str, path: str) -> None:
             raise ValueError(f"{platform} did not answer: {exc}; {_ANOTHER}") from None
     if status_problem(reply.status):
         raise ValueError(status_refusal(platform, reply.status))
-    with open(path, 'rb') as stream:
+    with (io.BytesIO(data_store.read_bytes(path)) if virtual else open(path, 'rb')) as stream:
         head = stream.read(600)
         stream.seek(max(0, received[0] - 4000))
         tail = stream.read()
@@ -121,7 +122,11 @@ def _convert(osm_path: str, config_path: str, gpkg_path: str, tags: Sequence[Tag
         ValueError: A file GDAL cannot read, or cannot read to its end (cut, or no XML): what was read before is
             a part of what was asked, never given as the whole. Or layers that cannot be written.
     """
-    with _Gdal() as gdal:
+    # The OSM driver's node index and SQLite geometry index must never spill into an OS temp directory.
+    # Its temporary files use GDAL's virtual filesystem as well, in the private asset folder.
+    options = {'CPL_TMPDIR': os.path.dirname(osm_path), 'OSM_MAX_TMPFILE_SIZE': '0'} \
+        if data_store.is_memory(osm_path) else {}
+    with _Gdal(options=options) as gdal:
         from osgeo import ogr, osr
         source = target = answer = feature = origin = definition = shape = row = out = made = None
         layers: Dict[str, Any] = {}
@@ -277,14 +282,13 @@ def add_osm_features(platform: str, tags: List[Dict[str, Any]], extent_wkt: str 
     ``geometry``: ``as_mapped`` makes a layer per kind of geometry OpenStreetMap holds them in (points, lines,
     polygons); ``points`` makes one layer of points (a point inside each area, the middle of each line): to count, to
     measure distances, for a heatmap; ``lines`` or ``polygons`` keeps that kind alone. The layers are kept in a
-    GeoPackage of the QGIS profile, in longitude and latitude, each with ``osm_id``, ``osm_type``, ``name``, a column
+    GeoPackage in project memory, in longitude and latitude, each with ``osm_id``, ``osm_type``, ``name``, a column
     per key asked, and the other tags together.
 
     Raises:
         ValueError: Not an OpenStreetMap server, tags or an area that cannot be read, an area too large, a server
             that does not answer or stops short, no feature with these tags, stopped; the message says which.
     """
-    from qgis.core import QgsApplication
     url = _server(platform, extra_domains)
     asked = read_tags(tags)
     if geometry not in GEOMETRIES:
@@ -293,24 +297,19 @@ def add_osm_features(platform: str, tags: List[Dict[str, Any]], extent_wkt: str 
     problem = area_problem(bbox)
     if problem:
         raise ValueError(problem)
-    root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data')
-    work = folder = ''
+    answer = config = path = ''
     kept = False
     made: List[Dict[str, Any]] = []
     unwritten = _TEMPORARY  # what a full disk is said as: by the folder that could not be written
     try:
-        work = tempfile.mkdtemp(prefix='filtermate-osm-')
         with running('add_osm_features'):
-            answer = os.path.join(work, 'answer.osm')
+            answer = data_store.new_path('answer.osm')
             _ask(platform, url, overpass_query(asked, bbox), answer)
-            config = os.path.join(work, 'osmconf.ini')
-            with open(config, 'w', encoding='utf-8') as stream:
-                stream.write(gdal_config(asked))
+            config = data_store.new_path('osmconf.ini')
+            with data_store.store_for().writer(config) as write:
+                write(gdal_config(asked).encode('utf-8'))
             unwritten = _NOT_WRITTEN
-            os.makedirs(root, exist_ok=True)
-            sweep_empty_data_dirs(root)
-            folder = tempfile.mkdtemp(prefix='osm-', dir=root)
-            path = os.path.join(folder, 'openstreetmap.gpkg')
+            path = data_store.new_path('openstreetmap.gpkg')
             counts = _in_background('add_osm_features',
                                     lambda ended: _convert(answer, config, path, asked, geometry, ended))
         found = [kind for kind in _ORDER if counts.get(kind)]
@@ -331,10 +330,11 @@ def add_osm_features(platform: str, tags: List[Dict[str, Any]], extent_wkt: str 
     except OSError:
         raise ValueError(unwritten) from None
     finally:
-        if work:
-            shutil.rmtree(work, ignore_errors=True)
-        if folder and not kept:
-            _forget(folder, made)
+        for temporary in (answer, config):
+            if temporary:
+                data_store.discard(temporary)
+        if path and not kept:
+            _forget(path, made)
     made.reverse()  # as the layer tree shows them, top first
     return {'platform': platform, 'tags': [tag.shown() for tag in asked], 'layers': made,
             'feature_count': sum(row['feature_count'] for row in made), 'crs_authid': 'EPSG:4326',
@@ -348,7 +348,7 @@ def _forget(folder: str, made: Sequence[Dict[str, Any]]) -> None:
     from qgis.core import QgsProject
     for row in made:
         QgsProject.instance().removeMapLayer(row['layer_id'])
-    shutil.rmtree(folder, ignore_errors=True)
+    data_store.discard(folder)
 
 
 def check_osm(platform: str, extra_domains: str = '') -> Dict[str, Any]:

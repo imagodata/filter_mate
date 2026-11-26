@@ -217,6 +217,8 @@ def ctrl_module(monkeypatch):
     _module(monkeypatch, ".filtermate_api.qgis_accessor")
     _module(monkeypatch, ".ui.controllers.agent_mcp_bridge", AgentMcpBridge=FakeBridge)
     _module(monkeypatch, ".ui.controllers.agent_charts", AgentCharts=FakeCharts, file_stem=str)
+    _module(monkeypatch, ".ui.controllers.agent_data", AgentDataController=MagicMock())
+    _module(monkeypatch, ".ui.controllers.agent_outputs", AgentOutputsController=MagicMock())
     _module(monkeypatch, ".ui.widgets.agent_panel", ANSWER_CONVERSATION="conversation", ANSWER_NO="no",
             ANSWER_ONCE="once", AgentPanel=lambda parent: MagicMock(), level_short=str, preset_label=str)
     _module(monkeypatch, ".ui.widgets.agent_widgets_strip", number_text=str)

@@ -2,7 +2,7 @@
 """Processing for the agent: find an algorithm, read its parameters, run it on the layers of the project.
 
 Main thread only, plain dicts out. What may run is decided by ``core/agent/processing_policy.py``. Each layer an
-algorithm makes is written to a temporary file and added to the project, so undoing the turn of the chat removes it
+algorithm makes is held in project memory and added to the project, so undoing the turn of the chat removes it
 and redoing it opens the file again. An algorithm that can run in the background does, while the event loop turns
 and the user can press Stop; one that cannot (``FlagNoThreading``) holds QGIS until it ends.
 """
@@ -372,9 +372,11 @@ def _value(definition, value: Any) -> Any:
 
 
 def _destination_path(definition) -> str:
-    from qgis.core import QgsProcessingUtils
+    from ..agent.data_store import new_path, store_for
     extension = definition.defaultFileExtension() or ('tif' if definition.type() == 'rasterDestination' else 'gpkg')
-    return QgsProcessingUtils.generateTempFilename(f"{definition.name().lower()}.{extension}")
+    if definition.type() == 'pointCloudDestination':
+        return store_for().disk_path(f"{definition.name().lower()}.{extension}")
+    return new_path(f"{definition.name().lower()}.{extension}")
 
 
 def _parameters(algorithm, given: Dict[str, Any]) -> Tuple[Dict[str, Any], List[Any]]:
@@ -394,7 +396,7 @@ def _parameters(algorithm, given: Dict[str, Any]) -> Tuple[Dict[str, Any], List[
         if kind in LAYER_DESTINATIONS:
             wanted = given.get(name)
             if wanted is not None and not isinstance(wanted, bool):
-                raise ValueError(f"{name} is an output: FilterMate gives it a temporary file; pass true or false")
+                raise ValueError(f"{name} is an output: FilterMate stores it in memory; pass true or false")
             if wanted is False and not _optional(definition):
                 raise ValueError(f"{name} is a required output: it cannot be skipped")
             if wanted is True or (wanted is None and (not _optional(definition) or definition.createByDefault())):

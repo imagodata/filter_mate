@@ -399,6 +399,8 @@ def in_session(source: str) -> bool:
 
     Session folder names (``session_<hex>``) survive any URI encoding.
     """
+    if isinstance(source, str) and source.startswith('/vsimem/filtermate-agent-'):
+        return True  # owned by the open project's memory store, retained with its undo history
     folder = _session_dir
     return bool(folder and source and os.path.basename(folder) in source)
 

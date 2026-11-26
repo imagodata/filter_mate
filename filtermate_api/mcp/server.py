@@ -416,7 +416,7 @@ def build_server(client: FilterMateClient) -> Any:
     ) -> Dict[str, Any]:
         """Run a Processing algorithm of QGIS on layers of the project; the layers it makes are added to the project.
 
-        Each output layer is a temporary file: export_layers keeps one for good. In the chat of FilterMate, undoing
+        Output layers stay in memory until the user chooses Save project and layers in the agent menu, or asks for export_layers. In the chat of FilterMate, undoing
         the turn removes them. Returns layers [{output, layer_id, name, layer_kind, feature_count}], values (what the
         algorithm answers besides layers: statistics...), not_made and messages (its warnings). Inputs are layers
         of the project only, never a path or a URL; expressions take the functions of select_features and math,
@@ -1233,7 +1233,7 @@ def build_server(client: FilterMateClient) -> Any:
 
         Typical use after search_open_data: pick a geojson or gpkg resource url and add it, then filter it like any
         other layer. A remote file is read where it is when its server gives parts of it (GeoPackage, GeoTIFF, zip);
-        any other is first copied to the QGIS profile (512 MB and 3 minutes at most). When it cannot be added the
+        any other is held in project memory until the user chooses to save it (512 MB and 3 minutes at most). When it cannot be added the
         error says why: try another resource of the dataset, or a service layer. Returns the layer summary (layer_id,
         name, layer_kind, provider_type, crs_authid, feature_count). The chat of FilterMate asks the user first.
         """
@@ -1369,7 +1369,7 @@ def build_server(client: FilterMateClient) -> Any:
         """Draw the contour lines of an elevation raster of the project as a new line layer, added on top.
 
         Each line has elevation (its height) and is_index (1 for an index contour); the layer comes in thin lines
-        with the index contours thicker. A temporary file: export_layers keeps it. Returns layer_id, name,
+        with the index contours thicker. Held in memory: Save project and layers in the agent menu or export_layers keeps it. Returns layer_id, name,
         feature_count, index_count, left_out, minimum and maximum (the levels drawn).
         """
         return await call("POST", "/layers/contours", _body(
@@ -1400,7 +1400,7 @@ def build_server(client: FilterMateClient) -> Any:
         crs: Annotated[str, Field(max_length=64, description=(
             "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty"))] = "",
     ) -> Dict[str, Any]:
-        """Copy a web service layer over an area to a file next to the project (GeoPackage for features, GeoTIFF for
+        """Copy a web service layer over an area to project memory (GeoPackage for features, GeoTIFF for
         a web map), and the layer reads it with its style and filter: faster, and without the network.
 
         A web map is copied as a still image at the finest level the budget affords. Returns reads, file,

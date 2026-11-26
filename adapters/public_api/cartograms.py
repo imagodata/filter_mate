@@ -3,10 +3,12 @@
 
 Main thread only, plain dicts out. The features are read in a projected CRS: the layer's own, or for a layer in
 degrees an equal-area projection made for its extent (``core/agent/projections.custom``), since a cartogram compares
-areas. The algorithms are ``core/agent/cartograms.py``. The result is a GeoPackage of the temporary folder of QGIS,
+areas. The algorithms are ``core/agent/cartograms.py``. The result is a GeoPackage in project memory,
 added at the top of the layer tree with the fields of the layer and ``cartogram_value``; undoing the turn removes it.
 """
 from __future__ import annotations
+
+from ..agent import data_store
 
 import logging
 from typing import Any, Dict, List, Tuple
@@ -139,12 +141,12 @@ def make_cartogram(layer: str, field: str, kind: str = "contiguous", iterations:
     """A new layer whose areas show ``field`` of ``layer``: contiguous (borders kept), noncontiguous (each polygon
     scaled), dorling (circles) or demers (squares).
 
-    The layer is temporary (a file of the temporary folder of QGIS): the answer says so, with what keeps it.
+    The layer stays in project memory until the user saves the project and its layers.
 
     Raises:
         ValueError: An unknown layer, field or kind, values that cannot be drawn, too many features.
     """
-    from qgis.core import (QgsFeature, QgsField, QgsFields, QgsGeometry, QgsPointXY, QgsProcessingUtils,
+    from qgis.core import (QgsFeature, QgsField, QgsFields, QgsGeometry, QgsPointXY,
                            QgsProject, QgsVectorFileWriter, QgsVectorLayer, QgsWkbTypes)
     from qgis.PyQt.QtCore import QVariant
     if kind not in KINDS:
@@ -180,7 +182,7 @@ def make_cartogram(layer: str, field: str, kind: str = "contiguous", iterations:
     while fields.lookupField(value_name) >= 0:
         value_name, number = f"{VALUE_FIELD}_{number}", number + 1
     fields.append(QgsField(value_name, QVariant.Double))
-    path = QgsProcessingUtils.generateTempFilename("cartogram.gpkg")
+    path = data_store.new_path("cartogram.gpkg")
     options = QgsVectorFileWriter.SaveVectorOptions()
     options.driverName = "GPKG"
     options.layerName = "cartogram"
@@ -216,8 +218,6 @@ def make_cartogram(layer: str, field: str, kind: str = "contiguous", iterations:
         answer["error_after"] = round(history[-1] if history else errors(shaped), 3)
         answer["note"] = ("error: the mean ratio between the area of a feature and the area its value asks for; "
                           "1 is exact")
-    # The file lives in the temporary folder of QGIS: it is gone at restart, and saving the project does not keep
-    # it (audit of 2026-11-24). The model offers an export while it lasts.
-    answer["temporary"] = ("a layer of the temporary folder: export it (export_layers) or save its features "
-                           "elsewhere, it does not survive a restart")
+    # Saving the project together with its data makes this layer durable.
+    answer["temporary"] = ("a layer held in memory: save the project and its layers to keep it after closing QGIS")
     return answer

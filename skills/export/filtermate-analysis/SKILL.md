@@ -22,8 +22,8 @@ intersection, points to a heatmap, a slope. To answer "how many" or "how long", 
 2. describe_algorithm for its parameters: never guess a parameter name or a value.
 3. run_algorithm with the layers by name or id and plain values; give names to the outputs the user will see.
 
-The layers it makes are added to the project and undone with the turn. Each one is a temporary file, lost when QGIS
-closes: when the user wants to keep one, export_layers writes it. Distances are in the units of the layer's CRS
+The layers it makes are added to the project and undone with the turn. The data stay in memory until the project closes. The panel offers Save project and layers, where the user
+chooses a destination. export_layers also keeps a layer when explicitly requested. Distances are in the units of the layer's CRS
 (describe_layer says it): a geographic CRS counts in degrees, so reproject or say so.
 
 ## Which algorithm

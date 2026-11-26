@@ -150,7 +150,7 @@ def local_source(port):
 
 
 def check_population(project, work):
-    from filter_mate.adapters.agent import bounded_http
+    from filter_mate.adapters.agent import bounded_http, data_store
     from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
     from filter_mate.adapters.public_api import operations
     from filter_mate.adapters.public_api import population as adapter
@@ -163,10 +163,11 @@ def check_population(project, work):
     server, asked = serve(files, delay)
     local = local_source(server.server_address[1])
     adapter.known = lambda identifier: local if (identifier or "").strip().lower() == real.id else None
-    root = os.path.join(QgsApplication.qgisSettingsDirPath(), "filtermate", "open_data")
+    root = data_store.store_for(project).root
 
     def written():
-        return {name for name in (os.listdir(root) if os.path.isdir(root) else []) if name.startswith("population-")}
+        from osgeo import gdal
+        return {name.rsplit("/", 1)[0] for name in (gdal.ReadDirRecursive(root) or []) if name.endswith(".tif")}
 
     data = QgsVectorLayer("Point?crs=EPSG:4326", "data", "memory")
     project.addMapLayer(data)
@@ -195,7 +196,7 @@ def check_population(project, work):
               and made["attribution"] == real.attribution and "census" in made["note"] and "zonalstatisticsfb" in made["note"],
               made)
         kept = written() - already
-        check("population: one file kept in the QGIS profile", len(kept) == 1 and os.path.isfile(layer.source())
+        check("population: one raster kept in memory", len(kept) == 1 and data_store.is_memory(layer.source()) and data_store.exists(layer.source())
               and os.path.basename(os.path.dirname(layer.source())) in kept, layer.source())
         ranges = [wanted for command, path, wanted in asked if command == "GET" and path == TILE]
         check("population: the grid is read by parts, never whole", ranges and not [wanted for wanted in ranges if not wanted],

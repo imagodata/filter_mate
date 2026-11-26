@@ -1816,6 +1816,14 @@ Do you agree to all of them? No runs none of them.</source>
         <source>⚠ Reaches outside QGIS (network, file or code).</source>
         <translation>⚠ Agit hors de QGIS (réseau, fichier ou code).</translation>
     </message>
+    <message>
+        <source>The linked layer is no longer available in the project.</source>
+        <translation>La couche liée n’est plus disponible dans le projet.</translation>
+    </message>
+    <message>
+        <source>The linked layer could not be shown in the Layers panel.</source>
+        <translation>Impossible d’afficher la couche liée dans le panneau Couches.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -3512,6 +3520,38 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="767"/>
         <source>writes the steps, shows each change before applying it</source>
         <translation>décrit les étapes et montre chaque modification avant de l’appliquer</translation>
+    </message>
+    <message>
+        <source>Save project and layers…</source>
+        <translation>Enregistrer le projet et les couches…</translation>
+    </message>
+    <message>
+        <source>Show in the Layers panel: {}</source>
+        <translation>Afficher dans le panneau Couches : {}</translation>
+    </message>
+    <message>
+        <source>Open in browser: {}</source>
+        <translation>Ouvrir dans le navigateur : {}</translation>
+    </message>
+    <message>
+        <source>Open file: {}</source>
+        <translation>Ouvrir le fichier : {}</translation>
+    </message>
+    <message>
+        <source>Open folder: {}</source>
+        <translation>Ouvrir le dossier : {}</translation>
+    </message>
+    <message>
+        <source>Open folder</source>
+        <translation>Ouvrir le dossier</translation>
+    </message>
+    <message>
+        <source>This output is no longer available: {}</source>
+        <translation>Cette sortie n’est plus disponible : {}</translation>
+    </message>
+    <message>
+        <source>This output could not be opened: {}</source>
+        <translation>Impossible d’ouvrir cette sortie : {}</translation>
     </message>
 </context>
 <context>
@@ -14385,6 +14425,18 @@ Dossier : {6}</translation>
         <source>{0} request(s) of the service were not answered: the image may have holes.</source>
         <translation>{0} requête(s) au service sont restées sans réponse : l'image peut avoir des trous.</translation>
     </message>
+    <message>
+        <source>Copy in memory: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests, {5:.0f} MB at most. Save the project and its layers to keep it.</source>
+        <translation>Copie en mémoire : {0} × {1} pixels, {2:.3g} {3} par pixel, {4} requêtes, {5:.0f} Mo au maximum. Enregistrez le projet et ses couches pour la conserver.</translation>
+    </message>
+    <message>
+        <source>Copy of the visible features in memory, {0} at most. Save the project and its layers to keep it.</source>
+        <translation>Copie des entités visibles en mémoire, {0} au maximum. Enregistrez le projet et ses couches pour la conserver.</translation>
+    </message>
+    <message>
+        <source>Memory; save the project and its layers to keep the copy</source>
+        <translation>En mémoire ; enregistrez le projet et ses couches pour conserver la copie</translation>
+    </message>
 </context>
 <context>
     <name>StreamCopyActions</name>
@@ -14871,6 +14923,75 @@ Dossier : {6}</translation>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Points retenus</translation>
+    </message>
+</context>
+<context>
+    <name>AgentData</name>
+    <message>
+        <source>Data</source>
+        <translation>Données</translation>
+    </message>
+    <message>
+        <source>Keep this work?</source>
+        <translation>Conserver ce travail ?</translation>
+    </message>
+    <message>
+        <source>Save project and layers…</source>
+        <translation>Enregistrer le projet et les couches…</translation>
+    </message>
+    <message>
+        <source>Continue in memory</source>
+        <translation>Continuer en mémoire</translation>
+    </message>
+    <message>
+        <source>Choose where to save the project and its layers.</source>
+        <translation>Choisissez où enregistrer le projet et ses couches.</translation>
+    </message>
+    <message>
+        <source>The data stay in memory until this project is closed.</source>
+        <translation>Les données restent en mémoire jusqu’à la fermeture du projet.</translation>
+    </message>
+    <message>
+        <source>Downloaded data and results are held in memory. Save the project together with its layers to keep them after closing QGIS.</source>
+        <translation>Les données téléchargées et les résultats restent en mémoire. Enregistrez le projet avec ses couches pour les conserver après la fermeture de QGIS.</translation>
+    </message>
+    <message>
+        <source>Wait for the current request to finish before saving its data.</source>
+        <translation>Attendez la fin de la demande en cours avant d’enregistrer ses données.</translation>
+    </message>
+    <message>
+        <source>Save project and layers</source>
+        <translation>Enregistrer le projet et les couches</translation>
+    </message>
+    <message>
+        <source>QGIS project (*.qgz *.qgs)</source>
+        <translation>Projet QGIS (*.qgz *.qgs)</translation>
+    </message>
+    <message>
+        <source>The project and its layers could not be saved.</source>
+        <translation>Le projet et ses couches n’ont pas pu être enregistrés.</translation>
+    </message>
+    <message>
+        <source>Project and layers saved: {}</source>
+        <translation>Projet et couches enregistrés : {}</translation>
+    </message>
+    <message>
+        <source>Save the downloaded data and results beside this project?
+{}
+
+If you choose No, these data stay in memory and will be lost when the project closes.</source>
+        <translation>Enregistrer les données téléchargées et les résultats à côté de ce projet ?
+{}
+
+Si vous choisissez Non, ces données resteront en mémoire et seront perdues à la fermeture du projet.</translation>
+    </message>
+    <message>
+        <source>Data still in memory</source>
+        <translation>Données encore en mémoire</translation>
+    </message>
+    <message>
+        <source>Project data</source>
+        <translation>Données du projet</translation>
     </message>
 </context>
 </TS>

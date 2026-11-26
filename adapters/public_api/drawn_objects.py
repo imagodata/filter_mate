@@ -7,6 +7,8 @@ layer of its own to the project and changes no other layer.
 """
 from __future__ import annotations
 
+from ..agent import data_store
+
 import logging
 import math
 import statistics
@@ -184,7 +186,7 @@ def segment_objects(raster: str, guide_layer: str, selected_only: bool = True, l
         ValueError: A layer that does not fit, too many guide features, SAM not installed, nothing drawn.
     """
     from qgis.core import (
-        QgsFillSymbol, QgsProcessingContext, QgsProcessingFeatureSourceDefinition, QgsProcessingUtils, QgsProject,
+        QgsFillSymbol, QgsProcessingContext, QgsProcessingFeatureSourceDefinition, QgsProject,
         QgsVectorLayer,
     )
     from ...processing.algorithms.segmentation_algorithm import SegmentFromFeaturesAlgorithm
@@ -227,7 +229,7 @@ def segment_objects(raster: str, guide_layer: str, selected_only: bool = True, l
     context.setProject(project)
     feedback = _budget_feedback(BUDGET_SECONDS)
     # A file, as the outputs of run_algorithm: Redo of the turn opens it again (a memory layer would come back empty).
-    path = QgsProcessingUtils.generateTempFilename("sam_objects.gpkg")
+    path = data_store.new_path("sam_objects.gpkg")
     begin = time.monotonic()
     # Qt serves events while the windows are drawn: a REST call queued meanwhile is refused, not run nested.
     with running("segment_objects"):
@@ -431,7 +433,7 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
         ValueError: A layer or an example that does not fit, an area too large, SAM not installed.
     """
     import numpy as np
-    from qgis.core import QgsFillSymbol, QgsGeometry, QgsMapSettings, QgsPointXY, QgsProcessingUtils, QgsProject, \
+    from qgis.core import QgsFillSymbol, QgsGeometry, QgsMapSettings, QgsPointXY, QgsProject, \
         QgsVectorLayer
     from qgis.PyQt.QtGui import QColor
     from ...processing.algorithms.segmentation_algorithm import _metres_to_units
@@ -580,7 +582,7 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
     }
     if not found:
         return answer
-    path = QgsProcessingUtils.generateTempFilename("similar_objects.gpkg")
+    path = data_store.new_path("similar_objects.gpkg")
     _write_objects(found, image.crs(), path, measure)
     layer = QgsVectorLayer(path, (name or '').strip()[:200] or f"{image_name} (similar objects)", 'ogr')
     if not layer.isValid():

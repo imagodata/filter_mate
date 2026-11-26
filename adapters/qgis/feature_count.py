@@ -150,6 +150,9 @@ def _whole_table(layer: Any, count: int) -> Optional[int]:
         return None
     if path is None:
         return count
+    if path.startswith('/vsimem/'):
+        # sqlite3 opens OS files, not GDAL virtual files. Read these through their GDAL provider instead.
+        return _read_count(path, table, index, '', TABLE_BUDGET)
     key = _cache_key(path, table, index, '')
     if key is not None and key in _CACHE:
         _CACHE.move_to_end(key)
@@ -319,13 +322,22 @@ def source_parts(source: str) -> Tuple[Optional[str], str, int]:
         index = int(options.get('layerid') or 0)
     except ValueError:
         return None, '', 0
-    if options.get('geometrytype') or not os.path.isfile(parts[0]):
+    virtual = parts[0].startswith('/vsimem/')
+    if virtual:
+        try:
+            from osgeo import gdal
+            virtual = gdal.VSIStatL(parts[0]) is not None
+        except ImportError:
+            virtual = False
+    if options.get('geometrytype') or not (virtual or os.path.isfile(parts[0])):
         return None, '', 0
     return parts[0], options.get('layername', ''), index
 
 
 def _cache_key(path: str, table: str, index: int, subset: str) -> Optional[tuple]:
     """The file as it is (time and size of the file and of its write-ahead log) and what is counted in it."""
+    if path.startswith('/vsimem/'):
+        return None  # the virtual filesystem supplies no reliable edit timestamp; never reuse a stale count
     try:
         states = [(stat.st_mtime_ns, stat.st_size) for stat in
                   (os.stat(name) for name in (path, path + '-wal') if os.path.exists(name))]

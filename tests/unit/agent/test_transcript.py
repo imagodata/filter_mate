@@ -14,6 +14,13 @@ def test_round_trip_keeps_what_matters():
     assert from_json(to_json(entries)) == entries
 
 
+def test_output_links_round_trip_without_sending_local_paths_to_the_model():
+    entries = [entry('user', 'exporte la carte'),
+               entry('output', 'map.pdf', detail='/chosen/private/map.pdf')]
+    assert from_json(to_json(entries)) == entries
+    assert '/chosen/private' not in recap(entries) and 'map.pdf' not in recap(entries)
+
+
 def test_odd_input_is_dropped_not_interpreted():
     assert from_json("not json") == []
     assert from_json(json.dumps([{"kind": "evil", "text": "x"}, {"kind": "user"}, "x", {"kind": "text", "text": "ok"}])) == [

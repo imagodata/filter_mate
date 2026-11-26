@@ -21,7 +21,7 @@ COLORS = {"accent": "#0066cc", "code_bg": "#eeeeee", "rule": "#cccccc"}
 
 def test_everything_the_model_wrote_is_escaped():
     shown = md.answer_html('<img src="file:///x.png"> <a href="http://evil">x</a> & "q"')
-    assert "<img" not in shown and "<a " not in shown
+    assert "<img" not in shown and '<a href="http://evil">x' not in shown
     assert "&lt;img" in shown and "&amp;" in shown and "&quot;q&quot;" in shown
 
 
@@ -64,9 +64,10 @@ def test_fenced_code_keeps_its_lines_escaped():
     assert "```" not in shown
 
 
-def test_a_link_shows_its_address_and_is_never_clicked_through():
+def test_a_web_link_keeps_its_label_and_escapes_its_address():
     shown = md.answer_html("Voir [la page](https://example.org/p?a=1&b=2)")
-    assert "<a " not in shown and "la page (https://example.org/p?a=1&amp;b=2)" in shown
+    assert 'href="https://example.org/p?a=1&amp;b=2"' in shown and '>la page</a>' in shown
+    assert 'text-decoration: underline' in shown
 
 
 def test_layer_names_link_whole_words_only():
@@ -140,3 +141,108 @@ def test_a_rule_is_drawn():
 def test_two_layers_of_one_name_link_the_first():
     shown = md.answer_html("routes", ["routes", "routes"])
     assert 'href="layer:0"' in shown
+
+
+def test_stable_layer_links_ignore_the_position_in_the_tree_and_keep_case():
+    layers = [md.LayerReference('rivers_id', 'Rivières', 'Données / Hydrographie')]
+    shown = md.answer_html('Les RIVIÈRES et `Rivières`.', layers=layers)
+    assert shown.count('href="layer:id/rivers_id"') == 2 and '>RIVIÈRES</a>' in shown
+    assert md.layer_reference('layer:id/rivers_id', list(reversed(layers))).layer_id == 'rivers_id'
+    assert md.layer_reference('layer:id/removed', layers) is None
+
+
+def test_duplicate_names_need_an_explicit_layer_id():
+    layers = [md.LayerReference('roads_a', 'routes', 'A'), md.LayerReference('roads_b', 'routes', 'B')]
+    shown = md.answer_html('Les routes : [couche B](layer:roads_b). [Ambigu](layer:routes)', layers=layers)
+    assert shown.count('<a ') == 1 and 'href="layer:id/roads_b"' in shown
+    assert md.layer_reference('layer:routes', layers) is None
+
+
+def test_explicit_named_links_and_quoted_short_names_are_supported():
+    layers = [md.LayerReference('points_id', 'A'), md.LayerReference('cities_id', 'Communes')]
+    shown = md.answer_html('A et `A`, [les villes](layer:Communes)', layers=layers)
+    assert shown.count('<a ') == 2 and 'href="layer:id/points_id"' in shown
+    assert 'href="layer:id/cities_id"' in shown
+
+
+def test_a_layer_id_and_its_displayed_name_are_escaped_independently():
+    layer = md.LayerReference('id/?"', 'Routes <img> & voies')
+    shown = md.answer_html(layer.name, layers=[layer])
+    assert '<img>' not in shown and 'href="layer:id/id%2F%3F%22"' in shown
+    assert md.layer_reference('layer:id/id%2F%3F%22', [layer]) == layer
+
+
+@pytest.mark.parametrize('url', ['file:///tmp/data.gpkg', 'javascript:alert(1)', 'data:text/html,test',
+                                'mailto:user@example.org', 'qgis://run/code', 'https://',
+                                'https://user:password@example.org', 'https://host:wrong',
+                                'https://host/\nnext', 'https://host/\\data', 'https://[bad'])
+def test_only_web_urls_can_be_opened(url):
+    assert md.web_url(url) == ''
+    if not any(char.isspace() for char in url):
+        assert '<a ' not in md.answer_html('[open](' + url + ')')
+
+
+def test_plain_web_urls_do_not_link_layer_names_inside_their_address():
+    shown = md.answer_html('Voir https://example.org/communes?q=1&b=2, puis communes.', ['communes'])
+    assert shown.count('<a ') == 2 and 'href="https://example.org/communes?q=1&amp;b=2"' in shown
+    assert shown.count('href="layer:0"') == 1 and '</a>, puis' in shown
+
+
+def test_url_parentheses_and_trailing_sentence_punctuation():
+    shown = md.answer_html('(https://example.org/place_(city)).')
+    assert 'href="https://example.org/place_(city)"' in shown and '</a>).' in shown
+
+
+def test_a_long_url_with_unbalanced_brackets_is_linear():
+    import time
+    start = time.perf_counter()
+    shown = md.answer_html('https://example.org/' + ')' * 100_000)
+    assert time.perf_counter() - start < 1.0 and shown
+
+
+def test_unicode_case_matching_does_not_fail_for_turkish_names():
+    shown = md.answer_html('İSTANBUL et istanbul', layers=[md.LayerReference('city_id', 'İstanbul')])
+    assert shown.count('href="layer:id/city_id"') == 2
+
+
+def test_registered_output_files_and_folders_are_clickable():
+    files = [md.FileReference('/chosen/layouts/map.pdf', 'layouts/map.pdf', aliases=('map.pdf',)),
+             md.FileReference('/chosen/layouts', 'layouts', True)]
+    shown = md.answer_html('map.pdf, `layouts/map.pdf`, [PDF](layouts/map.pdf), [dossier](folder:layouts)', files=files)
+    assert shown.count('href="' + md.output_href(files[0].path) + '"') == 3
+    assert md.output_href(files[1].path) in shown
+    assert md.file_reference('file:///chosen/layouts/map.pdf', files) == files[0]
+    assert md.file_reference('file:///etc/passwd', files) is None
+
+
+def test_duplicate_output_names_need_their_relative_path():
+    files = [md.FileReference('/chosen/charts/map.pdf', 'charts/map.pdf', aliases=('map.pdf',)),
+             md.FileReference('/chosen/layouts/map.pdf', 'layouts/map.pdf', aliases=('map.pdf',))]
+    shown = md.answer_html('map.pdf et charts/map.pdf', files=files)
+    assert shown.count('<a ') == 1 and md.output_href(files[0].path) in shown
+    assert md.file_reference('map.pdf', files) is None
+
+
+def test_output_paths_with_spaces_accents_and_quotes_are_escaped():
+    file = md.FileReference('/chosen/été & "carte".pdf', 'été & "carte".pdf')
+    shown = md.answer_html(file.name, files=[file])
+    assert md.output_href(file.path) in shown and '&quot;carte&quot;' in shown
+    assert md.file_reference(md.output_href(file.path), [file]) == file
+
+
+def test_explicit_links_keep_balanced_parentheses_in_their_url():
+    shown = md.answer_html('[page](https://example.org/(place_(city))/map) puis **bilan**')
+    assert 'href="https://example.org/(place_(city))/map"' in shown
+    assert '>page</a> puis <b>bilan</b>' in shown
+
+
+def test_angle_delimited_local_links_support_spaces_in_known_output_names():
+    file = md.FileReference('/chosen/carte été.pdf', 'carte été.pdf')
+    shown = md.answer_html('[La carte](</chosen/carte été.pdf>)', files=[file])
+    assert md.output_href(file.path) in shown and '>La carte</a>' in shown
+
+
+def test_network_file_links_resolve_only_to_registered_outputs():
+    file = md.FileReference('//server/share/map.pdf', 'map.pdf')
+    assert md.file_reference('file://server/share/map.pdf', [file]) == file
+    assert md.file_reference('file://other/share/map.pdf', [file]) is None

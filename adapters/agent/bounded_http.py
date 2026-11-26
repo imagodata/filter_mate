@@ -180,6 +180,8 @@ class _Wait:
         else:
             try:
                 self._sink(chunk)
+            except (MemoryError, ValueError) as exc:  # memory stores can refuse a chunk; never escape a Qt slot
+                self._failure = self._failure or str(exc) or "the received data could not be held in memory"
             except OSError:  # raised from a Qt slot it would end QGIS
                 self._failure = self._failure or "what the server sent could not be written to disk"
 

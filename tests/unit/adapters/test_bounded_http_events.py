@@ -81,3 +81,12 @@ def test_one_line_end_is_not_a_blank_line(bounded_http):
     assert _ends(bounded_http, [b"data: a\r\ndata: b\r\n"]) == [False]
     assert _ends(bounded_http, [b"data: a\r", b"\ndata: b\r", b"\n"]) == [False, False, False]
     assert _ends(bounded_http, [b"data: a\rdata: b\r"]) == [False]
+
+
+@pytest.mark.parametrize('error', [ValueError('memory budget is full'), MemoryError('not enough memory')])
+def test_a_memory_sink_failure_does_not_escape_a_qt_slot(bounded_http, error):
+    reader = bounded_http._Wait.__new__(bounded_http._Wait)
+    reader._received, reader._max_bytes, reader._failure = 0, 100, ''
+    reader._sink = MagicMock(side_effect=error)
+    reader._keep(b'data')
+    assert reader._failure == str(error)

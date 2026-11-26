@@ -569,6 +569,7 @@ class AgentPanel(QFrame):
     feedback_requested = pyqtSignal(str, str)  # a form of the feedback page of the site, and where it was clicked
     shown = pyqtSignal()  # the panel comes in view: its section opens, or the dock shows it
     new_conversation_requested = pyqtSignal()
+    save_project_requested = pyqtSignal()
     redo_requested = pyqtSignal()
     history_requested = pyqtSignal()
     # The options of the agent from the menu "⋯" (2026-11-16): the controller fills them when the menu opens.
@@ -587,7 +588,7 @@ class AgentPanel(QFrame):
     recipe_run_requested = pyqtSignal(str)
     recipe_remove_requested = pyqtSignal(str)
     recipe_live_toggled = pyqtSignal(str, bool)
-    layer_link_clicked = pyqtSignal(str)  # the name of a layer clicked in an answer (agent_markdown)
+    layer_link_clicked = pyqtSignal(str)  # stable id of the layer clicked in an answer (legacy: its name)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -720,6 +721,8 @@ class AgentPanel(QFrame):
         self.new_action.triggered.connect(self.new_conversation_requested)
         self.history_action = menu.addAction(_tr("History…"))
         self.history_action.triggered.connect(self.history_requested)
+        self.save_project_action = menu.addAction(_tr("Save project and layers…"))
+        self.save_project_action.triggered.connect(self.save_project_requested)
         # Recipes: the changes of a request kept in the project, run again without the model.
         self.recipes_menu = menu.addMenu(_tr("Recipes"))
         self.recipes_menu.setObjectName("menu_agent_recipes")
@@ -2018,6 +2021,11 @@ class AgentPanel(QFrame):
         card = self.thread.add_chart(title, svg, caption, on_save, on_layout)
         self._in_answer = False
         return card
+
+    def add_output(self, path: str, name: str, is_dir: bool = False) -> None:
+        self._show_conversation()
+        self.thread.add_output(path, name, is_dir)
+        self._in_answer = False
 
     def show_error(self, title: str, detail: str = "", offer_settings: bool = False, action: str = "",
                    on_action=None) -> None:

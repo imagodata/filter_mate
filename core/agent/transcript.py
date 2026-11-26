@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List, Sequence
 
-KINDS = ("user", "action", "text", "note")
+KINDS = ("user", "action", "text", "note", "output")
 MAX_CHARS = 60_000
 _MAX_FIELD = 4_000
 _MAX_STRONG = 8  # names shown in bold in a card: the layers it is about

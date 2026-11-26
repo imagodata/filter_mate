@@ -9,6 +9,7 @@ import pathlib
 import socket
 import sys
 import types
+from contextlib import contextmanager
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -101,7 +102,7 @@ class _Layer:
 
 @pytest.fixture
 def qgis_layers(monkeypatch, tmp_path):
-    """What add_layer needs of QGIS: a profile folder, layers that open, a project that takes them."""
+    """Layers that open, a project that takes them, and a store independent of QGIS/GDAL for the DNS test."""
     core = sys.modules["qgis.core"]
     added = []
     monkeypatch.setattr(core, "QgsApplication", SimpleNamespace(qgisSettingsDirPath=lambda: str(tmp_path)), raising=False)
@@ -109,6 +110,15 @@ def qgis_layers(monkeypatch, tmp_path):
     project = SimpleNamespace(addMapLayer=added.append, transformContext=lambda: None)
     monkeypatch.setattr(core, "QgsProject", SimpleNamespace(instance=lambda: project), raising=False)
     monkeypatch.setattr(project_control, "_summary", lambda layer: {"source": layer.source})
+
+    @contextmanager
+    def writer(path):
+        with open(path, "wb") as output:
+            yield output.write
+
+    store = SimpleNamespace(new_path=lambda name, size: str(tmp_path / name), writer=writer)
+    if hasattr(project_control, "data_store"):
+        monkeypatch.setattr(project_control.data_store, "store_for", lambda: store)
     return added
 
 

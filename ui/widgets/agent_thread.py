@@ -2,8 +2,8 @@
 """The conversation of the AGENT section, drawn as the mockup draws it.
 
 Requests in a tinted bubble on the right, each change in a card (what, expression, kept / total, Undo), the
-steps of a request while it runs, the answer as text. Every label is plain text: what a model writes can
-repeat what it read in a layer, and nothing of it is ever interpreted as HTML.
+steps of a request while it runs, and escaped Markdown answers. Layer/file targets come from the project and
+actual outputs; web links open only on a click. Nothing the model writes is interpreted as raw HTML.
 """
 from __future__ import annotations
 
@@ -21,7 +21,8 @@ from qgis.PyQt.QtWidgets import (
 
 from ...core.agent.project_notes import MAX_NOTE_CHARS
 from ...core.agent.questions import MAX_OTHER
-from .agent_markdown import answer_html, layer_of_link
+from .agent_markdown import (FileReference, LayerReference, anchor_html, answer_html, file_reference, layer_href,
+                             layer_of_link, layer_reference, web_url)
 
 BUBBLE_SHARE = 0.88  # of the width of the thread
 ANSWER_DELAY_MS = 80  # the answer being written is drawn again at most so often, whatever the number of fragments
@@ -63,8 +64,8 @@ def plain_markdown(text: str) -> str:
     return "\n".join(lines)
 
 
-def strong_markup(text: str, strong: Sequence[str]) -> str:
-    """``text`` as rich text whose only markup is the bold of the ``strong`` names: everything else is escaped."""
+def strong_markup(text: str, strong: Sequence[str], layers: Sequence[LayerReference] = (), accent: str = '') -> str:
+    """Bold layer names, linked when unambiguous; all other characters remain escaped text."""
     names = sorted({name for name in strong if name and name in text}, key=len, reverse=True)
     if not names:
         return html.escape(text)
@@ -73,7 +74,9 @@ def strong_markup(text: str, strong: Sequence[str]) -> str:
     out, start = [], 0
     for match in pattern.finditer(text):
         out.append(html.escape(breakable(text[start:match.start()])))
-        out.append(f"<b>{html.escape(breakable(match.group(0)))}</b>")
+        shown = f"<b>{html.escape(breakable(match.group(0)))}</b>"
+        matching = [layer for layer in layers if layer.name == match.group(0)]
+        out.append(anchor_html(layer_href(matching[0].layer_id), shown, accent) if len(matching) == 1 else shown)
         start = match.end()
     out.append(html.escape(breakable(text[start:])))
     return "".join(out)
@@ -708,11 +711,13 @@ class ChangeCard(QFrame):
 
     def __init__(self, text: str, succeeded: bool, detail: str, count: str, palette: dict, dark: bool,
                  on_undo: Callable[[], None], parent: QWidget, strong: Sequence[str] = (),
-                 on_compare: Optional[Callable[[Any], None]] = None) -> None:
+                 on_compare: Optional[Callable[[Any], None]] = None,
+                 layers: Sequence[LayerReference] = ()) -> None:
         super().__init__(parent)
         self.setObjectName("frame_agent_card")
         self._succeeded = succeeded
         self._on_compare = on_compare
+        self._title_text, self._strong, self._layers = text, tuple(strong), tuple(layers)
         self.compare_key: Any = None  # the step of the history the card shows (the controller sets it); None: none
         self.compare_available = False
         self._mark = mark = _plain_label("✓" if succeeded else "✗", self, wrap=False)
@@ -720,7 +725,11 @@ class ChangeCard(QFrame):
         self._title = title = _plain_label(text, self)
         if strong:  # the layer names in bold, the rest escaped: a name can hold anything
             title.setTextFormat(Qt.TextFormat.RichText)
-            title.setText(strong_markup(text, strong))
+            title.setOpenExternalLinks(False)
+            title.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse
+                                          | Qt.TextInteractionFlag.LinksAccessibleByKeyboard
+                                          | Qt.TextInteractionFlag.TextSelectableByMouse)
+            title.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self._muted: List[QLabel] = []
         column = QVBoxLayout()
         column.setContentsMargins(0, 0, 0, 0)
@@ -780,6 +789,8 @@ class ChangeCard(QFrame):
         mark = DONE_COLOR["dark" if dark else "light"] if self._succeeded else palette["fm_danger"]
         _sheet(self._mark, f"color: {mark}; font-weight: 600;")
         _sheet(self._title, f"font-size: 12px; color: {palette['fm_text'] if self._succeeded else palette['fm_danger']};")
+        if self._strong:
+            self._title.setText(strong_markup(self._title_text, self._strong, self._layers, palette['fm_accent']))
         for label in self._muted:
             _sheet(label, f"font-size: 11px; color: {palette['fm_text_muted']};")
         for button in (self.compare_button, self.undo_button):
@@ -900,10 +911,14 @@ class AgentThread(QScrollArea):
         self._answer: Optional[_Item] = None
         self._answer_raw = ""
         self._step_cards: List[ChangeCard] = []  # the cards of the last step of the history
-        # The names of the layers of the project, read when an answer starts: they become links in it, and a click
-        # on one gives its name to ``on_layer`` (the panel sets both).
+        # Snapshot the targets when each answer/card starts: links keep their ids through a rename or reorder.
+        # layer_names is the fallback for callers without a project catalogue.
         self.layer_names: Callable[[], Sequence[str]] = lambda: ()
+        self.layer_references: Callable[[], Sequence[LayerReference]] = lambda: ()
+        self.file_references: Callable[[], Sequence[FileReference]] = lambda: ()
         self.on_layer: Optional[Callable[[str], None]] = None
+        self.on_file: Optional[Callable[[str], None]] = None
+        self.on_web: Callable[[str], None] = self._open_web
         self._undo_possible = False
         self._compare_possible = False  # Compare on the cards: the dock can compare, and the agent does not work
         self._content = QWidget(self)
@@ -1014,13 +1029,21 @@ class AgentThread(QScrollArea):
         self._refresh_undo()
 
     def add_card(self, text: str, succeeded: bool, detail: str, count: str, strong: Sequence[str] = ()) -> ChangeCard:
+        try:
+            layers = tuple(self.layer_references())
+        except Exception:
+            layers = ()
         card = ChangeCard(text, succeeded, detail, count, self._palette_of(), self._is_dark(), self._on_undo,
-                          self._content, strong, self._on_compare)
+                          self._content, strong, self._on_compare, layers)
         if succeeded:
             self._step_cards.append(card)
         mark = "✓" if succeeded else "✗"
         plain = f"{mark} {text}" + (f"  ·  {count}" if count else "") + (f"\n   {detail}" if detail else "")
-        self._append(_Item(card, plain, "card", card.restyle))
+        item = _Item(card, plain, "card", card.restyle)
+        item.layers, item.names = layers, ()
+        card._title.linkActivated.connect(lambda link: self._layer_clicked(link, (), layers))
+        card._title.linkHovered.connect(lambda link: self._link_hovered(link, item))
+        self._append(item)
         self._refresh_undo()
         self.end_answer()
         return card
@@ -1154,6 +1177,38 @@ class AgentThread(QScrollArea):
         self._hint.setVisible(bool(text))
         self._fit_timer.start()
 
+    def add_output(self, path: str, name: str, is_dir: bool = False) -> None:
+        """A generated output, with a direct open action and its containing folder."""
+        import os
+        row = QWidget(self._content)
+        layout = QHBoxLayout(row)
+        layout.setContentsMargins(0, 0, 0, 0)
+        opened = ElidedButton(name, row)
+        opened.setObjectName('pushButton_agent_output')
+        opened.setToolTip(plain_tooltip((_tr('Open folder: {}') if is_dir else _tr('Open file: {}')).format(path)))
+        opened.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_DirOpenIcon if is_dir
+                                                 else QStyle.StandardPixmap.SP_FileIcon))
+        opened.clicked.connect(lambda: self.on_file(path) if self.on_file else None)
+        layout.addWidget(opened, 1)
+        buttons = [opened]
+        if not is_dir:
+            folder = ElidedButton(_tr('Open folder'), row)
+            folder.setObjectName('pushButton_agent_output_folder')
+            folder.setToolTip(plain_tooltip(os.path.dirname(path)))
+            folder.clicked.connect(lambda: self.on_file(os.path.dirname(path)) if self.on_file else None)
+            layout.addWidget(folder)
+            buttons.append(folder)
+
+        def look(palette: dict, _dark: bool):
+            for button in buttons:
+                button.setFlat(True)
+                button.setCursor(Qt.CursorShape.PointingHandCursor)
+                _sheet(button, f"QPushButton {{ color: {palette['fm_accent']}; background: transparent;"
+                               " border: none; padding: 3px 0; text-align: left; }"
+                               " QPushButton:hover { text-decoration: underline; }")
+        self._append(_Item(row, name, 'output', look))
+        self.end_answer()
+
     def add_text(self, text: str) -> None:
         """More of the answer being written: one label per answer, its Markdown marks taken out.
 
@@ -1169,13 +1224,22 @@ class AgentThread(QScrollArea):
             label.setTextFormat(Qt.TextFormat.RichText)
             label.setOpenExternalLinks(False)
             label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse
-                                          | Qt.TextInteractionFlag.LinksAccessibleByMouse)
+                                          | Qt.TextInteractionFlag.LinksAccessibleByMouse
+                                          | Qt.TextInteractionFlag.TextSelectableByKeyboard
+                                          | Qt.TextInteractionFlag.LinksAccessibleByKeyboard)
+            label.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
             item = _Item(label, "", "text")
             try:
                 item.names = tuple(self.layer_names())  # type: ignore[attr-defined]
+                item.layers = tuple(self.layer_references())  # type: ignore[attr-defined]
+                item.files = tuple(self.file_references())  # type: ignore[attr-defined]
             except Exception:  # a project closing: no link this time
                 item.names = ()  # type: ignore[attr-defined]
-            label.linkActivated.connect(lambda link, shown=item: self._layer_clicked(link, shown.names))
+                item.layers = ()  # type: ignore[attr-defined]
+                item.files = ()  # type: ignore[attr-defined]
+            label.linkActivated.connect(lambda link, shown=item: self._layer_clicked(link, shown.names, shown.layers,
+                                                                                   shown.files))
+            label.linkHovered.connect(lambda link, shown=item: self._link_hovered(link, shown))
 
             def look(palette: dict, _dark: bool, shown=item) -> None:
                 _sheet(shown.widget, f"font-size: 13px; color: {palette['fm_text']};")
@@ -1201,17 +1265,48 @@ class AgentThread(QScrollArea):
         colors = {"accent": palette["fm_accent"], "code_bg": palette["fm_group"], "rule": palette["fm_group_border"]}
         try:
             try:
-                shown = answer_html(item.plain.strip("\n"), getattr(item, "names", ()), colors, breakable)
+                shown = answer_html(item.plain.strip("\n"), getattr(item, "names", ()), colors, breakable,
+                                    layers=getattr(item, 'layers', ()), files=getattr(item, 'files', ()))
             except RecursionError:  # never expected (MAX_DEPTH): the answer is shown whole, as plain text
                 shown = f'<p style="white-space: pre-wrap;">{html.escape(breakable(item.plain))}</p>'
             item.widget.setText(shown)
         except RuntimeError:  # cleared meanwhile
             pass
 
-    def _layer_clicked(self, link: str, names: Sequence[str]) -> None:
-        name = layer_of_link(link, names)
-        if name and self.on_layer is not None:
-            self.on_layer(name)
+    def _layer_clicked(self, link: str, names: Sequence[str], layers: Sequence[LayerReference] = (),
+                       files: Sequence[FileReference] = ()) -> None:
+        reference = layer_reference(link, layers)
+        file = file_reference(link, files)
+        target = reference.layer_id if reference is not None else (layer_of_link(link, names) if not layers else '')
+        if target and self.on_layer is not None:
+            self.on_layer(target)
+        elif file is not None and self.on_file is not None:
+            self.on_file(file.path)
+        elif web_url(link):
+            self.on_web(link)
+
+    def _link_hovered(self, link: str, item: _Item) -> None:
+        reference = layer_reference(link, getattr(item, 'layers', ()))
+        file = file_reference(link, getattr(item, 'files', ()))
+        if reference is not None:
+            text = _tr("Show in the Layers panel: {}").format(reference.name)
+            if reference.group:
+                text += '\n' + reference.group
+        elif file is not None:
+            text = (_tr('Open folder: {}') if file.is_dir else _tr('Open file: {}')).format(file.path)
+        elif web_url(link):
+            text = _tr("Open in browser: {}").format(link)
+        else:
+            name = layer_of_link(link, getattr(item, 'names', ()))
+            text = _tr("Show in the Layers panel: {}").format(name) if name else ''
+        item.widget.setToolTip(plain_tooltip(text))
+
+    @staticmethod
+    def _open_web(link: str) -> None:
+        from qgis.PyQt.QtCore import QUrl
+        from qgis.PyQt.QtGui import QDesktopServices
+        if web_url(link):
+            QDesktopServices.openUrl(QUrl(link))
 
     def add_step(self, text: str) -> None:
         """A step of the running request; the previous one is marked done."""

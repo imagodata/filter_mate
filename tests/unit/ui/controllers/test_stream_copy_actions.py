@@ -35,6 +35,7 @@ class FakeCopy(types.ModuleType):
         return layer.id() in self.streams
 
     rules = SimpleNamespace(PROPERTY="filtermate/local_copy")
+    data_store = SimpleNamespace(PERSISTENT_PROPERTY="filtermate/agent/persistent_data")
 
     def record_of(self, layer):
         if layer.id() not in self.copies:
@@ -309,6 +310,15 @@ def test_stop_puts_the_copies_back_on_their_service(env):
     env.actions.start()
     env.actions.stop()
     assert env.fake.back == ["C"]
+
+
+def test_stop_keeps_a_copy_the_user_saved_as_permanent_data(env):
+    saved = layer(env, "C")
+    saved.customProperty.return_value = True
+    env.fake.copies.add("C")
+    env.actions.start()
+    env.actions.stop()
+    assert env.fake.back == []
 
 
 def test_stop_cancels_the_copies_and_forgets_itself(env):

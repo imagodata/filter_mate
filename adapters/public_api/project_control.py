@@ -7,13 +7,11 @@ them back with the turn; a zoom is not undone, and a memory layer removed is gon
 """
 from __future__ import annotations
 
-import hashlib
+import io
 import json
 import logging
 import os
 import re
-import shutil
-import tempfile
 import zipfile
 from contextlib import contextmanager
 import math
@@ -32,6 +30,7 @@ from ...core.agent.sql_guard import expression_problem, quoted_identifiers
 from ...core.agent.style_presets import scale_words
 from ...core.domain.layer_kind import LayerKind
 from ..agent.bounded_http import STOPPED, TOO_LARGE, TOO_LONG, HttpFailure, fetch
+from ..agent import data_store
 from ..qgis.feature_count import exact_feature_count
 from .operations import layer_kind, resolve_layer
 
@@ -45,7 +44,7 @@ SEARCH_TIMEOUTS_MS = (20_000, 45_000)
 _OVERLOADED = (502, 503, 504)
 BASEMAP_TIMEOUT_MS = 15_000
 _ELSEWHERE = ". It was asked twice: search another platform of the list rather than this one again."
-# A file its server only gives whole is copied to the QGIS profile first: what a layer may cost in disk and in time.
+# A whole-file download is bounded in memory and in time.
 MAX_DOWNLOAD = 512 * 1024 * 1024
 DOWNLOAD_TIMEOUT_MS = 180_000
 MAX_UNZIPPED = 4 * MAX_DOWNLOAD
@@ -405,11 +404,11 @@ def _probe(url: str, checked: Dict[str, str]) -> Tuple[str, RemoteFile]:
 
 def _discard(path: str) -> None:
     """Remove a download that makes no layer, with its folder: each copy has one of its own."""
-    shutil.rmtree(os.path.dirname(path), ignore_errors=True)
+    data_store.discard(path)
 
 
 def _download(url: str, found: RemoteFile, checked: Dict[str, str]) -> str:
-    """Copy a file its server only gives whole to the QGIS profile; returns the path of the copy.
+    """Copy a file its server only gives whole to the project's memory store.
 
     Bounded in size and in time, stopped by Stop, and the interface stays alive meanwhile. Each copy is written
     in a new folder of its own, under its final name: no copy a layer reads is ever replaced or removed, two
@@ -419,26 +418,23 @@ def _download(url: str, found: RemoteFile, checked: Dict[str, str]) -> str:
     Raises:
         ValueError: Too large, too slow, cut, stopped, or refused by the server or the disk; nothing is kept.
     """
-    from qgis.core import QgsApplication
     problem = resolved_problem(url, checked=checked)
     if problem:
         raise ValueError(f"this link cannot be read: {problem}")
     if found.size > MAX_DOWNLOAD:
         raise ValueError(f"this file weighs {megabytes(found.size)}, more than the {megabytes(MAX_DOWNLOAD)} a layer "
                          f"can be made of: {_SMALLER}")
-    root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data')
+    store = data_store.store_for()
     received = [0]
     path, kept = '', False
 
     def keep(chunk: bytes) -> None:
-        out.write(chunk)
+        out(chunk)
         received[0] += len(chunk)
 
     try:
-        os.makedirs(root, exist_ok=True)
-        path = os.path.join(tempfile.mkdtemp(prefix=hashlib.sha256(url.encode('utf-8')).hexdigest()[:12] + '-',
-                                             dir=root), found.name)
-        with open(path, 'wb') as out:
+        path = store.new_path(found.name, found.size)
+        with store.writer(path) as out:
             reply = fetch(url, max_bytes=MAX_DOWNLOAD, timeout_ms=DOWNLOAD_TIMEOUT_MS, sink=keep, decompress_freely=True)
         if reply.status != 200:
             raise ValueError(f"its server answered with an error ({reply.status})")
@@ -457,7 +453,8 @@ def _download(url: str, found: RemoteFile, checked: Dict[str, str]) -> str:
                              f"finished, too slow to make a layer of it: {_SMALLER}") from None
         raise ValueError("the download was stopped" if str(exc) == STOPPED else f"the download failed: {exc}") from None
     except OSError:
-        raise ValueError("the file could not be written in the QGIS profile folder") from None
+        raise ValueError("the file could not be held in memory: use a smaller extract or save the project and its "
+                         "layers in a folder you choose") from None
     finally:
         if path and not kept:  # whatever ended it, Stop, QGIS closing or a full disk
             _discard(path)
@@ -472,7 +469,7 @@ def _local_source(path: str, kind: str) -> str:
     if not path.lower().endswith('.zip'):
         return path
     try:
-        with zipfile.ZipFile(path) as archive:
+        with zipfile.ZipFile(io.BytesIO(data_store.read_bytes(path)) if data_store.is_memory(path) else path) as archive:
             entries = archive.infolist()
     except (zipfile.BadZipFile, OSError, ValueError, NotImplementedError, UnicodeDecodeError):
         _discard(path)
@@ -513,7 +510,7 @@ def add_layer(source: str, name: str = '', kind: str = 'vector') -> Dict[str, An
 
     A remote file is read where it is when its server gives parts of it and GDAL reads the format by parts
     (GeoPackage, FlatGeobuf, GeoTIFF, zip); any other (an export made on request, GeoJSON, CSV) is copied to the
-    QGIS profile first, where the project finds it again.
+    memory first. The user can then save the project together with its data.
 
     Raises:
         ValueError: Any other source, or one that cannot be opened; the message says which step failed.
@@ -565,7 +562,7 @@ def _add_layer(source: str, name: str, kind: str) -> Dict[str, Any]:
     if not layer.isValid():
         # Nothing more is read from an invalid layer: its provider and its error crashed QGIS 3.22.
         if copy:
-            weight = megabytes(os.path.getsize(copy)) if os.path.isfile(copy) else '?'
+            weight = megabytes(data_store.size(copy)) if data_store.exists(copy) else '?'
             del layer
             _discard(copy)
             raise ValueError(f"the file was read from its server ({os.path.basename(copy)}, {weight}) but it holds no "

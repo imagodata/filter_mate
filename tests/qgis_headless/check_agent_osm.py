@@ -188,7 +188,7 @@ def kinds_of(project, made):
 
 
 def check_features(project, work):
-    from filter_mate.adapters.agent import bounded_http
+    from filter_mate.adapters.agent import bounded_http, data_store
     from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
     from filter_mate.adapters.public_api import operations, osm_features
     from filter_mate.core.agent import osm
@@ -199,10 +199,11 @@ def check_features(project, work):
     server = serve_overpass(state)
     mine = make_source(f"http://127.0.0.1:{server.server_address[1]}/api/interpreter", "overpass", "Banc")
     platform, domains = platform_name(mine), platform_domains([mine])
-    root = os.path.join(QgsApplication.qgisSettingsDirPath(), "filtermate", "open_data")
+    root = data_store.store_for(project).root
 
     def kept():
-        return {name for name in (os.listdir(root) if os.path.isdir(root) else []) if name.startswith("osm-")}
+        from osgeo import gdal
+        return {name for name in (gdal.ReadDirRecursive(root) or []) if name.endswith("openstreetmap.gpkg")}
 
     def temporary():
         return {name for name in os.listdir(tempfile.gettempdir()) if name.startswith("filtermate-osm-")}
@@ -255,7 +256,7 @@ def check_features(project, work):
               sent["query"] == osm.overpass_query(osm.read_tags(HOSPITALS + [{"key": "building"}]), [4.78, 45.70, 4.92, 45.80])
               and sent["type"].startswith("application/x-www-form-urlencoded") and sent["path"] == "/api/interpreter",
               sent)
-        check("features: one file kept in the QGIS profile, the answer of the server is not",
+        check("features: data stay in memory, the answer and config are discarded",
               len(kept() - before) == 1 and temporary() == drafts
               and polygons.source().split("|")[0].endswith("openstreetmap.gpkg"), (kept() - before, temporary() - drafts))
         json.dumps(made)

@@ -275,8 +275,9 @@ class AgentChatController(QObject):
         self.panel = AgentPanel(parent_widget)
         self._facts_layers = {}  # layer id -> layer whose selection or filter the requests of the welcome follow
         self.panel.facts_provider = self._read_welcome_facts
-        # The names of the layers become links in the answers; a click makes that layer the active one.
+        # Layer references in answers and action cards reveal that exact layer in the QGIS tree.
         self.panel.thread.layer_names = self._linked_layer_names
+        self.panel.thread.layer_references = self._linked_layers
         self.panel.mention_source = self._layers_in_tree_order
         self.panel.layer_link_clicked.connect(self._on_layer_link)
         self.panel.refresh_examples()  # drawn for an unknown state in the panel: now for the project
@@ -330,6 +331,8 @@ class AgentChatController(QObject):
         self.panel.recipe_remove_requested.connect(self._on_remove_recipe)
         self.panel.recipe_live_toggled.connect(self._on_live_toggled)
         self._charts = AgentCharts(lambda: self.panel._dark(), self)  # the theme of the dock, as the thread draws it
+        from .agent_outputs import AgentOutputsController
+        self._outputs = AgentOutputsController(self)
         self._restore_transcript()
         self._refresh_history()
         self._mcp = AgentMcpBridge(self, self)
@@ -353,6 +356,9 @@ class AgentChatController(QObject):
         QgsProject.instance().layersRemoved.connect(self._on_layers_changed)
         self._follow_welcome_facts()
         self._charts.watch_layers()
+        from .agent_data import AgentDataController
+        self._data = AgentDataController(self)
+        self.panel.save_project_requested.connect(self._data.save)
 
     # --- the requests of the welcome follow the project ---------------------------
 
@@ -372,18 +378,38 @@ class AgentChatController(QObject):
     def _linked_layer_names(self):
         return [layer.name() for layer in self._layers_in_tree_order()]
 
-    def _on_layer_link(self, name: str) -> None:
-        """A layer named in an answer was clicked: it becomes the active layer of QGIS (nothing else changes)."""
-        layer = next((layer for layer in self._layers_in_tree_order() if layer.name() == name), None)
+    def _linked_layers(self):
+        from ..widgets.agent_markdown import LayerReference
+        project = QgsProject.instance()
+        layers, seen = [], set()
+        root = project.layerTreeRoot()
+        for node in root.findLayers():
+            layer = node.layer()
+            if layer is None:
+                continue
+            groups, parent = [], node.parent()
+            while parent is not None and parent is not root:
+                groups.insert(0, parent.name())
+                parent = parent.parent()
+            layers.append(LayerReference(layer.id(), layer.name(), ' / '.join(groups)))
+            seen.add(layer.id())
+        layers.extend(LayerReference(layer.id(), layer.name()) for layer in project.mapLayers().values()
+                      if layer.id() not in seen)
+        return layers
+
+    def _on_layer_link(self, reference: str) -> None:
+        """Reveal the exact linked layer in QGIS, also after renaming or reordering it."""
+        project = QgsProject.instance()
+        layer = project.mapLayer(reference)
         if layer is None:
-            self._say(_tr("The layer {} is no longer in the project.").format(name))
+            self.panel.set_status(_tr("The linked layer is no longer available in the project."))
             return
         try:
-            from qgis.utils import iface
-            if iface is not None:
-                iface.setActiveLayer(layer)
+            from ...adapters.public_api.gui_control import set_active_layer
+            set_active_layer(layer.id(), reveal=True)
         except Exception:  # an interface closing
-            logger.debug("Agent: the layer clicked could not be made active", exc_info=True)
+            logger.debug("Agent: the linked layer could not be revealed", exc_info=True)
+            self.panel.set_status(_tr("The linked layer could not be shown in the Layers panel."))
 
     @staticmethod
     def _active_layer():
@@ -516,6 +542,7 @@ class AgentChatController(QObject):
         """
         for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._unfollow_welcome_facts,
                      self._disconnect_project, self._charts.unwatch_all, self._drop_chart_page,
+                     lambda: self._data.close(),
                      lambda: plugin_settings.clear_applier(self._settings_applier)):
             try:
                 step()
@@ -624,6 +651,7 @@ class AgentChatController(QObject):
         self._drop_engine()
         self.panel.input.forget()
         self.panel.clear_thread()
+        self._outputs.clear()
         self._setup_card = None  # it went with the thread
         self._wizard.forget()
         if not self._transcript:
@@ -637,6 +665,9 @@ class AgentChatController(QObject):
             elif kind == "text":
                 self.panel.add_text(item["text"])
                 self.panel.end_answer()
+            elif kind == 'output':
+                self._outputs.show(item['detail'], item['text'], record=False, restore=True,
+                                   is_dir=item.get('count') == 'folder')
             else:
                 self.panel.add_note(item["text"])
         if not self._resume_available():
@@ -858,6 +889,7 @@ class AgentChatController(QObject):
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
         self.panel.hold_examples()
+        self._outputs.clear()
         self._charts.forget()  # the charts of a project closed, and their data, go with it
         abort_active(CHAT_WAITS)  # a tool of the chat waiting (Processing, a download) ends: its project is gone
         # The turn under way, ended below, must not be recorded against the closed project, nor the change another
@@ -3740,6 +3772,8 @@ class AgentChatController(QObject):
             return
         settings.setValue("FilterMate/agent/chart_folder", os.path.dirname(path))
         self.panel.add_note(_tr("Infographic saved: {}").format(os.path.basename(path)))
+        self._outputs.show(path)
+        self._save_transcript()
 
     def _save_chart(self, chart_id: str, file_format: str) -> None:
         """PNG, JPG or SVG of a card: where the user chooses."""
@@ -3768,6 +3802,8 @@ class AgentChatController(QObject):
             return
         settings.setValue("FilterMate/agent/chart_folder", os.path.dirname(path))
         self.panel.add_note(_tr("Chart saved: {}").format(os.path.basename(path)))
+        self._outputs.show(path)
+        self._save_transcript()
 
     def _chart_layout_menu(self, chart_id: str, button) -> None:
         """The print layouts of the project, to put a chart in one."""
@@ -3834,6 +3870,7 @@ class AgentChatController(QObject):
             self._follow_card(self.panel.add_action(label, not result.is_error, detail, count, strong), call)
             if keep:
                 self._record("action", label, ok=not result.is_error, detail=detail, count=count, strong=strong)
+            self._outputs.from_result(call, result, record=keep)
 
     # --- what another application does (AgentMcpBridge) --------------------------
 
@@ -4191,7 +4228,8 @@ class AgentChatController(QObject):
             record = record_of(layer)
             if record is None:
                 return ""
-            size = os.path.getsize(record.path) if os.path.isfile(record.path) else -1
+            from ...adapters.agent import data_store
+            size = data_store.size(record.path) if data_store.exists(record.path) else -1
             return "\n\n" + copy_text(record) + (f" · {megabytes(size)}" if size >= 0 else "")
         except Exception:  # the question is asked all the same
             return ""
@@ -4448,6 +4486,7 @@ class AgentChatController(QObject):
         # of the conversation took its news with it: the next one tells them again.
         if not dropped:
             self._remember_project()
+        self._data.offer()
         kept = outcome.kept_steps
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
             self._leave_memory_cards(self._memory_request)

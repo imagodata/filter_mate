@@ -221,13 +221,17 @@ class TargetJob:
         self.crs = QgsCoordinateReferenceSystem(layer.crs())
         self.operator = operator
         self.before: LayerSnapshot = take_snapshot(layer, self.kind)
+        from ...agent.data_store import memory_path, store_for
+        self._agent_store = store_for() if (memory_path(layer.source()) or
+                                             memory_path(self.before.pristine_source)) else None
         self.outcome = CrossFilterOutcome(self.layer_id, self.kind, False)
         self.outputs: List[str] = []  # cache files written, settled once applied
         self._started = 0.0
 
     def _new_path(self, suffix: str) -> str:
         """A cache file for this job, protected from the cache cleaner until the task is applied."""
-        path = cache.new_path(self.layer_name, suffix)
+        path = self._agent_store.new_path(self.layer_name + suffix) if self._agent_store is not None \
+            else cache.new_path(self.layer_name, suffix)
         self.outputs.append(path)
         return path
 

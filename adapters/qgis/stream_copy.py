@@ -5,8 +5,8 @@ A WFS, OGC API Features or ArcGIS Feature Service layer is copied to a GeoPackag
 GeoTIFF (red, green, blue, alpha, with overviews). The copy is read in a background task, bounded in pixels,
 features and time (``APP.OPTIONS.STREAM_COPY``), then the layer reads it: same layer, same style, same filter.
 
-The copy is kept in a folder next to the project (``<project>_filtermate_local``), in the QGIS profile when that
-cannot be written. The project file keeps the address of the service, and the record of the copy
+Agent copies stay in project memory until the user chooses to save them. Copies requested directly from the
+dock keep their existing destination policy. The project file keeps the address of the service and record
 (``filtermate/local_copy``): it opens anywhere, with or without FilterMate, and opened with FilterMate the layer
 finds its copy again when the file is there (:func:`reattach_project`).
 
@@ -25,6 +25,7 @@ from typing import Any, Callable, List, Optional, Tuple
 from qgis.core import QgsTask
 
 from ...core.domain import stream_copy as rules
+from ..agent import data_store
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ def _writable(folder: str) -> bool:
 
 
 def copy_folder(project=None) -> str:
-    """Next to the project file, else in the QGIS profile; "" when neither can be written."""
+    """Destination of a copy requested directly from the dock; agent plans use project memory instead."""
     from qgis.core import QgsApplication, QgsProject
     project = project or QgsProject.instance()
     for folder in rules.folder_candidates(project.absoluteFilePath() or project.fileName(),
@@ -224,14 +225,23 @@ class CopyPlan:
 
     def summary(self) -> str:
         """What the user reads before the copy starts."""
-        place = os.path.dirname(self.path)
+        place = _tr("Memory; save the project and its layers to keep the copy") \
+            if data_store.is_memory(self.path) else os.path.dirname(self.path)
         if self.kind == rules.KIND_IMAGE and self.estimate is not None:
             unit = _crs_unit(self.crs)
+            if data_store.is_memory(self.path):
+                return _tr("Copy in memory: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests, "
+                           "{5:.0f} MB at most. Save the project and its layers to keep it.").format(
+                    self.estimate.columns, self.estimate.rows, self.resolution, unit, self.estimate.requests,
+                    max(1.0, self.estimate.megabytes_at_most))
             return _tr("Copy of the visible map: {0} x {1} pixels, {2:.3g} {3} per pixel, {4} requests to the "
                        "service, {5:.0f} MB at most on disk.\n\nFolder: {6}").format(
                 self.estimate.columns, self.estimate.rows, self.resolution, unit, self.estimate.requests,
                 max(1.0, self.estimate.megabytes_at_most), place)
         most = f"{self.limits.max_features:,}".replace(",", "\u202f")
+        if data_store.is_memory(self.path):
+            return _tr("Copy of the visible features in memory, {0} at most. Save the project and its layers "
+                       "to keep it.").format(most)
         return _tr("Copy of the features of the visible map, {0} at most.\n\nFolder: {1}").format(most, place)
 
 
@@ -260,7 +270,7 @@ def _area_in_layer_crs(layer, extent, extent_crs):
 
 
 def plan_copy(layer, extent=None, extent_crs=None, screen_width: int = 0, project=None,
-              with_folder: bool = True) -> CopyPlan:
+              with_folder: bool = True, in_memory: bool = False) -> CopyPlan:
     """What copying ``layer`` over ``extent`` (the visible map by default) would read and write. Main thread.
 
     Nothing is read from the service: the levels of a tile service are those its capabilities gave when the layer
@@ -339,12 +349,18 @@ def plan_copy(layer, extent=None, extent_crs=None, screen_width: int = 0, projec
         plan.wkb_type, plan.fields = layer.wkbType(), layer.fields()
     if not with_folder:
         return plan
+    stamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    if in_memory:
+        plan.path = data_store.new_path(rules.file_name(layer.name(), plan.kind, stamp),
+                                        plan.columns * plan.rows * 4 if plan.kind == rules.KIND_IMAGE else 0,
+                                        project=project)
+        plan.folder = os.path.dirname(plan.path)
+        return plan
     plan.folder = copy_folder(project)
     if not plan.folder:
         plan.refusal = _tr("No folder can be written for the copy: neither next to the project nor in the QGIS "
                            "profile.")
         return plan
-    stamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
     # Two copies planned in the same second, of layers whose names read alike (Bâti, B_ti): never one file.
     plan.path = rules.free_path(os.path.join(plan.folder, rules.file_name(layer.name(), plan.kind, stamp)),
                                 lambda path: os.path.exists(path) or path in _RESERVED)
@@ -426,7 +442,8 @@ class StreamCopyTask(QgsTask):
         base = _ProviderLayer.open(plan.provider, plan.source, plan.layer_name)
         if not base.isValid():
             raise RuntimeError(_tr("the service could not be opened"))
-        os.makedirs(plan.folder, exist_ok=True)
+        if not data_store.is_memory(plan.path):
+            os.makedirs(plan.folder, exist_ok=True)
         self.setProgress(1)
         path, unread = materialize_web_map(base, plan.area, plan.columns, plan.rows, self._canceled,
                                            timeout=plan.limits.timeout_seconds, destination=plan.path,
@@ -446,7 +463,8 @@ class StreamCopyTask(QgsTask):
         rect = bounded_rectangle(plan.area)
         limits = MaterializationLimits(max_features=plan.limits.max_features,
                                        timeout_seconds=float(plan.limits.timeout_seconds))
-        os.makedirs(plan.folder, exist_ok=True)
+        if not data_store.is_memory(plan.path):
+            os.makedirs(plan.folder, exist_ok=True)
         options = QgsVectorFileWriter.SaveVectorOptions()
         options.driverName = 'GPKG'
         options.layerName = os.path.splitext(os.path.basename(plan.path))[0]
@@ -532,6 +550,10 @@ class StreamCopyTask(QgsTask):
 
 
 def _remove(path: str) -> None:
+    if path.startswith('/vsimem/'):
+        from ..agent import data_store
+        data_store.discard(path)
+        return
     for suffix in ('', '-wal', '-shm', '.aux.xml', '.ovr', '.msk'):
         try:
             os.remove(path + suffix)
@@ -646,6 +668,10 @@ def _is_managed_copy_name(name: str) -> bool:
 def _delete_copy_files(path: str) -> None:
     """Remove a copy and its sidecars (.ovr, .aux.xml, .qmd, after the full name as GDAL writes them); failures
     are logged, never raised."""
+    if path.startswith('/vsimem/'):
+        from ..agent import data_store
+        data_store.discard(path)
+        return
     for candidate in [path] + ([path + suffix for suffix in (".ovr", ".aux.xml", ".qmd")] if path else []):
         try:
             if candidate and os.path.isfile(candidate):
@@ -726,7 +752,7 @@ def prune_copies(project=None) -> int:
 
     deleted = 0
     try:
-        folder = copy_folder(project)
+        folder = rules.project_folder(project.absoluteFilePath() or project.fileName())
     except Exception:
         folder = ""
     if folder:
@@ -789,8 +815,10 @@ def switch_to_stream(layer, keep_record: bool = False) -> List[str]:
     if not keep_record:
         # The file is read by nothing any more: it goes now, not at the next opening (audit of 2026-11-24:
         # copies were never deleted). On unload (keep_record) it stays for the reattach.
-        _delete_copy_files(record.path)
+        if layer.customProperty(data_store.PERSISTENT_PROPERTY) is not True:
+            _delete_copy_files(record.path)
         layer.removeCustomProperty(rules.PROPERTY)
+        layer.removeCustomProperty(data_store.PERSISTENT_PROPERTY)
     layer.triggerRepaint()
     return notes
 
@@ -845,6 +873,13 @@ def rewrite_saved_layer(project, layer, element, document) -> None:
     Also called at the end of the hook of the derived sources (a copy clipped by another layer), so the service is
     written whichever hook runs last.
     """
+    if layer.customProperty(data_store.PERSISTENT_PROPERTY) is True:
+        record = saved_record(layer)
+        if record is not None:
+            from .coverage_layers.snapshots import _set_custom_property
+            _set_custom_property(element, document, rules.PROPERTY,
+                                 record.with_path(project.pathResolver().writePath(record.path)).to_json())
+        return
     try:
         from .coverage_layers.snapshots import (
             _remove_custom_property, _set_custom_property, _set_text, _set_tree_layer_source)
@@ -918,7 +953,7 @@ def reattach_project(project=None) -> Tuple[int, List[str]]:
             # layer again in its own order.)
             layer.removeCustomProperty(rules.PROPERTY)
             continue
-        if not os.path.isfile(record.path):
+        if not data_store.exists(record.path):
             missing.append(layer.name())
             _MISSING.add(layer.id())  # its record is kept: the copy is looked for again next time
             continue
@@ -971,7 +1006,7 @@ def evict_service_cache() -> bool:
     return True
 
 
-def recopy_plan(layer) -> Tuple[CopyPlan, Optional[rules.LocalCopy]]:
+def recopy_plan(layer, in_memory: bool = False) -> Tuple[CopyPlan, Optional[rules.LocalCopy]]:
     """The plan of a new copy of a layer on its copy, over the same area and, for a web map, the same detail; and
     the copy it read, to read again when the new one is not made (cancelled, refused, failed).
 
@@ -983,7 +1018,7 @@ def recopy_plan(layer) -> Tuple[CopyPlan, Optional[rules.LocalCopy]]:
     """
     record = record_of(layer)
     if record is None:
-        return plan_copy(layer), None
+        return plan_copy(layer, in_memory=in_memory), None
     if hasattr(layer, 'subsetString'):
         record = record.replaced(subset=layer.subsetString())
     from qgis.core import QgsCoordinateReferenceSystem, QgsRectangle
@@ -994,7 +1029,7 @@ def recopy_plan(layer) -> Tuple[CopyPlan, Optional[rules.LocalCopy]]:
     area = QgsRectangle(*record.extent)
     # A WMS draws at any resolution: twice the detail of a screen as wide as the first copy gives its resolution.
     width = int(round(area.width() / (2 * record.resolution))) if record.resolution > 0 else 0
-    plan = plan_copy(layer, area, crs, width)
+    plan = plan_copy(layer, area, crs, width, in_memory=in_memory or data_store.is_memory(record.path))
     if plan.refusal:
         back_to(layer, record)
         return plan, record
@@ -1011,6 +1046,8 @@ def discard(record: Optional[rules.LocalCopy], project=None) -> None:
         return
     from qgis.core import QgsProject
     project = project or QgsProject.instance()
+    if record.path in data_store.store_for(project).protected:
+        return  # an explicit project save made this dataset permanent
     for layer in project.mapLayers().values():
         try:
             other = rules.LocalCopy.from_json(layer.customProperty(rules.PROPERTY))

@@ -79,8 +79,8 @@ When the user gives none, choose, and say what you chose.
 - Copernicus DEM is a surface model at 30 m: buildings and trees are in it, so a dense town or a forest stands a
   few metres above its ground, and nothing smaller than 30 m shows. Good for a map and for a first reading of the
   relief, not for a building site.
-- The elevation is a file kept in the QGIS profile; the contours are a temporary layer: export_layers keeps them
-  when the user asks.
+- Elevation, contours and analysis results stay in memory. Save project and layers in the agent menu lets the
+  user choose where to keep them; export_layers also keeps them when requested.
 - Undoing the turn removes every layer of the chain.
 
 ## What never to do

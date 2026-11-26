@@ -154,6 +154,18 @@ def _reveal(face: Any, layer: Any) -> bool:
         return False
     if view is None:
         return False
+    # A link must also work when the Layers dock was closed or behind a tabbed dock.
+    try:
+        from qgis.PyQt.QtWidgets import QDockWidget
+        parent = view.parentWidget()
+        while parent is not None:
+            if isinstance(parent, QDockWidget):
+                parent.show()
+                parent.raise_()
+                break
+            parent = parent.parentWidget()
+    except (RuntimeError, AttributeError, TypeError):
+        pass
     try:
         view.setCurrentLayer(layer)
     except (RuntimeError, AttributeError, TypeError):
@@ -162,7 +174,11 @@ def _reveal(face: Any, layer: Any) -> bool:
         from qgis.core import QgsProject
         node = QgsProject.instance().layerTreeRoot().findLayer(layer.id())
         model = view.model()
-        indexer = getattr(model, "node2index", None)
+        # QgsLayerTreeView uses a proxy model: its own node2index maps to the view's indexes.
+        # Source-model indexes do not expand or scroll the real QGIS tree.
+        indexer = getattr(view, "node2index", None)
+        if not callable(indexer):
+            indexer = getattr(model, "node2index", None)
         if node is None or not callable(indexer):
             return True  # current, but the tree cannot unfold or scroll to it
         chain: List[Any] = []

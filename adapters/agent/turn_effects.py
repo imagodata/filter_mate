@@ -262,6 +262,19 @@ def _bring_back(project: QgsProject, layer_id: str, definition: str, place: Plac
         return project.mapLayer(layer_id) is not None
     document = QDomDocument()
     document.setContent(definition)
+    # After an explicit save, a redo uses the durable source. Old virtual files stay available until
+    # the project closes, for snapshots of filters that still refer to them.
+    from .data_store import store_for
+    store = store_for(project)
+    sources = document.elementsByTagName("datasource")
+    for index in range(sources.count()):
+        node = sources.at(index).toElement()
+        source = node.text()
+        resolved = store.resolve(source)
+        if resolved != source:
+            while not node.firstChild().isNull():
+                node.removeChild(node.firstChild())
+            node.appendChild(document.createTextNode(resolved))
     result = QgsLayerDefinition.loadLayerDefinition(document, project, project.layerTreeRoot(), QgsReadWriteContext())
     loaded = result[0] if isinstance(result, tuple) else bool(result)
     layer = project.mapLayer(layer_id)

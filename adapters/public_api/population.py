@@ -9,14 +9,12 @@ made is added to the project, so undoing the turn of the chat removes it (``adap
 """
 from __future__ import annotations
 
-import os
-import shutil
-import tempfile
 import uuid
 from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
 from ...core.agent.elevation import quiet_message
-from ...core.agent.open_data import KIND_POPULATION, megabytes, resolve_platform, sweep_empty_data_dirs
+from ...core.agent.open_data import KIND_POPULATION, megabytes, resolve_platform
+from ..agent import data_store
 from ...core.agent.population import (
     MAX_VRT_BYTES, NOT_COVERED, PopulationSource, area_problem, covered_share, exact_total_fits,
     extent_note, grid_for, grid_url, known, on_the_grid, resolution_label, snapped, verify_vrt, vrt_geotransform,
@@ -211,14 +209,14 @@ def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs:
     allowed.
 
     ``resolution``: the size of a pixel in metres (default 100: the scale of a street; 1000 for a region); the finest
-    is the source's. Written in EPSG:4326, on the grid of the source, as one GeoTIFF in the QGIS profile; the layer
+    is the source's. Written in EPSG:4326, on the grid of the source, as one GeoTIFF in project memory; the layer
     goes under the data, above the web basemaps.
 
     Raises:
         ValueError: Not a population source, an area that cannot be read or is too large, nobody there, a server
             that does not answer, stopped; the message says which.
     """
-    from qgis.core import QgsApplication, QgsProject, QgsRasterLayer
+    from qgis.core import QgsProject, QgsRasterLayer
     source = _population_source(platform, extra_domains)
     bbox = _area_in_degrees(extent_wkt, crs)
     problem = area_problem(bbox)
@@ -231,15 +229,11 @@ def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs:
     counted = tuple(snapped(source, bbox, 1)) if exact_total_fits(source, bbox) else None
     latitude = (bbox[1] + bbox[3]) / 2.0
     shown = resolution_label(source, factor, latitude)
-    root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data')
-    folder = ''
+    path = ''
     kept = False
     try:
         with running('add_population'):  # from the first request: a call made meanwhile would run nested inside it
-            os.makedirs(root, exist_ok=True)
-            sweep_empty_data_dirs(root)
-            folder = tempfile.mkdtemp(prefix='population-', dir=root)
-            path = os.path.join(folder, f"{source.id}_{factor}.tif")
+            path = data_store.new_path(f"{source.id}_{factor}.tif", _width * _height * 4)
             read = _in_background('add_population', lambda ended: _read(
                 grid_url(source), path, bounds, source.step * factor, factor, ended, source=source,
                 count_bounds=counted))
@@ -254,15 +248,15 @@ def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs:
         _under_the_data(QgsProject.instance(), layer)
         kept = True
     except OSError:
-        raise ValueError("the population could not be written in the QGIS profile folder") from None
+        raise ValueError("the population could not be held in memory") from None
     finally:
-        if folder and not kept:
-            shutil.rmtree(folder, ignore_errors=True)
+        if path and not kept:
+            data_store.discard(path)
     summed = counted if read['exact'] else bounds
     return {'layer_id': layer.id(), 'name': layer.name(), 'platform': platform, 'crs_authid': CRS,
             'resolution': shown, 'width': read['width'], 'height': read['height'],
             'total': int(round(read['total'])), 'maximum': round(read['maximum'], 1),
-            'size': megabytes(os.path.getsize(path)) if os.path.isfile(path) else '',
+            'size': megabytes(data_store.size(path)),
             'summed_bounds': [round(value, 6) for value in summed],
             'summed_km2': round(area_km2(summed), 2), 'asked_km2': round(area_km2(bbox), 2),
             'attribution': source.attribution,
@@ -288,12 +282,12 @@ def check_population(platform: str, extra_domains: str = '') -> Dict[str, Any]:
     source = _population_source(platform, extra_domains)
     lyon = (4.835, 45.760, 4.840, 45.765)  # the centre of Lyon: people in every grid of the list
     factor, bounds, _width, _height, _note = grid_for(source, lyon, None)
-    folder = tempfile.mkdtemp(prefix='filtermate-population-')
+    path = data_store.new_path('check.tif')
     try:
         with running('check_population'):
             _in_background('check_population', lambda ended: _read(
-                grid_url(source), os.path.join(folder, 'check.tif'), bounds, source.step * factor, factor, ended,
+                grid_url(source), path, bounds, source.step * factor, factor, ended,
                 anyone=False, source=source))
     finally:
-        shutil.rmtree(folder, ignore_errors=True)
+        data_store.discard(path)
     return {'platform': platform, 'status': 200}

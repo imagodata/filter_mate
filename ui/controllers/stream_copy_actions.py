@@ -94,6 +94,8 @@ class StreamCopyActions:
             try:
                 record = stream_copy.record_of(layer)
                 if record is not None:
+                    if layer.customProperty(stream_copy.data_store.PERSISTENT_PROPERTY) is True:
+                        continue  # the user saved this as a durable local layer, usable without FilterMate
                     # Its filter now, in the record that brings the copy back when FilterMate starts again.
                     current = layer.subsetString() if hasattr(layer, 'subsetString') else ''
                     layer.setCustomProperty(stream_copy.rules.PROPERTY, record.replaced(subset=current).to_json())

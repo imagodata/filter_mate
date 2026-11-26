@@ -42,10 +42,10 @@ Controller = chat_controller.AgentChatController
 GOLDEN = {  # (length, sha256 of the UTF-8 text); 2026-11-16, lot 1 of the token diet: the instructions without the
     # paragraphs that described a tool one by one (12,076 characters before for the default); then the way of working
     # starts from the state of the project sent, not from list_layers and map_context (review of lot 1); lot 2: the
-    # sources not ticked in one paragraph, a shorter way of working. 2026-11-26: Esri and regional basemap IDs.
-    "default": (4042, "e3cfcfd6a57983993447b60a1898c9e5a9c3c507cc93242813393b79f32d8485"),
-    "no_values_local": (4526, "9c83ee2c7faa6627a78aea2e568837f47d577a96f69e74d18b11c6645174e7be"),
-    "every_source": (5895, "5a600c3b257168f8bb266acff1140eaa9e517c57023d7f0f695d05fbc49e803d"),
+    # sources not ticked in one paragraph, a shorter way of working. 2026-11-26: Esri and regional basemap IDs, then explicit layer/output hyperlink syntax.
+    "default": (4153, "684b681cf0ff1914a5daa0d3f188ddcd6878063a110acf62e6948bb183518b53"),
+    "no_values_local": (4637, "49e430b7b57db230b1a384819d04948415776b7e54f00c07f46d04bae7039f2d"),
+    "every_source": (6006, "505a0e9763b9d922843495c7f3e8d9e01d0366a8c32378c9bf520b9131248b73"),
 }
 _EVERY = tuple(source.id for source in sources.BUILT_IN)
 CONFIGS = {

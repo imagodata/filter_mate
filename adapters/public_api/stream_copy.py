@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """The local copy of a web service layer for the agent, the REST API and the MCP server (2026-11-22).
 
-``local_copy`` copies a WFS, WMS, WMTS or XYZ layer over the visible map (or an area) to a file next to the project
+``local_copy`` copies a WFS, WMS, WMTS or XYZ layer over the visible map (or an area) to project memory
 and makes the layer read it, or puts it back on its service. It goes through the copies of the dock
 (``ui/controllers/stream_copy_actions``), so that the button of the rail and the menu of the layers see the copy
 under way, and waits for its end while the event loop turns; Stop cancels it.
@@ -65,7 +65,7 @@ def plan_for(layer, extent_wkt: str = '', crs: str = ''):
         if not extent_crs.isValid():
             raise ValueError(f"unknown CRS {crs!r}")
     # An area given: a WMS is drawn at most at twice the detail of a map 1000 pixels wide over it.
-    return stream_copy.plan_copy(layer, extent, extent_crs, 1000 if extent is not None else 0)
+    return stream_copy.plan_copy(layer, extent, extent_crs, 1000 if extent is not None else 0, in_memory=True)
 
 
 def local_copy(layer: str, action: str = 'copy', extent_wkt: str = '', crs: str = '') -> Dict[str, Any]:
@@ -102,7 +102,7 @@ def local_copy(layer: str, action: str = 'copy', extent_wkt: str = '', crs: str 
         if not stream_copy.is_local_copy(found):
             raise ValueError(f"'{found.name()}' does not read a local copy: call local_copy with action copy")
         try:
-            plan, previous = stream_copy.recopy_plan(found)  # on its service now, or on its copy again if refused
+            plan, previous = stream_copy.recopy_plan(found, in_memory=True)
         except RuntimeError as exc:
             raise ValueError(str(exc)) from None
         actions._changed(found.id())

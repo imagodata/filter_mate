@@ -130,10 +130,10 @@ def raster_look(layer):
 
 def temp_contours():
     """The contour GeoPackages in the temporary folder of the Processing framework."""
-    from qgis.core import QgsProcessingUtils
-    root = QgsProcessingUtils.tempFolder()
-    return {os.path.join(folder, name) for folder, _dirs, names in os.walk(root) for name in names
-            if name.startswith("contours.gpkg")}
+    from filter_mate.adapters.agent import data_store
+    from osgeo import gdal
+    root = data_store.store_for().root
+    return {root + "/" + name for name in (gdal.ReadDirRecursive(root) or []) if name.endswith("contours.gpkg")}
 
 
 def check_contours(project, work):
@@ -500,7 +500,7 @@ def serve_tiles(tiles, delay, stall=None):
 
 
 def check_elevation(project, work):
-    from filter_mate.adapters.agent import bounded_http
+    from filter_mate.adapters.agent import bounded_http, data_store
     from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
     from filter_mate.adapters.public_api import project_control, terrain
     from filter_mate.core.agent import elevation
@@ -518,10 +518,11 @@ def check_elevation(project, work):
     local = elevation.ElevationSource(real.id, real.title, f"http://127.0.0.1:{server.server_address[1]}",
                                       real.resolution, real.attribution, real.note)
     terrain.known = lambda identifier: local if (identifier or "").strip().lower() == real.id else None
-    root = os.path.join(QgsApplication.qgisSettingsDirPath(), "filtermate", "open_data")
+    root = data_store.store_for(project).root
 
     def written():
-        return {name for name in (os.listdir(root) if os.path.isdir(root) else []) if name.startswith("elevation-")}
+        from osgeo import gdal
+        return {name.rsplit("/", 1)[0] for name in (gdal.ReadDirRecursive(root) or []) if name.endswith(".tif")}
 
     data = QgsVectorLayer("Point?crs=EPSG:4326", "data", "memory")
     project.addMapLayer(data)
@@ -549,8 +550,8 @@ def check_elevation(project, work):
               and made["attribution"] == real.attribution and "surface model" in made["note"], made)
         kept = written() - already
         folder = os.path.dirname(layer.source())
-        check("elevation: one file kept in the QGIS profile", len(kept) == 1 and os.path.basename(folder) in kept
-              and os.path.isfile(layer.source()) and layer.source().endswith("copernicus_dem_30m.tif"), layer.source())
+        check("elevation: one raster kept in memory", len(kept) == 1 and os.path.basename(folder) in kept
+              and data_store.is_memory(layer.source()) and data_store.exists(layer.source()) and layer.source().endswith("copernicus_dem_30m.tif"), layer.source())
         ranges = [wanted for command, path, wanted in asked if command == "GET" and path == TILE]
         whole = [wanted for wanted in ranges if not wanted]
         check("elevation: the tile is read by parts, never whole", ranges and not whole, ranges[:5])

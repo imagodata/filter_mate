@@ -76,7 +76,8 @@ def main():
     result = project.mapLayer(made["layer_id"])
     check("contiguous: a new layer of every feature, at the top of the tree", result is not None and
           made["features"] == 16 and project.layerTreeRoot().children()[0].layerId() == made["layer_id"], made)
-    check("contiguous: the answer says the layer is temporary", "restart" in made.get("temporary", ""), made)
+    check("contiguous: the answer says how to keep its in-memory data", "memory" in made.get("temporary", "")
+          and "save the project" in made.get("temporary", ""), made)
     # Values from 1 to 100 on squares of 4 vertices: the error falls from 9.2 to below 2 in 12 iterations.
     check("contiguous: the areas come closer to the values", made["error_after"] < made["error_before"] / 3, made)
     check("contiguous: the fields of the layer and the value kept", result is not None and

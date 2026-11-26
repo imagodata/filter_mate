@@ -12,8 +12,6 @@ import logging
 import math
 import os
 import re
-import shutil
-import tempfile
 import threading
 import time
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
@@ -22,7 +20,8 @@ from ...core.agent.elevation import (
     MAX_CONTOUR_PIXELS, NO_DATA, ElevationSource, contour_problem, empty_note, gdal_srs, is_index, known, metric_grid,
     quiet_message, resolution_for, tile_url, tiles_for, tiles_for_grid, utm_authid,
 )
-from ...core.agent.open_data import KIND_ELEVATION, megabytes, resolve_platform, sweep_empty_data_dirs
+from ...core.agent.open_data import KIND_ELEVATION, megabytes, resolve_platform
+from ..agent import data_store
 from ...core.domain.layer_kind import LayerKind
 from ..agent.bounded_http import STOPPED as HTTP_STOPPED, HttpFailure, fetch_together, on_abort
 from .operations import layer_kind, resolve_layer, running
@@ -127,12 +126,13 @@ class _Gdal:
     ``tiles``: the files read are the tiles of a grid, asked by their names; ``extensions`` the only ones it reads
     by HTTP (a VRT that names its tiles: ``.tif,.vrt``)."""
 
-    def __init__(self, tiles: bool = False, extensions: str = '.tif') -> None:
+    def __init__(self, tiles: bool = False, extensions: str = '.tif', options=None) -> None:
         from osgeo import gdal
         self.gdal = gdal
         self._options = dict(_TIMEOUTS, **(_TILE_OPTIONS if tiles else {}))
         if tiles:
             self._options['CPL_VSIL_CURL_ALLOWED_EXTENSIONS'] = extensions
+        self._options.update(options or {})
         self._previous: Dict[str, Optional[str]] = {}
 
     def __enter__(self):
@@ -478,7 +478,7 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
     """Add the elevation of an area as a raster layer, read from an elevation model the user allowed.
 
     Only the part of each tile the area needs is read, warped on a grid in metres and written as one GeoTIFF in the
-    QGIS profile, where the project finds it again. The layer goes under the data, above the web basemaps. Tiles are
+    project memory, until the user chooses to save it. The layer goes under the data, above the web basemaps. Tiles are
     chosen for the grid written (the rectangle of the area in a CRS in metres, wider than the area in degrees), and
     what no tile reaches (open sea, a country the model leaves out) is no data (``NO_DATA``), said in the note and
     left out of minimum, maximum and mean.
@@ -487,7 +487,7 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
         ValueError: Not an elevation source, an area that cannot be read or is too large, no elevation there, a
             server that does not answer, stopped; the message says which.
     """
-    from qgis.core import QgsApplication, QgsProject, QgsRasterLayer
+    from qgis.core import QgsProject, QgsRasterLayer
     source = _elevation_source(platform, extra_domains)
     bbox = _area_in_degrees(extent_wkt, crs)
     tiles_for(bbox)  # refuses an area of too many squares before anything is asked
@@ -497,18 +497,14 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
     # The grid is the rectangle around the area in the CRS of metres, wider than the area in degrees: its corners are
     # read from the tiles they fall in, or they would be written empty.
     tiles = tiles_for_grid(bbox, _grid_in_degrees(bounds, grid_crs, bbox))
-    root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data')
-    folder = ''
+    path = ''
     kept = False
     try:
         with running('add_elevation'):  # from the first request: a call made meanwhile would run nested inside this one
             urls = _tiles_there(source, tiles)
             if not urls:
                 raise ValueError(f"{source.title} {_NO_TILE}")
-            os.makedirs(root, exist_ok=True)
-            sweep_empty_data_dirs(root)
-            folder = tempfile.mkdtemp(prefix='elevation-', dir=root)
-            path = os.path.join(folder, f"{source.id}_{size:g}m.tif")
+            path = data_store.new_path(f"{source.id}_{size:g}m.tif", _width * _height * 4)
             crs_text = gdal_srs(grid_crs.authid(), grid_crs.toWkt)
             read = _in_background('add_elevation', lambda ended: _warp(urls, path, crs_text, bounds, size, ended))
             if read['empty'] >= read['width'] * read['height']:
@@ -526,16 +522,16 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
         _under_the_data(QgsProject.instance(), layer)
         kept = True
     except OSError:
-        raise ValueError("the elevation could not be written in the QGIS profile folder") from None
+        raise ValueError("the elevation could not be held in memory") from None
     finally:
-        if folder and not kept:
-            shutil.rmtree(folder, ignore_errors=True)
+        if path and not kept:
+            data_store.discard(path)
     notes = [coarser]
     notes += [empty_note(read['empty'], read['width'] * read['height'], _NO_TILE), _DSM_NOTE]
     return {'layer_id': layer.id(), 'name': layer.name(), 'platform': platform, 'crs_authid': grid_crs.authid(),
             'resolution': size, 'width': read['width'], 'height': read['height'],
             'minimum': _rounded(read['minimum']), 'maximum': _rounded(read['maximum']), 'mean': _rounded(read['mean']),
-            'size': megabytes(os.path.getsize(path)) if os.path.isfile(path) else '',
+            'size': megabytes(data_store.size(path)),
             'attribution': source.attribution, 'note': '; '.join(note for note in notes if note)}
 
 
@@ -668,6 +664,9 @@ def _contour_style(layer, with_index: bool) -> None:
 def _discard_gpkg(path: str) -> None:
     """Remove a GeoPackage a call did not keep, with the files SQLite writes beside it and the folder made for it when
     nothing else is in it."""
+    if data_store.is_memory(path):
+        data_store.discard(path)
+        return
     for suffix in ('', '-wal', '-shm', '-journal'):
         try:
             os.remove(path + suffix)
@@ -693,7 +692,7 @@ def contour_lines(layer: str, interval: float, index_interval: Optional[float] =
         ValueError: Not a raster with values, a band it does not have, a raster too large, intervals that make no
             sense or too many levels, no contour between its heights, stopped.
     """
-    from qgis.core import QgsProcessingUtils, QgsProject, QgsVectorLayer
+    from qgis.core import QgsProject, QgsVectorLayer
     from .layer_style import _drawn_by_its_service
     found = resolve_layer(layer)
     if found is None:
@@ -722,7 +721,7 @@ def contour_lines(layer: str, interval: float, index_interval: Optional[float] =
     # The loop of events turns while the raster is read, and the user may remove the layer meanwhile: its object is
     # then destroyed and any call on it raises a RuntimeError. What is needed of it later is taken now (a CRS is a copy).
     source_name, source_crs = found.name(), found.crs()
-    path = QgsProcessingUtils.generateTempFilename('contours.gpkg')
+    path = data_store.new_path('contours.gpkg')
     contours = None
     kept = False
     try:

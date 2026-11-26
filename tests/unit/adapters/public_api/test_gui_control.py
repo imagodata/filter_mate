@@ -378,6 +378,15 @@ def test_set_active_layer_reveals_in_the_tree(layers):
     assert view._model.expanded and view.scrolled  # groups unfolded, scrolled into view
 
 
+def test_layer_tree_navigation_uses_view_indexes_instead_of_source_model_indexes(layers):
+    view = _View()
+    view.node2index = lambda node: ('view-index', id(node))
+    gui_control.set_active_layer('communes', iface_obj=_Face(view=view))
+    assert view._model.expanded and view.scrolled
+    assert all(index[0] == 'view-index' for index, _expanded in view._model.expanded)
+    assert all(index[0] == 'view-index' for index in view.scrolled)
+
+
 def test_set_active_layer_without_reveal_leaves_the_tree_alone():
     face = _Face(view=_View())
     answer = gui_control.set_active_layer("communes", reveal=False, iface_obj=face)

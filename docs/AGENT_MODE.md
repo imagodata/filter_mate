@@ -149,7 +149,18 @@ Rules worth keeping:
   consent): the thread is then cleared. Other sources, tools or the sending of values under the same provider drop
   the engine alone (`_restart_engine`): the thread and what was allowed for the conversation stay, and the next
   request tells the model what the thread holds (the recap).
-- **What a model writes is shown as plain text** (`QPlainTextEdit`): rich text would load its images and links.
+- **Answers use escaped Markdown** (`ui/widgets/agent_markdown.py`); raw HTML and embedded images are never
+  interpreted. Underlined layer links use stable layer ids, so renaming or reordering a layer does not redirect an
+  old answer. A click activates the layer, shows the Layers dock, expands its parent groups and scrolls to it using
+  the view’s proxy indexes. Hover shows the layer’s group path; ambiguous names need an explicit id link.
+- **Outputs can be opened directly**: successful exports, charts saved from their cards and saved projects get a
+  file/folder row with an Open folder action. Names and relative Markdown links in answers resolve to the actual
+  registered outputs. ZIP exports link the archive, not similarly named old files outside it; multipage layouts
+  expose their generated pages or atlas folder. Local paths are retained in the local transcript, omitted from its
+  model recap, and restored with their open actions when the project is reopened.
+- HTTP(S) links open in the browser only on a click, with the full destination in the hover tooltip. File links
+  resolve only to registered outputs; arbitrary local files and application URI schemes stay plain text. A deleted
+  layer or missing output gives a status message. Links are also accessible from the keyboard.
 - A conversation does not survive a change of project or of provider, but the model is told what came before: with
   the first request of a conversation that starts under a thread already shown (the project opened again, another
   provider), a few lines say what the last six requests asked and which actions the panel showed for each
@@ -479,7 +490,8 @@ each time the edits of one of its source layers are saved in QGIS (`afterCommitC
   shown again when the project opens. The model does not get it back: a conversation starts afresh.
 - A turn also records what it does beside the filters (`adapters/agent/turn_effects.py`): layers added or removed,
   selections, visibility in the layer tree. Undo and redo apply them with the filters. A removed layer comes back from
-  its definition, same id, at its place in its group; a layer kept in memory cannot, and the panel says so. Zooms and
+  its definition, same id, at its place in its group. Agent datasets in GDAL virtual memory can be restored;
+  a native QGIS scratch layer cannot, and the panel says so. Zooms and
   exports are not undone. What the user changed in QGIS since the turn (the visibility of a layer, the project CRS, a
   layer name, the style of a vector layer or the style it has on) is theirs: undo and redo put back only what is still
   as the turn left it, and the message names the rest. Not checked, put back as before: what is read as a whole
@@ -526,7 +538,7 @@ followed, each hop held to the rules above, and the answer tells its format (the
 address, else its content type), its size, and whether the server gives parts of it (`open_data.remote_file`).
 
 - A GeoPackage, FlatGeobuf, GeoTIFF or zip on a server that gives parts is read where it is, through `/vsicurl/`.
-- Anything else is copied to `<QGIS profile>/filtermate/open_data/` first, through `bounded_http`: 512 MB and
+- Anything else is held in the project’s GDAL `/vsimem/` store first, through `bounded_http`: 512 MB and
   3 minutes at most, Stop ends it, the interface stays alive, a copy cut before its end is discarded. An export made
   on request (an Opendatasoft portal, and what data.gouv.fr lists for the portals it harvests) has no size and cannot
   be read by parts, which is what GDAL needs; its address ends with the name of a format, not of a file. A zip is
@@ -543,6 +555,32 @@ address, else its content type), its size, and whether the server gives parts of
 
 `search_open_data` blocks the interface until the platform answers or the network timeout of QGIS runs out.
 
+### Storage of agent geodata (2026-11-26)
+
+`adapters/agent/data_store.py` owns the downloads and generated datasets of an open project. They use private
+GDAL `/vsimem/` paths, including GeoPackages, GeoTIFFs, archives, the OSM response/configuration and its temporary
+indexes. Spatially clipped views of these rasters also use virtual files; saving copies their full sources
+and rewrites VRT dependencies as relative paths. No agent geodata are written into the QGIS profile or OS temporary directories. Remote files read by
+parts and live service layers keep their remote sources. Existing local sources stay where the user put them.
+
+- Downloads share a 1 GiB storage budget; raster allocations check their expected size against it. There is no
+  silent disk fallback. A file-only point-cloud output requires a destination chosen through Save project and layers.
+- The panel offers Continue in memory or Save project and layers after a turn creates data, and keeps the save
+  command in its menu. The file chooser belongs to QGIS, not to the model. Autonomy never chooses a disk location.
+- An explicit save writes complete datasets and sidecars beside the selected `.qgz`/`.qgs`, under
+  `<project>_data/<capture>/<asset>/`. The existing formats are preserved, including multilayer GeoPackages and
+  zipped shapefiles. Each save uses a new capture folder and never overwrites an existing dataset.
+- Layer objects, ids, styles, subsets, selections, metadata and custom properties survive the change of source.
+  Data are copied in full, even when a layer is filtered. A failed copy leaves the live sources in memory and
+  removes only its new capture folder. Project paths are relative, so moving the project with its data works.
+- Native QGIS Save also asks whether to make the transient data permanent beside the selected project. Choosing
+  No keeps them in memory; the project is marked dirty again because its data are still transient.
+- Memory assets remain available to undo/redo until the project closes; a new conversation or panel unload does
+  not delete them. After an explicit save, redo resolves old sources to their durable copies. Permanent local
+  copies stay local when FilterMate unloads. Closing the project releases its virtual datasets.
+- Copies requested directly from the dock keep their existing destination policy; agent `local_copy` requests
+  explicitly select in-memory storage.
+
 ### Terrain (2026-11-15)
 
 A relief map asked in one sentence ("a terrain map of Lyon over Google Satellite, a semi-transparent elevation
@@ -553,7 +591,7 @@ Eight calls and about 6 s of tools on Lyon (373 x 380 pixels, 0.4 MB read).
 
 - `add_elevation` (`adapters/public_api/terrain.py`) reads, from each tile of the model the area touches, only
   the part it needs (GDAL reads the files by parts through `/vsicurl/`), warps it on a grid in metres and writes
-  one GeoTIFF in the QGIS profile. The grid is the CRS of the project when it is in metres and keeps distances
+  one GeoTIFF in project memory. The grid is the CRS of the project when it is in metres and keeps distances
   (not Web Mercator, whose metres are those of the equator), else the UTM zone of the area: a slope, a hillshade
   and a contour need metres. Bounded: 16 squares of one degree, 16 million pixels (a larger area is written
   coarser, and said so), 240 s. The layer goes under the data, above the web basemaps.
@@ -595,14 +633,14 @@ features of OpenStreetMap that carry given tags in an area, from an Overpass ser
   `core/agent/osm.py` from tags checked one by one (a key in letters, digits and `: _ . -`; a value without a
   quote nor a backslash), so nothing of a model is a piece of a query language. Ten tags, 10 000 km2 and 64 MB at
   most.
-- The answer (OpenStreetMap XML) is copied to a temporary file through `bounded_http` (bounded, ended by Stop),
+- The answer (OpenStreetMap XML) is held in memory through `bounded_http` (bounded, ended by Stop),
   then read by the OSM driver of GDAL in a worker thread, with a configuration written per request: the keys asked
   become columns, and a feature is kept when it carries one of the tags (the nodes of a way come with tags of
   their own, a door, a traffic light). The query asks for the nodes before the ways (`(._;>;); out body;`): in
   the order Overpass gives by default, GDAL builds no area (0 polygon for the hospitals of Lyon).
 - One layer per kind of geometry (`as_mapped`), or one layer of points (a point inside each area, the middle of
   each line) to count, to measure distances and for a heatmap: a hospital is a node here and an area there. The
-  layers are kept in a GeoPackage of the QGIS profile, in EPSG:4326, with `osm_id`, `osm_type`, `name`, a column
+  layers are kept in an in-memory GeoPackage, in EPSG:4326, with `osm_id`, `osm_type`, `name`, a column
   per key asked (`addr:street` is `addr_street`) and `other_tags`; a column no feature fills is dropped.
 - The public servers are run by volunteers and often busy. Measured on 2026-11-15 on the hospitals of Lyon (34
   features): overpass.openstreetmap.fr answered in 2 s each time, overpass-api.de answered 502 or 429 twice out of
@@ -672,7 +710,7 @@ It covers most countries, not all: China, Russia, Iran and North Korea are left 
   whose count is unknown (a web service), is refused, never cut: the model selects fewer. The errors of the algorithm
   stay in the log; the model reads its own messages only, never a traceback or a path. The objects are written to a
   temporary GeoPackage, as the outputs of `run_algorithm`: not confirmed, since it adds a layer and changes none; Undo
-  of the turn removes it and Redo opens the file again. A layer held in memory (none the agent makes) is recorded
+  of the turn removes it and Redo opens the file again. A native QGIS scratch layer (none the agent makes) is recorded
   without a definition, so Redo says it cannot come back instead of bringing back an empty layer.
 - `drawn_objects` only offers the objects that select in the dock: object target and SAM engine. With the colour
   engine the panel keeps SAM's objects for later, and they are left out.
@@ -1037,9 +1075,9 @@ Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/proce
   are written again, each source the id of a vector layer of the project and the rest integers. Expressions go through a list a little wider than the one of
   `select_features` (math, text, geometry functions that only compute; nothing that reads another layer, a file or
   the environment, and no `eval`). Raster calculator expressions have their own parser and are not checked;
-- each layer an algorithm makes is written to a temporary file (GeoPackage, GeoTIFF) and added to the project: the
+- each vector or raster layer an algorithm makes is held in GDAL virtual memory (GeoPackage, GeoTIFF) and added to the project: the
   turn checkpoint sees it as added, so undoing the turn removes it and redoing it opens the file again. A temporary
-  file goes when QGIS closes; `export_layers` keeps a layer;
+  file goes when the project closes; Save project and layers or `export_layers` keeps a layer;
 - it runs in a `QgsProcessingAlgRunnerTask` while the event loop turns, busy for the other operations, and Stop
   cancels it. An algorithm flagged `NoThreading` (geometry checks) holds QGIS while it runs;
 - without attribute values shared, what an algorithm answers besides its layers (statistics) is left out.

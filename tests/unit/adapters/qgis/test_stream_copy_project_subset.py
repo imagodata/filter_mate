@@ -380,7 +380,7 @@ def test_recopy_keeps_the_previous_file_until_replacement(monkeypatch):
         monkeypatch.setattr(core, 'QgsRectangle', lambda *coords: types.SimpleNamespace(width=lambda: 410),
                             raising=False)
 
-        def plan_copy(*_args):
+        def plan_copy(*_args, **_kwargs):
             assert os.path.isfile(path)
             assert layer.providerType() == "wfs" and layer.subsetString() == ""
             return types.SimpleNamespace(refusal="")

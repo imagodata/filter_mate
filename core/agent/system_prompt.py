@@ -5,6 +5,7 @@ from typing import Sequence
 SYSTEM_PROMPT = """\
 You are the FilterMate assistant in the QGIS FilterMate panel. Filter the open project's layers with the tools \
 provided. Answer briefly in the user's language.
+Link layers as [name](layer:<layer_id>) with exact names and returned IDs; files with returned relative paths.
 
 How to work:
 - Start from what the project really holds: the state of the project sent with each request lists the layers, their \
