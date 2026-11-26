@@ -1,0 +1,106 @@
+{
+  "stage": "altitude",
+  "layers": [
+    {
+      "name": "Bâtiments",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 3073,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Bâtiments altitude",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 3073,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags",
+        "alt_mean"
+      ]
+    },
+    {
+      "name": "Copernicus 30 m",
+      "valid": true,
+      "crs": "EPSG:32630"
+    },
+    {
+      "name": "Ponts lignes",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 158,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Ponts polygones",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 8,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "man_made",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Routes",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 701,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "highway",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Urumea",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 2,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "waterway",
+        "other_tags"
+      ]
+    }
+  ],
+  "filters": {},
+  "replay_comparison": null,
+  "render_flag": true,
+  "thread": "Ajoute le modèle de surface Copernicus à 30 m sur l'emprise visible de l'Urumea à Saint-Sébastien, en EPSG:32630. Nomme-le « Copernicus 30 m » et affiche-le en ombrage sous les vecteurs. Les couches OSM sont déjà chargées.\n\n\n✓ Couche ajoutée : Copernicus 30 m\n\n✓ Style de Copernicus 30 m\n   hillshade\n\n\nJ'ai ajouté la couche « Copernicus 30 m » : le modèle d'élévation Copernicus à 30 m, en EPSG:32630, sur l'emprise visible de la carte. Elle est en ombrage (relief multidirectionnel) et placée sous toutes les couches vectorielles.\n\nLa zone couvre environ 163 × 132 pixels, avec des altitudes de 0 à 205 m (moyenne 45 m). Ce modèle est une surface : les bâtiments et la végétation y figurent, donc les zones urbaines et boisées sont surélevées. Aucune donnée vectorielle n'a été modifiée.\nCalcule la moyenne du DEM par emprise de bâtiment avec les statistiques zonales sur « Bâtiments ». Crée une couche « Bâtiments altitude » avec un champ alt_mean, conserve les NoData et colore-la par altitude moyenne. Il s'agit d'un modèle de surface, pas d'une hauteur de bâtiment. Masque la couche originale « Bâtiments ».\n\n\n\n\n✓ Traitement : native:zonalstatisticsfb  ·  3,073\n   INPUT=\"Bâtiments\", INPUT_RASTER=\"Copernicus 30 m\", RASTER_BAND=1, COLUMN_PREFIX=\"alt_\", STATISTICS=[2]\n\n\n✓ Masqué : Bâtiments\n\n✓ Style de Bâtiments altitude\n   graduated · alt_mean · Viridis · 5\n\nLa couche « Bâtiments altitude » est créée : les 3 073 bâtiments y portent le champ `alt_mean`, moyenne du modèle Copernicus sur chaque emprise. Elle est colorée en Viridis par classes de quantiles, de 0,04 m à 118,5 m (moyenne 33,2 m). Aucune valeur NoData n'est apparue : chaque bâtiment a reçu une moyenne, donc aucune entité n'a été écartée.\n\nLa couche originale « Bâtiments » est masquée, pas supprimée ni modifiée. Comme le DEM est un modèle de surface, `alt_mean` est une altitude moyenne du sol et des bâtiments, pas une hauteur de bâtiment."
+}

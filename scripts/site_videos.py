@@ -2277,6 +2277,7 @@ def urumea_empty():
     canvas = prepare_window()
     for lyr in list(QgsProject.instance().mapLayers().values()):
         QgsProject.instance().removeMapLayer(lyr.id())
+    canvas.setRenderFlag(True)
     canvas.refresh()
 
 

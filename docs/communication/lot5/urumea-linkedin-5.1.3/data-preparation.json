@@ -1,0 +1,37 @@
+{
+  "source": "legacy OSM snapshot, raw buildings without derived alt_mean",
+  "area_wgs84": [
+    -1.985,
+    43.295,
+    -1.948,
+    43.324
+  ],
+  "crs": "EPSG:32630",
+  "layers": [
+    {
+      "table": "batiments",
+      "count": 3073,
+      "crs": "EPSG:32630"
+    },
+    {
+      "table": "routes",
+      "count": 701,
+      "crs": "EPSG:32630"
+    },
+    {
+      "table": "ponts_lignes",
+      "count": 158,
+      "crs": "EPSG:32630"
+    },
+    {
+      "table": "ponts_polygones",
+      "count": 8,
+      "crs": "EPSG:32630"
+    },
+    {
+      "table": "urumea",
+      "count": 2,
+      "crs": "EPSG:32630"
+    }
+  ]
+}

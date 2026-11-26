@@ -1,0 +1,54 @@
+{
+  "expected_counts_from_real_filter_tools": {
+    "Bâtiments altitude": 63,
+    "Routes": 304,
+    "Ponts lignes": 92,
+    "Ponts polygones": 6
+  },
+  "identical_filter_expressions_after_replay": {
+    "Bâtiments altitude": true,
+    "Ponts lignes": true,
+    "Ponts polygones": true,
+    "Routes": true
+  },
+  "independent_sql_counts": {
+    "Routes": {
+      "before": 304,
+      "after": 304
+    },
+    "Ponts lignes": {
+      "before": 92,
+      "after": 92
+    },
+    "Ponts polygones": {
+      "before": 6,
+      "after": 6
+    }
+  },
+  "exported_counts": {
+    "Urumea": 2,
+    "Ponts polygones": 6,
+    "Ponts lignes": 92,
+    "Routes": 304,
+    "Bâtiments altitude": 63
+  },
+  "exported_rasters": [
+    {
+      "file": "Copernicus 30 m.tif",
+      "width": 163,
+      "height": 132,
+      "bands": 1
+    }
+  ],
+  "replay_operations": [
+    "apply_favorite"
+  ],
+  "verified": true,
+  "package": {
+    "version": "5.1.3",
+    "zip": "/home/simon/dev/filter_mate/dist/filter_mate_v5.1.3.zip",
+    "sha256": "5ac5cdde9970e31c64a3b79ed3cfb9408e3d5850c3619e1ea46e02c3c6357625",
+    "plugin_modified": false
+  },
+  "scope_note": "Counters, stored predicates, exported data and tool calls are verified. Model prose is not used as evidence of scope."
+}

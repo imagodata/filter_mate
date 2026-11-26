@@ -1,0 +1,123 @@
+{
+  "stage": "favori",
+  "layers": [
+    {
+      "name": "Bâtiments",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 3073,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Bâtiments altitude",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 63,
+      "subset": "(\"alt_mean\" < 5) AND (\"fid\" IN (67, 317, 344, 503, 649, 652, 657, 734, 780, 781, 782, 783, 784, 785, 786, 787, 788, 2535, 4980, 4982, 5019, 5036, 5575, 6585, 6593, 6597, 6600, 6601, 6602, 6603, 7215, 7427, 7435, 7436, 7440, 7494, 7501, 7515, 7516, 8595, 8596, 9353, 9960, 11663, 11749, 11750, 13459, 13460, 13830, 13831, 13832, 14315, 14316, 14352, 14387, 14388, 14389, 14390, 14391, 15077, 15200, 15201, 15202))",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags",
+        "alt_mean"
+      ]
+    },
+    {
+      "name": "Copernicus 30 m",
+      "valid": true,
+      "crs": "EPSG:32630"
+    },
+    {
+      "name": "Ponts lignes",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 92,
+      "subset": "\"fid\" IN (117, 62, 122, 120, 119, 201, 368, 471, 556, 557, 671, 672, 148, 147, 322, 643, 644, 722, 468, 145, 146, 467, 143, 465, 202, 224, 466, 142, 116, 17, 78, 335, 291, 298, 231, 223, 445, 343, 640, 641, 642, 686, 687, 688, 690, 714, 715, 716, 717, 23, 205, 22, 21, 197, 446, 361, 362, 363, 364, 232, 349, 354, 233, 15, 20, 371, 16, 372, 370, 373, 369, 353, 484, 213, 239, 469, 114, 470, 516, 526, 531, 532, 630, 639, 689, 699, 700, 701, 705, 738, 739, 740)",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Ponts polygones",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 6,
+      "subset": "\"fid\" IN (3, 40, 41, 42, 43, 44)",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "man_made",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Routes",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 304,
+      "subset": "\"fid\" IN (680, 499, 71, 149, 2441, 1088, 500, 2446, 2143, 69, 2190, 2447, 150, 2376, 2442, 1519, 970, 1411, 1513, 148, 33, 506, 1099, 1059, 1407, 2000, 2448, 790, 794, 1178, 1177, 1166, 1179, 1167, 1180, 1133, 795, 1137, 164, 690, 792, 946, 793, 1270, 1273, 1268, 1271, 1272, 1269, 1319, 1094, 1318, 1171, 247, 1170, 250, 1169, 249, 809, 1320, 1317, 271, 1484, 1592, 1988, 2182, 2243, 2244, 2247, 2248, 2357, 2361, 2362, 2363, 2364, 2365, 2589, 18, 144, 1460, 2240, 457, 460, 300, 727, 666, 122, 665, 447, 1255, 1452, 1502, 2095, 2098, 2136, 2582, 415, 513, 76, 99, 514, 1308, 947, 75, 1305, 1924, 764, 38, 1923, 972, 796, 1364, 512, 1307, 1309, 72, 1306, 2051, 1141, 1140, 516, 1474, 151, 1285, 1126, 2141, 2142, 2241, 2245, 2246, 2588, 26, 269, 789, 1267, 1823, 1822, 1413, 1825, 1824, 1607, 1820, 1414, 1821, 1819, 1412, 1032, 1266, 791, 967, 2575, 1105, 1104, 1103, 1073, 1106, 162, 161, 1107, 1108, 1112, 1346, 1347, 1348, 1447, 1522, 1523, 1524, 505, 65, 856, 64, 70, 68, 767, 1109, 1433, 1434, 2198, 270, 669, 248, 857, 165, 167, 399, 146, 166, 145, 398, 1321, 1322, 668, 667, 142, 849, 1521, 1553, 1554, 1612, 2012, 2013, 2014, 2242, 2292, 2293, 2294, 2295, 2296, 2297, 2313, 2355, 2356, 2358, 2359, 2360, 2406, 2440, 2451, 759, 115, 245, 246, 100, 758, 1330, 810, 103, 689, 2201, 2202, 2203, 2348, 2349, 2350, 1284, 696, 695, 698, 345, 969, 1475, 1128, 1129, 697, 1485, 1065, 1514, 1286, 981, 1061, 979, 2443, 2444, 2445, 2449, 2450, 1826, 444, 1453, 1033, 445, 267, 508, 507, 446, 754, 664, 451, 443, 266, 448, 1079, 755, 1687, 1080, 1609, 449, 450, 2130, 265, 268, 260, 3, 2131, 2132, 2133, 2134, 1218, 1920, 147, 1051, 1127, 23, 501, 22, 67, 1282, 43, 1287, 2493, 2494, 2533, 2534)",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "highway",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Urumea",
+      "valid": true,
+      "crs": "EPSG:32630",
+      "count": 2,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "waterway",
+        "other_tags"
+      ]
+    }
+  ],
+  "filters": {
+    "Bâtiments altitude": {
+      "count": 63,
+      "subset": "(\"alt_mean\" < 5) AND (\"fid\" IN (67, 317, 344, 503, 649, 652, 657, 734, 780, 781, 782, 783, 784, 785, 786, 787, 788, 2535, 4980, 4982, 5019, 5036, 5575, 6585, 6593, 6597, 6600, 6601, 6602, 6603, 7215, 7427, 7435, 7436, 7440, 7494, 7501, 7515, 7516, 8595, 8596, 9353, 9960, 11663, 11749, 11750, 13459, 13460, 13830, 13831, 13832, 14315, 14316, 14352, 14387, 14388, 14389, 14390, 14391, 15077, 15200, 15201, 15202))"
+    },
+    "Ponts lignes": {
+      "count": 92,
+      "subset": "\"fid\" IN (117, 62, 122, 120, 119, 201, 368, 471, 556, 557, 671, 672, 148, 147, 322, 643, 644, 722, 468, 145, 146, 467, 143, 465, 202, 224, 466, 142, 116, 17, 78, 335, 291, 298, 231, 223, 445, 343, 640, 641, 642, 686, 687, 688, 690, 714, 715, 716, 717, 23, 205, 22, 21, 197, 446, 361, 362, 363, 364, 232, 349, 354, 233, 15, 20, 371, 16, 372, 370, 373, 369, 353, 484, 213, 239, 469, 114, 470, 516, 526, 531, 532, 630, 639, 689, 699, 700, 701, 705, 738, 739, 740)"
+    },
+    "Ponts polygones": {
+      "count": 6,
+      "subset": "\"fid\" IN (3, 40, 41, 42, 43, 44)"
+    },
+    "Routes": {
+      "count": 304,
+      "subset": "\"fid\" IN (680, 499, 71, 149, 2441, 1088, 500, 2446, 2143, 69, 2190, 2447, 150, 2376, 2442, 1519, 970, 1411, 1513, 148, 33, 506, 1099, 1059, 1407, 2000, 2448, 790, 794, 1178, 1177, 1166, 1179, 1167, 1180, 1133, 795, 1137, 164, 690, 792, 946, 793, 1270, 1273, 1268, 1271, 1272, 1269, 1319, 1094, 1318, 1171, 247, 1170, 250, 1169, 249, 809, 1320, 1317, 271, 1484, 1592, 1988, 2182, 2243, 2244, 2247, 2248, 2357, 2361, 2362, 2363, 2364, 2365, 2589, 18, 144, 1460, 2240, 457, 460, 300, 727, 666, 122, 665, 447, 1255, 1452, 1502, 2095, 2098, 2136, 2582, 415, 513, 76, 99, 514, 1308, 947, 75, 1305, 1924, 764, 38, 1923, 972, 796, 1364, 512, 1307, 1309, 72, 1306, 2051, 1141, 1140, 516, 1474, 151, 1285, 1126, 2141, 2142, 2241, 2245, 2246, 2588, 26, 269, 789, 1267, 1823, 1822, 1413, 1825, 1824, 1607, 1820, 1414, 1821, 1819, 1412, 1032, 1266, 791, 967, 2575, 1105, 1104, 1103, 1073, 1106, 162, 161, 1107, 1108, 1112, 1346, 1347, 1348, 1447, 1522, 1523, 1524, 505, 65, 856, 64, 70, 68, 767, 1109, 1433, 1434, 2198, 270, 669, 248, 857, 165, 167, 399, 146, 166, 145, 398, 1321, 1322, 668, 667, 142, 849, 1521, 1553, 1554, 1612, 2012, 2013, 2014, 2242, 2292, 2293, 2294, 2295, 2296, 2297, 2313, 2355, 2356, 2358, 2359, 2360, 2406, 2440, 2451, 759, 115, 245, 246, 100, 758, 1330, 810, 103, 689, 2201, 2202, 2203, 2348, 2349, 2350, 1284, 696, 695, 698, 345, 969, 1475, 1128, 1129, 697, 1485, 1065, 1514, 1286, 981, 1061, 979, 2443, 2444, 2445, 2449, 2450, 1826, 444, 1453, 1033, 445, 267, 508, 507, 446, 754, 664, 451, 443, 266, 448, 1079, 755, 1687, 1080, 1609, 449, 450, 2130, 265, 268, 260, 3, 2131, 2132, 2133, 2134, 1218, 1920, 147, 1051, 1127, 23, 501, 22, 67, 1282, 43, 1287, 2493, 2494, 2533, 2534)"
+    }
+  },
+  "replay_comparison": null,
+  "render_flag": true,
+  "thread": "Ajoute le modèle de surface Copernicus à 30 m sur l'emprise visible de l'Urumea à Saint-Sébastien, en EPSG:32630. Nomme-le « Copernicus 30 m » et affiche-le en ombrage sous les vecteurs. Les couches OSM sont déjà chargées.\n\n\n✓ Couche ajoutée : Copernicus 30 m\n\n✓ Style de Copernicus 30 m\n   hillshade\n\n\nJ'ai ajouté la couche « Copernicus 30 m » : le modèle d'élévation Copernicus à 30 m, en EPSG:32630, sur l'emprise visible de la carte. Elle est en ombrage (relief multidirectionnel) et placée sous toutes les couches vectorielles.\n\nLa zone couvre environ 163 × 132 pixels, avec des altitudes de 0 à 205 m (moyenne 45 m). Ce modèle est une surface : les bâtiments et la végétation y figurent, donc les zones urbaines et boisées sont surélevées. Aucune donnée vectorielle n'a été modifiée.\nCalcule la moyenne du DEM par emprise de bâtiment avec les statistiques zonales sur « Bâtiments ». Crée une couche « Bâtiments altitude » avec un champ alt_mean, conserve les NoData et colore-la par altitude moyenne. Il s'agit d'un modèle de surface, pas d'une hauteur de bâtiment. Masque la couche originale « Bâtiments ».\n\n\n\n\n✓ Traitement : native:zonalstatisticsfb  ·  3,073\n   INPUT=\"Bâtiments\", INPUT_RASTER=\"Copernicus 30 m\", RASTER_BAND=1, COLUMN_PREFIX=\"alt_\", STATISTICS=[2]\n\n\n✓ Masqué : Bâtiments\n\n✓ Style de Bâtiments altitude\n   graduated · alt_mean · Viridis · 5\n\nLa couche « Bâtiments altitude » est créée : les 3 073 bâtiments y portent le champ `alt_mean`, moyenne du modèle Copernicus sur chaque emprise. Elle est colorée en Viridis par classes de quantiles, de 0,04 m à 118,5 m (moyenne 33,2 m). Aucune valeur NoData n'est apparue : chaque bâtiment a reçu une moyenne, donc aucune entité n'a été écartée.\n\nLa couche originale « Bâtiments » est masquée, pas supprimée ni modifiée. Comme le DEM est un modèle de surface, `alt_mean` est une altitude moyenne du sol et des bâtiments, pas une hauteur de bâtiment.\nDans « Bâtiments altitude », garde alt_mean < 5 m à moins de 200 m de la couche « Urumea ». Filtre « Routes », « Ponts lignes » et « Ponts polygones » à moins de 300 m des bâtiments retenus, avec les distances en mètres. Garde ces filtres actifs, ne modifie pas les données et ne change pas le cadrage.\n\n\n\n✓ Filtre sur Bâtiments altitude  ·  89 / 3,073\n   \"alt_mean\" < 5\n\n✓ Filtre sur Bâtiments altitude par Urumea  ·  63\n\n✓ Filtre sur Routes, Ponts lignes, Ponts polygones par Bâtiments altitude  ·  402\nLes filtres sont en place ; aucune donnée modifiée, cadrage inchangé.\n\n- **Bâtiments altitude** : `alt_mean < 5` puis moins de 200 m de « Urumea ». Il reste **63 bâtiments** sur 3 073 (sur 89 avec la seule condition d'altitude).\n- **Routes** : **304** entités sur 701 à moins de 300 m des bâtiments retenus.\n- **Ponts lignes** : **92** entités sur 158.\n- **Ponts polygones** : **6** entités sur 8.\n\nLes distances sont en mètres (la couche est en EPSG:32630). Les filtres sont actifs et restent en place jusqu'à ce que vous les retiriez.\n\nSi vous voulez ajuster le seuil d'altitude (5 m) ou la distance, je peux vous proposer un curseur ou un réglage dans le panneau EXPLORING.\nEnregistre l'état actuel des filtres du projet comme favori « Urumea — seuils illustratifs ». Réponds uniquement « Favori enregistré » lorsque le succès est confirmé.\n\n\n✓ Favori enregistré : Urumea — seuils illustratifs\nFavori enregistré"
+}
