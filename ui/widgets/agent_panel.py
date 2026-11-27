@@ -1537,7 +1537,7 @@ class AgentPanel(QFrame):
         back = render_icon("undo", dark)
         if back is not None:
             self.back_button.setIcon(back)
-        welcome = render_icon("agent", dark, palette["fm_accent"])
+        welcome = render_icon("agent_network", dark, palette["fm_accent"])
         if welcome is not None:
             self.welcome_icon.setPixmap(welcome.pixmap(WELCOME_ICON_SIZE, WELCOME_ICON_SIZE))
         self.activity_icon.refresh_look(dark)
@@ -2003,6 +2003,12 @@ class AgentPanel(QFrame):
         cursor.insertText(left + text + right)
         self.input.setTextCursor(cursor)
         self.input.setFocus()
+
+    def set_activity_phase(self, phase: str) -> None:
+        self.activity_icon.set_phase(phase)
+
+    def activity_phase(self) -> str:
+        return self.activity_icon.phase
 
     def set_working(self, working: bool) -> None:
         """While the agent works the next request can be typed, and the button stops it."""

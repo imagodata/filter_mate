@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import sys
 import types
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -79,3 +80,30 @@ def test_missing_qtsvg_keeps_the_indicator_hidden(activity, monkeypatch):
     widget.set_working(True)
     app.processEvents()
     assert widget._renderer is None and not widget.isVisible()
+
+
+def test_action_phases_change_the_picture_without_restarting_on_each_text_chunk(activity, monkeypatch):
+    app, parent, widget, _ = activity
+    parent.show()
+    widget.set_working(True)
+    app.processEvents()
+    thinking = widget.grab().toImage()
+    load = MagicMock(wraps=widget._renderer.load)
+    monkeypatch.setattr(widget._renderer, 'load', load)
+    widget.set_phase('working')
+    app.processEvents()
+    assert widget.phase == 'working' and widget.grab().toImage() != thinking
+    assert load.call_count == 1
+    widget.set_phase('working')
+    assert load.call_count == 1
+    widget.set_phase('waiting')
+    app.processEvents()
+    assert widget.phase == 'waiting' and widget._renderer.animated()
+    assert widget.grab().toImage() != thinking
+    parent.hide()
+    parent.show()
+    app.processEvents()
+    assert widget.phase == 'waiting' and widget._renderer.animated()
+    widget.set_working(False)
+    widget.set_working(True)
+    assert widget.phase == 'thinking'

@@ -71,6 +71,9 @@ def host(monkeypatch):
     made._options_sources = lambda values: Controller._options_sources(made, values)
     made._policy, made._transcript, made._recap_from = MagicMock(), [], 0
     made.panel = SimpleNamespace(set_status=MagicMock(), fill_options=MagicMock())
+    made._memory_generation = 0
+    for name in ('_activity', '_set_activity', '_confirm_action'):
+        setattr(made, name, types.MethodType(getattr(Controller, name), made))
     made._engine = None
     made.chat_busy = lambda: made._engine is not None and made._engine.busy
     return made

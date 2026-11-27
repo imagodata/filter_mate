@@ -142,9 +142,9 @@ ICON_BODIES: Dict[str, str] = {
     'unfilter': '<path d="M3 4h18l-7 8v6l-4 2v-8z"/><path d="M16 16l5 5M21 16l-5 5"/>',
     'export': '<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v7h14v-7"/>',
     'reset_all': '<path d="M12 21s-6-5.5-6-11a6 6 0 0112 0c0 5.5-6 11-6 11z"/><path d="M4 4l16 16"/>',
-    # Compact version of the user's network mark: keep its five nodes readable at 16 px.
-    # Theme-coloured links and centre also work on a light background, unlike the source's white centre.
-    'agent': '<path d="M5 5l14 14M19 5L5 19" stroke-width="1.2"/>'
+    'agent': '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+    # Keep the section's chat glyph; the welcome and activity indicator use the user's network mark.
+    'agent_network': '<path d="M5 5l14 14M19 5L5 19" stroke-width="1.2"/>'
              '<circle cx="5" cy="5" r="2.2" fill="#3884d4" stroke="none"/>'
              '<circle cx="19" cy="5" r="2.2" fill="#d95d65" stroke="none"/>'
              '<circle cx="5" cy="19" r="2.2" fill="#ba7b1e" stroke="none"/>'
@@ -361,27 +361,52 @@ def svg_document(key: str, color: str) -> str:
             f'stroke="{color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{body}</svg>')
 
 
-def agent_activity_svg(color: str, animated: bool = False) -> str:
+AGENT_ACTIVITY_STYLES = {
+    # orbit seconds, pulse seconds, moving points, point radius (on the 24-unit grid)
+    'thinking': (5.4, 2.4, 3, 1.8),
+    'reading': (3.6, 1.9, 2, 2.0),
+    'working': (2.1, 1.2, 3, 2.1),
+    'fetching': (2.8, 1.6, 3, 2.0),
+    'responding': (4.2, 2.0, 1, 1.9),
+    'waiting': (0, 3.8, 0, 0),
+    'retry': (6.4, 3.0, 1, 1.8),
+    'stopping': (0, 2.6, 0, 0),
+}
+
+
+def agent_activity_svg(color: str, animated: bool = False, phase: str = 'thinking') -> str:
     """Network mark with Qt 5/6 compatible pulse and orbit animations.
 
     The supplied artwork uses animate/animateMotion, which QtSvg ignores. animateTransform works in both
     supported Qt versions. Keep this renderer out of the QIcon cache: it belongs to one visible activity widget.
     """
-    document = svg_document('agent', color)
+    document = svg_document('agent_network', color)
     if not animated:
         return document
+    orbit, duration, count, radius = AGENT_ACTIVITY_STYLES.get(phase, AGENT_ACTIVITY_STYLES['thinking'])
+    if phase in ('waiting', 'retry', 'stopping'):
+        document = document.replace(f'cx="12" cy="12" r="3.1" fill="{color}"',
+                                    'cx="12" cy="12" r="3.1" fill="#ba7b1e"')
     pulse = (
         '<g transform="translate(12 12)"><g>'
         '<animateTransform attributeName="transform" type="scale" values="0.7;1.15;0.7" '
-        'dur="2s" repeatCount="indefinite"/>'
-        f'<circle r="4.5" fill="none" stroke="{color}" stroke-opacity="0.3" stroke-width="0.5"/>'
+        f'dur="{duration}s" repeatCount="indefinite"/>'
+        f'<circle r="4.8" fill="none" stroke="{color}" stroke-opacity="0.5" stroke-width="0.7"/>'
         '</g></g>'
-        '<g><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" '
-        'dur="8s" repeatCount="indefinite"/>'
-        '<circle cx="18.2" cy="12" r="0.95" fill="#3884d4" stroke="none"/>'
-        '<circle cx="8.9" cy="17.37" r="0.95" fill="#d95d65" stroke="none"/>'
-        '<circle cx="8.9" cy="6.63" r="0.95" fill="#ba7b1e" stroke="none"/></g>'
     )
+    if count:
+        pulse += ('<g><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" '
+                  f'dur="{orbit}s" repeatCount="indefinite"/>')
+        points = ((18.6, 12, '#3884d4'), (8.7, 17.72, '#d95d65'), (8.7, 6.28, '#ba7b1e'))
+        if phase == 'retry':
+            points = ((18.6, 12, '#ba7b1e'),)
+        for x, y, fill in points[:count]:
+            pulse += f'<circle cx="{x}" cy="{y}" r="{radius}" fill="{fill}" stroke="none"/>'
+        pulse += '</g>'
+    elif phase == 'waiting':
+        pulse += '<path d="M11 10.5v3M13 10.5v3" stroke="#202020" stroke-width="0.9"/>'
+    elif phase == 'stopping':
+        pulse += '<rect x="10.7" y="10.7" width="2.6" height="2.6" rx="0.3" fill="#202020" stroke="none"/>'
     return document.replace('</svg>', pulse + '</svg>')
 
 

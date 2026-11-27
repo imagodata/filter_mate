@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import time
+from contextlib import contextmanager
 from dataclasses import asdict, replace
 from typing import Dict, List, Optional, Sequence, Tuple
 
@@ -2032,7 +2033,8 @@ class AgentChatController(QObject):
         card.destroyed.connect(lambda *_args: declined())  # a new conversation, the panel taken away
         forget = on_abort(stopped)
         try:
-            loop.exec()
+            with self._activity('waiting'):
+                loop.exec()
         finally:
             forget()
         return outcome.get("payload", {"declined": True})
@@ -2518,6 +2520,7 @@ class AgentChatController(QObject):
                     break
                 self.panel.add_step(self._describe(call))
                 before = tuple(self._project_layers())
+                self._set_activity(self._tool_activity(call))
                 result = executor.execute(call)
                 if self._abandoned:  # its project closed during the step
                     break
@@ -3426,6 +3429,7 @@ class AgentChatController(QObject):
         self._seen = None if read is None else project_state(*read, previous=self._seen)
 
     def _on_stop(self) -> None:
+        self._set_activity('stopping')
         self.panel.pause_queued()
         self._leave_memory_cards(self._memory_request)
         abort_active(CHAT_WAITS)  # a connector or a platform the chat waits for, not a call of another application
@@ -3456,11 +3460,36 @@ class AgentChatController(QObject):
     def _say(self, text: str, error: bool = False, offer_settings: bool = False) -> None:
         self.panel.set_status(text, error, offer_settings)
 
+    def _set_activity(self, phase: str) -> None:
+        setter = getattr(self.panel, 'set_activity_phase', None)
+        if callable(setter):
+            setter(phase)
+
+    def _tool_activity(self, call: ToolCallPart) -> str:
+        spec = self._tools.get(call.name)
+        if spec is not None and spec.open_world and call.name not in (RUN_PYTHON, RUN_CHART_CODE):
+            return 'fetching'
+        return 'reading' if spec is not None and spec.read_only else 'working'
+
+    @contextmanager
+    def _activity(self, phase: str):
+        """Temporary activity for a real wait; Stop and a new conversation retain their own state."""
+        getter = getattr(self.panel, 'activity_phase', None)
+        previous = getter() if callable(getter) else 'thinking'
+        generation = self._memory_generation
+        self._set_activity(phase)
+        try:
+            yield
+        finally:
+            if generation == self._memory_generation and (not callable(getter) or getter() == phase):
+                self._set_activity(previous)
+
     # --- what the conversation does (ChatListener) --------------------------------
 
     def on_text(self, text: str) -> None:
         if self._abandoned:
             return
+        self._set_activity('responding')
         self.panel.add_text(text)
         self._answer.append(text)
 
@@ -3468,6 +3497,7 @@ class AgentChatController(QObject):
         """``step`` (a new try of the model turn), once the status no longer says a new try is coming."""
         def run():
             if not self._abandoned and self.chat_busy():
+                self._set_activity('thinking')
                 self.panel.set_status(_tr("Thinking…"))
             step()
         return run
@@ -3476,6 +3506,7 @@ class AgentChatController(QObject):
         """The provider failed for a moment: the engine asks it again by itself after ``seconds``."""
         if self._abandoned:
             return
+        self._set_activity('retry')
         words = (_tr("The provider could not be reached, trying again in {} s…") if error.kind == ERROR_NETWORK
                  else _tr("The provider is busy, trying again in {} s…"))
         self.panel.set_status(words.format(max(1, round(seconds))))
@@ -3728,6 +3759,7 @@ class AgentChatController(QObject):
         self._layers_before = tuple(self._project_layers())
         if self._abandoned:
             return
+        self._set_activity(self._tool_activity(call))
         # The step number of this turn (S5, P6): long turns read as progress, not as a stall.
         step = _tr("Step {} · {}…").format(len(self._request_calls) + 1, self._describe(call))
         self.panel.set_status(step)
@@ -3748,6 +3780,7 @@ class AgentChatController(QObject):
         if made and not getattr(self, '_copy_offered', True):
             self._offer_local_copy(load_settings())  # a web service layer the agent added: copied in this turn
         self.panel.set_status(_tr("Thinking…"))
+        self._set_activity('thinking')
 
     def _show_chart_card(self, call: ToolCallPart, result: ToolResultPart) -> None:
         """A chart show_chart drew, in a card of the thread; the transcript keeps a line of it (an SVG is too large
@@ -4015,8 +4048,9 @@ class AgentChatController(QObject):
         with owned_by(CHAT_WAITS):
             forget = on_abort(stopped)
         try:
-            if "answer" not in outcome and not card.done:
-                loop.exec()
+            with self._activity('waiting'):
+                if "answer" not in outcome and not card.done:
+                    loop.exec()
         finally:
             forget()
         return outcome.get("answer", ANSWER_NO)
@@ -4085,7 +4119,8 @@ class AgentChatController(QObject):
                 lines.extend(f"    {line}" for line in self._settings_lines(call)[0])
         text = _tr("The agent wants to do these {} actions:\n{}\n\nDo you agree to all of them? No runs none of "
                    "them.").format(len(calls), "\n".join(lines))
-        return bool(self._ask_user(title or _tr("FilterMate agent"), text))
+        with self._activity('waiting'):
+            return bool(self._ask_user(title or _tr("FilterMate agent"), text))
 
     def confirm_each(self, calls) -> Optional[Dict[int, bool]]:
         """One tick per action of a turn, in the thread (S3): Allow or Refuse each, then Answer.
@@ -4140,8 +4175,9 @@ class AgentChatController(QObject):
         with owned_by(CHAT_WAITS):
             forget = on_abort(stopped)
         try:
-            if "each" not in outcome and not card.done:
-                loop.exec()
+            with self._activity('waiting'):
+                if "each" not in outcome and not card.done:
+                    loop.exec()
         finally:
             forget()
         return outcome.get("each")
@@ -4149,6 +4185,10 @@ class AgentChatController(QObject):
     def confirm(self, call: ToolCallPart) -> bool:
         """A call of the chat the level of autonomy does not let run alone; the user may allow the tool for the
         rest of the conversation."""
+        with self._activity('waiting'):
+            return self._confirm_action(call)
+
+    def _confirm_action(self, call: ToolCallPart) -> bool:
         title = _tr("FilterMate agent")
         if call.name == TURN_ON_OPTIONS:
             # What it would turn on, in words: nothing already on is asked; a call the tool refuses runs to say why.

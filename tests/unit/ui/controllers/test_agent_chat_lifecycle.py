@@ -243,6 +243,52 @@ def controller(ctrl_module, dock):
     return ctrl_module.AgentChatController(lambda page: None, MagicMock(), dock, ask_user=lambda title, text: True)
 
 
+@pytest.fixture
+def activity_state(controller):
+    state = {"phase": "thinking"}
+    controller.panel.set_activity_phase.side_effect = lambda phase: state.update(phase=phase)
+    controller.panel.activity_phase.side_effect = lambda: state["phase"]
+    return state
+
+
+def test_activity_follows_tools_text_and_provider_retry(ctrl_module, controller, activity_state):
+    catalog = sys.modules[f"{_PKG}.core.agent.tool_catalog"]
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    controller._tools = {
+        "read": catalog.ToolSpec("read", "Read", {}, read_only=True),
+        "write": catalog.ToolSpec("write", "Write", {}),
+        "fetch": catalog.ToolSpec("fetch", "Fetch", {}, open_world=True),
+    }
+    for name, phase in (("read", "reading"), ("write", "working"), ("fetch", "fetching")):
+        controller.on_tool_start(messages.ToolCallPart(name, name, {}))
+        assert activity_state["phase"] == phase
+    controller.on_text("Answer")
+    assert activity_state["phase"] == "responding"
+    controller.on_retry(2, messages.ProviderError(messages.ERROR_SERVER, "busy"))
+    assert activity_state["phase"] == "retry"
+
+
+def test_waiting_activity_restores_the_step_after_a_question_or_exception(controller, activity_state):
+    controller._set_activity("working")
+    with controller._activity("waiting"):
+        assert activity_state["phase"] == "waiting"
+    assert activity_state["phase"] == "working"
+    with pytest.raises(ValueError):
+        with controller._activity("waiting"):
+            raise ValueError("closed")
+    assert activity_state["phase"] == "working"
+
+
+def test_waiting_activity_does_not_overwrite_stop_or_a_new_conversation(controller, activity_state):
+    with controller._activity("waiting"):
+        controller._on_stop()
+    assert activity_state["phase"] == "stopping"
+    with controller._activity("waiting"):
+        controller._memory_generation += 1
+        controller._set_activity("thinking")
+    assert activity_state["phase"] == "thinking"
+
+
 def _engine(ctrl_module, controller, handler):
     """A real conversation engine on a transport the test feeds, with one tool that changes something."""
     chat_engine = sys.modules[f"{_PKG}.core.agent.chat_engine"]
