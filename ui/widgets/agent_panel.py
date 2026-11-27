@@ -30,6 +30,7 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
+from .agent_activity import AgentActivityIcon
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.example_prompts import (
     CATALOG as EXAMPLE_CATALOG, Facts, SHOWN as EXAMPLES_SHOWN, adjust as adjust_examples, pick as pick_examples,
@@ -713,6 +714,8 @@ class AgentPanel(QFrame):
         actions = QHBoxLayout()
         actions.setContentsMargins(0, 0, 0, 0)
         actions.setSpacing(4)
+        self.activity_icon = AgentActivityIcon(self)
+        actions.addWidget(self.activity_icon)
         actions.addWidget(self.status, 1)
         actions.addWidget(self.fix_button)
         actions.addWidget(self.undo_button)
@@ -1537,6 +1540,7 @@ class AgentPanel(QFrame):
         welcome = render_icon("agent", dark, palette["fm_accent"])
         if welcome is not None:
             self.welcome_icon.setPixmap(welcome.pixmap(WELCOME_ICON_SIZE, WELCOME_ICON_SIZE))
+        self.activity_icon.refresh_look(dark)
 
     def _refresh_action_icons(self, dark: bool) -> None:
         """One icon language for the toolbar, menus and recipe actions, in either theme."""
@@ -2003,6 +2007,7 @@ class AgentPanel(QFrame):
     def set_working(self, working: bool) -> None:
         """While the agent works the next request can be typed, and the button stops it."""
         self._working = working
+        self.activity_icon.set_working(working)
         if working and self._speech_state != 'idle':
             self.microphone_cancel_requested.emit()
         self.microphone_button.setEnabled(self._ready and not working)

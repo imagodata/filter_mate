@@ -142,7 +142,14 @@ ICON_BODIES: Dict[str, str] = {
     'unfilter': '<path d="M3 4h18l-7 8v6l-4 2v-8z"/><path d="M16 16l5 5M21 16l-5 5"/>',
     'export': '<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v7h14v-7"/>',
     'reset_all': '<path d="M12 21s-6-5.5-6-11a6 6 0 0112 0c0 5.5-6 11-6 11z"/><path d="M4 4l16 16"/>',
-    'agent': '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+    # Compact version of the user's network mark: keep its five nodes readable at 16 px.
+    # Theme-coloured links and centre also work on a light background, unlike the source's white centre.
+    'agent': '<path d="M5 5l14 14M19 5L5 19" stroke-width="1.2"/>'
+             '<circle cx="5" cy="5" r="2.2" fill="#3884d4" stroke="none"/>'
+             '<circle cx="19" cy="5" r="2.2" fill="#d95d65" stroke="none"/>'
+             '<circle cx="5" cy="19" r="2.2" fill="#ba7b1e" stroke="none"/>'
+             '<circle cx="19" cy="19" r="2.2" fill="#248c68" stroke="none"/>'
+             '<circle cx="12" cy="12" r="3.1" fill="currentColor" stroke="none"/>',
     'agent_send': '<path d="M4 12l16-8-6 16-3-6z"/><path d="M11 14l9-10"/>',
     'agent_push': '<path d="M13 2L3 14h8l-1 8 11-12h-8z"/>',
     'agent_queue': '<path d="M4 6h16M4 12h7M4 18h7"/><circle cx="17" cy="16" r="5"/>'
@@ -352,6 +359,30 @@ def svg_document(key: str, color: str) -> str:
     body = ICON_BODIES[key].replace('currentColor', color)
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" '
             f'stroke="{color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{body}</svg>')
+
+
+def agent_activity_svg(color: str, animated: bool = False) -> str:
+    """Network mark with Qt 5/6 compatible pulse and orbit animations.
+
+    The supplied artwork uses animate/animateMotion, which QtSvg ignores. animateTransform works in both
+    supported Qt versions. Keep this renderer out of the QIcon cache: it belongs to one visible activity widget.
+    """
+    document = svg_document('agent', color)
+    if not animated:
+        return document
+    pulse = (
+        '<g transform="translate(12 12)"><g>'
+        '<animateTransform attributeName="transform" type="scale" values="0.7;1.15;0.7" '
+        'dur="2s" repeatCount="indefinite"/>'
+        f'<circle r="4.5" fill="none" stroke="{color}" stroke-opacity="0.3" stroke-width="0.5"/>'
+        '</g></g>'
+        '<g><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" '
+        'dur="8s" repeatCount="indefinite"/>'
+        '<circle cx="18.2" cy="12" r="0.95" fill="#3884d4" stroke="none"/>'
+        '<circle cx="8.9" cy="17.37" r="0.95" fill="#d95d65" stroke="none"/>'
+        '<circle cx="8.9" cy="6.63" r="0.95" fill="#ba7b1e" stroke="none"/></g>'
+    )
+    return document.replace('</svg>', pulse + '</svg>')
 
 
 _ICON_CACHE: Dict[tuple, object] = {}
