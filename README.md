@@ -45,35 +45,49 @@ exports from a typed or dictated request, with the model you choose.
 
 ## ✨ New in 5.1.3
 
+- **Find datasets and suitable sources.** Ask which data fits a place and a task, including when the relevant
+  sources are disabled. Optional Web search finds candidate portals and services; review, test and add a proposed
+  source in a prefilled Sources form. Recommendations leave activation and layer loading to your choice.
+- **Conversations you can reopen.** **New conversation** archives the exchanges. **History → Conversations**
+  reopens them in their original project or shows other projects' conversations for consultation, without replaying
+  actions. Model context resumes only when the provider, server, account, model and sharing settings are compatible.
 - **Agent data in memory.** Downloaded and generated layers stay in project memory where possible.
   **⋯ → Save project and layers…** asks where to save the project and its in-memory agent datasets.
-  Closing the project releases unsaved memory datasets. Providers that need files use the chosen folder for
-  their outputs and working files.
+  Saved datasets sit beside the project; providers that need files use the chosen folder for outputs and working
+  files. Closing the project releases unsaved memory datasets. Save suggestions can be hidden until QGIS restarts.
+- **Exports and edits with a chosen destination.** The first agent export asks for a default folder and remembers
+  it. Saving pending layer edits to the source needs a separate confirmation, with the affected layers listed.
 - **Links to the result.** Click a layer name to reveal it in QGIS's Layers panel. Open exported files,
   their containing folders and web sources directly from the conversation.
 - **Processing models and providers.** Discover and run compatible algorithms from installed providers, including
-  GDAL, GRASS, SAGA and PDAL, and registered models.
-- **Microphone dictation.** Click the microphone beside the input to record, then click again to transcribe.
+  GDAL, GRASS, SAGA and PDAL, and registered models. Managed output budgets reject oversized results before adding
+  their layers; these budgets do not cap all QGIS memory.
+- **Microphone dictation and tests.** Click the microphone beside the input to record, then click again to transcribe.
   **⋯ → Microphone settings…** offers a local OpenAI-compatible service, OpenAI or Mistral, independently of the
-  chat provider. Recordings stay in RAM for up to two minutes; the text goes into the draft for review before Send.
+  chat provider. Test the microphone level and a ten-second transcription before saving your settings.
+  Dictation stays in RAM for up to two minutes; the text goes into the draft for review before Send.
+- **CRS advice and smooth navigation.** Assess whether the current project CRS suits the data and intended use.
+  Zoom transitions stop when you navigate manually, and **Previous view** returns to the starting extent in one step.
+  Selection and highlighting use cancellable background reads that preserve intervening manual selections.
+- **QGIS controls from the chat.** Discover available actions and existing plugin panels, open attribute tables
+  and layer properties, or switch to a supported map tool. Properties open after the response finishes.
+- **Guide a running request.** **Push** steers the current request; **Queue** keeps a message for later, with
+  **Send now** when needed. **Ctrl+Shift+Enter** uses the other mode for one message; **Esc** stops the run.
 - **Lighter agent context.** Loaded skills are reused, recent instructions survive tool-result trimming, and shared
   notes refresh when another QGIS session changes them. Recent agent actions are translated in all 34 languages;
   the new microphone controls and errors include French translations.
-
 - **Consistent selections and local copies.** Background expressions use the project's variables, measurement units,
   CRS and ellipsoid. GeoPackage copies keep their SQLite filters when a project reopens; a cancelled or failed
   copy-again operation restores the previous copy and its filter.
 - **Respond, Propose or Act.** Read without changing the project, approve each proposed change, or follow the
   permissions saved in the settings. Memory proposals stay yours to accept or refuse.
-- **Conversations that resume.** The project's conversation is taken up again with the same server, account and
-  attribute-sharing choice. New conversation clears the saved history. Long conversations save faster, and choosing
-  a layer with `@` inserts the layer selected in the completion list.
 - **Reasoning effort when supported.** An optional menu offers the levels supported by the selected model, with
   **Automatic** keeping the provider's default. The choice is remembered per model and server and applies to the next
   request without clearing the conversation.
 - **Charts and clearer navigation.** Standard charts render in QGIS 3 and 4; combine them into vector infographics
-  and export them as images, PDF, SVG or an offline HTML page. Navigation icons follow the theme, long model names
-  stay readable in tooltips, and EXPLORING keeps its source-layer chooser when FILTERING is hidden.
+  and export them as images, PDF, SVG or an offline HTML page. A persistent activity icon follows the agent's task;
+  local busy cursors preserve QGIS map tools. Long model names stay readable in tooltips, and EXPLORING keeps its
+  source-layer chooser when FILTERING is hidden.
 
 See [the 5.1.3 release notes](CHANGELOG.md#513---2026-11-27) and [the agent documentation](docs/AGENT_MODE.md) for details.
 
@@ -128,8 +142,15 @@ the original source back, and project files are always saved with the original s
   Austria, Netherlands, Japan, United States), searches enabled local catalogs and reuses local raster files.
   See the [regional source list](docs/AGENT_MODE.md#regional-basemaps-and-local-backgrounds).
 - 💾 **Agent data and result links.** Keep downloaded and generated data in memory, then choose where to save the
-  project and its agent datasets. Layer links reveal the exact layer in the tree; output actions open the file or
-  its folder. Sources on the web open only when you click their links.
+  project and its agent datasets. Choose the default export folder from **⋯ → Default export folder…**.
+  Layer links reveal the exact layer in the tree; output actions open the file or its folder. Sources on the web
+  open only when you click their links.
+- 🌐 **Dataset and source discovery.** Compare suitable sources from the local catalog, including disabled ones,
+  then search the enabled services for actual datasets. Optional Web search returns unverified candidates for
+  review in Sources. A recommendation does not enable a source or add a layer.
+- 🗂️ **Conversation history.** Archive exchanges with **New conversation**, then reopen them from
+  **History → Conversations**. Conversations from other projects remain available for consultation without changing
+  the current project. Past actions are never replayed when opening a conversation.
 - 🧩 **Processing models and providers.** The agent searches installed providers and registered models, describes
   their parameters and steps, and runs compatible treatments on project layers.
 - 🎙️ **Microphone dictation.** Transcribe through a local compatible service, OpenAI or Mistral. Choose the device,
