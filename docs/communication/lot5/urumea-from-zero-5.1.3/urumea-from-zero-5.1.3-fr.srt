@@ -1,0 +1,131 @@
+1
+00:00:00,000 --> 00:00:06,000
+Imagodata présente… FilterMate.
+
+2
+00:00:06,000 --> 00:00:16,520
+Un projet QGIS vide. Une demande à l’agent. Construisons une analyse de l’Urumea, jusqu’aux fichiers à transmettre.
+
+3
+00:00:16,520 --> 00:00:23,187
+Je précise le secteur et les liens officiels. L’agent acquiert les bâtiments, les voies et les objets ponts dans
+
+4
+00:00:23,187 --> 00:00:29,853
+OpenStreetMap. Il ajoute un modèle numérique de terrain à cinq mètres, fourni par GeoEuskadi, et le zonage
+
+5
+00:00:29,853 --> 00:00:36,520
+d’inondabilité de l’agence basque de l’eau.
+
+6
+00:00:36,520 --> 00:00:41,867
+FilterMate propose de conserver ce travail. Je choisis un projet QGIS : les données détenues en mémoire sont
+
+7
+00:00:41,867 --> 00:00:47,213
+sauvegardées avec lui. Les liens vers le projet et son dossier de données apparaissent directement dans la
+
+8
+00:00:47,213 --> 00:00:52,560
+conversation.
+
+9
+00:00:52,560 --> 00:00:59,893
+Prenons le temps de lire le relief. Ce modèle représente le terrain, et non la surface des bâtiments. Nous calculons
+
+10
+00:00:59,893 --> 00:01:07,227
+la pente en pourcentage, puis sa moyenne sous chaque emprise. Elle décrit le contexte topographique ; elle ne simule
+
+11
+00:01:07,227 --> 00:01:14,560
+pas une crue.
+
+12
+00:01:14,560 --> 00:01:21,227
+Voici le moteur de filtre de FilterMate. La rivière sert de source, les bâtiments de cible. Un tampon de cinq cents
+
+13
+00:01:21,227 --> 00:01:27,893
+mètres définit un couloir assez large pour explorer les deux rives. Le filtre change les objets affichés, sans
+
+14
+00:01:27,893 --> 00:01:34,560
+supprimer les données sources.
+
+15
+00:01:34,560 --> 00:01:41,227
+Nous ajoutons maintenant un second critère, avec un ET : l’intersection avec le zonage officiel de période de retour
+
+16
+00:01:41,227 --> 00:01:47,893
+cent ans. La carte se resserre sur les bâtiments qui croisent ce zonage dans notre couloir. Ce résultat reste une
+
+17
+00:01:47,893 --> 00:01:54,560
+sélection exploratoire, à interpréter avec la source officielle.
+
+18
+00:01:54,560 --> 00:02:01,620
+Les bâtiments retenus deviennent à leur tour la source du filtre. FilterMate conserve les voies et les objets ponts à
+
+19
+00:02:01,620 --> 00:02:08,680
+moins de trois cents mètres. Les critères déjà appliqués aux bâtiments restent actifs.
+
+20
+00:02:08,680 --> 00:02:16,013
+Passons à la synthèse. Deux graphiques sont dessinés avec D3 : la progression du nombre de bâtiments après chaque
+
+21
+00:02:16,013 --> 00:02:23,347
+filtre, puis la distribution des pentes moyennes sous les emprises retenues. Les populations du premier graphique
+
+22
+00:02:23,347 --> 00:02:30,680
+sont emboîtées : on ne les additionne pas.
+
+23
+00:02:30,680 --> 00:02:37,347
+L’agent crée ensuite une vraie mise en page QGIS, à partir de notre modèle A trois. La carte, les graphiques, les
+
+24
+00:02:37,347 --> 00:02:44,013
+sources et les repères cartographiques composent une page lisible. Le composeur reste accessible pour ajuster le
+
+25
+00:02:44,013 --> 00:02:50,680
+document.
+
+26
+00:02:50,680 --> 00:02:56,827
+Le moteur d’export de FilterMate écrit les couches avec leurs filtres actifs dans un GeoPackage. Les rasters sont
+
+27
+00:02:56,827 --> 00:03:02,973
+exportés séparément. Nous obtenons aussi un PDF de la mise en page : des fichiers effectivement produits, prêts à
+
+28
+00:03:02,973 --> 00:03:09,120
+être vérifiés et partagés.
+
+29
+00:03:09,120 --> 00:03:15,060
+Voici le PDF exporté, ouvert dans un lecteur. La carte et les deux graphiques sont réunis sur une page, avec les
+
+30
+00:03:15,060 --> 00:03:21,000
+sources et les précautions de lecture.
+
+31
+00:03:21,000 --> 00:03:27,280
+Enfin, je sauvegarde le projet avec ses nouvelles données. La mise en page et les graphiques restent dans le projet.
+
+32
+00:03:27,280 --> 00:03:33,560
+Le dossier livré a été déplacé puis rouvert pour vérifier que les couches restent lisibles. FilterMate, le meilleur
+
+33
+00:03:33,560 --> 00:03:39,840
+compagnon pour QGIS.

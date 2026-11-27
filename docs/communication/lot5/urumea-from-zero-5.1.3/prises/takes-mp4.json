@@ -1,0 +1,55 @@
+{
+  "takes": [
+    {
+      "phase": "acquisition",
+      "take": "acquire04",
+      "file": "acquisition.mp4",
+      "frames_captured": 1046,
+      "duration_s": 70.666667,
+      "bytes": 2597103,
+      "audio": "silent raw footage",
+      "timing": "Original capture timestamps; displayed at 15 fps without cuts or speed-up."
+    },
+    {
+      "phase": "analyse",
+      "take": "analysis03",
+      "file": "analyse.mp4",
+      "frames_captured": 2684,
+      "duration_s": 183.066667,
+      "bytes": 6710412,
+      "audio": "silent raw footage",
+      "timing": "Original capture timestamps; displayed at 15 fps without cuts or speed-up."
+    },
+    {
+      "phase": "composition",
+      "take": "composer02",
+      "file": "composition.mp4",
+      "frames_captured": 2744,
+      "duration_s": 183.133333,
+      "bytes": 4974706,
+      "audio": "silent raw footage",
+      "timing": "Original capture timestamps; displayed at 15 fps without cuts or speed-up."
+    },
+    {
+      "phase": "finition",
+      "take": "finish01",
+      "file": "finition.mp4",
+      "frames_captured": 2491,
+      "duration_s": 164.733333,
+      "bytes": 3080799,
+      "audio": "silent raw footage",
+      "timing": "Original capture timestamps; displayed at 15 fps without cuts or speed-up."
+    },
+    {
+      "phase": "relecture",
+      "take": "review02",
+      "file": "relecture.mp4",
+      "frames_captured": 360,
+      "duration_s": 23.666667,
+      "bytes": 719036,
+      "audio": "silent raw footage",
+      "timing": "Original capture timestamps; displayed at 15 fps without cuts or speed-up."
+    }
+  ],
+  "publication": "not_published"
+}

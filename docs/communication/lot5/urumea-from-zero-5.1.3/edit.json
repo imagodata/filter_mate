@@ -1,0 +1,116 @@
+{
+  "duration_s": 219.84,
+  "fps": 25,
+  "size": [
+    1920,
+    1080
+  ],
+  "takes": [
+    "/w/out/acquire04/urumea",
+    "/w/out/analysis03/urumea",
+    "/w/out/composer02/urumea",
+    "/w/out/review02/urumea"
+  ],
+  "scenes": [
+    {
+      "scene": "intro",
+      "start": 0.0,
+      "duration": 6.0,
+      "voice": "00-intro-imagodata",
+      "title": "imagodata présente"
+    },
+    {
+      "scene": "depart",
+      "start": 6.0,
+      "duration": 10.52,
+      "voice": "01-depart",
+      "title": "01 · Un projet vide"
+    },
+    {
+      "scene": "sources",
+      "start": 16.52,
+      "duration": 20.0,
+      "voice": "02-sources",
+      "title": "02 · Acquérir les sources · attentes raccourcies"
+    },
+    {
+      "scene": "sauvegarde",
+      "start": 36.519999999999996,
+      "duration": 16.04,
+      "voice": "03-sauvegarde",
+      "title": "03 · Conserver le projet et ses données"
+    },
+    {
+      "scene": "terrain",
+      "start": 52.559999999999995,
+      "duration": 22.0,
+      "voice": "04-terrain",
+      "title": "04 · MNT 5 m → pente (%) → moyenne par emprise"
+    },
+    {
+      "scene": "corridor",
+      "start": 74.56,
+      "duration": 20.0,
+      "voice": "05-couloir",
+      "title": "05 · Moteur de filtre · couloir de 500 m"
+    },
+    {
+      "scene": "t100",
+      "start": 94.56,
+      "duration": 20.0,
+      "voice": "06-ura",
+      "title": "06 · Couloir ET zonage officiel URA T100"
+    },
+    {
+      "scene": "reseau",
+      "start": 114.56,
+      "duration": 14.12,
+      "voice": "07-reseau",
+      "title": "07 · Un filtre en cascade · voies et objets ponts à 300 m"
+    },
+    {
+      "scene": "charts",
+      "start": 128.68,
+      "duration": 22.0,
+      "voice": "08-graphiques",
+      "title": "08 · Deux graphiques D3.js sur les résultats observés"
+    },
+    {
+      "scene": "composer",
+      "start": 150.68,
+      "duration": 20.0,
+      "voice": "09-composer",
+      "title": "09 · Une mise en page QGIS A3"
+    },
+    {
+      "scene": "export",
+      "start": 170.68,
+      "duration": 18.44,
+      "voice": "10-export",
+      "title": "10 · Moteur d’export · GeoPackage et GeoTIFF"
+    },
+    {
+      "scene": "pdf",
+      "start": 189.12,
+      "duration": 11.88,
+      "voice": "11-pdf",
+      "title": "11 · Le PDF effectivement exporté"
+    },
+    {
+      "scene": "projet",
+      "start": 201.0,
+      "duration": 18.84,
+      "voice": "12-projet",
+      "title": "12 · Le projet, ses données et sa composition"
+    }
+  ],
+  "qgis_frame": [
+    0,
+    0,
+    1920,
+    990
+  ],
+  "captions_outside_qgis": true,
+  "source": "recorded QGIS desktop; magnifiers duplicate recorded pixels",
+  "publication": "not_published"
+}

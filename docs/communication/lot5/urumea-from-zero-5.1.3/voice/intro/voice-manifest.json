@@ -1,0 +1,21 @@
+{
+  "provider": "elevenlabs",
+  "voice_name": "Tony - Punchy Ad & Social",
+  "voice_id": "fsYODoWLWYJ5ai6CAN3M",
+  "model_id": "eleven_v4",
+  "publication": "not_published",
+  "lines": [
+    {
+      "id": "00-intro-imagodata",
+      "text": "Imagodata présente… FilterMate.",
+      "file": "00-intro-imagodata.mp3",
+      "request_sha256": "c94e39a33587df54665c5a28f6e3c87a556515487aa24d7cb6d0d4719ea84eb7",
+      "sha256": "7c82fa258985e82b851538cc14f9a5219d6385fa8778cd58e6175faaa9524f17",
+      "duration_s": 3.04,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    }
+  ]
+}

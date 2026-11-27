@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "full_decode": "passed",
+  "duration_s": 219.84,
+  "bytes": 17626958,
+  "sha256": "536a25af029a028b4b227d9cc0a28dc47789ad9e7aa041556e67a0029a28b9d0",
+  "video": {
+    "codec_name": "h264",
+    "profile": "High",
+    "codec_type": "video",
+    "width": 1920,
+    "height": 1080,
+    "avg_frame_rate": "25/1",
+    "tags": {
+      "language": "und"
+    }
+  },
+  "audio": {
+    "codec_name": "aac",
+    "profile": "LC",
+    "codec_type": "audio",
+    "sample_rate": "48000",
+    "channels": 2,
+    "avg_frame_rate": "0/0",
+    "tags": {
+      "language": "fra"
+    }
+  },
+  "audio_volume_db": {
+    "mean_volume": "-23.1",
+    "max_volume": "-2.0"
+  },
+  "faststart": true,
+  "publication": "not_published",
+  "validation_scope": "ffprobe, full ffmpeg decode, audio peak and local visual review"
+}

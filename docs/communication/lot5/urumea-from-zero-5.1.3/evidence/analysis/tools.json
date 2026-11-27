@@ -1,0 +1,555 @@
+[
+  {
+    "request": "preparer",
+    "tool": "describe_algorithm",
+    "arguments": {
+      "algorithm_id": "native:reprojectlayer"
+    },
+    "is_error": false,
+    "content": "{\"id\": \"native:reprojectlayer\", \"name\": \"Reprojeter une couche\", \"group\": \"Outils généraux pour les vecteurs\", \"help\": \"Cet algorithme reprojette une couche vecteur. Il crée une nouvelle couche avec les mêmes éléments que la couche d'entrée, mais pour lesquels les géométries ont été projetées dans le nouveau SCR. Les attributs ne sont pas modifiés.\", \"parameters\": [{\"name\": \"INPUT\", \"type\": \"source\", \"description\": \"Couche source\", \"optional\": false, \"value\": \"a layer of the project (name or id); {\\\"layer\\\": ..., \\\"selected_only\\\": true} for its selection\"}, {\"name\": \"TARGET_CRS\", \"type\": \"crs\", \"description\": \"SCR cible\", \"optional\": false, \"default\": \"EPSG:4326\", \"value\": \"\\\"EPSG:2154\\\", or a layer of the project for its CRS\"}, {\"name\": \"CONVERT_CURVED_GEOMETRIES\", \"type\": \"boolean\", \"description\": \"Convertir des géométries courbes en segments droits\", \"optional\": false, \"default\": false}, {\"name\": \"TRANSFORM_Z\", \"type\": \"boolean\", \"description\": \"Transformer également les coordonnées Z\", \"optional\": false, \"default\": false}, {\"name\": \"OUTPUT\", \"type\": \"sink\", \"description\": \"Reprojeté\", \"optional\": false, \"destination\": \"FilterMate chooses its storage and adds the layer to the project; pass false to skip it when it is optional\", \"created_by_default\": true}], \"outputs\": [{\"name\": \"OUTPUT\", \"type\": \"outputVector\", \"description\": \"Reprojeté\"}], \"left_out\": [\"OPERATION\"], \"note\": \"The parameters in left_out (files, folders, connections, types the agent cannot give) cannot be given: they stay unset.\", \"provider\": \"native\", \"provider_name\": \"QGIS (C++ natif)\", \"is_model\": false, \"requires_disk\": false, \"storage_note\": \"\", \"steps\": []}"
+  },
+  {
+    "request": "preparer",
+    "tool": "run_algorithm",
+    "arguments": {
+      "algorithm_id": "native:reprojectlayer",
+      "parameters": {
+        "INPUT": "Bâtiments",
+        "TARGET_CRS": "EPSG:25830"
+      },
+      "names": {
+        "OUTPUT": "tmp_Bâtiments_25830"
+      }
+    },
+    "is_error": false,
+    "content": "{\"algorithm\": \"native:reprojectlayer\", \"name\": \"Reprojeter une couche\", \"layers\": [{\"output\": \"OUTPUT\", \"layer_id\": \"tmp_B_timents_25830_adb3df39_dc49_4aec_8c04_cea398497cd8\", \"name\": \"tmp_Bâtiments_25830\", \"layer_kind\": \"vector\", \"feature_count\": 2995}], \"not_made\": [], \"values\": {}, \"messages\": [], \"feature_count\": 2995}"
+  },
+  {
+    "request": "preparer",
+    "tool": "run_algorithm",
+    "arguments": {
+      "algorithm_id": "native:reprojectlayer",
+      "parameters": {
+        "INPUT": "Routes",
+        "TARGET_CRS": "EPSG:25830"
+      },
+      "names": {
+        "OUTPUT": "tmp_Routes_25830"
+      }
+    },
+    "is_error": false,
+    "content": "{\"algorithm\": \"native:reprojectlayer\", \"name\": \"Reprojeter une couche\", \"layers\": [{\"output\": \"OUTPUT\", \"layer_id\": \"tmp_Routes_25830_573df1f4_a566_41ac_823c_e6ee5a15673d\", \"name\": \"tmp_Routes_25830\", \"layer_kind\": \"vector\", \"feature_count\": 5013}], \"not_made\": [], \"values\": {}, \"messages\": [], \"feature_count\": 5013}"
+  },
+  {
+    "request": "preparer",
+    "tool": "run_algorithm",
+    "arguments": {
+      "algorithm_id": "native:reprojectlayer",
+      "parameters": {
+        "INPUT": "Ponts lignes",
+        "TARGET_CRS": "EPSG:25830"
+      },
+      "names": {
+        "OUTPUT": "tmp_Ponts lignes_25830"
+      }
+    },
+    "is_error": false,
+    "content": "{\"algorithm\": \"native:reprojectlayer\", \"name\": \"Reprojeter une couche\", \"layers\": [{\"output\": \"OUTPUT\", \"layer_id\": \"tmp_Ponts_lignes_25830_82045280_16ad_4e4a_a721_6f826fd6a8df\", \"name\": \"tmp_Ponts lignes_25830\", \"layer_kind\": \"vector\", \"feature_count\": 157}], \"not_made\": [], \"values\": {}, \"messages\": [], \"feature_count\": 157}"
+  },
+  {
+    "request": "preparer",
+    "tool": "run_algorithm",
+    "arguments": {
+      "algorithm_id": "native:reprojectlayer",
+      "parameters": {
+        "INPUT": "Ponts polygones",
+        "TARGET_CRS": "EPSG:25830"
+      },
+      "names": {
+        "OUTPUT": "tmp_Ponts polygones_25830"
+      }
+    },
+    "is_error": false,
+    "content": "{\"algorithm\": \"native:reprojectlayer\", \"name\": \"Reprojeter une couche\", \"layers\": [{\"output\": \"OUTPUT\", \"layer_id\": \"tmp_Ponts_polygones_25830_f20e1127_d353_46a3_bdd5_bc651683aacd\", \"name\": \"tmp_Ponts polygones_25830\", \"layer_kind\": \"vector\", \"feature_count\": 5}], \"not_made\": [], \"values\": {}, \"messages\": [], \"feature_count\": 5}"
+  },
+  {
+    "request": "preparer",
+    "tool": "run_algorithm",
+    "arguments": {
+      "algorithm_id": "native:reprojectlayer",
+      "parameters": {
+        "INPUT": "Urumea",
+        "TARGET_CRS": "EPSG:25830"
+      },
+      "names": {
+        "OUTPUT": "tmp_Urumea_25830"
+      }
+    },
+    "is_error": false,
+    "content": "{\"algorithm\": \"native:reprojectlayer\", \"name\": \"Reprojeter une couche\", \"layers\": [{\"output\": \"OUTPUT\", \"layer_id\": \"tmp_Urumea_25830_7003c13a_3796_48c9_a20e_31624827ebb1\", \"name\": \"tmp_Urumea_25830\", \"layer_kind\": \"vector\", \"feature_count\": 10}], \"not_made\": [], \"values\": {}, \"messages\": [], \"feature_count\": 10}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "Bâtiments",
+      "name": "Bâtiments source WGS84"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"B_timents_d39c94f4_f161_4570_97ba_49a669f04347\", \"name\": \"Bâtiments source WGS84\", \"previous\": \"Bâtiments\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "Routes",
+      "name": "Routes source WGS84"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"Routes_4276376c_3ac6_40f5_9623_ecdc2a7d6965\", \"name\": \"Routes source WGS84\", \"previous\": \"Routes\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "Ponts lignes",
+      "name": "Ponts lignes source WGS84"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"Ponts_lignes_11a8047e_8cae_4a38_85e0_613e0aea5757\", \"name\": \"Ponts lignes source WGS84\", \"previous\": \"Ponts lignes\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "Ponts polygones",
+      "name": "Ponts polygones source WGS84"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"Ponts_polygones_4b0960e9_92e8_4814_aa7a_32ce153d9420\", \"name\": \"Ponts polygones source WGS84\", \"previous\": \"Ponts polygones\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "Urumea",
+      "name": "Urumea source WGS84"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"Urumea_5a5bd193_f8b0_4784_a6b8_db549e31bf43\", \"name\": \"Urumea source WGS84\", \"previous\": \"Urumea\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "set_layers_visibility",
+    "arguments": {
+      "layers": [
+        "Bâtiments source WGS84",
+        "Routes source WGS84",
+        "Ponts lignes source WGS84",
+        "Ponts polygones source WGS84",
+        "Urumea source WGS84"
+      ],
+      "visible": false
+    },
+    "is_error": false,
+    "content": "{\"done\": [\"Bâtiments source WGS84\", \"Routes source WGS84\", \"Ponts lignes source WGS84\", \"Ponts polygones source WGS84\", \"Urumea source WGS84\"], \"failed\": {}, \"skipped\": {}, \"error\": null, \"outputs\": {}, \"package\": null, \"tables\": {}, \"styles\": {}}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "tmp_Bâtiments_25830",
+      "name": "Bâtiments"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"tmp_B_timents_25830_adb3df39_dc49_4aec_8c04_cea398497cd8\", \"name\": \"Bâtiments\", \"previous\": \"tmp_Bâtiments_25830\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "tmp_Routes_25830",
+      "name": "Routes"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"tmp_Routes_25830_573df1f4_a566_41ac_823c_e6ee5a15673d\", \"name\": \"Routes\", \"previous\": \"tmp_Routes_25830\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "tmp_Ponts lignes_25830",
+      "name": "Ponts lignes"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"tmp_Ponts_lignes_25830_82045280_16ad_4e4a_a721_6f826fd6a8df\", \"name\": \"Ponts lignes\", \"previous\": \"tmp_Ponts lignes_25830\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "tmp_Ponts polygones_25830",
+      "name": "Ponts polygones"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"tmp_Ponts_polygones_25830_f20e1127_d353_46a3_bdd5_bc651683aacd\", \"name\": \"Ponts polygones\", \"previous\": \"tmp_Ponts polygones_25830\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "rename_layer",
+    "arguments": {
+      "layer": "tmp_Urumea_25830",
+      "name": "Urumea"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"tmp_Urumea_25830_7003c13a_3796_48c9_a20e_31624827ebb1\", \"name\": \"Urumea\", \"previous\": \"tmp_Urumea_25830\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "field_values",
+    "arguments": {
+      "layer": "Urumea",
+      "field": "name",
+      "limit": 20
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"Urumea\", \"field\": \"name\", \"values\": [\"Urumea\", \"Urumea ibaia\"], \"truncated\": false, \"minimum\": null, \"maximum\": null}"
+  },
+  {
+    "request": "preparer",
+    "tool": "preview_filter",
+    "arguments": {
+      "layer_name": "Urumea",
+      "expression": "lower(coalesce(\"name\", '')) LIKE '%urumea%'"
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"Urumea\", \"expression\": \"lower(coalesce(\\\"name\\\", '')) LIKE '%urumea%'\", \"valid\": true, \"feature_count\": 10, \"error\": \"\"}"
+  },
+  {
+    "request": "preparer",
+    "tool": "apply_filter",
+    "arguments": {
+      "layer_name": "Urumea",
+      "expression": "lower(coalesce(\"name\", '')) LIKE '%urumea%'"
+    },
+    "is_error": false,
+    "content": "{\"success\": true, \"layer_name\": \"Urumea\", \"expression\": \"lower(coalesce(\\\"name\\\", '')) LIKE '%urumea%'\", \"active_filters\": {\"Urumea\": \"lower(coalesce(\\\"name\\\", '')) LIKE '%urumea%'\"}, \"feature_count\": 10, \"total_count\": 10}"
+  },
+  {
+    "request": "preparer",
+    "tool": "describe_layer",
+    "arguments": {
+      "layer": "Urumea"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"tmp_Urumea_25830_7003c13a_3796_48c9_a20e_31624827ebb1\", \"name\": \"Urumea\", \"layer_kind\": \"vector\", \"provider_type\": \"ogr\", \"crs_authid\": \"EPSG:25830\", \"geometry_type\": \"MultiLineString\", \"feature_count\": 10, \"subset\": \"lower(coalesce(\\\"name\\\", '')) LIKE '%urumea%'\", \"sql_dialect\": \"sqlite\", \"fields\": [{\"name\": \"fid\", \"type\": \"Integer64\"}, {\"name\": \"osm_id\", \"type\": \"String\"}, {\"name\": \"osm_type\", \"type\": \"String\"}, {\"name\": \"name\", \"type\": \"String\"}, {\"name\": \"waterway\", \"type\": \"String\"}, {\"name\": \"other_tags\", \"type\": \"String\"}], \"bands\": [], \"pixel_size\": null, \"attributes\": [], \"visible\": true, \"group\": \"\", \"extent\": [582500.6886568225, 4775748.347098155, 593919.2273143673, 4797584.688734453], \"style\": {\"renderer\": \"singleSymbol\"}, \"joins\": [], \"relations\": [], \"editing\": false, \"unsaved\": false}"
+  },
+  {
+    "request": "terrain",
+    "tool": "describe_algorithm",
+    "arguments": {
+      "algorithm_id": "gdal:slope"
+    },
+    "is_error": false,
+    "content": "{\"id\": \"gdal:slope\", \"name\": \"Pente\", \"group\": \"Analyse raster\", \"help\": \"\", \"parameters\": [{\"name\": \"INPUT\", \"type\": \"raster\", \"description\": \"Couche source\", \"optional\": false, \"value\": \"a layer of the project (name or id)\"}, {\"name\": \"BAND\", \"type\": \"band\", \"description\": \"Numéro de bande\", \"optional\": false, \"default\": 1, \"parent\": \"INPUT\"}, {\"name\": \"SCALE\", \"type\": \"number\", \"description\": \"Ratio entre les unités verticale et horizontale\", \"optional\": false, \"default\": 1.0, \"minimum\": 0.0}, {\"name\": \"AS_PERCENT\", \"type\": \"boolean\", \"description\": \"Pente exprimé en pourcentage plutôt qu'en degrès\", \"optional\": false, \"default\": false}, {\"name\": \"COMPUTE_EDGES\", \"type\": \"boolean\", \"description\": \"Calculer les bords\", \"optional\": false, \"default\": false}, {\"name\": \"ZEVENBERGEN\", \"type\": \"boolean\", \"description\": \"Utiliser la formule de Zevenbergen & Thorne au lieu de celle de Horn\", \"optional\": false, \"default\": false}, {\"name\": \"CREATION_OPTIONS\", \"type\": \"string\", \"description\": \"Options de création supplémentaires\", \"optional\": true}, {\"name\": \"OUTPUT\", \"type\": \"rasterDestination\", \"description\": \"Pente\", \"optional\": false, \"destination\": \"FilterMate chooses its storage and adds the layer to the project; pass false to skip it when it is optional\", \"created_by_default\": true}], \"outputs\": [{\"name\": \"OUTPUT\", \"type\": \"outputRaster\", \"description\": \"Pente\"}], \"left_out\": [\"EXTRA\"], \"note\": \"The parameters in left_out (files, folders, connections, types the agent cannot give) cannot be given: they stay unset.\", \"provider\": \"gdal\", \"provider_name\": \"GDAL\", \"is_model\": false, \"requires_disk\": true, \"storage_note\": \"This provider needs files. Use Save project and layers in the agent menu to choose their folder before running it.\", \"steps\": []}"
+  },
+  {
+    "request": "terrain",
+    "tool": "describe_algorithm",
+    "arguments": {
+      "algorithm_id": "native:zonalstatisticsfb"
+    },
+    "is_error": false,
+    "content": "{\"id\": \"native:zonalstatisticsfb\", \"name\": \"Statistiques de zone\", \"group\": \"Analyse raster\", \"help\": \"Cet algorithme calcule les statistiques d'une couche raster pour chaque entité d'une couche de polygones qui la recouvre.\", \"parameters\": [{\"name\": \"INPUT\", \"type\": \"source\", \"description\": \"Couche source\", \"optional\": false, \"value\": \"a layer of the project (name or id); {\\\"layer\\\": ..., \\\"selected_only\\\": true} for its selection\"}, {\"name\": \"INPUT_RASTER\", \"type\": \"raster\", \"description\": \"Couche raster\", \"optional\": false, \"value\": \"a layer of the project (name or id)\"}, {\"name\": \"RASTER_BAND\", \"type\": \"band\", \"description\": \"Bande raster\", \"optional\": false, \"default\": 1, \"parent\": \"INPUT_RASTER\"}, {\"name\": \"COLUMN_PREFIX\", \"type\": \"string\", \"description\": \"Préfixe de la colonne en sortie\", \"optional\": false, \"default\": \"_\"}, {\"name\": \"STATISTICS\", \"type\": \"enum\", \"description\": \"Statistiques à calculer\", \"optional\": false, \"default\": [0, 1, 2], \"options\": [\"Compte\", \"Somme\", \"Moyenne\", \"Médiane\", \"Ecart-type\", \"Minimum\", \"Maximum\", \"Plage\", \"Minorité\", \"Majorité\", \"Variété\", \"Variance\"], \"multiple\": true}, {\"name\": \"OUTPUT\", \"type\": \"sink\", \"description\": \"Statistiques de zones\", \"optional\": false, \"destination\": \"FilterMate chooses its storage and adds the layer to the project; pass false to skip it when it is optional\", \"created_by_default\": true}], \"outputs\": [{\"name\": \"OUTPUT\", \"type\": \"outputVector\", \"description\": \"Statistiques de zones\"}], \"left_out\": [], \"note\": \"\", \"provider\": \"native\", \"provider_name\": \"QGIS (C++ natif)\", \"is_model\": false, \"requires_disk\": false, \"storage_note\": \"\", \"steps\": []}"
+  },
+  {
+    "request": "terrain",
+    "tool": "run_algorithm",
+    "arguments": {
+      "algorithm_id": "gdal:slope",
+      "parameters": {
+        "INPUT": "MNT GeoEuskadi 5 m",
+        "BAND": 1,
+        "SCALE": 1,
+        "AS_PERCENT": true,
+        "COMPUTE_EDGES": true
+      },
+      "names": {
+        "OUTPUT": "Pente (%)"
+      }
+    },
+    "is_error": false,
+    "content": "{\"algorithm\": \"gdal:slope\", \"name\": \"Pente\", \"layers\": [{\"output\": \"OUTPUT\", \"layer_id\": \"Pente_____4667a83c_ae4c_425e_b3ba_af2da140922f\", \"name\": \"Pente (%)\", \"layer_kind\": \"raster\"}], \"not_made\": [], \"values\": {}, \"messages\": []}"
+  },
+  {
+    "request": "terrain",
+    "tool": "run_algorithm",
+    "arguments": {
+      "algorithm_id": "native:zonalstatisticsfb",
+      "parameters": {
+        "INPUT": "Bâtiments",
+        "INPUT_RASTER": "Pente (%)",
+        "RASTER_BAND": 1,
+        "COLUMN_PREFIX": "pente_",
+        "STATISTICS": [
+          2
+        ]
+      },
+      "names": {
+        "OUTPUT": "Bâtiments pente"
+      }
+    },
+    "is_error": false,
+    "content": "{\"algorithm\": \"native:zonalstatisticsfb\", \"name\": \"Statistiques de zone\", \"layers\": [{\"output\": \"OUTPUT\", \"layer_id\": \"B_timents_pente_a3bae165_642b_4ce1_84ab_99a786c52185\", \"name\": \"Bâtiments pente\", \"layer_kind\": \"vector\", \"feature_count\": 2995}], \"not_made\": [], \"values\": {}, \"messages\": [], \"feature_count\": 2995}"
+  },
+  {
+    "request": "terrain",
+    "tool": "set_layers_visibility",
+    "arguments": {
+      "layers": [
+        "Bâtiments source WGS84"
+      ],
+      "visible": false
+    },
+    "is_error": false,
+    "content": "{\"done\": [\"Bâtiments source WGS84\"], \"failed\": {}, \"skipped\": {}, \"error\": null, \"outputs\": {}, \"package\": null, \"tables\": {}, \"styles\": {}}"
+  },
+  {
+    "request": "terrain",
+    "tool": "layer_statistics",
+    "arguments": {
+      "layer": "Bâtiments pente",
+      "field": "pente_mean"
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"Bâtiments pente\", \"field\": \"pente_mean\", \"measure\": \"\", \"unit\": \"\", \"ellipsoid\": \"\", \"selected_only\": false, \"feature_count\": 2995, \"statistics\": {\"count\": 2995, \"nulls\": 0, \"minimum\": 0.16135694179683924, \"maximum\": 90.47036007176276, \"sum\": 30546.2, \"mean\": 10.1991, \"stdev\": 10.8749}, \"group_by\": \"\", \"groups\": [], \"groups_total\": 0, \"truncated\": false, \"ranked_by\": \"\"}"
+  },
+  {
+    "request": "corridor",
+    "tool": "layer_statistics",
+    "arguments": {
+      "layer": "Urumea",
+      "group_by": "name"
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"Urumea\", \"field\": \"\", \"measure\": \"\", \"unit\": \"\", \"ellipsoid\": \"\", \"selected_only\": false, \"feature_count\": 10, \"statistics\": {}, \"group_by\": \"name\", \"groups\": [{\"value\": \"Urumea\", \"feature_count\": 5}, {\"value\": \"Urumea ibaia\", \"feature_count\": 5}], \"groups_total\": 2, \"truncated\": false, \"ranked_by\": \"feature_count\"}"
+  },
+  {
+    "request": "corridor",
+    "tool": "sample_features",
+    "arguments": {
+      "layer": "Urumea",
+      "fields": [
+        "osm_id",
+        "osm_type",
+        "name",
+        "waterway",
+        "other_tags"
+      ],
+      "limit": 10
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"Urumea\", \"crs_authid\": \"EPSG:25830\", \"features\": [{\"fid\": 1, \"attributes\": {\"osm_id\": \"24513381\", \"osm_type\": \"way\", \"name\": \"Urumea\", \"waterway\": \"river\", \"other_tags\": \"\\\"name:es\\\"=>\\\"Río Urumea\\\",\\\"name:eu\\\"=>\\\"Urumea\\\"\"}}, {\"fid\": 2, \"attributes\": {\"osm_id\": \"157768909\", \"osm_type\": \"way\", \"name\": \"Urumea\", \"waterway\": \"river\", \"other_tags\": \"\\\"alt_name\\\"=>\\\"Goizuetan Errekaundi\\\",\\\"name:es\\\"=>\\\"Río Urumea\\\",\\\"name:eu\\\"=>\\\"Urumea\\\"\"}}, {\"fid\": 3, \"attributes\": {\"osm_id\": \"157768911\", \"osm_type\": \"way\", \"name\": \"Urumea ibaia\", \"waterway\": \"river\", \"other_tags\": \"\\\"name:br\\\"=>\\\"Stêr Urumea\\\",\\\"name:es\\\"=>\\\"Río Urumea\\\",\\\"name:eu\\\"=>\\\"Urumea ibaia\\\",\\\"source:name:br\\\"=>\\\"proper translation\\\"\"}}, {\"fid\": 4, \"attributes\": {\"osm_id\": \"157768913\", \"osm_type\": \"way\", \"name\": \"Urumea ibaia\", \"waterway\": \"river\", \"other_tags\": \"\\\"name:br\\\"=>\\\"Stêr Urumea\\\",\\\"name:es\\\"=>\\\"Río Urumea\\\",\\\"name:eu\\\"=>\\\"Urumea ibaia\\\",\\\"source:name:br\\\"=>\\\"proper translation\\\"\"}}, {\"fid\": 5, \"attributes\": {\"osm_id\": \"157768922\", \"osm_type\": \"way\", \"name\": \"Urumea ibaia\", \"waterway\": \"river\", \"other_tags\": \"\\\"name:es\\\"=>\\\"Río Urumea\\\",\\\"name:eu\\\"=>\\\"Urumea ibaia\\\"\"}}, {\"fid\": 6, \"attributes\": {\"osm_id\": \"157768926\", \"osm_type\": \"way\", \"name\": \"Urumea ibaia\", \"waterway\": \"river\", \"other_tags\": \"\\\"name:es\\\"=>\\\"Río Urumea\\\",\\\"name:eu\\\"=>\\\"Urumea ibaia\\\"\"}}, {\"fid\": 7, \"attributes\": {\"osm_id\": \"211463029\", \"osm_type\": \"way\", \"name\": \"Urumea\", \"waterway\": \"river\", \"other_tags\": \"\\\"name:es\\\"=>\\\"Río Urumea\\\",\\\"name:eu\\\"=>\\\"Urumea\\\",\\\"note\\\"=>\\\"Río principal\\\",\\\"source\\\"=>\\\"Gobierno de Navarra 2013;Bing\\\"\"}}, {\"fid\": 8, \"attributes\": {\"osm_id\": \"779391263\", \"osm_type\": \"way\", \"name\": \"Urumea\", \"waterway\": \"river\", \"other_tags\": \"\\\"name:es\\\"=>\\\"Río Urumea\\\",\\\"name:eu\\\"=>\\\"Urumea\\\",\\\"note\\\"=>\\\"Río principal\\\",\\\"source\\\"=>\\\"Gobierno de Navarra 2013;Bing\\\"\"}}, {\"fid\": 9, \"attributes\": {\"osm_id\": \"779391264\", \"osm_type\": \"way\", \"name\": \"Urumea ibaia\", \"waterway\": \"river\", \"other_tags\": \"\\\"note\\\"=>\\\"Río principal\\\",\\\"source\\\"=>\\\"Gobierno de Navarra 2013;Bing\\\"\"}}, {\"fid\": 10, \"attributes\": {\"osm_id\": \"779391265\", \"osm_type\": \"way\", \"name\": \"Urumea\", \"waterway\": \"river\", \"other_tags\": \"\\\"name:es\\\"=>\\\"Río Urumea\\\",\\\"name:eu\\\"=>\\\"Urumea\\\",\\\"note\\\"=>\\\"Río principal\\\",\\\"source\\\"=>\\\"Gobierno de Navarra 2013;Bing\\\"\"}}], \"truncated\": false, \"fields_truncated\": false, \"scope\": \"the layer\"}"
+  },
+  {
+    "request": "corridor",
+    "tool": "preview_filter",
+    "arguments": {
+      "layer_name": "Urumea",
+      "expression": "\"name\" IN ('Urumea', 'Urumea ibaia')"
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"Urumea\", \"expression\": \"\\\"name\\\" IN ('Urumea', 'Urumea ibaia')\", \"valid\": true, \"feature_count\": 10, \"error\": \"\"}"
+  },
+  {
+    "request": "corridor",
+    "tool": "apply_filter",
+    "arguments": {
+      "layer_name": "Urumea",
+      "expression": "\"name\" IN ('Urumea', 'Urumea ibaia')"
+    },
+    "is_error": false,
+    "content": "{\"success\": true, \"layer_name\": \"Urumea\", \"expression\": \"\\\"name\\\" IN ('Urumea', 'Urumea ibaia')\", \"active_filters\": {\"Urumea\": \"\\\"name\\\" IN ('Urumea', 'Urumea ibaia')\"}, \"replaced_filter\": \"lower(coalesce(\\\"name\\\", '')) LIKE '%urumea%'\", \"feature_count\": 10}"
+  },
+  {
+    "request": "corridor",
+    "tool": "layer_statistics",
+    "arguments": {
+      "layer": "Bâtiments pente"
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"Bâtiments pente\", \"field\": \"\", \"measure\": \"\", \"unit\": \"\", \"ellipsoid\": \"\", \"selected_only\": false, \"feature_count\": 2995, \"statistics\": {}, \"group_by\": \"\", \"groups\": [], \"groups_total\": 0, \"truncated\": false, \"ranked_by\": \"\"}"
+  },
+  {
+    "request": "corridor",
+    "tool": "cross_filter",
+    "arguments": {
+      "source_layer": "Urumea",
+      "target_layers": [
+        "Bâtiments pente"
+      ],
+      "buffer": 500,
+      "selected_only": false,
+      "predicates": [
+        "Intersect"
+      ]
+    },
+    "is_error": false,
+    "content": "{\"filtered\": [\"Bâtiments pente\"], \"failed\": {}, \"error\": null, \"skipped\": {}, \"warnings\": {}, \"kept\": {\"Bâtiments pente\": 1826}}"
+  },
+  {
+    "request": "corridor",
+    "tool": "run_algorithm",
+    "arguments": {
+      "algorithm_id": "native:buffer",
+      "parameters": {
+        "INPUT": "Urumea",
+        "DISTANCE": 500,
+        "SEGMENTS": 5,
+        "END_CAP_STYLE": 0,
+        "JOIN_STYLE": 0,
+        "MITER_LIMIT": 2,
+        "DISSOLVE": true
+      },
+      "names": {
+        "OUTPUT": "Couloir Urumea 500 m"
+      }
+    },
+    "is_error": false,
+    "content": "{\"algorithm\": \"native:buffer\", \"name\": \"Tampon\", \"layers\": [{\"output\": \"OUTPUT\", \"layer_id\": \"Couloir_Urumea_500_m_8f0b0b1f_7b8b_4e51_be3a_a34d2f7ca07e\", \"name\": \"Couloir Urumea 500 m\", \"layer_kind\": \"vector\", \"feature_count\": 1}], \"not_made\": [], \"values\": {}, \"messages\": [], \"feature_count\": 1}"
+  },
+  {
+    "request": "corridor",
+    "tool": "list_layers",
+    "arguments": {},
+    "is_error": false,
+    "content": "{\"layers\": [{\"layer_id\": \"B_timents_d39c94f4_f161_4570_97ba_49a669f04347\", \"name\": \"Bâtiments source WGS84\", \"provider_type\": \"ogr\", \"feature_count\": 2995, \"geometry_type\": \"Polygon\", \"crs_authid\": \"EPSG:4326\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": false, \"group\": \"\"}, {\"layer_id\": \"Routes_4276376c_3ac6_40f5_9623_ecdc2a7d6965\", \"name\": \"Routes source WGS84\", \"provider_type\": \"ogr\", \"feature_count\": 5013, \"geometry_type\": \"LineString\", \"crs_authid\": \"EPSG:4326\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": false, \"group\": \"\"}, {\"layer_id\": \"Couloir_Urumea_500_m_8f0b0b1f_7b8b_4e51_be3a_a34d2f7ca07e\", \"name\": \"Couloir Urumea 500 m\", \"provider_type\": \"ogr\", \"feature_count\": 1, \"geometry_type\": \"Polygon\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": true, \"group\": \"\"}, {\"layer_id\": \"B_timents_pente_a3bae165_642b_4ce1_84ab_99a786c52185\", \"name\": \"Bâtiments pente\", \"provider_type\": \"ogr\", \"feature_count\": 1826, \"geometry_type\": \"Polygon\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": true, \"active_filter_expression\": \"\\\"fid\\\" IN (SELECT value FROM json_each('[3,5,6,10,13,14,15,23,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,43,44,45,46,47,48,49,50,51,52,53,54,55,58,59,60,61,62,64,65,66,67,70,71,72,74,75,76,77,7…\", \"layer_kind\": \"vector\", \"visible\": true, \"group\": \"\", \"active_filter_expression_length\": 8601}, {\"layer_id\": \"Pente_____4667a83c_ae4c_425e_b3ba_af2da140922f\", \"name\": \"Pente (%)\", \"provider_type\": \"gdal\", \"feature_count\": -1, \"geometry_type\": \"Raster\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"raster\", \"visible\": true, \"group\": \"\"}, {\"layer_id\": \"tmp_Urumea_25830_7003c13a_3796_48c9_a20e_31624827ebb1\", \"name\": \"Urumea\", \"provider_type\": \"ogr\", \"feature_count\": 10, \"geometry_type\": \"LineString\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": true, \"active_filter_expression\": \"\\\"name\\\" IN ('Urumea', 'Urumea ibaia')\", \"layer_kind\": \"vector\", \"visible\": true, \"group\": \"\"}, {\"layer_id\": \"tmp_Ponts_polygones_25830_f20e1127_d353_46a3_bdd5_bc651683aacd\", \"name\": \"Ponts polygones\", \"provider_type\": \"ogr\", \"feature_count\": 5, \"geometry_type\": \"Polygon\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": true, \"group\": \"\"}, {\"layer_id\": \"tmp_Ponts_lignes_25830_82045280_16ad_4e4a_a721_6f826fd6a8df\", \"name\": \"Ponts lignes\", \"provider_type\": \"ogr\", \"feature_count\": 157, \"geometry_type\": \"LineString\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": true, \"group\": \"\"}, {\"layer_id\": \"tmp_Routes_25830_573df1f4_a566_41ac_823c_e6ee5a15673d\", \"name\": \"Routes\", \"provider_type\": \"ogr\", \"feature_count\": 5013, \"geometry_type\": \"LineString\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": true, \"group\": \"\"}, {\"layer_id\": \"tmp_B_timents_25830_adb3df39_dc49_4aec_8c04_cea398497cd8\", \"name\": \"Bâtiments\", \"provider_type\": \"ogr\", \"feature_count\": 2995, \"geometry_type\": \"Polygon\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": true, \"group\": \"\"}, {\"layer_id\": \"Ponts_lignes_11a8047e_8cae_4a38_85e0_613e0aea5757\", \"name\": \"Ponts lignes source WGS84\", \"provider_type\": \"ogr\", \"feature_count\": 157, \"geometry_type\": \"LineString\", \"crs_authid\": \"EPSG:4326\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": false, \"group\": \"\"}, {\"layer_id\": \"Ponts_polygones_4b0960e9_92e8_4814_aa7a_32ce153d9420\", \"name\": \"Ponts polygones source WGS84\", \"provider_type\": \"ogr\", \"feature_count\": 5, \"geometry_type\": \"Polygon\", \"crs_authid\": \"EPSG:4326\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": false, \"group\": \"\"}, {\"layer_id\": \"Urumea_5a5bd193_f8b0_4784_a6b8_db549e31bf43\", \"name\": \"Urumea source WGS84\", \"provider_type\": \"ogr\", \"feature_count\": 10, \"geometry_type\": \"LineString\", \"crs_authid\": \"EPSG:4326\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": false, \"group\": \"\"}, {\"layer_id\": \"URA_officiel_1270c8c0_da78_4597_a9f6_635c77a142d3\", \"name\": \"URA officiel\", \"provider_type\": \"ogr\", \"feature_count\": 1317, \"geometry_type\": \"Polygon\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"vector\", \"visible\": false, \"group\": \"\"}, {\"layer_id\": \"MNT_GeoEuskadi_5_m_e5f1a45b_5e77_4136_9475_93e20276cad6\", \"name\": \"MNT GeoEuskadi 5 m\", \"provider_type\": \"gdal\", \"feature_count\": -1, \"geometry_type\": \"Raster\", \"crs_authid\": \"EPSG:25830\", \"has_active_filter\": false, \"active_filter_expression\": \"\", \"layer_kind\": \"raster\", \"visible\": true, \"group\": \"\"}]}"
+  },
+  {
+    "request": "corridor",
+    "tool": "group_layers",
+    "arguments": {
+      "layers": [
+        "Couloir Urumea 500 m"
+      ],
+      "above": "Pente (%)"
+    },
+    "is_error": false,
+    "content": "{\"group\": \"\", \"groups_made\": [], \"moved\": [\"Couloir Urumea 500 m\"], \"not_found\": []}"
+  },
+  {
+    "request": "t100",
+    "tool": "field_values",
+    "arguments": {
+      "layer": "URA officiel",
+      "field": "RIO",
+      "limit": 50
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"URA officiel\", \"field\": \"RIO\", \"values\": [\"Agüera\", \"Arakil\", \"Arroyo Abauntzako\", \"Arroyo Eztanda\", \"Arroyo Indusi\", \"Arroyo Malcuarto\", \"Arroyo Orue\", \"Arroyo Subitzi\", \"Arroyo de Kolitza\", \"Arroyo del Acebo\", \"Artibai\", \"Baia\", \"Barbadun\", \"Bidasoa\", \"Butroe\", \"Deba\", \"Ea\", \"Ebro\", \"Ega\", \"Estepona\", \"Gobela\", \"Ibaizabal\", \"Ibaizabal Ibaia\", \"Igara\", \"Karrantza\", \"Laga\", \"Lea\", \"Leitzaran\", \"Oiartzun\", \"Oka\", \"Omecillo\", \"Oria\", \"Oria Ibaia\", \"Río Agauntza\", \"Río Altube\", \"Río Amezketa\", \"Río Araxes\", \"Río Aretxabalgane\", \"Río Arnauri\", \"Río Arratia\", \"Río Arrazola\", \"Río Asteasuko\", \"Río Cadagua\", \"Río Erretola\", \"Río Garatondo\", \"Río Herrerías\", \"Río Inarrondo\", \"Río Izalde\", \"Río Larrea\", \"Río Mastondo\"], \"truncated\": true, \"minimum\": null, \"maximum\": null}"
+  },
+  {
+    "request": "t100",
+    "tool": "field_values",
+    "arguments": {
+      "layer": "URA officiel",
+      "field": "CODIGO",
+      "limit": 50
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"URA officiel\", \"field\": \"CODIGO\", \"values\": [\"Q0010\", \"Q0100\", \"Q0500\"], \"truncated\": false, \"minimum\": null, \"maximum\": null}"
+  },
+  {
+    "request": "t100",
+    "tool": "field_values",
+    "arguments": {
+      "layer": "URA officiel",
+      "field": "RIO",
+      "search": "Urumea"
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"URA officiel\", \"field\": \"RIO\", \"values\": [\"Río Urumea\", \"Urumea\"], \"truncated\": false, \"minimum\": null, \"maximum\": null}"
+  },
+  {
+    "request": "t100",
+    "tool": "preview_filter",
+    "arguments": {
+      "layer_name": "URA officiel",
+      "expression": "\"RIO\" = 'Urumea' AND \"CODIGO\" = 'Q0100'"
+    },
+    "is_error": false,
+    "content": "{\"layer_name\": \"URA officiel\", \"expression\": \"\\\"RIO\\\" = 'Urumea' AND \\\"CODIGO\\\" = 'Q0100'\", \"valid\": true, \"feature_count\": 2, \"error\": \"\"}"
+  },
+  {
+    "request": "t100",
+    "tool": "select_features",
+    "arguments": {
+      "layer": "URA officiel",
+      "expression": "\"RIO\" = 'Urumea' AND \"CODIGO\" = 'Q0100'"
+    },
+    "is_error": false,
+    "content": "{\"layer_id\": \"URA_officiel_1270c8c0_da78_4597_a9f6_635c77a142d3\", \"layer_name\": \"URA officiel\", \"selected_count\": 2}"
+  },
+  {
+    "request": "t100",
+    "tool": "run_algorithm",
+    "arguments": {
+      "algorithm_id": "native:reprojectlayer",
+      "parameters": {
+        "INPUT": {
+          "layer": "URA officiel",
+          "selected_only": true
+        },
+        "TARGET_CRS": "EPSG:25830"
+      },
+      "names": {
+        "OUTPUT": "URA T100"
+      }
+    },
+    "is_error": false,
+    "content": "{\"algorithm\": \"native:reprojectlayer\", \"name\": \"Reprojeter une couche\", \"layers\": [{\"output\": \"OUTPUT\", \"layer_id\": \"URA_T100_172ad01f_8861_4320_a3fb_372d7c379b15\", \"name\": \"URA T100\", \"layer_kind\": \"vector\", \"feature_count\": 2}], \"not_made\": [], \"values\": {}, \"messages\": [], \"feature_count\": 2}"
+  },
+  {
+    "request": "t100",
+    "tool": "cross_filter",
+    "arguments": {
+      "source_layer": "URA T100",
+      "target_layers": [
+        "Bâtiments pente"
+      ],
+      "operator": "AND",
+      "selected_only": false,
+      "predicates": [
+        "Intersect"
+      ]
+    },
+    "is_error": false,
+    "content": "{\"filtered\": [\"Bâtiments pente\"], \"failed\": {}, \"error\": null, \"skipped\": {}, \"warnings\": {}, \"kept\": {\"Bâtiments pente\": 108}}"
+  },
+  {
+    "request": "t100",
+    "tool": "filter_state",
+    "arguments": {},
+    "is_error": false,
+    "content": "{\"layers\": [{\"layer_id\": \"B_timents_pente_a3bae165_642b_4ce1_84ab_99a786c52185\", \"name\": \"Bâtiments pente\", \"layer_kind\": \"vector\", \"subset\": \"(\\\"fid\\\" IN (SELECT value FROM json_each('[3,5,6,10,13,14,15,23,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,43,44,45,46,47,48,49,50,51,52,53,54,55,58,59,60,61,62,64,65,66,67,70,71,72,74,75,76,77,…\", \"derived\": false, \"subset_length\": 9224}, {\"layer_id\": \"tmp_Urumea_25830_7003c13a_3796_48c9_a20e_31624827ebb1\", \"name\": \"Urumea\", \"layer_kind\": \"vector\", \"subset\": \"\\\"name\\\" IN ('Urumea', 'Urumea ibaia')\", \"derived\": false}]}"
+  },
+  {
+    "request": "reseau",
+    "tool": "cross_filter",
+    "arguments": {
+      "source_layer": "Bâtiments pente",
+      "target_layers": [
+        "Routes",
+        "Ponts lignes",
+        "Ponts polygones"
+      ],
+      "buffer": 300,
+      "selected_only": false,
+      "predicates": [
+        "Intersect"
+      ]
+    },
+    "is_error": false,
+    "content": "{\"filtered\": [\"Routes\", \"Ponts lignes\", \"Ponts polygones\"], \"failed\": {}, \"error\": null, \"skipped\": {}, \"warnings\": {}, \"kept\": {\"Routes\": 995, \"Ponts lignes\": 80, \"Ponts polygones\": 5}}"
+  }
+]

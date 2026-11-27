@@ -1,0 +1,50 @@
+{
+  "selected": [
+    {
+      "phase": "acquire",
+      "take": "acquire04",
+      "status": "complete",
+      "frames": 1046,
+      "raw_duration_s": 70.6693,
+      "capture": "real QGIS desktop",
+      "original_frames": "/tmp/fm-urumea-from-zero/out/acquire04/urumea/frames"
+    },
+    {
+      "phase": "analysis",
+      "take": "analysis03",
+      "status": "complete",
+      "frames": 2684,
+      "raw_duration_s": 183.1078,
+      "capture": "real QGIS desktop",
+      "original_frames": "/tmp/fm-urumea-from-zero/out/analysis03/urumea/frames"
+    },
+    {
+      "phase": "composer",
+      "take": "composer02",
+      "status": "complete",
+      "frames": 2744,
+      "raw_duration_s": 183.2368,
+      "capture": "real QGIS desktop",
+      "original_frames": "/tmp/fm-urumea-from-zero/out/composer02/urumea/frames"
+    },
+    {
+      "phase": "finish",
+      "take": "finish01",
+      "status": "complete",
+      "frames": 2491,
+      "raw_duration_s": 164.7667,
+      "capture": "real QGIS desktop",
+      "original_frames": "/tmp/fm-urumea-from-zero/out/finish01/urumea/frames"
+    },
+    {
+      "phase": "review",
+      "take": "review02",
+      "status": "complete",
+      "frames": 360,
+      "raw_duration_s": 23.699,
+      "capture": "real QGIS desktop",
+      "original_frames": "/tmp/fm-urumea-from-zero/out/review02/urumea/frames"
+    }
+  ],
+  "publication": "not_published"
+}

@@ -1,0 +1,23 @@
+{
+  "provider": "elevenlabs",
+  "requests": [
+    {
+      "id": "00-intro-imagodata",
+      "text": "Imagodata présente… FilterMate.",
+      "request": {
+        "voice_id": "fsYODoWLWYJ5ai6CAN3M",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[confident, warm] Imagodata présente… [pause] Filter Mate.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "c94e39a33587df54665c5a28f6e3c87a556515487aa24d7cb6d0d4719ea84eb7"
+    }
+  ]
+}

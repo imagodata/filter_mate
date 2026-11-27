@@ -1,0 +1,153 @@
+{
+  "provider": "elevenlabs",
+  "voice_name": "Benjamin - Clear and Engaging",
+  "voice_id": "F9KUTOne5xOKqAbIU7yg",
+  "model_id": "eleven_v4",
+  "publication": "not_published",
+  "lines": [
+    {
+      "id": "01-depart",
+      "text": "Un projet QGIS vide. Une demande à l’agent. Construisons une analyse de l’Urumea, jusqu’aux fichiers à transmettre.",
+      "file": "01-depart.mp3",
+      "request_sha256": "35d941f17f178a550d98bfcb19bd9d618c222ce1b92688a02db38b72f19f9ffd",
+      "sha256": "c48a1f4d79a4416f07821a05827f462d0cd6b1168518c17a57f8abc8c9e05957",
+      "duration_s": 9.12,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "02-sources",
+      "text": "Je précise le secteur et les liens officiels. L’agent acquiert les bâtiments, les voies et les objets ponts dans OpenStreetMap. Il ajoute un modèle numérique de terrain à cinq mètres, fourni par GeoEuskadi, et le zonage d’inondabilité de l’agence basque de l’eau.",
+      "file": "02-sources.mp3",
+      "request_sha256": "d913c9dd3d01c2b959ad913e1b8d48bc6c6d9b7c3f1b5381e39d5a0d72313395",
+      "sha256": "3a931bea7a87f7274db40e8909aad41584ab709f5b0a8c95a75642a8a5d530e7",
+      "duration_s": 16.24,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "03-sauvegarde",
+      "text": "FilterMate propose de conserver ce travail. Je choisis un projet QGIS : les données détenues en mémoire sont sauvegardées avec lui. Les liens vers le projet et son dossier de données apparaissent directement dans la conversation.",
+      "file": "03-sauvegarde.mp3",
+      "request_sha256": "64e393dfa197473a80c6c8a3b8eb522a10e85b9d4dd60e37a0a0776efb34db27",
+      "sha256": "dd3fabb4e0c36f9de4083163f6f7107d47d1033e5e7708f59bcb8b7ccdaea6cf",
+      "duration_s": 14.64,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "04-terrain",
+      "text": "Prenons le temps de lire le relief. Ce modèle représente le terrain, et non la surface des bâtiments. Nous calculons la pente en pourcentage, puis sa moyenne sous chaque emprise. Elle décrit le contexte topographique ; elle ne simule pas une crue.",
+      "file": "04-terrain.mp3",
+      "request_sha256": "e5c782186f5b400a87acb885e164832af9257a659c7432a4fb4d5a31e01783b7",
+      "sha256": "d3db466b0f449173ea852e384e1b9674f26b67141264f89ffdf17cd3ee5f9447",
+      "duration_s": 16.88,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "05-couloir",
+      "text": "Voici le moteur de filtre de FilterMate. La rivière sert de source, les bâtiments de cible. Un tampon de cinq cents mètres définit un couloir assez large pour explorer les deux rives. Le filtre change les objets affichés, sans supprimer les données sources.",
+      "file": "05-couloir.mp3",
+      "request_sha256": "ba8276261a34cc05e20b1670f88bd9aa3d1c6be68c227bc43d2035e5adfa15d3",
+      "sha256": "314ce8ab9bfcd7272cf555cb8bc90cb62de98d2aa406af5ea0f0b890cf7242fc",
+      "duration_s": 17.2,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "06-ura",
+      "text": "Nous ajoutons maintenant un second critère, avec un ET : l’intersection avec le zonage officiel de période de retour cent ans. La carte se resserre sur les bâtiments qui croisent ce zonage dans notre couloir. Ce résultat reste une sélection exploratoire, à interpréter avec la source officielle.",
+      "file": "06-ura.mp3",
+      "request_sha256": "a31223215bc013609831c0b5408f4753cf5324f62c6825d6aec0218e8c7615d5",
+      "sha256": "b038d45b3dbb79e5601e87b92a5b060b06159b39c579ff45555d62b1dea4901e",
+      "duration_s": 18.48,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "07-reseau",
+      "text": "Les bâtiments retenus deviennent à leur tour la source du filtre. FilterMate conserve les voies et les objets ponts à moins de trois cents mètres. Les critères déjà appliqués aux bâtiments restent actifs.",
+      "file": "07-reseau.mp3",
+      "request_sha256": "4fce470e5d1f1958182dd2ba249a1cb60d21d1007ffd38501f9a8801643123a3",
+      "sha256": "ca83c403eb3f5180b01ce056ab5f09728aa22ea783438a2644da91296fd6c97e",
+      "duration_s": 12.72,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "08-graphiques",
+      "text": "Passons à la synthèse. Deux graphiques sont dessinés avec D3 : la progression du nombre de bâtiments après chaque filtre, puis la distribution des pentes moyennes sous les emprises retenues. Les populations du premier graphique sont emboîtées : on ne les additionne pas.",
+      "file": "08-graphiques.mp3",
+      "request_sha256": "9ab69d63487c6e599382042ade123386af842bf03ff585c0b0db1150035c3949",
+      "sha256": "987d226794524509d32dc53dbeddba984d8b6f2d7169798da374d6054fae46a2",
+      "duration_s": 17.2,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "09-composer",
+      "text": "L’agent crée ensuite une vraie mise en page QGIS, à partir de notre modèle A trois. La carte, les graphiques, les sources et les repères cartographiques composent une page lisible. Le composeur reste accessible pour ajuster le document.",
+      "file": "09-composer.mp3",
+      "request_sha256": "e7510330cc6080befc3fdcf53c7934acddc46dd620129e5571937539fca06e36",
+      "sha256": "f54b1e014c2456b3f4276e5d0b6105c104877515c101c5aa15d441ed87d41857",
+      "duration_s": 16.0,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "10-export",
+      "text": "Le moteur d’export de FilterMate écrit les couches avec leurs filtres actifs dans un GeoPackage. Les rasters sont exportés séparément. Nous obtenons aussi un PDF de la mise en page : des fichiers effectivement produits, prêts à être vérifiés et partagés.",
+      "file": "10-export.mp3",
+      "request_sha256": "e6d1da980daa00f62525d9aaca2bcaba47b6bacd18d9cd9edb149abdf1824066",
+      "sha256": "e3465b407ab3a5ce08846e1e9b369650625e347e772c386a03ca6516bc8605f1",
+      "duration_s": 17.04,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "11-pdf",
+      "text": "Voici le PDF exporté, ouvert dans un lecteur. La carte et les deux graphiques sont réunis sur une page, avec les sources et les précautions de lecture.",
+      "file": "11-pdf.mp3",
+      "request_sha256": "1a8a26b51cbb334ad321b944b6063a8d79c8b4b3a7f224b0c49500c75d91ae2f",
+      "sha256": "d0db19f6393725a2c7af45ffa620b09b4208196fd455f0f0453a5d757da45387",
+      "duration_s": 10.48,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    },
+    {
+      "id": "12-projet",
+      "text": "Enfin, je sauvegarde le projet avec ses nouvelles données. La mise en page et les graphiques restent dans le projet. Le dossier livré a été déplacé puis rouvert pour vérifier que les couches restent lisibles. FilterMate, le meilleur compagnon pour QGIS.",
+      "file": "12-projet.mp3",
+      "request_sha256": "b17cafe1a4c427427629d678bfc8ccae0ddaac9d631008e24482158ec93c8f07",
+      "sha256": "b0e9ba1d84e972639dff4f22eaf5cdab222e48e7fe882b7f3bb9632b642fc716",
+      "duration_s": 17.44,
+      "codec_name": "mp3",
+      "codec_type": "audio",
+      "sample_rate": "44100",
+      "channels": 1
+    }
+  ]
+}

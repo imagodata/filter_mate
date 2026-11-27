@@ -1,0 +1,59 @@
+{
+  "provider": "elevenlabs",
+  "requests": [
+    {
+      "id": "10-export",
+      "text": "Le moteur d’export de FilterMate écrit les couches avec leurs filtres actifs dans un GeoPackage. Les rasters sont exportés séparément. Nous obtenons aussi un PDF de la mise en page : des fichiers effectivement produits, prêts à être vérifiés et partagés.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] Le moteur d’export de FilterMate écrit les couches avec leurs filtres actifs dans un GeoPackage. [pause] Les rasters sont exportés séparément. [pause] Nous obtenons aussi un PDF de la mise en page : des fichiers effectivement produits, prêts à être vérifiés et partagés.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "e6d1da980daa00f62525d9aaca2bcaba47b6bacd18d9cd9edb149abdf1824066"
+    },
+    {
+      "id": "11-pdf",
+      "text": "Voici le PDF exporté, ouvert dans un lecteur. La carte et les deux graphiques sont réunis sur une page, avec les sources et les précautions de lecture.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] Voici le PDF exporté, ouvert dans un lecteur. [pause] La carte et les deux graphiques sont réunis sur une page, avec les sources et les précautions de lecture.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "1a8a26b51cbb334ad321b944b6063a8d79c8b4b3a7f224b0c49500c75d91ae2f"
+    },
+    {
+      "id": "12-projet",
+      "text": "Enfin, je sauvegarde le projet avec ses nouvelles données. La mise en page et les graphiques restent dans le projet. Le dossier livré a été déplacé puis rouvert pour vérifier que les couches restent lisibles. FilterMate, le meilleur compagnon pour QGIS.",
+      "request": {
+        "voice_id": "F9KUTOne5xOKqAbIU7yg",
+        "output_format": "mp3_44100_128",
+        "payload": {
+          "text": "[slowly] Enfin, je sauvegarde le projet avec ses nouvelles données. [pause] La mise en page et les graphiques restent dans le projet. [pause] Le dossier livré a été déplacé puis rouvert pour vérifier que les couches restent lisibles. [pause] FilterMate, le meilleur compagnon pour QGIS.",
+          "model_id": "eleven_v4",
+          "language_code": "fr",
+          "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+          }
+        }
+      },
+      "request_sha256": "b17cafe1a4c427427629d678bfc8ccae0ddaac9d631008e24482158ec93c8f07"
+    }
+  ]
+}

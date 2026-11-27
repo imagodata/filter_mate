@@ -1,0 +1,48 @@
+{
+  "mnt-source": {
+    "url": "https://www.geo.euskadi.eus/WCS_KARTOGRAFIA?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCoverage&COVERAGE=MDT_LIDAR_2017_5M&CRS=EPSG%3A25830&RESPONSE_CRS=EPSG%3A25830&BBOX=581825%2C4793565%2C585805%2C4797840&RESX=5&RESY=5&FORMAT=GeoTIFF",
+    "coverage": "MDT_LIDAR_2017_5M",
+    "bbox": [
+      581825,
+      4793565,
+      585805,
+      4797840
+    ],
+    "crs": "EPSG:25830",
+    "resolution_m": 5,
+    "sha256": "59bc3bb7ffa9c07f9d22589a9b5953ac21b4589ce01078e8e5cea8700fa0cbad",
+    "metadata": "https://www.geo.euskadi.eus/geonetwork/srv/spa/metadata.show?uuid=md_IDEEu_MDT_LIDAR_5M_2017_es",
+    "licence": "CC BY 3.0",
+    "credit": "Eusko Jaurlaritza / Gobierno Vasco, GeoEuskadi"
+  },
+  "ura-source": {
+    "url": "https://www.geo.euskadi.eus/cartografia/DatosDescarga/Aguas_Interiores/INUNDABILIDAD/CARTOGRAFIA_PELIGROSIDAD/URA0501GInundabilidad_ETRS89.zip",
+    "last_modified": "Wed, 02 Sep 2026 08:49:16 GMT",
+    "bytes": 22946853,
+    "metadata": "https://www.geo.euskadi.eus/geonetwork/srv/spa/metadata.show?uuid=md_IDEEu_INUNDABILIDAD_es",
+    "member": "CT_0501GInundabilidad_2025.shp",
+    "sha256": "3d68938a1863fbaced92449f639d38e4edb0eb1003b0bdd63efa47f1bbc59c9d",
+    "filter": "RIO = 'Urumea' AND CODIGO = 'Q0100'",
+    "notes": "Les variantes Río Urumea sont en amont, hors emprise des bâtiments acquis."
+  },
+  "osm": {
+    "source": "Overpass France / OpenStreetMap",
+    "licence": "ODbL",
+    "credit": "© contributeurs OpenStreetMap",
+    "bbox_wgs84": [
+      -1.985,
+      43.295,
+      -1.948,
+      43.324
+    ],
+    "acquired_utc": "2026-11-27",
+    "river_query": "waterway=river",
+    "river_names": [
+      "Urumea",
+      "Urumea ibaia"
+    ],
+    "scope": "Entités OSM acquises par emprise ; géométries complètes, pas recensement du bâti."
+  },
+  "working_crs": "EPSG:25830",
+  "publication": "not_published"
+}
