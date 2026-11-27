@@ -59,7 +59,13 @@ def test_animation_moves_then_stops_when_hidden_or_idle(activity):
     widget.refresh_look(True)
     assert widget._renderer.animated()
     widget.set_working(False)
-    assert not widget._renderer.animated() and not widget.isVisible()
+    assert not widget._renderer.animated() and widget.isVisible()
+    assert widget.display_phase == 'complete'
+    before = widget.grab().toImage()
+    loop = QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(150, loop.quit)
+    getattr(loop, 'exec', getattr(loop, 'exec_', None))()
+    assert widget.grab().toImage() == before
 
 
 def test_indicators_own_separate_renderers(activity):
@@ -107,3 +113,46 @@ def test_action_phases_change_the_picture_without_restarting_on_each_text_chunk(
     widget.set_working(False)
     widget.set_working(True)
     assert widget.phase == 'thinking'
+
+
+def test_user_interactions_are_static_except_live_dictation_and_never_replace_active_work(activity):
+    app, parent, widget, _ = activity
+    parent.show()
+    app.processEvents()
+    assert widget.isVisible() and widget.display_phase == 'idle' and not widget._renderer.animated()
+    widget.set_interaction('drafting')
+    assert widget.display_phase == 'drafting' and not widget._renderer.animated()
+    widget.set_working(True)
+    widget.set_phase('processing')
+    assert widget.display_phase == 'processing' and widget._renderer.animated()
+    widget.set_working(False)
+    assert widget.display_phase == 'drafting' and not widget._renderer.animated()
+    widget.set_interaction('listening')
+    assert widget.display_phase == 'listening' and widget._renderer.animated()
+    parent.hide()
+    assert not widget._renderer.animated()
+    parent.show()
+    widget.set_interaction('queued')
+    assert widget.display_phase == 'queued' and not widget._renderer.animated()
+    assert widget.accessibleName() == widget.toolTip() and 'queued' in widget.toolTip()
+
+
+def test_all_phases_render_valid_distinct_static_artwork_and_static_states_never_animate(activity):
+    app, parent, widget, module = activity
+    from qgis.PyQt.QtCore import QByteArray
+    parent.show()
+    app.processEvents()
+    images = []
+    for phase in module.AGENT_ACTIVITY_STYLES:
+        renderer = QtSvg.QSvgRenderer(QByteArray(module.agent_activity_svg('#2e2e2e', False, phase).encode()))
+        assert renderer.isValid() and not renderer.animated(), phase
+        image = QtGui.QImage(64, 64, QtGui.QImage.Format.Format_ARGB32)
+        image.fill(QtCore.Qt.GlobalColor.transparent)
+        painter = QtGui.QPainter(image)
+        renderer.render(painter)
+        painter.end()
+        assert all(image != previous for previous in images), phase
+        images.append(image)
+        widget.set_working(True)
+        widget.set_phase(phase)
+        assert widget._renderer.animated() == (phase not in module.STATIC_AGENT_PHASES), phase

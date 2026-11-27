@@ -288,6 +288,15 @@ def test_waiting_activity_restores_the_step_after_a_question_or_exception(contro
     assert activity_state["phase"] == "working"
 
 
+@pytest.mark.parametrize('tool, phase', [
+    ('search_open_data', 'searching'), ('run_algorithm', 'processing'), ('update_features', 'editing'),
+    ('export_layers', 'exporting'), ('set_layer_style', 'designing'), ('zoom_to', 'navigating'),
+])
+def test_the_activity_identifies_the_actual_tool_task(controller, ctrl_module, tool, phase):
+    call = ctrl_module.ToolCallPart('activity', tool, {})
+    assert controller._tool_activity(call) == phase
+
+
 def test_waiting_activity_does_not_overwrite_stop_or_a_new_conversation(controller, activity_state):
     with controller._activity("waiting"):
         controller._on_stop()

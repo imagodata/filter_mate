@@ -2050,6 +2050,7 @@ class AgentPanel(QFrame):
         self.microphone_button.setToolTip(title)
         self.microphone_button.setAccessibleName(title)
         self.send_button.setEnabled((self._ready or self._working) and (state == 'idle' or self._working))
+        self._refresh_activity_interaction()
         self._refresh_look()
 
     def insert_transcription(self, text: str) -> None:
@@ -2161,6 +2162,7 @@ class AgentPanel(QFrame):
         self.thread.set_hint(text if self._working else "")
 
     def _refresh_send_action(self) -> None:
+        self._refresh_activity_interaction()
         stopping = self._working and not self.input.text().strip()
         tooltip = (_tr("Stop (Esc)") if stopping else
                    _tr("Send to the running agent (Enter)") if self._working and self._followup_mode == "push" else
@@ -2170,6 +2172,17 @@ class AgentPanel(QFrame):
         if stopping != self._send_stops:
             self._send_stops = stopping
             self._refresh_look()
+
+    def _refresh_activity_interaction(self) -> None:
+        if self._speech_state in ('recording', 'transcribing'):
+            interaction = 'listening' if self._speech_state == 'recording' else 'transcribing'
+        elif self.input.text().strip():
+            interaction = 'drafting'
+        elif self._queue:
+            interaction = 'queued'
+        else:
+            interaction = ''
+        self.activity_icon.set_interaction(interaction)
 
     def _on_send(self, alternate: bool = False) -> None:
         if self._speech_state != 'idle':
@@ -2214,6 +2227,7 @@ class AgentPanel(QFrame):
 
     def _refresh_queue_row(self) -> None:
         """The pile waiting, numbered once there are several: the first line of each, in order."""
+        self._refresh_activity_interaction()
         queue = list(getattr(self, "_queue", ()))
         if not queue:
             self.queue_row.setVisible(False)
@@ -2317,6 +2331,8 @@ class AgentPanel(QFrame):
         self._refresh_new_button()
         if hasattr(self, "example_buttons"):
             self._examples_on_screen()  # the welcome may have been on screen already: no show event then
+        self.activity_icon.set_phase('idle')
+        self._refresh_activity_interaction()
 
     def end_answer(self) -> None:
         """What comes next starts on its own line."""

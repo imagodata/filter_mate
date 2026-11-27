@@ -371,6 +371,43 @@ AGENT_ACTIVITY_STYLES = {
     'waiting': (0, 3.8, 0, 0),
     'retry': (6.4, 3.0, 1, 1.8),
     'stopping': (0, 2.6, 0, 0),
+    'idle': (0, 0, 0, 0),
+    'complete': (0, 0, 0, 0),
+    'drafting': (0, 0, 0, 0),
+    'queued': (0, 0, 0, 0),
+    'error': (0, 0, 0, 0),
+    'searching': (3.0, 1.6, 2, 1.9),
+    'processing': (1.6, 1.1, 3, 2.1),
+    'editing': (3.2, 1.7, 1, 2.0),
+    'exporting': (2.6, 1.5, 2, 2.0),
+    'designing': (4.5, 2.0, 3, 1.9),
+    'navigating': (2.4, 1.8, 1, 2.0),
+    'confirming': (0, 3.8, 0, 0),
+    'listening': (0, 1.2, 0, 0),
+    'transcribing': (2.9, 1.6, 2, 1.8),
+}
+
+STATIC_AGENT_PHASES = frozenset({'idle', 'complete', 'drafting', 'queued', 'error'})
+
+# Simple center marks remain legible in the 32 px activity indicator. Color is never the only state cue.
+_AGENT_PHASE_MARKS = {
+    'complete': ('#248c68', '<path d="m10.4 12 1.1 1.2 2.2-2.5"/>'),
+    'error': ('#c54a56', '<path d="M12 10.2v2.2m0 1v.1"/>'),
+    'drafting': ('#3884d4', '<path d="m10.4 12.7-.3 1.1 1.1-.3 2.5-2.5-.8-.8z"/>'),
+    'editing': ('#ba7b1e', '<path d="m10.4 12.7-.3 1.1 1.1-.3 2.5-2.5-.8-.8z"/>'),
+    'queued': ('#ba7b1e', '<path d="M10.3 10.8h3.4m-3.4 1.2h2.6m-2.6 1.2H12"/>'),
+    'reading': ('#3884d4', '<path d="M12 10.7v2.6m0-2.6-1.7-.3v2.6l1.7.3 1.7-.3v-2.6z"/>'),
+    'searching': ('#3884d4', '<circle cx="11.6" cy="11.6" r="1.2"/><path d="m12.5 12.5 1.3 1.3"/>'),
+    'processing': ('#248c68', '<path d="M10.5 11.7v1.6M12 10.5v2.8m1.5-2v2"/>'),
+    'exporting': ('#248c68', '<path d="M12 13.5v-3m-1.2 1.2 1.2-1.2 1.2 1.2m-2.7 1.9v.6h3v-.6"/>'),
+    'designing': ('#8656bc', '<path d="m12 10.2.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5z"/>'),
+    'navigating': ('#248c68', '<circle cx="12" cy="12" r="1.1"/><path d="M12 9.8v.8m0 2.8v.8m-2.2-2.2h.8m2.8 0h.8"/>'),
+    'waiting': ('#ba7b1e', '<path d="M11 10.5v3m2-3v3"/>'),
+    'confirming': ('#ba7b1e', '<path d="M10.9 11a1.1 1.1 0 0 1 2.2 0c0 .8-1.1.7-1.1 1.6m0 .9v.1"/>'),
+    'retry': ('#ba7b1e', '<path d="M13.4 11.5a1.5 1.5 0 1 0-.2 1.5m.2-2.5v1.2h-1.2"/>'),
+    'stopping': ('#ba7b1e', '<rect x="10.8" y="10.8" width="2.4" height="2.4" rx=".2"/>'),
+    'listening': ('#3884d4', '<rect x="11.4" y="10" width="1.2" height="2.5" rx=".6"/><path d="M10.5 11.8a1.5 1.5 0 0 0 3 0M12 13.3v.8"/>'),
+    'transcribing': ('#8656bc', '<path d="M10.3 10.5h3.4M12 10.5v3m-1 .1h2"/>'),
 }
 
 
@@ -380,33 +417,39 @@ def agent_activity_svg(color: str, animated: bool = False, phase: str = 'thinkin
     The supplied artwork uses animate/animateMotion, which QtSvg ignores. animateTransform works in both
     supported Qt versions. Keep this renderer out of the QIcon cache: it belongs to one visible activity widget.
     """
+    phase = phase if phase in AGENT_ACTIVITY_STYLES else 'thinking'
+    animated = animated and phase not in STATIC_AGENT_PHASES
     document = svg_document('agent_network', color)
-    if not animated:
-        return document
     orbit, duration, count, radius = AGENT_ACTIVITY_STYLES.get(phase, AGENT_ACTIVITY_STYLES['thinking'])
-    if phase in ('waiting', 'retry', 'stopping'):
+    accent, mark = _AGENT_PHASE_MARKS.get(phase, (color, ''))
+    if mark:
         document = document.replace(f'cx="12" cy="12" r="3.1" fill="{color}"',
-                                    'cx="12" cy="12" r="3.1" fill="#ba7b1e"')
-    pulse = (
-        '<g transform="translate(12 12)"><g>'
-        '<animateTransform attributeName="transform" type="scale" values="0.7;1.15;0.7" '
-        f'dur="{duration}s" repeatCount="indefinite"/>'
-        f'<circle r="4.8" fill="none" stroke="{color}" stroke-opacity="0.5" stroke-width="0.7"/>'
-        '</g></g>'
-    )
+                                    f'cx="12" cy="12" r="3.1" fill="{accent}"')
+    pulse = ''
+    if animated:
+        pulse = (
+            '<g transform="translate(12 12)"><g>'
+            # Qt 6 needs both scale components; a single value can load as animated but never change a pixel.
+            '<animateTransform attributeName="transform" type="scale" values="0.7 0.7;1.15 1.15;0.7 0.7" '
+            f'dur="{duration}s" repeatCount="indefinite"/>'
+            f'<circle r="4.8" fill="none" stroke="{accent}" stroke-opacity="0.5" stroke-width="0.7"/>'
+            '</g></g>'
+        )
     if count:
-        pulse += ('<g><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" '
-                  f'dur="{orbit}s" repeatCount="indefinite"/>')
+        pulse += '<g>'
+        if animated:
+            direction = -360 if phase in ('searching', 'transcribing') else 360
+            pulse += ('<animateTransform attributeName="transform" type="rotate" from="0 12 12" '
+                      f'to="{direction} 12 12" dur="{orbit}s" repeatCount="indefinite"/>')
         points = ((18.6, 12, '#3884d4'), (8.7, 17.72, '#d95d65'), (8.7, 6.28, '#ba7b1e'))
         if phase == 'retry':
             points = ((18.6, 12, '#ba7b1e'),)
         for x, y, fill in points[:count]:
             pulse += f'<circle cx="{x}" cy="{y}" r="{radius}" fill="{fill}" stroke="none"/>'
         pulse += '</g>'
-    elif phase == 'waiting':
-        pulse += '<path d="M11 10.5v3M13 10.5v3" stroke="#202020" stroke-width="0.9"/>'
-    elif phase == 'stopping':
-        pulse += '<rect x="10.7" y="10.7" width="2.6" height="2.6" rx="0.3" fill="#202020" stroke="none"/>'
+    if mark:
+        ink = '#202020' if accent == '#ba7b1e' else '#ffffff'
+        pulse += f'<g stroke="{ink}" stroke-width=".7" fill="none">{mark}</g>'
     return document.replace('</svg>', pulse + '</svg>')
 
 

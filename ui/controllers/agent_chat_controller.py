@@ -2176,7 +2176,7 @@ class AgentChatController(QObject):
         card.destroyed.connect(lambda *_args: declined())  # a new conversation, the panel taken away
         forget = on_abort(stopped)
         try:
-            with self._activity('waiting'):
+            with self._activity('confirming'):
                 loop.exec()
         finally:
             forget()
@@ -3641,6 +3641,20 @@ class AgentChatController(QObject):
             setter(phase)
 
     def _tool_activity(self, call: ToolCallPart) -> str:
+        if call.name in ('search_open_data', 'search_imagery', 'find_place', 'find_algorithms', 'list_tables'):
+            return 'searching'
+        if call.name in ('run_algorithm', 'contour_lines', 'make_cartogram', 'cross_filter', 'geometry_filter',
+                         'point_cloud_filter', 'apply_filter', 'segment_objects'):
+            return 'processing'
+        if call.name in ('update_features', 'delete_features', 'add_features', 'add_field', 'set_form', 'relations'):
+            return 'editing'
+        if call.name in ('export_layers', 'export_layout', 'export_chart', 'export_infographic', 'export_settings_profile'):
+            return 'exporting'
+        if call.name in ('set_layer_style', 'set_labels', 'design_style', 'apply_style_preset', 'create_layout',
+                         'edit_layout', 'show_chart', 'show_infographic'):
+            return 'designing'
+        if call.name in ('zoom_to', 'flash_features', 'control_qgis', 'set_active_layer', 'set_exploring'):
+            return 'navigating'
         spec = self._tools.get(call.name)
         if spec is not None and spec.open_world and call.name not in (RUN_PYTHON, RUN_CHART_CODE):
             return 'fetching'
@@ -4229,7 +4243,7 @@ class AgentChatController(QObject):
         with owned_by(CHAT_WAITS):
             forget = on_abort(stopped)
         try:
-            with self._activity('waiting'):
+            with self._activity('confirming'):
                 if "answer" not in outcome and not card.done:
                     loop.exec()
         finally:
@@ -4300,7 +4314,7 @@ class AgentChatController(QObject):
                 lines.extend(f"    {line}" for line in self._settings_lines(call)[0])
         text = _tr("The agent wants to do these {} actions:\n{}\n\nDo you agree to all of them? No runs none of "
                    "them.").format(len(calls), "\n".join(lines))
-        with self._activity('waiting'):
+        with self._activity('confirming'):
             return bool(self._ask_user(title or _tr("FilterMate agent"), text))
 
     def confirm_each(self, calls) -> Optional[Dict[int, bool]]:
@@ -4356,7 +4370,7 @@ class AgentChatController(QObject):
         with owned_by(CHAT_WAITS):
             forget = on_abort(stopped)
         try:
-            with self._activity('waiting'):
+            with self._activity('confirming'):
                 if "each" not in outcome and not card.done:
                     loop.exec()
         finally:
@@ -4366,7 +4380,7 @@ class AgentChatController(QObject):
     def confirm(self, call: ToolCallPart) -> bool:
         """A call of the chat the level of autonomy does not let run alone; the user may allow the tool for the
         rest of the conversation."""
-        with self._activity('waiting'):
+        with self._activity('confirming'):
             return self._confirm_action(call)
 
     def _confirm_action(self, call: ToolCallPart) -> bool:
@@ -4710,6 +4724,7 @@ class AgentChatController(QObject):
             listed, one_line(str(reason), 300))
 
     def on_finished(self, outcome: ChatOutcome) -> None:
+        generation, abandoned = self._memory_generation, self._abandoned
         if outcome.status != OUTCOME_DONE or self._abandoned:
             self._interface_handoffs = []
         if self._interface_handoffs:
@@ -4717,6 +4732,8 @@ class AgentChatController(QObject):
                 self._finish_turn_view(outcome)
         else:
             self._finish_turn_view(outcome)
+        if not abandoned and generation == self._memory_generation and outcome.status != OUTCOME_DONE:
+            self._set_activity('error' if outcome.status == OUTCOME_FAILED else 'stopping')
 
     def _finish_turn_view(self, outcome: ChatOutcome) -> None:
         # What the request carried is known to the model, unless it failed before reaching it or was taken out of

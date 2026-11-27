@@ -1,0 +1,12 @@
+{
+  "qgis": "4.3.0-Master",
+  "states": 22,
+  "static_states": [
+    "complete",
+    "drafting",
+    "error",
+    "idle",
+    "queued"
+  ],
+  "passed": true
+}

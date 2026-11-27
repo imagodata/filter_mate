@@ -23,6 +23,7 @@ des propositions encore à réaliser.
 | Curseurs du plugin | Implémenté | Intentions cohérentes selon le contrôle, attentes locales et restauration sans toucher aux outils de carte. |
 | Éditions de couche par l’agent | Implémenté | Confirmation explicite après la demande avant l’enregistrement dans la source, par couche ou groupe de transaction. |
 | Dossier des exports de l’agent | Implémenté | Choix local mémorisé par l’utilisateur, annulation sans export et destinations dans les profils QGIS refusées. |
+| Réseau SVG au repos et variantes | Implémenté | Icône persistante, repos statique et 22 états liés aux tâches et interactions. |
 
 ## Vérification du choix du SCR
 
@@ -247,3 +248,21 @@ des graphiques et des sorties locales ; banc hors ligne inchangé à 174 scénar
 QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6 : export réel puis relecture d’un GeoPackage dans le dossier sélectionné,
 réutilisation du choix, refus du profil et d’un sous-dossier interdit, annulation sans repli et refus de sauvegarder
 le projet avec ses couches dans le profil. La réponse du sélecteur de dossier est simulée dans ce scénario.
+
+## Réseau SVG persistant et variations d’activité
+
+L’indicateur reste visible après la réponse, sous forme statique. Les 22 états distinguent les tâches réelles des
+outils et les interactions : recherche, calcul, édition, export, style, navigation, rédaction, confirmation,
+dictée, transcription, brouillon, file d’attente, fin, erreur et arrêt. Les états de repos, fin, brouillon,
+file et erreur ne déclenchent aucune animation SVG. La dictée anime l’indicateur même sans requête modèle.
+Un brouillon saisi pendant un traitement ne masque pas l’activité de ce traitement.
+
+Les variantes claires et sombres, leurs SVG individuels et les planches de comparaison sont dans
+[l’identité de l’agent](../../design/agent-identity/README.md). Les petits symboles centraux complètent la couleur,
+avec un nom accessible et une infobulle traduits. Le titre de l’onglet conserve son ancienne icône.
+
+La pulsation utilise désormais deux composantes explicites d’échelle ; la forme à une composante pouvait rester
+figée dans Qt 6 tout en étant déclarée animée. Les contrôles natifs vérifient le changement réel des images des
+orbites et de la pulsation, ainsi que l’immobilité de l’état terminé et l’arrêt lorsque le panneau est masqué.
+Validation : 160 tests ciblés des widgets et du contrôleur, 46 SVG générés vérifiés ; comparaison de 22 dessins
+distincts dans chaque thème et contrôle des images animées dans QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6.

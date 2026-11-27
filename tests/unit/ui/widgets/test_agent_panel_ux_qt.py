@@ -70,6 +70,35 @@ def _ready_panel():
     return panel
 
 
+def test_network_icon_follows_drafts_voice_and_paused_queue_without_hiding_after_work():
+    panel = _ready_panel()
+    panel.show()
+    _APP.processEvents()
+    icon = panel.activity_icon
+    assert icon.isVisible() and icon.display_phase == 'idle' and not icon._renderer.animated()
+    panel.input.setText('my request')
+    assert icon.display_phase == 'drafting' and not icon._renderer.animated()
+    panel.set_working(True)
+    panel.set_activity_phase('exporting')
+    panel.input.setText('a correction while exporting')
+    assert icon.display_phase == 'exporting'
+    panel.queue_message('next request', 'respond')
+    panel.pause_queued()
+    panel.input.clear()
+    panel.set_working(False)
+    assert icon.display_phase == 'queued' and icon.isVisible() and not icon._renderer.animated()
+    panel.cancel_queued()
+    assert icon.display_phase == 'drafting'
+    panel.input.clear()
+    panel.set_speech_state('recording')
+    assert icon.display_phase == 'listening' and icon._renderer.animated()
+    panel.set_speech_state('transcribing')
+    assert icon.display_phase == 'transcribing' and icon._renderer.animated()
+    panel.set_speech_state('idle')
+    assert icon.display_phase == 'complete' and not icon._renderer.animated()
+    panel.close()
+
+
 @pytest.mark.parametrize('paused', [False, True])
 def test_native_interface_handoff_holds_automatic_followups_until_the_dialog_closes(paused):
     panel = _ready_panel()

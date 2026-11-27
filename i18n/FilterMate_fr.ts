@@ -15505,4 +15505,95 @@ Si vous choisissez Non, ces données resteront en mémoire et seront perdues à 
         <translation>Dossier d’export</translation>
     </message>
 </context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Prêt pour un message</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Terminé — prêt pour un message</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Réflexion</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Lecture des données</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Action en cours</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Récupération des données</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Rédaction de la réponse</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Attente</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Nouvelle tentative</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Arrêt demandé ou terminé</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Vous rédigez un message</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Des messages sont en file d’attente</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>La demande nécessite votre attention</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Recherche de données</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Traitement des données</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Édition d’une couche</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Export des fichiers</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Préparation de la carte</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>Navigation dans QGIS</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>En attente de votre confirmation</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Enregistrement de votre voix</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Transcription de votre enregistrement</translation>
+    </message>
+</context>
 </TS>

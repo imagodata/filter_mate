@@ -1,0 +1,12 @@
+{
+  "qgis": "3.44.15-Solothurn",
+  "states": 22,
+  "static_states": [
+    "complete",
+    "drafting",
+    "error",
+    "idle",
+    "queued"
+  ],
+  "passed": true
+}

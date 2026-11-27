@@ -9,11 +9,28 @@ Le réseau pulsé est la direction retenue par l’utilisateur pour l’accueil 
 - [Icône claire](agent-light.svg) et [icône sombre](agent-dark.svg), dessinées sur une grille de 24 unités.
 - [Animation claire](agent-loader-light.svg) et [animation sombre](agent-loader-dark.svg).
 - Quatre branches colorées, centre suivant le thème et points en orbite agrandis. Le loader occupe 32 pixels.
-- Animation limitée à 20 images par seconde dans le composant Qt, active pendant une requête, arrêtée lorsque le panneau est masqué ou inactif. Elle reprend si le panneau redevient visible pendant le travail.
+- Indicateur visible aussi au repos : réseau statique au démarrage, puis coche discrète après une réponse terminée.
+- Animation limitée à 20 images par seconde, active pendant le travail ou la dictée, arrêtée lorsque le panneau est masqué. La saisie d’un brouillon et la file d’attente restent statiques.
 
 Le rendu partagé de `ui/styles/mockup_design.py` distingue l’ancienne icône de titre `agent` du réseau `agent_network` utilisé dans l’accueil. Les icônes de titre sont conservées en [clair](agent-tab-light.svg) et [sombre](agent-tab-dark.svg). Le composant `ui/widgets/agent_activity.py` possède son propre moteur SVG ; les animations ne sont pas placées dans le cache global des icônes.
 
 ## Animation selon les actions
+
+La famille actuelle comprend **22 états**, chacun décliné pour les thèmes clair et sombre :
+[planche statique](agent-states-static.svg), [planche animée](agent-states-animated.svg).
+
+![Les états de l’agent, sur fond clair et sombre](agent-states-static.png)
+
+Les SVG de repos prêts à utiliser sont [Prêt, clair](states/idle-light.svg), [Prêt, sombre](states/idle-dark.svg),
+[Terminé, clair](states/complete-light.svg) et [Terminé, sombre](states/complete-dark.svg).
+Le dessin garde les quatre nœuds colorés ; une petite marque centrale et le rythme distinguent les actions.
+Les variations suivent les vrais noms d’outils : recherche, lecture, calcul, édition de couche, export, style,
+navigation, rédaction, récupération distante. Côté utilisateur : saisie, messages en file, confirmation, voix et
+transcription. Une saisie pendant un calcul ne remplace pas l’état du calcul. Une erreur ou un arrêt conserve un
+état distinct. L’icône de titre de l’onglet reste l’ancienne bulle de conversation.
+
+Les 44 SVG de `states/` et les deux planches proviennent du même générateur que le rendu du plugin :
+`python3 scripts/render_agent_activity_variants.py` ; `--check` vérifie qu’ils sont à jour.
 
 La vitesse et l’affichage suivent les événements de la conversation et des outils. Les changements de phase viennent des callbacks du contrôleur, sans interpréter les textes traduits. Envoyer plusieurs fragments de texte dans une même phase ne redémarre pas son animation.
 
@@ -21,16 +38,19 @@ La vitesse et l’affichage suivent les événements de la conversation et des o
 |---|---|---|
 | Préparation de réponse | Trois points et pulsation lente | 5,4 s |
 | Lecture par un outil | Deux points plus grands | 3,6 s |
-| Traitement ou modification | Trois grands points et pulsation plus vive | 2,1 s |
+| Autre action | Trois grands points et pulsation plus vive | 2,1 s |
 | Appel d’un outil extérieur | Trois points et rythme intermédiaire | 2,8 s |
 | Réponse reçue progressivement | Un point bleu, plus discret | 4,2 s |
-| Attente de décision | Centre ambre avec pause, pulsation calme | Pas d’orbite |
+| Attente d’interface | Centre ambre avec pause, pulsation calme | Pas d’orbite |
 | Nouvelle tentative | Un point ambre, rotation lente | 6,4 s |
 | Arrêt demandé | Centre ambre avec carré d’arrêt | Pas d’orbite |
 
 [Comparer les animations](agent-activity-phases.svg) et [aperçu des états](agent-activity-phases.png). Une attente de confirmation retrouve ensuite sa phase précédente ; un arrêt ou un changement de conversation conserve son nouvel état. Les recettes utilisent le même indicateur lorsqu’elles exécutent leurs outils.
 
 Les fichiers fournis comme références utilisent `animate` et `animateMotion`. QtSvg les charge comme images mais ne reconnaît pas leurs animations dans les environnements vérifiés. Les variantes utilisent `animateTransform`, pris en charge par Qt5 et Qt6. Cette adaptation conserve la pulsation et les orbites sans ajouter de navigateur embarqué. [Prise en charge SVG par Qt](https://doc.qt.io/qt-6/topics-vectorimageformats.html).
+La pulsation précise ses deux composantes d’échelle : `0.7 0.7;1.15 1.15;0.7 0.7`. Avec une seule composante,
+Qt 6 pouvait déclarer le document animé tout en gardant une image fixe. Les contrôles comparent désormais les
+images effectivement affichées, y compris la pulsation lente de confirmation.
 
 ## Proposition pour le plugin
 
