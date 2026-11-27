@@ -1,0 +1,11 @@
+svg.selectAll('*').remove();
+svg.append('rect').attr('width',width).attr('height',height).attr('fill','#ffffff');
+const m={left:225,right:70,top:14,bottom:45};
+const x=d3.scaleLinear().domain([0,d3.max(data,d=>d.value)]).nice().range([m.left,width-m.right]);
+const y=d3.scaleBand().domain(data.map(d=>d.label)).range([m.top,height-m.bottom]).padding(.42);
+const colors=['#c2dce4','#168cad','#e75d35'];
+svg.append('g').attr('transform',`translate(0,${height-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format('d'))).call(g=>g.select('.domain').remove());
+svg.selectAll('rect.bar').data(data).join('rect').attr('class','bar').attr('x',m.left).attr('y',d=>y(d.label)).attr('width',d=>x(d.value)-m.left).attr('height',y.bandwidth()).attr('rx',4).attr('fill',(d,i)=>colors[i]);
+svg.selectAll('text.name').data(data).join('text').attr('class','name').attr('x',m.left-12).attr('y',d=>y(d.label)+y.bandwidth()/2).attr('dy','.35em').attr('text-anchor','end').attr('font-size',24).attr('fill','#183747').text(d=>d.label);
+svg.selectAll('text.value').data(data).join('text').attr('class','value').attr('x',d=>x(d.value)+12).attr('y',d=>y(d.label)+y.bandwidth()/2).attr('dy','.35em').attr('font-size',26).attr('font-weight',700).attr('fill','#183747').text(d=>d3.format(',d')(d.value).replaceAll(',',' '));
+svg.selectAll('.tick text').attr('font-size',20).attr('fill','#54717e');

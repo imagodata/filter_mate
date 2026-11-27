@@ -1,0 +1,122 @@
+{
+  "stage": "sources",
+  "layers": [
+    {
+      "name": "Bâtiments",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 2995,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "MNT GeoEuskadi 5 m",
+      "valid": true,
+      "crs": "EPSG:25830"
+    },
+    {
+      "name": "Ponts lignes",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 157,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Ponts polygones",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 5,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Routes",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 5013,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "highway",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "URA officiel",
+      "valid": true,
+      "crs": "EPSG:25830",
+      "count": 1317,
+      "subset": "",
+      "fields": [
+        "ZONA",
+        "TIPO_ZONA",
+        "RIO",
+        "LONG_KM",
+        "HIPOTESIS",
+        "HIDROLOGIA",
+        "PRECISION_",
+        "HIDRAUL",
+        "ESTUDIO",
+        "TIPO_EST",
+        "DOCUMENTO",
+        "ORGANISMO",
+        "CLAVE_EXPE",
+        "DEMARCACIO",
+        "ID_DEMAR",
+        "Q_M3_S",
+        "ZI_DIRECTI",
+        "FECHA_APRO",
+        "FECHA_GEO",
+        "ID_ZONA",
+        "CICLO",
+        "CODIGO",
+        "Shape_Leng",
+        "Shape_Area"
+      ]
+    },
+    {
+      "name": "Urumea",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 10,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "waterway",
+        "other_tags"
+      ]
+    }
+  ],
+  "filters": {},
+  "replay_comparison": null,
+  "render_flag": true,
+  "thread": "Partons de ce projet vide à Saint-Sébastien. Acquiers les données sur le rectangle WGS84 [-1.985,43.295,-1.948,43.324]. Avec Overpass, ajoute les bâtiments (polygones) « Bâtiments », les routes highway (lignes) « Routes », les ponts bridge (lignes et polygones séparés) « Ponts lignes » et « Ponts polygones ». Pour la couche « Urumea », utilise UNE requête Overpass avec UNIQUEMENT le tag waterway=river, geometry=lines. Ne fais PAS une requête name=Urumea : les segments urbains portent un nom différent. Nous filtrerons les noms contenant Urumea ensuite. Voici deux liens officiels déjà identifiés : ajoute le GeoTIFF numérique de terrain « MNT GeoEuskadi 5 m » depuis https://www.geo.euskadi.eus/WCS_KARTOGRAFIA?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCoverage&COVERAGE=MDT_LIDAR_2017_5M&CRS=EPSG%3A25830&RESPONSE_CRS=EPSG%3A25830&BBOX=581825%2C4793565%2C585805%2C4797840&RESX=5&RESY=5&FORMAT=GeoTIFF ; et le ZIP shapefile « URA officiel » depuis https://www.geo.euskadi.eus/cartografia/DatosDescarga/Aguas_Interiores/INUNDABILIDAD/CARTOGRAFIA_PELIGROSIDAD/URA0501GInundabilidad_ETRS89.zip. Le projet est en EPSG:25830. Mets les vecteurs au-dessus du raster, zoome sur le rectangle demandé. Ne filtre pas, ne calcule pas encore. Réponds brièvement sur les données effectivement ajoutées.\n\n\n\n\n\n✓ Couche ajoutée : Bâtiments  ·  2,995\n\n✓ Couche ajoutée : Routes  ·  5,013\n\n✓ Couche ajoutée : Ponts lignes  ·  157\n\n✓ Couche ajoutée : Ponts polygones  ·  5\n\n✓ Couche ajoutée : Urumea  ·  10\n\n✓ Couche ajoutée : MNT GeoEuskadi 5 m\n\n✓ Couche ajoutée : URA officiel  ·  1,317\n\n✓ Couches rangées dans le haut de l'arbre\n\n✓ Zoom sur une zone\nDonnées ajoutées dans le projet (EPSG:25830), vecteurs placés au-dessus du raster, carte zoomée sur le rectangle demandé. Aucun filtre ni calcul.\n\n**Overpass (OpenStreetMap, rectangle WGS84 demandé) :**\n- [Bâtiments](layer:B_timents_d39c94f4_f161_4570_97ba_49a669f04347) : 2 995 polygones (building)\n- [Routes](layer:Routes_4276376c_3ac6_40f5_9623_ecdc2a7d6965) : 5 013 lignes (highway)\n- [Ponts lignes](layer:Ponts_lignes_11a8047e_8cae_4a38_85e0_613e0aea5757) : 157 lignes (bridge)\n- [Ponts polygones](layer:Ponts_polygones_4b0960e9_92e8_4814_aa7a_32ce153d9420) : 5 polygones (bridge)\n- [Urumea](layer:Urumea_5a5bd193_f8b0_4784_a6b8_db549e31bf43) : 10 lignes (waterway=river, une seule requête, sans filtre de nom)\n\n**Fichiers officiels :**\n- [MNT GeoEuskadi 5 m](layer:MNT_GeoEuskadi_5_m_e5f1a45b_5e77_4136_9475_93e20276cad6) : raster GeoTIFF (MDT LiDAR 2017, 5 m), en EPSG:25830\n- [URA officiel](layer:URA_officiel_1270c8c0_da78_4597_a9f6_635c77a142d3) : shapefile de l'archive ZIP, 1 317 entités, en EPSG:25830\n\nLes données OSM sont issues de contributions volontaires : elles sont plus ou moins complètes selon les secteurs, donc les comptes ne sont pas un recensement.\n? Les données téléchargées et les résultats restent en mémoire. Enregistrez le projet avec ses couches pour les conserver après la fermeture de QGIS."
+}

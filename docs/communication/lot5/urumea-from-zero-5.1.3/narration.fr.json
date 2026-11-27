@@ -1,0 +1,74 @@
+{
+  "provider": "elevenlabs",
+  "voice_name": "Benjamin - Clear and Engaging",
+  "voice_id": "F9KUTOne5xOKqAbIU7yg",
+  "model_id": "eleven_v4",
+  "language_code": "fr",
+  "direction": "[slowly] ",
+  "voice_settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.75
+  },
+  "lines": [
+    {
+      "id": "01-depart",
+      "text": "Un projet QGIS vide. Une demande à l’agent. Construisons une analyse de l’Urumea, jusqu’aux fichiers à transmettre.",
+      "tts_text": "[slowly] Un projet QGIS vide. [pause] Une demande à l’agent. [pause] Construisons une analyse de l’Urumea, jusqu’aux fichiers à transmettre."
+    },
+    {
+      "id": "02-sources",
+      "text": "Je précise le secteur et les liens officiels. L’agent acquiert les bâtiments, les voies et les objets ponts dans OpenStreetMap. Il ajoute un modèle numérique de terrain à cinq mètres, fourni par GeoEuskadi, et le zonage d’inondabilité de l’agence basque de l’eau.",
+      "tts_text": "[slowly] Je précise le secteur et les liens officiels. [pause] L’agent acquiert les bâtiments, les voies et les objets ponts dans OpenStreetMap. [pause] Il ajoute un modèle numérique de terrain à cinq mètres, fourni par GeoEuskadi, et le zonage d’inondabilité de l’agence basque de l’eau."
+    },
+    {
+      "id": "03-sauvegarde",
+      "text": "FilterMate propose de conserver ce travail. Je choisis un projet QGIS : les données détenues en mémoire sont sauvegardées avec lui. Les liens vers le projet et son dossier de données apparaissent directement dans la conversation.",
+      "tts_text": "[slowly] FilterMate propose de conserver ce travail. [pause] Je choisis un projet QGIS : les données détenues en mémoire sont sauvegardées avec lui. [pause] Les liens vers le projet et son dossier de données apparaissent directement dans la conversation."
+    },
+    {
+      "id": "04-terrain",
+      "text": "Prenons le temps de lire le relief. Ce modèle représente le terrain, et non la surface des bâtiments. Nous calculons la pente en pourcentage, puis sa moyenne sous chaque emprise. Elle décrit le contexte topographique ; elle ne simule pas une crue.",
+      "tts_text": "[slowly] Prenons le temps de lire le relief. [pause] Ce modèle représente le terrain, et non la surface des bâtiments. [pause] Nous calculons la pente en pourcentage, puis sa moyenne sous chaque emprise. [pause] Elle décrit le contexte topographique ; elle ne simule pas une crue."
+    },
+    {
+      "id": "05-couloir",
+      "text": "Voici le moteur de filtre de FilterMate. La rivière sert de source, les bâtiments de cible. Un tampon de cinq cents mètres définit un couloir assez large pour explorer les deux rives. Le filtre change les objets affichés, sans supprimer les données sources.",
+      "tts_text": "[slowly] Voici le moteur de filtre de FilterMate. [pause] La rivière sert de source, les bâtiments de cible. [pause] Un tampon de cinq cents mètres définit un couloir assez large pour explorer les deux rives. [pause] Le filtre change les objets affichés, sans supprimer les données sources."
+    },
+    {
+      "id": "06-ura",
+      "text": "Nous ajoutons maintenant un second critère, avec un ET : l’intersection avec le zonage officiel de période de retour cent ans. La carte se resserre sur les bâtiments qui croisent ce zonage dans notre couloir. Ce résultat reste une sélection exploratoire, à interpréter avec la source officielle.",
+      "tts_text": "[slowly] Nous ajoutons maintenant un second critère, avec un ET : l’intersection avec le zonage officiel de période de retour cent ans. [pause] La carte se resserre sur les bâtiments qui croisent ce zonage dans notre couloir. [pause] Ce résultat reste une sélection exploratoire, à interpréter avec la source officielle."
+    },
+    {
+      "id": "07-reseau",
+      "text": "Les bâtiments retenus deviennent à leur tour la source du filtre. FilterMate conserve les voies et les objets ponts à moins de trois cents mètres. Les critères déjà appliqués aux bâtiments restent actifs.",
+      "tts_text": "[slowly] Les bâtiments retenus deviennent à leur tour la source du filtre. [pause] FilterMate conserve les voies et les objets ponts à moins de trois cents mètres. [pause] Les critères déjà appliqués aux bâtiments restent actifs."
+    },
+    {
+      "id": "08-graphiques",
+      "text": "Passons à la synthèse. Deux graphiques sont dessinés avec D3 : la progression du nombre de bâtiments après chaque filtre, puis la distribution des pentes moyennes sous les emprises retenues. Les populations du premier graphique sont emboîtées : on ne les additionne pas.",
+      "tts_text": "[slowly] Passons à la synthèse. [pause] Deux graphiques sont dessinés avec D3 : la progression du nombre de bâtiments après chaque filtre, puis la distribution des pentes moyennes sous les emprises retenues. [pause] Les populations du premier graphique sont emboîtées : on ne les additionne pas."
+    },
+    {
+      "id": "09-composer",
+      "text": "L’agent crée ensuite une vraie mise en page QGIS, à partir de notre modèle A trois. La carte, les graphiques, les sources et les repères cartographiques composent une page lisible. Le composeur reste accessible pour ajuster le document.",
+      "tts_text": "[slowly] L’agent crée ensuite une vraie mise en page QGIS, à partir de notre modèle A trois. [pause] La carte, les graphiques, les sources et les repères cartographiques composent une page lisible. [pause] Le composeur reste accessible pour ajuster le document."
+    },
+    {
+      "id": "10-export",
+      "text": "Le moteur d’export de FilterMate écrit les couches avec leurs filtres actifs dans un GeoPackage. Les rasters sont exportés séparément. Nous obtenons aussi un PDF de la mise en page : des fichiers effectivement produits, prêts à être vérifiés et partagés.",
+      "tts_text": "[slowly] Le moteur d’export de FilterMate écrit les couches avec leurs filtres actifs dans un GeoPackage. [pause] Les rasters sont exportés séparément. [pause] Nous obtenons aussi un PDF de la mise en page : des fichiers effectivement produits, prêts à être vérifiés et partagés."
+    },
+    {
+      "id": "11-pdf",
+      "text": "Voici le PDF exporté, ouvert dans un lecteur. La carte et les deux graphiques sont réunis sur une page, avec les sources et les précautions de lecture.",
+      "tts_text": "[slowly] Voici le PDF exporté, ouvert dans un lecteur. [pause] La carte et les deux graphiques sont réunis sur une page, avec les sources et les précautions de lecture."
+    },
+    {
+      "id": "12-projet",
+      "text": "Enfin, je sauvegarde le projet avec ses nouvelles données. La mise en page et les graphiques restent dans le projet. Le dossier livré a été déplacé puis rouvert pour vérifier que les couches restent lisibles. FilterMate, le meilleur compagnon pour QGIS.",
+      "tts_text": "[slowly] Enfin, je sauvegarde le projet avec ses nouvelles données. [pause] La mise en page et les graphiques restent dans le projet. [pause] Le dossier livré a été déplacé puis rouvert pour vérifier que les couches restent lisibles. [pause] FilterMate, le meilleur compagnon pour QGIS."
+    }
+  ]
+}

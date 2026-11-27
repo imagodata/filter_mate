@@ -1,0 +1,112 @@
+{
+  "verified": true,
+  "scope": "Observed tools, independent geometry and numerical recomputation; moved project reopened with network disabled.",
+  "qgis_version": "4.2.3-Belém do Pará",
+  "gdal_version": "GDAL 3.12.2 \"Chicoutimi\", released 2026/02/03",
+  "total_buildings": 2995,
+  "corridor_500m_buildings": 1826,
+  "ura_t100_buildings": 108,
+  "network_counts": {
+    "Routes": 995,
+    "Ponts lignes": 80,
+    "Ponts polygones": 5
+  },
+  "exported_counts": {
+    "Bâtiments pente": 108,
+    "Routes": 995,
+    "Ponts lignes": 80,
+    "Ponts polygones": 5,
+    "Urumea": 10,
+    "Couloir Urumea 500 m": 1,
+    "URA T100": 2
+  },
+  "building_ids_match": true,
+  "network_ids_match": true,
+  "buffer_segments": 5,
+  "slope_raster_max_abs_difference_percent": 0.0,
+  "mean_slope_max_abs_difference_percent": 0.0,
+  "valid_mean_slopes": 108,
+  "missing_mean_slopes": 0,
+  "actual_d3_calls": 2,
+  "embedded_chart_svgs": 2,
+  "pdfs": [
+    "Urumea _ analyse.pdf",
+    "Urumea _ analyse_2.pdf"
+  ],
+  "scale_bar": {
+    "units_per_segment": 250.0,
+    "segments": 2,
+    "label": "m"
+  },
+  "d3_chart_ids_placed": [
+    "c3",
+    "c5"
+  ],
+  "native_qgis_picture_resources": [
+    ":/images/north_arrows/layout_default_north_arrow.svg"
+  ],
+  "offline_moved_project_layers": [
+    {
+      "name": "Bâtiments source WGS84",
+      "valid": true
+    },
+    {
+      "name": "Bâtiments pente",
+      "valid": true
+    },
+    {
+      "name": "Couloir Urumea 500 m",
+      "valid": true
+    },
+    {
+      "name": "MNT GeoEuskadi 5 m",
+      "valid": true
+    },
+    {
+      "name": "Pente (%)",
+      "valid": true
+    },
+    {
+      "name": "Ponts lignes source WGS84",
+      "valid": true
+    },
+    {
+      "name": "Ponts polygones source WGS84",
+      "valid": true
+    },
+    {
+      "name": "Routes source WGS84",
+      "valid": true
+    },
+    {
+      "name": "URA T100",
+      "valid": true
+    },
+    {
+      "name": "Urumea source WGS84",
+      "valid": true
+    },
+    {
+      "name": "Bâtiments",
+      "valid": true
+    },
+    {
+      "name": "Ponts lignes",
+      "valid": true
+    },
+    {
+      "name": "Ponts polygones",
+      "valid": true
+    },
+    {
+      "name": "Routes",
+      "valid": true
+    },
+    {
+      "name": "Urumea",
+      "valid": true
+    }
+  ],
+  "tool_errors": [],
+  "publication": "not_published"
+}

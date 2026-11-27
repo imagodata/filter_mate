@@ -1,0 +1,71 @@
+[
+  {
+    "request": "finition",
+    "tool": "describe_layout",
+    "arguments": {
+      "name": "Urumea — analyse"
+    },
+    "is_error": false,
+    "content": "{\"name\": \"Urumea — analyse\", \"pages\": [{\"page\": 1, \"width_mm\": 420.0, \"height_mm\": 297.0}], \"items\": [{\"ref\": \"title\", \"type\": \"text\", \"page\": 1, \"x_mm\": 37.0, \"y_mm\": 10.0, \"width_mm\": 280.0, \"height_mm\": 15.0, \"text\": \"Urumea — Saint-Sébastien\"}, {\"ref\": \"edc965b8\", \"type\": \"picture\", \"page\": 1, \"x_mm\": 12.0, \"y_mm\": 11.0, \"width_mm\": 20.0, \"height_mm\": 20.0}, {\"ref\": \"brand\", \"type\": \"text\", \"page\": 1, \"x_mm\": 344.0, \"y_mm\": 12.0, \"width_mm\": 64.0, \"height_mm\": 19.0, \"text\": \"imagodata FilterMate · QGIS\"}, {\"ref\": \"subtitle\", \"type\": \"text\", \"page\": 1, \"x_mm\": 37.0, \"y_mm\": 26.0, \"width_mm\": 280.0, \"height_mm\": 9.0, \"text\": \"Du projet vide à une synthèse partageable · FilterMate\"}, {\"ref\": \"study-map\", \"type\": \"map\", \"page\": 1, \"x_mm\": 12.0, \"y_mm\": 42.0, \"width_mm\": 246.0, \"height_mm\": 210.0, \"scale\": 15514, \"layers\": \"shown in the tree\"}, {\"ref\": \"kpi-heading\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 42.0, \"width_mm\": 138.0, \"height_mm\": 10.0, \"text\": \"BÂTIMENTS RETENUS\"}, {\"ref\": \"kpi-value\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 52.0, \"width_mm\": 138.0, \"height_mm\": 15.0, \"text\": \"108 / 2995\"}, {\"ref\": \"kpi-caption\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 69.0, \"width_mm\": 138.0, \"height_mm\": 9.0, \"text\": \"Couloir 500 m ET zonage URA T100\"}, {\"ref\": \"progression-heading\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 85.0, \"width_mm\": 138.0, \"height_mm\": 10.0, \"text\": \"Effet des filtres\"}, {\"ref\": \"progression-caption\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 95.0, \"width_mm\": 138.0, \"height_mm\": 8.0, \"text\": \"Comptes uniques · populations emboîtées\"}, {\"ref\": \"FilterMate chart: bar\", \"type\": \"picture\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 105.0, \"width_mm\": 138.0, \"height_mm\": 61.1, \"chart\": true}, {\"ref\": \"slope-heading\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 176.0, \"width_mm\": 138.0, \"height_mm\": 10.0, \"text\": \"Pentes du terrain (%)\"}, {\"ref\": \"slope-caption\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 187.0, \"width_mm\": 138.0, \"height_mm\": 8.0, \"text\": \"Moyenne sous les emprises retenues\"}, {\"ref\": \"FilterMate chart: histogram\", \"type\": \"picture\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 197.0, \"width_mm\": 138.0, \"height_mm\": 47.3, \"chart\": true}, {\"ref\": \"scale\", \"type\": \"scale_bar\", \"page\": 1, \"x_mm\": 16.0, \"y_mm\": 215.0, \"width_mm\": 6.7, \"height_mm\": 13.0}, {\"ref\": \"legend-background\", \"type\": \"text\", \"page\": 1, \"x_mm\": 16.0, \"y_mm\": 229.0, \"width_mm\": 235.0, \"height_mm\": 18.0, \"text\": \"\"}, {\"ref\": \"legend-buildings\", \"type\": \"text\", \"page\": 1, \"x_mm\": 18.0, \"y_mm\": 230.0, \"width_mm\": 68.0, \"height_mm\": 7.0, \"text\": \"● Bâtiments retenus\"}, {\"ref\": \"legend-river\", \"type\": \"text\", \"page\": 1, \"x_mm\": 87.0, \"y_mm\": 230.0, \"width_mm\": 38.0, \"height_mm\": 7.0, \"text\": \"━ Urumea\"}, {\"ref\": \"legend-roads\", \"type\": \"text\", \"page\": 1, \"x_mm\": 126.0, \"y_mm\": 230.0, \"width_mm\": 36.0, \"height_mm\": 7.0, \"text\": \"━ Voies\"}, {\"ref\": \"legend-bridges\", \"type\": \"text\", \"page\": 1, \"x_mm\": 166.0, \"y_mm\": 230.0, \"width_mm\": 72.0, \"height_mm\": 7.0, \"text\": \"━ Objets ponts\"}, {\"ref\": \"legend-ura\", \"type\": \"text\", \"page\": 1, \"x_mm\": 18.0, \"y_mm\": 238.0, \"width_mm\": 100.0, \"height_mm\": 7.0, \"text\": \"■ Zonage URA T100\"}, {\"ref\": \"legend-buffer\", \"type\": \"text\", \"page\": 1, \"x_mm\": 119.0, \"y_mm\": 238.0, \"width_mm\": 122.0, \"height_mm\": 7.0, \"text\": \"□ Couloir d’étude 500 m\"}, {\"ref\": \"valid-values\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 244.0, \"width_mm\": 138.0, \"height_mm\": 9.0, \"text\": \"Valeurs renseignées / manquantes : 108 / 0\"}, {\"ref\": \"sources\", \"type\": \"text\", \"page\": 1, \"x_mm\": 12.0, \"y_mm\": 261.0, \"width_mm\": 396.0, \"height_mm\": 14.0, \"text\": \"Sources : OpenStreetMap © contributeurs (ODbL) · MNT 5 m/2017 : Eusko Jaurlaritza / Gobierno Vasco, GeoEuskadi (CC BY 3.0) URA : zonage T100, fichier CT_0501GInundabilidad_2025 · ETRS89 / UTM 30N (EPS\"}, {\"ref\": \"method\", \"type\": \"text\", \"page\": 1, \"x_mm\": 12.0, \"y_mm\": 278.0, \"width_mm\": 396.0, \"height_mm\": 12.0, \"text\": \"Analyse exploratoire : la pente décrit le terrain ; elle ne calcule pas la crue. L’intersection d’une emprise avec le zonage ne constitue pas un diagnostic du bâtiment.\"}]}"
+  },
+  {
+    "request": "finition",
+    "tool": "edit_layout",
+    "arguments": {
+      "layout": "Urumea — analyse",
+      "changes": [
+        {
+          "do": "remove",
+          "ref": "scale"
+        },
+        {
+          "do": "add_scale_bar",
+          "map": "study-map",
+          "x": 16,
+          "y": 215,
+          "width": 60,
+          "height": 10
+        },
+        {
+          "do": "add_north_arrow",
+          "map": "study-map",
+          "x": 238,
+          "y": 46,
+          "width": 12,
+          "height": 12
+        }
+      ]
+    },
+    "is_error": false,
+    "content": "{\"layout\": \"Urumea — analyse\", \"done\": [{\"do\": \"remove\", \"ref\": \"scale\"}, {\"do\": \"add_scale_bar\", \"ref\": \"ef79246c\"}, {\"do\": \"add_north_arrow\", \"ref\": \"b0da3658\"}], \"items\": 26, \"pages\": 1}"
+  },
+  {
+    "request": "finition",
+    "tool": "describe_layout",
+    "arguments": {
+      "name": "Urumea — analyse"
+    },
+    "is_error": false,
+    "content": "{\"name\": \"Urumea — analyse\", \"pages\": [{\"page\": 1, \"width_mm\": 420.0, \"height_mm\": 297.0}], \"items\": [{\"ref\": \"title\", \"type\": \"text\", \"page\": 1, \"x_mm\": 37.0, \"y_mm\": 10.0, \"width_mm\": 280.0, \"height_mm\": 15.0, \"text\": \"Urumea — Saint-Sébastien\"}, {\"ref\": \"edc965b8\", \"type\": \"picture\", \"page\": 1, \"x_mm\": 12.0, \"y_mm\": 11.0, \"width_mm\": 20.0, \"height_mm\": 20.0}, {\"ref\": \"brand\", \"type\": \"text\", \"page\": 1, \"x_mm\": 344.0, \"y_mm\": 12.0, \"width_mm\": 64.0, \"height_mm\": 19.0, \"text\": \"imagodata FilterMate · QGIS\"}, {\"ref\": \"subtitle\", \"type\": \"text\", \"page\": 1, \"x_mm\": 37.0, \"y_mm\": 26.0, \"width_mm\": 280.0, \"height_mm\": 9.0, \"text\": \"Du projet vide à une synthèse partageable · FilterMate\"}, {\"ref\": \"study-map\", \"type\": \"map\", \"page\": 1, \"x_mm\": 12.0, \"y_mm\": 42.0, \"width_mm\": 246.0, \"height_mm\": 210.0, \"scale\": 15514, \"layers\": \"shown in the tree\"}, {\"ref\": \"kpi-heading\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 42.0, \"width_mm\": 138.0, \"height_mm\": 10.0, \"text\": \"BÂTIMENTS RETENUS\"}, {\"ref\": \"b0da3658\", \"type\": \"picture\", \"page\": 1, \"x_mm\": 238.0, \"y_mm\": 46.0, \"width_mm\": 12.0, \"height_mm\": 12.0, \"north_arrow\": true}, {\"ref\": \"kpi-value\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 52.0, \"width_mm\": 138.0, \"height_mm\": 15.0, \"text\": \"108 / 2995\"}, {\"ref\": \"kpi-caption\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 69.0, \"width_mm\": 138.0, \"height_mm\": 9.0, \"text\": \"Couloir 500 m ET zonage URA T100\"}, {\"ref\": \"progression-heading\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 85.0, \"width_mm\": 138.0, \"height_mm\": 10.0, \"text\": \"Effet des filtres\"}, {\"ref\": \"progression-caption\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 95.0, \"width_mm\": 138.0, \"height_mm\": 8.0, \"text\": \"Comptes uniques · populations emboîtées\"}, {\"ref\": \"FilterMate chart: bar\", \"type\": \"picture\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 105.0, \"width_mm\": 138.0, \"height_mm\": 61.1, \"chart\": true}, {\"ref\": \"slope-heading\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 176.0, \"width_mm\": 138.0, \"height_mm\": 10.0, \"text\": \"Pentes du terrain (%)\"}, {\"ref\": \"slope-caption\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 187.0, \"width_mm\": 138.0, \"height_mm\": 8.0, \"text\": \"Moyenne sous les emprises retenues\"}, {\"ref\": \"FilterMate chart: histogram\", \"type\": \"picture\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 197.0, \"width_mm\": 138.0, \"height_mm\": 47.3, \"chart\": true}, {\"ref\": \"ef79246c\", \"type\": \"scale_bar\", \"page\": 1, \"x_mm\": 16.0, \"y_mm\": 215.0, \"width_mm\": 60.0, \"height_mm\": 13.0}, {\"ref\": \"legend-background\", \"type\": \"text\", \"page\": 1, \"x_mm\": 16.0, \"y_mm\": 229.0, \"width_mm\": 235.0, \"height_mm\": 18.0, \"text\": \"\"}, {\"ref\": \"legend-buildings\", \"type\": \"text\", \"page\": 1, \"x_mm\": 18.0, \"y_mm\": 230.0, \"width_mm\": 68.0, \"height_mm\": 7.0, \"text\": \"● Bâtiments retenus\"}, {\"ref\": \"legend-river\", \"type\": \"text\", \"page\": 1, \"x_mm\": 87.0, \"y_mm\": 230.0, \"width_mm\": 38.0, \"height_mm\": 7.0, \"text\": \"━ Urumea\"}, {\"ref\": \"legend-roads\", \"type\": \"text\", \"page\": 1, \"x_mm\": 126.0, \"y_mm\": 230.0, \"width_mm\": 36.0, \"height_mm\": 7.0, \"text\": \"━ Voies\"}, {\"ref\": \"legend-bridges\", \"type\": \"text\", \"page\": 1, \"x_mm\": 166.0, \"y_mm\": 230.0, \"width_mm\": 72.0, \"height_mm\": 7.0, \"text\": \"━ Objets ponts\"}, {\"ref\": \"legend-ura\", \"type\": \"text\", \"page\": 1, \"x_mm\": 18.0, \"y_mm\": 238.0, \"width_mm\": 100.0, \"height_mm\": 7.0, \"text\": \"■ Zonage URA T100\"}, {\"ref\": \"legend-buffer\", \"type\": \"text\", \"page\": 1, \"x_mm\": 119.0, \"y_mm\": 238.0, \"width_mm\": 122.0, \"height_mm\": 7.0, \"text\": \"□ Couloir d’étude 500 m\"}, {\"ref\": \"valid-values\", \"type\": \"text\", \"page\": 1, \"x_mm\": 270.0, \"y_mm\": 244.0, \"width_mm\": 138.0, \"height_mm\": 9.0, \"text\": \"Valeurs renseignées / manquantes : 108 / 0\"}, {\"ref\": \"sources\", \"type\": \"text\", \"page\": 1, \"x_mm\": 12.0, \"y_mm\": 261.0, \"width_mm\": 396.0, \"height_mm\": 14.0, \"text\": \"Sources : OpenStreetMap © contributeurs (ODbL) · MNT 5 m/2017 : Eusko Jaurlaritza / Gobierno Vasco, GeoEuskadi (CC BY 3.0) URA : zonage T100, fichier CT_0501GInundabilidad_2025 · ETRS89 / UTM 30N (EPS\"}, {\"ref\": \"method\", \"type\": \"text\", \"page\": 1, \"x_mm\": 12.0, \"y_mm\": 278.0, \"width_mm\": 396.0, \"height_mm\": 12.0, \"text\": \"Analyse exploratoire : la pente décrit le terrain ; elle ne calcule pas la crue. L’intersection d’une emprise avec le zonage ne constitue pas un diagnostic du bâtiment.\"}]}"
+  },
+  {
+    "request": "finition",
+    "tool": "open_layout",
+    "arguments": {
+      "name": "Urumea — analyse"
+    },
+    "is_error": false,
+    "content": "{\"name\": \"Urumea — analyse\", \"opened\": true}"
+  },
+  {
+    "request": "pdf-final",
+    "tool": "export_layout",
+    "arguments": {
+      "name": "Urumea — analyse",
+      "format": "pdf",
+      "dpi": 200
+    },
+    "is_error": false,
+    "content": "{\"name\": \"Urumea — analyse\", \"format\": \"pdf\", \"dpi\": 200, \"path\": \"Urumea _ analyse_2.pdf\", \"bytes\": 1353218}"
+  }
+]

@@ -1,15 +1,19 @@
-# Lot 5 — démonstrations, livraison locale du 26 novembre 2026
+# Lot 5 — démonstrations, livraison locale du 27 novembre 2026
 
-**Nouvelle vidéo Urumea finalisée avec le ZIP 5.1.3 de `dist`** :
-[vidéo, narration française et preuves de rejeu](urumea-linkedin-5.1.3/README.md).
-Le MP4 dure 64,32 s ; la carte et ses changements sont visibles, avec voix et
-sous-titres français. Il est prêt à être téléversé sur LinkedIn. La répétition
-historique `urumea-rehearsal` reste distincte et non validée comme film final.
+**Vidéo Urumea courante : départ de zéro, vrai MNT, filtres, D3, PDF et projet** :
+[film français, livrables et preuves](urumea-from-zero-5.1.3/README.md).
+Environ 3 min 40, Tony à l’introduction et Benjamin pour le corps ; QGIS et
+FilterMate restent visibles. Le dossier projet déplacé a été rouvert hors réseau.
+Aucune publication externe. Travail isolé dans `codex/lot5-urumea-from-zero`,
+base `d3561853` ; intégration main toujours centralisée.
+
+Le [montage historique de 64,32 s](urumea-linkedin-5.1.3/README.md), les essais
+Copernicus MNS et la répétition `urumea-rehearsal` restent des archives.
 
 
-Travail isolé : `/tmp/filter_mate-lot5`, branche `codex/lot5-demonstrations`,
+Historique de la première consolidation : `/tmp/filter_mate-lot5`, branche `codex/lot5-demonstrations`,
 base `8fbd62c5`. Intégration dans main centralisée par la session de consolidation,
-à la demande « merger au fur et à mesure ». Aucun push ni publication externe. La voix de la nouvelle vidéo Urumea est
+à la demande « merger au fur et à mesure ». Aucun push ni publication externe. La voix de cet ancien montage Urumea est
 générée avec la voix de synthèse française `fr-FR-HenriNeural`. Les fichiers communs des lots 1–3 et 7 ne sont pas modifiés.
 
 ## Sources réconciliées

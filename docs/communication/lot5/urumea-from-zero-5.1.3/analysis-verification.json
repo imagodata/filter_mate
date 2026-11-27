@@ -1,0 +1,19 @@
+{
+  "verified": false,
+  "analysis_verified": true,
+  "total_buildings": 2995,
+  "corridor_500m_buildings": 1826,
+  "ura_t100_buildings": 108,
+  "network_counts": {
+    "Routes": 995,
+    "Ponts lignes": 80,
+    "Ponts polygones": 5
+  },
+  "building_ids_match": true,
+  "network_ids_match": true,
+  "slope_raster_max_abs_difference_percent": 0.0,
+  "mean_slope_max_abs_difference_percent": 0.0,
+  "valid_mean_slopes": 108,
+  "missing_mean_slopes": 0,
+  "scope": "Geometry and numerical checks only; composition/export/portability pending."
+}

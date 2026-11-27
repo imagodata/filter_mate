@@ -1,0 +1,223 @@
+{
+  "stage": "terrain",
+  "layers": [
+    {
+      "name": "Bâtiments source WGS84",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 2995,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Bâtiments pente",
+      "valid": true,
+      "crs": "EPSG:25830",
+      "count": 2995,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags",
+        "pente_mean"
+      ]
+    },
+    {
+      "name": "MNT GeoEuskadi 5 m",
+      "valid": true,
+      "crs": "EPSG:25830"
+    },
+    {
+      "name": "Pente (%)",
+      "valid": true,
+      "crs": "EPSG:25830"
+    },
+    {
+      "name": "Ponts lignes source WGS84",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 157,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Ponts polygones source WGS84",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 5,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Routes source WGS84",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 5013,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "highway",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "URA officiel",
+      "valid": true,
+      "crs": "EPSG:25830",
+      "count": 1317,
+      "subset": "",
+      "fields": [
+        "ZONA",
+        "TIPO_ZONA",
+        "RIO",
+        "LONG_KM",
+        "HIPOTESIS",
+        "HIDROLOGIA",
+        "PRECISION_",
+        "HIDRAUL",
+        "ESTUDIO",
+        "TIPO_EST",
+        "DOCUMENTO",
+        "ORGANISMO",
+        "CLAVE_EXPE",
+        "DEMARCACIO",
+        "ID_DEMAR",
+        "Q_M3_S",
+        "ZI_DIRECTI",
+        "FECHA_APRO",
+        "FECHA_GEO",
+        "ID_ZONA",
+        "CICLO",
+        "CODIGO",
+        "Shape_Leng",
+        "Shape_Area"
+      ]
+    },
+    {
+      "name": "Urumea source WGS84",
+      "valid": true,
+      "crs": "EPSG:4326",
+      "count": 10,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "waterway",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Bâtiments",
+      "valid": true,
+      "crs": "EPSG:25830",
+      "count": 2995,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "building",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Ponts lignes",
+      "valid": true,
+      "crs": "EPSG:25830",
+      "count": 157,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Ponts polygones",
+      "valid": true,
+      "crs": "EPSG:25830",
+      "count": 5,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "bridge",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Routes",
+      "valid": true,
+      "crs": "EPSG:25830",
+      "count": 5013,
+      "subset": "",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "highway",
+        "other_tags"
+      ]
+    },
+    {
+      "name": "Urumea",
+      "valid": true,
+      "crs": "EPSG:25830",
+      "count": 10,
+      "subset": "lower(coalesce(\"name\", '')) LIKE '%urumea%'",
+      "fields": [
+        "fid",
+        "osm_id",
+        "osm_type",
+        "name",
+        "waterway",
+        "other_tags"
+      ]
+    }
+  ],
+  "filters": {
+    "Urumea": {
+      "count": 10,
+      "subset": "lower(coalesce(\"name\", '')) LIKE '%urumea%'"
+    }
+  },
+  "replay_comparison": null,
+  "render_flag": true,
+  "thread": "Projet et couches enregistrés : /w/exports/urumea/urumea.qgz\nurumea.qgz\nPrépare les données acquises : reprojette les CINQ couches OSM en EPSG:25830 avec native:reprojectlayer (Bâtiments, Routes, Ponts lignes, Ponts polygones, Urumea). Renomme les originales en ajoutant « source WGS84 », masque-les et donne aux copies métriques les noms initiaux exacts. Les données restent complètes. Inspecte les valeurs name de « Urumea » puis filtre avec lower(coalesce(\"name\", '')) LIKE '%urumea%' : les segments urbains ne portent pas forcément le nom exact Urumea. Contrôle que l’étendue de la rivière recouvre le secteur [582334,4794075,585295,4797333]. Ne filtre pas encore les bâtiments. Conserve le cadrage.\n\n\n\n✓ Traitement : native:reprojectlayer  ·  2,995\n   INPUT=\"Bâtiments\", TARGET_CRS=\"EPSG:25830\"\n\n✓ Traitement : native:reprojectlayer  ·  5,013\n   INPUT=\"Routes\", TARGET_CRS=\"EPSG:25830\"\n\n✓ Traitement : native:reprojectlayer  ·  157\n   INPUT=\"Ponts lignes\", TARGET_CRS=\"EPSG:25830\"\n\n✓ Traitement : native:reprojectlayer  ·  5\n   INPUT=\"Ponts polygones\", TARGET_CRS=\"EPSG:25830\"\n\n✓ Traitement : native:reprojectlayer  ·  10\n   INPUT=\"Urumea\", TARGET_CRS=\"EPSG:25830\"\n\n✓ Bâtiments renommée Bâtiments source WGS84\n\n✓ Routes renommée Routes source WGS84\n\n✓ Ponts lignes renommée Ponts lignes source WGS84\n\n✓ Ponts polygones renommée Ponts polygones source WGS84\n\n✓ Urumea renommée Urumea source WGS84\n\n✓ Masqué : Bâtiments source WGS84, Routes source WGS84, Ponts lignes source WGS84, Ponts polygones source WGS84, Urumea source WGS84\n\n✓ tmp_Bâtiments_25830 renommée Bâtiments\n\n✓ tmp_Routes_25830 renommée Routes\n\n✓ tmp_Ponts lignes_25830 renommée Ponts lignes\n\n✓ tmp_Ponts polygones_25830 renommée Ponts polygones\n\n✓ tmp_Urumea_25830 renommée Urumea\nLes copies métriques portent maintenant les noms initiaux. Je passe à l'inspection des noms de la rivière.\n\n\n\n✓ Filtre sur Urumea  ·  10 / 10\n   lower(coalesce(\"name\", '')) LIKE '%urumea%'\n\nLes cinq couches sont reprojetées en EPSG:25830, et le filtre de « Urumea » est appliqué. Le cadrage n'a pas bougé.\n\n- **Copies métriques** (noms initiaux, données complètes) : Bâtiments (2995), Routes (5013), Ponts lignes (157), Ponts polygones (5), Urumea (10).\n- **Originaux** renommés en « Bâtiments source WGS84 », « Routes source WGS84 », « Ponts lignes source WGS84 », « Ponts polygones source WGS84 », « Urumea source WGS84 », et masqués. Ils restent dans le projet.\n- **Noms de la rivière** : seulement deux valeurs, « Urumea » et « Urumea ibaia ». Le filtre `lower(coalesce(\"name\", '')) LIKE '%urumea%'` garde les 10 entités, donc aucune n'est perdue.\n- **Étendue** de « Urumea » en EPSG:25830 : x de 582 500,7 à 593 919,2 ; y de 4 775 748 à 4 797 585.\n  - En y, elle couvre le secteur (4 794 075 à 4 797 333).\n  - En x, elle couvre le secteur à l'est (585 295), mais commence à 582 500,7 alors que le secteur part de 582 334. Il manque donc environ 166 m à l'ouest : l'étendue de la rivière ne couvre pas tout le secteur. Si la rivière ne passe pas dans cette bande, cela ne change rien ; sinon, il faut en tenir compte.\n\nLes bâtiments ne sont pas filtrés.\n? Les données téléchargées et les résultats restent en mémoire. Enregistrez le projet avec ses couches pour les conserver après la fermeture de QGIS.\n   Choisissez où enregistrer le projet et ses couches.\nÀ partir du MNT numérique GeoEuskadi 5 m (terrain nu, 2017), calcule une pente en POURCENTAGE avec gdal:slope, AS_PERCENT=true, COMPUTE_EDGES=true, SCALE=1. Nomme le raster « Pente (%) ». Calcule ensuite sa moyenne par emprise de « Bâtiments » avec native:zonalstatisticsfb, préfixe pente_, statistique moyenne seulement, sortie « Bâtiments pente ». Masque les bâtiments originaux. La pente décrit le terrain : aucun seuil de pente ne définit une inondabilité. Conserve toutes les géométries de bâtiments et le cadrage.\n\n\n\n\n✓ Traitement : gdal:slope\n   INPUT=\"MNT GeoEuskadi 5 m\", BAND=1, SCALE=1, AS_PERCENT=true, COMPUTE_EDGES=true\n\n✓ Traitement : native:zonalstatisticsfb  ·  2,995\n   INPUT=\"Bâtiments\", INPUT_RASTER=\"Pente (%)\", RASTER_BAND=1, COLUMN_PREFIX=\"pente_\", STATISTICS=[2]\n\n✓ Masqué : Bâtiments source WGS84\n\nLa pente en pourcentage est calculée, puis moyennée pour chaque bâtiment ; les 2995 bâtiments sont conservés.\n\n- **« Pente (%) »** : raster créé avec `gdal:slope` à partir de « MNT GeoEuskadi 5 m », bande 1, AS_PERCENT=true, COMPUTE_EDGES=true, SCALE=1.\n- **« Bâtiments pente »** : couche de 2995 entités, avec la colonne `pente_mean` (moyenne de la pente par emprise de bâtiment, préfixe `pente_`, statistique moyenne seule). Les valeurs vont de 0,16 % à 90,5 %, avec une moyenne de 10,2 %.\n- **Masquage** : « Bâtiments source WGS84 » est masqué (il l'était déjà depuis la requête précédente). La couche « Bâtiments » (EPSG:25830) reste visible, et aucune géométrie n'a été filtrée.\n- **Cadrage** : inchangé.\n\nCette pente décrit le terrain uniquement : elle ne dit rien sur l'inondabilité, et aucun seuil n'en a été déduit.\n? Les données téléchargées et les résultats restent en mémoire. Enregistrez le projet avec ses couches pour les conserver après la fermeture de QGIS."
+}

@@ -6,5 +6,5 @@ ARG BASE_IMAGE=fm-video
 FROM ${BASE_IMAGE}
 USER root
 RUN apt-get update -qq \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends python3-pyqt6.qtwebengine \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends python3-pyqt6.qtwebengine python3-pyqt6.qtpdf \
     && rm -rf /var/lib/apt/lists/*
