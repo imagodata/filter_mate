@@ -240,7 +240,9 @@ def test_navigation_is_icon_only_with_tooltips_and_accessible_names():
         assert button.toolTip().splitlines()[0] == title
         assert button.accessibleName()
         assert button.size().width() >= 30 and button.size().height() >= 30
-    assert panel.mode_button.text()  # the posture stays explicit beside the icon actions
+    assert panel.mode_button.text() == "" and not panel.mode_button.icon().isNull()
+    assert panel.mode_button.toolTip().splitlines()[0] == "Act"
+    assert "Act" in panel.mode_button.accessibleName()
 
 
 def test_history_state_follows_the_page_and_back_button():

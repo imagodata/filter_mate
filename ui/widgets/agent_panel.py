@@ -929,7 +929,9 @@ class AgentPanel(QFrame):
         self.mode_button.setObjectName("toolButton_agent_mode")
         self.mode_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.mode_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-        self.mode_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        self.mode_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        self.mode_button.setIconSize(QSize(ACTION_ICON_SIZE, ACTION_ICON_SIZE))
+        self.mode_button.setFixedSize(ACTION_BUTTON_SIZE, ACTION_BUTTON_SIZE)
         mode_menu = QMenu(self.mode_button)
         mode_menu.setObjectName("menu_agent_mode")
         self._mode_actions = {}
@@ -1091,7 +1093,6 @@ class AgentPanel(QFrame):
         self.input.setAccessibleDescription(self.input.placeholderText())
         self.send_button.setAccessibleName(_tr("Send the request"))
         self.send_button.setAccessibleDescription(_tr("Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode."))
-        self.mode_button.setAccessibleName(_tr("What the agent may do"))
         self.history_button.setAccessibleName(_tr("Show the history"))
         self.recipes_button.setAccessibleName(_tr("Show the recipes"))
         self.new_button.setAccessibleName(_tr("Start a new conversation"))
@@ -1602,22 +1603,17 @@ class AgentPanel(QFrame):
             f"QPushButton#pushButton_agent_speech_finish:focus {{ border-color: {palette['fm_accent_text']}; }}"
             f"QPushButton#pushButton_agent_speech_cancel {{ color: {muted}; background: transparent; border: none;"
             " padding: 2px 0; min-width: 0; min-height: 0; }"
-            "QToolButton#toolButton_agent_effort, QToolButton#toolButton_agent_followup {"
+            "QToolButton#toolButton_agent_mode, QToolButton#toolButton_agent_effort, QToolButton#toolButton_agent_followup {"
             f" min-width: {ACTION_BUTTON_SIZE}px; max-width: {ACTION_BUTTON_SIZE}px;"
             f" min-height: {ACTION_BUTTON_SIZE}px; max-height: {ACTION_BUTTON_SIZE}px; border: 1px solid transparent;"
             " border-radius: 6px; background: transparent; }"
-            "QToolButton#toolButton_agent_effort:hover, QToolButton#toolButton_agent_followup:hover {"
+            "QToolButton#toolButton_agent_mode:hover, QToolButton#toolButton_agent_effort:hover, QToolButton#toolButton_agent_followup:hover {"
             f" background: {palette['fm_hover']}; }}"
-            "QToolButton#toolButton_agent_effort:focus, QToolButton#toolButton_agent_followup:focus {"
+            "QToolButton#toolButton_agent_mode:focus, QToolButton#toolButton_agent_effort:focus, QToolButton#toolButton_agent_followup:focus {"
             f" border-color: {palette['fm_accent']}; }}"
-            f"QToolButton#toolButton_agent_mode {{ min-width: 0; max-width: 240px; min-height: 20px;"
-            f" max-height: 22px; padding: 0 8px; border: 1px solid {palette['fm_field_border']}; border-radius: 10px;"
-            f" background: {palette['fm_field']}; color: {palette['fm_text']}; font-size: 11px; }}"
-            f"QToolButton#toolButton_agent_mode:hover {{ border-color: {palette['fm_accent']}; }}"
-            # Act changes the project: its chip is drawn in the accent; Answer and Propose, which change nothing
-            # without being shown first, stay plain.
-            + (f"QToolButton#toolButton_agent_mode {{ border-color: {palette['fm_accent']}; color: {palette['fm_accent']};"
-               " font-weight: 600; }" if getattr(self, "_posture", POSTURE_ACT) == POSTURE_ACT else "") +
+            # Act keeps an accent border so its permission to change the project remains visible.
+            + (f"QToolButton#toolButton_agent_mode {{ border-color: {palette['fm_accent']}; }}"
+               if getattr(self, "_posture", POSTURE_ACT) == POSTURE_ACT else "") +
             # The frame alone paints the background: a viewport or a page with one of its own squares the corners.
             "QScrollArea#scrollArea_agent_welcome > QWidget#qt_scrollarea_viewport, QWidget#widget_agent_welcome"
             " { background: transparent; }"
@@ -1706,7 +1702,10 @@ class AgentPanel(QFrame):
             self._refresh_effort_button()
         if hasattr(self, "followup_button"):
             self._refresh_followup_button()
+        posture = getattr(self, '_posture', POSTURE_ACT)
+        mode_icon = {RESPOND: 'agent', PROPOSE: 'recipes', POSTURE_ACT: 'agent_push'}.get(posture, 'agent_push')
         for name, key, fallback in (
+                ("mode_button", mode_icon, QStyle.StandardPixmap.SP_MediaPlay),
                 ("history_button", "history", QStyle.StandardPixmap.SP_FileDialogDetailedView),
                 ("recipes_button", "recipes", QStyle.StandardPixmap.SP_FileIcon),
                 ("new_button", "new_conversation", QStyle.StandardPixmap.SP_FileDialogNewFolder),
@@ -1714,7 +1713,8 @@ class AgentPanel(QFrame):
                 ("redo_button", "redo", QStyle.StandardPixmap.SP_ArrowForward)):
             button = getattr(self, name, None)
             if button is not None:
-                icon = render_icon(key, dark)
+                color = tokens(dark)['fm_accent'] if name == 'mode_button' and posture == POSTURE_ACT else None
+                icon = render_icon(key, dark, color)
                 button.setIcon(icon if icon is not None else self.style().standardIcon(fallback))
         for name, key in (("new_action", "new_conversation"), ("history_action", "history"),
                           ("recipes_menu", "recipes"), ("sources_menu", "projection"),
@@ -2091,7 +2091,7 @@ class AgentPanel(QFrame):
         """Show ``mode`` as the one picked, without telling anyone (the controller restores the saved one).
 
         Takes a posture (``respond``/``propose``/``act``) or a legacy mode (``ask``/``plan``/``act``,
-        core/agent/postures.py): the chip shows the posture, ``mode()`` still reads the legacy mode.
+        core/agent/postures.py): the icon shows the posture, ``mode()`` still reads the legacy mode.
         """
         text = str(mode or "").strip().lower()
         if text == ASK:
@@ -2105,13 +2105,14 @@ class AgentPanel(QFrame):
         for each, (action, _label) in self._mode_actions.items():
             action.setChecked(each == self._posture)
         label = self._mode_actions[self._posture][1]
-        self.mode_button.setText(f"{label} \u25be")
-        self.mode_button.setToolTip(_tr("What the agent may do: Answer reads and changes nothing, Propose writes "
-                                        "the steps and shows each change before applying it, Act follows the saved permissions."))
+        self.mode_button.setText("")
+        self.mode_button.setAccessibleName(f"{_tr('What the agent may do')}: {label}")
+        self.mode_button.setToolTip(label + '\n' + _tr("What the agent may do: Answer reads and changes nothing, Propose writes "
+                                                     "the steps and shows each change before applying it, Act follows the saved permissions."))
         self._refresh_placeholder()
         if hasattr(self, "thread"):
             self._refresh_followup_hint()
-            self._refresh_look()  # the chip takes the color of its posture
+            self._refresh_look()
 
     def _refresh_placeholder(self) -> None:
         """The line to ask says what the next request may do: the posture picked under it (2026-11-24)."""
