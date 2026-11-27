@@ -15336,5 +15336,53 @@ Si vous choisissez Non, ces données resteront en mémoire et seront perdues à 
         <source>API key</source>
         <translation>Clé API</translation>
     </message>
+    <message>
+        <source>Test microphone</source>
+        <translation>Tester le microphone</translation>
+    </message>
+    <message>
+        <source>Test transcription</source>
+        <translation>Tester la transcription</translation>
+    </message>
+    <message>
+        <source>Microphone level: %p%</source>
+        <translation>Niveau du microphone : %p%</translation>
+    </message>
+    <message>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>Enregistrez jusqu’à 10 secondes, puis testez la transcription avec les réglages ci-dessus.</translation>
+    </message>
+    <message>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Réglages modifiés. Testez à nouveau la transcription.</translation>
+    </message>
+    <message>
+        <source>Test cancelled.</source>
+        <translation>Test annulé.</translation>
+    </message>
+    <message>
+        <source>Stop microphone test</source>
+        <translation>Arrêter le test du microphone</translation>
+    </message>
+    <message>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Parlez dans le microphone… {} / 10 s</translation>
+    </message>
+    <message>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Enregistrement prêt. Cliquez sur Tester la transcription pour vérifier le service.</translation>
+    </message>
+    <message>
+        <source>Cancel transcription</source>
+        <translation>Annuler la transcription</translation>
+    </message>
+    <message>
+        <source>Transcription test succeeded.</source>
+        <translation>Test de transcription réussi.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral demande un code de langue à deux lettres comme fr ou en ; laissez vide pour la détection automatique.</translation>
+    </message>
 </context>
 </TS>

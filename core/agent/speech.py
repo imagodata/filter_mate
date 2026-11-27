@@ -23,7 +23,7 @@ MAX_RESPONSE_BYTES = 256 * 1024
 SERVICES = {
     'local': ('http://127.0.0.1:8000/v1', 'whisper-1'),
     'openai': ('https://api.openai.com/v1', 'gpt-transcribe'),
-    'mistral': ('https://api.mistral.ai/v1', 'voxtral-mini-latest'),
+    'mistral': ('https://api.mistral.ai/v1', 'voxtral-mini-transcribe-3'),
 }
 
 
@@ -70,7 +70,12 @@ def validate_settings(settings: SpeechSettings):
             raise ValueError('The local transcription service must run on this computer (localhost).')
     if not settings.chosen_model or len(settings.chosen_model) > 200 or any(c in settings.chosen_model for c in '\r\n'):
         raise ValueError('Choose a transcription model (at most 200 characters).')
-    if settings.language and not re.fullmatch(r'[a-z]{2,3}', settings.language):
+    if settings.language and settings.service == 'mistral' and not re.fullmatch(r'[a-z]{2}', settings.language):
+        raise ValueError('Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.')
+    language_pattern = (r'(?:[a-z]{2,3}|zh-(?:cn|tw|hk))'
+                        if settings.service == 'openai' and settings.chosen_model == 'gpt-transcribe'
+                        else r'[a-z]{2,3}')
+    if settings.language and not re.fullmatch(language_pattern, settings.language):
         raise ValueError('Language is an ISO code such as fr or en, or empty for automatic detection.')
 
 
@@ -136,6 +141,7 @@ class PcmBuffer:
         self._index, self._next, self._previous = 0, 0, None
         self._max = min(MAX_SAMPLES, max_samples)
         self.peak = 0
+        self.level = 0.0
 
     @property
     def full(self):
@@ -146,6 +152,7 @@ class PcmBuffer:
         return len(self._pcm) / (2 * SAMPLE_RATE)
 
     def feed(self, chunk: bytes):
+        peak = 0
         chunk = self._carry + chunk
         end = len(chunk) - len(chunk) % self._frame.size
         self._carry = chunk[end:]
@@ -165,10 +172,12 @@ class PcmBuffer:
                 interpolated = self._previous + min(1, max(0, fraction)) * (value - self._previous)
                 sample = max(-32768, min(32767, round(interpolated)))
                 self.peak = max(self.peak, abs(sample))
+                peak = max(peak, abs(sample))
                 self._pcm.extend(struct.pack('<h', sample))
                 self._next += self._rate
             self._previous = value
             self._index += 1
+        self.level = peak / 32768
 
     def wav(self):
         if self.seconds < 0.15 or not self.peak:
@@ -184,3 +193,4 @@ class PcmBuffer:
     def clear(self):
         self._pcm.clear()
         self._carry = b''
+        self.level = 0.0

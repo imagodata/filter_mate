@@ -40,7 +40,7 @@ def until(condition, timeout=5):
 
 
 def main():
-    from filter_mate.core.agent.speech import MAX_RESPONSE_BYTES, SpeechSettings, transcription_request
+    from filter_mate.core.agent.speech import MAX_RESPONSE_BYTES, SERVICES, SpeechSettings, transcription_request
     from filter_mate.adapters.agent import speech_audio, speech_transport
     from filter_mate.ui.controllers import agent_speech as controller
     from filter_mate.ui.widgets.agent_panel import AgentPanel
@@ -81,6 +81,12 @@ def main():
         wav = capture.stop()
     check('microphone PCM becomes a WAV held only in memory', wav.startswith(b'RIFF') and len(wav) > 44
           and capture.buffer is None and capture._source is None)
+    limited = speech_audio.AudioCapture(lambda: None, errors.append, lambda: None, max_seconds=0.2)
+    with patch.object(speech_audio, '_devices', return_value=(fake_media, [device], device, qt6)):
+        limited.start()
+        short_wav = limited.stop()
+    check('test capture duration is bounded by the audio samples as well as the UI timer',
+          len(short_wav) == 44 + 3200 * 2)
     if qt6:
         denied = SimpleNamespace(checkPermission=lambda _: speech_audio.Qt.PermissionStatus.Denied)
         with patch.object(speech_audio, 'QCoreApplication', SimpleNamespace(instance=lambda: denied)):
@@ -139,12 +145,15 @@ def main():
     panel.send_requested.connect(sent.append)
 
     class Capture(QObject):
+        level = 0.5
+
         def __init__(self, started, failed, limit, parent):
             super().__init__(parent)
             self.started, self.failed, self.limit = started, failed, limit
             self.cancelled = False
 
         def start(self, device):
+            self.device = device
             self.started()
 
         def stop(self):
@@ -244,6 +253,169 @@ def main():
     check('a local service cannot silently send audio to a remote host', len(saved) == 1)
     dialog.reject()
 
+    Handler.mode = 'success'
+    before = len(Handler.received)
+    dialog = SpeechSettingsDialog(SpeechSettings(), AgentSettings(), panel, saver=save, capture_factory=Capture)
+    dialog.device.addItem('Test input', 'test-input')
+    dialog.device.setCurrentIndex(dialog.device.findData('test-input'))
+    dialog.show()
+    dialog.test_microphone.click()
+    check('microphone test uses the selected device and displays a live level without a service',
+          dialog._test_capture.device == 'test-input' and dialog.test_level.value() == 50
+          and len(Handler.received) == before and not dialog.test_transcription.isEnabled())
+    dialog.test_microphone.click()
+    check('stopping the microphone test retains a bounded in-memory recording without uploading',
+          dialog._test_wav == wav and dialog.test_transcription.isEnabled()
+          and len(Handler.received) == before)
+    dialog.address.setText(address)
+    dialog.model.setText('local-test-model')
+    dialog.language.setText('fr')
+    dialog.test_transcription.click()
+    until(lambda: dialog._test_request is None)
+    check('transcription tests unsaved settings and displays its result only in the dialog',
+          dialog.test_result.toPlainText() == 'Ajoute un fond de carte' and len(saved) == 1
+          and panel.input.text() == 'Note 🌍' and not sent
+          and b'local-test-model' in Handler.received[-1][2] and b'\r\n\r\nfr' in Handler.received[-1][2])
+    dialog.model.setText('corrected-model')
+    check('editing test settings clears a previous success and allows retry with the same recording',
+          dialog.test_result.isHidden() and dialog.test_result.toPlainText() == '' and bool(dialog._test_wav))
+    Handler.mode = 'redirect'
+    dialog.test_transcription.click()
+    until(lambda: dialog._test_request is None)
+    check('a failed transcription keeps the recording available for retry',
+          'redirect' in dialog.test_status.text() and bool(dialog._test_wav)
+          and dialog.test_transcription.isEnabled())
+    Handler.mode = 'slow'
+    dialog.test_transcription.click()
+    pending = dialog._test_request
+    dialog.address.setText(address + '/changed')
+    check('editing the destination aborts any pending test upload', pending._over and dialog._test_request is None)
+    dialog.test_transcription.click()
+    pending = dialog._test_request
+    dialog.test_microphone.click()
+    check('a pending transcription test can be cancelled explicitly',
+          pending._over and dialog._test_request is None and not dialog._test_wav)
+    dialog.test_microphone.click()
+    active = dialog._test_capture
+    dialog._test_started -= 11
+    dialog._test_tick()
+    check('microphone tests stop automatically after ten seconds without uploading',
+          dialog._test_capture is None and bool(dialog._test_wav) and not active.cancelled)
+    dialog.test_microphone.click()
+    active = dialog._test_capture
+    late_started = active.started
+    dialog.reject()
+    late_started()
+    check('closing settings releases the microphone, recording and delayed permission callbacks',
+          active.cancelled and not dialog._test_wav and not dialog._test_timer.isActive())
+
+    dialog = SpeechSettingsDialog(SpeechSettings(), AgentSettings(), panel, saver=save, capture_factory=Capture)
+    dialog.test_microphone.click()
+    dialog.test_microphone.click()
+    dialog.service.setCurrentIndex(dialog.service.findData('openai'))
+    before = len(Handler.received)
+    dialog.test_transcription.click()
+    check('cloud test audio cannot be uploaded without explicit consent',
+          'Choose whether' in dialog.test_status.text() and len(Handler.received) == before)
+    dialog.consent.setChecked(True)
+    dialog.test_transcription.click()
+    check('cloud tests report missing credentials without saving the form or uploading',
+          'API key' in dialog.test_status.text() and len(Handler.received) == before and len(saved) == 1)
+    dialog.reject()
+
+    class TestRequest:
+        def __init__(self, request, callback, parent):
+            self.request, self.callback, self.aborted = request, callback, False
+
+        def abort(self):
+            self.aborted = True
+
+    from filter_mate.adapters.agent import speech_settings
+    for service, model, language_field in (('openai', 'gpt-transcribe', 'languages[]'),
+                                           ('mistral', 'voxtral-mini-transcribe-3', 'language')):
+        dialog = SpeechSettingsDialog(SpeechSettings(), AgentSettings(), panel, saver=save,
+                                      capture_factory=Capture, request_factory=TestRequest)
+        dialog.service.setCurrentIndex(dialog.service.findData(service))
+        check(service + ' selects its own transcription address and model',
+              dialog.address.text() == SERVICES[service][0] and dialog.model.text() == model)
+        dialog.language.setText('fr')
+        dialog.key.setText(service + '-test-secret')
+        dialog.test_microphone.click()
+        dialog.test_microphone.click()
+        dialog.test_transcription.click()
+        check(service + ' microphone tests remain local until cloud consent is given',
+              dialog._test_request is None and 'Choose whether' in dialog.test_status.text())
+        dialog.consent.setChecked(True)
+        dialog.test_transcription.click()
+        pending = dialog._test_request
+        check(service + ' transcription tests use the correct model, language format and unsaved key',
+              pending.request.url == SERVICES[service][0] + '/audio/transcriptions'
+              and pending.request.headers['Authorization'] == 'Bearer ' + service + '-test-secret'
+              and f'name="{language_field}"\r\n\r\nfr'.encode() in pending.request.body
+              and model.encode() in pending.request.body)
+        pending.callback('Texte reconnu par ' + service, '')
+        check(service + ' shows the test transcript without saving or sending a chat request',
+              dialog.test_result.toPlainText() == 'Texte reconnu par ' + service and len(saved) == 1 and not sent)
+        dialog.test_transcription.click()
+        pending = dialog._test_request
+        next_service = 'mistral' if service == 'openai' else 'openai'
+        dialog.service.setCurrentIndex(dialog.service.findData(next_service))
+        check(service + ' credentials and consent are cleared when changing provider during a test',
+              pending.aborted and dialog._test_request is None and not dialog.key.text()
+              and not dialog.consent.isChecked() and not dialog.reuse_key.isChecked()
+              and dialog.test_result.toPlainText() == '' and bool(dialog._test_wav))
+        dialog.reject()
+
+        provider = AgentSettings(preset=service, authcfg='chat-auth', key_target=SERVICES[service][0])
+        preferences = SpeechSettings(service=service, accepted_target=SERVICES[service][0])
+        dialog = SpeechSettingsDialog(preferences, provider, panel, saver=save,
+                                      capture_factory=Capture, request_factory=TestRequest)
+        dialog.reuse_key.setChecked(True)
+        dialog.test_microphone.click()
+        dialog.test_microphone.click()
+        with patch.object(speech_settings, 'load_settings', return_value=provider), \
+                patch.object(speech_settings, 'read_key', return_value='chat-secret') as read_key:
+            dialog.test_transcription.click()
+            pending = dialog._test_request
+            check(service + ' can test transcription using the matching chat provider key',
+                  pending.request.headers['Authorization'] == 'Bearer chat-secret'
+                  and read_key.call_args.args == ('chat-auth',) and not dialog.key.isEnabled())
+        dialog.reject()
+
+    secured = SpeechSettings(service='openai', accepted_target='https://api.openai.com/v1',
+                             authcfg='saved-auth', key_target='https://api.openai.com/v1')
+    dialog = SpeechSettingsDialog(secured, AgentSettings(), panel, saver=save,
+                                  capture_factory=Capture, request_factory=TestRequest)
+    dialog.test_microphone.click()
+    dialog.test_microphone.click()
+    with patch.object(speech_settings, 'read_key', return_value='stored-secret') as read_key:
+        dialog.test_transcription.click()
+        pending = dialog._test_request
+        check('transcription tests can use a stored key belonging to the same address',
+              pending.request.headers['Authorization'] == 'Bearer stored-secret'
+              and read_key.call_args.args == ('saved-auth',))
+    dialog.key.setText('unsaved-secret')
+    with patch.object(speech_settings, 'read_key', side_effect=AssertionError('must use the entered key')):
+        dialog.test_transcription.click()
+    pending = dialog._test_request
+    check('an entered test key overrides the stored credential without saving it',
+          pending.request.headers['Authorization'] == 'Bearer unsaved-secret' and len(saved) == 1)
+    dialog.reject()
+    pending.callback('late result', '')
+    check('closing settings aborts a pending upload and ignores a late response',
+          pending.aborted and not dialog._test_wav and dialog.test_result.toPlainText() == '')
+
+    class MissingMicrophone(Capture):
+        def start(self, device):
+            raise ValueError('No microphone is available. Check the device in Microphone settings.')
+
+    dialog = SpeechSettingsDialog(values, AgentSettings(), panel, saver=save, capture_factory=MissingMicrophone)
+    dialog.test_microphone.click()
+    check('a missing microphone is reported in the settings dialog without enabling transcription',
+          'No microphone' in dialog.test_status.text() and dialog._test_capture is None
+          and not dialog.test_transcription.isEnabled())
+    dialog.reject()
+
     from qgis.PyQt.QtCore import QTranslator
     translator = QTranslator()
     check('the French speech catalog loads', translator.load('/src/i18n/FilterMate_fr.qm'))
@@ -253,6 +425,11 @@ def main():
     voice._fail('No speech was recognized. Try recording again.')
     check('speech errors are translated without being interpreted as rich text',
           'Aucune parole reconnue' in panel.status.text())
+    dialog = SpeechSettingsDialog(values, AgentSettings(), panel, saver=save)
+    check('microphone test controls are translated in French',
+          dialog.test_microphone.text() == 'Tester le microphone' and
+          dialog.test_transcription.text() == 'Tester la transcription')
+    dialog.reject()
     app.removeTranslator(translator)
 
     voice.close()

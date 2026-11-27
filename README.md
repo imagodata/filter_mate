@@ -133,7 +133,8 @@ the original source back, and project files are always saved with the original s
 - 🧩 **Processing models and providers.** The agent searches installed providers and registered models, describes
   their parameters and steps, and runs compatible treatments on project layers.
 - 🎙️ **Microphone dictation.** Transcribe through a local compatible service, OpenAI or Mistral. Choose the device,
-  service and language in **⋯ → Microphone settings…**. Click again to transcribe, or press Esc to discard or cancel.
+  service and language in **⋯ → Microphone settings…**. Test the microphone level and a short transcription there
+  before saving. Click again to transcribe, or press Esc to discard or cancel.
   Audio stays in memory; recognized text is inserted in the editable draft. You press Send yourself.
 - 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster, a value condition
   on a point cloud attribute.

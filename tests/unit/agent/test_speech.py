@@ -64,6 +64,17 @@ def test_silence_and_short_recordings_are_never_submitted():
             buffer.wav()
 
 
+def test_live_level_drops_with_silence_without_losing_the_recording_peak():
+    buffer = PcmBuffer(16000, 1, 's16')
+    buffer.feed(struct.pack('<h', 16384) * 4000)
+    assert buffer.level == 0.5
+    buffer.feed(b'\0\0' * 4000)
+    assert buffer.level == 0
+    assert len(buffer.wav()) > 44
+    buffer.clear()
+    assert buffer.level == 0
+
+
 def test_local_multipart_contains_only_audio_model_and_language():
     request = transcription_request(local(language='fr'), recorded())
     assert request.url == 'http://127.0.0.1:8000/v1/audio/transcriptions'
@@ -87,6 +98,44 @@ def test_cloud_key_stays_out_of_repr_and_requires_exact_configuration():
     assert b'gpt-transcribe' in request.body
     with pytest.raises(ValueError, match='Configure'):
         transcription_request(replace(values, base_url='https://another.example/v1'), recorded(), 'private-key')
+
+
+@pytest.mark.parametrize('service, model, language_field', [
+    ('openai', 'gpt-transcribe', 'languages[]'),
+    ('openai', 'whisper-1', 'language'),
+    ('mistral', 'voxtral-mini-transcribe-3', 'language'),
+    ('local', 'custom-whisper', 'language'),
+])
+def test_transcription_wire_format_matches_each_provider(service, model, language_field):
+    settings = local(service=service, model=model, language='fr')
+    key = '' if service == 'local' else 'provider-secret'
+    request = transcription_request(settings, recorded(), key)
+    assert request.url == settings.target + '/audio/transcriptions'
+    assert f'name="model"\r\n\r\n{model}\r\n'.encode() in request.body
+    assert f'name="{language_field}"\r\n\r\nfr\r\n'.encode() in request.body
+    other_field = 'language' if language_field == 'languages[]' else 'languages[]'
+    assert f'name="{other_field}"'.encode() not in request.body
+    if key:
+        assert request.headers['Authorization'] == 'Bearer ' + key
+    else:
+        assert 'Authorization' not in request.headers
+
+
+@pytest.mark.parametrize('service', ['openai', 'mistral', 'local'])
+def test_automatic_language_is_omitted_for_every_provider(service):
+    request = transcription_request(local(service=service), recorded(), 'provider-secret')
+    assert b'name="language"' not in request.body and b'name="languages[]"' not in request.body
+
+
+def test_provider_language_requirements_are_validated_before_upload():
+    validate_settings(local(service='openai', language='zh-tw'))
+    validate_settings(local(service='openai', language='eng'))
+    validate_settings(local(service='mistral', language='fr'))
+    for language in ('eng', 'zh-tw'):
+        with pytest.raises(ValueError, match='Mistral requires a two-letter'):
+            transcription_request(local(service='mistral', language=language), recorded(), 'provider-secret')
+    with pytest.raises(ValueError, match='Language is an ISO code'):
+        validate_settings(local(service='openai', model='whisper-1', language='zh-tw'))
 
 
 @pytest.mark.parametrize('values', [

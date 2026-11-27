@@ -5,7 +5,7 @@ import importlib
 
 from qgis.PyQt.QtCore import QCoreApplication, QObject, QTimer, Qt
 
-from ...core.agent.speech import PcmBuffer
+from ...core.agent.speech import MAX_SECONDS, SAMPLE_RATE, PcmBuffer
 
 
 def _multimedia():
@@ -33,12 +33,17 @@ def device_choices():
 
 
 class AudioCapture(QObject):
-    def __init__(self, on_started, on_error, on_limit, parent=None):
+    def __init__(self, on_started, on_error, on_limit, parent=None, *, max_seconds=MAX_SECONDS):
         super().__init__(parent)
         self.on_started, self.on_error, self.on_limit = on_started, on_error, on_limit
         self._source = self._io = self.buffer = None
         self._token = 0
         self._limit_queued = False
+        self._max_samples = SAMPLE_RATE * max_seconds
+
+    @property
+    def level(self):
+        return self.buffer.level if self.buffer is not None else 0.0
 
     def start(self, device_id=''):
         self._token += 1
@@ -105,7 +110,8 @@ class AudioCapture(QObject):
                 (audio_format.sampleType(), audio_format.sampleSize()), '')
             little = audio_format.byteOrder() == media.QAudioFormat.Endian.LittleEndian
             source_type = media.QAudioInput
-        self.buffer = PcmBuffer(audio_format.sampleRate(), audio_format.channelCount(), sample_format, little)
+        self.buffer = PcmBuffer(audio_format.sampleRate(), audio_format.channelCount(), sample_format, little,
+                                max_samples=self._max_samples)
         self._source = source_type(selected, audio_format, self)
         self._source.stateChanged.connect(self._state_changed)
         self._io = self._source.start()

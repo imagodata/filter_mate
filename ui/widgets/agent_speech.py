@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-"""User-chosen microphone and transcription destination; no audio is captured by the settings dialog."""
+"""Microphone settings and an explicit, bounded recording/transcription test."""
 from dataclasses import replace
+from functools import partial
+import time
 
-from qgis.PyQt.QtCore import QCoreApplication, Qt
-from qgis.PyQt.QtWidgets import (QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QLabel,
-                                 QLineEdit, QPushButton, QVBoxLayout)
+from qgis.PyQt.QtCore import QCoreApplication, QTimer, Qt
+from qgis.PyQt.QtWidgets import (QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
+                                 QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QPushButton, QVBoxLayout)
 
-from ...core.agent.speech import SERVICES, SpeechSettings, validate_settings
+from ...core.agent.speech import SERVICES, SpeechSettings, transcription_request, validate_settings
 
 
 def _tr(text):
@@ -14,13 +16,21 @@ def _tr(text):
 
 
 class SpeechSettingsDialog(QDialog):
-    def __init__(self, values, provider, parent=None, saver=None):
+    def __init__(self, values, provider, parent=None, saver=None, capture_factory=None, request_factory=None):
         super().__init__(parent)
         self.setWindowTitle(_tr('Microphone settings'))
         self.setMinimumWidth(420)
         self._original, self._provider, self._saver = values, provider, saver
         self.chosen = None
         self.forget_key = False
+        self._capture_factory, self._request_factory = capture_factory, request_factory
+        self._test_capture = self._test_request = None
+        self._test_wav = b''
+        self._test_started = None
+        self._test_generation = 0
+        self._test_timer = QTimer(self)
+        self._test_timer.setInterval(100)
+        self._test_timer.timeout.connect(self._test_tick)
         self.service = QComboBox(self)
         for key, label in (('local', 'Local server (OpenAI-compatible)'), ('openai', 'OpenAI'), ('mistral', 'Mistral')):
             self.service.addItem(_tr(label), key)
@@ -55,6 +65,22 @@ class SpeechSettingsDialog(QDialog):
         self.error = QLabel(self)
         self.error.setWordWrap(True)
         self.error.setTextFormat(Qt.TextFormat.PlainText)
+        self.test_microphone = QPushButton(_tr('Test microphone'), self)
+        self.test_microphone.clicked.connect(self._toggle_test)
+        self.test_transcription = QPushButton(_tr('Test transcription'), self)
+        self.test_transcription.setEnabled(False)
+        self.test_transcription.clicked.connect(self._transcribe_test)
+        self.test_level = QProgressBar(self)
+        self.test_level.setRange(0, 100)
+        self.test_level.setValue(0)
+        self.test_level.setFormat(_tr('Microphone level: %p%'))
+        self.test_status = QLabel(_tr('Record up to 10 seconds, then test transcription with the settings above.'), self)
+        self.test_status.setWordWrap(True)
+        self.test_status.setTextFormat(Qt.TextFormat.PlainText)
+        self.test_result = QPlainTextEdit(self)
+        self.test_result.setReadOnly(True)
+        self.test_result.setMaximumHeight(85)
+        self.test_result.hide()
         form = QFormLayout()
         for label, widget in (('Transcription service', self.service), ('Service address', self.address),
                               ('Transcription model', self.model), ('Language', self.language),
@@ -69,6 +95,13 @@ class SpeechSettingsDialog(QDialog):
         layout.addWidget(self.remove_key)
         layout.addWidget(self.note)
         layout.addWidget(self.consent)
+        test_buttons = QHBoxLayout()
+        test_buttons.addWidget(self.test_microphone)
+        test_buttons.addWidget(self.test_transcription)
+        layout.addLayout(test_buttons)
+        layout.addWidget(self.test_level)
+        layout.addWidget(self.test_status)
+        layout.addWidget(self.test_result)
         layout.addWidget(self.error)
         layout.addWidget(buttons)
         self.service.currentIndexChanged.connect(self._service_changed)
@@ -76,8 +109,147 @@ class SpeechSettingsDialog(QDialog):
         self.reuse_key.toggled.connect(lambda checked: self.key.setEnabled(not checked))
         self._destination_changed()
         self.key.setEnabled(not self.reuse_key.isChecked())
+        for widget in (self.address, self.model, self.language, self.key):
+            widget.textChanged.connect(self._test_settings_changed)
+        self.reuse_key.toggled.connect(self._test_settings_changed)
+        self.consent.toggled.connect(self._test_settings_changed)
+
+    def _test_settings_changed(self, *_):
+        if self._test_request is not None or not self.test_result.isHidden():
+            self._reset_test(discard=False)
+            self.test_result.clear()
+            self.test_result.hide()
+            self.test_status.setText(_tr('Settings changed. Test transcription again.'))
+
+    def _reset_test(self, *, discard=True):
+        self._test_generation += 1
+        self._test_timer.stop()
+        self._test_started = None
+        capture, request = self._test_capture, self._test_request
+        self._test_capture = self._test_request = None
+        if capture is not None:
+            capture.cancel()
+            capture.deleteLater()
+        if request is not None:
+            request.abort()
+        if discard:
+            self._test_wav = b''
+        self.device.setEnabled(True)
+        self.test_level.setValue(0)
+        self.test_microphone.setText(_tr('Test microphone'))
+        self.test_transcription.setEnabled(bool(self._test_wav))
+
+    def _test_error(self, generation, error):
+        if generation != self._test_generation:
+            return
+        self._reset_test()
+        self.test_status.setText(_tr(error))
+
+    def _toggle_test(self):
+        if self._test_capture is not None:
+            self._stop_test()
+            return
+        if self._test_request is not None:
+            self._reset_test()
+            self.test_status.setText(_tr('Test cancelled.'))
+            return
+        self._reset_test()
+        self.test_result.clear()
+        self.test_result.hide()
+        generation = self._test_generation
+        try:
+            factory = self._capture_factory
+            if factory is None:
+                from ...adapters.agent.speech_audio import AudioCapture
+                factory = partial(AudioCapture, max_seconds=10)
+            self._test_capture = factory(lambda: self._test_listening(generation),
+                lambda error: self._test_error(generation, error),
+                lambda: self._stop_test() if generation == self._test_generation else None, self)
+            self.device.setEnabled(False)
+            self.test_microphone.setText(_tr('Stop microphone test'))
+            self.test_status.setText(_tr('Requesting microphone access…'))
+            self._test_capture.start(self.device.currentData() or '')
+        except (ValueError, RuntimeError, ImportError) as exc:
+            self._test_error(generation, str(exc))
+
+    def _test_listening(self, generation):
+        if generation != self._test_generation:
+            return
+        self._test_started = time.monotonic()
+        self._test_timer.start()
+        self._test_tick()
+
+    def _test_tick(self):
+        if self._test_capture is None or self._test_started is None:
+            return
+        seconds = time.monotonic() - self._test_started
+        if seconds >= 10:
+            self._stop_test()
+            return
+        self.test_level.setValue(round(self._test_capture.level * 100))
+        self.test_status.setText(_tr('Speak into the microphone… {} / 10 s').format(int(seconds)))
+
+    def _stop_test(self):
+        capture, self._test_capture = self._test_capture, None
+        if capture is None:
+            return
+        generation = self._test_generation
+        try:
+            wav = capture.stop()
+            if generation != self._test_generation:
+                return
+            self._test_wav = wav
+            self._reset_test(discard=False)
+            self.test_status.setText(_tr('Recording ready. Click Test transcription to check the service.'))
+        except (ValueError, RuntimeError) as exc:
+            capture.cancel()
+            self._test_error(self._test_generation, str(exc))
+        finally:
+            capture.deleteLater()
+
+    def _transcribe_test(self):
+        if not self._test_wav or self._test_request is not None:
+            return
+        generation = self._test_generation
+        try:
+            from ...adapters.agent.speech_settings import speech_key
+            values = self.values()
+            validate_settings(values)
+            if not values.configured:
+                raise ValueError('Choose whether to send recorded audio to this transcription service.')
+            # Test the unsaved form without writing settings or credentials.
+            if not self.forget_key and values.target == self._original.key_target:
+                values = replace(values, authcfg=self._original.authcfg, key_target=self._original.key_target)
+            key = speech_key(values) if values.use_provider_key else self.key.text().strip() or speech_key(values)
+            request = transcription_request(values, self._test_wav, key)
+            factory = self._request_factory
+            if factory is None:
+                from ...adapters.agent.speech_transport import SpeechRequest
+                factory = SpeechRequest
+            self.test_transcription.setEnabled(False)
+            self.test_result.clear()
+            self.test_result.hide()
+            self.test_microphone.setText(_tr('Cancel transcription'))
+            self.test_status.setText(_tr('Transcribing…'))
+            self._test_request = factory(request,
+                lambda text, error: self._test_done(generation, text, error), self)
+        except (ValueError, RuntimeError, ImportError) as exc:
+            # Keep the recording so the user can correct the settings and retry.
+            self._reset_test(discard=False)
+            self.test_status.setText(_tr(str(exc)))
+
+    def _test_done(self, generation, text, error):
+        if generation != self._test_generation:
+            return
+        self._test_request = None
+        self._reset_test(discard=False)
+        self.test_status.setText(_tr(error) if error else _tr('Transcription test succeeded.'))
+        if not error:
+            self.test_result.setPlainText(text)
+            self.test_result.show()
 
     def _forget(self):
+        self._test_settings_changed()
         self.forget_key = True
         self.key.clear()
         self.key.setPlaceholderText('')
@@ -135,5 +307,7 @@ class SpeechSettingsDialog(QDialog):
         super().accept()
 
     def done(self, result):
+        self._reset_test()
+        self.test_result.clear()
         self.key.clear()
         super().done(result)

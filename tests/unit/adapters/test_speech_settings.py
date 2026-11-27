@@ -31,9 +31,10 @@ def settings(monkeypatch):
     return module, data
 
 
-def test_transcription_credentials_never_enter_the_settings_file(settings):
+@pytest.mark.parametrize('service', ['openai', 'mistral'])
+def test_transcription_credentials_never_enter_the_settings_file(settings, service):
     module, data = settings
-    values = module.SpeechSettings(service='openai')
+    values = module.SpeechSettings(service=service)
     values = replace(values, accepted_target=values.target)
     saved = module.save_speech_settings(values, 'private-secret-key')
     assert saved.authcfg == 'speech-authcfg'
@@ -42,18 +43,20 @@ def test_transcription_credentials_never_enter_the_settings_file(settings):
     assert module.speech_key(saved) == 'private-secret-key'
 
 
-def test_a_stored_key_never_follows_an_address_change(settings):
+@pytest.mark.parametrize('service', ['openai', 'mistral'])
+def test_a_stored_key_never_follows_an_address_change(settings, service):
     module, _data = settings
-    values = module.SpeechSettings(service='openai', authcfg='old-key', key_target='https://original.example/v1')
+    values = module.SpeechSettings(service=service, authcfg='old-key', key_target='https://original.example/v1')
     with pytest.raises(ValueError, match='another service'):
         module.speech_key(values)
     module.read_key.assert_not_called()
 
 
-def test_reusing_the_chat_key_requires_the_same_provider_and_exact_destination(settings, monkeypatch):
+@pytest.mark.parametrize('service', ['openai', 'mistral'])
+def test_reusing_the_chat_key_requires_the_same_provider_and_exact_destination(settings, monkeypatch, service):
     module, _data = settings
-    values = module.SpeechSettings(service='openai', use_provider_key=True)
-    current = SimpleNamespace(preset='openai', target=values.target, has_key=True, authcfg='chat-authcfg')
+    values = module.SpeechSettings(service=service, use_provider_key=True)
+    current = SimpleNamespace(preset=service, target=values.target, has_key=True, authcfg='chat-authcfg')
     monkeypatch.setattr(module, 'load_settings', lambda: current)
     saved = module.save_speech_settings(replace(values, accepted_target=values.target))
     assert saved.authcfg == '' and saved.use_provider_key
@@ -62,6 +65,10 @@ def test_reusing_the_chat_key_requires_the_same_provider_and_exact_destination(s
     module.read_key.reset_mock()
     with pytest.raises(ValueError, match='no stored key'):
         module.speech_key(replace(saved, base_url='https://another.example/v1'))
+    module.read_key.assert_not_called()
+    current.preset = 'mistral' if service == 'openai' else 'openai'
+    with pytest.raises(ValueError, match='no stored key'):
+        module.speech_key(saved)
     module.read_key.assert_not_called()
 
 

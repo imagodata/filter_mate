@@ -1112,6 +1112,17 @@ Microphone dictation:
 - **More actions → Microphone settings…** chooses the input device, transcription service, address, model and
   language (empty: automatic). Local mode requires a running OpenAI-compatible transcription server on localhost
   (default `http://127.0.0.1:8000/v1`, model `whisper-1`). No model or service is installed automatically;
+- in that dialog, **Test microphone** records up to ten seconds and shows the input level without contacting a
+  transcription service. Stop recording, then use **Test transcription** to check the unsaved address, model,
+  language and credentials; the recognized text appears only in the dialog. Cloud tests require consent to the
+  selected destination. Tests do not save settings or send a chat message. The sample stays in RAM for retries
+  and is discarded when another recording starts, the test is cancelled, or the dialog closes;
+- the same microphone and transcription tests work with **Local server**, **OpenAI** and **Mistral**.
+  OpenAI defaults to `gpt-transcribe`; Mistral defaults to `voxtral-mini-transcribe-3`. Models remain editable,
+  including previously saved choices. Mistral uses two-letter language codes; OpenAI's `gpt-transcribe` also
+  accepts three-letter codes and `zh-cn`, `zh-tw`, `zh-hk`. Changing provider clears an entered key and aborts
+  a pending test. Cloud tests can use an entered key, the key stored for that address, or the chat key when
+  explicitly selected for the same provider and address;
 - OpenAI and Mistral are available independently of the chat provider, including when the chat uses Claude or
   Ollama. Their API key stays in the QGIS authentication database. Reusing the chat key is explicit and requires
   the same provider and exact address. Selecting a cloud service explicitly enables sending audio to that address;
