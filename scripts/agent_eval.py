@@ -684,6 +684,9 @@ class SimulatedProject:
 
         def qgis_capabilities(_):
             return {'available': True, 'qgis_version': 'scripted bench', 'actions': [],
+                    'project_assets': {'available': True, 'map_themes': ['Overview', 'Analysis'],
+                                       'layouts': ['Carte des communes'],
+                                       'themes_truncated': False, 'layouts_truncated': False},
                     'panels': [{'id': 'ProcessingToolbox', 'title': 'Processing', 'available': True,
                                 'visible': False, 'enabled': True, 'owner': 'QGIS'}]}
 

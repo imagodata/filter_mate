@@ -1,0 +1,17 @@
+{
+  "qgis": "4.3.0-Master",
+  "checks_passed": true,
+  "project_assets": {
+    "available": true,
+    "map_themes": [
+      "Sans points",
+      "Vue générale"
+    ],
+    "layouts": [
+      "Rapport A4"
+    ],
+    "themes_truncated": false,
+    "layouts_truncated": false,
+    "names_truncated": false
+  }
+}

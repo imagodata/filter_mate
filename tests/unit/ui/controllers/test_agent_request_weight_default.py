@@ -38,6 +38,16 @@ chat_controller, agent_settings = _load()
 Controller = chat_controller.AgentChatController
 
 
+def test_designer_guidance_is_opt_in_and_keeps_the_normal_permissions():
+    values = agent_settings.AgentSettings()
+    plain = Controller._prompt(values, [])
+    designer = Controller._prompt(values, [], designer=True)
+    assert designer.startswith(plain)
+    assert 'Advanced Designer workspace:' not in plain
+    assert 'Advanced Designer workspace:' in designer
+    assert 'current user permissions' in designer and 'not approval' in designer
+
+
 class _Host:
     """What tools_and_handlers and _families read of the controller: a portal-less accessor, placeholders."""
 

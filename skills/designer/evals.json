@@ -1,0 +1,92 @@
+{
+  "cases": [
+    {
+      "id": "designer_read_design_inventory",
+      "prompt": "Dans Designer, liste les thèmes QGIS et mises en page existants sans rien changer.",
+      "expect": [
+        [
+          {
+            "tool": "qgis_capabilities",
+            "args": {},
+            "call_args": {}
+          }
+        ]
+      ],
+      "forbid": [
+        "map_theme",
+        "create_layout",
+        "set_layer_style",
+        "run_pyqgis"
+      ]
+    },
+    {
+      "id": "designer_native_styling_handoff",
+      "prompt": "Ouvre l’éditeur de symbologie natif QGIS pour les communes ; je règle moi-même leur style.",
+      "expect": [
+        [
+          {
+            "tool": "control_qgis",
+            "args": {
+              "action": "properties",
+              "layer": "communes",
+              "page": "style"
+            },
+            "call_args": {
+              "action": "properties",
+              "layer": "communes",
+              "page": "style"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "set_layer_style",
+        "design_style",
+        "run_pyqgis"
+      ]
+    },
+    {
+      "id": "designer_proposal_is_not_theme_replace",
+      "trap": true,
+      "prompt": "Compare deux variantes pour le thème Overview et le composeur, mais ne remplace pas le thème et ne crée pas de mise en page.",
+      "expect": [
+        [
+          {
+            "tool": "qgis_capabilities",
+            "args": {},
+            "call_args": {}
+          }
+        ]
+      ],
+      "forbid": [
+        "map_theme",
+        "set_layer_style",
+        "create_layout",
+        "edit_layout",
+        "export_layout"
+      ]
+    },
+    {
+      "id": "designer_open_existing_composer",
+      "prompt": "Ouvre la mise en page existante Carte des communes dans le composeur QGIS.",
+      "expect": [
+        [
+          {
+            "tool": "open_layout",
+            "args": {
+              "name": "Carte des communes"
+            },
+            "call_args": {
+              "name": "Carte des communes"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "create_layout",
+        "export_layout",
+        "edit_layout"
+      ]
+    }
+  ]
+}

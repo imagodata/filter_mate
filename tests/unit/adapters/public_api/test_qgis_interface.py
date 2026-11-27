@@ -76,6 +76,31 @@ def test_capabilities_are_observational_and_report_ambiguous_disabled_and_unname
     session.command.trigger.assert_not_called()
 
 
+def test_design_inventory_is_bounded_read_only_and_marks_truncated_names(session, monkeypatch):
+    names = ['z' * 220] + [f'Theme {i:03}' for i in range(105)]
+    project = SimpleNamespace(mapThemeCollection=lambda: SimpleNamespace(mapThemes=lambda: names),
+                              layoutManager=lambda: SimpleNamespace(printLayouts=lambda: [
+                                  SimpleNamespace(name=lambda: 'Atlas')]))
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsProject', SimpleNamespace(instance=lambda: project))
+    assets = interface.qgis_capabilities(session.face)['project_assets']
+    assert assets['available'] and len(assets['map_themes']) == 100
+    assert assets['themes_truncated'] and not assets['layouts_truncated']
+    assert assets['layouts'] == ['Atlas'] and names[0] == 'z' * 220
+    assert not assets['names_truncated']  # long name sorts beyond the first hundred
+    names[:] = ['z' * 220]
+    assets = interface._project_assets()
+    assert assets['names_truncated'] and len(assets['map_themes'][0]) == 200
+    assert not any(dock.visible for dock in session.docks)
+
+
+def test_unavailable_design_inventory_does_not_prevent_window_discovery(session, monkeypatch):
+    def closed():
+        raise RuntimeError('project unavailable')
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsProject', SimpleNamespace(instance=closed))
+    result = interface.qgis_capabilities(session.face)
+    assert result['available'] and not result['project_assets']['available']
+
+
 def test_plugin_panels_use_live_ids_and_disappear_after_unload(session):
     assert interface.control_qgis('show_panel', panel='plugin.panel', iface_obj=session.face)['visible']
     assert session.docks[1].raised == 1

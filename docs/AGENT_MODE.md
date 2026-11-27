@@ -325,6 +325,20 @@ Rules worth keeping:
   A proposed source opens a prefilled review form through `show_settings_link` (`target: sources`, `source` with
   address, kind and title). The user tests, adds, chooses activation and saves it; agent proposals start unchecked.
   Pasted service/API URLs are detected and normalized, with an optional name and explicit type selection when unknown.
+- **Brainstorm and Advanced Designer**: the chat-only `brainstorm` skill compares two or three feasible options,
+  asks only missing questions that change the choice, preserves prior decisions and refines a concrete proposal.
+  Selecting an option does not apply it. An existing explicit implementation request still follows its normal
+  permissions without another redundant approval loop. The skill works with only `ask_user` available.
+  The menu **Advanced Designer workspace** remembers an independent preference and shows **Ideas**, **Styles**,
+  **Print layout** and **Map themes** shortcuts. They append an editable request to the current draft, without
+  sending it or changing Respond/Propose/Act. The switch is unavailable while a chat or MCP request is running.
+  Designer guidance is appended only while enabled; no skill body is sent until loaded. The `designer` skill
+  coordinates layer styling, labels, map themes and layouts using the existing permissions and native editors.
+  `qgis_capabilities.project_assets` provides a bounded, read-only inventory of theme/layout names, with truncation
+  flags. Native layer properties and `open_layout` hand off to manual QGIS editing; arbitrary editor controls
+  are not automated. QGIS map themes reference named layer styles, not frozen renderer copies. Independent named
+  styles and binding a layout map to a theme currently require native QGIS editing. Interface light/dark themes
+  remain distinct from map themes.
 - **At most 16 model turns per request** (`max_model_turns`, `core/agent/session.py`). Two turns before the limit the
   model is told so, and a request that reaches it stops with a sentence that says why; what was done stays and can be
   undone.

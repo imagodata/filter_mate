@@ -1859,6 +1859,18 @@ Do you agree to all of them? No runs none of them.</source>
         <source>The linked layer could not be shown in the Layers panel.</source>
         <translation>Impossible d’afficher la couche liée dans le panneau Couches.</translation>
     </message>
+    <message>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Attendez la fin de la demande en cours avant de changer d’atelier Designer.</translation>
+    </message>
+    <message>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Atelier Designer avancé activé : styles, mises en page et thèmes cartographiques QGIS.</translation>
+    </message>
+    <message>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>Espace de conversation standard activé.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -3706,6 +3718,54 @@ Do you agree to all of them? No runs none of them.</source>
     <message>
         <source>Cancel transcription</source>
         <translation>Annuler la transcription</translation>
+    </message>
+    <message>
+        <source>Advanced Designer workspace</source>
+        <translation>Atelier Designer avancé</translation>
+    </message>
+    <message>
+        <source>Brainstorm a solution…</source>
+        <translation>Explorer et affiner une solution…</translation>
+    </message>
+    <message>
+        <source>Designer</source>
+        <translation>Designer</translation>
+    </message>
+    <message>
+        <source>Ideas</source>
+        <translation>Idées</translation>
+    </message>
+    <message>
+        <source>Styles</source>
+        <translation>Styles</translation>
+    </message>
+    <message>
+        <source>Print layout</source>
+        <translation>Mise en page</translation>
+    </message>
+    <message>
+        <source>Map themes</source>
+        <translation>Thèmes carte</translation>
+    </message>
+    <message>
+        <source>Insert an editable request: {}</source>
+        <translation>Insérer une demande modifiable : {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Aide-moi à explorer et affiner une solution à partir du contexte actuel. Propose deux ou trois options et pose seulement les questions qui changent le choix. Ne modifie pas encore le projet.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>Dans l’atelier Designer avancé, propose des styles de couches et des étiquettes soignés pour ce projet. Compare deux directions avec des couleurs lisibles et une hiérarchie claire. Ne les applique pas encore.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>Dans l’atelier Designer avancé, propose une mise en page : objectif, format de page, carte, légende, échelle et typographie. Affine la proposition avec moi avant de créer ou de modifier quoi que ce soit.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>Dans l’atelier Designer avancé, examine les thèmes cartographiques QGIS existants et propose de les organiser pour différentes vues et mises en page. Ne sauvegarde, remplace, applique ou supprime encore aucun thème.</translation>
     </message>
 </context>
 <context>

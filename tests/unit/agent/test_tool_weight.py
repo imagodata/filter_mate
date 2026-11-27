@@ -91,7 +91,7 @@ def test_a_source_ticked_leaves_the_paragraph():
     assert "find_place (" not in text and "add_basemap (" not in text and "add_elevation (" in text
 
 
-def test_the_fixed_part_is_under_22200(bench):
+def test_the_fixed_part_is_under_22500(bench):
     """Instructions with the index, and the tools of the core, as the default settings send them."""
     instructions, tools, _held = bench.default_setup()
     fixed = len(instructions) + sum(weight_of(tool) for tool in tools)
@@ -108,4 +108,6 @@ def test_the_fixed_part_is_under_22200(bench):
     # 2026-11-26 (save_favorite): the index line, the filtering set and the "only when the user asks" words (+91).
     # 2026-11-26 (visible automation): the index lines of open_layout, preview_atlas, flash_features,
     # set_active_layer and show_message (+275).
-    assert fixed < 22200, fixed
+    # 2026-11-27: discovery entries for Designer and Brainstorm, plus read-only design inventory metadata.
+    # The workspace note itself is only sent when enabled; no skill body is added to the fixed part.
+    assert fixed < 22500, fixed

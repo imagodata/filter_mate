@@ -252,6 +252,39 @@ def controller(ctrl_module, dock):
     return ctrl_module.AgentChatController(lambda page: None, MagicMock(), dock, ask_user=lambda title, text: True)
 
 
+def test_designer_preference_rebuilds_guidance_without_changing_authorization(ctrl_module, controller, monkeypatch):
+    saved, rebuilt = [], []
+    monkeypatch.setattr(ctrl_module, 'write_designer_mode', saved.append)
+    monkeypatch.setattr(controller, '_restart_engine', lambda: rebuilt.append(True))
+    controller._mcp.busy = False
+    mode, posture = controller._mode, controller._posture
+    controller._on_designer_mode_changed(True)
+    assert controller._designer_mode and saved == [True] and rebuilt == [True]
+    assert (controller._mode, controller._posture) == (mode, posture)
+    controller._on_designer_mode_changed(True)
+    assert saved == [True] and rebuilt == [True]
+    controller._on_designer_mode_changed(False)
+    assert saved == [True, False] and not controller._designer_mode
+
+
+@pytest.mark.parametrize('busy_kind', ['chat', 'mcp'])
+def test_designer_preference_cannot_change_during_a_request(ctrl_module, controller, monkeypatch, busy_kind):
+    saved = []
+    monkeypatch.setattr(ctrl_module, 'write_designer_mode', saved.append)
+    controller._mcp.busy = busy_kind == 'mcp'
+    controller._building = busy_kind == 'chat'
+    controller._on_designer_mode_changed(True)
+    assert not saved and not controller._designer_mode
+    controller.panel.set_designer_mode.assert_called_with(False)
+
+
+def test_designer_preference_restored_when_the_controller_is_created(ctrl_module, dock, monkeypatch):
+    monkeypatch.setattr(ctrl_module, 'read_designer_mode', lambda: True)
+    instance = ctrl_module.AgentChatController(lambda page: None, MagicMock(), dock, ask_user=lambda *args: True)
+    assert instance._designer_mode
+    instance.panel.set_designer_mode.assert_called_with(True)
+
+
 @pytest.fixture
 def activity_state(controller):
     state = {"phase": "thinking"}

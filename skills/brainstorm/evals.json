@@ -1,0 +1,67 @@
+{
+  "cases": [
+    {
+      "id": "brainstorm_focus_question",
+      "prompt": "Je veux mieux présenter mes résultats, aide-moi à comparer les possibilités. Demande-moi d’abord si je vise un écran ou un document imprimé.",
+      "expect": [
+        [
+          {
+            "tool": "ask_user",
+            "args": {},
+            "call_args": {
+              "questions": [
+                {
+                  "header": "Support",
+                  "question": "À quel support destinez-vous les résultats ?",
+                  "options": [
+                    {
+                      "label": "Écran (Recommended)"
+                    },
+                    {
+                      "label": "Document imprimé"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "create_layout",
+        "set_layer_style",
+        "export_layout"
+      ]
+    },
+    {
+      "id": "brainstorm_existing_context",
+      "prompt": "Avec les communes déjà chargées, propose deux pistes de carte pour un rapport A4 sur la population, sans rien modifier. Le public et le format sont déjà précisés, ne me les redemande pas.",
+      "expect": [
+        []
+      ],
+      "forbid": [
+        "ask_user",
+        "create_layout",
+        "set_layer_style",
+        "export_layout",
+        "run_pyqgis"
+      ]
+    },
+    {
+      "id": "brainstorm_choice_is_not_apply",
+      "trap": true,
+      "prompt": "Je préfère ta deuxième proposition. Affine les couleurs et la légende, mais attends avant de l’appliquer.",
+      "expect": [
+        []
+      ],
+      "forbid": [
+        "set_layer_style",
+        "set_labels",
+        "map_theme",
+        "create_layout",
+        "export_layout",
+        "turn_on_agent_options"
+      ]
+    }
+  ]
+}

@@ -22,6 +22,11 @@ The folder is the name of the skill.
 from authorized sources. The source catalogue is local metadata; actual searches still require an enabled source
 and its tools, and adding a result requires an explicit user request.
 
+`brainstorm` compares feasible options and refines them with the user before applying a solution. It works with
+only `ask_user` available. `designer` coordinates styles, labels, QGIS map themes and print layouts, including
+handoff to native QGIS editors. Both are chat-only. The optional Advanced Designer workspace inserts editable
+requests; it keeps the current Respond/Propose/Act mode and tool permissions.
+
 ## SKILL.md
 
 ```

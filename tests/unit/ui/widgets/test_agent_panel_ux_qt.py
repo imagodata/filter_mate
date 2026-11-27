@@ -70,6 +70,40 @@ def _ready_panel():
     return panel
 
 
+@pytest.mark.parametrize('dark', [False, True])
+def test_designer_shortcuts_preserve_draft_and_posture_without_sending(dark):
+    panel = _ready_panel()
+    panel._dark = lambda: dark
+    panel._refresh_look()
+    panel.resize(280, 560)
+    panel.show()
+    events, sent = [], []
+    panel.designer_mode_changed.connect(events.append)
+    panel.send_requested.connect(sent.append)
+    posture = panel._posture
+    assert not panel.designer_mode and not panel.designer_frame.isVisible()
+    panel.designer_action.trigger()
+    _APP.processEvents()
+    assert events == [True] and panel.designer_frame.isVisible()
+    assert panel.width() == 280
+    for kind, button in panel.designer_buttons.items():
+        panel.input.setText('My existing draft')
+        button.click()
+        text = panel.input.text()
+        assert text.startswith('My existing draft\n\n') and len(text) > len('My existing draft\n\n')
+        button.click()
+        assert panel.input.text() == text and button.accessibleName()
+    assert not sent and panel._posture == posture
+    panel.set_working(True)
+    assert not panel.designer_action.isEnabled()
+    panel.set_working(False)
+    before = panel.input.text()
+    panel.set_designer_mode(False)
+    assert not panel.designer_frame.isVisible() and panel.input.text() == before
+    assert events == [True]  # rendering a persisted preference does not emit another user choice
+    panel.close()
+
+
 def test_network_icon_follows_drafts_voice_and_paused_queue_without_hiding_after_work():
     panel = _ready_panel()
     panel.show()

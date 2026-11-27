@@ -238,7 +238,8 @@ CHAT_ONLY = (
         description=('List native QGIS window actions, map tools and registered dock panels currently available. '
                      'Panel ids come from live object names, including panels registered by plugins. Changes nothing. '
                      'Does not discover or authorize arbitrary plugin execution. Returns available, qgis_version, '
-                     'actions, map_tools and panels [{id, title, visible, enabled, available, owner}].'),
+                     'actions, map_tools, panels [{id, title, visible, enabled, available, owner}] and '
+                     'project_assets: map_themes and layouts (up to 100 names each, with truncation flags).'),
         input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
         read_only=True, chat_only=True),
     ToolSpec(

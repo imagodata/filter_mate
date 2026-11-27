@@ -67,7 +67,23 @@ def qgis_capabilities(iface_obj: Any = None) -> Dict[str, Any]:
                     'owner': 'QGIS', 'effect': 'choose a map tool for the user'})
     return {'available': True, 'schema_version': 1, 'qgis_version': Qgis.QGIS_VERSION, 'actions': actions, 'map_tools': tools,
             'panels': docks[:MAX_PANELS], 'panels_truncated': len(docks) > MAX_PANELS,
+            'project_assets': _project_assets(),
             'scope': 'native window operations and existing registered panels; not arbitrary plugin execution'}
+
+
+def _project_assets():
+    """Bounded local design metadata, usable without running a theme-changing operation."""
+    from qgis.core import QgsProject
+    try:
+        project = QgsProject.instance()
+        themes = sorted(str(name) for name in project.mapThemeCollection().mapThemes())
+        layouts = sorted(layout.name() for layout in project.layoutManager().printLayouts())
+        return {'available': True, 'map_themes': [name[:200] for name in themes[:100]],
+                'layouts': [name[:200] for name in layouts[:100]],
+                'themes_truncated': len(themes) > 100, 'layouts_truncated': len(layouts) > 100,
+                'names_truncated': any(len(name) > 200 for name in themes[:100] + layouts[:100])}
+    except (AttributeError, RuntimeError, TypeError):
+        return {'available': False, 'map_themes': [], 'layouts': []}
 
 
 def control_qgis(action: str, layer: str = '', panel: str = '', tool: str = '', page: str = 'information',

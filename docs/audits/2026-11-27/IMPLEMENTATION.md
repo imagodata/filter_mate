@@ -26,6 +26,37 @@ des propositions encore à réaliser.
 | Réseau SVG au repos et variantes | Implémenté | Icône persistante, repos statique et 22 états liés aux tâches et interactions. |
 | Recherche de datasets et sources désactivées | Implémenté | Skill disponible sans source externe active, catalogue local enrichi et propositions d’activation explicites. |
 | Découverte Web et sources personnalisées | Implémenté | Recherche Web optionnelle et bornée, candidats non vérifiés, proposition par formulaire prérempli et ajout confirmé par l’utilisateur. |
+| Atelier Designer avancé et thèmes | Implémenté | Atelier mémorisé, demandes modifiables pour les styles, mises en page et thèmes QGIS, inventaire en lecture seule et accès aux éditeurs natifs. |
+| Brainstorm et affinage avec l’utilisateur | Implémenté | Comparaison de solutions, questions utiles et conservation des décisions ; choix d’une option distinct de son application. |
+
+## Atelier Designer et skill Brainstorm
+
+Le menu de l’agent propose désormais un atelier Designer avancé mémorisé séparément du mode Répondre,
+Proposer ou Agir. Ses raccourcis Idées, Styles, Mise en page et Thèmes carte ajoutent une demande modifiable
+au brouillon existant, sans l’envoyer. Leur grille reste utilisable dans un panneau de 280 pixels, en clair et
+en sombre. Le changement d’atelier est refusé pendant une demande du chat ou de MCP.
+
+Le skill `brainstorm` compare deux ou trois solutions, conserve les choix déjà faits et pose seulement les
+questions qui changent la décision. Il affine une proposition concrète avant application ; une demande explicite
+de mise en œuvre conserve son autorisation et suit les confirmations habituelles. Le skill `designer` coordonne
+styles, étiquettes, thèmes cartographiques et mises en page avec les outils existants et les éditeurs natifs.
+
+L’inventaire des thèmes et mises en page est désormais accessible en lecture seule via `qgis_capabilities`,
+avec limites de taille signalées. Les thèmes QGIS référencent des styles nommés : ils ne figent pas des rendus
+indépendants. Créer des styles nommés indépendants et lier une carte du composeur à un thème nécessitent encore
+l’interface native QGIS ; les contrôles arbitraires des éditeurs ne sont pas automatisés.
+
+Validation : 3 990 tests passent dans la suite élargie, avec un test de transport local exclu ; les 30 tests
+du panneau repassent après l’ajustement de la grille. Les 22 tests du contrat d’API passent séparément, car leur
+mock global de Qt provoque une erreur de collecte lorsqu’ils sont combinés à cette suite. Banc hors ligne :
+188 scénarios réussis et 4 ignorés pour outils désactivés ; ce banc scripté ne mesure pas la qualité d’un modèle
+réel. Les scénarios natifs Designer passent sur QGIS 3.44.15 / Qt 5 et QGIS 4.3 Master / Qt 6 : préférences,
+brouillons, tailles de panneau, thèmes réels et mise en page réelle. Aucun test complet du bureau Windows
+n’est revendiqué. Les deux skills portent le catalogue à 25 skills, dont 24 pour le chat et 16 pour MCP,
+sous réserve de leurs outils requis. Partie fixe par défaut : 22 344 caractères, garde à 22 500 ; les corps
+des skills restent chargés à la demande.
+
+Résultats natifs : [Qt 5](designer-qt5.json), [Qt 6](designer-qt6.json).
 
 ## Vérification du choix du SCR
 

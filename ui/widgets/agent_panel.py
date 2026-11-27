@@ -23,14 +23,14 @@ try:
 except ImportError:  # Qt5 keeps actions in QtWidgets
     from qgis.PyQt.QtWidgets import QActionGroup
 from qgis.PyQt.QtWidgets import (
-    QApplication, QCheckBox, QComboBox, QCompleter, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
+    QApplication, QCheckBox, QComboBox, QCompleter, QDialog, QDialogButtonBox, QFormLayout, QFrame, QGridLayout, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QMenu,
     QButtonGroup, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QRadioButton,
     QScrollArea, QSizePolicy, QSpinBox, QStackedWidget, QStyle,
     QTabBar, QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
-from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
+from .agent_thread import DONE_COLOR, AgentThread, ElidedButton, ElidedLabel, plain_tooltip
 from .agent_activity import AgentActivityIcon
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.example_prompts import (
@@ -613,6 +613,7 @@ class AgentPanel(QFrame):
     new_conversation_requested = pyqtSignal()
     save_project_requested = pyqtSignal()
     export_folder_requested = pyqtSignal()
+    designer_mode_changed = pyqtSignal(bool)
     microphone_requested = pyqtSignal()
     microphone_cancel_requested = pyqtSignal()
     microphone_settings_requested = pyqtSignal()
@@ -796,6 +797,11 @@ class AgentPanel(QFrame):
         self.save_project_action.triggered.connect(self.save_project_requested)
         self.export_folder_action = menu.addAction(_tr('Default export folder…'))
         self.export_folder_action.triggered.connect(self.export_folder_requested)
+        self.designer_action = menu.addAction(_tr('Advanced Designer workspace'))
+        self.designer_action.setCheckable(True)
+        self.designer_action.toggled.connect(self._pick_designer_mode)
+        self.brainstorm_action = menu.addAction(_tr('Brainstorm a solution…'))
+        self.brainstorm_action.triggered.connect(lambda: self._insert_designer_prompt('brainstorm'))
         # Recipes: the changes of a request kept in the project, run again without the model.
         self.recipes_menu = menu.addMenu(_tr("Recipes"))
         self.recipes_menu.setObjectName("menu_agent_recipes")
@@ -980,6 +986,29 @@ class AgentPanel(QFrame):
         self.more_button.setToolTip(_tr("More actions"))
         self.stack.currentChanged.connect(self._refresh_new_button)
 
+        self._designer_mode = False
+        self.designer_frame = QFrame(self)
+        self.designer_frame.setObjectName('frame_agent_designer')
+        designer_layout = QGridLayout(self.designer_frame)
+        designer_layout.setContentsMargins(6, 3, 6, 3)
+        designer_layout.setSpacing(4)
+        designer_layout.addWidget(QLabel(_tr('Designer'), self.designer_frame), 0, 0, 2, 1)
+        designer_layout.setColumnStretch(1, 1)
+        designer_layout.setColumnStretch(2, 1)
+        self.designer_buttons = {}
+        for index, (key, title) in enumerate((('brainstorm', _tr('Ideas')), ('styles', _tr('Styles')),
+                                             ('layout', _tr('Print layout')), ('themes', _tr('Map themes')))):
+            button = ElidedButton(title, self.designer_frame)
+            button.setFlat(True)
+            button.setMinimumWidth(0)
+            button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            button.setToolTip(_tr('Insert an editable request: {}').format(title))
+            button.setAccessibleName(title)
+            button.clicked.connect(lambda _checked=False, chosen=key: self._insert_designer_prompt(chosen))
+            designer_layout.addWidget(button, index // 2, index % 2 + 1)
+            self.designer_buttons[key] = button
+        self.designer_frame.hide()
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(6)
@@ -990,6 +1019,7 @@ class AgentPanel(QFrame):
         layout.addWidget(self.widgets_strip)
         layout.addLayout(actions)
         layout.addWidget(self.queue_row)
+        layout.addWidget(self.designer_frame)
         layout.addLayout(ask)
         layout.addWidget(self.speech_row)
         layout.addLayout(under)
@@ -1485,6 +1515,13 @@ class AgentPanel(QFrame):
             f"QFrame#frame_agent_queued {{ background: {palette['fm_group']}; border: 1px dashed"
             f" {palette['fm_group_border']}; border-radius: 6px; }}"
             f"QLabel#label_agent_queued {{ font-size: 12px; color: {muted}; background: transparent; border: none; }}"
+            f"QFrame#frame_agent_designer {{ background: {palette['fm_group']}; border: 1px solid"
+            f" {palette['fm_group_border']}; border-radius: 6px; }}"
+            f"QFrame#frame_agent_designer QLabel {{ color: {muted}; border: none; background: transparent; }}"
+            f"QFrame#frame_agent_designer QPushButton {{ color: {palette['fm_text']}; background: transparent;"
+            " border: 1px solid transparent; border-radius: 4px; padding: 2px; min-width: 0; }"
+            f"QFrame#frame_agent_designer QPushButton:hover {{ background: {palette['fm_hover']}; }}"
+            f"QFrame#frame_agent_designer QPushButton:focus {{ border-color: {palette['fm_accent']}; }}"
             f"QPushButton#pushButton_agent_queued_cancel {{ border: none; background: transparent; color: {muted};"
             " padding: 0 4px; min-height: 0; min-width: 0; }"
             f"QPushButton#pushButton_agent_queued_push {{ border: none; background: transparent;"
@@ -2085,6 +2122,7 @@ class AgentPanel(QFrame):
         self.microphone_button.setEnabled(self._ready and not working)
         self.progress.setVisible(working)
         self.more_button.setEnabled(not working)
+        self.designer_action.setEnabled(not working)
         self.effort_button.setEnabled(bool(self._effort_levels) and not working)
         self.history_undo_button.setEnabled(self.history_undo_button.isEnabled() and not working)
         self.history_redo_button.setEnabled(self.history_redo_button.isEnabled() and not working)
@@ -2101,6 +2139,31 @@ class AgentPanel(QFrame):
             QTimer.singleShot(0, self._send_queued)  # once the engine let go of the request that ended
         self._refresh_new_button()
         self._refresh_look()
+
+    @property
+    def designer_mode(self):
+        return self._designer_mode
+
+    def set_designer_mode(self, enabled):
+        self._designer_mode = bool(enabled)
+        blocked = self.designer_action.blockSignals(True)
+        try:
+            self.designer_action.setChecked(self._designer_mode)
+        finally:
+            self.designer_action.blockSignals(blocked)
+        self.designer_frame.setVisible(self._designer_mode)
+
+    def _pick_designer_mode(self, enabled):
+        self.set_designer_mode(enabled)
+        self.designer_mode_changed.emit(self._designer_mode)
+
+    def _insert_designer_prompt(self, kind):
+        from ...core.agent.design_workspace import STARTERS
+        prompt = _tr(STARTERS[kind])
+        before = self.input.text().rstrip()
+        if not before.endswith(prompt):
+            self.input.setText(before + '\n\n' + prompt if before else prompt)
+        self.input.setFocus()
 
     def set_can_undo(self, possible: bool) -> None:
         """Undo sits on the cards of the last step (mockup); the button below only when no card can hold it."""

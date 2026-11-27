@@ -370,3 +370,11 @@ def read_mode() -> str:
 def write_mode(mode: str) -> None:
     from ...core.agent.modes import mode_or_default
     QgsSettings().setValue(_PREFIX + "mode", mode_or_default(mode))
+
+
+def read_designer_mode() -> bool:
+    return QgsSettings().value(_PREFIX + 'designer_mode', False, type=bool) is True
+
+
+def write_designer_mode(enabled: bool) -> None:
+    QgsSettings().setValue(_PREFIX + 'designer_mode', bool(enabled))

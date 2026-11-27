@@ -17,7 +17,7 @@ from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 from ...adapters.agent.qt_transport import QtTransport
 from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, delete_own_key, load_settings, provider_config, read_key, save_settings, store_key,
-    target_of, current_provider, read_providers, write_providers, read_mode, write_mode,
+    target_of, current_provider, read_providers, write_providers, read_mode, write_mode, read_designer_mode, write_designer_mode,
 )
 from ...adapters.agent import conversation_store, request_log_store, session_store, transcript_store
 from ...adapters.agent.memory_store import change_memory, memory_path, project_sources, read_memory, source_signature
@@ -294,6 +294,9 @@ class AgentChatController(QObject):
         # Propose shows each change before applying it, Act runs at the level of the Autonomy tab.
         self._posture = posture_from_mode(self._mode)
         self.panel.set_mode(self._mode)
+        self._designer_mode = read_designer_mode() is True
+        self.panel.set_designer_mode(self._designer_mode)
+        self.panel.designer_mode_changed.connect(self._on_designer_mode_changed)
         self.panel.mode_changed.connect(self._on_mode_changed)
         self.panel.posture_changed.connect(self._on_posture_changed)
         self.panel.effort_changed.connect(self._on_effort_changed)
@@ -530,6 +533,21 @@ class AgentChatController(QObject):
             write_effort(values, value)
             self._restart_engine()  # the saved session resumes with the new provider configuration
         self._refresh_ready()
+
+    def _on_designer_mode_changed(self, enabled: bool) -> None:
+        if self.chat_busy() or self._mcp.busy:
+            self.panel.set_designer_mode(self._designer_mode)
+            self._say(_tr('Wait for the current request to finish before changing the Designer workspace.'))
+            return
+        enabled = bool(enabled)
+        if enabled == self._designer_mode:
+            return
+        self._designer_mode = enabled
+        write_designer_mode(enabled)
+        self.panel.set_designer_mode(enabled)
+        self._restart_engine()
+        self._say(_tr('Advanced Designer workspace enabled: styles, layouts and QGIS map themes.') if enabled
+                  else _tr('Standard conversation workspace enabled.'))
 
     def stop(self) -> None:
         """The dock closes: it can reopen on this same conversation. A recipe stops before its next step."""
@@ -1504,6 +1522,7 @@ class AgentChatController(QObject):
     def _fill_options(self) -> None:
         """The menu "⋯" opens: the sources by group, the providers set up, the MCP server, as the settings hold them."""
         self.panel.export_folder_action.setEnabled(not self.chat_busy() and not self._mcp.busy)
+        self.panel.designer_action.setEnabled(not self.chat_busy() and not self._mcp.busy)
         self.panel.export_folder_action.setToolTip(str(_default_export_root()))
         from ...core.agent.sources import source_group
         values = load_settings()
@@ -3063,7 +3082,8 @@ class AgentChatController(QObject):
         configured = parse_extra_domains(self._accessor().configured_domains())
         index = getattr(self, "_index_tools", [])
         prompt = self._prompt(
-            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered, index)
+            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered, index,
+            designer=getattr(self, '_designer_mode', False) is True)
         # Lot 3: the history a provider gets before the compaction, after what the instructions and tools take.
         # Measured on the form of the schemas the providers send (lot 2, core/agent/tool_schema.py).
         # The tools a skill or use_tools offers later are taken off it by the session (``shrinks_with_tools``).
@@ -3156,14 +3176,18 @@ class AgentChatController(QObject):
 
     @staticmethod
     def _prompt(values: AgentSettings, active, configured_basemaps: Sequence[str] = (),
-                offered: Optional[Sequence[str]] = None, available: Sequence = ()) -> str:
+                offered: Optional[Sequence[str]] = None, available: Sequence = (), *, designer=False) -> str:
         """``offered``: the tools of the conversation, those a skill brings later among them; None when not known.
         A note that says a tool is missing must be true: a geocoder of the configuration file offers find_place with
         nothing ticked, and a tool turned off in the Tools tab is missing with its source ticked."""
-        return chat_instructions(active, send_values=values.send_values,
-                                 filtering=AgentChatController.local_filtering(values),
-                                 configured_basemaps=configured_basemaps, offered=offered, available=available,
-                                 settings_link=values.rules.get(SHOW_SETTINGS_LINK) != RULE_NEVER)
+        prompt = chat_instructions(active, send_values=values.send_values,
+                                   filtering=AgentChatController.local_filtering(values),
+                                   configured_basemaps=configured_basemaps, offered=offered, available=available,
+                                   settings_link=values.rules.get(SHOW_SETTINGS_LINK) != RULE_NEVER)
+        if designer:
+            from ...core.agent.design_workspace import DESIGNER_NOTE
+            prompt += DESIGNER_NOTE
+        return prompt
 
     @staticmethod
     def local_filtering(values: AgentSettings) -> bool:
@@ -3701,7 +3725,7 @@ class AgentChatController(QObject):
         if call.name in ('export_layers', 'export_layout', 'export_chart', 'export_infographic', 'export_settings_profile'):
             return 'exporting'
         if call.name in ('set_layer_style', 'set_labels', 'design_style', 'apply_style_preset', 'create_layout',
-                         'edit_layout', 'show_chart', 'show_infographic'):
+                         'edit_layout', 'show_chart', 'show_infographic', 'map_theme'):
             return 'designing'
         if call.name in ('zoom_to', 'flash_features', 'control_qgis', 'set_active_layer', 'set_exploring'):
             return 'navigating'
