@@ -51,11 +51,14 @@ QTest.qWait(50)
 sent, stopped = [], []
 panel.send_requested.connect(sent.append)
 panel.stop_requested.connect(lambda: stopped.append(True))
-for key in (Qt.Key.Key_Return, Qt.Key.Key_Tab):
+for prefix, command, key in (('/bra', 'brainstorm', Qt.Key.Key_Return),
+                             ('/bra', 'brainstorm', Qt.Key.Key_Tab),
+                             ('/find', 'find-skills', Qt.Key.Key_Return),
+                             ('/find', 'find-skills', Qt.Key.Key_Tab)):
     panel.input.setText('')
     panel.input.setFocus()
     QTest.qWait(30)
-    QTest.keyClicks(panel.input, '/bra')
+    QTest.keyClicks(panel.input, prefix)
     QTest.qWait(30)
     assert panel.input.completer.popup().isVisible(), {
         'text': panel.input.text(), 'names': names, 'rows': panel.input._mention_rows,
@@ -63,7 +66,7 @@ for key in (Qt.Key.Key_Return, Qt.Key.Key_Tab):
         'focus': panel.input.hasFocus(), 'cursor': panel.input.textCursor().position(),
         'source': list(panel.input.skill_rows())}
     QTest.keyClick(panel.input, key)
-    assert panel.input.text() == '/brainstorm ' and not sent
+    assert panel.input.text() == f'/{command} ' and not sent
 panel.input.setText('/')
 panel.input._offer_names()
 QTest.keyClick(panel.input, Qt.Key.Key_Escape)
@@ -109,6 +112,13 @@ for provider in ('anthropic', 'openai', 'ollama'):
     assert calls == ['brainstorm', 'brainstorm'] and len(records) == 2
     assert json.loads(session.messages[-1].parts[0].content)['already_loaded']
     engine.cancel()
+    records.clear()
+    engine.send('/find-skills Recommend GIS and dataviz skills offline; change nothing.')
+    assert calls[-1] == 'find-skills' and len(records) == 1 and policy.posture == 'respond'
+    result = json.loads(session.messages[-1].parts[0].content)
+    assert result['skill'] == 'find-skills' and result['instructions']
+    records[-1][1](TurnComplete(Message(ROLE_ASSISTANT, (TextPart('Recommended skills.'),)), STOP_END))
+    assert outcomes[-1].status == 'done'
     records.clear()
     engine.send('/missing-skill')
     assert not records and not engine.busy

@@ -3,7 +3,7 @@ from ...core.agent.source_search import MAX_BYTES, TIMEOUT_MS, SourceSearchError
 from .bounded_http import HttpFailure, fetch
 
 
-def search_data_sources(query, limit=5):
+def _search_pages(query, limit):
     url = search_url(query)
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 8:
         raise SourceSearchError('limit is an integer from 1 to 8')
@@ -15,5 +15,20 @@ def search_data_sources(query, limit=5):
     if reply.status != 200:
         raise SourceSearchError(f'The web search answered HTTP {reply.status}. Use the browser search; no source was visited.')
     return {'provider': 'DuckDuckGo', 'query': query.strip(), 'search_url': url,
-            'results': parse_search_results(reply.content, limit),
-            'note': 'Unverified candidate pages. Result sites were not visited, added or enabled. Verify the service before adding it.'}
+            'results': parse_search_results(reply.content, limit)}
+
+
+def search_data_sources(query, limit=5):
+    answer = _search_pages(query, limit)
+    answer['note'] = ('Unverified candidate pages. Result sites were not visited, added or enabled. '
+                      'Verify the service before adding it.')
+    return answer
+
+
+def search_skills(query, limit=5):
+    answer = _search_pages(query, limit)
+    for row in answer['results']:
+        row.pop('kind_hint', None)
+    answer['note'] = ('Unverified skill candidates. Result sites were not visited. No skill was installed or loaded; '
+                      'compatibility, license and instructions still need review.')
+    return answer

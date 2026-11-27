@@ -17,6 +17,12 @@ skills/
 
 The folder is the name of the skill.
 
+`find-skills` recommends available skills for GIS, dataviz and related data tasks from the current `load_skill`
+catalogue. `/find-skills quel skill pour un tableau de bord ?` works without external sources or expert mode.
+When requested or when no local skill fits, `search_skills` finds external candidate pages through the enabled
+`web_search` source. Results carry source links and remain unverified; discovery installs nothing. External skills
+need review and adaptation to this standard before the existing custom-skill loading flow can use them.
+
 `datasets` handles source suggestions and dataset discovery in the chat. It requires only `agent_options` and
 `show_settings_link`, so it remains available with all external sources disabled. `open-data` handles retrieval
 from authorized sources. The source catalogue is local metadata; actual searches still require an enabled source

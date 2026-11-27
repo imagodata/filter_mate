@@ -80,6 +80,7 @@ SUMMARIES = {
     "remove_layers": "Remove layers",
     "search_open_data": "Open data search",
     'search_data_sources': 'Find candidate data sources on the web',
+    'search_skills': 'Find GIS, dataviz and related skills on the web',
     "add_service_layer": "Add a WFS, WMS or WMTS layer",
     "search_imagery": "Satellite scenes over an area",
     "add_basemap": "Add a web basemap",

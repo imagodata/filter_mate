@@ -103,6 +103,16 @@ FEEDBACK_FORMS = ("usage", "feature", "testers", "services")
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
     ToolSpec(
+        'search_skills',
+        'Search the web for Agent Skills in GIS, dataviz and related data domains, only when web_search is enabled. '
+        'Use public task keywords and SKILL.md, never project data or connection details. Returns unverified '
+        'candidate titles, URLs and snippets. Does not visit result sites, install skills or load their instructions. '
+        'Load find-skills for local recommendations and the review workflow.',
+        {'type': 'object', 'properties': {'query': {'type': 'string', 'minLength': 1, 'maxLength': 400},
+                                        'limit': {'type': 'integer', 'minimum': 1, 'maximum': 8, 'default': 5}},
+         'required': ['query'], 'additionalProperties': False},
+        title='Find GIS and dataviz skills on the web', read_only=True, open_world=True, chat_only=True),
+    ToolSpec(
         'search_data_sources',
         'Search the web for candidate data portals and OGC services, only when web_search is enabled. Send a public '
         'topic and place, never private field values or connection details. Returns candidate titles, URLs and '

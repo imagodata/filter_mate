@@ -1294,14 +1294,21 @@ class AgentChatController(QObject):
         return {"shown": label}
 
     def _search_data_sources_tool(self, arguments) -> dict:
+        return self._web_search_tool(arguments)
+
+    def _search_skills_tool(self, arguments) -> dict:
+        return self._web_search_tool(arguments, skill_search=True)
+
+    def _web_search_tool(self, arguments, skill_search=False) -> dict:
         from ...core.agent.source_search import SourceSearchError, search_url
         values = load_settings()
         if not any(source.kind == KIND_WEB_SEARCH for source in enabled(
                 all_sources(custom_from_json(values.custom_sources)), values.enabled_sources)):
             raise ToolFailure('Web source search is disabled. The user enables web_search in Sources first.')
-        from ...adapters.agent.source_search import search_data_sources
+        from ...adapters.agent import source_search
+        search = source_search.search_skills if skill_search else source_search.search_data_sources
         try:
-            return search_data_sources(arguments.get('query'), arguments.get('limit', 5))
+            return search(arguments.get('query'), arguments.get('limit', 5))
         except SourceSearchError as exc:
             try:
                 url = search_url(arguments.get('query'))
@@ -1723,7 +1730,7 @@ class AgentChatController(QObject):
         if not kinds - {KIND_MCP, KIND_STAC, *NO_DATA_KINDS} and not searched:
             left_out.add(OPEN_DATA_TOOL)
         if KIND_WEB_SEARCH not in kinds or not for_chat:
-            left_out.add('search_data_sources')
+            left_out.update({'search_data_sources', 'search_skills'})
         if not kinds & set(SERVICE_KINDS) and not set(configured_kinds.values()) & set(SERVICE_KINDS):
             left_out.add(SERVICE_TOOL)
         if KIND_STAC not in kinds:
@@ -1820,6 +1827,7 @@ class AgentChatController(QObject):
         handlers[ASK_USER] = self._ask_user_tool
         handlers["show_settings_link"] = self._settings_link_tool
         handlers['search_data_sources'] = self._search_data_sources_tool
+        handlers['search_skills'] = self._search_skills_tool
         handlers[AGENT_OPTIONS] = self._agent_options_tool
         handlers[TURN_OFF_OPTIONS] = self._turn_off_options_tool
         handlers[TURN_ON_OPTIONS] = self._turn_on_options_tool
@@ -3749,7 +3757,7 @@ class AgentChatController(QObject):
             setter(phase)
 
     def _tool_activity(self, call: ToolCallPart) -> str:
-        if call.name in ('search_open_data', 'search_data_sources', 'search_imagery', 'find_place', 'find_algorithms', 'list_database_tables'):
+        if call.name in ('search_open_data', 'search_data_sources', 'search_skills', 'search_imagery', 'find_place', 'find_algorithms', 'list_database_tables'):
             return 'searching'
         if call.name in ('run_algorithm', 'contour_lines', 'make_cartogram', 'cross_filter', 'geometry_filter',
                          'point_cloud_filter', 'apply_filter', 'segment_objects'):

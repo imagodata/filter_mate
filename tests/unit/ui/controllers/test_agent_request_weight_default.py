@@ -76,7 +76,7 @@ def test_slash_discovery_uses_the_real_skill_catalogue_and_current_settings(plug
     values = agent_settings.AgentSettings(preset='anthropic', model='test')
     monkeypatch.setattr(chat_controller, 'load_settings', lambda: values)
     rows = Controller._skill_command_rows(host)
-    assert {'brainstorm', 'designer', 'datasets'} <= {name for _label, name in rows}
+    assert {'brainstorm', 'designer', 'datasets', 'find-skills'} <= {name for _label, name in rows}
     values = agent_settings.AgentSettings(preset='anthropic', model='test', tool_rules='{"load_skill":"never"}')
     assert Controller._skill_command_rows(host) == []
 

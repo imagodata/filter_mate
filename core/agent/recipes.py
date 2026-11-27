@@ -54,6 +54,7 @@ NOT_KEPT = frozenset({
     # tests/unit/agent/test_recipes.py checks that every chat_only tool of the catalog is here.
     "agent_options", "turn_on_agent_options", "turn_off_agent_options", "ask_user", "show_settings_link",
     "list_database_tables", "add_database_table", 'qgis_capabilities', 'control_qgis', 'search_data_sources',
+    'search_skills',
     # A chart belongs to its conversation (its id), and its file or its place in a layout to the user's question.
     "show_chart", "export_chart", "add_chart_to_layout", "run_chart_code",
     "show_infographic", "export_infographic",

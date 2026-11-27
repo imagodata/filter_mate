@@ -81,7 +81,7 @@ def test_source_tools():
     chat_setup = importlib.import_module(f"{_PKG}.core.agent.chat_setup")
     assert chat_setup.SOURCE_TOOLS == {"search_open_data", "add_service_layer", "search_imagery", "add_basemap",
                                        "add_elevation", "add_osm_features", "add_population", "find_place",
-                                       "list_database_tables", "add_database_table", 'search_data_sources'}
+                                       "list_database_tables", "add_database_table", 'search_data_sources', 'search_skills'}
 
 
 def test_a_settings_link_turned_off_in_the_tools_tab_is_not_named_by_the_note():

@@ -106,6 +106,7 @@ class SimulatedProject:
             self.by_ref[name] = name
             self.by_ref[layer["id"]] = name
         setup = setup or {}
+        self.enabled_sources = tuple(setup.get('enabled_sources', ('datagouv',)))
         self.drawn: Dict[str, int] = dict(setup.get("drawn", {}))  # objects drawn in the dock, by raster
         self.filters: Dict[str, str] = dict(setup.get("filters", {}))
         self.selected: List[str] = list(setup.get("selected", ["communes"]))
@@ -672,9 +673,9 @@ class SimulatedProject:
         def agent_options(_):
             from agent.agent_options import ProviderEntry, options_view
             from agent.sources import all_sources
-            sources = [source for source in all_sources(()) if source.id in ('datagouv', 'osm_mcp')]
+            sources = [source for source in all_sources(()) if source.id in ('datagouv', 'osm_mcp', 'web_search')]
             provider = ProviderEntry('anthropic', 'scripted', '')
-            return options_view(sources, ('datagouv',), (provider,), provider, False)
+            return options_view(sources, self.enabled_sources, (provider,), provider, False)
 
         def turn_off_agent_options(args):
             return {"turned_off": list(args.get("sources") or []), "already": [], "applies": "after this request"}
@@ -727,6 +728,12 @@ class SimulatedProject:
                 'results': [{'title': 'Official geodata catalogue', 'url': 'https://geo.example.org/wfs',
                              'description': 'WFS service candidate', 'kind_hint': 'wfs', 'verified': False}],
                 'note': 'Unverified candidates; no result site visited.'},
+            'search_skills': lambda args: {
+                'provider': 'scripted web search', 'query': args['query'],
+                'results': [{'title': 'GIS and dataviz Agent Skill',
+                             'url': 'https://github.com/example/skills/blob/main/skills/gis/SKILL.md',
+                             'description': 'Candidate skill for spatial data visualization', 'verified': False}],
+                'note': 'Unverified candidates; no result site visited, no skill installed or loaded.'},
             "add_service_layer": lambda args: {"layer_id": "wfs_1", "name": args.get("name") or args["typename"], "layer_kind": "vector"},
             "find_place": lambda args: {"platform": args["platform"], "query": args["query"], "count": 1, "places": [{
                 "name": args["query"], "label": args["query"], "kind": "municipality", "longitude": 1.44, "latitude": 43.6,

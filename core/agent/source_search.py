@@ -1,4 +1,4 @@
-"""Bounded, text-only discovery of candidate data-source sites; returned sites are never visited here."""
+"""Bounded, text-only discovery of candidate pages for data sources or skills; result sites are never visited."""
 from html.parser import HTMLParser
 from ipaddress import ip_address
 from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
